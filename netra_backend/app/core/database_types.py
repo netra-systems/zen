@@ -37,6 +37,9 @@ class DatabaseConfig:
     max_overflow: int = 20
     timeout: float = 30.0
     retry_attempts: int = 3
+    max_retries: int = 3  # Circuit breaker max retries before opening
+    retry_delay: float = 1.0  # Delay between retries in seconds
+    db_type: DatabaseType = DatabaseType.POSTGRESQL  # Database type
 
 
 @dataclass

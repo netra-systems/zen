@@ -60,3 +60,22 @@ class MockHighVolumeWebSocketServer:
             "connected_clients": len(self.connected_clients),
             "is_running": self.is_running
         }
+
+class WebSocketMock:
+    """Compatibility WebSocketMock class for legacy tests."""
+    
+    def __init__(self, *args, **kwargs):
+        self.messages = []
+        self.connected = False
+    
+    async def send(self, message):
+        self.messages.append(message)
+    
+    async def recv(self):
+        return self.messages.pop(0) if self.messages else None
+    
+    async def connect(self):
+        self.connected = True
+    
+    async def close(self):
+        self.connected = False

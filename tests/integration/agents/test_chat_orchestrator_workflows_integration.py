@@ -59,7 +59,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDisp
 # Test framework imports
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.orchestration import get_orchestration_config
-from test_framework.websocket_test_utility import WebSocketTestUtility
+from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 
 
 class TestChatOrchestratorWorkflowsIntegration(BaseIntegrationTest):

@@ -54,7 +54,7 @@ try:
     from netra_backend.app.core.startup_phase_validation import StartupPhaseValidator
     from netra_backend.app.core.websocket_cors import WebSocketCORS
     from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-    from netra_backend.app.agents.registry import AgentRegistry
+    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     IMPORTS_AVAILABLE = True
 except ImportError as e:
     print(f"WARNING: Backend imports failed (expected for deadlock testing): {e}")

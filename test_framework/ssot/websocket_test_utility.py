@@ -33,9 +33,10 @@ class WebSocketTestUtility(WebSocketBridgeTestHelper):
     by inheriting from WebSocketBridgeTestHelper and adding auth capabilities.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, config=None, env=None, **kwargs):
         """Initialize WebSocket test utility."""
-        super().__init__(*args, **kwargs)
+        # Filter out unrecognized kwargs like base_url, environment
+        super().__init__(config=config, env=env)
         self.auth_helper = WebSocketAuthHelper()
 
     def setup_auth_for_testing(self, *args, **kwargs):
@@ -46,8 +47,32 @@ class WebSocketTestUtility(WebSocketBridgeTestHelper):
         """Create authenticated WebSocket connection."""
         return await self.auth_helper.create_authenticated_connection(*args, **kwargs)
 
+    async def get_staging_websocket_url(self):
+        """
+        REMEDIATION FIX: Get staging WebSocket URL - missing method for Issue #861.
+
+        This method was missing and causing integration test failures.
+        It provides the staging WebSocket URL for E2E testing.
+
+        Returns:
+            str: Staging WebSocket URL
+        """
+        # Use staging config to get proper URL
+        from tests.e2e.staging_config import StagingTestConfig
+        staging_config = StagingTestConfig()
+        return staging_config.urls.websocket_url
+
+# Create alias for compatibility with existing test files
+WebSocketTestHelper = WebSocketTestUtility
+
+# Create WebSocketTestManager alias for integration tests expecting this name
+# This alias provides compatibility for tests migrated from legacy test infrastructure
+WebSocketTestManager = WebSocketTestUtility
+
 __all__ = [
     "WebSocketTestUtility",
+    "WebSocketTestHelper",  # Compatibility alias
+    "WebSocketTestManager",  # Alias for integration tests
     "WebSocketBridgeTestHelper",
     "WebSocketAuthHelper",
 ]

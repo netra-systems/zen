@@ -111,3 +111,19 @@ def mock_permission_system():
     system.has_permission = MagicMock(return_value=True)
     system.get_user_tier = MagicMock(return_value="free")
     return system
+@pytest.fixture
+async def auth_service_client():
+    """HTTP client for auth service integration testing."""
+    import httpx
+    import os
+    
+    try:
+        from dev_launcher.isolated_environment import IsolatedEnvironment
+        env = IsolatedEnvironment()
+        auth_service_url = env.get("AUTH_SERVICE_URL", "http://localhost:8001")
+    except ImportError:
+        # Fallback if IsolatedEnvironment not available
+        auth_service_url = os.environ.get("AUTH_SERVICE_URL", "http://localhost:8001")
+    
+    async with httpx.AsyncClient(base_url=auth_service_url) as client:
+        yield client

@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-09-13T20:38:38.412737",
-    "root_directory": "/Users/anthony/Desktop/netra-apex",
-    "total_literals": 213
+    "generated_at": "2025-09-13T22:43:15.641357",
+    "root_directory": "C:\\GitHub\\netra-apex",
+    "total_literals": 214
   },
   "literals": {
     "AI21_API_KEY": {
@@ -98,6 +98,13 @@
         "scripts/code_review_analysis.py:190",
         "scripts/llm_compliance_report.py:85",
         "scripts/review/security_checker.py:36"
+      ]
+    },
+    "API_SECURITY": {
+      "value": "API_SECURITY",
+      "category": "environment",
+      "locations": [
+        "netra_backend/app/security/audit_findings.py:33"
       ]
     },
     "API_URL": {
@@ -1460,7 +1467,8 @@
       "value": "PYTEST_REAL_DATABASE_TEST",
       "category": "environment",
       "locations": [
-        "netra_backend/app/db/clickhouse.py:204"
+        "netra_backend/app/db/clickhouse.py:204",
+        "netra_backend/app/db/clickhouse_backup.py:189"
       ]
     },
     "README_API_KEY": {

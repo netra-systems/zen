@@ -14,7 +14,7 @@ PURPOSE:
 - Validate no functionality lost in agent WebSocket integration
 
 CRITICAL INTEGRATION POINTS:
-- SupervisorAgent → UnifiedWebSocketManager event delivery
+- SupervisorAgent → WebSocketManager event delivery
 - AgentRegistry → WebSocket manager coordination
 - ExecutionEngine → WebSocket event emission
 - UserExecutionContext → WebSocket user isolation
@@ -57,11 +57,11 @@ try:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.agents.base_agent import BaseAgent
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     SSOT_INTEGRATION_AVAILABLE = True
 except ImportError as e:
     logger.warning(f"SSOT integration imports not available: {e}")
-    UnifiedWebSocketManager = None
+    WebSocketManager = None
     UserExecutionContext = None
     AgentRegistry = None
     BaseAgent = None
@@ -180,7 +180,7 @@ class TestWebSocketSSotAgentIntegrationValidation(SSotAsyncTestCase):
         
         try:
             # Create unified WebSocket manager
-            websocket_manager = UnifiedWebSocketManager()
+            websocket_manager = WebSocketManager()
             self._setup_integration_tracking(websocket_manager, "supervisor")
             
             # Create user execution context
@@ -253,7 +253,7 @@ class TestWebSocketSSotAgentIntegrationValidation(SSotAsyncTestCase):
         try:
             for agent_index in range(num_agents):
                 # Create isolated WebSocket manager for each agent/user
-                websocket_manager = UnifiedWebSocketManager()
+                websocket_manager = WebSocketManager()
                 self._setup_integration_tracking(websocket_manager, f"agent_{agent_index}")
                 
                 # Create isolated user context
@@ -326,7 +326,7 @@ class TestWebSocketSSotAgentIntegrationValidation(SSotAsyncTestCase):
         
         try:
             # Create unified WebSocket manager
-            websocket_manager = UnifiedWebSocketManager()
+            websocket_manager = WebSocketManager()
             self._setup_integration_tracking(websocket_manager, "execution_engine")
             
             # Create user execution context
@@ -405,7 +405,7 @@ class TestWebSocketSSotAgentIntegrationValidation(SSotAsyncTestCase):
         
         try:
             # Create unified WebSocket manager
-            websocket_manager = UnifiedWebSocketManager()
+            websocket_manager = WebSocketManager()
             self._setup_integration_tracking(websocket_manager, "agent_registry")
             
             # Create user execution context
@@ -478,7 +478,7 @@ class TestWebSocketSSotAgentIntegrationValidation(SSotAsyncTestCase):
             self.integration_metrics['integration_failures'] += 1
             pytest.fail(f"CRITICAL: AgentRegistry WebSocket coordination failed: {e}")
     
-    def _setup_integration_tracking(self, manager: UnifiedWebSocketManager, prefix: str):
+    def _setup_integration_tracking(self, manager: WebSocketManager, prefix: str):
         """Set up integration event tracking on the WebSocket manager."""
         original_send = getattr(manager, 'send_to_thread', None)
         
@@ -548,7 +548,7 @@ class TestWebSocketSSotAgentIntegrationValidation(SSotAsyncTestCase):
             return {"success": False, "error": str(e)}
     
     async def _simulate_execution_engine_coordination(
-        self, websocket_manager: UnifiedWebSocketManager, user_context: UserExecutionContext
+        self, websocket_manager: WebSocketManager, user_context: UserExecutionContext
     ) -> Dict[str, Any]:
         """Simulate ExecutionEngine WebSocket coordination."""
         try:
@@ -581,7 +581,7 @@ class TestWebSocketSSotAgentIntegrationValidation(SSotAsyncTestCase):
             return {"success": False, "error": str(e)}
     
     async def _test_agent_registry_coordination(
-        self, agent_registry: AgentRegistry, websocket_manager: UnifiedWebSocketManager, 
+        self, agent_registry: AgentRegistry, websocket_manager: WebSocketManager, 
         user_context: UserExecutionContext
     ) -> Dict[str, Any]:
         """Test AgentRegistry WebSocket coordination."""
@@ -595,7 +595,7 @@ class TestWebSocketSSotAgentIntegrationValidation(SSotAsyncTestCase):
             return {"success": False, "error": str(e)}
     
     async def _simulate_agent_registry_coordination(
-        self, websocket_manager: UnifiedWebSocketManager, user_context: UserExecutionContext
+        self, websocket_manager: WebSocketManager, user_context: UserExecutionContext
     ) -> Dict[str, Any]:
         """Simulate AgentRegistry WebSocket coordination."""
         try:

@@ -32,7 +32,7 @@ from shared.isolated_environment import IsolatedEnvironment
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 
-class TestWebSocketConnection:
+class MockWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):

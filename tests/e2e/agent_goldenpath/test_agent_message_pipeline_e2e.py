@@ -58,10 +58,8 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """Setup staging environment configuration and dependencies."""
-        super().setUpClass()
-        
         # Initialize staging configuration
         cls.staging_config = get_staging_config()
         cls.logger = logging.getLogger(__name__)
@@ -74,10 +72,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         cls.auth_helper = E2EAuthHelper(environment="staging")
         
         # Initialize WebSocket test utilities
-        cls.websocket_helper = WebSocketTestHelper(
-            base_url=cls.staging_config.urls.websocket_url,
-            environment="staging"
-        )
+        cls.websocket_helper = WebSocketTestHelper()
         
         # Test user configuration
         cls.test_user_id = f"golden_path_user_{int(time.time())}"
@@ -85,19 +80,19 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         
         cls.logger.info(f"Agent message pipeline e2e tests initialized for staging")
 
-    def setUp(self):
+    def setup_method(self, method):
         """Setup for each test method."""
-        super().setUp()
+        super().setup_method(method)
         
         # Generate test-specific user context
         self.thread_id = f"message_pipeline_test_{int(time.time())}"
         self.run_id = f"run_{self.thread_id}"
         
         # Create JWT token for this test
-        self.access_token = self.auth_helper.create_test_jwt_token(
-            user_id=self.test_user_id,
-            email=self.test_user_email,
-            expires_in_hours=1
+        self.access_token = self.__class__.auth_helper.create_test_jwt_token(
+            user_id=self.__class__.test_user_id,
+            email=self.__class__.test_user_email,
+            exp_minutes=60
         )
         
         self.logger.info(f"Test setup complete - thread_id: {self.thread_id}")
@@ -122,6 +117,23 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         pipeline_start_time = time.time()
         pipeline_events = []
         
+        # Initialize class attributes if not already done
+        if not hasattr(self.__class__, 'logger'):
+            self.__class__.setUpClass()
+
+        # Initialize instance attributes if not already done
+        if not hasattr(self, 'access_token'):
+            # Generate test-specific user context
+            self.thread_id = f"message_pipeline_test_{int(time.time())}"
+            self.run_id = f"run_{self.thread_id}"
+
+            # Create JWT token for this test
+            self.access_token = self.__class__.auth_helper.create_test_jwt_token(
+                user_id=self.__class__.test_user_id,
+                email=self.__class__.test_user_email,
+                exp_minutes=60
+            )
+
         self.logger.info("🎯 Testing complete user message → agent response pipeline")
         
         try:
@@ -133,8 +145,8 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
             connection_start = time.time()
             websocket = await asyncio.wait_for(
                 websockets.connect(
-                    self.staging_config.urls.websocket_url,
-                    extra_headers={
+                    self.__class__.staging_config.urls.websocket_url,
+                    additional_headers={
                         "Authorization": f"Bearer {self.access_token}",
                         "X-Environment": "staging",
                         "X-Test-Suite": "agent-pipeline-e2e"
@@ -167,7 +179,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
                 ),
                 "thread_id": self.thread_id,
                 "run_id": self.run_id,
-                "user_id": self.test_user_id,
+                "user_id": self.__class__.test_user_id,
                 "context": {
                     "test_scenario": "golden_path_message_pipeline",
                     "expected_agents": ["supervisor_agent", "triage_agent", "apex_optimizer_agent"],
@@ -390,8 +402,8 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         
         websocket = await asyncio.wait_for(
             websockets.connect(
-                self.staging_config.urls.websocket_url,
-                extra_headers={
+                self.__class__.staging_config.urls.websocket_url,
+                additional_headers={
                     "Authorization": f"Bearer {self.access_token}",
                     "X-Environment": "staging",
                     "X-Test-Suite": "error-handling-e2e"
@@ -495,7 +507,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
             }
             
             # Generate JWT for each user
-            user["access_token"] = self.auth_helper.create_test_jwt_token(
+            user["access_token"] = self.__class__.auth_helper.create_test_jwt_token(
                 user_id=user["user_id"],
                 email=user["email"]
             )
@@ -515,8 +527,8 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
                 # Establish user-specific WebSocket connection
                 websocket = await asyncio.wait_for(
                     websockets.connect(
-                        self.staging_config.urls.websocket_url,
-                        extra_headers={
+                        self.__class__.staging_config.urls.websocket_url,
+                        additional_headers={
                             "Authorization": f"Bearer {user['access_token']}",
                             "X-Environment": "staging",
                             "X-User-Context": user["user_id"]
@@ -641,8 +653,8 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         
         websocket = await asyncio.wait_for(
             websockets.connect(
-                self.staging_config.urls.websocket_url,
-                extra_headers={
+                self.__class__.staging_config.urls.websocket_url,
+                additional_headers={
                     "Authorization": f"Bearer {self.access_token}",
                     "X-Environment": "staging",
                     "X-Test-Suite": "large-message-e2e"
@@ -716,7 +728,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
                     "agent": "apex_optimizer_agent",
                     "message": test_case["content"],
                     "thread_id": f"large_msg_test_{test_case['name']}_{int(time.time())}",
-                    "user_id": self.test_user_id,
+                    "user_id": self.__class__.test_user_id,
                     "context": {
                         "test_case": test_case["name"],
                         "message_length": message_length

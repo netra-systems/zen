@@ -42,7 +42,7 @@ GCP_STAGING_WS_URL = os.getenv('STAGING_WS_URL', 'wss://staging-api.netra.ai/ws'
 
 # Registry imports for staging validation
 try:
-    from netra_backend.app.agents.registry import AgentRegistry as BasicAgentRegistry
+    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry as BasicAgentRegistry
     basic_registry_available = True
 except ImportError:
     BasicAgentRegistry = None

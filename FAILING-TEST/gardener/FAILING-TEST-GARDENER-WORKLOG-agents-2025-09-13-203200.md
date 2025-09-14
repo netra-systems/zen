@@ -1,0 +1,99 @@
+# FAILING-TEST-GARDENER-WORKLOG - Agents Focus
+**Generated:** 2025-09-13 20:32:00
+**Test Focus:** agents (agent-related unit, integration, e2e tests)
+**Command:** `/failingtestsgardener agents`
+**Total Tests Discovered:** 2387 tests
+**Collection Errors:** 3 errors
+**Skipped Tests:** 2 tests
+
+## Executive Summary
+Agent test collection reveals 3 critical import errors preventing test execution and 2 skipped tests due to missing modules. Tests collected successfully (2387 tests) but execution blocked by collection failures.
+
+## Collection Errors (Critical)
+
+### Error 1: DeepAgentState Import Error - P1 High
+**File:** `tests/integration/agents/test_actions_agent_ssot.py`
+**Error Type:** ImportError
+**Details:**
+```
+ImportError: cannot import name 'DeepAgentState' from 'netra_backend.app.agents.state'
+Location: tests\integration\agents\test_actions_agent_ssot.py:58
+```
+**Impact:** Integration test for actions agent SSOT cannot execute
+**Business Impact:** Blocks validation of agent action execution patterns
+**GitHub Issue:** [#953 - SSOT-legacy-deepagentstate-critical-user-isolation-vulnerability](https://github.com/netra-systems/netra-apex/issues/953) (Updated with test failure details)
+
+### Error 2: WebSocketTestUtility Module Missing - P1 High
+**File:** `tests/integration/agents/test_chat_orchestrator_workflows_integration.py`
+**Error Type:** ModuleNotFoundError
+**Details:**
+```
+ModuleNotFoundError: No module named 'test_framework.websocket_test_utility'
+Location: tests\integration\agents\test_chat_orchestrator_workflows_integration.py:62
+```
+**Impact:** Chat orchestrator integration tests cannot execute
+**Business Impact:** Blocks validation of chat workflow integration (90% of platform value)
+**GitHub Issue:** [#963 - uncollectable-test-regression-p1-websocket-test-utility-module-missing](https://github.com/netra-systems/netra-apex/issues/963) (Created - SSOT import path issue)
+
+### Error 3: WebSocketConnection Import Error - P1 High
+**File:** `netra_backend/tests/unit/agents/test_websocket_agent_integration_comprehensive.py`
+**Error Type:** ImportError
+**Details:**
+```
+ImportError: cannot import name 'WebSocketConnection' from 'netra_backend.app.websocket_core.types'
+Location: netra_backend\tests\unit\agents\test_websocket_agent_integration_comprehensive.py:36
+```
+**Impact:** WebSocket agent integration unit tests cannot execute
+**Business Impact:** Blocks validation of critical WebSocket agent functionality
+**GitHub Issue:** [#961 - failing-test-collection-P1-websocket-connection-import-error](https://github.com/netra-systems/netra-apex/issues/961) (Updated with latest analysis)
+
+## Skipped Tests
+
+### Skip 1: ExecutionEngine Module Missing - P2 Medium
+**File:** `netra_backend/tests/unit/agents/supervisor/test_execution_engine_complete.py`
+**Reason:** No module named 'netra_backend.app.agents.supervisor.execution_engine'
+**Impact:** Supervisor execution engine tests skipped
+**GitHub Issue:** [#915 - failing-test-regression-critical-execution-engine-module-not-found](https://github.com/netra-systems/netra-apex/issues/915) (Updated with latest discovery)
+
+### Skip 2: ExecutionEngine Module Missing - P2 Medium
+**File:** `netra_backend/tests/unit/agents/supervisor/test_execution_engine_comprehensive.py`
+**Reason:** No module named 'netra_backend.app.agents.supervisor.execution_engine'
+**Impact:** Comprehensive execution engine tests skipped
+**GitHub Issue:** [#915 - failing-test-regression-critical-execution-engine-module-not-found](https://github.com/netra-systems/netra-apex/issues/915) (Updated with latest discovery)
+
+## Test Discovery Success
+
+### Tests Successfully Collected: 2387
+- Agent business logic tests
+- Supervisor agent tests
+- Base agent infrastructure tests
+- WebSocket agent event tests
+- Agent state management tests
+- Agent registry tests
+- And many more agent-focused test files
+
+## Issues Identified for GitHub Processing ✅ COMPLETED
+
+1. **uncollectable-test-regression-p1-deepagentstate-import-missing** → [Updated existing issue #953](https://github.com/netra-systems/netra-apex/issues/953)
+2. **uncollectable-test-regression-p1-websocket-test-utility-module-missing** → [Created new issue #963](https://github.com/netra-systems/netra-apex/issues/963)
+3. **uncollectable-test-regression-p1-websocket-connection-import-missing** → [Updated existing issue #961](https://github.com/netra-systems/netra-apex/issues/961)
+4. **uncollectable-test-active-dev-p2-execution-engine-module-missing** → [Updated existing issue #915](https://github.com/netra-systems/netra-apex/issues/915)
+
+## Actions Completed ✅
+
+1. ✅ Searched existing GitHub issues for similar import/collection problems
+2. ✅ Created or updated GitHub issues for each identified problem
+3. ✅ Linked related issues and documentation
+4. ✅ Assigned appropriate priority tags (P0-P3)
+5. ✅ Updated worklog and committed safely to repository
+
+## Summary of Actions Taken
+
+- **Issues Updated:** 3 existing issues enhanced with latest discovery details
+- **Issues Created:** 1 new issue for WebSocket test utility SSOT import path problem
+- **Business Impact Protected:** All issues properly prioritized with business value context
+- **Documentation:** Comprehensive worklog with technical details and GitHub integration
+- **Repository Safety:** All changes committed safely following git best practices
+
+---
+*Generated by Netra Apex Failing Test Gardener v1.0*

@@ -26,13 +26,13 @@ from datetime import datetime
 from abc import abstractmethod
 
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from shared.types.core_types import (
     UserID, ThreadID, ConnectionID, WebSocketID, RequestID,
     ensure_user_id, ensure_thread_id, ensure_websocket_id
 )
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 @runtime_checkable

@@ -845,3 +845,15 @@ Components still containing DeepAgentState imports (non-critical or deprecated):
 
 **STATUS**: Phase 1 COMPLETE - Critical infrastructure secured. Issue #271 remediation 60% complete.
 
+## RECENT FIXES (2025-09-14)
+
+### SessionManager Import Fix
+- **Problem**: Tests failing due to missing `auth_service.auth_core.core.session_manager` module
+- **Solution**: Created compatibility SessionManager class wrapping JWTHandler functionality
+- **Import Path**: `from auth_service.auth_core.core.session_manager import SessionManager`
+- **SSOT Compliance**: SessionManager delegates to JWTHandler (maintains single source of truth)
+- **Test Impact**: Fixed 2 E2E test collection failures:
+  - `tests/e2e/test_auth_race_conditions_core.py`
+  - `tests/e2e/test_cold_start_critical_issues.py`
+- **Interface**: Provides `create_session()`, `validate_session()`, `invalidate_session()` methods
+

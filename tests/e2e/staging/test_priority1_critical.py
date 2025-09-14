@@ -177,9 +177,11 @@ class TestCriticalWebSocket:
         # TESTS MUST RAISE ERRORS - but here we catch expected authentication errors
         # First test: Try to connect without auth - should fail with 403
         try:
+            # PHASE 1 FIX: Use staging config subprotocols (empty list) instead of hardcoded jwt-auth
+            staging_subprotocols = config.get_websocket_subprotocols() if hasattr(config, 'get_websocket_subprotocols') else []
             async with websockets.connect(
                 config.websocket_url,
-                subprotocols=["jwt-auth"],
+                subprotocols=staging_subprotocols,
                 close_timeout=5  # SSOT: Prevent Windows asyncio race conditions
             ) as ws:
                 # Should not reach here

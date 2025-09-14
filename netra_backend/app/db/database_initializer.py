@@ -1413,11 +1413,11 @@ class DatabaseInitializer:
         try:
             # Import here to avoid circular dependencies
             from netra_backend.app.db.postgres_core import async_engine
-            from netra_backend.app.core.configuration.base import get_unified_config
+            from netra_backend.app.config import get_config
             
             # Validate async engine availability
             if async_engine is None:
-                config = get_unified_config()
+                config = get_config()
                 timeout = getattr(config, 'async_engine_wait_timeout', 30)
                 
                 # Wait for async engine with retry logic

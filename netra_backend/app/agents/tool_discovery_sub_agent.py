@@ -21,7 +21,7 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.input_validation import validate_agent_input
 from netra_backend.app.agents.triage.unified_triage_agent import ExtractedEntities, ToolRecommendation
-from netra_backend.app.agents.triage_sub_agent.tool_recommender import ToolRecommender
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.user_execution_context import UserExecutionContext, validate_user_context
 from netra_backend.app.database.session_manager import SessionManager
@@ -48,7 +48,8 @@ class ToolDiscoverySubAgent(BaseAgent):
             enable_execution_engine=True, # Get modern execution patterns
             enable_caching=True,          # Cache tool recommendations
         )   
-        self.tool_recommender = ToolRecommender()
+        # Tool recommender will be instantiated from UnifiedTriageAgent
+        self.unified_triage_agent = None
         self.discovery_cache = {}  # In-memory cache for fast lookups
 
     async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> Dict[str, Any]:
@@ -214,10 +215,28 @@ class ToolDiscoverySubAgent(BaseAgent):
     async def _discover_tools(self, categories: List[str], entities: ExtractedEntities) -> List[ToolRecommendation]:
         """Discover tools for the identified categories."""
         all_recommendations = []
-        
+
+        # Create UnifiedTriageAgent instance for tool recommendation
+        if self.unified_triage_agent is None:
+            self.unified_triage_agent = UnifiedTriageAgent(
+                llm_manager=None,  # Not needed for tool recommendation
+                tool_dispatcher=None,  # Not needed for tool recommendation
+                context=None
+            )
+
         for category in categories:
-            recommendations = self.tool_recommender.recommend_tools(category, entities)
-            all_recommendations.extend(recommendations)
+            # Use UnifiedTriageAgent._recommend_tools method
+            tool_recommendation = self.unified_triage_agent._recommend_tools(category, entities)
+
+            # Convert ToolRecommendation to list of ToolRecommendation objects
+            for tool_name in tool_recommendation.primary_tools + tool_recommendation.secondary_tools:
+                score = tool_recommendation.tool_scores.get(tool_name, 0.5)
+                recommendation = ToolRecommendation(
+                    tool_name=tool_name,
+                    relevance_score=score,
+                    parameters={}
+                )
+                all_recommendations.append(recommendation)
         
         # Remove duplicates and sort by relevance
         unique_tools = {}

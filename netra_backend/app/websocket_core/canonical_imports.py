@@ -31,7 +31,6 @@ from netra_backend.app.websocket_core.canonical_imports import (
 
 # CANONICAL: WebSocket Manager Factory (PREFERRED)
 from netra_backend.app.websocket_core.websocket_manager_factory import (
-    get_websocket_manager_factory,
     create_websocket_manager,
     FactoryInitializationError,
     WebSocketComponentError,
@@ -76,7 +75,6 @@ from netra_backend.app.websocket_core.migration_adapter import (
 # Single source of truth exports
 __all__ = [
     # PREFERRED: Use these for new code
-    'get_websocket_manager_factory',
     'create_websocket_manager',
     
     # INTERFACE: Use for type checking and contracts

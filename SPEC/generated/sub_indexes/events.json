@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-09-13T20:38:38.413681",
-    "root_directory": "/Users/anthony/Desktop/netra-apex",
+    "generated_at": "2025-09-13T22:43:15.642616",
+    "root_directory": "C:\\GitHub\\netra-apex",
     "total_literals": 45
   },
   "literals": {
@@ -124,8 +124,8 @@
       "locations": [
         "netra_backend/app/websocket_core/protocols.py:292",
         "netra_backend/app/websocket_core/protocols.py:655",
-        "scripts/P0_SYSTEM_REGRESSION_TEST.py:66",
-        "scripts/generate_websocket_mro_report.py:129"
+        "scripts/generate_websocket_mro_report.py:129",
+        "scripts/P0_SYSTEM_REGRESSION_TEST.py:66"
       ]
     },
     "emit_event": {
@@ -220,7 +220,7 @@
         "netra_backend/app/agents/agent_communication.py:66",
         "netra_backend/app/agents/agent_communication.py:82",
         "netra_backend/app/agents/agent_lifecycle.py:171",
-        "netra_backend/app/agents/base/execution_context.py:119"
+        "netra_backend/app/agents/agent_lifecycle_backup.py:171"
       ]
     },
     "newest_event": {

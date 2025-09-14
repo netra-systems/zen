@@ -19,8 +19,8 @@ class StagingConfig:
     # CRITICAL FIX: Add missing base_url attribute (required by configuration system)
     base_url: str = "https://api.staging.netrasystems.ai"
     
-    # Auth service URLs (when deployed)
-    auth_url: str = "https://auth.staging.netrasystems.ai"
+    # Auth service URLs (when deployed) - Updated after commit 630b63ca2
+    auth_url: str = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
     
     # Frontend URL (when deployed)
     frontend_url: str = "https://app.staging.netrasystems.ai"
@@ -143,29 +143,49 @@ class StagingConfig:
             headers["Authorization"] = f"Bearer {jwt_token}"
             
             # Method 2: WebSocket subprotocol header (secondary)
-            # CRITICAL FIX: Add sec-websocket-protocol header to prevent "[MISSING]" error
+            # PHASE 1 FIX: Remove unsupported subprotocol to prevent "no subprotocols supported" error
             try:
                 import base64
                 # Remove "Bearer " prefix if present for subprotocol encoding
                 clean_token = jwt_token.replace("Bearer ", "").strip()
                 # Base64url encode the token for WebSocket subprotocol
                 encoded_token = base64.urlsafe_b64encode(clean_token.encode()).decode().rstrip('=')
-                headers["sec-websocket-protocol"] = "e2e-testing, jwt-auth"
-                print(f"[STAGING AUTH FIX] Added WebSocket subprotocol: jwt.{encoded_token[:20]}...")
+                # PHASE 1 FIX: Only use subprotocol if backend supports it (disabled for staging)
+                # headers["sec-websocket-protocol"] = f"jwt.{encoded_token}"
+                print(f"[STAGING PHASE1 FIX] Subprotocol disabled - staging backend doesn't support jwt-auth subprotocols")
+                print(f"[STAGING PHASE1 FIX] Using Authorization header only for WebSocket auth")
             except Exception as e:
                 print(f"[WARNING] Could not encode JWT for WebSocket subprotocol: {e}")
-                # Fallback: set a recognizable subprotocol for debugging
-                headers["sec-websocket-protocol"] = "e2e-testing, jwt-auth"
+                # PHASE 1 FIX: Don't set fallback subprotocol that causes negotiation failure
+                print(f"[STAGING PHASE1 FIX] No subprotocol set - using header auth only")
             
             print(f"[STAGING AUTH FIX] Added JWT token to WebSocket headers (Authorization + subprotocol)")
         else:
             # Fallback test headers (will likely be rejected but enables auth flow testing)
             headers["X-Test-Auth"] = "test-token-for-staging"
-            headers["sec-websocket-protocol"] = "e2e-testing, jwt-auth"
-            print(f"[WARNING] No JWT token available - using test header fallback with subprotocol")
+            # PHASE 1 FIX: Remove fallback subprotocol that causes negotiation failure
+            # headers["sec-websocket-protocol"] = "e2e-testing"
+            print(f"[WARNING] No JWT token available - using test header fallback without subprotocol")
             
         print(f"[STAGING AUTH FIX] WebSocket headers include E2E detection: {list(headers.keys())}")
         return headers
+
+    def get_websocket_subprotocols(self, token: Optional[str] = None) -> list:
+        """
+        Get WebSocket subprotocols for staging environment.
+
+        PHASE 1 FIX: Staging backend doesn't support subprotocols, so return empty list
+        to prevent "no subprotocols supported" negotiation errors.
+
+        Args:
+            token: JWT token (not used since staging doesn't support subprotocol auth)
+
+        Returns:
+            Empty list - staging backend doesn't support subprotocols
+        """
+        # PHASE 1 FIX: Return empty list since staging backend doesn't support subprotocols
+        print(f"[STAGING PHASE1 FIX] get_websocket_subprotocols returning empty list - staging backend doesn't support subprotocols")
+        return []
     
     def create_test_jwt_token(self) -> Optional[str]:
         """Create a test JWT token for staging authentication using EXISTING staging users.
@@ -206,15 +226,18 @@ class StagingConfig:
                 os.environ["E2E_OAUTH_SIMULATION_KEY"] = "staging-e2e-test-bypass-key-2025"
                 print(f"[STAGING TEST FIX] Set E2E_OAUTH_SIMULATION_KEY for staging testing")
             
-            # Create staging config
+            # Create staging config with updated auth service URL
             staging_config = E2EAuthConfig.for_staging()
+            staging_config.auth_service_url = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+            staging_config.jwt_validation_strict = False  # Allow E2E test tokens in staging
             auth_helper = E2EAuthHelper(config=staging_config, environment="staging")
             
             # Create token for EXISTING staging user (should pass user validation)
+            # PHASE 2 FIX: Add agent-specific permissions for WebSocket agent events
             token = auth_helper.create_test_jwt_token(
                 user_id=test_user["user_id"],
                 email=test_user["email"],
-                permissions=["read", "write", "execute"]  # Standard test permissions
+                permissions=["read", "write", "execute", "basic_chat", "agent_access"]  # Agent-enabled permissions
             )
             
             print(f"[SUCCESS] Created staging JWT for EXISTING user: {test_user['user_id']}")
@@ -237,10 +260,11 @@ class StagingConfig:
                 staging_secret = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
                 
                 # Create fallback payload - NOTE: This may still fail in staging
+                # PHASE 2 FIX: Include agent permissions in fallback JWT
                 payload = {
                     "sub": f"fallback-user-{uuid.uuid4().hex[:8]}",
-                    "email": "fallback-test@netrasystems.ai", 
-                    "permissions": ["read", "write"],
+                    "email": "fallback-test@netrasystems.ai",
+                    "permissions": ["read", "write", "execute", "basic_chat", "agent_access"],
                     "iat": int(datetime.now(timezone.utc).timestamp()),
                     "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
                     "iss": "netra-auth-service",
