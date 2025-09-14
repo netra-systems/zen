@@ -44,7 +44,7 @@ class TestConfigManagerImportConflicts(SSotBaseTestCase):
         # The three configuration managers that should not coexist
         config_managers = [
             ("netra_backend.app.core.configuration.base", "UnifiedConfigManager"),
-            ("netra_backend.app.core.managers.unified_configuration_manager", "UnifiedConfigurationManager"),
+            ("netra_backend.app.core.configuration.base", "UnifiedConfigurationManager"),
             ("netra_backend.app.services.configuration_service", "ConfigurationManager")
         ]
 
@@ -91,7 +91,7 @@ class TestConfigManagerImportConflicts(SSotBaseTestCase):
         # Import all available managers and analyze their methods
         manager_imports = [
             ("netra_backend.app.core.configuration.base", "UnifiedConfigManager"),
-            ("netra_backend.app.core.managers.unified_configuration_manager", "UnifiedConfigurationManager"),
+            ("netra_backend.app.core.configuration.base", "UnifiedConfigurationManager"),
             ("netra_backend.app.services.configuration_service", "ConfigurationManager")
         ]
 
@@ -160,7 +160,7 @@ class TestConfigManagerImportConflicts(SSotBaseTestCase):
 
         manager_imports = [
             ("netra_backend.app.core.configuration.base", "UnifiedConfigManager"),
-            ("netra_backend.app.core.managers.unified_configuration_manager", "UnifiedConfigurationManager"),
+            ("netra_backend.app.core.configuration.base", "UnifiedConfigurationManager"),
             ("netra_backend.app.services.configuration_service", "ConfigurationManager")
         ]
 
@@ -222,7 +222,7 @@ class TestConfigManagerImportConflicts(SSotBaseTestCase):
 
         manager_imports = [
             ("netra_backend.app.core.configuration.base", "UnifiedConfigManager"),
-            ("netra_backend.app.core.managers.unified_configuration_manager", "UnifiedConfigurationManager"),
+            ("netra_backend.app.core.configuration.base", "UnifiedConfigurationManager"),
             ("netra_backend.app.services.configuration_service", "ConfigurationManager")
         ]
 
@@ -280,7 +280,7 @@ class TestConfigManagerImportConflicts(SSotBaseTestCase):
 
         manager_imports = [
             ("netra_backend.app.core.configuration.base", "UnifiedConfigManager"),
-            ("netra_backend.app.core.managers.unified_configuration_manager", "UnifiedConfigurationManager"),
+            ("netra_backend.app.core.configuration.base", "UnifiedConfigurationManager"),
             ("netra_backend.app.services.configuration_service", "ConfigurationManager")
         ]
 

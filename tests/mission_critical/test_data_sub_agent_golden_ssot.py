@@ -53,7 +53,7 @@
                 # REMOVED_SYNTAX_ERROR: import asyncio
                 # REMOVED_SYNTAX_ERROR: import pytest
                 # REMOVED_SYNTAX_ERROR: from typing import Dict, Any
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                 # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.redis_manager import redis_manager
                 # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager

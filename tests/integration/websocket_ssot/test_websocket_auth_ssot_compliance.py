@@ -88,7 +88,7 @@ class TestWebSocketAuthSSOTCompliance(SSotAsyncTestCase):
             }
 
             # Test WebSocket manager auth context
-            from netra_backend.app.websocket_core.manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
             ws_manager = WebSocketManager()
             test_token = "manager-test-token"

@@ -65,7 +65,7 @@ class TestWebSocketManagerFactoryConsolidation(SSotBaseTestCase):
             
         try:
             # Check for other factory patterns
-            from netra_backend.app.websocket_core.unified_manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             if hasattr(WebSocketManager, 'create') or hasattr(WebSocketManager, 'factory'):
                 factory_classes.append(('WebSocketManager.factory_methods', WebSocketManager))
         except ImportError:
@@ -136,7 +136,7 @@ class TestWebSocketManagerFactoryConsolidation(SSotBaseTestCase):
 
         try:
             # Test unified manager direct creation
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager3 = UnifiedWebSocketManager()
             manager_types.add(type(manager3).__name__)
             
@@ -173,7 +173,7 @@ class TestWebSocketManagerFactoryConsolidation(SSotBaseTestCase):
 
         # Check for direct manager instantiation patterns (anti-pattern)
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             # Direct instantiation should be deprecated in favor of factory
             manager = UnifiedWebSocketManager()
             legacy_patterns_found.append('Direct UnifiedWebSocketManager instantiation')

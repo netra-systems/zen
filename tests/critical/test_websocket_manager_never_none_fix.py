@@ -164,7 +164,7 @@ class WebSocketTestConnection:
                                                 async def test_websocket_manager_creation_failure_handling():
                                                     """Test handling of WebSocket manager creation failures."""
                                                     pass
-                                                    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+                                                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
                                                     import netra_backend.app.websocket_core.manager as manager_module
 
     # Reset singleton

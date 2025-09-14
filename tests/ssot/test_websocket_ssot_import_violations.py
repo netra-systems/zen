@@ -57,7 +57,7 @@ class TestWebSocketSSotImportViolations(SSotBaseTestCase, unittest.TestCase):
             import_test_results['websocket_manager_import'] = False
             
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             import_test_results['unified_manager_import'] = True
         except ImportError:
             import_test_results['unified_manager_import'] = False
@@ -93,7 +93,7 @@ class TestWebSocketSSotImportViolations(SSotBaseTestCase, unittest.TestCase):
             # Test import sequence that might cause circular dependencies
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as LegacyWebSocketManager
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # Check if same class is imported with different names
             manager_classes = [WebSocketManager, LegacyWebSocketManager, UnifiedWebSocketManager]

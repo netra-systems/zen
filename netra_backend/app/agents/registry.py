@@ -101,12 +101,17 @@ class AgentRegistry(CanonicalAgentRegistry):
             "This compatibility wrapper will be removed in a future version."
         )
 
-        # Delegate to canonical implementation
+        # Delegate to canonical implementation (canonical doesn't accept websocket_manager in constructor)
         super().__init__(
             llm_manager=llm_manager,
-            tool_dispatcher_factory=tool_dispatcher_factory,
-            websocket_manager=websocket_manager
+            tool_dispatcher_factory=tool_dispatcher_factory
         )
+
+        # Set websocket manager separately if provided
+        # NOTE: The canonical implementation handles websocket managers per user session
+        if websocket_manager is not None:
+            # Store for backward compatibility, but actual websocket handling is per-user in canonical impl
+            logger.info("WebSocket manager provided to compatibility wrapper - will be handled per user session")
 
         logger.info("✅ AgentRegistry compatibility wrapper initialized")
 

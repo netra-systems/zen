@@ -40,9 +40,9 @@ class TestAgentRegistryImportResolutionConflicts(SSotAsyncTestCase):
     that cause unpredictable behavior and runtime failures in production.
     """
     
-    async def async_setup_method(self, method=None):
+    def setup_method(self, method=None):
         """Set up test environment with SSOT patterns"""
-        await super().async_setup_method(method)
+        super().setup_method(method)
         self.env = IsolatedEnvironment()
         
         # Define conflicting import patterns found in Issue #914
@@ -815,14 +815,14 @@ class TestAgentRegistryImportResolutionConflicts(SSotAsyncTestCase):
         # If no circular dependencies or import issues, dependencies are clean
         self.logger.info("No circular dependency resolution conflicts detected")
 
-    async def async_teardown_method(self, method=None):
+    def teardown_method(self, method=None):
         """Clean up test resources and restore module states"""
         # Restore any modified module states
         for module_name, original_module in self.original_modules.items():
             if module_name in sys.modules:
                 sys.modules[module_name] = original_module
         
-        await super().async_teardown_method(method)
+        super().teardown_method(method)
 
 
 if __name__ == "__main__":

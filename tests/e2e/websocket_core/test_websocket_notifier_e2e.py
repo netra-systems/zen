@@ -21,7 +21,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.ssot.websocket import WebSocketTestUtility, WebSocketEventType
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 
 

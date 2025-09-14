@@ -84,7 +84,7 @@
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.redis_manager import RedisManager
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.state.state_manager import StateManager, StateStorage
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
                 # REMOVED_SYNTAX_ERROR: from netra_backend.tests.performance.performance_baseline_config import ( )
                 # REMOVED_SYNTAX_ERROR: get_benchmark_runner,
                 # REMOVED_SYNTAX_ERROR: PerformanceCategory,

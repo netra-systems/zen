@@ -58,15 +58,25 @@ class UnifiedConfigManager:
                 self._logger = logging.getLogger(__name__)
         return self._logger
     
-    def get_config(self) -> AppConfig:
+    def get_config(self, key: str = None, default: Any = None) -> AppConfig:
         """Get the unified application configuration.
+        
+        COMPATIBILITY FIX: Support both get_config() and get_config(key, default) patterns
+        for backward compatibility during SSOT migration.
         
         CRITICAL FIX: Removed @lru_cache decorator to prevent test configuration caching issues.
         Test environments need fresh configuration loading to properly reflect environment variables.
         
+        Args:
+            key: Optional configuration key for backward compatibility
+            default: Default value if key not found
+        
         Returns:
-            AppConfig: The validated application configuration
+            AppConfig or Any: The validated application configuration, or specific value if key provided
         """
+        # Handle backward compatibility for get_config(key, default) pattern
+        if key is not None:
+            return self.get_config_value(key, default)
         # CRITICAL FIX: Always check if we're in test environment to avoid caching issues
         current_environment = self._get_environment()
         
@@ -340,6 +350,76 @@ class UnifiedConfigManager:
         """
         return self.get_config_value(key, default)
 
+    # GOLDEN PATH REQUIRED METHODS: These methods are required by Golden Path tests
+    # for $500K+ ARR protection
+    
+    def get_database_config(self) -> Dict[str, Any]:
+        """Get database configuration.
+        
+        GOLDEN PATH REQUIREMENT: Tests require this method for database connectivity validation.
+        
+        Returns:
+            Dict[str, Any]: Database configuration dictionary
+        """
+        try:
+            config = self.get_config()
+            return {
+                'database_url': getattr(config, 'database_url', None),
+                'postgres_url': getattr(config, 'postgres_url', None),
+                'clickhouse_url': getattr(config, 'clickhouse_url', None),
+                'redis_url': getattr(config, 'redis_url', None),
+            }
+        except Exception as e:
+            self._get_logger().error(f"Error getting database config: {e}")
+            return {}
+    
+    def get_auth_config(self) -> Dict[str, Any]:
+        """Get authentication configuration.
+        
+        GOLDEN PATH REQUIREMENT: Tests require this method for auth service integration.
+        
+        Returns:
+            Dict[str, Any]: Authentication configuration dictionary
+        """
+        try:
+            config = self.get_config()
+            return {
+                'jwt_secret_key': getattr(config, 'service_secret', None) or getattr(config, 'jwt_secret_key', None),
+                'auth_service_url': getattr(config, 'auth_service_url', None),
+                'service_secret': getattr(config, 'service_secret', None),
+            }
+        except Exception as e:
+            self._get_logger().error(f"Error getting auth config: {e}")
+            return {}
+    
+    def get_redis_config(self) -> Dict[str, Any]:
+        """Get Redis configuration.
+        
+        GOLDEN PATH REQUIREMENT: Tests require this method for cache connectivity validation.
+        
+        Returns:
+            Dict[str, Any]: Redis configuration dictionary
+        """
+        try:
+            config = self.get_config()
+            return {
+                'redis_url': getattr(config, 'redis_url', None),
+                'cache_ttl': getattr(config, 'cache_ttl', 3600),
+            }
+        except Exception as e:
+            self._get_logger().error(f"Error getting redis config: {e}")
+            return {}
+    
+    def get_environment(self) -> str:
+        """Get current environment name.
+        
+        GOLDEN PATH REQUIREMENT: Tests require this method for environment detection.
+        
+        Returns:
+            str: Environment name (development, staging, production, testing)
+        """
+        return self._get_environment()
+
 
 # Global configuration manager instance
 config_manager = UnifiedConfigManager()
@@ -502,6 +582,40 @@ def get(key: str, default: Any = None) -> Any:
     return config_manager.get(key, default)
 
 
+# GOLDEN PATH REQUIRED MODULE FUNCTIONS
+def get_database_config():
+    """Get database configuration.
+    
+    GOLDEN PATH REQUIREMENT: Module-level function for database connectivity validation.
+    
+    Returns:
+        Dict[str, Any]: Database configuration dictionary
+    """
+    return config_manager.get_database_config()
+
+
+def get_auth_config():
+    """Get authentication configuration.
+    
+    GOLDEN PATH REQUIREMENT: Module-level function for auth service integration.
+    
+    Returns:
+        Dict[str, Any]: Authentication configuration dictionary
+    """
+    return config_manager.get_auth_config()
+
+
+def get_redis_config():
+    """Get Redis configuration.
+    
+    GOLDEN PATH REQUIREMENT: Module-level function for cache connectivity validation.
+    
+    Returns:
+        Dict[str, Any]: Redis configuration dictionary
+    """
+    return config_manager.get_redis_config()
+
+
 # Export compatibility functions
 __all__ = [
     "UnifiedConfigManager",
@@ -518,4 +632,8 @@ __all__ = [
     "is_production",
     "is_development",
     "is_testing",
+    # Golden Path required accessors
+    "get_database_config",
+    "get_auth_config", 
+    "get_redis_config",
 ]

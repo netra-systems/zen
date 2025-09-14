@@ -55,7 +55,7 @@ import websockets
 try:
     from netra_backend.app.main import app
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
     from netra_backend.app.agents.supervisor.agent_instance_factory import (
         AgentInstanceFactory,

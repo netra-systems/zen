@@ -21,7 +21,7 @@ class TestConfigurationConsistencyIntegration:
             sys.path.insert(0, str(Path.cwd()))
 
             # Import both configuration managers
-            from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+            from netra_backend.app.core.configuration.base import UnifiedConfigurationManager
             from netra_backend.app.core.configuration.base import UnifiedConfigManager
 
             # Simulate different services using different configs
@@ -240,7 +240,7 @@ class TestProductionRiskAssessment:
                 try:
                     content = py_file.read_text(encoding='utf-8')
 
-                    if 'from netra_backend.app.core.managers.unified_configuration_manager' in content:
+                    if 'from netra_backend.app.core.configuration.base' in content:
                         deprecated_imports.append(str(py_file))
 
                     if 'from netra_backend.app.core.configuration.base' in content:

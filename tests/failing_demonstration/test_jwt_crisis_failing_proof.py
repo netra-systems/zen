@@ -275,7 +275,7 @@ class TestJWTCrisisBusinessImpactProof(SSotBaseTestCase):
                 revenue_functionality_steps.append("Middleware integration available")
                 
                 # Revenue Step 3: WebSocket manager for agent events
-                from netra_backend.app.websocket_core.manager import WebSocketManager
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                 manager = WebSocketManager()
                 revenue_functionality_steps.append("Agent events infrastructure available")
                 

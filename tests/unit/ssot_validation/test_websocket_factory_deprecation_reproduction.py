@@ -211,7 +211,7 @@ class TestWebSocketFactoryDeprecationReproduction(SSotAsyncTestCase):
         
         # Test 1: Import WebSocketManager directly (SSOT pattern)
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
             logger.success("[SSOT IMPORT] Direct WebSocketManager import successful")
         except ImportError as e:
             pytest.fail(f"SSOT WebSocketManager import failed: {str(e)}")
@@ -281,7 +281,7 @@ class TestWebSocketFactoryDeprecationReproduction(SSotAsyncTestCase):
             
         # Test 2: Try SSOT import
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             results['ssot_import_available'] = True
             logger.success("[SSOT IMPORT] UnifiedWebSocketManager available")
         except ImportError as e:

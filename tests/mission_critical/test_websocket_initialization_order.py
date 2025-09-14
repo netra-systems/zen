@@ -65,7 +65,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.llm.llm_manager import LLMManager
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
             # REMOVED_SYNTAX_ERROR: from sqlalchemy.ext.asyncio import AsyncSession
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager

@@ -32,14 +32,14 @@ class TestUserExecutionContextCore:
             thread_id="thread_456",
             run_id="run_789",
             request_id="req_012",
-            websocket_connection_id="conn_345"
+            websocket_client_id="conn_345"
         )
         
         assert context.user_id == "user_123"
         assert context.thread_id == "thread_456"
         assert context.run_id == "run_789"
         assert context.request_id == "req_012"
-        assert context.websocket_connection_id == "conn_345"
+        assert context.websocket_client_id == "conn_345"
     
     def test_context_validation_rejects_none_user_id(self):
         """Test context validation fails for None user_id."""
@@ -81,7 +81,7 @@ class TestUserExecutionContextCore:
             thread_id="thread_456",
             run_id="run_789",
             request_id="req_012",
-            websocket_connection_id="conn_345"
+            websocket_client_id="conn_345"
         )
         
         # The supervisor UserExecutionContext doesn't have to_dict method, but attributes are accessible
@@ -89,7 +89,7 @@ class TestUserExecutionContextCore:
         assert context.thread_id == "thread_456"
         assert context.run_id == "run_789"
         assert context.request_id == "req_012"
-        assert context.websocket_connection_id == "conn_345"
+        assert context.websocket_client_id == "conn_345"
     
     def test_context_string_representation_security(self):
         """Test UserExecutionContext string representation is safe."""

@@ -45,7 +45,7 @@ from shared.logging.unified_logging_ssot import (
 
 # Real service imports for integration testing (no Docker)
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.core.configuration.base import get_config
+from netra_backend.app.config import get_config
 
 
 class TestGCPLoggingCriticalMessageIntegration(SSotAsyncTestCase):

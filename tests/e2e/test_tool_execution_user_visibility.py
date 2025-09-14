@@ -43,7 +43,7 @@ from netra_backend.app.core.tool_models import ToolExecutionResult
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.isolated_environment import get_env
 

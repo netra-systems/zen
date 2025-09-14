@@ -121,7 +121,7 @@ class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
 
         # Test alternative import paths (should be consistent)
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager3 = UnifiedWebSocketManager(user_context=self.user_context)
             managers_created.append(('UnifiedWebSocketManager direct', manager3))
 
@@ -326,7 +326,7 @@ class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
         async def create_manager_method_3():
             start_time = time.time()
             try:
-                from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                 manager = UnifiedWebSocketManager(user_context=self.user_context)
                 end_time = time.time()
                 creation_times.append(('UnifiedWebSocketManager', end_time - start_time))

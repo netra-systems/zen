@@ -26,7 +26,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 
 # Core system imports for WebSocket validation
 try:
-    from netra_backend.app.core.configuration.base import get_config
+    from netra_backend.app.config import get_config
     from netra_backend.app.core.app_state_contracts import validate_app_state_contracts
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     config = get_config()

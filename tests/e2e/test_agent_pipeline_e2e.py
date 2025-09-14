@@ -67,7 +67,7 @@ from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecution
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 # WebSocket and real-time communication
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 # LLM and core infrastructure

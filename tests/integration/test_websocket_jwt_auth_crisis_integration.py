@@ -73,7 +73,7 @@ class TestWebSocketJWTAuthenticationCrisis(SSotAsyncTestCase):
         
         with patch('shared.isolated_environment.get_env', return_value=mock_env):
             # Mock WebSocket manager creation that would fail
-            from netra_backend.app.websocket_core.manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # This should fail during initialization due to JWT config
             with pytest.raises((ValueError, RuntimeError, Exception)) as exc_info:
@@ -171,7 +171,7 @@ class TestWebSocketJWTAuthenticationCrisis(SSotAsyncTestCase):
         
         with patch('shared.isolated_environment.get_env', return_value=mock_env):
             # Mock the complete WebSocket event flow
-            from netra_backend.app.websocket_core.manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # WebSocket manager creation should fail
             with pytest.raises((ValueError, Exception)) as exc_info:
@@ -199,8 +199,13 @@ class TestWebSocketJWTAuthenticationCrisis(SSotAsyncTestCase):
         with patch('shared.isolated_environment.get_env', return_value=mock_env):
             # Simulate Golden Path WebSocket flow
             try:
+<<<<<<< HEAD
                 from netra_backend.app.websocket_core.manager import WebSocketManager
                 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+=======
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.agents.registry import AgentRegistry
+>>>>>>> c2e4b48c66d9bf92657c93ac92e56d57f8cca6b1
                 
                 # Step 1: Initialize WebSocket manager (should fail)
                 manager = WebSocketManager()
@@ -253,7 +258,7 @@ class TestJWTConfigurationBusinessImpactIntegration(SSotAsyncTestCase):
                 secret = get_jwt_secret()
                 
                 # If secret resolution succeeded, test WebSocket integration
-                from netra_backend.app.websocket_core.manager import WebSocketManager
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                 manager = WebSocketManager()
                 await manager.initialize()
             
@@ -286,7 +291,7 @@ class TestJWTConfigurationBusinessImpactIntegration(SSotAsyncTestCase):
                 validation_steps.append("JWT secret resolved")
                 
                 # Step 2: WebSocket service initialization
-                from netra_backend.app.websocket_core.manager import WebSocketManager
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                 manager = WebSocketManager()
                 await manager.initialize()
                 validation_steps.append("WebSocket manager initialized")
@@ -335,7 +340,7 @@ class TestJWTSecretDeploymentScenarios(SSotAsyncTestCase):
         
         with patch('shared.isolated_environment.get_env', return_value=mock_env):
             from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret
-            from netra_backend.app.websocket_core.manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # Should successfully resolve JWT secret
             secret = get_jwt_secret()

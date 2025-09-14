@@ -26,7 +26,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 # ABSOLUTE IMPORTS ONLY per Claude.md
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 
 
 @pytest.mark.e2e

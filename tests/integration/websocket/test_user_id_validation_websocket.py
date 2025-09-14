@@ -46,7 +46,7 @@ from test_framework.websocket_helpers import MockWebSocketConnection
 # WebSocket components (real, not mocked)
 from netra_backend.app.websocket_core.unified_websocket_auth import WebSocketAuthenticator
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # Authentication components (real, not mocked)
 from netra_backend.app.services.unified_authentication_service import UnifiedAuthenticationService

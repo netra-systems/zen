@@ -29,7 +29,7 @@ import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Integration test imports
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.connection_state_machine import (
     ApplicationConnectionState,
     ConnectionStateMachine

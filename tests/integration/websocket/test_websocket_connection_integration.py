@@ -29,7 +29,7 @@ from netra_backend.app.websocket_core.types import (
     WebSocketMessage
 )
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from shared.isolated_environment import get_env
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 

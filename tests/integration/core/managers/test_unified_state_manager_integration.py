@@ -50,7 +50,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.managers.unified_state_manager import UnifiedStateManager
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from netra_backend.app.services.state_persistence import StatePersistenceService
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.isolated_environment import IsolatedEnvironment
 

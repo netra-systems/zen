@@ -161,12 +161,14 @@ except ImportError:
     PHASE0_COMPONENTS_AVAILABLE = False
     
     class UserExecutionContext:
-        def __init__(self, user_id, thread_id, run_id, request_id, websocket_connection_id=None):
+        def __init__(self, user_id, thread_id, run_id, request_id, websocket_client_id=None):
             self.user_id = user_id
             self.thread_id = thread_id
             self.run_id = run_id
             self.request_id = request_id
-            self.websocket_connection_id = websocket_connection_id
+            self.websocket_client_id = websocket_client_id
+            # Backward compatibility property
+            self.websocket_connection_id = websocket_client_id
 
 @pytest.fixture
 @memory_profile("Valid UserExecutionContext with realistic IDs")
@@ -186,7 +188,7 @@ def valid_user_execution_context():
         thread_id=f"thread_{uuid.uuid4().hex[:8]}",
         run_id=f"run_{uuid.uuid4().hex[:8]}",
         request_id=f"req_{uuid.uuid4().hex[:8]}",
-        websocket_connection_id=f"ws_{uuid.uuid4().hex[:8]}" if PHASE0_COMPONENTS_AVAILABLE else None
+        websocket_client_id=f"ws_{uuid.uuid4().hex[:8]}" if PHASE0_COMPONENTS_AVAILABLE else None
     )
 
 @pytest.fixture
@@ -209,7 +211,7 @@ async def concurrent_user_contexts():
             thread_id=f"thread_{i}_{uuid.uuid4().hex[:8]}",
             run_id=f"run_{i}_{uuid.uuid4().hex[:8]}",
             request_id=f"req_{i}_{uuid.uuid4().hex[:8]}",
-            websocket_connection_id=f"ws_{i}_{uuid.uuid4().hex[:8]}" if PHASE0_COMPONENTS_AVAILABLE else None
+            websocket_client_id=f"ws_{i}_{uuid.uuid4().hex[:8]}" if PHASE0_COMPONENTS_AVAILABLE else None
         )
         contexts.append(context)
     

@@ -68,10 +68,10 @@ class TestWebSocketManagerImportPathFragmentation(SSotBaseTestCase):
         from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ManagerPath1
         
         # Import WebSocketManager from compatibility path (manager.py)  
-        from netra_backend.app.websocket_core.manager import WebSocketManager as ManagerPath2
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ManagerPath2
         
         # Import UnifiedWebSocketManager directly
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as ManagerPath3
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ManagerPath3
         
         logger.info(f"ManagerPath1 class: {ManagerPath1}")
         logger.info(f"ManagerPath2 class: {ManagerPath2}")
@@ -132,7 +132,7 @@ class TestWebSocketManagerImportPathFragmentation(SSotBaseTestCase):
         try:
             # Create instances from different import paths
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as factory1
-            from netra_backend.app.websocket_core.manager import WebSocketManager as DirectClass
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as DirectClass
             
             # Test async factory creation
             import asyncio
@@ -143,7 +143,7 @@ class TestWebSocketManagerImportPathFragmentation(SSotBaseTestCase):
                 
                 # Create instance via direct class instantiation
                 # Note: This may require different parameters due to fragmentation
-                from netra_backend.app.websocket_core.unified_manager import WebSocketManagerMode
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
                 
                 # Create test user context for direct instantiation
                 test_context = type('MockUserContext', (), {

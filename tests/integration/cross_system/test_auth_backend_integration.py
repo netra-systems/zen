@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 
 # System imports for integration testing
 from netra_backend.app.auth_integration.auth import AuthIntegrationService
-from netra_backend.app.core.configuration.base import get_config
+from netra_backend.app.config import get_config
 from netra_backend.app.core.session_manager import SessionManager
 from netra_backend.app.middleware.auth_middleware import AuthMiddleware
 

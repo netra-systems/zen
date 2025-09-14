@@ -38,7 +38,7 @@ from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngi
 
 # Modern infrastructure components
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 
 # Context and execution models

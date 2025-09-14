@@ -196,7 +196,7 @@ class TestWebSocketAuthBypassDetection(SSotAsyncTestCase):
 
         # Test WebSocket event auth context preservation
         try:
-            from netra_backend.app.websocket_core.manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
             # Initialize WebSocket manager (should use auth service context)
             ws_manager = WebSocketManager()

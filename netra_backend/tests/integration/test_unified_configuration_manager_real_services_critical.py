@@ -85,6 +85,13 @@ from netra_backend.app.core.configuration.base import (
     is_testing,
     config_manager
 )
+
+# Import compatibility classes for legacy test patterns (Issue #932 - SSOT regression fix)
+from netra_backend.app.core.configuration.compatibility_shim import (
+    UnifiedConfigurationManager,
+    ConfigurationManagerFactory,
+    get_configuration_manager
+)
 from shared.isolated_environment import IsolatedEnvironment
 
 
@@ -109,7 +116,7 @@ class TestUnifiedConfigurationManagerRealServicesCritical(BaseIntegrationTest):
         """Provide UnifiedConfigurationManager with real service connections."""
         # Mock the IsolatedEnvironment to use our test environment
         with pytest.MonkeyPatch.context() as mp:
-            mp.setattr('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', 
+            mp.setattr('netra_backend.app.core.configuration.base.IsolatedEnvironment', 
                       lambda: isolated_env_real)
             
             manager = UnifiedConfigurationManager(
@@ -180,7 +187,7 @@ class TestUnifiedConfigurationManagerRealServicesCritical(BaseIntegrationTest):
         # Test configuration persistence across manager recreations
         # Create new manager instance to simulate service restart
         with pytest.MonkeyPatch.context() as mp:
-            mp.setattr('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', 
+            mp.setattr('netra_backend.app.core.configuration.base.IsolatedEnvironment', 
                       lambda: manager._env)
             
             new_manager = UnifiedConfigurationManager(
@@ -470,7 +477,7 @@ class TestUnifiedConfigurationManagerRealServicesCritical(BaseIntegrationTest):
         managers = []
         for instance_id in range(3):
             with pytest.MonkeyPatch.context() as mp:
-                mp.setattr('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', 
+                mp.setattr('netra_backend.app.core.configuration.base.IsolatedEnvironment', 
                           lambda: isolated_env_real)
                 
                 manager = UnifiedConfigurationManager(
@@ -676,7 +683,7 @@ class TestUnifiedConfigurationManagerRealServicesCritical(BaseIntegrationTest):
         
         for instance_id in range(3):
             with pytest.MonkeyPatch.context() as mp:
-                mp.setattr('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', 
+                mp.setattr('netra_backend.app.core.configuration.base.IsolatedEnvironment', 
                           lambda: isolated_env_real)
                 
                 manager = UnifiedConfigurationManager(
@@ -791,7 +798,7 @@ class TestUnifiedConfigurationManagerRealServicesCritical(BaseIntegrationTest):
         # Create managers for each service
         for service_name, config_data in services.items():
             with pytest.MonkeyPatch.context() as mp:
-                mp.setattr('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', 
+                mp.setattr('netra_backend.app.core.configuration.base.IsolatedEnvironment', 
                           lambda: isolated_env_real)
                 
                 manager = ConfigurationManagerFactory.get_service_manager(service_name)
@@ -891,7 +898,7 @@ class TestUnifiedConfigurationManagerRealServicesCritical(BaseIntegrationTest):
         # Create and configure service managers
         for service_name, config_data in service_dependencies.items():
             with pytest.MonkeyPatch.context() as mp:
-                mp.setattr('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', 
+                mp.setattr('netra_backend.app.core.configuration.base.IsolatedEnvironment', 
                           lambda: isolated_env_real)
                 
                 manager = ConfigurationManagerFactory.get_service_manager(service_name)
@@ -998,7 +1005,7 @@ class TestUnifiedConfigurationManagerRealServicesCritical(BaseIntegrationTest):
                 start_time = time.time()
                 
                 with pytest.MonkeyPatch.context() as mp:
-                    mp.setattr('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', 
+                    mp.setattr('netra_backend.app.core.configuration.base.IsolatedEnvironment', 
                               lambda: isolated_env_real)
                     
                     # Create user-specific manager

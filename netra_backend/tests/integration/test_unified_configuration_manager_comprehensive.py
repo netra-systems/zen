@@ -52,6 +52,13 @@ from netra_backend.app.core.configuration.base import (
     config_manager
 )
 
+# Import compatibility classes for legacy test patterns (Issue #932 - SSOT regression fix)
+from netra_backend.app.core.configuration.compatibility_shim import (
+    UnifiedConfigurationManager,
+    ConfigurationManagerFactory,
+    get_configuration_manager
+)
+
 
 class TestUnifiedConfigurationManagerIntegration(BaseIntegrationTest):
     """Comprehensive integration tests for UnifiedConfigurationManager."""
@@ -973,7 +980,7 @@ class TestUnifiedConfigurationManagerIntegration(BaseIntegrationTest):
         test_env.set("DEBUG", "true", source="test")
         
         # Create configuration manager that uses the isolated environment
-        with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', return_value=test_env):
+        with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment', return_value=test_env):
             manager = UnifiedConfigurationManager(environment="test")
         
         # Verify that configuration manager uses isolated environment values
@@ -1000,7 +1007,7 @@ class TestUnifiedConfigurationManagerIntegration(BaseIntegrationTest):
         production_env.set("ENVIRONMENT", "production", source="production")
         production_env.set("DEBUG", "false", source="production")
         
-        with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', return_value=production_env):
+        with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment', return_value=production_env):
             prod_manager = UnifiedConfigurationManager(environment="production")
         
         # Verify isolation between environments
