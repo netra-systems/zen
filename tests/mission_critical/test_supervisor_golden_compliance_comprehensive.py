@@ -46,7 +46,7 @@
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.data_helper_agent import DataHelperAgent
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.reporting_sub_agent import ReportingAgent
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler

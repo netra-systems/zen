@@ -51,7 +51,7 @@
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_discovery_sub_agent import ToolDiscoverySubAgent
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.agent_error_types import AgentValidationError
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent import SubAgentLifecycle
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager

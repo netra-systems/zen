@@ -48,7 +48,7 @@ from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecution
 # Use SSOT canonical import path for WebSocket Manager (Issue #824)
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 # Removed DeepAgentState import - using UserExecutionContext for user isolation security
-# from netra_backend.app.agents.state import DeepAgentState  # DEPRECATED - security vulnerability
+# from netra_backend.app.schemas.agent_models import DeepAgentState  # DEPRECATED - security vulnerability
 from netra_backend.app.llm.llm_manager import LLMManager
 
 # Import WebSocket test utilities - REAL SERVICES ONLY per CLAUDE.md

@@ -16,7 +16,7 @@ from test_framework.agent_test_helpers import (
     CommonValidators,
     create_standard_validation_config
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
 @pytest.fixture

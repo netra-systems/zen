@@ -124,7 +124,7 @@ async def test_orchestration_mock():
     try:
         from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
 
         # Create mocks
         mock_session = MagicMock()

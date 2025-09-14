@@ -561,7 +561,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         
         agent = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         # Create proper state object
         state = DeepAgentState(
@@ -611,7 +611,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         
         agent = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         # Create proper state object
         state = DeepAgentState(

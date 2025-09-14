@@ -63,7 +63,7 @@
 
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.llm.llm_manager import LLMManager
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
@@ -390,7 +390,7 @@
                                                         # REMOVED_SYNTAX_ERROR: assert asyncio.iscoroutinefunction(data_agent.execute_core_logic), "execute_core_logic should be async"
 
                                                         # Test execution with proper context
-                                                        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+                                                        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
                                                         # REMOVED_SYNTAX_ERROR: state = DeepAgentState()
                                                         # REMOVED_SYNTAX_ERROR: state.agent_input = {"analysis_type": "performance", "timeframe": "24h"}
 

@@ -26,7 +26,7 @@ from netra_backend.app.services.compensation_engine import CompensationEngine
 from netra_backend.app.services.compensation_models import CompensationAction, CompensationState
 from netra_backend.app.core.error_recovery import RecoveryContext, OperationType, RecoveryAction
 from netra_backend.app.core.error_codes import ErrorSeverity
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from tests.e2e.agent_orchestration_fixtures import (
     real_supervisor_agent,
     real_sub_agents, 

@@ -64,7 +64,7 @@
     # REMOVED_SYNTAX_ERROR: enhance_tool_dispatcher_with_notifications
     
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
 
     # Import test helpers
     # REMOVED_SYNTAX_ERROR: from tests.mission_critical.test_helpers import SimpleWebSocketNotifier

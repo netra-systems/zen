@@ -232,7 +232,7 @@ CRITICAL: Fix Issue #871 to restore chat functionality and protect revenue
 
         # Test 1: Verify only one DeepAgentState definition exists
         try:
-            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+            from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
             deprecated_exists = True
             deprecated_location = DeprecatedState.__module__
         except ImportError:
@@ -390,14 +390,14 @@ REMEDIATION: Complete Issue #871 SSOT fixes to restore customer trust
                 return False
 
             content = full_path.read_text(encoding='utf-8')
-            return 'from netra_backend.app.agents.state import DeepAgentState' in content
+            return 'from netra_backend.app.schemas.agent_models import DeepAgentState' in content
         except Exception:
             return False
 
     async def _execute_enterprise_customer_scenario(self, customer_data: Dict[str, Any], db_session=None, redis_session=None) -> Dict[str, Any]:
         """Execute enterprise customer scenario with state tracking"""
         try:
-            from netra_backend.app.agents.state import DeepAgentState
+            from netra_backend.app.schemas.agent_models import DeepAgentState
 
             # Create state for enterprise customer
             state = DeepAgentState(
@@ -428,7 +428,7 @@ REMEDIATION: Complete Issue #871 SSOT fixes to restore customer trust
     async def _execute_sensitive_customer_scenario(self, scenario: Dict[str, str]) -> Dict[str, Any]:
         """Execute customer scenario with sensitive data"""
         try:
-            from netra_backend.app.agents.state import DeepAgentState
+            from netra_backend.app.schemas.agent_models import DeepAgentState
 
             state = DeepAgentState(
                 user_id=scenario["id"],
