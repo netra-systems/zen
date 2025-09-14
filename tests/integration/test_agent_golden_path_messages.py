@@ -38,7 +38,7 @@ import uuid
 import pytest
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, contextmanager
 from unittest.mock import AsyncMock, MagicMock, patch
 
 # SSOT imports following architecture patterns
