@@ -240,7 +240,7 @@ class TestAgentWebSocketBridgeFactoryMethods(SSotAsyncTestCase):
                 user_id=self.test_user_id,
                 thread_id=self.test_thread_id,
                 run_id=self.test_run_id,
-                websocket_connection_id=self.test_connection_id
+                websocket_client_id=self.test_connection_id
             )
             
             # Verify emitter was created
