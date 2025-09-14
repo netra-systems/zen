@@ -77,7 +77,7 @@ except ImportError as e:
 
 # Import WebSocket components for real-time testing
 try:
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.websocket_core.auth import WebSocketAuth
 except ImportError as e:
     logger.warning(f"Could not import WebSocket components: {e}")

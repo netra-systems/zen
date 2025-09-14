@@ -497,7 +497,11 @@ LEGACY_MESSAGE_TYPE_MAP = {
     
     # Testing
     "resilience_test": MessageType.RESILIENCE_TEST,
-    "recovery_test": MessageType.RECOVERY_TEST
+    "recovery_test": MessageType.RECOVERY_TEST,
+
+    # Additional legacy mappings - Issue #913 remediation
+    "legacy_response": MessageType.AGENT_RESPONSE,
+    "legacy_heartbeat": MessageType.HEARTBEAT
 }
 
 # Frontend compatibility mapping - maps backend types to frontend-expected types

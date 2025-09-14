@@ -55,7 +55,7 @@ import websockets
 try:
     from netra_backend.app.main import app
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
     from netra_backend.app.agents.supervisor.agent_instance_factory import (
         AgentInstanceFactory,
@@ -63,7 +63,7 @@ try:
     )
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.base_agent import BaseAgent
-    from netra_backend.app.agents.state import DeepAgentState
+    from netra_backend.app.schemas.agent_models import DeepAgentState
     from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper
     REAL_COMPONENTS_AVAILABLE = True
 except ImportError as e:

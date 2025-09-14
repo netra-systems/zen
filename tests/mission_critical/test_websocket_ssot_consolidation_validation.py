@@ -31,7 +31,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from shared.isolated_environment import IsolatedEnvironment
 
 # Import components for future SSOT validation
-from netra_backend.app.websocket_core.unified_manager import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ensure_user_id
@@ -389,7 +389,7 @@ class TestSsotConsolidationIntegration(SSotBaseTestCase):
         """
         # TARGET STATE: WebSocket SSOT isolated to backend service
         try:
-            from netra_backend.app.websocket_core.unified_manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # Check that WebSocket SSOT doesn't import cross-service dependencies
             websocket_module_path = WebSocketManager.__module__

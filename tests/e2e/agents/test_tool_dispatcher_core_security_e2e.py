@@ -265,7 +265,7 @@ class TestToolDispatcherCoreSecurity(BaseE2ETest):
                 pass
         
         # Create user contexts with WebSocket managers
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         
         websocket_manager = UnifiedWebSocketManager()
         

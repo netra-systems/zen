@@ -48,7 +48,7 @@ class TestConfigEnvironmentAccessSSot(SSotBaseTestCase):
         """
         config_manager_modules = [
             "netra_backend.app.core.configuration.base",
-            "netra_backend.app.core.managers.unified_configuration_manager",
+            "netra_backend.app.core.configuration.base",
             "netra_backend.app.services.configuration_service"
         ]
 

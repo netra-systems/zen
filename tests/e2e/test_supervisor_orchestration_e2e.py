@@ -37,7 +37,7 @@ import json
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 import uuid
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from auth_service.core.auth_manager import AuthManager
@@ -50,7 +50,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.core.configuration.manager import ConfigurationManager
 from netra_backend.app.database import get_db, Base

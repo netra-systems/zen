@@ -38,7 +38,7 @@ import asyncio
 import time
 import uuid
 from typing import Any, Dict, Optional
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
@@ -49,7 +49,7 @@ import pytest
 
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.agent import SubAgentLifecycle

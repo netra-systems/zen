@@ -45,7 +45,7 @@ class TestWebSocketSSotConnectionLifecycle(SSotAsyncTestCase):
         
         # Test different connection creation methods
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager = UnifiedWebSocketManager()
             
             # Test direct connection creation
@@ -106,7 +106,7 @@ class TestWebSocketSSotConnectionLifecycle(SSotAsyncTestCase):
         connection_leaks = []
         
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager = UnifiedWebSocketManager()
             
             # Create connections through different methods and test cleanup
@@ -199,7 +199,7 @@ class TestWebSocketSSotConnectionLifecycle(SSotAsyncTestCase):
         
         try:
             # Create multiple manager instances and check state sync
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             managers = []
             for i in range(3):

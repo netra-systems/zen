@@ -461,7 +461,7 @@ class AgentPipelineInfrastructure:
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.config import get_config
         from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         
         # REAL components - no mocks
         config = get_config()

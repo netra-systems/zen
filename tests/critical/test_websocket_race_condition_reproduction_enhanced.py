@@ -42,7 +42,7 @@ from netra_backend.app.websocket_core.connection_state_machine import (
 
 # Import WebSocket core components for integration testing
 try:
-    from netra_backend.app.websocket_core.manager import WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.routes.websocket import websocket_endpoint
 except ImportError:
     # Mock if not available

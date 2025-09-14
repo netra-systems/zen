@@ -34,7 +34,7 @@ from netra_backend.app.websocket_core.types import (
     create_standard_message,
     WebSocketMessage
 )
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 from test_framework.database.test_database_manager import DatabaseTestManager
 

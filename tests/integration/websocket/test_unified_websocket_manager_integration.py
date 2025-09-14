@@ -47,7 +47,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 # WebSocket Manager imports - SSOT verified paths
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketManagerMode, WebSocketConnection
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode, WebSocketConnection
 from netra_backend.app.websocket_core.types import WebSocketConnectionState, ConnectionInfo, MessageType
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 

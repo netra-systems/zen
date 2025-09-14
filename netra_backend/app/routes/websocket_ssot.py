@@ -1290,8 +1290,9 @@ class WebSocketSSOTRouter:
         
         try:
             while True:
-                # CRITICAL: Check connection state before each message receive
-                if not is_websocket_connected(websocket):
+                # CRITICAL: Check connection state and handshake completion before each message receive
+                # FIX FOR ISSUE #888: Use comprehensive validation to prevent "Need to call 'accept' first" errors
+                if not is_websocket_connected_and_ready(websocket, connection_id):
                     # CRITICAL: Log disconnection with context
                     disconnect_context = {
                         "connection_id": connection_id,
@@ -1499,13 +1500,15 @@ class WebSocketSSOTRouter:
         
         try:
             while True:
-                if not is_websocket_connected(websocket):
+                # FIX FOR ISSUE #888: Use comprehensive validation with user context connection ID
+                connection_id = getattr(user_context, 'websocket_connection_id', None)
+                if not is_websocket_connected_and_ready(websocket, connection_id):
                     break
-                
+
                 try:
                     raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=websocket_timeout)
                     message_data = json.loads(raw_message)
-                    
+
                     # Factory pattern: isolated processing per user
                     response = {
                         "type": "factory_response",
@@ -1539,10 +1542,12 @@ class WebSocketSSOTRouter:
         websocket_timeout = get_websocket_recv_timeout()
         
         logger.info(f"[ISOLATED MODE] Starting zero-leakage message loop for user {user_id[:8]} (websocket_timeout: {websocket_timeout}s)")
-        
+
         try:
             while True:
-                if not is_websocket_connected(websocket):
+                # FIX FOR ISSUE #888: Use comprehensive validation with user context connection ID
+                connection_id = getattr(user_context, 'websocket_connection_id', None)
+                if not is_websocket_connected_and_ready(websocket, connection_id):
                     break
                 
                 try:
@@ -1585,10 +1590,11 @@ class WebSocketSSOTRouter:
         websocket_timeout = get_websocket_recv_timeout()
         
         logger.info(f"[LEGACY MODE] Starting compatibility message loop {connection_id} (websocket_timeout: {websocket_timeout}s)")
-        
+
         try:
             while True:
-                if not is_websocket_connected(websocket):
+                # FIX FOR ISSUE #888: Use comprehensive validation to prevent accept race conditions
+                if not is_websocket_connected_and_ready(websocket, connection_id):
                     break
                 
                 try:

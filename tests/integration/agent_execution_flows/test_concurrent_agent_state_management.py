@@ -22,7 +22,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine

@@ -233,14 +233,10 @@ class AgentToolTester(SSotAsyncTestCase, StagingTestBase):
         )
         
         # Create WebSocket client
-        self.websocket_client = StagingWebSocketClient(
-            websocket_url=self.websocket_url,
-            access_token=access_token,
-            user_id=user_id
-        )
+        self.websocket_client = StagingWebSocketClient()
         
         # Establish connection
-        success = await self.websocket_client.connect()
+        success = await self.websocket_client.connect(token=access_token)
         if success:
             self.test_user = {
                 "user_id": user_id,
@@ -270,7 +266,7 @@ class AgentToolTester(SSotAsyncTestCase, StagingTestBase):
         
         try:
             # Send message
-            await self.websocket_client.send_message(message)
+            await self.websocket_client.send_message("chat_message", message)
             
             # Collect events and responses
             events = await self._collect_tool_execution_events(
@@ -430,7 +426,7 @@ class AgentToolTester(SSotAsyncTestCase, StagingTestBase):
         start_time = time.time()
         
         try:
-            await self.websocket_client.send_message(message)
+            await self.websocket_client.send_message("chat_message", message)
             
             # Collect events for longer timeout (tool chaining takes time)
             events = await self._collect_tool_execution_events("tool_chain", 90.0)
@@ -482,7 +478,6 @@ class TestAgentToolIntegrationComprehensive:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    @pytest.mark.tools
     @pytest.mark.staging
     async def test_all_tool_types_execution(self):
         """
@@ -525,7 +520,6 @@ class TestAgentToolIntegrationComprehensive:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    @pytest.mark.tools
     @pytest.mark.staging
     async def test_tool_parameter_validation(self):
         """
@@ -566,7 +560,6 @@ class TestAgentToolIntegrationComprehensive:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    @pytest.mark.tools
     @pytest.mark.staging
     async def test_tool_timeout_and_retry_logic(self):
         """
@@ -607,7 +600,6 @@ class TestAgentToolIntegrationComprehensive:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    @pytest.mark.tools
     @pytest.mark.staging
     async def test_tool_chaining_comprehensive(self):
         """

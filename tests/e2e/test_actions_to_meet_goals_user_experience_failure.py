@@ -43,7 +43,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
 # WebSocket and API testing
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.routes.websocket import websocket_endpoint
 
 # Authentication and session management
@@ -52,7 +52,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Database and state management
 from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult
+from netra_backend.app.schemas.agent_models import DeepAgentState, OptimizationsResult
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 
 

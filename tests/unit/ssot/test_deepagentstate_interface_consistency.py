@@ -64,7 +64,7 @@ class TestDeepAgentStateInterfaceConsistency:
         After Fix: N/A (only SSOT version exists)
         """
         try:
-            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+            from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
         except ImportError:
             pytest.skip("Deprecated DeepAgentState has been removed - SSOT remediation complete")
 
@@ -119,7 +119,7 @@ class TestDeepAgentStateInterfaceConsistency:
         After Fix: N/A (only SSOT version exists)
         """
         try:
-            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+            from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
         except ImportError:
             pytest.skip("Deprecated DeepAgentState has been removed - SSOT remediation complete")
 
@@ -154,7 +154,7 @@ class TestDeepAgentStateInterfaceConsistency:
         After Fix: N/A (only SSOT version exists)
         """
         try:
-            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+            from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
         except ImportError:
             pytest.skip("Deprecated DeepAgentState has been removed - SSOT remediation complete")
 
@@ -187,7 +187,7 @@ class TestDeepAgentStateInterfaceConsistency:
         After Fix: N/A (only SSOT version exists)
         """
         try:
-            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+            from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
         except ImportError:
             pytest.skip("Deprecated DeepAgentState has been removed - SSOT remediation complete")
 

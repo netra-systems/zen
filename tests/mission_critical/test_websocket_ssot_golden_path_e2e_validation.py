@@ -56,7 +56,7 @@ from loguru import logger
 
 # Import SSOT components for Golden Path testing
 try:
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgentModern
     from netra_backend.app.auth_integration.auth import JWTManager

@@ -40,7 +40,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
     # REMOVED_SYNTAX_ERROR: import gc
     # REMOVED_SYNTAX_ERROR: from datetime import datetime, timezone
     # REMOVED_SYNTAX_ERROR: from concurrent.futures import ThreadPoolExecutor, as_completed
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
     # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry

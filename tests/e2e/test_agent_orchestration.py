@@ -34,10 +34,10 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import get_env

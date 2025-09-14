@@ -27,7 +27,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import WebSocket
 from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory
 from netra_backend.app.agents.supervisor.agent_instance_factory import UserWebSocketEmitter
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 
 class TestWebSocketFactoryChainViolations(BaseIntegrationTest):

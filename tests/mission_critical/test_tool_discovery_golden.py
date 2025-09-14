@@ -40,7 +40,7 @@
         # REMOVED_SYNTAX_ERROR: import asyncio
         # REMOVED_SYNTAX_ERROR: import pytest
         # REMOVED_SYNTAX_ERROR: from typing import Dict, Any, List
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.redis_manager import redis_manager
         # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
@@ -51,7 +51,7 @@
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_discovery_sub_agent import ToolDiscoverySubAgent
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.agent_error_types import AgentValidationError
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent import SubAgentLifecycle
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager

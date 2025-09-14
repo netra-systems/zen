@@ -248,7 +248,7 @@ class TestWebSocketNotifierSSOTIntegrationPatterns(SSotAsyncTestCase, SSotDataba
         
         try:
             # Try creating WebSocket manager without factory
-            from netra_backend.app.websocket_core.unified_manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager = WebSocketManager()
             direct_instantiation_success.append("WebSocketManager")
         except (ImportError, TypeError):

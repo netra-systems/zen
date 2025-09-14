@@ -102,7 +102,7 @@ class TestAgentRegistryStartup(BaseIntegrationTest):
         - Agent-to-business-capability mapping
         - Dynamic agent loading and configuration
         """
-        from netra_backend.app.agents.registry import AgentRegistry
+        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         from shared.isolated_environment import IsolatedEnvironment
         
         env = IsolatedEnvironment("test_agent_registry")
@@ -143,7 +143,7 @@ class TestAgentRegistryStartup(BaseIntegrationTest):
         - Reporting agent for business insights and value demonstration
         - Supervisor agent for workflow orchestration
         """
-        from netra_backend.app.agents.registry import AgentRegistry
+        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         from netra_backend.app.agents.agent_loader import AgentLoader
         
         # Mock agent registry and loader
@@ -364,7 +364,7 @@ class TestAgentRegistryStartup(BaseIntegrationTest):
         - Scalable agent execution for concurrent users
         """
         from netra_backend.app.agents.agent_instance_factory import AgentInstanceFactory
-        from netra_backend.app.agents.registry import AgentRegistry
+        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         
         # Mock registry and factory integration
         mock_registry = MagicMock()

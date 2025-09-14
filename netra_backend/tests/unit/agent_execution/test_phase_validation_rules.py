@@ -17,6 +17,7 @@ This module tests the AgentExecutionPhase validation rules to ensure:
 """
 
 import pytest
+import unittest
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
@@ -34,7 +35,7 @@ from netra_backend.app.core.agent_execution_tracker import (
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestPhaseValidationRules(SSotBaseTestCase):
+class TestPhaseValidationRules(SSotBaseTestCase, unittest.TestCase):
     """Unit tests for agent execution phase validation and transition rules."""
     
     def setUp(self):

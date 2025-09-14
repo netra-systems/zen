@@ -223,7 +223,7 @@ class TestImportPathUnificationValidation(SSotAsyncTestCase):
                 if module_name in sys.modules:
                     del sys.modules[module_name]
 
-                from netra_backend.app.websocket_core.unified_manager import WebSocketManager
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                 canonical_classes.append({
                     'iteration': i,
                     'class': WebSocketManager,
@@ -259,7 +259,7 @@ class TestImportPathUnificationValidation(SSotAsyncTestCase):
         canonical_class = None
 
         try:
-            from netra_backend.app.websocket_core.unified_manager import WebSocketManager as CanonicalWSM
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CanonicalWSM
             canonical_class = CanonicalWSM
             canonical_id = id(CanonicalWSM)
             logger.info(f"✓ Canonical WebSocketManager loaded (id: {canonical_id})")

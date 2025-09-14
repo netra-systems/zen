@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-09-13T18:49:19.605611",
-    "root_directory": "C:\\GitHub\\netra-apex",
+    "generated_at": "2025-09-13T20:38:38.412737",
+    "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 213
   },
   "literals": {
@@ -369,7 +369,7 @@
         "auth_service/auth_core/performance/startup_optimizer.py:98",
         "auth_service/auth_core/validation/pre_deployment_validator.py:508",
         "auth_service/auth_core/validation/pre_deployment_validator.py:623",
-        "auth_service/main.py:264",
+        "auth_service/main.py:270",
         "scripts/deploy_to_gcp_actual.py:156",
         "scripts/fix_authentication_system.py:92"
       ]
@@ -1460,8 +1460,7 @@
       "value": "PYTEST_REAL_DATABASE_TEST",
       "category": "environment",
       "locations": [
-        "netra_backend/app/db/clickhouse.py:204",
-        "netra_backend/app/db/clickhouse_backup.py:189"
+        "netra_backend/app/db/clickhouse.py:204"
       ]
     },
     "README_API_KEY": {

@@ -25,14 +25,14 @@ from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.environment_markers import env, env_requires, dev_and_staging
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.quality.quality_gate_service import QualityGateService
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.user_plan import PlanTier
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient

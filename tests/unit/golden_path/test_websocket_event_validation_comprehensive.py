@@ -41,7 +41,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility
 # WebSocket core imports
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.websocket_core.agent_handler import AgentHandler
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 # Agent and execution imports

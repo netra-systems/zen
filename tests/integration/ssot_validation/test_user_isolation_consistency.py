@@ -253,7 +253,7 @@ class TestUserIsolationConsistency(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, PipelineStep
-            from netra_backend.app.agents.state import DeepAgentState
+            from netra_backend.app.schemas.agent_models import DeepAgentState
             from datetime import datetime, timezone
             
             # Create engines for concurrent testing

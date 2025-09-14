@@ -74,7 +74,7 @@ class IsolatedUserAgent:
         }
         
         # Memory isolation validation
-        self.memory_marker = f"USER_MEMORY_{user_context.user_id}_{int(time.time())}"
+        self.memory_marker = f"USER_MEMORY_{user_context.user_id}_{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}"
         self.is_active = True
         
     async def execute_with_context(self, context: AgentExecutionContext, prompt: str, **kwargs) -> AgentExecutionResult:

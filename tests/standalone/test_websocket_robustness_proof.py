@@ -40,7 +40,7 @@ import pytest
 from loguru import logger
 
 # Import the improved components
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.manager import WebSocketHeartbeatManager, HeartbeatConfig
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from shared.types.core_types import AgentExecutionContext

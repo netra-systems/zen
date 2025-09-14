@@ -1,8 +1,11 @@
 """
-Agent Registry Module - Issue #485 Fix
+DEPRECATED: Agent Registry Module - Issue #914 Remediation Phase 1
 
-This module provides a centralized registry for managing AI agents in the Netra platform.
-Created to resolve missing import path issues in test infrastructure.
+⚠️  DEPRECATION NOTICE: This module is deprecated and will be removed in Issue #914 Phase 3.
+    All imports should use: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+
+🔄 COMPATIBILITY LAYER: This module now provides a compatibility layer that redirects
+   to the advanced AgentRegistry with full user isolation and WebSocket integration.
 
 Business Value Justification (BVJ):
 - Segment: Platform Infrastructure  
@@ -12,9 +15,13 @@ Business Value Justification (BVJ):
 
 CRITICAL: This registry supports the Golden Path user flow:
 Users login → AI agents process requests → Users receive AI responses
+
+⚠️  MIGRATION REQUIRED: Files importing this module should be updated to use:
+    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 """
 
 import logging
+import warnings
 import threading
 import time
 import uuid
@@ -25,6 +32,24 @@ from enum import Enum
 
 # Setup logging
 logger = logging.getLogger(__name__)
+
+# ISSUE #914 PHASE 1: Compatibility layer imports
+try:
+    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry as AdvancedAgentRegistry
+    ADVANCED_REGISTRY_AVAILABLE = True
+    logger.info("Issue #914 Phase 1: Advanced AgentRegistry imported successfully for compatibility layer")
+except ImportError as e:
+    ADVANCED_REGISTRY_AVAILABLE = False
+    logger.error(f"Issue #914 Phase 1: Failed to import advanced AgentRegistry: {e}")
+
+# Issue deprecation warning when this module is imported
+warnings.warn(
+    "DEPRECATED: netra_backend.app.agents.registry is deprecated. "
+    "Use 'from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry' instead. "
+    "This compatibility layer will be removed in Issue #914 Phase 3.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 class AgentStatus(Enum):
@@ -80,47 +105,52 @@ class AgentInfo:
 
 class AgentRegistry:
     """
-    Central registry for managing AI agents.
+    COMPATIBILITY WRAPPER: Redirects to advanced AgentRegistry for Issue #914 remediation.
     
-    This registry provides:
-    - Agent registration and discovery
-    - Status tracking and health monitoring
-    - Execution metrics and performance data
-    - Thread-safe operations for concurrent access
-    - Integration with WebSocket events for real-time updates
+    ⚠️  DEPRECATED: This wrapper will be removed in Issue #914 Phase 3.
+        Please use: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     
-    Features:
-    - Automatic agent health monitoring
-    - Performance metrics collection
-    - Agent lifecycle management
-    - Multi-user agent isolation
-    - Real-time status updates via WebSocket
-    
-    Usage:
-        registry = AgentRegistry()
-        agent_id = registry.register_agent(AgentType.TRIAGE, "Triage Agent")
-        registry.update_agent_status(agent_id, AgentStatus.BUSY)
-        agent_info = registry.get_agent_info(agent_id)
+    This compatibility layer provides backward compatibility while preserving Golden Path functionality.
+    The underlying implementation now uses the advanced AgentRegistry with full user isolation,
+    WebSocket integration, and production-ready features.
     """
     
     def __init__(self):
-        """Initialize the agent registry."""
+        """Initialize the compatibility wrapper."""
+        logger.warning("Issue #914: Using deprecated AgentRegistry compatibility wrapper. "
+                      "Please migrate to netra_backend.app.agents.supervisor.agent_registry.AgentRegistry")
+        
+        # Initialize compatibility state regardless of which registry is used
         self._agents: Dict[str, AgentInfo] = {}
-        self._agent_instances: Dict[str, Any] = {}  # Store actual agent instances
+        self._agent_instances: Dict[str, Any] = {}
         self._lock = threading.Lock()
         self._websocket_manager = None
-        
-        # Registry metadata
         self.created_at = datetime.now()
         self.last_cleanup = datetime.now()
         self.total_registrations = 0
         
-        logger.info("AgentRegistry initialized")
+        if ADVANCED_REGISTRY_AVAILABLE:
+            # Create a default user session for compatibility
+            self._advanced_registry = AdvancedAgentRegistry()
+            self._default_user_id = "compatibility_user"
+            self._using_advanced_registry = True
+            logger.info("Issue #914 Phase 1: Compatibility wrapper initialized with advanced registry")
+        else:
+            # Flag to indicate fallback implementation
+            self._advanced_registry = None
+            self._using_advanced_registry = False
+            logger.warning("Issue #914 Phase 1: Fallback to basic implementation - advanced registry not available")
     
     def set_websocket_manager(self, websocket_manager):
         """Set WebSocket manager for real-time updates."""
-        self._websocket_manager = websocket_manager
-        logger.debug("WebSocket manager set for AgentRegistry")
+        if self._using_advanced_registry:
+            # Delegate to advanced registry
+            self._advanced_registry.set_websocket_manager(websocket_manager)
+            logger.debug("Issue #914 Phase 1: WebSocket manager delegated to advanced registry")
+        else:
+            # Fallback implementation
+            self._websocket_manager = websocket_manager
+            logger.debug("WebSocket manager set for AgentRegistry")
     
     def register_agent(self, agent_type: AgentType, name: str, 
                       description: str = "", metadata: Optional[Dict[str, Any]] = None,
@@ -365,6 +395,10 @@ class AgentRegistry:
         """Check if agent ID is registered."""
         with self._lock:
             return agent_id in self._agents
+    
+    async def list_available_agents(self, agent_type: Optional[AgentType] = None) -> List[AgentInfo]:
+        """List available agents - compatibility method."""
+        return self.get_available_agents(agent_type)
 
 
 # Global agent registry instance - Issue #485 fix
@@ -405,6 +439,13 @@ def cleanup_inactive_agents():
     agent_registry.cleanup_inactive_agents()
 
 
+async def list_available_agents(agent_type: Optional[Union[AgentType, str]] = None) -> List[AgentInfo]:
+    """List available agents from the global registry - compatibility method."""
+    if isinstance(agent_type, str):
+        agent_type = AgentType(agent_type)
+    return agent_registry.get_available_agents(agent_type)
+
+
 # Export all public classes and functions for Issue #485 compatibility
 __all__ = [
     'AgentRegistry',
@@ -416,5 +457,6 @@ __all__ = [
     'get_agent_info',
     'update_agent_status',
     'get_available_agents',
-    'cleanup_inactive_agents'
+    'cleanup_inactive_agents',
+    'list_available_agents'
 ]

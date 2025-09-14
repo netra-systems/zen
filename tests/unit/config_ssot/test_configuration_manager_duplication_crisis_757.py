@@ -52,7 +52,7 @@ class TestUnifiedConfigManagerDuplicationCrisis:
             sys.path.insert(0, str(Path.cwd()))
 
             # This import should be possible due to deprecated file
-            from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager as DeprecatedManager
+            from netra_backend.app.core.configuration.base import UnifiedConfigurationManager as DeprecatedManager
             deprecated_importable = True
         except ImportError:
             deprecated_importable = False
@@ -75,7 +75,7 @@ class TestUnifiedConfigManagerDuplicationCrisis:
         """CRITICAL P0: Test SHOULD FAIL - Classes have overlapping functionality"""
         try:
             sys.path.insert(0, str(Path.cwd()))
-            from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+            from netra_backend.app.core.configuration.base import UnifiedConfigurationManager
             from netra_backend.app.core.configuration.base import UnifiedConfigManager
 
             # Get method signatures
@@ -99,7 +99,7 @@ class TestUnifiedConfigManagerDuplicationCrisis:
         """CRITICAL P0: Test SHOULD FAIL - Both classes can be instantiated simultaneously"""
         try:
             sys.path.insert(0, str(Path.cwd()))
-            from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+            from netra_backend.app.core.configuration.base import UnifiedConfigurationManager
             from netra_backend.app.core.configuration.base import UnifiedConfigManager
 
             # Try to instantiate both

@@ -284,6 +284,21 @@ class TestIssue932SSOTImportValidation(SSotBaseTestCase, unittest.TestCase):
         """
         self.record_metric("test_category", "import_summary")
         
+        # Since this test may run before others, perform basic import validation here
+        if len(self.working_imports) == 0 and len(self.broken_imports) == 0:
+            # Perform basic import validation to populate results
+            try:
+                from netra_backend.app.config import get_config
+                self.working_imports.append("netra_backend.app.config.get_config")
+            except ImportError as e:
+                self.broken_imports.append(f"netra_backend.app.config.get_config: {e}")
+            
+            try:
+                from netra_backend.app.core.configuration.base import get_unified_config
+                self.working_imports.append("netra_backend.app.core.configuration.base.get_unified_config")
+            except ImportError as e:
+                self.broken_imports.append(f"netra_backend.app.core.configuration.base.get_unified_config: {e}")
+        
         # Calculate metrics
         total_working = len(self.working_imports)
         total_broken = len(self.broken_imports)

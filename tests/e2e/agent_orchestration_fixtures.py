@@ -132,7 +132,7 @@ async def real_sub_agents():
 def sample_agent_state():
     """Sample agent state for testing - REAL DeepAgentState object per CLAUDE.md"""
     # Import the proper DeepAgentState class
-    from netra_backend.app.agents.state import DeepAgentState
+    from netra_backend.app.schemas.agent_models import DeepAgentState
     
     # Create a REAL DeepAgentState object using proper constructor parameters
     state = DeepAgentState(

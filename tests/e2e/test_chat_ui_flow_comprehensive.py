@@ -52,7 +52,7 @@
             # REMOVED_SYNTAX_ERROR: from test_framework.real_services import get_real_services, RealServicesManager
 
             # Production imports - using absolute paths only (CLAUDE.md requirement)
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
@@ -62,7 +62,7 @@
             # REMOVED_SYNTAX_ERROR: UnifiedToolExecutionEngine,
             # REMOVED_SYNTAX_ERROR: enhance_tool_dispatcher_with_notifications
             
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.llm.llm_manager import LLMManager
 
 

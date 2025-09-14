@@ -1,5 +1,5 @@
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
@@ -38,7 +38,7 @@ env = get_env()
         # REMOVED_SYNTAX_ERROR: from sqlalchemy.exc import SQLAlchemyError
         # REMOVED_SYNTAX_ERROR: from sqlalchemy.ext.asyncio import AsyncSession
 
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.clickhouse import get_clickhouse_client
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.models_postgres import Assistant, Message, Run, Thread
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.postgres import get_postgres_db

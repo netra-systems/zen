@@ -41,7 +41,7 @@ class TestSSOTComplianceFinalValidation:
             # Deprecated import should fail
             deprecated_import_failed = False
             try:
-                from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+                from netra_backend.app.core.configuration.base import UnifiedConfigurationManager
                 deprecated_import_failed = False
             except ImportError:
                 deprecated_import_failed = True
@@ -81,7 +81,7 @@ class TestSSOTComplianceFinalValidation:
 
                     # Look for import references to deprecated manager
                     deprecated_patterns = [
-                        'from netra_backend.app.core.managers.unified_configuration_manager',
+                        'from netra_backend.app.core.configuration.base',
                         'import unified_configuration_manager',
                         'UnifiedConfigurationManager'
                     ]
@@ -331,7 +331,7 @@ class TestSSOTComplianceFinalValidation:
             # Check that deprecated import fails
             deprecated_importable = True
             try:
-                from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+                from netra_backend.app.core.configuration.base import UnifiedConfigurationManager
             except ImportError:
                 deprecated_importable = False
 

@@ -100,7 +100,7 @@ class TestWebSocketEventsFactoryConsolidation884(SSotAsyncTestCase):
             
             # Import WebSocket components
             try:
-                from netra_backend.app.websocket_core.manager import WebSocketManager
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                 websocket_manager = WebSocketManager()
             except ImportError:
                 # Create mock WebSocket manager for testing

@@ -51,7 +51,7 @@
 
             # Import production components for testing
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.auth import WebSocketAuthenticator, AuthInfo
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.dependencies import create_user_execution_context

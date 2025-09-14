@@ -57,7 +57,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # Import state and data structures
-from netra_backend.app.agents.state import (
+from netra_backend.app.schemas.agent_models import (
     DeepAgentState
 )
 

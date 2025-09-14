@@ -55,7 +55,7 @@ except ImportError:
     AGENT_FACTORY_AVAILABLE = False
 
 try:
-    from netra_backend.app.agents.registry import AgentRegistry
+    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     AGENT_REGISTRY_AVAILABLE = True  
 except ImportError:
     AGENT_REGISTRY_AVAILABLE = False

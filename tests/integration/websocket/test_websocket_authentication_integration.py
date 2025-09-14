@@ -31,7 +31,7 @@ from netra_backend.app.websocket_core.types import (
     AuthInfo,
     create_standard_message
 )
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuth
 from shared.isolated_environment import get_env
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator

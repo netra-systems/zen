@@ -25,9 +25,9 @@ from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecut
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.ssot.e2e_auth_helper import get_test_user_context
 
 

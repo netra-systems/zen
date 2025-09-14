@@ -95,7 +95,8 @@ class TestBaseAgentInfrastructureIntegration(SSotAsyncTestCase):
                 'session_id': kwargs.get('session_id', self.session_id)
             })
             
-        self.mock_websocket_emitter.emit_event.side_effect = capture_websocket_event
+        # Fix: Use correct method name 'emit' instead of 'emit_event'  
+        self.mock_websocket_emitter.emit.side_effect = capture_websocket_event
         
         # Resource tracking for cleanup validation
         self.created_agents = []

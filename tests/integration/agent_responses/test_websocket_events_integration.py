@@ -46,7 +46,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
 
 

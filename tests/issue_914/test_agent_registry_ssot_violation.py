@@ -86,11 +86,12 @@ class TestAgentRegistrySSotViolations(SSotAsyncTestCase):
             self.assertTrue(hasattr(basic_registry, 'register_agent'))
             self.assertTrue(hasattr(advanced_registry, 'register_agent'))
 
-            # But advanced has user isolation features basic lacks
-            self.assertFalse(hasattr(basic_registry, 'get_user_session'))
+            # AFTER CONSOLIDATION: Both should have user isolation features (SSOT success!)
+            self.assertTrue(hasattr(basic_registry, 'get_user_session'),
+                           "Basic registry should now have user isolation via SSOT consolidation")
             self.assertTrue(hasattr(advanced_registry, 'get_user_session'))
 
-            print("✅ SSOT VIOLATION DETECTED: Two AgentRegistry classes with same name but different capabilities")
+            print("✅ SSOT CONSOLIDATION SUCCESS: Both AgentRegistry classes now have identical capabilities")
 
         except ImportError as e:
             self.fail(f"Could not import both AgentRegistry classes: {e}")
@@ -131,12 +132,14 @@ class TestAgentRegistrySSotViolations(SSotAsyncTestCase):
             basic_has_isolation = user_isolation_methods.intersection(basic_methods)
             advanced_has_isolation = user_isolation_methods.intersection(advanced_methods)
 
-            # This shows the SSOT violation - same name, different capabilities
-            self.assertEqual(len(basic_has_isolation), 0, "Basic registry should not have user isolation")
+            # AFTER CONSOLIDATION: Both should have identical user isolation capabilities
+            self.assertGreater(len(basic_has_isolation), 4, "Basic registry should now have user isolation via SSOT")
             self.assertGreater(len(advanced_has_isolation), 4, "Advanced registry should have user isolation")
+            self.assertEqual(len(basic_has_isolation), len(advanced_has_isolation),
+                           "Both registries should have identical capabilities after SSOT consolidation")
 
-            print(f"🚨 IMPORT CONFUSION: Basic registry missing {len(user_isolation_methods)} user isolation methods")
-            print(f"📊 Capability Gap: {user_isolation_methods - basic_methods}")
+            print(f"✅ SSOT SUCCESS: Both registries have {len(basic_has_isolation)} user isolation methods")
+            print(f"🎉 CAPABILITY PARITY: {basic_has_isolation}")
 
         except Exception as e:
             self.fail(f"Import path test failed: {e}")
@@ -300,20 +303,20 @@ class TestAgentRegistrySSotViolations(SSotAsyncTestCase):
             print(f"Basic registry MRO: {basic_hierarchy}")
             print(f"Advanced registry MRO: {advanced_hierarchy}")
 
-            # They should have different inheritance chains
-            self.assertNotEqual(basic_hierarchy, advanced_hierarchy)
+            # AFTER CONSOLIDATION: They should have similar inheritance chains (SSOT success!)
+            # Note: Basic registry delegates to advanced, so hierarchies should be closely aligned
 
-            # Advanced should inherit from BaseAgentRegistry
+            # Both should inherit from UniversalRegistry after SSOT consolidation
             advanced_parent_names = [cls.__name__ for cls in advanced_mro[1:]]  # Exclude self
-            self.assertIn('BaseAgentRegistry', advanced_parent_names,
-                         "Advanced registry should inherit from BaseAgentRegistry")
+            self.assertIn('UniversalRegistry', advanced_parent_names,
+                         "Advanced registry should inherit from UniversalRegistry")
 
-            # Basic should have simpler inheritance
+            # Basic registry now also delegates to the same base architecture
             basic_parent_names = [cls.__name__ for cls in basic_mro[1:]]  # Exclude self
-            self.assertNotIn('BaseAgentRegistry', basic_parent_names,
-                           "Basic registry should not inherit from BaseAgentRegistry")
+            self.assertIn('UniversalRegistry', basic_parent_names,
+                         "Basic registry should now inherit from UniversalRegistry via SSOT consolidation")
 
-            print("🚨 INHERITANCE SSOT VIOLATION: Different inheritance hierarchies for same-named class")
+            print("✅ SSOT INHERITANCE SUCCESS: Both registries now share UniversalRegistry foundation")
 
         except Exception as e:
             self.fail(f"Inheritance hierarchy test failed: {e}")

@@ -388,7 +388,7 @@ class TestWebSocketFactoryAntiPatternDetection(SSotBaseTestCase):
             pass
         
         try:
-            from netra_backend.app.websocket_core.unified_manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             try:
                 direct_manager = WebSocketManager()

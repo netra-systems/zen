@@ -37,7 +37,7 @@ from netra_backend.app.core.agent_reliability_types import AgentError
 
 # Try to import WebSocket components
 try:
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     WEBSOCKET_MANAGER_AVAILABLE = True
 except ImportError:
     WEBSOCKET_MANAGER_AVAILABLE = False
@@ -529,7 +529,7 @@ class TestWebSocketHealthIntegrationRequirements(SSotAsyncTestCase):
         
         Expected to FAIL: No direct integration between WebSocket manager and agent health.
         """
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         
         # Create real WebSocket manager instance
         websocket_manager = UnifiedWebSocketManager()

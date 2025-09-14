@@ -634,6 +634,9 @@ markers = [
     
     # Missing supervisor orchestration marker causing collection failures
     "supervisor_orchestration: Supervisor orchestration and multi-user isolation tests",
+    
+    # Missing agent_handoff_chain marker causing collection failures  
+    "agent_handoff_chain: Agent handoff chain coordination tests",
 ]
 
 # Coverage settings

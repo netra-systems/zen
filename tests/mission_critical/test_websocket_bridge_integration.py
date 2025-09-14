@@ -1,5 +1,5 @@
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from auth_service.core.auth_manager import AuthManager
@@ -161,7 +161,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
                         # REMOVED_SYNTAX_ERROR: pass
                         # REMOVED_SYNTAX_ERROR: try:
                             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
-                            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+                            # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
                             # REMOVED_SYNTAX_ERROR: except ImportError as e:
                                 # REMOVED_SYNTAX_ERROR: self.skipTest("formatted_string")
 

@@ -47,7 +47,7 @@
             # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.routes.websocket import router, websocket_beacon
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.handlers import MessageRouter, ConnectionHandler
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler

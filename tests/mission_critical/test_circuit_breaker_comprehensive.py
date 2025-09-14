@@ -53,7 +53,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Set, Any, Optional, Callable
 import threading
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from auth_service.core.auth_manager import AuthManager
@@ -1093,7 +1093,7 @@ async def test_circuit_breaker_execute_core_integration():
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
         pytest.skip("Required components not available")
@@ -1187,7 +1187,7 @@ async def test_execute_core_circuit_breaker_recovery_patterns():
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
         pytest.skip("Required components not available")
@@ -1274,7 +1274,7 @@ async def test_execute_core_circuit_breaker_timing():
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
         pytest.skip("Required components not available")
@@ -1374,7 +1374,7 @@ async def test_execute_core_circuit_breaker_resource_management():
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
         pytest.skip("Required components not available")
@@ -1482,7 +1482,7 @@ async def test_execute_core_circuit_breaker_state_consistency():
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         from netra_backend.app.schemas.agent import SubAgentLifecycle
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
@@ -1606,7 +1606,7 @@ async def test_execute_core_circuit_breaker_concurrent_safety():
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
         pytest.skip("Required components not available")
@@ -1720,7 +1720,7 @@ async def test_execute_core_circuit_breaker_error_propagation():
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
         pytest.skip("Required components not available")

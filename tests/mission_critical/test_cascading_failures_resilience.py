@@ -38,7 +38,7 @@ from shared.isolated_environment import IsolatedEnvironment
 # Core component imports - with error handling
 try:
     from netra_backend.app.redis_manager import redis_manager
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketConnection
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketConnection
     from netra_backend.app.services.websocket.message_queue import MessageQueue, QueuedMessage, MessagePriority, MessageStatus
     from netra_backend.app.core.resilience.unified_circuit_breaker import (
         UnifiedCircuitBreaker,

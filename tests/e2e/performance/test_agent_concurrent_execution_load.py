@@ -190,13 +190,9 @@ class ConcurrentAgentLoadTester(SSotAsyncTestCase, StagingTestBase):
     async def _connect_single_user(self, user: ConcurrentUser) -> bool:
         """Connect a single user's WebSocket"""
         try:
-            user.websocket_client = StagingWebSocketClient(
-                websocket_url=self.websocket_url,
-                access_token=user.access_token,
-                user_id=user.user_id
-            )
+            user.websocket_client = StagingWebSocketClient()
             
-            success = await user.websocket_client.connect()
+            success = await user.websocket_client.connect(token=user.access_token)
             if success:
                 user.connection_established = True
                 return True
@@ -273,7 +269,7 @@ class ConcurrentAgentLoadTester(SSotAsyncTestCase, StagingTestBase):
                 "timestamp": time.time()
             }
             
-            await user.websocket_client.send_message(message)
+            await user.websocket_client.send_message("chat_message", message)
             user.messages_sent += 1
             
             # Wait for agent response with timeout

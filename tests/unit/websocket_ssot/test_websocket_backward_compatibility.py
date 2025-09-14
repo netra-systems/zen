@@ -444,7 +444,7 @@ class TestWebSocketBackwardCompatibility(BaseIntegrationTest):
             return WebSocketManager()
         except ImportError:
             try:
-                from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                 return UnifiedWebSocketManager()
             except ImportError:
                 return None

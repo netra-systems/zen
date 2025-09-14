@@ -58,7 +58,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, PipelineStep
-            from netra_backend.app.agents.state import DeepAgentState
+            from netra_backend.app.schemas.agent_models import DeepAgentState
             
             # Create mock WebSocket emitter to capture events
             mock_websocket_emitter = AsyncMock()
