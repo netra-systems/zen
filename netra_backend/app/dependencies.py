@@ -1144,12 +1144,13 @@ ExecutionEngineFactoryDep = Annotated[Any, Depends(get_execution_engine_factory_
 
 async def get_agent_instance_factory_dependency(request: Request):
     """
-    Create per-request AgentInstanceFactory with infrastructure from app state.
+    Create per-request AgentInstanceFactory with proper user isolation.
     
+    ISSUE #1116: Uses SSOT create_agent_instance_factory for complete user isolation.
     CRITICAL: This creates a NEW factory instance for each request to ensure
     complete user isolation. No shared state exists between requests.
     """
-    from netra_backend.app.agents.supervisor.agent_instance_factory import create_configured_agent_factory
+    from netra_backend.app.agents.supervisor.agent_instance_factory import create_agent_instance_factory
     
     # Get infrastructure components from app state (shared immutable resources)
     if not hasattr(request.app.state, 'agent_websocket_bridge'):
@@ -1158,20 +1159,22 @@ async def get_agent_instance_factory_dependency(request: Request):
             detail="WebSocket bridge not initialized - startup failure"
         )
     
-    # Create NEW factory instance for this request (no singletons)
+    # Create NEW factory instance for this request using SSOT pattern
     try:
-        factory = await create_configured_agent_factory(
+        factory = create_agent_instance_factory(user_context)
+        
+        # Configure the factory with shared infrastructure
+        await factory.configure(
             websocket_bridge=request.app.state.agent_websocket_bridge,
             llm_manager=getattr(request.app.state, 'llm_manager', None),
             agent_class_registry=getattr(request.app.state, 'agent_class_registry', None),
-            # tool_dispatcher will be created per-request in UserExecutionContext
         )
         
-        logger.debug(f"Created per-request AgentInstanceFactory for user isolation")
+        logger.debug(f"Created per-request AgentInstanceFactory for user {user_context.user_id} (run: {user_context.run_id})")
         return factory
         
     except Exception as e:
-        logger.error(f"Failed to create per-request AgentInstanceFactory: {e}")
+        logger.error(f"Failed to create per-request AgentInstanceFactory for user {user_context.user_id if user_context else 'unknown'}: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Failed to create AgentInstanceFactory: {e}"

@@ -28,9 +28,7 @@ from netra_backend.app.services.user_execution_context import (
 from netra_backend.app.database.session_manager import (
     validate_agent_session_isolation
 )
-from netra_backend.app.agents.supervisor.agent_instance_factory import (
-    get_agent_instance_factory
-)
+# REMOVED: get_agent_instance_factory import - singleton pattern eliminated for Issue #1116
 from netra_backend.app.agents.supervisor.user_execution_engine import (
     UserExecutionEngine
 )
@@ -64,16 +62,17 @@ class SupervisorAgent(BaseAgent):
             llm_manager: LLM manager for agent operations
             websocket_bridge: Optional WebSocket bridge
             db_session_factory: Legacy parameter (ignored in SSOT pattern)
-            user_context: Legacy parameter (ignored in SSOT pattern)
+            user_context: User execution context for per-request factory creation (ISSUE #1116)
             tool_dispatcher: Legacy parameter (ignored in SSOT pattern)
         """
         # Log legacy parameter usage
         if db_session_factory is not None:
             logger.info(" CYCLE:  Legacy db_session_factory parameter ignored in SSOT pattern")
-        if user_context is not None:
-            logger.info(" CYCLE:  Legacy user_context parameter ignored in SSOT pattern")
         if tool_dispatcher is not None:
             logger.info(" CYCLE:  Legacy tool_dispatcher parameter ignored in SSOT pattern")
+        
+        # Store user_context for factory creation
+        self._initialization_user_context = user_context
         super().__init__(
             llm_manager=llm_manager,
             name="Supervisor",
@@ -87,7 +86,19 @@ class SupervisorAgent(BaseAgent):
         self._llm_manager = llm_manager
         
         # Use SSOT factory instead of maintaining own state
-        self.agent_factory = get_agent_instance_factory()
+        # ISSUE #1116: Migrate to per-request factory for user isolation
+        if user_context:
+            logger.info(f"SupervisorAgent: Using per-request factory with user context for {user_context.user_id}")
+            from netra_backend.app.agents.supervisor.agent_instance_factory import create_agent_instance_factory
+            self.agent_factory = create_agent_instance_factory(user_context)
+        else:
+            # CRITICAL SECURITY FIX: No more fallback to singleton - require user_context
+            logger.error("CRITICAL: SupervisorAgent requires user_context for proper user isolation (Issue #1116)")
+            raise ValueError(
+                "SupervisorAgent now requires user_context parameter to prevent user data leakage. "
+                "The singleton factory pattern has been eliminated for security compliance. "
+                "Use SupervisorAgent(..., user_context=your_user_context) instead."
+            )
         
         # Initialize workflow executor for workflow orchestration
         from netra_backend.app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor

@@ -168,6 +168,24 @@ class DeepAgentState(BaseModel):
         else:
             return AgentMetadata()
     
+    @field_validator('agent_context', mode='before')
+    @classmethod
+    def validate_agent_context(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+        """Deep copy agent_context to prevent cross-user contamination.
+        
+        SECURITY FIX: Issue #953 - Critical security vulnerability fix.
+        Prevents shared reference vulnerabilities by creating deep copies of
+        agent_context dictionaries to ensure complete user isolation.
+        
+        This is the primary fix for the cross-user data contamination vulnerability
+        where multiple users could access each other's sensitive data through
+        shared dictionary references.
+        """
+        if v is None:
+            return {}
+        # Deep copy the entire context dictionary to prevent shared references
+        return copy.deepcopy(v)
+    
     @field_validator('step_count')
     @classmethod
     def validate_step_count(cls, v: int) -> int:
