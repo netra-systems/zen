@@ -185,7 +185,7 @@ class StagingTestDiagnostics:
 3. **Validate Fix:**
    ```bash
    # Test auth bypass endpoint directly
-   curl -X POST https://netra-auth-service-pnovr5vsba-uc.a.run.app/auth/e2e/test-auth \
+   curl -X POST https://auth.staging.netrasystems.ai/auth/e2e/test-auth \
      -H "Content-Type: application/json" \
      -d '{"simulation_key": "staging-e2e-test-bypass-key-2025", "email": "test@staging.netrasystems.ai"}'
    ```

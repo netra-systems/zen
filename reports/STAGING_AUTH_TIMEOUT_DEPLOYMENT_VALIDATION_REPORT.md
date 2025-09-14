@@ -20,7 +20,7 @@
 ### Services Deployed Successfully:
 ```
 ✅ backend    : https://netra-backend-staging-pnovr5vsba-uc.a.run.app
-✅ auth       : https://netra-auth-service-pnovr5vsba-uc.a.run.app  
+✅ auth       : https://auth.staging.netrasystems.ai  
 ✅ frontend   : https://netra-frontend-staging-pnovr5vsba-uc.a.run.app
 ```
 
@@ -48,7 +48,7 @@ AFTER (Post-Remediation):
 ### 2. API Response Performance
 ```bash
 # Auth Service Health Check
-curl https://netra-auth-service-pnovr5vsba-uc.a.run.app/health
+curl https://auth.staging.netrasystems.ai/health
 Response Time: 0.152s ✅ (FAST)
 Status: {"service":"auth-service","status":"running","version":"1.0.0"}
 

@@ -20,7 +20,7 @@ class StagingConfig:
     base_url: str = "https://api.staging.netrasystems.ai"
     
     # Auth service URLs (when deployed) - Updated after commit 630b63ca2
-    auth_url: str = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+    auth_url: str = "https://auth.staging.netrasystems.ai"
     
     # Frontend URL (when deployed)
     frontend_url: str = "https://app.staging.netrasystems.ai"
@@ -228,7 +228,7 @@ class StagingConfig:
             
             # Create staging config with updated auth service URL
             staging_config = E2EAuthConfig.for_staging()
-            staging_config.auth_service_url = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+            staging_config.auth_service_url = "https://auth.staging.netrasystems.ai"
             staging_config.jwt_validation_strict = False  # Allow E2E test tokens in staging
             auth_helper = E2EAuthHelper(config=staging_config, environment="staging")
             

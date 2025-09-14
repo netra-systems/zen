@@ -21,7 +21,7 @@
 | Service | Status | URL | Health Check |
 |---------|---------|-----|--------------|
 | **Backend** | ✅ Healthy | https://netra-backend-staging-pnovr5vsba-uc.a.run.app | ✅ 200 OK |
-| **Auth Service** | ✅ Healthy | https://netra-auth-service-pnovr5vsba-uc.a.run.app | ✅ 200 OK |
+| **Auth Service** | ✅ Healthy | https://auth.staging.netrasystems.ai | ✅ 200 OK |
 | **Frontend** | ✅ Healthy | https://netra-frontend-staging-pnovr5vsba-uc.a.run.app | ✅ 200 OK |
 
 ### Deployment Commands Used
@@ -170,7 +170,7 @@ curl -X POST "https://netra-backend-staging-pnovr5vsba-uc.a.run.app/api/agents/e
 ```bash
 # Health checks
 curl https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health
-curl https://netra-auth-service-pnovr5vsba-uc.a.run.app/health
+curl https://auth.staging.netrasystems.ai/health
 
 # WebSocket test (using websocket-client library)
 python3 -c "import websocket; ws = websocket.create_connection('wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws', subprotocols=['jwt-auth']); print('Connected'); ws.close()"

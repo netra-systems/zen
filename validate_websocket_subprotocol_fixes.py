@@ -74,7 +74,7 @@ async def test_staging_config_updates():
         config = get_staging_config()
 
         # Check auth URL update
-        expected_auth_url = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+        expected_auth_url = "https://auth.staging.netrasystems.ai"
         if config.auth_url == expected_auth_url:
             print(f"✅ Auth URL updated correctly: {config.auth_url}")
         else:
@@ -128,8 +128,8 @@ async def test_auth_service_connectivity():
     print("\n=== Testing Auth Service Connectivity ===")
 
     auth_urls = [
-        "https://netra-auth-service-pnovr5vsba-uc.a.run.app/health",
-        "https://netra-auth-service-pnovr5vsba-uc.a.run.app",
+        "https://auth.staging.netrasystems.ai/health",
+        "https://auth.staging.netrasystems.ai",
     ]
 
     async with httpx.AsyncClient(timeout=10.0) as client:

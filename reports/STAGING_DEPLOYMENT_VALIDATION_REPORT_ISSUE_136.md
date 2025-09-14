@@ -26,7 +26,7 @@
 ### 1.1 Services Deployed
 ```bash
 ✅ netra-backend-staging   - https://netra-backend-staging-pnovr5vsba-uc.a.run.app
-✅ netra-auth-service      - https://netra-auth-service-pnovr5vsba-uc.a.run.app  
+✅ netra-auth-service      - https://auth.staging.netrasystems.ai  
 ✅ netra-frontend-staging  - https://netra-frontend-staging-pnovr5vsba-uc.a.run.app
 ```
 
