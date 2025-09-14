@@ -397,12 +397,18 @@ class AgentRequestHandler(BaseMessageHandler):
                 MessageType.AGENT_PROGRESS,
                 {
                     "event": "tool_executing",
-                    "type": "tool_executing", 
+                    "type": "tool_executing",
                     "status": "Executing analysis tools",
-                    "tool_name": "analysis_tool",
                     "user_id": user_id,
                     "turn_id": turn_id,
-                    "timestamp": time.time()
+                    "timestamp": time.time(),
+                    "payload": {
+                        "tool_name": "analysis_tool",
+                        "agent_name": "supervisor-agent",
+                        "parameters": {"action": "analyze"},
+                        "tool_purpose": "Data analysis",
+                        "estimated_duration_ms": 2000
+                    }
                 }
             )
             
@@ -422,11 +428,16 @@ class AgentRequestHandler(BaseMessageHandler):
                     "event": "tool_completed",
                     "type": "tool_completed",
                     "status": "Tool execution completed",
-                    "tool_name": "analysis_tool",
-                    "result": "Analysis complete",
                     "user_id": user_id,
                     "turn_id": turn_id,
-                    "timestamp": time.time()
+                    "timestamp": time.time(),
+                    "payload": {
+                        "tool_name": "analysis_tool",
+                        "agent_name": "supervisor-agent",
+                        "result": "Analysis complete",
+                        "duration_ms": 2000,
+                        "success": True
+                    }
                 }
             )
             
