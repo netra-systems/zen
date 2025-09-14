@@ -59,7 +59,7 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """Setup staging environment for advanced feature testing."""
 
         # Initialize staging configuration
@@ -90,9 +90,9 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
 
         cls.logger.info(f"Advanced agent features E2E tests initialized for staging")
 
-    def setUp(self):
+    def setup_method(self, method):
         """Setup for each test method."""
-        super().setUp()
+        super().setup_method(method)
 
         # Generate test-specific context
         self.advanced_test_session = f"advanced_features_{int(time.time())}"
@@ -109,7 +109,7 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
             exp_minutes=90  # Longer for complex processing
         )
 
-        self.__class__.logger.info(f"Advanced features test setup - session: {self.advanced_test_session}")
+        self.logger.info(f"Advanced features test setup - session: {self.advanced_test_session}")
 
     async def _establish_websocket_connection(self) -> websockets.WebSocketServerProtocol:
         """Establish WebSocket connection for advanced feature testing."""
@@ -198,7 +198,7 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
                 except asyncio.TimeoutError:
                     continue
                 except json.JSONDecodeError as e:
-                    self.__class__.logger.warning(f"JSON decode error in advanced processing: {e}")
+                    self.logger.warning(f"JSON decode error in advanced processing: {e}")
                     continue
 
             await websocket.close()
@@ -315,7 +315,7 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Advanced APEX agent capabilities in staging
         STATUS: Should PASS - Premium optimization features essential for differentiation
         """
-        self.__class__.logger.info("🧠 Testing complex multi-step optimization analysis")
+        self.logger.info("🧠 Testing complex multi-step optimization analysis")
 
         complex_optimization_request = (
             "I'm the CTO of a fintech startup that's grown from 50K to 2M users in 18 months. "
@@ -349,14 +349,14 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
             timeout=180.0
         )
 
-        self.__class__.logger.info(f"📊 Complex Optimization Analysis Results:")
-        self.__class__.logger.info(f"   Success: {result['success']}")
-        self.__class__.logger.info(f"   Processing Time: {result['total_time']:.1f}s")
-        self.__class__.logger.info(f"   Events: {result['events_count']}")
-        self.__class__.logger.info(f"   Critical Events: {len(result['critical_events'])}")
-        self.__class__.logger.info(f"   Thinking Events: {len(result['thinking_events'])}")
-        self.__class__.logger.info(f"   Tool Events: {len(result['tool_events'])}")
-        self.__class__.logger.info(f"   Response Length: {result['response_length']} chars")
+        self.logger.info(f"📊 Complex Optimization Analysis Results:")
+        self.logger.info(f"   Success: {result['success']}")
+        self.logger.info(f"   Processing Time: {result['total_time']:.1f}s")
+        self.logger.info(f"   Events: {result['events_count']}")
+        self.logger.info(f"   Critical Events: {len(result['critical_events'])}")
+        self.logger.info(f"   Thinking Events: {len(result['thinking_events'])}")
+        self.logger.info(f"   Tool Events: {len(result['tool_events'])}")
+        self.logger.info(f"   Response Length: {result['response_length']} chars")
 
         # Validate successful processing
         assert result["success"], (
@@ -377,19 +377,19 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
 
         # May use tools for market research or calculations
         if len(result["tool_events"]) > 0:
-            self.__class__.logger.info(f"   Tool usage detected: {len(result['tool_events'])} tool events")
+            self.logger.info(f"   Tool usage detected: {len(result['tool_events'])} tool events")
 
         # Analyze response sophistication
         sophistication = self._analyze_response_sophistication(result["response_content"])
 
-        self.__class__.logger.info(f"📈 Response Sophistication Analysis:")
-        self.__class__.logger.info(f"   Word Count: {sophistication['word_count']}")
-        self.__class__.logger.info(f"   Has Numbers: {sophistication['has_numbers']}")
-        self.__class__.logger.info(f"   Has Recommendations: {sophistication['has_specific_recommendations']}")
-        self.__class__.logger.info(f"   Has Implementation: {sophistication['has_implementation_steps']}")
-        self.__class__.logger.info(f"   Has Business Context: {sophistication['has_business_context']}")
-        self.__class__.logger.info(f"   Has Technical Details: {sophistication['has_technical_details']}")
-        self.__class__.logger.info(f"   Sophistication Score: {sophistication['sophistication_score']:.2f}")
+        self.logger.info(f"📈 Response Sophistication Analysis:")
+        self.logger.info(f"   Word Count: {sophistication['word_count']}")
+        self.logger.info(f"   Has Numbers: {sophistication['has_numbers']}")
+        self.logger.info(f"   Has Recommendations: {sophistication['has_specific_recommendations']}")
+        self.logger.info(f"   Has Implementation: {sophistication['has_implementation_steps']}")
+        self.logger.info(f"   Has Business Context: {sophistication['has_business_context']}")
+        self.logger.info(f"   Has Technical Details: {sophistication['has_technical_details']}")
+        self.logger.info(f"   Sophistication Score: {sophistication['sophistication_score']:.2f}")
 
         # Validate response sophistication for premium feature
         assert sophistication["sophistication_score"] >= 0.6, (
@@ -425,7 +425,7 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
             f"Complex analysis should complete within reasonable time: {result['total_time']:.1f}s (max 240s)"
         )
 
-        self.__class__.logger.info("✅ Complex multi-step optimization analysis validated")
+        self.logger.info("✅ Complex multi-step optimization analysis validated")
 
     async def test_supervisor_agent_coordination_capabilities(self):
         """
@@ -445,7 +445,7 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Advanced supervisor coordination in staging
         STATUS: Should PASS - Supervisor coordination essential for enterprise features
         """
-        self.__class__.logger.info("👥 Testing supervisor agent coordination capabilities")
+        self.logger.info("👥 Testing supervisor agent coordination capabilities")
 
         coordination_request = (
             "I'm presenting to our board next week about our AI strategy and need comprehensive analysis. "
@@ -483,11 +483,11 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
             timeout=150.0
         )
 
-        self.__class__.logger.info(f"📊 Supervisor Coordination Results:")
-        self.__class__.logger.info(f"   Success: {result['success']}")
-        self.__class__.logger.info(f"   Processing Time: {result['total_time']:.1f}s")
-        self.__class__.logger.info(f"   Events: {result['events_count']}")
-        self.__class__.logger.info(f"   Response Length: {result['response_length']} chars")
+        self.logger.info(f"📊 Supervisor Coordination Results:")
+        self.logger.info(f"   Success: {result['success']}")
+        self.logger.info(f"   Processing Time: {result['total_time']:.1f}s")
+        self.logger.info(f"   Events: {result['events_count']}")
+        self.logger.info(f"   Response Length: {result['response_length']} chars")
 
         # Validate successful coordination
         assert result["success"], (
@@ -519,11 +519,11 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
         operational_addressed = sum(1 for term in operational_coverage if term in response_content)
         risk_addressed = sum(1 for term in risk_coverage if term in response_content)
 
-        self.__class__.logger.info(f"📈 Multi-Dimensional Coverage Analysis:")
-        self.__class__.logger.info(f"   Strategic Coverage: {strategic_addressed}/{len(strategic_coverage)}")
-        self.__class__.logger.info(f"   Operational Coverage: {operational_addressed}/{len(operational_coverage)}")
-        self.__class__.logger.info(f"   Risk Coverage: {risk_addressed}/{len(risk_coverage)}")
-        self.__class__.logger.info(f"   Overall Sophistication: {sophistication['sophistication_score']:.2f}")
+        self.logger.info(f"📈 Multi-Dimensional Coverage Analysis:")
+        self.logger.info(f"   Strategic Coverage: {strategic_addressed}/{len(strategic_coverage)}")
+        self.logger.info(f"   Operational Coverage: {operational_addressed}/{len(operational_coverage)}")
+        self.logger.info(f"   Risk Coverage: {risk_addressed}/{len(risk_coverage)}")
+        self.logger.info(f"   Overall Sophistication: {sophistication['sophistication_score']:.2f}")
 
         # Should cover multiple dimensions comprehensively
         assert strategic_addressed >= 2, (
@@ -561,7 +561,7 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
             f"Addressed: {context_addressed}/{len(healthcare_context)} elements"
         )
 
-        self.__class__.logger.info("✅ Supervisor agent coordination capabilities validated")
+        self.logger.info("✅ Supervisor agent coordination capabilities validated")
 
     async def test_data_helper_agent_analytical_capabilities(self):
         """
@@ -581,7 +581,7 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Advanced data analysis capabilities in staging
         STATUS: Should PASS - Data analysis features critical for business intelligence
         """
-        self.__class__.logger.info("📊 Testing data helper agent analytical capabilities")
+        self.logger.info("📊 Testing data helper agent analytical capabilities")
 
         analytical_request = (
             "I need comprehensive data analysis for our AI cost optimization project. Here's our data: "
@@ -625,11 +625,11 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
             timeout=120.0
         )
 
-        self.__class__.logger.info(f"📊 Data Analysis Results:")
-        self.__class__.logger.info(f"   Success: {result['success']}")
-        self.__class__.logger.info(f"   Processing Time: {result['total_time']:.1f}s")
-        self.__class__.logger.info(f"   Events: {result['events_count']}")
-        self.__class__.logger.info(f"   Response Length: {result['response_length']} chars")
+        self.logger.info(f"📊 Data Analysis Results:")
+        self.logger.info(f"   Success: {result['success']}")
+        self.logger.info(f"   Processing Time: {result['total_time']:.1f}s")
+        self.logger.info(f"   Events: {result['events_count']}")
+        self.logger.info(f"   Response Length: {result['response_length']} chars")
 
         # Validate successful analysis
         assert result["success"], (
@@ -686,7 +686,7 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
             f"Complex data analysis should be comprehensive: {sophistication['word_count']} words (min 250)"
         )
 
-        self.__class__.logger.info("✅ Data helper agent analytical capabilities validated")
+        self.logger.info("✅ Data helper agent analytical capabilities validated")
 
     async def test_agent_context_awareness_and_personalization(self):
         """
@@ -706,7 +706,7 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Context-aware response generation in staging
         STATUS: Should PASS - Personalization essential for premium user experience
         """
-        self.__class__.logger.info("🎯 Testing agent context awareness and personalization")
+        self.logger.info("🎯 Testing agent context awareness and personalization")
 
         # Test with different persona contexts
         persona_scenarios = [
@@ -746,7 +746,7 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
         results = []
 
         for scenario in persona_scenarios:
-            self.__class__.logger.info(f"Testing {scenario['persona']} persona...")
+            self.logger.info(f"Testing {scenario['persona']} persona...")
 
             result = await self._process_advanced_agent_request(
                 "supervisor_agent",  # Supervisor best for context adaptation
@@ -793,12 +793,12 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
         avg_focus_coverage = sum(r["focus_percentage"] for r in results) / len(results)
         avg_sophistication = sum(r["sophistication"]["sophistication_score"] for r in results) / len(results)
 
-        self.__class__.logger.info(f"📈 Personalization Analysis:")
-        self.__class__.logger.info(f"   Average Focus Coverage: {avg_focus_coverage:.1%}")
-        self.__class__.logger.info(f"   Average Sophistication: {avg_sophistication:.2f}")
+        self.logger.info(f"📈 Personalization Analysis:")
+        self.logger.info(f"   Average Focus Coverage: {avg_focus_coverage:.1%}")
+        self.logger.info(f"   Average Sophistication: {avg_sophistication:.2f}")
 
         for result in results:
-            self.__class__.logger.info(f"   {result['persona']}: {result['focus_percentage']:.1%} focus, "
+            self.logger.info(f"   {result['persona']}: {result['focus_percentage']:.1%} focus, "
                           f"{result['sophistication']['sophistication_score']:.2f} sophistication")
 
         # Validate overall personalization quality
@@ -819,7 +819,7 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
             f"Successful: {successful_personas}/{len(persona_scenarios)}"
         )
 
-        self.__class__.logger.info("✅ Agent context awareness and personalization validated")
+        self.logger.info("✅ Agent context awareness and personalization validated")
 
 
 if __name__ == "__main__":

@@ -60,7 +60,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """Setup staging environment for security testing."""
 
         # Initialize staging configuration
@@ -82,9 +82,9 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
 
         cls.logger.info(f"Security and authorization edge cases E2E tests initialized for staging")
 
-    def setUp(self):
+    def setup_method(self, method):
         """Setup for each test method."""
-        super().setUp()
+        super().setup_method(method)
 
         # Generate test-specific context
         self.security_test_session = f"security_test_{int(time.time())}"
@@ -99,7 +99,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
             exp_minutes=60
         )
 
-        self.__class__.logger.info(f"Security test setup - session: {self.security_test_session}")
+        self.logger.info(f"Security test setup - session: {self.security_test_session}")
 
     async def _attempt_websocket_connection(self, headers: Dict[str, str],
                                           should_succeed: bool = True,
@@ -274,7 +274,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - JWT validation in staging
         STATUS: Should PASS - Token expiration critical for security
         """
-        self.__class__.logger.info("🔒 Testing expired token rejection")
+        self.logger.info("🔒 Testing expired token rejection")
 
         # Create expired JWT token (expired 1 hour ago)
         expired_token = self.__class__.auth_helper.create_test_jwt_token(
@@ -290,10 +290,10 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
             "X-Test-Suite": "expired-token-test"
         }, should_succeed=False)
 
-        self.__class__.logger.info(f"📊 Expired Token Test Results:")
-        self.__class__.logger.info(f"   Connection Success: {connection_result['success']}")
-        self.__class__.logger.info(f"   Connected: {connection_result['connected']}")
-        self.__class__.logger.info(f"   Error: {connection_result['error']}")
+        self.logger.info(f"📊 Expired Token Test Results:")
+        self.logger.info(f"   Connection Success: {connection_result['success']}")
+        self.logger.info(f"   Connected: {connection_result['connected']}")
+        self.logger.info(f"   Error: {connection_result['error']}")
 
         # Expired token should be rejected
         assert connection_result["success"], (
@@ -317,7 +317,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
                 f"Error: {connection_result['error']}"
             )
 
-        self.__class__.logger.info("✅ Expired token rejection validated")
+        self.logger.info("✅ Expired token rejection validated")
 
     async def test_invalid_token_format_rejection(self):
         """
@@ -337,7 +337,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - JWT parsing security in staging
         STATUS: Should PASS - Token format validation essential for security
         """
-        self.__class__.logger.info("🔧 Testing invalid token format rejection")
+        self.logger.info("🔧 Testing invalid token format rejection")
 
         # Various malformed token formats
         invalid_tokens = [
@@ -354,7 +354,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
         rejection_results = []
 
         for i, invalid_token in enumerate(invalid_tokens):
-            self.__class__.logger.info(f"Testing invalid token format {i+1}/{len(invalid_tokens)}...")
+            self.logger.info(f"Testing invalid token format {i+1}/{len(invalid_tokens)}...")
 
             # Attempt connection with invalid token
             connection_result = await self._attempt_websocket_connection({
@@ -373,10 +373,10 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
         successful_rejections = [r for r in rejection_results if r["result"]["success"]]
         failed_rejections = [r for r in rejection_results if not r["result"]["success"]]
 
-        self.__class__.logger.info(f"📊 Invalid Token Format Test Results:")
-        self.__class__.logger.info(f"   Total Tests: {len(invalid_tokens)}")
-        self.__class__.logger.info(f"   Successful Rejections: {len(successful_rejections)}")
-        self.__class__.logger.info(f"   Failed Rejections: {len(failed_rejections)}")
+        self.logger.info(f"📊 Invalid Token Format Test Results:")
+        self.logger.info(f"   Total Tests: {len(invalid_tokens)}")
+        self.logger.info(f"   Successful Rejections: {len(successful_rejections)}")
+        self.logger.info(f"   Failed Rejections: {len(failed_rejections)}")
 
         # All invalid tokens should be rejected
         rejection_rate = len(successful_rejections) / len(invalid_tokens)
@@ -405,7 +405,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
                     f"Token: {result['token_type']}, Error: {result['result']['error']}"
                 )
 
-        self.__class__.logger.info("✅ Invalid token format rejection validated")
+        self.logger.info("✅ Invalid token format rejection validated")
 
     async def test_unauthorized_user_isolation(self):
         """
@@ -425,7 +425,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - User isolation validation in staging
         STATUS: Should PASS - User isolation critical for enterprise data security
         """
-        self.__class__.logger.info("👥 Testing unauthorized user isolation")
+        self.logger.info("👥 Testing unauthorized user isolation")
 
         # Create two distinct user contexts
         user_a_id = f"user_a_{int(time.time())}"
@@ -455,7 +455,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
             f"Result: {user_a_request_result}"
         )
 
-        self.__class__.logger.info("User A successfully created conversation with sensitive data")
+        self.logger.info("User A successfully created conversation with sensitive data")
 
         # User B attempts various unauthorized access scenarios
         unauthorized_attempts = [
@@ -500,7 +500,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
         isolation_results = []
 
         for attempt in unauthorized_attempts:
-            self.__class__.logger.info(f"Testing {attempt['scenario']}: {attempt['description']}")
+            self.logger.info(f"Testing {attempt['scenario']}: {attempt['description']}")
 
             # User B attempts unauthorized access using their own token
             try:
@@ -589,13 +589,13 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
         successful_isolations = [r for r in isolation_results if r["isolation_maintained"]]
         data_breaches = [r for r in isolation_results if r["unauthorized_data_found"]]
 
-        self.__class__.logger.info(f"📊 User Isolation Test Results:")
-        self.__class__.logger.info(f"   Total Scenarios: {len(unauthorized_attempts)}")
-        self.__class__.logger.info(f"   Successful Isolations: {len(successful_isolations)}")
-        self.__class__.logger.info(f"   Data Breaches: {len(data_breaches)}")
+        self.logger.info(f"📊 User Isolation Test Results:")
+        self.logger.info(f"   Total Scenarios: {len(unauthorized_attempts)}")
+        self.logger.info(f"   Successful Isolations: {len(successful_isolations)}")
+        self.logger.info(f"   Data Breaches: {len(data_breaches)}")
 
         for result in isolation_results:
-            self.__class__.logger.info(f"   {result['scenario']}: "
+            self.logger.info(f"   {result['scenario']}: "
                           f"Isolated: {result['isolation_maintained']}, "
                           f"Auth Error: {result['auth_error_detected']}")
 
@@ -612,7 +612,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
             f"Breaches: {data_breaches}"
         )
 
-        self.__class__.logger.info("✅ Unauthorized user isolation validated")
+        self.logger.info("✅ Unauthorized user isolation validated")
 
     async def test_malicious_request_payload_rejection(self):
         """
@@ -632,7 +632,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Payload security validation in staging
         STATUS: Should PASS - Malicious payload rejection critical for system security
         """
-        self.__class__.logger.info("🛡️ Testing malicious request payload rejection")
+        self.logger.info("🛡️ Testing malicious request payload rejection")
 
         # Various malicious payload scenarios
         malicious_payloads = [
@@ -711,7 +711,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
         rejection_results = []
 
         for attack in malicious_payloads:
-            self.__class__.logger.info(f"Testing {attack['name']}...")
+            self.logger.info(f"Testing {attack['name']}...")
 
             try:
                 # Attempt connection with legitimate token but malicious payload
@@ -816,13 +816,13 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
         secure_rejections = [r for r in rejection_results if r.get("security_maintained", True)]
         security_compromises = [r for r in rejection_results if r.get("security_compromise", False)]
 
-        self.__class__.logger.info(f"📊 Malicious Payload Test Results:")
-        self.__class__.logger.info(f"   Total Attacks: {len(malicious_payloads)}")
-        self.__class__.logger.info(f"   Secure Rejections: {len(secure_rejections)}")
-        self.__class__.logger.info(f"   Security Compromises: {len(security_compromises)}")
+        self.logger.info(f"📊 Malicious Payload Test Results:")
+        self.logger.info(f"   Total Attacks: {len(malicious_payloads)}")
+        self.logger.info(f"   Secure Rejections: {len(secure_rejections)}")
+        self.logger.info(f"   Security Compromises: {len(security_compromises)}")
 
         for result in rejection_results:
-            self.__class__.logger.info(f"   {result['attack']}: "
+            self.logger.info(f"   {result['attack']}: "
                           f"Secure: {result.get('security_maintained', True)}")
 
         # All malicious payloads should be rejected or handled securely
@@ -839,7 +839,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
             f"Compromises: {security_compromises}"
         )
 
-        self.__class__.logger.info("✅ Malicious request payload rejection validated")
+        self.logger.info("✅ Malicious request payload rejection validated")
 
     def _create_deeply_nested_payload(self, depth: int) -> Dict[str, Any]:
         """Create deeply nested payload for testing parsing limits."""
@@ -873,13 +873,13 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Rate limiting validation in staging
         STATUS: Should PASS - Rate limiting critical for system stability and security
         """
-        self.__class__.logger.info("⏱️ Testing rate limiting and abuse prevention")
+        self.logger.info("⏱️ Testing rate limiting and abuse prevention")
 
         # Test normal rate (should succeed)
         normal_rate_requests = 3
         normal_rate_results = []
 
-        self.__class__.logger.info(f"Testing normal rate: {normal_rate_requests} requests with delays...")
+        self.logger.info(f"Testing normal rate: {normal_rate_requests} requests with delays...")
 
         for i in range(normal_rate_requests):
             result = await self._attempt_agent_request_with_auth(
@@ -893,13 +893,13 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
 
         normal_success_rate = sum(1 for r in normal_rate_results if r["success"]) / len(normal_rate_results)
 
-        self.__class__.logger.info(f"Normal rate success: {normal_success_rate:.1%}")
+        self.logger.info(f"Normal rate success: {normal_success_rate:.1%}")
 
         # Test rapid rate (may trigger rate limiting)
         rapid_rate_requests = 10
         rapid_rate_results = []
 
-        self.__class__.logger.info(f"Testing rapid rate: {rapid_rate_requests} requests without delays...")
+        self.logger.info(f"Testing rapid rate: {rapid_rate_requests} requests without delays...")
 
         # Send requests rapidly
         rapid_tasks = [
@@ -917,10 +917,10 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
 
         rapid_success_rate = len(successful_rapid) / rapid_rate_requests
 
-        self.__class__.logger.info(f"📊 Rate Limiting Test Results:")
-        self.__class__.logger.info(f"   Normal Rate Success: {normal_success_rate:.1%}")
-        self.__class__.logger.info(f"   Rapid Rate Success: {rapid_success_rate:.1%}")
-        self.__class__.logger.info(f"   Rapid Requests Blocked: {len(failed_rapid)}/{rapid_rate_requests}")
+        self.logger.info(f"📊 Rate Limiting Test Results:")
+        self.logger.info(f"   Normal Rate Success: {normal_success_rate:.1%}")
+        self.logger.info(f"   Rapid Rate Success: {rapid_success_rate:.1%}")
+        self.logger.info(f"   Rapid Requests Blocked: {len(failed_rapid)}/{rapid_rate_requests}")
 
         # Validate rate limiting behavior
 
@@ -944,10 +944,10 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
 
                 # Rapid requests should be slower due to rate limiting or load
                 # This is acceptable behavior but we log it
-                self.__class__.logger.info(f"   Rapid requests avg time: {avg_rapid_time:.1f}s")
+                self.logger.info(f"   Rapid requests avg time: {avg_rapid_time:.1f}s")
 
         # Test rate limit recovery after cool-down
-        self.__class__.logger.info("Testing rate limit recovery after cool-down...")
+        self.logger.info("Testing rate limit recovery after cool-down...")
         await asyncio.sleep(10)  # Cool-down period
 
         recovery_result = await self._attempt_agent_request_with_auth(
@@ -959,7 +959,7 @@ class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
             f"Recovery result: {recovery_result}"
         )
 
-        self.__class__.logger.info("✅ Rate limiting and abuse prevention validated")
+        self.logger.info("✅ Rate limiting and abuse prevention validated")
 
 
 if __name__ == "__main__":

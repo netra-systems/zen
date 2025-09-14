@@ -61,7 +61,7 @@ class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """Setup staging environment for concurrent user testing."""
 
         # Initialize staging configuration
@@ -92,14 +92,14 @@ class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
 
         cls.logger.info(f"Concurrent user scenarios E2E tests initialized for staging")
 
-    def setUp(self):
+    def setup_method(self, method):
         """Setup for each test method."""
-        super().setUp()
+        super().setup_method(method)
 
         # Generate test-specific context for isolation validation
         self.test_session_id = f"concurrent_test_{int(time.time())}"
 
-        self.__class__.logger.info(f"Concurrent user test setup - session: {self.test_session_id}")
+        self.logger.info(f"Concurrent user test setup - session: {self.test_session_id}")
 
     async def _create_isolated_user_context(self, user_index: int) -> Dict[str, Any]:
         """Create completely isolated user context for concurrent testing."""
@@ -197,7 +197,7 @@ class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
                 except asyncio.TimeoutError:
                     continue
                 except json.JSONDecodeError as e:
-                    self.__class__.logger.warning(f"JSON decode error for user {user_context['user_index']}: {e}")
+                    self.logger.warning(f"JSON decode error for user {user_context['user_index']}: {e}")
                     continue
 
             await websocket.close()
@@ -261,7 +261,7 @@ class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Multiple concurrent staging connections
         STATUS: Should PASS - Basic concurrent isolation is critical
         """
-        self.__class__.logger.info("🏗️ Testing basic concurrent user isolation (3 users)")
+        self.logger.info("🏗️ Testing basic concurrent user isolation (3 users)")
 
         concurrent_users = 3
 
@@ -298,11 +298,11 @@ class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
         failed_results = [r for r in results if isinstance(r, dict) and not r.get("success")]
         exception_results = [r for r in results if isinstance(r, Exception)]
 
-        self.__class__.logger.info(f"📊 Concurrent Execution Results:")
-        self.__class__.logger.info(f"   Successful: {len(successful_results)}/{concurrent_users}")
-        self.__class__.logger.info(f"   Failed: {len(failed_results)}")
-        self.__class__.logger.info(f"   Exceptions: {len(exception_results)}")
-        self.__class__.logger.info(f"   Total Time: {total_concurrent_time:.2f}s")
+        self.logger.info(f"📊 Concurrent Execution Results:")
+        self.logger.info(f"   Successful: {len(successful_results)}/{concurrent_users}")
+        self.logger.info(f"   Failed: {len(failed_results)}")
+        self.logger.info(f"   Exceptions: {len(exception_results)}")
+        self.logger.info(f"   Total Time: {total_concurrent_time:.2f}s")
 
         # All users should succeed
         assert len(successful_results) == concurrent_users, (
@@ -360,11 +360,11 @@ class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
                 f"User {i} response too short: {result['response_length']} chars"
             )
 
-        self.__class__.logger.info(f"✅ Basic concurrent user isolation validated:")
-        self.__class__.logger.info(f"   Response Times: {[f'{t:.1f}s' for t in response_times]}")
-        self.__class__.logger.info(f"   Average: {avg_response_time:.1f}s, Max: {max_response_time:.1f}s")
+        self.logger.info(f"✅ Basic concurrent user isolation validated:")
+        self.logger.info(f"   Response Times: {[f'{t:.1f}s' for t in response_times]}")
+        self.logger.info(f"   Average: {avg_response_time:.1f}s, Max: {max_response_time:.1f}s")
 
-        self.__class__.logger.info("🏗️ Basic concurrent user isolation test complete")
+        self.logger.info("🏗️ Basic concurrent user isolation test complete")
 
     async def test_high_concurrency_user_load(self):
         """
@@ -384,7 +384,7 @@ class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - High concurrent load testing in staging
         STATUS: Should PASS - Scalability essential for enterprise adoption
         """
-        self.__class__.logger.info("🚀 Testing high concurrency user load (5 users)")
+        self.logger.info("🚀 Testing high concurrency user load (5 users)")
 
         concurrent_users = 5
 
@@ -439,12 +439,12 @@ class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
         failed_results = [r for r in results if isinstance(r, dict) and not r.get("success")]
         exception_results = [r for r in results if isinstance(r, Exception)]
 
-        self.__class__.logger.info(f"📊 High Concurrency Results:")
-        self.__class__.logger.info(f"   Users: {concurrent_users}")
-        self.__class__.logger.info(f"   Successful: {len(successful_results)}")
-        self.__class__.logger.info(f"   Failed: {len(failed_results)}")
-        self.__class__.logger.info(f"   Exceptions: {len(exception_results)}")
-        self.__class__.logger.info(f"   Total Execution: {total_execution_time:.2f}s")
+        self.logger.info(f"📊 High Concurrency Results:")
+        self.logger.info(f"   Users: {concurrent_users}")
+        self.logger.info(f"   Successful: {len(successful_results)}")
+        self.logger.info(f"   Failed: {len(failed_results)}")
+        self.logger.info(f"   Exceptions: {len(exception_results)}")
+        self.logger.info(f"   Total Execution: {total_execution_time:.2f}s")
 
         # At least 80% of high concurrent users should succeed
         success_rate = len(successful_results) / concurrent_users
@@ -473,10 +473,10 @@ class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
             max_response_time = max(response_times)
             min_response_time = min(response_times)
 
-            self.__class__.logger.info(f"📈 High Load Performance:")
-            self.__class__.logger.info(f"   Average Response: {avg_response_time:.1f}s")
-            self.__class__.logger.info(f"   Min Response: {min_response_time:.1f}s")
-            self.__class__.logger.info(f"   Max Response: {max_response_time:.1f}s")
+            self.logger.info(f"📈 High Load Performance:")
+            self.logger.info(f"   Average Response: {avg_response_time:.1f}s")
+            self.logger.info(f"   Min Response: {min_response_time:.1f}s")
+            self.logger.info(f"   Max Response: {max_response_time:.1f}s")
 
             # Under high load, performance should remain reasonable
             assert avg_response_time < 75.0, (
@@ -494,11 +494,11 @@ class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
             f"Total events: {total_events}, Users: {len(successful_results)}"
         )
 
-        self.__class__.logger.info(f"✅ High concurrency load test validated:")
-        self.__class__.logger.info(f"   Success Rate: {success_rate:.1%}")
-        self.__class__.logger.info(f"   Performance: Avg {avg_response_time:.1f}s, Max {max_response_time:.1f}s")
+        self.logger.info(f"✅ High concurrency load test validated:")
+        self.logger.info(f"   Success Rate: {success_rate:.1%}")
+        self.logger.info(f"   Performance: Avg {avg_response_time:.1f}s, Max {max_response_time:.1f}s")
 
-        self.__class__.logger.info("🚀 High concurrency user load test complete")
+        self.logger.info("🚀 High concurrency user load test complete")
 
     async def test_concurrent_agent_type_isolation(self):
         """
@@ -518,7 +518,7 @@ class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Multi-agent concurrent execution in staging
         STATUS: Should PASS - Agent isolation critical for multi-user system
         """
-        self.__class__.logger.info("🤖 Testing concurrent agent type isolation")
+        self.logger.info("🤖 Testing concurrent agent type isolation")
 
         # Define agent types and corresponding test scenarios
         agent_scenarios = [
@@ -576,11 +576,11 @@ class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
         failed_results = [r for r in results if isinstance(r, dict) and not r.get("success")]
         exception_results = [r for r in results if isinstance(r, Exception)]
 
-        self.__class__.logger.info(f"📊 Agent Type Isolation Results:")
-        self.__class__.logger.info(f"   Agent Types: {len(agent_scenarios)}")
-        self.__class__.logger.info(f"   Successful: {len(successful_results)}")
-        self.__class__.logger.info(f"   Failed: {len(failed_results)}")
-        self.__class__.logger.info(f"   Total Time: {total_time:.2f}s")
+        self.logger.info(f"📊 Agent Type Isolation Results:")
+        self.logger.info(f"   Agent Types: {len(agent_scenarios)}")
+        self.logger.info(f"   Successful: {len(successful_results)}")
+        self.logger.info(f"   Failed: {len(failed_results)}")
+        self.logger.info(f"   Total Time: {total_time:.2f}s")
 
         # All agent types should execute successfully
         assert len(successful_results) == len(agent_scenarios), (
@@ -656,12 +656,12 @@ class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
                 f"Got {critical_events}: {result['event_types']}"
             )
 
-        self.__class__.logger.info(f"✅ Concurrent agent type isolation validated:")
-        self.__class__.logger.info(f"   Agent Types: {[s['agent_type'] for s in agent_scenarios]}")
-        self.__class__.logger.info(f"   Response Times: {[f'{t:.1f}s' for t in response_times]}")
-        self.__class__.logger.info(f"   Average Time: {avg_response_time:.1f}s")
+        self.logger.info(f"✅ Concurrent agent type isolation validated:")
+        self.logger.info(f"   Agent Types: {[s['agent_type'] for s in agent_scenarios]}")
+        self.logger.info(f"   Response Times: {[f'{t:.1f}s' for t in response_times]}")
+        self.logger.info(f"   Average Time: {avg_response_time:.1f}s")
 
-        self.__class__.logger.info("🤖 Concurrent agent type isolation test complete")
+        self.logger.info("🤖 Concurrent agent type isolation test complete")
 
 
 if __name__ == "__main__":

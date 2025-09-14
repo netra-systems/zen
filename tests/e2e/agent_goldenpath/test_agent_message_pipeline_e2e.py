@@ -58,7 +58,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """Setup staging environment configuration and dependencies."""
         # Initialize staging configuration
         cls.staging_config = get_staging_config()
@@ -80,9 +80,9 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         
         cls.logger.info(f"Agent message pipeline e2e tests initialized for staging")
 
-    def setUp(self):
+    def setup_method(self, method):
         """Setup for each test method."""
-        super().setUp()
+        super().setup_method(method)
         
         # Generate test-specific user context
         self.thread_id = f"message_pipeline_test_{int(time.time())}"
@@ -95,7 +95,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
             exp_minutes=60
         )
         
-        self.__class__.logger.info(f"Test setup complete - thread_id: {self.thread_id}")
+        self.logger.info(f"Test setup complete - thread_id: {self.thread_id}")
 
     async def test_complete_user_message_to_agent_response_flow(self):
         """
@@ -134,7 +134,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
                 exp_minutes=60
             )
 
-        self.__class__.logger.info("🎯 Testing complete user message → agent response pipeline")
+        self.logger.info("🎯 Testing complete user message → agent response pipeline")
         
         try:
             # Step 1: Establish WebSocket connection to staging
@@ -166,7 +166,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
                 "success": True
             })
             
-            self.__class__.logger.info(f"✅ WebSocket connected to staging in {connection_time:.2f}s")
+            self.logger.info(f"✅ WebSocket connected to staging in {connection_time:.2f}s")
             
             # Step 2: Send realistic user message
             user_message = {
@@ -199,7 +199,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
                 "success": True
             })
             
-            self.__class__.logger.info(f"📤 User message sent ({len(user_message['message'])} chars)")
+            self.logger.info(f"📤 User message sent ({len(user_message['message'])} chars)")
             
             # Step 3: Collect all agent processing events
             agent_events = []
@@ -226,7 +226,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
                     event_type = event.get("type", "unknown")
                     received_events.add(event_type)
                     
-                    self.__class__.logger.info(f"📨 Received event: {event_type}")
+                    self.logger.info(f"📨 Received event: {event_type}")
                     
                     # Check for agent completion
                     if event_type == "agent_completed":
@@ -241,7 +241,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
                     # Log timeout and continue - may be normal for slower processing
                     continue
                 except json.JSONDecodeError as e:
-                    self.__class__.logger.warning(f"Failed to parse WebSocket message: {e}")
+                    self.logger.warning(f"Failed to parse WebSocket message: {e}")
                     continue
             
             event_collection_time = time.time() - event_collection_start
@@ -313,15 +313,15 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
             })
             
             # Log comprehensive results
-            self.__class__.logger.info("🎉 GOLDEN PATH MESSAGE PIPELINE SUCCESS")
-            self.__class__.logger.info(f"📊 Pipeline Metrics:")
-            self.__class__.logger.info(f"   Total Duration: {total_pipeline_time:.1f}s")
-            self.__class__.logger.info(f"   WebSocket Connection: {connection_time:.2f}s")
-            self.__class__.logger.info(f"   Agent Processing: {event_collection_time:.1f}s")
-            self.__class__.logger.info(f"   Events Received: {len(agent_events)}")
-            self.__class__.logger.info(f"   Event Types: {received_events}")
-            self.__class__.logger.info(f"   Response Length: {len(response_text)} characters")
-            self.__class__.logger.info(f"   Pipeline Events: {len(pipeline_events)}")
+            self.logger.info("🎉 GOLDEN PATH MESSAGE PIPELINE SUCCESS")
+            self.logger.info(f"📊 Pipeline Metrics:")
+            self.logger.info(f"   Total Duration: {total_pipeline_time:.1f}s")
+            self.logger.info(f"   WebSocket Connection: {connection_time:.2f}s")
+            self.logger.info(f"   Agent Processing: {event_collection_time:.1f}s")
+            self.logger.info(f"   Events Received: {len(agent_events)}")
+            self.logger.info(f"   Event Types: {received_events}")
+            self.logger.info(f"   Response Length: {len(response_text)} characters")
+            self.logger.info(f"   Pipeline Events: {len(pipeline_events)}")
             
             # Business value assertions
             assert total_pipeline_time < 120.0, f"Pipeline too slow: {total_pipeline_time:.1f}s (max 120s)"
@@ -330,10 +330,10 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         except Exception as e:
             total_time = time.time() - pipeline_start_time
             
-            self.__class__.logger.error(f"❌ GOLDEN PATH MESSAGE PIPELINE FAILED")
-            self.__class__.logger.error(f"   Error: {str(e)}")
-            self.__class__.logger.error(f"   Duration: {total_time:.1f}s")
-            self.__class__.logger.error(f"   Events collected: {len(pipeline_events)}")
+            self.logger.error(f"❌ GOLDEN PATH MESSAGE PIPELINE FAILED")
+            self.logger.error(f"   Error: {str(e)}")
+            self.logger.error(f"   Duration: {total_time:.1f}s")
+            self.logger.error(f"   Events collected: {len(pipeline_events)}")
             
             # Fail with detailed context for debugging
             raise AssertionError(
@@ -358,7 +358,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Staging GCP environment
         STATUS: Should PASS - Error handling is critical for user experience
         """
-        self.__class__.logger.info("🛡️ Testing agent error handling and recovery")
+        self.logger.info("🛡️ Testing agent error handling and recovery")
         
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False
@@ -416,7 +416,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         try:
             for scenario in error_scenarios:
                 scenario_start = time.time()
-                self.__class__.logger.info(f"Testing error scenario: {scenario['name']}")
+                self.logger.info(f"Testing error scenario: {scenario['name']}")
                 
                 # Send error-inducing message
                 await websocket.send(json.dumps(scenario["message"]))
@@ -437,7 +437,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
                         # Check if we received expected error
                         if "error" in event_type.lower():
                             received_error = True
-                            self.__class__.logger.info(f"✅ Received expected error: {event_type}")
+                            self.logger.info(f"✅ Received expected error: {event_type}")
                             break
                             
                     except asyncio.TimeoutError:
@@ -468,9 +468,9 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
                         f"System should recover after {scenario['name']} error"
                     )
                     
-                    self.__class__.logger.info(f"✅ System recovered successfully after {scenario['name']}")
+                    self.logger.info(f"✅ System recovered successfully after {scenario['name']}")
         
-            self.__class__.logger.info("🛡️ All error handling scenarios passed")
+            self.logger.info("🛡️ All error handling scenarios passed")
             
         finally:
             await websocket.close()
@@ -492,7 +492,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Staging GCP with real isolation
         STATUS: Should PASS - Multi-user isolation is critical for platform
         """
-        self.__class__.logger.info("👥 Testing concurrent user message processing")
+        self.logger.info("👥 Testing concurrent user message processing")
         
         # Create multiple test users
         concurrent_users = []
@@ -599,11 +599,11 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         failed_users = [r for r in results if isinstance(r, dict) and not r["success"]]
         error_users = [r for r in results if isinstance(r, Exception)]
         
-        self.__class__.logger.info(f"👥 Concurrent processing results:")
-        self.__class__.logger.info(f"   Total time: {total_concurrent_time:.1f}s")
-        self.__class__.logger.info(f"   Successful users: {len(successful_users)}/{user_count}")
-        self.__class__.logger.info(f"   Failed users: {len(failed_users)}")
-        self.__class__.logger.info(f"   Error users: {len(error_users)}")
+        self.logger.info(f"👥 Concurrent processing results:")
+        self.logger.info(f"   Total time: {total_concurrent_time:.1f}s")
+        self.logger.info(f"   Successful users: {len(successful_users)}/{user_count}")
+        self.logger.info(f"   Failed users: {len(failed_users)}")
+        self.logger.info(f"   Error users: {len(error_users)}")
         
         # Validate concurrent processing
         success_rate = len(successful_users) / user_count
@@ -622,11 +622,11 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
             assert avg_duration < 90.0, f"Average response time too slow: {avg_duration:.1f}s"
             assert max_duration < 150.0, f"Max response time too slow: {max_duration:.1f}s"
             
-            self.__class__.logger.info(f"📊 Performance metrics:")
-            self.__class__.logger.info(f"   Average duration: {avg_duration:.1f}s")
-            self.__class__.logger.info(f"   Max duration: {max_duration:.1f}s")
+            self.logger.info(f"📊 Performance metrics:")
+            self.logger.info(f"   Average duration: {avg_duration:.1f}s")
+            self.logger.info(f"   Max duration: {max_duration:.1f}s")
         
-        self.__class__.logger.info("✅ Concurrent user processing validation complete")
+        self.logger.info("✅ Concurrent user processing validation complete")
 
     async def test_large_message_handling(self):
         """
@@ -645,7 +645,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Staging GCP message processing
         STATUS: Should PASS - Message size flexibility is important for UX
         """
-        self.__class__.logger.info("📏 Testing large message handling capabilities")
+        self.logger.info("📏 Testing large message handling capabilities")
         
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False
@@ -720,7 +720,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
                 case_start = time.time()
                 message_length = len(test_case["content"])
                 
-                self.__class__.logger.info(f"Testing {test_case['name']}: {message_length} characters")
+                self.logger.info(f"Testing {test_case['name']}: {message_length} characters")
                 
                 # Send test message
                 message = {
@@ -777,10 +777,10 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
                     f"{len(response_content)} chars (expected ≥{expected_min_response_length})"
                 )
                 
-                self.__class__.logger.info(f"✅ {test_case['name']}: {case_duration:.1f}s, "
+                self.logger.info(f"✅ {test_case['name']}: {case_duration:.1f}s, "
                                f"response: {len(response_content)} chars")
             
-            self.__class__.logger.info("📏 Large message handling tests completed successfully")
+            self.logger.info("📏 Large message handling tests completed successfully")
         
         finally:
             await websocket.close()

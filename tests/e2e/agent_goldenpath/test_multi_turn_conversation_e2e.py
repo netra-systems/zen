@@ -59,7 +59,7 @@ class TestMultiTurnConversationE2E(SSotAsyncTestCase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """Setup staging environment configuration and dependencies."""
 
         # Initialize staging configuration
@@ -85,9 +85,9 @@ class TestMultiTurnConversationE2E(SSotAsyncTestCase):
 
         cls.logger.info(f"Multi-turn conversation E2E tests initialized for staging")
 
-    def setUp(self):
+    def setup_method(self, method):
         """Setup for each test method."""
-        super().setUp()
+        super().setup_method(method)
 
         # Generate persistent conversation context
         self.conversation_id = str(uuid.uuid4())
@@ -101,7 +101,7 @@ class TestMultiTurnConversationE2E(SSotAsyncTestCase):
             exp_minutes=120  # Longer for multi-turn tests
         )
 
-        self.__class__.logger.info(f"Conversation test setup - conversation_id: {self.conversation_id}")
+        self.logger.info(f"Conversation test setup - conversation_id: {self.conversation_id}")
 
     async def _establish_persistent_websocket_connection(self) -> websockets.WebSocketServerProtocol:
         """Establish persistent WebSocket connection for multi-turn conversation."""

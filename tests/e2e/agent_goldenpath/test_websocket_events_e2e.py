@@ -65,7 +65,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """Setup staging environment for WebSocket event testing."""
 
         # Initialize staging configuration
@@ -100,9 +100,9 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
         
         cls.logger.info(f"WebSocket events e2e tests initialized for staging")
 
-    def setUp(self):
+    def setup_method(self, method):
         """Setup for each test method."""
-        super().setUp()
+        super().setup_method(method)
         
         # Generate test-specific context
         self.thread_id = f"ws_events_test_{int(time.time())}"
@@ -115,7 +115,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
             exp_minutes=60
         )
         
-        self.__class__.logger.info(f"WebSocket events test setup - thread_id: {self.thread_id}")
+        self.logger.info(f"WebSocket events test setup - thread_id: {self.thread_id}")
 
     async def test_all_5_critical_events_delivered_for_agent_request(self):
         """
@@ -154,7 +154,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                 exp_minutes=60
             )
 
-        self.__class__.logger.info("🔥 Testing ALL 5 critical WebSocket events delivery")
+        self.logger.info("🔥 Testing ALL 5 critical WebSocket events delivery")
         
         # Track event delivery metrics
         event_metrics = {
@@ -189,7 +189,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
             )
             
             connection_time = time.time() - connection_start
-            self.__class__.logger.info(f"✅ WebSocket connected in {connection_time:.2f}s")
+            self.logger.info(f"✅ WebSocket connected in {connection_time:.2f}s")
             
             # Send agent request that should trigger ALL 5 events
             test_message = {
@@ -213,7 +213,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
             message_send_time = time.time()
             await websocket.send(json.dumps(test_message))
             
-            self.__class__.logger.info("📤 Agent request sent - collecting critical events...")
+            self.logger.info("📤 Agent request sent - collecting critical events...")
             
             # Collect events with comprehensive tracking
             events_timeout = 120.0  # Allow time for complete agent processing with tools
@@ -239,14 +239,14 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                         time_since_request = event_received_time - message_send_time
                         event_metrics["event_timing"][event_type] = time_since_request
                         
-                        self.__class__.logger.info(
+                        self.logger.info(
                             f"📨 CRITICAL EVENT: {event_type} "
                             f"(+{time_since_request:.1f}s)"
                         )
                     
                     # Check for completion
                     if event_type == "agent_completed":
-                        self.__class__.logger.info("🏁 Agent completion event received")
+                        self.logger.info("🏁 Agent completion event received")
                         break
                     
                     # Check for error events
@@ -256,14 +256,14 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                 except asyncio.TimeoutError:
                     # Log timeout and continue - but record the gap
                     current_time = time.time()
-                    self.__class__.logger.warning(
+                    self.logger.warning(
                         f"⏰ Event timeout - no event for 15s "
                         f"(total elapsed: {current_time - message_send_time:.1f}s)"
                     )
                     continue
                     
                 except json.JSONDecodeError as e:
-                    self.__class__.logger.error(f"❌ Failed to parse WebSocket event: {e}")
+                    self.logger.error(f"❌ Failed to parse WebSocket event: {e}")
                     continue
             
             await websocket.close()
@@ -346,14 +346,14 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                     )
             
             # LOG COMPREHENSIVE SUCCESS METRICS
-            self.__class__.logger.info("🎉 ALL 5 CRITICAL WEBSOCKET EVENTS DELIVERED SUCCESSFULLY")
-            self.__class__.logger.info(f"📊 Event Delivery Metrics:")
-            self.__class__.logger.info(f"   Total Events: {len(event_metrics['events_received'])}")
-            self.__class__.logger.info(f"   Critical Events: {len(received_critical_events)}/5")
-            self.__class__.logger.info(f"   Event Types: {sorted(event_metrics['event_types'])}")
-            self.__class__.logger.info(f"   Total Duration: {total_events_time:.1f}s")
-            self.__class__.logger.info(f"   Event Timing: {event_metrics['event_timing']}")
-            self.__class__.logger.info(f"   Sequence: {event_metrics['sequence_order'][:15]}...")  # First 15 events
+            self.logger.info("🎉 ALL 5 CRITICAL WEBSOCKET EVENTS DELIVERED SUCCESSFULLY")
+            self.logger.info(f"📊 Event Delivery Metrics:")
+            self.logger.info(f"   Total Events: {len(event_metrics['events_received'])}")
+            self.logger.info(f"   Critical Events: {len(received_critical_events)}/5")
+            self.logger.info(f"   Event Types: {sorted(event_metrics['event_types'])}")
+            self.logger.info(f"   Total Duration: {total_events_time:.1f}s")
+            self.logger.info(f"   Event Timing: {event_metrics['event_timing']}")
+            self.logger.info(f"   Sequence: {event_metrics['sequence_order'][:15]}...")  # First 15 events
             
             # Business value validation
             assert len(event_metrics["events_received"]) >= 5, (
@@ -367,12 +367,12 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
         except Exception as e:
             total_time = time.time() - events_start_time
             
-            self.__class__.logger.error("❌ CRITICAL WEBSOCKET EVENTS FAILURE")
-            self.__class__.logger.error(f"   Error: {str(e)}")
-            self.__class__.logger.error(f"   Duration: {total_time:.1f}s")
-            self.__class__.logger.error(f"   Events Received: {len(event_metrics.get('events_received', []))}")
-            self.__class__.logger.error(f"   Critical Events: {event_metrics.get('event_types', set())}")
-            self.__class__.logger.error(f"   Missing Events: {event_metrics.get('missing_events', [])}")
+            self.logger.error("❌ CRITICAL WEBSOCKET EVENTS FAILURE")
+            self.logger.error(f"   Error: {str(e)}")
+            self.logger.error(f"   Duration: {total_time:.1f}s")
+            self.logger.error(f"   Events Received: {len(event_metrics.get('events_received', []))}")
+            self.logger.error(f"   Critical Events: {event_metrics.get('event_types', set())}")
+            self.logger.error(f"   Missing Events: {event_metrics.get('missing_events', [])}")
             
             raise AssertionError(
                 f"Critical WebSocket events test failed after {total_time:.1f}s: {e}. "
@@ -396,7 +396,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Staging WebSocket performance measurement
         STATUS: Should PASS - Good timing is essential for user experience
         """
-        self.__class__.logger.info("⏱️ Testing WebSocket event timing and performance")
+        self.logger.info("⏱️ Testing WebSocket event timing and performance")
         
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False
@@ -426,7 +426,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
         
         for test_scenario in timing_tests:
             scenario_start = time.time()
-            self.__class__.logger.info(f"Testing timing scenario: {test_scenario['name']}")
+            self.logger.info(f"Testing timing scenario: {test_scenario['name']}")
             
             websocket = await asyncio.wait_for(
                 websockets.connect(
@@ -535,17 +535,17 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                     f"(expected ≥3 events)"
                 )
                 
-                self.__class__.logger.info(f"✅ {test_scenario['name']} timing validation passed:")
-                self.__class__.logger.info(f"   First event: {timing_data['first_event_time']:.1f}s")
-                self.__class__.logger.info(f"   Total duration: {timing_data['last_event_time']:.1f}s") 
-                self.__class__.logger.info(f"   Total events: {timing_data['total_events']}")
-                self.__class__.logger.info(f"   Average inter-event time: "
+                self.logger.info(f"✅ {test_scenario['name']} timing validation passed:")
+                self.logger.info(f"   First event: {timing_data['first_event_time']:.1f}s")
+                self.logger.info(f"   Total duration: {timing_data['last_event_time']:.1f}s") 
+                self.logger.info(f"   Total events: {timing_data['total_events']}")
+                self.logger.info(f"   Average inter-event time: "
                                f"{sum(timing_data['inter_event_times'])/len(timing_data['inter_event_times']):.1f}s")
             
             finally:
                 await websocket.close()
         
-        self.__class__.logger.info("⏱️ WebSocket event timing and performance validation complete")
+        self.logger.info("⏱️ WebSocket event timing and performance validation complete")
 
     async def test_websocket_event_resilience_and_recovery(self):
         """
@@ -564,14 +564,14 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Staging resilience testing
         STATUS: Should PASS - Resilience is critical for production reliability
         """
-        self.__class__.logger.info("🛡️ Testing WebSocket event resilience and recovery")
+        self.logger.info("🛡️ Testing WebSocket event resilience and recovery")
         
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False
         ssl_context.verify_mode = ssl.CERT_NONE
         
         # Test 1: Connection recovery after interruption
-        self.__class__.logger.info("Testing connection recovery after interruption")
+        self.logger.info("Testing connection recovery after interruption")
         
         websocket = await asyncio.wait_for(
             websockets.connect(
@@ -611,7 +611,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
             # Simulate connection interruption by closing and reconnecting
             await websocket.close()
             
-            self.__class__.logger.info("Connection closed - attempting recovery...")
+            self.logger.info("Connection closed - attempting recovery...")
             await asyncio.sleep(2)  # Brief pause to simulate network issue
             
             # Reconnect
@@ -664,13 +664,13 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                 f"Should receive agent_started after recovery, got: {recovery_event_types}"
             )
             
-            self.__class__.logger.info(f"✅ Connection recovery successful: {len(recovery_events)} events")
+            self.logger.info(f"✅ Connection recovery successful: {len(recovery_events)} events")
         
         finally:
             await websocket.close()
         
         # Test 2: Multiple concurrent event streams
-        self.__class__.logger.info("Testing multiple concurrent event streams")
+        self.logger.info("Testing multiple concurrent event streams")
         
         concurrent_streams = 3
         stream_tasks = []
@@ -759,9 +759,9 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                 f"Stream {stream['stream_id']} missing agent_started event"
             )
         
-        self.__class__.logger.info(f"✅ Concurrent streams test: {len(successful_streams)}/{concurrent_streams} successful")
+        self.logger.info(f"✅ Concurrent streams test: {len(successful_streams)}/{concurrent_streams} successful")
         
-        self.__class__.logger.info("🛡️ WebSocket event resilience and recovery tests complete")
+        self.logger.info("🛡️ WebSocket event resilience and recovery tests complete")
 
     async def test_event_data_structure_and_content_validation(self):
         """
@@ -781,7 +781,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Staging data structure validation  
         STATUS: Should PASS - Consistent data structures are essential for frontend
         """
-        self.__class__.logger.info("📋 Testing event data structure and content validation")
+        self.logger.info("📋 Testing event data structure and content validation")
         
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False
@@ -859,7 +859,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                     # Timestamp or timing information should be present
                     has_timing_info = any(key in str(event).lower() for key in ["time", "timestamp", "duration"])
                     if not has_timing_info:
-                        self.__class__.logger.warning(f"Event '{event_type}' may lack timing information")
+                        self.logger.warning(f"Event '{event_type}' may lack timing information")
                     
                     # Event-specific validations
                     if event_type == "agent_started":
@@ -876,7 +876,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                         ])
                         # Note: This is a soft requirement - log warning if missing
                         if not has_thinking_info:
-                            self.__class__.logger.warning(f"agent_thinking event may lack thinking content: {event}")
+                            self.logger.warning(f"agent_thinking event may lack thinking content: {event}")
                     
                     elif event_type == "tool_executing":
                         # Should indicate which tool is being executed
@@ -910,14 +910,14 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                 f"Should find at least 2 critical events for validation, got: {critical_events_found}"
             )
             
-            self.__class__.logger.info(f"📋 Data structure validation passed:")
-            self.__class__.logger.info(f"   Total events analyzed: {len(events_for_validation)}")
-            self.__class__.logger.info(f"   Critical events validated: {critical_events_found}")
+            self.logger.info(f"📋 Data structure validation passed:")
+            self.logger.info(f"   Total events analyzed: {len(events_for_validation)}")
+            self.logger.info(f"   Critical events validated: {critical_events_found}")
             
         finally:
             await websocket.close()
         
-        self.__class__.logger.info("📋 Event data structure and content validation complete")
+        self.logger.info("📋 Event data structure and content validation complete")
 
 
 if __name__ == "__main__":

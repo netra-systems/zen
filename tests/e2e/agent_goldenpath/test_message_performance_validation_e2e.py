@@ -60,7 +60,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """Setup staging environment for performance testing."""
 
         # Initialize staging configuration
@@ -101,9 +101,9 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
 
         cls.logger.info(f"Message performance validation E2E tests initialized for staging")
 
-    def setUp(self):
+    def setup_method(self, method):
         """Setup for each test method."""
-        super().setUp()
+        super().setup_method(method)
 
         # Generate test-specific context
         self.performance_test_session = f"perf_test_{int(time.time())}"
@@ -120,7 +120,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
             exp_minutes=60
         )
 
-        self.__class__.logger.info(f"Performance test setup - session: {self.performance_test_session}")
+        self.logger.info(f"Performance test setup - session: {self.performance_test_session}")
 
     async def _establish_websocket_connection(self, headers_override: Dict[str, str] = None) -> websockets.WebSocketServerProtocol:
         """Establish WebSocket connection for performance testing."""
@@ -368,7 +368,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Performance measurement in staging
         STATUS: Should PASS - Simple query SLAs are fundamental business requirements
         """
-        self.__class__.logger.info("⚡ Testing simple query performance SLA compliance")
+        self.logger.info("⚡ Testing simple query performance SLA compliance")
 
         simple_queries = [
             "What are the top 3 ways to reduce AI API costs?",
@@ -381,7 +381,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
         performance_results = []
 
         for query in simple_queries:
-            self.__class__.logger.info(f"Testing query: {query[:50]}...")
+            self.logger.info(f"Testing query: {query[:50]}...")
 
             metrics = await self._measure_message_performance(
                 "triage_agent",  # Triage agent for simple queries
@@ -399,9 +399,9 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
             })
 
             # Log individual result
-            self.__class__.logger.info(f"   Response Time: {metrics.get('agent_completed_time', 0):.1f}s")
-            self.__class__.logger.info(f"   First Event: {metrics.get('first_event_time', 0):.1f}s")
-            self.__class__.logger.info(f"   Grade: {analysis['performance_grade']}")
+            self.logger.info(f"   Response Time: {metrics.get('agent_completed_time', 0):.1f}s")
+            self.logger.info(f"   First Event: {metrics.get('first_event_time', 0):.1f}s")
+            self.logger.info(f"   Grade: {analysis['performance_grade']}")
 
         # Aggregate performance analysis
         successful_queries = [r for r in performance_results if r["metrics"]["success"]]
@@ -409,12 +409,12 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
         first_event_times = [r["metrics"].get("first_event_time", float('inf')) for r in successful_queries]
         performance_grades = [r["analysis"]["performance_grade"] for r in performance_results]
 
-        self.__class__.logger.info(f"📊 Simple Query Performance Results:")
-        self.__class__.logger.info(f"   Successful Queries: {len(successful_queries)}/{len(simple_queries)}")
-        self.__class__.logger.info(f"   Avg Response Time: {statistics.mean(response_times):.1f}s")
-        self.__class__.logger.info(f"   Max Response Time: {max(response_times):.1f}s")
-        self.__class__.logger.info(f"   Avg First Event: {statistics.mean(first_event_times):.1f}s")
-        self.__class__.logger.info(f"   Performance Grades: {performance_grades}")
+        self.logger.info(f"📊 Simple Query Performance Results:")
+        self.logger.info(f"   Successful Queries: {len(successful_queries)}/{len(simple_queries)}")
+        self.logger.info(f"   Avg Response Time: {statistics.mean(response_times):.1f}s")
+        self.logger.info(f"   Max Response Time: {max(response_times):.1f}s")
+        self.logger.info(f"   Avg First Event: {statistics.mean(first_event_times):.1f}s")
+        self.logger.info(f"   Performance Grades: {performance_grades}")
 
         # Validate SLA compliance
         sla_violations = []
@@ -463,7 +463,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
             f"Failing grades: {failing_grades}, SLA violations: {sla_violations}"
         )
 
-        self.__class__.logger.info("✅ Simple query performance SLA compliance validated")
+        self.logger.info("✅ Simple query performance SLA compliance validated")
 
     async def test_complex_analysis_performance_sla(self):
         """
@@ -483,7 +483,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Complex processing performance in staging
         STATUS: Should PASS - Complex analysis SLAs critical for enterprise features
         """
-        self.__class__.logger.info("🧠 Testing complex analysis performance SLA compliance")
+        self.logger.info("🧠 Testing complex analysis performance SLA compliance")
 
         complex_analyses = [
             (
@@ -509,7 +509,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
         performance_results = []
 
         for agent_type, analysis_request in complex_analyses:
-            self.__class__.logger.info(f"Testing complex analysis with {agent_type}...")
+            self.logger.info(f"Testing complex analysis with {agent_type}...")
 
             metrics = await self._measure_message_performance(
                 agent_type,
@@ -527,21 +527,21 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
             })
 
             # Log individual result
-            self.__class__.logger.info(f"   Response Time: {metrics.get('agent_completed_time', 0):.1f}s")
-            self.__class__.logger.info(f"   Events: {len(metrics.get('events', []))}")
-            self.__class__.logger.info(f"   Grade: {analysis['performance_grade']}")
-            self.__class__.logger.info(f"   Response Length: {len(metrics.get('response_content', ''))} chars")
+            self.logger.info(f"   Response Time: {metrics.get('agent_completed_time', 0):.1f}s")
+            self.logger.info(f"   Events: {len(metrics.get('events', []))}")
+            self.logger.info(f"   Grade: {analysis['performance_grade']}")
+            self.logger.info(f"   Response Length: {len(metrics.get('response_content', ''))} chars")
 
         # Aggregate complex analysis performance
         successful_analyses = [r for r in performance_results if r["metrics"]["success"]]
         response_times = [r["metrics"].get("agent_completed_time", float('inf')) for r in successful_analyses]
         response_qualities = [len(r["metrics"].get("response_content", "")) for r in successful_analyses]
 
-        self.__class__.logger.info(f"📊 Complex Analysis Performance Results:")
-        self.__class__.logger.info(f"   Successful Analyses: {len(successful_analyses)}/{len(complex_analyses)}")
-        self.__class__.logger.info(f"   Avg Response Time: {statistics.mean(response_times):.1f}s")
-        self.__class__.logger.info(f"   Max Response Time: {max(response_times):.1f}s")
-        self.__class__.logger.info(f"   Avg Response Quality: {statistics.mean(response_qualities):.0f} chars")
+        self.logger.info(f"📊 Complex Analysis Performance Results:")
+        self.logger.info(f"   Successful Analyses: {len(successful_analyses)}/{len(complex_analyses)}")
+        self.logger.info(f"   Avg Response Time: {statistics.mean(response_times):.1f}s")
+        self.logger.info(f"   Max Response Time: {max(response_times):.1f}s")
+        self.logger.info(f"   Avg Response Quality: {statistics.mean(response_qualities):.0f} chars")
 
         # Validate complex analysis SLA compliance
 
@@ -580,7 +580,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
             f"Grades: {performance_grades}"
         )
 
-        self.__class__.logger.info("✅ Complex analysis performance SLA compliance validated")
+        self.logger.info("✅ Complex analysis performance SLA compliance validated")
 
     async def test_concurrent_load_performance_degradation(self):
         """
@@ -600,7 +600,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Concurrent load testing in staging
         STATUS: Should PASS - Concurrent performance critical for multi-user enterprise deployment
         """
-        self.__class__.logger.info("🚀 Testing concurrent load performance degradation")
+        self.logger.info("🚀 Testing concurrent load performance degradation")
 
         # Step 1: Establish baseline performance
         baseline_request = (
@@ -608,7 +608,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
             "across customer support, content generation, and data analysis use cases."
         )
 
-        self.__class__.logger.info("Establishing baseline performance...")
+        self.logger.info("Establishing baseline performance...")
         baseline_metrics = await self._measure_message_performance(
             "apex_optimizer_agent",
             baseline_request,
@@ -623,7 +623,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
             f"Baseline performance test should succeed. Error: {baseline_metrics.get('error')}"
         )
 
-        self.__class__.logger.info(f"Baseline Performance: {baseline_time:.1f}s")
+        self.logger.info(f"Baseline Performance: {baseline_time:.1f}s")
 
         # Step 2: Test concurrent load performance
         concurrent_users = 4
@@ -644,7 +644,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
             )
 
         # Execute concurrent requests
-        self.__class__.logger.info(f"Testing concurrent load with {concurrent_users} users...")
+        self.logger.info(f"Testing concurrent load with {concurrent_users} users...")
         concurrent_start = time.time()
 
         concurrent_tasks = [
@@ -673,15 +673,15 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
             r.get("agent_completed_time", 0) for r in successful_concurrent
         ]
 
-        self.__class__.logger.info(f"📊 Concurrent Load Performance Results:")
-        self.__class__.logger.info(f"   Concurrent Users: {concurrent_users}")
-        self.__class__.logger.info(f"   Successful: {len(successful_concurrent)}")
-        self.__class__.logger.info(f"   Failed: {len(failed_concurrent)}")
-        self.__class__.logger.info(f"   Exceptions: {len(exception_concurrent)}")
-        self.__class__.logger.info(f"   Total Execution: {total_concurrent_time:.1f}s")
+        self.logger.info(f"📊 Concurrent Load Performance Results:")
+        self.logger.info(f"   Concurrent Users: {concurrent_users}")
+        self.logger.info(f"   Successful: {len(successful_concurrent)}")
+        self.logger.info(f"   Failed: {len(failed_concurrent)}")
+        self.logger.info(f"   Exceptions: {len(exception_concurrent)}")
+        self.logger.info(f"   Total Execution: {total_concurrent_time:.1f}s")
         if concurrent_response_times:
-            self.__class__.logger.info(f"   Avg Response Time: {statistics.mean(concurrent_response_times):.1f}s")
-            self.__class__.logger.info(f"   Max Response Time: {max(concurrent_response_times):.1f}s")
+            self.logger.info(f"   Avg Response Time: {statistics.mean(concurrent_response_times):.1f}s")
+            self.logger.info(f"   Max Response Time: {max(concurrent_response_times):.1f}s")
 
         # Validate concurrent load performance
 
@@ -699,11 +699,11 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
 
             max_degradation = self.__class__.ENTERPRISE_SLAS["concurrent_user_degradation"]
 
-            self.__class__.logger.info(f"📈 Performance Degradation Analysis:")
-            self.__class__.logger.info(f"   Baseline: {baseline_time:.1f}s")
-            self.__class__.logger.info(f"   Concurrent Avg: {avg_concurrent_time:.1f}s")
-            self.__class__.logger.info(f"   Degradation: {performance_degradation:.1%}")
-            self.__class__.logger.info(f"   SLA Limit: {max_degradation:.1%}")
+            self.logger.info(f"📈 Performance Degradation Analysis:")
+            self.logger.info(f"   Baseline: {baseline_time:.1f}s")
+            self.logger.info(f"   Concurrent Avg: {avg_concurrent_time:.1f}s")
+            self.logger.info(f"   Degradation: {performance_degradation:.1%}")
+            self.logger.info(f"   SLA Limit: {max_degradation:.1%}")
 
             assert performance_degradation <= max_degradation, (
                 f"Performance degradation exceeds SLA limit: {performance_degradation:.1%} > {max_degradation:.1%}. "
@@ -724,7 +724,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
                 f"Maximum concurrent response time exceeds reasonable limit: {max_concurrent_time:.1f}s > {reasonable_limit:.1f}s"
             )
 
-        self.__class__.logger.info("✅ Concurrent load performance degradation validated")
+        self.logger.info("✅ Concurrent load performance degradation validated")
 
     async def test_websocket_event_timing_precision(self):
         """
@@ -744,7 +744,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - WebSocket timing precision in staging
         STATUS: Should PASS - Event timing precision critical for real-time UX
         """
-        self.__class__.logger.info("⏱️ Testing WebSocket event timing precision")
+        self.logger.info("⏱️ Testing WebSocket event timing precision")
 
         timing_test_requests = [
             {
@@ -764,7 +764,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
         timing_results = []
 
         for test_config in timing_test_requests:
-            self.__class__.logger.info(f"Testing event timing for {test_config['complexity']} request...")
+            self.logger.info(f"Testing event timing for {test_config['complexity']} request...")
 
             metrics = await self._measure_message_performance(
                 test_config["agent"],
@@ -811,10 +811,10 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
             timing_results.append(timing_analysis)
 
             # Log individual timing analysis
-            self.__class__.logger.info(f"   Events: {timing_analysis['total_events']}")
-            self.__class__.logger.info(f"   Avg Gap: {timing_analysis['timing_consistency'].get('avg_gap', 0):.1f}s")
-            self.__class__.logger.info(f"   Max Gap: {timing_analysis['timing_consistency'].get('max_gap', 0):.1f}s")
-            self.__class__.logger.info(f"   Issues: {len(timing_analysis['precision_issues'])}")
+            self.logger.info(f"   Events: {timing_analysis['total_events']}")
+            self.logger.info(f"   Avg Gap: {timing_analysis['timing_consistency'].get('avg_gap', 0):.1f}s")
+            self.logger.info(f"   Max Gap: {timing_analysis['timing_consistency'].get('max_gap', 0):.1f}s")
+            self.logger.info(f"   Issues: {len(timing_analysis['precision_issues'])}")
 
         # Validate WebSocket event timing precision
 
@@ -862,15 +862,15 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
             f"Should not have WebSocket timing precision issues: {all_precision_issues}"
         )
 
-        self.__class__.logger.info(f"📊 Event Timing Precision Summary:")
+        self.logger.info(f"📊 Event Timing Precision Summary:")
         for result in timing_results:
             complexity = result["test_config"]["complexity"]
             consistency = result["timing_consistency"]
-            self.__class__.logger.info(f"   {complexity.title()}: {consistency.get('avg_gap', 0):.1f}s avg, "
+            self.logger.info(f"   {complexity.title()}: {consistency.get('avg_gap', 0):.1f}s avg, "
                           f"{consistency.get('max_gap', 0):.1f}s max, "
                           f"{result['total_events']} events")
 
-        self.__class__.logger.info("✅ WebSocket event timing precision validated")
+        self.logger.info("✅ WebSocket event timing precision validated")
 
 
 if __name__ == "__main__":

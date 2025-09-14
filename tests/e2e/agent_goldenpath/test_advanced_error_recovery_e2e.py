@@ -59,7 +59,7 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """Setup staging environment for error recovery testing."""
 
         # Initialize staging configuration
@@ -90,9 +90,9 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
 
         cls.logger.info(f"Advanced error recovery E2E tests initialized for staging")
 
-    def setUp(self):
+    def setup_method(self, method):
         """Setup for each test method."""
-        super().setUp()
+        super().setup_method(method)
 
         # Generate test-specific context
         self.error_test_session = f"error_recovery_{int(time.time())}"
@@ -109,7 +109,7 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
             exp_minutes=60
         )
 
-        self.__class__.logger.info(f"Error recovery test setup - session: {self.error_test_session}")
+        self.logger.info(f"Error recovery test setup - session: {self.error_test_session}")
 
     async def _establish_websocket_connection(self, headers_override: Dict[str, str] = None) -> websockets.WebSocketServerProtocol:
         """Establish WebSocket connection with optional header overrides for error testing."""
@@ -223,7 +223,7 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Invalid agent handling in staging
         STATUS: Should PASS - Graceful error handling essential for UX
         """
-        self.__class__.logger.info("🚨 Testing invalid agent type error recovery")
+        self.logger.info("🚨 Testing invalid agent type error recovery")
 
         websocket = await self._establish_websocket_connection()
 
@@ -247,11 +247,11 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
                 websocket, invalid_request, timeout=30.0
             )
 
-            self.__class__.logger.info(f"📊 Invalid Agent Request Result:")
-            self.__class__.logger.info(f"   Success: {invalid_result['success']}")
-            self.__class__.logger.info(f"   Events: {invalid_result['events_count']}")
-            self.__class__.logger.info(f"   Error Events: {len(invalid_result['error_events'])}")
-            self.__class__.logger.info(f"   Time: {invalid_result['total_time']:.1f}s")
+            self.logger.info(f"📊 Invalid Agent Request Result:")
+            self.logger.info(f"   Success: {invalid_result['success']}")
+            self.logger.info(f"   Events: {invalid_result['events_count']}")
+            self.logger.info(f"   Error Events: {len(invalid_result['error_events'])}")
+            self.logger.info(f"   Time: {invalid_result['total_time']:.1f}s")
 
             # Should receive error response, not success
             assert not invalid_result["success"], (
@@ -297,10 +297,10 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
                 websocket, recovery_request, timeout=45.0
             )
 
-            self.__class__.logger.info(f"📊 Recovery Request Result:")
-            self.__class__.logger.info(f"   Success: {recovery_result['success']}")
-            self.__class__.logger.info(f"   Events: {recovery_result['events_count']}")
-            self.__class__.logger.info(f"   Critical Events: {len(recovery_result['critical_events'])}")
+            self.logger.info(f"📊 Recovery Request Result:")
+            self.logger.info(f"   Success: {recovery_result['success']}")
+            self.logger.info(f"   Events: {recovery_result['events_count']}")
+            self.logger.info(f"   Critical Events: {len(recovery_result['critical_events'])}")
 
             # Recovery request should succeed
             assert recovery_result["success"], (
@@ -318,7 +318,7 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
                 f"Recovery should generate adequate events: {recovery_result['events_count']}"
             )
 
-            self.__class__.logger.info("✅ Invalid agent type error recovery validated")
+            self.logger.info("✅ Invalid agent type error recovery validated")
 
         finally:
             await websocket.close()
@@ -341,7 +341,7 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Message parsing resilience in staging
         STATUS: Should PASS - Robust message handling critical for reliability
         """
-        self.__class__.logger.info("🔧 Testing malformed request error recovery")
+        self.logger.info("🔧 Testing malformed request error recovery")
 
         websocket = await self._establish_websocket_connection()
 
@@ -349,7 +349,7 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
             error_scenarios = []
 
             # Scenario 1: Malformed JSON
-            self.__class__.logger.info("Testing malformed JSON handling...")
+            self.logger.info("Testing malformed JSON handling...")
             try:
                 malformed_json = '{"type": "agent_request", "incomplete": true, "missing_quote": test}'
                 await websocket.send(malformed_json)
@@ -376,7 +376,7 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
                 })
 
             # Scenario 2: Missing required fields
-            self.__class__.logger.info("Testing missing required fields...")
+            self.logger.info("Testing missing required fields...")
             missing_fields_request = {
                 "type": "agent_request",
                 # Missing agent, message, user_id, etc.
@@ -393,7 +393,7 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
             })
 
             # Scenario 3: Invalid data types
-            self.__class__.logger.info("Testing invalid data types...")
+            self.logger.info("Testing invalid data types...")
             invalid_types_request = {
                 "type": "agent_request",
                 "agent": 12345,  # Should be string
@@ -413,11 +413,11 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
             })
 
             # Analyze error handling
-            self.__class__.logger.info(f"📊 Malformed Request Handling Results:")
+            self.logger.info(f"📊 Malformed Request Handling Results:")
 
             for scenario in error_scenarios:
                 scenario_name = scenario["scenario"]
-                self.__class__.logger.info(f"   {scenario_name}: {scenario}")
+                self.logger.info(f"   {scenario_name}: {scenario}")
 
             # System should handle malformed requests gracefully
             # (either with error responses or by ignoring gracefully)
@@ -441,10 +441,10 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
                 websocket, stability_request, timeout=45.0
             )
 
-            self.__class__.logger.info(f"📊 Connection Stability Result:")
-            self.__class__.logger.info(f"   Success: {stability_result['success']}")
-            self.__class__.logger.info(f"   Events: {stability_result['events_count']}")
-            self.__class__.logger.info(f"   Time: {stability_result['total_time']:.1f}s")
+            self.logger.info(f"📊 Connection Stability Result:")
+            self.logger.info(f"   Success: {stability_result['success']}")
+            self.logger.info(f"   Events: {stability_result['events_count']}")
+            self.logger.info(f"   Time: {stability_result['total_time']:.1f}s")
 
             # Connection should remain stable and functional
             assert stability_result["success"], (
@@ -468,7 +468,7 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
                         f"{result['total_time']:.1f}s"
                     )
 
-            self.__class__.logger.info("✅ Malformed request error recovery validated")
+            self.logger.info("✅ Malformed request error recovery validated")
 
         finally:
             await websocket.close()
@@ -491,7 +491,7 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Connection resilience testing in staging
         STATUS: Should PASS - Network resilience critical for production
         """
-        self.__class__.logger.info("🌐 Testing network interruption recovery")
+        self.logger.info("🌐 Testing network interruption recovery")
 
         # First connection - start a request then interrupt
         websocket1 = await self._establish_websocket_connection()
@@ -537,13 +537,13 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
                 except json.JSONDecodeError:
                     continue
 
-            self.__class__.logger.info(f"Collected {len(initial_events)} events before interruption")
+            self.logger.info(f"Collected {len(initial_events)} events before interruption")
 
             # Simulate network interruption by closing connection
             await websocket1.close()
             await asyncio.sleep(2)  # Brief pause to simulate network issue
 
-            self.__class__.logger.info("Connection interrupted - attempting recovery...")
+            self.logger.info("Connection interrupted - attempting recovery...")
 
             # Attempt reconnection
             websocket2 = await self._establish_websocket_connection({
@@ -569,11 +569,11 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
                 websocket2, recovery_request, timeout=45.0
             )
 
-            self.__class__.logger.info(f"📊 Network Interruption Recovery Results:")
-            self.__class__.logger.info(f"   Initial Events: {len(initial_events)}")
-            self.__class__.logger.info(f"   Recovery Success: {recovery_result['success']}")
-            self.__class__.logger.info(f"   Recovery Events: {recovery_result['events_count']}")
-            self.__class__.logger.info(f"   Recovery Time: {recovery_result['total_time']:.1f}s")
+            self.logger.info(f"📊 Network Interruption Recovery Results:")
+            self.logger.info(f"   Initial Events: {len(initial_events)}")
+            self.logger.info(f"   Recovery Success: {recovery_result['success']}")
+            self.logger.info(f"   Recovery Events: {recovery_result['events_count']}")
+            self.logger.info(f"   Recovery Time: {recovery_result['total_time']:.1f}s")
 
             # Recovery should be successful
             assert recovery_result["success"], (
@@ -603,7 +603,7 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
                 f"Recovery should deliver meaningful response content"
             )
 
-            self.__class__.logger.info("✅ Network interruption recovery validated")
+            self.logger.info("✅ Network interruption recovery validated")
 
         finally:
             try:
@@ -629,7 +629,7 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Concurrent error resilience in staging
         STATUS: Should PASS - Concurrent error handling critical for multi-user stability
         """
-        self.__class__.logger.info("⚡ Testing concurrent error scenarios")
+        self.logger.info("⚡ Testing concurrent error scenarios")
 
         # Define mixed scenario: valid and invalid requests
         concurrent_scenarios = [
@@ -757,12 +757,12 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
         invalid_scenarios = [r for r in results if isinstance(r, dict) and not r.get("expected_success")]
         exception_scenarios = [r for r in results if isinstance(r, Exception)]
 
-        self.__class__.logger.info(f"📊 Concurrent Error Scenarios Results:")
-        self.__class__.logger.info(f"   Total Scenarios: {len(concurrent_scenarios)}")
-        self.__class__.logger.info(f"   Valid Scenarios: {len(valid_scenarios)}")
-        self.__class__.logger.info(f"   Invalid Scenarios: {len(invalid_scenarios)}")
-        self.__class__.logger.info(f"   Exceptions: {len(exception_scenarios)}")
-        self.__class__.logger.info(f"   Total Time: {total_time:.2f}s")
+        self.logger.info(f"📊 Concurrent Error Scenarios Results:")
+        self.logger.info(f"   Total Scenarios: {len(concurrent_scenarios)}")
+        self.logger.info(f"   Valid Scenarios: {len(valid_scenarios)}")
+        self.logger.info(f"   Invalid Scenarios: {len(invalid_scenarios)}")
+        self.logger.info(f"   Exceptions: {len(exception_scenarios)}")
+        self.logger.info(f"   Total Time: {total_time:.2f}s")
 
         # Valid scenarios should succeed despite concurrent errors
         valid_successes = [r for r in valid_scenarios if r.get("result", {}).get("success")]
@@ -798,12 +798,12 @@ class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
             f"Concurrent error handling should complete in reasonable time: {total_time:.2f}s"
         )
 
-        self.__class__.logger.info(f"✅ Concurrent error scenarios validated:")
-        self.__class__.logger.info(f"   Valid Success Rate: {valid_success_rate:.1%}")
-        self.__class__.logger.info(f"   System Stability: No exceptions")
-        self.__class__.logger.info(f"   Performance: {total_time:.1f}s")
+        self.logger.info(f"✅ Concurrent error scenarios validated:")
+        self.logger.info(f"   Valid Success Rate: {valid_success_rate:.1%}")
+        self.logger.info(f"   System Stability: No exceptions")
+        self.logger.info(f"   Performance: {total_time:.1f}s")
 
-        self.__class__.logger.info("⚡ Concurrent error scenarios test complete")
+        self.logger.info("⚡ Concurrent error scenarios test complete")
 
 
 if __name__ == "__main__":

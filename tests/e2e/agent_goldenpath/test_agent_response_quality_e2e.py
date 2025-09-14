@@ -60,7 +60,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """Setup staging environment configuration and dependencies."""
         # Initialize staging configuration
         cls.staging_config = get_staging_config()
@@ -82,9 +82,9 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
 
         cls.logger.info(f"Agent response quality E2E tests initialized for staging")
 
-    def setUp(self):
+    def setup_method(self, method):
         """Setup for each test method."""
-        super().setUp()
+        super().setup_method(method)
 
         # Generate test-specific user context
         self.thread_id = f"quality_test_{int(time.time())}"
@@ -97,7 +97,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
             exp_minutes=60
         )
 
-        self.__class__.logger.info(f"Quality test setup complete - thread_id: {self.thread_id}")
+        self.logger.info(f"Quality test setup complete - thread_id: {self.thread_id}")
 
     async def _establish_websocket_connection(self) -> websockets.WebSocketServerProtocol:
         """Establish WebSocket connection to staging with proper auth headers."""
@@ -159,7 +159,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
             except asyncio.TimeoutError:
                 continue
             except json.JSONDecodeError as e:
-                self.__class__.logger.warning(f"Failed to parse WebSocket message: {e}")
+                self.logger.warning(f"Failed to parse WebSocket message: {e}")
                 continue
 
         return events
@@ -253,7 +253,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Complete staging GCP stack with real LLM
         STATUS: Should PASS - Core supervisor functionality
         """
-        self.__class__.logger.info("🎯 Testing supervisor agent comprehensive response quality")
+        self.logger.info("🎯 Testing supervisor agent comprehensive response quality")
 
         websocket = await self._establish_websocket_connection()
 
@@ -281,14 +281,14 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
             # Analyze response quality
             is_quality, metrics = self._analyze_response_quality(events)
 
-            self.__class__.logger.info(f"📊 Supervisor Agent Quality Metrics:")
-            self.__class__.logger.info(f"   Response Length: {metrics['response_length']} chars")
-            self.__class__.logger.info(f"   Word Count: {metrics['word_count']} words")
-            self.__class__.logger.info(f"   Quality Score: {metrics['quality_score']}/4")
-            self.__class__.logger.info(f"   Quality Grade: {metrics['quality_grade']}")
-            self.__class__.logger.info(f"   Has Actionable Content: {metrics['has_actionable_content']}")
-            self.__class__.logger.info(f"   Has Specific Recommendations: {metrics['has_specific_recommendations']}")
-            self.__class__.logger.info(f"   Has Numerical Insights: {metrics['has_numerical_insights']}")
+            self.logger.info(f"📊 Supervisor Agent Quality Metrics:")
+            self.logger.info(f"   Response Length: {metrics['response_length']} chars")
+            self.logger.info(f"   Word Count: {metrics['word_count']} words")
+            self.logger.info(f"   Quality Score: {metrics['quality_score']}/4")
+            self.logger.info(f"   Quality Grade: {metrics['quality_grade']}")
+            self.logger.info(f"   Has Actionable Content: {metrics['has_actionable_content']}")
+            self.logger.info(f"   Has Specific Recommendations: {metrics['has_specific_recommendations']}")
+            self.logger.info(f"   Has Numerical Insights: {metrics['has_numerical_insights']}")
 
             # Business value assertions
             assert is_quality, (
@@ -317,7 +317,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
                 f"Found: {addressed_elements} of {key_elements}"
             )
 
-            self.__class__.logger.info("✅ Supervisor agent comprehensive quality validation passed")
+            self.logger.info("✅ Supervisor agent comprehensive quality validation passed")
 
         finally:
             await websocket.close()
@@ -340,7 +340,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Staging triage agent with real LLM analysis
         STATUS: Should PASS - Triage specialization is critical for UX
         """
-        self.__class__.logger.info("🎯 Testing triage agent specialization quality")
+        self.logger.info("🎯 Testing triage agent specialization quality")
 
         websocket = await self._establish_websocket_connection()
 
@@ -367,10 +367,10 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
             # Analyze response quality
             is_quality, metrics = self._analyze_response_quality(events)
 
-            self.__class__.logger.info(f"📊 Triage Agent Quality Metrics:")
-            self.__class__.logger.info(f"   Response Length: {metrics['response_length']} chars")
-            self.__class__.logger.info(f"   Quality Score: {metrics['quality_score']}/4")
-            self.__class__.logger.info(f"   Quality Grade: {metrics['quality_grade']}")
+            self.logger.info(f"📊 Triage Agent Quality Metrics:")
+            self.logger.info(f"   Response Length: {metrics['response_length']} chars")
+            self.logger.info(f"   Quality Score: {metrics['quality_score']}/4")
+            self.logger.info(f"   Quality Grade: {metrics['quality_grade']}")
 
             # Triage-specific quality checks
             response_text = metrics["response_text_sample"].lower()
@@ -403,7 +403,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
                 f"Got grade {metrics['quality_grade']} - need quality analysis for routing decisions."
             )
 
-            self.__class__.logger.info("✅ Triage agent specialization quality validation passed")
+            self.logger.info("✅ Triage agent specialization quality validation passed")
 
         finally:
             await websocket.close()
@@ -426,7 +426,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Full APEX agent with comprehensive LLM analysis
         STATUS: Should PASS - APEX optimization is core product value
         """
-        self.__class__.logger.info("🎯 Testing APEX Optimizer deep analysis quality")
+        self.logger.info("🎯 Testing APEX Optimizer deep analysis quality")
 
         websocket = await self._establish_websocket_connection()
 
@@ -457,11 +457,11 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
             # Analyze response quality with higher standards for APEX
             is_quality, metrics = self._analyze_response_quality(events)
 
-            self.__class__.logger.info(f"📊 APEX Optimizer Quality Metrics:")
-            self.__class__.logger.info(f"   Response Length: {metrics['response_length']} chars")
-            self.__class__.logger.info(f"   Word Count: {metrics['word_count']} words")
-            self.__class__.logger.info(f"   Quality Score: {metrics['quality_score']}/4")
-            self.__class__.logger.info(f"   Quality Grade: {metrics['quality_grade']}")
+            self.logger.info(f"📊 APEX Optimizer Quality Metrics:")
+            self.logger.info(f"   Response Length: {metrics['response_length']} chars")
+            self.logger.info(f"   Word Count: {metrics['word_count']} words")
+            self.logger.info(f"   Quality Score: {metrics['quality_score']}/4")
+            self.logger.info(f"   Quality Grade: {metrics['quality_grade']}")
 
             # APEX requires higher quality standards
             assert metrics["response_length"] >= 400, (
@@ -496,7 +496,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
                 f"Sample: {metrics['response_text_sample']}"
             )
 
-            self.__class__.logger.info("✅ APEX Optimizer expert-level quality validation passed")
+            self.logger.info("✅ APEX Optimizer expert-level quality validation passed")
 
         finally:
             await websocket.close()
@@ -519,7 +519,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Data Helper with real analysis capabilities
         STATUS: Should PASS - Data insights are critical for business decisions
         """
-        self.__class__.logger.info("🎯 Testing Data Helper insights quality")
+        self.logger.info("🎯 Testing Data Helper insights quality")
 
         websocket = await self._establish_websocket_connection()
 
@@ -547,10 +547,10 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
             # Analyze response quality with focus on data insights
             is_quality, metrics = self._analyze_response_quality(events)
 
-            self.__class__.logger.info(f"📊 Data Helper Quality Metrics:")
-            self.__class__.logger.info(f"   Response Length: {metrics['response_length']} chars")
-            self.__class__.logger.info(f"   Quality Score: {metrics['quality_score']}/4")
-            self.__class__.logger.info(f"   Quality Grade: {metrics['quality_grade']}")
+            self.logger.info(f"📊 Data Helper Quality Metrics:")
+            self.logger.info(f"   Response Length: {metrics['response_length']} chars")
+            self.logger.info(f"   Quality Score: {metrics['quality_score']}/4")
+            self.logger.info(f"   Quality Grade: {metrics['quality_grade']}")
 
             # Data Helper specific validation
             response_text = metrics["response_text_sample"].lower()
@@ -584,7 +584,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
                 f"Got grade {metrics['quality_grade']} - data analysis requires quality insights."
             )
 
-            self.__class__.logger.info("✅ Data Helper insights quality validation passed")
+            self.logger.info("✅ Data Helper insights quality validation passed")
 
         finally:
             await websocket.close()
@@ -607,7 +607,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - All agent types in staging
         STATUS: Should PASS - Quality consistency is critical for platform reliability
         """
-        self.__class__.logger.info("🎯 Testing response quality consistency across all agents")
+        self.logger.info("🎯 Testing response quality consistency across all agents")
 
         websocket = await self._establish_websocket_connection()
 
@@ -631,7 +631,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
             agent_results = {}
 
             for agent_type in agent_types:
-                self.__class__.logger.info(f"Testing {agent_type} response quality")
+                self.logger.info(f"Testing {agent_type} response quality")
 
                 events = await self._send_agent_request(
                     websocket,
@@ -652,7 +652,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
                     "events_count": len(events)
                 }
 
-                self.__class__.logger.info(f"   {agent_type}: Grade {metrics['quality_grade']}, "
+                self.logger.info(f"   {agent_type}: Grade {metrics['quality_grade']}, "
                                f"Length {metrics['response_length']}, "
                                f"Score {metrics['quality_score']}/4")
 
@@ -678,10 +678,10 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
 
             quality_variance = max(quality_scores) - min(quality_scores)
 
-            self.__class__.logger.info(f"📊 Cross-Agent Quality Analysis:")
-            self.__class__.logger.info(f"   Average Quality Score: {avg_quality:.1f}/4")
-            self.__class__.logger.info(f"   Average Response Length: {avg_length:.0f} chars")
-            self.__class__.logger.info(f"   Quality Score Variance: {quality_variance}")
+            self.logger.info(f"📊 Cross-Agent Quality Analysis:")
+            self.logger.info(f"   Average Quality Score: {avg_quality:.1f}/4")
+            self.logger.info(f"   Average Response Length: {avg_length:.0f} chars")
+            self.logger.info(f"   Quality Score Variance: {quality_variance}")
 
             # Quality consistency validation
             assert avg_quality >= 2.0, (
@@ -703,7 +703,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
                 f"Business users need actionable guidance from all agents."
             )
 
-            self.__class__.logger.info("✅ Cross-agent quality consistency validation passed")
+            self.logger.info("✅ Cross-agent quality consistency validation passed")
 
         finally:
             await websocket.close()
