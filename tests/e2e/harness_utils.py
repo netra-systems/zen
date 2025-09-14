@@ -1000,7 +1000,7 @@ async def create_minimal_harness(test_name: str) -> 'TestHarnessContext':
 
 
 # Compatibility function for existing imports
-def create_test_harness(harness_name: str = "default") -> UnifiedTestHarnessComplete:
+def create_test_harness(harness_name: str = "default") -> UnifiedHarnessComplete:
     """
     Create test harness with optional name parameter.
 
