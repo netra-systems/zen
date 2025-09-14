@@ -162,7 +162,7 @@ class TestAgentExecutionCoreIntegration:
     @pytest.fixture
     async def mock_websocket_bridge(self, auth_helper):
         """Mock WebSocket bridge for tests requiring mock behavior."""
-        bridge = SSotMockFactory.create_websocket_bridge_mock()
+        bridge = SSotMockFactory.create_mock_agent_websocket_bridge()
         bridge.call_log = []  # Add tracking for test validation
 
         # Add call tracking to mock methods
