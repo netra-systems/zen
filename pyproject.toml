@@ -621,7 +621,10 @@ markers = [
     "concurrent_testing: Multi-user concurrent execution validation tests",
     
     # Golden path specific markers for issue #843
-    "goldenpath: Golden path integration tests for critical user flows"
+    "goldenpath: Golden path integration tests for critical user flows",
+
+    # SLA compliance markers for Issue #865
+    "sla_critical: Service Level Agreement critical validation tests",
 ]
 
 # Coverage settings

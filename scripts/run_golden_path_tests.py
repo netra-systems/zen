@@ -22,7 +22,7 @@ import argparse
 from pathlib import Path
 
 # Add project root to Python path
-project_root = Path(__file__).parent
+project_root = Path(__file__).parent.parent  # Go up one level from scripts/ to project root
 sys.path.insert(0, str(project_root))
 
 def run_command(cmd, verbose=False):
