@@ -1084,7 +1084,9 @@ async def main():
             print(f"  Tool Calls: {status.tool_calls}")
 
         if status.output:
-            print(f"  Output Preview: {status.output[:200]}...")
+            # Show preview of FULL captured output (not truncated)
+            output_preview = status.output[:500].replace('\n', ' ').strip()
+            print(f"  Output Preview: {output_preview}...")
 
         if status.error:
             print(f"  Errors: {status.error[:200]}...")
