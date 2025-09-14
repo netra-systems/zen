@@ -1705,7 +1705,7 @@ class AgentRegistry(BaseAgentRegistry):
             Agent ID for compatibility
         """
         # Import here to avoid circular imports
-        from netra_backend.app.agents.registry import AgentType, AgentStatus
+        from netra_backend.app.agents.types import AgentType, AgentStatus
         import uuid
         from datetime import datetime
         

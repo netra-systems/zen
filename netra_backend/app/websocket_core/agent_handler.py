@@ -439,6 +439,38 @@ class AgentMessageHandler(BaseMessageHandler):
         except Exception as e:
             logger.error(f"Failed to cleanup WebSocket connection: {e}", exc_info=True)
             return False
+    
+    async def _cleanup_resources(self) -> bool:
+        """Clean up all handler resources on destruction.
+        
+        This method provides the interface that tests expect for handler resource cleanup.
+        It's called when the handler is being destroyed to ensure proper cleanup of
+        any resources, connections, or state.
+        
+        Returns:
+            bool: True if cleanup was successful, False otherwise
+        """
+        try:
+            # Clean up processing stats
+            if hasattr(self, 'processing_stats'):
+                self.processing_stats["last_processed_time"] = time.time()
+                
+            # Clean up websocket reference
+            if hasattr(self, 'websocket'):
+                self.websocket = None
+                
+            # Clean up message handler service reference
+            if hasattr(self, 'message_handler_service'):
+                # Don't actually destroy the service, just clear our reference
+                # The service is managed externally and may be shared
+                pass
+                
+            logger.debug("Successfully cleaned up AgentMessageHandler resources")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to cleanup AgentMessageHandler resources: {e}", exc_info=True)
+            return False
 
 
 # COMPATIBILITY ALIAS: Export AgentMessageHandler as AgentHandler for backward compatibility

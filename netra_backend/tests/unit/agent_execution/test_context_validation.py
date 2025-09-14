@@ -371,7 +371,7 @@ class TestContextValidation(SSotAsyncTestCase, unittest.TestCase):
         self.assertEqual(metrics.active_sessions, 0)
         self.assertEqual(metrics.isolation_violations, 0)
     
-    async def test_context_validation_performance_reasonable(self):
+    def test_context_validation_performance_reasonable(self):
         """Test that context validation performs reasonably for business needs.
 
         Performance expectation updated with platform-aware thresholds and detailed monitoring

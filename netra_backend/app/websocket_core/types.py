@@ -15,7 +15,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 import time
 import uuid
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 # Import UnifiedIdGenerator for SSOT ID generation
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
@@ -178,7 +178,8 @@ class WebSocketMessage(BaseModel):
     user_id: Optional[str] = None
     thread_id: Optional[str] = None
     
-    @validator('timestamp', pre=True)
+    @field_validator('timestamp', mode='before')
+    @classmethod
     def validate_timestamp(cls, v):
         """Validate and convert timestamp to float.
         

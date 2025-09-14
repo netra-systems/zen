@@ -11,7 +11,7 @@ Business Value Impact:
 - User Experience: Real-time chat streaming broken for demo mode users
 
 Root Cause:
-The infrastructure\websocket_auth_remediation.py file uses legacy UserExecutionContext
+The infrastructure/websocket_auth_remediation.py file uses legacy UserExecutionContext
 instantiation pattern on line 469 instead of the SSOT factory method.
 
 Expected Fix:
