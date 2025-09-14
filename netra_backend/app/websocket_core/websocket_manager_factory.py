@@ -44,6 +44,7 @@ from netra_backend.app.websocket_core.websocket_manager import (
     get_websocket_manager,
     create_test_user_context
 )
+from netra_backend.app.websocket_core.ssot_validation_enhancer import validate_websocket_manager_creation
 from shared.types.core_types import UserID, ensure_user_id
 
 logger = get_logger(__name__)
