@@ -18,7 +18,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class EventType(str, Enum):
@@ -202,7 +202,8 @@ class AnalyticsEvent(BaseModel):
     # User context
     context: EventContext = Field(..., description="Event context information")
 
-    @validator('properties')
+    @field_validator('properties')
+    @classmethod
     def validate_properties(cls, v, values):
         """Validate properties match event type requirements."""
         if 'event_type' not in values:
@@ -241,14 +242,16 @@ class EventIngestionRequest(BaseModel):
     events: List[AnalyticsEvent] = Field(..., description="List of events to ingest")
     batch_id: Optional[str] = Field(None, description="Optional batch identifier")
     
-    @validator('events')
+    @field_validator('events')
+    @classmethod
     def validate_events_not_empty(cls, v):
         """Ensure events list is not empty."""
         if not v:
             raise ValueError("Events list cannot be empty")
         return v
     
-    @validator('events')
+    @field_validator('events')
+    @classmethod
     def validate_max_batch_size(cls, v):
         """Ensure batch size doesn't exceed limit."""
         if len(v) > 1000:
