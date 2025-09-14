@@ -658,6 +658,12 @@ markers = [
     "websocket_messaging: WebSocket messaging flow and communication tests",
     "staging_clickhouse: ClickHouse-related tests in staging environment",
     "requires_real_services: Tests that explicitly require real external services (not mocks)",
+    "websocket_ssot: WebSocket Single Source of Truth pattern and consolidation tests",
+    "migration_safety: Migration safety and rollback validation tests",
+    "performance_safety: Performance safety and resource management tests",
+    "issue_1058_migration_safety: Issue #1058 migration safety specific tests",
+    "issue_1058_broadcast_consolidation: Issue #1058 broadcast consolidation specific tests",
+    "integration_demo: Integration demonstration and workflow tests",
 ]
 
 # Coverage settings
