@@ -42,7 +42,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestContextValidation(SSotAsyncTestCase, unittest.TestCase):
+class TestContextValidation(SSotAsyncTestCase):
     """Unit tests for user execution context validation and security."""
     
     def setUp(self):
