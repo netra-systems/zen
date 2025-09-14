@@ -119,9 +119,12 @@ class AgentResult(BaseModel):
 class DeepAgentState(BaseModel):
     """Unified Deep Agent State - single source of truth (replaces old AgentState)."""
     user_request: str = "default_request"  # Default for backward compatibility
+    user_prompt: str = "default_request"   # SSOT MIGRATION FIX: Interface alignment for execution engines (Golden Path)
     chat_thread_id: Optional[str] = None
     user_id: Optional[str] = None
-    
+    run_id: Optional[str] = None           # SSOT MIGRATION FIX: Unique execution run identifier
+    agent_input: Optional[Dict[str, Any]] = None  # SSOT MIGRATION FIX: Agent configuration parameters
+
     # Strongly typed result fields with proper type unions
     triage_result: Optional["TriageResult"] = None
     data_result: Optional[Union[DataAnalysisResponse, AnomalyDetectionResponse]] = None
@@ -131,12 +134,15 @@ class DeepAgentState(BaseModel):
     synthetic_data_result: Optional[SyntheticDataResult] = None
     supply_research_result: Optional[Any] = None # Will be strongly typed when SupplyResearchResult is moved to schemas
     corpus_admin_result: Optional[Any] = None
-    
+    corpus_admin_error: Optional[str] = None  # SSOT MIGRATION FIX: Corpus admin error handling
+
     # Execution tracking
     final_report: Optional[str] = None
     step_count: int = 0
+    messages: List[Dict[str, Any]] = Field(default_factory=list)  # SSOT MIGRATION FIX: E2E test compatibility
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
     quality_metrics: Dict[str, Any] = Field(default_factory=dict)
+    context_tracking: Dict[str, Any] = Field(default_factory=dict)  # SSOT MIGRATION FIX: E2E test compatibility
     
     # PHASE 1 BACKWARDS COMPATIBILITY FIX: Add agent_context for UserExecutionContext compatibility
     # This field provides backwards compatibility with execution code that expects agent_context

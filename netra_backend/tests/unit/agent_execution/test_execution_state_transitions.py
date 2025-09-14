@@ -173,7 +173,7 @@ class TestExecutionStateTransitions(unittest.TestCase, SSotBaseTestCase):
             with self.assertRaises(ValueError) as context:
                 self.tracker.update_execution_state(execution_id, invalid_state)
             
-            self.assertIn("dict object", str(context.exception))
+            self.assertIn("Dict object", str(context.exception))
             self.assertIn("Issue #305", str(context.exception))
     
     def test_non_execution_state_enum_rejection(self):
