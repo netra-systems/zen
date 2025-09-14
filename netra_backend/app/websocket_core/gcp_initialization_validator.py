@@ -1442,6 +1442,45 @@ async def gcp_websocket_readiness_check(app_state: Any) -> Tuple[bool, Dict[str,
     # Normal validation flow for production and non-bypassed environments
     result = await validator.validate_gcp_readiness_for_websocket(timeout_seconds=15.0)
 
+    # CRITICAL FIX: Apply staging graceful degradation for health checks too
+    # This ensures health checks match actual WebSocket functionality
+    if not result.ready and environment == 'staging':
+        # Check if this is a Redis-only failure or similar recoverable issue
+        redis_only_failure = (
+            result.failed_services and
+            len(result.failed_services) == 1 and
+            result.failed_services[0] == 'redis'
+        )
+
+        # Check if startup phase is stuck at 'unknown' (common in GCP staging)
+        startup_phase_unknown = (
+            hasattr(app_state, 'startup_phase') and
+            str(app_state.startup_phase).lower() == 'unknown'
+        )
+
+        if redis_only_failure or startup_phase_unknown or not result.failed_services:
+            central_logger.get_logger(__name__).info(
+                f"🔄 STAGING HEALTH CHECK GRACEFUL DEGRADATION: Health check failed but "
+                f"applying same graceful degradation as WebSocket connections. "
+                f"Failed services: {result.failed_services}, startup_phase: "
+                f"{getattr(app_state, 'startup_phase', 'unknown')}"
+            )
+            # Override result to match middleware behavior
+            return True, {
+                "websocket_ready": True,
+                "state": "degraded_but_functional",
+                "elapsed_time": result.elapsed_time,
+                "failed_services": result.failed_services,
+                "warnings": result.warnings + ["Health check graceful degradation applied for staging"],
+                "gcp_environment": validator.is_gcp_environment,
+                "cloud_run": validator.is_cloud_run,
+                "bypass_active": False,
+                "graceful_degradation": True,
+                "original_ready": False,
+                "degradation_reason": "staging_health_check_graceful_override",
+                "environment": environment
+            }
+
     return result.ready, {
         "websocket_ready": result.ready,
         "state": result.state.value,

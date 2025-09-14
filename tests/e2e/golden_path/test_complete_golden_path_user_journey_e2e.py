@@ -308,15 +308,70 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
         
         self.logger.info(" PASS:  Step 5: All 5 required WebSocket events validated")
         
-        # Step 6: Validate business value delivery
-        self.logger.info("[U+1F4B0] Step 6: Validating business value delivery...")
-        
-        # CRITICAL: Must deliver actual business value (cost optimization)
+        # Step 6: Validate business value delivery (ENHANCED - Issue #1059)
+        self.logger.info("[U+1F4B0] Step 6: Validating business value delivery with enhanced metrics...")
+
+        # Extract comprehensive response content for business value analysis
+        agent_response_content = ""
+        for event in collected_events:
+            if event.get("type") == "agent_completed":
+                response_text = event.get("final_response") or event.get("content") or event.get("message", "")
+                if response_text:
+                    agent_response_content += response_text + " "
+            elif event.get("type") == "agent_thinking":
+                thinking_text = event.get("reasoning") or event.get("content", "")
+                if thinking_text and len(thinking_text) > 100:  # Substantive thinking
+                    agent_response_content += thinking_text + " "
+
+        # CRITICAL: Must have substantive agent response content
+        assert agent_response_content.strip(), (
+            "CRITICAL FAILURE: No substantive agent response content received. "
+            "Golden Path MUST deliver comprehensive cost optimization insights."
+        )
+
+        # ENHANCED: Use business value validators (Issue #1059)
+        if self.validate_business_value:
+            self.logger.info("Running enhanced business value validation (Issue #1059)...")
+
+            business_validation_results = self.validate_business_value(
+                agent_response_content,
+                optimization_request['message'],
+                specialized_validation='cost_optimization'
+            )
+
+            # CRITICAL: Enhanced business value validation must pass
+            assert business_validation_results['passes_business_threshold'], (
+                f"ENHANCED VALIDATION FAILURE: Agent response failed business value validation. "
+                f"Score: {business_validation_results['general_quality'].overall_score:.2f}. "
+                f"Quality: {business_validation_results['general_quality'].quality_level.value}. "
+                f"This validates Issue #1059 coverage improvement requirements."
+            )
+
+            # Log enhanced business value metrics
+            quality_metrics = business_validation_results['general_quality']
+            self.logger.info(f"[ENHANCED] Business Value Validation Results:")
+            self.logger.info(f"  Overall Score: {quality_metrics.overall_score:.2f}")
+            self.logger.info(f"  Quality Level: {quality_metrics.quality_level.value}")
+            self.logger.info(f"  Word Count: {quality_metrics.word_count}")
+            self.logger.info(f"  Actionable Steps: {quality_metrics.actionable_steps_count}")
+            self.logger.info(f"  Cost Savings Mentioned: {quality_metrics.cost_savings_mentioned}")
+            self.logger.info(f"  Quantified Recommendations: {quality_metrics.quantified_recommendations}")
+
+            # Validate cost optimization specific requirements
+            if business_validation_results.get('specialized_validation'):
+                cost_results = business_validation_results['specialized_validation']
+                assert cost_results['passes_cost_optimization_test'], (
+                    f"COST OPTIMIZATION FAILURE: {cost_results['business_value_summary']}"
+                )
+                self.logger.info(f"[COST OPTIMIZATION] Score: {cost_results['overall_score']:.2f}")
+                self.logger.info(f"[COST OPTIMIZATION] Requirements: {cost_results['requirements_met']}")
+
+        # LEGACY: Maintain existing business value validation for backward compatibility
         assert business_value_data, (
             "CRITICAL FAILURE: No business value data received. "
             "Golden Path MUST deliver cost optimization insights to generate revenue."
         )
-        
+
         # Check for cost savings data
         has_savings = (
             "savings_amount" in business_value_data or
@@ -324,13 +379,13 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
             "optimization_value" in business_value_data or
             "monthly_savings" in business_value_data
         )
-        
+
         assert has_savings, (
             f"CRITICAL FAILURE: No cost savings data in business value response. "
             f"Golden Path MUST provide quantified savings for business value. "
             f"Response data: {business_value_data}"
         )
-        
+
         # Extract savings amount for validation
         savings_amount = (
             business_value_data.get("savings_amount", 0) or
