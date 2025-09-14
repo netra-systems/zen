@@ -259,13 +259,15 @@ class WebSocketTestClient:
         self._mock_mode = False
         self._mock_websocket = None
         
-    async def connect(self, timeout: float = 30.0, mock_mode: bool = False) -> bool:
+    async def connect(self, timeout: float = 30.0, mock_mode: bool = False, 
+                    subprotocols: Optional[List[str]] = None) -> bool:
         """
-        Connect to WebSocket server.
+        Connect to WebSocket server with subprotocol fallback strategy.
         
         Args:
             timeout: Connection timeout in seconds
             mock_mode: If True, use mock connection instead of real WebSocket
+            subprotocols: Optional list of subprotocols to negotiate
             
         Returns:
             True if connected successfully
@@ -290,42 +292,105 @@ class WebSocketTestClient:
             logger.info(f"WebSocket client {self.test_id} connected in mock mode")
             return True
         
-        try:
-            # Add test identification to headers
-            test_headers = self.headers.copy()
-            test_headers.update({
-                "X-Test-ID": self.test_id,
-                "X-Test-Timestamp": str(int(time.time()))
-            })
+        # WEBSOCKET SUBPROTOCOL FALLBACK STRATEGY
+        # Try multiple connection strategies for GCP Cloud Run compatibility
+        connection_strategies = self._get_connection_strategies(subprotocols)
+        
+        for strategy_name, strategy in connection_strategies:
+            try:
+                logger.info(f"Attempting {strategy_name} connection strategy for {self.test_id}")
+                
+                # Add test identification to headers
+                test_headers = self.headers.copy()
+                test_headers.update({
+                    "X-Test-ID": self.test_id,
+                    "X-Test-Timestamp": str(int(time.time())),
+                    "X-Connection-Strategy": strategy_name
+                })
+                
+                # Apply strategy-specific connection parameters
+                connection_params = {
+                    "extra_headers": test_headers,
+                    "ping_interval": 20,
+                    "ping_timeout": 10,
+                    "close_timeout": 10
+                }
+                connection_params.update(strategy)
+                
+                # Connect with timeout (Python 3.12 compatible)
+                async with asyncio.timeout(timeout / len(connection_strategies)):
+                    self.websocket = await websockets.connect(self.url, **connection_params)
+                
+                self.is_connected = True
+                
+                # Start background listener
+                self.listener_task = asyncio.create_task(self._listen_for_messages())
+                
+                # Start heartbeat if configured
+                if self._should_send_heartbeat():
+                    self.heartbeat_task = asyncio.create_task(self._send_heartbeat())
+                
+                logger.info(f"WebSocket client {self.test_id} connected using {strategy_name} strategy")
+                return True
+                
+            except Exception as e:
+                error_msg = str(e).lower()
+                if "no subprotocols supported" in error_msg or "subprotocol" in error_msg:
+                    logger.warning(f"{strategy_name} failed due to subprotocol issues: {e}")
+                elif "timeout" in error_msg:
+                    logger.warning(f"{strategy_name} timed out: {e}")
+                else:
+                    logger.warning(f"{strategy_name} failed: {e}")
+                
+                # Continue to next strategy
+                continue
+        
+        # All strategies failed
+        logger.error(f"All WebSocket connection strategies failed for {self.test_id}")
+        return False
+    
+    def _get_connection_strategies(self, subprotocols: Optional[List[str]] = None) -> List[tuple]:
+        """
+        Get WebSocket connection strategies in order of preference.
+        
+        Args:
+            subprotocols: Optional list of subprotocols to negotiate
             
-            # Connect with timeout (Python 3.12 compatible)
-            async with asyncio.timeout(timeout):
-                self.websocket = await websockets.connect(
-                    self.url,
-                    extra_headers=test_headers,
-                    ping_interval=20,
-                    ping_timeout=10,
-                    close_timeout=10
-                )
-            
-            self.is_connected = True
-            
-            # Start background listener
-            self.listener_task = asyncio.create_task(self._listen_for_messages())
-            
-            # Start heartbeat if configured
-            if self._should_send_heartbeat():
-                self.heartbeat_task = asyncio.create_task(self._send_heartbeat())
-            
-            logger.info(f"WebSocket client {self.test_id} connected to {self.url}")
-            return True
-            
-        except asyncio.TimeoutError:
-            logger.error(f"WebSocket connection timeout for {self.test_id}")
-            return False
-        except Exception as e:
-            logger.error(f"WebSocket connection failed for {self.test_id}: {e}")
-            return False
+        Returns:
+            List of (strategy_name, strategy_params) tuples
+        """
+        strategies = []
+        
+        # Strategy 1: Full RFC 6455 subprotocol negotiation (if subprotocols provided)
+        if subprotocols and len(subprotocols) > 0:
+            strategies.append(("RFC6455_SUBPROTOCOL", {
+                "subprotocols": subprotocols
+            }))
+        
+        # Strategy 2: JWT auth subprotocol (if Authorization header present)
+        if self.headers.get("Authorization"):
+            # Extract JWT token from Authorization header
+            auth_header = self.headers["Authorization"]
+            if auth_header.startswith("Bearer "):
+                jwt_token = auth_header[7:]  # Remove "Bearer " prefix
+                strategies.append(("JWT_AUTH_SUBPROTOCOL", {
+                    "subprotocols": ["jwt-auth"]
+                }))
+        
+        # Strategy 3: Simple connection without subprotocols (GCP Cloud Run fallback)
+        strategies.append(("HEADER_ONLY", {
+            # No subprotocols parameter - rely only on headers
+        }))
+        
+        # Strategy 4: Minimal connection (last resort)
+        strategies.append(("MINIMAL", {
+            # Minimal parameters for maximum compatibility
+            "ping_interval": None,  # Disable ping
+            "ping_timeout": None,   # Disable ping timeout
+        }))
+        
+        logger.debug(f"Generated {len(strategies)} connection strategies: {[s[0] for s in strategies]}")
+        return strategies
     
     async def disconnect(self):
         """Disconnect from WebSocket server with cleanup."""

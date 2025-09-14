@@ -1,5 +1,12 @@
 """
-Message Router Module - Compatibility Layer for Integration Tests
+Message Router Module - DEPRECATED Compatibility Layer
+
+⚠️ DEPRECATION WARNING: This module is deprecated as of Phase 2 SSOT consolidation.
+Please use the canonical MessageRouter from: netra_backend.app.websocket_core.handlers
+
+MIGRATION PATH:
+- OLD: from netra_backend.app.core.message_router import MessageRouter
+- NEW: from netra_backend.app.websocket_core.handlers import MessageRouter
 
 This module provides a compatibility layer for integration tests that expect
 a message router implementation. This is a minimal implementation for test compatibility.
@@ -20,6 +27,7 @@ from typing import Any, Dict, List, Optional, Union, Callable
 import asyncio
 import uuid
 import time
+import warnings
 from enum import Enum
 from dataclasses import dataclass
 
@@ -56,18 +64,28 @@ class MessageRouter:
     """
     Simple message router for test compatibility.
 
+    ⚠️ DEPRECATED: Use netra_backend.app.websocket_core.handlers.MessageRouter instead
     This is a minimal implementation to satisfy integration test imports.
     Not intended for production use.
     """
 
     def __init__(self):
-        """Initialize message router."""
+        """Initialize message router with deprecation warning."""
+        # Issue deprecation warning
+        warnings.warn(
+            "MessageRouter from netra_backend.app.core.message_router is deprecated. "
+            "Use 'from netra_backend.app.websocket_core.handlers import MessageRouter' instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         self.routes: Dict[str, List[Callable]] = {}
         self.middleware: List[Callable] = []
         self.message_history: List[Message] = []
         self.active = False
 
-        logger.info("Message router initialized (test compatibility mode)")
+        logger.warning("DEPRECATED: Message router initialized (test compatibility mode) - "
+                      "Use netra_backend.app.websocket_core.handlers.MessageRouter instead")
 
     def add_route(self, pattern: str, handler: Callable):
         """Add a route handler."""

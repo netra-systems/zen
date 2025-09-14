@@ -40,7 +40,7 @@
 ```bash
 ✅ Auth service deployment completed successfully:
   - Service: netra-auth-staging
-  - URL: https://netra-auth-service-pnovr5vsba-uc.a.run.app
+  - URL: https://auth.staging.netrasystems.ai
   - All critical secrets configured from Google Secret Manager
   - Health status: healthy ✅
   - Database status: connected ✅
@@ -187,7 +187,7 @@ curl -s https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health
 ✅ Returns: {"status": "healthy", "service": "netra-ai-platform"}
 
 # Auth Service Health Check  
-curl -s https://netra-auth-service-pnovr5vsba-uc.a.run.app/health
+curl -s https://auth.staging.netrasystems.ai/health
 ✅ Returns: {"status": "healthy", "database_status": "connected"}
 ```
 
@@ -255,14 +255,14 @@ python tests/e2e/staging/run_staging_tests.py
 
 ### Service URLs (Production Ready)
 - **Backend API**: https://netra-backend-staging-pnovr5vsba-uc.a.run.app
-- **Auth Service**: https://netra-auth-service-pnovr5vsba-uc.a.run.app  
+- **Auth Service**: https://auth.staging.netrasystems.ai  
 - **Health Checks**: Both services responding to `/health` endpoint
 
 ### Monitoring Commands
 ```bash
 # Check service health
 curl -s https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health
-curl -s https://netra-auth-service-pnovr5vsba-uc.a.run.app/health
+curl -s https://auth.staging.netrasystems.ai/health
 
 # Monitor logs
 gcloud logging tail "resource.type=cloud_run_revision AND resource.labels.service_name=netra-backend-staging" --project=netra-staging

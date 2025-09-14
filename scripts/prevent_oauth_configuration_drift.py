@@ -143,7 +143,7 @@ class OAuthConfigurationDriftDetector:
         print(f"\n[SERVICE] Checking Auth Service health...")
         
         if self.environment == "staging":
-            auth_url = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+            auth_url = "https://auth.staging.netrasystems.ai"
         else:
             auth_url = "https://netra-auth-service-production-url"  # Update as needed
         

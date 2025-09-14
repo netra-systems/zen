@@ -1,13 +1,16 @@
-# E2E Agent Test Remediation Plan - Issue #872
+# E2E Agent Test Remediation Plan
+**Five Whys Audit-Based Action Plan**
 
-**Session ID:** agent-session-2025-01-14-1430  
-**Date:** 2025-09-13  
-**Issue:** Issue #872 - "[test-coverage] 9.7% coverage | agents"  
-**Status:** Test Execution Complete, Remediation Plan Created
+**Date:** September 14, 2025  
+**Scope:** Issues #958, #1032, #886 - Critical WebSocket Agent Test Failures  
+**Business Impact:** $500K+ ARR Golden Path functionality  
+**Root Cause:** Infrastructure configuration drift in staging environment  
 
 ## Executive Summary
 
-All 3 newly created E2E agent tests failed execution due to **interface mismatches** with existing infrastructure. The tests are well-designed but make incorrect assumptions about existing E2E component interfaces. This is **100% fixable** with targeted updates to align with existing patterns.
+Based on comprehensive Five Whys analysis, **all three failing e2e agent issues stem from staging environment infrastructure configuration drift**, NOT code defects. The WebSocket authentication, subprotocol handling, and agent orchestration code are correct and SSOT-compliant. 
+
+**Key Finding:** Infrastructure mismatches are causing systematic test failures while the underlying business logic remains functional.
 
 ### Test Execution Results
 - **Total Tests:** 3

@@ -12,7 +12,7 @@
 **Current Status:** Fresh backend deployment completed successfully, proceeding with comprehensive E2E test validation
 - ✅ **Backend Deployment:** SUCCESS - Fresh deployment completed (all services healthy)
   - Backend: https://netra-backend-staging-pnovr5vsba-uc.a.run.app
-  - Auth: https://netra-auth-service-pnovr5vsba-uc.a.run.app
+  - Auth: https://auth.staging.netrasystems.ai
   - Frontend: https://netra-frontend-staging-pnovr5vsba-uc.a.run.app
 - ✅ **Test Selection:** Comprehensive "all" category E2E tests selected from staging index
 - ⚠️ **Issue Context:** Recent critical issues require attention (SSOT, WebSocket, infrastructure)
@@ -40,7 +40,7 @@ Multiple P0/P1 critical SSOT and WebSocket issues indicate infrastructure instab
 ### 0.2 Service Health Verification
 **All Services Operational:**
 - ✅ **backend:** https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health
-- ✅ **auth:** https://netra-auth-service-pnovr5vsba-uc.a.run.app/health
+- ✅ **auth:** https://auth.staging.netrasystems.ai/health
 - ✅ **frontend:** https://netra-frontend-staging-pnovr5vsba-uc.a.run.app
 
 ---
@@ -108,7 +108,7 @@ Multiple P0/P1 critical SSOT and WebSocket issues indicate infrastructure instab
 
 #### 2.5 Service Health Validation ✅ ALL HEALTHY
 - **Backend:** ✅ `https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health` - Healthy
-- **Auth:** ✅ `https://netra-auth-service-pnovr5vsba-uc.a.run.app/health` - Healthy with DB connected
+- **Auth:** ✅ `https://auth.staging.netrasystems.ai/health` - Healthy with DB connected
 - **Frontend:** ✅ Available and responsive
 
 ---

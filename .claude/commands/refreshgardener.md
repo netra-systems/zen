@@ -36,6 +36,8 @@ for each TASK in FOCUS_AREA:
         1.4 Refresh string literals
         1.5 Refresh test coverage docs
         1.6 Refresh golden path docs
+        including GOLDEN_PATH_USER_FLOW_COMPLETE.md
+            
         1.7 Refresh SSOT docs
         1.8 Refresh other important docs
 

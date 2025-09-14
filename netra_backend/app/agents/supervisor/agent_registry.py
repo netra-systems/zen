@@ -730,7 +730,6 @@ class AgentRegistry(BaseAgentRegistry):
         Args:
             manager: WebSocket manager instance for agent events
         """
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         if manager is None:
@@ -808,7 +807,7 @@ class AgentRegistry(BaseAgentRegistry):
         
         logger.info(f" PASS:  WebSocket manager set on AgentRegistry with user isolation support and SSOT compliance")
     
-    async def set_websocket_manager_async(self, manager: 'WebSocketManager') -> None:
+    async def set_websocket_manager_async(self, manager: 'AgentWebSocketBridge') -> None:
         """Async version of set_websocket_manager for async contexts.
         
         This method can be used when we're already in an async context and want
@@ -817,7 +816,6 @@ class AgentRegistry(BaseAgentRegistry):
         Args:
             manager: WebSocket manager instance for agent events
         """
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         if manager is None:

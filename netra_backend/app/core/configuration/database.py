@@ -24,6 +24,31 @@ from netra_backend.app.schemas.config import AppConfig
 logger = logging.getLogger(__name__)
 
 
+class DatabaseConfig:
+    """
+    DatabaseConfig class for backward compatibility.
+    
+    Some E2E tests import this class directly. This provides a simple
+    interface compatible with the expected usage patterns.
+    """
+    
+    def __init__(self, postgres_url: str = None, redis_url: str = None, clickhouse_url: str = None):
+        """Initialize database configuration."""
+        self.postgres_url = postgres_url
+        self.redis_url = redis_url
+        self.clickhouse_url = clickhouse_url
+        
+    @classmethod
+    def from_environment(cls, environment: str = None):
+        """Create DatabaseConfig from environment."""
+        manager = DatabaseConfigManager()
+        return cls(
+            postgres_url=manager.get_database_url(environment),
+            redis_url=f"redis://{manager.get_redis_config(environment).get('host', 'localhost')}:{manager.get_redis_config(environment).get('port', 6379)}",
+            clickhouse_url=f"clickhouse://{manager.get_clickhouse_config(environment).get('host', 'localhost')}:{manager.get_clickhouse_config(environment).get('port', 9000)}"
+        )
+
+
 class DatabaseConfigManager:
     """
     Database Configuration Manager - Backward Compatibility Layer
@@ -227,6 +252,7 @@ def populate_database_config(environment: Optional[str] = None) -> Dict[str, Any
 
 # Export public interface
 __all__ = [
+    "DatabaseConfig",
     "DatabaseConfigManager",
     "get_database_config_manager", 
     "get_database_url",

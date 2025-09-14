@@ -61,7 +61,7 @@
 **Deployment Command:** `python scripts/deploy_to_gcp.py --project netra-staging --build-local`
 
 **Service Health Status:**
-- ✅ **Auth Service:** `https://netra-auth-service-pnovr5vsba-uc.a.run.app/health` - 200 OK
+- ✅ **Auth Service:** `https://auth.staging.netrasystems.ai/health` - 200 OK
 - ❌ **Backend Service:** `https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health` - 503 Service Unavailable
 - ✅ **Frontend Service:** `https://netra-frontend-staging-pnovr5vsba-uc.a.run.app` - 200 OK
 
@@ -199,7 +199,7 @@ pytest tests/e2e/staging/test_10_critical_path_staging.py -v --env staging
 - Response Time: 11.43 seconds
 
 **Auth Service:** ✅ **HEALTHY**
-- URL: `https://netra-auth-service-pnovr5vsba-uc.a.run.app/health`
+- URL: `https://auth.staging.netrasystems.ai/health`
 - Status: 200 OK
 - Response Time: 0.16 seconds
 - Database Status: Connected

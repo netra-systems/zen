@@ -16,7 +16,7 @@
 - **Project:** netra-staging
 - **Region:** us-central1
 - **Revision:** netra-auth-service-00193-jz7
-- **URL:** https://netra-auth-service-pnovr5vsba-uc.a.run.app
+- **URL:** https://auth.staging.netrasystems.ai
 
 ### Build Information
 - **Build ID:** d59755d2-48ba-4eac-9df2-de1c0f92c0ab

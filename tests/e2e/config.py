@@ -285,3 +285,29 @@ class TestEnvironmentType(str, Enum):
     LOCAL = "local"
     STAGING = "staging" 
     PRODUCTION = "production"
+
+
+def create_unified_config(environment: str = "test", **kwargs) -> UnifiedTestConfig:
+    """
+    Create unified test configuration.
+    
+    This function provides backward compatibility for tests expecting
+    create_unified_config function.
+    
+    Args:
+        environment: Test environment name
+        **kwargs: Additional configuration parameters
+        
+    Returns:
+        UnifiedTestConfig instance
+    """
+    return UnifiedTestConfig(
+        environment=environment,
+        use_real_services=kwargs.get("use_real_services", True),
+        use_real_llm=kwargs.get("use_real_llm", False),
+        timeout_seconds=kwargs.get("timeout_seconds", 30.0),
+        max_retries=kwargs.get("max_retries", 3),
+        customer_tier=kwargs.get("customer_tier", CustomerTier.FREE),
+        debug_mode=kwargs.get("debug_mode", False),
+        metadata=kwargs.get("metadata", {})
+    )
