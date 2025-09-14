@@ -34,7 +34,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 # Import core message routing components
-from netra_backend.app.agents.message_router import MessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 from netra_backend.app.agents.triage_agent import TriageAgent
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent

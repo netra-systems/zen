@@ -377,8 +377,8 @@ manager = await factory.create_isolated_manager(user_id, connection_id)
  FAIL:  INCORRECT (Don't use these patterns):
 ```python
 # Multiple import paths (causes SSOT violations)
-from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager  
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager  
 from netra_backend.app.core.interfaces_websocket import WebSocketManagerProtocol
 
 # Singleton patterns (security risk)

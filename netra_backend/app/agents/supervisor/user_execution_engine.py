@@ -37,6 +37,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     PipelineStep,
 )
 from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
+from netra_backend.app.schemas.tool import ToolExecutionEngineInterface, ToolExecuteResponse
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
@@ -236,7 +237,7 @@ class MinimalFallbackManager:
         )
 
 
-class UserExecutionEngine(IExecutionEngine):
+class UserExecutionEngine(IExecutionEngine, ToolExecutionEngineInterface):
     """Per-user execution engine with isolated state.
     
     This engine is created per-request with UserExecutionContext and maintains
@@ -996,6 +997,92 @@ class UserExecutionEngine(IExecutionEngine):
                 return result
         
         return MinimalToolDispatcher(self.context, self.websocket_emitter)
+    
+    # ToolExecutionEngineInterface Implementation
+    async def execute_tool(
+        self, 
+        tool_name: str, 
+        parameters: Dict[str, Any]
+    ) -> ToolExecuteResponse:
+        """Execute a tool by name with parameters - implements ToolExecutionEngineInterface.
+        
+        Issue #1146 Phase 2: This method provides ToolExecutionEngine interface compatibility
+        by delegating to the UserExecutionEngine's tool dispatcher. This enables migration
+        from tool_dispatcher_execution.py to UserExecutionEngine while maintaining WebSocket
+        event delivery and user isolation.
+        
+        Args:
+            tool_name: Name of the tool to execute
+            parameters: Parameters to pass to the tool
+            
+        Returns:
+            ToolExecuteResponse: Tool execution result with success/data/message
+            
+        Raises:
+            ValueError: If tool_name is invalid
+            RuntimeError: If tool execution fails
+        """
+        try:
+            logger.debug(f"ToolExecutionEngineInterface.execute_tool: {tool_name} for user {self.context.user_id}")
+            
+            # Get the tool dispatcher for this user
+            tool_dispatcher = await self.get_tool_dispatcher()
+            
+            # Execute the tool through the dispatcher - this maintains WebSocket events
+            result = await tool_dispatcher.execute_tool(tool_name, parameters)
+            
+            # Convert dispatcher result to ToolExecuteResponse format
+            if isinstance(result, dict):
+                success = result.get("success", True)
+                data = result.get("result", result.get("data"))
+                message = result.get("message", f"Tool {tool_name} executed successfully" if success else "Tool execution failed")
+                metadata = result.get("metadata", {})
+            else:
+                # Handle non-dict results
+                success = True
+                data = result
+                message = f"Tool {tool_name} executed successfully"
+                metadata = {}
+            
+            # Add user isolation metadata
+            metadata.update({
+                "user_id": self.context.user_id,
+                "engine_id": self.engine_id,
+                "user_isolated": True,
+                "interface": "ToolExecutionEngineInterface",
+                "migration_issue": "#1146"
+            })
+            
+            response = ToolExecuteResponse(
+                success=success,
+                data=data,
+                message=message,
+                metadata=metadata
+            )
+            
+            logger.info(f" PASS:  ToolExecutionEngineInterface: Tool {tool_name} executed via UserExecutionEngine "
+                       f"for user {self.context.user_id} - success: {success}")
+            
+            return response
+            
+        except Exception as e:
+            error_message = f"Tool execution failed for {tool_name}: {str(e)}"
+            logger.error(f" ALERT:  ToolExecutionEngineInterface: {error_message} (user: {self.context.user_id})")
+            
+            # Return error response with user isolation metadata
+            return ToolExecuteResponse(
+                success=False,
+                data=None,
+                message=error_message,
+                metadata={
+                    "user_id": self.context.user_id,
+                    "engine_id": self.engine_id,
+                    "user_isolated": True,
+                    "error_type": type(e).__name__,
+                    "interface": "ToolExecutionEngineInterface",
+                    "migration_issue": "#1146"
+                }
+            )
     
     def _init_components(self) -> None:
         """Initialize execution components with user context."""

@@ -1668,7 +1668,7 @@ def get_cleanup_priority(id_string: str) -> int:
         return 1  # Default low priority
 
 
-def create_websocket_manager(user_context=None, user_id=None):
+async def create_websocket_manager(user_context=None, user_id=None):
     """
     Create WebSocket manager instance - Compatibility wrapper.
     
@@ -1683,7 +1683,7 @@ def create_websocket_manager(user_context=None, user_id=None):
     Returns:
         WebSocketManager instance configured for the user context
     """
-    from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager as factory_create
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
     
     logger.debug(f"COMPATIBILITY: Creating WebSocket manager via utils.py wrapper (user_id: {user_id})")
-    return factory_create(user_context=user_context, user_id=user_id)
+    return await get_websocket_manager(user_context)

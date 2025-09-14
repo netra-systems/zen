@@ -23,10 +23,9 @@ from typing import Dict, Any, List
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-# Import all MessageRouter variants to test proxy removal impact
-from netra_backend.app.core.message_router import MessageRouter as ProxyMessageRouter
+# Import canonical MessageRouter and test import path behavior
 from netra_backend.app.websocket_core.handlers import MessageRouter as CanonicalMessageRouter
-from netra_backend.app.services.message_router import MessageRouter as ServicesMessageRouter
+# NOTE: Proxy imports now removed as part of Issue #1101 SSOT remediation
 
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from netra_backend.app.logging_config import central_logger
@@ -48,42 +47,34 @@ class TestMessageRouterProxyRemovalImpact(SSotBaseTestCase):
             "timestamp": time.time()
         }
     
-    def test_current_proxy_behavior_baseline(self):
-        """Establish baseline behavior of current proxy implementation."""
-        proxy_router = ProxyMessageRouter()
+    def test_canonical_router_functionality_after_proxy_removal(self):
+        """Verify canonical router functionality after proxy removal."""
+        canonical_router = CanonicalMessageRouter()
         
-        # Verify proxy is working correctly
-        self.assertTrue(hasattr(proxy_router, '_canonical_router'))
-        self.assertIsInstance(proxy_router._canonical_router, CanonicalMessageRouter)
-        
-        # Test all proxy methods are functional
-        proxy_methods = [
+        # Test all canonical router methods are functional
+        canonical_methods = [
             'add_route', 'add_middleware', 'start', 'stop', 
-            'get_statistics', 'handlers', 'routes', 'middleware', 'active'
+            'get_statistics', 'handlers', 'add_handler', 'remove_handler',
+            'route_message', 'get_stats'
         ]
         
-        for method in proxy_methods:
-            self.assertTrue(hasattr(proxy_router, method), 
-                           f"Proxy missing method: {method}")
+        for method in canonical_methods:
+            self.assertTrue(hasattr(canonical_router, method), 
+                           f"Canonical router missing method: {method}")
     
-    def test_proxy_deprecation_warnings_collected(self):
-        """Test that proxy deprecation warnings are properly emitted and collected."""
-        warnings.resetwarnings()
+    def test_proxy_imports_properly_removed(self):
+        """Test that proxy imports now fail correctly after removal."""
+        # Test 1: core.message_router import should fail
+        with self.assertRaises(ImportError):
+            from netra_backend.app.core.message_router import MessageRouter
         
-        with warnings.catch_warnings(record=True) as warning_list:
-            warnings.simplefilter("always")
-            
-            # Create proxy instance - should trigger deprecation warning
-            proxy_router = ProxyMessageRouter()
-            
-            # Verify warning was emitted
-            self.assertTrue(len(warning_list) > 0)
-            deprecation_warnings = [w for w in warning_list if issubclass(w.category, DeprecationWarning)]
-            self.assertTrue(len(deprecation_warnings) > 0)
-            
-            warning_message = str(deprecation_warnings[0].message)
-            self.assertIn("deprecated", warning_message.lower())
-            self.assertIn("phase 2", warning_message.lower())
+        # Test 2: services.message_router import should fail
+        with self.assertRaises(ImportError):
+            from netra_backend.app.services.message_router import MessageRouter
+        
+        # Test 3: agents.message_router import should fail
+        with self.assertRaises(ImportError):
+            from netra_backend.app.agents.message_router import MessageRouter
     
     def test_proxy_removal_simulation_direct_canonical_usage(self):
         """Simulate proxy removal by testing direct canonical router usage."""
@@ -103,81 +94,76 @@ class TestMessageRouterProxyRemovalImpact(SSotBaseTestCase):
             self.assertTrue(hasattr(canonical_router, method),
                            f"Canonical router missing method: {method}")
     
-    def test_breaking_changes_from_proxy_removal(self):
-        """Identify potential breaking changes when proxy is removed."""
-        # Test 1: Import path changes
-        try:
-            # This import would break if proxy is removed
+    def test_confirmed_breaking_changes_after_proxy_removal(self):
+        """Confirm that breaking changes occurred as expected after proxy removal."""
+        # Test 1: Import path changes - these should now fail
+        with self.assertRaises(ImportError):
             from netra_backend.app.core.message_router import MessageRouter
-            self.assertIsNotNone(MessageRouter)
             
-            # Document the breaking change
-            logger.warning("BREAKING CHANGE: Import 'from netra_backend.app.core.message_router import MessageRouter' "
-                          "will fail when proxy is removed")
-        except ImportError:
-            # This would happen after proxy removal
-            pass
+        # Test 2: Global instance imports should also fail
+        with self.assertRaises(ImportError):
+            from netra_backend.app.core.message_router import message_router
+            
+        # Test 3: Type imports from proxy paths should fail  
+        with self.assertRaises(ImportError):
+            from netra_backend.app.core.message_router import Message, MessageType
         
-        # Test 2: Global instance compatibility
-        from netra_backend.app.core.message_router import message_router
-        self.assertIsInstance(message_router, ProxyMessageRouter)
-        
-        # Document that global instance would need updating
-        logger.warning("BREAKING CHANGE: Global 'message_router' instance would need to be updated "
-                      "when proxy is removed")
+        # All proxy-related imports should now fail after removal
+        logger.info("SUCCESS: All proxy imports correctly fail after Issue #1101 remediation")
     
-    def test_proxy_specific_methods_would_be_lost(self):
-        """Test that proxy-specific methods would be lost on removal."""
-        proxy_router = ProxyMessageRouter()
-        
-        # These are proxy-specific and would be lost
-        proxy_specific_attributes = ['_canonical_router']
-        
-        for attr in proxy_specific_attributes:
-            self.assertTrue(hasattr(proxy_router, attr),
-                           f"Proxy-specific attribute {attr} exists now but would be lost")
-        
-        # Verify canonical router doesn't have these
+    def test_canonical_router_has_complete_interface(self):
+        """Test that canonical router has complete interface after proxy removal."""
         canonical_router = CanonicalMessageRouter()
+        
+        # Verify canonical router has all necessary methods
+        required_methods = [
+            'add_handler', 'remove_handler', 'route_message', 'handlers',
+            'get_stats', 'add_route', 'add_middleware', 'start', 'stop',
+            'get_statistics'
+        ]
+        
+        for method in required_methods:
+            self.assertTrue(hasattr(canonical_router, method),
+                           f"Canonical router missing required method: {method}")
+        
+        # Verify no proxy-specific attributes exist
+        proxy_specific_attributes = ['_canonical_router']
         for attr in proxy_specific_attributes:
             self.assertFalse(hasattr(canonical_router, attr),
                             f"Canonical router should not have proxy attribute {attr}")
     
-    def test_proxy_logging_behavior_changes(self):
-        """Test that proxy-specific logging would change after removal."""
-        proxy_router = ProxyMessageRouter()
-        
-        # Capture logs during proxy operation
-        with patch('netra_backend.app.core.message_router.logger') as mock_logger:
-            proxy_router.get_statistics()
-            
-            # Verify proxy-specific logging occurred
-            mock_logger.debug.assert_called()
-            debug_calls = [call.args[0] for call in mock_logger.debug.call_args_list]
-            proxy_debug_messages = [msg for msg in debug_calls if "PROXY:" in msg]
-            
-            self.assertTrue(len(proxy_debug_messages) > 0,
-                           "Proxy-specific debug logging would be lost")
-    
-    def test_statistics_format_changes_after_proxy_removal(self):
-        """Test that statistics format would change when proxy is removed."""
-        proxy_router = ProxyMessageRouter()
+    def test_canonical_logging_behavior_after_removal(self):
+        """Test canonical router logging behavior after proxy removal."""
         canonical_router = CanonicalMessageRouter()
         
-        # Get statistics from both
-        proxy_stats = proxy_router.get_statistics()
+        # Test that canonical router has proper logging
+        stats = canonical_router.get_statistics()
+        self.assertIsInstance(stats, dict)
+        
+        # Verify no proxy-specific entries in stats
+        self.assertNotIn("proxy_info", stats)
+        
+        logger.info("SUCCESS: Canonical router operates with clean logging (no proxy artifacts)")
+    
+    def test_canonical_statistics_format_after_proxy_removal(self):
+        """Test canonical statistics format after proxy removal."""
+        canonical_router = CanonicalMessageRouter()
+        
+        # Get statistics from canonical router
         canonical_stats = canonical_router.get_statistics()
         
-        # Proxy stats should include proxy_info
-        self.assertIn("proxy_info", proxy_stats)
-        self.assertTrue(proxy_stats["proxy_info"]["is_proxy"])
+        # Verify canonical stats format
+        self.assertIsInstance(canonical_stats, dict)
         
         # Canonical stats should NOT include proxy_info
         self.assertNotIn("proxy_info", canonical_stats)
         
-        # Document the format change
-        logger.warning("FORMAT CHANGE: Statistics format will change when proxy is removed - "
-                      "proxy_info section will disappear")
+        # Should include expected canonical fields
+        expected_fields = ["total_messages", "active_routes", "middleware_count", "active"]
+        for field in expected_fields:
+            self.assertIn(field, canonical_stats, f"Missing expected field: {field}")
+        
+        logger.info("SUCCESS: Canonical statistics format clean after proxy removal")
     
     def test_middleware_and_route_compatibility_after_removal(self):
         """Test middleware and route compatibility after proxy removal."""
@@ -190,9 +176,11 @@ class TestMessageRouterProxyRemovalImpact(SSotBaseTestCase):
         # This should work in canonical router
         canonical_router.add_route(test_route_pattern, test_handler)
         
-        # Verify route was added
+        # Verify route was added (test compatibility method)
         if hasattr(canonical_router, '_test_routes'):
             self.assertIn(test_route_pattern, canonical_router._test_routes)
+        
+        logger.info("SUCCESS: Canonical router maintains compatibility interface after proxy removal")
         
         # Test middleware addition
         test_middleware = Mock()

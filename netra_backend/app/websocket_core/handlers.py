@@ -1792,7 +1792,7 @@ class MessageRouter:
         logger.warning(f"Unknown quality message type: {message_type}")
         try:
             from netra_backend.app.dependencies import get_user_execution_context
-            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
             error_message = f"Unknown quality message type: {message_type}"
             user_context = get_user_execution_context(
@@ -1800,7 +1800,7 @@ class MessageRouter:
                 thread_id=None,  # Let session manager handle missing IDs
                 run_id=None      # Let session manager handle missing IDs
             )
-            manager = await create_websocket_manager(user_context)
+            manager = await get_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:
             logger.error(f"Failed to send unknown quality message error to user {user_id}: {e}")
@@ -1809,7 +1809,7 @@ class MessageRouter:
         """Handle quality handler errors."""
         try:
             from netra_backend.app.dependencies import get_user_execution_context
-            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
             error_message = f"Quality handler error for {message_type}: {str(error)}"
             user_context = get_user_execution_context(
@@ -1817,7 +1817,7 @@ class MessageRouter:
                 thread_id=None,  # Let session manager handle missing IDs
                 run_id=None      # Let session manager handle missing IDs
             )
-            manager = await create_websocket_manager(user_context)
+            manager = await get_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:
             logger.error(f"Failed to send quality handler error to user {user_id}: {e}")
@@ -1839,7 +1839,7 @@ class MessageRouter:
             # Get monitoring service for subscriber list
             from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
             from netra_backend.app.dependencies import get_user_execution_context
-            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
             # Create monitoring service to get subscribers
             monitoring_service = QualityMonitoringService()
@@ -1858,7 +1858,7 @@ class MessageRouter:
         """Send quality update to a single subscriber."""
         try:
             from netra_backend.app.dependencies import get_user_execution_context
-            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
             message = {
                 "type": "quality_update",
@@ -1870,7 +1870,7 @@ class MessageRouter:
                 thread_id=None,  # Let session manager handle missing IDs
                 run_id=None      # Let session manager handle missing IDs
             )
-            manager = await create_websocket_manager(user_context)
+            manager = await get_websocket_manager(user_context)
             await manager.send_to_user(message)
             
         except Exception as e:
@@ -1914,7 +1914,7 @@ class MessageRouter:
         """Send quality alert to a single subscriber."""
         try:
             from netra_backend.app.dependencies import get_user_execution_context
-            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
             alert_message = {
                 "type": "quality_alert",
@@ -1929,7 +1929,7 @@ class MessageRouter:
                 thread_id=None,  # Let session manager handle missing IDs
                 run_id=None      # Let session manager handle missing IDs
             )
-            manager = await create_websocket_manager(user_context)
+            manager = await get_websocket_manager(user_context)
             await manager.send_to_user(alert_message)
             
         except Exception as e:
