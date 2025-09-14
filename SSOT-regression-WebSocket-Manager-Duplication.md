@@ -3,7 +3,7 @@
 **Issue:** [#1033](https://github.com/netra-systems/netra-apex/issues/1033)  
 **Focus:** Message Routing - WebSocket Manager SSOT Violation  
 **Priority:** CRITICAL - Golden Path Blocker  
-**Status:** Discovery Complete, Moving to Test Planning
+**Status:** Test Discovery & Planning Complete, Moving to Test Execution
 
 ---
 
@@ -62,22 +62,51 @@
 - ✅ Identified 4 critical SSOT violations with WebSocket Manager as highest priority
 - ✅ Created GitHub issue #1033 documenting the violation
 - ✅ Established business impact ($500K+ ARR Golden Path blocker)
-- 🔄 **NEXT:** Move to test discovery and planning phase
+
+### 2025-01-14 - Test Discovery & Planning Complete
+- ✅ Comprehensive test analysis reveals **62.5% mission critical test failure rate**
+- ✅ Identified **60+ existing tests** for regression protection during SSOT consolidation
+- ✅ Planned **20+ new SSOT-specific tests** to validate consolidation success
+- ✅ Current failures align with WebSocket Manager fragmentation issues
+- 🔄 **NEXT:** Execute test plan for new SSOT tests (20% focus)
 
 ---
 
 ## Test Strategy
 
-### Existing Test Coverage (To Discover)
-- Mission critical WebSocket tests
-- Integration tests for message routing
-- E2E tests for agent communication
+### Existing Test Coverage Discovered ✅
+**Current Status:** 62.5% mission critical test failure rate requires immediate SSOT action
 
-### New Test Requirements (To Plan)
-- SSOT compliance tests for single WebSocket manager
-- Race condition prevention tests  
-- Message routing consolidation validation
-- Golden Path reliability tests
+**Mission Critical Tests (Primary Protection):**
+- `tests/mission_critical/test_websocket_agent_events_suite.py` - 8 tests, 3 failing due to event structure
+- WebSocket event validation tests for Golden Path protection
+- Real-time communication reliability tests
+
+**Integration Tests (Regression Protection):**
+- 60+ existing tests covering WebSocket manager functionality
+- Message routing integration across services
+- Agent communication pathway validation
+
+**Test Failure Pattern Analysis:**
+- Event structure validation failures align with SSOT fragmentation
+- Multiple WebSocket managers causing inconsistent event formats
+- Race conditions in message delivery during concurrent access
+
+### New Test Requirements Planned ✅
+**SSOT Compliance Tests (20% New Test Focus):**
+- Single WebSocket manager instance validation 
+- SSOT import pattern compliance checking
+- Duplicate manager prevention tests
+
+**Race Condition Prevention Tests:**
+- Concurrent WebSocket connection handling validation
+- Message delivery ordering guarantee tests
+- Event synchronization across multiple users
+
+**Event Structure Consistency Tests:**
+- Canonical event format validation
+- Cross-service event compatibility verification
+- Real-time event delivery reliability testing
 
 ---
 
