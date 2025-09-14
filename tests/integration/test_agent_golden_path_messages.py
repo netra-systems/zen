@@ -234,6 +234,10 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
             'confidence_score': 'Above 0.8 for credible recommendations'
         }
 
+        # Initialize async infrastructure if not already done
+        if self.llm_manager is None:
+            await self.async_setup_method()
+
         # Track complete Golden Path execution
         golden_path_start = time.time()
 
