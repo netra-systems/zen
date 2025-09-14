@@ -353,7 +353,7 @@ class TestWebSocketManagerCanonicalInterface(SSotBaseTestCase):
         successful_analyses = [a for a in self.interface_analyses if a.success]
 
         if len(successful_analyses) == 0:
-            self.fail("No WebSocket Manager implementations could be imported for interface analysis")
+            pytest.fail("No WebSocket Manager implementations could be imported for interface analysis")
 
         print(f"=== CANONICAL INTERFACE COMPLIANCE ANALYSIS ===")
 
@@ -406,7 +406,7 @@ class TestWebSocketManagerCanonicalInterface(SSotBaseTestCase):
                     print(f"     - {method}")
 
             # This should FAIL before SSOT interface consolidation
-            self.fail(
+            pytest.fail(
                 f"CANONICAL INTERFACE VIOLATIONS: Found {len(interface_violations)} interface violations "
                 f"across WebSocket Manager implementations. After SSOT consolidation, all import paths "
                 f"should expose the same canonical interface. Violations: {interface_violations}"
@@ -530,7 +530,7 @@ class TestWebSocketManagerCanonicalInterface(SSotBaseTestCase):
                 print(f"   - {violation}")
 
             # This should FAIL before SSOT consolidation
-            self.fail(
+            pytest.fail(
                 f"CRITICAL METHOD SIGNATURE VIOLATIONS: Found {len(signature_violations)} signature "
                 f"violations in business-critical WebSocket Manager methods. These methods are "
                 f"essential for Golden Path functionality and must have consistent signatures "
@@ -608,7 +608,7 @@ class TestWebSocketManagerCanonicalInterface(SSotBaseTestCase):
                 print(f"   - {violation}")
 
             # This should FAIL before SSOT consolidation
-            self.fail(
+            pytest.fail(
                 f"INTERFACE COMPLETENESS VIOLATIONS: Found {len(completeness_violations)} implementations "
                 f"with incomplete interfaces. After SSOT consolidation, all WebSocket Manager implementations "
                 f"must expose the complete canonical interface required for Golden Path functionality. "
