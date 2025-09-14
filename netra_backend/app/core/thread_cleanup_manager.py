@@ -30,6 +30,24 @@ from datetime import datetime, timedelta
 logger = logging.getLogger(__name__)
 
 
+def _safe_log(log_level: str, message: str) -> None:
+    """
+    Safe logging that handles shutdown scenarios where logging system may be partially torn down.
+    
+    Args:
+        log_level: Level to log at ('info', 'warning', 'error', 'debug')
+        message: Message to log
+    """
+    try:
+        if logger and hasattr(logger, log_level):
+            log_func = getattr(logger, log_level)
+            if callable(log_func):
+                log_func(message)
+    except (TypeError, AttributeError, ImportError):
+        # Logger system is being torn down during shutdown, skip logging
+        pass
+
+
 @dataclass
 class ThreadInfo:
     """Information about a tracked thread."""
@@ -275,11 +293,13 @@ class ThreadCleanupManager:
         # Skip cleanup during Python shutdown
         try:
             if hasattr(sys, 'meta_path') and sys.meta_path is None:
-                logger.warning("Thread cleanup skipped - Python shutdown detected (sys.meta_path is None)")
+                # Safe logging during shutdown
+                _safe_log('warning', "Thread cleanup skipped - Python shutdown detected (sys.meta_path is None)")
                 return
         except (ImportError, AttributeError):
             # Python is shutting down, skip cleanup
-            logger.warning("Thread cleanup skipped - Python shutdown detected (ImportError/AttributeError)")
+            # Safe logging during shutdown
+            _safe_log('warning', "Thread cleanup skipped - Python shutdown detected (ImportError/AttributeError)")
             return
 
         self._cleanup_scheduled = True
