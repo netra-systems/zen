@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-09-14T12:14:28.558990",
+    "generated_at": "2025-09-14T12:24:41.566729",
     "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 45
   },
@@ -61,7 +61,7 @@
       "category": "events",
       "locations": [
         "netra_backend/app/services/user_scoped_websocket_event_router.py:781",
-        "netra_backend/app/services/websocket_broadcast_service.py:274"
+        "netra_backend/app/services/websocket_broadcast_service.py:300"
       ]
     },
     "business_event": {
