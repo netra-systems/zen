@@ -39,7 +39,7 @@ class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestC
     They should PASS initially (proving violations exist) and FAIL after consolidation.
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment with isolated configuration."""
         super().setUp()
         
@@ -59,7 +59,7 @@ class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestC
         self.env_patcher = patch.dict('os.environ', self.test_env)
         self.env_patcher.start()
 
-    def tearDown(self):
+    def teardown_method(self, method):
         """Clean up test environment."""
         super().tearDown()
         if hasattr(self, 'env_patcher'):

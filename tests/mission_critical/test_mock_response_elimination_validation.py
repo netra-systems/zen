@@ -24,6 +24,7 @@ import uuid
 from typing import Dict, List, Any, Optional
 import aiohttp
 import websockets
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 
 from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, AuthenticatedUser
@@ -35,7 +36,7 @@ from shared.types.core_types import UserID, ThreadID, RequestID
 logger = logging.getLogger(__name__)
 
 
-class TestMockResponseEliminationValidation(BaseE2ETest):
+class TestMockResponseEliminationValidation(SSotBaseTestCase):
     """
     MISSION CRITICAL FAILING TESTS: Prove ANY mock response can reach users
     

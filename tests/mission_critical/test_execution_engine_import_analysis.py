@@ -36,7 +36,7 @@ logger = central_logger.get_logger(__name__)
 class TestExecutionEngineImportAnalysis(SSotBaseTestCase):
     """Test for analyzing ExecutionEngine import patterns and violations."""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment for import analysis."""
         super().setUp()
         self.codebase_root = Path(__file__).parent.parent.parent

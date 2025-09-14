@@ -297,7 +297,7 @@
     # REMOVED_SYNTAX_ERROR: and security boundary enforcement.
     # REMOVED_SYNTAX_ERROR: '''
 
-# REMOVED_SYNTAX_ERROR: def setUp(self):
+# REMOVED_SYNTAX_ERROR: def setup_method(self, method):
     # REMOVED_SYNTAX_ERROR: """Set up orchestration test environment with strict isolation validation."""
     # Note: Using setUp instead of setup_method for BaseTestCase compatibility
     # REMOVED_SYNTAX_ERROR: self.start_time = time.time()
@@ -314,7 +314,7 @@
     # Set up isolated environment
     # REMOVED_SYNTAX_ERROR: self.env = self.test_env_manager.setup_test_environment()
 
-# REMOVED_SYNTAX_ERROR: def tearDown(self):
+# REMOVED_SYNTAX_ERROR: def teardown_method(self, method):
     # REMOVED_SYNTAX_ERROR: """Tear down with metrics collection and mock detection."""
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: duration = time.time() - self.start_time

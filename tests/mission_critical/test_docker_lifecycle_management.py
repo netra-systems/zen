@@ -104,7 +104,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
     # REMOVED_SYNTAX_ERROR: '''
 
     # REMOVED_SYNTAX_ERROR: @classmethod
-# REMOVED_SYNTAX_ERROR: def setUpClass(cls):
+# REMOVED_SYNTAX_ERROR: def setup_class(cls):
     # REMOVED_SYNTAX_ERROR: """Set up class-level test infrastructure."""
     # REMOVED_SYNTAX_ERROR: cls.test_project_prefix = "lifecycle_test"
     # REMOVED_SYNTAX_ERROR: cls.docker_manager = None
@@ -121,12 +121,12 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
         # REMOVED_SYNTAX_ERROR: cls._cleanup_test_artifacts()
 
         # REMOVED_SYNTAX_ERROR: @classmethod
-# REMOVED_SYNTAX_ERROR: def tearDownClass(cls):
+# REMOVED_SYNTAX_ERROR: def teardown_class(cls):
     # REMOVED_SYNTAX_ERROR: """Clean up class-level resources."""
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: cls._cleanup_test_artifacts()
 
-# REMOVED_SYNTAX_ERROR: def setUp(self):
+# REMOVED_SYNTAX_ERROR: def setup_method(self, method):
     # REMOVED_SYNTAX_ERROR: """Set up individual test."""
     # REMOVED_SYNTAX_ERROR: self.test_id = "formatted_string"
     # REMOVED_SYNTAX_ERROR: self.docker_manager = UnifiedDockerManager( )
@@ -135,7 +135,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
     # REMOVED_SYNTAX_ERROR: use_production_images=True
     
 
-# REMOVED_SYNTAX_ERROR: def tearDown(self):
+# REMOVED_SYNTAX_ERROR: def teardown_method(self, method):
     # REMOVED_SYNTAX_ERROR: """Clean up individual test."""
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: if self.docker_manager:
@@ -1576,7 +1576,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
     # REMOVED_SYNTAX_ERROR: """Infrastructure Test Category: Service Startup (5 tests)"""
 
     # REMOVED_SYNTAX_ERROR: @classmethod
-# REMOVED_SYNTAX_ERROR: def setUpClass(cls):
+# REMOVED_SYNTAX_ERROR: def setup_class(cls):
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: cls.test_project_prefix = "infra_startup"
     # REMOVED_SYNTAX_ERROR: cls.created_containers = set()
@@ -1586,7 +1586,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
     
 
     # REMOVED_SYNTAX_ERROR: @classmethod
-# REMOVED_SYNTAX_ERROR: def tearDownClass(cls):
+# REMOVED_SYNTAX_ERROR: def teardown_class(cls):
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: cls._cleanup_containers()
 
@@ -1844,13 +1844,13 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
     # REMOVED_SYNTAX_ERROR: """Infrastructure Test Category: Health Monitoring (5 tests)"""
 
     # REMOVED_SYNTAX_ERROR: @classmethod
-# REMOVED_SYNTAX_ERROR: def setUpClass(cls):
+# REMOVED_SYNTAX_ERROR: def setup_class(cls):
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: cls.test_project_prefix = "infra_health"
     # REMOVED_SYNTAX_ERROR: cls.created_containers = set()
 
     # REMOVED_SYNTAX_ERROR: @classmethod
-# REMOVED_SYNTAX_ERROR: def tearDownClass(cls):
+# REMOVED_SYNTAX_ERROR: def teardown_class(cls):
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: cls._cleanup_containers()
 
@@ -2217,13 +2217,13 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
     # REMOVED_SYNTAX_ERROR: """Infrastructure Test Category: Failure Recovery (5 tests)"""
 
     # REMOVED_SYNTAX_ERROR: @classmethod
-# REMOVED_SYNTAX_ERROR: def setUpClass(cls):
+# REMOVED_SYNTAX_ERROR: def setup_class(cls):
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: cls.test_project_prefix = "infra_recovery"
     # REMOVED_SYNTAX_ERROR: cls.created_containers = set()
 
     # REMOVED_SYNTAX_ERROR: @classmethod
-# REMOVED_SYNTAX_ERROR: def tearDownClass(cls):
+# REMOVED_SYNTAX_ERROR: def teardown_class(cls):
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: cls._cleanup_containers()
 
@@ -2609,13 +2609,13 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
     # REMOVED_SYNTAX_ERROR: """Infrastructure Test Category: Performance (5 tests)"""
 
     # REMOVED_SYNTAX_ERROR: @classmethod
-# REMOVED_SYNTAX_ERROR: def setUpClass(cls):
+# REMOVED_SYNTAX_ERROR: def setup_class(cls):
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: cls.test_project_prefix = "infra_perf"
     # REMOVED_SYNTAX_ERROR: cls.created_containers = set()
 
     # REMOVED_SYNTAX_ERROR: @classmethod
-# REMOVED_SYNTAX_ERROR: def tearDownClass(cls):
+# REMOVED_SYNTAX_ERROR: def teardown_class(cls):
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: cls._cleanup_containers()
 

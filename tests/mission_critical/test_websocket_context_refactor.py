@@ -134,13 +134,13 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
 # REMOVED_SYNTAX_ERROR: class TestProperWebSocketHandling(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test that proper WebSocket handling patterns work correctly."""
 
-# REMOVED_SYNTAX_ERROR: def setUp(self):
+# REMOVED_SYNTAX_ERROR: def setup_method(self, method):
     # REMOVED_SYNTAX_ERROR: """Set up test fixtures."""
     # REMOVED_SYNTAX_ERROR: self.loop = asyncio.new_event_loop()
     # REMOVED_SYNTAX_ERROR: asyncio.set_event_loop(self.loop)
     # REMOVED_SYNTAX_ERROR: self.capture = AdvancedWebSocketCapture()
 
-# REMOVED_SYNTAX_ERROR: def tearDown(self):
+# REMOVED_SYNTAX_ERROR: def teardown_method(self, method):
     # REMOVED_SYNTAX_ERROR: """Clean up after tests."""
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: self.loop.close()
@@ -306,12 +306,12 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
 # REMOVED_SYNTAX_ERROR: class TestConcurrentAgentExecution(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test concurrent agent execution with WebSocket notifications."""
 
-# REMOVED_SYNTAX_ERROR: def setUp(self):
+# REMOVED_SYNTAX_ERROR: def setup_method(self, method):
     # REMOVED_SYNTAX_ERROR: """Set up test fixtures."""
     # REMOVED_SYNTAX_ERROR: self.loop = asyncio.new_event_loop()
     # REMOVED_SYNTAX_ERROR: asyncio.set_event_loop(self.loop)
 
-# REMOVED_SYNTAX_ERROR: def tearDown(self):
+# REMOVED_SYNTAX_ERROR: def teardown_method(self, method):
     # REMOVED_SYNTAX_ERROR: """Clean up after tests."""
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: self.loop.close()
@@ -457,12 +457,12 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
 # REMOVED_SYNTAX_ERROR: class TestErrorHandlingAndRecovery(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test error handling and recovery in WebSocket operations."""
 
-# REMOVED_SYNTAX_ERROR: def setUp(self):
+# REMOVED_SYNTAX_ERROR: def setup_method(self, method):
     # REMOVED_SYNTAX_ERROR: """Set up test fixtures."""
     # REMOVED_SYNTAX_ERROR: self.loop = asyncio.new_event_loop()
     # REMOVED_SYNTAX_ERROR: asyncio.set_event_loop(self.loop)
 
-# REMOVED_SYNTAX_ERROR: def tearDown(self):
+# REMOVED_SYNTAX_ERROR: def teardown_method(self, method):
     # REMOVED_SYNTAX_ERROR: """Clean up after tests."""
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: self.loop.close()
@@ -589,12 +589,12 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
 # REMOVED_SYNTAX_ERROR: class TestPerformanceAndMemory(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test performance and memory efficiency after refactoring."""
 
-# REMOVED_SYNTAX_ERROR: def setUp(self):
+# REMOVED_SYNTAX_ERROR: def setup_method(self, method):
     # REMOVED_SYNTAX_ERROR: """Set up test fixtures."""
     # REMOVED_SYNTAX_ERROR: self.loop = asyncio.new_event_loop()
     # REMOVED_SYNTAX_ERROR: asyncio.set_event_loop(self.loop)
 
-# REMOVED_SYNTAX_ERROR: def tearDown(self):
+# REMOVED_SYNTAX_ERROR: def teardown_method(self, method):
     # REMOVED_SYNTAX_ERROR: """Clean up after tests."""
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: self.loop.close()

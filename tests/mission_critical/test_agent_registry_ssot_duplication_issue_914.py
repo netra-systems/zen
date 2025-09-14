@@ -373,7 +373,7 @@ class TestAgentRegistrySSotDuplication(SSotBaseTestCase):
                            f"Patterns: {initialization_patterns}")
 
 
-class TestAgentRegistryRuntimeBehaviorInconsistencies(unittest.TestCase):
+class TestAgentRegistryRuntimeBehaviorInconsistencies(SSotBaseTestCase):
     """Test suite for runtime behavior inconsistencies between registries."""
     
     def test_01_concurrent_access_behavior(self):

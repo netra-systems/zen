@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 class TestMessageRouterGoldenPathProtection(SSotAsyncTestCase, unittest.TestCase):
     """Validates Golden Path protection during MessageRouter consolidation."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test fixtures."""
         if hasattr(super(), 'setUp'):
             super().setUp()

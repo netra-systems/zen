@@ -265,7 +265,7 @@ class TestWebSocketJwtBypassViolation(SSotAsyncTestCase):
             logger.info(f" PASS:  Unauthorized access properly blocked: {e}")
             pytest.fail("VIOLATION NOT REPRODUCED: Unauthorized access was blocked")
 
-    def tearDown(self):
+    def teardown_method(self, method):
         """Clean up test artifacts."""
         logger.info("[U+1F9F9] JWT bypass violation test cleanup complete")
 

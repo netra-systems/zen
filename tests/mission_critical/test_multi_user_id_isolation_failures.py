@@ -52,7 +52,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
 from netra_backend.app.dependencies import get_request_scoped_db_session
 
 
-class TestMultiUserIDIsolationFailures(BaseTestCase):
+class TestMultiUserIDIsolationFailures(SSotBaseTestCase):
     """Mission critical tests for multi-user ID isolation failures."""
     
     def setup_method(self):

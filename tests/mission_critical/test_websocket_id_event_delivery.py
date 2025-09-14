@@ -32,6 +32,7 @@ import time
 from typing import Dict, List, Any, Optional, Set
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 
 # Import mission critical testing framework
 from tests.mission_critical.base_mission_critical_test import BaseMissionCriticalTest
@@ -59,7 +60,7 @@ from shared.types.core_types import UserID, ConnectionID, ExecutionID, MessageID
 @pytest.mark.websocket
 @pytest.mark.event_delivery
 @pytest.mark.business_value
-class TestWebSocketIdEventDeliveryMissionCritical(BaseMissionCriticalTest):
+class TestWebSocketIdEventDeliveryMissionCritical(SSotBaseTestCase):
     """
     Mission Critical tests that EXPOSE event delivery failures with uuid.uuid4().
     

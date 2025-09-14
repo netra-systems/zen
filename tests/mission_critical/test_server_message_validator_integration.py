@@ -13,17 +13,18 @@ real WebSocket message structures.
 
 import asyncio
 import json
-import unittest
+# SSOT Base Test Case Import
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 from datetime import datetime, timezone
 from typing import Dict, List, Any
 
 from tests.mission_critical.test_websocket_agent_events_suite import MissionCriticalEventValidator
 
 
-class TestServerMessageValidatorIntegration(unittest.TestCase):
+class TestServerMessageValidatorIntegration(SSotBaseTestCase):
     """Integration test for MissionCriticalEventValidator with real message formats."""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test validator and sample messages."""
         self.validator = MissionCriticalEventValidator()
         self.test_timestamp = datetime.now(timezone.utc).isoformat()

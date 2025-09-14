@@ -37,6 +37,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 
 # Migrated to use UserExecutionContext fixtures
 # from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
@@ -78,7 +79,7 @@ except ImportError:
     logger = logging.getLogger(__name__)
 
 
-class TestAgentExecutionBusinessValue(BaseIntegrationTest):
+class TestAgentExecutionBusinessValue(SSotBaseTestCase):
     """
     P0 Mission Critical Test: Agent Execution Business Value Delivery
     

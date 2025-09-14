@@ -27,6 +27,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 
 import httpx
 import jwt
@@ -150,7 +151,7 @@ class AuthServiceCoordinationValidator:
 
 @pytest.mark.mission_critical
 @pytest.mark.real_services
-class TestAuthServiceCoordination(BaseIntegrationTest):
+class TestAuthServiceCoordination(SSotBaseTestCase):
     """Mission Critical: Auth service coordination for seamless user experience."""
     
     @pytest.fixture(autouse=True)
@@ -425,7 +426,7 @@ class TestAuthServiceCoordination(BaseIntegrationTest):
 
 @pytest.mark.mission_critical
 @pytest.mark.real_services  
-class TestAuthServiceFailureRecovery(BaseIntegrationTest):
+class TestAuthServiceFailureRecovery(SSotBaseTestCase):
     """Mission Critical: Auth service failure recovery scenarios."""
     
     async def test_auth_service_timeout_recovery(self):

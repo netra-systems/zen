@@ -33,6 +33,7 @@ import json
 from typing import Dict, List, Any, Optional, Tuple, Set
 from datetime import datetime, timezone, timedelta
 from dataclasses import dataclass
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 
 # Import mission critical testing framework
 from tests.mission_critical.base_mission_critical_test import BaseMissionCriticalTest
@@ -75,7 +76,7 @@ class AuditTrailEntry:
 @pytest.mark.websocket
 @pytest.mark.audit_trail
 @pytest.mark.compliance
-class TestWebSocketAuditTrailComplianceMissionCritical(BaseMissionCriticalTest):
+class TestWebSocketAuditTrailComplianceMissionCritical(SSotBaseTestCase):
     """
     Mission Critical tests that EXPOSE audit trail compliance failures with uuid.uuid4().
     

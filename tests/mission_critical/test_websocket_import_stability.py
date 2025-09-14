@@ -35,7 +35,7 @@ from test_framework.ssot.real_websocket_connection_manager import RealWebSocketC
 from netra_backend.app.websocket_core.event_validator import AgentEventValidator
 
 
-class TestWebSocketAuthCircuitBreakerImportStability(BaseTestCase):
+class TestWebSocketAuthCircuitBreakerImportStability(SSotBaseTestCase):
     """
     CRITICAL: Tests the exact lines that failed due to missing "import time"
     
@@ -320,7 +320,7 @@ class TestWebSocketAuthCircuitBreakerImportStability(BaseTestCase):
             await ws_manager.cleanup_all_connections()
 
 
-class TestWebSocketImportStabilityOriginal(BaseTestCase):
+class TestWebSocketImportStabilityOriginal(SSotBaseTestCase):
     """
     Original import stability tests (preserved for backward compatibility).
     """
@@ -631,7 +631,7 @@ class TestWebSocketImportStabilityOriginal(BaseTestCase):
             return {"connection_id": connection_id, "error": str(e)}
 
 
-class TestCloudRunEnvironmentCompatibility(BaseTestCase):
+class TestCloudRunEnvironmentCompatibility(SSotBaseTestCase):
     """Test Cloud Run environment compatibility for import stability."""
     
     @pytest.mark.mission_critical

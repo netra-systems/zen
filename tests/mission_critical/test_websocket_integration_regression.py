@@ -28,6 +28,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional, Tuple
 import websockets
 from unittest.mock import Mock, patch
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
@@ -36,7 +37,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketIntegrationRegression(BaseIntegrationTest):
+class TestWebSocketIntegrationRegression(SSotBaseTestCase):
     """
     Mission-critical test suite to prevent WebSocket integration regressions.
     

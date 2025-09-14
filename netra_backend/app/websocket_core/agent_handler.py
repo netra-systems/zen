@@ -25,7 +25,7 @@ from netra_backend.app.dependencies import (
     get_user_execution_context
 )
 from shared.id_generation import UnifiedIdGenerator
-from netra_backend.app.websocket_core import create_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.message_handlers import MessageHandlerService
@@ -109,7 +109,7 @@ class AgentMessageHandler(BaseMessageHandler):
                 thread_id=thread_id,  # None if not provided - maintains session continuity
                 run_id=run_id  # None if not provided - allows session reuse
             )
-            ws_manager = await create_websocket_manager(context)
+            ws_manager = await get_websocket_manager(context)
             connection_id = None
             
             if thread_id and ws_manager:
@@ -325,7 +325,7 @@ class AgentMessageHandler(BaseMessageHandler):
                     thread_id=websocket_context.thread_id,  # Use existing thread_id from context
                     run_id=websocket_context.run_id  # Use existing run_id from context
                 )
-                manager = await create_websocket_manager(context)
+                manager = await get_websocket_manager(context)
                 await manager.send_error(
                     websocket_context.user_id, 
                     f"Failed to process {message.type}. Please try again."
