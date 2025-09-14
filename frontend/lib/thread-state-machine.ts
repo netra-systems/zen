@@ -173,7 +173,7 @@ export class ThreadStateMachine {
   /**
    * Finds transition for current state and event
    */
-  private findTransition(state: ThreadState, event: ThreadEvent): ThreadTransition | undefined {
+  private findTransition(state: ThreadOperationState, event: ThreadEvent): ThreadTransition | undefined {
     return this.config.transitions.find(t => t.from === state && t.event === event);
   }
 
