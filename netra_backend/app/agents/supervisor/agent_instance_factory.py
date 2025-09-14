@@ -44,7 +44,7 @@ from netra_backend.app.websocket_core import (
 )
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 # Import WebSocketManager from SSOT factory
-from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 # WebSocket exceptions module was deleted - using standard exceptions
 from netra_backend.app.logging_config import central_logger
 

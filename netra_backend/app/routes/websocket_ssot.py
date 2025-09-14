@@ -129,7 +129,7 @@ from netra_backend.app.dependencies import (
 )
 
 # Isolated pattern dependencies (for isolated mode)
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as ConnectionScopedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ConnectionScopedWebSocketManager
 from netra_backend.app.websocket.connection_handler import connection_scope
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
