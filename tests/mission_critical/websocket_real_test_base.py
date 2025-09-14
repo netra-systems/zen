@@ -1044,7 +1044,7 @@ class RealWebSocketTestBase:
         Validate that required agent events are received through real WebSocket.
         
         Args:
-            test_context: TestContext to validate events for
+            test_context: WebSocketTestContext to validate events for
             required_events: Set of required event types
             timeout: Maximum time to wait for events
             
@@ -1367,7 +1367,7 @@ async def real_websocket_connection(real_websocket_test_base):
 
 @pytest.fixture
 async def real_test_context(real_websocket_test_base):
-    """Pytest fixture providing a TestContext with real WebSocket."""
+    """Pytest fixture providing a WebSocketTestContext with real WebSocket."""
     context = await real_websocket_test_base.create_test_context()
     await context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
     yield context
@@ -1375,7 +1375,7 @@ async def real_test_context(real_websocket_test_base):
 
 @pytest.fixture
 async def multiple_real_test_contexts(real_websocket_test_base):
-    """Pytest fixture providing multiple TestContexts with real WebSockets."""
+    """Pytest fixture providing multiple WebSocketTestContexts with real WebSockets."""
     contexts = []
     for i in range(3):
         context = await real_websocket_test_base.create_test_context(
@@ -1390,7 +1390,7 @@ async def multiple_real_test_contexts(real_websocket_test_base):
 # Utility functions for common test patterns
 
 async def assert_agent_events_received(
-    test_context: TestContext,
+    test_context: WebSocketTestContext,
     required_events: Optional[Set[str]] = None,
     timeout: float = 30.0
 ) -> None:
@@ -1428,7 +1428,7 @@ async def assert_agent_events_received(
 
 
 async def send_test_agent_request(
-    test_context: TestContext,
+    test_context: WebSocketTestContext,
     agent_name: str = "test_agent",
     task: str = "Perform a simple test task"
 ) -> Dict[str, Any]:

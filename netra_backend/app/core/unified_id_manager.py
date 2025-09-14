@@ -11,10 +11,10 @@ import threading
 from typing import Dict, Optional, Any, Set, Union
 from dataclasses import dataclass
 from enum import Enum
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class IDType(Enum):
