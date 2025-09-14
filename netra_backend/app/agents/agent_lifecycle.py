@@ -36,6 +36,8 @@ class AgentLifecycleMixin(ABC):
     def _finalize_execution_timing(self) -> float:
         """Finalize execution timing and return duration."""
         self.end_time = time.time()
+        if self.start_time is None:
+            return 0.0  # Return 0 if start_time was never set
         return self.end_time - self.start_time
     
     def _update_lifecycle_status(self, success: bool) -> str:
