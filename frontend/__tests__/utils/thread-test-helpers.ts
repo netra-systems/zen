@@ -16,6 +16,7 @@
 
 import { jest } from '@jest/globals';
 import { createMockMessage, MockMessage, MockThread } from './test-helpers';
+import { ThreadState } from '@shared/types/frontend_types';
 
 // Define types locally to avoid import issues during testing
 export interface ThreadMetadata {
@@ -47,13 +48,7 @@ export interface Thread {
   tags?: string[];
 }
 
-export interface ThreadState {
-  threads: Thread[];
-  activeThreadId: string | null;
-  currentThread: Thread | null;
-  isLoading: boolean;
-  error: string | null;
-}
+// ThreadState imported from canonical SSOT location: @shared/types/frontend_types
 
 // ============================================================================
 // THREAD MOCK FACTORIES - Thread generation utilities
