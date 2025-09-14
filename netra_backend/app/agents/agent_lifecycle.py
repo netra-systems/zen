@@ -111,7 +111,7 @@ class AgentLifecycleMixin(ABC):
         self.logger.info(f"WebSocket disconnected during {self.name} execution: {e}")
         await self._post_run(context, run_id, stream_updates, success=False)
     
-    async def _handle_execution_error(self, e: Exception, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+    async def _handle_execution_error(self, e: Exception, context: UserExecutionContext, run_id: str, stream_updates: bool) -> None:
         """Handle execution errors and send notifications."""
         self.logger.error(f"{self.name} failed for run_id: {run_id}: {e}")
         await self._send_error_notification(e, run_id, stream_updates)

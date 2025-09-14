@@ -98,7 +98,7 @@ class ProductionLeakReproducer:
             return True
         return False
     
-    async def simulate_browser_multi_tab_pattern(self, factory: WebSocketManagerFactory, user_id: str) -> Dict[str, Any]:
+    async def simulate_browser_multi_tab_pattern(self, factory: WebSocketManager, user_id: str) -> Dict[str, Any]:
         """
         PRODUCTION SCENARIO 1: Browser Multi-Tab Pattern
         
@@ -210,7 +210,7 @@ class ProductionLeakReproducer:
             'isolation_key_uniqueness': len(isolation_keys) == len([m for m in tab_managers if m._is_active])
         }
     
-    async def simulate_cloud_run_cold_start_burst(self, factory: WebSocketManagerFactory, user_id: str) -> Dict[str, Any]:
+    async def simulate_cloud_run_cold_start_burst(self, factory: WebSocketManager, user_id: str) -> Dict[str, Any]:
         """
         PRODUCTION SCENARIO 2: Cloud Run Cold Start + Connection Burst
         
@@ -226,7 +226,7 @@ class ProductionLeakReproducer:
         baseline_memory = self.capture_memory_snapshot("cold_start_baseline")
         
         # Simulate cold start - create new factory (no background cleanup started)
-        cold_start_factory = WebSocketManagerFactory(max_managers_per_user=20, connection_timeout_seconds=300)
+        cold_start_factory = WebSocketManager(max_managers_per_user=20, connection_timeout_seconds=300)
         
         # Simulate connection burst (users reconnecting after cold start)
         burst_managers = []
@@ -286,7 +286,7 @@ class ProductionLeakReproducer:
             'memory_growth_mb': final_memory - baseline_memory
         }
     
-    async def simulate_network_reconnection_cycles(self, factory: WebSocketManagerFactory, user_id: str) -> Dict[str, Any]:
+    async def simulate_network_reconnection_cycles(self, factory: WebSocketManager, user_id: str) -> Dict[str, Any]:
         """
         PRODUCTION SCENARIO 3: Network Reconnection Cycles
         
@@ -377,7 +377,7 @@ class ProductionLeakReproducer:
             'leak_detected': active_managers > 3  # More than 3 remaining indicates leak
         }
     
-    async def simulate_database_websocket_context_mismatch(self, factory: WebSocketManagerFactory, user_id: str) -> Dict[str, Any]:
+    async def simulate_database_websocket_context_mismatch(self, factory: WebSocketManager, user_id: str) -> Dict[str, Any]:
         """
         PRODUCTION SCENARIO 4: Database Session + WebSocket Context ID Mismatch
         
@@ -495,7 +495,7 @@ class ProductionLeakReproducer:
             'leak_evidence_count': len([e for e in self.leak_evidence if e['type'] == 'context_mismatch_leak'])
         }
     
-    async def simulate_background_cleanup_race_condition(self, factory: WebSocketManagerFactory, user_id: str) -> Dict[str, Any]:
+    async def simulate_background_cleanup_race_condition(self, factory: WebSocketManager, user_id: str) -> Dict[str, Any]:
         """
         PRODUCTION SCENARIO 5: Background Cleanup vs Creation Rate Race
         
@@ -615,7 +615,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         """Setup for each test with production leak reproducer."""
         super().setup_method(method)
         self.leak_reproducer = ProductionLeakReproducer()
-        self.factory = WebSocketManagerFactory(max_managers_per_user=20, connection_timeout_seconds=300)
+        self.factory = WebSocketManager(max_managers_per_user=20, connection_timeout_seconds=300)
         
         # Generate test user ID
         self.test_user_id = f"prod-leak-user-{random.randint(10000, 99999)}"
