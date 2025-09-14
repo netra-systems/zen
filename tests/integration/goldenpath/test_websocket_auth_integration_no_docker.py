@@ -160,10 +160,15 @@ class TestGoldenPathWebSocketAuthNonDocker(SSotAsyncTestCase):
         # Create user ID for golden path testing
         golden_user_id = f"golden_{self.test_user_id_base}"
         
-        # Initialize real WebSocket manager with real service URLs
+        # Initialize real WebSocket manager for testing
+        from netra_backend.app.websocket_core.websocket_manager_factory import create_test_user_context
+        from netra_backend.app.websocket_core.unified_manager import WebSocketManagerMode
+        
+        test_user_context = create_test_user_context()
         websocket_manager = UnifiedWebSocketManager(
-            postgres_url=self.postgres_url,
-            redis_url=self.redis_url
+            mode=WebSocketManagerMode.UNIFIED,
+            user_context=test_user_context,
+            _ssot_authorization_token="test_token_auth_integration"
         )
         
         try:
