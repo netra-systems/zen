@@ -42,20 +42,9 @@ from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
 
 # Factory function compatibility layer - Phase 1 implementation
-async def get_websocket_manager(user_context=None):
-    """
-    DEPRECATED: Factory compatibility function.
-    NEW CODE: Use WebSocketManager(user_context=context) directly.
-    """
-    warnings.warn(
-        "get_websocket_manager is deprecated. Use WebSocketManager directly.",
-        DeprecationWarning, stacklevel=2
-    )
-    return WebSocketManager(
-        mode=WebSocketManagerMode.UNIFIED,
-        user_context=user_context,
-        _ssot_authorization_token=secrets.token_urlsafe(32)
-    )
+# ISSUE #824 FIX: Removed duplicate get_websocket_manager() causing SSOT fragmentation
+# Use the canonical implementation in websocket_manager.py:182
+# This eliminates circular reference and consolidates to single SSOT
 
 def create_test_user_context():
     """
@@ -240,6 +229,8 @@ async def create_websocket_manager(user_context=None, user_id: Optional[UserID] 
             request_id=f"factory_test_{typed_user_id}"
         )
     
+    # ISSUE #824 FIX: Use canonical SSOT import path
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
     return await get_websocket_manager(user_context=user_context)
 
 

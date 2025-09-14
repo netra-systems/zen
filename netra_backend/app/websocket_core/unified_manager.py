@@ -3472,50 +3472,9 @@ class _UnifiedWebSocketManagerImplementation:
 #  ALERT:  SECURITY FIX: Singleton pattern completely removed to prevent multi-user data leakage
 # Use create_websocket_manager(user_context) or WebSocketBridgeFactory instead
 
-def get_websocket_manager() -> _UnifiedWebSocketManagerImplementation:
-    """
-     ALERT:  CRITICAL SECURITY ERROR: This function has been REMOVED.
-    
-    This function created critical security vulnerabilities in multi-user environments,
-    causing user data leakage and authentication bypass.
-    
-    REQUIRED MIGRATION (choose one):
-    1. For per-user WebSocket events: Use WebSocketBridgeFactory.create_user_emitter()
-    2. For authenticated connections: Use create_websocket_manager(user_context)
-    3. For testing: Create dedicated test instances with proper user context
-    
-    Example migration:
-    ```python
-    # OLD (UNSAFE):
-    manager = get_websocket_manager()
-    
-    # NEW (SAFE):
-    factory = WebSocketBridgeFactory()
-    emitter = await factory.create_user_emitter(user_id, thread_id, connection_id)
-    ```
-    
-    This function was causing User A to see User B's messages.
-    """
-    from shared.logging.unified_logging_ssot import get_logger
-    import inspect
-    
-    logger = get_logger(__name__)
-    
-    # Get caller information for debugging
-    frame = inspect.currentframe()
-    caller_info = "unknown"
-    if frame and frame.f_back:
-        caller_info = f"{frame.f_back.f_code.co_filename}:{frame.f_back.f_lineno}"
-    
-    error_message = (
-        f" ALERT:  CRITICAL SECURITY ERROR: get_websocket_manager() has been REMOVED for security. "
-        f"Called from: {caller_info}. "
-        f"This function caused USER DATA LEAKAGE between different users. "
-        f"Migrate to WebSocketBridgeFactory or create_websocket_manager(user_context)."
-    )
-    
-    logger.critical(error_message)
-    raise RuntimeError(error_message)
+# ISSUE #824 FIX: Removed get_websocket_manager() function causing circular reference
+# This deprecated function was throwing errors and blocking unit tests
+# The working implementation is in websocket_manager.py:182
 
 
 # ISSUE #824 REMEDIATION: SSOT CONSOLIDATION
