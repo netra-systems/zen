@@ -31,7 +31,7 @@ from enum import Enum
 from typing import Set, List, Any
 
 # SSOT imports from verified registry
-from test_framework.ssot.base_test_case import SSotBaseTestCase, SsotTestMetrics, CategoryType
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 
 # Core ID management imports - SSOT verified paths
@@ -147,10 +147,11 @@ class TestIDTypeRunEnumValidation(SSotBaseTestCase):
             assert len(current_names) >= 12, f"IDType enum too small, expected >= 12, got: {len(current_names)}"
             
             if hasattr(self, '_metrics'):
-                self._metrics.record_custom("success"(f"IDType enum complete with {len(current_names)} values including RUN")
+                self._metrics.record_custom("success", f"IDType enum complete with {len(current_names)} values including RUN")
             
         except AssertionError as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            if hasattr(self, '_metrics'):
+                self._metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType enum completeness validation failed: {e}")
 
     def test_idtype_run_backwards_compatibility(self):
@@ -184,10 +185,11 @@ class TestIDTypeRunEnumValidation(SSotBaseTestCase):
             assert IDType.RUN in all_types, "IDType.RUN should be in list of all types"
             
             if hasattr(self, '_metrics'):
-                self._metrics.record_custom("success"("IDType.RUN backwards compatibility validated")
+                self._metrics.record_custom("success", "IDType.RUN backwards compatibility validated")
             
         except AttributeError as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            if hasattr(self, '_metrics'):
+                self._metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN backwards compatibility test failed: {e}")
 
     def test_idtype_run_in_unified_id_manager_initialization(self):
@@ -216,10 +218,11 @@ class TestIDTypeRunEnumValidation(SSotBaseTestCase):
             assert run_count == 0, "New manager should have zero RUN IDs"
             
             if hasattr(self, '_metrics'):
-                self._metrics.record_custom("success"("UnifiedIDManager properly handles IDType.RUN initialization")
+                self._metrics.record_custom("success", "UnifiedIDManager properly handles IDType.RUN initialization")
             
         except Exception as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            if hasattr(self, '_metrics'):
+                self._metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"UnifiedIDManager IDType.RUN initialization failed: {e}")
 
     def test_idtype_run_enum_iteration_completeness(self):
@@ -251,14 +254,15 @@ class TestIDTypeRunEnumValidation(SSotBaseTestCase):
             assert run_found, "IDType.RUN should be found during enum iteration"
             
             if hasattr(self, '_metrics'):
-                self._metrics.record_custom("success"("IDType enum iteration properly includes RUN")
+                self._metrics.record_custom("success", "IDType enum iteration properly includes RUN")
             
         except Exception as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            if hasattr(self, '_metrics'):
+                self._metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType enum iteration test failed: {e}")
 
     def teardown_method(self, method=None):
         """Clean up test environment and record metrics."""
-        if hasattr(self, 'test_metrics'):
-            self.test_metrics.finalize()
+        if hasattr(self, '_metrics'):
+            self._metrics.end_timing()
         super().teardown_method(method)
