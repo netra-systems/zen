@@ -143,6 +143,14 @@ class StagingTestConfig:
         """
         return self.websocket_url
     
+    def get_auth_service_url(self) -> str:
+        """Get the auth service URL for staging tests.
+        
+        Returns:
+            str: The auth service URL for staging
+        """
+        return self.auth_url
+    
     def log_configuration(self) -> None:
         """Log current staging configuration for debugging."""
         logger.info("=== Staging Test Configuration ===")
