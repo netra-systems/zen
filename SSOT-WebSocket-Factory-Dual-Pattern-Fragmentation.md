@@ -50,6 +50,31 @@ Deprecated `WebSocketManagerFactory` still exists alongside SSOT `get_websocket_
 - [ ] No regression in WebSocket event delivery
 - [ ] Golden Path user flow operational
 
+## Test Discovery Results (Step 1.1)
+### Existing Tests Found
+- **Mission Critical**: 1 failing test (`test_issue_1100_websocket_ssot_mission_critical.py`)
+- **Unit Tests**: ~150 files (14/14 passing basic tests, 6/8 failing SSOT tests)
+- **Integration Tests**: ~100 files (mostly SKIPPED awaiting environment)
+- **E2E/Staging**: ~50 files (operational via staging)
+
+### Key Finding
+**30+ files still import deprecated factory** including production code:
+- `netra_backend/app/services/unified_authentication_service.py`
+- `netra_backend/app/websocket_core/handlers.py` (5 imports)
+
+## Test Plan (Step 1.2)
+### 4 New SSOT Validation Tests (20% of work)
+1. **Factory Pattern Validation Test**: Ensure only SSOT `get_websocket_manager()` accessible
+2. **Import Consistency Test**: Validate no deprecated imports exist  
+3. **WebSocket Instance Isolation Test**: Ensure user context isolation with SSOT
+4. **Event Delivery Consistency Test**: Validate all 5 WebSocket events work via SSOT
+
+### Test Strategy
+- **20% new tests** (4 SSOT validation tests)
+- **60% existing test validation** (ensure they pass after fix)
+- **20% broken test fixes** (repair affected tests)
+
 ## Progress Log
 - **2025-09-14 16:30**: Issue discovered and GitHub issue created
-- **Next**: Discover existing tests and plan new SSOT validation tests
+- **2025-09-14 16:45**: Step 1 complete - Test discovery and planning done
+- **Next**: Execute test plan (create 4 new SSOT validation tests)
