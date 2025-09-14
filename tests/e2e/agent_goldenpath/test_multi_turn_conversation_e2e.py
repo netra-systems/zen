@@ -96,13 +96,13 @@ class TestMultiTurnConversationE2E(SSotAsyncTestCase):
         self.run_id = f"run_{self.thread_id}"
 
         # Create JWT token with extended expiry for multi-turn testing
-        self.access_token = self.auth_helper.create_test_jwt_token(
-            user_id=self.test_user_id,
-            email=self.test_user_email,
+        self.access_token = self.__class__.auth_helper.create_test_jwt_token(
+            user_id=self.__class__.test_user_id,
+            email=self.__class__.test_user_email,
             expires_in_hours=2  # Longer for multi-turn tests
         )
 
-        self.logger.info(f"Conversation test setup - conversation_id: {self.conversation_id}")
+        self.__class__.logger.info(f"Conversation test setup - conversation_id: {self.conversation_id}")
 
     async def _establish_persistent_websocket_connection(self) -> websockets.WebSocketServerProtocol:
         """Establish persistent WebSocket connection for multi-turn conversation."""
@@ -112,7 +112,7 @@ class TestMultiTurnConversationE2E(SSotAsyncTestCase):
 
         websocket = await asyncio.wait_for(
             websockets.connect(
-                self.staging_config.urls.websocket_url,
+                self.__class__.staging_config.urls.websocket_url,
                 extra_headers={
                     "Authorization": f"Bearer {self.access_token}",
                     "X-Environment": "staging",
@@ -138,7 +138,7 @@ class TestMultiTurnConversationE2E(SSotAsyncTestCase):
             "message": message,
             "thread_id": self.thread_id,
             "run_id": f"{self.run_id}_turn_{turn_number}",
-            "user_id": self.test_user_id,
+            "user_id": self.__class__.test_user_id,
             "conversation_id": self.conversation_id,
             "turn_number": turn_number,
             "context": {

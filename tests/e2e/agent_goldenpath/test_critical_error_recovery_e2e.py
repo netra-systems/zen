@@ -125,13 +125,13 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
         self.run_id = f"run_{self.thread_id}"
 
         # Create JWT token for error recovery testing
-        self.access_token = self.auth_helper.create_test_jwt_token(
-            user_id=self.test_user_id,
-            email=self.test_user_email,
+        self.access_token = self.__class__.auth_helper.create_test_jwt_token(
+            user_id=self.__class__.test_user_id,
+            email=self.__class__.test_user_email,
             expires_in_hours=2
         )
 
-        self.logger.info(f"Error recovery test setup - recovery_test_id: {self.recovery_test_id}")
+        self.__class__.logger.info(f"Error recovery test setup - recovery_test_id: {self.recovery_test_id}")
 
     async def _establish_recovery_test_websocket(self) -> websockets.WebSocketServerProtocol:
         """Establish WebSocket connection for error recovery testing."""
@@ -141,7 +141,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
 
         websocket = await asyncio.wait_for(
             websockets.connect(
-                self.staging_config.urls.websocket_url,
+                self.__class__.staging_config.urls.websocket_url,
                 extra_headers={
                     "Authorization": f"Bearer {self.access_token}",
                     "X-Environment": "staging",
@@ -176,7 +176,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
 
         try:
             # Step 1: Induce the error condition
-            self.logger.info(f"🔥 Inducing error scenario: {scenario_type.value}")
+            self.__class__.logger.info(f"🔥 Inducing error scenario: {scenario_type.value}")
             await error_induction_func(result)
             result.error_induced = True
 
@@ -225,7 +225,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Actual WebSocket disconnection/reconnection in staging
         STATUS: Should PASS - WebSocket reliability is critical for real-time chat
         """
-        self.logger.info("🔥 Testing WebSocket disconnection recovery")
+        self.__class__.logger.info("🔥 Testing WebSocket disconnection recovery")
 
         async def induce_websocket_disconnection(result: ErrorRecoveryResult):
             """Induce WebSocket disconnection by closing connection abruptly."""
@@ -239,7 +239,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
                 "message": "Initial connection test before disconnection simulation",
                 "thread_id": self.thread_id,
                 "run_id": self.run_id,
-                "user_id": self.test_user_id,
+                "user_id": self.__class__.test_user_id,
                 "context": {"pre_disconnection": True}
             }
 
@@ -272,7 +272,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
                     "message": "Post-recovery connection test to validate session restoration",
                     "thread_id": self.thread_id,  # Same thread to test context preservation
                     "run_id": f"{self.run_id}_recovery",
-                    "user_id": self.test_user_id,
+                    "user_id": self.__class__.test_user_id,
                     "context": {"post_recovery": True}
                 }
 
@@ -315,13 +315,13 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
             validate_websocket_recovery
         )
 
-        self.logger.info(f"🔥 WebSocket Disconnection Recovery Results:")
-        self.logger.info(f"   Error Induced: {recovery_result.error_induced}")
-        self.logger.info(f"   Error Detected: {recovery_result.error_detected}")
-        self.logger.info(f"   Recovery Successful: {recovery_result.recovery_successful}")
-        self.logger.info(f"   User Experience Preserved: {recovery_result.user_experience_preserved}")
-        self.logger.info(f"   Recovery Time: {recovery_result.recovery_time:.1f}s")
-        self.logger.info(f"   Recovery Steps: {recovery_result.recovery_steps}")
+        self.__class__.logger.info(f"🔥 WebSocket Disconnection Recovery Results:")
+        self.__class__.logger.info(f"   Error Induced: {recovery_result.error_induced}")
+        self.__class__.logger.info(f"   Error Detected: {recovery_result.error_detected}")
+        self.__class__.logger.info(f"   Recovery Successful: {recovery_result.recovery_successful}")
+        self.__class__.logger.info(f"   User Experience Preserved: {recovery_result.user_experience_preserved}")
+        self.__class__.logger.info(f"   Recovery Time: {recovery_result.recovery_time:.1f}s")
+        self.__class__.logger.info(f"   Recovery Steps: {recovery_result.recovery_steps}")
 
         # Validate WebSocket disconnection recovery
         assert recovery_result.error_induced, (
@@ -349,7 +349,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
             f"(expected ≤90s for good user experience)"
         )
 
-        self.logger.info("✅ WebSocket disconnection recovery validated")
+        self.__class__.logger.info("✅ WebSocket disconnection recovery validated")
 
     async def test_agent_timeout_recovery(self):
         """
@@ -369,7 +369,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Actual agent timeout scenarios in staging
         STATUS: Should PASS - Timeout handling is critical for user experience
         """
-        self.logger.info("🔥 Testing agent timeout recovery")
+        self.__class__.logger.info("🔥 Testing agent timeout recovery")
 
         async def induce_agent_timeout(result: ErrorRecoveryResult):
             """Induce agent timeout by sending complex request that may timeout."""
@@ -389,7 +389,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
                 ),
                 "thread_id": self.thread_id,
                 "run_id": self.run_id,
-                "user_id": self.test_user_id,
+                "user_id": self.__class__.test_user_id,
                 "context": {
                     "timeout_test": True,
                     "complexity_level": "maximum",
@@ -436,7 +436,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
                     "message": "Simple post-timeout test: What is AI cost optimization?",
                     "thread_id": f"{self.thread_id}_recovery",
                     "run_id": f"{self.run_id}_recovery",
-                    "user_id": self.test_user_id,
+                    "user_id": self.__class__.test_user_id,
                     "context": {"post_timeout_recovery": True}
                 }
 
@@ -475,13 +475,13 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
             validate_timeout_recovery
         )
 
-        self.logger.info(f"🔥 Agent Timeout Recovery Results:")
-        self.logger.info(f"   Error Induced: {recovery_result.error_induced}")
-        self.logger.info(f"   Timeout Detected: {recovery_result.error_detected}")
-        self.logger.info(f"   Recovery Successful: {recovery_result.recovery_successful}")
-        self.logger.info(f"   System Responsive Post-Timeout: {recovery_result.user_experience_preserved}")
-        self.logger.info(f"   Recovery Time: {recovery_result.recovery_time:.1f}s")
-        self.logger.info(f"   Recovery Steps: {recovery_result.recovery_steps}")
+        self.__class__.logger.info(f"🔥 Agent Timeout Recovery Results:")
+        self.__class__.logger.info(f"   Error Induced: {recovery_result.error_induced}")
+        self.__class__.logger.info(f"   Timeout Detected: {recovery_result.error_detected}")
+        self.__class__.logger.info(f"   Recovery Successful: {recovery_result.recovery_successful}")
+        self.__class__.logger.info(f"   System Responsive Post-Timeout: {recovery_result.user_experience_preserved}")
+        self.__class__.logger.info(f"   Recovery Time: {recovery_result.recovery_time:.1f}s")
+        self.__class__.logger.info(f"   Recovery Steps: {recovery_result.recovery_steps}")
 
         # Validate timeout recovery
         assert recovery_result.error_detected, (
@@ -499,7 +499,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
             f"System should remain responsive for new requests."
         )
 
-        self.logger.info("✅ Agent timeout recovery validated")
+        self.__class__.logger.info("✅ Agent timeout recovery validated")
 
     async def test_malformed_request_handling(self):
         """
@@ -519,7 +519,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Actual request validation in staging
         STATUS: Should PASS - Input validation is critical for system stability
         """
-        self.logger.info("🔥 Testing malformed request handling")
+        self.__class__.logger.info("🔥 Testing malformed request handling")
 
         malformed_requests = [
             # Missing required fields
@@ -539,7 +539,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
 
         try:
             for i, malformed_request in enumerate(malformed_requests):
-                self.logger.info(f"Testing malformed request {i+1}/{len(malformed_requests)}")
+                self.__class__.logger.info(f"Testing malformed request {i+1}/{len(malformed_requests)}")
 
                 try:
                     # Send malformed request
@@ -595,7 +595,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
                 "message": "Valid request after malformed request handling test",
                 "thread_id": f"{self.thread_id}_malformed_recovery",
                 "run_id": f"{self.run_id}_malformed_recovery",
-                "user_id": self.test_user_id
+                "user_id": self.__class__.test_user_id
             }
 
             await websocket.send(json.dumps(valid_recovery_message))
@@ -624,11 +624,11 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
         handled_errors = [r for r in recovery_results if r["error_handled"]]
         total_malformed_requests = len(malformed_requests)
 
-        self.logger.info(f"🔥 Malformed Request Handling Results:")
-        self.logger.info(f"   Total Malformed Requests: {total_malformed_requests}")
-        self.logger.info(f"   Errors Properly Handled: {len(handled_errors)}")
-        self.logger.info(f"   Error Handling Rate: {len(handled_errors)/total_malformed_requests:.1%}")
-        self.logger.info(f"   System Recovery After Errors: {recovery_successful}")
+        self.__class__.logger.info(f"🔥 Malformed Request Handling Results:")
+        self.__class__.logger.info(f"   Total Malformed Requests: {total_malformed_requests}")
+        self.__class__.logger.info(f"   Errors Properly Handled: {len(handled_errors)}")
+        self.__class__.logger.info(f"   Error Handling Rate: {len(handled_errors)/total_malformed_requests:.1%}")
+        self.__class__.logger.info(f"   System Recovery After Errors: {recovery_successful}")
 
         # Validate malformed request handling
         error_handling_rate = len(handled_errors) / total_malformed_requests
@@ -651,7 +651,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
             f"Meaningful: {len(meaningful_errors)}/{len(handled_errors)}"
         )
 
-        self.logger.info("✅ Malformed request handling validated")
+        self.__class__.logger.info("✅ Malformed request handling validated")
 
     async def test_system_recovery_under_stress(self):
         """
@@ -671,7 +671,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Combined stress testing in staging
         STATUS: Should PASS - System resilience under stress is critical
         """
-        self.logger.info("🔥 Testing system recovery under combined stress")
+        self.__class__.logger.info("🔥 Testing system recovery under combined stress")
 
         stress_results = {
             "concurrent_connections": 0,
@@ -762,7 +762,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
                 "message": "Post-stress recovery validation: Simple AI optimization question",
                 "thread_id": f"post_stress_recovery_{self.recovery_test_id}",
                 "run_id": f"recovery_run_{self.recovery_test_id}",
-                "user_id": self.test_user_id,
+                "user_id": self.__class__.test_user_id,
                 "context": {"post_stress_recovery": True}
             }
 
@@ -788,21 +788,21 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
 
         except Exception as e:
             stress_results["stress_duration"] = time.time() - stress_start_time
-            self.logger.error(f"Stress test execution error: {e}")
+            self.__class__.logger.error(f"Stress test execution error: {e}")
 
         # Analyze stress test results
         total_requests = stress_results["successful_requests"] + stress_results["failed_requests"] + stress_results["timeouts"]
         success_rate = stress_results["successful_requests"] / total_requests if total_requests > 0 else 0
 
-        self.logger.info(f"🔥 System Stress Recovery Results:")
-        self.logger.info(f"   Stress Duration: {stress_results['stress_duration']:.1f}s")
-        self.logger.info(f"   Concurrent Connections: {stress_results['concurrent_connections']}")
-        self.logger.info(f"   Total Requests: {total_requests}")
-        self.logger.info(f"   Successful Requests: {stress_results['successful_requests']}")
-        self.logger.info(f"   Failed Requests: {stress_results['failed_requests']}")
-        self.logger.info(f"   Timeouts: {stress_results['timeouts']}")
-        self.logger.info(f"   Success Rate Under Stress: {success_rate:.1%}")
-        self.logger.info(f"   Post-Stress Recovery: {stress_results['recovery_successful']}")
+        self.__class__.logger.info(f"🔥 System Stress Recovery Results:")
+        self.__class__.logger.info(f"   Stress Duration: {stress_results['stress_duration']:.1f}s")
+        self.__class__.logger.info(f"   Concurrent Connections: {stress_results['concurrent_connections']}")
+        self.__class__.logger.info(f"   Total Requests: {total_requests}")
+        self.__class__.logger.info(f"   Successful Requests: {stress_results['successful_requests']}")
+        self.__class__.logger.info(f"   Failed Requests: {stress_results['failed_requests']}")
+        self.__class__.logger.info(f"   Timeouts: {stress_results['timeouts']}")
+        self.__class__.logger.info(f"   Success Rate Under Stress: {success_rate:.1%}")
+        self.__class__.logger.info(f"   Post-Stress Recovery: {stress_results['recovery_successful']}")
 
         # Validate system behavior under stress
         assert success_rate >= 0.5, (
@@ -827,7 +827,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
             f"Only {total_requests} requests generated."
         )
 
-        self.logger.info("✅ System recovery under stress validated")
+        self.__class__.logger.info("✅ System recovery under stress validated")
 
 
 if __name__ == "__main__":

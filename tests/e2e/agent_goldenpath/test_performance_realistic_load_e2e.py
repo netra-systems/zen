@@ -126,7 +126,7 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
         self.load_test_id = str(uuid.uuid4())
         self.test_start_time = time.time()
 
-        self.logger.info(f"Load test setup - load_test_id: {self.load_test_id}")
+        self.__class__.logger.info(f"Load test setup - load_test_id: {self.load_test_id}")
 
     async def _create_concurrent_user(self, user_index: int, total_users: int) -> PerformanceMetrics:
         """Create and execute a single concurrent user scenario."""
@@ -143,7 +143,7 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
 
         try:
             # Generate JWT token for this user
-            access_token = self.auth_helper.create_test_jwt_token(
+            access_token = self.__class__.auth_helper.create_test_jwt_token(
                 user_id=user_id,
                 email=user_email,
                 expires_in_hours=1
@@ -156,7 +156,7 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
 
             websocket = await asyncio.wait_for(
                 websockets.connect(
-                    self.staging_config.urls.websocket_url,
+                    self.__class__.staging_config.urls.websocket_url,
                     extra_headers={
                         "Authorization": f"Bearer {access_token}",
                         "X-Environment": "staging",
@@ -321,10 +321,10 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Concurrent load on staging GCP
         STATUS: Should PASS - Basic concurrent load handling is essential
         """
-        self.logger.info("⚡ Testing moderate concurrent user load")
+        self.__class__.logger.info("⚡ Testing moderate concurrent user load")
 
         concurrent_users = 5
-        self.logger.info(f"Starting load test with {concurrent_users} concurrent users")
+        self.__class__.logger.info(f"Starting load test with {concurrent_users} concurrent users")
 
         # Create concurrent user tasks
         user_tasks = []
@@ -344,16 +344,16 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
         # Analyze results
         results = self._analyze_load_test_results(valid_metrics)
 
-        self.logger.info(f"⚡ Moderate Load Test Results:")
-        self.logger.info(f"   Total Load Time: {total_load_time:.1f}s")
-        self.logger.info(f"   Concurrent Users: {concurrent_users}")
-        self.logger.info(f"   Successful Users: {results.successful_users}/{results.total_users}")
-        self.logger.info(f"   Success Rate: {results.success_rate:.1%}")
-        self.logger.info(f"   Average Response Time: {results.avg_response_time:.1f}s")
-        self.logger.info(f"   Median Response Time: {results.median_response_time:.1f}s")
-        self.logger.info(f"   P95 Response Time: {results.p95_response_time:.1f}s")
-        self.logger.info(f"   Throughput: {results.throughput:.2f} requests/sec")
-        self.logger.info(f"   Exceptions: {exception_count}")
+        self.__class__.logger.info(f"⚡ Moderate Load Test Results:")
+        self.__class__.logger.info(f"   Total Load Time: {total_load_time:.1f}s")
+        self.__class__.logger.info(f"   Concurrent Users: {concurrent_users}")
+        self.__class__.logger.info(f"   Successful Users: {results.successful_users}/{results.total_users}")
+        self.__class__.logger.info(f"   Success Rate: {results.success_rate:.1%}")
+        self.__class__.logger.info(f"   Average Response Time: {results.avg_response_time:.1f}s")
+        self.__class__.logger.info(f"   Median Response Time: {results.median_response_time:.1f}s")
+        self.__class__.logger.info(f"   P95 Response Time: {results.p95_response_time:.1f}s")
+        self.__class__.logger.info(f"   Throughput: {results.throughput:.2f} requests/sec")
+        self.__class__.logger.info(f"   Exceptions: {exception_count}")
 
         # Validate moderate load performance targets
         assert results.success_rate >= 0.80, (
@@ -388,7 +388,7 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
                 f"(expected ≥80 for business questions)"
             )
 
-        self.logger.info("✅ Moderate concurrent user load validation passed")
+        self.__class__.logger.info("✅ Moderate concurrent user load validation passed")
 
     async def test_high_concurrent_user_load(self):
         """
@@ -413,10 +413,10 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - High concurrent load on staging GCP
         STATUS: Should PASS - High load handling demonstrates platform scalability
         """
-        self.logger.info("⚡ Testing high concurrent user load")
+        self.__class__.logger.info("⚡ Testing high concurrent user load")
 
         concurrent_users = 10
-        self.logger.info(f"Starting high load test with {concurrent_users} concurrent users")
+        self.__class__.logger.info(f"Starting high load test with {concurrent_users} concurrent users")
 
         # Create concurrent user tasks with more complex scenarios
         user_tasks = []
@@ -436,17 +436,17 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
         # Analyze high load results
         results = self._analyze_load_test_results(valid_metrics)
 
-        self.logger.info(f"⚡ High Load Test Results:")
-        self.logger.info(f"   Total Load Time: {total_load_time:.1f}s")
-        self.logger.info(f"   Concurrent Users: {concurrent_users}")
-        self.logger.info(f"   Successful Users: {results.successful_users}/{results.total_users}")
-        self.logger.info(f"   Success Rate: {results.success_rate:.1%}")
-        self.logger.info(f"   Error Rate: {results.error_rate:.1%}")
-        self.logger.info(f"   Average Response Time: {results.avg_response_time:.1f}s")
-        self.logger.info(f"   Median Response Time: {results.median_response_time:.1f}s")
-        self.logger.info(f"   P95 Response Time: {results.p95_response_time:.1f}s")
-        self.logger.info(f"   P99 Response Time: {results.p99_response_time:.1f}s")
-        self.logger.info(f"   Throughput: {results.throughput:.2f} requests/sec")
+        self.__class__.logger.info(f"⚡ High Load Test Results:")
+        self.__class__.logger.info(f"   Total Load Time: {total_load_time:.1f}s")
+        self.__class__.logger.info(f"   Concurrent Users: {concurrent_users}")
+        self.__class__.logger.info(f"   Successful Users: {results.successful_users}/{results.total_users}")
+        self.__class__.logger.info(f"   Success Rate: {results.success_rate:.1%}")
+        self.__class__.logger.info(f"   Error Rate: {results.error_rate:.1%}")
+        self.__class__.logger.info(f"   Average Response Time: {results.avg_response_time:.1f}s")
+        self.__class__.logger.info(f"   Median Response Time: {results.median_response_time:.1f}s")
+        self.__class__.logger.info(f"   P95 Response Time: {results.p95_response_time:.1f}s")
+        self.__class__.logger.info(f"   P99 Response Time: {results.p99_response_time:.1f}s")
+        self.__class__.logger.info(f"   Throughput: {results.throughput:.2f} requests/sec")
 
         # Validate high load performance targets
         assert results.success_rate >= 0.70, (
@@ -484,13 +484,13 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
                     agent_performance[metric.agent_type] = []
                 agent_performance[metric.agent_type].append(metric.response_time)
 
-        self.logger.info("📊 Performance by Agent Type:")
+        self.__class__.logger.info("📊 Performance by Agent Type:")
         for agent_type, response_times in agent_performance.items():
             if response_times:
                 avg_time = statistics.mean(response_times)
-                self.logger.info(f"   {agent_type}: {avg_time:.1f}s avg ({len(response_times)} samples)")
+                self.__class__.logger.info(f"   {agent_type}: {avg_time:.1f}s avg ({len(response_times)} samples)")
 
-        self.logger.info("✅ High concurrent user load validation passed")
+        self.__class__.logger.info("✅ High concurrent user load validation passed")
 
     async def test_sustained_load_performance(self):
         """
@@ -515,7 +515,7 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Sustained load on staging GCP
         STATUS: Should PASS - Sustained performance is critical for production
         """
-        self.logger.info("⚡ Testing sustained load performance")
+        self.__class__.logger.info("⚡ Testing sustained load performance")
 
         concurrent_users = 3
         test_rounds = 4
@@ -524,7 +524,7 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
         all_round_results = []
 
         for round_num in range(test_rounds):
-            self.logger.info(f"🔄 Starting sustained load round {round_num + 1}/{test_rounds}")
+            self.__class__.logger.info(f"🔄 Starting sustained load round {round_num + 1}/{test_rounds}")
 
             # Create concurrent user tasks for this round
             user_tasks = []
@@ -549,14 +549,14 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
             round_results.round_duration = round_duration_actual
             all_round_results.append(round_results)
 
-            self.logger.info(f"   Round {round_num + 1} Results:")
-            self.logger.info(f"   Success Rate: {round_results.success_rate:.1%}")
-            self.logger.info(f"   Avg Response Time: {round_results.avg_response_time:.1f}s")
-            self.logger.info(f"   P95 Response Time: {round_results.p95_response_time:.1f}s")
+            self.__class__.logger.info(f"   Round {round_num + 1} Results:")
+            self.__class__.logger.info(f"   Success Rate: {round_results.success_rate:.1%}")
+            self.__class__.logger.info(f"   Avg Response Time: {round_results.avg_response_time:.1f}s")
+            self.__class__.logger.info(f"   P95 Response Time: {round_results.p95_response_time:.1f}s")
 
             # Brief pause between rounds (except last)
             if round_num < test_rounds - 1:
-                self.logger.info(f"   Pausing {round_duration}s before next round...")
+                self.__class__.logger.info(f"   Pausing {round_duration}s before next round...")
                 await asyncio.sleep(round_duration)
 
         # Analyze sustained performance consistency
@@ -564,11 +564,11 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
         avg_response_times = [r.avg_response_time for r in all_round_results if r.successful_users > 0]
         p95_response_times = [r.p95_response_time for r in all_round_results if r.successful_users > 0]
 
-        self.logger.info(f"⚡ Sustained Load Test Summary:")
-        self.logger.info(f"   Total Rounds: {test_rounds}")
-        self.logger.info(f"   Success Rates: {[f'{r:.1%}' for r in success_rates]}")
-        self.logger.info(f"   Avg Response Times: {[f'{t:.1f}s' for t in avg_response_times]}")
-        self.logger.info(f"   P95 Response Times: {[f'{t:.1f}s' for t in p95_response_times]}")
+        self.__class__.logger.info(f"⚡ Sustained Load Test Summary:")
+        self.__class__.logger.info(f"   Total Rounds: {test_rounds}")
+        self.__class__.logger.info(f"   Success Rates: {[f'{r:.1%}' for r in success_rates]}")
+        self.__class__.logger.info(f"   Avg Response Times: {[f'{t:.1f}s' for t in avg_response_times]}")
+        self.__class__.logger.info(f"   P95 Response Times: {[f'{t:.1f}s' for t in p95_response_times]}")
 
         # Validate sustained performance consistency
         avg_success_rate = statistics.mean(success_rates)
@@ -607,7 +607,7 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
             f"System should not have complete failures during sustained load."
         )
 
-        self.logger.info("✅ Sustained load performance validation passed")
+        self.__class__.logger.info("✅ Sustained load performance validation passed")
 
     async def test_mixed_agent_load_distribution(self):
         """
@@ -632,13 +632,13 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Mixed agent load on staging GCP
         STATUS: Should PASS - Balanced agent performance is important for UX
         """
-        self.logger.info("⚡ Testing mixed agent load distribution")
+        self.__class__.logger.info("⚡ Testing mixed agent load distribution")
 
         total_users = 8
         agent_types = ["supervisor_agent", "triage_agent", "apex_optimizer_agent", "data_helper_agent"]
         users_per_agent = total_users // len(agent_types)
 
-        self.logger.info(f"Testing {total_users} users across {len(agent_types)} agent types")
+        self.__class__.logger.info(f"Testing {total_users} users across {len(agent_types)} agent types")
 
         # Create agent-specific user tasks
         user_tasks = []
@@ -669,18 +669,18 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
                 agent_results = self._analyze_load_test_results(agent_metrics)
                 agent_performance[agent_type] = agent_results
 
-        self.logger.info(f"⚡ Mixed Agent Load Test Results:")
-        self.logger.info(f"   Total Load Time: {total_load_time:.1f}s")
-        self.logger.info(f"   Overall Success Rate: {overall_results.success_rate:.1%}")
-        self.logger.info(f"   Overall Avg Response Time: {overall_results.avg_response_time:.1f}s")
+        self.__class__.logger.info(f"⚡ Mixed Agent Load Test Results:")
+        self.__class__.logger.info(f"   Total Load Time: {total_load_time:.1f}s")
+        self.__class__.logger.info(f"   Overall Success Rate: {overall_results.success_rate:.1%}")
+        self.__class__.logger.info(f"   Overall Avg Response Time: {overall_results.avg_response_time:.1f}s")
 
-        self.logger.info("📊 Performance by Agent Type:")
+        self.__class__.logger.info("📊 Performance by Agent Type:")
         for agent_type, results in agent_performance.items():
-            self.logger.info(f"   {agent_type}:")
-            self.logger.info(f"     Success Rate: {results.success_rate:.1%}")
-            self.logger.info(f"     Avg Response Time: {results.avg_response_time:.1f}s")
-            self.logger.info(f"     P95 Response Time: {results.p95_response_time:.1f}s")
-            self.logger.info(f"     Users: {results.successful_users}/{results.total_users}")
+            self.__class__.logger.info(f"   {agent_type}:")
+            self.__class__.logger.info(f"     Success Rate: {results.success_rate:.1%}")
+            self.__class__.logger.info(f"     Avg Response Time: {results.avg_response_time:.1f}s")
+            self.__class__.logger.info(f"     P95 Response Time: {results.p95_response_time:.1f}s")
+            self.__class__.logger.info(f"     Users: {results.successful_users}/{results.total_users}")
 
         # Validate mixed agent performance
         assert overall_results.success_rate >= 0.70, (
@@ -733,7 +733,7 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
                     f"{success_percentage:.1%} (expected ≥10% of total successes)"
                 )
 
-        self.logger.info("✅ Mixed agent load distribution validation passed")
+        self.__class__.logger.info("✅ Mixed agent load distribution validation passed")
 
 
 if __name__ == "__main__":

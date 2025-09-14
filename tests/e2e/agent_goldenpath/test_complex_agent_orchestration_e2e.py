@@ -72,7 +72,6 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
     @classmethod
     def setUpClass(cls):
         """Setup staging environment configuration and dependencies."""
-        super().setUpClass()
 
         # Initialize staging configuration
         cls.staging_config = get_staging_config()
@@ -107,15 +106,15 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
         self.run_id = f"run_{self.thread_id}"
 
         # Create JWT token with orchestration permissions
-        self.access_token = self.auth_helper.create_test_jwt_token(
-            user_id=self.test_user_id,
-            email=self.test_user_email,
+        self.access_token = self.__class__.auth_helper.create_test_jwt_token(
+            user_id=self.__class__.test_user_id,
+            email=self.__class__.test_user_email,
             expires_in_hours=2
         )
 
         self.orchestration_events = []
 
-        self.logger.info(f"Orchestration test setup - orchestration_id: {self.orchestration_id}")
+        self.__class__.logger.info(f"Orchestration test setup - orchestration_id: {self.orchestration_id}")
 
     async def _establish_orchestration_websocket(self) -> websockets.WebSocketServerProtocol:
         """Establish WebSocket connection optimized for orchestration workflows."""
@@ -125,7 +124,7 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
 
         websocket = await asyncio.wait_for(
             websockets.connect(
-                self.staging_config.urls.websocket_url,
+                self.__class__.staging_config.urls.websocket_url,
                 extra_headers={
                     "Authorization": f"Bearer {self.access_token}",
                     "X-Environment": "staging",
@@ -151,7 +150,7 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
             "message": complex_request,
             "thread_id": self.thread_id,
             "run_id": self.run_id,
-            "user_id": self.test_user_id,
+            "user_id": self.__class__.test_user_id,
             "orchestration_id": self.orchestration_id,
             "orchestration_enabled": True,
             "context": {
@@ -190,7 +189,7 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
                 )
                 self.orchestration_events.append(orchestration_event)
 
-                self.logger.info(f"🎭 Orchestration Event: {event_type} from {current_agent}")
+                self.__class__.logger.info(f"🎭 Orchestration Event: {event_type} from {current_agent}")
 
                 # Check for completion or error
                 if event_type == "agent_completed":
@@ -201,7 +200,7 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
             except asyncio.TimeoutError:
                 continue
             except json.JSONDecodeError as e:
-                self.logger.warning(f"Failed to parse orchestration message: {e}")
+                self.__class__.logger.warning(f"Failed to parse orchestration message: {e}")
                 continue
 
         return events
@@ -294,7 +293,7 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Full supervisor orchestration in staging
         STATUS: Should PASS - Supervisor orchestration is core premium feature
         """
-        self.logger.info("🎭 Testing supervisor to specialist orchestration")
+        self.__class__.logger.info("🎭 Testing supervisor to specialist orchestration")
 
         websocket = await self._establish_orchestration_websocket()
 
@@ -328,14 +327,14 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
             orchestration_analysis = self._analyze_orchestration_flow(orchestration_events)
             final_response = self._extract_final_orchestrated_response(orchestration_events)
 
-            self.logger.info(f"🎭 Supervisor Orchestration Analysis:")
-            self.logger.info(f"   Total Events: {orchestration_analysis['total_events']}")
-            self.logger.info(f"   Unique Agents: {orchestration_analysis['unique_agents']}")
-            self.logger.info(f"   Agent Transitions: {orchestration_analysis['agent_transitions']}")
-            self.logger.info(f"   Orchestration Depth: {orchestration_analysis['orchestration_depth']}")
-            self.logger.info(f"   Handoff Events: {orchestration_analysis['handoff_events']}")
-            self.logger.info(f"   Complexity Score: {orchestration_analysis['workflow_complexity_score']}")
-            self.logger.info(f"   Final Response Length: {len(final_response)} chars")
+            self.__class__.logger.info(f"🎭 Supervisor Orchestration Analysis:")
+            self.__class__.logger.info(f"   Total Events: {orchestration_analysis['total_events']}")
+            self.__class__.logger.info(f"   Unique Agents: {orchestration_analysis['unique_agents']}")
+            self.__class__.logger.info(f"   Agent Transitions: {orchestration_analysis['agent_transitions']}")
+            self.__class__.logger.info(f"   Orchestration Depth: {orchestration_analysis['orchestration_depth']}")
+            self.__class__.logger.info(f"   Handoff Events: {orchestration_analysis['handoff_events']}")
+            self.__class__.logger.info(f"   Complexity Score: {orchestration_analysis['workflow_complexity_score']}")
+            self.__class__.logger.info(f"   Final Response Length: {len(final_response)} chars")
 
             # Validate sophisticated orchestration
             assert orchestration_analysis["orchestration_depth"] >= 2, (
@@ -388,7 +387,7 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
                 f"Addressed: {addressed_enterprise} of {enterprise_elements}"
             )
 
-            self.logger.info("✅ Supervisor to specialist orchestration validated")
+            self.__class__.logger.info("✅ Supervisor to specialist orchestration validated")
 
         finally:
             await websocket.close()
@@ -411,7 +410,7 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Multi-agent collaboration in staging
         STATUS: Should PASS - Collaborative AI is premium differentiation feature
         """
-        self.logger.info("🎭 Testing multi-agent collaborative problem solving")
+        self.__class__.logger.info("🎭 Testing multi-agent collaborative problem solving")
 
         websocket = await self._establish_orchestration_websocket()
 
@@ -450,14 +449,14 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
             collaboration_analysis = self._analyze_orchestration_flow(collaboration_events)
             final_collaborative_response = self._extract_final_orchestrated_response(collaboration_events)
 
-            self.logger.info(f"🎭 Multi-Agent Collaboration Analysis:")
-            self.logger.info(f"   Total Events: {collaboration_analysis['total_events']}")
-            self.logger.info(f"   Collaborating Agents: {collaboration_analysis['unique_agents']}")
-            self.logger.info(f"   Agent Transitions: {collaboration_analysis['agent_transitions']}")
-            self.logger.info(f"   Collaboration Depth: {collaboration_analysis['orchestration_depth']}")
-            self.logger.info(f"   Handoff Events: {collaboration_analysis['handoff_events']}")
-            self.logger.info(f"   Collaborative Indicators: {collaboration_analysis['collaborative_indicators']}")
-            self.logger.info(f"   Complexity Score: {collaboration_analysis['workflow_complexity_score']}")
+            self.__class__.logger.info(f"🎭 Multi-Agent Collaboration Analysis:")
+            self.__class__.logger.info(f"   Total Events: {collaboration_analysis['total_events']}")
+            self.__class__.logger.info(f"   Collaborating Agents: {collaboration_analysis['unique_agents']}")
+            self.__class__.logger.info(f"   Agent Transitions: {collaboration_analysis['agent_transitions']}")
+            self.__class__.logger.info(f"   Collaboration Depth: {collaboration_analysis['orchestration_depth']}")
+            self.__class__.logger.info(f"   Handoff Events: {collaboration_analysis['handoff_events']}")
+            self.__class__.logger.info(f"   Collaborative Indicators: {collaboration_analysis['collaborative_indicators']}")
+            self.__class__.logger.info(f"   Complexity Score: {collaboration_analysis['workflow_complexity_score']}")
 
             # Validate sophisticated multi-agent collaboration
             assert collaboration_analysis["orchestration_depth"] >= 3, (
@@ -521,7 +520,7 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
                 f"Strategic indicators: {strategic_content}"
             )
 
-            self.logger.info("✅ Multi-agent collaborative problem solving validated")
+            self.__class__.logger.info("✅ Multi-agent collaborative problem solving validated")
 
         finally:
             await websocket.close()
@@ -544,7 +543,7 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Complex agent handoff coordination in staging
         STATUS: Should PASS - Seamless handoffs are critical for premium orchestration
         """
-        self.logger.info("🎭 Testing agent handoff with context preservation")
+        self.__class__.logger.info("🎭 Testing agent handoff with context preservation")
 
         websocket = await self._establish_orchestration_websocket()
 
@@ -581,13 +580,13 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
             handoff_analysis = self._analyze_orchestration_flow(handoff_events)
             final_handoff_response = self._extract_final_orchestrated_response(handoff_events)
 
-            self.logger.info(f"🎭 Agent Handoff Analysis:")
-            self.logger.info(f"   Total Events: {handoff_analysis['total_events']}")
-            self.logger.info(f"   Agent Sequence: {list(handoff_analysis['unique_agents'])}")
-            self.logger.info(f"   Handoff Transitions: {handoff_analysis['agent_transitions']}")
-            self.logger.info(f"   Total Handoffs: {handoff_analysis['handoff_events']}")
-            self.logger.info(f"   Orchestration Depth: {handoff_analysis['orchestration_depth']}")
-            self.logger.info(f"   Context Preservation Score: {handoff_analysis['collaborative_indicators']}")
+            self.__class__.logger.info(f"🎭 Agent Handoff Analysis:")
+            self.__class__.logger.info(f"   Total Events: {handoff_analysis['total_events']}")
+            self.__class__.logger.info(f"   Agent Sequence: {list(handoff_analysis['unique_agents'])}")
+            self.__class__.logger.info(f"   Handoff Transitions: {handoff_analysis['agent_transitions']}")
+            self.__class__.logger.info(f"   Total Handoffs: {handoff_analysis['handoff_events']}")
+            self.__class__.logger.info(f"   Orchestration Depth: {handoff_analysis['orchestration_depth']}")
+            self.__class__.logger.info(f"   Context Preservation Score: {handoff_analysis['collaborative_indicators']}")
 
             # Validate sophisticated handoff orchestration
             assert handoff_analysis["handoff_events"] >= 1, (
@@ -651,7 +650,7 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
                 f"Integration indicators: {integration_content}"
             )
 
-            self.logger.info("✅ Agent handoff with context preservation validated")
+            self.__class__.logger.info("✅ Agent handoff with context preservation validated")
 
         finally:
             await websocket.close()
@@ -674,7 +673,7 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Constrained orchestration decision-making in staging
         STATUS: Should PASS - Constraint-aware orchestration is enterprise-critical
         """
-        self.logger.info("🎭 Testing orchestration under complex constraints")
+        self.__class__.logger.info("🎭 Testing orchestration under complex constraints")
 
         websocket = await self._establish_orchestration_websocket()
 
@@ -717,12 +716,12 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
             constraint_analysis = self._analyze_orchestration_flow(constrained_events)
             final_constrained_response = self._extract_final_orchestrated_response(constrained_events)
 
-            self.logger.info(f"🎭 Constrained Orchestration Analysis:")
-            self.logger.info(f"   Total Events: {constraint_analysis['total_events']}")
-            self.logger.info(f"   Constraint-Aware Agents: {constraint_analysis['unique_agents']}")
-            self.logger.info(f"   Orchestration Depth: {constraint_analysis['orchestration_depth']}")
-            self.logger.info(f"   Complexity Score: {constraint_analysis['workflow_complexity_score']}")
-            self.logger.info(f"   Final Response Length: {len(final_constrained_response)} chars")
+            self.__class__.logger.info(f"🎭 Constrained Orchestration Analysis:")
+            self.__class__.logger.info(f"   Total Events: {constraint_analysis['total_events']}")
+            self.__class__.logger.info(f"   Constraint-Aware Agents: {constraint_analysis['unique_agents']}")
+            self.__class__.logger.info(f"   Orchestration Depth: {constraint_analysis['orchestration_depth']}")
+            self.__class__.logger.info(f"   Complexity Score: {constraint_analysis['workflow_complexity_score']}")
+            self.__class__.logger.info(f"   Final Response Length: {len(final_constrained_response)} chars")
 
             # Validate constraint-aware orchestration sophistication
             assert constraint_analysis["orchestration_depth"] >= 2, (
@@ -795,7 +794,7 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
                 f"Feasibility indicators: {feasibility_content}"
             )
 
-            self.logger.info("✅ Orchestration under complex constraints validated")
+            self.__class__.logger.info("✅ Orchestration under complex constraints validated")
 
         finally:
             await websocket.close()
