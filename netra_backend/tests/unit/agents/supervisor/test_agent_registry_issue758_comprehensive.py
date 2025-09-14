@@ -41,7 +41,7 @@ import weakref
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Import registry classes and dependencies
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, WebSocketManagerAdapter
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base_agent import BaseAgent
 
@@ -478,26 +478,22 @@ class TestAgentRegistryGoldenPathWorkflows(SSotBaseTestCase):
         # Validate registry can track multiple active agents
         assert len(health_agents) == 3, "Registry health monitoring failed"
 
-    def test_golden_path_websocket_adapter_enterprise_integration(self):
-        """Test golden path WebSocket adapter integration for enterprise scenarios."""
-        # Create enterprise WebSocket adapter
-        adapter = WebSocketManagerAdapter(
-            websocket_manager=self.enterprise_websocket_manager,
-            user_context=self.enterprise_context
-        )
+    def test_golden_path_websocket_manager_enterprise_integration(self):
+        """Test golden path WebSocket manager integration for enterprise scenarios."""
+        # Use WebSocket manager directly (SSOT pattern - no adapter layer needed)
+        websocket_manager = self.enterprise_websocket_manager
 
-        # Validate adapter initialization
-        assert adapter is not None, "WebSocket adapter creation failed"
-        assert hasattr(adapter, '_websocket_manager'), "Adapter missing websocket manager"
-        assert hasattr(adapter, '_user_context'), "Adapter missing user context"
+        # Validate manager initialization
+        assert websocket_manager is not None, "WebSocket manager creation failed"
+        assert hasattr(websocket_manager, 'events'), "Manager missing events tracking"
+        assert hasattr(websocket_manager, 'user_contexts'), "Manager missing user contexts"
 
-        # Test adapter delegation patterns
-        assert hasattr(adapter, '_websocket_manager'), "Adapter delegation setup failed"
+        # Test manager delegation patterns
+        assert hasattr(websocket_manager, 'events'), "Manager delegation setup failed"
 
-        # Validate adapter supports enterprise operations
-        # The adapter should provide transparent access to WebSocket manager
-        original_manager = adapter._websocket_manager
-        assert original_manager is self.enterprise_websocket_manager, "Adapter delegation incorrect"
+        # Validate manager supports enterprise operations
+        # The manager should provide direct access without adapter layer
+        assert websocket_manager is self.enterprise_websocket_manager, "Manager reference incorrect"
 
     async def test_golden_path_business_value_protection_patterns(self):
         """Test golden path patterns that protect business value and revenue."""
