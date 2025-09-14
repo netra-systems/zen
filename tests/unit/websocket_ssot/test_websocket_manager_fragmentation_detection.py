@@ -103,7 +103,7 @@ class TestWebSocketManagerFragmentationDetection(SSotBaseTestCase):
             len(actual_implementations), 1,
             f"SSOT VIOLATION: Found {len(actual_implementations)} WebSocketManager implementations. "
             f"Expected exactly 1 in unified_manager.py only. "
-            f"Found: {[f\"{m['module']}.{m['class']}\" for m in actual_implementations]}"
+            f"Found: {[m['module'] + '.' + m['class'] for m in actual_implementations]}"
         )
 
     def test_detect_multiple_get_websocket_manager_functions(self):
@@ -290,7 +290,7 @@ class TestWebSocketManagerFragmentationDetection(SSotBaseTestCase):
                 len(unique_ids), 1,
                 f"IMPORT INCONSISTENCY: WebSocket imports resolve to {len(unique_ids)} different classes. "
                 f"All imports must resolve to the same SSOT implementation. "
-                f"Classes found: {[f\"{info['module']}.{info['name']}\" for info in valid_classes]}"
+                f"Classes found: {[f'{info[\"module\"]}.{info[\"name\"]}' for info in valid_classes]}"
             )
 
 
