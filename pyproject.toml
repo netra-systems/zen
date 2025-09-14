@@ -118,6 +118,7 @@ markers = [
     "asyncio: Asynchronous test functions",
     "websocket: WebSocket-related tests",
     "golden_path: Golden path user flow tests",
+    "agent_goldenpath: Agent golden path message tests",
     "deployment: Deployment-related tests",
     "regression: Regression prevention tests",
     "timeout: Tests with custom timeout settings",
