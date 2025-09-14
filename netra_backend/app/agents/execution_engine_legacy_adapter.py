@@ -285,92 +285,77 @@ class ConsolidatedExecutionEngineWrapper(IExecutionEngine):
         return True
 
 
-class ExecutionEngineFactory:
-    """Unified factory for creating execution engines with proper adapters.
+# REMOVED: ExecutionEngineFactory class eliminated - Issue #884 SSOT Consolidation
+# 
+# The ExecutionEngineFactory here created factory proliferation that fragmented
+# execution engine creation. All factory functionality has been consolidated into:
+# netra_backend.app.agents.supervisor.execution_engine_factory.ExecutionEngineFactory
+#
+# This legacy adapter module now only provides adapters for wrapping legacy engines.
+# Factory creation is handled by the SSOT ExecutionEngineFactory only.
+
+
+def create_adapted_engine(engine: Any) -> IExecutionEngine:
+    """Create an adapted execution engine from any engine implementation.
     
-    This factory automatically wraps legacy engines with appropriate adapters
-    and ensures all engines implement the IExecutionEngine interface.
+    🚨 MIGRATION NOTE: Factory functionality moved to SSOT ExecutionEngineFactory.
+    This function remains for adapter creation only.
     
-    Migration Strategy:
-    1. Factory detects engine type and applies appropriate adapter
-    2. Gradually replace legacy engine creation with consolidated engine
-    3. Remove adapters once migration is complete
+    Args:
+        engine: Any execution engine implementation
+        
+    Returns:
+        IExecutionEngine: Adapted engine implementing standard interface
+        
+    Raises:
+        ValueError: If engine type is not supported
     """
+    engine_type = type(engine).__name__
+    engine_module = type(engine).__module__
     
-    @staticmethod
-    def create_adapted_engine(engine: Any) -> IExecutionEngine:
-        """Create an adapted execution engine from any engine implementation.
-        
-        🚨 DEPRECATION WARNING: Issue #884 factory consolidation
-        This factory is deprecated and will be removed during SSOT consolidation.
-        Use netra_backend.app.agents.supervisor.execution_engine_factory instead.
-        
-        Args:
-            engine: Any execution engine implementation
-            
-        Returns:
-            IExecutionEngine: Adapted engine implementing standard interface
-            
-        Raises:
-            ValueError: If engine type is not supported
-        """
-        # 🚨 RUNTIME DEPRECATION WARNING: Issue #884
-        import warnings
-        warnings.warn(
-            "⚠️  CRITICAL: execution_engine_legacy_adapter.ExecutionEngineFactory is DEPRECATED in Issue #884. "
-            "This legacy adapter creates factory proliferation that fragments execution engine creation. "
-            "MIGRATION: Use 'from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory' instead. "
-            "This adapter will be removed after SSOT consolidation.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        engine_type = type(engine).__name__
-        engine_module = type(engine).__module__
-        
-        logger.info(f"Creating adapted engine for {engine_module}.{engine_type}")
-        
-        # Check if already implements interface
-        if isinstance(engine, IExecutionEngine):
-            logger.debug(f"Engine {engine_type} already implements IExecutionEngine")
-            return engine
-        
-        # Detect legacy SupervisorExecutionEngine
-        if 'supervisor.execution_engine' in engine_module and 'ExecutionEngine' in engine_type:
-            logger.info(f"Adapting SupervisorExecutionEngine: {engine_type}")
-            return SupervisorExecutionEngineAdapter(engine)
-        
-        # Detect ConsolidatedExecutionEngine
-        if 'execution_engine_consolidated' in engine_module and 'ExecutionEngine' in engine_type:
-            logger.info(f"Wrapping ConsolidatedExecutionEngine: {engine_type}")
-            return ConsolidatedExecutionEngineWrapper(engine)
-        
-        # Unknown engine type - emit warning and try generic adapter
-        warnings.warn(
-            f"Unknown execution engine type: {engine_module}.{engine_type}. "
-            f"Using generic adapter which may not work correctly. "
-            f"Consider adding specific adapter implementation.",
-            UserWarning,
-            stacklevel=2
-        )
-        
-        # Generic adapter as fallback
-        return GenericExecutionEngineAdapter(engine)
+    logger.info(f"Creating adapted engine for {engine_module}.{engine_type}")
     
-    @classmethod
-    def ensure_interface_compliance(cls, engine: Any) -> IExecutionEngine:
-        """Ensure an execution engine complies with IExecutionEngine interface.
+    # Check if already implements interface
+    if isinstance(engine, IExecutionEngine):
+        logger.debug(f"Engine {engine_type} already implements IExecutionEngine")
+        return engine
+    
+    # Detect legacy SupervisorExecutionEngine
+    if 'supervisor.execution_engine' in engine_module and 'ExecutionEngine' in engine_type:
+        logger.info(f"Adapting SupervisorExecutionEngine: {engine_type}")
+        return SupervisorExecutionEngineAdapter(engine)
+    
+    # Detect ConsolidatedExecutionEngine
+    if 'execution_engine_consolidated' in engine_module and 'ExecutionEngine' in engine_type:
+        logger.info(f"Wrapping ConsolidatedExecutionEngine: {engine_type}")
+        return ConsolidatedExecutionEngineWrapper(engine)
+    
+    # Unknown engine type - emit warning and try generic adapter
+    warnings.warn(
+        f"Unknown execution engine type: {engine_module}.{engine_type}. "
+        f"Using generic adapter which may not work correctly. "
+        f"Consider adding specific adapter implementation.",
+        UserWarning,
+        stacklevel=2
+    )
+    
+    # Generic adapter as fallback
+    return GenericExecutionEngineAdapter(engine)
+
+
+def ensure_interface_compliance(engine: Any) -> IExecutionEngine:
+    """Ensure an execution engine complies with IExecutionEngine interface.
+    
+    Args:
+        engine: Execution engine to check/adapt
         
-        Args:
-            engine: Execution engine to check/adapt
-            
-        Returns:
-            IExecutionEngine: Interface-compliant execution engine
-        """
-        if isinstance(engine, IExecutionEngine):
-            return engine
-        else:
-            return cls.create_adapted_engine(engine)
+    Returns:
+        IExecutionEngine: Interface-compliant execution engine
+    """
+    if isinstance(engine, IExecutionEngine):
+        return engine
+    else:
+        return create_adapted_engine(engine)
 
 
 class GenericExecutionEngineAdapter(ExecutionEngineAdapter, IExecutionEngine):
@@ -487,10 +472,11 @@ class GenericExecutionEngineAdapter(ExecutionEngineAdapter, IExecutionEngine):
         return self.capabilities.supports_user_context
 
 
-# Re-export main components
+# Re-export main components  
 __all__ = [
     'SupervisorExecutionEngineAdapter',
     'ConsolidatedExecutionEngineWrapper',
-    'ExecutionEngineFactory',
-    'GenericExecutionEngineAdapter'
+    'GenericExecutionEngineAdapter',
+    'create_adapted_engine',
+    'ensure_interface_compliance'
 ]

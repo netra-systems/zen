@@ -24,7 +24,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from shared.logging.unified_logger_factory import UnifiedLoggerFactory
+from shared.logging.unified_logging_ssot import get_ssot_logger, UnifiedLoggingSSOT
 from netra_backend.app.logging.auth_trace_logger import AuthTraceLogger, AuthTraceContext
 
 

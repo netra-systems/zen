@@ -628,6 +628,9 @@ markers = [
     
     # Issue #372 specific marker for staging import error tests
     "issue_372: Issue #372 E2E staging import error tests",
+    
+    # Issue #881 GCP Cloud Run marker for staging E2E tests
+    "gcp_cloud_run: Tests requiring GCP Cloud Run deployment environment",
 ]
 
 # Coverage settings
