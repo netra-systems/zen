@@ -30,13 +30,18 @@ from netra_backend.app.websocket_core.canonical_imports import (
 # ============================================================================
 
 # CANONICAL: WebSocket Manager Factory (PREFERRED) - Migrated to user_execution_context.py
-from netra_backend.app.auth_integration.user_execution_context import (
+from netra_backend.app.services.user_execution_context import (
     create_defensive_user_execution_context as create_websocket_manager,
 )
-from netra_backend.app.websocket_core.unified_manager import (
-    FactoryInitializationError,
-    WebSocketComponentError,
-)
+
+# Error classes for backward compatibility
+class FactoryInitializationError(Exception):
+    """Exception raised when WebSocket manager factory initialization fails."""
+    pass
+
+class WebSocketComponentError(Exception):
+    """Exception raised for WebSocket component validation errors."""
+    pass
 
 # CANONICAL: Unified WebSocket Manager (Direct Use - Use Factory Instead)
 from netra_backend.app.websocket_core.unified_manager import (

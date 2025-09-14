@@ -15,6 +15,7 @@ import asyncio
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional
+from unittest.mock import Mock
 
 import pytest
 
@@ -47,8 +48,8 @@ class ResourceMode(Enum):
     DOCKER = "docker"
 
 class ServiceConfigValidator:
-    def __init__(self):
-        pass
+    def __init__(self, context: ValidationContext = None):
+        self.context = context
     
     def validate(self, config):
         return ConfigValidationResult(status=ConfigStatus.VALID)
@@ -67,11 +68,8 @@ def temp_config_path(tmp_path: Path) -> Path:
 def mock_validation_context(temp_config_path: Path) -> ValidationContext:
     """Create mock validation context."""
     return ValidationContext(
-        config_path=temp_config_path,
-        is_interactive=True,
-        is_ci_environment=False,
-        cli_overrides={"REDIS_HOST": "localhost"},
-        env_overrides={"POSTGRES_HOST": "db.example.com"}
+        config_path=str(temp_config_path),
+        is_interactive=True
     )
 
 @pytest.fixture

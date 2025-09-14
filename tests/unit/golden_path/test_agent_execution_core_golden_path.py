@@ -121,6 +121,13 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         self.test_thread_id = str(uuid.uuid4())
         self.test_run_id = str(uuid.uuid4())
         
+        # Create user execution context in sync setup
+        self.user_context = UserExecutionContext(
+            user_id=self.test_user_id,
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
+        )
+        
         # Mock LLM Manager for agent testing
         self.mock_llm_manager = MagicMock()
         self.mock_llm_client = self.mock_factory.create_llm_client_mock()
@@ -139,13 +146,6 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         """Async setup for agent and context initialization."""
         await super().async_setup_method(method)
         
-        # Create user execution context
-        self.user_context = UserExecutionContext(
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id,
-            run_id=self.test_run_id
-        )
-        
         # Initialize execution tracker
         self.execution_tracker = get_execution_tracker()
 
@@ -157,7 +157,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         Test SupervisorAgent initialization with proper configuration.
         """
         # Test supervisor creation
-        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager)
+        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
         
         # Verify basic initialization
         assert supervisor is not None
@@ -264,7 +264,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         BVJ: All segments | State Management | Ensures proper agent state handling
         Test agent state management and state transitions during execution.
         """
-        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager)
+        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
         
         # Track state changes
         state_history = []
@@ -330,7 +330,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         BVJ: All segments | Workflow Management | Ensures proper execution coordination
         Test agent execution workflow and coordination logic.
         """
-        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager)
+        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
         
         # Mock WebSocket bridge for event tracking
         mock_bridge = AsyncMock(spec=AgentWebSocketBridge)
@@ -397,7 +397,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         BVJ: All segments | System Reliability | Ensures robust error handling
         Test agent error handling and recovery mechanisms.
         """
-        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager)
+        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
         
         # Mock failing LLM client
         failing_client = AsyncMock()
@@ -461,7 +461,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         BVJ: All segments | Performance SLA | Ensures agents meet timing requirements
         Test agent performance and timeout management for SLA compliance.
         """
-        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager)
+        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
         
         # Mock WebSocket bridge
         mock_bridge = AsyncMock(spec=AgentWebSocketBridge)
@@ -533,7 +533,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         BVJ: All segments | API Compatibility | Ensures consistent result formats
         Test agent execution result formats and API compatibility.
         """
-        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager)
+        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
         
         # Mock WebSocket bridge
         mock_bridge = AsyncMock(spec=AgentWebSocketBridge)
@@ -689,7 +689,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         BVJ: Platform/Internal | Observability | Ensures execution tracking works
         Test integration with AgentExecutionTracker for monitoring and metrics.
         """
-        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager)
+        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
         execution_tracker = get_execution_tracker()
         
         # Mock WebSocket bridge
