@@ -2,7 +2,7 @@
 
 **GitHub Issue:** [#1036](https://github.com/netra-systems/netra-apex/issues/1036)  
 **Progress Tracker:** SSOT-incomplete-migration-WebSocket Manager fragmentation blocking Golden Path.md  
-**Status:** FAIL-FIRST TESTS CREATED - Step 2 Complete
+**Status:** REMEDIATION PLAN READY - Step 3 Complete
 
 ## Issue Summary
 - **Critical Legacy SSOT Violation:** WebSocket Manager fragmentation with multiple implementations
@@ -57,10 +57,17 @@
 - [x] **Unit tests only, no Docker dependencies** 
 - [x] **Business value protected: $500K+ ARR Golden Path monitoring**
 
-## Remediation Planning (Step 3) - PENDING
-- [ ] Plan elimination of WebSocket manager aliases
-- [ ] Plan factory pattern enforcement strategy
-- [ ] Plan migration of existing code to single SSOT
+## Remediation Planning (Step 3) ✅ COMPLETE  
+- [x] **Target SSOT Architecture**: `/netra_backend/app/websocket_core/websocket_manager.py` as canonical source
+- [x] **4-Phase Migration Strategy**:
+  - Phase 1: SSOT Target Architecture definition ✅
+  - Phase 2A: Import Consolidation (49+ files) 
+  - Phase 2B: Factory Pattern Unification
+  - Phase 3: Alias Elimination & Validation
+- [x] **Risk Mitigation Plan**: Golden Path protection, rollback triggers, gradual phases
+- [x] **Fail-First Test Integration**: Use 3 tests to monitor consolidation progress
+- [x] **File Change Inventory**: 6 implementations → 1 SSOT, import updates identified
+- [x] **Success Criteria**: Single manager, unified factory, all 5 WebSocket events preserved
 
 ## Remediation Execution (Step 4) - PENDING
 - [ ] Remove `UnifiedWebSocketManager` alias
