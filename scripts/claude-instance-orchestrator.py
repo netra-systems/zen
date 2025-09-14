@@ -566,6 +566,53 @@ class ClaudeInstanceOrchestrator:
         except Exception as e:
             logger.error(f"Error in status reporter: {e}")
 
+    def _format_duration(self, seconds: float) -> str:
+        """Format duration in seconds to a readable format"""
+        if seconds < 60:
+            return f"{seconds:.1f}s"
+        elif seconds < 3600:
+            minutes = int(seconds // 60)
+            remaining_seconds = seconds % 60
+            return f"{minutes}m{remaining_seconds:.0f}s"
+        else:
+            hours = int(seconds // 3600)
+            remaining_minutes = int((seconds % 3600) // 60)
+            return f"{hours}h{remaining_minutes}m"
+
+    def _format_tokens(self, tokens: int) -> str:
+        """Format token count with thousands separator"""
+        if tokens >= 1000000:
+            return f"{tokens/1000000:.1f}M"
+        elif tokens >= 1000:
+            return f"{tokens/1000:.1f}K"
+        else:
+            return str(tokens)
+
+    def _calculate_token_median(self) -> float:
+        """Calculate median token usage across all instances"""
+        token_counts = [status.total_tokens for status in self.statuses.values() if status.total_tokens > 0]
+        if not token_counts:
+            return 0
+        
+        token_counts.sort()
+        n = len(token_counts)
+        if n % 2 == 0:
+            return (token_counts[n//2 - 1] + token_counts[n//2]) / 2
+        else:
+            return token_counts[n//2]
+
+    def _calculate_token_percentage(self, tokens: int, median: float) -> str:
+        """Calculate percentage relative to median"""
+        if median == 0:
+            return "N/A"
+        percentage = (tokens / median) * 100
+        if percentage >= 150:
+            return f"+{percentage-100:.0f}%"
+        elif percentage <= 50:
+            return f"-{100-percentage:.0f}%"
+        else:
+            return f"{percentage-100:+.0f}%"
+
     async def _print_status_report(self, final: bool = False):
         """Print a formatted status report of all instances"""
         if not self.statuses:
@@ -576,34 +623,14 @@ class ClaudeInstanceOrchestrator:
 
         # Create status summary
         status_counts = {"pending": 0, "running": 0, "completed": 0, "failed": 0}
-        instance_details = []
 
         for name, status in self.statuses.items():
             status_counts[status.status] += 1
 
-            # Calculate uptime/duration
-            if status.start_time:
-                if status.end_time:
-                    duration = status.end_time - status.start_time
-                    time_info = f"{duration:.1f}s"
-                else:
-                    uptime = current_time - status.start_time
-                    time_info = f"{uptime:.1f}s uptime"
-            else:
-                time_info = "not started"
+        # Calculate token median
+        token_median = self._calculate_token_median()
 
-            # Status emoji
-            emoji_map = {
-                "pending": "⏳",
-                "running": "🏃",
-                "completed": "✅",
-                "failed": "❌"
-            }
-            emoji = emoji_map.get(status.status, "❓")
-
-            instance_details.append(f"  {emoji} {name:<20} {status.status:<10} {time_info}")
-
-        # Print the report
+        # Print the report header
         header = f"╔═══ {report_type} [{datetime.now().strftime('%H:%M:%S')}] ═══╗"
         print(f"\n{header}")
         print(f"║ Total: {len(self.statuses)} instances")
@@ -613,8 +640,13 @@ class ClaudeInstanceOrchestrator:
         total_tokens_all = sum(s.total_tokens for s in self.statuses.values())
         total_cached_all = sum(s.cached_tokens for s in self.statuses.values())
         total_tools_all = sum(s.tool_calls for s in self.statuses.values())
-        print(f"║ Tokens: {total_tokens_all:,} total, {total_cached_all:,} cached | Tools: {total_tools_all}")
+        median_str = self._format_tokens(int(token_median)) if token_median > 0 else "0"
+        print(f"║ Tokens: {self._format_tokens(total_tokens_all)} total, {self._format_tokens(total_cached_all)} cached | Median: {median_str} | Tools: {total_tools_all}")
         print(f"║")
+        
+        # Print column headers
+        print(f"║  {'Status':<8} {'Name':<18} {'Duration':<10} {'Tokens':<8} {'vs Med':<8} {'Cache':<8} {'Tools':<6}")
+        print(f"║  {'─'*8} {'─'*18} {'─'*10} {'─'*8} {'─'*8} {'─'*8} {'─'*6}")
 
         for name, status in self.statuses.items():
             # Status emoji
@@ -630,23 +662,24 @@ class ClaudeInstanceOrchestrator:
             if status.start_time:
                 if status.end_time:
                     duration = status.end_time - status.start_time
-                    time_info = f"{duration:.1f}s"
+                    time_info = self._format_duration(duration)
                 else:
                     uptime = current_time - status.start_time
-                    time_info = f"{uptime:.1f}s up"
+                    time_info = self._format_duration(uptime)
             else:
                 time_info = "waiting"
 
-            # Create detailed line with tokens and cache info
-            token_info = f"{status.total_tokens:,}t" if status.total_tokens > 0 else "0t"
-            cache_info = f"{status.cached_tokens:,}c" if status.cached_tokens > 0 else "0c"
-            tool_info = f"{status.tool_calls}tc" if status.tool_calls > 0 else "0tc"
+            # Format token information
+            token_info = self._format_tokens(status.total_tokens) if status.total_tokens > 0 else "0"
+            cache_info = self._format_tokens(status.cached_tokens) if status.cached_tokens > 0 else "0"
+            tool_info = str(status.tool_calls) if status.tool_calls > 0 else "0"
+            
+            # Calculate percentage relative to median
+            token_pct = self._calculate_token_percentage(status.total_tokens, token_median)
 
-            detail = f"  {emoji} {name:<16} {status.status:<8} {time_info:<8} {token_info:<7} {cache_info:<6} {tool_info}"
+            # Create detailed line with consistent spacing
+            detail = f"  {emoji:<8} {name:<18} {time_info:<10} {token_info:<8} {token_pct:<8} {cache_info:<8} {tool_info:<6}"
 
-            # Ensure the line fits within a reasonable width
-            if len(detail) > 75:
-                detail = detail[:72] + "..."
             print(f"║{detail}")
 
         footer = "╚" + "═" * (len(header) - 2) + "╝"
