@@ -109,7 +109,7 @@ class TestWebSocketMessageRoutingPrecision(BaseIntegrationTest):
             )
             self.auth_helpers[user_name] = E2EWebSocketAuthHelper(config=auth_config, environment="test")
         
-        self.active_connections: Dict[str, websockets.WebSocketServerProtocol] = {}
+        self.active_connections: Dict[str, websockets.ServerConnection] = {}
         self.received_messages: Dict[str, List[Dict[str, Any]]] = {}
         
         # Initialize message tracking for each user
@@ -137,7 +137,7 @@ class TestWebSocketMessageRoutingPrecision(BaseIntegrationTest):
         self.active_connections.clear()
         await super().async_teardown()
     
-    async def create_user_connection(self, user_name: str) -> websockets.WebSocketServerProtocol:
+    async def create_user_connection(self, user_name: str) -> websockets.ServerConnection:
         """
         Create authenticated WebSocket connection for specific user.
         

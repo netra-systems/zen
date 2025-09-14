@@ -28,7 +28,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSo
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.websocket_core.websocket_manager_factory import create_defensive_user_execution_context
+from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context
 from test_framework.ssot import AsyncBaseTestCase
 from shared.types import UserID, ThreadID, RunID, RequestID
 

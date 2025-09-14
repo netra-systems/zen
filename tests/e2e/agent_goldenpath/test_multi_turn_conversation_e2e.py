@@ -103,7 +103,7 @@ class TestMultiTurnConversationE2E(SSotAsyncTestCase):
 
         self.logger.info(f"Conversation test setup - conversation_id: {self.conversation_id}")
 
-    async def _establish_persistent_websocket_connection(self) -> websockets.WebSocketServerProtocol:
+    async def _establish_persistent_websocket_connection(self) -> websockets.ServerConnection:
         """Establish persistent WebSocket connection for multi-turn conversation."""
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False  # Staging environment

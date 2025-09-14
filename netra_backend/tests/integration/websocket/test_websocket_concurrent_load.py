@@ -77,7 +77,7 @@ class TestWebSocketConcurrentLoad(BaseIntegrationTest):
         )
         
         self.auth_helper = E2EWebSocketAuthHelper(config=auth_config, environment="test")
-        self.concurrent_connections: Dict[str, websockets.WebSocketServerProtocol] = {}
+        self.concurrent_connections: Dict[str, websockets.ServerConnection] = {}
         self.load_metrics: Dict[str, Any] = {
             "connections_created": 0,
             "connections_failed": 0,
@@ -113,7 +113,7 @@ class TestWebSocketConcurrentLoad(BaseIntegrationTest):
         self,
         user_id: str,
         connection_delay: float = 0.0
-    ) -> Optional[websockets.WebSocketServerProtocol]:
+    ) -> Optional[websockets.ServerConnection]:
         """
         Create a single concurrent WebSocket connection.
         
@@ -172,7 +172,7 @@ class TestWebSocketConcurrentLoad(BaseIntegrationTest):
     async def simulate_user_activity(
         self,
         user_id: str,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: websockets.ServerConnection,
         activity_duration: float = 20.0,
         message_interval: float = 3.0
     ) -> Dict[str, Any]:

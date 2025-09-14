@@ -138,7 +138,7 @@ class TestServiceSecretAuthenticationRegression(SSotAsyncTestCase):
             """Test WebSocket authentication with service secret mismatch."""
             try:
                 import websockets
-                from websockets.exceptions import ConnectionClosedError
+                from websockets import ConnectionClosedError
 
                 # Create WebSocket connection with authentication
                 ws_url = self.backend_service_url.replace("http://", "ws://") + "/ws"

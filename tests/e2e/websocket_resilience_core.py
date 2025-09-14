@@ -9,7 +9,7 @@ import json
 import logging
 from typing import Any, Dict, List, Optional
 import websockets
-from websockets.exceptions import WebSocketException
+from websockets import WebSocketException
 
 logger = logging.getLogger(__name__)
 

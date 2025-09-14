@@ -34,7 +34,7 @@ import websockets
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch, call
-from websockets.exceptions import ConnectionClosed, WebSocketException
+from websockets import ConnectionClosed, WebSocketException
 
 # SSOT Test Framework imports
 from test_framework.ssot.base_test_case import SSotAsyncTestCase

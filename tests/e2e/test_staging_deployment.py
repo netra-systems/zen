@@ -34,7 +34,7 @@ import uuid
 import httpx
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
+from websockets import ConnectionClosedError, InvalidStatusCode
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.ssot.base_test_case import SSotBaseTestCase

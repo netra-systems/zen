@@ -18,7 +18,7 @@ from typing import Any, Dict, List
 
 import pytest
 import websockets
-from websockets.exceptions import WebSocketException
+from websockets import WebSocketException
 
 from netra_backend.tests.real_services_test_fixtures import skip_if_no_real_services
 from shared.isolated_environment import get_env

@@ -45,7 +45,7 @@ from netra_backend.app.services.database.thread_repository import ThreadReposito
 from netra_backend.app.services.database.unit_of_work import get_unit_of_work
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
-from netra_backend.app.websocket_core.websocket_manager_factory import create_defensive_user_execution_context
+from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context
 from netra_backend.app.db.models_postgres import Thread, Message, User
 from netra_backend.app.schemas.core_models import Thread as ThreadModel, ThreadMetadata
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager

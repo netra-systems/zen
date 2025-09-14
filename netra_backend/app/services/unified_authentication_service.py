@@ -659,8 +659,8 @@ class UnifiedAuthenticationService:
                 
                 logger.warning(f"UNIFIED AUTH: Attempting fallback UserExecutionContext creation for user {fallback_user_id[:8]}...")
                 
-                # Use defensive creation as fallback
-                from netra_backend.app.websocket_core.websocket_manager_factory import create_defensive_user_execution_context
+                # Use defensive creation as fallback - SSOT import path
+                from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context
                 
                 fallback_context = create_defensive_user_execution_context(
                     user_id=fallback_user_id,

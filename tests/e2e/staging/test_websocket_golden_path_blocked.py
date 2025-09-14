@@ -86,7 +86,7 @@ from loguru import logger
 import httpx
 import websockets
 from websockets import WebSocketClientProtocol
-from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
+from websockets import ConnectionClosedError, InvalidStatusCode
 
 # Import E2E test framework
 from tests.e2e.staging_test_base import StagingTestBase, staging_test, track_test_timing

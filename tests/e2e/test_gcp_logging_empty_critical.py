@@ -69,7 +69,7 @@ from unittest.mock import patch
 
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatusCode
+from websockets import ConnectionClosed, InvalidStatusCode
 
 # SSOT Test Infrastructure
 from test_framework.ssot.base_test_case import SSotBaseTestCase

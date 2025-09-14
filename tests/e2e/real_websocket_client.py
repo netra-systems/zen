@@ -16,7 +16,7 @@ import ssl
 from typing import Any, Dict, Optional, Union
 
 import websockets
-from websockets.exceptions import ConnectionClosedError
+from websockets import ConnectionClosedError
 
 from test_framework.http_client import ClientConfig, ConnectionState as IntegrationConnectionState
     

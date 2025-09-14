@@ -25,7 +25,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosed
+from websockets import ConnectionClosed
 
 from netra_backend.app.logging_config import central_logger
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete

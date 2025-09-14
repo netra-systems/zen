@@ -704,6 +704,81 @@ class UserExecutionContext:
                 f"WebSocket context creation failed due to ID generation error: {id_error}. "
                 f"This indicates a system configuration issue with SSOT ID generation."
             ) from id_error
+
+    @classmethod
+    def create_defensive_user_execution_context(
+        cls,
+        user_id: str, 
+        websocket_client_id: Optional[str] = None,
+        fallback_context: Optional[Dict[str, Any]] = None
+    ) -> 'UserExecutionContext':
+        """
+        Create a defensive UserExecutionContext with proper validation.
+        
+        This function provides backward compatibility for the unified authentication service
+        that expects defensive context creation during WebSocket authentication flows.
+        
+        SSOT Migration: This function was moved from websocket_manager_factory.py as part
+        of the Phase 3 factory deprecation. All defensive context creation now uses this
+        canonical SSOT implementation.
+        
+        Business Value Justification (BVJ):
+        - Segment: ALL (Free -> Enterprise) - WebSocket Authentication Infrastructure  
+        - Business Goal: Ensure reliable WebSocket authentication with proper fallback
+        - Value Impact: Prevents authentication failures that block Golden Path chat functionality
+        - Revenue Impact: Protects $500K+ ARR by ensuring reliable user authentication
+        
+        Args:
+            user_id: User identifier for the context
+            websocket_client_id: Optional WebSocket connection ID
+            fallback_context: Optional fallback context data
+            
+        Returns:
+            UserExecutionContext: Properly configured context for WebSocket authentication
+            
+        Raises:
+            InvalidContextError: If user_id is invalid or context creation fails
+        """
+        logger.debug(f"Creating defensive UserExecutionContext for user: {user_id}")
+        
+        if not user_id or not isinstance(user_id, str) or not user_id.strip():
+            raise InvalidContextError(
+                f"user_id must be a non-empty string for defensive context, got: {user_id!r}"
+            )
+        
+        # Use ID manager for consistent ID generation
+        from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+        id_manager = UnifiedIDManager()
+        
+        # Generate IDs if not provided in fallback_context
+        if fallback_context and 'thread_id' in fallback_context:
+            thread_id = fallback_context['thread_id']
+        else:
+            thread_id = id_manager.generate_thread_id()
+            
+        if fallback_context and 'run_id' in fallback_context:
+            run_id = fallback_context['run_id']
+        else:
+            run_id = id_manager.generate_run_id(thread_id)
+        
+        # Create defensive context with proper validation
+        context = cls(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=f"defensive_auth_{user_id}_{websocket_client_id or 'no_ws'}",
+            websocket_client_id=websocket_client_id,
+            agent_context=fallback_context or {},
+            audit_metadata={
+                'context_source': 'defensive_creation',
+                'creation_method': 'create_defensive_user_execution_context',
+                'migrated_from': 'websocket_manager_factory',
+                'ssot_compliant': True
+            }
+        )
+        
+        logger.debug(f"Created defensive context: user={user_id}, ws_id={websocket_client_id}")
+        return context
     
     @classmethod 
     def from_fastapi_request(
@@ -2770,6 +2845,34 @@ class UserContextManager:
                 self._audit_trail[context_key] = self._audit_trail[context_key][-max_events_per_context:]
 
 
+# ===== MODULE-LEVEL COMPATIBILITY FUNCTIONS =====
+
+def create_defensive_user_execution_context(
+    user_id: str, 
+    websocket_client_id: Optional[str] = None,
+    fallback_context: Optional[Dict[str, Any]] = None
+) -> 'UserExecutionContext':
+    """
+    Module-level function for defensive UserExecutionContext creation.
+    
+    This provides the same interface as the original websocket_manager_factory function
+    but delegates to the SSOT class method for consistent behavior.
+    
+    Args:
+        user_id: User identifier for the context
+        websocket_client_id: Optional WebSocket connection ID
+        fallback_context: Optional fallback context data
+        
+    Returns:
+        UserExecutionContext: Properly configured context for WebSocket authentication
+    """
+    return UserExecutionContext.create_defensive_user_execution_context(
+        user_id=user_id,
+        websocket_client_id=websocket_client_id,
+        fallback_context=fallback_context
+    )
+
+
 # Export all public classes and functions
 __all__ = [
     'UserExecutionContext',
@@ -2782,5 +2885,6 @@ __all__ = [
     'managed_user_context',
     'register_shared_object',
     'clear_shared_object_registry',
+    'create_defensive_user_execution_context',  # Migrated from websocket_manager_factory
     'create_isolated_execution_context'
 ]

@@ -24,7 +24,7 @@
 
     # REMOVED_SYNTAX_ERROR: import pytest
     # REMOVED_SYNTAX_ERROR: import websockets
-    # REMOVED_SYNTAX_ERROR: from websockets.exceptions import ConnectionClosed
+    # REMOVED_SYNTAX_ERROR: from websockets import ConnectionClosed
 
     # CLAUDE.md: Absolute imports only - NO relative imports
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env

@@ -99,7 +99,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
 
         self.logger.info(f"Quality test setup complete - thread_id: {self.thread_id}")
 
-    async def _establish_websocket_connection(self) -> websockets.WebSocketServerProtocol:
+    async def _establish_websocket_connection(self) -> websockets.ServerConnection:
         """Establish WebSocket connection to staging with proper auth headers."""
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False  # Staging environment

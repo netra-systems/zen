@@ -305,7 +305,7 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
     
     async def _monitor_event_stream(
         self, 
-        ws: websockets.WebSocketServerProtocol,
+        ws: websockets.ServerConnection,
         event_monitor: WebSocketEventDeliveryMonitor,
         stream_name: str
     ):
@@ -351,7 +351,7 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
     
     async def _monitor_critical_events(
         self,
-        ws: websockets.WebSocketServerProtocol, 
+        ws: websockets.ServerConnection, 
         event_monitor: WebSocketEventDeliveryMonitor,
         monitor_name: str
     ):
@@ -409,7 +409,7 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
     
     async def _validate_event_ids(
         self,
-        ws: websockets.WebSocketServerProtocol,
+        ws: websockets.ServerConnection,
         event_monitor: WebSocketEventDeliveryMonitor,
         trigger_request: dict,
         validator_name: str

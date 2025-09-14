@@ -1,8 +1,10 @@
 # API Dual-Channel Architecture: How It Works
 
+**System Health Score: 95% (EXCELLENT)** | **Last Updated: 2025-09-14** | **Issue #1116 COMPLETE: SSOT Factory Migration**
+
 ## Executive Summary
 
-Netra implements a **dual-channel API architecture** that provides both REST endpoints and WebSocket connections for agent communication. This is NOT a legacy vs. new situation - both channels are **actively maintained production features** that serve complementary purposes.
+Netra implements a **dual-channel API architecture** that provides both REST endpoints and WebSocket connections for agent communication. This is NOT a legacy vs. new situation - both channels are **actively maintained production features** that serve complementary purposes with complete factory-based user isolation.
 
 ## The Architecture
 

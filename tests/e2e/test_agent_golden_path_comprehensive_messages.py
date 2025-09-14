@@ -54,7 +54,7 @@ from contextlib import asynccontextmanager
 
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosed, WebSocketException
+from websockets import ConnectionClosed, WebSocketException
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, AuthenticatedUser

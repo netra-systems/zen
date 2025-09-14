@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Any
 from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor
-from websockets.exceptions import WebSocketException, ConnectionClosedError
+from websockets import WebSocketException, ConnectionClosedError
 
 from shared.isolated_environment import IsolatedEnvironment
 from tests.e2e.concurrent_user_models import UserTestSession, IsolationValidator

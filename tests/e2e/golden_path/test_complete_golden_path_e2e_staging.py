@@ -75,7 +75,7 @@ import websockets
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional, Set
 from unittest.mock import AsyncMock, patch
-from websockets.exceptions import ConnectionClosed, WebSocketException
+from websockets import ConnectionClosed, WebSocketException
 
 # SSOT Test Framework imports
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -139,7 +139,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
         
         # Event tracking for validation
         self.captured_events: List[Dict[str, Any]] = []
-        self.websocket_connections: List[websockets.WebSocketServerProtocol] = []
+        self.websocket_connections: List[websockets.ServerConnection] = []
         self.performance_metrics: List[Dict[str, Any]] = []
         
         # SLA requirements - Staging-optimized thresholds for Issue #677 resolution

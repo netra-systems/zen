@@ -21,7 +21,7 @@ from typing import Any, Dict, List, Optional, Set
 
 import pytest
 import websockets
-from websockets.exceptions import WebSocketException
+from websockets import WebSocketException
 
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier

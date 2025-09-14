@@ -103,7 +103,7 @@ class TestAuthenticatedMultiAgentChatFlowE2E(SSotBaseTestCase):
     
     async def _monitor_multi_agent_events(
         self, 
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: websockets.ServerConnection,
         user_context: StronglyTypedUserExecutionContext,
         expected_agents: List[str],
         timeout: float = 90.0

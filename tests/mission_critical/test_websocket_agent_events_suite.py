@@ -64,7 +64,7 @@ from tests.mission_critical.websocket_real_test_base import (
 # CRITICAL: Always use real WebSocket connections - NO MOCKS per CLAUDE.md
 # Tests will fail if Docker services are not available (expected behavior)
 WebSocketTestBase = RealWebSocketTestBase
-from test_framework.test_context import WebSocketTestContext, create_test_context
+from test_framework.test_context import WebSocketContext, create_test_context
 from test_framework.websocket_helpers import WebSocketTestHelpers
 
 

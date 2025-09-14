@@ -57,7 +57,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosed, WebSocketException
+from websockets import ConnectionClosed, WebSocketException
 
 from tests.e2e.config import TEST_CONFIG, get_test_environment_config, TestEnvironmentType
 from tests.e2e.real_services_manager import RealServicesManager

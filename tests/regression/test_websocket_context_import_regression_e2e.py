@@ -87,7 +87,7 @@ except ImportError as e:
 # WebSocket test utilities
 try:
     import websockets
-    from websockets.exceptions import ConnectionClosed
+    from websockets import ConnectionClosed
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
     WEBSOCKETS_AVAILABLE = False

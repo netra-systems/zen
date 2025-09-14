@@ -27,10 +27,17 @@ def fix_websockets_imports(file_path: str) -> bool:
             content
         )
         
-        # Fix InvalidStatusCode import
+        # Fix InvalidStatusCode import - pattern 1
         content = re.sub(
             r'from websockets\.exceptions import ([^\\n]*InvalidStatusCode[^\\n]*)',
             r'from websockets import \1',
+            content
+        )
+        
+        # Fix InvalidStatusCode import - pattern 2 (indented imports)
+        content = re.sub(
+            r'(\s+)from websockets\.exceptions import ([^\\n]*InvalidStatusCode[^\\n]*)',
+            r'\1from websockets import \2',
             content
         )
         

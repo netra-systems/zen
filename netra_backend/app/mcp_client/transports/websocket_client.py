@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 
 import websockets
 from websockets import ServerConnection
-from websockets.exceptions import ConnectionClosed, InvalidMessage
+from websockets import ConnectionClosed, InvalidMessage
 
 from netra_backend.app.db.base import (
     MCPConnectionError,

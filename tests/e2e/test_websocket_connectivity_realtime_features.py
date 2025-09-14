@@ -48,7 +48,7 @@ from urllib.parse import urljoin, urlparse
 import pytest
 import websockets
 from websockets import ServerConnection
-from websockets.exceptions import ConnectionClosed, InvalidURI, WebSocketException
+from websockets import ConnectionClosed, InvalidURI, WebSocketException
 
 # Use absolute imports per CLAUDE.md requirements
 from dev_launcher.service_discovery import ServiceDiscovery

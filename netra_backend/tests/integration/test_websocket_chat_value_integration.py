@@ -28,7 +28,7 @@ from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, patch
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosed
+from websockets import ConnectionClosed
 
 from test_framework.base_integration_test import BaseIntegrationTest, WebSocketIntegrationTest
 from test_framework.real_services import get_real_services

@@ -121,7 +121,7 @@ class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
 
         return user_context
 
-    async def _establish_user_websocket_connection(self, user_context: Dict[str, Any]) -> websockets.WebSocketServerProtocol:
+    async def _establish_user_websocket_connection(self, user_context: Dict[str, Any]) -> websockets.ServerConnection:
         """Establish WebSocket connection for a specific user."""
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False  # Staging environment

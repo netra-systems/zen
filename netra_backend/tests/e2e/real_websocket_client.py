@@ -9,7 +9,7 @@ import logging
 from typing import Any, Callable, Dict, Optional
 import websockets
 from websockets import ServerConnection
-from websockets.exceptions import ConnectionClosed, WebSocketException
+from websockets import ConnectionClosed, WebSocketException
 
 from netra_backend.tests.e2e.real_client_types import ClientConfig, ConnectionState
 

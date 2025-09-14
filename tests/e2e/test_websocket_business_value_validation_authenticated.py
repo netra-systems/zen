@@ -35,7 +35,7 @@ from typing import Dict, List, Optional, Any
 
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosedError
+from websockets import ConnectionClosedError
 
 # CLAUDE.md COMPLIANT: Use SSOT authentication helper - MANDATORY for all e2e tests
 from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper

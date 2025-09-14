@@ -114,7 +114,7 @@ class TestWebSocketSSoTGoldenPathStaging(SSotAsyncTestCase):
                 "Content-Type": "application/json"
             }
     
-    async def _establish_staging_websocket(self, auth_headers: Dict[str, str]) -> websockets.WebSocketServerProtocol:
+    async def _establish_staging_websocket(self, auth_headers: Dict[str, str]) -> websockets.ServerConnection:
         """
         Establish WebSocket connection to staging environment
         Validates real WebSocket handshake with staging infrastructure

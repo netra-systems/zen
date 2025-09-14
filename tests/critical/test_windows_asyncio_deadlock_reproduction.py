@@ -404,7 +404,7 @@ class TestWindowsAsyncioDeadlockReproduction:
     
     async def _wait_for_specific_event(
         self, 
-        ws: websockets.WebSocketServerProtocol,
+        ws: websockets.ServerConnection,
         event_type: str,
         deadlock_detector: AsyncioDeadlockDetector
     ):

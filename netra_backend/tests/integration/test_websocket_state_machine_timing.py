@@ -64,7 +64,7 @@ class TestWebSocketStateMachineTiming(SSotBaseTestCase):
         Expected Failure: NameError during state machine operations
         """
         import websockets
-        from websockets.exceptions import ConnectionClosed
+        from websockets import ConnectionClosed
         
         connection_attempts = []
         import_failures = []
@@ -129,7 +129,7 @@ class TestWebSocketStateMachineTiming(SSotBaseTestCase):
         and measures timing to identify import scope failures.
         """
         import websockets
-        from websockets.exceptions import WebSocketException
+        from websockets import WebSocketException
         
         start_time = time.time()
         connection_result = {
@@ -310,7 +310,7 @@ class TestWebSocketStateMachineTiming(SSotBaseTestCase):
         Expected Failure: Exception handlers cannot access function-scoped imports
         """
         import websockets
-        from websockets.exceptions import InvalidStatusCode, InvalidHandshake
+        from websockets import InvalidStatusCode, InvalidHandshake
         
         exception_handler_failures = []
         

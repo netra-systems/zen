@@ -122,7 +122,7 @@ class TestMessagePerformanceValidationE2E(SSotAsyncTestCase):
 
         self.logger.info(f"Performance test setup - session: {self.performance_test_session}")
 
-    async def _establish_websocket_connection(self, headers_override: Dict[str, str] = None) -> websockets.WebSocketServerProtocol:
+    async def _establish_websocket_connection(self, headers_override: Dict[str, str] = None) -> websockets.ServerConnection:
         """Establish WebSocket connection for performance testing."""
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False  # Staging environment

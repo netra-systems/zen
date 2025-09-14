@@ -33,7 +33,7 @@ from typing import Dict, List, Set, Any, Optional, Tuple
 import pytest
 from contextlib import asynccontextmanager
 import websockets
-from websockets.exceptions import ConnectionClosedError, WebSocketException
+from websockets import ConnectionClosedError, WebSocketException
 
 # CRITICAL: Add project root to Python path for absolute imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))

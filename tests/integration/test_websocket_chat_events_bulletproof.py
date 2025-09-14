@@ -27,7 +27,7 @@ import threading
 import pytest
 from loguru import logger
 import websockets
-from websockets.exceptions import WebSocketException
+from websockets import WebSocketException
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path

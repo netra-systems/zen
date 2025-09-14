@@ -38,13 +38,13 @@ from fastapi import WebSocket, HTTPException
 from fastapi.security.utils import get_authorization_scheme_param
 
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from shared.id_generation import UnifiedIdGenerator
 
 # SSOT COMPLIANCE: Direct import of auth service client (no fallback)
 from netra_backend.app.clients.auth_client_core import auth_client
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 def get_unified_auth():
