@@ -120,26 +120,37 @@ class AgentRegistry:
         logger.warning("Issue #914: Using deprecated AgentRegistry compatibility wrapper. "
                       "Please migrate to netra_backend.app.agents.supervisor.agent_registry.AgentRegistry")
         
+        # Initialize compatibility state regardless of which registry is used
+        self._agents: Dict[str, AgentInfo] = {}
+        self._agent_instances: Dict[str, Any] = {}
+        self._lock = threading.Lock()
+        self._websocket_manager = None
+        self.created_at = datetime.now()
+        self.last_cleanup = datetime.now()
+        self.total_registrations = 0
+        
         if ADVANCED_REGISTRY_AVAILABLE:
             # Create a default user session for compatibility
             self._advanced_registry = AdvancedAgentRegistry()
             self._default_user_id = "compatibility_user"
+            self._using_advanced_registry = True
             logger.info("Issue #914 Phase 1: Compatibility wrapper initialized with advanced registry")
         else:
-            # Fallback to basic implementation if advanced registry not available
-            self._agents: Dict[str, AgentInfo] = {}
-            self._agent_instances: Dict[str, Any] = {}
-            self._lock = threading.Lock()
-            self._websocket_manager = None
-            self.created_at = datetime.now()
-            self.last_cleanup = datetime.now()
-            self.total_registrations = 0
+            # Flag to indicate fallback implementation
+            self._advanced_registry = None
+            self._using_advanced_registry = False
             logger.warning("Issue #914 Phase 1: Fallback to basic implementation - advanced registry not available")
     
     def set_websocket_manager(self, websocket_manager):
         """Set WebSocket manager for real-time updates."""
-        self._websocket_manager = websocket_manager
-        logger.debug("WebSocket manager set for AgentRegistry")
+        if self._using_advanced_registry:
+            # Delegate to advanced registry
+            self._advanced_registry.set_websocket_manager(websocket_manager)
+            logger.debug("Issue #914 Phase 1: WebSocket manager delegated to advanced registry")
+        else:
+            # Fallback implementation
+            self._websocket_manager = websocket_manager
+            logger.debug("WebSocket manager set for AgentRegistry")
     
     def register_agent(self, agent_type: AgentType, name: str, 
                       description: str = "", metadata: Optional[Dict[str, Any]] = None,
