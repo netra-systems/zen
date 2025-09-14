@@ -21,7 +21,7 @@ Use label: "claude-code-generated-issue"
 11. -
 12. LIMIT SCOPE. Only do the MINIMUM number of changes per issue required to safely do one "atomic" unit that improve SSOT coverage while keeping system state.
 
-Example_JSON_payload to get
+Example_JSON_payload to get (check other fields etc for json or take what you can get)
     jsonPayload: {
         context: {
         name: "netra_backend.app.websocket_core.handlers"
@@ -37,11 +37,11 @@ Example_JSON_payload to get
 
 START:
 1. Get all the ${1 : latest} log notices, warnings and errors for ${2 : backend}.
-Be sure to get the actual JSON payloads, such as the context, labels, traceback, line etc. one of many possible formats is exampled in Example_JSON_payload
+Be sure to get logs, and if possible the actual JSON payloads, such as the context, labels, traceback, line etc. one of many possible formats is exampled in Example_JSON_payload
 
 2. Save the discovered issues to a fresh GCP-LOG-GARDENER-WORKLOG in gcp/log-gardener/ folder (or create it)
 
-Cluster the logs into groups that are related to each other, e.g. by time or message type.
+Cluster the logs into groups that are related to each other
 
 3. for each cluster of related logs start a new PROCESS with SNST:
 
