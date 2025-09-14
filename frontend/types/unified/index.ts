@@ -53,11 +53,17 @@ export type {
   BaseMessage
 } from '../domains/messages';
 
-export type { 
-  Thread, 
-  ThreadState, 
-  ThreadMetadata 
+export type {
+  Thread,
+  ThreadMetadata
 } from '../domains/threads';
+
+// ThreadState moved to shared types for SSOT compliance
+export type {
+  ThreadState,
+  BaseThreadState,
+  StoreThreadState
+} from '@shared/types/frontend_types';
 
 // Export utility functions
 export { 
