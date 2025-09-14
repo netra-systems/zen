@@ -314,6 +314,17 @@ class ExecutionEngineFactory:
         Raises:
             ValueError: If engine type is not supported
         """
+        # 🚨 RUNTIME DEPRECATION WARNING: Issue #884
+        import warnings
+        warnings.warn(
+            "⚠️  CRITICAL: execution_engine_legacy_adapter.ExecutionEngineFactory is DEPRECATED in Issue #884. "
+            "This legacy adapter creates factory proliferation that fragments execution engine creation. "
+            "MIGRATION: Use 'from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory' instead. "
+            "This adapter will be removed after SSOT consolidation.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         engine_type = type(engine).__name__
         engine_module = type(engine).__module__
         

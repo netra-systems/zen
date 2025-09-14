@@ -1685,13 +1685,16 @@ class StartupOrchestrator:
             # 5. Configure SSOT ExecutionEngineFactory (SSOT CONSOLIDATION COMPLETE)
             # Use configure_execution_engine_factory function for SSOT configuration
             from netra_backend.app.agents.supervisor.execution_engine_factory import configure_execution_engine_factory
-            await configure_execution_engine_factory()
+            ssot_factory = await configure_execution_engine_factory(
+                websocket_bridge=self.app.state.agent_websocket_bridge
+            )
+            self.app.state.execution_engine_factory = ssot_factory
             self.logger.info("    [U+2713] SSOT ExecutionEngineFactory configured")
             
             # 6. Initialize FactoryAdapter for backward compatibility
             adapter_config = AdapterConfig.from_env()
             factory_adapter = FactoryAdapter(
-                execution_engine_factory=self.app.state.execution_engine_factory_class,
+                execution_engine_factory=self.app.state.execution_engine_factory,
                 websocket_bridge_factory=websocket_factory,
                 config=adapter_config
             )
