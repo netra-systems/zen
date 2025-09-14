@@ -21,6 +21,8 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.db.database_manager import DatabaseManager
 
 logger = logging.getLogger(__name__)
+
+
 @dataclass
 class TestContextData:
     """Test context data container."""
@@ -122,6 +124,8 @@ class TestHarnessContext:
             database_name=self.database_name,
             seed_data=self.seed_data
         )
+
+
 @asynccontextmanager
 async def test_harness_context(test_name: str, seed_data: bool = False):
     """Async context manager for test harness.
@@ -134,6 +138,8 @@ async def test_harness_context(test_name: str, seed_data: bool = False):
     harness = TestHarnessContext(test_name, seed_data)
     async with harness:
         yield harness
+
+
 class UnifiedTestHarnessComplete:
     """
     Complete test harness for E2E WebSocket authentication testing.
@@ -478,10 +484,14 @@ class UnifiedTestHarnessComplete:
             logger.error(f"Emergency cleanup failed: {e}")
         
         self.is_setup = False
+
+
 # Factory function for easy instantiation
 def create_unified_test_harness() -> UnifiedTestHarnessComplete:
     """Create unified test harness instance for WebSocket authentication testing."""
     return UnifiedTestHarnessComplete()
+
+
 # Issue #732: TestClient and create_minimal_harness implementation
 class TestClient:
     """
@@ -600,6 +610,8 @@ class TestClient:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit with cleanup."""
         self.close()
+
+
 class MinimalHarnessContext:
     """
     Minimal harness context providing auth and backend clients.
@@ -674,6 +686,8 @@ class MinimalHarnessContext:
                 self.backend_client = None
 
         logger.info("MinimalHarnessContext cleanup complete")
+
+
 def create_minimal_harness(auth_port: int = 8001, backend_port: int = 8000, timeout: int = 30) -> MinimalHarnessContext:
     """
     Create minimal test harness with auth and backend clients.
@@ -698,17 +712,15 @@ def create_minimal_harness(auth_port: int = 8001, backend_port: int = 8000, time
     - Revenue Impact: Protects test reliability and system validation ($500K+ ARR)
     """
     return MinimalHarnessContext(auth_port, backend_port, timeout)
+
+
 # Compatibility function for existing imports
 def create_test_harness(harness_name: str = "default") -> UnifiedTestHarnessComplete:
     """
     Create test harness with optional name parameter.
 
-    
-
     Args:
         harness_name: Optional name for the harness (for logging purposes)
-
-        
 
     Returns:
         UnifiedTestHarnessComplete instance
