@@ -38,27 +38,20 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from shared.logging.unified_logging_ssot import get_logger
 
-# ISSUE #824 PHASE 1 REMEDIATION: Import from canonical SSOT path
-# The unified_manager.py is the implementation, but websocket_manager.py is the SSOT interface
-from netra_backend.app.websocket_core.websocket_manager import (
-    UnifiedWebSocketManager,
-    WebSocketManagerMode
-)
-
-# Compatibility alias
-WebSocketManager = UnifiedWebSocketManager
+# ISSUE #824 PHASE 1 REMEDIATION: Use canonical SSOT import path
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
 
 # Factory function compatibility layer - Phase 1 implementation
 async def get_websocket_manager(user_context=None):
     """
     DEPRECATED: Factory compatibility function.
-    NEW CODE: Use UnifiedWebSocketManager(user_context=context) directly.
+    NEW CODE: Use WebSocketManager(user_context=context) directly.
     """
     warnings.warn(
-        "get_websocket_manager is deprecated. Use UnifiedWebSocketManager directly.",
+        "get_websocket_manager is deprecated. Use WebSocketManager directly.",
         DeprecationWarning, stacklevel=2
     )
-    return UnifiedWebSocketManager(
+    return WebSocketManager(
         mode=WebSocketManagerMode.UNIFIED,
         user_context=user_context,
         _ssot_authorization_token=secrets.token_urlsafe(32)
@@ -280,11 +273,11 @@ def create_websocket_manager_sync(user_context=None, user_id: Optional[UserID] =
     """
     logger.info("Creating WebSocket manager via sync factory (test compatibility)")
     
-    # PHASE 1: Direct creation using UnifiedWebSocketManager (already imported)
+    # PHASE 1: Direct creation using WebSocketManager (SSOT import)
     # If user_context is provided, use it directly (preferred path)
     if user_context is not None:
         logger.debug("Creating WebSocket manager with full user context (sync)")
-        manager = UnifiedWebSocketManager(
+        manager = WebSocketManager(
             mode=WebSocketManagerMode.UNIFIED,
             user_context=user_context,
             _ssot_authorization_token=secrets.token_urlsafe(32)
@@ -319,7 +312,7 @@ def create_websocket_manager_sync(user_context=None, user_id: Optional[UserID] =
             request_id=f"golden_path_test_{typed_user_id}"
         )
         
-        return UnifiedWebSocketManager(
+        return WebSocketManager(
             mode=WebSocketManagerMode.UNIFIED,
             user_context=test_context, 
             _ssot_authorization_token=secrets.token_urlsafe(32)
