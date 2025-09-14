@@ -1009,6 +1009,11 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
             output_format=output_format
         ),
         InstanceConfig(
+            command="/refreshgardener",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
             command="/createtestsv2 agent goldenpath messages work, unit",
             permission_mode="acceptEdits",
             output_format=output_format
