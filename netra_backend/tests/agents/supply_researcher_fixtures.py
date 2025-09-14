@@ -12,7 +12,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 import pytest
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearcherAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.supply_research_service import SupplyResearchService
