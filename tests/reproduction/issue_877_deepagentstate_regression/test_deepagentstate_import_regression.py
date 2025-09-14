@@ -25,24 +25,23 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 class TestDeepAgentStateImportRegression(SSotBaseTestCase):
     """Test suite to validate DeepAgentState import regression exists."""
 
-    def setUp(self):
-        """Set up test fixtures."""
-        super().setUp()
-        self.agent_lifecycle_path = Path("netra_backend/app/agents/agent_lifecycle.py")
-        self.base_agent_path = Path("netra_backend/app/agents/base_agent.py")
-
     def test_agent_lifecycle_still_imports_deepagentstate_deprecated(self):
         """Test that agent_lifecycle.py still imports DeepAgentState from deprecated location.
 
         THIS TEST SHOULD FAIL - proving the regression exists.
         Expected failure: DeepAgentState import found in agent_lifecycle.py
         """
+        # Use absolute path from current working directory
+        import os
+        cwd = os.getcwd()
+        agent_lifecycle_path = Path(cwd) / "netra_backend/app/agents/agent_lifecycle.py"
+
         # Read agent_lifecycle.py source code
         try:
-            with open(self.agent_lifecycle_path) as f:
+            with open(agent_lifecycle_path) as f:
                 source_code = f.read()
         except FileNotFoundError:
-            self.fail(f"agent_lifecycle.py not found at {self.agent_lifecycle_path}")
+            self.fail(f"agent_lifecycle.py not found at {agent_lifecycle_path}")
 
         # Parse the AST to find imports
         try:
@@ -144,11 +143,15 @@ class TestDeepAgentStateImportRegression(SSotBaseTestCase):
         Expected failure: base_agent claims migration complete but agent_lifecycle still uses old pattern
         """
         # Check base_agent.py for migration completion claims
+        import os
+        cwd = os.getcwd()
+        base_agent_path = Path(cwd) / "netra_backend/app/agents/base_agent.py"
+
         try:
-            with open(self.base_agent_path) as f:
+            with open(base_agent_path) as f:
                 base_agent_source = f.read()
         except FileNotFoundError:
-            self.skip(f"base_agent.py not found at {self.base_agent_path}")
+            self.skip(f"base_agent.py not found at {base_agent_path}")
 
         # Look for migration completion claims
         migration_claims = []
