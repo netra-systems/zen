@@ -133,7 +133,7 @@ class AgentLifecycleMixin(ABC):
         pass
     
     @time_operation("check_entry_conditions", TimingCategory.VALIDATION)
-    async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
+    async def check_entry_conditions(self, context: UserExecutionContext, run_id: str) -> bool:
         """Check if agent should proceed. Override in subclasses for specific conditions."""
         return True
     
