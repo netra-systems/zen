@@ -75,7 +75,7 @@ Each issue will be processed through GitHub issue creation/updates via sub-agent
 
 1. **WebSocket Event Structure Issues** → ✅ **UPDATED** existing Issue #1021 with latest test results and worklog reference
 2. **Docker Build Infrastructure** → ✅ **UPDATED** existing Issue #1082 with priority escalation P2→P1  
-3. **SSOT WebSocket Violations** → Create/update GitHub issue with priority P2
+3. **SSOT WebSocket Violations** → ✅ **UPDATED** existing Issue #885 with latest violation details and escalation risk analysis
 
 ## GitHub Issue Actions Completed
 
@@ -119,6 +119,33 @@ The existing issue contains detailed technical analysis, expected vs actual beha
 
 The priority escalation from P2 to P1 reflects the business impact: when Docker failures block mission critical tests (not just nice-to-have integration tests), this becomes a major feature broken scenario rather than moderate infrastructure dependency.
 
+### 3. SSOT WebSocket Manager Violations - ✅ UPDATED
+
+**Issue:** #885 - "failing-test-ssot-medium-websocket-manager-fragmentation"  
+**Action Taken:** Updated existing P2 issue with latest violation detection results from 2025-09-14  
+**Status:** P2 Medium - SSOT compliance issue with escalation monitoring  
+**Links Added:** 
+- Worklog reference: `tests/FAILING-TEST/FAILING-TEST-GARDENER-WORKLOG-critical-2025-09-14-115930.md`
+- Agent session label: `agent-session-2025-09-14-1159`
+- Latest violation detection logs with exact timestamps
+- Escalation risk analysis (WARNING level → potential blocking)
+
+**Why Updated Instead of New:** Issue #885 already comprehensively covers SSOT WebSocket manager violations:
+- Same violation classes: `WebSocketManagerMode`, `WebSocketManagerProtocol`, `WebSocketManagerProtocolValidator`
+- Same affected files: `/netra_backend/app/websocket_core/websocket_manager.py`, etc.
+- Same priority level (P2) appropriate for architectural debt monitoring
+
+**Key Updates Added:**
+- Latest violation detection: 2025-09-14 11:57:29 with exact log timestamps
+- Current SSOT compliance context: 84.4% system-wide (333 violations)
+- Escalation risk analysis: WARNING level requiring monitoring before blocking
+- Business impact clarification: WebSocket supports 90% of platform value
+- Related issues cross-referencing: Links to P0 WebSocket issues (#1060, #1100)
+- CLAUDE.md compliance requirements: SSOT mandatory within each service
+- Success criteria updated with WARNING elimination focus
+
+The updated issue now reflects current system state and provides clear escalation prevention strategy with appropriate P2 priority for architectural debt monitoring.
+
 ## Success Metrics
 
 From successful test runs:
@@ -129,14 +156,16 @@ From successful test runs:
 ## Next Steps
 
 ✅ **COMPLETED:** GitHub Issue Management Actions
-1. ✅ Search for existing related issues - Found Issue #1082 for identical Docker build failure
-2. ✅ Update existing issues with latest failure logs - Updated #1082 with mission critical test timeout context
-3. ✅ Link related issues and documentation - Cross-referenced #420, #878, #419 with strategic context
-4. ✅ Assign appropriate priority tags - Escalated #1082 from P2 to P1 for mission critical test blocking
-5. ✅ Add relevant labels - Added golden-path, critical labels reflecting business impact
+1. ✅ Search for existing related issues - Found comprehensive existing issues for all 3 failure categories
+2. ✅ Update existing issues with latest failure logs - Updated all issues with current context and priorities
+3. ✅ Link related issues and documentation - Cross-referenced related issues with strategic context
+4. ✅ Assign appropriate priority tags - Applied proper priority escalation based on business impact
+5. ✅ Add relevant labels - Added session tracking and critical labels reflecting business impact
 
 **Issue Management Summary:**
-- **Issue #1082:** UPDATED with priority escalation P2→P1 and latest failure context
-- **Cross-References:** Linked to Issues #420 (strategic resolution), #878 (disk space), #419 (duplicate)
-- **Business Context:** Explained why this differs from Issue #420 P3 strategic resolution
-- **Action Items:** Documented immediate recovery steps (`docker system prune -a`)
+- **Issue #1021:** UPDATED with latest WebSocket event structure validation failure details
+- **Issue #1082:** UPDATED with priority escalation P2→P1 and mission critical test blocking context
+- **Issue #885:** UPDATED with latest SSOT WebSocket manager violation detection and escalation risk analysis
+- **Cross-References:** Linked to strategic Issues (#420, #878, #419) and critical WebSocket issues (#1060, #1100)
+- **Business Context:** Explained priority levels, business impact, and escalation strategies
+- **Action Items:** Documented immediate recovery steps and monitoring requirements
