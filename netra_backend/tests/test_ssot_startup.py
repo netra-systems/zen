@@ -14,7 +14,8 @@ Business Value Justification (BVJ):
 import asyncio
 import pytest
 from typing import Any, Dict
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from unittest.mock import Mock
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -78,8 +79,8 @@ class TestAgentRegistrySSOT:
         from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         
         # AgentRegistry now requires llm_manager and tool_dispatcher
-        mock_llm = mock_llm_instance  # Initialize appropriate service
-        mock_dispatcher = mock_dispatcher_instance  # Initialize appropriate service
+        mock_llm = Mock()  # Initialize appropriate service
+        mock_dispatcher = Mock()  # Initialize appropriate service
         
         # Multiple calls with same args should work
         registry1 = AgentRegistry(mock_llm, mock_dispatcher)
@@ -317,8 +318,8 @@ async def test_critical_startup_path():
     assert index_manager is not None
     
     # Verify agent registry initializes with required dependencies
-    mock_llm = mock_llm_instance  # Initialize appropriate service
-    mock_dispatcher = mock_dispatcher_instance  # Initialize appropriate service
+    mock_llm = Mock()  # Initialize appropriate service
+    mock_dispatcher = Mock()  # Initialize appropriate service
     registry = AgentRegistry(mock_llm, mock_dispatcher)
     assert registry is not None
     
