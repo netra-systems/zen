@@ -10,8 +10,8 @@ from typing import Any, Dict, List, Optional, Protocol
 from datetime import datetime
 
 
-class WebSocketManagerProtocol(Protocol):
-    """Protocol for WebSocket manager implementations."""
+class WebSocketProtocol(Protocol):
+    """Protocol for WebSocket implementations."""
     
     async def send_message(self, user_id: str, message: Dict[str, Any]) -> bool:
         """Send message to user via WebSocket."""
