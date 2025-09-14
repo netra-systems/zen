@@ -85,16 +85,11 @@ export interface Thread {
 }
 
 // ============================================================================
-// THREAD STATE MANAGEMENT
+// THREAD STATE MANAGEMENT - Use canonical ThreadState from @shared/types/frontend_types
 // ============================================================================
-
-export interface ThreadState {
-  threads: Thread[];
-  activeThreadId: string | null;
-  currentThread: Thread | null;
-  isLoading: boolean;
-  error: string | null;
-}
+//
+// NOTE: ThreadState moved to shared/types/frontend_types.ts for SSOT compliance
+// Import ThreadState from there instead of defining locally
 
 // ============================================================================
 // THREAD UTILITY FUNCTIONS - Each function ≤8 lines
