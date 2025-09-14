@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult
 )
-from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.execution_tracker import get_execution_tracker
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -212,13 +212,15 @@ class TestAgentExecutionCoreIntegration:
 
     @pytest.fixture
     def sample_state(self, auth_helper):
-        """Sample agent state with real user context."""
-        # Create real DeepAgentState instance instead of Mock (per CLAUDE.md compliance)
-        state = DeepAgentState(
-            user_request="Integration test request",
+        """Sample agent state with real user context using UserExecutionContext."""
+        # Use UserExecutionContext instead of DeepAgentState (per Issue #271 security fix)
+        state = UserExecutionContext(
             user_id="test-user-123",
-            chat_thread_id=f"test-thread-{uuid4()}"
+            thread_id=f"test-thread-{uuid4()}",
+            run_id=f"test-run-{uuid4()}",
+            request_id=f"test-request-{uuid4()}"
         )
+        state.user_request = "Integration test request"  # Add request context
         return state
 
     @pytest.mark.asyncio
@@ -404,7 +406,7 @@ class TestAgentExecutionCoreIntegration:
                 user_id="test-user-123",
                 correlation_id=f"concurrent-correlation-{i}"
             )
-            state = SSotMockFactory.create_deep_agent_state_mock()
+            state = SSotMockFactory.create_user_execution_context_mock()
             state.user_id = "test-user-123"
             state.thread_id = context.thread_id
             contexts.append(context)
@@ -498,7 +500,7 @@ class TestAgentExecutionCoreIntegration:
                 user_id="test-user-123",
                 correlation_id=f"perf-correlation-{i}"
             )
-            state = SSotMockFactory.create_deep_agent_state_mock()
+            state = SSotMockFactory.create_user_execution_context_mock()
             state.user_id = "test-user-123"
             state.thread_id = context.thread_id
             contexts.append(context)
