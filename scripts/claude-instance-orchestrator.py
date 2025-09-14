@@ -816,6 +816,16 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
             output_format=output_format
         ),
         InstanceConfig(
+            command="/ssotgardener websockets or auth",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/ssotgardener tests",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
             command="/ssotgardener removing legacy",
             permission_mode="acceptEdits",
             output_format=output_format
