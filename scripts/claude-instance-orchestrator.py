@@ -886,7 +886,7 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
             command="/gitcommitgardener",
             permission_mode="acceptEdits",
             output_format=output_format
-        )
+        ),
         InstanceConfig(
             command="/ultimate-test-deploy-loop",
             permission_mode="acceptEdits",
