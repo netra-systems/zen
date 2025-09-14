@@ -38,10 +38,19 @@ Critical SSOT violation: 4+ duplicate MessageRouter implementations blocking Gol
 - [x] Created GitHub issue #952
 - [x] Created progress tracking file
 
-### 🔄 Step 1: Discover and Plan Test (In Progress)
-- [ ] Discover existing tests protecting against breaking changes
-- [ ] Plan test updates/creation for SSOT refactor validation
-- [ ] Document test strategy in this file
+### ✅ Step 1: Discover and Plan Test (Complete)
+- [x] Discovered 17 MessageRouter test files (12 working, 5 broken)
+- [x] Identified broken tests with REMOVED_SYNTAX_ERROR patterns
+- [x] Confirmed SSOT violations through automated detection
+- [x] Developed 60-20-20 test strategy (existing/new validation/golden path)
+
+#### Test Discovery Results
+**Working Tests (12 files)**: Existing functional test coverage
+**Broken Tests (5 files)**: Tests with REMOVED_SYNTAX_ERROR patterns - likely designed for SSOT validation
+**Strategy**: 60% restore existing tests, 20% new SSOT validation tests, 20% Golden Path protection
+
+#### Key Finding
+Robust test infrastructure already exists but needs restoration. Broken tests contain critical validation logic that should be restored for SSOT consolidation.
 
 ### ⏳ Step 2: Execute Test Plan
 - [ ] Create new SSOT validation tests
