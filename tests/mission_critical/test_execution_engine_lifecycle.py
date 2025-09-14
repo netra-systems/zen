@@ -23,7 +23,8 @@ This test should PASS if ExecutionEngine lifecycle management works correctly.
 If it FAILS, it indicates resource management issues requiring immediate fix.
 """
 
-import unittest
+# SSOT Base Test Case Import
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 import asyncio
 import time
 import gc
