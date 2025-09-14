@@ -38,7 +38,7 @@ Business Value Justification (BVJ):
 """
 
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -56,6 +56,7 @@ from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
+from test_framework.ssot.mock_factory import SSotMockFactory
 
 class TestSupervisorWebSocketIntegration:
 
@@ -63,16 +64,10 @@ class TestSupervisorWebSocketIntegration:
 
 
     @pytest.fixture
-
     async def mock_db_session(self):
-
-        """Mock database session."""
-
-        # Mock: Database session isolation for transaction testing without real database dependency
-        session = AsyncMock(spec=AsyncSession)
-
-        # Mock: Session isolation for controlled testing without external state
-        session.websocket = MockWebSocketConnection()
+        """Mock database session using SSOT factory."""
+        # SSOT: Use standardized database session mock
+        session = SSotMockFactory.create_database_session_mock()
 
         # Mock: Session isolation for controlled testing without external state
         session.websocket = MockWebSocketConnection()
@@ -81,55 +76,33 @@ class TestSupervisorWebSocketIntegration:
 
 
     @pytest.fixture
-
     async def mock_llm_manager(self):
-
-        """Mock LLM manager."""
-
-        # Mock: LLM service isolation for fast testing without API calls or rate limits
-        llm_manager = AsyncMock(spec=LLMManager)
-
-        return llm_manager
+        """Mock LLM manager using SSOT factory."""
+        # SSOT: Use standardized LLM manager mock
+        return SSotMockFactory.create_mock_llm_manager()
 
 
     @pytest.fixture
-
     async def mock_websocket_manager(self):
+        """Mock WebSocket manager using SSOT factory."""
+        # SSOT: Use standardized WebSocket manager mock with user isolation
+        ws_manager = SSotMockFactory.create_websocket_manager_mock(
+            manager_type="unified",
+            user_isolation=True
+        )
 
-        """Mock WebSocket manager."""
-
-        # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        ws_manager = AsyncMock(spec=WebSocketManager)
-
-        # Mock: Async component isolation for testing without real async operations
-        ws_manager.send_message = AsyncMock(return_value=True)
-
-        # Mock: Async component isolation for testing without real async operations
-        ws_manager.send_error = AsyncMock(return_value=True)
-
-        # Mock WebSocket bridge notification methods required by supervisor
-        ws_manager.notify_agent_started = AsyncMock()
-        ws_manager.notify_agent_thinking = AsyncMock()
-        ws_manager.notify_tool_executing = AsyncMock()
-        ws_manager.notify_tool_completed = AsyncMock()
-        ws_manager.notify_agent_completed = AsyncMock()
-        ws_manager.notify_agent_error = AsyncMock()
+        # Additional WebSocket bridge notification methods required by supervisor
+        ws_manager.send_error = ws_manager.emit_critical_event
+        ws_manager.notify_agent_error = ws_manager.emit_critical_event
 
         return ws_manager
 
 
     @pytest.fixture
-
     async def mock_tool_dispatcher(self):
-
-        """Mock tool dispatcher."""
-        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-
-
-        # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        dispatcher = AsyncMock(spec=ToolDispatcher)
-
-        return dispatcher
+        """Mock tool dispatcher using SSOT factory."""
+        # SSOT: Use standardized tool mock
+        return SSotMockFactory.create_tool_mock(tool_name="tool_dispatcher")
 
 
     @pytest.fixture
@@ -161,7 +134,7 @@ class TestSupervisorWebSocketIntegration:
             return agent
         except Exception as e:
             # If initialization fails, create a mock agent with the minimum required interface
-            mock_agent = AsyncMock(spec=SupervisorAgent)
+            mock_agent = SSotMockFactory.create_agent_mock(agent_type="supervisor")
             mock_agent.websocket_manager = mock_websocket_manager
             mock_agent.websocket = MockWebSocketConnection()
             return mock_agent
@@ -247,8 +220,8 @@ class TestSupervisorWebSocketIntegration:
     async def test_agent_service_handles_websocket_message(self, mock_db_session):
 
         """Test that AgentService properly handles WebSocket messages."""
-        # Create mock supervisor
-        mock_supervisor = AsyncMock(spec=SupervisorAgent)
+        # Create mock supervisor using SSOT factory
+        mock_supervisor = SSotMockFactory.create_agent_mock(agent_type="supervisor")
 
         # Mock: Generic component isolation for controlled unit testing
         websocket = MockWebSocketConnection()
@@ -441,8 +414,8 @@ class TestSupervisorWebSocketIntegration:
     async def test_agent_service_websocket_message_validation(self):
 
         """Test WebSocket message validation in agent service."""
-        # Create mock supervisor
-        mock_supervisor = AsyncMock(spec=SupervisorAgent)
+        # Create mock supervisor using SSOT factory
+        mock_supervisor = SSotMockFactory.create_agent_mock(agent_type="supervisor")
 
         # Mock: Generic component isolation for controlled unit testing
         websocket = MockWebSocketConnection()
@@ -472,8 +445,8 @@ class TestSupervisorWebSocketIntegration:
             mock_handler.websocket = MockWebSocketConnection()
 
 
-            # Create mock db session for validation test
-            mock_db_session = AsyncMock(spec=AsyncSession)
+            # Create mock db session for validation test using SSOT factory
+            mock_db_session = SSotMockFactory.create_database_session_mock()
 
             await agent_service.handle_websocket_message(
 
@@ -487,8 +460,8 @@ class TestSupervisorWebSocketIntegration:
         # The production code has an undefined 'manager' variable, so we test for exception handling
         invalid_message = {"payload": {"content": "Missing type field"}}
 
-        # Create mock db session for invalid message test
-        mock_invalid_db_session = AsyncMock(spec=AsyncSession)
+        # Create mock db session for invalid message test using SSOT factory
+        mock_invalid_db_session = SSotMockFactory.create_database_session_mock()
 
         # The code has a bug where 'manager' is undefined, so we expect an exception
         try:

@@ -617,12 +617,28 @@ class AgentExecutionCore:
                     
                     # Transition to timeout phase
                     await self.agent_tracker.transition_state(
-                        state_exec_id, 
+                        state_exec_id,
                         AgentExecutionPhase.TIMEOUT,
                         metadata={'error': str(e), 'error_type': 'timeout'},
                         websocket_manager=self.websocket_bridge
                     )
-                    
+
+                    # CRITICAL FIX FOR ISSUE #1025: Send WebSocket error notification to users for timeout scenarios
+                    # This ensures users receive proper feedback when agents timeout, preventing hung agent appearance
+                    if self.websocket_bridge and hasattr(self.websocket_bridge, 'notify_agent_error'):
+                        try:
+                            await self.websocket_bridge.notify_agent_error(
+                                context.run_id,
+                                context.agent_name,
+                                f"Agent '{context.agent_name}' timed out after {execution_timeout}s "
+                                f"(tier: {selected_tier.value}). The AI processing exceeded the allowed time limit. "
+                                f"This may be due to complex analysis or external service delays. "
+                                f"{'Consider upgrading to Enterprise tier for extended processing time.' if selected_tier.value != 'ENTERPRISE' else 'Please contact support if this continues.'}"
+                            )
+                        except Exception as notify_error:
+                            # Don't let notification failures break agent execution flow
+                            logger.error(f"Failed to send timeout notification: {notify_error}")
+
                     # Create detailed timeout result with enhanced context and tier information
                     result = AgentExecutionResult(
                         success=False,

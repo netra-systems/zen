@@ -394,7 +394,7 @@ class TestWebSocketManagerImportConsolidation(SSotAsyncTestCase):
             if deprecated_factory_patterns_found:
                 logger.info(f"   Properly deprecated: {deprecated_factory_patterns_found}")
 
-    def test_websocket_manager_ssot_canonical_path(self):
+    async def test_websocket_manager_ssot_canonical_path(self):
         """
         CRITICAL: Validate that a single canonical import path is established.
 
