@@ -1684,7 +1684,7 @@ class StartupOrchestrator:
             # 4. Initialize AgentInstanceFactory
             agent_instance_factory = await configure_agent_instance_factory(
                 websocket_bridge=self.app.state.agent_websocket_bridge,
-                websocket_manager=None,  # Will be created per-request in UserExecutionContext pattern
+                # SSOT COMPLIANCE: Removed websocket_manager parameter - use AgentWebSocketBridge only
                 llm_manager=self.app.state.llm_manager,
                 tool_dispatcher=None  # Will be created per-request in UserExecutionContext pattern
             )
