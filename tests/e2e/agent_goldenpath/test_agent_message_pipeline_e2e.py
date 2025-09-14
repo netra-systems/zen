@@ -60,7 +60,6 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
     @classmethod
     def setUpClass(cls):
         """Setup staging environment configuration and dependencies."""
-
         # Initialize staging configuration
         cls.staging_config = get_staging_config()
         cls.logger = logging.getLogger(__name__)
