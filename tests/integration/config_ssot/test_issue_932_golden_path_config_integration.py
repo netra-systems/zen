@@ -382,7 +382,7 @@ class TestIssue932GoldenPathConfigIntegration(SSotAsyncTestCase, unittest.TestCa
             # Don't fail the test as agent config might be optional or handled differently
             self.record_metric("agent_system_config_test_result", "failed_but_optional")
     
-    async def test_configuration_consistency_across_services(self):
+    def test_configuration_consistency_across_services(self):
         """
         INTEGRATION TEST: Validate configuration consistency across services.
         
@@ -400,7 +400,7 @@ class TestIssue932GoldenPathConfigIntegration(SSotAsyncTestCase, unittest.TestCa
                 config = get_config()
                 self.assertIsNotNone(config, f"Configuration {i} should not be None")
                 configs.append(config)
-                await asyncio.sleep(0.1)  # Small delay
+                time.sleep(0.1)  # Small delay
             
             # Test consistency
             config_types = [type(config).__name__ for config in configs]
@@ -442,7 +442,7 @@ class TestIssue932GoldenPathConfigIntegration(SSotAsyncTestCase, unittest.TestCa
             self.record_metric("config_consistency_test", "failed")
             self.fail(f"Configuration consistency test failed: {e}")
     
-    async def test_golden_path_configuration_end_to_end(self):
+    def test_golden_path_configuration_end_to_end(self):
         """
         CRITICAL TEST: End-to-end Golden Path configuration validation.
         

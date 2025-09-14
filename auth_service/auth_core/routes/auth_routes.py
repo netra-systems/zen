@@ -338,6 +338,7 @@ async def login_endpoint(request: Request) -> Dict[str, Any]:
             )
         
         # Use auth service to authenticate
+        auth_service = get_auth_service()
         result = await auth_service.authenticate_user(email, password)
         
         if not result:
@@ -390,6 +391,7 @@ async def logout_endpoint(request: Request) -> Dict[str, Any]:
         if auth_header and auth_header.startswith("Bearer "):
             token = auth_header.split(" ")[1]
             # Blacklist the token
+            auth_service = get_auth_service()
             await auth_service.blacklist_token(token)
         
         return {
@@ -421,6 +423,7 @@ async def register_endpoint(request: Request) -> Dict[str, Any]:
             )
         
         # Create user using auth service
+        auth_service = get_auth_service()
         user_id = await auth_service.create_user(email, password, name)
         
         if not user_id:
@@ -484,6 +487,7 @@ async def dev_login() -> Dict[str, Any]:
         dev_email = "dev@example.com"
         
         # Generate tokens using auth service
+        auth_service = get_auth_service()
         access_token = await auth_service.create_access_token(
             user_id=dev_user_id,
             email=dev_email
@@ -568,6 +572,7 @@ async def e2e_test_auth(request: Request) -> Dict[str, Any]:
         user_id = f"e2e-{email.split('@')[0]}"
         
         # Generate tokens simulating OAuth authentication
+        auth_service = get_auth_service()
         access_token = await auth_service.create_access_token(
             user_id=user_id,
             email=email
@@ -622,6 +627,7 @@ async def service_token_endpoint(request: Request) -> Dict[str, Any]:
         
         # Validate service credentials using auth service validation logic
         # This will handle development mode fallbacks and proper service validation
+        auth_service = get_auth_service()
         if not await auth_service._validate_service(service_id, service_secret):
             raise HTTPException(
                 status_code=401,
@@ -661,6 +667,7 @@ async def verify_password_endpoint(request: Request) -> Dict[str, Any]:
             )
         
         # Verify password
+        auth_service = get_auth_service()
         is_valid = await auth_service.verify_password(password, hash_value)
         
         return {
@@ -688,6 +695,7 @@ async def hash_password_endpoint(request: Request) -> Dict[str, Any]:
             )
         
         # Hash password
+        auth_service = get_auth_service()
         hash_value = await auth_service.hash_password(password)
         
         return {
@@ -716,6 +724,7 @@ async def create_token_endpoint(request: Request) -> Dict[str, Any]:
             )
         
         # Generate tokens
+        auth_service = get_auth_service()
         access_token = await auth_service.create_access_token(
             user_id=user_id,
             email=email
@@ -811,6 +820,7 @@ async def validate_token(request: Request) -> Dict[str, Any]:
                 logger.debug("Token validation without service credentials")
         
         # Validate the token using auth service
+        auth_service = get_auth_service()
         validation_result = await auth_service.validate_token(token)
         
         if validation_result and validation_result.valid:
@@ -867,6 +877,7 @@ async def validate_service_token_endpoint(request: Request) -> Dict[str, Any]:
             }
         
         # Validate the token using auth service
+        auth_service = get_auth_service()
         validation_result = await auth_service.validate_token(token)
         
         if validation_result and validation_result.valid:
@@ -984,6 +995,7 @@ async def check_blacklist_endpoint(request: Request) -> Dict[str, Any]:
                 logger.debug(f"Blacklist check request missing service auth headers: {', '.join(missing_parts)}")
         
         # Check if token is blacklisted
+        auth_service = get_auth_service()
         is_blacklisted = await auth_service.is_token_blacklisted(token)
         
         logger.info(f"Token blacklist check: {'blacklisted' if is_blacklisted else 'not blacklisted'}")
@@ -1028,6 +1040,7 @@ async def check_authorization(request: Request) -> Dict[str, Any]:
             }
         
         # Validate the token
+        auth_service = get_auth_service()
         validation_result = await auth_service.validate_token(token)
         
         if not validation_result or not validation_result.valid:
@@ -1082,6 +1095,7 @@ async def check_permission(request: Request) -> Dict[str, Any]:
             }
         
         # Validate the token
+        auth_service = get_auth_service()
         validation_result = await auth_service.validate_token(token)
         
         if not validation_result or not validation_result.valid:
@@ -1133,6 +1147,7 @@ async def create_agent_endpoint(request: Request) -> Dict[str, Any]:
             }
         
         # Validate the token
+        auth_service = get_auth_service()
         validation_result = await auth_service.validate_token(token)
         
         if not validation_result or not validation_result.valid:
@@ -1184,6 +1199,7 @@ async def delete_agent_endpoint(agent_id: str, request: Request) -> Dict[str, An
         token = auth_header.replace("Bearer ", "")
         
         # Validate the token
+        auth_service = get_auth_service()
         validation_result = await auth_service.validate_token(token)
         
         if not validation_result or not validation_result.valid:
@@ -1239,6 +1255,7 @@ async def api_call_endpoint(request: Request) -> Dict[str, Any]:
             }
         
         # Validate the token
+        auth_service = get_auth_service()
         validation_result = await auth_service.validate_token(token)
         
         if not validation_result or not validation_result.valid:
@@ -1292,6 +1309,7 @@ async def get_user_info_endpoint(user_id: str, request: Request) -> Dict[str, An
         token = auth_header.replace("Bearer ", "")
         
         # Validate the token
+        auth_service = get_auth_service()
         validation_result = await auth_service.validate_token(token)
         
         if not validation_result or not validation_result.valid:
@@ -1396,6 +1414,7 @@ async def oauth_callback(
         
         # Generate tokens for the user
         # In a real implementation, you would create/update the user in the database first
+        auth_service = get_auth_service()
         access_token = await auth_service.create_access_token(
             user_id=google_id or email,
             email=email
@@ -1458,6 +1477,7 @@ async def get_current_user(request: Request) -> Dict[str, Any]:
         
         # Validate token using auth service
         try:
+            auth_service = get_auth_service()
             token_response = await auth_service.validate_token(token, "access")
         except Exception as e:
             logger.error(f"Token validation failed: {e}")
@@ -1551,6 +1571,7 @@ async def verify_token_endpoint(request: Request) -> Dict[str, Any]:
         
         # Validate token using auth service
         try:
+            auth_service = get_auth_service()
             token_response = await auth_service.validate_token(token, "access")
         except Exception as e:
             logger.error(f"Token validation failed with error: {e}")

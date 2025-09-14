@@ -246,10 +246,10 @@ Auth Service startup ABORTED.
     
     # Log Redis configuration status
     try:
-        import auth_service.auth_core.routes.auth_routes as auth_routes_module
-        # Check if auth_service global variable exists in the module
-        if hasattr(auth_routes_module, 'auth_service'):
-            auth_service = auth_routes_module.auth_service
+        from auth_service.auth_core.core.lazy_auth_service import get_auth_service_safe
+        # Use safe getter to avoid triggering initialization during startup
+        auth_service = get_auth_service_safe()
+        if auth_service:
             # Check if redis_client is available (AuthService uses redis_client, not session_manager)
             if hasattr(auth_service, 'redis_client'):
                 redis_enabled = auth_service.redis_client is not None
@@ -258,8 +258,8 @@ Auth Service startup ABORTED.
                 # Redis client might not be initialized yet
                 redis_status = "will be configured during route initialization"
         else:
-            # auth_service variable not yet initialized in routes module
-            redis_status = "auth service not yet initialized"
+            # auth_service not yet initialized - will be created on first use
+            redis_status = "auth service will be initialized on demand"
         logger.info(f"Redis session management: {redis_status}")
     except Exception as e:
         logger.warning(f"Could not determine Redis status: {e}")
@@ -351,13 +351,12 @@ Auth Service startup ABORTED.
     async def close_redis():
         try:
             # AuthService uses redis_client directly, not session_manager
-            import auth_service.auth_core.routes.auth_routes as auth_routes_module
-            if hasattr(auth_routes_module, 'auth_service'):
-                auth_service = auth_routes_module.auth_service
-                if hasattr(auth_service, 'redis_client') and auth_service.redis_client:
-                    if hasattr(auth_service.redis_client, 'close'):
-                        await auth_service.redis_client.close()
-                    logger.info("Redis connections closed successfully")
+            from auth_service.auth_core.core.lazy_auth_service import get_auth_service_safe
+            auth_service = get_auth_service_safe()
+            if auth_service and hasattr(auth_service, 'redis_client') and auth_service.redis_client:
+                if hasattr(auth_service.redis_client, 'close'):
+                    await auth_service.redis_client.close()
+                logger.info("Redis connections closed successfully")
         except Exception as e:
             logger.warning(f"Error closing Redis connections: {e}")
     
@@ -659,8 +658,8 @@ async def health_auth() -> Dict[str, Any]:
     try:
         # Check JWT capabilities (most critical for Golden Path)
         try:
-            from auth_service.auth_core.services.auth_service import AuthService
-            auth_svc = AuthService()
+            from auth_service.auth_core.core.lazy_auth_service import get_auth_service
+            auth_svc = get_auth_service()
             
             # Verify JWT creation and validation capabilities
             if hasattr(auth_svc, 'create_access_token') and hasattr(auth_svc, 'verify_token'):
@@ -671,9 +670,9 @@ async def health_auth() -> Dict[str, Any]:
         
         # Check session management (Redis-based or in-memory)
         try:
-            import auth_service.auth_core.routes.auth_routes as auth_routes_module
-            if hasattr(auth_routes_module, 'auth_service'):
-                auth_service = auth_routes_module.auth_service
+            from auth_service.auth_core.core.lazy_auth_service import get_auth_service_safe
+            auth_service = get_auth_service_safe()
+            if auth_service:
                 if hasattr(auth_service, 'redis_client') and auth_service.redis_client:
                     health_response["capabilities"]["session_management"] = True
                 elif hasattr(auth_service, 'session_store'):
