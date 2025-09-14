@@ -7,6 +7,7 @@
 **Revenue at Risk:** $500K+ ARR from chat functionality  
 **Priority:** P0 - Immediate action required  
 **Issue Created:** 2025-09-14  
+**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/1034  
 
 ### Root Cause: Competing Agent Registry Implementations
 
