@@ -1,5 +1,7 @@
 # REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
 
+from typing import Optional, List  # Added for typing support
+
 # PERFORMANCE: Lazy loading for mission critical tests
 
 # PERFORMANCE: Lazy loading for mission critical tests
@@ -247,7 +249,7 @@ def lazy_import(module_path: str, component: str = None):
                     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
 
 # REMOVED_SYNTAX_ERROR: def _create_test_container(self, name_suffix: str, image: str = "redis:7-alpine",
-memory_limit: Optional[str] = None,
+# REMOVED_SYNTAX_ERROR: memory_limit: Optional[str] = None,
 # REMOVED_SYNTAX_ERROR: command: Optional[List[str]] = None) -> str:
     # REMOVED_SYNTAX_ERROR: """Create a test container with tracking."""
     # REMOVED_SYNTAX_ERROR: container_name = "formatted_string"
