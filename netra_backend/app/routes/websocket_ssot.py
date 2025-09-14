@@ -61,7 +61,7 @@ from starlette.datastructures import QueryParams
 
 # Core infrastructure imports
 from netra_backend.app.core.tracing import TracingManager
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.services.monitoring.gcp_error_reporter import gcp_reportable, set_request_context, clear_request_context
 
 # WebSocket core components (unified across all patterns)
@@ -144,7 +144,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.auth_integration.auth import get_current_user
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 # Custom auth dependency that returns 401 instead of 403 for test compatibility
 security_401 = HTTPBearer(auto_error=False)
