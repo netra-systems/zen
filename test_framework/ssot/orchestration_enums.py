@@ -19,6 +19,7 @@ Consolidated Enums:
 - OrchestrationMode: Master orchestration execution modes
 - ResourceStatus: Resource management status types
 - ServiceStatus: Service dependency status types
+- ServiceAvailability: Service availability states for integration testing
 
 Previous Locations (Now Consolidated):
 - test_framework/orchestration/background_e2e_agent.py (BackgroundTaskStatus, E2ETestCategory)
@@ -27,6 +28,8 @@ Previous Locations (Now Consolidated):
 - test_framework/orchestration/layer_execution_manager.py (ExecutionStrategy)
 - test_framework/orchestration/progress_streaming_agent.py (ProgressOutputMode, ProgressEventType)
 - test_framework/orchestration/progress_streaming_manager.py (ProgressOutputMode, ProgressEventType)
+- test_framework/service_abstraction/integration_service_abstraction.py (ServiceAvailability)
+- test_framework/service_aware_testing.py (ServiceAvailability)
 """
 
 import sys
@@ -254,6 +257,23 @@ class ServiceStatus(Enum):
     DEGRADED = "degraded"          # Service is available but performance is degraded
     MAINTENANCE = "maintenance"    # Service is in maintenance mode
     UNKNOWN = "unknown"           # Service status cannot be determined
+
+
+class ServiceAvailability(Enum):
+    """
+    Service availability states for integration testing.
+    
+    CONSOLIDATED from:
+    - test_framework/service_abstraction/integration_service_abstraction.py:45
+    - test_framework/service_aware_testing.py:48
+    
+    This enum provides standardized availability states used throughout the test
+    framework for service availability detection and testing logic.
+    """
+    AVAILABLE = "available"        # Service is available for testing
+    UNAVAILABLE = "unavailable"    # Service is not available
+    DEGRADED = "degraded"          # Service is available but with reduced functionality
+    UNKNOWN = "unknown"           # Service availability status cannot be determined
 
 
 # ========== Data Classes for Complex Types ==========
@@ -681,6 +701,7 @@ __all__ = [
     'OrchestrationMode',
     'ResourceStatus',
     'ServiceStatus',
+    'ServiceAvailability',
     'LayerType',
     
     # Data Classes

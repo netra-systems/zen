@@ -101,7 +101,7 @@ class ExecutionConfig:
 
 
 @dataclass
-class TestRunnerConfig:
+class RunnerConfig:
     """Complete test runner configuration"""
     # General settings
     project_name: str = "Netra Tests"
@@ -143,7 +143,7 @@ class CategoryConfigLoader:
         self.load_env_files()
         
         # Loaded configuration
-        self._config: Optional[TestRunnerConfig] = None
+        self._config: Optional[RunnerConfig] = None
         self._category_system: Optional[CategorySystem] = None
         
         # Ensure config directory exists
@@ -162,7 +162,7 @@ class CategoryConfigLoader:
             if env_file.exists():
                 load_dotenv(env_file, override=True)
     
-    def load_config(self, environment: Optional[str] = None) -> TestRunnerConfig:
+    def load_config(self, environment: Optional[str] = None) -> RunnerConfig:
         """Load complete configuration with environment overrides"""
         env = environment or self.current_environment
         
@@ -181,9 +181,9 @@ class CategoryConfigLoader:
         self._config = config
         return config
     
-    def _load_base_config(self) -> TestRunnerConfig:
+    def _load_base_config(self) -> RunnerConfig:
         """Load base configuration from files"""
-        config = TestRunnerConfig()
+        config = RunnerConfig()
         
         # Load main config if exists
         if self.main_config_file.exists():
@@ -307,7 +307,7 @@ class CategoryConfigLoader:
         
         return environments
     
-    def _apply_environment_overrides(self, config: TestRunnerConfig, environment: str):
+    def _apply_environment_overrides(self, config: RunnerConfig, environment: str):
         """Apply environment-specific overrides"""
         env_config = config.environments.get(environment, {})
         
@@ -334,7 +334,7 @@ class CategoryConfigLoader:
                     if hasattr(category_config, key):
                         setattr(category_config, key, value)
     
-    def _apply_env_var_overrides(self, config: TestRunnerConfig):
+    def _apply_env_var_overrides(self, config: RunnerConfig):
         """Apply environment variable overrides"""
         # Pattern: TEST_CONFIG_<SECTION>_<KEY>
         pattern = re.compile(r'^TEST_CONFIG_(.+)$')
@@ -397,7 +397,7 @@ class CategoryConfigLoader:
         else:
             return env_value
     
-    def _validate_config(self, config: TestRunnerConfig):
+    def _validate_config(self, config: RunnerConfig):
         """Validate configuration for consistency and correctness"""
         errors = []
         
@@ -455,7 +455,7 @@ class CategoryConfigLoader:
         if errors:
             raise ValueError(f"Configuration validation errors:\n" + "\n".join(f"  - {error}" for error in errors))
     
-    def create_category_system(self, config: Optional[TestRunnerConfig] = None) -> CategorySystem:
+    def create_category_system(self, config: Optional[RunnerConfig] = None) -> CategorySystem:
         """Create CategorySystem from configuration"""
         if not config:
             config = self._config or self.load_config()
@@ -496,7 +496,7 @@ class CategoryConfigLoader:
         self._category_system = category_system
         return category_system
     
-    def create_progress_tracker(self, config: Optional[TestRunnerConfig] = None) -> ProgressTracker:
+    def create_progress_tracker(self, config: Optional[RunnerConfig] = None) -> ProgressTracker:
         """Create ProgressTracker from configuration"""
         if not config:
             config = self._config or self.load_config()
@@ -509,7 +509,7 @@ class CategoryConfigLoader:
             auto_save_interval=execution.auto_save_interval_seconds
         )
     
-    def create_threshold_config(self, config: Optional[TestRunnerConfig] = None) -> ThresholdConfig:
+    def create_threshold_config(self, config: Optional[RunnerConfig] = None) -> ThresholdConfig:
         """Create ThresholdConfig from configuration"""
         if not config:
             config = self._config or self.load_config()
@@ -668,7 +668,7 @@ class CategoryConfigLoader:
         with open(self.execution_config_file, 'w') as f:
             yaml.dump(execution_data, f, default_flow_style=False)
     
-    def save_config(self, config: TestRunnerConfig):
+    def save_config(self, config: RunnerConfig):
         """Save complete configuration to files"""
         # Save main config
         main_data = {
@@ -811,7 +811,7 @@ class CategoryConfigLoader:
             f.write("# Netra Test Runner Configuration Template\n")
             yaml.dump(template, f, default_flow_style=False, sort_keys=False)
     
-    def get_config_summary(self, config: Optional[TestRunnerConfig] = None) -> Dict[str, Any]:
+    def get_config_summary(self, config: Optional[RunnerConfig] = None) -> Dict[str, Any]:
         """Get configuration summary"""
         if not config:
             config = self._config or self.load_config()
@@ -860,3 +860,7 @@ class CategoryConfigLoader:
                     warnings.append(f"Environment variable '{var}' not set for environment '{environment}'")
         
         return warnings
+
+
+# Backward compatibility alias
+TestRunnerConfig = RunnerConfig
