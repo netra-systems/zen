@@ -385,24 +385,27 @@ class ClaudeInstanceOrchestrator:
         recent_lines_buffer = []
         line_count = 0
 
-        def format_instance_line(content: str, prefix: str = "") -> str:
-            """Format a line with clear instance separation and smart truncation"""
-            # Smart truncation - preserve important content
-            if len(content) > self.max_line_length:
-                # Don't truncate if it contains token or tool information
-                if any(keyword in content.lower() for keyword in ['tokens', 'tool', 'completed', 'error', 'success']):
-                    # Keep important lines intact, just add line break if very long
-                    if len(content) > self.max_line_length * 2:
-                        content = content[:self.max_line_length*2-3] + "..."
+        def format_instance_line_for_display(content: str, prefix: str = "") -> str:
+            """Format a line for VISUAL DISPLAY ONLY - does not affect background data collection"""
+            # Create a copy for display formatting (original content preserved in status.output)
+            display_content = content
+
+            # Truncate ONLY for visual display - background keeps full content
+            if len(display_content) > self.max_line_length:
+                # Smart truncation for display - preserve important content
+                if any(keyword in display_content.lower() for keyword in ['tokens', 'tool', 'completed', 'error', 'success']):
+                    # Keep important lines longer for display
+                    if len(display_content) > self.max_line_length * 2:
+                        display_content = display_content[:self.max_line_length*2-3] + "..."
                 else:
-                    content = content[:self.max_line_length-3] + "..."
+                    display_content = display_content[:self.max_line_length-3] + "..."
 
             # Create clear visual separation
             instance_header = f"╔═[{name}]" + "═" * (20 - len(name) - 4) if len(name) < 16 else f"╔═[{name}]═"
             if prefix:
                 instance_header += f" {prefix} "
 
-            return f"{instance_header}\n║ {content}\n╚" + "═" * (len(instance_header) - 1)
+            return f"{instance_header}\n║ {display_content}\n╚" + "═" * (len(instance_header) - 1)
 
         async def read_stream(stream, prefix):
             nonlocal line_count
@@ -417,17 +420,25 @@ class ClaudeInstanceOrchestrator:
                     # Clean the line
                     clean_line = line_str.strip()
 
-                    # Add to rolling buffer with formatted display
-                    display_line = format_instance_line(clean_line, prefix)
+                    # FIRST: Always accumulate FULL output in status (background data collection)
+                    # This happens REGARDLESS of display settings - captures everything
+                    if prefix == "STDOUT":
+                        status.output += line_str  # Full line with all content
+                        # Parse token usage from the COMPLETE line
+                        self._parse_token_usage(clean_line, status)
+                    else:
+                        status.error += line_str  # Full error content
+
+                    # SECOND: Handle visual display (separate from data collection)
+                    # Format line for display only (doesn't affect background data)
+                    display_line = format_instance_line_for_display(clean_line, prefix)
                     recent_lines_buffer.append(display_line)
 
-                    # Keep only the most recent lines
+                    # Keep only the most recent display lines (visual buffer management)
                     if len(recent_lines_buffer) > self.max_console_lines:
                         recent_lines_buffer.pop(0)
 
-                    # Only show periodic updates to prevent spam
-                    # Show every 5th line, or important lines (errors, completions)
-                    # Respect quiet mode
+                    # Determine if this line should be shown (visual display decision)
                     if self.max_console_lines > 0:
                         should_display = (
                             line_count % 5 == 0 or  # Every 5th line (increased frequency)
@@ -444,17 +455,9 @@ class ClaudeInstanceOrchestrator:
                         if should_display:
                             print(f"\n{display_line}\n", flush=True)
                     elif prefix == "STDERR":
-                        # In quiet mode, still show errors
-                        error_display = format_instance_line(clean_line, "ERROR")
+                        # In quiet mode, still show errors (but background still captures all)
+                        error_display = format_instance_line_for_display(clean_line, "ERROR")
                         print(f"\n{error_display}\n", flush=True)
-
-                    # Accumulate output in status (keep full output for saving)
-                    if prefix == "STDOUT":
-                        status.output += line_str
-                        # Parse token usage from Claude output if present
-                        self._parse_token_usage(clean_line, status)
-                    else:
-                        status.error += line_str
             except Exception as e:
                 logger.error(f"Error reading {prefix} for instance {name}: {e}")
 
