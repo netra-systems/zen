@@ -786,27 +786,42 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
     """Create default instance configurations"""
     return [
         InstanceConfig(
-            command="/createtestsv2 agents, unit",
+            command="/createtestsv2 agent goldenpath messages work, unit",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            command="/createtestsv2 agents, integration",
+            command="/gcploggardener",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            command="/createtestsv2 agents, e2e",
+            command="/createtestsv2 agent goldenpath messages work, integration",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            command="/ssotgardener",
+            command="/createtestsv2 agent goldenpath messages work, e2e",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            command="/ssotgardener agents",
+            command="/ssotgardener message routing",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/ssotgardener removing legacy",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/ssotgardener agent goldenpath messages work",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/gcploggardener",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
