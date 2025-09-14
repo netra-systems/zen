@@ -30,7 +30,10 @@ import os
 from unittest.mock import patch
 from typing import Dict, Any, List, Optional
 
-from shared.isolated_environment import get_env
+# Using os.environ directly for staging validation since this is environment-specific test
+import os
+def get_env(key, default=None):
+    return os.environ.get(key, default)
 
 
 class TestIssue847StagingWebSocketConnectivity(unittest.TestCase):
