@@ -82,8 +82,8 @@ class TestWebSocketAuthGoldenPathStaging(StagingTestBase):
             run_id="test_run"
         )
 
-    def setUp(self):
-        """Initialize test attributes with fallback values"""
+    def setup_method(self):
+        """Initialize test attributes with fallback values for pytest"""
         # Note: StagingTestBase doesn't have setUp method, so no super() call needed
         
         # Initialize CLASS attributes with fallback values in case asyncSetUpClass fails
@@ -98,6 +98,7 @@ class TestWebSocketAuthGoldenPathStaging(StagingTestBase):
             
             # Create staging-compatible JWT token
             import jwt
+            import base64
             from datetime import datetime, timedelta, timezone
             
             payload = {
@@ -134,14 +135,22 @@ class TestWebSocketAuthGoldenPathStaging(StagingTestBase):
         # Initialize staging configuration if not set
         if not hasattr(self, 'staging_config'):
             self.staging_config = StagingConfig()
+        # Ensure staging configuration is available
+        if not hasattr(self.__class__, 'staging_config') or self.__class__.staging_config is None:
+            self.__class__.staging_config = StagingConfig()
+            
         if not hasattr(self, 'staging_backend_url'):
-            self.staging_backend_url = self.staging_config.get_backend_websocket_url()
+            self.staging_backend_url = self.__class__.staging_config.get_backend_websocket_url()
         if not hasattr(self, 'staging_auth_url'):
-            self.staging_auth_url = self.staging_config.get_auth_service_url()
+            self.staging_auth_url = self.__class__.staging_config.get_auth_service_url()
         
-        # Initialize logger for instance methods
+        # Initialize logger for instance methods - use class logger if available
         import logging
-        self.logger = logging.getLogger(__name__)
+        if hasattr(self.__class__, 'logger') and self.__class__.logger:
+            self.logger = self.__class__.logger
+        else:
+            self.logger = logging.getLogger(__name__)
+            self.__class__.logger = self.logger
 
     """E2E tests for WebSocket authentication in staging - MISSION CRITICAL"""
     

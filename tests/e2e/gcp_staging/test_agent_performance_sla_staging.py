@@ -106,9 +106,21 @@ class TestAgentPerformanceSLAStaging(StagingTestBase):
     }
     
     @classmethod
-    async def asyncSetUpClass(cls):
+    def setup_class(cls):
         """Setup performance testing infrastructure"""
-        await super().asyncSetUpClass()
+        # Call parent setup first
+        super().setup_class()
+        
+        # Run async setup in event loop
+        import asyncio
+        asyncio.run(cls._async_setup_class())
+    
+    @classmethod
+    async def _async_setup_class(cls):
+        """Async portion of class setup"""
+        # Initialize logging first
+        from shared.logging.unified_logging_ssot import get_logger
+        cls.logger = get_logger(__name__)
         
         # Initialize staging configuration
         cls.staging_config = StagingConfig()
@@ -116,7 +128,7 @@ class TestAgentPerformanceSLAStaging(StagingTestBase):
         
         # Initialize real service clients
         cls.auth_client = StagingAuthClient()
-        cls.websocket_client = RealWebSocketClient()
+        cls.websocket_client = RealWebSocketClient(cls.staging_backend_url)
         
         # Verify staging services performance baseline
         await cls._verify_staging_performance_baseline()
