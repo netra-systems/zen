@@ -199,8 +199,13 @@ class TestWebSocketJWTAuthenticationCrisis(SSotAsyncTestCase):
         with patch('shared.isolated_environment.get_env', return_value=mock_env):
             # Simulate Golden Path WebSocket flow
             try:
+<<<<<<< HEAD
+                from netra_backend.app.websocket_core.manager import WebSocketManager
+                from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+=======
                 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                 from netra_backend.app.agents.registry import AgentRegistry
+>>>>>>> c2e4b48c66d9bf92657c93ac92e56d57f8cca6b1
                 
                 # Step 1: Initialize WebSocket manager (should fail)
                 manager = WebSocketManager()

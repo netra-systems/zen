@@ -40,9 +40,8 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInst
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-# ISSUE #914 PHASE 2: Use advanced registry for reliable WebSocket coordination
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.config import get_config
+from netra_backend.app.core.configuration.base import get_config
 
 
 @pytest.mark.integration

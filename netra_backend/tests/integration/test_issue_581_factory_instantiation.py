@@ -55,7 +55,6 @@ except ImportError:
     AGENT_FACTORY_AVAILABLE = False
 
 try:
-    # ISSUE #914 PHASE 2: Use advanced registry for reliable factory instantiation  
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     AGENT_REGISTRY_AVAILABLE = True  
 except ImportError:

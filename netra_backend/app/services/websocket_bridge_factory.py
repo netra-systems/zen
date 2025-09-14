@@ -271,14 +271,12 @@ class WebSocketBridgeFactory:
                 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
                 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 
-                # ISSUE #914 PHASE 2: Use advanced registry directly for Golden Path reliability
+                # Try different registry import paths - SSOT first
                 try:
                     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
                 except ImportError:
                     try:
-                        # Fallback to deprecated basic registry with compatibility layer
                         from netra_backend.app.agents.registry import AgentRegistry
-                        logger.warning("Issue #914: Using deprecated basic AgentRegistry in WebSocketBridgeFactory")
                     except ImportError:
                         AgentRegistry = None  # Use None if not available
                         logger.error("Issue #914: No AgentRegistry available in WebSocketBridgeFactory")

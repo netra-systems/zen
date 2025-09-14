@@ -52,6 +52,13 @@ from netra_backend.app.core.configuration.base import (
     config_manager
 )
 
+# Import compatibility classes for legacy test patterns (Issue #932 - SSOT regression fix)
+from netra_backend.app.core.configuration.compatibility_shim import (
+    UnifiedConfigurationManager,
+    ConfigurationManagerFactory,
+    get_configuration_manager
+)
+
 
 class TestUnifiedConfigurationManagerIntegration(BaseIntegrationTest):
     """Comprehensive integration tests for UnifiedConfigurationManager."""

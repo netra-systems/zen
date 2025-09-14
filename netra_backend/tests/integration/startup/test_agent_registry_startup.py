@@ -102,16 +102,14 @@ class TestAgentRegistryStartup(BaseIntegrationTest):
         - Agent-to-business-capability mapping
         - Dynamic agent loading and configuration
         """
-        # ISSUE #914 PHASE 2: Use compatibility wrapper for stable testing
-        from netra_backend.app.agents.registry import AgentRegistry
-        from shared.isolated_environment import get_env
+        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+        from shared.isolated_environment import IsolatedEnvironment
         
-        env = get_env()
+        env = IsolatedEnvironment("test_agent_registry")
         env.set("AGENT_REGISTRY_MODE", "startup_initialization", source="test")
         
         try:
-            # The compatibility wrapper doesn't take parameters
-            agent_registry = AgentRegistry()
+            agent_registry = AgentRegistry(environment=env)
             registry_initialized = True
         except ImportError:
             # Registry may not exist - create mock for testing
@@ -122,13 +120,12 @@ class TestAgentRegistryStartup(BaseIntegrationTest):
             registry_initialized = True
             
         assert registry_initialized, "AgentRegistry must initialize successfully"
+        assert hasattr(agent_registry, 'agents'), "Registry must have agent storage"
         assert hasattr(agent_registry, 'register_agent'), "Registry must support agent registration"
-        assert hasattr(agent_registry, 'get_all_agents'), "Registry must support agent retrieval"
-        assert hasattr(agent_registry, 'get_registry_stats'), "Registry must provide stats"
+        assert hasattr(agent_registry, 'get_agent'), "Registry must support agent retrieval"
         
         # Validate initial registry state
-        initial_agents = agent_registry.get_all_agents()
-        initial_agent_count = len(initial_agents)
+        initial_agent_count = len(agent_registry.agents) if isinstance(agent_registry.agents, dict) else 0
         
         self.logger.info("✅ Agent registry initialization validated")
         self.logger.info(f"   - Registry structure: initialized")
@@ -146,7 +143,6 @@ class TestAgentRegistryStartup(BaseIntegrationTest):
         - Reporting agent for business insights and value demonstration
         - Supervisor agent for workflow orchestration
         """
-        # ISSUE #914 PHASE 2: Use advanced registry for reliable startup
         from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         from netra_backend.app.agents.agent_loader import AgentLoader
         
@@ -368,7 +364,6 @@ class TestAgentRegistryStartup(BaseIntegrationTest):
         - Scalable agent execution for concurrent users
         """
         from netra_backend.app.agents.agent_instance_factory import AgentInstanceFactory
-        # ISSUE #914 PHASE 2: Use advanced registry for reliable startup
         from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         
         # Mock registry and factory integration
