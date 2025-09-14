@@ -117,6 +117,23 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         pipeline_start_time = time.time()
         pipeline_events = []
         
+        # Initialize class attributes if not already done
+        if not hasattr(self.__class__, 'logger'):
+            self.__class__.setUpClass()
+
+        # Initialize instance attributes if not already done
+        if not hasattr(self, 'access_token'):
+            # Generate test-specific user context
+            self.thread_id = f"message_pipeline_test_{int(time.time())}"
+            self.run_id = f"run_{self.thread_id}"
+
+            # Create JWT token for this test
+            self.access_token = self.__class__.auth_helper.create_test_jwt_token(
+                user_id=self.__class__.test_user_id,
+                email=self.__class__.test_user_email,
+                exp_minutes=60
+            )
+
         self.__class__.logger.info("🎯 Testing complete user message → agent response pipeline")
         
         try:
@@ -129,7 +146,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
             websocket = await asyncio.wait_for(
                 websockets.connect(
                     self.__class__.staging_config.urls.websocket_url,
-                    extra_headers={
+                    additional_headers={
                         "Authorization": f"Bearer {self.access_token}",
                         "X-Environment": "staging",
                         "X-Test-Suite": "agent-pipeline-e2e"
