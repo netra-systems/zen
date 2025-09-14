@@ -51,13 +51,10 @@ export interface AgentTrackingState {
   setProcessing: (isProcessing: boolean) => void;
 }
 
-// Thread management slice state
-export interface ThreadState {
-  activeThreadId: string | null;
-  threads: Map<string, unknown>;
-  isThreadLoading: boolean;
-  setActiveThread: (threadId: string | null) => void;
-  setThreadLoading: (isLoading: boolean) => void;
+// Thread management slice state - use canonical base and extend for store actions
+import type { StoreThreadState } from '@shared/types/frontend_types';
+export interface ThreadState extends StoreThreadState {
+  // Additional store-specific methods can be added here if needed
 }
 
 // Connection state slice - import from consolidated types

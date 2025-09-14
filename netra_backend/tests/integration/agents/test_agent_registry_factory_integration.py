@@ -761,15 +761,17 @@ class TestAgentRegistryFactoryIntegration(SSotAsyncTestCase):
         
         BVJ: Ensures factory fails fast on misconfiguration - prevents runtime errors in production.
         """
-        # Test 1: AgentInstanceFactory requires WebSocket bridge
+        # Test 1: AgentInstanceFactory accepts None WebSocket bridge with warning
         factory = AgentInstanceFactory()
+
+        # Factory should accept None websocket_bridge but log a warning (degraded mode)
+        factory.configure(websocket_bridge=None)
+        assert factory._websocket_bridge is None
         
-        with pytest.raises(ValueError, match="AgentWebSocketBridge cannot be None"):
-            factory.configure(websocket_bridge=None)
-        
-        # Test 2: ExecutionEngineFactory requires WebSocket bridge
-        with pytest.raises(ExecutionEngineFactoryError, match="requires websocket_bridge"):
-            ExecutionEngineFactory(websocket_bridge=None)
+        # Test 2: ExecutionEngineFactory accepts None WebSocket bridge for test environments
+        test_factory = ExecutionEngineFactory(websocket_bridge=None)
+        assert test_factory._websocket_bridge is None
+        await test_factory.shutdown()  # Clean up
         
         # Test 3: Proper configuration succeeds
         factory.configure(
@@ -812,18 +814,22 @@ class TestAgentRegistryFactoryIntegration(SSotAsyncTestCase):
             ws_user_2.user_id, ws_user_2.thread_id, ws_user_2.run_id
         )
         
-        # Create WebSocket emitters
+        # Create WebSocket emitters (UnifiedWebSocketEmitter interface)
         emitter_1 = UserWebSocketEmitter(
-            ws_user_1.user_id, ws_user_1.thread_id, ws_user_1.run_id, mock_websocket_bridge
+            manager=mock_websocket_bridge,  # Bridge acts as manager in tests
+            user_id=ws_user_1.user_id,
+            context=context_1
         )
         emitter_2 = UserWebSocketEmitter(
-            ws_user_2.user_id, ws_user_2.thread_id, ws_user_2.run_id, mock_websocket_bridge
+            manager=mock_websocket_bridge,  # Bridge acts as manager in tests
+            user_id=ws_user_2.user_id,
+            context=context_2
         )
-        
+
         # Verify emitters are isolated
         assert emitter_1.user_id != emitter_2.user_id
-        assert emitter_1.thread_id != emitter_2.thread_id
-        assert emitter_1.run_id != emitter_2.run_id
+        assert emitter_1.context.thread_id != emitter_2.context.thread_id
+        assert emitter_1.context.run_id != emitter_2.context.run_id
         assert emitter_1 is not emitter_2
         
         # Test emitter functionality

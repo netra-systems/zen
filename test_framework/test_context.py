@@ -149,7 +149,11 @@ class TestContext:
         # Environment configuration
         self.env = get_env()
         self.frontend_url = self.env.get('FRONTEND_URL', 'http://localhost:3000')
-        self.backend_url = self.env.get('BACKEND_URL', 'http://localhost:8000')
+        self.backend_url = (
+            self.env.get('BACKEND_URL') or
+            self.env.get('NETRA_BACKEND_URL') or
+            'http://localhost:8000'
+        )
         self.websocket_base_url = self.backend_url.replace('http://', 'ws://').replace('https://', 'wss://')
     
     def _create_default_user_context(self) -> TestUserContext:
