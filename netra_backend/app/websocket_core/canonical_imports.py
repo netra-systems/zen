@@ -18,7 +18,7 @@ Usage:
 ```python
 # CANONICAL IMPORTS - Use these paths only:
 from netra_backend.app.websocket_core.canonical_imports import (
-    WebSocketManagerFactory,      # Factory for isolated managers
+    create_websocket_manager,     # Factory function for isolated managers
     UnifiedWebSocketManager,      # Direct manager (use factory instead)
     WebSocketManagerProtocol,     # Interface protocol
 )
@@ -31,7 +31,6 @@ from netra_backend.app.websocket_core.canonical_imports import (
 
 # CANONICAL: WebSocket Manager Factory (PREFERRED)
 from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
     get_websocket_manager_factory,
     create_websocket_manager,
     FactoryInitializationError,
@@ -77,7 +76,6 @@ from netra_backend.app.websocket_core.migration_adapter import (
 # Single source of truth exports
 __all__ = [
     # PREFERRED: Use these for new code
-    'WebSocketManagerFactory',
     'get_websocket_manager_factory',
     'create_websocket_manager',
     
