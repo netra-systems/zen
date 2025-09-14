@@ -356,6 +356,10 @@ SEE GIT ISSUES, GIT PRs.
 - Stay on develop-long-lived branch as current branch.
 - ONLY use safe opreations, never filter branch etc.
 
+### Deploy and staging
+Always must use https://auth.staging.netrasystems.ai
+and the other canonical *.staging.netrasystems.ai URLS. NEVER the cloud run urls.
+
 **FINAL REMINDER:** 
 - **GOLDEN PATH PRIORITY:** Users login → get AI responses
 - **ULTRA THINK DEEPLY:** Deep analysis required
