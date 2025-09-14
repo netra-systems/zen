@@ -867,10 +867,27 @@ class GCPWebSocketInitializationValidator:
             # This prevents race condition where validation runs before Phase 5 completion
             # PERFORMANCE OPTIMIZATION: Use environment-optimized timeout for startup wait
             wait_timeout = self._get_optimized_timeout(optimized_timeout * 0.3)  # Use 30% of optimized timeout
-            startup_ready = await self._wait_for_startup_phase_completion(
-                minimum_phase='services', 
-                timeout_seconds=wait_timeout
-            )
+            
+            # ISSUE #919 FIX: Check for GCP environments with startup phase stuck at 'unknown'
+            current_phase = getattr(self.app_state, 'startup_phase', 'unknown') if self.app_state else 'no_app_state'
+            
+            # ISSUE #919 GRACEFUL DEGRADATION: Handle startup_phase stuck at 'unknown' 
+            # This occurs in GCP Cloud Run and staging environments where the deterministic startup
+            # sequence hasn't properly initialized the startup_phase
+            if (self.is_gcp_environment and current_phase == 'unknown' and 
+                (self.is_cloud_run or self.environment in ['staging', 'gcp-active-dev'])):
+                self.logger.warning(
+                    f"🔄 ISSUE #919 FIX: GCP environment ({self.environment}) startup_phase stuck at 'unknown' - "
+                    f"skipping startup phase wait and proceeding with service validation "
+                    f"(graceful degradation for GCP Cloud Run and staging environments) "
+                    f"Cloud Run: {self.is_cloud_run}, GCP: {self.is_gcp_environment}"
+                )
+                startup_ready = True  # Skip startup phase requirement for GCP environments with unknown phase
+            else:
+                startup_ready = await self._wait_for_startup_phase_completion(
+                    minimum_phase='services', 
+                    timeout_seconds=wait_timeout
+                )
             
             if not startup_ready:
                 # Startup didn't reach services phase - this is the race condition
