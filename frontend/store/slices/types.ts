@@ -12,6 +12,7 @@ import type {
 import type { WebSocketEventBuffer } from '@/lib/circular-buffer';
 import type { ConnectionState, ConnectionActions } from '@/types/store-types';
 import type { PerformanceMetrics } from '@/types/unified';
+import type { StoreThreadState } from '@shared/types/frontend_types';
 
 // Agent execution tracking
 export interface AgentExecution {
@@ -52,7 +53,6 @@ export interface AgentTrackingState {
 }
 
 // Thread management slice state - use canonical base and extend for store actions
-import type { StoreThreadState } from '@shared/types/frontend_types';
 export interface ThreadState extends StoreThreadState {
   // Additional store-specific methods can be added here if needed
 }
