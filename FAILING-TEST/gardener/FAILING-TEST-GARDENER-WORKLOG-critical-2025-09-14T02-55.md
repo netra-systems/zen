@@ -109,4 +109,38 @@ Multiple deprecation warnings found across test execution:
 3. **Fix WebSocket event structure validation** - Debug event structure mismatch in staging
 4. **Address deprecation warnings** - Migrate deprecated imports and patterns
 
-**Session Complete:** Ready for sub-agent processing of individual issues.
+## GitHub Issues Created/Updated
+
+### ✅ Issue #911 - WebSocket Event Structure Validation Failures  
+**URL:** https://github.com/netra-systems/netra-apex/issues/911  
+**Status:** NEW ISSUE CREATED  
+**Priority:** P1 (High)  
+**Labels:** claude-code-generated-issue, websocket, P1, critical, golden-path
+
+**Issue Details:** WebSocket server returning 'connect' events instead of expected event-specific structures (agent_started, agent_thinking, tool_executing). Affects real-time chat functionality and $500K+ ARR.
+
+### ✅ Issue #864 - REMOVED_SYNTAX_ERROR Pattern (Updated)  
+**URL:** https://github.com/netra-systems/netra-apex/issues/864  
+**Status:** EXISTING ISSUE UPDATED  
+**Priority:** P0 (Critical)  
+**Enhancement:** Added Docker stability and SSOT compliance test coverage loss
+
+**Updates Made:**
+- **Docker Tests:** Added 50+ disabled infrastructure tests affecting production deployment safety
+- **SSOT Tests:** Added architectural integrity validation loss affecting data security and isolation
+- **Priority Escalation:** Escalated from P1 to P0 due to production safety risks
+- **Business Impact:** Updated to reflect complete loss of infrastructure and architectural validation
+
+---
+
+## Processing Results Summary
+
+**Total Issues Processed:** 3  
+**New GitHub Issues Created:** 1  
+**Existing Issues Updated:** 1  
+**P0 Critical Issues:** 2 (Docker + SSOT test coverage loss)  
+**P1 High Issues:** 1 (WebSocket event validation)
+
+**Business Impact Protection:** All discovered issues properly tracked and prioritized for resolution, protecting $500K+ ARR and production deployment safety.
+
+**Session Complete:** All critical test failures and collection issues successfully cataloged and reported to GitHub issue tracking system.
