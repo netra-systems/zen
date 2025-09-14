@@ -408,48 +408,32 @@ class TestSupervisorWebSocketIntegration:
 
             mock_executor.side_effect = responses
 
-            # Mock justification: Flow logging subsystem is peripheral to
-            # concurrent WebSocket processing SUT
+            # Execute messages concurrently
 
-            with patch("netra_backend.app.agents.supervisor.observability_flow.get_supervisor_flow_logger") as mock_logger_factory:
-                mock_logger = AsyncMock()
-                mock_logger_factory.return_value = mock_logger
-                mock_logger.generate_flow_id.side_effect = [
+            tasks = []
 
-                    f"flow-{i}" for i in range(3)
+            for user_id, prompt, thread_id, run_id in messages:
 
-                ]
+                task = asyncio.create_task(
 
-                mock_logger.start_flow.return_value = None
+                    supervisor_agent.run(prompt, thread_id, user_id, run_id)
 
-                mock_logger.complete_flow.return_value = None
+                )
 
-                # Execute messages concurrently
-
-                tasks = []
-
-                for user_id, prompt, thread_id, run_id in messages:
-
-                    task = asyncio.create_task(
-
-                        supervisor_agent.run(prompt, thread_id, user_id, run_id)
-
-                    )
-
-                    tasks.append(task)
+                tasks.append(task)
 
 
-                results = await asyncio.gather(*tasks)
+            results = await asyncio.gather(*tasks)
 
-                # Verify all messages were processed
+            # Verify all messages were processed
 
-                assert len(results) == 3
+            assert len(results) == 3
 
-                for i, result in enumerate(results):
+            for i, result in enumerate(results):
 
-                    expected_user_id = messages[i][0]
+                expected_user_id = messages[i][0]
 
-                    assert result["user_id"] == expected_user_id
+                assert result["user_id"] == expected_user_id
 
 
     @pytest.mark.asyncio
