@@ -295,10 +295,11 @@ class RealAgentExecutionWebSocketIntegrator:
         assert auth_result["success"], f"Authentication failed: {auth_result.get('error')}"
         
         # Create real user execution context
-        user_context = UserExecutionContext.create_for_request(
+        user_context = UserExecutionContext.from_request(
             user_id=user_id,
             request_id=f"exec_req_{uuid.uuid4().hex[:8]}",
-            thread_id=f"exec_thread_{uuid.uuid4().hex[:8]}"
+            thread_id=f"exec_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"exec_run_{uuid.uuid4().hex[:8]}"
         )
         
         # Setup WebSocket notifier with integration tracking

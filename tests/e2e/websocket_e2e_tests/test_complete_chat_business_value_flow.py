@@ -334,10 +334,11 @@ class RealChatBusinessValueTester:
         jwt_token = auth_result["jwt_token"]
         
         # Create real user execution context
-        user_context = UserExecutionContext.create_for_request(
+        user_context = UserExecutionContext.from_request(
             user_id=user_id,
             request_id=f"chat_req_{uuid.uuid4().hex[:8]}",
-            thread_id=f"chat_thread_{uuid.uuid4().hex[:8]}"
+            thread_id=f"chat_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"chat_run_{uuid.uuid4().hex[:8]}"
         )
         
         # Setup WebSocket notifier with event capture
