@@ -135,10 +135,16 @@ async def test_backward_compatibility_reasoning_fallback():
     mock_manager.emit_critical_event = AsyncMock()
     mock_manager.is_connection_active = Mock(return_value=True)
     
+    # Mock context with run_id
+    mock_context = Mock()
+    mock_context.run_id = "test_run_id"
+    mock_context.user_id = "test_user"
+    
     # Create emitter
     emitter = UnifiedWebSocketEmitter(
         manager=mock_manager,
-        user_id="test_user"
+        user_id="test_user",
+        context=mock_context
     )
     
     # Call with both reasoning and thought (reasoning should win)

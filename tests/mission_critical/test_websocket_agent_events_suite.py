@@ -151,7 +151,16 @@ class RealWebSocketEventCapture:
 
 
 class MissionCriticalEventValidator:
-    """Validates WebSocket events with extreme rigor for real connections."""
+    """Validates WebSocket events with extreme rigor for real connections.
+    
+    Supports both flat event format and ServerMessage format for Golden Path compatibility.
+    
+    Event Formats Supported:
+    1. Flat format: Event data directly in event dict
+    2. ServerMessage format: Event data nested in 'payload' field (Issue #892 fix)
+    
+    Maintains backward compatibility while handling WebSocket message format variations.
+    """
     
     REQUIRED_EVENTS = {
         "agent_started",
