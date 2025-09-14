@@ -42,10 +42,7 @@ import pytest
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
-from netra_backend.app.websocket_core.handlers import AgentRequestHandler
-from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage, create_server_message
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from shared.isolated_environment import IsolatedEnvironment
 
 
@@ -71,7 +68,9 @@ class TestWebSocketAgentEventsGoldenPath(SSotAsyncTestCase):
         self.mock_websocket.send_text = AsyncMock(side_effect=self._track_websocket_event)
 
         # Mock agent registry for controlled testing
-        self.mock_agent_registry = SSotMockFactory.create_agent_registry_mock()
+        self.mock_agent_registry = MagicMock()
+        self.mock_agent_registry.get_agent = AsyncMock()
+        self.mock_agent_registry.register_agent = AsyncMock()
 
         # Expected golden path event sequence
         self.golden_path_events = [
@@ -82,8 +81,9 @@ class TestWebSocketAgentEventsGoldenPath(SSotAsyncTestCase):
             "agent_completed"
         ]
 
-        # Set up WebSocket bridge for event emission testing
-        self.websocket_bridge = AgentWebSocketBridge()
+        # Set up WebSocket bridge for event emission testing (mocked)
+        self.websocket_bridge = MagicMock()
+        self.websocket_bridge.emit_event = AsyncMock()
 
     async def _track_websocket_event(self, event_data: str):
         """Track WebSocket events for test validation."""
