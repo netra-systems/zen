@@ -131,6 +131,14 @@ class TestWebSocketAuthGoldenPathStaging(StagingTestBase):
         self.auth_client = self.__class__.auth_client
         self.test_user = self.__class__.test_user
         
+        # Initialize staging configuration if not set
+        if not hasattr(self, 'staging_config'):
+            self.staging_config = StagingConfig()
+        if not hasattr(self, 'staging_backend_url'):
+            self.staging_backend_url = self.staging_config.get_backend_websocket_url()
+        if not hasattr(self, 'staging_auth_url'):
+            self.staging_auth_url = self.staging_config.get_auth_service_url()
+        
         # Initialize logger for instance methods
         import logging
         self.logger = logging.getLogger(__name__)
