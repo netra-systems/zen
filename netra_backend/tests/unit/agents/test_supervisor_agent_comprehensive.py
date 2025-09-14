@@ -129,8 +129,8 @@ class TestSupervisorAgentCore(BaseTestCase):
         self.websocket_bridge.websocket_manager = self.websocket_manager
         self.websocket_bridge.emit_agent_event = AsyncMock()
         
-        # Create real UserExecutionContext for testing
-        self.test_context = UserExecutionContext(
+        # Create real UserExecutionContext for testing using supervisor compatibility method
+        self.test_context = UserExecutionContext.from_request_supervisor(
             user_id=f"test-user-{uuid.uuid4().hex[:8]}",
             thread_id=f"test-thread-{uuid.uuid4().hex[:8]}",
             run_id=f"test-run-{uuid.uuid4().hex[:8]}",
@@ -262,7 +262,7 @@ class TestSupervisorAgentCore(BaseTestCase):
         # Create multiple user contexts
         contexts = []
         for i in range(5):
-            context = UserExecutionContext(
+            context = UserExecutionContext.from_request_supervisor(
                 user_id=f"concurrent-user-{i}",
                 thread_id=f"concurrent-thread-{i}",
                 run_id=f"concurrent-run-{i}",
