@@ -56,7 +56,7 @@ from netra_backend.app.agents.apex_optimizer_agent import ApexOptimizerAgent
 # WebSocket and Communication
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.unified_websocket_emitter import UnifiedWebSocketEmitter
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 
 # Context and State Management
 from netra_backend.app.services.user_execution_context import UserExecutionContext
