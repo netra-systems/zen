@@ -45,7 +45,8 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+# Use SSOT import path for WebSocket Manager
+from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation as WebSocketManager
 # Removed DeepAgentState import - using UserExecutionContext for user isolation security
 # from netra_backend.app.agents.state import DeepAgentState  # DEPRECATED - security vulnerability
 from netra_backend.app.llm.llm_manager import LLMManager
