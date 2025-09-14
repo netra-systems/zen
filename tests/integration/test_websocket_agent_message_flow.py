@@ -117,13 +117,15 @@ class TestWebSocketAgentMessageFlow(SSotAsyncTestCase):
         self.websocket_bridge = None
         self.agent_factory = None
 
+    async def async_setup_method(self, method=None):
+        """Set up async WebSocket components."""
+        await super().async_setup_method(method)
         # Initialize real WebSocket infrastructure
         await self._initialize_real_websocket_infrastructure()
 
-    async def teardown_method(self, method):
+    def teardown_method(self, method):
         """Clean up test resources - pytest entry point."""
-        await self.async_teardown_method(method)
-        await super().teardown_method(method)
+        super().teardown_method(method)
 
     async def async_teardown_method(self, method=None):
         """Clean up test resources and record WebSocket performance metrics."""
