@@ -168,19 +168,13 @@ class BroadcastFunctionDiscovery:
 class TestBroadcastFunctionSSotCompliance(SSotBaseTestCase):
     """Test suite for broadcast function SSOT compliance detection."""
 
-    @classmethod
-    def setUpClass(cls):
-        """Set up test class."""
-        super().setUpClass()
-        cls.project_root = Path(__file__).parent.parent.parent.parent
-        cls.discovery = BroadcastFunctionDiscovery(cls.project_root)
-
-    @property
-    def broadcast_functions(self):
-        """Get broadcast functions (lazy loading)."""
-        if not hasattr(self.__class__, '_broadcast_functions'):
-            self.__class__._broadcast_functions = self.__class__.discovery.scan_for_broadcast_functions()
-        return self.__class__._broadcast_functions
+    def _get_broadcast_functions(self):
+        """Get broadcast functions."""
+        if not hasattr(self, '_broadcast_functions_cache'):
+            project_root = Path(__file__).parent.parent.parent.parent
+            discovery = BroadcastFunctionDiscovery(project_root)
+            self._broadcast_functions_cache = discovery.scan_for_broadcast_functions()
+        return self._broadcast_functions_cache
 
     def test_discover_all_broadcast_functions(self):
         """
@@ -192,10 +186,12 @@ class TestBroadcastFunctionSSotCompliance(SSotBaseTestCase):
         # This test should FAIL initially with 3+ functions found
         # After SSOT remediation, should PASS with exactly 1 function
 
-        print(f"\n=== BROADCAST FUNCTION DISCOVERY ===")
-        print(f"Total broadcast functions discovered: {len(self.broadcast_functions)}")
+        broadcast_functions = self._get_broadcast_functions()
 
-        for func in self.broadcast_functions:
+        print(f"\n=== BROADCAST FUNCTION DISCOVERY ===")
+        print(f"Total broadcast functions discovered: {len(broadcast_functions)}")
+
+        for func in broadcast_functions:
             print(f"- {func.full_identifier} (line {func.line_number})")
             print(f"  Signature: {func.signature}")
             if func.docstring:
@@ -210,7 +206,7 @@ class TestBroadcastFunctionSSotCompliance(SSotBaseTestCase):
         ]
 
         found_duplicates = []
-        for func in self.broadcast_functions:
+        for func in broadcast_functions:
             # Check if this function matches our expected duplicates
             module_name = func.module_path.split('/')[-1] if '/' in func.module_path else func.module_path.split('\\')[-1]
             if func.class_name:
@@ -231,13 +227,13 @@ class TestBroadcastFunctionSSotCompliance(SSotBaseTestCase):
         # This test SHOULD FAIL initially (indicating duplicates exist)
         # After SSOT remediation, this should PASS (only 1 canonical function)
 
-        if len(self.broadcast_functions) <= 1:
+        if len(broadcast_functions) <= 1:
             # SSOT remediation complete - single canonical function
-            self.assertEqual(len(self.broadcast_functions), 1,
+            self.assertEqual(len(broadcast_functions), 1,
                            "SSOT remediation complete: Should have exactly 1 canonical broadcast function")
         else:
             # Pre-SSOT remediation - multiple duplicates detected
-            self.fail(f"SSOT VIOLATION: Found {len(self.broadcast_functions)} broadcast functions. "
+            self.fail(f"SSOT VIOLATION: Found {len(broadcast_functions)} broadcast functions. "
                      f"Expected duplicates: {len(found_duplicates)}. "
                      f"This violates SSOT principles and blocks Golden Path functionality. "
                      f"Remediation required to consolidate to single canonical function.")
@@ -249,7 +245,9 @@ class TestBroadcastFunctionSSotCompliance(SSotBaseTestCase):
         Expected Behavior: FAIL - Different signatures detected
         After SSOT remediation: PASS - Single consistent signature
         """
-        if len(self.broadcast_functions) <= 1:
+        broadcast_functions = self._get_broadcast_functions()
+
+        if len(broadcast_functions) <= 1:
             self.skipTest("SSOT remediation complete - single function, signature consistency not applicable")
 
         print(f"\n=== SIGNATURE CONSISTENCY ANALYSIS ===")
@@ -257,7 +255,7 @@ class TestBroadcastFunctionSSotCompliance(SSotBaseTestCase):
         # Group functions by signature patterns
         signature_groups: Dict[str, List[BroadcastFunction]] = {}
 
-        for func in self.broadcast_functions:
+        for func in broadcast_functions:
             # Normalize signature for comparison
             normalized_sig = self._normalize_signature(func.parameters)
 
