@@ -57,10 +57,11 @@ class TestWebSocketEventEmissionIntegration(SSotAsyncTestCase):
             """Capture sent messages for structure validation"""
             captured_messages.append(message)
             
-        with patch.object(self.websocket_manager, 'send_to_user', side_effect=capture_send_to_user):
+        with patch.object(self.websocket_manager, 'send_to_user', side_effect=capture_send_to_user), \
+             patch.object(self.websocket_manager, 'is_connection_active', return_value=True):
             
             # Simulate agent started event
-            await self.websocket_manager.send_critical_event(
+            await self.websocket_manager.emit_critical_event(
                 self.test_user_id,
                 "agent_started",
                 {
@@ -72,7 +73,7 @@ class TestWebSocketEventEmissionIntegration(SSotAsyncTestCase):
             )
             
             # Simulate agent thinking event
-            await self.websocket_manager.send_critical_event(
+            await self.websocket_manager.emit_critical_event(
                 self.test_user_id,
                 "agent_thinking",
                 {
@@ -84,7 +85,7 @@ class TestWebSocketEventEmissionIntegration(SSotAsyncTestCase):
             )
             
             # Simulate tool execution
-            await self.websocket_manager.send_critical_event(
+            await self.websocket_manager.emit_critical_event(
                 self.test_user_id,
                 "tool_executing", 
                 {
@@ -96,7 +97,7 @@ class TestWebSocketEventEmissionIntegration(SSotAsyncTestCase):
             )
             
             # Simulate tool completion
-            await self.websocket_manager.send_critical_event(
+            await self.websocket_manager.emit_critical_event(
                 self.test_user_id,
                 "tool_completed",
                 {
@@ -113,7 +114,7 @@ class TestWebSocketEventEmissionIntegration(SSotAsyncTestCase):
             )
             
             # Simulate agent completion
-            await self.websocket_manager.send_critical_event(
+            await self.websocket_manager.emit_critical_event(
                 self.test_user_id,
                 "agent_completed",
                 {
@@ -161,20 +162,24 @@ class TestWebSocketEventEmissionIntegration(SSotAsyncTestCase):
     def validate_message_structure(self, message, expected_type, required_fields):
         """
         Validate message has correct structure with business fields at top level
-        EXPECTED FAILURES: Messages currently have generic wrapper structure
+        UPDATED: Messages should now have correct structure (Issue #1021 resolved)
         """
+        print(f"Validating {expected_type} message structure: {message}")
+        
         # Verify event type at top level
         self.assertEqual(message.get("type"), expected_type,
                         f"Event type should be '{expected_type}' at top level")
         
-        # FAILING ASSERTIONS: Business fields should be at top level, not in 'data'
+        # PASSING ASSERTIONS: Business fields should be at top level
         for field in required_fields:
             self.assertIn(field, message, 
                          f"Field '{field}' should be at top level of {expected_type} message")
         
-        # Critical assertion - should not have generic wrapper
-        if "data" in message and any(field in message["data"] for field in required_fields):
-            self.fail(f"Business fields for {expected_type} should not be buried in 'data' wrapper")
+        # Verify no business fields are wrapped in 'data' 
+        if "data" in message and isinstance(message["data"], dict):
+            for field in required_fields:
+                if field in message["data"]:
+                    self.fail(f"Business field '{field}' should not be buried in 'data' wrapper for {expected_type}")
     
     async def test_real_time_event_structure_validation(self):
         """
