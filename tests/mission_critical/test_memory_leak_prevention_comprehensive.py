@@ -75,7 +75,7 @@ if project_root not in sys.path:
 
 # Import components for memory testing
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager

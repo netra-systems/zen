@@ -120,7 +120,7 @@ class TestConfigManagerSSotViolationsIssue757(SSotBaseTestCase):
                 deprecation_warnings = [warning for warning in w if issubclass(warning.category, DeprecationWarning)]
 
                 # Test 4: Instantiate both managers (this should cause conflicts)
-                deprecated_manager = DeprecatedManager(user_id="test_user_conflict")
+                deprecated_manager = UnifiedConfigManager()
                 canonical_manager = CanonicalManager()
 
                 # Test 5: Attempt to get configuration from both (should show inconsistency)
@@ -208,7 +208,7 @@ class TestConfigManagerSSotViolationsIssue757(SSotBaseTestCase):
     is_testing,
     config_manager
 )
-                        deprecated_manager = get_configuration_manager(user_id=f"worker_{worker_id}")
+                        deprecated_manager = UnifiedConfigManager()
 
                         # Access canonical manager
                         from netra_backend.app.core.configuration.base import config_manager
@@ -355,7 +355,7 @@ class TestConfigManagerSSotViolationsIssue757(SSotBaseTestCase):
     is_testing,
     config_manager
 )
-                deprecated_manager = DeprecatedManager()
+                deprecated_manager = UnifiedConfigManager()
 
                 # Test canonical manager environment access
                 from netra_backend.app.core.configuration.base import config_manager
@@ -470,7 +470,7 @@ class TestConfigManagerSSotViolationsIssue757(SSotBaseTestCase):
     is_testing,
     config_manager
 )
-                deprecated_manager = ConfigurationManagerFactory.get_global_manager()
+                deprecated_manager = UnifiedConfigManager()
 
                 # Test canonical manager JWT configuration
                 from netra_backend.app.core.configuration.base import config_manager

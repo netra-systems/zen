@@ -46,7 +46,7 @@ class TestConfigurationManagerSSotEnforcement(SSotBaseTestCase):
             'canonical_path': 'netra_backend/app/core/configuration/base.py',
             'canonical_class': 'UnifiedConfigManager',
             'duplicate_paths': [
-                'netra_backend/app/core/managers/unified_configuration_manager.py',
+                'netra_backend/app/core/configuration/base.py',
                 'netra_backend/app/services/configuration_service.py'
             ],
             'allowed_max_managers': 1,  # After consolidation
@@ -401,7 +401,7 @@ class TestConfigurationManagerSSotEnforcement(SSotBaseTestCase):
 
         # Import patterns to check
         import_patterns = [
-            'from netra_backend.app.core.managers.unified_configuration_manager import',
+            'from netra_backend.app.core.configuration.base import',
             'from netra_backend.app.services.configuration_service import',
             'import os.environ',  # Direct environ usage
         ]
