@@ -30,7 +30,14 @@ import time
 from typing import Optional, Dict, Any, TYPE_CHECKING, List
 from datetime import datetime, timezone
 from dataclasses import dataclass, field
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
+
+# Use SSOT logging instead of deprecated central_logger
+class CentralLoggerCompat:
+    def get_logger(self, name):
+        return get_logger(name)
+
+central_logger = CentralLoggerCompat()
 
 if TYPE_CHECKING:
     # ISSUE #824 REMEDIATION: Use canonical SSOT import path

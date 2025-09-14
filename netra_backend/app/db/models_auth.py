@@ -18,6 +18,8 @@ GOLDEN PATH DEPENDENCY: Required for test collection and execution
 
 # Re-export User model from the SSOT location
 from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
+# Re-export UserID type from the SSOT location for test compatibility
+from shared.types.core_types import UserID
 
 # Maintain compatibility for any existing imports
-__all__ = ["User", "Secret", "ToolUsageLog"]
+__all__ = ["User", "Secret", "ToolUsageLog", "UserID"]
