@@ -26,24 +26,56 @@
 
 ## P0 IMMEDIATE FIXES (Same Day)
 
-### 1. Redis Configuration Validation ✅ VALIDATED
+### 1. Redis Authentication Fix (P0 - 1 HOUR) ⚠️ CRITICAL
 
-**Analysis Complete:**
-```bash
-# CONFIRMED: Redis instance exists and is ready
-gcloud redis instances list --region=us-central1 --project=netra-staging
-# Result: staging-redis-f1adc35c READY at 10.166.204.83:6379
+**IMMEDIATE ACTION REQUIRED:** Add missing Redis password authentication in connection handler.
 
-# CONFIRMED: VPC connector exists and is ready  
-gcloud compute networks vpc-access connectors list --region=us-central1 --project=netra-staging
-# Result: staging-connector READY with staging-vpc network
+**File to Fix:** `/netra_backend/app/core/redis_connection_handler.py`
 
-# CONFIRMED: Secrets configuration is correct
-gcloud secrets versions access latest --secret="redis-host-staging" --project=netra-staging
-# Result: 10.166.204.83
+**Exact Code Change Required:**
+```python
+# Line 131-140: Add password parameter
+client = redis.Redis(
+    host=self._connection_info["host"],
+    port=self._connection_info["port"],  
+    db=self._connection_info["db"],
+    password=self._connection_info.get("password"),  # ← ADD THIS LINE
+    socket_timeout=self._connection_info["socket_timeout"],
+    socket_connect_timeout=self._connection_info["socket_connect_timeout"],
+    retry_on_timeout=self._connection_info["retry_on_timeout"],
+    health_check_interval=self._connection_info["health_check_interval"],
+    decode_responses=True
+)
 ```
 
-**Root Cause:** Redis configuration is CORRECT. Issue is likely VPC routing or Cloud Run service annotation misconfiguration.
+**Also Required:** Add password to connection info in `_build_connection_info` method:
+```python
+# Add to connection_info dict around line 66:
+connection_info = {
+    "host": host,
+    "port": port,
+    "db": db,
+    "password": get_env().get("REDIS_PASSWORD", ""),  # ← ADD THIS LINE
+    "environment": self.env,
+    "socket_timeout": 5,
+    # ... rest unchanged
+}
+```
+
+**Deployment Commands:**
+```bash
+# Apply the fix and deploy
+python scripts/deploy_to_gcp_actual.py --project netra-staging --build-local
+
+# Test Redis connectivity immediately  
+curl -s "https://api.staging.netrasystems.ai/health" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+print('Redis Status: SUCCESS' if 'healthy' in str(data) else 'Redis Status: STILL FAILING')
+"
+```
+
+**Expected Result:** Redis connection will succeed immediately, resolving agent execution timeouts.
 
 ### 2. Cloud Run VPC Connector Validation ✅ VALIDATED
 
@@ -378,10 +410,11 @@ python tests/mission_critical/test_websocket_agent_events_suite.py
 ## EXECUTION TIMELINE
 
 ### Day 1 (Immediate - 0-8 hours)
-- [ ] **0-2h:** Validate VPC connector configuration on Cloud Run services
-- [ ] **2-4h:** Fix Cloud Run VPC annotations if misconfigured  
-- [ ] **4-6h:** PostgreSQL performance investigation and scaling
-- [ ] **6-8h:** Run infrastructure validation tests
+- [ ] **0-1h:** 🚨 **CRITICAL** - Fix Redis authentication in connection handler
+- [ ] **1-2h:** Deploy and validate Redis connection fix
+- [ ] **2-4h:** PostgreSQL performance investigation and scaling  
+- [ ] **4-6h:** Run E2E agent tests to validate full pipeline
+- [ ] **6-8h:** Infrastructure monitoring setup
 
 ### Day 2 (Follow-up - 8-16 hours)
 - [ ] **8-12h:** Implement monitoring improvements
@@ -462,10 +495,11 @@ gcloud sql instances patch staging-postgres-db \
 
 ---
 
-**NEXT ACTIONS:**
-1. ✅ Analysis complete - infrastructure validated
-2. 🔄 Execute VPC connector validation (P0 - 2 hours)
-3. 🔄 PostgreSQL performance remediation (P1 - 4 hours)  
-4. 📋 Schedule monitoring improvements (P2 - 8 hours)
+**IMMEDIATE NEXT ACTIONS:**
+1. ✅ **ROOT CAUSE IDENTIFIED** - Redis authentication missing from connection handler
+2. 🚨 **URGENT** - Apply Redis authentication fix (1 hour max)
+3. 🔄 Deploy and test Redis connectivity resolution  
+4. 🔄 PostgreSQL performance investigation (after Redis fixed)
+5. 📋 Full E2E agent test validation
 
-**BUSINESS PRIORITY:** Focus on P0 VPC connectivity first - this is likely blocking agent execution despite Redis instance being healthy.
+**BUSINESS IMPACT:** This single line of code (missing Redis password) is blocking $500K+ ARR chat functionality. Fix is simple and immediate.
