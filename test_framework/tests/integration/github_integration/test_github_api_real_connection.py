@@ -175,7 +175,7 @@ class TestGitHubAPIRealConnection(BaseTestCase):
 
 @pytest.mark.integration
 @pytest.mark.github_integration
-@pytest.mark.duplicate_detection
+@pytest.mark.integration
 class TestGitHubDuplicateDetectionReal(BaseTestCase):
     """Test duplicate issue detection with real repository data."""
 
