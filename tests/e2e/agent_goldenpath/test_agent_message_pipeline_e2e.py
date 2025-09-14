@@ -72,10 +72,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         cls.auth_helper = E2EAuthHelper(environment="staging")
         
         # Initialize WebSocket test utilities
-        cls.websocket_helper = WebSocketTestHelper(
-            base_url=cls.staging_config.urls.websocket_url,
-            environment="staging"
-        )
+        cls.websocket_helper = WebSocketTestHelper()
         
         # Test user configuration
         cls.test_user_id = f"golden_path_user_{int(time.time())}"
