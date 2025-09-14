@@ -32,6 +32,15 @@ class StagingWebSocketTestRunner:
     
     def __init__(self):
         self.env = IsolatedEnvironment()
+        
+        # CRITICAL: Staging tests must run against staging environment
+        # Override test environment detection to ensure staging infrastructure is used
+        # Force staging environment even if already set to 'test' by conftest_e2e.py
+        current_env = self.env.get('ENVIRONMENT')
+        if current_env != 'staging':
+            self.env.set('ENVIRONMENT', 'staging', 'staging_test_override')
+            print(f"Environment overridden from '{current_env}' to 'staging' for staging test")
+        
         self.environment = StagingConfig.get_environment()
         self.timeout = StagingConfig.TIMEOUTS["websocket"]
         self.received_events = []
