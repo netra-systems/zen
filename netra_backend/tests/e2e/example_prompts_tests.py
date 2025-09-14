@@ -9,7 +9,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 import pytest
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.quality_gate_service import (
     ContentType,
     QualityGateService,

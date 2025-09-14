@@ -79,7 +79,6 @@
     "checked_at",
     "checkpoint_created_at",
     "child_created_at",
-    "child_id",
     "child_trace_id",
     "client_id",
     "closed_at",

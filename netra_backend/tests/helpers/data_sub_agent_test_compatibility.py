@@ -4,7 +4,7 @@ import json
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional, Tuple
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.logging_config import central_logger as logger
 
 class TestCompatibilityMixin:

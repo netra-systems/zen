@@ -31,7 +31,7 @@ import pytest
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, get_agent_registry
 from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory as AgentFactory, get_agent_instance_factory as get_agent_factory
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker, get_execution_tracker
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotBaseTestCase

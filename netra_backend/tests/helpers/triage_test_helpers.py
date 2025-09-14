@@ -9,7 +9,7 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock
 
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
 class TriageMockHelpers:
     """Mock helpers for triage tests"""

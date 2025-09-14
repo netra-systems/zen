@@ -61,7 +61,7 @@ from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOr
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
-# from netra_backend.app.agents.state import DeepAgentState  # Deprecated - replaced with simple dict
+# from netra_backend.app.schemas.agent_models import DeepAgentState  # Deprecated - replaced with simple dict
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 

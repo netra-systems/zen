@@ -51,7 +51,7 @@ class TestDeepAgentStateMigrationDetection(SSotAsyncTestCase):
         DESIGNED TO FAIL: Scan production files for active DeepAgentState imports
         
         This test fails if ANY production files contain:
-        - from netra_backend.app.agents.state import DeepAgentState
+        - from netra_backend.app.schemas.agent_models import DeepAgentState
         - DeepAgentState class usage in method signatures
         - DeepAgentState instantiation
         """
@@ -137,8 +137,8 @@ PRIORITY: P0 - Migrate these files first to protect $500K+ ARR.
             lines = content.split('\n')
             
             # Check for import statements
-            if 'from netra_backend.app.agents.state import DeepAgentState' in content:
-                violations.append("Direct import: 'from netra_backend.app.agents.state import DeepAgentState'")
+            if 'from netra_backend.app.schemas.agent_models import DeepAgentState' in content:
+                violations.append("Direct import: 'from netra_backend.app.schemas.agent_models import DeepAgentState'")
                 
             if 'from netra_backend.app.agents.state import' in content and 'DeepAgentState' in content:
                 violations.append("Indirect import: DeepAgentState imported via state module")

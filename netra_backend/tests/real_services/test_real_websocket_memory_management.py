@@ -37,7 +37,7 @@ import uvicorn
 
 from test_framework.environment_isolation import get_test_env_manager
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
 logger = logging.getLogger(__name__)

@@ -1501,6 +1501,32 @@ class UserExecutionEngine(IExecutionEngine):
         
         return stats
     
+    async def create_agent_instance(self, agent_name: str):
+        """Create agent instance using the factory.
+        
+        This method delegates to the agent_factory to create an agent instance
+        for the current user context. This fixes the API contract mismatch where
+        tests expect UserExecutionEngine to have this method.
+        
+        Args:
+            agent_name: Name of the agent to create
+            
+        Returns:
+            Agent instance created by the factory
+            
+        Raises:
+            ValueError: If agent_name is invalid
+            RuntimeError: If agent creation fails
+        """
+        try:
+            logger.debug(f"Creating agent instance: {agent_name} for user {self.context.user_id}")
+            agent_instance = await self.agent_factory.create_agent_instance(agent_name, self.context)
+            logger.info(f"Successfully created agent {agent_name} for user {self.context.user_id}")
+            return agent_instance
+        except Exception as e:
+            logger.error(f"Failed to create agent {agent_name} for user {self.context.user_id}: {e}")
+            raise RuntimeError(f"Agent creation failed for {agent_name}: {e}")
+    
     async def execute_agent_pipeline(self, 
                                     agent_name: str,
                                     execution_context: UserExecutionContext,

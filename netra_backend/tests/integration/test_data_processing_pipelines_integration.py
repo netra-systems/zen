@@ -47,7 +47,7 @@ from netra_backend.app.schemas.data_ingestion_types import (
     IngestionMetrics, DataPipeline, TransformationStep, IngestionStatus,
     ValidationRule, SchemaMapping, DataQualityCheck, DataQualityReport
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext, PipelineStepConfig
 )

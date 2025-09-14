@@ -27,7 +27,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import (
     ToolDispatchResponse,
     DispatchStrategy
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from langchain_core.tools import BaseTool
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 

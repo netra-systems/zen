@@ -1681,6 +1681,420 @@ class AgentRegistry(BaseAgentRegistry):
         """
         return self.prerequisites_validator
 
+    # ===================== COMPATIBILITY LAYER FOR SIMPLE REGISTRY INTERFACE =====================
+    # Phase 1 of SSOT consolidation - provide backward compatibility without breaking changes
+    # These methods bridge the Simple Registry interface to Enhanced Registry functionality
+    
+    def register_agent(self, agent_type, name: str, description: str = "", 
+                      metadata: Optional[Dict[str, Any]] = None, 
+                      agent_instance: Optional[Any] = None) -> str:
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Maps to Enhanced Registry's user-aware agent creation pattern.
+        Creates a default user context for non-user-aware calls.
+        
+        Args:
+            agent_type: Agent type (AgentType enum or string)
+            name: Agent name
+            description: Agent description
+            metadata: Optional metadata
+            agent_instance: Optional agent instance (will be stored for compatibility)
+            
+        Returns:
+            Agent ID for compatibility
+        """
+        # Import here to avoid circular imports
+        from netra_backend.app.agents.registry import AgentType, AgentStatus
+        import uuid
+        from datetime import datetime
+        
+        # Convert string to enum if needed
+        if isinstance(agent_type, str):
+            agent_type = AgentType(agent_type)
+        
+        # Generate compatibility agent ID
+        agent_id = f"{agent_type.value}_{uuid.uuid4().hex[:8]}"
+        
+        # Store agent in compatibility registry
+        if not hasattr(self, '_compatibility_agents'):
+            self._compatibility_agents = {}
+            self._compatibility_instances = {}
+        
+        # Create AgentInfo for compatibility
+        from netra_backend.app.agents.registry import AgentInfo
+        agent_info = AgentInfo(
+            agent_id=agent_id,
+            agent_type=agent_type,
+            name=name,
+            description=description,
+            status=AgentStatus.IDLE,
+            created_at=datetime.now(),
+            last_active=datetime.now(),
+            execution_count=0,
+            error_count=0,
+            metadata=metadata or {}
+        )
+        
+        self._compatibility_agents[agent_id] = agent_info
+        if agent_instance:
+            self._compatibility_instances[agent_id] = agent_instance
+        
+        # Also register with Enhanced Registry using agent_type as name
+        self.register(name, agent_instance) if agent_instance else None
+        
+        logger.info(f"Registered agent via compatibility layer: {agent_id} ({agent_type.value}: {name})")
+        return agent_id
+    
+    def unregister_agent(self, agent_id: str) -> bool:
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Args:
+            agent_id: Agent ID to unregister
+            
+        Returns:
+            True if unregistered, False if not found
+        """
+        if not hasattr(self, '_compatibility_agents'):
+            return False
+            
+        if agent_id in self._compatibility_agents:
+            agent_info = self._compatibility_agents.pop(agent_id)
+            self._compatibility_instances.pop(agent_id, None)
+            
+            # Try to remove from Enhanced Registry if it exists
+            self.remove_agent(agent_info.name)
+            
+            logger.info(f"Unregistered agent via compatibility layer: {agent_id}")
+            return True
+        return False
+    
+    def get_agent_info(self, agent_id: str):
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Args:
+            agent_id: Agent ID
+            
+        Returns:
+            AgentInfo if found, None otherwise
+        """
+        if not hasattr(self, '_compatibility_agents'):
+            return None
+        return self._compatibility_agents.get(agent_id)
+    
+    def get_agent_instance(self, agent_id: str):
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Args:
+            agent_id: Agent ID
+            
+        Returns:
+            Agent instance if found, None otherwise
+        """
+        if not hasattr(self, '_compatibility_instances'):
+            return None
+        return self._compatibility_instances.get(agent_id)
+    
+    def update_agent_status(self, agent_id: str, status) -> bool:
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Args:
+            agent_id: Agent ID
+            status: New status (AgentStatus enum or string)
+            
+        Returns:
+            True if updated, False if not found
+        """
+        from netra_backend.app.agents.registry import AgentStatus
+        from datetime import datetime
+        
+        if not hasattr(self, '_compatibility_agents'):
+            return False
+            
+        if agent_id not in self._compatibility_agents:
+            return False
+        
+        # Convert string to enum if needed
+        if isinstance(status, str):
+            status = AgentStatus(status)
+        
+        # Update status
+        self._compatibility_agents[agent_id].status = status
+        self._compatibility_agents[agent_id].last_active = datetime.now()
+        
+        logger.debug(f"Updated agent status via compatibility layer: {agent_id} -> {status.value}")
+        return True
+    
+    def increment_execution_count(self, agent_id: str) -> bool:
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Args:
+            agent_id: Agent ID
+            
+        Returns:
+            True if updated, False if not found
+        """
+        from datetime import datetime
+        
+        if not hasattr(self, '_compatibility_agents'):
+            return False
+            
+        if agent_id not in self._compatibility_agents:
+            return False
+        
+        self._compatibility_agents[agent_id].execution_count += 1
+        self._compatibility_agents[agent_id].last_active = datetime.now()
+        return True
+    
+    def increment_error_count(self, agent_id: str) -> bool:
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Args:
+            agent_id: Agent ID
+            
+        Returns:
+            True if updated, False if not found
+        """
+        from datetime import datetime
+        
+        if not hasattr(self, '_compatibility_agents'):
+            return False
+            
+        if agent_id not in self._compatibility_agents:
+            return False
+        
+        self._compatibility_agents[agent_id].error_count += 1
+        self._compatibility_agents[agent_id].last_active = datetime.now()
+        return True
+    
+    def get_agents_by_type(self, agent_type):
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Args:
+            agent_type: Agent type to filter by
+            
+        Returns:
+            List of AgentInfo matching the type
+        """
+        from netra_backend.app.agents.registry import AgentType
+        
+        if not hasattr(self, '_compatibility_agents'):
+            return []
+            
+        # Convert string to enum if needed
+        if isinstance(agent_type, str):
+            agent_type = AgentType(agent_type)
+        
+        return [info for info in self._compatibility_agents.values() 
+                if info.agent_type == agent_type]
+    
+    def get_agents_by_status(self, status):
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Args:
+            status: Agent status to filter by
+            
+        Returns:
+            List of AgentInfo matching the status
+        """
+        from netra_backend.app.agents.registry import AgentStatus
+        
+        if not hasattr(self, '_compatibility_agents'):
+            return []
+            
+        # Convert string to enum if needed
+        if isinstance(status, str):
+            status = AgentStatus(status)
+        
+        return [info for info in self._compatibility_agents.values() 
+                if info.status == status]
+    
+    def get_all_agents(self):
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Returns:
+            List of all AgentInfo objects
+        """
+        if not hasattr(self, '_compatibility_agents'):
+            return []
+        return list(self._compatibility_agents.values())
+    
+    def get_available_agents(self, agent_type=None):
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Args:
+            agent_type: Optional agent type to filter by
+            
+        Returns:
+            List of available (idle) AgentInfo objects
+        """
+        from netra_backend.app.agents.registry import AgentStatus, AgentType
+        
+        if not hasattr(self, '_compatibility_agents'):
+            return []
+        
+        agents = [info for info in self._compatibility_agents.values() 
+                 if info.status == AgentStatus.IDLE]
+        
+        if agent_type:
+            # Convert string to enum if needed
+            if isinstance(agent_type, str):
+                agent_type = AgentType(agent_type)
+            agents = [info for info in agents if info.agent_type == agent_type]
+        
+        return agents
+    
+    def find_agent_by_name(self, name: str):
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Args:
+            name: Agent name to search for
+            
+        Returns:
+            AgentInfo if found, None otherwise
+        """
+        if not hasattr(self, '_compatibility_agents'):
+            return None
+            
+        for info in self._compatibility_agents.values():
+            if info.name == name:
+                return info
+        return None
+    
+    def cleanup_inactive_agents(self, inactive_threshold=None):
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Args:
+            inactive_threshold: Time threshold for considering agents inactive
+        """
+        from datetime import datetime, timedelta
+        
+        if not hasattr(self, '_compatibility_agents'):
+            return
+        
+        if inactive_threshold is None:
+            inactive_threshold = timedelta(hours=1)
+        
+        current_time = datetime.now()
+        inactive_agents = []
+        
+        for agent_id, info in self._compatibility_agents.items():
+            if (current_time - info.last_active) > inactive_threshold:
+                inactive_agents.append(agent_id)
+        
+        # Remove inactive agents
+        for agent_id in inactive_agents:
+            self.unregister_agent(agent_id)
+        
+        if inactive_agents:
+            logger.info(f"Cleaned up {len(inactive_agents)} inactive agents via compatibility layer")
+    
+    def get_registry_stats(self) -> Dict[str, Any]:
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Returns:
+            Dictionary with registry statistics
+        """
+        from datetime import datetime
+        
+        if not hasattr(self, '_compatibility_agents'):
+            self._compatibility_agents = {}
+        
+        stats = {
+            "total_agents": len(self._compatibility_agents),
+            "total_registrations": getattr(self, '_total_registrations', len(self._compatibility_agents)),
+            "agents_by_type": {},
+            "agents_by_status": {},
+            "total_executions": 0,
+            "total_errors": 0,
+            "created_at": getattr(self, '_created_at', datetime.now()).isoformat() if hasattr(getattr(self, '_created_at', datetime.now()), 'isoformat') else str(getattr(self, '_created_at', datetime.now())),
+            "last_cleanup": datetime.now().isoformat(),
+            "enhanced_registry_stats": {
+                "total_enhanced_agents": len(self.list_keys()),
+                "total_user_sessions": len(getattr(self, '_user_sessions', {})),
+                "using_enhanced_features": True
+            }
+        }
+        
+        # Calculate stats from compatibility agents
+        for info in self._compatibility_agents.values():
+            # By type
+            type_name = info.agent_type.value
+            stats["agents_by_type"][type_name] = stats["agents_by_type"].get(type_name, 0) + 1
+            
+            # By status  
+            status_name = info.status.value
+            stats["agents_by_status"][status_name] = stats["agents_by_status"].get(status_name, 0) + 1
+            
+            # Execution counts
+            stats["total_executions"] += info.execution_count
+            stats["total_errors"] += info.error_count
+        
+        return stats
+    
+    def __len__(self) -> int:
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Returns:
+            Number of registered agents in compatibility layer
+        """
+        if not hasattr(self, '_compatibility_agents'):
+            return 0
+        return len(self._compatibility_agents)
+    
+    def __contains__(self, agent_id: str) -> bool:
+        """
+        Compatibility method for Simple Registry interface.
+        
+        Args:
+            agent_id: Agent ID to check
+            
+        Returns:
+            True if agent ID is registered, False otherwise
+        """
+        if not hasattr(self, '_compatibility_agents'):
+            return False
+        return agent_id in self._compatibility_agents
+    
+    async def list_available_agents(self, agent_type=None):
+        """
+        Additional compatibility method - some tests may use this variant name.
+        
+        Args:
+            agent_type: Optional agent type to filter by
+            
+        Returns:
+            List of available (idle) AgentInfo objects
+        """
+        return self.get_available_agents(agent_type)
+    
+    async def create_user_session(self, user_id: str, session_id: str = None):
+        """
+        Additional compatibility method for tests that expect this interface.
+        
+        Args:
+            user_id: User ID
+            session_id: Session ID (for compatibility, not used)
+            
+        Returns:
+            User session object
+        """
+        return await self.get_user_session(user_id)
+
 
 # ===================== MODULE EXPORTS =====================
 

@@ -631,6 +631,12 @@ markers = [
     
     # Issue #881 GCP Cloud Run marker for staging E2E tests
     "gcp_cloud_run: Tests requiring GCP Cloud Run deployment environment",
+    
+    # Missing supervisor orchestration marker causing collection failures
+    "supervisor_orchestration: Supervisor orchestration and multi-user isolation tests",
+    
+    # Missing agent_handoff_chain marker causing collection failures  
+    "agent_handoff_chain: Agent handoff chain coordination tests",
 ]
 
 # Coverage settings

@@ -31,7 +31,7 @@ import json
 from netra_backend.app.models.user import User
 from netra_backend.app.models.thread import Thread  
 from netra_backend.app.models.agent_execution import AgentExecution
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 

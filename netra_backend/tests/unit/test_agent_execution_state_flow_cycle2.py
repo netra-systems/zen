@@ -19,7 +19,7 @@ from typing import Dict, Any
 # ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from shared.types import UserID, ThreadID, RunID
 

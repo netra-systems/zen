@@ -244,7 +244,6 @@
     "retry_history_count",
     "router_count",
     "rules_count",
-    "run_history_count",
     "sample_count",
     "secret_count",
     "security_critical_count",

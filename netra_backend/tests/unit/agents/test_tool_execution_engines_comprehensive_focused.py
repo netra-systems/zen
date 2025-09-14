@@ -85,7 +85,7 @@ from netra_backend.app.schemas.tool_permission import (
 )
 
 # State and context management
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 # Logging

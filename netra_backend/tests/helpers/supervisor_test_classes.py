@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
 class QualitySupervisor:
     """Mock QualitySupervisor for testing."""
