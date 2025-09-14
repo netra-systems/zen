@@ -1,26 +1,63 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-14 14:28:28
+**Generated:** 2025-09-14 15:19:42
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 0
+- **Total Tests:** 3
 - **Passed:** 0 (0.0%)
-- **Failed:** 0 (0.0%)
+- **Failed:** 3 (100.0%)
 - **Skipped:** 0
-- **Duration:** 0.00 seconds
+- **Duration:** 0.99 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
+### NORMAL Priority Tests
+
+| Test Name | Status | Duration | File |
+|-----------|--------|----------|------|
+| test_golden_path_user_login_ai_response_flow_with_ssot_router | FAIL failed | 0.000s | test_golden_path_message_router_ssot_validation.py |
+| test_multiple_concurrent_users_with_ssot_router | FAIL failed | 0.000s | test_golden_path_message_router_ssot_validation.py |
+| test_ssot_router_error_handling_and_recovery | FAIL failed | 0.000s | test_golden_path_message_router_ssot_validation.py |
+
+## Failed Tests Details
+
+### FAILED: test_golden_path_user_login_ai_response_flow_with_ssot_router
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_message_router_ssot_validation.py
+- **Duration:** 0.000s
+- **Error:** tests\e2e\staging\test_golden_path_message_router_ssot_validation.py:67: in test_golden_path_user_login_ai_response_flow_with_ssot_router
+    self.test_users.append(test_user)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'TestGoldenPathMessageRouterSSOTValidation' object has no attribute 'test_users'...
+
+### FAILED: test_multiple_concurrent_users_with_ssot_router
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_message_router_ssot_validation.py
+- **Duration:** 0.000s
+- **Error:** tests\e2e\staging\test_golden_path_message_router_ssot_validation.py:183: in test_multiple_concurrent_users_with_ssot_router
+    self.test_users.append(user)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'TestGoldenPathMessageRouterSSOTValidation' object has no attribute 'test_users'...
+
+### FAILED: test_ssot_router_error_handling_and_recovery
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_message_router_ssot_validation.py
+- **Duration:** 0.000s
+- **Error:** tests\e2e\staging\test_golden_path_message_router_ssot_validation.py:282: in test_ssot_router_error_handling_and_recovery
+    self.test_users.append(test_user)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'TestGoldenPathMessageRouterSSOTValidation' object has no attribute 'test_users'...
+
 ## Pytest Output Format
 
 ```
+test_golden_path_message_router_ssot_validation.py::test_golden_path_user_login_ai_response_flow_with_ssot_router FAILED
+test_golden_path_message_router_ssot_validation.py::test_multiple_concurrent_users_with_ssot_router FAILED
+test_golden_path_message_router_ssot_validation.py::test_ssot_router_error_handling_and_recovery FAILED
 
 ==================================================
-0 passed, 0 failed in 0.00s
+0 passed, 3 failed in 0.99s
 ```
 
 ## Test Coverage Matrix

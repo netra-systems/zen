@@ -447,9 +447,9 @@ class TestAgentExecutionCoreErrorHandling(SSotAsyncTestCase):
     to maintain system stability under failure conditions.
     """
     
-    async def asyncSetUp(self):
+    async def async_setup_method(self, method=None):
         """Set up error handling test fixtures."""
-        await super().asyncSetUp()
+        await super().async_setup_method(method)
         
         self.mock_registry = MagicMock()
         self.mock_websocket_bridge = AsyncMock()
@@ -574,9 +574,9 @@ class TestAgentExecutionCorePerformance(SSotAsyncTestCase):
     to ensure system can handle production load efficiently.
     """
     
-    async def asyncSetUp(self):
+    async def async_setup_method(self, method=None):
         """Set up performance test fixtures."""
-        await super().asyncSetUp()
+        await super().async_setup_method(method)
         
         self.mock_registry = MagicMock()
         self.mock_websocket_bridge = AsyncMock()
