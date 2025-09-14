@@ -403,7 +403,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         websocket = await asyncio.wait_for(
             websockets.connect(
                 self.__class__.staging_config.urls.websocket_url,
-                extra_headers={
+                additional_headers={
                     "Authorization": f"Bearer {self.access_token}",
                     "X-Environment": "staging",
                     "X-Test-Suite": "error-handling-e2e"
@@ -528,7 +528,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
                 websocket = await asyncio.wait_for(
                     websockets.connect(
                         self.__class__.staging_config.urls.websocket_url,
-                        extra_headers={
+                        additional_headers={
                             "Authorization": f"Bearer {user['access_token']}",
                             "X-Environment": "staging",
                             "X-User-Context": user["user_id"]
@@ -654,7 +654,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         websocket = await asyncio.wait_for(
             websockets.connect(
                 self.__class__.staging_config.urls.websocket_url,
-                extra_headers={
+                additional_headers={
                     "Authorization": f"Bearer {self.access_token}",
                     "X-Environment": "staging",
                     "X-Test-Suite": "large-message-e2e"

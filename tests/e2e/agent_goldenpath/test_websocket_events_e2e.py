@@ -136,6 +136,24 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
         STATUS: Should PASS - Critical events are fundamental to user experience
         """
         events_start_time = time.time()
+
+        # Initialize class attributes if not already done
+        if not hasattr(self.__class__, 'logger'):
+            self.__class__.setUpClass()
+
+        # Initialize instance attributes if not already done
+        if not hasattr(self, 'access_token'):
+            # Generate test-specific user context
+            self.thread_id = f"websocket_events_test_{int(time.time())}"
+            self.run_id = f"run_{self.thread_id}"
+
+            # Create JWT token for this test
+            self.access_token = self.__class__.auth_helper.create_test_jwt_token(
+                user_id=self.__class__.test_user_id,
+                email=self.__class__.test_user_email,
+                exp_minutes=60
+            )
+
         self.__class__.logger.info("🔥 Testing ALL 5 critical WebSocket events delivery")
         
         # Track event delivery metrics
@@ -158,7 +176,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
             websocket = await asyncio.wait_for(
                 websockets.connect(
                     self.__class__.staging_config.urls.websocket_url,
-                    extra_headers={
+                    additional_headers={
                         "Authorization": f"Bearer {self.access_token}",
                         "X-Environment": "staging",
                         "X-Test-Suite": "critical-events-validation"
@@ -413,7 +431,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
             websocket = await asyncio.wait_for(
                 websockets.connect(
                     self.__class__.staging_config.urls.websocket_url,
-                    extra_headers={
+                    additional_headers={
                         "Authorization": f"Bearer {self.access_token}",
                         "X-Environment": "staging", 
                         "X-Test-Suite": "event-timing-performance"
@@ -558,7 +576,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
         websocket = await asyncio.wait_for(
             websockets.connect(
                 self.__class__.staging_config.urls.websocket_url,
-                extra_headers={
+                additional_headers={
                     "Authorization": f"Bearer {self.access_token}",
                     "X-Environment": "staging",
                     "X-Test-Suite": "event-resilience-recovery"
@@ -600,7 +618,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
             websocket = await asyncio.wait_for(
                 websockets.connect(
                     self.__class__.staging_config.urls.websocket_url,
-                    extra_headers={
+                    additional_headers={
                         "Authorization": f"Bearer {self.access_token}",
                         "X-Environment": "staging",
                         "X-Connection": "recovery"
@@ -663,7 +681,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                 ws = await asyncio.wait_for(
                     websockets.connect(
                         self.__class__.staging_config.urls.websocket_url,
-                        extra_headers={
+                        additional_headers={
                             "Authorization": f"Bearer {self.access_token}",
                             "X-Environment": "staging",
                             "X-Stream-ID": str(stream_id)
@@ -772,7 +790,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
         websocket = await asyncio.wait_for(
             websockets.connect(
                 self.__class__.staging_config.urls.websocket_url,
-                extra_headers={
+                additional_headers={
                     "Authorization": f"Bearer {self.access_token}",
                     "X-Environment": "staging",
                     "X-Test-Suite": "event-data-validation"

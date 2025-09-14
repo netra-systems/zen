@@ -108,7 +108,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
         websocket = await asyncio.wait_for(
             websockets.connect(
                 self.__class__.staging_config.urls.websocket_url,
-                extra_headers={
+                additional_headers={
                     "Authorization": f"Bearer {self.access_token}",
                     "X-Environment": "staging",
                     "X-Test-Suite": "agent-quality-e2e"

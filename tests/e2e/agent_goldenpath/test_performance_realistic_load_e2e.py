@@ -156,7 +156,7 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
             websocket = await asyncio.wait_for(
                 websockets.connect(
                     self.__class__.staging_config.urls.websocket_url,
-                    extra_headers={
+                    additional_headers={
                         "Authorization": f"Bearer {access_token}",
                         "X-Environment": "staging",
                         "X-Test-Suite": "performance-load-e2e",
