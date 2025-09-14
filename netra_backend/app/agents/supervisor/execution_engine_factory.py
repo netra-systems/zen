@@ -258,17 +258,29 @@ class ExecutionEngineFactory:
                 # Register engine for lifecycle management
                 self._active_engines[engine_key] = engine
                 
+                # SSOT ENHANCEMENT: Perform validation before registration
+                await self._validate_ssot_compliance(engine, validated_context)
+                await self._validate_user_isolation(engine, validated_context)
+                
                 # Update metrics
                 self._factory_metrics['total_engines_created'] += 1
                 self._factory_metrics['active_engines_count'] = len(self._active_engines)
+                # SSOT metrics
+                self._factory_metrics['ssot_validations_performed'] += 1
+                self._factory_metrics['user_isolation_validations'] += 1
                 
                 # Start cleanup task if not running
                 if not self._cleanup_task:
                     self._cleanup_task = asyncio.create_task(self._cleanup_loop())
                 
                 creation_time = (time.time() - start_time) * 1000
+                
+                # SSOT ENHANCEMENT: Update performance metrics
+                self._update_performance_metrics(creation_time / 1000.0)
+                
                 logger.info(f" PASS:  Created UserExecutionEngine {engine.engine_id} "
                            f"in {creation_time:.1f}ms (user: {validated_context.user_id})")
+                ssot_logger.info(f"SSOT ENGINE CREATED: {engine.engine_id} with validated user isolation and SSOT compliance")
                 
                 return engine
                 
