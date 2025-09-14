@@ -246,14 +246,20 @@ Auth Service startup ABORTED.
     
     # Log Redis configuration status
     try:
-        from auth_service.auth_core.routes.auth_routes import auth_service
-        # Check if redis_client is available (AuthService uses redis_client, not session_manager)
-        if hasattr(auth_service, 'redis_client'):
-            redis_enabled = auth_service.redis_client is not None
-            redis_status = "enabled" if redis_enabled else "disabled"
+        import auth_service.auth_core.routes.auth_routes as auth_routes_module
+        # Check if auth_service global variable exists in the module
+        if hasattr(auth_routes_module, 'auth_service'):
+            auth_service = auth_routes_module.auth_service
+            # Check if redis_client is available (AuthService uses redis_client, not session_manager)
+            if hasattr(auth_service, 'redis_client'):
+                redis_enabled = auth_service.redis_client is not None
+                redis_status = "enabled" if redis_enabled else "disabled"
+            else:
+                # Redis client might not be initialized yet
+                redis_status = "will be configured during route initialization"
         else:
-            # Redis client might not be initialized yet
-            redis_status = "will be configured during route initialization"
+            # auth_service variable not yet initialized in routes module
+            redis_status = "auth service not yet initialized"
         logger.info(f"Redis session management: {redis_status}")
     except Exception as e:
         logger.warning(f"Could not determine Redis status: {e}")
@@ -345,10 +351,13 @@ Auth Service startup ABORTED.
     async def close_redis():
         try:
             # AuthService uses redis_client directly, not session_manager
-            if hasattr(auth_service, 'redis_client') and auth_service.redis_client:
-                if hasattr(auth_service.redis_client, 'close'):
-                    await auth_service.redis_client.close()
-                logger.info("Redis connections closed successfully")
+            import auth_service.auth_core.routes.auth_routes as auth_routes_module
+            if hasattr(auth_routes_module, 'auth_service'):
+                auth_service = auth_routes_module.auth_service
+                if hasattr(auth_service, 'redis_client') and auth_service.redis_client:
+                    if hasattr(auth_service.redis_client, 'close'):
+                        await auth_service.redis_client.close()
+                    logger.info("Redis connections closed successfully")
         except Exception as e:
             logger.warning(f"Error closing Redis connections: {e}")
     
@@ -662,10 +671,13 @@ async def health_auth() -> Dict[str, Any]:
         
         # Check session management (Redis-based or in-memory)
         try:
-            if hasattr(auth_service, 'redis_client') and auth_service.redis_client:
-                health_response["capabilities"]["session_management"] = True
-            elif hasattr(auth_service, 'session_store'):
-                health_response["capabilities"]["session_management"] = True
+            import auth_service.auth_core.routes.auth_routes as auth_routes_module
+            if hasattr(auth_routes_module, 'auth_service'):
+                auth_service = auth_routes_module.auth_service
+                if hasattr(auth_service, 'redis_client') and auth_service.redis_client:
+                    health_response["capabilities"]["session_management"] = True
+                elif hasattr(auth_service, 'session_store'):
+                    health_response["capabilities"]["session_management"] = True
                 
         except Exception as session_error:
             logger.warning(f"Session management check failed: {session_error}")
