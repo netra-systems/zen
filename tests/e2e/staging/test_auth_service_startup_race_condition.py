@@ -197,9 +197,9 @@ class TestAuthServiceStartupRaceConditionE2E(SSotAsyncTestCase):
                          f"Got {total_race_failures} race condition failures out of {len(health_check_results)} checks.")
         
         # This should FAIL initially, confirming staging race condition
-        self.fail(f"Staging auth service startup race condition reproduced: "
-                 f"{total_race_failures} failures where auth service was not ready. "
-                 f"This confirms Issue #926 affects real staging environment.")
+        self.assertTrue(False, f"Staging auth service startup race condition reproduced: "
+                              f"{total_race_failures} failures where auth service was not ready. "
+                              f"This confirms Issue #926 affects real staging environment.")
 
     async def test_staging_oauth_initialization_race_condition(self):
         """
@@ -311,9 +311,9 @@ class TestAuthServiceStartupRaceConditionE2E(SSotAsyncTestCase):
                          f"Got {total_oauth_race_failures} failures out of {len(oauth_results)} operations.")
         
         # This should FAIL initially
-        self.fail(f"Staging OAuth initialization race condition reproduced: "
-                 f"{total_oauth_race_failures} failures where OAuth was not ready. "
-                 f"This confirms OAuth providers are not available during auth service startup.")
+        self.assertTrue(False, f"Staging OAuth initialization race condition reproduced: "
+                              f"{total_oauth_race_failures} failures where OAuth was not ready. "
+                              f"This confirms OAuth providers are not available during auth service startup.")
 
     async def test_staging_database_connectivity_during_startup_race(self):
         """
@@ -430,9 +430,9 @@ class TestAuthServiceStartupRaceConditionE2E(SSotAsyncTestCase):
                          f"Got {db_race_failures} database-related failures out of {len(readiness_results)} checks.")
         
         # This should FAIL initially
-        self.fail(f"Staging database connectivity race condition reproduced: "
-                 f"{db_race_failures} failures where database was not ready during startup. "
-                 f"This confirms database initialization race conditions affect staging.")
+        self.assertTrue(False, f"Staging database connectivity race condition reproduced: "
+                              f"{db_race_failures} failures where database was not ready during startup. "
+                              f"This confirms database initialization race conditions affect staging.")
 
     def tearDown(self):
         """Clean up after E2E staging tests"""
@@ -556,8 +556,8 @@ class TestAuthServiceStartupRaceConditionE2E(SSotAsyncTestCase):
                          f"Got {total_failures} failures out of {total_operations} operations.")
         
         # This should FAIL initially - comprehensive race condition proof
-        self.fail(f"Comprehensive staging startup race condition reproduced: "
-                 f"{total_failures} total failures across all auth service components. "
-                 f"Service unavailable responses: {service_unavailable}. "
-                 f"This provides comprehensive evidence that Issue #926 affects staging environment "
-                 f"with race conditions in health checks, OAuth, database connectivity, and concurrent requests.")
+        self.assertTrue(False, f"Comprehensive staging startup race condition reproduced: "
+                              f"{total_failures} total failures across all auth service components. "
+                              f"Service unavailable responses: {service_unavailable}. "
+                              f"This provides comprehensive evidence that Issue #926 affects staging environment "
+                              f"with race conditions in health checks, OAuth, database connectivity, and concurrent requests.")

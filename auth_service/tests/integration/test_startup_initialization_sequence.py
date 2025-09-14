@@ -324,8 +324,8 @@ class TestStartupInitializationSequence(SSotAsyncTestCase):
                 self.logger.error(f"Failure timing: {failure['timing']}")
         
         # This should FAIL initially
-        self.fail(f"Database initialization race condition reproduced: "
-                 f"{len(db_failures)} failures. Database not ready during auth service startup.")
+        self.assertTrue(False, f"Database initialization race condition reproduced: "
+                              f"{len(db_failures)} failures. Database not ready during auth service startup.")
 
     async def test_redis_connection_initialization_race(self):
         """
@@ -396,8 +396,8 @@ class TestStartupInitializationSequence(SSotAsyncTestCase):
         self.logger.error(f"Missing Redis attribute: {len(missing_attr_failures)}")
         
         # This should FAIL initially
-        self.fail(f"Redis connection race condition reproduced: "
-                 f"{total_redis_race_failures} failures. Redis not available during startup sequence.")
+        self.assertTrue(False, f"Redis connection race condition reproduced: "
+                              f"{total_redis_race_failures} failures. Redis not available during startup sequence.")
 
     def tearDown(self):
         """Clean up after startup sequence tests"""
