@@ -190,11 +190,14 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         self.mock_state_persistence.save_state = AsyncMock(side_effect=mock_save_state)
         self.mock_state_persistence.load_state = AsyncMock(return_value=self.test_agent_state)
         
-        # Configure flow logger
+        # Configure flow logger (sync methods, not async)
         self.mock_flow_logger.start_flow = MagicMock(return_value="test_flow_id_001")
         self.mock_flow_logger.log_step_start = MagicMock()
         self.mock_flow_logger.log_step_complete = MagicMock()
         self.mock_flow_logger.complete_flow = MagicMock()
+        self.mock_flow_logger.step_started = MagicMock()
+        self.mock_flow_logger.step_completed = MagicMock()
+        self.mock_flow_logger.log_parallel_execution = MagicMock()
         
         # Configure WebSocket manager
         self.mock_websocket_manager.notify_pipeline_started = AsyncMock()
@@ -700,7 +703,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         # Act: Execute both pipelines concurrently
         task_1 = pipeline_executor_1.execute_pipeline(
             pipeline=self.test_pipeline_steps,
-            state=state_1,
+            user_context=user_context_1,
             run_id="concurrent_run_001",
             context={"user_id": "concurrent_user_001", "thread_id": "concurrent_thread_001"},
             db_session=self.mock_db_session
@@ -708,7 +711,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         
         task_2 = pipeline_executor_2.execute_pipeline(
             pipeline=self.test_pipeline_steps,
-            state=state_2,
+            user_context=user_context_2,
             run_id="concurrent_run_002", 
             context={"user_id": "concurrent_user_002", "thread_id": "concurrent_thread_002"},
             db_session=self.mock_db_session

@@ -4004,5 +4004,162 @@ def create_agent_websocket_bridge(user_context: 'UserExecutionContext' = None, w
 # REMOVED: Deprecated get_agent_websocket_bridge() function that created security vulnerabilities
 # All code must use create_agent_websocket_bridge(user_context) for proper user isolation
 
+    # BUSINESS VALUE ENHANCEMENT METHODS: Extract meaningful progress from agent reasoning
+    
+    def _extract_business_phase(self, reasoning: str, agent_name: str, step_number: Optional[int] = None) -> str:
+        """Extract current business phase from agent reasoning for user visibility."""
+        reasoning_lower = reasoning.lower()
+        
+        # Agent-specific business phases
+        if "supervisor" in agent_name.lower():
+            if any(word in reasoning_lower for word in ["analyzing", "understand", "requirements"]):
+                return "Understanding Business Requirements"
+            elif any(word in reasoning_lower for word in ["planning", "strategy", "approach"]):
+                return "Developing Strategic Approach" 
+            elif any(word in reasoning_lower for word in ["coordinating", "orchestrating", "delegating"]):
+                return "Coordinating Expert Analysis"
+            else:
+                return "Managing Analysis Process"
+                
+        elif "triage" in agent_name.lower():
+            if any(word in reasoning_lower for word in ["categorizing", "classifying", "determining"]):
+                return "Categorizing Business Challenge"
+            elif any(word in reasoning_lower for word in ["priority", "urgent", "critical"]):
+                return "Assessing Business Priority"
+            elif any(word in reasoning_lower for word in ["routing", "directing", "specialist"]):
+                return "Directing to Domain Expert"
+            else:
+                return "Analyzing Business Context"
+                
+        elif "data" in agent_name.lower():
+            if any(word in reasoning_lower for word in ["collecting", "gathering", "sourcing"]):
+                return "Gathering Business Intelligence"
+            elif any(word in reasoning_lower for word in ["analyzing", "processing", "computing"]):
+                return "Analyzing Business Metrics"
+            elif any(word in reasoning_lower for word in ["insights", "patterns", "trends"]):
+                return "Identifying Business Insights"
+            else:
+                return "Processing Business Data"
+                
+        elif "apex" in agent_name.lower() or "optim" in agent_name.lower():
+            if any(word in reasoning_lower for word in ["optimization", "efficiency", "improvement"]):
+                return "Identifying Optimization Opportunities"
+            elif any(word in reasoning_lower for word in ["cost", "savings", "reduction"]):
+                return "Calculating Cost Optimization"
+            elif any(word in reasoning_lower for word in ["recommendation", "suggest", "implement"]):
+                return "Formulating Strategic Recommendations"
+            else:
+                return "Optimizing Business Operations"
+                
+        # Generic phases based on content
+        if any(word in reasoning_lower for word in ["setting up", "preparing", "initializing"]):
+            return "Preparing Analysis Tools"
+        elif any(word in reasoning_lower for word in ["finalizing", "completing", "wrapping"]):
+            return "Finalizing Business Recommendations"
+        else:
+            return f"Processing {agent_name} Analysis"
+    
+    def _extract_value_indicators(self, reasoning: str) -> List[str]:
+        """Extract business value indicators from reasoning content."""
+        reasoning_lower = reasoning.lower()
+        value_indicators = []
+        
+        # Cost and efficiency indicators
+        if any(word in reasoning_lower for word in ["cost", "savings", "reduce", "efficiency"]):
+            value_indicators.append("Cost Optimization Focus")
+        if any(word in reasoning_lower for word in ["revenue", "profit", "income", "earning"]):
+            value_indicators.append("Revenue Impact Analysis") 
+        if any(word in reasoning_lower for word in ["roi", "return on investment", "payback"]):
+            value_indicators.append("ROI Calculation")
+        if any(word in reasoning_lower for word in ["performance", "speed", "faster", "improvement"]):
+            value_indicators.append("Performance Enhancement")
+        if any(word in reasoning_lower for word in ["risk", "compliance", "security", "audit"]):
+            value_indicators.append("Risk Mitigation")
+        if any(word in reasoning_lower for word in ["scalability", "growth", "expansion"]):
+            value_indicators.append("Scalability Planning")
+        if any(word in reasoning_lower for word in ["automation", "workflow", "process"]):
+            value_indicators.append("Process Automation")
+        
+        return value_indicators[:3]  # Limit to top 3 for clarity
+    
+    def _extract_actionable_content(self, reasoning: str) -> List[str]:
+        """Extract actionable insights from reasoning for business users."""
+        reasoning_lower = reasoning.lower()
+        actionable_insights = []
+        
+        # Look for actionable language patterns
+        if any(phrase in reasoning_lower for phrase in ["recommend", "suggest", "should consider"]):
+            actionable_insights.append("Strategic Recommendations Available")
+        if any(phrase in reasoning_lower for phrase in ["implement", "deploy", "configure", "setup"]):
+            actionable_insights.append("Implementation Guidance Ready")
+        if any(phrase in reasoning_lower for phrase in ["next steps", "action items", "follow up"]):
+            actionable_insights.append("Action Plan Development")
+        if any(phrase in reasoning_lower for phrase in ["timeline", "schedule", "plan", "roadmap"]):
+            actionable_insights.append("Execution Timeline Planning")
+        if any(phrase in reasoning_lower for phrase in ["budget", "investment", "resources", "team"]):
+            actionable_insights.append("Resource Planning Analysis")
+        if any(phrase in reasoning_lower for phrase in ["measure", "track", "monitor", "kpi"]):
+            actionable_insights.append("Success Metrics Identification")
+        
+        return actionable_insights[:2]  # Limit to top 2 for focus
+        
+    def _calculate_technical_depth(self, reasoning: str) -> float:
+        """Calculate technical depth score (0-1) of the reasoning content."""
+        reasoning_lower = reasoning.lower()
+        technical_indicators = 0
+        total_possible = 10
+        
+        # Technical depth indicators
+        technical_terms = [
+            "configuration", "parameter", "algorithm", "architecture", "database",
+            "api", "integration", "deployment", "infrastructure", "framework"
+        ]
+        for term in technical_terms:
+            if term in reasoning_lower:
+                technical_indicators += 1
+        
+        # Specific numbers and quantification
+        import re
+        if re.search(r'\d+\.?\d*%', reasoning):  # Percentages
+            technical_indicators += 1
+        if re.search(r'\$\d+', reasoning):  # Dollar amounts
+            technical_indicators += 1
+        if re.search(r'\d+\s*(days?|weeks?|months?)', reasoning):  # Time estimates
+            technical_indicators += 1
+        
+        return min(technical_indicators / total_possible, 1.0)
+    
+    def _determine_business_impact(self, agent_name: str, reasoning: str) -> str:
+        """Determine expected business impact category."""
+        reasoning_lower = reasoning.lower()
+        agent_lower = agent_name.lower()
+        
+        # High impact scenarios
+        if any(word in reasoning_lower for word in ["critical", "urgent", "significant", "major"]):
+            if any(word in reasoning_lower for word in ["cost", "savings", "revenue"]):
+                return "High Financial Impact"
+            elif any(word in reasoning_lower for word in ["risk", "compliance", "security"]):
+                return "High Risk Mitigation"
+            else:
+                return "High Operational Impact"
+                
+        # Medium impact scenarios  
+        elif any(word in reasoning_lower for word in ["improve", "optimize", "enhance", "upgrade"]):
+            if "data" in agent_lower:
+                return "Medium Analytics Enhancement"
+            elif any(word in agent_lower for word in ["apex", "optim"]):
+                return "Medium Process Optimization"
+            else:
+                return "Medium Operational Improvement"
+                
+        # Standard impact
+        else:
+            if "supervisor" in agent_lower:
+                return "Strategic Coordination"
+            elif "triage" in agent_lower:
+                return "Expert Routing"
+            else:
+                return "Standard Analysis"
+
 # COMPATIBILITY: Set the WebSocketNotifier reference for test compatibility
 AgentWebSocketBridge.WebSocketNotifier = WebSocketNotifier
