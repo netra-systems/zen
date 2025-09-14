@@ -81,13 +81,10 @@ class ExecutionEngineFactory:
             database_session_manager: Database session manager for infrastructure access.
             redis_manager: Redis manager for caching and session management.
         """
-        # DEPRECATION WARNING: This factory is being consolidated into UnifiedExecutionEngineFactory
-        warnings.warn(
-            "SupervisorExecutionEngineFactory is deprecated. "
-            "Use UnifiedExecutionEngineFactory from execution_engine_unified_factory instead.",
-            DeprecationWarning,
-            stacklevel=2
-        )
+        # SSOT CONSOLIDATION COMPLETE: This is now the canonical ExecutionEngineFactory
+        # Previously deprecated in favor of UnifiedExecutionEngineFactory, 
+        # but UnifiedExecutionEngineFactory was a redirect layer that has been removed.
+        # This is now the Single Source of Truth for ExecutionEngine creation.
         
         # COMPATIBILITY FIX: Make websocket_bridge optional for test environments
         if not websocket_bridge:
