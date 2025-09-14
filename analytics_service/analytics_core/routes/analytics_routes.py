@@ -75,7 +75,8 @@ class EventBatch(BaseModel):
     events: List[AnalyticsEvent] = Field(..., min_items=1)
     batch_id: Optional[str] = None
     
-    @validator('events')
+    @field_validator('events')
+    @classmethod
     def validate_batch_size(cls, v):
         max_events = rate_limits["events_per_request"]
         if len(v) > max_events:
@@ -99,7 +100,8 @@ class ReportRequest(BaseModel):
     group_by: Optional[List[str]] = None
     limit: int = Field(default=1000, ge=1, le=10000)
     
-    @validator('end_date')
+    @field_validator('end_date')
+    @classmethod
     def validate_date_range(cls, v, values):
         if 'start_date' in values and v < values['start_date']:
             raise ValueError("end_date must be after start_date")

@@ -73,8 +73,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
             user_id="test_user_123",
             thread_id="test_thread_123",
             run_id=str(self.test_run_id),
-            agent_context={},
-            session_data={}
+            agent_context={}
         )
         
         # Record metrics for business value tracking

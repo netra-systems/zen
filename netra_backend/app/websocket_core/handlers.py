@@ -1365,10 +1365,27 @@ class MessageRouter:
         # Handle JSON-RPC messages
         if is_jsonrpc_message(raw_message):
             return convert_jsonrpc_to_websocket_message(raw_message)
-        
+
         # Handle standard messages
         msg_type = raw_message.get("type", "user_message")
-        normalized_type = normalize_message_type(msg_type)
+
+        # SURGICAL FIX: Preserve agent event strings before normalization
+        # Import get_frontend_message_type for agent event preservation logic
+        from netra_backend.app.websocket_core.types import get_frontend_message_type
+
+        # Check if this is an agent event that should be preserved as string
+        frontend_type = get_frontend_message_type(msg_type)
+
+        # If frontend preservation differs from raw type, it means it's a critical agent event
+        if isinstance(msg_type, str) and frontend_type == msg_type:
+            # This is an agent event string that should be preserved - use AGENT_PROGRESS as enum
+            # but maintain the original string in the payload for frontend compatibility
+            normalized_type = MessageType.AGENT_PROGRESS
+            # Preserve the original agent event type in payload
+            raw_message["original_agent_event_type"] = msg_type
+        else:
+            # Normal message type - apply standard normalization
+            normalized_type = normalize_message_type(msg_type)
         
         # Convert timestamp safely to handle various formats (ISO strings, Unix floats, etc.)
         raw_timestamp = raw_message.get("timestamp")
