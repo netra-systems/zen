@@ -821,7 +821,7 @@ async def test_circuit_breaker_state_transitions_under_load(circuit_breaker_stre
 async def test_circuit_breaker_websocket_notifications():
     """Test circuit breaker state changes trigger WebSocket notifications."""
     try:
-        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     except ImportError:
         pytest.skip("WebSocket components not available")
@@ -875,7 +875,7 @@ async def test_circuit_breaker_websocket_notifications():
 async def test_circuit_breaker_websocket_event_sequence():
     """Test proper sequence of WebSocket events during circuit breaker lifecycle."""
     try:
-        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
@@ -956,7 +956,7 @@ async def test_circuit_breaker_websocket_event_sequence():
 async def test_circuit_breaker_websocket_error_notifications():
     """Test WebSocket error notifications during circuit breaker failures."""
     try:
-        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
@@ -1007,7 +1007,7 @@ async def test_circuit_breaker_websocket_error_notifications():
 async def test_circuit_breaker_websocket_concurrent_notifications():
     """Test WebSocket notifications work correctly with concurrent circuit breaker operations."""
     try:
-        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
