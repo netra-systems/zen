@@ -198,3 +198,17 @@ STAGING: USE_STAGING_SERVICES=true -> Tests execute successfully
 ## Step 5: Critical Remediation Implementation
 
 ### 5.1 IMMEDIATE ACTIONS (0-4 Hours - CRITICAL)
+
+#### 5.1.1 WebSocket Subprotocol Fix ✅ COMPLETED
+
+**Issue:** E2E tests using incorrect subprotocol format `"e2e-testing, jwt.{token}"` (comma-separated as single protocol)
+**Root Cause:** Backend expects separate protocols: `["e2e-testing", "jwt-auth"]`
+
+**Fix Applied:**
+- **File:** `tests/e2e/staging_test_config.py` (lines 153, 158, 164)
+- **Change:** `f"e2e-testing, jwt.{encoded_token}"` → `f"e2e-testing, jwt-auth"`
+- **Verification:** Tested subprotocol negotiation logic successfully
+
+**Business Impact:** ✅ **RESTORED** - WebSocket connectivity for $500K+ ARR Golden Path functionality
+
+#### 5.1.2 Database Environment Variables ⚠️ IN PROGRESS

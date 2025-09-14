@@ -41,13 +41,13 @@ class TestDeepAgentStateImportRegression(SSotBaseTestCase):
             with open(agent_lifecycle_path) as f:
                 source_code = f.read()
         except FileNotFoundError:
-            self.fail(f"agent_lifecycle.py not found at {agent_lifecycle_path}")
+            pytest.fail(f"agent_lifecycle.py not found at {agent_lifecycle_path}")
 
         # Parse the AST to find imports
         try:
             tree = ast.parse(source_code)
         except SyntaxError as e:
-            self.fail(f"Syntax error in agent_lifecycle.py: {e}")
+            pytest.fail(f"Syntax error in agent_lifecycle.py: {e}")
 
         # Check for DeepAgentState import
         deepagent_import_found = False
@@ -160,11 +160,12 @@ class TestDeepAgentStateImportRegression(SSotBaseTestCase):
                 migration_claims.append(f"Line {line_num}: {line.strip()}")
 
         # Check agent_lifecycle.py for actual DeepAgentState usage
+        agent_lifecycle_path = Path(cwd) / "netra_backend/app/agents/agent_lifecycle.py"
         try:
-            with open(self.agent_lifecycle_path) as f:
+            with open(agent_lifecycle_path) as f:
                 lifecycle_source = f.read()
         except FileNotFoundError:
-            self.fail(f"agent_lifecycle.py not found at {self.agent_lifecycle_path}")
+            self.fail(f"agent_lifecycle.py not found at {agent_lifecycle_path}")
 
         # Look for actual DeepAgentState usage
         deepagent_usage = []

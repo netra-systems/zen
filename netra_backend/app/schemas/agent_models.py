@@ -166,7 +166,60 @@ class DeepAgentState(BaseModel):
         if v > 10000:  # Reasonable upper bound
             raise ValueError('Step count exceeds maximum allowed value (10000)')
         return v
-    
+
+    @property
+    def thread_id(self) -> Optional[str]:
+        """SSOT INTERFACE COMPATIBILITY: Property to access chat_thread_id as thread_id for backward compatibility.
+
+        This property ensures the SSOT version of DeepAgentState maintains interface compatibility
+        with the deprecated version, preventing 'object has no attribute thread_id' runtime errors.
+
+        Returns:
+            Optional[str]: The chat_thread_id value accessed via thread_id property
+        """
+        return self.chat_thread_id
+
+    @thread_id.setter
+    def thread_id(self, value: Optional[str]) -> None:
+        """SSOT INTERFACE COMPATIBILITY: Setter to update chat_thread_id via thread_id for backward compatibility.
+
+        This setter ensures the SSOT version of DeepAgentState maintains interface compatibility
+        with the deprecated version, allowing thread_id assignment to update chat_thread_id.
+
+        Args:
+            value: The thread ID value to set
+        """
+        self.chat_thread_id = value
+
+    def __init__(self, **data):
+        """Initialize DeepAgentState with SSOT interface compatibility.
+
+        SSOT INTERFACE COMPATIBILITY: This constructor ensures compatibility with the deprecated
+        version by handling thread_id parameter mapping and maintaining backward compatibility
+        for existing code that passes thread_id instead of chat_thread_id.
+
+        Args:
+            **data: Initialization data, including potential thread_id parameter
+        """
+        # SSOT COMPATIBILITY: Handle thread_id backward compatibility
+        # Map thread_id to chat_thread_id for compatibility with deprecated interface
+        if 'thread_id' in data and 'chat_thread_id' not in data:
+            data['chat_thread_id'] = data.pop('thread_id')
+        elif 'thread_id' in data and 'chat_thread_id' in data:
+            # If both provided, use thread_id as the canonical value
+            data['chat_thread_id'] = data.pop('thread_id')
+
+        # SSOT COMPATIBILITY: Synchronize user_request and user_prompt fields for backward compatibility
+        if 'user_prompt' in data and 'user_request' not in data:
+            data['user_request'] = data['user_prompt']
+        elif 'user_request' in data and 'user_prompt' not in data:
+            data['user_prompt'] = data['user_request']
+        elif 'user_prompt' in data and 'user_request' in data:
+            # If both are provided, prefer user_prompt as it's the expected interface
+            data['user_request'] = data['user_prompt']
+
+        super().__init__(**data)
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert state to dictionary."""
         return self.model_dump(exclude_none=True, mode='json')
