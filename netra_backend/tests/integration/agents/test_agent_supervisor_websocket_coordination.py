@@ -46,7 +46,7 @@ from shared.isolated_environment import get_env
 # Supervisor agent and orchestration imports
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.pipeline_executor import PipelineExecutor
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine_factory import (
