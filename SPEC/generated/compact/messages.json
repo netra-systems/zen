@@ -10106,7 +10106,7 @@
     "Execute complete MCP workflow.",
     "Execute complete ROI calculation flow.",
     "Execute complete agent workflow.",
-    "Execute complete approval flow, return True if handled",
+    "Execute complete approval flow, return (handled, updated_context)",
     "Execute complete audit workflow.",
     "Execute complete demo chat flow.",
     "Execute complete end-to-end validation of infrastructure remediation\n        \n        Returns comprehensive report on Golden Path health and business continuity",
