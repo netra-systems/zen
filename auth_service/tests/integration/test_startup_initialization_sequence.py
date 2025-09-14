@@ -121,8 +121,8 @@ class TestStartupInitializationSequence(SSotAsyncTestCase):
             self.logger.error(f"Startup failure: {failure}")
             
         # This should FAIL initially, confirming the race condition
-        self.fail(f"FastAPI lifespan race condition reproduced: {len(failed_startups)} startup failures. "
-                 f"Auth service not available during lifespan startup sequence.")
+        self.assertTrue(False, f"FastAPI lifespan race condition reproduced: {len(failed_startups)} startup failures. "
+                              f"Auth service not available during lifespan startup sequence.")
 
     async def test_concurrent_startup_and_health_check_race(self):
         """
@@ -218,9 +218,9 @@ class TestStartupInitializationSequence(SSotAsyncTestCase):
         self.logger.error(f"Race condition specific: {len(race_condition_failures)} auth_service unavailable")
         
         # This should FAIL initially
-        self.fail(f"Startup/health check race condition reproduced: "
-                 f"{len(race_condition_failures)} race condition failures. "
-                 f"Health checks fail when auth_service is not yet available.")
+        self.assertTrue(False, f"Startup/health check race condition reproduced: "
+                              f"{len(race_condition_failures)} race condition failures. "
+                              f"Health checks fail when auth_service is not yet available.")
 
     async def test_database_initialization_timing_race(self):
         """
