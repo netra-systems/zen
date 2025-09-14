@@ -576,26 +576,88 @@ async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], 
     return False
 
 
-async def safe_websocket_close(websocket: WebSocket, code: int = 1000, 
+async def safe_websocket_close(websocket: WebSocket, code: int = 1000,
                              reason: str = "Normal closure") -> None:
     """
-    Safely close WebSocket connection.
-    
+    Safely close WebSocket connection with enhanced production state validation.
+
     CRITICAL FIX: Enhanced error handling for connection state issues during close.
+    Addresses Issue #335: WebSocket "send after close" runtime errors with comprehensive
+    state validation and production-specific race condition handling.
     """
-    # Try to close even if connection check fails - websocket might be in transitional state
+    # Enhanced state validation before attempting close
+    connection_already_closed = False
+    close_attempted = False
+
     try:
+        # PRODUCTION FIX: Comprehensive pre-close state validation
+        # Check multiple state indicators to determine if connection is already closed
+        if hasattr(websocket, 'client_state'):
+            client_state = websocket.client_state
+            if client_state == WebSocketState.DISCONNECTED:
+                logger.debug(f"WebSocket already disconnected (client_state: {_safe_websocket_state_for_logging(client_state)}), skipping close")
+                connection_already_closed = True
+            elif client_state == WebSocketState.CONNECTING:
+                logger.debug(f"WebSocket still connecting (client_state: {_safe_websocket_state_for_logging(client_state)}), attempting graceful close")
+
+        # Additional application state check for Cloud Run environments
+        if hasattr(websocket, 'application_state') and not connection_already_closed:
+            app_state = websocket.application_state
+            if app_state == WebSocketState.DISCONNECTED:
+                logger.debug(f"WebSocket already disconnected (application_state: {_safe_websocket_state_for_logging(app_state)}), skipping close")
+                connection_already_closed = True
+
+        # Skip close attempt if we've determined the connection is already closed
+        if connection_already_closed:
+            logger.debug(f"Skipping WebSocket close operation - connection already closed")
+            return
+
+        # PRODUCTION FIX: Try close with enhanced error categorization
+        close_attempted = True
         await websocket.close(code=code, reason=reason)
-        logger.debug(f"WebSocket closed successfully with code {code}")
+        logger.debug(f"WebSocket closed successfully with code {code}, reason: {reason}")
+
     except RuntimeError as e:
-        # CRITICAL FIX: Handle connection state errors during close
+        # CRITICAL FIX: Enhanced RuntimeError handling for production edge cases
         error_message = str(e)
-        if "Need to call 'accept' first" in error_message or "WebSocket is not connected" in error_message:
-            logger.debug(f"WebSocket already disconnected or not accepted during close: {error_message}")
+
+        # Known recoverable state errors that indicate connection already closed
+        recoverable_errors = [
+            "Need to call 'accept' first",
+            "WebSocket is not connected",
+            "Connection is already closed",
+            "Cannot send to a closing connection",
+            "Cannot send to a closed connection"
+        ]
+
+        if any(error_text in error_message for error_text in recoverable_errors):
+            logger.debug(f"WebSocket close skipped - connection already in closed state: {error_message}")
         else:
-            logger.warning(f"Runtime error closing WebSocket: {e}")
+            # Unknown RuntimeError - log as warning for production debugging
+            logger.warning(f"Unexpected RuntimeError during WebSocket close (code: {code}): {error_message}")
+
+    except WebSocketDisconnect as e:
+        # PRODUCTION FIX: Handle WebSocketDisconnect during close attempts
+        # This can happen in Cloud Run when connection drops during close
+        logger.debug(f"WebSocket disconnected during close attempt (code: {code}): {e}")
+
+    except ConnectionError as e:
+        # PRODUCTION FIX: Handle network-level connection errors
+        # Common in Cloud Run environments with timeout/infrastructure issues
+        logger.debug(f"Connection error during WebSocket close (code: {code}): {e}")
+
     except Exception as e:
-        logger.warning(f"Error closing WebSocket: {e}")
+        # PRODUCTION FIX: Enhanced general exception handling with better context
+        error_type = type(e).__name__
+        logger.warning(f"Unexpected {error_type} during WebSocket close (code: {code}, attempted: {close_attempted}): {e}")
+
+        # Additional context for production debugging
+        if hasattr(websocket, 'client_state'):
+            try:
+                current_state = _safe_websocket_state_for_logging(websocket.client_state)
+                logger.debug(f"WebSocket client_state during error: {current_state}")
+            except Exception as state_error:
+                logger.debug(f"Could not read WebSocket state during error: {state_error}")
 
 
 class WebSocketMessageQueue:

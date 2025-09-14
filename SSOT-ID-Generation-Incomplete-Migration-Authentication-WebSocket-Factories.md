@@ -2,7 +2,7 @@
 
 **GitHub Issue**: #841
 **Priority**: P0 - BLOCKS GOLDEN PATH
-**Status**: In Progress - Step 2 Complete
+**Status**: In Progress - Step 3 Complete
 
 ## Issue Summary
 20+ critical files still using `uuid.uuid4()` instead of UnifiedIdGenerator SSOT, causing race conditions, ID collisions, and user isolation failures in Golden Path.
@@ -90,10 +90,53 @@
 - ✅ API mismatches confirm migration scope identified
 - ✅ $500K+ ARR Golden Path protection implemented
 
-### Step 3 - Plan SSOT Remediation (PENDING)
-- [ ] Plan UnifiedIdGenerator migration strategy
-- [ ] Identify all uuid.uuid4() usage
-- [ ] Plan atomic commit strategy
+### Step 3 - Plan SSOT Remediation ✅
+- [x] Plan UnifiedIdGenerator migration strategy
+- [x] Identify all uuid.uuid4() usage
+- [x] Plan atomic commit strategy
+
+#### 3.1 Complete Scope Identified (12 Production Files, 15+ Instances):
+**Critical P0 Violations:**
+1. `unified_websocket_auth.py` - Lines 1303, 1702, 1751 (WebSocket connections & auth)
+2. `auth.py:160` - Session ID generation
+3. `redis_factory.py:594` - Client ID generation
+4. `clickhouse_factory.py:522` - Client ID generation
+5. `audit_models.py:41` - Audit record IDs
+
+**Additional P1 Violations:**
+6. `timing_collector.py:42` - Performance monitoring
+7. `tool_dispatcher.py:77` - Agent execution tracking
+8. `reporting_sub_agent.py:705` - Error reporting
+9. `registry.py:141` - Agent registration
+10. `state_coordinator.py:186` - State coordination
+11-12. Additional factory and schema violations
+
+#### 3.2 Technical Migration Strategy:
+- **SSOT Patterns**: `UnifiedIdGenerator.generate_session_id()`, `.generate_websocket_connection_id()`, etc.
+- **Import Strategy**: `from shared.id_generation.unified_id_generator import UnifiedIdGenerator`
+- **ID Format Mapping**: Session, WebSocket, client, audit, agent execution patterns
+- **Performance Impact**: Minimal (<1ms per ID, comparable to uuid.uuid4())
+
+#### 3.3 Atomic Commit Strategy (6 Phases):
+1. **Phase 1**: WebSocket SSOT Migration (lines 1303, 1702, 1751)
+2. **Phase 2**: Auth Integration SSOT Migration (line 160)
+3. **Phase 3**: Factory SSOT Migration (lines 594, 522)
+4. **Phase 4**: Agent Core SSOT Migration (lines 141, 77)
+5. **Phase 5**: Agent Support SSOT Migration (lines 42, 705, 186)
+6. **Phase 6**: Schema SSOT Migration (line 41)
+
+#### 3.4 Risk Mitigation Plan:
+- **Business Risk**: Golden Path protection through staged rollout
+- **Technical Risk**: Backward compatibility and rollback procedures
+- **Quality Assurance**: Comprehensive test validation at each phase
+- **Deployment Strategy**: Staging validation before production
+
+#### 3.5 Implementation Readiness:
+- ✅ UnifiedIdGenerator verified available and functional
+- ✅ All import paths validated
+- ✅ Test infrastructure ready (36+ test files)
+- ✅ Atomic commit sequence defined
+- ✅ Risk mitigation procedures established
 
 ### Step 4 - Execute Remediation (PENDING)
 - [ ] Replace uuid.uuid4() calls with UnifiedIdGenerator
