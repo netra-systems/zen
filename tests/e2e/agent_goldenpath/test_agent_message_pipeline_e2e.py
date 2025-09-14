@@ -22,8 +22,9 @@ Test Strategy:
 CRITICAL: These tests must fail properly when system issues exist.
 No mocking, bypassing, or 0-second test completions allowed.
 
-GitHub Issue: #870 Agent Integration Test Suite Phase 1
-Target Coverage: 25% → 75% improvement
+GitHub Issue: #1059 Agent Golden Path Messages E2E Test Creation - Phase 1
+ENHANCEMENT: Business value validation, multi-agent orchestration, response quality >0.7 threshold
+Target Coverage: 15% → 35% improvement
 """
 
 import asyncio
@@ -33,9 +34,11 @@ import json
 import logging
 import websockets
 import ssl
+import re
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 import httpx
+from collections import defaultdict
 
 # SSOT imports
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -55,6 +58,9 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
     E2E tests for the complete agent message pipeline in staging GCP.
     
     Tests the core Golden Path: User Message → Agent Processing → AI Response
+    
+    ENHANCED PHASE 1 (Issue #1059): Business value validation, multi-agent
+    orchestration, and response quality scoring with >0.7 threshold.
     """
 
     @classmethod
@@ -78,7 +84,20 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         cls.test_user_id = f"golden_path_user_{int(time.time())}"
         cls.test_user_email = f"golden_path_test_{int(time.time())}@netra-testing.ai"
         
-        cls.logger.info(f"Agent message pipeline e2e tests initialized for staging")
+        # PHASE 1 ENHANCEMENT: Business value validation framework
+        cls.business_value_keywords = {
+            "cost_optimization": ["cost", "savings", "reduce", "optimization", "efficiency", "budget"],
+            "technical_accuracy": ["specific", "implement", "configure", "setup", "deploy"],
+            "actionability": ["step", "recommend", "suggest", "should", "consider", "strategy"],
+            "quantification": ["percent", "%", "dollar", "$", "reduction", "improvement", "roi"]
+        }
+        
+        # Response quality scoring thresholds (Issue #1059)
+        cls.QUALITY_THRESHOLD_HIGH = 0.7  # For enterprise/complex scenarios
+        cls.QUALITY_THRESHOLD_MEDIUM = 0.5  # For standard scenarios
+        cls.MIN_SUBSTANTIVE_LENGTH = 200  # Minimum chars for business value
+        
+        cls.logger.info(f"Agent message pipeline e2e tests initialized for staging with business value framework")
 
     def setup_method(self, method):
         """Setup for each test method."""
@@ -96,6 +115,84 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         )
         
         self.logger.info(f"Test setup complete - thread_id: {self.thread_id}")
+    
+    def _calculate_response_quality_score(self, response_text: str, scenario_context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Calculate comprehensive response quality score for business value validation.
+        
+        PHASE 1 ENHANCEMENT: Implements >0.7 threshold scoring framework.
+        
+        Args:
+            response_text: Agent response to score
+            scenario_context: Context about the business scenario
+        
+        Returns:
+            Dict with quality metrics and overall score
+        """
+        quality_metrics = {
+            "length_score": min(len(response_text) / self.__class__.MIN_SUBSTANTIVE_LENGTH, 1.0),
+            "keyword_relevance": {},
+            "actionability_score": 0.0,
+            "technical_specificity": 0.0,
+            "business_indicators": [],
+            "overall_quality_score": 0.0,
+            "meets_threshold": False
+        }
+        
+        response_lower = response_text.lower()
+        
+        # Keyword relevance scoring
+        for category, keywords in self.__class__.business_value_keywords.items():
+            found_keywords = [kw for kw in keywords if kw in response_lower]
+            relevance_score = min(len(found_keywords) / len(keywords), 1.0)
+            quality_metrics["keyword_relevance"][category] = {
+                "found": found_keywords,
+                "score": relevance_score
+            }
+        
+        # Actionability scoring (concrete recommendations)
+        actionable_patterns = [
+            r'\d+\.\s+[A-Z]',  # Numbered lists
+            r'recommend\w*\s+\w+',  # Recommendations  
+            r'should\s+\w+',  # Should statements
+            r'step\s+\d+',  # Step references
+            r'implement\s+\w+',  # Implementation guidance
+        ]
+        actionability_matches = sum(len(re.findall(pattern, response_text, re.IGNORECASE))
+                                   for pattern in actionable_patterns)
+        quality_metrics["actionability_score"] = min(actionability_matches / 5, 1.0)
+        
+        # Technical specificity scoring
+        technical_indicators = [
+            r'\$\d+', r'\d+%', r'\d+\s*seconds?', r'\d+\s*minutes?',  # Quantifications
+            r'config\w*', r'setup', r'deploy', r'implement',  # Technical terms
+            r'API\s+\w+', r'endpoint', r'database', r'cache'  # System components
+        ]
+        technical_matches = sum(len(re.findall(pattern, response_text, re.IGNORECASE))
+                               for pattern in technical_indicators)
+        quality_metrics["technical_specificity"] = min(technical_matches / 8, 1.0)
+        
+        # Business value indicators
+        expected_indicators = scenario_context.get("expected_business_value", [])
+        for indicator in expected_indicators:
+            if indicator.lower() in response_lower:
+                quality_metrics["business_indicators"].append(indicator)
+        
+        # Calculate overall quality score (weighted components)
+        quality_components = [
+            quality_metrics["length_score"] * 0.2,
+            quality_metrics["keyword_relevance"]["cost_optimization"]["score"] * 0.25,
+            quality_metrics["keyword_relevance"]["actionability"]["score"] * 0.25,
+            quality_metrics["actionability_score"] * 0.15,
+            quality_metrics["technical_specificity"] * 0.15
+        ]
+        quality_metrics["overall_quality_score"] = sum(quality_components)
+        
+        # Determine if meets business value threshold
+        threshold = scenario_context.get("quality_threshold", self.__class__.QUALITY_THRESHOLD_MEDIUM)
+        quality_metrics["meets_threshold"] = quality_metrics["overall_quality_score"] >= threshold
+        
+        return quality_metrics
 
     async def test_complete_user_message_to_agent_response_flow(self):
         """
@@ -267,16 +364,43 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
             response_data = final_response.get("data", {})
             result = response_data.get("result", {})
             
-            # Response should contain substantive AI content
+            # PHASE 1 ENHANCEMENT: Comprehensive business value validation
             if isinstance(result, dict):
                 response_text = result.get("response", str(result))
             else:
                 response_text = str(result)
             
-            assert len(response_text) > 50, f"Agent response too short: {len(response_text)} chars"
-            assert any(keyword in response_text.lower() for keyword in [
-                "cost", "optimization", "gpt-4", "reduce", "quality", "suggest"
-            ]), f"Response doesn't address user's AI cost question: {response_text[:200]}..."
+            # Calculate response quality score
+            quality_evaluation = self._calculate_response_quality_score(
+                response_text,
+                {
+                    "expected_business_value": ["cost optimization", "specific recommendations", "implementation steps"],
+                    "quality_threshold": self.__class__.QUALITY_THRESHOLD_HIGH  # High threshold for cost optimization
+                }
+            )
+            
+            # Enhanced business value assertions
+            assert len(response_text) > self.__class__.MIN_SUBSTANTIVE_LENGTH, (
+                f"Agent response not substantive enough: {len(response_text)} chars "
+                f"(required >{self.__class__.MIN_SUBSTANTIVE_LENGTH} for business value)"
+            )
+            
+            assert quality_evaluation["meets_threshold"], (
+                f"Response fails business value quality threshold. "
+                f"Score: {quality_evaluation['overall_quality_score']:.3f} "
+                f"(required ≥{self.__class__.QUALITY_THRESHOLD_HIGH}). "
+                f"Metrics: {quality_evaluation}"
+            )
+            
+            # Validate specific business requirements
+            assert quality_evaluation["keyword_relevance"]["cost_optimization"]["score"] >= 0.4, (
+                f"Insufficient cost optimization focus in response. "
+                f"Found keywords: {quality_evaluation['keyword_relevance']['cost_optimization']['found']}"
+            )
+            
+            assert quality_evaluation["actionability_score"] >= 0.3, (
+                f"Response lacks actionable recommendations: {quality_evaluation['actionability_score']:.3f}"
+            )
             
             # Step 5: Test message acknowledgment flow
             ack_message = {
