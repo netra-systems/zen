@@ -291,7 +291,7 @@ class RegistryCompat:
         return []
 
 
-class UnifiedWebSocketManager:
+class _UnifiedWebSocketManagerImplementation:
     """Unified WebSocket connection manager - SSOT with enhanced thread safety.
     
      ALERT:  FIVE WHYS ROOT CAUSE PREVENTION: This class implements the same interface
@@ -3517,6 +3517,10 @@ def get_websocket_manager() -> UnifiedWebSocketManager:
     logger.critical(error_message)
     raise RuntimeError(error_message)
 
+
+# ISSUE #824 REMEDIATION: CREATE ALIAS FOR INTERNAL USE ONLY
+# The class is made private to prevent direct imports while allowing internal access
+UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
 
 # ISSUE #824 REMEDIATION: EXPORTS REMOVED FOR SSOT CONSOLIDATION
 #
