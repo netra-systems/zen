@@ -30,10 +30,12 @@ ImportError: cannot import name 'DeepAgentState' from 'netra_backend.app.agents.
 - Unit and integration test coverage for agent functionality is severely compromised
 - Indicates missing or relocated class definition affecting multiple test suites
 
-**Next Actions**:
-- [ ] Search for existing GitHub issues related to DeepAgentState import
-- [ ] Create or update GitHub issue with current failure details
-- [ ] Link to related issues if found
+**GitHub Issue Processing**:
+- ✅ **PROCESSED**: Updated existing issue #871 - "SSOT-AgentState-DuplicateDeepAgentStateDefinitions"
+- ✅ **Status**: OPEN, P0 Critical Priority, actively being worked on
+- ✅ **Integration**: Failing tests are part of ongoing SSOT consolidation Phase 2C (353+ files to migrate)
+- ✅ **Labels**: claude-code-generated-issue, P0, SSOT, actively-being-worked-on, bug
+- ✅ **URL**: https://github.com/netra-systems/netra-apex/issues/871
 
 ---
 
@@ -57,10 +59,12 @@ ImportError: cannot import name 'DeepAgentState' from 'netra_backend.app.agents.
 - User execution context and session isolation may have issues
 - Factory pattern implementations may be problematic
 
-**Next Actions**:
-- [ ] Search for existing GitHub issues related to BaseAgent test failures
-- [ ] Create or update GitHub issue with current failure details
-- [ ] Link to related issues if found
+**GitHub Issue Processing**:
+- ✅ **PROCESSED**: Updated existing issue #891 - "failing-test-regression-p1-base-agent-session-factory-failures"
+- ✅ **Status**: OPEN, P2 Medium Priority (adjusted from P1)
+- ✅ **Integration**: Linked to 9 related issues including execution engine and factory pattern issues
+- ✅ **Labels**: claude-code-generated-issue, P2, test-failure, session-management, factory-pattern
+- ✅ **URL**: https://github.com/netra-systems/netra-apex/issues/891
 
 ---
 
@@ -86,10 +90,12 @@ ImportError: cannot import name 'DeepAgentState' from 'netra_backend.app.agents.
 - WebSocket real-time chat functionality may have issues
 - Performance and E2E conversation flows are failing
 
-**Next Actions**:
-- [ ] Search for existing GitHub issues related to WebSocket agent events
-- [ ] Create or update GitHub issue with current failure details
-- [ ] Link to related issues if found
+**GitHub Issue Processing**:
+- ✅ **PROCESSED**: Created NEW issue #937 - "failing-test-regression-P0-websocket-agent-events-mission-critical"
+- ✅ **Status**: OPEN, P0 Critical Priority
+- ✅ **Integration**: Linked to 5 related WebSocket infrastructure issues
+- ✅ **Labels**: claude-code-generated-issue, P0, critical, golden-path, test-failure, websocket
+- ✅ **URL**: https://github.com/netra-systems/netra-apex/issues/937
 
 ---
 
