@@ -39,9 +39,9 @@ class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
     the issues exist and need to be fixed.
     """
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment for import validation."""
-        super().setUp()
+        super().setup_method(method)
         self.project_root = Path(__file__).parent.parent.parent
         self.tests_e2e_path = self.project_root / "tests" / "e2e"
         self.import_failures = []
@@ -86,18 +86,18 @@ class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
                 from tests.e2e.staging_test_base import StagingTestBase
                 if hasattr(StagingTestBase, 'wait_for_websocket_event'):
                     print("ISSUE IDENTIFIED: wait_for_websocket_event exists in StagingTestBase but not exported from websocket_helpers")
-                    self.fail("wait_for_websocket_event exists but not accessible from expected import path")
+                    raise AssertionError("wait_for_websocket_event exists but not accessible from expected import path")
                 else:
                     print("ISSUE CONFIRMED: wait_for_websocket_event missing from websocket_helpers")
-                    self.fail("wait_for_websocket_event function completely missing from helpers")
+                    raise AssertionError("wait_for_websocket_event function completely missing from helpers")
             except Exception as nested_e:
                 print(f"NESTED ERROR: Cannot check alternative locations: {nested_e}")
-                self.fail(f"wait_for_websocket_event import chain broken: {e}")
+                raise AssertionError(f"wait_for_websocket_event import chain broken: {e}")
         
         except AttributeError as e:
             self.import_failures.append(f"wait_for_websocket_event attribute error: {e}")
             print(f"EXPECTED FAILURE: wait_for_websocket_event not found: {e}")
-            self.fail(f"wait_for_websocket_event function missing from websocket_helpers: {e}")
+            raise AssertionError(f"wait_for_websocket_event function missing from websocket_helpers: {e}")
     
     async def test_e2e_auth_helper_missing_functions_import(self):
         """
@@ -136,7 +136,7 @@ class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
             
             if missing_methods:
                 print(f"EXPECTED FAILURE: E2EAuthHelper missing methods: {missing_methods}")
-                self.fail(f"E2EAuthHelper missing required methods: {missing_methods}")
+                raise AssertionError(f"E2EAuthHelper missing required methods: {missing_methods}")
             
             # Test that critical methods are callable and async where expected
             async_methods = ['authenticate_test_user', 'create_authenticated_user', 'get_staging_token_async']
@@ -149,12 +149,12 @@ class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
         except ImportError as e:
             self.import_failures.append(f"E2EAuthHelper import failed: {e}")
             print(f"CRITICAL FAILURE: E2EAuthHelper import error: {e}")
-            self.fail(f"E2EAuthHelper import chain broken: {e}")
+            raise AssertionError(f"E2EAuthHelper import chain broken: {e}")
         
         except Exception as e:
             self.import_failures.append(f"E2EAuthHelper validation failed: {e}")
             print(f"UNEXPECTED FAILURE: E2EAuthHelper validation error: {e}")
-            self.fail(f"E2EAuthHelper interface validation failed: {e}")
+            raise AssertionError(f"E2EAuthHelper interface validation failed: {e}")
     
     def test_pytest_marker_configuration(self):
         """
@@ -190,7 +190,7 @@ class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
             
         except Exception as e:
             print(f"EXPECTED FAILURE: pytest marker configuration issue: {e}")
-            self.fail(f"pytest marker configuration broken: {e}")
+            raise AssertionError(f"pytest marker configuration broken: {e}")
     
     async def test_reproduce_e2e_staging_import_chain(self):
         """
@@ -331,11 +331,11 @@ class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
             
         except Exception as e:
             print(f"FAILURE: Staging environment detection error: {e}")
-            self.fail(f"Staging environment detection broken: {e}")
+            raise AssertionError(f"Staging environment detection broken: {e}")
     
-    def tearDown(self):
+    def teardown_method(self, method):
         """Clean up after test execution."""
-        super().tearDown()
+        super().teardown_method(method)
         
         # Log summary of findings for Issue #881
         print(f"\n" + "="*60)

@@ -1,5 +1,5 @@
 """
-Configuration Test Fixtures for UnifiedConfigurationManager
+Configuration Test Fixtures for UnifiedConfigManager
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - Development Velocity, Test Infrastructure
@@ -18,6 +18,7 @@ import os
 import shutil
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Generator
+from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from contextlib import contextmanager
 import threading
 import time
@@ -44,7 +45,7 @@ class ConfigurationTestEnvironment:
         self.environment_name = environment_name
         self.temp_dir: Optional[Path] = None
         self.isolated_env: Optional[IsolatedEnvironment] = None
-        self.managers: Dict[str, UnifiedConfigurationManager] = {}
+        self.managers: Dict[str, UnifiedConfigManager] = {}
         self.original_env_vars: Dict[str, Optional[str]] = {}
         
     def __enter__(self):
@@ -116,12 +117,12 @@ class ConfigurationTestEnvironment:
                    user_id: Optional[str] = None,
                    service_name: Optional[str] = None,
                    enable_validation: bool = True,
-                   enable_caching: bool = True) -> UnifiedConfigurationManager:
+                   enable_caching: bool = True) -> UnifiedConfigManager:
         """Get configuration manager for test."""
         key = f"{user_id or 'global'}:{service_name or 'none'}"
         
         if key not in self.managers:
-            self.managers[key] = UnifiedConfigurationManager(
+            self.managers[key] = UnifiedConfigManager(
                 user_id=user_id,
                 environment=self.environment_name,
                 service_name=service_name,
@@ -659,7 +660,7 @@ def create_realistic_config_file(file_path: Path, config_type: str = "basic") ->
     return file_path
 
 
-def assert_configuration_equals(manager: UnifiedConfigurationManager, 
+def assert_configuration_equals(manager: UnifiedConfigManager, 
                               expected_config: Dict[str, Any],
                               exclude_keys: List[str] = None) -> None:
     """Assert that configuration manager contains expected configuration."""
@@ -673,7 +674,7 @@ def assert_configuration_equals(manager: UnifiedConfigurationManager,
         assert actual_value == expected_value, f"Key '{key}': expected {expected_value}, got {actual_value}"
 
 
-def assert_configuration_validation_passes(manager: UnifiedConfigurationManager) -> None:
+def assert_configuration_validation_passes(manager: UnifiedConfigManager) -> None:
     """Assert that configuration validation passes."""
     validation_result = manager.validate_all_configurations()
     
@@ -686,7 +687,7 @@ def assert_configuration_validation_passes(manager: UnifiedConfigurationManager)
         assert len(validation_result.errors) == 0, f"Validation errors: {validation_result.errors}"
 
 
-def simulate_concurrent_config_access(manager: UnifiedConfigurationManager, 
+def simulate_concurrent_config_access(manager: UnifiedConfigManager, 
                                     operations_per_thread: int = 100,
                                     num_threads: int = 5) -> Dict[str, Any]:
     """Simulate concurrent configuration access for testing thread safety."""
@@ -731,7 +732,7 @@ def simulate_concurrent_config_access(manager: UnifiedConfigurationManager,
     return results
 
 
-def measure_configuration_performance(manager: UnifiedConfigurationManager,
+def measure_configuration_performance(manager: UnifiedConfigManager,
                                     config_count: int = 1000) -> Dict[str, float]:
     """Measure configuration manager performance."""
     import random
@@ -781,7 +782,7 @@ class ConfigurationTestManager:
     def __init__(self, environment: str = "test"):
         self.environment = environment
         self.test_environments: Dict[str, ConfigurationTestEnvironment] = {}
-        self.managers: Dict[str, UnifiedConfigurationManager] = {}
+        self.managers: Dict[str, UnifiedConfigManager] = {}
         self.cleanup_callbacks: List[callable] = []
         
     def create_test_environment(self, name: str) -> ConfigurationTestEnvironment:
@@ -796,12 +797,12 @@ class ConfigurationTestManager:
     def get_manager_for_scenario(self, 
                                 scenario: str,
                                 user_id: Optional[str] = None,
-                                service_name: Optional[str] = None) -> UnifiedConfigurationManager:
+                                service_name: Optional[str] = None) -> UnifiedConfigManager:
         """Get configuration manager for specific test scenario."""
         key = f"{scenario}_{user_id or 'global'}_{service_name or 'none'}"
         
         if key not in self.managers:
-            self.managers[key] = UnifiedConfigurationManager(
+            self.managers[key] = UnifiedConfigManager(
                 user_id=user_id,
                 environment=self.environment,
                 service_name=service_name,
@@ -814,7 +815,7 @@ class ConfigurationTestManager:
         
         return self.managers[key]
     
-    def _setup_scenario_configuration(self, scenario: str, manager: UnifiedConfigurationManager):
+    def _setup_scenario_configuration(self, scenario: str, manager: UnifiedConfigManager):
         """Set up configuration for specific test scenario."""
         scenario_configs = {
             "startup_finalize": {
@@ -843,7 +844,7 @@ class ConfigurationTestManager:
         for key, value in config.items():
             manager.set(key, value)
     
-    def setup_multi_user_scenario(self, user_ids: List[str]) -> Dict[str, UnifiedConfigurationManager]:
+    def setup_multi_user_scenario(self, user_ids: List[str]) -> Dict[str, UnifiedConfigManager]:
         """Set up configuration managers for multi-user scenarios."""
         managers = {}
         

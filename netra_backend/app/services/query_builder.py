@@ -10,7 +10,7 @@ from netra_backend.app.agents.base.interface import (
     ExecutionContext,
 )
 from netra_backend.app.schemas.core_enums import ExecutionStatus
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
 # Local result structure since ExecutionResult may not be available
 @dataclass

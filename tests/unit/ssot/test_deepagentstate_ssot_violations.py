@@ -18,12 +18,12 @@ class TestDeepAgentStateSSotViolation:
 
     def test_deepagentstate_import_conflict_violation(self):
         """
-        FAILING TEST: Proves SSOT violation - both import paths exist and create different objects
+        VALIDATION TEST: Confirms SSOT remediation - deprecated path removed, only SSOT path works
 
         Expected: FAIL initially (different objects exist)
-        After Fix: PASS (single SSOT source)
+        After Fix: PASS (single SSOT source, deprecated removed)
         """
-        # Import both versions to prove duplication exists
+        # Test that deprecated path is now removed
         try:
             from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
             deprecated_exists = True
@@ -32,6 +32,7 @@ class TestDeepAgentStateSSotViolation:
             deprecated_exists = False
             deprecated_module = None
 
+        # Test that SSOT path still works
         try:
             from netra_backend.app.schemas.agent_models import DeepAgentState as SsotState
             ssot_exists = True
@@ -40,34 +41,59 @@ class TestDeepAgentStateSSotViolation:
             ssot_exists = False
             ssot_module = None
 
-        # Both should exist currently (proving duplication)
-        assert deprecated_exists, "Deprecated DeepAgentState should exist in agents.state module"
-        assert ssot_exists, "SSOT DeepAgentState should exist in schemas.agent_models module"
-
-        # This assertion will FAIL initially - proving SSOT violation
-        # After remediation, both imports should point to the same object
-        assert DeprecatedState is SsotState, (
-            f"SSOT VIOLATION DETECTED: DeepAgentState has duplicate definitions!\n"
-            f"  - Deprecated: {deprecated_module.__file__ if deprecated_module else 'None'}\n"
-            f"  - SSOT Source: {ssot_module.__file__ if ssot_module else 'None'}\n"
-            f"  - Different objects: {id(DeprecatedState)} != {id(SsotState)}\n"
-            f"REMEDIATION: All imports should use netra_backend.app.schemas.agent_models.DeepAgentState"
+        # After remediation: deprecated should be gone, SSOT should exist
+        assert not deprecated_exists, (
+            f"REMEDIATION INCOMPLETE: Deprecated DeepAgentState still exists in agents.state module!\n"
+            f"  - Deprecated path should be removed: {deprecated_module.__file__ if deprecated_module else 'None'}\n"
+            f"REQUIRED: Remove duplicate DeepAgentState class from netra_backend.app.agents.state"
         )
+
+        assert ssot_exists, (
+            f"SSOT BROKEN: DeepAgentState should exist in schemas.agent_models module!\n"
+            f"  - SSOT Source: {ssot_module.__file__ if ssot_module else 'None'}\n"
+            f"REQUIRED: Ensure netra_backend.app.schemas.agent_models.DeepAgentState exists"
+        )
+
+        # SUCCESS: Only SSOT path exists, duplicate is removed
+        print(f"✅ SSOT REMEDIATION SUCCESSFUL:")
+        print(f"   - Deprecated path removed: netra_backend.app.agents.state.DeepAgentState")
+        print(f"   - SSOT path active: {ssot_module.__file__ if ssot_module else 'None'}")
+        print(f"   - Single source of truth established for DeepAgentState")
 
     def test_deepagentstate_module_path_violation(self):
         """
-        FAILING TEST: Proves deprecated module path still exists
+        FAILING TEST: Proves deprecated module path still exists when it should be removed
 
-        Expected: FAIL initially (deprecated path importable)
-        After Fix: ImportError (deprecated path removed)
+        Expected: FAIL initially (deprecated path still importable)
+        After Fix: PASS (deprecated path removed, only SSOT exists)
         """
-        # This should eventually raise ImportError after remediation
-        with pytest.raises(ImportError, match="cannot import name 'DeepAgentState'"):
-            from netra_backend.app.agents.state import DeepAgentState
+        # Check if deprecated path is still importable (should fail during SSOT violation)
+        deprecated_importable = True
+        try:
+            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+        except ImportError:
+            deprecated_importable = False
 
-        # But SSOT source should always work
-        from netra_backend.app.schemas.agent_models import DeepAgentState
-        assert DeepAgentState is not None
+        # SSOT source should always work
+        try:
+            from netra_backend.app.schemas.agent_models import DeepAgentState as SsotState
+            ssot_importable = True
+        except ImportError:
+            ssot_importable = False
+
+        # During SSOT violation, deprecated should be importable (that's the problem!)
+        if deprecated_importable and ssot_importable:
+            pytest.fail(
+                "SSOT VIOLATION: Both deprecated and SSOT paths are importable! "
+                "Only SSOT path should exist after remediation."
+            )
+        elif not deprecated_importable and ssot_importable:
+            # This is the desired end state after remediation
+            assert True, "SSOT REMEDIATION COMPLETE: Only SSOT path exists"
+        elif deprecated_importable and not ssot_importable:
+            pytest.fail("CRITICAL ERROR: SSOT source missing!")
+        else:
+            pytest.fail("CRITICAL ERROR: Neither version importable!")
 
     def test_deprecated_warning_documentation(self):
         """

@@ -257,9 +257,16 @@ class TestConcurrentSupport:
 
 
 # Convenience functions for direct usage
-def create_test_user_data(email: str = None, tier: str = "free") -> Dict[str, Any]:
-    """Create test user data as dictionary for E2E tests"""
+def create_test_user_data(identifier: str = None, tier: str = "free") -> Dict[str, Any]:
+    """Create test user data as dictionary for E2E tests
+    
+    Args:
+        identifier: Test identifier (will be used to generate email)
+        tier: User tier for testing
+    """
     factory = TestDataFactory()
+    # Generate proper email from identifier
+    email = f"{identifier}@test-netra.com" if identifier else None
     user = factory.create_test_user(email=email, tier=tier)
     return {
         "id": user.id,

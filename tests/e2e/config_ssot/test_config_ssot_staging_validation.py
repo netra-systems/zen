@@ -28,10 +28,10 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import patch
 
 # Import test framework
-from test_framework.ssot.base_test_case import BaseE2ETest
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestConfigSSotStagingValidation(BaseE2ETest):
+class TestConfigSSotStagingValidation(SSotAsyncTestCase):
     """E2E tests for configuration SSOT validation on GCP staging environment."""
 
     def setUp(self):

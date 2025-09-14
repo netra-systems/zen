@@ -1634,14 +1634,14 @@ class StartupOrchestrator:
         self.logger.info("    - Initializing factory patterns for singleton removal...")
         
         try:
-            # 1. Initialize UnifiedExecutionEngineFactory (MIGRATION COMPLETE)
-            from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory
+            # 1. Initialize SSOT ExecutionEngineFactory (SSOT CONSOLIDATION COMPLETE)
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
             
-            # Note: UnifiedExecutionEngineFactory is a class with class methods, not requiring instantiation
-            # Configuration will be done later after WebSocket bridge is available
+            # Note: ExecutionEngineFactory is the SSOT implementation that requires proper instantiation
+            # with WebSocket bridge dependency - will be configured later after WebSocket bridge is available
             # We store the class reference directly for later configuration and use
-            self.app.state.execution_engine_factory = UnifiedExecutionEngineFactory
-            self.logger.info("    [U+2713] UnifiedExecutionEngineFactory assigned (will be configured after WebSocket bridge)")
+            self.app.state.execution_engine_factory_class = ExecutionEngineFactory
+            self.logger.info("    [U+2713] SSOT ExecutionEngineFactory class assigned (will be configured after WebSocket bridge)")
             
             
             # 2. Initialize WebSocketConnectionPool first (required by factory)
@@ -1682,15 +1682,19 @@ class StartupOrchestrator:
             self.app.state.agent_instance_factory = agent_instance_factory
             self.logger.info("    [U+2713] AgentInstanceFactory configured")
             
-            # 5. Configure UnifiedExecutionEngineFactory with WebSocket bridge (MIGRATION COMPLETE)
-            # Configure class with WebSocket bridge for compatibility (configure is a class method)
-            UnifiedExecutionEngineFactory.configure(websocket_bridge=self.app.state.agent_websocket_bridge)
-            self.logger.info("    [U+2713] UnifiedExecutionEngineFactory configured with WebSocket bridge")
+            # 5. Configure SSOT ExecutionEngineFactory (SSOT CONSOLIDATION COMPLETE)
+            # Use configure_execution_engine_factory function for SSOT configuration
+            from netra_backend.app.agents.supervisor.execution_engine_factory import configure_execution_engine_factory
+            ssot_factory = await configure_execution_engine_factory(
+                websocket_bridge=self.app.state.agent_websocket_bridge
+            )
+            self.app.state.execution_engine_factory = ssot_factory
+            self.logger.info("    [U+2713] SSOT ExecutionEngineFactory configured")
             
             # 6. Initialize FactoryAdapter for backward compatibility
             adapter_config = AdapterConfig.from_env()
             factory_adapter = FactoryAdapter(
-                execution_engine_factory=UnifiedExecutionEngineFactory,
+                execution_engine_factory=self.app.state.execution_engine_factory,
                 websocket_bridge_factory=websocket_factory,
                 config=adapter_config
             )

@@ -29,6 +29,7 @@ import json
 
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class MissionCriticalTestHelper:

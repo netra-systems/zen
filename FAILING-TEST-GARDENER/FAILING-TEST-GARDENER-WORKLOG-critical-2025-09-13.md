@@ -91,12 +91,69 @@ SSOT WARNING: Found other WebSocket Manager classes:
 **Category:** failing-test-ssot-medium-websocket-manager-fragmentation
 **Business Impact:** Threatens WebSocket reliability for chat functionality
 
+### Issue 5: Multiple Deprecation Warnings - Technical Debt Accumulation
+**Error Type:** Deprecation warnings and import path violations
+**Error Details:**
+```
+DeprecationWarning: shared.logging.unified_logger_factory is deprecated.
+Use 'from shared.logging.unified_logging_ssot import get_logger' instead.
+
+DeprecationWarning: Importing WebSocketManager from 'netra_backend.app.websocket_core' is deprecated.
+Use canonical path 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager' instead.
+
+PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead.
+
+DeprecationWarning: netra_backend.app.logging_config is deprecated.
+Use 'from shared.logging.unified_logging_ssot import get_logger' instead.
+```
+
+**Impact:**
+- Multiple deprecated import paths and configurations
+- Technical debt accumulation across logging, WebSocket, and Pydantic systems
+- SSOT compliance violations with deprecated import patterns
+- Future version compatibility concerns
+
+**Priority:** P3 (Low) - technical debt improvements, no immediate functional impact
+**Category:** failing-test-deprecation-low-technical-debt-accumulation
+**Business Impact:** Prevents future upgrades and increases maintenance overhead
+
+### Issue 6: Critical Auth JWT Test Timeout - Potential Service Hanging
+**Error Type:** Test execution timeout during JWT authentication test
+**Error Details:**
+```
+Command timed out after 2m 0.0s
+tests/e2e/critical/test_auth_jwt_critical.py::TestCriticalJWTAuthentication::test_jwt_token_generation_works
+```
+
+**Impact:**
+- Critical JWT authentication test cannot complete execution
+- May indicate service hanging or connectivity issues
+- Prevents validation of authentication functionality (critical for user access)
+
+**Priority:** P1 (High) - critical authentication functionality cannot be validated
+**Category:** failing-test-timeout-high-critical-auth-jwt
+**Business Impact:** Cannot validate user authentication flow that enables platform access
+
+## Issues Summary
+- **P0 (Critical):** 1 issue - Syntax error blocking all tests (Issue #869) ✅
+- **P1 (High):** 3 issues - Docker failure, unit test blocking, JWT timeout ✅✅🔄
+- **P2 (Medium):** 1 issue - SSOT WebSocket fragmentation (Issue #885) ✅
+- **P3 (Low):** 1 issue - Deprecation warnings technical debt 🔄
+
+## GitHub Issues Created
+1. ✅ **Issue #869** - failing-test-syntax-error-critical-websocket-fragmentation (P0)
+2. ✅ **Issue #878** - failing-test-infrastructure-high-docker-daemon (P1)
+3. ✅ **Issue #882** - failing-test-blocking-high-unit-test-failures (P1)
+4. ✅ **Issue #885** - failing-test-ssot-medium-websocket-manager-fragmentation (P2)
+
 ## Next Actions
 1. ✅ Create GitHub issue for syntax error (P0 priority) - Issue #869 created
-2. 🔄 Process Docker daemon infrastructure failure (P1)
-3. 🔄 Process unit test failures blocking mission critical tests (P1)
-4. 🔄 Process SSOT WebSocket Manager fragmentation warning (P2)
-5. 🔄 Run non-Docker critical tests to identify additional runtime failures
+2. ✅ Process Docker daemon infrastructure failure (P1) - Issue #878 created
+3. ✅ Process unit test failures blocking mission critical tests (P1) - Issue #882 created
+4. ✅ Process SSOT WebSocket Manager fragmentation warning (P2) - Issue #885 created
+5. 🔄 Process JWT timeout authentication test failure (P1)
+6. 🔄 Process deprecation warnings technical debt accumulation (P3)
+7. 🔄 Finalize worklog and commit changes
 
 ## Test Categories to Process
 - Mission Critical Tests (tests/mission_critical/*)

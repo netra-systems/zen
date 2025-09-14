@@ -74,6 +74,7 @@ class ErrorContext(BaseModel):
     function: Optional[str] = None
     user_id: Optional[str] = None
     request_id: Optional[str] = None
+    run_id: Optional[str] = None
     trace_id: Optional[str] = None
     retry_count: int = 0
     additional_data: Dict[str, Any] = Field(default_factory=dict)

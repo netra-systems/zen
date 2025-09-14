@@ -1,0 +1,104 @@
+================================================================================
+AGENT PERFORMANCE AND CONCURRENCY TEST REPORT
+================================================================================
+Total concurrent test scenarios: 4
+
+
+--- Test Scenario 1: basic_agent_performance ---
+Concurrent users: 1
+Test duration: 0.00s
+Total requests: 1
+Successful requests: 0
+Failed requests: 1
+Timeout requests: 0
+Success rate: 0.0%
+
+Performance Statistics:
+  - No successful responses to analyze
+
+Concurrency Validation:
+  ✓ Concurrent execution achieved: False
+  ✓ User isolation maintained: True
+  ✓ Resource limits respected: False
+  ✓ WebSocket stability maintained: True
+  - Performance degradation ratio: 0.00
+
+Individual User Analysis:
+  - Users with all required events: 0/1
+
+--- Test Scenario 2: supply_research_load ---
+Concurrent users: 3
+Test duration: 0.00s
+Total requests: 3
+Successful requests: 0
+Failed requests: 3
+Timeout requests: 0
+Success rate: 0.0%
+
+Performance Statistics:
+  - No successful responses to analyze
+
+Concurrency Validation:
+  ✓ Concurrent execution achieved: False
+  ✓ User isolation maintained: True
+  ✓ Resource limits respected: False
+  ✓ WebSocket stability maintained: True
+  - Performance degradation ratio: 0.00
+
+Individual User Analysis:
+  - Users with all required events: 0/3
+
+--- Test Scenario 3: domain_expert_concurrency ---
+Concurrent users: 5
+Test duration: 0.00s
+Total requests: 5
+Successful requests: 0
+Failed requests: 5
+Timeout requests: 0
+Success rate: 0.0%
+
+Performance Statistics:
+  - No successful responses to analyze
+
+Concurrency Validation:
+  ✓ Concurrent execution achieved: False
+  ✓ User isolation maintained: True
+  ✓ Resource limits respected: False
+  ✓ WebSocket stability maintained: True
+  - Performance degradation ratio: 0.00
+
+Individual User Analysis:
+  - Users with all required events: 0/5
+
+--- Test Scenario 4: high_concurrency_stress ---
+Concurrent users: 8
+Test duration: 0.00s
+Total requests: 8
+Successful requests: 0
+Failed requests: 8
+Timeout requests: 0
+Success rate: 0.0%
+
+Performance Statistics:
+  - No successful responses to analyze
+
+Concurrency Validation:
+  ✓ Concurrent execution achieved: False
+  ✓ User isolation maintained: True
+  ✓ Resource limits respected: False
+  ✓ WebSocket stability maintained: True
+  - Performance degradation ratio: 0.00
+
+Individual User Analysis:
+  - Users with all required events: 0/8
+
+================================================================================
+SUMMARY STATISTICS
+================================================================================
+Overall success rate: 0.0% (0/17)
+Maximum concurrent users tested: 8
+Successful concurrency tests: 0/4
+
+================================================================================
+
+Generated at: 2025-09-13T18:55:39.761911

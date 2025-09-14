@@ -17,7 +17,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
 @pytest.mark.github_integration
-@pytest.mark.external_api
+@pytest.mark.integration
 class TestGitHubAPIRealConnection(BaseTestCase):
     """Test real GitHub API connections and operations."""
 
@@ -175,7 +175,7 @@ class TestGitHubAPIRealConnection(BaseTestCase):
 
 @pytest.mark.integration
 @pytest.mark.github_integration
-@pytest.mark.duplicate_detection
+@pytest.mark.integration
 class TestGitHubDuplicateDetectionReal(BaseTestCase):
     """Test duplicate issue detection with real repository data."""
 

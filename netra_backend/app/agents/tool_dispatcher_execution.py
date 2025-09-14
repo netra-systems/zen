@@ -2,7 +2,7 @@
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from netra_backend.app.agents.production_tool import ProductionTool
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.tool import (

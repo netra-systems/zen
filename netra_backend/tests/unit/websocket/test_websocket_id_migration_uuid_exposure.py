@@ -25,12 +25,11 @@ import time
 from typing import Dict, Any, Optional
 from unittest.mock import patch, MagicMock
 
-# Import WebSocket core modules that need UUID migration - SSOT after Issue #824
+# Import WebSocket core modules that need UUID migration
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, create_standard_message
 from netra_backend.app.websocket_core.context import WebSocketContext
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-# SSOT replacement for WebSocketManagerFactory
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.utils import generate_connection_id, generate_message_id
 from netra_backend.app.websocket_core.migration_adapter import WebSocketManagerAdapter
 from netra_backend.app.websocket_core.handlers import WebSocketHandler

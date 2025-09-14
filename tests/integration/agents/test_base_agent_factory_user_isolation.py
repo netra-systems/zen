@@ -260,9 +260,9 @@ class IsolatingAgentFactory:
 class TestBaseAgentFactoryUserIsolation(SSotAsyncTestCase):
     """Integration tests for base agent factory user isolation patterns."""
     
-    async def setUp(self):
+    def setup_method(self, method):
         """Set up test fixtures."""
-        await super().setUp()
+        super().setup_method(method)
         self.factory = IsolatingAgentFactory()
         self.test_start_time = time.time()
         
@@ -781,22 +781,22 @@ class TestBaseAgentFactoryUserIsolation(SSotAsyncTestCase):
         cleanup_tasks = [self.factory.cleanup_user_agents(user_id) for user_id in all_user_agents.keys()]
         await asyncio.gather(*cleanup_tasks)
     
-    async def tearDown(self):
+    def teardown_method(self, method):
         """Clean up test fixtures."""
         # Final factory validation
-        final_violations = self.factory.validate_factory_isolation()
-        if final_violations:
-            logger.warning(f"Final isolation violations detected: {final_violations}")
-        
-        # Force cleanup of any remaining agents
-        remaining_user_ids = list(self.factory.user_agent_counts.keys())
-        if remaining_user_ids:
-            cleanup_tasks = [self.factory.cleanup_user_agents(uid) for uid in remaining_user_ids]
-            await asyncio.gather(*cleanup_tasks)
+        if hasattr(self, 'factory'):
+            final_violations = self.factory.validate_factory_isolation()
+            if final_violations:
+                logger.warning(f"Final isolation violations detected: {final_violations}")
+            
+            # Log cleanup requirements
+            remaining_user_ids = list(self.factory.user_agent_counts.keys())
+            if remaining_user_ids:
+                logger.info(f"Cleanup required for users: {remaining_user_ids}")
         
         # Force garbage collection
         gc.collect()
         
         test_duration = time.time() - self.test_start_time
         logger.info(f"Test completed in {test_duration:.3f}s")
-        await super().tearDown()
+        super().teardown_method(method)

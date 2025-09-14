@@ -184,13 +184,18 @@ def get_local_config() -> E2ETestConfig:
 
 def get_staging_config() -> E2ETestConfig:
     """Get configuration for staging GCP environment"""
+    # Use environment-specific staging URLs from .env.staging.e2e
+    staging_base_url = get_env_instance().get("STAGING_BASE_URL", "https://netra-backend-staging-pnovr5vsba-uc.a.run.app")
+    staging_auth_url = get_env_instance().get("STAGING_AUTH_URL", "https://auth-service-701982941522.us-central1.run.app")
+    staging_websocket_url = get_env_instance().get("STAGING_WEBSOCKET_URL", "wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws")
+    
     return E2ETestConfig(
         environment=TestEnvironment.STAGING,
-        # CRITICAL: Use load balancer endpoints, not direct Cloud Run URLs
-        backend_url="https://api.staging.netrasystems.ai",
-        api_url="https://api.staging.netrasystems.ai/api",
-        websocket_url="wss://api.staging.netrasystems.ai/ws",
-        auth_url="https://auth.staging.netrasystems.ai",
+        # Use actual staging Cloud Run URLs for agent connectivity
+        backend_url=staging_base_url,
+        api_url=f"{staging_base_url}/api",
+        websocket_url=staging_websocket_url,
+        auth_url=staging_auth_url,
         frontend_url="https://app.staging.netrasystems.ai",
         
         # Staging test credentials

@@ -58,12 +58,11 @@ class TestIDTypeRunGeneration(SSotBaseTestCase):
         super().setup_method(method)
         
         # Test metrics for SSOT compliance
-        self.test_metrics = SsotTestMetrics(
-            category=CategoryType.UNIT,
-            test_name=method.__name__ if method else "setup",
-            business_value_segment="Platform/Internal",
-            expected_outcome="Validate IDType.RUN ID generation works correctly"
-        )
+        self.test_metrics = SsotTestMetrics()
+        self.test_metrics.record_custom("category", "UNIT")
+        self.test_metrics.record_custom("test_name", method.__name__ if method else "setup")
+        self.test_metrics.record_custom("business_value_segment", "Platform/Internal")
+        self.test_metrics.record_custom("expected_outcome", "Validate IDType.RUN ID generation works correctly")
         
         # Fresh ID manager for each test
         self.id_manager = UnifiedIDManager()
@@ -106,12 +105,12 @@ class TestIDTypeRunGeneration(SSotBaseTestCase):
             assert counter_part.isdigit(), f"Counter part should be numeric, got: {counter_part}"
             
             self.generated_ids.add(run_id)
-            self.test_metrics.record_success(f"Basic run ID generated successfully: {run_id}")
+            self.test_metrics.record_custom("success", f"Basic run ID generated successfully: {run_id}")
             
         except AttributeError as e:
             # Expected failure before fix
             assert "RUN" in str(e), f"Expected 'RUN' in error message, got: {e}"
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN ID generation failed (expected before fix): {e}")
 
     def test_run_id_generation_with_prefix(self):
@@ -141,10 +140,10 @@ class TestIDTypeRunGeneration(SSotBaseTestCase):
                 
                 self.generated_ids.add(run_id)
             
-            self.test_metrics.record_success(f"Run IDs with prefixes generated successfully: {len(self.test_prefixes)} variants")
+            self.test_metrics.record_custom("success", f"Run IDs with prefixes generated successfully: {len(self.test_prefixes)} variants")
             
         except AttributeError as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN prefixed generation failed: {e}")
 
     def test_run_id_generation_with_context(self):
@@ -180,10 +179,10 @@ class TestIDTypeRunGeneration(SSotBaseTestCase):
             assert metadata.context == context_data, f"Context mismatch. Expected: {context_data}, got: {metadata.context}"
             
             self.generated_ids.add(run_id)
-            self.test_metrics.record_success(f"Run ID with context generated and stored successfully")
+            self.test_metrics.record_custom("success", f"Run ID with context generated and stored successfully")
             
         except AttributeError as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN context generation failed: {e}")
 
     def test_run_id_uniqueness_validation(self):
@@ -216,10 +215,10 @@ class TestIDTypeRunGeneration(SSotBaseTestCase):
             assert len(generated_run_ids) == num_ids, f"Expected {num_ids} unique IDs, got {len(generated_run_ids)}"
             
             self.generated_ids.update(generated_run_ids)
-            self.test_metrics.record_success(f"Generated {num_ids} unique run IDs successfully")
+            self.test_metrics.record_custom("success", f"Generated {num_ids} unique run IDs successfully")
             
         except AttributeError as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN uniqueness validation failed: {e}")
 
     def test_run_id_format_compliance(self):
@@ -266,10 +265,10 @@ class TestIDTypeRunGeneration(SSotBaseTestCase):
                 
                 self.generated_ids.add(run_id)
             
-            self.test_metrics.record_success(f"All run ID formats passed SSOT compliance validation")
+            self.test_metrics.record_custom("success", f"All run ID formats passed SSOT compliance validation")
             
         except AttributeError as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN format compliance failed: {e}")
 
     def test_run_id_integration_with_existing_methods(self):
@@ -313,10 +312,10 @@ class TestIDTypeRunGeneration(SSotBaseTestCase):
             assert "run" in stats["counters_by_type"], f"Stats should include RUN counters: {stats}"
             
             self.generated_ids.add(run_id)
-            self.test_metrics.record_success(f"Run ID integration with existing methods validated")
+            self.test_metrics.record_custom("success", f"Run ID integration with existing methods validated")
             
         except AttributeError as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN integration test failed: {e}")
 
     def test_concurrent_run_id_generation(self):
@@ -368,10 +367,10 @@ class TestIDTypeRunGeneration(SSotBaseTestCase):
                 assert "run" in run_id, f"Run ID missing 'run' identifier: {run_id}"
             
             self.generated_ids.update(all_run_ids)
-            self.test_metrics.record_success(f"Concurrent run ID generation successful: {len(all_run_ids)} unique IDs")
+            self.test_metrics.record_custom("success", f"Concurrent run ID generation successful: {len(all_run_ids)} unique IDs")
             
         except AttributeError as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN concurrent generation failed: {e}")
 
     def test_run_id_performance_baseline(self):
@@ -404,10 +403,10 @@ class TestIDTypeRunGeneration(SSotBaseTestCase):
             min_performance = 1000
             assert ids_per_second >= min_performance, f"Performance too slow: {ids_per_second:.2f} IDs/sec, expected >= {min_performance}"
             
-            self.test_metrics.record_success(f"Run ID performance: {ids_per_second:.2f} IDs/sec")
+            self.test_metrics.record_custom("success", f"Run ID performance: {ids_per_second:.2f} IDs/sec")
             
         except AttributeError as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN performance test failed: {e}")
 
     def teardown_method(self, method=None):
@@ -423,6 +422,6 @@ class TestIDTypeRunGeneration(SSotBaseTestCase):
         
         # Record metrics
         if hasattr(self, 'test_metrics'):
-            self.test_metrics.finalize()
+            self.test_metrics.record_custom("test_completed", True)
             
         super().teardown_method(method)

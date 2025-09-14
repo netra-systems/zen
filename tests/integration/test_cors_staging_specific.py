@@ -118,7 +118,7 @@ class TestCORSStagingSpecific:
         """Test staging Cloud Run URL pattern matching."""
         cloud_run_urls = [
             "https://netra-frontend-701982941522.us-central1.run.app",
-            "https://netra-backend-701982941522.us-central1.run.app",
+            "https://netra-backend-staging-pnovr5vsba-uc.a.run.app",
             "https://netra-auth-123456789.europe-west1.run.app"
         ]
         

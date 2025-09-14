@@ -625,6 +625,9 @@ markers = [
 
     # SLA compliance markers for Issue #865
     "sla_critical: Service Level Agreement critical validation tests",
+    
+    # Issue #372 specific marker for staging import error tests
+    "issue_372: Issue #372 E2E staging import error tests",
 ]
 
 # Coverage settings

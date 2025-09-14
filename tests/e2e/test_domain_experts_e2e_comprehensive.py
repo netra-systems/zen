@@ -30,10 +30,15 @@ from typing import Dict, List, Any, Optional, Set
 from dataclasses import dataclass, field
 from enum import Enum
 
-# Add project root to path
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
+# Add project root to path - Fix __file__ usage for test collection
+import os
+import sys
+from pathlib import Path
+
+# Replace problematic __file__ usage
+project_root = Path(__file__).parent.parent.parent if '__file__' in locals() else Path.cwd().parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 import pytest
 from loguru import logger
@@ -756,8 +761,9 @@ class TestRealDomainExperts:
 if __name__ == "__main__":
     # Run with real services - domain expert testing is critical for enterprise features
     import sys
+    current_file = str(Path(__file__)) if '__file__' in globals() else "test_domain_experts_e2e_comprehensive.py"
     args = [
-        __file__,
+        current_file,
         "-v",
         "--real-services",
         "--real-llm", 

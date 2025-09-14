@@ -28,7 +28,6 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any
 
 # Core imports - SSOT after Issue #824 remediation
-# from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManager  # REMOVED: Use WebSocketManager directly
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
