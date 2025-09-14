@@ -658,6 +658,14 @@ markers = [
     "scalability: System scalability and performance under load tests",
     "startup_scenarios: Application startup and initialization scenario tests", 
     "llm_fallback: LLM service fallback and resilience tests",
+    "throughput: System throughput and performance measurement tests",
+    "sla_validation: Service Level Agreement validation tests",
+    "mid_market_scenarios: Mid-market customer scenario validation tests",
+    "multi_segment_validation: Multi-segment business validation tests", 
+    "tool_fallback: Tool execution fallback and resilience tests",
+    "timeout_handling: Timeout handling and recovery tests",
+    "resource_pressure: Resource pressure and constraint tests",
+    "database_recovery: Database recovery and resilience tests",
 ]
 
 # Coverage settings
