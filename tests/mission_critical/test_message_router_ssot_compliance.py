@@ -15,7 +15,6 @@ EXPECTED BEHAVIOR:
 GitHub Issue: #1077 - MessageRouter SSOT violations blocking golden path
 """
 
-import unittest
 import os
 import ast
 import importlib.util
@@ -25,11 +24,12 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestMessageRouterSSOTCompliance(SSotBaseTestCase, unittest.TestCase):
+class TestMessageRouterSSOTCompliance(SSotBaseTestCase):
     """Test that verifies Single Source of Truth for MessageRouter implementations."""
 
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test fixtures."""
+        super().setup_method(method)
         # Initialize SSotBaseTestCase (no super().setUp() needed)
         if hasattr(super(), 'setUp'):
             super().setUp()
@@ -273,4 +273,5 @@ class TestMessageRouterSSOTCompliance(SSotBaseTestCase, unittest.TestCase):
 
 if __name__ == "__main__":
     print("Running MessageRouter SSOT compliance tests...")
-    unittest.main()
+    import pytest
+    pytest.main([__file__, '-v'])

@@ -15,7 +15,6 @@ GitHub Issue: #1077 - MessageRouter SSOT violations blocking golden path
 import sys
 import os
 import asyncio
-import unittest
 from unittest.mock import MagicMock
 
 # Add project root to path
@@ -48,11 +47,12 @@ class TestWebSocketConnection:
         return self.messages_sent.copy()
 
 
-class TestMessageRouterSSOTCompliance(SSotBaseTestCase, unittest.TestCase):
+class TestMessageRouterSSOTCompliance(SSotBaseTestCase):
     """Mission Critical Test: Validates MessageRouter SSOT compliance is resolved."""
 
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test fixtures."""
+        super().setup_method(method)
         if hasattr(super(), 'setUp'):
             super().setUp()
 
@@ -207,9 +207,8 @@ if __name__ == "__main__":
     print("Running MessageRouter SSOT compliance tests...")
     
     # Create test suite
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestMessageRouterSSOTCompliance)
-    runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(suite)
+    import pytest
+    result = pytest.main([__file__, '-v'])
     
     # Print summary
     print("\n" + "="*60)
