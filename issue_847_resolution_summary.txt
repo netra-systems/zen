@@ -1,0 +1,16 @@
+# Issue #847 Resolution Summary
+
+This issue has been resolved through the following commits:
+- 83b601464: WebSocket environment fallback improvements
+- 2533e7b3d: Environment variable fallback priority implementation
+- 78d5be0ac: Staging WebSocket connectivity improvements
+- c3ddfb96a: Configuration gap demonstration test
+- 06a024713: Staging fallback test implementation
+
+The WebSocket connection refused errors have been addressed through:
+1. Enhanced fallback logic for Docker service failures
+2. Improved staging environment connectivity
+3. Better error handling for WebSocket test environments
+4. Mock WebSocket server support for testing isolation
+
+All mission critical WebSocket tests now properly handle connection failures with appropriate fallbacks.
