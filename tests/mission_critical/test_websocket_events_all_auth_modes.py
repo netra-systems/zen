@@ -97,7 +97,7 @@ class TestWebSocketEventsAllAuthModes(SSotBaseTestCase):
     """
     
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """Set up mission critical test environment"""
         super().setUpClass()
         

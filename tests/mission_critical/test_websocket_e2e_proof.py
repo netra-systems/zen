@@ -80,7 +80,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
 # REMOVED_SYNTAX_ERROR: class TestWebSocketE2EProof(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Prove the WebSocket factory pattern flow works end-to-end."""
 
-# REMOVED_SYNTAX_ERROR: def setUp(self):
+# REMOVED_SYNTAX_ERROR: def setup_method(self, method):
     # REMOVED_SYNTAX_ERROR: """Set up test environment with factory components."""
     # REMOVED_SYNTAX_ERROR: self.captured_events = []
     # REMOVED_SYNTAX_ERROR: self.run_id = "formatted_string"

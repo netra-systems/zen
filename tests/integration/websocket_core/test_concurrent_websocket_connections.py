@@ -35,7 +35,7 @@ if project_root not in sys.path:
 
 from shared.logging.unified_logging_ssot import get_logger
 from shared.isolated_environment import get_env
-from test_framework.base_integration_test import BaseIntegrationTest
+from test_framework.ssot.base_integration_test import SSotBaseIntegrationTest as BaseIntegrationTest
 
 # Import test utilities for real service integration
 from test_framework.real_services_test_fixtures import real_services_fixture

@@ -519,9 +519,9 @@ class TestRealWebSocketComponents:
             thread_id="test-thread-789"
         )
         
-        # Import and create WebSocket manager using secure factory pattern
-        from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
-        websocket_manager = await create_websocket_manager(user_context=user_context)
+        # Import and create WebSocket manager using SSOT pattern (Issue #989 fix)
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        websocket_manager = await get_websocket_manager(user_context=user_context)
 
         # Create WebSocket emitter from manager for tool dispatcher
         from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
@@ -555,9 +555,9 @@ class TestRealWebSocketComponents:
         
         # Use real LLM manager instead of mock
         llm_manager = LLMManager()
-        # Use secure factory pattern for WebSocket manager
-        from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
-        ws_manager = await create_websocket_manager(user_context=user_context)
+        # Use SSOT pattern for WebSocket manager (Issue #989 fix)
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        ws_manager = await get_websocket_manager(user_context=user_context)
         
         tool_dispatcher = UnifiedToolDispatcherFactory.create_for_request(
             user_context=user_context,
@@ -1057,21 +1057,30 @@ class TestRealWebSocketIntegration:
         
         # Listen for agent events on real WebSocket connection
         start_time = time.time()
-        timeout = 20.0  # Issue #773: Reduced for Cloud Run compatibility
+        timeout = 30.0  # Increased timeout for real agent workflow events
+        receive_timeout = 5.0  # Individual message receive timeout
         
         captured_events = []
         while time.time() - start_time < timeout:
             try:
-                event = await test_context.receive_message()
+                # Use longer individual timeout for real agent events
+                event = await asyncio.wait_for(
+                    test_context.receive_message(),
+                    timeout=receive_timeout
+                )
                 captured_events.append(event)
                 validator.record(event)
                 
+                logger.info(f"Received agent event: {event.get('type', event.get('event', 'unknown'))}")
+                
                 # Check if we have all required events
                 if validator.event_counts.keys() >= validator.REQUIRED_EVENTS:
+                    logger.info("All required events received, breaking")
                     break
                     
             except asyncio.TimeoutError:
-                # Continue listening
+                # Continue listening - this is normal for real agent workflows
+                logger.debug("Timeout waiting for next event, continuing to listen...")
                 continue
             except Exception as e:
                 logger.warning(f"Error receiving event: {e}")

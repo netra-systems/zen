@@ -40,7 +40,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 class TestWebSocketBridgeSSoTIntegration(SSotAsyncTestCase):
     """Critical P0 tests protecting $500K+ ARR WebSocket functionality during SSOT consolidation"""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up WebSocket bridge test environment with SSOT patterns"""
         super().setUp()
         self.env = IsolatedEnvironment()
@@ -319,7 +319,7 @@ class TestWebSocketBridgeSSoTIntegration(SSotAsyncTestCase):
                                   event_timings[i-1]['delivered_at'],
                                   "Events should be delivered in chronological order")
 
-    def tearDown(self):
+    def teardown_method(self, method):
         """Clean up WebSocket test resources with SSOT patterns"""
         super().tearDown()
 

@@ -31,7 +31,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from shared.logging.unified_logging_ssot import get_logger
-from test_framework.base_test_case import BaseTestCase
+from test_framework.ssot.base_test_case import SSotBaseTestCase as BaseTestCase
 
 logger = get_logger(__name__)
 

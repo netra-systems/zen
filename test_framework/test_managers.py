@@ -1,6 +1,6 @@
 """
 Test Managers Module
 """
-from test_framework.auth_jwt_test_manager import JWTGenerationTestManager
+from test_framework.jwt_test_utils import generate_test_jwt_token
 from shared.isolated_environment import IsolatedEnvironment
-__all__ = ["JWTGenerationTestManager"]
+__all__ = ["generate_test_jwt_token"]

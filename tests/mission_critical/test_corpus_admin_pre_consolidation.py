@@ -11,7 +11,8 @@ import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
-import unittest
+# SSOT Base Test Case Import
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
@@ -19,13 +20,14 @@ project_root = Path(__file__).parent.parent.parent.absolute()
 sys.path.insert(0, str(project_root))
 
 # Standard unittest imports
-import unittest
+# SSOT Base Test Case Import
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
-class TestCorpusAdminPreConsolidation(unittest.IsolatedAsyncioTestCase):
+class TestCorpusAdminPreConsolidation(SSotAsyncTestCase):
     """
     CRITICAL: Pre-consolidation tests to ensure all corpus functionality is preserved.
     Tests multi-user isolation, thread safety, and all corpus operations.
@@ -376,7 +378,7 @@ class TestCorpusAdminPreConsolidation(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(result.operation, CorpusOperation.CREATE)
 
 
-class TestCorpusAdminFactoryPattern(unittest.IsolatedAsyncioTestCase):
+class TestCorpusAdminFactoryPattern(SSotAsyncTestCase):
     """Test that corpus admin will support factory pattern for user isolation"""
     
     async def test_factory_pattern_readiness(self):

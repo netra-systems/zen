@@ -86,7 +86,7 @@ class TestSSOTBackwardCompatibility:
     These tests ensure existing code continues to work during SSOT migration.
     """
     
-    async def setUp(self):
+    async def setup_method(self, method):
         """Set up backward compatibility test environment with REAL services."""
         await super().setUp()
         self.test_id = uuid.uuid4().hex[:8]
@@ -104,7 +104,7 @@ class TestSSOTBackwardCompatibility:
         
         logger.info(f"Starting backward compatibility test with REAL services: {self._testMethodName} (ID: {self.test_id})")
     
-    async def tearDown(self):
+    async def teardown_method(self, method):
         """Clean up backward compatibility test and REAL service connections."""
         # Clean up compatibility test data
         try:
@@ -647,7 +647,7 @@ class TestSSOTBackwardCompatibility:
         """
         # Create test class with legacy patterns
         class LegacyPatternTest(TestCase):
-            def setUp(self):
+            def setup_method(self, method):
                 # Legacy direct os.environ access
                 self.old_env = os.environ.get('TEST_VAR', 'default')
                 
@@ -686,7 +686,7 @@ class TestSSOTBackwardCompatibility:
         """
         # Create legacy test class
         class MigrationCandidateTest(TestCase):
-            def setUp(self):
+            def setup_method(self, method):
                 self.env_var = os.environ.get('TEST_VAR')
                 self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
             
@@ -794,7 +794,7 @@ class TestSSOTBackwardCompatibility:
         """
         # Test class that mixes legacy and SSOT patterns
         class MixedInheritanceTest(BaseTestCase):
-            def setUp(self):
+            def setup_method(self, method):
                 super().setUp()  # SSOT setup
                 self.legacy_data = "legacy_value"  # Legacy pattern
             
@@ -925,7 +925,7 @@ class TestSSOTLegacyMigrationHelpers:
     These tests validate tools that help migrate legacy code to SSOT patterns.
     """
     
-    async def setUp(self):
+    async def setup_method(self, method):
         """Set up migration helper test environment with REAL services."""
         self.test_id = uuid.uuid4().hex[:8]
         
@@ -937,7 +937,7 @@ class TestSSOTLegacyMigrationHelpers:
         
         logger.info(f"Starting migration helper test with REAL services: {self._testMethodName} (ID: {self.test_id})")
     
-    async def tearDown(self):
+    async def teardown_method(self, method):
         """Clean up migration helper test and REAL service connections."""
         try:
             await self.redis_client.flushdb()
@@ -954,7 +954,7 @@ class TestSSOTLegacyMigrationHelpers:
         # Create simple legacy test code
         legacy_code = '''
 class OldTest(SSotAsyncTestCase):
-    def setUp(self):
+    def setup_method(self, method):
         self.env_var = os.environ.get('TEST_VAR')
         self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
     
@@ -995,7 +995,7 @@ class OldTest(SSotAsyncTestCase):
         # Create migrated test code
         migrated_code = '''
 class NewTest(BaseTestCase):
-    def setUp(self):
+    def setup_method(self, method):
         super().setUp()
         self.env_var = self.env.get('TEST_VAR')
         factory = get_mock_factory()
@@ -1100,13 +1100,13 @@ class TestSSOTDeprecationHandling:
     These tests ensure deprecated patterns are handled gracefully with warnings.
     """
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up deprecation handling test environment."""
         super().setUp()
         self.test_id = uuid.uuid4().hex[:8]
         logger.info(f"Starting deprecation handling test: {self._testMethodName} (ID: {self.test_id})")
     
-    def tearDown(self):
+    def teardown_method(self, method):
         """Clean up deprecation handling test."""
         logger.info(f"Completing deprecation handling test: {self._testMethodName} (ID: {self.test_id})")
         super().tearDown()

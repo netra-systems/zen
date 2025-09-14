@@ -59,7 +59,7 @@ class TestSSOTRegressionPrevention:
     These tests catch violations before they can cause system-wide issues.
     """
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up regression prevention test environment with REAL services."""
         self.test_id = uuid.uuid4().hex[:8]
         self.project_root = Path(__file__).parent.parent.parent
@@ -84,7 +84,7 @@ class TestSSOTRegressionPrevention:
         
         logger.info(f"Starting regression prevention test with REAL services: {getattr(self, '_testMethodName', 'unknown')} (ID: {self.test_id})")
     
-    def tearDown(self):
+    def teardown_method(self, method):
         """Clean up regression prevention test and REAL service connections."""
         # Clean up all real service connections - sync version for non-async tests
         for db_session in self.database_sessions.values():
@@ -1410,7 +1410,7 @@ class TestSSOTContinuousCompliance:
     These tests run continuously to ensure SSOT compliance is maintained.
     """
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up continuous compliance test environment with REAL services."""
         self.test_id = uuid.uuid4().hex[:8]
         
@@ -1429,7 +1429,7 @@ class TestSSOTContinuousCompliance:
         
         logger.info(f"Starting continuous compliance test with REAL services (ID: {self.test_id})")
     
-    def tearDown(self):
+    def teardown_method(self, method):
         """Clean up continuous compliance test and REAL service connections."""
         try:
             self.redis_client.flushdb()

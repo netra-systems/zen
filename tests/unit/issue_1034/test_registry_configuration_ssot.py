@@ -29,7 +29,7 @@ from pathlib import Path
 # SSOT TEST INFRASTRUCTURE - Use established testing patterns
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
-from shared.dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestRegistryConfigurationSSoT(SSotBaseTestCase):

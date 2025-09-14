@@ -377,7 +377,7 @@ class TestJwtSecretConsistencyViolation(SSotAsyncTestCase):
         else:
             pytest.fail("VIOLATION NOT REPRODUCED: Cross-service JWT validation is consistent")
 
-    def tearDown(self):
+    def teardown_method(self, method):
         """Clean up test artifacts."""
         logger.info("[U+1F9F9] JWT consistency violation test cleanup complete")
 

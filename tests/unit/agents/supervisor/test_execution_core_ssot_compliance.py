@@ -168,10 +168,14 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
             user_id="user-123"
         )
         
-        # Create mock user context
-        user_context = Mock()
-        user_context.user_id = "user-123"
-        user_context.thread_id = "thread-123"
+        # Create real UserExecutionContext (SSOT compliance fix)
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        user_context = UserExecutionContext(
+            user_id="user-123",
+            thread_id="thread-123",
+            run_id="test-run-123",
+            request_id="req-123"
+        )
         
         # Execute agent successfully
         result = await execution_core.execute_agent(context, user_context)
@@ -254,10 +258,14 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
             user_id="user-123"
         )
         
-        # Create mock user context
-        user_context = Mock()
-        user_context.user_id = "user-123"
-        user_context.thread_id = "thread-123"
+        # Create real UserExecutionContext (SSOT compliance fix)
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        user_context = UserExecutionContext(
+            user_id="user-123",
+            thread_id="thread-123",
+            run_id="test-run-123",
+            request_id="req-123"
+        )
         
         # Execute agent (should fail)
         result = await execution_core.execute_agent(context, user_context)

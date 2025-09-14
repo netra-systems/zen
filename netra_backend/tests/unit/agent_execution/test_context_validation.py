@@ -377,18 +377,30 @@ class TestContextValidation(SSotAsyncTestCase):
         Performance expectation updated with platform-aware thresholds and detailed monitoring
         to catch intermittent performance issues that were causing 180% degradation spikes.
 
+        FIVE WHYS REMEDIATION: Added resource isolation to prevent dual SSOT implementations
+        from causing resource contention during concurrent test execution.
+
         Thresholds account for:
         - Comprehensive SSOT validation (20+ security patterns)
         - Multi-tenant isolation with SHA256 fingerprinting
         - Memory leak prevention and garbage collection tracking
         - Enterprise compliance features
         - Windows platform performance characteristics
+        - Resource contention in concurrent test environments
 
         Performance is well within real-time chat requirements (AI responses take 500-5000ms).
         """
         import time
         import platform
         import statistics
+        
+        # FIVE WHYS REMEDIATION: Use resource isolation to prevent test contention
+        try:
+            from test_framework.resource_isolation import isolated_test_execution
+            resource_isolation_available = True
+        except ImportError:
+            resource_isolation_available = False
+            print("INFO: Resource isolation not available, using standard test execution")
 
         # Platform-aware performance thresholds with concurrent test environment adjustment
         is_windows = platform.system() == 'Windows'
@@ -426,33 +438,50 @@ class TestContextValidation(SSotAsyncTestCase):
         individual_times = []
         creation_times = []
         validation_times = []
+        overall_start = None
 
-        # Time context creation and validation with detailed breakdown
-        overall_start = time.time()
+        # Define the test execution function to avoid code duplication
+        async def run_performance_test(resource_manager=None):
+            nonlocal individual_times, creation_times, validation_times, overall_start
+            
+            # Time context creation and validation with detailed breakdown
+            overall_start = time.time()
 
-        for i in range(100):  # Validate 100 contexts
-            # Time individual context creation
-            creation_start = time.time()
-            context = await create_isolated_execution_context(
-                user_id=f"user_{i}_{uuid.uuid4().hex[:8]}",
-                request_id=f"req_{i}_{uuid.uuid4().hex[:8]}",
-                thread_id=f"thread_{i}_{uuid.uuid4().hex[:8]}",
-                run_id=f"run_{i}_{uuid.uuid4().hex[:8]}"
-            )
-            creation_end = time.time()
-            creation_time_ms = (creation_end - creation_start) * 1000
-            creation_times.append(creation_time_ms)
+            for i in range(100):  # Validate 100 contexts
+                # Time individual context creation
+                creation_start = time.time()
+                context = await create_isolated_execution_context(
+                    user_id=f"user_{i}_{uuid.uuid4().hex[:8]}",
+                    request_id=f"req_{i}_{uuid.uuid4().hex[:8]}",
+                    thread_id=f"thread_{i}_{uuid.uuid4().hex[:8]}",
+                    run_id=f"run_{i}_{uuid.uuid4().hex[:8]}"
+                )
+                creation_end = time.time()
+                creation_time_ms = (creation_end - creation_start) * 1000
+                creation_times.append(creation_time_ms)
 
-            # Time individual validation
-            validation_start = time.time()
-            validate_user_context(context)
-            validation_end = time.time()
-            validation_time_ms = (validation_end - validation_start) * 1000
-            validation_times.append(validation_time_ms)
+                # Register context with resource manager if available
+                if resource_manager:
+                    resource_manager.register_context(context)
 
-            # Total time for this iteration
-            total_iteration_time = creation_time_ms + validation_time_ms
-            individual_times.append(total_iteration_time)
+                # Time individual validation
+                validation_start = time.time()
+                validate_user_context(context)
+                validation_end = time.time()
+                validation_time_ms = (validation_end - validation_start) * 1000
+                validation_times.append(validation_time_ms)
+
+                # Total time for this iteration
+                total_iteration_time = creation_time_ms + validation_time_ms
+                individual_times.append(total_iteration_time)
+
+        # FIVE WHYS REMEDIATION: Wrap test execution in resource isolation if available
+        if resource_isolation_available:
+            with isolated_test_execution("test_context_validation_performance_reasonable") as resource_manager:
+                print(f"INFO: Using resource isolation with limits: {resource_manager.get_resource_summary()}")
+                await run_performance_test(resource_manager)
+        else:
+            await run_performance_test()
 
         overall_end = time.time()
         total_time = overall_end - overall_start

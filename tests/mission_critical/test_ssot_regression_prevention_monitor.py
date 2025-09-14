@@ -462,7 +462,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
         except Exception:
             return False
     
-    def tearDown(self):
+    def teardown_method(self, method):
         """Clean up test artifacts."""
         logger.info("[U+1F9F9] SSOT regression prevention test cleanup complete")
         if self.monitoring_reports:

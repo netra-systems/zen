@@ -88,24 +88,60 @@ class TestWebSocketAuthGoldenPathStaging(StagingTestBase):
         
         # Initialize CLASS attributes with fallback values in case asyncSetUpClass fails
         if not hasattr(self.__class__, 'auth_client') or self.__class__.auth_client is None:
-            # Use E2EAuthHelper as the SSOT for all auth operations to ensure compatibility
-            from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
-            self.__class__.auth_client = E2EAuthHelper(environment="staging")
+            # Use StagingAuthClient for staging environment
+            self.__class__.auth_client = StagingAuthClient()
         
         if not hasattr(self.__class__, 'test_user') or self.__class__.test_user is None:
             # Create a fallback test user with proper token
             user_id = f"fallback_user_{int(time.time())}"
             user_email = f"fallback_test_{int(time.time())}@netra-testing.ai"
-            # Generate proper token using the auth client
-            access_token = self.__class__.auth_client.create_test_jwt_token(
-                user_id=user_id,
-                email=user_email
-            )
+            
+            # Create staging-compatible JWT token
+            import jwt
+            from datetime import datetime, timedelta, timezone
+            
+            payload = {
+                "sub": user_id,
+                "email": user_email,
+                "permissions": ["read", "write"],
+                "iat": datetime.now(timezone.utc),
+                "exp": datetime.now(timezone.utc) + timedelta(minutes=30),
+                "type": "access",
+                "iss": "netra-auth-service",
+                "jti": f"fallback-{int(time.time())}"
+            }
+            
+            # Use staging JWT secret
+            staging_jwt_secret = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
+            access_token = jwt.encode(payload, staging_jwt_secret, algorithm="HS256")
+            
+            # Create encoded token for WebSocket subprotocols
+            encoded_token = base64.urlsafe_b64encode(
+                access_token.encode()
+            ).decode().rstrip('=')
+            
             self.__class__.test_user = {
                 "user_id": user_id,
                 "email": user_email,
-                "access_token": access_token
+                "access_token": access_token,
+                "encoded_token": encoded_token
             }
+        
+        # Make class attributes accessible as instance attributes
+        self.auth_client = self.__class__.auth_client
+        self.test_user = self.__class__.test_user
+        
+        # Initialize staging configuration if not set
+        if not hasattr(self, 'staging_config'):
+            self.staging_config = StagingConfig()
+        if not hasattr(self, 'staging_backend_url'):
+            self.staging_backend_url = self.staging_config.get_backend_websocket_url()
+        if not hasattr(self, 'staging_auth_url'):
+            self.staging_auth_url = self.staging_config.get_auth_service_url()
+        
+        # Initialize logger for instance methods
+        import logging
+        self.logger = logging.getLogger(__name__)
 
     """E2E tests for WebSocket authentication in staging - MISSION CRITICAL"""
     
@@ -203,6 +239,9 @@ class TestWebSocketAuthGoldenPathStaging(StagingTestBase):
         REAL SERVICES: Yes (staging GCP Cloud Run environment)
         STATUS: Should FAIL initially (WebSocket connection timeout), PASS after fix
         """
+        # CRITICAL FIX: Ensure test attributes are initialized 
+        self.setUp()
+        
         # Arrange: Prepare Golden Path test scenario
         golden_path_start_time = time.time()
         golden_path_steps = []
@@ -709,6 +748,8 @@ class TestWebSocketAuthGoldenPathStaging(StagingTestBase):
         Returns:
             WebSocket connection or None if failed
         """
+        connection_start = time.time()  # Initialize at function start for proper scope
+        
         try:
             self.logger.info(
                 f"Attempting staging connection: {connection_description}, "
@@ -719,8 +760,6 @@ class TestWebSocketAuthGoldenPathStaging(StagingTestBase):
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False  # For staging testing
             ssl_context.verify_mode = ssl.CERT_NONE  # For staging testing
-            
-            connection_start = time.time()
             
             connection = await asyncio.wait_for(
                 websockets.connect(

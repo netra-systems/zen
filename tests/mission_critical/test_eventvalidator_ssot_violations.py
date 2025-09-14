@@ -40,7 +40,7 @@ class TestEventValidatorSSOTViolations(SSotBaseTestCase):
     This test is DESIGNED TO FAIL initially to prove violations exist.
     """
     
-    def setUp(self):
+    def setup_method(self, method):
         super().setUp()
         self.sample_valid_event = {
             "type": "agent_started",
