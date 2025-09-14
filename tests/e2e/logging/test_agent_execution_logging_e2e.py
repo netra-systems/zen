@@ -28,7 +28,7 @@ import websockets
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.conftest_real_services import real_services
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
-from shared.logging.unified_logger_factory import get_logger
+from shared.logging.unified_logging_ssot import get_logger
 
 
 class TestAgentExecutionLoggingE2E(SSotAsyncTestCase):

@@ -26,8 +26,5 @@ from test_framework.fixtures.github_integration_fixtures import (
 # Import mission critical test helpers
 from tests.mission_critical.helpers.test_helpers import MissionCriticalTestHelper
 
-# GitHub-specific pytest configuration
-pytest_plugins = [
-    "test_framework.fixtures.github_integration_fixtures",
-    "tests.mission_critical.helpers"
-]
+# Note: pytest_plugins configuration moved to root conftest.py
+# as per pytest best practices for plugin registration

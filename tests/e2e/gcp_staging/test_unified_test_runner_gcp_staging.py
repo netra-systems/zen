@@ -21,10 +21,11 @@ import tempfile
 import os
 from pathlib import Path
 
-from tests.unified_test_runner import (
-    UnifiedTestRunner, TestRunnerConfig, TestCategory, ExecutionMode, 
-    TestResult, TestSuiteResult
-)
+from tests.unified_test_runner import UnifiedTestRunner
+from test_framework.config.category_config import TestRunnerConfig
+from test_framework.unified import ExecutionCategory, TestResult
+from test_framework.service_dependencies import ExecutionMode
+# Note: TestSuiteResult not found - using TestResult instead
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
@@ -91,10 +92,10 @@ class TestUnifiedTestRunnerGCPStaging(SSotAsyncTestCase):
         cloud_build_test_suite = {
             "suite_name": "production_validation_suite",
             "categories": [
-                TestCategory.UNIT,
-                TestCategory.INTEGRATION,
-                TestCategory.E2E,
-                TestCategory.PERFORMANCE
+                ExecutionCategory.UNIT,
+                ExecutionCategory.INTEGRATION,
+                ExecutionCategory.E2E,
+                ExecutionCategory.PERFORMANCE
             ],
             "test_files": [
                 "tests/unit/test_core_business_logic.py",

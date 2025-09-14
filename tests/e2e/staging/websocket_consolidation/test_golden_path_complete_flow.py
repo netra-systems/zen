@@ -32,7 +32,7 @@ import time
 import jwt
 from typing import Dict, List, Any, Optional
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 try:
     # Staging environment imports

@@ -256,7 +256,7 @@ class DeploymentLoggingFixer:
         
         try:
             # Try importing shared logging
-            from shared.logging.unified_logger_factory import get_logger
+            from shared.logging.unified_logging_ssot import get_logger
             print("    [U+2713] Shared logging imports successfully")
             return True
         except ImportError as e:
