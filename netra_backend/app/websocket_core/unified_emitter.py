@@ -88,23 +88,23 @@ class UnifiedWebSocketEmitter:
         'auth_failed'
     ]
     
-    # Retry configuration for critical events
+    # Retry configuration for critical events - OPTIMIZED for <50ms delivery
     MAX_RETRIES = 3
     MAX_CRITICAL_RETRIES = 5  # Additional retries for authentication events
-    RETRY_BASE_DELAY = 0.1  # 100ms
-    RETRY_MAX_DELAY = 2.0   # 2 seconds
-    
+    RETRY_BASE_DELAY = 0.005  # 5ms (reduced from 100ms for better UX)
+    RETRY_MAX_DELAY = 0.025   # 25ms (reduced from 2s for <50ms target)
+
     # PERFORMANCE OPTIMIZATION: Fast mode for high-throughput scenarios
     FAST_MODE_MAX_RETRIES = 1  # Minimal retries for performance
-    FAST_MODE_BASE_DELAY = 0.001  # 1ms instead of 100ms
-    FAST_MODE_MAX_DELAY = 0.01   # 10ms instead of 2s
+    FAST_MODE_BASE_DELAY = 0.001  # 1ms for immediate retry
+    FAST_MODE_MAX_DELAY = 0.005   # 5ms maximum delay
     
     def __init__(
         self,
         manager: 'UnifiedWebSocketManager' = None,
         user_id: str = None,
         context: Optional['UserExecutionContext'] = None,
-        performance_mode: bool = False,
+        performance_mode: bool = True,  # Enable by default for <50ms delivery
         # PHASE 1 BACKWARD COMPATIBILITY: Support legacy constructor parameters
         websocket_manager: 'UnifiedWebSocketManager' = None
     ):
@@ -146,7 +146,7 @@ class UnifiedWebSocketEmitter:
         self._event_buffer: List[Dict[str, Any]] = []
         self._buffer_lock = asyncio.Lock()
         self._batch_size = 5 if performance_mode else 10  # Smaller batches for performance mode
-        self._batch_timeout = 0.05 if performance_mode else 0.1  # 50ms vs 100ms
+        self._batch_timeout = 0.02 if performance_mode else 0.05  # 20ms vs 50ms for better UX
         self._batch_timer: Optional[asyncio.Task] = None
         self._enable_batching = not performance_mode  # Disable batching in performance mode for lower latency
         
