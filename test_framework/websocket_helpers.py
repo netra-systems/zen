@@ -171,6 +171,7 @@ class WebSocketTestClient:
         self.user_id = user_id
         self.websocket = None
         self.events_received = []
+        self._connected = False
         
     async def __aenter__(self):
         """Enter async context manager."""

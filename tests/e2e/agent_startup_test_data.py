@@ -26,7 +26,7 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, Generator, List, Optional, Tuple
 
-from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
+from netra_backend.app.schemas.agent_models import AgentMetadata, DeepAgentState
 from netra_backend.app.schemas.shared_types import CustomerTier
 from tests.e2e.config import TestUser, get_test_user
 
