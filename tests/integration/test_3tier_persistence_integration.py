@@ -35,7 +35,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.redis_manager import redis_manager
