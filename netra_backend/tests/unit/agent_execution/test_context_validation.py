@@ -17,6 +17,7 @@ This module tests the UserExecutionContext validation logic to ensure:
 """
 
 import pytest
+import unittest
 import uuid
 import asyncio
 from datetime import datetime, timezone
@@ -41,12 +42,12 @@ from shared.types.core_types import UserID, ThreadID, RunID
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestContextValidation(SSotAsyncTestCase):
+class TestContextValidation(SSotAsyncTestCase, unittest.TestCase):
     """Unit tests for user execution context validation and security."""
     
-    def setup_method(self):
-        """Set up test fixtures."""
-        super().setup_method()
+    def setUp(self):
+        """Set up test fixtures using unittest pattern for compatibility."""
+        super().setUp()
         self.context_manager = AgentExecutionContextManager()
         self.test_user_id = f"user_{uuid.uuid4().hex[:8]}"
         self.test_thread_id = f"thread_{uuid.uuid4().hex[:8]}"
