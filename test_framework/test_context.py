@@ -98,10 +98,10 @@ class WebSocketEventCapture:
         self.start_time = None
 
 
-class TestContext:
+class WebSocketTestContext:
     """
-    Main TestContext class for WebSocket testing and user context simulation.
-    
+    Main WebSocketTestContext class for WebSocket testing and user context simulation.
+
     Provides comprehensive utilities for testing WebSocket agent interactions,
     user context isolation, and event validation.
     """
