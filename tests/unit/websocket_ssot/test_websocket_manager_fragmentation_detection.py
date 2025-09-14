@@ -290,7 +290,7 @@ class TestWebSocketManagerFragmentationDetection(SSotBaseTestCase):
                 len(unique_ids), 1,
                 f"IMPORT INCONSISTENCY: WebSocket imports resolve to {len(unique_ids)} different classes. "
                 f"All imports must resolve to the same SSOT implementation. "
-                f"Classes found: {[f'{info[\"module\"]}.{info[\"name\"]}' for info in valid_classes]}"
+                "Classes found: " + str([f"{info['module']}.{info['name']}" for info in valid_classes])
             )
 
 
@@ -353,7 +353,7 @@ class TestWebSocketManagerUserIsolationFragmentation(SSotBaseTestCase):
 
         except Exception as e:
             self.logger.error(f"Failed to create isolated WebSocket managers: {e}")
-            self.fail(f"WebSocket Manager fragmentation prevents proper user isolation: {e}")
+            pytest.fail(f"WebSocket Manager fragmentation prevents proper user isolation: {e}")
 
     def test_websocket_manager_factory_consistency(self):
         """
