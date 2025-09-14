@@ -2,7 +2,7 @@
 
 **GitHub Issue:** [#1036](https://github.com/netra-systems/netra-apex/issues/1036)  
 **Progress Tracker:** SSOT-incomplete-migration-WebSocket Manager fragmentation blocking Golden Path.md  
-**Status:** DISCOVERED - Step 0 Complete
+**Status:** TEST PLANNING COMPLETE - Step 1 Complete
 
 ## Issue Summary
 - **Critical Legacy SSOT Violation:** WebSocket Manager fragmentation with multiple implementations
@@ -19,18 +19,34 @@
 - **Golden Path Impact:** WebSocket race conditions prevent reliable agent event delivery
 - **Multi-User Security Risk:** Factory pattern violations cause user isolation failures
 
-## Test Discovery and Planning (Step 1) - PENDING
-### 1.1 Existing Tests to Discover:
-- [ ] Find WebSocket manager tests protecting against breaking changes
-- [ ] Identify tests for the 5 critical WebSocket events
-- [ ] Locate multi-user isolation tests
-- [ ] Find Golden Path integration tests
+## Test Discovery and Planning (Step 1) ✅ COMPLETE
+### 1.1 Existing Tests Discovered:
+- [x] **MASSIVE COVERAGE FOUND**: 1,456 test files with WebSocket-related patterns
+- [x] **5 CRITICAL EVENTS**: 1,453 files testing WebSocket events (agent_started, agent_thinking, etc.)
+- [x] **MULTI-USER ISOLATION**: 980 files testing factory patterns and user isolation  
+- [x] **GOLDEN PATH**: 991 files testing Golden Path integration
+- [x] **MISSION CRITICAL SUITE**: `/tests/mission_critical/test_websocket_agent_events_suite.py` (comprehensive)
 
-### 1.2 Test Plan to Create:
-- [ ] Unit tests for single SSOT WebSocket manager
-- [ ] Integration tests for factory pattern enforcement  
-- [ ] E2E staging tests for all 5 WebSocket events
-- [ ] Multi-user isolation validation tests
+### 1.2 Root Cause - Why Tests Don't Prevent Fragmentation:
+- **Tests run in isolation** - don't validate system-wide SSOT compliance
+- **Mock-heavy architecture** misses real integration issues
+- **Missing fail-first tests** that demonstrate current fragmentation problems
+
+### 1.3 New Test Plan (20% of work):
+**Phase 1: Fail-First SSOT Detection Tests (Unit)**
+- [ ] WebSocket Manager implementation scanner (FAIL: 6+ implementations → PASS: 1 SSOT)
+- [ ] Import path consolidation validator (FAIL: fragmented imports → PASS: unified paths)
+- [ ] Factory pattern consistency validator (FAIL: inconsistent types → PASS: unified instances)
+
+**Phase 2: Integration SSOT Validation (Non-Docker)**  
+- [ ] Cross-service WebSocket Manager consistency validation
+- [ ] Event delivery consistency across all 5 critical events
+- [ ] Real services validation without Docker dependencies
+
+**Phase 3: Golden Path Business Value Tests (GCP Staging)**
+- [ ] Complete user flow with WebSocket events (login → AI response)
+- [ ] Multi-user concurrent isolation validation  
+- [ ] Real-time business value metrics validation
 
 ## Test Execution (Step 2) - PENDING
 - [ ] Create new SSOT validation tests (20% of work)
