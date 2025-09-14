@@ -939,7 +939,6 @@ class TestRealWebSocketComponents:
         # Tool dispatcher should use UnifiedToolExecutionEngine
 
         assert isinstance(dispatcher.executor, UnifiedToolExecutionEngine), \
-
             f"Executor is not UnifiedToolExecutionEngine, got {type(dispatcher.executor)}"
 
     
@@ -1003,7 +1002,6 @@ class TestRealWebSocketComponents:
         # Verify tool dispatcher was enhanced
 
         assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
-
             "AgentRegistry did not enhance tool dispatcher"
 
 
@@ -1157,7 +1155,6 @@ class TestIndividualWebSocketEvents:
             # Validate event structure
 
             assert validator.validate_event_content_structure(received_event, "agent_started"), \
-
                 "agent_started event structure validation failed"
 
             
@@ -1751,7 +1748,6 @@ class TestEventSequenceAndTiming:
             processing_time = event.get("processing_time", 0) * 1000  # Convert to ms
 
             assert processing_time < validator.MAX_EVENT_LATENCY, \
-
                 f"Event processing time {processing_time:.1f}ms exceeds {validator.MAX_EVENT_LATENCY}ms limit"
 
         
