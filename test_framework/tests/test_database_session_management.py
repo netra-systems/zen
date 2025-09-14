@@ -10,7 +10,6 @@ from test_framework.fixtures import isolated_environment
 
 pytestmark = [
     pytest.mark.integration,
-    pytest.mark.test_infrastructure,
     pytest.mark.database
 ]
 

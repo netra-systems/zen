@@ -27,6 +27,7 @@ from test_framework.fixtures.github_integration_fixtures import (
 from test_framework.ssot.base_integration_test import BaseIntegrationTest
 
 # GitHub-specific pytest configuration
-pytest_plugins = [
-    "test_framework.fixtures.github_integration_fixtures"
-]
+# NOTE: pytest_plugins moved to top-level conftest for pytest compliance
+# pytest_plugins = [
+#     "test_framework.fixtures.github_integration_fixtures"
+# ]
