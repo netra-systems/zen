@@ -356,7 +356,7 @@ class TestHealthCheckLogic(SSotBaseTestCase):
         self.assertEqual(determine_health_status(none_healthy), 'unhealthy')
 
 
-class TestEnvironmentConfiguration(unittest.TestCase):
+class TestEnvironmentConfiguration(SSotBaseTestCase):
     """
     Test environment configuration handling without external dependencies
     """

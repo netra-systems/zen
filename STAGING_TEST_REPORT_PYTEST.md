@@ -1,46 +1,63 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-14 06:40:20
+**Generated:** 2025-09-14 06:40:52
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 4
-- **Passed:** 4 (100.0%)
-- **Failed:** 0 (0.0%)
+- **Total Tests:** 5
+- **Passed:** 4 (80.0%)
+- **Failed:** 1 (20.0%)
 - **Skipped:** 0
-- **Duration:** 4.24 seconds
-- **Pass Rate:** 100.0%
+- **Duration:** 14.05 seconds
+- **Pass Rate:** 80.0%
 
 ## Test Results by Priority
 
-### CRITICAL Priority Tests
+### NORMAL Priority Tests
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_001_http_connectivity | PASS passed | 0.477s | test_staging_connectivity_validation.py |
-| test_002_websocket_connectivity | PASS passed | 0.825s | test_staging_connectivity_validation.py |
-| test_003_agent_request_pipeline | PASS passed | 0.812s | test_staging_connectivity_validation.py |
-| test_004_generate_connectivity_report | PASS passed | 1.946s | test_staging_connectivity_validation.py |
+| test_health_check | FAIL failed | 5.502s | test_1_websocket_events_staging.py |
+| test_websocket_connection | PASS passed | 0.809s | test_1_websocket_events_staging.py |
+| test_api_endpoints_for_agents | PASS passed | 0.543s | test_1_websocket_events_staging.py |
+| test_websocket_event_flow_real | PASS passed | 2.808s | test_1_websocket_events_staging.py |
+| test_concurrent_websocket_real | PASS passed | 1.786s | test_1_websocket_events_staging.py |
+
+## Failed Tests Details
+
+### FAILED: test_health_check
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_1_websocket_events_staging.py
+- **Duration:** 5.502s
+- **Error:** tests\e2e\staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\e2e\staging\test_1_websocket_events_staging.py:54: in test_health_check
+    await self.verify_api_health()
+tests\e2e\staging_test_base.py:274: in verify_api_health
+    assert data["status"] == "healthy"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError...
 
 ## Pytest Output Format
 
 ```
-test_staging_connectivity_validation.py::test_001_http_connectivity PASSED
-test_staging_connectivity_validation.py::test_002_websocket_connectivity PASSED
-test_staging_connectivity_validation.py::test_003_agent_request_pipeline PASSED
-test_staging_connectivity_validation.py::test_004_generate_connectivity_report PASSED
+test_1_websocket_events_staging.py::test_health_check FAILED
+test_1_websocket_events_staging.py::test_websocket_connection PASSED
+test_1_websocket_events_staging.py::test_api_endpoints_for_agents PASSED
+test_1_websocket_events_staging.py::test_websocket_event_flow_real PASSED
+test_1_websocket_events_staging.py::test_concurrent_websocket_real PASSED
 
 ==================================================
-4 passed, 0 failed in 4.24s
+4 passed, 1 failed in 14.05s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 1 | 1 | 0 | 100.0% |
+| WebSocket | 3 | 3 | 0 | 100.0% |
 | Agent | 1 | 1 | 0 | 100.0% |
 
 ---
