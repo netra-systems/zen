@@ -647,6 +647,9 @@ class WebSocketTestContext:
         return {"success": True, "request_sent": True}
 
 
+# Class alias for backward compatibility
+TestContext = WebSocketTestContext
+
 # Convenience factory functions
 
 def create_test_context(
