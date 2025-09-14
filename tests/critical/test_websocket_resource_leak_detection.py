@@ -417,7 +417,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
             user_id = f"test-user-{numeric_suffix}"
         
         # Create real test WebSocket component instead of AsyncMock
-        test_websocket = TestWebSocketConnection(connection_id)
+        test_websocket = MockWebSocketConnection(connection_id)
         
         return WebSocketConnection(
             connection_id=connection_id,

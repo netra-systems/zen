@@ -129,7 +129,7 @@ class WebSocketSimulationHelper:
         """Setup controlled services for reliable testing."""
         mock_websocket = MagicMock()
         mock_websocket.connect = AsyncMock(return_value=True)
-        mock_websocket.websocket = TestWebSocketConnection()
+        mock_websocket.websocket = MockWebSocketConnection()
         return mock_websocket
 
 

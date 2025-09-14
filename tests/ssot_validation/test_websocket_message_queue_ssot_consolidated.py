@@ -124,9 +124,9 @@ class TestWebSocketMessageQueueSsotConsolidated(SSotAsyncTestCase):
         # assert hasattr(self.ssot_queue, 'redis_circuit'), "SSOT queue should have Redis circuit breaker"
 
         # Record Redis behavior preservation metrics
-        # self.record_custom_metric("redis_behavior_preserved", True)
-        # self.record_custom_metric("redis_retry_logic", ssot_message.max_retries)
-        # self.record_custom_metric("redis_backoff_multiplier", ssot_message.backoff_multiplier)
+        # self.record_metric("redis_behavior_preserved", True)
+        # self.record_metric("redis_retry_logic", ssot_message.max_retries)
+        # self.record_metric("redis_backoff_multiplier", ssot_message.backoff_multiplier)
 
         # Placeholder assertion for now
         assert True, "Test implementation pending SSOT consolidation"
@@ -164,9 +164,9 @@ class TestWebSocketMessageQueueSsotConsolidated(SSotAsyncTestCase):
         # assert "total_size" in stats, "SSOT queue should track total message size"
 
         # Record ConnectionState behavior preservation metrics
-        # self.record_custom_metric("connection_state_behavior_preserved", True)
-        # self.record_custom_metric("state_aware_buffering", True)
-        # self.record_custom_metric("flush_mechanism", True)
+        # self.record_metric("connection_state_behavior_preserved", True)
+        # self.record_metric("state_aware_buffering", True)
+        # self.record_metric("flush_mechanism", True)
 
         # Placeholder assertion for now
         assert True, "Test implementation pending SSOT consolidation"
@@ -211,9 +211,9 @@ class TestWebSocketMessageQueueSsotConsolidated(SSotAsyncTestCase):
         # assert hasattr(self.ssot_queue, '_calculate_message_size'), "SSOT queue should calculate message sizes like Buffer"
 
         # Record Buffer behavior preservation metrics
-        # self.record_custom_metric("buffer_behavior_preserved", True)
-        # self.record_custom_metric("overflow_protection", True)
-        # self.record_custom_metric("critical_message_protection", True)
+        # self.record_metric("buffer_behavior_preserved", True)
+        # self.record_metric("overflow_protection", True)
+        # self.record_metric("critical_message_protection", True)
 
         # Placeholder assertion for now
         assert True, "Test implementation pending SSOT consolidation"
@@ -238,9 +238,9 @@ class TestWebSocketMessageQueueSsotConsolidated(SSotAsyncTestCase):
         #     from netra_backend.app.websocket_core.message_queue import MessageQueue as OldConnectionQueue
 
         # Record SSOT implementation metrics
-        # self.record_custom_metric("single_implementation", True)
-        # self.record_custom_metric("queue_implementation_type", queue_type)
-        # self.record_custom_metric("old_implementations_deprecated", True)
+        # self.record_metric("single_implementation", True)
+        # self.record_metric("queue_implementation_type", queue_type)
+        # self.record_metric("old_implementations_deprecated", True)
 
         # Placeholder assertion for now
         assert True, "Test implementation pending SSOT consolidation"
@@ -264,8 +264,8 @@ class TestWebSocketMessageQueueSsotConsolidated(SSotAsyncTestCase):
         # assert len(duplicate_implementations) == 0, f"Found duplicate implementations: {duplicate_implementations}"
 
         # Record duplication elimination metrics
-        # self.record_custom_metric("duplicate_implementations_eliminated", True)
-        # self.record_custom_metric("ssot_violations_resolved", True)
+        # self.record_metric("duplicate_implementations_eliminated", True)
+        # self.record_metric("ssot_violations_resolved", True)
 
         # Placeholder assertion for now
         assert True, "Test implementation pending SSOT consolidation"
@@ -305,9 +305,9 @@ class TestWebSocketMessageQueueSsotConsolidated(SSotAsyncTestCase):
         # assert delivery_count >= 0, "SSOT queue should provide unified message delivery"
 
         # Record interface consistency metrics
-        # self.record_custom_metric("consistent_interface", True)
-        # self.record_custom_metric("multiple_enqueue_methods", 3)
-        # self.record_custom_metric("unified_delivery", True)
+        # self.record_metric("consistent_interface", True)
+        # self.record_metric("multiple_enqueue_methods", 3)
+        # self.record_metric("unified_delivery", True)
 
         # Placeholder assertion for now
         assert True, "Test implementation pending SSOT consolidation"
@@ -344,9 +344,9 @@ class TestWebSocketMessageQueueSsotConsolidated(SSotAsyncTestCase):
         #     f"Should detect valid context, got {detected_context}"
 
         # Record context selection metrics
-        # self.record_custom_metric("context_based_selection", True)
-        # self.record_custom_metric("auto_context_detection", True)
-        # self.record_custom_metric("detected_context", detected_context)
+        # self.record_metric("context_based_selection", True)
+        # self.record_metric("auto_context_detection", True)
+        # self.record_metric("detected_context", detected_context)
 
         # Placeholder assertion for now
         assert True, "Test implementation pending SSOT consolidation"
@@ -389,10 +389,10 @@ class TestWebSocketMessageQueueSsotConsolidated(SSotAsyncTestCase):
         # assert delivery_rate > 30, f"Delivery rate {delivery_rate:.2f} msg/sec should exceed 30 msg/sec"
 
         # Record performance metrics
-        # self.record_custom_metric("enqueue_rate_msg_per_sec", enqueue_rate)
-        # self.record_custom_metric("delivery_rate_msg_per_sec", delivery_rate)
-        # self.record_custom_metric("enqueue_duration_seconds", enqueue_duration)
-        # self.record_custom_metric("delivery_duration_seconds", delivery_duration)
+        # self.record_metric("enqueue_rate_msg_per_sec", enqueue_rate)
+        # self.record_metric("delivery_rate_msg_per_sec", delivery_rate)
+        # self.record_metric("enqueue_duration_seconds", enqueue_duration)
+        # self.record_metric("delivery_duration_seconds", delivery_duration)
 
         # Placeholder assertion for now
         assert True, "Test implementation pending SSOT consolidation"

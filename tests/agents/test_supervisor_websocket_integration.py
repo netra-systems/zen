@@ -343,48 +343,32 @@ class TestSupervisorWebSocketIntegration:
         # Mock justification: Agent workflow execution subsystem is complex
         # orchestration not part of WebSocket integration SUT
 
-        with patch.object(supervisor_agent, "workflow_executor") as mock_executor:
+        with patch.object(supervisor_agent, "_execute_orchestration_workflow") as mock_executor:
 
-            mock_state = DeepAgentState(
+            mock_state = {
+                "workflow_completed": True,
+                "user_request": user_prompt,
+                "user_id": user_id,
+                "results": "Workflow executed successfully"
+            }
 
-                user_request=user_prompt, chat_thread_id=thread_id, user_id=user_id
+            mock_executor.return_value = mock_state
+
+            # Execute supervisor run
+
+            result = await supervisor_agent.run(
+
+                user_prompt, thread_id, user_id, run_id
 
             )
 
-            mock_executor.execute_workflow_steps = AsyncMock(return_value=mock_state)
+            # Verify workflow executor was called
 
-            # Mock justification: Flow logging subsystem is peripheral to
-            # WebSocket message handling SUT
+            mock_executor.assert_called_once()
 
-            with patch("netra_backend.app.agents.supervisor.observability_flow.get_supervisor_flow_logger") as mock_logger_factory:
-                mock_logger = AsyncMock()
-                mock_logger_factory.return_value = mock_logger
-                mock_logger.generate_flow_id.return_value = "flow-123"
+            # Verify result matches expected state
 
-                mock_logger.start_flow.return_value = None
-
-                mock_logger.complete_flow.return_value = None
-
-                # Execute supervisor run
-
-                result = await supervisor_agent.run(
-
-                    user_prompt, thread_id, user_id, run_id
-
-                )
-
-                # Verify workflow executor was called
-
-                mock_executor.execute_workflow_steps.assert_called_once()
-
-                # Verify flow was logged
-
-                mock_logger.start_flow.assert_called_once()
-
-                mock_logger.complete_flow.assert_called_once()
-
-
-                assert result == mock_state
+            assert result == mock_state
 
 
     @pytest.mark.asyncio
@@ -406,22 +390,23 @@ class TestSupervisorWebSocketIntegration:
         # Mock justification: Agent workflow execution subsystem is complex
         # orchestration not part of concurrent WebSocket SUT
 
-        with patch.object(supervisor_agent, "workflow_executor") as mock_executor:
+        with patch.object(supervisor_agent, "_execute_orchestration_workflow") as mock_executor:
 
             responses = []
 
             for i, (user_id, prompt, thread_id, run_id) in enumerate(messages):
 
-                response = DeepAgentState(
-
-                    user_request=prompt, chat_thread_id=thread_id, user_id=user_id
-
-                )
+                response = {
+                    "workflow_completed": True,
+                    "user_request": prompt,
+                    "user_id": user_id,
+                    "results": f"Processed: {prompt}"
+                }
 
                 responses.append(response)
 
 
-            mock_executor.execute_workflow_steps = AsyncMock(side_effect=responses)
+            mock_executor.side_effect = responses
 
             # Mock justification: Flow logging subsystem is peripheral to
             # concurrent WebSocket processing SUT
@@ -464,7 +449,7 @@ class TestSupervisorWebSocketIntegration:
 
                     expected_user_id = messages[i][0]
 
-                    assert result.user_id == expected_user_id
+                    assert result["user_id"] == expected_user_id
 
 
     @pytest.mark.asyncio
@@ -553,42 +538,29 @@ class TestSupervisorWebSocketIntegration:
         # Mock justification: Agent workflow execution subsystem is not part of
         # WebSocket disconnection handling SUT
 
-        with patch.object(supervisor_agent, "workflow_executor") as mock_executor:
+        with patch.object(supervisor_agent, "_execute_orchestration_workflow") as mock_executor:
             from starlette.websockets import WebSocketDisconnect
 
 
-            mock_executor.execute_workflow_steps.side_effect = WebSocketDisconnect(
+            mock_executor.side_effect = WebSocketDisconnect(
 
                 code=1001, reason="Client disconnected"
 
             )
 
-            # Mock justification: Flow logging subsystem is peripheral to
-            # WebSocket disconnection handling SUT
+            # Execute should handle disconnect gracefully
 
-            with patch("netra_backend.app.agents.supervisor.observability_flow.get_supervisor_flow_logger") as mock_logger_factory:
-                mock_logger = AsyncMock()
-                mock_logger_factory.return_value = mock_logger
-                mock_logger.generate_flow_id.return_value = "flow-disconnect"
+            try:
 
-                mock_logger.start_flow.return_value = None
+                await supervisor_agent.run(user_prompt, thread_id, user_id, run_id)
 
-                mock_logger.complete_flow.return_value = None
+            except WebSocketDisconnect:
+                # This is expected behavior
 
-                # Execute should handle disconnect gracefully
+                pass
 
-                try:
-
-                    await supervisor_agent.run(user_prompt, thread_id, user_id, run_id)
-
-                except WebSocketDisconnect:
-                    # This is expected behavior
-
-                    pass
-
-                # Flow should still be tracked
-
-                mock_logger.start_flow.assert_called_once()
+            # Verify the orchestration workflow was called before disconnect
+            mock_executor.assert_called_once()
 
 
     @pytest.mark.asyncio

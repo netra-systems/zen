@@ -218,10 +218,10 @@ class TestGoldenPathWithSsotMessageQueue(SSotAsyncTestCase):
             successful_deliveries = sum(1 for _, result in delivery_results if result)
             total_messages = len(golden_path_messages)
 
-            self.record_custom_metric("golden_path_messages", total_messages)
-            self.record_custom_metric("successful_deliveries", successful_deliveries)
-            self.record_custom_metric("delivery_success_rate", successful_deliveries / total_messages)
-            self.record_custom_metric("queue_fragmentation", len(set(queue_type for queue_type, _ in delivery_results)))
+            self.record_metric("golden_path_messages", total_messages)
+            self.record_metric("successful_deliveries", successful_deliveries)
+            self.record_metric("delivery_success_rate", successful_deliveries / total_messages)
+            self.record_metric("queue_fragmentation", len(set(queue_type for queue_type, _ in delivery_results)))
 
             logger.info(f"Golden Path delivery: {successful_deliveries}/{total_messages} messages delivered")
             logger.error(f"Queue fragmentation: Using {len(set(queue_type for queue_type, _ in delivery_results))} different queues")
@@ -318,10 +318,10 @@ class TestGoldenPathWithSsotMessageQueue(SSotAsyncTestCase):
                 if user_buffer_info.get("buffer_size", 0) != expected_messages:
                     cross_contamination_count += 1
 
-            self.record_custom_metric("total_users_tested", len(users))
-            self.record_custom_metric("isolation_violations", len(isolation_violations))
-            self.record_custom_metric("cross_contamination_count", cross_contamination_count)
-            self.record_custom_metric("queue_types_per_user", 2)  # ConnectionState + Buffer
+            self.record_metric("total_users_tested", len(users))
+            self.record_metric("isolation_violations", len(isolation_violations))
+            self.record_metric("cross_contamination_count", cross_contamination_count)
+            self.record_metric("queue_types_per_user", 2)  # ConnectionState + Buffer
 
             logger.info(f"Multi-user isolation test: {len(isolation_violations)} violations found")
 
@@ -405,11 +405,11 @@ class TestGoldenPathWithSsotMessageQueue(SSotAsyncTestCase):
             queues_used = set(queue_type for queue_type, _ in event_distribution)
             critical_events_count = len([e for e in agent_events if e["type"] in self.critical_events])
 
-            self.record_custom_metric("total_agent_events", len(agent_events))
-            self.record_custom_metric("successful_agent_events", successful_events)
-            self.record_custom_metric("critical_events_count", critical_events_count)
-            self.record_custom_metric("queues_used_for_events", len(queues_used))
-            self.record_custom_metric("event_distribution", dict(event_distribution))
+            self.record_metric("total_agent_events", len(agent_events))
+            self.record_metric("successful_agent_events", successful_events)
+            self.record_metric("critical_events_count", critical_events_count)
+            self.record_metric("queues_used_for_events", len(queues_used))
+            self.record_metric("event_distribution", dict(event_distribution))
 
             logger.info(f"Agent events: {successful_events}/{len(agent_events)} delivered across {len(queues_used)} queues")
 
@@ -497,11 +497,11 @@ class TestGoldenPathWithSsotMessageQueue(SSotAsyncTestCase):
             processing_ready_flush = lifecycle_results.get("processing_ready", {}).get("flush_triggered", False)
             closed_cleanup = lifecycle_results.get("closed", {}).get("cleanup_performed", False)
 
-            self.record_custom_metric("lifecycle_stages_tested", total_stages)
-            self.record_custom_metric("successful_stage_handling", successful_stages)
-            self.record_custom_metric("processing_ready_flush", processing_ready_flush)
-            self.record_custom_metric("closed_cleanup", closed_cleanup)
-            self.record_custom_metric("lifecycle_results", lifecycle_results)
+            self.record_metric("lifecycle_stages_tested", total_stages)
+            self.record_metric("successful_stage_handling", successful_stages)
+            self.record_metric("processing_ready_flush", processing_ready_flush)
+            self.record_metric("closed_cleanup", closed_cleanup)
+            self.record_metric("lifecycle_results", lifecycle_results)
 
             logger.info(f"Connection lifecycle: {successful_stages}/{total_stages} stages handled successfully")
 
@@ -641,14 +641,14 @@ class TestGoldenPathWithSsotMessageQueue(SSotAsyncTestCase):
             loss_rate = (total_lost / total_sent * 100) if total_sent > 0 else 0
             critical_loss_rate = ((critical_sent - critical_received) / critical_sent * 100) if critical_sent > 0 else 0
 
-            self.record_custom_metric("total_messages_sent", total_sent)
-            self.record_custom_metric("total_messages_received", total_received)
-            self.record_custom_metric("total_messages_lost", total_lost)
-            self.record_custom_metric("message_loss_rate_percent", loss_rate)
-            self.record_custom_metric("critical_messages_sent", critical_sent)
-            self.record_custom_metric("critical_messages_received", critical_received)
-            self.record_custom_metric("critical_loss_rate_percent", critical_loss_rate)
-            self.record_custom_metric("buffer_delivered_count", buffer_delivered)
+            self.record_metric("total_messages_sent", total_sent)
+            self.record_metric("total_messages_received", total_received)
+            self.record_metric("total_messages_lost", total_lost)
+            self.record_metric("message_loss_rate_percent", loss_rate)
+            self.record_metric("critical_messages_sent", critical_sent)
+            self.record_metric("critical_messages_received", critical_received)
+            self.record_metric("critical_loss_rate_percent", critical_loss_rate)
+            self.record_metric("buffer_delivered_count", buffer_delivered)
 
             logger.info(f"Golden Path message loss test: {total_lost}/{total_sent} messages lost ({loss_rate:.1f}%)")
             logger.error(f"Critical message loss: {critical_sent - critical_received}/{critical_sent} lost ({critical_loss_rate:.1f}%)")
@@ -742,12 +742,12 @@ class TestGoldenPathWithSsotMessageQueue(SSotAsyncTestCase):
             total_messages = len(expected_sequence)
             received_count = len(actual_sequence)
 
-            self.record_custom_metric("expected_sequence", expected_sequence)
-            self.record_custom_metric("actual_sequence", actual_sequence)
-            self.record_custom_metric("correct_order", correct_order)
-            self.record_custom_metric("ordering_violations", len(ordering_violations))
-            self.record_custom_metric("total_ordered_messages", total_messages)
-            self.record_custom_metric("received_ordered_messages", received_count)
+            self.record_metric("expected_sequence", expected_sequence)
+            self.record_metric("actual_sequence", actual_sequence)
+            self.record_metric("correct_order", correct_order)
+            self.record_metric("ordering_violations", len(ordering_violations))
+            self.record_metric("total_ordered_messages", total_messages)
+            self.record_metric("received_ordered_messages", received_count)
 
             logger.info(f"Message ordering test: {received_count}/{total_messages} messages, correct order: {correct_order}")
 

@@ -134,8 +134,8 @@ class TestWebSocketMessageQueueSsotViolations(SSotAsyncTestCase):
         assert stats["total_pending"] >= 0, "Redis queue should track pending messages"
 
         # Record baseline behavior for comparison
-        self.record_custom_metric("redis_queue_pending", stats["total_pending"])
-        self.record_custom_metric("redis_message_id", redis_message.id)
+        self.record_metric("redis_queue_pending", stats["total_pending"])
+        self.record_metric("redis_message_id", redis_message.id)
 
         logger.info(f"Redis queue baseline: {stats}")
 
@@ -157,8 +157,8 @@ class TestWebSocketMessageQueueSsotViolations(SSotAsyncTestCase):
         assert stats["total_size"] >= 0, "ConnectionState queue should track message count"
 
         # Record baseline behavior for comparison
-        self.record_custom_metric("connection_state_queue_size", stats["total_size"])
-        self.record_custom_metric("connection_state_queue_state", stats["state"])
+        self.record_metric("connection_state_queue_size", stats["total_size"])
+        self.record_metric("connection_state_queue_state", stats["state"])
 
         logger.info(f"ConnectionState queue baseline: {stats}")
 
@@ -179,8 +179,8 @@ class TestWebSocketMessageQueueSsotViolations(SSotAsyncTestCase):
         assert stats["total_buffered_messages"] >= 0, "Message buffer should track buffered count"
 
         # Record baseline behavior for comparison
-        self.record_custom_metric("buffer_total_messages", stats["total_buffered_messages"])
-        self.record_custom_metric("buffer_size_bytes", stats["buffer_size_bytes"])
+        self.record_metric("buffer_total_messages", stats["total_buffered_messages"])
+        self.record_metric("buffer_size_bytes", stats["buffer_size_bytes"])
 
         logger.info(f"Message buffer baseline: {stats}")
 
@@ -200,9 +200,9 @@ class TestWebSocketMessageQueueSsotViolations(SSotAsyncTestCase):
         implementation_types = [redis_queue_type, connection_state_queue_type, buffer_type]
         unique_implementations = set(implementation_types)
 
-        self.record_custom_metric("total_implementations", len(implementation_types))
-        self.record_custom_metric("unique_implementations", len(unique_implementations))
-        self.record_custom_metric("implementation_types", list(unique_implementations))
+        self.record_metric("total_implementations", len(implementation_types))
+        self.record_metric("unique_implementations", len(unique_implementations))
+        self.record_metric("implementation_types", list(unique_implementations))
 
         logger.error(f"SSOT VIOLATION: Found {len(unique_implementations)} different message queue implementations")
         logger.error(f"Implementations: {list(unique_implementations)}")
@@ -258,9 +258,9 @@ class TestWebSocketMessageQueueSsotViolations(SSotAsyncTestCase):
         # Count successful enqueues
         successful_enqueues = sum(1 for result in results if result is True)
 
-        self.record_custom_metric("race_condition_attempts", len(tasks))
-        self.record_custom_metric("successful_enqueues", successful_enqueues)
-        self.record_custom_metric("message_ids", message_ids)
+        self.record_metric("race_condition_attempts", len(tasks))
+        self.record_metric("successful_enqueues", successful_enqueues)
+        self.record_metric("message_ids", message_ids)
 
         logger.warning(f"Race condition test: {successful_enqueues}/{len(tasks)} queues accepted the message")
 
@@ -323,11 +323,11 @@ class TestWebSocketMessageQueueSsotViolations(SSotAsyncTestCase):
 
         total_messages_queued = redis_pending + connection_pending + buffer_pending
 
-        self.record_custom_metric("original_message_count", original_message_count)
-        self.record_custom_metric("redis_pending", redis_pending)
-        self.record_custom_metric("connection_pending", connection_pending)
-        self.record_custom_metric("buffer_pending", buffer_pending)
-        self.record_custom_metric("total_messages_queued", total_messages_queued)
+        self.record_metric("original_message_count", original_message_count)
+        self.record_metric("redis_pending", redis_pending)
+        self.record_metric("connection_pending", connection_pending)
+        self.record_metric("buffer_pending", buffer_pending)
+        self.record_metric("total_messages_queued", total_messages_queued)
 
         logger.error(f"MESSAGE LOSS TEST: Original={original_message_count}, Queued={total_messages_queued}")
 
@@ -417,9 +417,9 @@ class TestWebSocketMessageQueueSsotViolations(SSotAsyncTestCase):
         total_deliveries = len(delivered_messages)
         unique_deliveries = len(unique_logical_ids)
 
-        self.record_custom_metric("total_deliveries", total_deliveries)
-        self.record_custom_metric("unique_deliveries", unique_deliveries)
-        self.record_custom_metric("delivered_messages", delivered_messages)
+        self.record_metric("total_deliveries", total_deliveries)
+        self.record_metric("unique_deliveries", unique_deliveries)
+        self.record_metric("delivered_messages", delivered_messages)
 
         logger.error(f"DUPLICATE DELIVERY TEST: {total_deliveries} total deliveries, {unique_deliveries} unique messages")
 
