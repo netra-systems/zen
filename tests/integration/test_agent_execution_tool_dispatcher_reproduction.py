@@ -48,7 +48,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
 class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):

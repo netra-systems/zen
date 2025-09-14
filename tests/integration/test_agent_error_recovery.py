@@ -42,7 +42,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 import pytest
 
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 # CANONICAL IMPORT: Use direct import path for better SSOT compliance
