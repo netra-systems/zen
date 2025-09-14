@@ -37,10 +37,7 @@ async function scanForThreadStateDefinitions() {
   const definitions = [];
 
   // Find all TypeScript files
-  const tsFiles = await glob('**/*.ts', {
-    cwd: projectRoot,
-    ignore: ['node_modules/**', 'dist/**', 'build/**', '.next/**', '**/*.d.ts']
-  });
+  const tsFiles = findTypescriptFiles(projectRoot);
 
   console.log(`📁 Scanning ${tsFiles.length} TypeScript files...\n`);
 
@@ -110,10 +107,7 @@ function determineSemanticMeaning(filePath, content) {
 async function findImportViolations() {
   const violations = [];
 
-  const tsFiles = await glob('**/*.ts', {
-    cwd: projectRoot,
-    ignore: ['node_modules/**', 'dist/**', 'build/**', '.next/**', '**/*.d.ts']
-  });
+  const tsFiles = findTypescriptFiles(projectRoot);
 
   for (const file of tsFiles) {
     const fullPath = path.resolve(projectRoot, file);
@@ -197,8 +191,17 @@ async function runAnalysis() {
         console.log(`      ❌ REMOVE: ${def.filePath}:${def.lineNumber} (duplicate)`);
       }
     });
+  } else if (dataStructureDefs.length === 1) {
+    const singleDef = dataStructureDefs[0];
+    if (singleDef.filePath.includes(canonicalPath)) {
+      console.log('   ✅ SSOT COMPLIANT: Single canonical data structure definition');
+    } else {
+      console.log('   ⚠️ ISSUE: Single definition but not in canonical location');
+      console.log(`      Current: ${singleDef.filePath}:${singleDef.lineNumber}`);
+      console.log(`      Expected: ${canonicalPath}`);
+    }
   } else {
-    console.log('   ✅ SSOT COMPLIANT: Single data structure definition');
+    console.log('   ❌ ERROR: No data structure definitions found');
   }
   console.log('');
 
