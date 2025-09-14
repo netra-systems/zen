@@ -459,8 +459,19 @@ class TestAgentFactoryUserIsolationCompliance(SSotAsyncTestCase):
             "This violates enterprise multi-tenancy compliance requirements."
         )
         
-        # VIOLATION ASSERTION: Each tenant can access others' compliance data
-        for result in tenant_compliance_results:
+        # VIOLATION ASSERTION: Check that final result shows contamination
+        final_result = tenant_compliance_results[-1]  # Last tenant processed
+        accessible_tenants = final_result['accessible_tenants']
+        
+        # Final result should show all tenants' data is accessible
+        assert len(accessible_tenants) == len(enterprise_tenants), (
+            f"MULTI-TENANCY CONTAMINATION: Final tenant can access all {len(accessible_tenants)} "
+            f"tenant data. Expected {len(enterprise_tenants)} tenants. This proves enterprise "
+            "multi-tenancy isolation is violated through shared factory."
+        )
+        
+        # VIOLATION ASSERTION: Each tenant can access others' compliance data  
+        for result in tenant_compliance_results[1:]:  # Skip first tenant (no others to contaminate)
             accessible_tenants = result['accessible_tenants']
             tenant_id = result['tenant_id']
             isolation_req = result['isolation_requirement']
@@ -473,7 +484,7 @@ class TestAgentFactoryUserIsolationCompliance(SSotAsyncTestCase):
             
             assert len(other_tenant_data) > 0, (
                 f"COMPLIANCE VIOLATION: Tenant {tenant_id} with {isolation_req} isolation "
-                f"and {compliance_level} compliance can access other tenants' data. "
+                f"and {compliance_level} compliance can access {len(other_tenant_data)} other tenants' data. "
                 f"Accessible other tenants: {list(other_tenant_data.keys())}. "
                 "This violates enterprise multi-tenancy isolation requirements."
             )
