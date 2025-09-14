@@ -35,10 +35,11 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
+import unittest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestWebSocketManagerFragmentationDetection(SSotBaseTestCase):
+class TestWebSocketManagerFragmentationDetection(SSotBaseTestCase, unittest.TestCase):
     """Test suite to detect WebSocket Manager fragmentation causing SSOT violations."""
 
     def setUp(self):
@@ -294,7 +295,7 @@ class TestWebSocketManagerFragmentationDetection(SSotBaseTestCase):
             )
 
 
-class TestWebSocketManagerUserIsolationFragmentation(SSotBaseTestCase):
+class TestWebSocketManagerUserIsolationFragmentation(SSotBaseTestCase, unittest.TestCase):
     """Test user isolation failures caused by WebSocket Manager fragmentation."""
 
     def test_user_context_isolation_with_multiple_managers(self):

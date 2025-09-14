@@ -94,7 +94,7 @@ class RecoveryStatus:
 
 # Type imports for better IDE support
 if TYPE_CHECKING:
-    from netra_backend.app.agents.state import DeepAgentState
+    from netra_backend.app.schemas.agent_models import DeepAgentState
     from netra_backend.app.core.agent_recovery_supervisor import AgentRecoverySupervisor
 
 # Legacy compatibility aliases

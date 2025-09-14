@@ -11,7 +11,7 @@
 
 from typing import Any, Awaitable, Callable, Dict, Optional
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.synthetic_data_generator import (
     GenerationStatus,
     SyntheticDataResult,

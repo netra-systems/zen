@@ -56,18 +56,38 @@ class TestDeepAgentStateSSotViolation:
 
     def test_deepagentstate_module_path_violation(self):
         """
-        FAILING TEST: Proves deprecated module path still exists
+        FAILING TEST: Proves deprecated module path still exists when it should be removed
 
-        Expected: FAIL initially (deprecated path importable)
-        After Fix: ImportError (deprecated path removed)
+        Expected: FAIL initially (deprecated path still importable)
+        After Fix: PASS (deprecated path removed, only SSOT exists)
         """
-        # This should eventually raise ImportError after remediation
-        with pytest.raises(ImportError, match="cannot import name 'DeepAgentState'"):
-            from netra_backend.app.agents.state import DeepAgentState
+        # Check if deprecated path is still importable (should fail during SSOT violation)
+        deprecated_importable = True
+        try:
+            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+        except ImportError:
+            deprecated_importable = False
 
-        # But SSOT source should always work
-        from netra_backend.app.schemas.agent_models import DeepAgentState
-        assert DeepAgentState is not None
+        # SSOT source should always work
+        try:
+            from netra_backend.app.schemas.agent_models import DeepAgentState as SsotState
+            ssot_importable = True
+        except ImportError:
+            ssot_importable = False
+
+        # During SSOT violation, deprecated should be importable (that's the problem!)
+        if deprecated_importable and ssot_importable:
+            pytest.fail(
+                "SSOT VIOLATION: Both deprecated and SSOT paths are importable! "
+                "Only SSOT path should exist after remediation."
+            )
+        elif not deprecated_importable and ssot_importable:
+            # This is the desired end state after remediation
+            assert True, "SSOT REMEDIATION COMPLETE: Only SSOT path exists"
+        elif deprecated_importable and not ssot_importable:
+            pytest.fail("CRITICAL ERROR: SSOT source missing!")
+        else:
+            pytest.fail("CRITICAL ERROR: Neither version importable!")
 
     def test_deprecated_warning_documentation(self):
         """

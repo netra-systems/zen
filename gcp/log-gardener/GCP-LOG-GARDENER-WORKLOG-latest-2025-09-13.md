@@ -211,6 +211,9 @@ File "/app/netra_backend/app/services/websocket_bridge_factory.py", line 23, in 
 - **Issue #878**: "[failing-test-infrastructure-high-docker-daemon](https://github.com/netra-systems/netra-apex/issues/878)"
   - **Labels**: claude-code-generated-issue, P1, bug, infrastructure-dependency, critical
   - **Purpose**: Docker daemon connectivity failure blocking all Docker-dependent critical tests (CreateFile system cannot find file)
+- **Issue #885**: "[failing-test-ssot-medium-websocket-manager-fragmentation](https://github.com/netra-systems/netra-apex/issues/885)"
+  - **Labels**: claude-code-generated-issue, P2, websocket, SSOT, tech-debt
+  - **Purpose**: SSOT compliance warning for WebSocket Manager class fragmentation across multiple modules affecting architecture compliance
 
 **EXISTING ISSUES UPDATED:**
 1. **Issue #856**: "🚨 P0 CRITICAL SERVICE OUTAGE: F-string syntax error in websocket_ssot.py causing complete backend failure" (Reopened)
@@ -240,7 +243,7 @@ File "/app/netra_backend/app/services/websocket_bridge_factory.py", line 23, in 
 **Session Summary:**
 - **Logs Analyzed**: ~50+ GCP log entries from netra-staging backend service
 - **Clusters Identified**: 5 distinct issue clusters (P0-P3 priority levels)
-- **Issues Processed**: 1 created, 6 updated with comprehensive cross-references
+- **Issues Processed**: 4 created, 6 updated with comprehensive cross-references
 - **Business Impact**: Protected $500K+ ARR by identifying and tracking critical service outage
 - **Documentation**: All issues fully linked with architecture and validation references
 

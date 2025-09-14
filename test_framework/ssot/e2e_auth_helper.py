@@ -1384,25 +1384,27 @@ async def create_authenticated_user(
     environment: str = "test",
     user_id: Optional[str] = None,
     email: Optional[str] = None,
-    permissions: Optional[List[str]] = None
+    permissions: Optional[List[str]] = None,
+    user_prefix: str = "user"
 ) -> Tuple[str, Dict[str, Any]]:
     """
     Create an authenticated user and return token and user data.
     This is a convenience function that wraps E2EAuthHelper.
-    
+
     Args:
         environment: Test environment ('test', 'staging', etc.)
         user_id: Optional user ID (auto-generated if not provided)
-        email: Optional email (uses default if not provided) 
+        email: Optional email (uses default if not provided)
         permissions: Optional permissions list
-        
+        user_prefix: Prefix for auto-generated user ID (default: "user")
+
     Returns:
         Tuple of (jwt_token, user_data)
     """
     auth_helper = E2EAuthHelper(environment=environment)
     
-    # Generate user ID if not provided
-    user_id = user_id or f"test-user-{uuid.uuid4().hex[:8]}"
+    # Generate user ID if not provided, using the user_prefix parameter
+    user_id = user_id or f"{user_prefix}-{uuid.uuid4().hex[:8]}"
     email = email or auth_helper.config.test_user_email
     permissions = permissions if permissions is not None else ["read", "write"]
     

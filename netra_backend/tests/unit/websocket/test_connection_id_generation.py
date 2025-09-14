@@ -30,8 +30,12 @@ from typing import Dict, Any, List, Optional
 from netra_backend.app.websocket_core.utils import generate_connection_id, generate_message_id
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, MessageType, create_standard_message
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+<<<<<<< HEAD
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+=======
 # SSOT import after Issue #824 remediation
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+>>>>>>> cdc129325dc110e1452f134d617cc76bf55b1cfa
 from netra_backend.app.websocket_core.connection_manager import ConnectionManager
 
 # Import ID generation components

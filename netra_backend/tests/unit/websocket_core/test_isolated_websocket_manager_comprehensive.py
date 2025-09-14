@@ -27,8 +27,12 @@ from datetime import datetime, timezone
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any
 
+<<<<<<< HEAD
+# Core imports
+=======
 # Core imports - SSOT after Issue #824 remediation
 # from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManager  # REMOVED: Use WebSocketManager directly
+>>>>>>> cdc129325dc110e1452f134d617cc76bf55b1cfa
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection

@@ -9,7 +9,7 @@ Business Value: Standardized execution patterns with 25-line function limit.
 from typing import Any, Dict
 
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

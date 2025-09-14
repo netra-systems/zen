@@ -194,7 +194,10 @@ class TestAgentExecutionComprehensive(BaseIntegrationTest):
             thread_id=ThreadID(f"test-thread-{uuid.uuid4()}"),
             run_id=RunID(f"test-run-{uuid.uuid4()}"),
             request_id=RequestID(f"test-request-{uuid.uuid4()}"),
+<<<<<<< HEAD
+=======
             agent_context={},
+>>>>>>> cdc129325dc110e1452f134d617cc76bf55b1cfa
             created_at=datetime.now(timezone.utc)
         )
 
@@ -326,7 +329,10 @@ class TestAgentExecutionComprehensive(BaseIntegrationTest):
             thread_id=ThreadID("test-thread"),
             run_id=RunID("test-run"),
             request_id=RequestID("test-request"),
+<<<<<<< HEAD
+=======
             agent_context={},
+>>>>>>> cdc129325dc110e1452f134d617cc76bf55b1cfa
             created_at=datetime.now(timezone.utc)
         )
         

@@ -17,7 +17,7 @@ from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionR
 from netra_backend.app.agents.base.errors import ValidationError
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.unified_error_handler import agent_error_handler
