@@ -65,9 +65,14 @@ class WebSocketTestUtility(WebSocketBridgeTestHelper):
 # Create alias for compatibility with existing test files
 WebSocketTestHelper = WebSocketTestUtility
 
+# Create WebSocketTestManager alias for integration tests expecting this name
+# This alias provides compatibility for tests migrated from legacy test infrastructure
+WebSocketTestManager = WebSocketTestUtility
+
 __all__ = [
     "WebSocketTestUtility",
     "WebSocketTestHelper",  # Compatibility alias
+    "WebSocketTestManager",  # Alias for integration tests
     "WebSocketBridgeTestHelper",
     "WebSocketAuthHelper",
 ]
