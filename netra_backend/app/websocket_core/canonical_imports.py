@@ -29,9 +29,11 @@ from netra_backend.app.websocket_core.canonical_imports import (
 # CANONICAL IMPORT PATHS - Single Source of Truth
 # ============================================================================
 
-# CANONICAL: WebSocket Manager Factory (PREFERRED)
-from netra_backend.app.websocket_core.websocket_manager_factory import (
-    create_websocket_manager,
+# CANONICAL: WebSocket Manager Factory (PREFERRED) - Migrated to user_execution_context.py
+from netra_backend.app.auth_integration.user_execution_context import (
+    create_defensive_user_execution_context as create_websocket_manager,
+)
+from netra_backend.app.websocket_core.unified_manager import (
     FactoryInitializationError,
     WebSocketComponentError,
 )
