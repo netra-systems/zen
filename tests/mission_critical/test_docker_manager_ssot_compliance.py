@@ -45,10 +45,10 @@ class TestDockerManagerSSOTCompliance(SSotBaseTestCase):
     After remediation, they will PASS to prove SSOT compliance.
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment with SSOT compliance checking."""
-        super().setUp()
-        self.project_root = Path(env.get("PROJECT_ROOT", "/c/GitHub/netra-apex"))
+        super().setup_method(method)
+        self.project_root = Path("/c/GitHub/netra-apex")
         self.mock_docker_manager_path = self.project_root / "test_framework" / "docker" / "unified_docker_manager.py"
         self.real_docker_manager_path = self.project_root / "test_framework" / "unified_docker_manager.py"
 
@@ -64,12 +64,12 @@ class TestDockerManagerSSOTCompliance(SSotBaseTestCase):
         real_exists = self.real_docker_manager_path.exists()
 
         # This test FAILS if both exist (proving violation)
-        with self.assertRaises(AssertionError, msg="SSOT VIOLATION: Both mock and real Docker Managers exist"):
-            self.assertFalse(mock_exists and real_exists,
-                           f"SSOT VIOLATION DETECTED:\n"
-                           f"Mock Docker Manager: {self.mock_docker_manager_path} (exists: {mock_exists})\n"
-                           f"Real Docker Manager: {self.real_docker_manager_path} (exists: {real_exists})\n"
-                           f"Expected: Only real implementation should exist")
+        # Expected: This assertion will FAIL, proving SSOT violation exists
+        assert not (mock_exists and real_exists), \
+               f"SSOT VIOLATION DETECTED:\n" \
+               f"Mock Docker Manager: {self.mock_docker_manager_path} (exists: {mock_exists})\n" \
+               f"Real Docker Manager: {self.real_docker_manager_path} (exists: {real_exists})\n" \
+               f"Expected: Only real implementation should exist - This FAILURE proves violation exists"
 
     def test_ssot_violation_mock_docker_manager_has_mock_implementations(self):
         """
@@ -97,9 +97,9 @@ class TestDockerManagerSSOTCompliance(SSotBaseTestCase):
         found_mocks = [indicator for indicator in mock_indicators if indicator in content]
 
         # This test FAILS if mock implementations are found (proving violation)
-        self.assertNotEqual(found_mocks, [],
-                           f"SSOT VIOLATION: Mock implementations found in Docker Manager: {found_mocks}\n"
-                           f"This proves the violation exists - tests are using mock instead of real services")
+        assert found_mocks != [], \
+               f"SSOT VIOLATION: Mock implementations found in Docker Manager: {found_mocks}\n" \
+               f"This proves the violation exists - tests are using mock instead of real services"
 
     def test_ssot_violation_tests_import_mock_docker_manager(self):
         """
@@ -129,10 +129,10 @@ class TestDockerManagerSSOTCompliance(SSotBaseTestCase):
                 continue
 
         # This test FAILS if mock imports are found (proving violation)
-        self.assertNotEqual(mock_import_files, [],
-                           f"SSOT VIOLATION: {len(mock_import_files)} test files import mock Docker Manager:\n" +
-                           "\n".join(mock_import_files[:10]) +
-                           (f"\n... and {len(mock_import_files) - 10} more" if len(mock_import_files) > 10 else ""))
+        assert mock_import_files != [], \
+               f"SSOT VIOLATION: {len(mock_import_files)} test files import mock Docker Manager:\n" + \
+               "\n".join(mock_import_files[:10]) + \
+               (f"\n... and {len(mock_import_files) - 10} more" if len(mock_import_files) > 10 else "")
 
     def test_golden_path_functionality_mock_vs_real_docker_manager(self):
         """
@@ -359,9 +359,9 @@ class TestDockerManagerMissionCriticalIntegration(SSotBaseTestCase):
     mission critical business functionality worth $500K+ ARR.
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up mission critical test environment."""
-        super().setUp()
+        super().setup_method(method)
 
     def test_mission_critical_websocket_events_require_real_docker_services(self):
         """

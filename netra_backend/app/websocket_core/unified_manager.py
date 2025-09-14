@@ -3059,9 +3059,9 @@ class _UnifiedWebSocketManagerImplementation:
             # Create event message structure
             event_message = {
                 "type": event_type,
-                "data": event_data,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "connection_id": connection_id
+                "connection_id": connection_id,
+                **event_data  # Spread business data to root level
             }
             
             # Use send_message for actual delivery
@@ -3468,8 +3468,8 @@ class _UnifiedWebSocketManagerImplementation:
         try:
             message = {
                 "type": event_type,
-                "data": event_data,
-                "timestamp": datetime.now(timezone.utc).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                **event_data  # Spread business data to root level
             }
             
             if connection_id:

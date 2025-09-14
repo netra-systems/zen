@@ -37,7 +37,7 @@ class TestServiceSecretAuthenticationRegression(SSotAsyncTestCase):
     def setUp(self):
         """Set up integration test environment for regression testing."""
         super().setUp()
-        self.env = IsolatedEnvironment()
+        self.env = self.get_env()
 
         # Test configuration values
         self.test_jwt_secret = "test-jwt-secret-key-32-chars-long-for-integration"

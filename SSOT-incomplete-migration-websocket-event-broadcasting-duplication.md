@@ -64,20 +64,67 @@
 - [x] GitHub issue #1092 created
 - [x] Impact analysis on Golden Path documented
 - [x] Remediation complexity assessment: HIGH
-- [ ] **NEXT:** Test discovery and planning (Step 1)
 
-## Test Strategy (Planned)
+### 2025-09-14 - Test Discovery and Planning Complete ✅
+- [x] Step 1.1: Discovered 100+ existing WebSocket tests protecting $500K+ ARR
+- [x] Step 1.2: Planned 20 new tests in 3 phases (reproduction, regression, validation)
+- [x] Identified mission critical test commands for validation
+- [ ] **NEXT:** Execute new SSOT test plan (Step 2)
 
-### Existing Tests to Protect (Step 1.1)
-- Mission critical WebSocket event tests
-- Integration tests for real-time chat functionality
-- Authentication flow tests with WebSocket
+## Test Strategy (DETAILED DISCOVERY COMPLETE)
 
-### New Tests Required (Step 1.2)
-- SSOT event broadcasting validation
-- Race condition reproduction tests
-- Memory leak detection for multiple emitters
-- Connection ID conflict detection
+### Existing Tests Discovered (Step 1.1) - COMPREHENSIVE COVERAGE ✅
+
+**Mission Critical Protection (100+ tests):**
+- `tests/mission_critical/test_websocket_agent_events_suite.py` - 39,749 lines protecting $500K+ ARR
+- `tests/mission_critical/test_websocket_five_critical_events_business_value.py` - 5 critical events validation
+- `tests/mission_critical/websocket_emitter_consolidation/` - 5 specialized emitter tests
+- `tests/critical/test_websocket_resource_leak_detection.py` - Memory leak detection
+
+**Race Condition & Concurrency Tests:**
+- `tests/unit/websocket_core/test_ssot_race_condition_reproduction.py`
+- `tests/integration/agent_golden_path/test_multi_user_concurrent_message_processing.py`
+
+**Authentication Integration Tests:**
+- `tests/e2e/test_golden_path_websocket_auth_staging.py` - E2E auth validation
+- `tests/integration/websocket_core/test_websocket_auth_protocol_integration.py`
+
+**Broadcast & Factory Tests:**
+- `tests/unit/websocket/test_broadcast_function_ssot_compliance.py`
+- `tests/unit/websocket_core/test_ssot_factory_pattern_consolidation_validation.py`
+
+### New Test Plan (Step 1.2) - 20 TESTS IN 3 PHASES
+
+**Phase 1: Reproduction Tests (MUST FAIL - 6 tests, 20%)**
+- `test_duplicate_emit_event_methods_detection.py` - Detect 3 duplicate emit methods
+- `test_duplicate_broadcast_methods_detection.py` - Detect cross-module duplicates
+- `test_deprecated_factory_imports_still_used.py` - Detect 40+ deprecated imports
+- `test_concurrent_emit_race_conditions_reproduction.py` - Race condition reproduction
+- `test_auth_sync_failures_reproduction.py` - Auth sync failure reproduction
+
+**Phase 2: Regression Protection (MUST PASS - 8 tests, 60%)**
+- `test_golden_path_5_events_still_work.py` - Critical events delivery
+- `test_multi_user_isolation_preserved.py` - User context isolation
+- `test_staging_chat_functionality_preserved.py` - E2E GCP staging validation
+
+**Phase 3: SSOT Validation (NEW TESTS - 6 tests, 20%)**
+- `test_unified_emitter_is_only_emitter.py` - Single emitter validation
+- `test_single_emitter_performance_improvement.py` - Performance validation
+- `test_memory_leak_elimination_validation.py` - Memory leak elimination
+
+### Test Execution Commands
+```bash
+# Mission critical protection
+python tests/mission_critical/test_websocket_agent_events_suite.py
+python -m pytest tests/mission_critical/websocket_emitter_consolidation/
+
+# Integration validation (non-docker)
+python -m pytest tests/integration/websocket_core/test_websocket_auth_protocol_integration.py
+python -m pytest tests/integration/agent_golden_path/test_multi_user_concurrent_message_processing.py
+
+# E2E GCP staging
+python tests/e2e/test_golden_path_websocket_auth_staging.py
+```
 
 ## Files Requiring Changes
 
@@ -109,4 +156,4 @@
 
 ---
 *Last Updated: 2025-09-14*
-*Next Update: After test discovery and planning phase*
+*Next Update: After executing new SSOT test plan (Step 2)*

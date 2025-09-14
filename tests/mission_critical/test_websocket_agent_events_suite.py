@@ -302,11 +302,13 @@ class MissionCriticalEventValidator:
     
     def validate_event_content_structure(self, event: Dict, event_type: str) -> bool:
         """Validate the content structure of specific event types.
-        
-        Handles both flat event format and ServerMessage format where
-        event data is nested in 'payload' field.
-        
-        Issue #892: Fixed to handle ServerMessage format for Golden Path compatibility.
+
+        Handles multiple event formats:
+        1. Flat format: Event data directly in event dict
+        2. ServerMessage format with 'payload' field (legacy)
+        3. ServerMessage format with 'data' field (current Golden Path format)
+
+        Issue #892: Fixed to handle both ServerMessage formats for Golden Path compatibility.
         """
         required_fields = {
             "agent_started": ["type", "user_id", "thread_id", "timestamp"],
@@ -315,22 +317,29 @@ class MissionCriticalEventValidator:
             "tool_completed": ["type", "tool_name", "results", "duration", "timestamp"],
             "agent_completed": ["type", "status", "final_response", "timestamp"]
         }
-        
+
         if event_type not in required_fields:
             return True  # No specific validation for this event type
-        
-        # Determine if this is ServerMessage format (has payload field)
-        # or flat format (event data directly in event dict)
-        if "payload" in event and isinstance(event["payload"], dict):
-            # ServerMessage format: event data is in payload
+
+        # Determine event format and extract event data
+        if "data" in event and isinstance(event["data"], dict):
+            # Current ServerMessage format: event data is in 'data' field
+            event_data = event["data"]
+            format_type = "ServerMessage(data)"
+            # 'type' field is at top level in ServerMessage format
+            has_type = "type" in event
+        elif "payload" in event and isinstance(event["payload"], dict):
+            # Legacy ServerMessage format: event data is in 'payload' field
             event_data = event["payload"]
+            format_type = "ServerMessage(payload)"
             # 'type' field is at top level in ServerMessage format
             has_type = "type" in event
         else:
             # Flat format: event data is directly in event dict
             event_data = event
+            format_type = "flat"
             has_type = "type" in event_data
-        
+
         missing_fields = []
         for field in required_fields[event_type]:
             if field == "type":
@@ -341,12 +350,11 @@ class MissionCriticalEventValidator:
                 # All other fields should be in event_data
                 if field not in event_data:
                     missing_fields.append(field)
-        
+
         if missing_fields:
-            format_type = "ServerMessage" if "payload" in event else "flat"
             self.errors.append(f"Event {event_type} ({format_type} format) missing required fields: {missing_fields}")
             return False
-        
+
         return True
     
     def generate_report(self) -> str:

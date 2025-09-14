@@ -76,7 +76,7 @@ from netra_backend.app.agents.supervisor.pipeline_executor import PipelineExecut
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
-    PipelineStep
+    PipelineStepConfig
 )
 
 # Supporting Infrastructure
@@ -126,15 +126,15 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         
         # Test pipeline steps
         self.test_pipeline_steps = [
-            PipelineStep(
+            PipelineStepConfig(
                 agent_name="triage_agent",
                 metadata={"step_number": 1, "description": "Initial request triage"}
             ),
-            PipelineStep(
-                agent_name="data_helper_agent", 
+            PipelineStepConfig(
+                agent_name="data_helper_agent",
                 metadata={"step_number": 2, "description": "Data collection"}
             ),
-            PipelineStep(
+            PipelineStepConfig(
                 agent_name="reporting_agent",
                 metadata={"step_number": 3, "description": "Final report generation"}
             )

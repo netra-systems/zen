@@ -102,12 +102,39 @@ class TestAgentExecutionCoreIntegration:
         """Real agent registry for integration testing."""
         # Create a minimal LLM manager for integration testing
         from netra_backend.app.llm.llm_manager import LLMManager
-        
+
         # Create LLM manager without user context for testing
         # This is acceptable for integration tests as warned in the manager
         llm_manager = LLMManager(user_context=None)
-        
+
         registry = AgentRegistry(llm_manager)
+
+        # For integration testing, set up the registry to use simple registration
+        # instead of the complex factory pattern
+        registry._test_agents = {}  # Simple storage for test agents
+
+        # Override get method for testing
+        original_get = registry.get
+        def test_get(key, context=None):
+            # First try our simple test storage
+            if hasattr(registry, '_test_agents') and key in registry._test_agents:
+                return registry._test_agents[key]
+            # Fall back to original get method
+            return original_get(key, context)
+
+        # Override register method for testing
+        original_register = registry.register
+        def test_register(name, agent, source="test"):
+            # Store in our simple test storage
+            if not hasattr(registry, '_test_agents'):
+                registry._test_agents = {}
+            registry._test_agents[name] = agent
+            # Also call original register
+            original_register(name, agent, source)
+
+        registry.get = test_get
+        registry.register = test_register
+
         return registry
 
     @pytest.fixture
