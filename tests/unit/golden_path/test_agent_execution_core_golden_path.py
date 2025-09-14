@@ -79,7 +79,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 # Agent core imports
 from netra_backend.app.agents.base_agent import BaseAgent, AgentState
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory as UnifiedExecutionEngineFactory
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
 
