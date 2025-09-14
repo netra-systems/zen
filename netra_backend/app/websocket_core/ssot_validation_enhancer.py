@@ -96,7 +96,7 @@ class WebSocketManagerSSotValidator:
             logger.warning(f"SSOT VALIDATION: {issue}")
 
         # Issue #712 Fix 2: Validate manager type is correct SSOT class
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
         if not isinstance(manager_instance, UnifiedWebSocketManager):
             issue = f"Manager not instance of SSOT UnifiedWebSocketManager: {type(manager_instance)}"
             validation_issues.append(issue)
