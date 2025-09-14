@@ -22,7 +22,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.modern_execution_helpers import ModernExecutionHelpers
+from netra_backend.app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
 
 
 class TestEnterpriseSecurityValidation:
@@ -48,7 +48,7 @@ class TestEnterpriseSecurityValidation:
             "phi_data": "protected health information"
         }
         
-        execution_helpers = ModernExecutionHelpers(supervisor=mock_supervisor)
+        execution_helpers = SupervisorExecutionHelpers(supervisor_agent=mock_supervisor)
         
         # Simulate healthcare enterprise user with PHI data
         healthcare_context = DeepAgentState(
@@ -66,8 +66,7 @@ class TestEnterpriseSecurityValidation:
         # VULNERABILITY REPRODUCTION: Interface mismatch prevents secure child context creation
         with pytest.raises(AttributeError) as exc_info:
             # This would fail in production healthcare environment
-            await execution_helpers.execute_supervisor_workflow(
-                user_request="healthcare data analysis",
+            await execution_helpers.run_supervisor_workflow(
                 context=healthcare_context,
                 run_id="hipaa_vulnerability_test"
             )
@@ -99,7 +98,7 @@ class TestEnterpriseSecurityValidation:
             "audit_trail": "compliance tracking information"
         }
         
-        execution_helpers = ModernExecutionHelpers(supervisor=mock_supervisor)
+        execution_helpers = SupervisorExecutionHelpers(supervisor_agent=mock_supervisor)
         
         # Simulate SOC2 enterprise customer
         soc2_context = DeepAgentState(
@@ -116,8 +115,7 @@ class TestEnterpriseSecurityValidation:
         
         # VULNERABILITY REPRODUCTION: SOC2 security control failure
         with pytest.raises(AttributeError) as exc_info:
-            await execution_helpers.execute_supervisor_workflow(
-                user_request="SOC2 compliant financial analysis",
+            await execution_helpers.run_supervisor_workflow(
                 context=soc2_context,
                 run_id="soc2_vulnerability_test"
             )
@@ -148,7 +146,7 @@ class TestEnterpriseSecurityValidation:
             "material_information": "non-public financial data"
         }
         
-        execution_helpers = ModernExecutionHelpers(supervisor=mock_supervisor)
+        execution_helpers = SupervisorExecutionHelpers(supervisor_agent=mock_supervisor)
         
         # Simulate SEC-regulated financial services customer
         sec_context = DeepAgentState(
@@ -165,8 +163,7 @@ class TestEnterpriseSecurityValidation:
         
         # VULNERABILITY REPRODUCTION: SEC regulatory violation
         with pytest.raises(AttributeError) as exc_info:
-            await execution_helpers.execute_supervisor_workflow(
-                user_request="SEC compliant financial analysis",
+            await execution_helpers.run_supervisor_workflow(
                 context=sec_context,
                 run_id="sec_vulnerability_test"
             )
@@ -228,7 +225,7 @@ class TestEnterpriseSecurityValidation:
         mock_supervisor.run.return_value = Mock()
         mock_supervisor.run.return_value.to_dict.return_value = {"test": "result"}
         
-        execution_helpers = ModernExecutionHelpers(supervisor=mock_supervisor)
+        execution_helpers = SupervisorExecutionHelpers(supervisor_agent=mock_supervisor)
         
         # Track failures for each enterprise user
         failures = []
@@ -236,8 +233,7 @@ class TestEnterpriseSecurityValidation:
         # Simulate concurrent enterprise user processing
         for user_data in enterprise_users:
             try:
-                await execution_helpers.execute_supervisor_workflow(
-                    user_request=user_data["context"].user_request,
+                await execution_helpers.run_supervisor_workflow(
                     context=user_data["context"],
                     run_id=f"contamination_test_{user_data['context'].user_id}"
                 )
@@ -295,7 +291,7 @@ class TestEnterpriseSecurityValidation:
         
         # Test vulnerability impact on each segment
         mock_supervisor = AsyncMock()
-        execution_helpers = ModernExecutionHelpers(supervisor=mock_supervisor)
+        execution_helpers = SupervisorExecutionHelpers(supervisor_agent=mock_supervisor)
         
         vulnerable_segments = 0
         for segment in enterprise_segments:
@@ -307,8 +303,7 @@ class TestEnterpriseSecurityValidation:
             
             try:
                 # This should fail for all segments due to interface vulnerability
-                await execution_helpers.execute_supervisor_workflow(
-                    user_request="enterprise compliance test",
+                await execution_helpers.run_supervisor_workflow(
                     context=test_context,
                     run_id=f"revenue_impact_test_{segment['sector']}"
                 )
@@ -339,7 +334,7 @@ class TestProductionScenarioReproduction:
             "performance_improvements": "25% efficiency gain"
         }
         
-        execution_helpers = ModernExecutionHelpers(supervisor=mock_supervisor)
+        execution_helpers = SupervisorExecutionHelpers(supervisor_agent=mock_supervisor)
         
         # Create production-like enterprise context
         production_context = DeepAgentState(
@@ -357,8 +352,7 @@ class TestProductionScenarioReproduction:
         
         # VULNERABILITY REPRODUCTION: Production failure scenario
         with pytest.raises(AttributeError) as exc_info:
-            result = await execution_helpers.execute_supervisor_workflow(
-                user_request=production_context.user_request,
+            result = await execution_helpers.run_supervisor_workflow(
                 context=production_context,
                 run_id="production_failure_reproduction"
             )

@@ -3150,6 +3150,8 @@ class _UnifiedWebSocketManagerImplementation:
         CRITICAL SSOT INTERFACE COMPLIANCE: This method provides standard event 
         interface expected by WebSocket validation tests and agent systems.
         
+        ISSUE #1098 HOTFIX: Fixed to include all 7 required fields for Golden Path AI response delivery.
+        
         Args:
             connection_id: Unique connection identifier
             event_type: Type of event being sent
@@ -3159,12 +3161,25 @@ class _UnifiedWebSocketManagerImplementation:
             bool: Success status of event delivery
         """
         try:
-            # Create event message structure
+            # Get connection to extract user context
+            connection = self._connections.get(connection_id)
+            if not connection:
+                logger.warning(f"Connection {connection_id} not found for event {event_type}")
+                return False
+            
+            # Extract user context fields from connection for proper event structure
+            user_id = getattr(connection, 'user_id', None)
+            thread_id = getattr(connection, 'thread_id', None)
+            run_id = getattr(connection, 'run_id', None)
+            
+            # Create event message with all 7 required fields for Golden Path compliance
             event_message = {
-                "type": event_type,
-                "data": event_data,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "connection_id": connection_id
+                "type": event_type,                                          # Field 1: Event type identifier
+                "user_id": str(user_id) if user_id else "unknown_user",     # Field 2: User isolation and security  
+                "thread_id": str(thread_id) if thread_id else "unknown_thread", # Field 3: Context routing
+                "run_id": str(run_id) if run_id else "unknown_run",         # Field 4: Request correlation
+                "timestamp": datetime.now(timezone.utc).isoformat(),        # Field 5: Time tracking
+                **event_data                                                # Fields 6-7: Event-specific data (agent_name, task, etc)
             }
             
             # Use send_message for actual delivery
@@ -3559,6 +3574,8 @@ class _UnifiedWebSocketManagerImplementation:
                                    connection_id: Optional[str] = None, user_id: Optional[str] = None) -> bool:
         """Send WebSocket event immediately (fallback when coordination disabled).
         
+        ISSUE #1098 HOTFIX: Fixed to include all 7 required fields for Golden Path AI response delivery.
+        
         Args:
             event_type: Type of WebSocket event
             event_data: Event data payload
@@ -3569,10 +3586,26 @@ class _UnifiedWebSocketManagerImplementation:
             True if sent successfully, False otherwise
         """
         try:
+            # Extract user context for proper event structure
+            extracted_user_id = user_id
+            thread_id = None
+            run_id = None
+            
+            # If sending to specific connection, extract context from connection
+            if connection_id and connection_id in self._connections:
+                connection = self._connections[connection_id]
+                extracted_user_id = getattr(connection, 'user_id', user_id)
+                thread_id = getattr(connection, 'thread_id', None)
+                run_id = getattr(connection, 'run_id', None)
+            
+            # Create message with all 7 required fields for Golden Path compliance
             message = {
-                "type": event_type,
-                "data": event_data,
-                "timestamp": datetime.now(timezone.utc).isoformat()
+                "type": event_type,                                             # Field 1: Event type identifier
+                "user_id": str(extracted_user_id) if extracted_user_id else "unknown_user", # Field 2: User isolation
+                "thread_id": str(thread_id) if thread_id else "unknown_thread", # Field 3: Context routing  
+                "run_id": str(run_id) if run_id else "unknown_run",            # Field 4: Request correlation
+                "timestamp": datetime.now(timezone.utc).isoformat(),           # Field 5: Time tracking
+                **event_data                                                   # Fields 6-7: Event-specific data
             }
             
             if connection_id:

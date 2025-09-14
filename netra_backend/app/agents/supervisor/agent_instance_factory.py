@@ -43,7 +43,7 @@ from netra_backend.app.websocket_core import (
     WebSocketEmitterPool,
 )
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+# SSOT COMPLIANCE: Removed legacy WebSocketManager import - use AgentWebSocketBridge only
 # SSOT COMPLIANT: Use AgentWebSocketBridge factory instead of direct WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 # WebSocket exceptions module was deleted - using standard exceptions
@@ -90,13 +90,21 @@ class AgentInstanceFactory:
         'SyntheticDataSubAgent': ['llm_manager'],
     }
     
-    def __init__(self):
-        """Initialize the factory with infrastructure components."""
+    def __init__(self, user_context: Optional[UserExecutionContext] = None):
+        """Initialize the factory with infrastructure components.
+        
+        Args:
+            user_context: Optional user execution context for per-request factory instances.
+                         When provided, creates a factory bound to specific user context.
+                         When None, creates infrastructure-only factory for global configuration.
+        """
+        # Store user context for per-request factories (SSOT remediation)
+        self._user_context = user_context
         # Infrastructure components (shared, immutable)
         self._agent_class_registry: Optional[AgentClassRegistry] = None
         self._agent_registry: Optional[AgentRegistry] = None
         self._websocket_bridge: Optional[AgentWebSocketBridge] = None
-        self._websocket_manager: Optional[WebSocketManager] = None
+        # SSOT COMPLIANCE: Removed _websocket_manager - use AgentWebSocketBridge only
         self._llm_manager: Optional[Any] = None
         self._tool_dispatcher: Optional[Any] = None
         
@@ -159,7 +167,7 @@ class AgentInstanceFactory:
                  agent_class_registry: Optional[AgentClassRegistry] = None,
                  agent_registry: Optional[AgentRegistry] = None,
                  websocket_bridge: Optional[AgentWebSocketBridge] = None,
-                 websocket_manager: Optional[WebSocketManager] = None,
+                 # SSOT COMPLIANCE: Removed websocket_manager parameter - use AgentWebSocketBridge only
                  llm_manager: Optional[Any] = None,
                  tool_dispatcher: Optional[Any] = None) -> None:
         """
@@ -168,8 +176,7 @@ class AgentInstanceFactory:
         Args:
             agent_class_registry: Registry containing agent classes (preferred)
             agent_registry: Legacy agent registry (for backward compatibility)
-            websocket_bridge: WebSocket bridge for agent notifications
-            websocket_manager: Optional WebSocket manager for direct access
+            websocket_bridge: WebSocket bridge for agent notifications (SSOT)
             llm_manager: LLM manager for agent communication
             tool_dispatcher: Tool dispatcher for agent tools
         """
@@ -211,13 +218,13 @@ class AgentInstanceFactory:
                 self._agent_class_registry = None
         
         self._websocket_bridge = websocket_bridge
-        self._websocket_manager = websocket_manager
+        # SSOT COMPLIANCE: Removed websocket_manager assignment - use AgentWebSocketBridge only
         self._llm_manager = llm_manager
         self._tool_dispatcher = tool_dispatcher
         
         logger.info(f" PASS:  AgentInstanceFactory configured successfully:")
-        logger.info(f"   - WebSocket bridge: {type(websocket_bridge).__name__}")
-        logger.info(f"   - WebSocket manager: {type(websocket_manager).__name__ if websocket_manager else 'None'}")
+        logger.info(f"   - WebSocket bridge: {type(websocket_bridge).__name__ if websocket_bridge else 'None'}")
+        # SSOT COMPLIANCE: Removed websocket_manager logging - use AgentWebSocketBridge only
         logger.info(f"   - Registry type: {'AgentClassRegistry' if self._agent_class_registry else 'AgentRegistry' if self._agent_registry else 'Unknown'}")
         logger.info(f"   - LLM manager: {'Configured' if llm_manager else 'None'}")
         logger.info(f"   - Tool dispatcher: {'Configured' if tool_dispatcher else 'None'}")
@@ -892,8 +899,9 @@ class AgentInstanceFactory:
                 context=None  # Will be set by caller if needed
             )
         else:
-            # Create mock manager for tests when no real bridge available
-            class MockWebSocketManager:
+            # Create mock bridge for tests when no real bridge available
+            # SSOT COMPLIANCE: Use AgentWebSocketBridge-compatible mock
+            class MockWebSocketBridge:
                 async def emit_user_event(self, *args, **kwargs):
                     return True
                 async def notify_agent_started(self, *args, **kwargs):
@@ -905,7 +913,7 @@ class AgentInstanceFactory:
                 async def notify_tool_completed(self, *args, **kwargs):
                     return True
                     
-            mock_manager = MockWebSocketManager()
+            mock_manager = MockWebSocketBridge()
             return UnifiedWebSocketEmitter(
                 manager=mock_manager,
                 user_id=user_id,
@@ -957,7 +965,7 @@ class AgentInstanceFactory:
             'configuration_status': {
                 'agent_registry_configured': self._agent_registry is not None,
                 'websocket_bridge_configured': self._websocket_bridge is not None,
-                'websocket_manager_configured': self._websocket_manager is not None
+                'websocket_manager_configured': False  # SSOT COMPLIANCE: Always False - use AgentWebSocketBridge only
             },
             'performance_config': self._performance_config.to_dict()
         }
@@ -1124,13 +1132,56 @@ class AgentInstanceFactory:
         logger.debug("AgentInstanceFactory state reset completed")
 
 
-# Singleton factory instance for application use
+# SSOT REMEDIATION: Per-Request Factory Creation (PHASE 1)
+def create_agent_instance_factory(user_context: UserExecutionContext) -> AgentInstanceFactory:
+    """
+    Create per-request AgentInstanceFactory with proper user isolation.
+    
+    This is the SSOT-compliant method for creating agent factories that ensures
+    complete user isolation and prevents context leakage between concurrent users.
+    
+    Args:
+        user_context: User execution context for complete isolation
+        
+    Returns:
+        AgentInstanceFactory: Fresh factory instance bound to user context
+        
+    Business Impact: Enables enterprise-grade multi-user deployment with
+    guaranteed data isolation and regulatory compliance.
+    """
+    if not user_context:
+        raise ValueError("UserExecutionContext is required for per-request factory creation")
+    
+    logger.info(f"Creating per-request AgentInstanceFactory for user {user_context.user_id} (run: {user_context.run_id})")
+    
+    # Create factory with user context binding
+    factory = AgentInstanceFactory(user_context=user_context)
+    
+    logger.debug(f"Per-request factory created with user context isolation for {user_context.user_id}")
+    return factory
+
+
+# LEGACY SINGLETON PATTERN (PHASE 1: Maintain compatibility during transition)
 _factory_instance: Optional[AgentInstanceFactory] = None
 
 
 def get_agent_instance_factory() -> AgentInstanceFactory:
-    """Get singleton AgentInstanceFactory instance."""
+    """Get singleton AgentInstanceFactory instance.
+    
+    DEPRECATION WARNING: This singleton pattern will be phased out in favor of
+    create_agent_instance_factory() for proper user isolation.
+    
+    Current consumers should migrate to per-request pattern:
+    - SupervisorAgent: Use create_agent_instance_factory(user_context)
+    - Test suites: Use create_agent_instance_factory(test_context)
+    - Direct consumers: Get user context first, then create factory
+    """
     global _factory_instance
+    
+    logger.warning(
+        "SINGLETON PATTERN USAGE DETECTED: get_agent_instance_factory() called. "
+        "Consider migrating to create_agent_instance_factory(user_context) for proper user isolation."
+    )
     
     if _factory_instance is None:
         _factory_instance = AgentInstanceFactory()
@@ -1141,7 +1192,7 @@ def get_agent_instance_factory() -> AgentInstanceFactory:
 async def configure_agent_instance_factory(agent_class_registry: Optional[AgentClassRegistry] = None,
                                           agent_registry: Optional[AgentRegistry] = None,
                                           websocket_bridge: Optional[AgentWebSocketBridge] = None,
-                                          websocket_manager: Optional[WebSocketManager] = None,
+                                          # SSOT COMPLIANCE: Removed websocket_manager parameter - use AgentWebSocketBridge only
                                           llm_manager: Optional[Any] = None,
                                           tool_dispatcher: Optional[Any] = None) -> AgentInstanceFactory:
     """
@@ -1150,8 +1201,7 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
     Args:
         agent_class_registry: Registry containing agent classes (preferred)
         agent_registry: Legacy agent registry (for backward compatibility)
-        websocket_bridge: WebSocket bridge for notifications
-        websocket_manager: Optional WebSocket manager
+        websocket_bridge: WebSocket bridge for notifications (SSOT)
         llm_manager: LLM manager for agent communication
         tool_dispatcher: Tool dispatcher for agent tools
         
@@ -1163,7 +1213,7 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
         agent_class_registry=agent_class_registry,
         agent_registry=agent_registry,
         websocket_bridge=websocket_bridge,
-        websocket_manager=websocket_manager,
+        # SSOT COMPLIANCE: Removed websocket_manager parameter - use AgentWebSocketBridge only
         llm_manager=llm_manager,
         tool_dispatcher=tool_dispatcher
     )

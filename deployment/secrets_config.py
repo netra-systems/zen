@@ -17,7 +17,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Ensures reliable service availability
 """
 
-from typing import Dict, List, Set, Optional, Any
+from typing import Dict, List, Set, Optional, Any, Tuple
 import logging
 
 logger = logging.getLogger(__name__)
@@ -749,6 +749,145 @@ def get_secret_with_fallback(secret_name: str, fallback_env_var: str = None,
         )
 
 
+# Bridge Functions for Mission Critical Configuration Regression Tests
+# These functions provide the missing bridge between SecretConfig and the tests
+
+def get_secret_mappings(environment: str) -> Dict[str, str]:
+    """
+    Get secret mappings for a specific environment.
+    
+    This is a bridge function that provides the missing functionality
+    required by Mission Critical Configuration Regression Tests (Issue #1091).
+    
+    Args:
+        environment: Environment name (staging, production)
+        
+    Returns:
+        Dictionary mapping environment variable names to GSM secret names
+        
+    Business Impact: $500K+ ARR Golden Path configuration protection
+    """
+    logger.info(f"Getting secret mappings for environment: {environment}")
+    
+    # For now, return the base SECRET_MAPPINGS since they're environment-aware
+    # In the future, this could be enhanced to return environment-specific mappings
+    mappings = SecretConfig.SECRET_MAPPINGS.copy()
+    
+    # Add environment-specific OAuth mappings based on environment
+    if environment.lower() == 'staging':
+        # Staging uses the existing mappings which are staging-specific
+        pass  # Current mappings are already staging
+    elif environment.lower() == 'production':
+        # Production would use production-specific mappings
+        # Update mappings to use production secrets
+        production_mappings = {}
+        for key, value in mappings.items():
+            if 'staging' in value.lower():
+                production_mappings[key] = value.replace('staging', 'production')
+            else:
+                production_mappings[key] = value
+        mappings = production_mappings
+    
+    logger.info(f"Retrieved {len(mappings)} secret mappings for {environment}")
+    return mappings
+
+
+def validate_secret_mappings(environment: str) -> Tuple[bool, List[str]]:
+    """
+    Validate secret mappings for a specific environment.
+    
+    This is a bridge function that provides the missing functionality
+    required by Mission Critical Configuration Regression Tests (Issue #1091).
+    
+    Args:
+        environment: Environment name (staging, production)
+        
+    Returns:
+        Tuple of (is_valid: bool, errors: List[str])
+        
+    Business Impact: $500K+ ARR Golden Path configuration protection
+    """
+    logger.info(f"Validating secret mappings for environment: {environment}")
+    
+    errors = []
+    
+    try:
+        # Get the mappings for this environment
+        mappings = get_secret_mappings(environment)
+        
+        # Validate that critical secrets are present
+        critical_backend_secrets = SecretConfig.CRITICAL_SECRETS.get("backend", [])
+        critical_auth_secrets = SecretConfig.CRITICAL_SECRETS.get("auth", [])
+        all_critical = set(critical_backend_secrets + critical_auth_secrets)
+        
+        missing_critical = []
+        for critical_secret in all_critical:
+            if critical_secret not in mappings:
+                missing_critical.append(critical_secret)
+        
+        if missing_critical:
+            errors.append(f"Missing critical secrets in {environment}: {', '.join(missing_critical)}")
+        
+        # Validate that mappings are not empty
+        empty_mappings = []
+        for secret_name, gsm_name in mappings.items():
+            if not gsm_name or gsm_name.isspace():
+                empty_mappings.append(secret_name)
+        
+        if empty_mappings:
+            errors.append(f"Empty GSM mappings in {environment}: {', '.join(empty_mappings)}")
+        
+        # Validate environment-specific naming
+        if environment.lower() == 'staging':
+            non_staging_mappings = []
+            for secret_name, gsm_name in mappings.items():
+                if 'production' in gsm_name.lower():
+                    non_staging_mappings.append(f"{secret_name} -> {gsm_name}")
+            
+            if non_staging_mappings:
+                errors.append(f"Staging should not reference production secrets: {', '.join(non_staging_mappings)}")
+        
+        elif environment.lower() == 'production':
+            non_production_mappings = []
+            for secret_name, gsm_name in mappings.items():
+                if 'staging' in gsm_name.lower():
+                    non_production_mappings.append(f"{secret_name} -> {gsm_name}")
+            
+            if non_production_mappings:
+                errors.append(f"Production should not reference staging secrets: {', '.join(non_production_mappings)}")
+        
+        # Additional validation: Check for duplicate GSM names
+        gsm_names = list(mappings.values())
+        duplicate_gsm = []
+        seen = set()
+        for gsm_name in gsm_names:
+            if gsm_name in seen and gsm_name not in duplicate_gsm:
+                duplicate_gsm.append(gsm_name)
+            seen.add(gsm_name)
+        
+        if duplicate_gsm:
+            errors.append(f"Duplicate GSM secret names in {environment}: {', '.join(duplicate_gsm)}")
+        
+        is_valid = len(errors) == 0
+        
+        logger.info(
+            f"Secret mapping validation for {environment}: "
+            f"{'✅ VALID' if is_valid else '❌ INVALID'} "
+            f"({len(mappings)} mappings checked, {len(errors)} errors)"
+        )
+        
+        if errors:
+            for error in errors:
+                logger.warning(f"Validation error: {error}")
+        
+        return is_valid, errors
+        
+    except Exception as e:
+        error_msg = f"Failed to validate secret mappings for {environment}: {e}"
+        logger.error(error_msg)
+        return False, [error_msg]
+
+
 if __name__ == "__main__":
     # Print requirements for all services when run directly
     print("SECRET CONFIGURATION REPORT")
@@ -779,4 +918,26 @@ if __name__ == "__main__":
     print(f"Message: {validation['message']}")
     if not validation['valid']:
         print(f"Error: {validation.get('error', 'Unknown error')}")
+    print()
+    
+    # Test the new bridge functions
+    print("\nBRIDGE FUNCTIONS VALIDATION")
+    print("="*60)
+    for env in ['staging', 'production']:
+        print(f"\n{env.upper()} Environment:")
+        try:
+            mappings = get_secret_mappings(env)
+            print(f"  ✅ get_secret_mappings: {len(mappings)} mappings retrieved")
+            
+            is_valid, errors = validate_secret_mappings(env)
+            status = "✅ VALID" if is_valid else "❌ INVALID"
+            print(f"  {status} validate_secret_mappings: {len(errors)} errors")
+            
+            if errors:
+                for error in errors[:3]:  # Show first 3 errors
+                    print(f"    - {error}")
+                if len(errors) > 3:
+                    print(f"    ... and {len(errors) - 3} more errors")
+        except Exception as e:
+            print(f"  ❌ Bridge function error: {e}")
     print()
