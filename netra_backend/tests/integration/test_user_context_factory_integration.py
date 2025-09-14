@@ -38,7 +38,7 @@ from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     UserContextFactory
 )
-from netra_backend.app.agents.supervisor.execution_factory import (
+from netra_backend.app.agents.supervisor.execution_engine_factory import (
     ExecutionEngineFactory,
     ExecutionFactoryConfig
 )

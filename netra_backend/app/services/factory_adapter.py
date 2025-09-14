@@ -29,7 +29,10 @@ from enum import Enum
 from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory, UserExecutionContext, IsolatedExecutionEngine
+    # SSOT IMPORT: Updated to use canonical execution engine factory  
+    from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as IsolatedExecutionEngine
     from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, UserWebSocketEmitter
     from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
