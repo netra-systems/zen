@@ -46,7 +46,7 @@ describe('Type Safety - ThreadState Import Consistency', () => {
       name: 'StoreSlice importing conflicting ThreadState definitions',
       imports: [
         "import { ThreadState as SharedThreadState } from '@/shared/types/frontend_types';",
-        "import { ThreadState as SliceThreadState } from '@/store/slices/types';"
+        "import { ThreadSliceState as SliceThreadState } from '@/store/slices/types';"
       ],
       usage: `
         function mergeThreadStates(shared: SharedThreadState, slice: SliceThreadState) {
@@ -58,7 +58,7 @@ describe('Type Safety - ThreadState Import Consistency', () => {
       name: 'StateMachine conflicting with data ThreadState',
       imports: [
         "import { ThreadState as DataState } from '@/shared/types/frontend_types';",
-        "import { ThreadState as MachineState } from '@/lib/thread-state-machine';"
+        "import { ThreadOperationState as MachineState } from '@/lib/thread-state-machine';"
       ],
       usage: `
         function handleThreadState(state: DataState | MachineState) {

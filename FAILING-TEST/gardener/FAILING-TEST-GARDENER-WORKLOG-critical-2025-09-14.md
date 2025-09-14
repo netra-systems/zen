@@ -150,6 +150,23 @@ target alpine-test-backend: failed to solve: failed to compute cache key: failed
 **Business Impact**: Core agent execution and user session isolation affected
 **GitHub Issue**: #891 - failing-test-regression-p1-base-agent-session-factory-failures
 
+### Issue 11: Agent Registry WebSocket Integration Failures
+**Category**: Agent Registry/WebSocket Integration  
+**Severity**: P2 - Medium (Agent communication affected)  
+**Description**: Agent Registry WebSocket bridge creation and interface compatibility issues
+**Details**:
+- 2 out of 13 Agent Registry tests failing (84.6% pass rate)
+- WebSocket bridge type validation failing
+- Constructor interface signature mismatch between parent/child registries
+- Interface mismatch warning: "Parent expects AgentWebSocketBridge, Child expects WebSocketManager"
+
+**Failed Tests**:
+- test_websocket_manager_to_bridge_conversion (bridge type validation)
+- test_parent_interface_compatibility (constructor signature mismatch)
+
+**Business Impact**: WebSocket event delivery reliability compromised, affecting real-time agent communication
+**GitHub Issue**: #896 - failing-test-regression-p2-agent-registry-websocket-failures
+
 ## Next Steps
 1. **URGENT**: Address auth service connection failures (P0)
 2. **URGENT**: Fix WebSocket event tester missing attribute (P0)
@@ -157,8 +174,9 @@ target alpine-test-backend: failed to solve: failed to compute cache key: failed
 4. Fix missing imports in Docker lifecycle tests (P1)
 5. Repair corrupted test file syntax (P1)
 6. **NEW**: Fix BaseAgent session management and factory pattern failures (P1) - Issue #891
-7. Address deprecation warnings (P2)
-8. Create GitHub issues for remaining problem categories
+7. **NEW**: Fix Agent Registry WebSocket integration failures (P2) - Issue #896
+8. Address deprecation warnings (P2)
+9. Create GitHub issues for remaining problem categories
 
 ## Test Execution Summary
 ### Infrastructure Tests
