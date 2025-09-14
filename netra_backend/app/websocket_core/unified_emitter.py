@@ -542,7 +542,7 @@ class UnifiedWebSocketEmitter:
             metadata['agent_name'] = agent_name
         
         await self.emit_agent_thinking({
-            'thought': actual_thought,
+            'reasoning': actual_thought,
             'metadata': metadata,
             'type': 'reasoning',
             'timestamp': time.time()
@@ -560,7 +560,7 @@ class UnifiedWebSocketEmitter:
             metadata = {}
         
         await self.emit_tool_executing({
-            'tool': tool_name,
+            'tool_name': tool_name,
             'metadata': metadata,
             'status': 'executing',
             'timestamp': time.time()
@@ -578,7 +578,7 @@ class UnifiedWebSocketEmitter:
             metadata = {}
         
         await self.emit_tool_completed({
-            'tool': tool_name,
+            'tool_name': tool_name,
             'metadata': metadata,
             'status': 'completed',
             'timestamp': time.time()

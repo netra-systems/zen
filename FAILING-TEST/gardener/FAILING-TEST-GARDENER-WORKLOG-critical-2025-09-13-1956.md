@@ -91,6 +91,8 @@ assert 'tool_name' in {'correlation_id': None, 'data': {'connection_id': 'legacy
 
 **LOCATION**: `auth_service/tests` with unit marker
 
+**GITHUB ISSUE**: Created Issue #925 "failing-test-auth-service-unit-execution-p1-security-validation-compromised" for comprehensive auth service unit test execution failure tracking and security validation
+
 ---
 
 ## ISSUE #4: SSOT Violations - WebSocket Manager Classes

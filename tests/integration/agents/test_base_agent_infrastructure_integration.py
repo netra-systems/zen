@@ -56,7 +56,6 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDisp
 
 # WebSocket Event Testing
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
-from netra_backend.app.websocket_core.types import WebSocketEventType
 
 import logging
 logger = logging.getLogger(__name__)
