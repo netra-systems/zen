@@ -122,7 +122,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
             run_id="pipeline_run_001"
         )
         self.test_agent_state.user_request = "Test pipeline execution request"
-        self.test_agent_state.current_step = 0
+        self.test_agent_state.step_count = 0
         
         # Test pipeline steps
         self.test_pipeline_steps = [
