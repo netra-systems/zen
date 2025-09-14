@@ -23,7 +23,8 @@ This eliminates ID collision risks and ensures consistent ID formats across WebS
 from netra_backend.app.websocket_core.unified_manager import (
     _UnifiedWebSocketManagerImplementation,
     WebSocketConnection,
-    _serialize_message_safely
+    _serialize_message_safely,
+    WebSocketManagerMode
 )
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from shared.logging.unified_logging_ssot import get_logger
