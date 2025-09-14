@@ -211,10 +211,11 @@ class TestWebSocketEventEmissionIntegration(SSotAsyncTestCase):
         async def capture_event(user_id, message):
             captured_events.append(message)
         
-        with patch.object(self.websocket_manager, 'send_to_user', side_effect=capture_event):
+        with patch.object(self.websocket_manager, 'send_to_user', side_effect=capture_event), \
+             patch.object(self.websocket_manager, 'is_connection_active', return_value=True):
             
             for event_type, event_data in events_to_test:
-                await self.websocket_manager.send_critical_event(
+                await self.websocket_manager.emit_critical_event(
                     self.test_user_id,
                     event_type,
                     event_data
@@ -258,11 +259,12 @@ class TestWebSocketEventEmissionIntegration(SSotAsyncTestCase):
                 all_captured_messages[user_id] = []
             all_captured_messages[user_id].append(message)
         
-        with patch.object(self.websocket_manager, 'send_to_user', side_effect=capture_by_user):
+        with patch.object(self.websocket_manager, 'send_to_user', side_effect=capture_by_user), \
+             patch.object(self.websocket_manager, 'is_connection_active', return_value=True):
             
             # Send same event type to all users with different data
             for i, user_id in enumerate(user_ids):
-                await self.websocket_manager.send_critical_event(
+                await self.websocket_manager.emit_critical_event(
                     user_id,
                     "agent_started",
                     {
