@@ -12,19 +12,6 @@ def test_timeout_command_generation():
     print("DIRECT TIMEOUT COMMAND GENERATION TEST")
     print("=" * 60)
 
-    # Create test runner instance
-    runner = TestRunner()
-
-    # Create mock args objects for different environments
-    class MockArgs:
-        def __init__(self, env):
-            self.env = env
-            self.verbose = False
-            self.fast_fail = False
-            self.pattern = None
-            # ... add other required args
-
-    # Test timeout logic by directly inspecting the command generation
     test_cases = [
         {"env": "staging", "category": "unit", "expected_timeout": "--timeout=300"},
         {"env": "staging", "category": "e2e", "expected_timeout": "--timeout=900"},

@@ -25,18 +25,18 @@ class TestImportPathUnificationValidation(SSotAsyncTestCase):
     def setUp(self):
         """Set up test environment."""
         super().setUp()
-        self.canonical_import_path = "netra_backend.app.websocket_core.unified_manager"
+        self.canonical_import_path = "netra_backend.app.websocket_core.websocket_manager"
         self.canonical_class_name = "WebSocketManager"
 
         # All possible import paths that should resolve to the same class
         self.import_paths_to_test = [
-            "netra_backend.app.websocket_core.unified_manager.WebSocketManager",
+            "netra_backend.app.websocket_core.websocket_manager.WebSocketManager",
             "netra_backend.app.websocket_core.websocket_manager.WebSocketManager",
         ]
 
         # Functions that should resolve to consistent implementations
         self.function_paths_to_test = [
-            "netra_backend.app.websocket_core.unified_manager.get_websocket_manager",
+            "netra_backend.app.websocket_core.websocket_manager.get_websocket_manager",
             "netra_backend.app.websocket_core.websocket_manager.get_websocket_manager",
         ]
 
