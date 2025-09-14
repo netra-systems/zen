@@ -84,7 +84,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
 
 # User context and state management
-from netra_backend.app.services.user_execution_context import UserExecutionContext, UserContextManager
+from netra_backend.app.services.user_execution_context import UserExecutionContext, UserContextManager, create_isolated_execution_context
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker, get_execution_tracker
 from netra_backend.app.core.execution_tracker import ExecutionState
 
@@ -97,10 +97,10 @@ from shared.types.agent_types import AgentExecutionResult
 from netra_backend.app.schemas.agent_result_types import AgentExecutionResult as LegacyAgentExecutionResult
 
 # Logging and monitoring
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from shared.isolated_environment import get_env
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):

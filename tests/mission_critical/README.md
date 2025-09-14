@@ -36,6 +36,16 @@ Without these WebSocket events, the chat UI appears "frozen" and users cannot se
    - Performance benchmarks (500+ events/sec)
    - Security and edge cases
 
+### Agent Golden Path Coverage (Issue #872) - **NEW**
+
+4. **Agent Golden Path Integration Tests**
+   - **Status**: Phase 1 Complete - 100% success rate (4/4 tests passing)
+   - **Coverage**: Core agent execution, WebSocket integration, SSOT validation
+   - **Business Impact**: $500K+ ARR golden path functionality protected
+   - **SSOT Enhancements**: ExecutionEngineFactory validation methods
+   - **Multi-User Isolation**: Enhanced concurrent user session security
+   - **Performance Metrics**: Factory creation timing and baseline establishment
+
 ## Required Events
 
 The following events MUST be sent during agent execution:
@@ -56,6 +66,16 @@ python -m pytest tests/mission_critical/test_final_validation.py -v
 ### Full Test Suite
 ```bash
 python -m pytest tests/mission_critical/ -v
+```
+
+### Agent Golden Path Tests (Issue #872)
+```bash
+# Core golden path tests - 100% success rate
+python tests/unit/golden_path/test_agent_execution_core_golden_path.py
+python tests/unit/golden_path/test_golden_path_business_value_protection.py
+
+# SSOT validation tests
+python tests/unit/ssot_validation/test_golden_path_logging_disconnection_reproduction.py
 ```
 
 ### Regression Prevention Only

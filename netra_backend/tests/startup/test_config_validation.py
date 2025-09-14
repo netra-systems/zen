@@ -50,9 +50,56 @@ class ResourceMode(Enum):
 class ServiceConfigValidator:
     def __init__(self, context: ValidationContext = None):
         self.context = context
+        self.stale_threshold_days = 30
     
     def validate(self, config):
         return ConfigValidationResult(status=ConfigStatus.VALID)
+    
+    async def _check_config_file(self):
+        """Check if config file exists and is recent."""
+        if not Path(self.context.config_path).exists():
+            return ConfigValidationResult(status=ConfigStatus.MISSING)
+        
+        # Check file age
+        file_path = Path(self.context.config_path)
+        file_modified = datetime.fromtimestamp(file_path.stat().st_mtime)
+        age_days = (datetime.now() - file_modified).days
+        
+        if age_days > self.stale_threshold_days:
+            return ConfigValidationResult(status=ConfigStatus.STALE)
+        
+        return ConfigValidationResult(status=ConfigStatus.VALID)
+    
+    def _check_file_age(self, file_path: Path) -> ConfigValidationResult:
+        """Check if file is recent or stale."""
+        if not file_path.exists():
+            return ConfigValidationResult(status=ConfigStatus.MISSING)
+        
+        file_modified = datetime.fromtimestamp(file_path.stat().st_mtime)
+        age_days = (datetime.now() - file_modified).days
+        
+        if age_days > self.stale_threshold_days:
+            return ConfigValidationResult(status=ConfigStatus.STALE)
+        
+        return ConfigValidationResult(status=ConfigStatus.VALID)
+    
+    async def _load_config(self):
+        """Load configuration from file."""
+        try:
+            # Mock implementation for testing
+            return {"redis": {"host": "localhost"}, "status": "valid"}
+        except Exception:
+            return ConfigValidationResult(status=ConfigStatus.INVALID, errors=["Failed to load config"])
+    
+    def _get_service_endpoints(self, services_config, resource_mode: ResourceMode):
+        """Get service endpoints based on resource mode."""
+        # Mock implementation for testing
+        endpoints = {}
+        if resource_mode == ResourceMode.SHARED:
+            endpoints["redis"] = "shared.redis.com:6379"
+        elif resource_mode == ResourceMode.LOCAL:
+            endpoints["clickhouse"] = "localhost:8123"
+        return endpoints
 
 class ServicesConfiguration:
     def __init__(self):
