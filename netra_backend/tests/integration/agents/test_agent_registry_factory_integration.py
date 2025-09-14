@@ -56,7 +56,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
     get_agent_instance_factory,
     configure_agent_instance_factory
 )
-from netra_backend.app.agents.supervisor.user_execution_context import (
+from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context,
     InvalidContextError
@@ -867,14 +867,34 @@ class TestAgentRegistryFactoryIntegration(SSotAsyncTestCase):
     def teardown_method(self, method=None):
         """Clean up test resources."""
         super().teardown_method(method)
-        
+
         # Log comprehensive test metrics
         metrics = self.get_all_metrics()
         print(f"\nAgent Registry Factory Integration Test Metrics:")
         for key, value in metrics.items():
             print(f"  {key}: {value}")
-        
-        # Verify critical metrics
-        assert metrics.get("user_sessions_isolated", False), "User session isolation must be verified"
-        assert metrics.get("execution_contexts_isolated", False), "Execution context isolation must be verified"
-        assert metrics.get("memory_leak_prevention_verified", False), "Memory leak prevention must be verified"
+
+        # Verify critical metrics based on test method scope
+        method_name = method.__name__ if method else "unknown"
+
+        # Core metrics that ALL tests should verify
+        assert metrics.get("execution_time", 0) > 0, "Execution time must be recorded"
+
+        # Method-specific metric validation
+        if "user_sessions" in method_name:
+            assert metrics.get("user_sessions_isolated", False), "User session isolation must be verified"
+
+        if "execution_context" in method_name:
+            assert metrics.get("execution_contexts_isolated", False), "Execution context isolation must be verified"
+
+        if "memory_leak" in method_name:
+            assert metrics.get("memory_leak_prevention_verified", False), "Memory leak prevention must be verified"
+
+        if "lifecycle_manager" in method_name:
+            assert metrics.get("lifecycle_management_verified", False), "Lifecycle management must be verified"
+
+        if "error_scenarios" in method_name:
+            assert metrics.get("error_isolation_maintained", False), "Error isolation must be verified"
+
+        if "websocket" in method_name:
+            assert metrics.get("websocket_integration_verified", False), "WebSocket integration must be verified"

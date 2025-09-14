@@ -16,7 +16,7 @@ Context:
         Have sub agents use built in github tools or direct `git` or `gh` if needed.
         ALWAYS think about overall repo safety and STOP if anything might damage overall health of repo.
 
-REPEAT THIS PROCESS UNTIL ALL TESTS PASS OR 10 TIMES.
+REPEAT THIS PROCESS UNTIL ALL TESTS PASS OR 20 TIMES.
 
 PROCESS INSTRUCTIONS START SNST:
 

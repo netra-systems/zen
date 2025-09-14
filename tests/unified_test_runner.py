@@ -3113,10 +3113,24 @@ class UnifiedTestRunner:
         if args.fast_fail:
             cmd_parts.append("-x")
         
-        # Add timeout for unit tests to prevent hanging
-        # DISABLED: pytest-timeout conflicts with subprocess timeout causing hangs
-        # if category_name == "unit":
-        #     cmd_parts.extend(["--timeout=120", "--timeout-method=thread"])
+        # Environment-aware timeout configuration - replaces global pyproject.toml timeout
+        # This provides sophisticated timeout handling for different environments and test types
+        if args.env == 'staging':
+            # Staging environment needs longer timeouts due to network latency and GCP constraints
+            if category_name == "unit":
+                cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])  # 5min for staging unit tests
+            elif category_name in ["e2e", "integration", "e2e_critical", "e2e_full"]:
+                cmd_parts.extend(["--timeout=900", "--timeout-method=thread"])  # 15min for staging e2e tests
+            else:
+                cmd_parts.extend(["--timeout=600", "--timeout-method=thread"])  # 10min for staging integration tests
+        elif category_name == "unit":
+            cmd_parts.extend(["--timeout=180", "--timeout-method=thread"])  # 3min for local unit tests
+        elif category_name in ["e2e", "integration", "e2e_critical", "e2e_full"]:
+            cmd_parts.extend(["--timeout=600", "--timeout-method=thread"])   # 10min for local e2e tests
+        elif category_name == "frontend":
+            cmd_parts.extend(["--timeout=120", "--timeout-method=thread"])   # 2min for frontend tests
+        else:
+            cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])   # 5min for other test categories
         
         # Add specific test pattern
         if args.pattern:

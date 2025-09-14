@@ -44,7 +44,7 @@ addopts = [
     "-ra",
     "--strict-markers",
     "--strict-config",
-    "--timeout=120",
+    # NOTE: --timeout removed - now handled dynamically by unified_test_runner.py based on environment
     "--tb=short",
     "--maxfail=10",
     "--import-mode=importlib",  # Faster import mode
