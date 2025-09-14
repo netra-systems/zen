@@ -27,7 +27,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine as ConsolidatedEngine
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as DeprecatedEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as DeprecatedEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
