@@ -365,6 +365,10 @@ class AgentRegistry:
         """Check if agent ID is registered."""
         with self._lock:
             return agent_id in self._agents
+    
+    async def list_available_agents(self, agent_type: Optional[AgentType] = None) -> List[AgentInfo]:
+        """List available agents - compatibility method."""
+        return self.get_available_agents(agent_type)
 
 
 # Global agent registry instance - Issue #485 fix
@@ -405,6 +409,13 @@ def cleanup_inactive_agents():
     agent_registry.cleanup_inactive_agents()
 
 
+async def list_available_agents(agent_type: Optional[Union[AgentType, str]] = None) -> List[AgentInfo]:
+    """List available agents from the global registry - compatibility method."""
+    if isinstance(agent_type, str):
+        agent_type = AgentType(agent_type)
+    return agent_registry.get_available_agents(agent_type)
+
+
 # Export all public classes and functions for Issue #485 compatibility
 __all__ = [
     'AgentRegistry',
@@ -416,5 +427,6 @@ __all__ = [
     'get_agent_info',
     'update_agent_status',
     'get_available_agents',
-    'cleanup_inactive_agents'
+    'cleanup_inactive_agents',
+    'list_available_agents'
 ]
