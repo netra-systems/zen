@@ -48,7 +48,7 @@ class TestCollectionValidation(SSotBaseTestCase):
                 name_errors = [line for line in error_lines if 'NameError' in line]
                 import_errors = [line for line in error_lines if 'ImportError' in line]
                 
-                self.fail(f"Pytest collection failed with {len(name_errors)} NameErrors, {len(import_errors)} ImportErrors")
+                assert False, f"Pytest collection failed with {len(name_errors)} NameErrors, {len(import_errors)} ImportErrors"
             
             # Count collected tests
             output_lines = result.stdout.split('\n')
@@ -61,9 +61,9 @@ class TestCollectionValidation(SSotBaseTestCase):
             self.assertGreater(test_count, 0, "Should collect at least some tests")
             
         except subprocess.TimeoutExpired:
-            self.fail("Pytest collection timed out - possible infinite loop or deadlock")
+            assert False, "Pytest collection timed out - possible infinite loop or deadlock"
         except Exception as e:
-            self.fail(f"Unexpected error during pytest collection: {e}")
+            assert False, f"Unexpected error during pytest collection: {e}"
     
     def test_specific_problematic_files_collection(self):
         """Test collection of specific files that showed failures in Issue #976."""
@@ -144,7 +144,7 @@ class TestCollectionValidation(SSotBaseTestCase):
         
         # This test should initially fail to demonstrate the issue
         if failed_files:
-            self.fail(f"Collection failed for {len(failed_files)} files: {list(failed_files.keys())}")
+            assert False, f"Collection failed for {len(failed_files)} files: {list(failed_files.keys())}"
     
     def test_import_path_resolution(self):
         """Test that import paths can be resolved correctly."""
@@ -180,7 +180,7 @@ class TestCollectionValidation(SSotBaseTestCase):
             for import_path, error in failed_imports.items():
                 print(f"  {import_path}: {error}")
             
-            self.fail(f"Import resolution failed for {len(failed_imports)} paths")
+            assert False, f"Import resolution failed for {len(failed_imports)} paths"
     
     def test_test_discovery_comprehensive(self):
         """Test comprehensive test discovery across all test directories."""
@@ -267,7 +267,7 @@ class TestCollectionValidation(SSotBaseTestCase):
         
         # This test should initially fail to demonstrate discovery issues
         if failed_directories:
-            self.fail(f"Test discovery failed in {len(failed_directories)} directories: {failed_directories}")
+            assert False, f"Test discovery failed in {len(failed_directories)} directories: {failed_directories}"
     
     def _analyze_collection_error(self, stderr: str) -> Dict[str, int]:
         """Analyze collection error output to categorize issues."""
