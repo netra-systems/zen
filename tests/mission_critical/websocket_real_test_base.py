@@ -522,9 +522,9 @@ class MockWebSocketServer:
                     data = json.loads(message)
                     await self.handle_message(websocket, data)
                 except json.JSONDecodeError:
-                    logger.warning(f"⚠️ Invalid JSON received: {message}")
+                    logger.warning(f"Invalid JSON received: {message}")
         except Exception as e:
-            logger.error(f"❌ WebSocket client error: {e}")
+            logger.error(f"WebSocket client error: {e}")
         finally:
             await self.unregister_client(websocket)
 
@@ -664,7 +664,7 @@ class MockWebSocketServer:
             self._server.close()
             await self._server.wait_closed()
             self._running = False
-            logger.info("🛑 Mock WebSocket server stopped")
+            logger.info("Mock WebSocket server stopped")
 
     @classmethod
     def get_instance(cls):

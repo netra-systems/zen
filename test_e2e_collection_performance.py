@@ -115,10 +115,10 @@ def test_unified_runner_integration():
         integration_time = time.time() - start_time
 
         print(f"  Unified runner E2E: {len(e2e_files)} files in {integration_time:.2f}s")
-        print("  ✅ Integration successful")
+        print("  Integration successful")
 
     except Exception as e:
-        print(f"  ❌ Integration failed: {e}")
+        print(f"  Integration failed: {e}")
 
 
 if __name__ == "__main__":
