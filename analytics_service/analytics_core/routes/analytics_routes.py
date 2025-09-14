@@ -9,7 +9,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from analytics_service.analytics_core.config import AnalyticsConfig
 from shared.isolated_environment import get_env
@@ -57,11 +57,13 @@ class AnalyticsEvent(BaseModel):
     properties: Dict[str, Any] = Field(default_factory=dict)
     context: Dict[str, Any] = Field(default_factory=dict)
     
-    @validator('timestamp', pre=True, always=True)
+    @field_validator('timestamp', mode='before')
+    @classmethod
     def set_timestamp(cls, v):
         return v or datetime.now(timezone.utc)
     
-    @validator('properties')
+    @field_validator('properties')
+    @classmethod
     def validate_properties(cls, v):
         # Limit the size of properties to prevent abuse
         if len(str(v)) > 10000:  # 10KB limit
