@@ -10,8 +10,8 @@ ISSUE #408: SupervisorAgent classes missing critical attributes expected by test
 """
 
 import pytest
+from unittest.mock import Mock, AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
-from test_framework.ssot.mock_factory import SSotMockFactory
 
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent as SupervisorAgentConsolidated
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent as SupervisorAgentSSot
@@ -24,25 +24,13 @@ from netra_backend.app.agents.base.interface import ExecutionContext
 class TestSupervisorAgentMissingAttributes:
     """Test validation that issue #408 missing attributes have been resolved."""
 
-    def _create_supervisor_mocks(self, include_db_session=False):
-        """Helper method to create supervisor agent mocks using SSOT factory."""
-        # SSOT: Create standardized LLM manager mock
-        llm_manager = SSotMockFactory.create_mock_llm_manager()
-
-        # SSOT: Create standardized agent WebSocket bridge mock
-        websocket_bridge = SSotMockFactory.create_mock_agent_websocket_bridge()
-
-        if include_db_session:
-            # SSOT: Create standardized database session mock
-            db_session = SSotMockFactory.create_database_session_mock()
-            return llm_manager, db_session, websocket_bridge
-
-        return llm_manager, websocket_bridge
-
     def test_supervisor_consolidated_has_workflow_executor(self):
         """Test that SupervisorAgent (consolidated) has workflow_executor attribute."""
-        # Setup mocks using SSOT factory
-        llm_manager, websocket_bridge = self._create_supervisor_mocks()
+        # Setup mocks
+        llm_manager = Mock(spec=LLMManager)
+        websocket_bridge = Mock(spec=AgentWebSocketBridge)
+        websocket_bridge.websocket_manager = Mock()
+        websocket_bridge.emit_agent_event = AsyncMock()
 
         # Create supervisor instance
         supervisor = SupervisorAgentConsolidated(llm_manager=llm_manager, websocket_bridge=websocket_bridge)
@@ -58,8 +46,11 @@ class TestSupervisorAgentMissingAttributes:
 
     def test_supervisor_ssot_has_workflow_executor(self):
         """Test that SupervisorAgentSSot has workflow_executor attribute."""
-        # Setup mocks using SSOT factory
-        llm_manager, websocket_bridge = self._create_supervisor_mocks()
+        # Setup mocks
+        llm_manager = Mock(spec=LLMManager)
+        websocket_bridge = Mock(spec=AgentWebSocketBridge)
+        websocket_bridge.websocket_manager = Mock()
+        websocket_bridge.emit_agent_event = AsyncMock()
 
         # Create supervisor instance
         supervisor = SupervisorAgentSSot(llm_manager=llm_manager, websocket_bridge=websocket_bridge)
@@ -74,8 +65,11 @@ class TestSupervisorAgentMissingAttributes:
 
     def test_supervisor_consolidated_has_create_supervisor_execution_context(self):
         """Test that SupervisorAgent (consolidated) has _create_supervisor_execution_context method."""
-        # Setup mocks using SSOT factory
-        llm_manager, websocket_bridge = self._create_supervisor_mocks()
+        # Setup mocks
+        llm_manager = Mock(spec=LLMManager)
+        websocket_bridge = Mock(spec=AgentWebSocketBridge)
+        websocket_bridge.websocket_manager = Mock()
+        websocket_bridge.emit_agent_event = AsyncMock()
 
         # Create supervisor instance
         supervisor = SupervisorAgentConsolidated(llm_manager=llm_manager, websocket_bridge=websocket_bridge)
@@ -112,8 +106,11 @@ class TestSupervisorAgentMissingAttributes:
 
     def test_supervisor_ssot_has_create_supervisor_execution_context(self):
         """Test that SupervisorAgentSSot has _create_supervisor_execution_context method."""
-        # Setup mocks using SSOT factory
-        llm_manager, websocket_bridge = self._create_supervisor_mocks()
+        # Setup mocks
+        llm_manager = Mock(spec=LLMManager)
+        websocket_bridge = Mock(spec=AgentWebSocketBridge)
+        websocket_bridge.websocket_manager = Mock()
+        websocket_bridge.emit_agent_event = AsyncMock()
 
         # Create supervisor instance
         supervisor = SupervisorAgentSSot(llm_manager=llm_manager, websocket_bridge=websocket_bridge)
@@ -150,8 +147,11 @@ class TestSupervisorAgentMissingAttributes:
 
     def test_workflow_executor_integration_consolidated(self):
         """Test that workflow_executor integrates properly with SupervisorAgent methods."""
-        # Setup mocks using SSOT factory
-        llm_manager, websocket_bridge = self._create_supervisor_mocks()
+        # Setup mocks
+        llm_manager = Mock(spec=LLMManager)
+        websocket_bridge = Mock(spec=AgentWebSocketBridge)
+        websocket_bridge.websocket_manager = Mock()
+        websocket_bridge.emit_agent_event = AsyncMock()
 
         # Create supervisor instance
         supervisor = SupervisorAgentConsolidated(llm_manager=llm_manager, websocket_bridge=websocket_bridge)
@@ -172,8 +172,11 @@ class TestSupervisorAgentMissingAttributes:
 
     def test_workflow_executor_integration_ssot(self):
         """Test that workflow_executor integrates properly with SupervisorAgentSSot methods."""
-        # Setup mocks using SSOT factory
-        llm_manager, websocket_bridge = self._create_supervisor_mocks()
+        # Setup mocks
+        llm_manager = Mock(spec=LLMManager)
+        websocket_bridge = Mock(spec=AgentWebSocketBridge)
+        websocket_bridge.websocket_manager = Mock()
+        websocket_bridge.emit_agent_event = AsyncMock()
 
         # Create supervisor instance
         supervisor = SupervisorAgentSSot(llm_manager=llm_manager, websocket_bridge=websocket_bridge)
@@ -188,8 +191,11 @@ class TestSupervisorAgentMissingAttributes:
 
     def test_execution_context_bridge_functionality_consolidated(self):
         """Test that _create_supervisor_execution_context properly bridges UserExecutionContext to ExecutionContext."""
-        # Setup mocks using SSOT factory
-        llm_manager, websocket_bridge = self._create_supervisor_mocks()
+        # Setup mocks
+        llm_manager = Mock(spec=LLMManager)
+        websocket_bridge = Mock(spec=AgentWebSocketBridge)
+        websocket_bridge.websocket_manager = Mock()
+        websocket_bridge.emit_agent_event = AsyncMock()
 
         # Create supervisor instance
         supervisor = SupervisorAgentConsolidated(llm_manager=llm_manager, websocket_bridge=websocket_bridge)
@@ -236,8 +242,11 @@ class TestSupervisorAgentMissingAttributes:
 
     def test_execution_context_bridge_functionality_ssot(self):
         """Test that _create_supervisor_execution_context properly bridges UserExecutionContext to ExecutionContext for SSOT."""
-        # Setup mocks using SSOT factory
-        llm_manager, websocket_bridge = self._create_supervisor_mocks()
+        # Setup mocks
+        llm_manager = Mock(spec=LLMManager)
+        websocket_bridge = Mock(spec=AgentWebSocketBridge)
+        websocket_bridge.websocket_manager = Mock()
+        websocket_bridge.emit_agent_event = AsyncMock()
 
         # Create supervisor instance
         supervisor = SupervisorAgentSSot(llm_manager=llm_manager, websocket_bridge=websocket_bridge)
@@ -276,8 +285,12 @@ class TestBackwardCompatibility:
     @pytest.mark.asyncio
     async def test_execute_method_still_works_consolidated(self):
         """Test that the execute method still works after adding missing attributes."""
-        # Setup mocks using SSOT factory
-        llm_manager, db_session, websocket_bridge = self._create_supervisor_mocks(include_db_session=True)
+        # Setup mocks
+        llm_manager = Mock(spec=LLMManager)
+        db_session = Mock(spec=AsyncSession)
+        websocket_bridge = Mock(spec=AgentWebSocketBridge)
+        websocket_bridge.websocket_manager = Mock()
+        websocket_bridge.emit_agent_event = AsyncMock()
 
         supervisor = SupervisorAgentConsolidated(llm_manager=llm_manager, websocket_bridge=websocket_bridge)
 
@@ -308,8 +321,12 @@ class TestBackwardCompatibility:
     @pytest.mark.asyncio
     async def test_execute_method_still_works_ssot(self):
         """Test that the execute method still works after adding missing attributes for SSOT."""
-        # Setup mocks using SSOT factory
-        llm_manager, db_session, websocket_bridge = self._create_supervisor_mocks(include_db_session=True)
+        # Setup mocks
+        llm_manager = Mock(spec=LLMManager)
+        db_session = Mock(spec=AsyncSession)
+        websocket_bridge = Mock(spec=AgentWebSocketBridge)
+        websocket_bridge.websocket_manager = Mock()
+        websocket_bridge.emit_agent_event = AsyncMock()
 
         supervisor = SupervisorAgentSSot(llm_manager=llm_manager, websocket_bridge=websocket_bridge)
 
@@ -347,8 +364,11 @@ class TestBackwardCompatibility:
 
     def test_attributes_are_not_none_after_initialization(self):
         """Test that the added attributes are properly initialized and not None."""
-        # Setup mocks using SSOT factory
-        llm_manager, websocket_bridge = self._create_supervisor_mocks()
+        # Setup mocks
+        llm_manager = Mock(spec=LLMManager)
+        websocket_bridge = Mock(spec=AgentWebSocketBridge)
+        websocket_bridge.websocket_manager = Mock()
+        websocket_bridge.emit_agent_event = AsyncMock()
 
         # Test consolidated supervisor
         supervisor_consolidated = SupervisorAgentConsolidated(llm_manager=llm_manager, websocket_bridge=websocket_bridge)

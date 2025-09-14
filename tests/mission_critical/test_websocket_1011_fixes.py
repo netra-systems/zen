@@ -33,7 +33,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 class TestWebSocket1011Fixes(SSotAsyncTestCase):
     """Mission Critical: Test WebSocket 1011 error fixes through Redis SSOT."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test fixtures."""
         super().setUp()
         self.test_redis_keys = set()

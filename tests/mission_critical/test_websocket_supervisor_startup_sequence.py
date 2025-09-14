@@ -249,7 +249,7 @@ class MissionCriticalWebSocketTester:
 class TestWebSocketSupervisorStartupSequence(SSotAsyncTestCase):
     """Mission critical tests for WebSocket supervisor startup sequence."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up mission critical test environment with real services."""
         super().setUp()
         self.test_metrics = SsotTestMetrics()
@@ -270,7 +270,7 @@ class TestWebSocketSupervisorStartupSequence(SSotAsyncTestCase):
         self.logger = logging.getLogger(__name__)
         self.websocket_tester = MissionCriticalWebSocketTester()
     
-    def teardown_method(self, method):
+    def tearDown(self):
         """Clean up mission critical test environment."""
         for patch_obj in self.env_patches:
             patch_obj.stop()
@@ -664,7 +664,7 @@ class TestWebSocketSupervisorStartupSequence(SSotAsyncTestCase):
 class TestWebSocketAgentInteractionFlow(SSotAsyncTestCase):
     """Mission critical tests for complete WebSocket agent interaction flow."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up end-to-end WebSocket agent flow testing."""
         super().setUp()
         self.test_metrics = SsotTestMetrics()
@@ -677,7 +677,7 @@ class TestWebSocketAgentInteractionFlow(SSotAsyncTestCase):
         })
         self.env_patch.start()
     
-    def teardown_method(self, method):
+    def tearDown(self):
         """Clean up end-to-end test environment."""
         self.env_patch.stop()
         self.test_metrics.end_timing()

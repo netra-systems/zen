@@ -12,18 +12,17 @@ both flat event structures and ServerMessage format with nested payload.
 """
 
 import json
-# SSOT Base Test Case Import
-from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
+import unittest
 from datetime import datetime, timezone
 from typing import Dict, Any
 
 from tests.mission_critical.test_websocket_agent_events_suite import MissionCriticalEventValidator
 
 
-class TestServerMessageValidationFixed(SSotBaseTestCase):
+class TestServerMessageValidationFixed(unittest.TestCase):
     """Test MissionCriticalEventValidator with both formats after fix."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test validator."""
         self.validator = MissionCriticalEventValidator()
         self.test_timestamp = datetime.now(timezone.utc).isoformat()

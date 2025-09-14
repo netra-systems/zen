@@ -39,7 +39,7 @@ from netra_backend.app.dependencies import (
     SessionIsolationError
 )
 from netra_backend.app.agents.supervisor.execution_engine_factory import (
-    ExecutionEngineFactory
+    ExecutionEngineFactory, ExecutionFactoryConfig
 )
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
     get_agent_instance_factory, configure_agent_instance_factory
@@ -102,16 +102,22 @@ class TestAgentExecutionPipelineIntegration(BaseIntegrationTest):
             metadata={"test_source": "integration_test"}
         )
         
+        # Create execution factory with proper configuration
+        factory_config = ExecutionFactoryConfig(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            database_session=db,
+            enable_websocket_notifications=True,
+            isolation_level="per_request"
+        )
+        
+        execution_factory = ExecutionEngineFactory(config=factory_config)
+        
         # Mock WebSocket manager for testing
         mock_websocket_manager = AsyncMock(spec=UnifiedWebSocketManager)
         mock_websocket_manager.send_agent_started = AsyncMock()
         mock_websocket_manager.send_agent_completed = AsyncMock()
-        
-        # Create execution factory with proper configuration
-        execution_factory = ExecutionEngineFactory(
-            database_session_manager=db,
-            websocket_bridge=mock_websocket_manager
-        )
         
         # Create agent instance with factory pattern
         with patch('netra_backend.app.websocket_core.unified_manager.UnifiedWebSocketManager', 
@@ -199,10 +205,15 @@ class TestAgentExecutionPipelineIntegration(BaseIntegrationTest):
                     request_id=RequestID(str(uuid.uuid4()))
                 )
                 
-                execution_factory = ExecutionEngineFactory(
-                    database_session_manager=db,
-                    websocket_bridge=mock_websocket_manager
+                factory_config = ExecutionFactoryConfig(
+                    user_id=user_id,
+                    thread_id=thread_id,
+                    run_id=execution_context.run_id,
+                    database_session=db,
+                    isolation_level="per_user"
                 )
+                
+                execution_factory = ExecutionEngineFactory(config=factory_config)
                 agent_factory = get_agent_instance_factory()
                 
                 user_context = UserExecutionContext(

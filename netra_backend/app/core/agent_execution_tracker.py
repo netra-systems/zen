@@ -117,7 +117,6 @@ class ExecutionRecord:
     execution_id: str
     agent_name: str
     thread_id: str
-    run_id: str  # WebSocket run_id for notification consistency
     user_id: str
     state: ExecutionState
     started_at: datetime
@@ -323,7 +322,6 @@ class AgentExecutionTracker:
             execution_id=execution_id,
             agent_name=agent_name,
             thread_id=thread_id,
-            run_id=thread_id,  # Default to thread_id if not provided separately
             user_id=user_id,
             state=ExecutionState.PENDING,
             started_at=now,
@@ -423,7 +421,6 @@ class AgentExecutionTracker:
                 execution_id=execution_id,
                 agent_name="unknown",  # Default when auto-created
                 thread_id="unknown",
-                run_id="unknown",  # Default when auto-created
                 user_id="unknown",
                 state=ExecutionState.PENDING,
                 started_at=now,
@@ -923,7 +920,7 @@ class AgentExecutionTracker:
         try:
             if event_type == "agent_started":
                 await websocket_manager.notify_agent_started(
-                    run_id=record.run_id,
+                    run_id=record.thread_id,  # Use thread_id as run_id
                     agent_name=record.agent_name,
                     context={
                         "phase": transition.to_phase.value,
@@ -933,21 +930,21 @@ class AgentExecutionTracker:
                 )
             elif event_type == "agent_thinking":
                 await websocket_manager.notify_agent_thinking(
-                    run_id=record.run_id,
+                    run_id=record.thread_id,
                     agent_name=record.agent_name,
                     reasoning=message,
                     step_number=len(record.phase_history)
                 )
             elif event_type == "tool_executing":
                 await websocket_manager.notify_tool_executing(
-                    run_id=record.run_id,
+                    run_id=record.thread_id,
                     agent_name=record.agent_name,
                     tool_name="execution_tools",
                     parameters=transition.metadata
                 )
             elif event_type == "agent_completed":
                 await websocket_manager.notify_agent_completed(
-                    run_id=record.run_id,
+                    run_id=record.thread_id,
                     agent_name=record.agent_name,
                     result={
                         "success": True,
@@ -960,7 +957,7 @@ class AgentExecutionTracker:
                 )
             elif event_type == "agent_error":
                 await websocket_manager.notify_agent_error(
-                    run_id=record.run_id,
+                    run_id=record.thread_id,
                     agent_name=record.agent_name,
                     error=message,
                     error_context={

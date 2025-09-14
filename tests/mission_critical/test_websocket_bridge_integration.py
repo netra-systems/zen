@@ -19,8 +19,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import sys
 import os
-# SSOT Base Test Case Import
-from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
+import unittest
 import asyncio
 from typing import Dict, List, Any
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
@@ -99,10 +98,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
     # REMOVED_SYNTAX_ERROR: if event.get("run_id") == run_id and event["type"] in critical_types]
 
 
-# REMOVED_SYNTAX_ERROR: class TestWebSocketBridgeIntegration(SSotAsyncTestCase):
+# REMOVED_SYNTAX_ERROR: class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
     # REMOVED_SYNTAX_ERROR: """Integration tests with real agent classes."""
 
-# REMOVED_SYNTAX_ERROR: def setup_method(self, method):
+# REMOVED_SYNTAX_ERROR: def setUp(self):
     # REMOVED_SYNTAX_ERROR: """Set up test environment with mocks."""
     # REMOVED_SYNTAX_ERROR: self.bridge = ComprehensiveMockBridge()
 
@@ -118,7 +117,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
         # REMOVED_SYNTAX_ERROR: mock = p.start()
         # REMOVED_SYNTAX_ERROR: if hasattr(mock, 'return_value'):
             # REMOVED_SYNTAX_ERROR: mock.return_value = Magic
-# REMOVED_SYNTAX_ERROR: def teardown_method(self, method):
+# REMOVED_SYNTAX_ERROR: def tearDown(self):
     # REMOVED_SYNTAX_ERROR: """Clean up mocks."""
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: for p in self.patches:

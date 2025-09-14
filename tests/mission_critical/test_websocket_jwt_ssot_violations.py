@@ -30,7 +30,7 @@ class TestMissionCriticalWebSocketJWTSSOTViolations(SSotBaseTestCase):
     These tests MUST FAIL initially to prove violations exist and justify SSOT consolidation.
     """
 
-    def setup_method(self, method):
+    def setUp(self):
         """Set up mission critical test environment."""
         super().setUp()
         self.golden_path_jwt_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnb2xkZW5fcGF0aF91c2VyIiwiZW1haWwiOiJ1c2VyQGdvbGRlbnBhdGguY29tIiwiZXhwIjo5OTk5OTk5OTk5LCJpYXQiOjE2MDAwMDAwMDB9.golden_path_signature"
@@ -553,7 +553,7 @@ class TestMissionCriticalWebSocketJWTSSOTViolations(SSotBaseTestCase):
         
         return patterns
 
-    def teardown_method(self, method):
+    def tearDown(self):
         """Clean up mission critical test environment."""
         super().tearDown()
 

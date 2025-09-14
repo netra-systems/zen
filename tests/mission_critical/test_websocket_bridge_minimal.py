@@ -18,8 +18,7 @@ This is a regression test to catch any future breaks in bridge propagation.
 
 import sys
 import os
-# SSOT Base Test Case Import
-from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
+import unittest
 from typing import Dict, List, Any
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
@@ -111,7 +110,7 @@ class MinimalTestAgent:
         return {"status": "success", "agent": self.name}
 
 
-class TestWebSocketBridgeMinimal(SSotAsyncTestCase):
+class TestWebSocketBridgeMinimal(unittest.IsolatedAsyncioTestCase):
     """Minimal WebSocket bridge lifecycle tests."""
     
     async def test_bridge_propagation_to_agent(self):

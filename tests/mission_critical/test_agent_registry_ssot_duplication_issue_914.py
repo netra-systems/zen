@@ -22,8 +22,7 @@ Expected Result: Tests should FAIL initially, demonstrating the problems.
 After SSOT consolidation, tests should pass proving unified behavior.
 """
 
-# SSOT Base Test Case Import
-from test_framework.ssot.base_test_case import SSotBaseTestCase
+import unittest
 import sys
 import importlib
 import inspect
@@ -32,11 +31,11 @@ import time
 from typing import Dict, Any, List, Set, Type
 from unittest.mock import MagicMock, patch
 
-class TestAgentRegistrySSotDuplication(SSotBaseTestCase):
+class TestAgentRegistrySSotDuplication(unittest.TestCase):
     """Test suite demonstrating AgentRegistry SSOT duplication issues."""
     
     @classmethod
-    def setup_class(cls):
+    def setUpClass(cls):
         """Set up test class with registry paths."""
         
         # Known AgentRegistry implementation paths
@@ -373,7 +372,7 @@ class TestAgentRegistrySSotDuplication(SSotBaseTestCase):
                            f"Patterns: {initialization_patterns}")
 
 
-class TestAgentRegistryRuntimeBehaviorInconsistencies(SSotBaseTestCase):
+class TestAgentRegistryRuntimeBehaviorInconsistencies(unittest.TestCase):
     """Test suite for runtime behavior inconsistencies between registries."""
     
     def test_01_concurrent_access_behavior(self):

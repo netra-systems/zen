@@ -255,13 +255,8 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
         execution_core.websocket_bridge.notify_agent_error.assert_called()
         
         # Verify execution was marked as failed for monitoring
-        # Note: complete_execution may not be called if execution path differs
-        if execution_core.execution_tracker.complete_execution.call_args:
-            args, kwargs = execution_core.execution_tracker.complete_execution.call_args
-            assert "error" in kwargs or len(args) > 1
-        else:
-            # Alternative check: verify execution state was updated to failed
-            assert hasattr(execution_core.execution_tracker, 'update_execution_state')
+        args, kwargs = execution_core.execution_tracker.complete_execution.call_args
+        assert "error" in kwargs or len(args) > 1
         
         # Record failure metrics
         self.metrics.record_custom("agent_deaths_detected", 1)
@@ -304,8 +299,7 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
         assert end_time - start_time < 1.0  # Should timeout quickly
         
         # Verify user was notified of timeout
-        # Expect 2 calls: 1 from timeout handler + 1 from TIMEOUT phase transition
-        assert execution_core.websocket_bridge.notify_agent_error.call_count >= 1
+        execution_core.websocket_bridge.notify_agent_error.assert_called()
         
         # Record timeout metrics
         self.metrics.record_custom("timeouts_enforced", 1)
@@ -337,13 +331,7 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
             agent_name=business_context.agent_name,
             context=ANY
         )
-        # notify_agent_completed may be called via different paths
-        # Focus on ensuring user gets completion feedback
-        if bridge.notify_agent_completed.call_count == 0:
-            # If not called directly, may be called via agent tracker phase transitions
-            assert bridge.notify_agent_started.call_count >= 1  # At least started event sent
-        else:
-            bridge.notify_agent_completed.assert_called()
+        bridge.notify_agent_completed.assert_called_once()
         
         # Record user experience metrics
         self.metrics.record_custom("websocket_events_sent", bridge.notify_agent_started.call_count)
@@ -387,8 +375,7 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
         assert "AWS API rate limit exceeded" in result.error
         
         # Verify user received meaningful error message
-        # Note: May be called 1 or 2 times depending on execution path
-        assert execution_core.websocket_bridge.notify_agent_error.call_count >= 1
+        execution_core.websocket_bridge.notify_agent_error.assert_called()
         error_args = execution_core.websocket_bridge.notify_agent_error.call_args
         assert "AWS API rate limit exceeded" in str(error_args)
         
@@ -410,16 +397,8 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
         
         result = await execution_core.execute_agent(business_context, business_state)
         
-        # Verify metrics collection (may vary based on execution path)
-        # The important thing is the execution completed successfully
-        if hasattr(execution_core.execution_tracker, 'collect_metrics'):
-            # If method exists, it should have been called
-            if execution_core.execution_tracker.collect_metrics.call_count == 0:
-                # Allow for cases where metrics collection happens via different path
-                print("Debug: Metrics collection not called via execution_tracker, may use alternative path")
-        
-        # Focus on core validation: execution succeeded and metrics are available
-        assert result.success is True
+        # Verify metrics were collected for business insights
+        execution_core.execution_tracker.collect_metrics.assert_called_once()
         
         # Verify result includes performance metrics
         assert result.success is True
@@ -452,15 +431,7 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
         assert "cost_optimizer_agent not found" in result.error
         
         # Verify user was notified with helpful error
-        # Note: Agent not found case may not trigger WebSocket error in current implementation
-        # The important validation is that a clear error message is provided to the user
-        if execution_core.websocket_bridge.notify_agent_error.call_count == 0:
-            # Agent not found case - error is returned in result but WebSocket notification may not be sent
-            # This is acceptable as long as the calling code handles the error result properly
-            print("Debug: Agent not found - error returned in result rather than WebSocket notification")
-        else:
-            # If WebSocket notification was sent, validate it was called
-            assert execution_core.websocket_bridge.notify_agent_error.call_count >= 1
+        execution_core.websocket_bridge.notify_agent_error.assert_called()
         
         # Record error clarity metrics
         self.metrics.record_custom("clear_errors_provided", 1)

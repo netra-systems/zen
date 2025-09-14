@@ -3318,68 +3318,6 @@ class AgentWebSocketBridge(MonitorableComponent):
             # Clean up if needed
             pass
     
-    async def handle_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Handle WebSocket message processing with SSOT compliance.
-
-        CRITICAL FIX: This method was missing causing 'AgentWebSocketBridge' object
-        has no attribute 'handle_message' errors in staging (Issue #1030).
-
-        Args:
-            message: WebSocket message to process
-
-        Returns:
-            Dict containing processing result
-
-        Business Value: Fixes P1 HIGH WebSocket Event Structure Validation Failures
-        """
-        try:
-            if not message or not isinstance(message, dict):
-                return {"success": False, "error": "Invalid message format"}
-
-            message_type = message.get("type", "unknown")
-            logger.debug(f"Processing WebSocket message type: {message_type}")
-
-            # Route message based on type using existing patterns
-            if message_type == "agent_message":
-                return await self._handle_agent_message(message)
-            elif message_type == "user_message":
-                return await self._handle_user_message(message)
-            elif message_type == "system_message":
-                return await self._handle_system_message(message)
-            else:
-                logger.warning(f"Unknown message type: {message_type}")
-                return {"success": False, "error": f"Unknown message type: {message_type}"}
-
-        except Exception as e:
-            error_msg = f"Error handling WebSocket message: {e}"
-            logger.error(error_msg, exc_info=True)
-            return {"success": False, "error": error_msg}
-
-    async def _handle_agent_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle agent-originated messages."""
-        try:
-            # Basic message validation and routing
-            return {"success": True, "message": "Agent message processed"}
-        except Exception as e:
-            return {"success": False, "error": f"Agent message handling failed: {e}"}
-
-    async def _handle_user_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle user-originated messages."""
-        try:
-            # Basic message validation and routing
-            return {"success": True, "message": "User message processed"}
-        except Exception as e:
-            return {"success": False, "error": f"User message handling failed: {e}"}
-
-    async def _handle_system_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle system-originated messages."""
-        try:
-            # Basic message validation and routing
-            return {"success": True, "message": "System message processed"}
-        except Exception as e:
-            return {"success": False, "error": f"System message handling failed: {e}"}
-
     # COMPATIBILITY: Reference to WebSocketNotifier class for test compatibility
     # This allows tests to access AgentWebSocketBridge.WebSocketNotifier
     WebSocketNotifier = None  # Will be set after class definition

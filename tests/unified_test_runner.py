@@ -3157,12 +3157,8 @@ class UnifiedTestRunner:
             cmd_parts.append("-x")
         
         # Environment-aware timeout configuration - replaces global pyproject.toml timeout
-        # FIVE WHYS REMEDIATION: Use explicit timeout from args when provided, otherwise use defaults
         # This provides sophisticated timeout handling for different environments and test types
-        if hasattr(args, 'timeout') and args.timeout and args.timeout != 180:
-            # Use explicitly provided timeout value
-            cmd_parts.extend([f"--timeout={args.timeout}", "--timeout-method=thread"])
-        elif args.env == 'staging':
+        if args.env == 'staging':
             # Staging environment needs longer timeouts due to network latency and GCP constraints
             if category_name == "unit":
                 cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])  # 5min for staging unit tests
@@ -4125,13 +4121,6 @@ def main():
         type=int,
         default=30,
         help="Timeout for test collection in seconds (default: 30)"
-    )
-    
-    parser.add_argument(
-        "--timeout",
-        type=int,
-        default=180,
-        help="Test execution timeout in seconds (default: 180)"
     )
     
     parser.add_argument(

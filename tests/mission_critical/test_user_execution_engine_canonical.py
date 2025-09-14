@@ -35,7 +35,7 @@ logger = central_logger.get_logger(__name__)
 class TestUserExecutionEngineCanonical(SSotBaseTestCase):
     """Test UserExecutionEngine as canonical SSOT implementation."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test environment for canonical validation."""
         super().setUp()
         self.canonical_violations = []

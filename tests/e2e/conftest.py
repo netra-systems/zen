@@ -1,6 +1,6 @@
 
 
-class MockWebSocketConnection:
+class TestWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):

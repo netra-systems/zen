@@ -33,7 +33,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 class TestRedisSSOTConsolidation(SSotAsyncTestCase):
     """Mission Critical: Test Redis SSOT consolidation fixes."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test fixtures."""
         super().setUp()
         self.redis_test_keys = set()

@@ -30,14 +30,14 @@ import time
 from typing import Optional, Dict, Any, TYPE_CHECKING, List
 from datetime import datetime, timezone
 from dataclasses import dataclass, field
-from shared.logging.unified_logging_ssot import get_logger
+from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
     # ISSUE #824 REMEDIATION: Use canonical SSOT import path
     from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-logger = get_logger(__name__)
+logger = central_logger.get_logger(__name__)
 
 
 @dataclass

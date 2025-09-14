@@ -78,8 +78,6 @@ Examples:
                            help='Disable smart limit detection')
         parser.add_argument('--no-emoji', action='store_true',
                            help='Disable emoji severity markers')
-        parser.add_argument('--strict-mode', action='store_true',
-                           help='Enable strict mode (default is relaxed mode)')
         parser.add_argument('--mro-audit', action='store_true',
                            help='Run MRO (Method Resolution Order) complexity audit')
     

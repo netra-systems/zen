@@ -121,24 +121,12 @@ class RedisConnectionHandler:
                 
         return self._connection_pool
     
-    def get_redis_client(self, enable_circuit_breaker: bool = True):
-        """Get Redis client with proper connection configuration and circuit breaker.
-
-        Args:
-            enable_circuit_breaker: Enable graceful degradation for Redis failures
-
-        Returns:
-            Redis client or None if circuit breaker is open
-        """
+    def get_redis_client(self):
+        """Get Redis client with proper connection configuration."""
         try:
             # Use SSOT Redis import pattern
             import redis
-
-            # CRITICAL FIX: Add circuit breaker for Issue #1029 Redis connection failures
-            if enable_circuit_breaker and not self._check_circuit_breaker():
-                logger.warning("Redis circuit breaker is OPEN - returning None for graceful degradation")
-                return None
-
+            
             # Create Redis client directly with connection info
             client = redis.Redis(
                 host=self._connection_info["host"],
@@ -150,79 +138,14 @@ class RedisConnectionHandler:
                 health_check_interval=self._connection_info["health_check_interval"],
                 decode_responses=True
             )
-
+            
             # Test connection
             client.ping()
-            self._record_success()
             logger.info(f"Redis client connected successfully to {self._connection_info['host']} ({self.env})")
             return client
-
+            
         except Exception as e:
-            self._record_failure()
-            if enable_circuit_breaker:
-                logger.warning(f"Redis connection failed, circuit breaker updated: {e}")
-                return None  # Graceful degradation
-            else:
-                raise RedisConnectionError(f"Failed to create Redis client: {e}")
-
-    def _check_circuit_breaker(self) -> bool:
-        """Check if Redis circuit breaker allows connections.
-
-        Returns:
-            True if connections allowed, False if circuit breaker is open
-        """
-        import time
-
-        # Initialize circuit breaker state if not exists
-        if not hasattr(self, '_circuit_breaker_failures'):
-            self._circuit_breaker_failures = 0
-            self._circuit_breaker_last_failure = 0
-            self._circuit_breaker_threshold = 3  # Open after 3 failures
-            self._circuit_breaker_timeout = 60   # Retry after 60 seconds
-
-        current_time = time.time()
-
-        # If we have too many failures and haven't waited long enough, circuit is open
-        if (self._circuit_breaker_failures >= self._circuit_breaker_threshold and
-            current_time - self._circuit_breaker_last_failure < self._circuit_breaker_timeout):
-            return False
-
-        # If enough time has passed, allow retry (half-open state)
-        if current_time - self._circuit_breaker_last_failure >= self._circuit_breaker_timeout:
-            self._circuit_breaker_failures = 0  # Reset for retry attempt
-
-        return True
-
-    def _record_success(self):
-        """Record successful Redis connection (circuit breaker)."""
-        self._circuit_breaker_failures = 0
-
-    def _record_failure(self):
-        """Record failed Redis connection (circuit breaker)."""
-        import time
-        self._circuit_breaker_failures += 1
-        self._circuit_breaker_last_failure = time.time()
-        logger.warning(f"Redis circuit breaker failure count: {self._circuit_breaker_failures}")
-
-    def get_circuit_breaker_status(self) -> Dict[str, Any]:
-        """Get current circuit breaker status for monitoring."""
-        import time
-
-        if not hasattr(self, '_circuit_breaker_failures'):
-            return {"state": "closed", "failures": 0, "threshold": 0}
-
-        current_time = time.time()
-        is_open = (self._circuit_breaker_failures >= self._circuit_breaker_threshold and
-                  current_time - self._circuit_breaker_last_failure < self._circuit_breaker_timeout)
-
-        return {
-            "state": "open" if is_open else "closed",
-            "failures": self._circuit_breaker_failures,
-            "threshold": self._circuit_breaker_threshold,
-            "seconds_until_retry": max(0, self._circuit_breaker_timeout -
-                                     (current_time - self._circuit_breaker_last_failure)) if is_open else 0,
-            "last_failure_timestamp": self._circuit_breaker_last_failure
-        }
+            raise RedisConnectionError(f"Failed to create Redis client: {e}")
     
     def validate_connection(self) -> Dict[str, Any]:
         """Validate Redis connection and return status."""

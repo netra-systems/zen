@@ -11,22 +11,21 @@ MISSION: Enable basic auth unit testing without Docker infrastructure dependency
 import os
 import sys
 import pytest
+import unittest
 import logging
 import time
 from datetime import datetime, timedelta, timezone
 import jwt
-from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestJWTBasicOperations(SSotBaseTestCase):
+class TestJWTBasicOperations(unittest.TestCase):
     """
     Basic JWT operations test without auth service dependencies
     Test fundamental JWT functionality that the auth service should provide
     """
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test environment"""
-        super().setup_method(method)
         self.secret = 'test-secret-key-for-unit-testing-32chars-long'
         self.algorithm = 'HS256'
         
@@ -267,7 +266,7 @@ class TestJWTBasicOperations(SSotBaseTestCase):
         self.assertEqual(header['typ'], 'JWT')
 
 
-class TestBasicPasswordHashing(SSotBaseTestCase):
+class TestBasicPasswordHashing(unittest.TestCase):
     """
     Test basic password hashing functionality
     This represents what an auth service should provide for password validation
@@ -309,7 +308,7 @@ class TestBasicPasswordHashing(SSotBaseTestCase):
         self.assertEqual(len(salt2), 32)
 
 
-class TestHealthCheckLogic(SSotBaseTestCase):
+class TestHealthCheckLogic(unittest.TestCase):
     """
     Test basic health check logic that doesn't require network calls
     """
@@ -356,7 +355,7 @@ class TestHealthCheckLogic(SSotBaseTestCase):
         self.assertEqual(determine_health_status(none_healthy), 'unhealthy')
 
 
-class TestEnvironmentConfiguration(SSotBaseTestCase):
+class TestEnvironmentConfiguration(unittest.TestCase):
     """
     Test environment configuration handling without external dependencies
     """

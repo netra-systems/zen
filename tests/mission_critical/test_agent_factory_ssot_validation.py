@@ -39,13 +39,13 @@ from shared.isolated_environment import IsolatedEnvironment
 class TestAgentFactorySsotValidation(SSotAsyncTestCase):
     """Mission critical validation of agent factory SSOT compliance."""
 
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test environment for factory validation."""
         super().setUp()
         self.env = IsolatedEnvironment()
         self.test_user_contexts = []
 
-    def teardown_method(self, method):
+    def tearDown(self):
         """Clean up test resources."""
         super().tearDown()
         # Clean up any created contexts

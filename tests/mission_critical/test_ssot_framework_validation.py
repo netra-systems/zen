@@ -52,7 +52,6 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union, Set
-from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -237,7 +236,7 @@ class SSotUserContextSimulator:
 
 
 @pytest.mark.usefixtures("isolated_test_env")
-class TestSSotFrameworkWithIsolation(SSotBaseTestCase):
+class TestSSotFrameworkWithIsolation(BaseTestCase):
     """
     CRITICAL: SSOT Framework validation with comprehensive isolation testing.
     
@@ -246,7 +245,7 @@ class TestSSotFrameworkWithIsolation(SSotBaseTestCase):
     WebSocket channel separation, and security boundaries.
     """
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test environment with strict isolation validation."""
         super().setUp()
         self.start_time = time.time()
@@ -264,7 +263,7 @@ class TestSSotFrameworkWithIsolation(SSotBaseTestCase):
         # Initialize test environment manager for user isolation
         self.test_env_manager = get_test_env_manager()
         
-    def teardown_method(self, method):
+    def tearDown(self):
         """Tear down with metrics collection and mock detection."""
         duration = time.time() - self.start_time
         logger.info(f"SSOT isolation test {self._testMethodName} took {duration:.2f}s")

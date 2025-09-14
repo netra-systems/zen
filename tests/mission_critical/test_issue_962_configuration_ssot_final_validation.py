@@ -55,7 +55,7 @@ class TestIssue962ConfigurationSSOTFinalValidation(SSotAsyncTestCase, unittest.T
     ANY FAILURE IN THESE TESTS BLOCKS PRODUCTION DEPLOYMENT.
     """
 
-    def setup_method(self, method):
+    def setUp(self):
         """Set up mission critical test environment."""
         super().setUp()
         self.env = IsolatedEnvironment()

@@ -27,7 +27,7 @@ class TestSupervisorAgentSSOTViolations(SSotBaseTestCase):
     and PASS after proper SSOT consolidation to supervisor_ssot.py only.
     """
 
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test environment."""
         super().setUp()
         self.project_root = Path(__file__).parent.parent.parent

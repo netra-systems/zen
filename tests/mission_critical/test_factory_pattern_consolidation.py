@@ -37,7 +37,7 @@ logger = central_logger.get_logger(__name__)
 class TestFactoryPatternConsolidation(SSotBaseTestCase):
     """Test ExecutionEngine factory pattern consolidation and SSOT compliance."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test environment for factory pattern validation."""
         super().setUp()
         self.codebase_root = Path(__file__).parent.parent.parent

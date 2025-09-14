@@ -11,8 +11,7 @@ Based on CRITICAL_CONFIG_REGRESSION_AUDIT_REPORT.md findings.
 
 import os
 import sys
-# SSOT Base Test Case Import
-from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
+import unittest
 import asyncio
 from pathlib import Path
 from typing import Dict, List, Set, Optional, Tuple
@@ -26,13 +25,13 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.isolated_test_helper import IsolatedTestCase
 
 
-class ConfigurationRegressionTests(SSotBaseTestCase):
+class ConfigurationRegressionTests(IsolatedTestCase):
     """
     Critical tests to prevent configuration regressions that cause cascade failures.
     """
     
     @classmethod
-    def setup_class(cls):
+    def setUpClass(cls):
         """Set up test environment."""
         super().setUpClass()
         cls.critical_configs = {
@@ -402,7 +401,7 @@ class ConfigurationRegressionTests(SSotBaseTestCase):
                               f"Configuration change for {key} not detected")
 
 
-class ConfigurationRegressionIntegrationTests(SSotBaseTestCase):
+class ConfigurationRegressionIntegrationTests(IsolatedTestCase):
     """
     Integration tests for configuration regression prevention.
     """

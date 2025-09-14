@@ -9,6 +9,6 @@ project_root = Path(__file__).parent.parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from test_framework.jwt_test_utils import generate_test_jwt_token
+from test_framework.auth_jwt_test_manager import JWTGenerationTestManager
 
-__all__ = ["generate_test_jwt_token"]
+__all__ = ["JWTGenerationTestManager"]

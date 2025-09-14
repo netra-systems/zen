@@ -27,7 +27,6 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 
 import httpx
 import jwt
@@ -152,7 +151,7 @@ class AuthJWTCoreFlowValidator:
 
 @pytest.mark.mission_critical
 @pytest.mark.real_services
-class TestAuthJWTCoreFlows(SSotBaseTestCase):
+class TestAuthJWTCoreFlows(BaseIntegrationTest):
     """Mission Critical: Core JWT authentication flows that enable ALL business value."""
     
     @pytest.fixture(autouse=True)
@@ -400,7 +399,7 @@ class TestAuthJWTCoreFlows(SSotBaseTestCase):
 
 @pytest.mark.mission_critical
 @pytest.mark.real_services
-class TestAuthJWTBusinessContinuity(SSotBaseTestCase):
+class TestAuthJWTBusinessContinuity(BaseIntegrationTest):
     """Mission Critical: Authentication business continuity scenarios."""
     
     async def test_auth_service_restart_scenario(self):

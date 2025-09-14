@@ -76,7 +76,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
 # REMOVED_SYNTAX_ERROR: class TestWebSocketInitializationOrder(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test suite to prevent WebSocket initialization order regression."""
 
-# REMOVED_SYNTAX_ERROR: def setup_method(self, method):
+# REMOVED_SYNTAX_ERROR: def setUp(self):
     # REMOVED_SYNTAX_ERROR: """Set up test fixtures."""
     # REMOVED_SYNTAX_ERROR: self.db_session = AsyncMock(spec=AsyncSession)
     # REMOVED_SYNTAX_ERROR: self.llm_manager = Mock(spec=LLMManager)
@@ -324,7 +324,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
 # REMOVED_SYNTAX_ERROR: class TestInitializationRaceConditions(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test for potential race conditions in initialization."""
 
-# REMOVED_SYNTAX_ERROR: def setup_method(self, method):
+# REMOVED_SYNTAX_ERROR: def setUp(self):
     # REMOVED_SYNTAX_ERROR: """Set up test fixtures."""
     # REMOVED_SYNTAX_ERROR: self.db_session = AsyncMock(spec=AsyncSession)
     # REMOVED_SYNTAX_ERROR: self.llm_manager = Mock(spec=LLMManager)

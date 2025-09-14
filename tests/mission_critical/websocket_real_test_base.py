@@ -1433,11 +1433,7 @@ async def send_test_agent_request(
     task: str = "Perform a simple test task"
 ) -> Dict[str, Any]:
     """
-    Send a test agent request that triggers real agent workflow with proper WebSocket events.
-    
-    This now sends a message that will trigger the AgentRequestHandler in the WebSocket
-    handler, which will emit the required agent events (agent_started, agent_thinking, 
-    tool_executing, tool_completed, agent_completed).
+    Send a test agent request and return the message sent.
     
     Args:
         test_context: TestContext to use
@@ -1447,19 +1443,12 @@ async def send_test_agent_request(
     Returns:
         The message that was sent
     """
-    # CRITICAL FIX: Send message in format expected by real WebSocket handler
-    # The handler expects 'message' or 'content' field for user requests
     message = {
         "type": "agent_request",
-        "message": task,  # Changed from "task" to "message" 
-        "content": task,  # Also include "content" for compatibility
-        "user_request": task,  # Also include "user_request" for handler compatibility
         "agent_name": agent_name,
+        "task": task,
         "user_id": test_context.user_context.user_id,
         "thread_id": test_context.user_context.thread_id,
-        "turn_id": f"test_turn_{int(time.time())}",  # Add turn_id for tracking
-        "require_multi_agent": False,  # Set to False for simple test case
-        "real_llm": False,  # Set to False for test environment
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
     

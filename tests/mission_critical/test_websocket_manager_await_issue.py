@@ -38,7 +38,7 @@ logger = central_logger.get_logger(__name__)
 class TestWebSocketManagerAwaitIssue(SSotAsyncTestCase):
     """Test suite for WebSocket manager await issue fix."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test fixtures."""
         super().setUp()
         self.user_id = "test_user_123"
@@ -114,7 +114,7 @@ class TestWebSocketManagerAwaitIssue(SSotAsyncTestCase):
 class TestQualityValidationHandlerAwaitFix(SSotAsyncTestCase):
     """Test quality validation handler await issue fix."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test fixtures."""
         super().setUp()
         self.user_id = "test_user_validation"
@@ -241,7 +241,7 @@ class TestQualityValidationHandlerAwaitFix(SSotAsyncTestCase):
 class TestQualityReportHandlerAwaitFix(SSotAsyncTestCase):
     """Test quality report handler await issue fix."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test fixtures."""
         super().setUp()
         self.user_id = "test_user_reports"
@@ -345,7 +345,7 @@ class TestQualityReportHandlerAwaitFix(SSotAsyncTestCase):
 class TestQualityManagerAwaitFix(SSotAsyncTestCase):
     """Test quality manager await issue fix."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test fixtures."""
         super().setUp()
         self.user_id = "test_user_manager"
@@ -403,7 +403,7 @@ class TestQualityManagerAwaitFix(SSotAsyncTestCase):
 class TestWebSocketEventDeliveryAfterFix(SSotAsyncTestCase):
     """Test that WebSocket event delivery still works correctly after the fix."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test fixtures."""
         super().setUp()
         self.user_id = "test_user_events"

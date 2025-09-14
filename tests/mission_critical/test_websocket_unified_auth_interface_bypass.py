@@ -303,7 +303,7 @@ class TestWebSocketUnifiedAuthInterfaceBypass(SSotAsyncTestCase):
         if not env_accessed:
             pytest.fail("VIOLATION NOT REPRODUCED: No direct environment access detected")
 
-    def teardown_method(self, method):
+    def tearDown(self):
         """Clean up test artifacts."""
         logger.info("[U+1F9F9] UnifiedAuthInterface bypass violation test cleanup complete")
 

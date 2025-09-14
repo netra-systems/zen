@@ -60,7 +60,7 @@ class WebSocketBusinessValueMetrics:
 class TestWebSocketBusinessValueProtection(SSotAsyncTestCase):
     """Critical tests protecting business value and revenue."""
 
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test environment."""
         super().setUp()
         self.metrics = WebSocketBusinessValueMetrics()

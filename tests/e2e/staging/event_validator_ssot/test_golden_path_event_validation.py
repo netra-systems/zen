@@ -98,23 +98,20 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
     environment that indicate incomplete SSOT consolidation deployment.
     """
     
-    @classmethod
-    def setup_class(cls):
-        """Set up class-level configuration for staging environment testing."""
+    async def asyncSetUp(self):
+        """Set up test fixtures for staging environment testing."""
+        await super().asyncSetUp()
+        
         # Get staging environment configuration
-        cls.env = get_env()
+        self.env = get_env()
         
         # Staging environment endpoints
-        cls.staging_base_url = cls._get_staging_base_url()
-        cls.staging_websocket_url = cls._get_staging_websocket_url()
+        self.staging_base_url = self._get_staging_base_url()
+        self.staging_websocket_url = self._get_staging_websocket_url()
         
         # Skip tests if staging environment not available
-        if not cls.staging_base_url:
+        if not self.staging_base_url:
             pytest.skip("Staging environment not configured")
-    
-    async def asyncSetUp(self):
-        """Set up test fixtures for individual test methods."""
-        await super().asyncSetUp()
         
         # Test user and session data for staging
         self.staging_user_id = f"staging-user-{uuid.uuid4().hex[:8]}"
@@ -135,14 +132,13 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
         if hasattr(self, "staging_session_token") and self.staging_session_token:
             await self._cleanup_staging_session()
     
-    @classmethod
-    def _get_staging_base_url(cls) -> Optional[str]:
+    def _get_staging_base_url(self) -> Optional[str]:
         """Get staging environment base URL."""
         try:
             # Common staging URL patterns
             staging_urls = [
-                cls.env.get("STAGING_BASE_URL"),
-                cls.env.get("GCP_STAGING_URL"),
+                self.env.get("STAGING_BASE_URL"),
+                self.env.get("GCP_STAGING_URL"),
                 "https://netra-staging.example.com",  # Replace with actual staging URL
                 "https://staging-api.netra.dev"  # Replace with actual staging URL
             ]
@@ -155,17 +151,16 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
         except Exception:
             return None
     
-    @classmethod
-    def _get_staging_websocket_url(cls) -> Optional[str]:
+    def _get_staging_websocket_url(self) -> Optional[str]:
         """Get staging WebSocket URL."""
-        base_url = cls.staging_base_url
+        base_url = self.staging_base_url
         if base_url:
             return base_url.replace("https://", "wss://").replace("http://", "ws://") + "/ws"
         return None
     
     async def _create_staging_session(self) -> Optional[str]:
         """Create a staging session for testing."""
-        if not self.__class__.staging_base_url:
+        if not self.staging_base_url:
             return None
         
         try:
@@ -178,7 +173,7 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
                 }
                 
                 async with session.post(
-                    f"{self.__class__.staging_base_url}/auth/test-session",
+                    f"{self.staging_base_url}/auth/test-session",
                     json=auth_data,
                     timeout=10
                 ) as response:
@@ -200,7 +195,7 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
         try:
             async with aiohttp.ClientSession() as session:
                 await session.delete(
-                    f"{self.__class__.staging_base_url}/auth/session/{self.staging_session_token}",
+                    f"{self.staging_base_url}/auth/session/{self.staging_session_token}",
                     timeout=5
                 )
         except Exception:
@@ -298,7 +293,7 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
         
         # Test each potential validation endpoint
         for endpoint in validation_endpoints:
-            if not self.__class__.staging_base_url:
+            if not self.staging_base_url:
                 continue
                 
             try:
@@ -317,7 +312,7 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
                     }
                     
                     async with session.post(
-                        f"{self.__class__.staging_base_url}{endpoint}",
+                        f"{self.staging_base_url}{endpoint}",
                         json=payload,
                         headers=headers,
                         timeout=10
@@ -394,7 +389,7 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
         Expected failure: Staging WebSocket implementation may use different validators
         or validation logic compared to REST endpoints.
         """
-        if not self.__class__.staging_websocket_url:
+        if not self.staging_websocket_url:
             self.skipTest("Staging WebSocket URL not available")
         
         websocket_validation_results = {}
@@ -415,7 +410,7 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
                 subprotocols = [f"jwt-auth.{self.staging_session_token}", "jwt-auth"]
 
             async with websockets.connect(
-                self.__class__.staging_websocket_url,
+                self.staging_websocket_url,
                 extra_headers=headers,
                 subprotocols=subprotocols if subprotocols else None,
                 timeout=10
@@ -517,7 +512,7 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
         Expected failure: Staging agent execution may use different event validation
         compared to direct event validation endpoints.
         """
-        if not self.__class__.staging_base_url:
+        if not self.staging_base_url:
             self.skipTest("Staging base URL not available")
         
         agent_execution_results = {}
@@ -541,7 +536,7 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
                 
                 # Start agent execution
                 async with session.post(
-                    f"{self.__class__.staging_base_url}/api/agents/execute",
+                    f"{self.staging_base_url}/api/agents/execute",
                     json=agent_request,
                     headers=headers,
                     timeout=30
@@ -619,7 +614,7 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
             # Poll execution status and events
             for _ in range(10):  # Poll for up to 10 iterations
                 async with session.get(
-                    f"{self.__class__.staging_base_url}/api/agents/execution/{execution_id}/events",
+                    f"{self.staging_base_url}/api/agents/execution/{execution_id}/events",
                     headers=headers,
                     timeout=10
                 ) as response:
@@ -648,7 +643,7 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
         Expected failure: Staging deployment may not be ready for unified validator,
         indicating incomplete SSOT consolidation deployment.
         """
-        if not self.__class__.staging_base_url:
+        if not self.staging_base_url:
             self.skipTest("Staging base URL not available")
         
         deployment_readiness = {}
@@ -657,7 +652,7 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
             async with aiohttp.ClientSession() as session:
                 # Check deployment health endpoint
                 async with session.get(
-                    f"{self.__class__.staging_base_url}/health",
+                    f"{self.staging_base_url}/health",
                     timeout=10
                 ) as response:
                     
@@ -676,7 +671,7 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
                 
                 # Check for API version and validator information
                 async with session.get(
-                    f"{self.__class__.staging_base_url}/api/version",
+                    f"{self.staging_base_url}/api/version",
                     timeout=10
                 ) as response:
                     

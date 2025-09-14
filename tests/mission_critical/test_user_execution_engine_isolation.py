@@ -22,8 +22,7 @@ This test should PASS if UserExecutionEngine properly implements user isolation.
 If it FAILS, it indicates security vulnerabilities requiring immediate fix.
 """
 
-# SSOT Base Test Case Import
-from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
+import unittest
 import asyncio
 import concurrent.futures
 from unittest.mock import Mock, AsyncMock, patch
@@ -37,10 +36,10 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestUserExecutionEngineIsolation(SSotBaseTestCase):
+class TestUserExecutionEngineIsolation(unittest.TestCase):
     """Test UserExecutionEngine multi-user isolation functionality."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test environment for isolation testing."""
         self.isolation_violations = []
         self.concurrency_issues = []

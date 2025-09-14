@@ -26,6 +26,7 @@ from netra_backend.app.websocket_core.unified_manager import (
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.websocket_core.websocket_manager_factory import (
     WebSocketManagerFactory,
+    IsolatedWebSocketManager,
     create_websocket_manager
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -224,7 +225,8 @@ __all__ = [
     "WebSocketEmitterPool",
     
     # SECURITY FIX: Secure factory pattern exports
-    "WebSocketManagerFactory", 
+    "WebSocketManagerFactory",
+    "IsolatedWebSocketManager", 
     "get_websocket_manager",
     "create_websocket_manager",
     "UserExecutionContext",

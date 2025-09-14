@@ -36,15 +36,13 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional
 import uuid
-from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestJWTAdvancedSecurity(SSotBaseTestCase):
+class TestJWTAdvancedSecurity(unittest.TestCase):
     """Advanced JWT security validation tests"""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test environment"""
-        super().setup_method(method)
         self.secret = "test-secret-key-for-security-testing"
         self.algorithm = "HS256"
         self.user_id = "test-user-123"
@@ -182,12 +180,11 @@ class TestJWTAdvancedSecurity(SSotBaseTestCase):
         self.assertTrue(all(t < 0.1 for t in times))  # Should all be very fast
 
 
-class TestGoldenPathAuthFlow(SSotBaseTestCase):
+class TestGoldenPathAuthFlow(unittest.TestCase):
     """Golden Path authentication flow validation"""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up Golden Path test environment"""
-        super().setup_method(method)
         self.secret = "golden-path-secret-key"
         self.algorithm = "HS256"
         self.user_id = "golden-path-user"
@@ -304,12 +301,11 @@ class TestGoldenPathAuthFlow(SSotBaseTestCase):
         self.assertEqual(decoded['aud'], 'netra-backend')
 
 
-class TestSessionManagementSecurity(SSotBaseTestCase):
+class TestSessionManagementSecurity(unittest.TestCase):
     """Session management and security validation"""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up session test environment"""
-        super().setup_method(method)
         self.secret = "session-secret-key"
         self.algorithm = "HS256"
         # Simulated session store
@@ -412,7 +408,7 @@ class TestSessionManagementSecurity(SSotBaseTestCase):
             jwt.decode(token, self.secret, algorithms=[self.algorithm])
 
 
-class TestPasswordSecurity(SSotBaseTestCase):
+class TestPasswordSecurity(unittest.TestCase):
     """Password security and policy validation"""
     
     def test_password_hashing_security(self):
@@ -492,12 +488,11 @@ class TestPasswordSecurity(SSotBaseTestCase):
             self.assertEqual(len(salt), 32)
 
 
-class TestAttackVectorDefense(SSotBaseTestCase):
+class TestAttackVectorDefense(unittest.TestCase):
     """Test defense against known attack vectors"""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up attack testing environment"""
-        super().setup_method(method)
         self.secret = "attack-test-secret-key"
         self.algorithm = "HS256"
     
@@ -588,12 +583,11 @@ class TestAttackVectorDefense(SSotBaseTestCase):
                 self.fail(f"Unexpected exception for token: {token}")
 
 
-class TestIntegrationSecurity(SSotBaseTestCase):
+class TestIntegrationSecurity(unittest.TestCase):
     """Integration security testing without external dependencies"""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up integration test environment"""
-        super().setup_method(method)
         self.auth_secret = "auth-service-secret"
         self.backend_secret = "backend-service-secret"  # Different secret
         self.algorithm = "HS256"

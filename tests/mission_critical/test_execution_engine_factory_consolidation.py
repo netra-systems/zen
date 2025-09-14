@@ -32,7 +32,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 class TestExecutionEngineFactoryConsolidation(SSotBaseTestCase):
     """Validates ExecutionEngine factory consolidation and thread safety."""
 
-    def setup_method(self, method):
+    def setUp(self):
         """Set up factory consolidation test environment."""
         super().setUp()
         

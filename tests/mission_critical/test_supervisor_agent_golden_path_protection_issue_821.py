@@ -23,7 +23,7 @@ class TestSupervisorAgentGoldenPathProtection(SSotAsyncTestCase):
     All tests must pass before and after SSOT consolidation.
     """
 
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test environment."""
         super().setUp()
         self.ssot_module_path = "netra_backend.app.agents.supervisor_ssot"

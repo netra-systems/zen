@@ -61,7 +61,7 @@ class TestSessionMiddlewareGoldenPath(SSotBaseTestCase):
 
     """Mission critical tests protecting Golden Path user flow."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test environment for Golden Path testing."""
         super().setUp()
         self.env = IsolatedEnvironment()

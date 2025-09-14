@@ -604,29 +604,9 @@ class AuthServiceSettings:
         self.circuit_breaker_enabled = env.get("AUTH_CLIENT_CIRCUIT_BREAKER", "true").lower() == "true"
         
         # Determine if auth service is enabled based on environment
-        # CRITICAL FIX for Issue #1007: Environment-aware AUTH_SERVICE_ENABLED defaults
-        # - Production/Staging: Default to True (required for service authentication)
-        # - Test/Development: Explicit setting required
-        current_env = env.get("ENVIRONMENT", "").lower()
-        is_testing = env.get("TESTING", "false").lower() in ("true", "1")
-
-        # Default behavior based on environment
-        if current_env in ("production", "staging"):
-            # Production and staging REQUIRE auth service for $500K+ ARR functionality
-            default_enabled = "true"
-        elif is_testing or current_env == "test":
-            # Test environments can disable auth service for testing
-            default_enabled = env.get("AUTH_SERVICE_ENABLED", "false")
-        else:
-            # Development and other environments default to true for safety
-            default_enabled = "true"
-
-        auth_enabled_str = env.get("AUTH_SERVICE_ENABLED", default_enabled)
+        # Default to True for production safety, can be disabled explicitly
+        auth_enabled_str = env.get("AUTH_SERVICE_ENABLED", "true")
         self.enabled = auth_enabled_str.lower() == "true"
-
-        # Log configuration for debugging Issue #1007
-        logger.debug(f"AuthServiceSettings: environment={current_env}, testing={is_testing}, "
-                    f"auth_enabled={self.enabled}, source={auth_enabled_str}")
     
     @classmethod
     def from_env(cls) -> 'AuthServiceSettings':
