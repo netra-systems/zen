@@ -28,7 +28,7 @@ from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
 class TestSupervisorAgentPipelineOrchestration(BaseIntegrationTest):
