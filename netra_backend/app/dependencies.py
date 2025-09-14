@@ -34,18 +34,15 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
 )
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-# NEW: Factory pattern imports - UPDATED TO USE SSOT FACTORY
+# SSOT FACTORY: All execution engine factory imports from canonical source
 from netra_backend.app.agents.supervisor.execution_engine_factory import (
     ExecutionEngineFactory,  # SSOT implementation
     configure_execution_engine_factory,
     get_execution_engine_factory,
     user_execution_engine
 )
-# Legacy imports for configuration compatibility
-from netra_backend.app.agents.supervisor.execution_factory import (
-    ExecutionFactoryConfig,
-    UserExecutionContext as FactoryUserExecutionContext
-)
+# SSOT COMPLIANCE: Use standard UserExecutionContext (no duplicate imports)
+# ExecutionFactoryConfig and FactoryUserExecutionContext aliases removed - use SSOT patterns
 from netra_backend.app.services.websocket_bridge_factory import (
     WebSocketBridgeFactory,
     WebSocketFactoryConfig
@@ -1651,7 +1648,7 @@ async def get_factory_execution_engine(
             from shared.id_generation import UnifiedIdGenerator
             request_id = UnifiedIdGenerator.generate_base_id("req")
         
-        user_context = FactoryUserExecutionContext(
+        user_context = UserExecutionContext(
             user_id=user_id,
             request_id=request_id,
             thread_id=thread_id,
