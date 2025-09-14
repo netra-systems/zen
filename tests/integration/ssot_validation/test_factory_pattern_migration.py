@@ -568,7 +568,7 @@ class TestFactoryPatternConsistency(SSotAsyncTestCase):
         
         # 3. Legacy factory methods
         try:
-            from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
+            from netra_backend.app.agents.supervisor.user_execution_engine import create_request_scoped_engine
             factory_patterns_found.append("create_request_scoped_engine")
         except ImportError:
             pass
