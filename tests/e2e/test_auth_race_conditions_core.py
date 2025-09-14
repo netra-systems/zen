@@ -58,7 +58,7 @@ import pytest
 import jwt as jwt_lib
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.core.session_manager import SessionManager
+from auth_service.services.session_service import SessionService
 from auth_service.auth_core.models.auth_models import (
     AuthProvider,
     LoginRequest,
@@ -96,7 +96,7 @@ async def isolated_auth_environment():
     # Mock: JWT token handling isolation to avoid real crypto dependencies
     jwt_handler = MagicMock(spec=JWTHandler)
     # Mock: Session management isolation for stateless unit testing
-    session_manager = AsyncMock(spec=SessionManager)
+    session_manager = AsyncMock(spec=SessionService)
     
     # Configure JWT handler
     # Mock: JWT processing isolation for fast authentication testing
