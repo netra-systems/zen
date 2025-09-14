@@ -103,7 +103,7 @@ class TestWebSocketManagerFragmentationDetection(SSotBaseTestCase):
             len(actual_implementations), 1,
             f"SSOT VIOLATION: Found {len(actual_implementations)} WebSocketManager implementations. "
             f"Expected exactly 1 in unified_manager.py only. "
-            f"Found: {[f'{m[\"module\"]}.{m[\"class\"]}' for m in actual_implementations]}"
+            f"Found: {[f\"{m['module']}.{m['class']}\" for m in actual_implementations]}"
         )
 
     def test_detect_multiple_get_websocket_manager_functions(self):
