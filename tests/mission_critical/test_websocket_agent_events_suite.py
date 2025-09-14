@@ -627,8 +627,16 @@ class TestIndividualWebSocketEvents:
             validator.record(received_event)
             
             # Validate event structure
-            assert validator.validate_event_content_structure(received_event, "agent_started"), \
-                "agent_started event structure validation failed"
+            print(f"DEBUG: Received event keys: {list(received_event.keys())}")
+            if 'data' in received_event:
+                print(f"DEBUG: Event data keys: {list(received_event['data'].keys())}")
+            print(f"DEBUG: Event type in event: {'type' in received_event}")
+
+            validation_result = validator.validate_event_content_structure(received_event, "agent_started")
+            if not validation_result:
+                print(f"DEBUG: Validation errors: {validator.errors}")
+
+            assert validation_result, "agent_started event structure validation failed"
             
         except asyncio.TimeoutError:
             # For real connections, we might not get an echo back

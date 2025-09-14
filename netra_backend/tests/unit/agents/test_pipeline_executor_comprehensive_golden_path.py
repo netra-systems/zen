@@ -249,7 +249,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         # Act: Execute pipeline steps
         await pipeline_executor.execute_pipeline(
             pipeline=self.test_pipeline_steps,
-            state=self.test_agent_state,
+            user_context=self.test_user_context,
             run_id="pipeline_run_001",
             context={"user_id": "pipeline_user_001", "thread_id": "pipeline_thread_001"},
             db_session=self.mock_db_session
@@ -300,7 +300,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         # Act: Execute pipeline with state persistence
         await pipeline_executor.execute_pipeline(
             pipeline=self.test_pipeline_steps,
-            state=self.test_agent_state,
+            user_context=self.test_user_context,
             run_id="pipeline_run_001",
             context={"user_id": "pipeline_user_001", "thread_id": "pipeline_thread_001"},
             db_session=self.mock_db_session
@@ -341,7 +341,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         # Act: Execute pipeline with flow logging
         await pipeline_executor.execute_pipeline(
             pipeline=self.test_pipeline_steps,
-            state=self.test_agent_state,
+            user_context=self.test_user_context,
             run_id="pipeline_run_001",
             context={"user_id": "pipeline_user_001", "thread_id": "pipeline_thread_001"},
             db_session=self.mock_db_session
@@ -391,7 +391,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         # Act: Execute pipeline with session parameter
         await pipeline_executor.execute_pipeline(
             pipeline=self.test_pipeline_steps,
-            state=self.test_agent_state,
+            user_context=self.test_user_context,
             run_id="pipeline_run_001",
             context={"user_id": "pipeline_user_001", "thread_id": "pipeline_thread_001"},
             db_session=self.mock_db_session  # Session passed as parameter
@@ -445,7 +445,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         # Act: Execute pipeline with user context
         await pipeline_executor_with_context.execute_pipeline(
             pipeline=self.test_pipeline_steps,
-            state=self.test_agent_state,
+            user_context=self.test_user_context,
             run_id="pipeline_run_001",
             context={"user_id": "pipeline_user_001", "thread_id": "pipeline_thread_001"},
             db_session=self.mock_db_session
@@ -621,7 +621,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         with pytest.raises(RuntimeError, match="Simulated agent execution failure"):
             await pipeline_executor.execute_pipeline(
                 pipeline=self.test_pipeline_steps,
-                state=self.test_agent_state,
+                user_context=self.test_user_context,
                 run_id="pipeline_run_001",
                 context={"user_id": "pipeline_user_001", "thread_id": "pipeline_thread_001"},
                 db_session=self.mock_db_session
@@ -767,7 +767,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         
         await pipeline_executor.execute_pipeline(
             pipeline=large_pipeline,
-            state=self.test_agent_state,
+            user_context=self.test_user_context,
             run_id="performance_run_001",
             context={"user_id": "performance_user_001", "thread_id": "performance_thread_001"},
             db_session=self.mock_db_session

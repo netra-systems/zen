@@ -115,12 +115,21 @@ class TestAgentExecutionCoreIntegration:
 
         # Override get method for testing
         original_get = registry.get
+        original_get_async = registry.get_async
+
         def test_get(key, context=None):
             # First try our simple test storage
             if hasattr(registry, '_test_agents') and key in registry._test_agents:
                 return registry._test_agents[key]
             # Fall back to original get method
             return original_get(key, context)
+
+        async def test_get_async(key, context=None):
+            # First try our simple test storage
+            if hasattr(registry, '_test_agents') and key in registry._test_agents:
+                return registry._test_agents[key]
+            # Fall back to original async get method
+            return await original_get_async(key, context)
 
         # Override register method for testing
         original_register = registry.register
@@ -133,6 +142,7 @@ class TestAgentExecutionCoreIntegration:
             original_register(name, agent)
 
         registry.get = test_get
+        registry.get_async = test_get_async
         registry.register = test_register
 
         return registry

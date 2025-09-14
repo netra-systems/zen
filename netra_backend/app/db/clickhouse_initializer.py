@@ -7,16 +7,15 @@ import asyncio
 import logging
 from typing import Dict, Any, Optional
 from pathlib import Path
+from netra_backend.app.db.clickhouse import get_clickhouse_client, ClickHouseClient, CLICKHOUSE_AVAILABLE as CLICKHOUSE_DRIVER_AVAILABLE
 try:
-    from clickhouse_driver import Client
     from clickhouse_driver.errors import ServerException, ErrorCodes
-    CLICKHOUSE_DRIVER_AVAILABLE = True
 except ImportError:
     # ClickHouse driver not available - provide stub
-    Client = None
-    ServerException = Exception
-    ErrorCodes = None
-    CLICKHOUSE_DRIVER_AVAILABLE = False
+    class ServerException(Exception):
+        pass
+    class ErrorCodes:
+        DATABASE_ALREADY_EXISTS = 81
 
 logger = logging.getLogger(__name__)
 
@@ -63,16 +62,10 @@ class ClickHouseInitializer:
             ]
         }
     
-    def _get_client(self) -> Client:
+    def _get_client(self) -> ClickHouseClient:
         """Get or create ClickHouse client."""
         if self._client is None:
-            self._client = Client(
-                host=self.host,
-                port=self.port,
-                user=self.user,
-                password=self.password,
-                **self.client_kwargs
-            )
+            self._client = get_clickhouse_client()
         return self._client
     
     async def initialize(self) -> Dict[str, Any]:
