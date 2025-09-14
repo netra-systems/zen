@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-14 06:41:13
+**Generated:** 2025-09-14 07:14:18
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 5
-- **Passed:** 4 (80.0%)
-- **Failed:** 1 (20.0%)
+- **Total Tests:** 2
+- **Passed:** 0 (0.0%)
+- **Failed:** 2 (100.0%)
 - **Skipped:** 0
-- **Duration:** 10.12 seconds
-- **Pass Rate:** 80.0%
+- **Duration:** 9.59 seconds
+- **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
@@ -19,38 +19,35 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_message_endpoints | PASS passed | 0.501s | test_2_message_flow_staging.py |
-| test_real_message_api_endpoints | PASS passed | 0.685s | test_2_message_flow_staging.py |
-| test_real_websocket_message_flow | FAIL failed | 4.353s | test_2_message_flow_staging.py |
-| test_real_thread_management | PASS passed | 0.540s | test_2_message_flow_staging.py |
-| test_real_error_handling_flow | PASS passed | 1.468s | test_2_message_flow_staging.py |
+| test_staging_event_validator_endpoint_consistency | FAIL failed | 0.000s | test_golden_path_event_validation.py |
+| test_staging_websocket_event_validation_golden_path | FAIL failed | 0.000s | test_golden_path_event_validation.py |
 
 ## Failed Tests Details
 
-### FAILED: test_real_websocket_message_flow
-- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_2_message_flow_staging.py
-- **Duration:** 4.353s
-- **Error:** C:\Program Files\Python313\Lib\asyncio\tasks.py:507: in wait_for
-    return await fut
-           ^^^^^^^^^
-C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\connection.py:303: in recv
-    return await self.recv_messages.get(decode)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\messages.py:159: in get
-    frame = await self.frames.get(not self.closed)
-            ^^^^^^^^^^^^^^^^^^^^^^^...
+### FAILED: test_staging_event_validator_endpoint_consistency
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/event_validator_ssot/test_golden_path_event_validation.py
+- **Duration:** 0.000s
+- **Error:** tests/e2e/staging/event_validator_ssot/test_golden_path_event_validation.py:296: in test_staging_event_validator_endpoint_consistency
+    if not self.staging_base_url:
+           ^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'TestGoldenPathEventValidationStaging' object has no attribute 'staging_base_url'...
+
+### FAILED: test_staging_websocket_event_validation_golden_path
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/event_validator_ssot/test_golden_path_event_validation.py
+- **Duration:** 0.000s
+- **Error:** tests/e2e/staging/event_validator_ssot/test_golden_path_event_validation.py:392: in test_staging_websocket_event_validation_golden_path
+    if not self.staging_websocket_url:
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'TestGoldenPathEventValidationStaging' object has no attribute 'staging_websocket_url'...
 
 ## Pytest Output Format
 
 ```
-test_2_message_flow_staging.py::test_message_endpoints PASSED
-test_2_message_flow_staging.py::test_real_message_api_endpoints PASSED
-test_2_message_flow_staging.py::test_real_websocket_message_flow FAILED
-test_2_message_flow_staging.py::test_real_thread_management PASSED
-test_2_message_flow_staging.py::test_real_error_handling_flow PASSED
+test_golden_path_event_validation.py::test_staging_event_validator_endpoint_consistency FAILED
+test_golden_path_event_validation.py::test_staging_websocket_event_validation_golden_path FAILED
 
 ==================================================
-4 passed, 1 failed in 10.12s
+0 passed, 2 failed in 9.59s
 ```
 
 ## Test Coverage Matrix
