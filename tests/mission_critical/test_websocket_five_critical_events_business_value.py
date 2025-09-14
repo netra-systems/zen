@@ -302,7 +302,7 @@ class RealWebSocketEventTester:
         
     async def start_test_server(self) -> int:
         """Start a real WebSocket server for event testing."""
-        async def event_handler(websocket, path):
+        async def event_handler(websocket):
             logger.info("WebSocket client connected for event testing")
             
             try:
