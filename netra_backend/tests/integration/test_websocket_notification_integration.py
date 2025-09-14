@@ -41,7 +41,7 @@ from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmi
 from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
 
 # Agent and execution components
-from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 

@@ -118,7 +118,7 @@ class TestExecutionEngineSSOT:
         """Verify execution engine modules can be imported."""
         # SSOT MIGRATION: Use UserExecutionEngine as the single source of truth
         from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory
+        from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
         
         assert UserExecutionEngine is not None
         assert ExecutionEngineFactory is not None
@@ -128,7 +128,7 @@ class TestExecutionEngineSSOT:
     
     def test_execution_factory_creation(self):
         """Test execution factory can be created."""
-        from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory
+        from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
         
         # Factory can be instantiated
         factory = ExecutionEngineFactory()

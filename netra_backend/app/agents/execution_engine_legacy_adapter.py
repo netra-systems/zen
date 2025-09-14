@@ -301,6 +301,10 @@ class ExecutionEngineFactory:
     def create_adapted_engine(engine: Any) -> IExecutionEngine:
         """Create an adapted execution engine from any engine implementation.
         
+        🚨 DEPRECATION WARNING: Issue #884 factory consolidation
+        This factory is deprecated and will be removed during SSOT consolidation.
+        Use netra_backend.app.agents.supervisor.execution_engine_factory instead.
+        
         Args:
             engine: Any execution engine implementation
             

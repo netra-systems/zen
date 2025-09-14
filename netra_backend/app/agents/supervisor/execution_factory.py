@@ -1,5 +1,16 @@
 """
-ExecutionEngineFactory - Factory Pattern for Per-User Isolated Execution Engines
+🚨 DEPRECATED: ExecutionEngineFactory - Factory Pattern for Per-User Isolated Execution Engines
+
+⚠️  CRITICAL DEPRECATION NOTICE ⚠️
+THIS MODULE IS DEPRECATED AND WILL BE REMOVED IN ISSUE #884 CONSOLIDATION.
+
+MIGRATION PATH:
+- OLD: from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory
+- NEW: from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+
+REASON FOR DEPRECATION:
+This module creates factory proliferation that fragments execution engine creation and 
+causes inconsistent AI response delivery for the $500K+ ARR Golden Path user flow.
 
 Business Value Justification:
 - Segment: Platform/Internal  
@@ -17,6 +28,8 @@ Key Features:
 3. Resource Management - Proper cleanup and lifecycle management
 4. Scalability - Support for 10+ concurrent users with bounded resources
 5. Backward Compatibility - Seamless migration from singleton pattern
+
+🚨 USE SSOT FACTORY: Use netra_backend.app.agents.supervisor.execution_engine_factory instead
 """
 
 import asyncio
@@ -267,6 +280,19 @@ class ExecutionEngineFactory:
     
     def __init__(self, config: Optional[ExecutionFactoryConfig] = None):
         """Initialize the execution engine factory."""
+        
+        # 🚨 DEPRECATION WARNING: Issue #884 factory consolidation
+        import warnings
+        warnings.warn(
+            "⚠️  CRITICAL: execution_factory.ExecutionEngineFactory is DEPRECATED in Issue #884. "
+            "This duplicate factory fragments execution engine creation and blocks consistent "
+            "AI response delivery for $500K+ ARR Golden Path. "
+            "MIGRATION: Use 'from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory' instead. "
+            "This module will be removed after SSOT consolidation.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         self.config = config or ExecutionFactoryConfig.from_env()
         
         # Infrastructure components (shared, immutable)

@@ -1938,9 +1938,12 @@ def configure_factory_dependencies(app) -> None:
     try:
         logger.info("[U+1F3ED] Configuring factory pattern dependencies...")
         
-        # Create ExecutionEngineFactory
-        execution_factory_config = ExecutionFactoryConfig.from_env()
-        execution_factory = ExecutionEngineFactory(execution_factory_config)
+        # SSOT FACTORY: Create ExecutionEngineFactory with SSOT constructor pattern
+        execution_factory = ExecutionEngineFactory(
+            websocket_bridge=None,  # Will be configured via configure_execution_engine_factory
+            database_session_manager=None,
+            redis_manager=None
+        )
         
         # Create WebSocketBridgeFactory
         websocket_factory_config = WebSocketFactoryConfig.from_env()
