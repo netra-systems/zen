@@ -786,17 +786,17 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
     """Create default instance configurations"""
     return [
         InstanceConfig(
-            command="/createtestsv2 goldenpath, unit",
+            command="/createtestsv2 agents, unit",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            command="/createtestsv2 goldenpath, integration",
+            command="/createtestsv2 agents, integration",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            command="/createtestsv2 goldenpath, e2e",
+            command="/createtestsv2 agents, e2e",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
@@ -811,7 +811,7 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
             output_format=output_format
         ),
         InstanceConfig(
-            command="/gitissueprogressorv2 goldenpath",
+            command="/gitissueprogressorv2 agents",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
@@ -836,7 +836,7 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
             output_format=output_format
         ),
         InstanceConfig(
-            command="/failingtestsgardener goldenpath",
+            command="/failingtestsgardener agents",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
@@ -871,7 +871,7 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
             output_format=output_format
         ),
         InstanceConfig(
-            command="/runtests goldenpath, e2e gcp",
+            command="/runtests agents, e2e gcp",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
@@ -916,8 +916,8 @@ async def main():
                        help="Maximum recent lines to show per instance on console (default: 5)")
     parser.add_argument("--quiet", action="store_true",
                        help="Minimize console output, show only errors and final summaries")
-    parser.add_argument("--startup-delay", type=float, default=2.0,
-                       help="Delay in seconds between launching each instance (default: 1.0)")
+    parser.add_argument("--startup-delay", type=float, default=5.0,
+                       help="Delay in seconds between launching each instance (default: 5.0)")
     parser.add_argument("--max-line-length", type=int, default=800,
                        help="Maximum characters per line in console output (default: 500)")
     parser.add_argument("--status-report-interval", type=int, default=5,
