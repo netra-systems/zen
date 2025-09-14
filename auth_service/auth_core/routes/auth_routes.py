@@ -38,8 +38,15 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 oauth_router = APIRouter()
 
-# Global auth service instance - use real implementation
-auth_service = AuthService()
+# Global auth service instance - use real implementation with defensive initialization
+try:
+    auth_service = AuthService()
+    logger.info("AuthService initialized successfully")
+except Exception as init_error:
+    logger.error(f"CRITICAL: Failed to initialize AuthService during module import: {init_error}")
+    logger.error("This will cause auth service startup failures - auth_service variable will be undefined")
+    # Re-raise the exception to make the failure visible
+    raise RuntimeError(f"AuthService initialization failed: {init_error}") from init_error
 
 @router.get("/auth/status")
 async def auth_status() -> Dict[str, Any]:

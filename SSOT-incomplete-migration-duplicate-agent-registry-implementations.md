@@ -21,10 +21,21 @@ Critical SSOT violation with duplicate AgentRegistry implementations blocking Go
 - [x] GitHub issue #929 created
 - [x] Progress tracker created
 
-### Step 1: Test Discovery & Planning 
-- [ ] Find existing tests protecting agent registry functionality
-- [ ] Plan new SSOT validation tests
-- [ ] Update progress
+### Step 1: Test Discovery & Planning ✅ COMPLETE
+- [x] Find existing tests protecting agent registry functionality - 359 existing tests found
+- [x] Plan new SSOT validation tests - ~20 new validation tests planned  
+- [x] Update progress
+
+#### Test Discovery Results:
+- **Mission Critical:** 169 tests protecting business value
+- **Agent Integration:** 17 files with 68+ tests covering agent registry functionality
+- **WebSocket Integration:** 25+ tests validating agent-WebSocket bridge functionality
+- **User Isolation:** 15+ tests ensuring multi-user agent session management
+
+#### New Test Plan:
+- **Pre-Fix Validation:** Tests that MUST FAIL showing SSOT violations
+- **Post-Fix Validation:** Tests that MUST PASS after consolidation
+- **Golden Path Protection:** GCP staging validation for $500K+ ARR functionality
 
 ### Step 2: Execute New Test Plan
 - [ ] Create SSOT agent registry tests
