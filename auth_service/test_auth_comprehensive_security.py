@@ -41,7 +41,7 @@ import uuid
 class TestJWTAdvancedSecurity(unittest.TestCase):
     """Advanced JWT security validation tests"""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment"""
         self.secret = "test-secret-key-for-security-testing"
         self.algorithm = "HS256"
@@ -183,8 +183,9 @@ class TestJWTAdvancedSecurity(unittest.TestCase):
 class TestGoldenPathAuthFlow(unittest.TestCase):
     """Golden Path authentication flow validation"""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up Golden Path test environment"""
+        super().setup_method(method)
         self.secret = "golden-path-secret-key"
         self.algorithm = "HS256"
         self.user_id = "golden-path-user"
@@ -304,7 +305,7 @@ class TestGoldenPathAuthFlow(unittest.TestCase):
 class TestSessionManagementSecurity(unittest.TestCase):
     """Session management and security validation"""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up session test environment"""
         self.secret = "session-secret-key"
         self.algorithm = "HS256"
@@ -491,7 +492,7 @@ class TestPasswordSecurity(unittest.TestCase):
 class TestAttackVectorDefense(unittest.TestCase):
     """Test defense against known attack vectors"""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up attack testing environment"""
         self.secret = "attack-test-secret-key"
         self.algorithm = "HS256"
@@ -586,7 +587,7 @@ class TestAttackVectorDefense(unittest.TestCase):
 class TestIntegrationSecurity(unittest.TestCase):
     """Integration security testing without external dependencies"""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up integration test environment"""
         self.auth_secret = "auth-service-secret"
         self.backend_secret = "backend-service-secret"  # Different secret
