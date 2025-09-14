@@ -82,7 +82,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 
 # SSOT Imports - Following CLAUDE.md absolute import requirements
-from test_framework.base_integration_test import BaseIntegrationTest
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.real_services_test_fixtures import RealServicesTestFixtures
 from shared.isolated_environment import get_env
 from shared.types.core_types import (
@@ -383,7 +383,7 @@ class RealWebSocketEventTester:
 
 
 @pytest.mark.mission_critical
-class TestWebSocketFiveCriticalEventsBusinessValue(BaseIntegrationTest):
+class TestWebSocketFiveCriticalEventsBusinessValue(SSotAsyncTestCase):
     """Mission critical tests for the 5 WebSocket events that drive business value."""
     
     async def setUp(self):
