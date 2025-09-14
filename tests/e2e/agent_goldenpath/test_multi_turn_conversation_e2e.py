@@ -98,7 +98,7 @@ class TestMultiTurnConversationE2E(SSotAsyncTestCase):
         self.access_token = self.__class__.auth_helper.create_test_jwt_token(
             user_id=self.__class__.test_user_id,
             email=self.__class__.test_user_email,
-            expires_in_hours=2  # Longer for multi-turn tests
+            exp_minutes=120  # Longer for multi-turn tests
         )
 
         self.__class__.logger.info(f"Conversation test setup - conversation_id: {self.conversation_id}")
