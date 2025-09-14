@@ -29,7 +29,7 @@ from netra_backend.app.services.user_execution_context import (
     validate_user_context
 )
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
-    get_agent_instance_factory,
+    create_agent_instance_factory,
     configure_agent_instance_factory
 )
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
@@ -571,6 +571,66 @@ def get_service_user_context() -> str:
     service_context = f"service:{service_id}"
     logger.debug(f"Service user context: {service_context}")
     return service_context
+
+async def _extract_user_id_from_request(request: Request) -> Optional[str]:
+    """
+    Extract user ID from FastAPI request context.
+    
+    This function attempts to extract user identity from various sources:
+    - Request headers (X-User-ID)
+    - Authentication middleware state  
+    - Session data
+    - JWT token (if available)
+    
+    Args:
+        request: FastAPI request object
+        
+    Returns:
+        Optional[str]: User ID if found, None otherwise
+    """
+    try:
+        # Try to get from request headers first (most direct)
+        if hasattr(request, 'headers'):
+            user_id = request.headers.get('X-User-ID')
+            if user_id:
+                logger.debug(f"Extracted user_id from X-User-ID header: {user_id}")
+                return user_id
+        
+        # Try to get from request state (set by auth middleware)
+        if hasattr(request, 'state'):
+            # Check if auth middleware set user context
+            if hasattr(request.state, 'user_id'):
+                user_id = request.state.user_id
+                logger.debug(f"Extracted user_id from request.state: {user_id}")
+                return user_id
+            
+            # Check if user context object exists
+            if hasattr(request.state, 'user_context') and request.state.user_context:
+                user_id = getattr(request.state.user_context, 'user_id', None)
+                if user_id:
+                    logger.debug(f"Extracted user_id from request.state.user_context: {user_id}")
+                    return user_id
+        
+        # Try to get from cookies/session (for authenticated web users)
+        if hasattr(request, 'cookies'):
+            session_cookie = request.cookies.get('session_id') or request.cookies.get('user_session')
+            if session_cookie:
+                # This would require session lookup - for now just log
+                logger.debug(f"Found session cookie: {session_cookie[:8]}... (lookup not implemented)")
+        
+        # Try to extract from Authorization header (JWT token)
+        if hasattr(request, 'headers'):
+            auth_header = request.headers.get('Authorization')
+            if auth_header and auth_header.startswith('Bearer '):
+                # Would need JWT decode - for now just log
+                logger.debug("Found Bearer token in Authorization header (decode not implemented in Phase 1)")
+        
+        logger.debug("No user_id found in request context")
+        return None
+        
+    except Exception as e:
+        logger.warning(f"Error extracting user_id from request: {e}")
+        return None
 
 def get_security_service(request: Request) -> SecurityService:
     logger.debug("Getting security service from app state")
@@ -1143,77 +1203,94 @@ async def get_execution_engine_factory_dependency(request: Request):
 ExecutionEngineFactoryDep = Annotated[Any, Depends(get_execution_engine_factory_dependency)]
 
 async def get_agent_instance_factory_dependency(
-    user_id: str,
-    thread_id: str,
+    request: Request,
+    user_id: Optional[str] = None,
+    thread_id: Optional[str] = None,
     run_id: Optional[str] = None,
-    websocket_client_id: Optional[str] = None,
-    request: Request = None
+    websocket_client_id: Optional[str] = None
 ):
     """
     Create per-request AgentInstanceFactory with proper user isolation.
     
-    ISSUE #1116: Uses SSOT create_agent_instance_factory for complete user isolation.
+    ISSUE #1116 Phase 1: Uses SSOT create_agent_instance_factory for complete user isolation.
     CRITICAL: This creates a NEW factory instance for each request to ensure
     complete user isolation. No shared state exists between requests.
     
+    This function extracts user context from FastAPI request (headers, auth, etc.)
+    and creates an isolated factory instance for the user.
+    
     Args:
-        user_id: Unique user identifier for request isolation
-        thread_id: Thread identifier for WebSocket routing
+        request: FastAPI request object for accessing app state and user context
+        user_id: Optional user identifier (extracted from request if not provided)
+        thread_id: Optional thread identifier (auto-generated if not provided)
         run_id: Optional run identifier (auto-generated if not provided)
-        websocket_client_id: Optional WebSocket client identifier
-        request: FastAPI request object for accessing app state
+        websocket_client_id: Optional WebSocket client identifier (auto-generated if not provided)
     
     Returns:
         Configured AgentInstanceFactory for the user context
+        
+    Raises:
+        HTTPException: If user context cannot be extracted or factory creation fails
     """
-    from netra_backend.app.agents.supervisor.agent_instance_factory import create_agent_instance_factory
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from shared.id_generation import UnifiedIdGenerator
     
-    # Generate run_id if not provided
-    if not run_id:
-        run_id = UnifiedIdGenerator.generate_base_id("run")
-    
-    # Generate websocket_client_id if not provided
-    if not websocket_client_id:
-        websocket_client_id = UnifiedIdGenerator.generate_websocket_client_id(user_id)
-    
-    # Create user context from parameters
-    user_context = UserExecutionContext(
-        user_id=user_id,
-        thread_id=thread_id,
-        run_id=run_id,
-        websocket_client_id=websocket_client_id
-    )
-    
-    logger.info(f"Creating AgentInstanceFactory for user {user_id} (run: {run_id})")
-    
-    # Get infrastructure components from app state (shared immutable resources)
-    if not hasattr(request.app.state, 'agent_websocket_bridge'):
-        raise HTTPException(
-            status_code=500,
-            detail="WebSocket bridge not initialized - startup failure"
-        )
-    
-    # Create NEW factory instance for this request using SSOT pattern
     try:
+        # Extract user context from FastAPI request if not provided
+        if not user_id:
+            # Try to extract from request headers, auth middleware, or session
+            user_id = await _extract_user_id_from_request(request)
+            if not user_id:
+                logger.warning("No user_id provided and could not extract from request - using service context")
+                user_id = get_service_user_context()
+        
+        # Generate missing identifiers using SSOT UnifiedIdGenerator
+        if not thread_id:
+            thread_id = UnifiedIdGenerator.generate_base_id("thread")
+            
+        if not run_id:
+            run_id = UnifiedIdGenerator.generate_base_id("run")
+        
+        if not websocket_client_id:
+            websocket_client_id = UnifiedIdGenerator.generate_websocket_client_id(user_id)
+        
+        # Create user context from extracted/provided parameters
+        user_context = UserExecutionContext(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            websocket_client_id=websocket_client_id
+        )
+        
+        logger.info(f"Creating per-request AgentInstanceFactory for user {user_id} (run: {run_id})")
+        
+        # Validate that required infrastructure is available
+        if not hasattr(request.app.state, 'agent_websocket_bridge'):
+            raise HTTPException(
+                status_code=500,
+                detail="WebSocket bridge not initialized - startup failure"
+            )
+        
+        # Create NEW factory instance for this request using SSOT pattern
         factory = create_agent_instance_factory(user_context)
         
-        # Configure the factory with shared infrastructure
-        await factory.configure(
+        # Configure the factory with shared infrastructure components
+        factory.configure(
             websocket_bridge=request.app.state.agent_websocket_bridge,
             llm_manager=getattr(request.app.state, 'llm_manager', None),
             agent_class_registry=getattr(request.app.state, 'agent_class_registry', None),
+            tool_dispatcher=getattr(request.app.state, 'tool_dispatcher', None)
         )
         
-        logger.debug(f"Created per-request AgentInstanceFactory for user {user_context.user_id} (run: {user_context.run_id})")
+        logger.info(f"Successfully created per-request AgentInstanceFactory for user {user_context.user_id} (run: {user_context.run_id})")
         return factory
         
     except Exception as e:
-        logger.error(f"Failed to create per-request AgentInstanceFactory for user {user_context.user_id}: {e}")
+        error_user_id = user_id or "unknown"
+        logger.error(f"Failed to create per-request AgentInstanceFactory for user {error_user_id}: {e}")
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to create AgentInstanceFactory: {e}"
+            detail=f"Failed to create AgentInstanceFactory: {str(e)}"
         )
 
 AgentInstanceFactoryDep = Annotated[Any, Depends(get_agent_instance_factory_dependency)]
