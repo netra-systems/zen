@@ -193,3 +193,18 @@ class SupplyResearchResult(BaseModel):
 # REMOVED: rebuild_model() function and DeepAgentState.model_rebuild() calls
 # DeepAgentState is now in SSOT location: netra_backend.app.schemas.agent_models
 # Model rebuilding is handled by the SSOT version automatically
+
+# COMPATIBILITY ALIAS: Import from SSOT location for backward compatibility
+# This allows existing imports to continue working while directing to the authoritative source
+try:
+    from netra_backend.app.schemas.agent_models import DeepAgentState
+    # Issue #871: DeepAgentState compatibility alias successfully imported from SSOT location
+except ImportError as e:
+    # Safety fallback in case of circular import issues
+    warnings.warn(
+        f"Failed to import DeepAgentState from SSOT location: {e}. "
+        "Please use 'from netra_backend.app.schemas.agent_models import DeepAgentState' directly.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    DeepAgentState = None

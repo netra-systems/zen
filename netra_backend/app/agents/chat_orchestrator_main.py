@@ -93,8 +93,8 @@ class ChatOrchestrator(SupervisorAgent):
         self.trace_logger = TraceLogger(self.websocket_bridge)
         
         # Create alias for PipelineExecutor compatibility
-        # PipelineExecutor expects agent_registry but SupervisorAgent provides registry
-        self.agent_registry = self.registry
+        # PipelineExecutor expects agent_registry but SupervisorAgent provides agent_factory
+        self.agent_registry = self.agent_factory
         
         self.pipeline_executor = PipelineExecutor(self)
     

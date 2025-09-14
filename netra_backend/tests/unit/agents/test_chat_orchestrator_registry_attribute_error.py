@@ -38,27 +38,26 @@ class TestChatOrchestratorRegistryAttributeError(SSotAsyncTestCase):
 
         self.mock_cache_manager = Mock()
 
-    async def test_chat_orchestrator_initialization_fails_with_registry_access(self):
-        """Test that ChatOrchestrator initialization fails due to missing registry attribute.
+    async def test_chat_orchestrator_initialization_succeeds_with_fixed_agent_factory(self):
+        """Test that ChatOrchestrator initialization succeeds after the fix.
 
-        This test should FAIL before the fix is applied, demonstrating the AttributeError
-        at line 97 in chat_orchestrator_main.py when accessing self.registry.
+        After the fix, ChatOrchestrator should initialize successfully using agent_factory
+        instead of the non-existent registry attribute.
         """
-        with pytest.raises(AttributeError) as exc_info:
-            # Attempt to initialize ChatOrchestrator - should fail at line 97
-            orchestrator = ChatOrchestrator(
-                db_session=self.mock_db_session,
-                llm_manager=self.mock_llm_manager,
-                websocket_manager=self.mock_websocket_manager,
-                tool_dispatcher=self.mock_tool_dispatcher,
-                cache_manager=self.mock_cache_manager,
-                semantic_cache_enabled=True
-            )
+        # Initialize ChatOrchestrator - should succeed after the fix
+        orchestrator = ChatOrchestrator(
+            db_session=self.mock_db_session,
+            llm_manager=self.mock_llm_manager,
+            websocket_manager=self.mock_websocket_manager,
+            tool_dispatcher=self.mock_tool_dispatcher,
+            cache_manager=self.mock_cache_manager,
+            semantic_cache_enabled=True
+        )
 
-        # Verify the specific AttributeError from registry access during ChatOrchestrator initialization
-        error_msg = str(exc_info.value)
-        assert "object has no attribute 'registry'" in error_msg
-        assert "registry" in error_msg
+        # Verify the fix: agent_registry should reference agent_factory
+        assert hasattr(orchestrator, 'agent_registry'), "ChatOrchestrator should have agent_registry after fix"
+        assert hasattr(orchestrator, 'agent_factory'), "ChatOrchestrator should have agent_factory from SupervisorAgent"
+        assert orchestrator.agent_registry is orchestrator.agent_factory, "agent_registry should reference agent_factory"
 
     def test_supervisor_agent_has_agent_factory_not_registry(self):
         """Test that SupervisorAgent provides agent_factory, not registry."""
@@ -144,27 +143,31 @@ class TestChatOrchestratorRegistryAttributeError(SSotAsyncTestCase):
         # Verify configuration doesn't raise exceptions
         assert supervisor.agent_factory is not None
 
-    async def test_chat_orchestrator_pipeline_executor_dependency(self):
-        """Test the specific dependency between ChatOrchestrator and PipelineExecutor.
+    async def test_chat_orchestrator_pipeline_executor_dependency_after_fix(self):
+        """Test the specific dependency between ChatOrchestrator and PipelineExecutor after fix.
 
-        This test reproduces the exact scenario from line 99 in chat_orchestrator_main.py
+        This test verifies the scenario from line 99 in chat_orchestrator_main.py
         where PipelineExecutor is initialized with 'self' (the ChatOrchestrator instance).
         """
-        # Mock the dependencies that would be initialized before line 97
-        with pytest.raises(AttributeError):
-            # This should fail when _init_helper_modules is called
-            orchestrator = ChatOrchestrator(
-                db_session=self.mock_db_session,
-                llm_manager=self.mock_llm_manager,
-                websocket_manager=self.mock_websocket_manager,
-                tool_dispatcher=self.mock_tool_dispatcher,
-                cache_manager=self.mock_cache_manager,
-                semantic_cache_enabled=True
-            )
+        # Initialize ChatOrchestrator - should now succeed with the fix
+        orchestrator = ChatOrchestrator(
+            db_session=self.mock_db_session,
+            llm_manager=self.mock_llm_manager,
+            websocket_manager=self.mock_websocket_manager,
+            tool_dispatcher=self.mock_tool_dispatcher,
+            cache_manager=self.mock_cache_manager,
+            semantic_cache_enabled=True
+        )
 
-            # If initialization somehow succeeded, this would be the next failure point
-            # where PipelineExecutor tries to access orchestrator.agent_registry
-            pipeline_executor = PipelineExecutor(orchestrator)
+        # Verify ChatOrchestrator has the required attributes for PipelineExecutor
+        assert hasattr(orchestrator, 'agent_registry'), "ChatOrchestrator should have agent_registry for PipelineExecutor"
+        assert hasattr(orchestrator, 'pipeline_executor'), "ChatOrchestrator should have initialized PipelineExecutor"
+
+        # Verify PipelineExecutor was created successfully and can access orchestrator attributes
+        pipeline_executor = orchestrator.pipeline_executor
+        assert pipeline_executor is not None, "PipelineExecutor should be created"
+        assert pipeline_executor.orchestrator is orchestrator, "PipelineExecutor should reference orchestrator"
+        assert pipeline_executor.agent_registry is orchestrator.agent_registry, "PipelineExecutor should use orchestrator's agent_registry"
 
 
 if __name__ == "__main__":
