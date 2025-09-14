@@ -15,6 +15,8 @@
 2. All else is secondary
 3. Staging GCP deployment only (ignore docker)
 4. Minimal fixes, zero new features
+5. Remove legacy entirely and atomically upgrade cleanly and wholly to clear SSOT patterns. (no "fallback" to legacy, complete upgrade). search far and wide to remove legacy and refresh associated elements like tests or docs.
+6. Tests that asked for legacy must be updated themsevles (the tests), the real system must always move towards and protect SSOT patterns
 
 **BETA GOLDEN PATH**
 1. Focus on effective golden path or beta.
