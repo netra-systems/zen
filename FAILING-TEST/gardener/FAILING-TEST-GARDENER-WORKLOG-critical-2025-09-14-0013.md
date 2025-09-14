@@ -105,6 +105,7 @@ NameError: name 'CRITICAL' is not defined
 ### 🟡 Issue #7: Circuit Breaker Import Errors
 **Category:** uncollectable-test-regression-p2-circuit-breaker-import-failures
 **Severity:** P2 (Medium - Minor feature issues, moderate user impact)
+**GitHub Issue:** [#977](https://github.com/netra-systems/netra-apex/issues/977) ✅
 **Affected Files:**
 - `test_circuit_breaker_comprehensive.py` - cannot import `CircuitOpenException`
 - `test_circuit_breaker_recovery.py` - undefined `AuthCircuitBreakerManager`
@@ -114,6 +115,8 @@ NameError: name 'CRITICAL' is not defined
 ImportError: cannot import name 'CircuitOpenException' from 'netra_backend.app.services.circuit_breaker'
 NameError: name 'AuthCircuitBreakerManager' is not defined
 ```
+
+**Root Cause:** SSOT consolidation changes likely moved or renamed circuit breaker classes. Tests need updated import paths to match current SSOT architecture.
 
 ---
 
