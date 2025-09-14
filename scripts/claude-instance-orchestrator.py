@@ -782,8 +782,6 @@ class ClaudeInstanceOrchestrator:
 
 
 
-
-
 def create_default_instances(output_format: str = "stream-json") -> List[InstanceConfig]:
     """Create default instance configurations"""
     return [
@@ -884,6 +882,11 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
         ),
         InstanceConfig(
             command="/gitcommitgardener",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/gcploggardener",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
