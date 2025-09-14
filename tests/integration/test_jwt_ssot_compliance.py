@@ -31,7 +31,7 @@ import pytest
 import jwt
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.integration_auth_manager import IntegrationAuthManager
+from test_framework.ssot.integration_auth_manager import IntegrationAuthServiceManager
 from test_framework.ssot.websocket_auth_test_helpers import WebSocketAuthTestHelper
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ class TestJwtSsotComplianceIntegration(SSotAsyncTestCase):
 
     def setup_method(self, method):
         super().setup_method(method)
-        self.auth_manager = IntegrationAuthManager()
+        self.auth_manager = IntegrationAuthServiceManager()
         self.websocket_helper = WebSocketAuthTestHelper()
         
     @pytest.mark.asyncio
