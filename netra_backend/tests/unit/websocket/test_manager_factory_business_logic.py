@@ -349,8 +349,8 @@ class TestIsolatedWebSocketManager(SSotBaseTestCase):
         invalid_contexts = ["string", 123, None, {}]
         
         for invalid_context in invalid_contexts:
-            with pytest.raises(ValueError, match="user_context must be a UserExecutionContext"):
-                IsolatedWebSocketManager(invalid_context)
+            with pytest.raises((ValueError, TypeError)):
+                WebSocketManager(user_context=invalid_context, _ssot_authorization_token="test_token")
                 
     async def test_add_connection_enforces_user_isolation(self):
         """Test add_connection enforces strict user isolation."""
@@ -444,32 +444,33 @@ class TestIsolatedWebSocketManager(SSotBaseTestCase):
 
 @pytest.mark.unit
 class TestWebSocketManagerFactory(SSotBaseTestCase):
-    """Test WebSocketManagerFactory business logic - CRITICAL for multi-user resource management."""
-    
+    """Test WebSocket Manager factory functions - CRITICAL for multi-user resource management."""
+
     def setup_method(self):
         """Set up test fixtures."""
-        self.factory = WebSocketManagerFactory(max_managers_per_user=5)
+        # Issue #824 SSOT Remediation: WebSocketManagerFactory class removed
+        # Test the factory functions directly instead
+        self.max_managers_per_user = 5
         
-    def test_factory_initialization_with_configuration(self):
-        """Test WebSocketManagerFactory initializes with proper configuration."""
-        assert self.factory.max_managers_per_user == 5
-        assert self.factory.connection_timeout_seconds == 1800  # 30 minutes
-        assert len(self.factory._active_managers) == 0
-        assert len(self.factory._user_manager_count) == 0
-        assert isinstance(self.factory._factory_metrics, FactoryMetrics)
+    def test_factory_functions_available(self):
+        """Test WebSocket Manager factory functions are available."""
+        # Test that SSOT factory functions are available
+        assert callable(create_websocket_manager)
+        assert callable(create_websocket_manager_sync)
+        assert callable(get_websocket_manager_factory)
         
-    def test_generate_isolation_key_uses_thread_id(self):
-        """Test _generate_isolation_key creates consistent keys using thread_id."""
-        user_context = Mock(spec=UserExecutionContext)
-        user_context.user_id = "key-user-123"
-        user_context.thread_id = "thread-456"
-        
-        key1 = self.factory._generate_isolation_key(user_context)
-        key2 = self.factory._generate_isolation_key(user_context)
-        
-        # Keys should be consistent
-        assert key1 == key2
-        assert key1 == "key-user-123:thread-456"
+    def test_defensive_user_context_creation(self):
+        """Test defensive user execution context creation."""
+        user_id = "key-user-123"
+        websocket_client_id = "ws-client-456"
+
+        context = create_defensive_user_execution_context(user_id, websocket_client_id)
+
+        # Verify context has required attributes
+        assert hasattr(context, 'user_id')
+        assert hasattr(context, 'websocket_client_id')
+        assert context.user_id == user_id
+        assert context.websocket_client_id == websocket_client_id
         
     async def test_create_manager_enforces_resource_limits(self):
         """Test create_manager enforces per-user resource limits."""

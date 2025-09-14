@@ -799,18 +799,21 @@ class GCPWebSocketInitializationValidator:
         return False
 
     async def validate_gcp_readiness_for_websocket(
-        self, 
+        self,
         timeout_seconds: float = 30.0
     ) -> GCPReadinessResult:
         """
-        Validate GCP readiness for WebSocket connections.
-        
+        Validate GCP readiness for WebSocket connections with enhanced error reporting.
+
         CRITICAL: This method prevents 1011 WebSocket errors by ensuring all
         required services are ready before GCP routes WebSocket connections.
-        
+
+        IMMEDIATE REMEDIATION FIX: Enhanced error reporting provides detailed debugging
+        information to identify specific service failures causing WebSocket issues.
+
         Args:
             timeout_seconds: Maximum time to wait for readiness
-            
+
         Returns:
             GCPReadinessResult with validation status and details
         """
@@ -818,14 +821,31 @@ class GCPWebSocketInitializationValidator:
         failed_services = []
         warnings = []
         details = {}
-        
+
+        # Enhanced debug information for troubleshooting
+        debug_info = {
+            "app_state_available": self.app_state is not None,
+            "environment": self.environment,
+            "is_gcp_environment": self.is_gcp_environment,
+            "is_cloud_run": self.is_cloud_run,
+            "validation_start_timestamp": self.validation_start_time
+        }
+
+        if self.app_state:
+            debug_info.update({
+                "app_state_attributes": [attr for attr in dir(self.app_state) if not attr.startswith('_')],
+                "startup_phase": getattr(self.app_state, 'startup_phase', 'unknown'),
+                "startup_complete": getattr(self.app_state, 'startup_complete', False),
+                "startup_failed": getattr(self.app_state, 'startup_failed', False)
+            })
+
         # PERFORMANCE OPTIMIZATION: Apply environment-aware timeout optimization
         optimized_timeout = self._get_optimized_timeout(timeout_seconds)
-        
+
         self.logger.info(
-            f" SEARCH:  GCP WebSocket readiness validation started "
+            f"🔍 GCP WebSocket readiness validation started "
             f"(requested: {timeout_seconds}s, optimized: {optimized_timeout:.1f}s, "
-            f"environment: {self.environment})"
+            f"environment: {self.environment}) - Debug info: {debug_info}"
         )
         
         try:

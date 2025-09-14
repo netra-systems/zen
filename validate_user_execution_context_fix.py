@@ -19,7 +19,7 @@ def test_user_execution_context_creation():
     try:
         # Import the UserExecutionContext class
         from netra_backend.app.services.user_execution_context import UserExecutionContext
-        print("✅ Successfully imported UserExecutionContext")
+        print("Successfully imported UserExecutionContext")
 
         # Create a UserExecutionContext instance with required parameters ONLY
         # This would have failed with the original session_data error
@@ -31,7 +31,7 @@ def test_user_execution_context_creation():
             websocket_client_id="ws_client_def"
         )
 
-        print("✅ Successfully created UserExecutionContext instance")
+        print("Successfully created UserExecutionContext instance")
         print(f"   - User ID: {context.user_id}")
         print(f"   - Thread ID: {context.thread_id}")
         print(f"   - Run ID: {context.run_id}")
@@ -44,16 +44,16 @@ def test_user_execution_context_creation():
     except TypeError as e:
         error_msg = str(e)
         if "session_data" in error_msg:
-            print(f"❌ ORIGINAL ERROR STILL EXISTS: {error_msg}")
+            print(f"ORIGINAL ERROR STILL EXISTS: {error_msg}")
             return False
         else:
-            print(f"❌ Different TypeError occurred: {error_msg}")
+            print(f"Different TypeError occurred: {error_msg}")
             print("   This indicates the original session_data issue is fixed,")
             print("   but there may be a different constructor issue.")
             return True  # Original issue is resolved
 
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print(f"Unexpected error: {e}")
         print(f"   Error type: {type(e).__name__}")
         traceback.print_exc()
         return False
@@ -92,8 +92,8 @@ def test_user_execution_context_compatibility():
 
 def main():
     """Main validation function."""
-    print("🎯 ISSUE #876 VALIDATION: UserExecutionContext session_data parameter error")
-    print("📋 OBJECTIVE: Prove that the original TypeError about session_data is RESOLVED")
+    print("ISSUE #876 VALIDATION: UserExecutionContext session_data parameter error")
+    print("OBJECTIVE: Prove that the original TypeError about session_data is RESOLVED")
     print()
 
     success_count = 0
@@ -112,12 +112,12 @@ def main():
     print("=" * 70)
 
     if success_count == total_tests:
-        print("🏆 RESOLVED: Original session_data parameter error is COMPLETELY FIXED")
-        print("✅ All UserExecutionContext constructor calls now work correctly")
-        print("✅ No TypeError about unexpected keyword argument 'session_data'")
+        print("RESOLVED: Original session_data parameter error is COMPLETELY FIXED")
+        print("All UserExecutionContext constructor calls now work correctly")
+        print("No TypeError about unexpected keyword argument 'session_data'")
         print()
-        print("📈 BUSINESS IMPACT: $500K+ ARR agent integration tests can now proceed")
-        print("🔧 TECHNICAL ACHIEVEMENT: UserExecutionContext API is stable and working")
+        print("BUSINESS IMPACT: $500K+ ARR agent integration tests can now proceed")
+        print("TECHNICAL ACHIEVEMENT: UserExecutionContext API is stable and working")
         return True
     else:
         print(f"⚠️  {success_count}/{total_tests} tests passed")

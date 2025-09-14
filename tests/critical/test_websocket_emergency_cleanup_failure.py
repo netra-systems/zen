@@ -25,7 +25,6 @@ from typing import Dict, Any, List, Optional
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.websocket_manager_factory import FactoryInitializationError
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager_factory import IsolatedWebSocketManager
 from shared.types.core_types import UserID
 
 

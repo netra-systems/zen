@@ -20,18 +20,18 @@ class AgentLifecycleMixin(ABC):
     """Mixin providing agent lifecycle management functionality"""
     
     @time_operation("pre_run", TimingCategory.ORCHESTRATION)
-    async def _pre_run(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> bool:
+    async def _pre_run(self, context: UserExecutionContext, run_id: str, stream_updates: bool) -> bool:
         """Entry conditions and setup. Returns True if agent should proceed."""
         self._initialize_agent_run(run_id)
         await self._send_starting_update(run_id, stream_updates)
-        return await self.check_entry_conditions(state, run_id)
+        return await self.check_entry_conditions(context, run_id)
     
     @time_operation("post_run", TimingCategory.ORCHESTRATION)
-    async def _post_run(self, state: DeepAgentState, run_id: str, stream_updates: bool, success: bool) -> None:
+    async def _post_run(self, context: UserExecutionContext, run_id: str, stream_updates: bool, success: bool) -> None:
         """Exit conditions and cleanup."""
         execution_time = self._finalize_execution_timing()
         status = self._update_lifecycle_status(success)
-        await self._complete_agent_run(run_id, stream_updates, status, execution_time, state)
+        await self._complete_agent_run(run_id, stream_updates, status, execution_time, context)
     
     def _finalize_execution_timing(self) -> float:
         """Finalize execution timing and return duration."""
@@ -62,16 +62,16 @@ class AgentLifecycleMixin(ABC):
         else:
             await self.emit_error(f"{self.name} {status}", "execution_failure")
     
-    async def run(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+    async def run(self, context: UserExecutionContext, run_id: str, stream_updates: bool) -> None:
         """Main run method with lifecycle management."""
         # Start timing execution tree
         if hasattr(self, 'timing_collector'):
             timing_tree = self.timing_collector.start_execution(correlation_id=run_id)
         
         try:
-            success = await self._execute_with_conditions(state, run_id, stream_updates)
+            success = await self._execute_with_conditions(context, run_id, stream_updates)
             if success:
-                await self._post_run(state, run_id, stream_updates, success=True)
+                await self._post_run(context, run_id, stream_updates, success=True)
         except WebSocketDisconnect as e:
             await self._handle_websocket_disconnect(e, state, run_id, stream_updates)
         except Exception as e:
