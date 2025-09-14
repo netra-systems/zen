@@ -43,11 +43,18 @@ Deprecated WebSocket Manager Factory compatibility layer (587 lines) still exist
 - [x] **All tests SSOT compliant** - use established testing infrastructure
 - [x] **Business value protected** - $500K+ ARR Golden Path validation included
 
+### ✅ 3) PLAN REMEDIATION (COMPLETE)
+- [x] **3-phase implementation strategy** with atomic rollback procedures
+- [x] **Single function migration:** `create_defensive_user_execution_context` to SSOT location
+- [x] **Minimal dependencies:** Only 2 primary files need import updates
+- [x] **Risk assessment:** LOW-MEDIUM with comprehensive test validation  
+- [x] **Target location:** `user_execution_context.py` identified as SSOT home
+- [x] **Timeline:** 4-7 hours with zero business impact when executed properly
+
 ### ⏳ Next Steps  
-1. **PLAN REMEDIATION** - Plan safe removal of deprecated factory  
-3. **EXECUTE REMEDIATION** - Remove legacy code and update imports
-4. **TEST FIX LOOP** - Ensure all tests pass
-5. **PR AND CLOSURE** - Create PR and close issue
+1. **EXECUTE REMEDIATION** - Implement 3-phase factory removal
+2. **TEST FIX LOOP** - Ensure all tests pass
+3. **PR AND CLOSURE** - Create PR and close issue
 
 ## Technical Analysis
 The websocket_manager_factory.py contains 587 lines of compatibility code that:

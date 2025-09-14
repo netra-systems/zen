@@ -21,6 +21,7 @@ Created: 2025-09-14
 
 import sys
 import re
+import pytest
 from pathlib import Path
 from typing import Dict, Any, List, Set, Optional
 

@@ -98,7 +98,7 @@ class WebSocketEventCapture:
         self.start_time = None
 
 
-class WebSocketTestContext:
+class WebSocketContext:
     """
     Main WebSocketTestContext class for WebSocket testing and user context simulation.
 
