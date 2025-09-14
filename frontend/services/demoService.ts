@@ -1,6 +1,5 @@
-import { API_BASE_URL } from './apiConfig'
-import { authInterceptor } from '@/lib/auth-interceptor'
 import { logger } from '@/lib/logger'
+import { webSocketService } from './webSocketService'
 
 export interface DemoChatRequest {
   message: string
@@ -66,62 +65,86 @@ export interface SessionStatus {
 }
 
 class DemoService {
-  private baseUrl: string
+  private sessionId: string | null = null
 
   constructor() {
-    this.baseUrl = API_BASE_URL
+    // WebSocket-only implementation - no HTTP base URL needed
+    this.sessionId = this.generateSessionId()
   }
 
-  private async fetchWithAuth(url: string, options: RequestInit = {}) {
-    // Use centralized auth interceptor instead of manual token handling
-    const fullUrl = `${this.baseUrl}${url}`;
-    
-    try {
-      const response = await authInterceptor.authenticatedFetch(fullUrl, {
-        ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
+  private generateSessionId(): string {
+    return `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  }
+
+  private getWebSocketUrl(): string {
+    // Use the same logic as other WebSocket services
+    const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const apiUrl = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_API_URL || 'localhost:8000'
+    const host = apiUrl.replace(/^https?:\/\//, '')
+    return `${protocol}//${host}`
+  }
+
+  private async sendWebSocketRequest(type: string, data: any): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error(`WebSocket request timeout: ${type}`))
+      }, 30000)
+
+      const handleResponse = (message: any) => {
+        if (message.type === `${type}_response`) {
+          clearTimeout(timeout)
+          resolve(message.data || message.payload)
         }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.text();
-        let errorMessage: string;
-        try {
-          const parsed = JSON.parse(errorData);
-          errorMessage = parsed.detail || parsed.message || parsed.error || `Request failed with status ${response.status}`;
-        } catch {
-          errorMessage = errorData || `Request failed with status ${response.status}`;
-        }
-        
-        const error = new Error(errorMessage);
-        (error as any).status = response.status;
-        throw error;
       }
-      
-      return response;
-    } catch (error) {
-      logger.error('Demo service request failed', error as Error, {
-        component: 'DemoService',
-        url: fullUrl,
-        method: options.method || 'GET'
-      });
-      throw error;
-    }
+
+      try {
+        webSocketService.connect(this.getWebSocketUrl(), {
+          onMessage: handleResponse,
+          onError: (error) => {
+            clearTimeout(timeout)
+            reject(error)
+          }
+        })
+
+        webSocketService.send({
+          type,
+          data: {
+            ...data,
+            session_id: this.sessionId,
+            timestamp: Date.now()
+          }
+        })
+      } catch (error) {
+        clearTimeout(timeout)
+        reject(error)
+      }
+    })
   }
 
   async sendChatMessage(request: DemoChatRequest): Promise<DemoChatResponse> {
-    const response = await this.fetchWithAuth('/api/demo/chat', {
-      method: 'POST',
-      body: JSON.stringify(request),
-    })
+    // SSOT WebSocket implementation - eliminates HTTP dual-path architecture
+    try {
+      const response = await this.sendWebSocketRequest('demo_chat', {
+        message: request.message,
+        industry: request.industry,
+        session_id: request.session_id || this.sessionId,
+        context: request.context || {}
+      })
 
-    if (!response.ok) {
-      throw new Error(`Failed to send demo chat message: ${response.statusText}`)
+      return {
+        response: response.response || response.message || '',
+        agents_involved: response.agents_involved || [],
+        optimization_metrics: response.optimization_metrics || {},
+        session_id: response.session_id || request.session_id || this.sessionId
+      }
+    } catch (error) {
+      logger.error('Demo chat WebSocket request failed', error as Error, {
+        component: 'DemoService',
+        action: 'sendChatMessage',
+        request: { ...request, context: '[redacted]' }
+      })
+      throw new Error(`Failed to send demo chat message: ${error.message}`)
     }
-
-    return response.json()
   }
 
   async calculateROI(request: ROICalculationRequest): Promise<ROICalculationResponse> {
