@@ -47,8 +47,9 @@ export interface ProcessingState {
 }
 
 // ThreadState moved to shared/types/frontend_types.ts for SSOT compliance
-// Use StoreThreadState for store-specific thread state with actions
-export type { StoreThreadState as ThreadState } from '@shared/types/frontend_types';
+// SSOT import for store-specific thread state with actions
+// NOTE: Renamed from ThreadState to avoid namespace collision with canonical ThreadState
+export type { StoreThreadState as StoreThreadSliceState } from '@shared/types/frontend_types';
 
 export interface ConnectionState {
   isConnected: boolean;
