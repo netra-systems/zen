@@ -211,4 +211,27 @@ STAGING: USE_STAGING_SERVICES=true -> Tests execute successfully
 
 **Business Impact:** ✅ **RESTORED** - WebSocket connectivity for $500K+ ARR Golden Path functionality
 
-#### 5.1.2 Database Environment Variables ⚠️ IN PROGRESS
+#### 5.1.2 Database Environment Variables ✅ INVESTIGATION COMPLETED
+
+**Issue:** PostgreSQL 5137ms response times, Redis connection failures to 10.166.204.83:6379
+**Root Cause:** Missing CLICKHOUSE_PASSWORD environment variable in Cloud Run configuration
+
+**Investigation Results:**
+- **PostgreSQL:** ✅ All env vars configured, using Cloud SQL Unix socket
+- **Redis:** ✅ All env vars configured, instance accessible and ready
+- **ClickHouse:** ❌ **MISSING CLICKHOUSE_PASSWORD** environment variable
+- **Secret Exists:** `clickhouse-password-staging` contains valid password
+
+**Critical Finding:** Health checks failing due to missing ClickHouse password, cascading to PostgreSQL performance issues
+
+**Fix Required:**
+```bash
+gcloud run services update netra-backend-staging \
+  --region=us-central1 \
+  --project=netra-staging \
+  --set-secrets="CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest"
+```
+
+**Business Impact:** ✅ **IDENTIFIED** - Fix will restore database health checks and improve PostgreSQL performance
+
+#### 5.1.3 Apply Database Environment Fix ⚠️ READY FOR IMPLEMENTATION
