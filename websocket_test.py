@@ -26,13 +26,7 @@ async def test_websocket_connection(uri, timeout=10):
             
         print(f"Attempting connection with timeout={timeout}s...")
         
-        async with websockets.connect(
-            uri, 
-            ssl=ssl_context,
-            extra_headers={
-                "User-Agent": "Phase3-WebSocket-Validator/1.0"
-            }
-        ) as websocket:
+        async with websockets.connect(uri, ssl=ssl_context) as websocket:
             print("✅ WebSocket connection established successfully!")
             print(f"Connection state: {websocket.state}")
             
@@ -59,26 +53,24 @@ async def test_websocket_connection(uri, timeout=10):
             except Exception as msg_error:
                 print(f"⚠️  Message send failed: {msg_error}")
                 
-    except Exception as status_error:
-        if "status" in str(status_error).lower():
-            print(f"❌ Invalid status response: {status_error}")
-            return False, f"Status error: {status_error}"
-        
-    except websockets.exceptions.InvalidURI as e:
-        print(f"❌ Invalid URI: {e}")
-        return False, "Invalid URI"
-        
-    except websockets.exceptions.ConnectionClosedError as e:
-        print(f"❌ Connection closed: {e.code} - {e.reason}")
-        return False, f"Connection closed: {e.code}"
-        
     except OSError as e:
         print(f"❌ Network error: {e}")
         return False, f"Network error: {e}"
         
     except Exception as e:
-        print(f"❌ Unexpected error: {type(e).__name__}: {e}")
-        return False, f"Error: {type(e).__name__}"
+        error_str = str(e).lower()
+        if "status" in error_str and hasattr(e, 'status_code'):
+            print(f"❌ Invalid status code: {e.status_code}")
+            return False, f"Status {e.status_code}"
+        elif "uri" in error_str:
+            print(f"❌ Invalid URI: {e}")
+            return False, "Invalid URI"
+        elif "connection" in error_str and "closed" in error_str:
+            print(f"❌ Connection closed: {e}")
+            return False, f"Connection closed: {e}"
+        else:
+            print(f"❌ Unexpected error: {type(e).__name__}: {e}")
+            return False, f"Error: {type(e).__name__}"
         
     return True, "Success"
 

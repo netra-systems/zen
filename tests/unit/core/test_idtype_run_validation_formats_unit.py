@@ -122,12 +122,12 @@ class TestIDTypeRunValidationFormats(SSotBaseTestCase):
                 self.valid_run_id_patterns.append(run_id)
                 self.generated_run_ids.add(run_id)
             
-            self.test_metrics.record_success(f"is_valid_id_format validation successful: {len(test_cases)} patterns")
+            self.test_metrics.record_custom("success", f"is_valid_id_format validation successful: {len(test_cases)} patterns")
             
         except AttributeError as e:
             # Expected failure before fix
             assert "RUN" in str(e), f"Expected 'RUN' in error message, got: {e}"
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"is_valid_id_format with run IDs failed: {e}")
 
     def test_is_valid_id_format_compatible_with_run_type(self):
@@ -163,10 +163,10 @@ class TestIDTypeRunValidationFormats(SSotBaseTestCase):
             # This might pass during migration period, but run_id with RUN must work
             
             self.generated_run_ids.update([run_id, user_id])
-            self.test_metrics.record_success(f"is_valid_id_format_compatible with RUN type successful")
+            self.test_metrics.record_custom("success", f"is_valid_id_format_compatible with RUN type successful")
             
         except AttributeError as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"is_valid_id_format_compatible with RUN type failed: {e}")
 
     def test_format_validation_edge_cases(self):
@@ -211,10 +211,10 @@ class TestIDTypeRunValidationFormats(SSotBaseTestCase):
             assert is_valid_id_format_compatible(valid_run_id, IDType.RUN), f"Valid run ID should be RUN compatible: {valid_run_id}"
             
             self.generated_run_ids.add(valid_run_id)
-            self.test_metrics.record_success(f"Edge case validation successful: {len(self.invalid_run_id_patterns)} invalid patterns tested")
+            self.test_metrics.record_custom("success", f"Edge case validation successful: {len(self.invalid_run_id_patterns)} invalid patterns tested")
             
         except AttributeError as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"Format validation edge cases failed: {e}")
 
     def test_ssot_format_pattern_compliance(self):
@@ -268,10 +268,10 @@ class TestIDTypeRunValidationFormats(SSotBaseTestCase):
                 
                 self.generated_run_ids.add(run_id)
             
-            self.test_metrics.record_success(f"SSOT format pattern compliance successful: {len(ssot_patterns)} patterns")
+            self.test_metrics.record_custom("success", f"SSOT format pattern compliance successful: {len(ssot_patterns)} patterns")
             
         except AttributeError as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"SSOT format pattern compliance failed: {e}")
 
     def test_backwards_compatibility_format_validation(self):
@@ -317,11 +317,11 @@ class TestIDTypeRunValidationFormats(SSotBaseTestCase):
             assert is_valid_id_format(run_id) and is_valid_id_format(user_id), f"Both IDs should be valid: run={run_id}, user={user_id}"
             
             self.generated_run_ids.update([run_id, user_id])
-            self.test_metrics.record_success(f"Backwards compatibility validation successful: {len(existing_types)} existing + RUN")
+            self.test_metrics.record_custom("success", f"Backwards compatibility validation successful: {len(existing_types)} existing + RUN")
             
         except AttributeError as e:
             # Expected failure for RUN type before fix
-            self.test_metrics.record_expected_failure(f"Expected failure for RUN type before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure for RUN type before fix: {e}")
             
             # But validate that existing types still work
             assert len(self.generated_run_ids) >= len(existing_types), f"Existing types should still work: {len(self.generated_run_ids)}"
@@ -371,10 +371,10 @@ class TestIDTypeRunValidationFormats(SSotBaseTestCase):
             assert compatible_ops_per_sec >= min_performance, f"Compatible validation too slow: {compatible_ops_per_sec:.2f} ops/sec"
             
             self.generated_run_ids.update(run_ids)
-            self.test_metrics.record_success(f"Format validation performance: format={format_ops_per_sec:.2f} ops/sec, compatible={compatible_ops_per_sec:.2f} ops/sec")
+            self.test_metrics.record_custom("success", f"Format validation performance: format={format_ops_per_sec:.2f} ops/sec, compatible={compatible_ops_per_sec:.2f} ops/sec")
             
         except AttributeError as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"Format validation performance test failed: {e}")
 
     def test_format_validation_comprehensive_coverage(self):
@@ -472,10 +472,10 @@ class TestIDTypeRunValidationFormats(SSotBaseTestCase):
             successful_scenarios = [r for r in validation_results if r["success"]]
             assert len(successful_scenarios) == len(test_scenarios), f"All scenarios should pass: {len(successful_scenarios)}/{len(test_scenarios)}"
             
-            self.test_metrics.record_success(f"Comprehensive format validation coverage successful: {len(test_scenarios)} scenarios")
+            self.test_metrics.record_custom("success", f"Comprehensive format validation coverage successful: {len(test_scenarios)} scenarios")
             
         except AttributeError as e:
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"Comprehensive format validation coverage failed: {e}")
 
     def teardown_method(self, method=None):
@@ -491,6 +491,6 @@ class TestIDTypeRunValidationFormats(SSotBaseTestCase):
         
         # Record metrics
         if hasattr(self, 'test_metrics'):
-            self.test_metrics.finalize()
+            self.test_metrics.record_custom("test_completed", True)
             
         super().teardown_method(method)
