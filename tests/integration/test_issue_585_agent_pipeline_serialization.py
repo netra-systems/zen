@@ -15,7 +15,7 @@ from unittest.mock import MagicMock, patch, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-from netra_backend.app.agents.supervisor.execution_factory import ExecutionFactory
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory as ExecutionFactory
 
 
 class TestIssue585AgentPipelineSerializationIntegration(SSotAsyncTestCase):
