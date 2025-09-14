@@ -115,7 +115,7 @@ class AgentLifecycleMixin(ABC):
         """Handle execution errors and send notifications."""
         self.logger.error(f"{self.name} failed for run_id: {run_id}: {e}")
         await self._send_error_notification(e, run_id, stream_updates)
-        await self._post_run(state, run_id, stream_updates, success=False)
+        await self._post_run(context, run_id, stream_updates, success=False)
     
     async def _send_error_notification(self, error: Exception, run_id: str, stream_updates: bool) -> None:
         """Send error notification via WebSocket."""
