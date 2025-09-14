@@ -48,9 +48,12 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         
         # Setup execution tracker mock
         self.mock_execution_tracker.collect_metrics = AsyncMock(return_value={})
-        self.mock_execution_tracker.register_execution = AsyncMock()
+        self.mock_execution_tracker.create_execution = AsyncMock()
+        self.mock_execution_tracker.register_execution = AsyncMock()  # Backward compatibility
         self.mock_execution_tracker.start_execution = AsyncMock()
         self.mock_execution_tracker.complete_execution = AsyncMock()
+        self.mock_execution_tracker.update_execution_state = Mock()
+        self.mock_execution_tracker.get_metrics = Mock(return_value={})
         
         with patch('netra_backend.app.agents.supervisor.agent_execution_core.get_execution_tracker') as mock_get_tracker:
             mock_get_tracker.return_value = self.mock_execution_tracker
@@ -87,7 +90,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         """
         # Setup successful agent execution
         exec_id = uuid4()
-        self.mock_execution_tracker.register_execution.return_value = exec_id
+        self.mock_execution_tracker.create_execution.return_value = exec_id
         self.mock_registry.get_async.return_value = self.mock_agent
         
         # Mock successful agent execution result
@@ -114,9 +117,9 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         assert result.duration is not None, "Execution duration should be recorded"
         
         # Verify execution tracking for monitoring
-        self.mock_execution_tracker.register_execution.assert_called_once()
+        self.mock_execution_tracker.create_execution.assert_called_once()
         self.mock_execution_tracker.start_execution.assert_called_once_with(exec_id)
-        self.mock_execution_tracker.complete_execution.assert_called_once()
+        self.mock_execution_tracker.update_execution_state.assert_called()
         
         # Verify WebSocket notifications for user feedback
         self.mock_websocket_bridge.notify_agent_started.assert_called_once()
