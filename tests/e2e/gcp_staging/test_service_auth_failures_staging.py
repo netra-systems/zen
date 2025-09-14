@@ -52,7 +52,7 @@ class TestServiceAuthFailuresStaging(BaseE2ETest):
 
     @pytest.mark.e2e
     @pytest.mark.gcp_staging
-    @pytest.mark.auth_failure_reproduction
+    
     async def test_staging_service_secret_synchronization(self):
         """
         Test SERVICE_SECRET consistency across all GCP staging services.
@@ -142,7 +142,7 @@ class TestServiceAuthFailuresStaging(BaseE2ETest):
 
     @pytest.mark.e2e
     @pytest.mark.gcp_staging
-    @pytest.mark.auth_failure_reproduction
+    
     async def test_staging_service_to_service_request_authentication(self):
         """
         Test real HTTP requests between GCP staging services with authentication.
@@ -211,7 +211,7 @@ class TestServiceAuthFailuresStaging(BaseE2ETest):
 
     @pytest.mark.e2e
     @pytest.mark.gcp_staging
-    @pytest.mark.auth_failure_reproduction
+    
     @pytest.mark.golden_path
     async def test_staging_golden_path_service_authentication(self):
         """
@@ -290,8 +290,8 @@ class TestRealGCPSecretManagerIntegration(BaseE2ETest):
 
     @pytest.mark.e2e
     @pytest.mark.gcp_staging
-    @pytest.mark.auth_failure_reproduction
-    @pytest.mark.gcp_integration
+    
+    @pytest.mark.e2e
     async def test_gcp_secret_manager_service_secret_retrieval(self):
         """
         Test real GCP Secret Manager integration for SERVICE_SECRET retrieval.
@@ -356,8 +356,8 @@ class TestRealGCPSecretManagerIntegration(BaseE2ETest):
 
     @pytest.mark.e2e
     @pytest.mark.gcp_staging
-    @pytest.mark.auth_failure_reproduction
-    @pytest.mark.cloud_run
+    
+    @pytest.mark.e2e
     async def test_cloud_run_environment_service_auth_configuration(self):
         """
         Test service authentication configuration in GCP Cloud Run environment.
@@ -408,7 +408,7 @@ class TestRealGCPSecretManagerIntegration(BaseE2ETest):
 
 
 # Test Suite Summary for Issue #1037 E2E Tests
-@pytest.mark.issue_1037_e2e_reproduction
+
 class TestIssue1037E2EReproductionSuite:
     """
     Complete E2E test suite for Issue #1037 in GCP staging environment.

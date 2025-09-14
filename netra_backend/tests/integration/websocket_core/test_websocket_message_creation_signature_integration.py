@@ -36,15 +36,9 @@ from netra_backend.app.websocket_core.types import (
     WebSocketMessage
 )
 from netra_backend.app.websocket_core.handlers import (
-    handle_connection_message,
-    handle_ping_heartbeat_message,
-    handle_agent_message,
-    handle_agent_task_message
-)
-
-# Import the specific handler functions that contain problematic lines
-from netra_backend.app.websocket_core.handlers import (
-    _send_system_message,  # Contains problematic usage
+    get_message_router,
+    get_router_handler_count,
+    list_registered_handlers
 )
 
 

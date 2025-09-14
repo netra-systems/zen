@@ -1812,6 +1812,113 @@ class AuthServiceClient:
         logger.warning("blacklist_token called - synchronous token blacklisting not fully implemented")
         return True
     
+    async def register_oauth_user(self, oauth_user_data: Dict) -> Dict:
+        """Register user via OAuth flow integration.
+        
+        Args:
+            oauth_user_data: Dictionary containing OAuth user data with required fields:
+                - email: User's email address
+                - name: User's display name
+                - oauth_provider: OAuth provider name (e.g., 'google', 'github')
+                - oauth_id: Provider-specific user ID
+                
+        Returns:
+            Dict with registration result containing:
+                - success: Boolean indicating if registration succeeded
+                - user_id: Generated user ID if successful
+                - access_token: JWT access token if successful
+                - error: Error message if failed
+        """
+        if not self.settings.enabled:
+            logger.error("Auth service disabled - OAuth user registration unavailable")
+            return {
+                "success": False,
+                "error": "auth_service_disabled",
+                "message": "Authentication service is not available"
+            }
+        
+        # Validate required OAuth user data fields
+        required_fields = ['email', 'name', 'oauth_provider', 'oauth_id']
+        missing_fields = [field for field in required_fields if not oauth_user_data.get(field)]
+        
+        if missing_fields:
+            logger.error(f"OAuth user registration missing required fields: {missing_fields}")
+            return {
+                "success": False,
+                "error": "invalid_oauth_data",
+                "message": f"Missing required fields: {', '.join(missing_fields)}",
+                "missing_fields": missing_fields
+            }
+        
+        try:
+            client = await self._get_client()
+            headers = self._get_request_headers()
+            
+            # Prepare OAuth registration request
+            registration_data = {
+                "email": oauth_user_data["email"],
+                "name": oauth_user_data["name"], 
+                "oauth_provider": oauth_user_data["oauth_provider"],
+                "oauth_id": oauth_user_data["oauth_id"]
+            }
+            
+            logger.info(f"Registering OAuth user with provider {oauth_user_data['oauth_provider']} for email: {oauth_user_data['email']}")
+            
+            response = await client.post("/auth/oauth/register", json=registration_data, headers=headers)
+            
+            if response.status_code == 200:
+                result = response.json()
+                logger.info(f"OAuth user registration successful for email: {oauth_user_data['email']}")
+                return {
+                    "success": True,
+                    "user_id": result.get("user_id"),
+                    "access_token": result.get("access_token"), 
+                    "refresh_token": result.get("refresh_token"),
+                    "message": "User registered successfully"
+                }
+            elif response.status_code == 409:
+                # User already exists
+                logger.info(f"OAuth user already exists for email: {oauth_user_data['email']}")
+                try:
+                    result = response.json()
+                    return {
+                        "success": True,  # Treat existing user as success for OAuth flow
+                        "user_id": result.get("user_id"),
+                        "access_token": result.get("access_token"),
+                        "refresh_token": result.get("refresh_token"),
+                        "message": "User already exists, logged in successfully"
+                    }
+                except:
+                    return {
+                        "success": False,
+                        "error": "user_exists",
+                        "message": "User already exists but login failed"
+                    }
+            else:
+                logger.error(f"OAuth user registration failed with status {response.status_code}")
+                try:
+                    error_detail = response.json()
+                    logger.error(f"Registration error details: {error_detail}")
+                    return {
+                        "success": False,
+                        "error": error_detail.get("error", "registration_failed"),
+                        "message": error_detail.get("message", "OAuth registration failed")
+                    }
+                except:
+                    return {
+                        "success": False,
+                        "error": "registration_failed",
+                        "message": f"OAuth registration failed with status {response.status_code}"
+                    }
+        
+        except Exception as e:
+            logger.error(f"OAuth user registration failed with exception: {e}")
+            return {
+                "success": False,
+                "error": "service_error",
+                "message": f"Registration service error: {str(e)}"
+            }
+
     async def get_user_permissions(self, user_id: str) -> List[str]:
         """Get user permissions by user ID."""
         if not self.settings.enabled:

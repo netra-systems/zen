@@ -18,8 +18,8 @@ env.set("ENVIRONMENT", "test", "test_auth_direct")
 
 import time
 import uuid
-from auth_core.core.jwt_handler import JWTHandler
-from auth_core.services.auth_service import AuthService
+from auth_service.auth_core.core.jwt_handler import JWTHandler
+from auth_service.auth_core.services.auth_service import AuthService
 
 
 def test_token_refresh_uniqueness():
