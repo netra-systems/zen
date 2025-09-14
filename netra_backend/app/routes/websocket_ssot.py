@@ -655,8 +655,8 @@ class WebSocketSSOTRouter:
         - Agent orchestration and tool execution
         - Emergency fallback patterns
         """
-        connection_id = f"main_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
-        preliminary_connection_id = f"prelim_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
+        connection_id = f"main_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
+        preliminary_connection_id = f"prelim_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
         user_context = None
         ws_manager = None
         
@@ -945,7 +945,7 @@ class WebSocketSSOTRouter:
         - Request-scoped context isolation
         - Health monitoring per user
         """
-        connection_id = f"factory_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
+        connection_id = f"factory_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
         user_context = None
         websocket_manager = None
         
@@ -1045,7 +1045,7 @@ class WebSocketSSOTRouter:
         - Automatic resource cleanup on disconnect
         - Comprehensive audit logging
         """
-        connection_id = f"isolated_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
+        connection_id = f"isolated_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
         user_context = None
         connection_scoped_manager = None
         
