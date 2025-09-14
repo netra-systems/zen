@@ -26,9 +26,39 @@ WebSocket Manager fragmentation creating race conditions and inconsistent behavi
 - [x] GitHub issue #1055 created
 - [x] Local progress tracker (IND) created
 
-### 🔄 STEP 1: DISCOVER AND PLAN TEST (IN PROGRESS)
-- [ ] 1.1) DISCOVER EXISTING: Find collection of existing tests
-- [ ] 1.2) PLAN ONLY: Plan for test updates and new test creation
+### ✅ STEP 1: DISCOVER AND PLAN TEST (COMPLETED)
+- [x] 1.1) DISCOVER EXISTING: Find collection of existing tests
+- [x] 1.2) PLAN ONLY: Plan for test updates and new test creation
+
+#### 1.1) EXISTING TESTS DISCOVERED
+**COMPREHENSIVE TEST COVERAGE:** 2888+ files contain websocket/WebSocket references!
+
+**KEY EXISTING SSOT TESTS (ALREADY DESIGNED TO FAIL/PASS):**
+- `tests/unit/websocket_core/test_ssot_websocket_manager_single_instance.py` - Tests single manager instance
+- `tests/unit/websocket_core/test_ssot_import_pattern_compliance.py` - Tests import standardization
+- `tests/mission_critical/test_websocket_agent_events_suite.py` - Protects $500K+ ARR Golden Path
+
+**CRITICAL MISSION TESTS TO PROTECT:**
+- WebSocket agent event delivery (Golden Path core)
+- WebSocket authentication flows
+- Multi-user WebSocket isolation
+- WebSocket manager lifecycle tests
+
+#### 1.2) TEST PLAN
+**EXISTING TEST UPDATES (60% - HIGH VALUE):**
+- Mission critical tests MUST continue passing during SSOT refactor
+- SSOT validation tests should PASS after consolidation (currently failing as designed)
+- WebSocket authentication tests need SSOT import updates
+
+**NEW SSOT TESTS (20% - TARGETED):**
+- Import path consistency validation tests
+- Factory pattern consolidation validation
+- Race condition reproduction tests (currently failing)
+
+**VALIDATION TESTS (20% - SAFETY):**
+- Golden Path functionality preserved during SSOT changes
+- No new breaking changes introduced
+- Performance impact assessment
 
 ### ⏳ REMAINING STEPS
 - [ ] STEP 2: EXECUTE THE TEST PLAN
