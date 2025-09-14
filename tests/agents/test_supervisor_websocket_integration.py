@@ -134,7 +134,7 @@ class TestSupervisorWebSocketIntegration:
             return agent
         except Exception as e:
             # If initialization fails, create a mock agent with the minimum required interface
-            mock_agent = AsyncMock(spec=SupervisorAgent)
+            mock_agent = SSotMockFactory.create_agent_mock(agent_type="supervisor")
             mock_agent.websocket_manager = mock_websocket_manager
             mock_agent.websocket = MockWebSocketConnection()
             return mock_agent
@@ -220,8 +220,8 @@ class TestSupervisorWebSocketIntegration:
     async def test_agent_service_handles_websocket_message(self, mock_db_session):
 
         """Test that AgentService properly handles WebSocket messages."""
-        # Create mock supervisor
-        mock_supervisor = AsyncMock(spec=SupervisorAgent)
+        # Create mock supervisor using SSOT factory
+        mock_supervisor = SSotMockFactory.create_agent_mock(agent_type="supervisor")
 
         # Mock: Generic component isolation for controlled unit testing
         websocket = MockWebSocketConnection()
@@ -414,8 +414,8 @@ class TestSupervisorWebSocketIntegration:
     async def test_agent_service_websocket_message_validation(self):
 
         """Test WebSocket message validation in agent service."""
-        # Create mock supervisor
-        mock_supervisor = AsyncMock(spec=SupervisorAgent)
+        # Create mock supervisor using SSOT factory
+        mock_supervisor = SSotMockFactory.create_agent_mock(agent_type="supervisor")
 
         # Mock: Generic component isolation for controlled unit testing
         websocket = MockWebSocketConnection()
@@ -445,8 +445,8 @@ class TestSupervisorWebSocketIntegration:
             mock_handler.websocket = MockWebSocketConnection()
 
 
-            # Create mock db session for validation test
-            mock_db_session = AsyncMock(spec=AsyncSession)
+            # Create mock db session for validation test using SSOT factory
+            mock_db_session = SSotMockFactory.create_database_session_mock()
 
             await agent_service.handle_websocket_message(
 
@@ -460,8 +460,8 @@ class TestSupervisorWebSocketIntegration:
         # The production code has an undefined 'manager' variable, so we test for exception handling
         invalid_message = {"payload": {"content": "Missing type field"}}
 
-        # Create mock db session for invalid message test
-        mock_invalid_db_session = AsyncMock(spec=AsyncSession)
+        # Create mock db session for invalid message test using SSOT factory
+        mock_invalid_db_session = SSotMockFactory.create_database_session_mock()
 
         # The code has a bug where 'manager' is undefined, so we expect an exception
         try:
