@@ -118,21 +118,53 @@ UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
 
 # SSOT Validation: Ensure we're truly the single source of truth
 def _validate_ssot_compliance():
-    """Validate that this is the only active WebSocket Manager implementation."""
+    """
+    Validate that this is the only active WebSocket Manager implementation.
+
+    THREAD SAFETY FIX: Creates a snapshot of sys.modules to prevent
+    "dictionary changed size during iteration" errors during concurrent
+    test collection or module loading.
+    """
     import inspect
     import sys
 
+    # CRITICAL FIX: Create a snapshot of sys.modules to prevent dictionary
+    # modification during iteration, especially during concurrent test collection
+    try:
+        # Create immutable snapshot of modules to prevent race conditions
+        modules_snapshot = dict(sys.modules.items())
+    except RuntimeError:
+        # If we still hit a race condition, retry once with smaller window
+        import time
+        time.sleep(0.001)  # Brief pause to let concurrent operations complete
+        modules_snapshot = dict(sys.modules.items())
+
     # Check for other WebSocket Manager implementations in the module cache
     websocket_manager_classes = []
-    for module_name, module in sys.modules.items():
-        if 'websocket' in module_name.lower() and hasattr(module, '__dict__'):
-            for attr_name in dir(module):
-                attr = getattr(module, attr_name, None)
-                if (inspect.isclass(attr) and
-                    'websocket' in attr_name.lower() and
-                    'manager' in attr_name.lower() and
-                    attr != WebSocketManager):
-                    websocket_manager_classes.append(f"{module_name}.{attr_name}")
+    for module_name, module in modules_snapshot.items():
+        # Additional safety: Skip None modules and add error handling
+        if module is None:
+            continue
+
+        if 'websocket' in module_name.lower():
+            try:
+                # Safety check: Ensure module has valid __dict__ before proceeding
+                if not hasattr(module, '__dict__') or module.__dict__ is None:
+                    continue
+
+                # Use getattr with default to prevent AttributeError during iteration
+                for attr_name in dir(module):
+                    attr = getattr(module, attr_name, None)
+                    if (attr is not None and
+                        inspect.isclass(attr) and
+                        'websocket' in attr_name.lower() and
+                        'manager' in attr_name.lower() and
+                        attr != WebSocketManager):
+                        websocket_manager_classes.append(f"{module_name}.{attr_name}")
+            except (AttributeError, TypeError, ImportError) as e:
+                # Silently skip problematic modules during SSOT validation
+                # This prevents validation failures from blocking import-time execution
+                continue
 
     if websocket_manager_classes:
         logger.warning(f"SSOT WARNING: Found other WebSocket Manager classes: {websocket_manager_classes}")
