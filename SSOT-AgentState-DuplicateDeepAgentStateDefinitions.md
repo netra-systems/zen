@@ -36,22 +36,32 @@
 1. **ExecutionEngineFactory duplication** (P1)
 2. **AgentRegistry duplication** (P1)
 
-## Test Discovery Status ✅ COMPLETE
-- [x] **Existing Tests Found**: 161 test files requiring SSOT import updates
-- [x] **Test Categories**: Unit (16), Integration (16), Mission Critical validation
-- [x] **Execution Strategy**: No Docker - unit/integration/staging GCP only
-- [x] **Test Plan**: 32 new tests (8 failing + 8 unit + 16 integration)
+## Test Discovery Status ✅ COMPLETE - COMPREHENSIVE ANALYSIS
+- [x] **CRITICAL FINDING**: 161 test files using deprecated imports will break during migration
+- [x] **VALIDATION**: 5 test files already use SSOT imports as migration examples
+- [x] **GOLDEN PATH SAFE**: Mission-critical WebSocket tests already migrated away from DeepAgentState
+- [x] **SECURITY**: WebSocket suite uses UserExecutionContext for safer user isolation
+
+### Critical Test Files Requiring Migration
+- `netra_backend/tests/supervisor_test_helpers.py` (Agent test foundation)
+- `netra_backend/tests/unit/agents/test_base_agent_comprehensive.py` (BaseAgent validation)
+- `netra_backend/tests/integration/agent_execution/*.py` (15+ execution tests)
+- `netra_backend/tests/security/test_deepagentstate_vulnerability_reproduction.py` (Security critical)
+
+### SSOT Reference Examples (Already Migrated)
+- `netra_backend/tests/unit/agents/test_base_agent_comprehensive_enhanced.py:45`
+- `netra_backend/tests/integration/agents/supervisor/test_agent_execution_core_integration.py:26`
+- `netra_backend/tests/unit/test_agent_forward_references.py:16`
+
+### New Tests Planned (3 Failing Tests to Prove SSOT Violation)
+1. **Test Import Conflict Validation** (should FAIL initially, proving violation exists)
+2. **Test State Compatibility Verification** (validate functional equivalence)
+3. **Test Golden Path Independence** (verify WebSocket independence)
 
 ### Test Execution Strategy (No Docker Requirements)
-- **Unit Tests**: `python tests/unified_test_runner.py --category unit --test-pattern "*deepagentstate*"`
+- **Validation**: `python tests/unified_test_runner.py --category unit --test-pattern "*deepagentstate*" --no-docker`
 - **Integration**: `python tests/unified_test_runner.py --category integration --test-pattern "*agent_state_ssot*" --env staging`
-- **Mission Critical**: `python tests/mission_critical/test_websocket_agent_events_suite.py`
-
-### Test Implementation Priority
-1. **Phase 1**: 8 failing tests proving SSOT violation exists
-2. **Phase 2**: 8 unit tests validating SSOT DeepAgentState
-3. **Phase 3**: 16 integration/security tests
-4. **Phase 4**: Update 161 existing tests to use SSOT imports
+- **Golden Path**: `python tests/mission_critical/test_websocket_agent_events_suite.py`
 
 ## Remediation Plan Status
 - [ ] Migration strategy for 20+ files using deprecated version
@@ -60,4 +70,9 @@
 
 ## Progress Log
 - **2025-09-13**: Initial discovery via SSOT Gardener audit
-- **2025-09-13**: Test discovery complete - 161 existing tests + 32 new tests planned
+- **2025-09-13**: GitHub Issue #871 created (P0 Critical SSOT violation)
+- **2025-09-13**: Comprehensive test analysis complete:
+  - 161 test files using deprecated imports identified
+  - 5 SSOT reference examples found
+  - Mission-critical WebSocket tests already migrated (Golden Path safe)
+  - 3 new failing tests planned to prove violation
