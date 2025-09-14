@@ -226,7 +226,7 @@ class ProductionLeakReproducer:
         baseline_memory = self.capture_memory_snapshot("cold_start_baseline")
         
         # Simulate cold start - create new factory (no background cleanup started)
-        cold_start_factory = WebSocketManager(max_managers_per_user=20, connection_timeout_seconds=300)
+        cold_start_factory = WebSocketManager()
         
         # Simulate connection burst (users reconnecting after cold start)
         burst_managers = []
@@ -615,7 +615,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         """Setup for each test with production leak reproducer."""
         super().setup_method(method)
         self.leak_reproducer = ProductionLeakReproducer()
-        self.factory = WebSocketManager(max_managers_per_user=20, connection_timeout_seconds=300)
+        self.factory = WebSocketManager()
         
         # Generate test user ID
         self.test_user_id = f"prod-leak-user-{random.randint(10000, 99999)}"

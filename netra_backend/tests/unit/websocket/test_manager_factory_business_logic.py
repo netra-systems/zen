@@ -56,29 +56,28 @@ class TestFactoryMetrics(SSotBaseTestCase):
     def test_factory_metrics_initialization(self):
         """Test FactoryMetrics initializes with correct default values."""
         metrics = FactoryMetrics()
-        
-        assert metrics.managers_created == 0
-        assert metrics.managers_active == 0
-        assert metrics.managers_cleaned_up == 0
-        assert metrics.users_with_active_managers == 0
-        assert metrics.resource_limit_hits == 0
-        assert metrics.total_connections_managed == 0
-        assert metrics.security_violations_detected == 0
-        assert metrics.average_manager_lifetime_seconds == 0.0
+
+        # Issue #824 SSOT Remediation: Use actual attributes from compatibility FactoryMetrics
+        assert metrics.emitters_created == 0
+        assert metrics.emitters_active == 0
+        assert metrics.emitters_cleaned == 0
+        assert metrics.events_sent_total == 0
+        assert metrics.events_failed_total == 0
+        assert metrics.ssot_redirect is True
         
     def test_factory_metrics_to_dict_serialization(self):
         """Test FactoryMetrics converts to dict for monitoring."""
         metrics = FactoryMetrics()
-        metrics.managers_created = 5
-        metrics.security_violations_detected = 1
-        
+        metrics.emitters_created = 5
+        metrics.events_failed_total = 1
+
         metrics_dict = metrics.to_dict()
-        
+
         assert isinstance(metrics_dict, dict)
-        assert metrics_dict["managers_created"] == 5
-        assert metrics_dict["security_violations_detected"] == 1
-        assert "managers_active" in metrics_dict
-        assert "resource_limit_hits" in metrics_dict
+        assert metrics_dict["emitters_created"] == 5
+        assert metrics_dict["events_failed_total"] == 1
+        assert "emitters_active" in metrics_dict
+        assert "ssot_redirect" in metrics_dict
 
 
 @pytest.mark.unit
