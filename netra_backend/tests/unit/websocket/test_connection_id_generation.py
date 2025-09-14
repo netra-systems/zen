@@ -30,7 +30,7 @@ from typing import Dict, Any, List, Optional
 from netra_backend.app.websocket_core.utils import generate_connection_id, generate_message_id
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, MessageType, create_standard_message
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.connection_manager import ConnectionManager
 
 # Import ID generation components

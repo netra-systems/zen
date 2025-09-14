@@ -194,7 +194,6 @@ class TestAgentExecutionComprehensive(BaseIntegrationTest):
             thread_id=ThreadID(f"test-thread-{uuid.uuid4()}"),
             run_id=RunID(f"test-run-{uuid.uuid4()}"),
             request_id=RequestID(f"test-request-{uuid.uuid4()}"),
-            session_data={},
             created_at=datetime.now(timezone.utc)
         )
 
@@ -326,7 +325,6 @@ class TestAgentExecutionComprehensive(BaseIntegrationTest):
             thread_id=ThreadID("test-thread"),
             run_id=RunID("test-run"),
             request_id=RequestID("test-request"),
-            session_data={},
             created_at=datetime.now(timezone.utc)
         )
         

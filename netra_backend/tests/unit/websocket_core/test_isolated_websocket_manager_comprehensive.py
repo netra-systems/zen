@@ -1,6 +1,6 @@
-"""Comprehensive unit tests for IsolatedWebSocketManager.
+"""Comprehensive unit tests for WebSocketManager.
 
-This test suite provides 100% method coverage of the IsolatedWebSocketManager class
+This test suite provides 100% method coverage of the WebSocketManager class
 with focus on security, user isolation, and strongly typed ID integration.
 
 Business Value Justification (BVJ):
@@ -28,7 +28,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any
 
 # Core imports
-from netra_backend.app.websocket_core.websocket_manager_factory import IsolatedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from shared.types.core_types import (

@@ -41,7 +41,7 @@ from netra_backend.app.websocket_core.utils import (
 )
 
 # Import routing-related modules
-from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.user_session_manager import UserSessionManager
 from netra_backend.app.websocket_core.batch_message_handler import BatchMessageHandler
 
