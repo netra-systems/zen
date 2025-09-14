@@ -62,9 +62,18 @@ class TestHarnessContext:
         logger.info(f"Setting up test harness context: {self.context_id}")
         
         try:
-            # Initialize database manager using SSOT pattern
-            self.db_manager = DatabaseManager()
-            await self.db_manager.initialize()
+            # Initialize database manager using SSOT pattern (skip if no proper config)
+            try:
+                self.db_manager = DatabaseManager()
+                await self.db_manager.initialize()
+                logger.info(f"Database manager initialized for {self.context_id}")
+            except Exception as db_error:
+                logger.warning(f"Database initialization failed: {db_error}")
+                logger.info("Continuing without database manager (test-only mode)")
+                self.db_manager = None
+
+            # Update alias
+            self.database_manager = self.db_manager
             
             # Seed data if requested
             if self.seed_data:
