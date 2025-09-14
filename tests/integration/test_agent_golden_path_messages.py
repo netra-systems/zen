@@ -110,6 +110,15 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
             'error_recoveries_successful': 0
         }
 
+        # Initialize test attributes to prevent AttributeError
+        self.websocket_connections = {}
+        self.agent_instances = {}
+        self.websocket_manager = None
+        self.websocket_bridge = None
+        self.tool_dispatcher = None
+        self.llm_manager = None
+        self.agent_factory = None
+
         # Initialize real message processing infrastructure
         await self._initialize_real_message_infrastructure()
 
@@ -553,21 +562,25 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
 
     # === HELPER METHODS FOR MESSAGE PROCESSING INTEGRATION ===
 
+    @asynccontextmanager
     async def _get_user_execution_context(self):
         """Get user execution context for message processing."""
         try:
             if hasattr(self.agent_factory, 'user_execution_scope'):
-                return self.agent_factory.user_execution_scope(
+                async with self.agent_factory.user_execution_scope(
                     user_id=self.test_user_id,
                     thread_id=self.test_thread_id,
                     run_id=self.test_run_id
-                )
+                ) as context:
+                    yield context
+                    return
         except Exception:
             pass
 
-        return self._mock_user_execution_scope(
+        async with self._mock_user_execution_scope(
             self.test_user_id, self.test_thread_id, self.test_run_id
-        )
+        ) as context:
+            yield context
 
     async def _create_message_processing_agent(self, user_context) -> Any:
         """Create agent for complete message processing."""
