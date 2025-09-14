@@ -841,27 +841,27 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
             output_format=output_format
         ),
         InstanceConfig(
-            command="/gitissueprogressorv2 agents",
+            command="/gitissueprogressorv3 agents",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            command="/gitissueprogressorv2 p0",
+            command="/gitissueprogressorv3 p0",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            command="/gitissueprogressorv2 agents",
+            command="/gitissueprogressorv3 agents",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            command="/gitissueprogressorv2 goldenpath",
+            command="/gitissueprogressorv3 goldenpath",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            command="/gitissueprogressorv2 tests p1",
+            command="/gitissueprogressorv3 tests p1",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
@@ -886,7 +886,7 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
             output_format=output_format
         ),
         InstanceConfig(
-            command="/gitissueprogressorv2 removing legacy",
+            command="/gitissueprogressorv3 removing legacy",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
