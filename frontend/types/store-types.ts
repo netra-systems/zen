@@ -1,7 +1,7 @@
 // Store types for unified chat system
 // Modular state management types
 
-import type { 
+import type {
   FastLayerData,
   MediumLayerData,
   SlowLayerData
@@ -9,6 +9,7 @@ import type {
 import type { UnifiedWebSocketEvent, ChatMessage } from './websocket-event-types';
 import type { MCPUIState } from './mcp-types';
 import type { OptimisticMessage } from '@/services/optimistic-updates';
+import type { StoreThreadState } from '@shared/types/frontend_types';
 
 // ============================================
 // Agent Execution Tracking
@@ -47,7 +48,7 @@ export interface ProcessingState {
 
 // ThreadState moved to shared/types/frontend_types.ts for SSOT compliance
 // Use StoreThreadState for store-specific thread state with actions
-export { StoreThreadState as ThreadState } from '@shared/types/frontend_types';
+export type { StoreThreadState as ThreadState } from '@shared/types/frontend_types';
 
 export interface ConnectionState {
   isConnected: boolean;
@@ -164,10 +165,10 @@ export interface StoreManagementActions {
 // Combined Store Types
 // ============================================
 
-export interface UnifiedChatState extends 
+export interface UnifiedChatState extends
   LayerState,
   ProcessingState,
-  ThreadState,
+  StoreThreadState,
   ConnectionState,
   AgentTrackingState,
   OptimisticState,

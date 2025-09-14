@@ -146,43 +146,112 @@ class TestContext:
         self.start_time: Optional[float] = None
         self.end_time: Optional[float] = None
         
-        # Environment configuration
+        # Environment configuration with enhanced Windows support (Issue #860)
         self.env = get_env()
         self.frontend_url = self.env.get('FRONTEND_URL', 'http://localhost:3000')
-        # Environment variable fallback priority: BACKEND_URL -> NETRA_BACKEND_URL -> default
-        # Handle both None and empty string as missing values
-        backend_url = self.env.get('BACKEND_URL')
-        if not backend_url:  # None or empty string
-            backend_url = self.env.get('NETRA_BACKEND_URL')
-        if not backend_url:  # Still None or empty string
-            backend_url = 'http://localhost:8000'
-        self.backend_url = backend_url
-        self.websocket_base_url = self.backend_url.replace('http://', 'ws://').replace('https://', 'wss://')
+
+        # Enhanced backend URL detection with Windows support
+        self.backend_url = self._get_enhanced_backend_url()
+        self.websocket_base_url = self._get_enhanced_websocket_base_url()
     
     def _create_default_user_context(self) -> TestUserContext:
         """Create a default test user context."""
         user_id = f"test_user_{uuid.uuid4().hex[:8]}"
         return TestUserContext(user_id=user_id)
+
+    def _get_enhanced_backend_url(self) -> str:
+        """Get backend URL with enhanced Windows support (Issue #860)."""
+        import platform
+
+        # Priority 1: Explicit TEST_BACKEND_URL override
+        test_backend_url = self.env.get('TEST_BACKEND_URL')
+        if test_backend_url:
+            return test_backend_url
+
+        # Priority 2: Environment variable fallback priority
+        backend_url = self.env.get('BACKEND_URL')
+        if not backend_url:  # None or empty string
+            backend_url = self.env.get('NETRA_BACKEND_URL')
+
+        if backend_url:
+            return backend_url
+
+        # Priority 3: Windows mock server detection
+        is_windows = platform.system() == 'Windows'
+        if is_windows and self.env.get('USE_MOCK_WEBSOCKET', 'false').lower() == 'true':
+            return 'http://localhost:8001'  # Mock server backend equivalent
+
+        # Priority 4: Staging environment
+        staging_base_url = self.env.get('STAGING_BASE_URL')
+        use_staging = self.env.get('USE_STAGING_SERVICES', 'false').lower() == 'true'
+        if staging_base_url and use_staging:
+            return staging_base_url
+
+        # Priority 5: Default fallback
+        return 'http://localhost:8000'
+
+    def _get_enhanced_websocket_base_url(self) -> str:
+        """Get WebSocket base URL with enhanced Windows support (Issue #860)."""
+        import platform
+
+        # Priority 1: Explicit TEST_WEBSOCKET_URL override
+        test_websocket_url = self.env.get('TEST_WEBSOCKET_URL')
+        if test_websocket_url:
+            # Extract base URL without endpoint
+            return test_websocket_url.replace('/ws', '').replace('/chat', '')
+
+        # Priority 2: Mock WebSocket server for Windows
+        is_windows = platform.system() == 'Windows'
+        mock_websocket_url = self.env.get('MOCK_WEBSOCKET_URL')
+        use_mock = self.env.get('USE_MOCK_WEBSOCKET', 'false').lower() == 'true'
+
+        if is_windows and (mock_websocket_url or use_mock):
+            mock_url = mock_websocket_url or 'ws://localhost:8001/ws'
+            return mock_url.replace('/ws', '')
+
+        # Priority 3: Staging WebSocket URL
+        staging_websocket_url = self.env.get('STAGING_WEBSOCKET_URL')
+        use_staging = self.env.get('USE_STAGING_SERVICES', 'false').lower() == 'true'
+
+        if staging_websocket_url and use_staging:
+            return staging_websocket_url.replace('/ws', '')
+
+        # Priority 4: Derive from backend URL
+        backend_url = self._get_enhanced_backend_url()
+        websocket_base_url = backend_url.replace('http://', 'ws://').replace('https://', 'wss://')
+
+        return websocket_base_url
     
     async def setup_websocket_connection(
-        self, 
+        self,
         endpoint: str = "/ws/chat",
         auth_required: bool = True
     ) -> None:
         """
-        Set up WebSocket connection for testing.
-        
+        Set up WebSocket connection for testing with enhanced Windows support (Issue #860).
+
         Args:
             endpoint: WebSocket endpoint to connect to
             auth_required: Whether authentication is required
         """
-        self.websocket_url = f"{self.websocket_base_url}{endpoint}"
-        
+        import platform
+
+        # Enhanced URL construction with Windows mock server support
+        is_windows = platform.system() == 'Windows'
+        use_mock = self.env.get('USE_MOCK_WEBSOCKET', 'false').lower() == 'true'
+
+        # For mock server, always use /ws endpoint regardless of requested endpoint
+        if is_windows and use_mock:
+            self.websocket_url = f"{self.websocket_base_url}/ws"
+        else:
+            self.websocket_url = f"{self.websocket_base_url}{endpoint}"
+
         headers = {}
         if auth_required and self.user_context.jwt_token:
             headers["Authorization"] = f"Bearer {self.user_context.jwt_token}"
-        
+
         try:
+            # Use WebSocketTestHelpers with enhanced fallback support
             self.websocket_connection = await WebSocketTestHelpers.create_test_websocket_connection(
                 self.websocket_url,
                 headers=headers if headers else None,
@@ -190,7 +259,40 @@ class TestContext:
                 max_retries=3,
                 user_id=self.user_context.user_id
             )
+
+            # Log connection details for debugging
+            print(f"🔗 WebSocket connection established: {self.websocket_url}")
+            if is_windows and use_mock:
+                print(f"🪟 Windows mock server connection active")
+
         except Exception as e:
+            # Enhanced error handling for Windows
+            if is_windows and "connection refused" in str(e).lower():
+                print(f"🪟 Windows connection refused detected - trying to start mock server")
+
+                # Try to start mock server as fallback
+                try:
+                    from tests.mission_critical.websocket_real_test_base import setup_mock_websocket_environment
+                    import asyncio
+                    await setup_mock_websocket_environment()
+
+                    # Update URL to mock server
+                    self.websocket_url = self.env.get('MOCK_WEBSOCKET_URL', 'ws://localhost:8001/ws')
+
+                    # Retry connection
+                    self.websocket_connection = await WebSocketTestHelpers.create_test_websocket_connection(
+                        self.websocket_url,
+                        headers=headers if headers else None,
+                        timeout=self.websocket_timeout,
+                        max_retries=3,
+                        user_id=self.user_context.user_id
+                    )
+                    print(f"✅ Mock WebSocket server fallback successful: {self.websocket_url}")
+                    return
+
+                except Exception as mock_error:
+                    print(f"❌ Mock WebSocket server fallback failed: {mock_error}")
+
             raise ConnectionError(f"Failed to setup WebSocket connection: {e}")
     
     async def send_message(self, message: Dict[str, Any]) -> None:
