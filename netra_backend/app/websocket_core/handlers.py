@@ -1334,7 +1334,21 @@ class MessageRouter:
         """Route message to appropriate handler."""
         try:
             raw_type = raw_message.get('type', 'unknown')
-            
+
+            # PHASE 2B STEP 1: Quality message routing integration
+            # Check for quality messages FIRST before standard message handling
+            if self._is_quality_message_type(raw_type):
+                logger.info(f"MessageRouter detected quality message type: {raw_type}")
+                self.routing_stats["messages_routed"] += 1
+                msg_type_str = f"quality_{raw_type}"
+                if msg_type_str in self.routing_stats["message_types"]:
+                    self.routing_stats["message_types"][msg_type_str] += 1
+                else:
+                    self.routing_stats["message_types"][msg_type_str] = 1
+
+                # Route to quality message handler
+                return await self.handle_quality_message(user_id, raw_message)
+
             # Check if this is an unknown message type BEFORE normalization
             is_unknown_type = self._is_unknown_message_type(raw_type)
             if is_unknown_type:
@@ -1343,11 +1357,11 @@ class MessageRouter:
                 self.routing_stats["unhandled_messages"] += 1
                 # Send ack response for unknown message types
                 return await self._send_unknown_message_ack(user_id, websocket, raw_type)
-            
+
             # Convert raw message to standard format
             message = await self._prepare_message(raw_message)
             logger.info(f"MessageRouter processing message type: {message.type} from raw type: {raw_type}")
-            
+
             # Update routing stats
             self.routing_stats["messages_routed"] += 1
             msg_type_str = str(message.type)
@@ -1355,7 +1369,7 @@ class MessageRouter:
                 self.routing_stats["message_types"][msg_type_str] += 1
             else:
                 self.routing_stats["message_types"][msg_type_str] = 1
-            
+
             # Find appropriate handler
             handler = self._find_handler(message.type)
             if handler:
@@ -1763,9 +1777,16 @@ class MessageRouter:
     
     def _is_quality_message_type(self, message_type: str) -> bool:
         """Check if message type is a quality message."""
-        if not hasattr(self, '_quality_handlers') or not self._quality_handlers:
-            return False
-        return message_type in self._quality_handlers
+        # PHASE 2B STEP 1: Quality message type detection for string-based routing
+        # Quality message types from QualityMessageRouter integration
+        quality_message_types = {
+            "get_quality_metrics",
+            "subscribe_quality_alerts",
+            "validate_content",
+            "generate_quality_report"
+            # Note: "start_agent" handled by normal flow but enhanced with quality features
+        }
+        return message_type in quality_message_types
     
     async def _route_quality_message(self, user_id: str, message: Dict[str, Any], message_type: str) -> None:
         """Route message to appropriate quality handler."""
