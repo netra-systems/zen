@@ -22,8 +22,7 @@ Expected Result: Tests FAIL initially showing import path violations.
 After SSOT consolidation, tests pass with single canonical import path.
 """
 
-# SSOT Base Test Case Import
-from test_framework.ssot.base_test_case import SSotBaseTestCase
+import unittest
 import sys
 import importlib
 import importlib.util
@@ -31,11 +30,11 @@ import os
 from typing import Dict, List, Set, Optional, Tuple
 from pathlib import Path
 
-class TestAgentRegistryImportPathViolations(SSotBaseTestCase):
+class TestAgentRegistryImportPathViolations(unittest.TestCase):
     """Test import path SSOT violations for AgentRegistry implementations."""
     
     @classmethod
-    def setup_class(cls):
+    def setUpClass(cls):
         """Initialize test class with import path analysis."""
         
         # Define all possible AgentRegistry import paths found in codebase

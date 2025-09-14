@@ -23,8 +23,7 @@ This test should PASS if ExecutionEngine lifecycle management works correctly.
 If it FAILS, it indicates resource management issues requiring immediate fix.
 """
 
-# SSOT Base Test Case Import
-from test_framework.ssot.base_test_case import SSotBaseTestCase
+import unittest
 import asyncio
 import time
 import gc
@@ -40,10 +39,10 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestExecutionEngineLifecycle(SSotBaseTestCase):
+class TestExecutionEngineLifecycle(unittest.TestCase):
     """Test ExecutionEngine lifecycle management and resource handling."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test environment for lifecycle testing."""
         self.lifecycle_violations = []
         self.resource_leaks = []

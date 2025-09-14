@@ -15,7 +15,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 import time
 import uuid
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 # Import UnifiedIdGenerator for SSOT ID generation
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
@@ -166,7 +166,6 @@ class WebSocketMessage(BaseModel):
     timestamp: Unix timestamp as float. Accepts various input formats:
     - Unix timestamp (float/int): 1693567801.447585
     - ISO datetime string: '2025-09-08T16:50:01.447585'
-    - datetime object: Automatically converted to timestamp
     - None: Uses current time
     
     Use timestamp_utils.safe_convert_timestamp() for safe conversion.
@@ -177,35 +176,6 @@ class WebSocketMessage(BaseModel):
     message_id: Optional[str] = None
     user_id: Optional[str] = None
     thread_id: Optional[str] = None
-    
-    @field_validator('timestamp', mode='before')
-    @classmethod
-    def validate_timestamp(cls, v):
-        """Validate and convert timestamp to float.
-        
-        Accepts:
-        - float/int: Returns as-is
-        - datetime: Converts to Unix timestamp
-        - None: Returns None (will be set to current time later)
-        """
-        if v is None:
-            return None
-        if isinstance(v, (int, float)):
-            return float(v)
-        if isinstance(v, datetime):
-            return v.timestamp()
-        if isinstance(v, str):
-            # Try to parse ISO datetime string
-            try:
-                dt = datetime.fromisoformat(v.replace('Z', '+00:00'))
-                return dt.timestamp()
-            except ValueError:
-                # If not ISO format, try to convert to float
-                try:
-                    return float(v)
-                except ValueError:
-                    raise ValueError(f"Invalid timestamp format: {v}")
-        raise TypeError(f"Timestamp must be float, int, datetime, or string, got {type(v)}")
 
 
 class ServerMessage(BaseModel):

@@ -54,8 +54,7 @@ from netra_backend.app.services.user_execution_context import (
     validate_user_context
 )
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-# SSOT WebSocket imports - following SSOT_IMPORT_REGISTRY.md
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.manager import WebSocketConnectionManager
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
     get_agent_instance_factory,
     UserWebSocketEmitter

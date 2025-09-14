@@ -416,7 +416,7 @@ __all__ = [
     # Real service classes
     "DatabaseSyncValidator",
     "RealDatabaseSyncHelper", 
-    "MockWebSocketConnection",
+    "TestWebSocketConnection",
     # Configuration
     "DatabaseSyncConfig",
     # Utility functions

@@ -46,13 +46,13 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
 
 from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,  # DEPRECATED - kept for test compatibility
+    WebSocketManagerFactory, 
+    IsolatedWebSocketManager,
     create_defensive_user_execution_context
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-# SSOT WebSocket imports - following SSOT_IMPORT_REGISTRY.md  
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core import create_websocket_manager
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, ThreadID, WebSocketID, ConnectionID, RequestID
 from shared.types import StronglyTypedWebSocketEvent, WebSocketEventType
@@ -88,12 +88,13 @@ class UserIsolationTestHarness:
             permissions=["read", "write"]
         )
         
-        # Create SSOT WebSocket manager (CRITICAL for isolation) - Issue #824 remediation
-        # MIGRATION: Using get_websocket_manager instead of deprecated factory pattern
-        manager = await get_websocket_manager(user_context=user_context)
-        
-        # For compatibility with legacy test structure
-        factory = WebSocketManagerFactory()  # DEPRECATED - kept for test compatibility
+        # Create factory-based WebSocket manager (CRITICAL for isolation)
+        factory = WebSocketManagerFactory()
+        manager = await factory.create_manager(
+            user_execution_context=user_context,
+            connection_id=f"conn_{user_id}",
+            websocket_id=f"ws_{user_id}"
+        )
         
         user_data = {
             "user_id": user_id,

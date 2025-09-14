@@ -22,9 +22,6 @@ import time
 from datetime import datetime, timezone
 from collections import defaultdict
 
-# SSOT COMPLIANCE: UnifiedIdGenerator for consistent ID generation
-from shared.id_generation.unified_id_generator import UnifiedIdGenerator
-
 # SSOT: Import from UniversalRegistry - avoid name collision
 from netra_backend.app.core.registry.universal_registry import (
     UniversalRegistry,
@@ -61,8 +58,105 @@ from netra_backend.app.agents.supervisor.agent_execution_prerequisites import (
 logger = central_logger.get_logger(__name__)
 
 
-# SSOT CONSOLIDATION: Removed WebSocketManagerAdapter class
-# Use WebSocketManager directly for SSOT compliance - no adapter layer needed
+class WebSocketManagerAdapter:
+    """Adapter to convert WebSocketManager to AgentWebSocketBridge interface.
+    
+    This adapter enables seamless compatibility between the WebSocketManager
+    interface expected by AgentRegistry and the AgentWebSocketBridge interface
+    expected by UniversalAgentRegistry, maintaining SSOT compliance.
+    """
+    
+    def __init__(self, websocket_manager: 'WebSocketManager', user_context: Optional['UserExecutionContext'] = None):
+        """Initialize the adapter with a WebSocketManager instance.
+        
+        Args:
+            websocket_manager: WebSocketManager instance to adapt
+            user_context: User execution context for proper isolation
+        """
+        self._websocket_manager = websocket_manager
+        self._user_context = user_context
+        
+    def __getattr__(self, name: str):
+        """Delegate unknown attributes to the underlying WebSocketManager.
+        
+        This provides transparent access to WebSocketManager methods while
+        maintaining the AgentWebSocketBridge interface contract.
+        """
+        # First check if the method exists in the underlying manager
+        if hasattr(self._websocket_manager, name):
+            return getattr(self._websocket_manager, name)
+        
+        # If not found, raise AttributeError with helpful message
+        raise AttributeError(
+            f"WebSocketManagerAdapter has no attribute '{name}'. "
+            f"Underlying WebSocketManager type: {type(self._websocket_manager).__name__}"
+        )
+        
+    async def notify_agent_started(self, run_id: str, agent_name: str, metadata: Dict[str, Any]) -> None:
+        """Adapter method for agent started notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_started'):
+            await self._websocket_manager.notify_agent_started(run_id, agent_name, metadata)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_started - skipping for {agent_name}")
+    
+    async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str, 
+                                   step_number: Optional[int] = None, **kwargs) -> None:
+        """Adapter method for agent thinking notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_thinking'):
+            await self._websocket_manager.notify_agent_thinking(run_id, agent_name, reasoning, step_number, **kwargs)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_thinking - skipping for {agent_name}")
+    
+    async def notify_tool_executing(self, run_id: str, agent_name: str, tool_name: str, 
+                                   parameters: Dict[str, Any]) -> None:
+        """Adapter method for tool executing notifications."""
+        if hasattr(self._websocket_manager, 'notify_tool_executing'):
+            await self._websocket_manager.notify_tool_executing(run_id, agent_name, tool_name, parameters)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_tool_executing - skipping for {tool_name}")
+    
+    async def notify_tool_completed(self, run_id: str, agent_name: str, tool_name: str, 
+                                   result: Any, execution_time_ms: float) -> None:
+        """Adapter method for tool completed notifications."""
+        if hasattr(self._websocket_manager, 'notify_tool_completed'):
+            await self._websocket_manager.notify_tool_completed(run_id, agent_name, tool_name, result, execution_time_ms)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_tool_completed - skipping for {tool_name}")
+    
+    async def notify_agent_completed(self, run_id: str, agent_name: str, result: Dict[str, Any], 
+                                    execution_time_ms: float) -> None:
+        """Adapter method for agent completed notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_completed'):
+            await self._websocket_manager.notify_agent_completed(run_id, agent_name, result, execution_time_ms)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_completed - skipping for {agent_name}")
+    
+    async def notify_agent_error(self, run_id: str, agent_name: str, error: str, 
+                                error_context: Optional[Dict[str, Any]] = None) -> None:
+        """Adapter method for agent error notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_error'):
+            await self._websocket_manager.notify_agent_error(run_id, agent_name, error, error_context)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_error - skipping for {agent_name}")
+    
+    async def notify_agent_death(self, run_id: str, agent_name: str, cause: str, 
+                                death_context: Dict[str, Any]) -> None:
+        """Adapter method for agent death notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_death'):
+            await self._websocket_manager.notify_agent_death(run_id, agent_name, cause, death_context)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_death - skipping for {agent_name}")
+    
+    async def get_metrics(self) -> Dict[str, Any]:
+        """Get metrics from the underlying WebSocketManager."""
+        if hasattr(self._websocket_manager, 'get_metrics'):
+            return await self._websocket_manager.get_metrics()
+        else:
+            return {
+                'adapter_type': 'WebSocketManagerAdapter',
+                'underlying_manager': type(self._websocket_manager).__name__,
+                'metrics_supported': False
+            }
 
 
 class UserAgentSession:
@@ -377,8 +471,13 @@ class AgentRegistry(BaseAgentRegistry):
                 if not callable(getattr(self, method_name)):
                     raise RuntimeError(f"Interface method {method_name} is not callable")
             
-            # 5. SSOT CONSOLIDATION: Skip adapter validation - using direct WebSocket manager
-            # WebSocketManager is used directly now, no adapter layer needed
+            # 5. Validate adapter can be created (test with None manager)
+            try:
+                test_adapter = WebSocketManagerAdapter(None)
+                if not hasattr(test_adapter, 'notify_agent_started'):
+                    raise RuntimeError("WebSocketManagerAdapter missing required notification methods")
+            except Exception as e:
+                raise RuntimeError(f"WebSocketManagerAdapter validation failed: {e}")
             
             # 6. Validate parent class methods are accessible
             if not hasattr(super(), 'set_websocket_bridge'):
@@ -462,9 +561,9 @@ class AgentRegistry(BaseAgentRegistry):
                         import uuid
                         user_context = UserExecutionContext(
                             user_id=user_id,
-                            request_id=UnifiedIdGenerator.generate_base_id("session_request"),
+                            request_id=str(uuid.uuid4()),
                             thread_id=f"session_thread_{user_id}",
-                            run_id=UnifiedIdGenerator.generate_base_id(f"session_run_{user_id[:8]}")
+                            run_id=f"session_run_{user_id}_{uuid.uuid4().hex[:8]}"
                         )
                         await user_session.set_websocket_manager(self.websocket_manager, user_context)
                         logger.debug(f"Set WebSocket manager on new user session for {user_id}")
@@ -745,17 +844,18 @@ class AgentRegistry(BaseAgentRegistry):
         import uuid
         default_context = UserExecutionContext(
             user_id="test_registry_system",
-            request_id=UnifiedIdGenerator.generate_base_id("websocket_setup"),
+            request_id=f"websocket_setup_{uuid.uuid4().hex[:8]}",
             thread_id="test_registry_thread",
-            run_id=UnifiedIdGenerator.generate_base_id("websocket_run")
+            run_id=f"websocket_run_{uuid.uuid4().hex[:8]}"
         )
         
-        # SSOT CONSOLIDATION: Use WebSocket manager directly instead of adapter
+        # Create adapter for SSOT compliance
         try:
-            super().set_websocket_bridge(manager)  # Use manager directly for SSOT compliance
-            logger.debug("Registry WebSocket manager set directly for SSOT consolidation")
+            adapter = WebSocketManagerAdapter(manager, default_context)
+            super().set_websocket_bridge(adapter)  # Use correct parent interface with adapter
+            logger.debug("Registry WebSocket adapter created for SSOT compliance")
         except Exception as e:
-            logger.warning(f"Failed to set registry WebSocket manager: {e}")
+            logger.warning(f"Failed to create registry WebSocket adapter: {e}")
         
         # Propagate to all existing user sessions asynchronously
         # We use asyncio.create_task to avoid blocking in sync context
@@ -771,8 +871,7 @@ class AgentRegistry(BaseAgentRegistry):
                             user_context = UserExecutionContext(
                                 user_id=user_id,
                                 request_id=f"websocket_update_{user_id}_{id(self)}",
-                                thread_id=f"ws_thread_{user_id}",
-                                run_id=f"ws_run_{user_id}_{id(self)}"  # ISSUE #556 FIX: Add required run_id parameter
+                                thread_id=f"ws_thread_{user_id}"
                             )
                             # Set WebSocket manager on user session using factory pattern
                             await user_session.set_websocket_manager(manager, user_context)
@@ -832,17 +931,18 @@ class AgentRegistry(BaseAgentRegistry):
         import uuid
         default_context = UserExecutionContext(
             user_id="test_registry_system_async",
-            request_id=UnifiedIdGenerator.generate_base_id("websocket_setup_async"),
+            request_id=f"websocket_setup_async_{uuid.uuid4().hex[:8]}",
             thread_id="test_registry_thread_async",
-            run_id=UnifiedIdGenerator.generate_base_id("websocket_run_async")
+            run_id=f"websocket_run_async_{uuid.uuid4().hex[:8]}"
         )
         
-        # SSOT CONSOLIDATION: Use WebSocket manager directly instead of adapter
+        # Create adapter for SSOT compliance
         try:
-            super().set_websocket_bridge(manager)  # Use manager directly for SSOT compliance
-            logger.debug(f"Registry WebSocket manager set directly for async context - SSOT consolidation")
+            adapter = WebSocketManagerAdapter(manager, default_context)
+            super().set_websocket_bridge(adapter)  # Use adapter with parent interface
+            logger.debug(f"Registry WebSocket adapter created for async context - SSOT compliance")
         except Exception as e:
-            logger.warning(f"Failed to set registry WebSocket manager (async): {e}")
+            logger.warning(f"Failed to create registry WebSocket adapter (async): {e}")
         
         # Propagate to all existing user sessions using factory pattern
         if self._user_sessions:
@@ -886,10 +986,13 @@ class AgentRegistry(BaseAgentRegistry):
         # Call parent implementation to maintain SSOT compliance
         super().set_websocket_bridge(bridge)
         
-        # SSOT CONSOLIDATION: Direct manager usage instead of adapter pattern
-        # Store the bridge directly as it's already the WebSocket manager
-        self.websocket_manager = bridge
-        logger.info(" PASS:  WebSocket bridge set directly - SSOT consolidation complete")
+        # If this is our adapter, extract the WebSocketManager for internal use
+        if isinstance(bridge, WebSocketManagerAdapter):
+            self.websocket_manager = bridge._websocket_manager
+            logger.info(" PASS:  WebSocket bridge set via adapter - SSOT interface compliance maintained")
+        else:
+            # For direct AgentWebSocketBridge instances, store and create backwards adapter if needed
+            logger.info(" PASS:  WebSocket bridge set directly - SSOT interface compliance maintained")
         
         # Propagate to user sessions if they exist (safely handle no event loop)
         try:
@@ -1409,9 +1512,9 @@ class AgentRegistry(BaseAgentRegistry):
                 import uuid
                 user_context = UserExecutionContext(
                     user_id="test_agent_creation_system",
-                    request_id=UnifiedIdGenerator.generate_base_id(f"register_{name}"),
+                    request_id=f"register_{name}_{uuid.uuid4().hex[:8]}",
                     thread_id=f"test_registry_thread_{name}",
-                    run_id=UnifiedIdGenerator.generate_base_id(f"register_run_{name}")
+                    run_id=f"register_run_{name}_{uuid.uuid4().hex[:8]}"
                 )
             
             # SSOT: Use factory to create properly isolated tool dispatcher
@@ -1587,9 +1690,18 @@ class AgentRegistry(BaseAgentRegistry):
                 'status': 'unknown'
             }
             
-            # SSOT CONSOLIDATION: Skip adapter testing - using WebSocket manager directly
-            # Adapter functionality replaced with direct WebSocket manager usage
-            status['adapter_class_functional'] = True  # Not applicable anymore
+            # Test adapter functionality
+            try:
+                test_adapter = WebSocketManagerAdapter(None)
+                required_adapter_methods = ['notify_agent_started', 'notify_agent_thinking', 
+                                          'notify_tool_executing', 'notify_agent_completed']
+                for method in required_adapter_methods:
+                    if not hasattr(test_adapter, method):
+                        status['adapter_class_functional'] = False
+                        status['violations'].append(f"Adapter missing method: {method}")
+            except Exception as e:
+                status['adapter_class_functional'] = False
+                status['violations'].append(f"Adapter instantiation failed: {e}")
             
             # Validate interface methods
             required_methods = ['set_websocket_bridge', 'register', 'get', 'has', 'list_keys']
@@ -1680,484 +1792,6 @@ class AgentRegistry(BaseAgentRegistry):
             AgentExecutionPrerequisites: The prerequisites validator instance
         """
         return self.prerequisites_validator
-
-    # ===================== COMPATIBILITY LAYER FOR SIMPLE REGISTRY INTERFACE =====================
-    # Phase 1 of SSOT consolidation - provide backward compatibility without breaking changes
-    # These methods bridge the Simple Registry interface to Enhanced Registry functionality
-    
-    def register_agent(self, agent_type, name: str, description: str = "", 
-                      metadata: Optional[Dict[str, Any]] = None, 
-                      agent_instance: Optional[Any] = None) -> str:
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Maps to Enhanced Registry's user-aware agent creation pattern.
-        Creates a default user context for non-user-aware calls.
-        
-        Args:
-            agent_type: Agent type (AgentType enum or string)
-            name: Agent name
-            description: Agent description
-            metadata: Optional metadata
-            agent_instance: Optional agent instance (will be stored for compatibility)
-            
-        Returns:
-            Agent ID for compatibility
-        """
-        # Import here to avoid circular imports
-        from netra_backend.app.agents.registry import AgentType, AgentStatus
-        import uuid
-        from datetime import datetime
-        
-        # Convert string to enum if needed
-        if isinstance(agent_type, str):
-            agent_type = AgentType(agent_type)
-        
-        # Generate compatibility agent ID
-        agent_id = f"{agent_type.value}_{uuid.uuid4().hex[:8]}"
-        
-        # Store agent in compatibility registry
-        if not hasattr(self, '_compatibility_agents'):
-            self._compatibility_agents = {}
-            self._compatibility_instances = {}
-        
-        # Create AgentInfo for compatibility
-        from netra_backend.app.agents.registry import AgentInfo
-        agent_info = AgentInfo(
-            agent_id=agent_id,
-            agent_type=agent_type,
-            name=name,
-            description=description,
-            status=AgentStatus.IDLE,
-            created_at=datetime.now(),
-            last_active=datetime.now(),
-            execution_count=0,
-            error_count=0,
-            metadata=metadata or {}
-        )
-        
-        self._compatibility_agents[agent_id] = agent_info
-        if agent_instance:
-            self._compatibility_instances[agent_id] = agent_instance
-        
-        # Also register with Enhanced Registry using agent_type as name
-        self.register(name, agent_instance) if agent_instance else None
-        
-        logger.info(f"Registered agent via compatibility layer: {agent_id} ({agent_type.value}: {name})")
-        return agent_id
-    
-    def unregister_agent(self, agent_id: str) -> bool:
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Args:
-            agent_id: Agent ID to unregister
-            
-        Returns:
-            True if unregistered, False if not found
-        """
-        if not hasattr(self, '_compatibility_agents'):
-            return False
-            
-        if agent_id in self._compatibility_agents:
-            agent_info = self._compatibility_agents.pop(agent_id)
-            self._compatibility_instances.pop(agent_id, None)
-            
-            # Try to remove from Enhanced Registry if it exists
-            self.remove_agent(agent_info.name)
-            
-            logger.info(f"Unregistered agent via compatibility layer: {agent_id}")
-            return True
-        return False
-    
-    def get_agent_info(self, agent_id: str):
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Args:
-            agent_id: Agent ID
-            
-        Returns:
-            AgentInfo if found, None otherwise
-        """
-        if not hasattr(self, '_compatibility_agents'):
-            return None
-        return self._compatibility_agents.get(agent_id)
-    
-    def get_agent_instance(self, agent_id: str):
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Args:
-            agent_id: Agent ID
-            
-        Returns:
-            Agent instance if found, None otherwise
-        """
-        if not hasattr(self, '_compatibility_instances'):
-            return None
-        return self._compatibility_instances.get(agent_id)
-    
-    def update_agent_status(self, agent_id: str, status) -> bool:
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Args:
-            agent_id: Agent ID
-            status: New status (AgentStatus enum or string)
-            
-        Returns:
-            True if updated, False if not found
-        """
-        from netra_backend.app.agents.registry import AgentStatus
-        from datetime import datetime
-        
-        if not hasattr(self, '_compatibility_agents'):
-            return False
-            
-        if agent_id not in self._compatibility_agents:
-            return False
-        
-        # Convert string to enum if needed
-        if isinstance(status, str):
-            status = AgentStatus(status)
-        
-        # Update status
-        self._compatibility_agents[agent_id].status = status
-        self._compatibility_agents[agent_id].last_active = datetime.now()
-        
-        logger.debug(f"Updated agent status via compatibility layer: {agent_id} -> {status.value}")
-        return True
-    
-    def increment_execution_count(self, agent_id: str) -> bool:
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Args:
-            agent_id: Agent ID
-            
-        Returns:
-            True if updated, False if not found
-        """
-        from datetime import datetime
-        
-        if not hasattr(self, '_compatibility_agents'):
-            return False
-            
-        if agent_id not in self._compatibility_agents:
-            return False
-        
-        self._compatibility_agents[agent_id].execution_count += 1
-        self._compatibility_agents[agent_id].last_active = datetime.now()
-        return True
-    
-    def increment_error_count(self, agent_id: str) -> bool:
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Args:
-            agent_id: Agent ID
-            
-        Returns:
-            True if updated, False if not found
-        """
-        from datetime import datetime
-        
-        if not hasattr(self, '_compatibility_agents'):
-            return False
-            
-        if agent_id not in self._compatibility_agents:
-            return False
-        
-        self._compatibility_agents[agent_id].error_count += 1
-        self._compatibility_agents[agent_id].last_active = datetime.now()
-        return True
-    
-    def get_agents_by_type(self, agent_type):
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Args:
-            agent_type: Agent type to filter by
-            
-        Returns:
-            List of AgentInfo matching the type
-        """
-        from netra_backend.app.agents.registry import AgentType
-        
-        if not hasattr(self, '_compatibility_agents'):
-            return []
-            
-        # Convert string to enum if needed
-        if isinstance(agent_type, str):
-            agent_type = AgentType(agent_type)
-        
-        return [info for info in self._compatibility_agents.values() 
-                if info.agent_type == agent_type]
-    
-    def get_agents_by_status(self, status):
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Args:
-            status: Agent status to filter by
-            
-        Returns:
-            List of AgentInfo matching the status
-        """
-        from netra_backend.app.agents.registry import AgentStatus
-        
-        if not hasattr(self, '_compatibility_agents'):
-            return []
-            
-        # Convert string to enum if needed
-        if isinstance(status, str):
-            status = AgentStatus(status)
-        
-        return [info for info in self._compatibility_agents.values() 
-                if info.status == status]
-    
-    def get_all_agents(self):
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Returns:
-            List of all AgentInfo objects
-        """
-        if not hasattr(self, '_compatibility_agents'):
-            return []
-        return list(self._compatibility_agents.values())
-    
-    def get_available_agents(self, agent_type=None):
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Args:
-            agent_type: Optional agent type to filter by
-            
-        Returns:
-            List of available (idle) AgentInfo objects
-        """
-        from netra_backend.app.agents.registry import AgentStatus, AgentType
-        
-        if not hasattr(self, '_compatibility_agents'):
-            return []
-        
-        agents = [info for info in self._compatibility_agents.values() 
-                 if info.status == AgentStatus.IDLE]
-        
-        if agent_type:
-            # Convert string to enum if needed
-            if isinstance(agent_type, str):
-                agent_type = AgentType(agent_type)
-            agents = [info for info in agents if info.agent_type == agent_type]
-        
-        return agents
-    
-    def find_agent_by_name(self, name: str):
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Args:
-            name: Agent name to search for
-            
-        Returns:
-            AgentInfo if found, None otherwise
-        """
-        if not hasattr(self, '_compatibility_agents'):
-            return None
-            
-        for info in self._compatibility_agents.values():
-            if info.name == name:
-                return info
-        return None
-    
-    def cleanup_inactive_agents(self, inactive_threshold=None):
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Args:
-            inactive_threshold: Time threshold for considering agents inactive
-        """
-        from datetime import datetime, timedelta
-        
-        if not hasattr(self, '_compatibility_agents'):
-            return
-        
-        if inactive_threshold is None:
-            inactive_threshold = timedelta(hours=1)
-        
-        current_time = datetime.now()
-        inactive_agents = []
-        
-        for agent_id, info in self._compatibility_agents.items():
-            if (current_time - info.last_active) > inactive_threshold:
-                inactive_agents.append(agent_id)
-        
-        # Remove inactive agents
-        for agent_id in inactive_agents:
-            self.unregister_agent(agent_id)
-        
-        if inactive_agents:
-            logger.info(f"Cleaned up {len(inactive_agents)} inactive agents via compatibility layer")
-    
-    def get_registry_stats(self) -> Dict[str, Any]:
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Returns:
-            Dictionary with registry statistics
-        """
-        from datetime import datetime
-        
-        if not hasattr(self, '_compatibility_agents'):
-            self._compatibility_agents = {}
-        
-        stats = {
-            "total_agents": len(self._compatibility_agents),
-            "total_registrations": getattr(self, '_total_registrations', len(self._compatibility_agents)),
-            "agents_by_type": {},
-            "agents_by_status": {},
-            "total_executions": 0,
-            "total_errors": 0,
-            "created_at": getattr(self, '_created_at', datetime.now()).isoformat() if hasattr(getattr(self, '_created_at', datetime.now()), 'isoformat') else str(getattr(self, '_created_at', datetime.now())),
-            "last_cleanup": datetime.now().isoformat(),
-            "enhanced_registry_stats": {
-                "total_enhanced_agents": len(self.list_keys()),
-                "total_user_sessions": len(getattr(self, '_user_sessions', {})),
-                "using_enhanced_features": True
-            }
-        }
-        
-        # Calculate stats from compatibility agents
-        for info in self._compatibility_agents.values():
-            # By type
-            type_name = info.agent_type.value
-            stats["agents_by_type"][type_name] = stats["agents_by_type"].get(type_name, 0) + 1
-            
-            # By status  
-            status_name = info.status.value
-            stats["agents_by_status"][status_name] = stats["agents_by_status"].get(status_name, 0) + 1
-            
-            # Execution counts
-            stats["total_executions"] += info.execution_count
-            stats["total_errors"] += info.error_count
-        
-        return stats
-    
-    def __len__(self) -> int:
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Returns:
-            Number of registered agents in compatibility layer
-        """
-        if not hasattr(self, '_compatibility_agents'):
-            return 0
-        return len(self._compatibility_agents)
-    
-    def __contains__(self, agent_id: str) -> bool:
-        """
-        Compatibility method for Simple Registry interface.
-        
-        Args:
-            agent_id: Agent ID to check
-            
-        Returns:
-            True if agent ID is registered, False otherwise
-        """
-        if not hasattr(self, '_compatibility_agents'):
-            return False
-        return agent_id in self._compatibility_agents
-    
-    async def list_available_agents(self, agent_type=None):
-        """
-        Additional compatibility method - some tests may use this variant name.
-        
-        Args:
-            agent_type: Optional agent type to filter by
-            
-        Returns:
-            List of available (idle) AgentInfo objects
-        """
-        return self.get_available_agents(agent_type)
-    
-    async def create_user_session(self, user_id: str, session_id: str = None):
-        """
-        Additional compatibility method for tests that expect this interface.
-        
-        Args:
-            user_id: User ID
-            session_id: Session ID (for compatibility, not used)
-            
-        Returns:
-            User session object
-        """
-        return await self.get_user_session(user_id)
-
-    # ===================== LEGACY INTERFACE COMPATIBILITY =====================
-    # Issue #991: Add missing interface methods to achieve SSOT compatibility
-
-    def increment_execution_count(self, agent_id: str) -> bool:
-        """Legacy compatibility method - increment agent execution count."""
-        try:
-            # For now, just return True for compatibility
-            # This could be enhanced to track metrics if needed
-            logger.debug(f"Legacy compatibility: increment_execution_count called for {agent_id}")
-            return True
-        except Exception as e:
-            logger.warning(f"Failed to increment execution count for {agent_id}: {e}")
-            return False
-
-    def increment_error_count(self, agent_id: str) -> bool:
-        """Legacy compatibility method - increment agent error count."""
-        try:
-            # For now, just return True for compatibility
-            # This could be enhanced to track metrics if needed
-            logger.debug(f"Legacy compatibility: increment_error_count called for {agent_id}")
-            return True
-        except Exception as e:
-            logger.warning(f"Failed to increment error count for {agent_id}: {e}")
-            return False
-
-    def get_registry_stats(self) -> Dict[str, Any]:
-        """Legacy compatibility method - get registry statistics."""
-        try:
-            from datetime import datetime
-
-            # Get basic stats from the advanced registry
-            stats = {
-                "total_agents": len(self._user_sessions),
-                "total_registrations": len(self._user_sessions),
-                "agents_by_type": {},
-                "agents_by_status": {"idle": 0, "busy": 0, "initializing": 0, "error": 0, "offline": 0},
-                "total_executions": 0,
-                "total_errors": 0,
-                "created_at": self._created_at.isoformat(),
-                "last_cleanup": datetime.now().isoformat()
-            }
-
-            # Count agents across all user sessions
-            for user_id, session in self._user_sessions.items():
-                if hasattr(session, '_agents'):
-                    stats["total_agents"] += len(session._agents)
-                    # Most agents are idle by default
-                    stats["agents_by_status"]["idle"] += len(session._agents)
-
-            return stats
-
-        except Exception as e:
-            logger.warning(f"Failed to get registry stats: {e}")
-            return {
-                "total_agents": 0,
-                "total_registrations": 0,
-                "agents_by_type": {},
-                "agents_by_status": {},
-                "total_executions": 0,
-                "total_errors": 0,
-                "created_at": datetime.now().isoformat(),
-                "last_cleanup": datetime.now().isoformat()
-            }
 
 
 # ===================== MODULE EXPORTS =====================

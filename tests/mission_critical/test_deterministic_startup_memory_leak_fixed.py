@@ -95,7 +95,7 @@ class TestDeterministicStartupMemoryLeakPrevention(SSotAsyncTestCase):
     deadlocks while preserving actual memory leak detection logic.
     """
 
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test environment with memory tracking."""
         super().setUp()
         
@@ -122,7 +122,7 @@ class TestDeterministicStartupMemoryLeakPrevention(SSotAsyncTestCase):
             self.original_env[key] = os.environ.get(key)
             os.environ[key] = value
     
-    def teardown_method(self, method):
+    def tearDown(self):
         """Clean up test environment and restore original state."""
         # Restore original environment variables
         for key, original_value in self.original_env.items():

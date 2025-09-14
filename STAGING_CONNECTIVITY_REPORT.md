@@ -1,38 +1,34 @@
 # Staging Environment Connectivity Report
-Generated: 2025-09-14 06:40:20
+Generated: 2025-09-12 05:18:52
 Environment: https://api.staging.netrasystems.ai
 
 ## Executive Summary
 - **Total Tests**: 3
-- **Successful**: 3
-- **Success Rate**: 100.0%
+- **Successful**: 1
+- **Success Rate**: 33.3%
 
 ## Test Results
 ### http_connectivity
 - **Status**:  PASS:  PASS
-- **Duration**: 0.348s
+- **Duration**: 0.366s
 - **Health Status**: 200
 - **Service Status**: healthy
 - **Version**: 1.0.0
 
 ### websocket_connectivity
-- **Status**:  PASS:  PASS
-- **Duration**: 0.000s
-- **Connection Time**: 0.725s
-- **Ping Time**: 0.000s
+- **Status**:  FAIL:  FAIL
+- **Duration**: 0.161s
+- **Error**: server rejected WebSocket connection: HTTP 500
 
 ### agent_request_pipeline
-- **Status**:  PASS:  PASS
-- **Duration**: 0.800s
-- **Pipeline Working**: True
-- **Response Type**: connection_established
+- **Status**:  FAIL:  FAIL
+- **Duration**: 0.198s
+- **Error**: server rejected WebSocket connection: HTTP 500
 
 ## Recommendations
- PASS:  **All connectivity tests passed!**
-- Staging environment is accessible and responding correctly
-- Agent execution pipeline is functional (auth layer working)
-- WebSocket communication is stable
-- Ready for comprehensive agent execution testing
+ WARNING: [U+FE0F] **Some connectivity issues detected**
+- Fix websocket_connectivity: server rejected WebSocket connection: HTTP 500
+- Fix agent_request_pipeline: server rejected WebSocket connection: HTTP 500
 
 ## Next Steps
 1. Run comprehensive agent execution tests with: `test_real_agent_execution_staging.py`

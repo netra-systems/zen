@@ -35,7 +35,7 @@ class TestWebSocketErrorMessagingReliability(SSotAsyncTestCase):
     in all critical business scenarios.
     """
     
-    async def setup_method(self, method):
+    async def setUp(self):
         """Set up mission critical test environment."""
         await super().setUp()
         self.websocket_mock = AsyncMock()

@@ -6,8 +6,7 @@ These tests ensure the unified corpus admin works correctly after consolidation.
 CRITICAL: These tests validate the new UnifiedCorpusAdmin implementation.
 """
 import asyncio
-# SSOT Base Test Case Import
-from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
+import unittest
 import sys
 from pathlib import Path
 from typing import Any, Dict
@@ -22,7 +21,7 @@ project_root = Path(__file__).parent.parent.parent.absolute()
 sys.path.insert(0, str(project_root))
 
 
-class TestUnifiedCorpusAdmin(SSotAsyncTestCase):
+class TestUnifiedCorpusAdmin(unittest.IsolatedAsyncioTestCase):
     """
     Test the new UnifiedCorpusAdmin implementation.
     Uses standard unittest for better compatibility.

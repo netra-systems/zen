@@ -15,7 +15,6 @@ Usage:
 """
 
 import uuid
-import copy
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
@@ -149,9 +148,6 @@ class DeepAgentState(BaseModel):
     # This field provides backwards compatibility with execution code that expects agent_context
     # from the UserExecutionContext migration. Should be removed in Phase 2 after proper migration.
     agent_context: Dict[str, Any] = Field(default_factory=dict)
-
-    # SSOT MIGRATION FIX: Add missing execution_history field for complete agent workflow tracking
-    execution_history: List[Dict[str, Any]] = Field(default_factory=list)
     
     @field_validator('metadata', mode='before')
     @classmethod
@@ -170,42 +166,6 @@ class DeepAgentState(BaseModel):
         if v > 10000:  # Reasonable upper bound
             raise ValueError('Step count exceeds maximum allowed value (10000)')
         return v
-
-    @field_validator('agent_context', mode='before')
-    @classmethod
-    def validate_agent_context(cls, v: Any) -> Dict[str, Any]:
-        """SECURITY FIX: Deep copy agent_context to prevent cross-user data contamination.
-
-        This validator ensures that agent_context dictionaries are deeply copied
-        to prevent shared object references that could allow one user to modify
-        another user's sensitive data.
-
-        Issue #1017: Fixes critical security vulnerability where users could
-        access each other's confidential data through shared dictionary references.
-        """
-        if v is None:
-            return {}
-        if not isinstance(v, dict):
-            raise ValueError('agent_context must be a dictionary')
-
-        # CRITICAL SECURITY: Deep copy to prevent shared object references
-        return copy.deepcopy(v)
-
-    @field_validator('execution_history', mode='before')
-    @classmethod
-    def validate_execution_history(cls, v: Any) -> List[Dict[str, Any]]:
-        """SECURITY FIX: Deep copy execution_history to prevent cross-user contamination.
-
-        This validator ensures that execution_history lists are deeply copied
-        to prevent shared references in execution tracking data.
-        """
-        if v is None:
-            return []
-        if not isinstance(v, list):
-            raise ValueError('execution_history must be a list')
-
-        # CRITICAL SECURITY: Deep copy to prevent shared references
-        return copy.deepcopy(v)
 
     @property
     def thread_id(self) -> Optional[str]:
@@ -399,39 +359,10 @@ class DeepAgentState(BaseModel):
         return merged_metadata, merged_results
     
     def merge_from(self, other_state: 'DeepAgentState') -> 'DeepAgentState':
-        """Create new state with data merged from another state (immutable).
-
-        SECURITY FIX Issue #1017: This method now includes critical security validation
-        to prevent cross-user data contamination during state merging operations.
-
-        Multi-user isolation check ensures that only states from the same user
-        can be merged, preventing enterprise data leakage between different customers.
-        """
-        # CRITICAL SECURITY: Validate user isolation before merging
-        self._validate_user_isolation_for_merge(other_state)
-
+        """Create new state with data merged from another state (immutable)."""
         merged_metadata, merged_results = self._prepare_merge_components(other_state)
         merge_data = self._create_merge_data(other_state, merged_metadata, merged_results)
-
-        # SECURITY: Deep copy merge data to prevent reference sharing
-        secure_merge_data = copy.deepcopy(merge_data)
-        return self.copy_with_updates(**secure_merge_data)
-
-    def _validate_user_isolation_for_merge(self, other_state: 'DeepAgentState') -> None:
-        """SECURITY VALIDATION: Ensure merge operations maintain user isolation.
-
-        This method prevents the critical security vulnerability where states from
-        different users could be merged, causing cross-user data contamination.
-
-        Raises:
-            ValueError: If attempting to merge states from different users
-        """
-        if self.user_id and other_state.user_id and self.user_id != other_state.user_id:
-            raise ValueError(
-                f"SECURITY VIOLATION: Cannot merge states from different users. "
-                f"Self user_id: {self.user_id}, Other user_id: {other_state.user_id}. "
-                f"This prevents cross-user data contamination."
-            )
+        return self.copy_with_updates(**merge_data)
     
     def _create_merge_data(self, other_state: 'DeepAgentState', metadata: AgentMetadata, 
                           results: Dict[str, Any]) -> Dict[str, Any]:

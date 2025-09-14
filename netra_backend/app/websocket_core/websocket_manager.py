@@ -26,8 +26,7 @@ from netra_backend.app.websocket_core.unified_manager import (
     _serialize_message_safely,
     WebSocketManagerMode
 )
-# SSOT CONSOLIDATION: Import protocol directly to prevent duplication warnings
-from netra_backend.app.websocket_core.protocols import WebSocketProtocol as WebSocketManagerProtocol
+from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from shared.logging.unified_logging_ssot import get_logger
 from shared.types.core_types import (
     UserID, ThreadID, ConnectionID, WebSocketID,
@@ -160,13 +159,7 @@ def _validate_ssot_compliance():
                         inspect.isclass(attr) and
                         'websocket' in attr_name.lower() and
                         'manager' in attr_name.lower() and
-                        attr != WebSocketManager and
-                        # SSOT FIX: Exclude known SSOT aliases to prevent false warnings
-                        attr_name not in ['WebSocketManagerMode', 'WebSocketManagerProtocol', 
-                                         'WebSocketManagerProtocolValidator'] and
-                        # Exclude enums and protocols that are legitimately used as types
-                        not (hasattr(attr, '__bases__') and any('Enum' in str(base) for base in attr.__bases__)) and
-                        not (hasattr(attr, '__bases__') and any('Protocol' in str(base) for base in attr.__bases__))):
+                        attr != WebSocketManager):
                         websocket_manager_classes.append(f"{module_name}.{attr_name}")
             except (AttributeError, TypeError, ImportError) as e:
                 # Silently skip problematic modules during SSOT validation

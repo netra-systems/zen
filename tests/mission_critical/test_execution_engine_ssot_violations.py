@@ -38,7 +38,7 @@ logger = central_logger.get_logger(__name__)
 class TestExecutionEngineSSotViolations(SSotBaseTestCase):
     """Test for detecting ExecutionEngine SSOT violations and fragmentation."""
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test environment for SSOT violation detection."""
         super().setUp()
         # Set up instance attributes after parent setup

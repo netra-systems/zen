@@ -137,42 +137,18 @@ class StagingAuthClient:
             token: The access token to verify
             
         Returns:
-            User information with "valid" key if token is valid
+            User information if token is valid
         """
-        try:
-            async with httpx.AsyncClient(timeout=self.config.timeout) as client:
-                response = await client.post(
-                    f"{self.config.urls.auth_url}/auth/verify",
-                    headers={"Authorization": f"Bearer {token}"}
-                )
-                
-                if response.status_code == 200:
-                    user_info = response.json()
-                    # Add "valid" key for test compatibility
-                    user_info["valid"] = True
-                    return user_info
-                else:
-                    return {"valid": False, "error": f"Token verification failed: {response.status_code}"}
-                    
-        except Exception as e:
-            logger.warning(f"Token verification error: {e}")
-            # Fallback: Basic JWT validation
-            try:
-                import jwt
-                
-                # Use staging JWT secret for verification
-                staging_jwt_secret = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
-                decoded = jwt.decode(token, staging_jwt_secret, algorithms=["HS256"])
-                
-                return {
-                    "valid": True,
-                    "user_id": decoded.get("sub"),
-                    "email": decoded.get("email"),
-                    "permissions": decoded.get("permissions", [])
-                }
-                
-            except Exception as jwt_error:
-                return {"valid": False, "error": f"JWT validation failed: {jwt_error}"}
+        async with httpx.AsyncClient(timeout=self.config.timeout) as client:
+            response = await client.post(
+                f"{self.config.urls.auth_url}/auth/verify",
+                headers={"Authorization": f"Bearer {token}"}
+            )
+            
+            if response.status_code == 200:
+                return response.json()
+            else:
+                raise ValueError(f"Token verification failed: {response.status_code}")
     
     async def logout(self, token: str) -> bool:
         """
@@ -196,79 +172,6 @@ class StagingAuthClient:
         """Clear the token cache."""
         self.token_cache.clear()
         logger.info("Token cache cleared")
-    
-    async def generate_test_access_token(
-        self,
-        user_id: str,
-        email: str,
-        permissions: Optional[list] = None
-    ) -> str:
-        """
-        Generate test access token for E2E testing.
-        
-        This method uses the staging auth service to generate a valid JWT token
-        for the specified user, mimicking the OAuth flow but using E2E bypass.
-        
-        Args:
-            user_id: User ID for the token
-            email: User email address
-            permissions: User permissions (defaults to ["read", "write"])
-            
-        Returns:
-            Valid JWT token string
-        """
-        permissions = permissions or ["read", "write"]
-        
-        # Try to get tokens via the E2E bypass endpoint
-        try:
-            tokens = await self.get_auth_token(
-                email=email,
-                name=f"E2E Test User {user_id}",
-                permissions=permissions,
-                force_refresh=True
-            )
-            return tokens["access_token"]
-            
-        except Exception as e:
-            logger.warning(f"Staging auth service failed for {email}: {e}")
-            logger.info("Falling back to JWT token creation")
-            
-            # Fallback: Create staging-compatible JWT token directly
-            return self._create_staging_jwt_token(user_id, email, permissions)
-    
-    def _create_staging_jwt_token(self, user_id: str, email: str, permissions: list) -> str:
-        """
-        Create staging-compatible JWT token as fallback.
-        
-        This creates a JWT token that works with the staging environment
-        when the auth service E2E bypass is unavailable.
-        """
-        import jwt
-        import time
-        from datetime import datetime, timedelta, timezone
-        
-        # Use staging JWT secret (hardcoded for E2E testing)
-        staging_jwt_secret = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
-        
-        # Create staging-compatible payload
-        payload = {
-            "sub": user_id,
-            "email": email,
-            "permissions": permissions,
-            "iat": datetime.now(timezone.utc),
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=30),
-            "type": "access",
-            "iss": "netra-auth-service",
-            "jti": f"e2e-staging-{int(time.time())}",
-            "staging": True,
-            "e2e_test": True
-        }
-        
-        # Sign with staging secret
-        token = jwt.encode(payload, staging_jwt_secret, algorithm="HS256")
-        
-        logger.info(f"Created fallback staging JWT for {email}")
-        return token
 
 
 class StagingAPIClient:

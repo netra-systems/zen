@@ -438,7 +438,7 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
         else:
             pytest.fail("VIOLATION NOT REPRODUCED: No independent auth state construction detected")
 
-    def teardown_method(self, method):
+    def tearDown(self):
         """Clean up test artifacts.""" 
         logger.info("[U+1F9F9] Fallback SSOT violation test cleanup complete")
 

@@ -87,7 +87,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
     DEPLOYMENT BLOCKER: This test will FAIL until SSOT violations are fixed.
     """
     
-    def setup_method(self, method):
+    def setUp(self):
         """Set up test context for Redis validation SSOT compliance."""
         super().setUp()
         self.context = SsotTestContext(
@@ -636,7 +636,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         
         return service_imports
     
-    def teardown_method(self, method):
+    def tearDown(self):
         """Clean up test and record final metrics."""
         self.metrics.end_timing()
         

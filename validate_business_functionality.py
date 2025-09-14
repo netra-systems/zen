@@ -54,24 +54,19 @@ def validate_functionality():
         print(f"FAIL: Test framework common imports failed: {e}")
         results.append(False)
     
-    # Test 3: SSOT WebSocket patterns work (Issue #989 fix)
+    # Test 3: Deprecated patterns still work (with warnings)
     try:
-        # Test the SSOT WebSocket manager import
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
-        print("PASS: SSOT WebSocket manager imports working")
-        
-        # Test that the manager classes are available
-        if hasattr(WebSocketManager, '__call__') or callable(WebSocketManager):
-            print("PASS: WebSocketManager class is callable")
-        else:
-            print("WARNING: WebSocketManager may not be properly callable")
-        
-        if callable(get_websocket_manager):
-            print("PASS: get_websocket_manager function is callable")
-        else:
-            print("WARNING: get_websocket_manager may not be properly callable")
+        import warnings
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
+            factory = get_websocket_manager_factory()
             
-        results.append(True)
+            if len(w) > 0:
+                print(f"PASS: Deprecated factory warns properly ({len(w)} warnings)")
+            else:
+                print("WARNING: Deprecated factory should warn but doesn't")
+            results.append(True)
     except Exception as e:
         print(f"WARNING: Deprecated factory test failed: {e}")
         results.append(False)

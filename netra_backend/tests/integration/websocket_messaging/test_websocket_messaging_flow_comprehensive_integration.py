@@ -684,7 +684,7 @@ def create_error_scenario_message(error_type: str, user_id: str) -> str:
 # Integration test configuration
 pytestmark = [
     pytest.mark.integration,
-    pytest.mark.websocket,
+    pytest.mark.websocket_messaging,
     pytest.mark.golden_path,
     pytest.mark.business_value
 ]

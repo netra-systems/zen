@@ -69,7 +69,7 @@ class TestWebSocketImportCollisionPrevention(SSotAsyncTestCase):
     DEPLOYMENT GATE: This test MUST PASS for production deployment approval.
     """
     
-    def setup_method(self, method):
+    def setUp(self):
         super().setUp()
         self.logger = logging.getLogger(__name__)
         self.test_start_time = time.time()
@@ -454,7 +454,7 @@ class TestWebSocketImportCollisionPrevention(SSotAsyncTestCase):
             request_id=f"mission_critical_request_{user_num}"
         )
     
-    def teardown_method(self, method):
+    def tearDown(self):
         super().tearDown()
         total_duration = time.time() - self.test_start_time
         self.logger.info("[U+1F3C1] MISSION CRITICAL COMPLETE: WebSocket import collision prevention finished")

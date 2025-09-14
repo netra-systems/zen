@@ -80,7 +80,6 @@ from dataclasses import dataclass
 from enum import Enum
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 
 # SSOT Imports - Following CLAUDE.md absolute import requirements
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -384,10 +383,10 @@ class RealWebSocketEventTester:
 
 
 @pytest.mark.mission_critical
-class TestWebSocketFiveCriticalEventsBusinessValue(SSotBaseTestCase):
+class TestWebSocketFiveCriticalEventsBusinessValue(BaseIntegrationTest):
     """Mission critical tests for the 5 WebSocket events that drive business value."""
     
-    async def setup_method(self, method):
+    async def setUp(self):
         """Set up real WebSocket event testing environment."""
         await super().setUp()
         self.manager = UnifiedWebSocketManager()
@@ -397,7 +396,7 @@ class TestWebSocketFiveCriticalEventsBusinessValue(SSotBaseTestCase):
         # Start real WebSocket server for event testing
         self.server_port = await self.event_tester.start_test_server()
         
-    async def teardown_method(self, method):
+    async def tearDown(self):
         """Clean up event testing environment."""
         await self.event_tester.stop_server()
         await super().tearDown()

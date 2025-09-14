@@ -18,7 +18,7 @@ Test Approach:
 """
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
-from shared.isolated_environment import IsolatedEnvironment
+from dev_launcher.isolated_environment import IsolatedEnvironment
 import pytest
 import asyncio
 from unittest.mock import patch

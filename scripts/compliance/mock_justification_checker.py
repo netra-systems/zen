@@ -15,11 +15,10 @@ from scripts.compliance.core import ComplianceConfig, Violation
 
 
 class MockJustificationChecker:
-    """Checks that all mocks have explicit justifications (relaxed for unit tests)"""
-
-    def __init__(self, config: ComplianceConfig, relaxed_mode: bool = True):
+    """Checks that all mocks have explicit justifications"""
+    
+    def __init__(self, config: ComplianceConfig):
         self.config = config
-        self.relaxed_mode = relaxed_mode
         self.mock_patterns = [
             r'@patch\(',
             r'@mock\.patch\(',
@@ -69,30 +68,26 @@ class MockJustificationChecker:
     def _check_file(self, filepath: str) -> List[Violation]:
         """Check a single file for unjustified mocks"""
         violations = []
-
+        
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
                 content = f.read()
                 lines = content.split('\n')
-
+            
             rel_path = str(Path(filepath).relative_to(self.config.root_path))
-
-            # In relaxed mode, be more permissive for unit test files
-            if self.relaxed_mode and self._is_unit_test_file(rel_path):
-                return self._check_relaxed_unit_tests(content, lines, rel_path)
-
+            
             # Parse AST to find mock decorators
             tree = ast.parse(content)
             decorator_violations = self._check_decorators(tree, lines, rel_path)
             violations.extend(decorator_violations)
-
+            
             # Check for inline Mock() calls
             inline_violations = self._check_inline_mocks(lines, rel_path, decorator_violations)
             violations.extend(inline_violations)
-
+            
         except Exception as e:
             print(f"Error parsing {filepath}: {e}")
-
+        
         return violations
     
     def _check_decorators(self, tree: ast.AST, lines: List[str], rel_path: str) -> List[Violation]:
@@ -161,72 +156,17 @@ class MockJustificationChecker:
         
         return False
     
-    def _is_unit_test_file(self, rel_path: str) -> bool:
-        """Check if this is a unit test file (not integration/e2e)"""
-        path_lower = rel_path.lower()
-
-        # Unit test indicators
-        unit_indicators = [
-            '/test/', '/tests/', 'test_', '_test.', '.test.',
-            '/unit/', '/units/', 'unit_test'
-        ]
-
-        # Not integration/e2e test indicators
-        non_unit_indicators = [
-            'integration', 'e2e', 'end_to_end', 'system',
-            'acceptance', 'functional', 'api_test'
-        ]
-
-        is_test = any(indicator in path_lower for indicator in unit_indicators)
-        is_non_unit = any(indicator in path_lower for indicator in non_unit_indicators)
-
-        return is_test and not is_non_unit
-
-    def _check_relaxed_unit_tests(self, content: str, lines: List[str], rel_path: str) -> List[Violation]:
-        """Check unit tests with relaxed mock requirements"""
-        violations = []
-
-        # Only flag mocks in unit tests if they're clearly problematic
-        problematic_patterns = [
-            'Mock().return_value = Mock()',  # Mock returning mock - likely over-mocking
-            'Mock(side_effect=Exception)',   # Mocking exceptions without context
-            'patch.*patch.*patch',           # Triple+ patching indicates complexity
-        ]
-
-        for i, line in enumerate(lines, 1):
-            line_stripped = line.strip()
-            for pattern in problematic_patterns:
-                if re.search(pattern, line_stripped):
-                    violations.append(self._create_relaxed_violation(
-                        rel_path, i, line_stripped, "Potentially problematic mock pattern"
-                    ))
-                    break
-
-        return violations
-
-    def _create_relaxed_violation(self, rel_path: str, line_num: int,
-                                line_content: str, reason: str) -> Violation:
-        """Create a relaxed violation for unit tests"""
-        return Violation(
-            file_path=rel_path,
-            violation_type="mock_justification",
-            severity="low",  # Reduced severity for unit tests
-            line_number=line_num,
-            description=f"{reason}: {line_content[:50]}...",
-            fix_suggestion="Consider simplifying mock usage or adding brief comment"
-        )
-
-    def _create_violation(self, rel_path: str, line_num: int,
+    def _create_violation(self, rel_path: str, line_num: int, 
                          func_name: Optional[str], line_content: str) -> Violation:
         """Create a violation for an unjustified mock"""
         description = f"Mock without justification: {line_content[:50]}..."
         if func_name:
             description = f"Mock without justification in {func_name}()"
-
+        
         return Violation(
             file_path=rel_path,
             violation_type="mock_justification",
-            severity="medium",  # Reduced from "high" to be more relaxed
+            severity="high",
             line_number=line_num,
             function_name=func_name,
             description=description,

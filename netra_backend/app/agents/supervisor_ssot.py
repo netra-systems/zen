@@ -303,18 +303,14 @@ class SupervisorAgent(BaseAgent):
         # Create UserExecutionContext using SSOT factory method
         from shared.id_generation import UnifiedIdGenerator
         
-        user_context = UserExecutionContext.from_request_supervisor(
+        user_context = UserExecutionContext(
             user_id=user_id,
             thread_id=thread_id,
             run_id=run_id,
             request_id=UnifiedIdGenerator.generate_base_id("req"),
-            websocket_connection_id=UnifiedIdGenerator.generate_websocket_client_id(user_id),
+            websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id(user_id),
             metadata={"user_request": user_request}
         )
-
-        # Add database session if missing (for backward compatibility)
-        if not user_context.db_session and hasattr(self, 'db_session'):
-            user_context = user_context.with_db_session(self.db_session)
         
         # Execute using SSOT pattern
         result = await self.execute(user_context, stream_updates=True)
