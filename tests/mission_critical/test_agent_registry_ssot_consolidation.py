@@ -110,8 +110,12 @@ class TestAgentRegistrySSoTConsolidation(SSotAsyncTestCase):
                         "Registry should be from consolidated SSOT module")
         
         # Test that deprecated import path is no longer accessible
-        with self.assertRaises(ImportError, msg="Deprecated registry path should not be importable"):
+        try:
             from netra_backend.app.agents.registry import AgentRegistry as DeprecatedRegistry
+            self.fail("Deprecated registry path should not be importable")
+        except ImportError:
+            # This is expected - deprecated path should fail
+            pass
         
         # Test that types are accessible from SSOT module
         agent_type = AgentType.SUPERVISOR
@@ -125,35 +129,35 @@ class TestAgentRegistrySSoTConsolidation(SSotAsyncTestCase):
 
     async def test_interface_consistency_validation(self):
         """
-        CRITICAL: Check interface consistency between implementations
+        CRITICAL: Check consolidated registry has all required interfaces
         
-        Business Impact: Ensures drop-in replacement possible during consolidation
-        Expected: FAIL initially due to interface differences, guide consolidation
+        Business Impact: Ensures consolidated registry supports all functionality
+        Expected: PASS - consolidated registry should have complete interface
         """
-        # Get method signatures from both registries
-        basic_methods = [method for method in dir(self.basic_registry) 
-                        if not method.startswith('_')]
-        advanced_methods = [method for method in dir(self.advanced_registry) 
+        # Get method signatures from consolidated registry
+        registry_methods = [method for method in dir(self.registry) 
                            if not method.startswith('_')]
         
-        # Check for basic methods in advanced registry (should all exist)
-        for method in basic_methods:
-            if method in ['list_available_agents', 'get_agent']:  # Core methods
-                self.assertIn(method, advanced_methods,
-                             f"Advanced registry missing basic method: {method}")
+        # Check for core methods that must exist
+        required_methods = [
+            'list_available_agents',
+            'create_user_session', 
+            'set_websocket_manager',
+            'register_agent',
+            'get_agent'
+        ]
+        
+        for method in required_methods:
+            self.assertIn(method, registry_methods,
+                         f"Consolidated registry missing required method: {method}")
         
         # Validate key methods are callable
-        core_methods = ['list_available_agents']
+        core_methods = ['list_available_agents', 'create_user_session']
         for method_name in core_methods:
-            if hasattr(self.basic_registry, method_name):
-                basic_method = getattr(self.basic_registry, method_name)
-                self.assertTrue(callable(basic_method), 
-                               f"Basic registry {method_name} must be callable")
-            
-            if hasattr(self.advanced_registry, method_name):
-                advanced_method = getattr(self.advanced_registry, method_name)
-                self.assertTrue(callable(advanced_method), 
-                               f"Advanced registry {method_name} must be callable")
+            if hasattr(self.registry, method_name):
+                method = getattr(self.registry, method_name)
+                self.assertTrue(callable(method), 
+                               f"Consolidated registry {method_name} must be callable")
 
     async def test_no_functionality_regression(self):
         """
@@ -162,31 +166,25 @@ class TestAgentRegistrySSoTConsolidation(SSotAsyncTestCase):
         Business Impact: Ensures Golden Path (login → AI responses) still works
         Expected: PASS - all core functionality must be preserved
         """
-        # Test basic agent registry functionality
+        # Test consolidated registry functionality
         try:
-            basic_agents = await self.basic_registry.list_available_agents()
-            basic_registry_works = True
+            agents = await self.registry.list_available_agents()
+            registry_works = True
         except Exception as e:
-            basic_registry_works = False
-            raise AssertionError(f"Basic registry functionality broken: {e}")
+            registry_works = False
+            raise AssertionError(f"Consolidated registry functionality broken: {e}")
         
-        # Test advanced agent registry functionality  
-        try:
-            advanced_agents = await self.advanced_registry.list_available_agents()
-            advanced_registry_works = True
-        except Exception as e:
-            advanced_registry_works = False
-            raise AssertionError(f"Advanced registry functionality broken: {e}")
+        # Consolidation should work completely
+        self.assertTrue(registry_works, "Consolidated registry must work")
         
-        # Both should work for now (before consolidation)
-        self.assertTrue(basic_registry_works, "Basic registry must work")
-        self.assertTrue(advanced_registry_works, "Advanced registry must work")
-        
-        # Test user context creation (advanced only)
-        user_context = await self.advanced_registry.create_user_session(
+        # Test user context creation (critical for Golden Path)
+        user_context = await self.registry.create_user_session(
             self.test_user_id, self.test_session_id
         )
         self.assertIsNotNone(user_context, "User context creation must work")
+        
+        # SSOT consolidation success
+        print("✅ CONSOLIDATION SUCCESS: All functionality preserved in single registry")
 
     def teardown_method(self, method=None):
         """Clean up test resources with SSOT patterns"""

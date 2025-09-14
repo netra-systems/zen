@@ -28,7 +28,7 @@ from datetime import datetime, timedelta
 # SSOT TEST INFRASTRUCTURE - Use established testing patterns
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
-from shared.dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import for E2E testing (should work in GCP staging)
 try:

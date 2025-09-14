@@ -33,7 +33,7 @@ from datetime import datetime
 # SSOT TEST INFRASTRUCTURE - Use established testing patterns
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
-from shared.dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import registry for performance testing
 try:

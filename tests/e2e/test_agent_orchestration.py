@@ -161,9 +161,9 @@ class RealAgentOrchestrationTester:
                 thread_id="test_thread"
             )
         
-        # Create WebSocket manager using secure factory pattern
-        from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
-        self.websocket_manager = await create_websocket_manager(user_context=user_context)
+        # Create WebSocket manager using SSOT pattern (Issue #989 fix)
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        self.websocket_manager = await get_websocket_manager(user_context=user_context)
         
         # Initialize dependent components
         from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier

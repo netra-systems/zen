@@ -121,13 +121,15 @@ class TestWebSocketBridgePropagationFailureIssue1028(SSotAsyncTestCase):
         user_context = UserExecutionContext(
             user_id=ensure_user_id(generate_user_id()),
             thread_id=ensure_thread_id(generate_thread_id()),
-            session_id="param_alignment_test"
+            run_id=str(uuid.uuid4())
         )
 
         # Create agent execution context 
         agent_context = AgentExecutionContext(
-            agent_name="completion_test_agent",
-            run_id=uuid.uuid4()
+            run_id=str(uuid.uuid4()),
+            thread_id=user_context.thread_id,
+            user_id=user_context.user_id,
+            agent_name="completion_test_agent"
         )
 
         # Monitor parameter passing to _emit_phase_event method
@@ -181,7 +183,7 @@ class TestWebSocketBridgePropagationFailureIssue1028(SSotAsyncTestCase):
                     f"\n🚨 THIS PROVES NO COMPLETION NOTIFICATION SENT TO USER!"
                 )
                 logger.error(failure_message)
-                self.fail(failure_message)
+                pytest.fail(failure_message)
 
             # Check for parameter alignment issues in completion calls
             completion_call = completion_phase_calls[0]
@@ -197,7 +199,7 @@ class TestWebSocketBridgePropagationFailureIssue1028(SSotAsyncTestCase):
                         f"\n🚨 THIS PREVENTS COMPLETION NOTIFICATION FROM BEING SENT!"
                     )
                     logger.error(failure_message)
-                    self.fail(failure_message)
+                    pytest.fail(failure_message)
 
         except Exception as e:
             # Check if this is a parameter alignment error
@@ -211,7 +213,7 @@ class TestWebSocketBridgePropagationFailureIssue1028(SSotAsyncTestCase):
                     f"\n🚨 THIS PREVENTS COMPLETION NOTIFICATIONS FROM REACHING USERS!"
                 )
                 logger.error(failure_message)
-                self.fail(failure_message)
+                pytest.fail(failure_message)
             else:
                 raise
 
@@ -237,7 +239,7 @@ class TestWebSocketBridgePropagationFailureIssue1028(SSotAsyncTestCase):
         user_context = UserExecutionContext(
             user_id=ensure_user_id(generate_user_id()),
             thread_id=ensure_thread_id(generate_thread_id()),
-            session_id="websocket_propagation_test"
+            run_id=str(uuid.uuid4())
         )
 
         # Mock WebSocket manager with tracking
@@ -269,8 +271,10 @@ class TestWebSocketBridgePropagationFailureIssue1028(SSotAsyncTestCase):
 
         # Create execution context
         agent_context = AgentExecutionContext(
-            agent_name="websocket_propagation_test_agent",
-            run_id=uuid.uuid4()
+            run_id=str(uuid.uuid4()),
+            thread_id=user_context.thread_id,
+            user_id=user_context.user_id,
+            agent_name="websocket_propagation_test_agent"
         )
 
         # Monitor WebSocket manager propagation
@@ -382,12 +386,14 @@ class TestWebSocketBridgePropagationFailureIssue1028(SSotAsyncTestCase):
         user_context = UserExecutionContext(
             user_id=ensure_user_id(generate_user_id()),
             thread_id=ensure_thread_id(generate_thread_id()),
-            session_id="completion_notification_test"
+            run_id=str(uuid.uuid4())
         )
 
         agent_context = AgentExecutionContext(
-            agent_name="completion_notification_agent",
-            run_id=uuid.uuid4()
+            run_id=str(uuid.uuid4()),
+            thread_id=user_context.thread_id,
+            user_id=user_context.user_id,
+            agent_name="completion_notification_agent"
         )
 
         # Execute agent
@@ -453,7 +459,7 @@ class TestWebSocketBridgePropagationFailureIssue1028(SSotAsyncTestCase):
                         f"\n🚨 USER MAY NOT RECEIVE PROPER COMPLETION FEEDBACK!"
                     )
                     logger.error(failure_message)
-                    self.fail(failure_message)
+                    pytest.fail(failure_message)
 
         # If we get here without failing, issue may be resolved
         logger.info("✅ UNEXPECTED: Completion notification working properly - Issue #1028 may be resolved")

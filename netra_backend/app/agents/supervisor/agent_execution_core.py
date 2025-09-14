@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
 )
-from netra_backend.app.core.execution_tracker import get_execution_tracker, ExecutionState
+from netra_backend.app.core.agent_execution_tracker import get_execution_tracker, ExecutionState
 # DISABLED: Heartbeat hidden errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
 # from netra_backend.app.core.agent_heartbeat import AgentHeartbeat
 # DISABLED: trace_persistence module removed - functionality no longer needed
