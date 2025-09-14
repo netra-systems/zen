@@ -48,7 +48,7 @@ class EmitterMetrics:
     error_count: int = 0
     retry_count: int = 0
     last_event_time: Optional[datetime] = None
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class UnifiedWebSocketEmitter:
