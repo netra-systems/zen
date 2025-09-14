@@ -420,8 +420,8 @@ class TestWebSocketManagerImportConsolidation(SSotAsyncTestCase):
 
             # Test that it works
             user_context = UserExecutionContext(
-                user_id=ensure_user_id("canonical_test_user"),
-                thread_id=ensure_thread_id("canonical_test_thread"),
+                user_id=ensure_user_id(generate_user_id()),
+                thread_id=ensure_thread_id(generate_thread_id()),
                 session_id="canonical_test_session"
             )
 

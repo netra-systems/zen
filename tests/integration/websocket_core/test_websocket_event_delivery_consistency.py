@@ -57,6 +57,7 @@ from shared.logging.unified_logging_ssot import get_logger
 from shared.types.core_types import UserID, ThreadID, ensure_user_id, ensure_thread_id
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+from netra_backend.app.core.unified_id_manager import generate_user_id, generate_thread_id
 
 # Import WebSocket managers (multiple paths to test)
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
@@ -149,8 +150,8 @@ class TestWebSocketEventDeliveryConsistency(SSotAsyncTestCase):
 
         # Create consistent user context for all tests
         user_context = UserExecutionContext(
-            user_id=ensure_user_id("consistency_test_user"),
-            thread_id=ensure_thread_id("consistency_test_thread"),
+            user_id=ensure_user_id(generate_user_id()),
+            thread_id=ensure_thread_id(generate_thread_id()),
             session_id="consistency_test_session"
         )
 
