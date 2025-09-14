@@ -36,7 +36,7 @@ import websockets
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, AuthenticatedUser
-from test_framework.ssot.websocket_auth_test_helpers import WebSocketAuthTestHelper
+from test_framework.ssot.websocket_auth_test_helpers import WebSocketAuthenticationTester
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class TestJwtGoldenPathProtection(SSotAsyncTestCase):
     def setup_method(self, method):
         super().setup_method(method)
         self.auth_helper = E2EAuthHelper()
-        self.websocket_helper = WebSocketAuthTestHelper()
+        self.websocket_helper = WebSocketAuthenticationTester()
         
         # Golden Path endpoints (production-like)
         self.backend_base_url = "http://localhost:8000"  # Main backend
