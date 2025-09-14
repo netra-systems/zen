@@ -229,6 +229,8 @@ async def create_websocket_manager(user_context=None, user_id: Optional[UserID] 
             request_id=f"factory_test_{typed_user_id}"
         )
     
+    # ISSUE #824 FIX: Use canonical SSOT import path
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
     return await get_websocket_manager(user_context=user_context)
 
 

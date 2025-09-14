@@ -192,7 +192,7 @@ async function runAnalysis() {
     console.log('   ❌ SSOT VIOLATION: Multiple data structure definitions found');
     console.log('   🎯 CONSOLIDATION REQUIRED:');
     dataStructureDefs.forEach(def => {
-      if (def.filePath.includes(canonicalPath)) {
+      if (def.filePath.includes(normalizedCanonicalPath)) {
         console.log(`      ✅ KEEP: ${def.filePath}:${def.lineNumber} (canonical)`);
       } else {
         console.log(`      ❌ REMOVE: ${def.filePath}:${def.lineNumber} (duplicate)`);
@@ -200,12 +200,12 @@ async function runAnalysis() {
     });
   } else if (dataStructureDefs.length === 1) {
     const singleDef = dataStructureDefs[0];
-    if (singleDef.filePath.includes(canonicalPath)) {
+    if (singleDef.filePath.includes(normalizedCanonicalPath)) {
       console.log('   ✅ SSOT COMPLIANT: Single canonical data structure definition');
     } else {
       console.log('   ⚠️ ISSUE: Single definition but not in canonical location');
       console.log(`      Current: ${singleDef.filePath}:${singleDef.lineNumber}`);
-      console.log(`      Expected: ${canonicalPath}`);
+      console.log(`      Expected: ${normalizedCanonicalPath}`);
     }
   } else {
     console.log('   ❌ ERROR: No data structure definitions found');
@@ -283,7 +283,7 @@ async function runAnalysis() {
   // Simulate test results
   const testResults = {
     'should have minimal ThreadState definitions': definitions.length <= 2 ? 'PASS' : 'FAIL',
-    'should have only one data-structure ThreadState': dataStructureDefs.length === 1 && dataStructureDefs[0]?.filePath.includes(canonicalPath) ? 'PASS' : 'FAIL',
+    'should have only one data-structure ThreadState': dataStructureDefs.length === 1 && dataStructureDefs[0]?.filePath.includes(normalizedCanonicalPath) ? 'PASS' : 'FAIL',
     'should have consistent imports': importViolations.length === 0 ? 'PASS' : 'FAIL',
     'should preserve operation states': operationStates.length >= 1 ? 'PASS' : 'FAIL',
     'should generate remediation report': !needsConsolidation ? 'PASS' : 'FAIL'

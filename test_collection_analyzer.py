@@ -90,7 +90,7 @@ def main():
         status = "TIMEOUT" if result.get('timeout') else ("SUCCESS" if result['success'] else "FAILED")
         print(f"  {status}: Tests: {result['tests']}, Warnings: {result['warnings']}, Errors: {result['errors']}, Import Errors: {result['import_errors']}, Time: {result['time']:.1f}s")
 
-        if result['stderr_sample'] and result['errors'] > 0:
+        if result.get('stderr_sample') and result['errors'] > 0:
             print(f"  Error sample: {result['stderr_sample'][:200]}...")
 
     print("\n" + "=" * 50)
