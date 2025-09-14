@@ -70,9 +70,14 @@ class TraceLogger:
     def _format_trace_line(self, trace: Dict[str, Any]) -> str:
         """Format single trace line."""
         full_timestamp = trace['timestamp']
-        # Extract last 8 chars, but handle cases where timestamp is shorter
+        # Extract meaningful time portion - last 8 chars but skip the dot if present
         if len(full_timestamp) >= 8:
-            timestamp = full_timestamp[-8:]
+            last_8 = full_timestamp[-8:]
+            # If it starts with '.', take from position 1 to get meaningful digits + Z
+            if last_8.startswith('.') and len(last_8) > 5:
+                timestamp = last_8[-5:]  # Get last 5 chars (like "3456Z")
+            else:
+                timestamp = last_8
         else:
             timestamp = ""  # Empty for short timestamps
         action = trace['action']
