@@ -98,8 +98,8 @@ class TestWebSocketEmergencyCleanupFailure:
     def mock_factory(self):
         """Create WebSocketManagerFactory with controlled state"""
         factory = WebSocketManagerFactory()
-        factory.max_managers_per_user = 20
-        return factory
+        # Note: WebSocketManager can be configured here
+        return manager
     
     @pytest.fixture
     def create_test_context(self):
