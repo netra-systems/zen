@@ -120,7 +120,7 @@ class TestInterfaceMismatchVulnerabilities:
         assert "'DeepAgentState' object has no attribute 'create_child_context'" in error_message
 
     async def test_modern_execution_helpers_works_with_userexecutioncontext(self):
-        """CONTROL TEST: ModernExecutionHelpers works correctly with UserExecutionContext.
+        """CONTROL TEST: SupervisorExecutionHelpers works correctly with UserExecutionContext.
         
         This proves the vulnerability is specific to DeepAgentState interface mismatch.
         """
@@ -130,8 +130,8 @@ class TestInterfaceMismatchVulnerabilities:
         mock_result.to_dict.return_value = {"test": "result"}
         mock_supervisor.run.return_value = mock_result
         
-        # Initialize ModernExecutionHelpers
-        execution_helpers = ModernExecutionHelpers(supervisor=mock_supervisor)
+        # Initialize SupervisorExecutionHelpers
+        execution_helpers = SupervisorExecutionHelpers(supervisor_agent=mock_supervisor)
         
         # Create secure UserExecutionContext instance
         secure_context = UserExecutionContext.from_request(
@@ -141,8 +141,7 @@ class TestInterfaceMismatchVulnerabilities:
         )
         
         # This should work correctly with UserExecutionContext
-        result = await execution_helpers.execute_supervisor_workflow(
-            user_request="enterprise security test",
+        result = await execution_helpers.run_supervisor_workflow(
             context=secure_context,
             run_id="control_test_run"
         )
