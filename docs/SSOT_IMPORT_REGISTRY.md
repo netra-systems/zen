@@ -37,8 +37,9 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketConnecti
 # Request Scoped Execution (VERIFIED 2025-09-11)
 from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
 
-# Execution Factory Pattern (VERIFIED 2025-09-11)
-from netra_backend.app.agents.supervisor.execution_factory import ExecutionFactory, ExecutionEngineFactory, ExecutionFactoryConfig
+# Execution Factory Pattern (FIXED 2025-01-14 - Issue #1004)
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory, get_execution_engine_factory, configure_execution_engine_factory
+from netra_backend.app.core.managers.execution_engine_factory import ExecutionEngineFactory  # COMPATIBILITY ALIAS - Use supervisor version for new code
 
 # ExecutionEngine - SSOT Pattern (FIXED 2025-09-12)
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine  # RECOMMENDED: Use alias for backward compatibility
@@ -111,6 +112,11 @@ from netra_backend.app.core.isolated_environment import IsolatedEnvironment  # �
 # AVAILABLE: CircuitBreakerOpen, CircuitBreakerTimeout, CircuitBreakerHalfOpen
 
 # CRITICAL: Fixed 2025-09-11 - agent_schemas module does not exist
+
+# CRITICAL: Fixed 2025-01-14 - ExecutionEngineFactory import path issue (Issue #1004)
+from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory  # ❌ BROKEN PATH - Module does not exist
+from netra_backend.app.services.user_execution_context import ExecutionEngineFactory  # ❌ BROKEN IMPORT - Not available in user_execution_context
+# USE INSTEAD: from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 
 # ISSUE #996 FIX: WebSocket Import Deprecations (2025-09-14)
 from netra_backend.app.websocket_core import WebSocketManager  # ⚠️ DEPRECATED (generates warnings)
