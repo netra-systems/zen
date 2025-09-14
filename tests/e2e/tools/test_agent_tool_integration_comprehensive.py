@@ -266,7 +266,7 @@ class AgentToolTester(SSotAsyncTestCase, StagingTestBase):
         
         try:
             # Send message
-            await self.websocket_client.send_message(message)
+            await self.websocket_client.send_message("chat_message", message)
             
             # Collect events and responses
             events = await self._collect_tool_execution_events(
@@ -426,7 +426,7 @@ class AgentToolTester(SSotAsyncTestCase, StagingTestBase):
         start_time = time.time()
         
         try:
-            await self.websocket_client.send_message(message)
+            await self.websocket_client.send_message("chat_message", message)
             
             # Collect events for longer timeout (tool chaining takes time)
             events = await self._collect_tool_execution_events("tool_chain", 90.0)

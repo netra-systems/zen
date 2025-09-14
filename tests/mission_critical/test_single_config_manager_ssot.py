@@ -48,7 +48,7 @@ class TestSingleConfigManagerSSot(SSotBaseTestCase):
 
         # Paths that should NOT exist after consolidation
         deprecated_paths = [
-            "netra_backend.app.core.managers.unified_configuration_manager.UnifiedConfigurationManager",
+            "netra_backend.app.core.configuration.base.UnifiedConfigManager",
             "netra_backend.app.services.configuration_service.ConfigurationManager"
         ]
 
@@ -101,7 +101,7 @@ class TestSingleConfigManagerSSot(SSotBaseTestCase):
 
         # Legacy imports that should redirect to SSOT
         legacy_imports = [
-            "netra_backend.app.core.managers.unified_configuration_manager",
+            "netra_backend.app.core.configuration.base",
             "netra_backend.app.services.configuration_service"
         ]
 

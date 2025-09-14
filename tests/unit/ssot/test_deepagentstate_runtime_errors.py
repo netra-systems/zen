@@ -30,7 +30,7 @@ class TestDeepAgentStateRuntimeErrorPrevention:
 
         # Test deprecated version
         try:
-            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+            from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
 
             # Create instance with minimal data
             deprecated_instance = DeprecatedState(
@@ -86,7 +86,7 @@ class TestDeepAgentStateRuntimeErrorPrevention:
         else:
             # Both work - check if they're actually the same object (SSOT compliance)
             try:
-                from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+                from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
                 from netra_backend.app.schemas.agent_models import DeepAgentState as SsotState
 
                 if DeprecatedState is SsotState:
@@ -107,7 +107,7 @@ class TestDeepAgentStateRuntimeErrorPrevention:
         After Fix: PASS (consistent attribute names)
         """
         try:
-            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+            from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
         except ImportError:
             pytest.skip("Deprecated DeepAgentState removed - SSOT remediation complete")
 
@@ -195,7 +195,7 @@ class TestDeepAgentStateRuntimeErrorPrevention:
 
         # Test deprecated version
         try:
-            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+            from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
             results['deprecated'] = mock_supervisor_execution(DeprecatedState)
         except ImportError:
             results['deprecated'] = {"success": False, "error": "Import failed", "error_type": "ImportError"}
@@ -226,7 +226,7 @@ class TestDeepAgentStateRuntimeErrorPrevention:
         else:
             # Both work - check if same object (SSOT compliance)
             try:
-                from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+                from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
                 from netra_backend.app.schemas.agent_models import DeepAgentState as SsotState
 
                 if DeprecatedState is SsotState:
@@ -248,7 +248,7 @@ class TestDeepAgentStateRuntimeErrorPrevention:
         After Fix: PASS (consistent validation from SSOT)
         """
         try:
-            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+            from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
         except ImportError:
             pytest.skip("Deprecated DeepAgentState removed - SSOT remediation complete")
 
