@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-09-13T18:49:19.606830",
-    "root_directory": "C:\\GitHub\\netra-apex",
+    "generated_at": "2025-09-13T20:38:38.413681",
+    "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 45
   },
   "literals": {
@@ -83,7 +83,7 @@
         "netra_backend/app/db/postgres_events.py:88",
         "netra_backend/app/db/postgres_events.py:144",
         "netra_backend/app/websocket_core/types.py:51",
-        "netra_backend/app/websocket_core/types.py:424"
+        "netra_backend/app/websocket_core/types.py:429"
       ]
     },
     "def\\s+process_event": {
@@ -99,7 +99,7 @@
       "locations": [
         "netra_backend/app/core/clickhouse_connection_manager.py:641",
         "netra_backend/app/websocket_core/types.py:52",
-        "netra_backend/app/websocket_core/types.py:425",
+        "netra_backend/app/websocket_core/types.py:430",
         "scripts/comprehensive_error_hunter.py:118",
         "scripts/scan_string_literals.py:193"
       ]
@@ -124,8 +124,8 @@
       "locations": [
         "netra_backend/app/websocket_core/protocols.py:292",
         "netra_backend/app/websocket_core/protocols.py:655",
-        "scripts/generate_websocket_mro_report.py:129",
-        "scripts/P0_SYSTEM_REGRESSION_TEST.py:66"
+        "scripts/P0_SYSTEM_REGRESSION_TEST.py:66",
+        "scripts/generate_websocket_mro_report.py:129"
       ]
     },
     "emit_event": {
@@ -143,7 +143,7 @@
       "value": "emit_user_event",
       "category": "events",
       "locations": [
-        "netra_backend/app/agents/supervisor/user_execution_engine.py:636"
+        "netra_backend/app/agents/supervisor/user_execution_engine.py:642"
       ]
     },
     "error": {
@@ -219,7 +219,7 @@
         "netra_backend/app/agents/agent_communication.py:61",
         "netra_backend/app/agents/agent_communication.py:66",
         "netra_backend/app/agents/agent_communication.py:82",
-        "netra_backend/app/agents/agent_lifecycle.py:169",
+        "netra_backend/app/agents/agent_lifecycle.py:171",
         "netra_backend/app/agents/base/execution_context.py:119"
       ]
     },
@@ -285,8 +285,8 @@
         "netra_backend/app/routes/utils/websocket_helpers.py:318",
         "netra_backend/app/schemas/core_enums.py:63",
         "netra_backend/app/schemas/core_enums.py:172",
-        "netra_backend/app/websocket_core/types.py:56",
-        "netra_backend/app/websocket_core/types.py:422",
+        "netra_backend/app/websocket_core/types.py:57",
+        "netra_backend/app/websocket_core/types.py:427",
         "frontend/providers/EnhancedWebSocketProvider.tsx:486"
       ]
     },

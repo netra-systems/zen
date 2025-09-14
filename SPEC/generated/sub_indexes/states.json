@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "states",
-    "generated_at": "2025-09-13T18:49:20.061739",
-    "root_directory": "C:\\GitHub\\netra-apex",
+    "generated_at": "2025-09-13T20:38:38.715171",
+    "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 30
   },
   "literals": {
@@ -27,7 +27,7 @@
       "value": "Disabled",
       "category": "states",
       "locations": [
-        "netra_backend/app/smd.py:1722",
+        "netra_backend/app/smd.py:1726",
         "scripts/deploy_to_gcp_actual.py:2033"
       ]
     },
@@ -42,7 +42,7 @@
       "value": "Enabled",
       "category": "states",
       "locations": [
-        "netra_backend/app/smd.py:1722",
+        "netra_backend/app/smd.py:1726",
         "scripts/deploy_to_gcp_actual.py:2033",
         "scripts/deploy_to_gcp_actual.py:2035",
         "scripts/deploy_to_gcp_actual.py:2036"
@@ -210,10 +210,10 @@
         "netra_backend/app/core/websocket_recovery_types.py:17",
         "netra_backend/app/db/clickhouse.py:585",
         "netra_backend/app/db/clickhouse.py:1127",
-        "netra_backend/app/db/clickhouse_backup.py:547",
-        "netra_backend/app/db/clickhouse_backup.py:1061",
         "netra_backend/app/db/clickhouse_init.py:145",
-        "netra_backend/app/diagnostics/websocket_diagnostics.py:216"
+        "netra_backend/app/diagnostics/websocket_diagnostics.py:216",
+        "netra_backend/app/mcp_client/models.py:29",
+        "netra_backend/app/schemas/core_enums.py:132"
       ]
     },
     "enabled": {
@@ -238,7 +238,7 @@
       "locations": [
         "netra_backend/app/admin/corpus/compatibility.py:111",
         "netra_backend/app/agents/agent_communication.py:67",
-        "netra_backend/app/agents/agent_lifecycle.py:48",
+        "netra_backend/app/agents/agent_lifecycle.py:50",
         "netra_backend/app/agents/base/execution_context.py:26",
         "netra_backend/app/agents/base/executor.py:477",
         "netra_backend/app/agents/base_agent.py:1349",
@@ -268,7 +268,7 @@
       "value": "inactive",
       "category": "states",
       "locations": [
-        "netra_backend/app/agents/supervisor/execution_engine_factory.py:420",
+        "netra_backend/app/agents/supervisor/execution_engine_factory.py:417",
         "netra_backend/app/agents/validation_sub_agent.py:302",
         "netra_backend/app/core/managers/unified_state_manager.py:73",
         "netra_backend/app/database/postgresql_pool_manager.py:273",
