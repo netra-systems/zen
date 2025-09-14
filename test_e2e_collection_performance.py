@@ -62,9 +62,9 @@ def test_collection_performance():
 
         # Verify consistency
         if len(test_files) == len(test_files_cached):
-            print("  ✅ Results consistent")
+            print("  Results consistent")
         else:
-            print("  ❌ Results inconsistent!")
+            print("  Results inconsistent!")
 
     # Test vs traditional glob
     print(f"\n3. Comparison with Traditional Collection")
@@ -94,7 +94,7 @@ def test_collection_performance():
     # Clean up
     optimizer.save_cache()
 
-    print(f"\n✅ E2E Collection Performance Test Complete")
+    print(f"\nE2E Collection Performance Test Complete")
     print("=" * 60)
 
 
@@ -126,8 +126,8 @@ if __name__ == "__main__":
         test_collection_performance()
         test_unified_runner_integration()
     except KeyboardInterrupt:
-        print("\n\n⚠️ Test interrupted by user")
+        print("\n\nTest interrupted by user")
     except Exception as e:
-        print(f"\n❌ Test failed with error: {e}")
+        print(f"\nTest failed with error: {e}")
         import traceback
         traceback.print_exc()

@@ -687,7 +687,7 @@ async def ensure_mock_websocket_server_running() -> str:
     server = MockWebSocketServer.get_instance()
 
     if not MockWebSocketServer.is_running():
-        logger.info("🚀 Starting mock WebSocket server for Windows development")
+        logger.info("Starting mock WebSocket server for Windows development")
 
         # Start server in background task
         await server.start()
