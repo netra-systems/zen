@@ -830,6 +830,7 @@ class TestAgentExecutionStateMachineUnit:
             (AgentExecutionState.READY, AgentExecutionEvent.INITIALIZE),
             (AgentExecutionState.STARTING, AgentExecutionEvent.START_EXECUTION),
             (AgentExecutionState.THINKING, AgentExecutionEvent.BEGIN_THINKING),
+            (AgentExecutionState.TOOL_PLANNING, AgentExecutionEvent.PLAN_TOOLS),
             (AgentExecutionState.TOOL_EXECUTING, AgentExecutionEvent.EXECUTE_TOOL),
             (AgentExecutionState.TOOL_PROCESSING, AgentExecutionEvent.PROCESS_TOOL_RESULT),
             (AgentExecutionState.TOOL_COMPLETED, AgentExecutionEvent.COMPLETE_TOOL),
