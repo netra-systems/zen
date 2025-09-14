@@ -38,6 +38,7 @@
       "@/styles/*": ["./styles/*"],
       "@/types/*": ["./types/*"],
       "@/utils/*": ["./utils/*"],
+      "@shared/*": ["../shared/*"],
       "@/*": ["./*"]
     }
   },

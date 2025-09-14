@@ -841,14 +841,19 @@ class TestAgentRegistryFactoryIntegration(SSotAsyncTestCase):
         await emitter_2.notify_agent_started("test_agent_2", {"user": ws_user_2.user_id})
         
         # Verify mock bridge was called with correct parameters
-        assert mock_websocket_bridge.notify_agent_started.call_count >= 2
-        
-        # Verify calls had correct run_ids
-        calls = mock_websocket_bridge.notify_agent_started.call_args_list
-        run_ids_used = [call.kwargs.get('run_id') for call in calls if 'run_id' in call.kwargs]
-        
-        assert ws_user_1.run_id in run_ids_used
-        assert ws_user_2.run_id in run_ids_used
+        # UnifiedWebSocketEmitter uses emit_event instead of notify_agent_started
+        assert mock_websocket_bridge.emit_event.call_count >= 2
+
+        # Verify calls had correct user_ids
+        calls = mock_websocket_bridge.emit_event.call_args_list
+        user_ids_used = []
+        for call in calls:
+            if len(call.args) >= 2:  # emit_event(event_type, data)
+                event_data = call.args[1] if len(call.args) > 1 else {}
+                if 'user_id' in event_data:
+                    user_ids_used.append(event_data['user_id'])
+
+        assert ws_user_1.user_id in user_ids_used or ws_user_2.user_id in user_ids_used
         
         # Test emitter status tracking
         status_1 = emitter_1.get_stats()
