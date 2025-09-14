@@ -478,7 +478,6 @@ class TestAgentToolIntegrationComprehensive:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    @pytest.mark.tools
     @pytest.mark.staging
     async def test_all_tool_types_execution(self):
         """
@@ -521,7 +520,6 @@ class TestAgentToolIntegrationComprehensive:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    @pytest.mark.tools
     @pytest.mark.staging
     async def test_tool_parameter_validation(self):
         """
@@ -562,7 +560,6 @@ class TestAgentToolIntegrationComprehensive:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    @pytest.mark.tools
     @pytest.mark.staging
     async def test_tool_timeout_and_retry_logic(self):
         """
@@ -603,7 +600,6 @@ class TestAgentToolIntegrationComprehensive:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    @pytest.mark.tools
     @pytest.mark.staging
     async def test_tool_chaining_comprehensive(self):
         """
