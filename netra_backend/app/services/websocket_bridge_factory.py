@@ -265,7 +265,7 @@ class WebSocketBridgeFactory:
         """
         if not self._unified_manager:
             # Create WebSocket manager using proper factory pattern with user context
-            # SECURITY FIX: Use create_websocket_manager instead of direct instantiation
+            # ISSUE #824 FIX: Use canonical SSOT get_websocket_manager instead of deprecated factory
             try:
                 # ISSUE #824 FIX: Use canonical SSOT import path
                 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
@@ -282,13 +282,13 @@ class WebSocketBridgeFactory:
 
                 logger.warning("WebSocketBridgeFactory auto-configuring - creating manager with user context")
 
-                # Use proper factory pattern with user context (if available)
+                # ISSUE #824 FIX: Use canonical SSOT factory pattern
                 if user_context:
-                    self._unified_manager = await create_websocket_manager(user_context)
+                    self._unified_manager = await get_websocket_manager(user_context)
                 else:
                     # For testing without user context, create minimal context
                     test_context = type('TestContext', (), {'user_id': 'test_user', 'thread_id': 'test_thread'})()
-                    self._unified_manager = await create_websocket_manager(test_context)
+                    self._unified_manager = await get_websocket_manager(test_context)
 
                 # Auto-configure other components if needed
                 if not self._connection_pool:

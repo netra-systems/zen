@@ -66,13 +66,13 @@ def validate_timeout_configuration():
     # Summary
     print("\n" + "=" * 80)
     if success:
-        print("🎉 SUCCESS: All timeout configuration validations passed!")
-        print("✅ Golden Path tests should now be able to complete in staging environment")
-        print("✅ Environment-aware timeouts properly configured")
+        print("SUCCESS: All timeout configuration validations passed!")
+        print("Golden Path tests should now be able to complete in staging environment")
+        print("Environment-aware timeouts properly configured")
         return 0
     else:
-        print("❌ FAILURE: Some timeout configuration validations failed")
-        print("⚠️  Golden Path tests may still experience timeout issues")
+        print("FAILURE: Some timeout configuration validations failed")
+        print("Golden Path tests may still experience timeout issues")
         return 1
 
 if __name__ == '__main__':
