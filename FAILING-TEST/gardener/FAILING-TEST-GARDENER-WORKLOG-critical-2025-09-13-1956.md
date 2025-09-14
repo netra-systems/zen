@@ -70,6 +70,8 @@ assert 'tool_name' in {'correlation_id': None, 'data': {'connection_id': 'legacy
 
 **LOCATION**: `netra_backend/tests/unit` and `netra_backend/tests/core` directories
 
+**GITHUB ISSUE**: Created Issue #918 "failing-test-backend-unit-execution-p1-test-runner-failures" for comprehensive backend unit test execution failure tracking
+
 ---
 
 ## ISSUE #3: Unit Test Execution Failures - Auth Service
@@ -88,6 +90,8 @@ assert 'tool_name' in {'correlation_id': None, 'data': {'connection_id': 'legacy
 **BUSINESS IMPACT**: Authentication system validation compromised, security testing reliability at risk
 
 **LOCATION**: `auth_service/tests` with unit marker
+
+**GITHUB ISSUE**: Created Issue #925 "failing-test-auth-service-unit-execution-p1-security-validation-compromised" for comprehensive auth service unit test execution failure tracking and security validation
 
 ---
 

@@ -9,7 +9,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from analytics_service.analytics_core.config import AnalyticsConfig
 from shared.isolated_environment import get_env
@@ -57,11 +57,13 @@ class AnalyticsEvent(BaseModel):
     properties: Dict[str, Any] = Field(default_factory=dict)
     context: Dict[str, Any] = Field(default_factory=dict)
     
-    @validator('timestamp', pre=True, always=True)
+    @field_validator('timestamp', mode='before')
+    @classmethod
     def set_timestamp(cls, v):
         return v or datetime.now(timezone.utc)
     
-    @validator('properties')
+    @field_validator('properties')
+    @classmethod
     def validate_properties(cls, v):
         # Limit the size of properties to prevent abuse
         if len(str(v)) > 10000:  # 10KB limit
@@ -73,7 +75,8 @@ class EventBatch(BaseModel):
     events: List[AnalyticsEvent] = Field(..., min_items=1)
     batch_id: Optional[str] = None
     
-    @validator('events')
+    @field_validator('events')
+    @classmethod
     def validate_batch_size(cls, v):
         max_events = rate_limits["events_per_request"]
         if len(v) > max_events:
@@ -97,7 +100,8 @@ class ReportRequest(BaseModel):
     group_by: Optional[List[str]] = None
     limit: int = Field(default=1000, ge=1, le=10000)
     
-    @validator('end_date')
+    @field_validator('end_date')
+    @classmethod
     def validate_date_range(cls, v, values):
         if 'start_date' in values and v < values['start_date']:
             raise ValueError("end_date must be after start_date")

@@ -18,7 +18,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class Granularity(str, Enum):
@@ -70,14 +70,16 @@ class UserActivityReportRequest(BaseModel):
     limit: int = Field(default=100, ge=1, le=1000, description="Maximum records to return")
     offset: int = Field(default=0, ge=0, description="Offset for pagination")
     
-    @validator('end_date')
+    @field_validator('end_date')
+    @classmethod
     def validate_date_range(cls, v, values):
         """Validate end date is after start date."""
         if 'start_date' in values and v <= values['start_date']:
             raise ValueError("End date must be after start date")
         return v
     
-    @validator('end_date')
+    @field_validator('end_date')
+    @classmethod
     def validate_max_date_range(cls, v, values):
         """Validate date range doesn't exceed 90 days."""
         if 'start_date' in values:

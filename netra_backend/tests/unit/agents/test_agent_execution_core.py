@@ -17,7 +17,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
@@ -68,9 +68,13 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
             retry_count=0
         )
         
-        self.test_state = DeepAgentState()
-        self.test_state.user_id = "test_user_123"
-        self.test_state.thread_id = "test_thread_123"
+        # Create UserExecutionContext for security-compliant testing
+        self.test_user_context = UserExecutionContext(
+            user_id="test_user_123",
+            thread_id="test_thread_123",
+            run_id=str(self.test_run_id),
+            agent_context={}
+        )
         
         # Record metrics for business value tracking
         self.record_metric("test_setup_duration", time.time())
@@ -97,7 +101,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         start_time = time.time()
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state,
+            user_context=self.test_user_context,
             timeout=30.0
         )
         execution_time = time.time() - start_time
@@ -137,7 +141,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify proper error handling
@@ -179,7 +183,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         start_time = time.time()
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state,
+            user_context=self.test_user_context,
             timeout=timeout
         )
         execution_time = time.time() - start_time
@@ -218,7 +222,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify exception handling
@@ -254,7 +258,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify WebSocket bridge was set on agent (multiple methods)
@@ -277,7 +281,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         with patch.object(self.execution_core, '_setup_agent_websocket') as mock_setup:
             await self.execution_core.execute_agent(
                 context=self.test_context,
-                state=self.test_state
+                user_context=self.test_user_context
             )
             mock_setup.assert_called_once()
         
@@ -298,7 +302,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify death detection
@@ -341,7 +345,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify metrics collection
@@ -386,7 +390,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
                 # Execute agent
                 result = await self.execution_core.execute_agent(
                     context=self.test_context,
-                    state=self.test_state
+                    user_context=self.test_user_context
                 )
                 
                 # Verify trace context creation
@@ -417,7 +421,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify heartbeat is disabled (business requirement)
