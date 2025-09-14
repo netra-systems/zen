@@ -115,7 +115,7 @@ class TestMessageHandler:
         }
 
 
-class TestMessageRouterCoreFunctionality(SSotAsyncTestCase, unittest.TestCase):
+class TestMessageRouterCoreFunctionality(SSotAsyncTestCase):
     """Integration tests for message router core functionality."""
 
     def setUp(self):

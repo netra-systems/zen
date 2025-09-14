@@ -37,7 +37,12 @@ from netra_backend.app.agents.supervisor.execution_context import (
     PipelineStep,
 )
 from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
-from netra_backend.app.schemas.tool import ToolExecutionEngineInterface, ToolExecuteResponse
+from netra_backend.app.schemas.tool import (
+    ToolExecutionEngineInterface, 
+    ToolExecuteResponse,
+    ToolInput,
+    ToolResult
+)
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
@@ -1083,6 +1088,178 @@ class UserExecutionEngine(IExecutionEngine, ToolExecutionEngineInterface):
                     "migration_issue": "#1146"
                 }
             )
+    
+    async def execute_tool_with_input(self, tool_input: ToolInput, tool: Any, kwargs: Dict[str, Any]) -> ToolResult:
+        """Execute tool with typed input and return typed result.
+        
+        Issue #1146 Phase 2: Additional ToolExecutionEngine interface compatibility method
+        that provides typed tool execution via UserExecutionEngine tool dispatcher.
+        
+        Args:
+            tool_input: Typed tool input with parameters
+            tool: Tool object to execute
+            kwargs: Additional keyword arguments
+            
+        Returns:
+            ToolResult: Typed tool execution result
+        """
+        try:
+            logger.debug(f"execute_tool_with_input: {tool_input.tool_name} for user {self.context.user_id}")
+            
+            # Get the tool dispatcher for this user
+            tool_dispatcher = await self.get_tool_dispatcher()
+            
+            # Convert ToolInput to dispatcher parameters
+            parameters = {}
+            if tool_input.kwargs:
+                parameters.update(tool_input.kwargs)
+            if tool_input.args:
+                # Convert args list to numbered parameters
+                for i, arg in enumerate(tool_input.args):
+                    parameters[f"arg_{i}"] = arg
+            if kwargs:
+                parameters.update(kwargs)
+            
+            # Execute through dispatcher
+            result = await tool_dispatcher.execute_tool(tool_input.tool_name, parameters)
+            
+            # Convert to ToolResult
+            from netra_backend.app.schemas.tool import ToolStatus
+            if isinstance(result, dict) and result.get("success", True):
+                status = ToolStatus.SUCCESS
+                message = result.get("message", f"Tool {tool_input.tool_name} executed successfully")
+            else:
+                status = ToolStatus.ERROR
+                message = result.get("message", "Tool execution failed") if isinstance(result, dict) else "Tool execution failed"
+            
+            # Create ToolResult
+            tool_result = ToolResult(tool_input=tool_input)
+            tool_result.complete(
+                status=status,
+                message=message,
+                payload=result if isinstance(result, dict) else {"result": result},
+                error_details=result.get("error_details") if isinstance(result, dict) else None
+            )
+            
+            # Add user isolation metadata
+            tool_result.execution_metadata.update({
+                "user_id": self.context.user_id,
+                "engine_id": self.engine_id,
+                "user_isolated": True,
+                "migration_issue": "#1146"
+            })
+            
+            logger.info(f" PASS:  execute_tool_with_input: {tool_input.tool_name} executed via UserExecutionEngine "
+                       f"for user {self.context.user_id} - status: {status}")
+            
+            return tool_result
+            
+        except Exception as e:
+            logger.error(f" ALERT:  execute_tool_with_input failed for {tool_input.tool_name}: {e} (user: {self.context.user_id})")
+            
+            # Return error ToolResult
+            from netra_backend.app.schemas.tool import ToolStatus
+            tool_result = ToolResult(tool_input=tool_input)
+            tool_result.complete(
+                status=ToolStatus.ERROR,
+                message=f"Tool execution failed: {str(e)}",
+                error_details={"error_type": type(e).__name__, "error_message": str(e)}
+            )
+            tool_result.execution_metadata.update({
+                "user_id": self.context.user_id,
+                "engine_id": self.engine_id,
+                "user_isolated": True,
+                "migration_issue": "#1146"
+            })
+            return tool_result
+    
+    async def execute_with_state(
+        self,
+        tool: Any,
+        tool_name: str,
+        parameters: Dict[str, Any],
+        state: Any,  # Changed from DeepAgentState to Any for security
+        run_id: str
+    ) -> Dict[str, Any]:
+        """Execute tool with state and comprehensive error handling.
+        
+        Issue #1146 Phase 2: Additional ToolExecutionEngine interface compatibility method.
+        SECURITY FIX: Changed state parameter from DeepAgentState to Any to avoid security vulnerabilities.
+        
+        Args:
+            tool: Tool object to execute
+            tool_name: Name of the tool
+            parameters: Tool parameters
+            state: Agent state (now generic Any type for security)
+            run_id: Execution run ID
+            
+        Returns:
+            Dict with success/result/error/metadata
+        """
+        try:
+            logger.debug(f"execute_with_state: {tool_name} for user {self.context.user_id}")
+            
+            # Get the tool dispatcher for this user
+            tool_dispatcher = await self.get_tool_dispatcher()
+            
+            # Add state and run_id to parameters for context
+            enhanced_parameters = parameters.copy()
+            enhanced_parameters.update({
+                "run_id": run_id,
+                "user_id": self.context.user_id,
+                "engine_id": self.engine_id
+            })
+            
+            # Execute through dispatcher
+            result = await tool_dispatcher.execute_tool(tool_name, enhanced_parameters)
+            
+            # Convert to expected format
+            if isinstance(result, dict):
+                response = {
+                    "success": result.get("success", True),
+                    "result": result.get("result", result.get("data")),
+                    "error": result.get("error") if not result.get("success", True) else None,
+                    "metadata": result.get("metadata", {})
+                }
+            else:
+                response = {
+                    "success": True,
+                    "result": result,
+                    "error": None,
+                    "metadata": {}
+                }
+            
+            # Add user isolation metadata
+            response["metadata"].update({
+                "user_id": self.context.user_id,
+                "engine_id": self.engine_id,
+                "user_isolated": True,
+                "run_id": run_id,
+                "migration_issue": "#1146"
+            })
+            
+            logger.info(f" PASS:  execute_with_state: {tool_name} executed via UserExecutionEngine "
+                       f"for user {self.context.user_id} - success: {response['success']}")
+            
+            return response
+            
+        except Exception as e:
+            error_message = f"Tool execution with state failed for {tool_name}: {str(e)}"
+            logger.error(f" ALERT:  execute_with_state: {error_message} (user: {self.context.user_id})")
+            
+            return {
+                "success": False,
+                "result": None,
+                "error": error_message,
+                "metadata": {
+                    "user_id": self.context.user_id,
+                    "engine_id": self.engine_id,
+                    "user_isolated": True,
+                    "run_id": run_id,
+                    "error_type": type(e).__name__,
+                    "migration_issue": "#1146"
+                }
+            }
     
     def _init_components(self) -> None:
         """Initialize execution components with user context."""
