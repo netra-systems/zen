@@ -349,7 +349,7 @@ async def request_scoped_supervisor(valid_user_execution_context, isolated_db_se
             user_id=valid_user_execution_context.user_id,
             thread_id=valid_user_execution_context.thread_id,
             run_id=valid_user_execution_context.run_id,
-            websocket_connection_id=getattr(valid_user_execution_context, 'websocket_connection_id', None)
+            websocket_client_id=getattr(valid_user_execution_context, 'websocket_client_id', None)
         )
         
         # Create supervisor with request-scoped session
