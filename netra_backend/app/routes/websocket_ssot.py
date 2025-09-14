@@ -536,7 +536,7 @@ class WebSocketSSOTRouter:
         - User-Agent header detection
         - Default: main mode (full functionality)
         """
-        connection_id = f"ssot_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
+        connection_id = f"ssot_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
         start_time = time.time()
         
         # CRITICAL: Log connection initiation with all context for Golden Path debugging
