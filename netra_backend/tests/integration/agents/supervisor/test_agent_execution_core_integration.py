@@ -218,9 +218,9 @@ class TestAgentExecutionCoreIntegration:
             user_id="test-user-123",
             thread_id=f"test-thread-{uuid4()}",
             run_id=f"test-run-{uuid4()}",
-            request_id=f"test-request-{uuid4()}"
+            request_id=f"test-request-{uuid4()}",
+            agent_context={"user_request": "Integration test request"}  # Add request in agent_context
         )
-        state.user_request = "Integration test request"  # Add request context
         return state
 
     @pytest.mark.asyncio
@@ -406,7 +406,7 @@ class TestAgentExecutionCoreIntegration:
                 user_id="test-user-123",
                 correlation_id=f"concurrent-correlation-{i}"
             )
-            state = SSotMockFactory.create_user_execution_context_mock()
+            state = SSotMockFactory.create_mock_user_context()
             state.user_id = "test-user-123"
             state.thread_id = context.thread_id
             contexts.append(context)
@@ -433,7 +433,7 @@ class TestAgentExecutionCoreIntegration:
     ):
         """Test resilience when WebSocket bridge fails."""
         # Create core with failing WebSocket bridge using SSOT patterns
-        failing_bridge = SSotMockFactory.create_websocket_bridge_mock(should_fail=True)
+        failing_bridge = SSotMockFactory.create_mock_agent_websocket_bridge()
         failing_bridge.notify_agent_started.side_effect = Exception("WebSocket error")
         failing_bridge.notify_agent_completed.side_effect = Exception("WebSocket error")
         failing_bridge.notify_agent_error.side_effect = Exception("WebSocket error")
@@ -500,7 +500,7 @@ class TestAgentExecutionCoreIntegration:
                 user_id="test-user-123",
                 correlation_id=f"perf-correlation-{i}"
             )
-            state = SSotMockFactory.create_user_execution_context_mock()
+            state = SSotMockFactory.create_mock_user_context()
             state.user_id = "test-user-123"
             state.thread_id = context.thread_id
             contexts.append(context)

@@ -139,6 +139,7 @@ class DeepAgentState(BaseModel):
     # Execution tracking
     final_report: Optional[str] = None
     step_count: int = 0
+    current_step: int = 0  # Current pipeline step number for execution tracking
     messages: List[Dict[str, Any]] = Field(default_factory=list)  # SSOT MIGRATION FIX: E2E test compatibility
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
     quality_metrics: Dict[str, Any] = Field(default_factory=dict)
@@ -165,6 +166,16 @@ class DeepAgentState(BaseModel):
             raise ValueError('Step count must be non-negative')
         if v > 10000:  # Reasonable upper bound
             raise ValueError('Step count exceeds maximum allowed value (10000)')
+        return v
+
+    @field_validator('current_step')
+    @classmethod
+    def validate_current_step(cls, v: int) -> int:
+        """Validate current step is within reasonable bounds."""
+        if v < 0:
+            raise ValueError('Current step must be non-negative')
+        if v > 10000:  # Reasonable upper bound
+            raise ValueError('Current step exceeds maximum allowed value (10000)')
         return v
 
     @property
