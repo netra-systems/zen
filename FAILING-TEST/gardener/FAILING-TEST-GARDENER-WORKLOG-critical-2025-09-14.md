@@ -26,6 +26,18 @@ WARNING: Failed to build images: backend.alpine.Dockerfile:69
 target alpine-test-backend: failed to solve: failed to compute cache key: failed to calculate checksum of ref 9x73yk
 ```
 
+**Related: Docker Daemon Connection Failures** (2025-09-14):
+```
+WARNING  test_framework.resource_monitor:resource_monitor.py:325 Failed to initialize Docker client (Docker daemon may not be running): Error while fetching server API version: (2, 'CreateFile', 'The system cannot find the file specified.')
+WARNING  tests.mission_critical.websocket_real_test_base:websocket_real_test_base.py:115 🔄 Docker unavailable or unhealthy - activating enhanced fallback (Issues #680, #773, #860)
+WARNING  test_framework.unified_docker_manager:unified_docker_manager.py:3675 Graceful shutdown had issues: error during connect: Get "http://%2F%2F.%2Fpipe%2FdockerDesktopLinuxEngine/v1.51/containers/json?all=1&filters=%7B%22label%22%3A%7B%22com.docker.compose.config-hash%22%3Atrue%2C%22com.docker.compose.oneoff%3DFalse%22%3Atrue%2C%22com.docker.compose.project%3Dnetra-alpine-test-46e547d4%22%3Atrue%7D%7D": open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+```
+- **Additional Issue**: Docker daemon connectivity failures (Windows named pipe issues)
+- **Component Impact**: Resource monitoring, test teardown, unified Docker management
+- **Fallback Status**: Enhanced fallback mode activated successfully
+- **GitHub Issue**: #979 (P3 priority - infrastructure enhancement)
+- **Related Issues**: #680 (CLOSED), #773 (CLOSED), #860 (OPEN), #420 (RESOLVED via staging validation)
+
 ### Issue 2: SSOT WebSocket Manager Violations
 **Category**: SSOT Compliance  
 **Severity**: P1 - High (SSOT violations)  
