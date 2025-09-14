@@ -128,7 +128,7 @@ class AgentLifecycleMixin(ABC):
     
     
     @abstractmethod
-    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+    async def execute(self, context: UserExecutionContext, run_id: str, stream_updates: bool) -> None:
         """The main execution logic of the agent. Subclasses must implement this."""
         pass
     
