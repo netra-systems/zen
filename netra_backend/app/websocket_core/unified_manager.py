@@ -3518,9 +3518,12 @@ def get_websocket_manager() -> UnifiedWebSocketManager:
     raise RuntimeError(error_message)
 
 
-# ISSUE #824 REMEDIATION: CREATE ALIAS FOR INTERNAL USE ONLY
-# The class is made private to prevent direct imports while allowing internal access
-UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
+# ISSUE #824 REMEDIATION: SSOT CONSOLIDATION
+# This implementation is only accessible through the canonical SSOT import path.
+# Direct imports from this module violate SSOT principles.
+
+# Implementation is available as a private class only
+# Public access must go through: netra_backend.app.websocket_core.websocket_manager
 
 # ISSUE #824 REMEDIATION: EXPORTS REMOVED FOR SSOT CONSOLIDATION
 #
