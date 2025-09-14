@@ -3533,9 +3533,14 @@ def get_websocket_manager() -> _UnifiedWebSocketManagerImplementation:
 #
 # This prevents fragmented import paths and enforces SSOT compliance.
 
-# NO EXPORTS - Issue #824 SSOT consolidation
-# Direct imports from this module are not supported
-__all__ = []
+# TEMPORARY COMPATIBILITY EXPORTS - Issue #824 SSOT consolidation
+# These exports are provided for backwards compatibility during SSOT migration
+# CANONICAL PATH: Use netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+
+# Compatibility alias for legacy imports
+UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
+
+__all__ = ['UnifiedWebSocketManager', 'WebSocketConnection', '_serialize_message_safely']
 
 # SSOT Consolidation: Log that direct imports are not supported
 import sys
