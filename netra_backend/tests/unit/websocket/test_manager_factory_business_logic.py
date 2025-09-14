@@ -27,10 +27,10 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, Any
 
-# SSOT imports using absolute paths
+# SSOT imports using absolute paths - Issue #824 Remediation
+# Import SSOT WebSocket manager and factory compatibility functions
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
-    IsolatedWebSocketManager,
     ConnectionLifecycleManager,
     FactoryMetrics,
     ManagerMetrics,
@@ -228,7 +228,7 @@ class TestConnectionLifecycleManager(SSotBaseTestCase):
         self.user_context = Mock(spec=UserExecutionContext)
         self.user_context.user_id = "lifecycle-user-123"
         
-        self.ws_manager = Mock(spec=IsolatedWebSocketManager)
+        self.ws_manager = Mock(spec=WebSocketManager)
         self.ws_manager.get_connection.return_value = None
         self.ws_manager.remove_connection = AsyncMock()
         
@@ -327,8 +327,14 @@ class TestIsolatedWebSocketManager(SSotBaseTestCase):
         self.user_context = Mock(spec=UserExecutionContext)
         self.user_context.user_id = "isolated-user-123"
         
+        # Issue #824 SSOT Remediation: Use WebSocketManager instead of removed IsolatedWebSocketManager
         with patch('netra_backend.app.websocket_core.websocket_manager_factory.ConnectionLifecycleManager'):
-            self.manager = IsolatedWebSocketManager(self.user_context)
+            # Create WebSocketManager with appropriate parameters for testing
+            self.manager = WebSocketManager(
+                user_context=self.user_context,
+                mode=None,  # Will use default mode
+                _ssot_authorization_token="test_token"
+            )
             
     def test_manager_initialization_with_user_context(self):
         """Test IsolatedWebSocketManager initializes with proper user isolation."""

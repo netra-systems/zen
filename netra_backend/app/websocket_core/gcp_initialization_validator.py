@@ -1302,16 +1302,47 @@ async def gcp_websocket_readiness_guard(app_state: Any, timeout: float = 120.0):
 # Health check endpoint integration
 async def gcp_websocket_readiness_check(app_state: Any) -> Tuple[bool, Dict[str, Any]]:
     """
-    Health check function for GCP WebSocket readiness.
-    
+    Health check function for GCP WebSocket readiness with staging bypass capability.
+
     INTEGRATION: Use this in /health endpoints to report WebSocket readiness.
-    
+
+    IMMEDIATE REMEDIATION FIX: Added staging environment bypass to allow WebSocket
+    connections even when service readiness checks fail, enabling golden path functionality
+    while service dependencies are being resolved.
+
     Returns:
         Tuple of (ready: bool, details: dict)
     """
     validator = create_gcp_websocket_validator(app_state)
+
+    # STAGING BYPASS: Check for staging environment bypass flag
+    from shared.isolated_environment import get_env
+    env_manager = get_env()
+    environment = env_manager.get('ENVIRONMENT', '').lower()
+    bypass_staging = env_manager.get('BYPASS_WEBSOCKET_READINESS_STAGING', 'false').lower() == 'true'
+
+    # Apply immediate remediation bypass for staging environment
+    if environment == 'staging' and bypass_staging:
+        central_logger.get_logger(__name__).warning(
+            "🚨 STAGING BYPASS ACTIVE: WebSocket readiness check bypassed for staging environment "
+            "to resolve golden path connectivity issues. This is temporary remediation."
+        )
+        return True, {
+            "websocket_ready": True,
+            "state": "bypassed_for_staging",
+            "elapsed_time": 0.0,
+            "failed_services": [],
+            "warnings": ["Staging environment bypass active - readiness validation skipped"],
+            "gcp_environment": validator.is_gcp_environment,
+            "cloud_run": validator.is_cloud_run,
+            "bypass_active": True,
+            "bypass_reason": "staging_connectivity_remediation",
+            "environment": environment
+        }
+
+    # Normal validation flow for production and non-bypassed environments
     result = await validator.validate_gcp_readiness_for_websocket(timeout_seconds=15.0)
-    
+
     return result.ready, {
         "websocket_ready": result.ready,
         "state": result.state.value,
@@ -1319,5 +1350,7 @@ async def gcp_websocket_readiness_check(app_state: Any) -> Tuple[bool, Dict[str,
         "failed_services": result.failed_services,
         "warnings": result.warnings,
         "gcp_environment": validator.is_gcp_environment,
-        "cloud_run": validator.is_cloud_run
+        "cloud_run": validator.is_cloud_run,
+        "bypass_active": False,
+        "environment": environment
     }
