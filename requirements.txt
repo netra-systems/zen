@@ -97,6 +97,10 @@ psutil>=7.0.0
 # Fake data generation for testing
 Faker>=37.6.0
 
+# --- Infrastructure Management ---
+# Docker SDK for container operations and management
+docker>=7.1.0
+
 # --- Security ---
 # Industry-standard cryptographic library.
 cryptography>=45.0.6
