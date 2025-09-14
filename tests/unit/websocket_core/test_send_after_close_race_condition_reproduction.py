@@ -29,7 +29,7 @@ import time
 
 # Import the classes we need to test
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-from netra_backend.app.websocket_core.unified_manager import WebSocketManagerMode
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
 from netra_backend.app.websocket_core.connection_state_machine import (
     ApplicationConnectionState,
     ConnectionStateMachine

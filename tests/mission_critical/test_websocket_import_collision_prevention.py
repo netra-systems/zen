@@ -56,7 +56,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
 )
 from netra_backend.app.routes.websocket import WebSocketComponentError
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
-from netra_backend.app.core.configuration.base import get_config
+from netra_backend.app.config import get_config
 
 class TestWebSocketImportCollisionPrevention(SSotAsyncTestCase):
     """

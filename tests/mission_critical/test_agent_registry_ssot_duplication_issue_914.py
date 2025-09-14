@@ -31,17 +31,12 @@ import time
 from typing import Dict, Any, List, Set, Type
 from unittest.mock import MagicMock, patch
 
-# Test framework imports
-from test_framework.ssot.base_test_case import SSotBaseTestCase
-
-
-class TestAgentRegistrySSotDuplication(SSotBaseTestCase):
+class TestAgentRegistrySSotDuplication(unittest.TestCase):
     """Test suite demonstrating AgentRegistry SSOT duplication issues."""
     
     @classmethod
     def setUpClass(cls):
         """Set up test class with registry paths."""
-        super().setUpClass()
         
         # Known AgentRegistry implementation paths
         cls.registry_paths = [
@@ -377,7 +372,7 @@ class TestAgentRegistrySSotDuplication(SSotBaseTestCase):
                            f"Patterns: {initialization_patterns}")
 
 
-class TestAgentRegistryRuntimeBehaviorInconsistencies(SSotBaseTestCase):
+class TestAgentRegistryRuntimeBehaviorInconsistencies(unittest.TestCase):
     """Test suite for runtime behavior inconsistencies between registries."""
     
     def test_01_concurrent_access_behavior(self):

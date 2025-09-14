@@ -57,7 +57,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.supervisor.state_manager import StateManager
 from netra_backend.app.services.state_persistence_optimized import StatePersistenceOptimized
-from netra_backend.app.core.configuration.base import get_config
+from netra_backend.app.config import get_config
 
 
 class TestAgentStateManagement(SSotAsyncTestCase):

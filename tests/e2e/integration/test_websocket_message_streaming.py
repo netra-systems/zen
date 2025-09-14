@@ -40,7 +40,7 @@
 
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.websocket_models import BroadcastResult, WebSocketStats
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.connection_info import ConnectionInfo
         # REMOVED_SYNTAX_ERROR: from typing import Any, Dict, List, Optional
         # REMOVED_SYNTAX_ERROR: import asyncio

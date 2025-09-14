@@ -39,7 +39,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 # System imports for integration testing
-from netra_backend.app.core.configuration.base import get_config
+from netra_backend.app.config import get_config
 from netra_backend.app.core.error_handler import ErrorHandler
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 

@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # SSOT Compliant Imports
 from test_framework import setup_test_path
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.auth_core.services.auth_service import AuthService
 from shared.isolated_environment import IsolatedEnvironment

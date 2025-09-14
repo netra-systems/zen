@@ -24,7 +24,7 @@ import asyncio
 from typing import Set, Dict, Any
 
 # Import WebSocket components to test
-from netra_backend.app.websocket_core.unified_manager import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import ensure_user_id

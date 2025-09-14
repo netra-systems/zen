@@ -259,7 +259,7 @@ class TestStagingWebSocketJWTIntegration(SSotAsyncTestCase):
         after Issue #681 is resolved.
         """
         try:
-            from netra_backend.app.websocket_core.manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # Test WebSocket manager initialization
             manager = WebSocketManager()
@@ -307,7 +307,7 @@ class TestStagingWebSocketJWTIntegration(SSotAsyncTestCase):
             logger.info("Golden Path Step 2: WebSocket authentication components available")
             
             # Step 3: Agent events should be enabled
-            from netra_backend.app.websocket_core.manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             manager = WebSocketManager()
             logger.info("Golden Path Step 3: WebSocket manager available for agent events")
@@ -398,7 +398,7 @@ class TestStagingJWTConfigurationBusinessImpact(SSotAsyncTestCase):
             validation_steps.append("WebSocket authentication ready")
             
             # Step 3: Golden Path components availability
-            from netra_backend.app.websocket_core.manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             manager = WebSocketManager()
             validation_steps.append("Golden Path components available")

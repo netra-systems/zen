@@ -56,7 +56,7 @@ from test_framework.ssot.e2e_auth_helper import (
 
 # Import production components to validate against fallback creation
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.smd import StartupOrchestrator
 

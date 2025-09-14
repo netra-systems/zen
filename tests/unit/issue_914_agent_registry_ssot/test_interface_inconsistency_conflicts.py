@@ -42,9 +42,9 @@ class TestAgentRegistryInterfaceInconsistency(SSotAsyncTestCase):
     conflicts that prevent reliable WebSocket integration and agent execution.
     """
     
-    async def async_setup_method(self, method=None):
+    def setup_method(self, method=None):
         """Set up test environment with SSOT patterns"""
-        await super().async_setup_method(method)
+        super().setup_method(method)
         self.env = IsolatedEnvironment()
         
         # Initialize both registry implementations
@@ -605,9 +605,9 @@ class TestAgentRegistryInterfaceInconsistency(SSotAsyncTestCase):
         # If all core method signatures are compatible, consolidation is feasible
         self.logger.info("Core method signatures are compatible across all registries")
 
-    async def async_teardown_method(self, method=None):
+    def teardown_method(self, method=None):
         """Clean up test resources"""
-        await super().async_teardown_method(method)
+        super().teardown_method(method)
 
 
 if __name__ == "__main__":

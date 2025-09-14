@@ -29,7 +29,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.core.configuration import get_configuration
 from netra_backend.app.database import get_db
 from netra_backend.app.main import app
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from test_framework.auth_jwt_test_manager import JWTGenerationTestManager as AuthJWTTestManager
 from test_framework.services import ServiceManager, get_service_manager
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler

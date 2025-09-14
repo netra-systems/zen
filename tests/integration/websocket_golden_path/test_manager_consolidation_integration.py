@@ -140,7 +140,7 @@ class TestWebSocketManagerGoldenPathIntegration(SSotAsyncTestCase):
 
         # Test with alternative manager if factory fails
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # This should also fail due to constructor issues
             try:
@@ -197,7 +197,7 @@ class TestWebSocketManagerGoldenPathIntegration(SSotAsyncTestCase):
             event_violations.append(f"Factory manager unavailable: {e}")
             
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             direct_manager = UnifiedWebSocketManager()
             managers_to_test.append(('Direct-created', direct_manager, False))  # Direct instantiation
         except Exception as e:
@@ -428,7 +428,7 @@ class TestWebSocketManagerGoldenPathIntegration(SSotAsyncTestCase):
             error_recovery_violations.append(f"Factory manager unavailable: {e}")
             
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             direct_manager = UnifiedWebSocketManager()
             managers_to_test.append(('Direct', direct_manager, False))
         except Exception as e:

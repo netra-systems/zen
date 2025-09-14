@@ -48,7 +48,7 @@ try:
         UserExecutionContext,
         UserContextManager
     )
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 except ImportError as e:
     pytest.skip(f"Required service imports not available: {e}", allow_module_level=True)

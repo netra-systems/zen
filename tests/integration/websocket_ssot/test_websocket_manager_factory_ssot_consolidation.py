@@ -69,7 +69,7 @@ class TestWebSocketManagerFactorySsotConsolidation(SSotAsyncTestCase):
         
         # Import factory functions from different paths
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as factory1
-        from netra_backend.app.websocket_core.unified_manager import WebSocketManagerMode
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
         
         # Test that factory function creates properly isolated instances
         factory_instances = []

@@ -33,7 +33,7 @@ try:
     from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
     from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
     from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
-    from netra_backend.app.core.configuration.base import get_config
+    from netra_backend.app.config import get_config
 except ImportError as e:
     import pytest
     pytest.skip(f"Backend modules not available: {e}", allow_module_level=True)

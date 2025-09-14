@@ -55,7 +55,7 @@ from test_framework.websocket_helpers import WebSocketTestHelpers, MockWebSocket
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.user_execution_context import UserExecutionContext, ExecutionEngineFactory
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 
 

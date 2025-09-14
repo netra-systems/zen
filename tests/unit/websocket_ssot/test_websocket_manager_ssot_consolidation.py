@@ -209,7 +209,7 @@ class TestWebSocketManagerSSOTConsolidation(BaseIntegrationTest):
 
                 if factory_type == "unified_manager":
                     # Direct instantiation from unified manager
-                    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                     instance = UnifiedWebSocketManager()
 
                 elif factory_type == "factory_pattern":
@@ -341,7 +341,7 @@ class TestWebSocketManagerSSOTConsolidation(BaseIntegrationTest):
 
     def _test_unified_manager_isolation(self, user_a: UserID, user_b: UserID) -> Dict[str, Any]:
         """Test user isolation for UnifiedWebSocketManager."""
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
         # Create manager and test user isolation
         manager = UnifiedWebSocketManager()
@@ -418,7 +418,7 @@ class TestWebSocketManagerSSOTConsolidation(BaseIntegrationTest):
                 start_time = time.time()
 
                 if impl_name == "unified_manager":
-                    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                     instance = UnifiedWebSocketManager()
 
                 elif impl_name == "factory":

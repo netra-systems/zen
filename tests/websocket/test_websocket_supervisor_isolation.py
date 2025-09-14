@@ -36,7 +36,7 @@ from netra_backend.app.websocket_core.supervisor_factory import get_websocket_sc
 from netra_backend.app.websocket_core.types import (
     WebSocketMessage, MessageType, WebSocketConnectionState, ConnectionInfo
 )
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.db.database_manager import DatabaseManager
 

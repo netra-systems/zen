@@ -30,7 +30,7 @@ from netra_backend.app.websocket_core.types import (
     normalize_message_type,
     create_standard_message
 )
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.handlers import WebSocketMessageHandler
 from shared.isolated_environment import get_env
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator

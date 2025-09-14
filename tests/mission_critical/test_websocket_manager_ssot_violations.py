@@ -75,7 +75,7 @@ class TestWebSocketManagerSSotViolationsUnit(SSotBaseTestCase):
             # Try to import the factory and manager
             from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # Check if factory exists (indicating SSOT violation)
             # Issue #712 Fix: Factory is acceptable if it creates SSOT instances
@@ -342,7 +342,7 @@ class TestWebSocketManagerSSotViolationsUnit(SSotBaseTestCase):
         # Check for context-based SSOT implementation
         try:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # SSOT should use single manager with context
             if not hasattr(UnifiedWebSocketManager, 'with_context') and not hasattr(UnifiedWebSocketManager, 'set_context'):

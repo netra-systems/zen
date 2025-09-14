@@ -213,9 +213,9 @@ class TestConfigManagerSSOTViolationsIssue667(SSotBaseTestCase, unittest.TestCas
         # Known import patterns that should be unified
         import_patterns = [
             'from netra_backend.app.config import get_config',
-            'from netra_backend.app.core.configuration.base import get_config',
+            'from netra_backend.app.config import get_config',
             'from netra_backend.app.core.configuration.base import get_unified_config',
-            'from netra_backend.app.core.configuration.base import get_config'
+            'from netra_backend.app.config import get_config'
         ]
         
         detected_imports = []

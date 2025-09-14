@@ -39,7 +39,7 @@ from netra_backend.app.agents.state import OptimizationsResult, ActionPlanResult
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 
 # WebSocket imports
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # Import for WebSocket event validation
 from tests.mission_critical.test_websocket_agent_events_suite import WebSocketEventValidator
