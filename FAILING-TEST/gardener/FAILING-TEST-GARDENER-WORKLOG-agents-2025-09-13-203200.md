@@ -53,11 +53,13 @@ Location: netra_backend\tests\unit\agents\test_websocket_agent_integration_compr
 **File:** `netra_backend/tests/unit/agents/supervisor/test_execution_engine_complete.py`
 **Reason:** No module named 'netra_backend.app.agents.supervisor.execution_engine'
 **Impact:** Supervisor execution engine tests skipped
+**GitHub Issue:** [#915 - failing-test-regression-critical-execution-engine-module-not-found](https://github.com/netra-systems/netra-apex/issues/915) (Updated with latest discovery)
 
 ### Skip 2: ExecutionEngine Module Missing - P2 Medium
 **File:** `netra_backend/tests/unit/agents/supervisor/test_execution_engine_comprehensive.py`
 **Reason:** No module named 'netra_backend.app.agents.supervisor.execution_engine'
 **Impact:** Comprehensive execution engine tests skipped
+**GitHub Issue:** [#915 - failing-test-regression-critical-execution-engine-module-not-found](https://github.com/netra-systems/netra-apex/issues/915) (Updated with latest discovery)
 
 ## Test Discovery Success
 
@@ -75,7 +77,7 @@ Location: netra_backend\tests\unit\agents\test_websocket_agent_integration_compr
 1. **uncollectable-test-regression-p1-deepagentstate-import-missing** → [Updated existing issue #953](https://github.com/netra-systems/netra-apex/issues/953)
 2. **uncollectable-test-regression-p1-websocket-test-utility-module-missing**
 3. **uncollectable-test-regression-p1-websocket-connection-import-missing** → [Updated existing issue #961](https://github.com/netra-systems/netra-apex/issues/961)
-4. **uncollectable-test-active-dev-p2-execution-engine-module-missing**
+4. **uncollectable-test-active-dev-p2-execution-engine-module-missing** → [Updated existing issue #915](https://github.com/netra-systems/netra-apex/issues/915)
 
 ## Next Actions Required
 
