@@ -116,8 +116,34 @@ AttributeError: type object 'IDType' has no attribute 'RUN'
 - No mocks - test real system components only
 - Proper SSOT metrics and validation patterns
 
-### ⏳ STEP 3: PLAN REMEDIATION
-- [ ] Plan SSOT remediation approach
+### ✅ STEP 3: PLAN REMEDIATION - COMPLETED
+- [x] Plan SSOT remediation approach
+
+#### 3.1 REMEDIATION PLAN SUMMARY
+**APPROACH:** Minimal, atomic, zero-risk fix
+
+**EXACT CHANGE REQUIRED:**
+- **File:** `/netra_backend/app/core/unified_id_manager.py`
+- **Location:** IDType enum (line ~32, after `THREAD = "thread"`)  
+- **Change:** Add single line: `RUN = "run"`
+
+#### 3.2 IMPACT ANALYSIS
+**✅ POSITIVE IMPACT (IMMEDIATE):**
+- Golden Path validation script unblocked
+- 26 new test methods transition FAIL → PASS
+- P0 SSOT violation resolved
+- WebSocket validation operational
+
+**✅ RISK ASSESSMENT: MINIMAL**
+- Backwards compatible enum addition
+- No breaking changes to existing code
+- All existing IDType values unchanged
+- SSOT architectural patterns maintained
+
+#### 3.3 VALIDATION STRATEGY PLANNED
+**Pre-Fix:** Confirm tests fail with AttributeError
+**Post-Fix:** Verify all 26 tests pass + Golden Path script works
+**Integration:** Verify no regressions in existing ID management
 
 ### ⏳ STEP 4: EXECUTE REMEDIATION
 - [ ] Add missing `RUN = "run"` to IDType enum
