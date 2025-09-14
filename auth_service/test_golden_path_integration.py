@@ -22,6 +22,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, Optional
 import uuid
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class MockAuthService:
@@ -135,11 +136,12 @@ class MockBackendAPI:
         return response
 
 
-class TestGoldenPathIntegration(unittest.TestCase):
+class TestGoldenPathIntegration(SSotBaseTestCase):
     """Test complete Golden Path integration flow"""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up Golden Path test environment"""
+        super().setup_method(method)
         self.auth_service = MockAuthService()
         self.backend_api = MockBackendAPI(self.auth_service)
         self.test_email = 'test@example.com'
@@ -302,11 +304,12 @@ class TestGoldenPathIntegration(unittest.TestCase):
         self.assertEqual(set(user_ids), {'user-1', 'user-2', 'user-3'})
 
 
-class TestBusinessContinuity(unittest.TestCase):
+class TestBusinessContinuity(SSotBaseTestCase):
     """Test business continuity and revenue protection"""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up business continuity test environment"""
+        super().setup_method(method)
         self.auth_service = MockAuthService()
         self.backend_api = MockBackendAPI(self.auth_service)
     
