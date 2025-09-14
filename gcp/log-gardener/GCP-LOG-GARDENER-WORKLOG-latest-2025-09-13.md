@@ -201,10 +201,13 @@ File "/app/netra_backend/app/services/websocket_bridge_factory.py", line 23, in 
 
 ### Issues Created/Updated
 
-**NEW ISSUE CREATED:**
+**NEW ISSUES CREATED:**
 - **Issue #867**: "[GCP-resolved | P0 | Historical import error resolved - UnifiedWebSocketManager import fixed in revision 00589](https://github.com/netra-systems/netra-apex/issues/867)"
   - **Labels**: claude-code-generated-issue, P0, bug, websocket
   - **Purpose**: Documentation of resolved import errors from previous revision
+- **Issue #869**: "[failing-test-syntax-error-critical-websocket-fragmentation](https://github.com/netra-systems/netra-apex/issues/869)"
+  - **Labels**: claude-code-generated-issue, P0, critical, websocket, golden-path
+  - **Purpose**: F-string syntax error in test_websocket_manager_fragmentation_detection.py:293 blocking mission critical test execution
 
 **EXISTING ISSUES UPDATED:**
 1. **Issue #856**: "🚨 P0 CRITICAL SERVICE OUTAGE: F-string syntax error in websocket_ssot.py causing complete backend failure" (Reopened)
@@ -222,6 +225,7 @@ File "/app/netra_backend/app/services/websocket_bridge_factory.py", line 23, in 
 
 ### Immediate Actions Required
 **P0 - CRITICAL**: Fix syntax error in websocket_ssot.py:658 (Issue #856) - commit local fixes and redeploy
+**P0 - CRITICAL**: Fix f-string syntax error in test_websocket_manager_fragmentation_detection.py:293 (Issue #869) - blocking mission critical test execution
 **P1 - HIGH**: Continue SSOT consolidation (Issue #824) - remove duplicate classes identified in logs
 **P3 - MEDIUM**: Update GCP SERVICE_ID secret (Issue #398) - remove trailing newline
 
