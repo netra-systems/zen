@@ -212,11 +212,7 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
         )
         
         # Create primary WebSocket client
-        self.websocket_client = StagingWebSocketClient(
-            websocket_url=self.websocket_url,
-            access_token=access_token,
-            user_id=user_id
-        )
+        self.websocket_client = StagingWebSocketClient()
         
         # Create secondary client for concurrent testing
         secondary_user_id = f"{user_id}_secondary"
@@ -227,15 +223,11 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
             expires_in=3600
         )
         
-        self.secondary_client = StagingWebSocketClient(
-            websocket_url=self.websocket_url,
-            access_token=secondary_token,
-            user_id=secondary_user_id
-        )
+        self.secondary_client = StagingWebSocketClient()
         
         # Establish connections
-        primary_connected = await self.websocket_client.connect()
-        secondary_connected = await self.secondary_client.connect()
+        primary_connected = await self.websocket_client.connect(token=access_token)
+        secondary_connected = await self.secondary_client.connect(token=secondary_token)
         
         if primary_connected and secondary_connected:
             self.test_user = {

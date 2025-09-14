@@ -233,14 +233,10 @@ class AgentToolTester(SSotAsyncTestCase, StagingTestBase):
         )
         
         # Create WebSocket client
-        self.websocket_client = StagingWebSocketClient(
-            websocket_url=self.websocket_url,
-            access_token=access_token,
-            user_id=user_id
-        )
+        self.websocket_client = StagingWebSocketClient()
         
         # Establish connection
-        success = await self.websocket_client.connect()
+        success = await self.websocket_client.connect(token=access_token)
         if success:
             self.test_user = {
                 "user_id": user_id,
