@@ -49,21 +49,53 @@
 ### ✅ COMPLETED
 - [x] **Step 0:** SSOT Audit Discovery - Message routing violations identified
 - [x] **GitHub Issue Created:** Issue #1067 created and linked
+- [x] **Step 1.1:** Test Discovery - Found 75+ MessageRouter tests, 612+ ToolDispatcher tests, 1,579+ WebSocket event tests
+- [x] **Step 1.2:** Testing Strategy Planned - Comprehensive 60-20-20 approach with 10-day phased implementation
 
 ### 🔄 IN PROGRESS
-- [ ] **Step 1:** Discover and Plan Tests
+- [ ] **Step 2:** Execute Test Plan (20% new SSOT tests)
 
 ### 📋 PENDING
-- [ ] **Step 2:** Execute Test Plan (20% new SSOT tests)
 - [ ] **Step 3:** Plan SSOT Remediation
 - [ ] **Step 4:** Execute SSOT Remediation
 - [ ] **Step 5:** Test Fix Loop - Prove System Stability
 - [ ] **Step 6:** Create PR and Close Issue
 
-## Test Strategy (60-20-20)
-- **60% Existing Tests:** Maintain and update existing 173 tool dispatcher tests + 89 WebSocket tests
+## Test Strategy (60-20-20) - DETAILED PLAN COMPLETE
+- **60% Existing Tests:** Maintain and update existing 2,266+ test files protecting message routing
+  - 75+ MessageRouter test files across unit, integration, and E2E categories
+  - 612+ ToolDispatcher test files with extensive coverage
+  - 1,579+ WebSocket event tests validating Golden Path functionality
 - **20% New SSOT Tests:** Create tests that validate SSOT consolidation
+  - SSOT compliance tests (single implementation validation)
+  - User isolation security tests (prevent cross-user contamination)
+  - Performance impact tests (ensure no degradation)
+  - Factory pattern validation tests
 - **20% Golden Path Tests:** Ensure all 5 critical WebSocket events work end-to-end
+  - agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
+  - Multi-user isolation testing
+  - Performance benchmarking
+
+## Detailed Testing Plan
+### Phase 1 (Days 1-2): Test Baseline and Inventory
+- Establish baseline test results
+- Document current test coverage
+- Identify critical tests that MUST NOT break
+
+### Phase 2 (Days 3-5): New SSOT Test Development
+- Create SSOT validation tests
+- Build user isolation security tests
+- Develop performance monitoring tests
+
+### Phase 3 (Days 6-8): Incremental Consolidation Execution
+- Consolidate MessageRouter implementations one at a time
+- Update tool dispatcher routing to UnifiedToolDispatcher
+- Migrate WebSocket event routing to single SSOT pattern
+
+### Phase 4 (Days 9-10): Final Validation and Cleanup
+- Run complete test suite validation
+- Golden Path end-to-end testing
+- Performance verification
 
 ## Success Criteria
 - [ ] 99.5% Golden Path reliability restored
