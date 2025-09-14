@@ -1535,9 +1535,10 @@ class _UnifiedWebSocketManagerImplementation:
         # Store for recovery instead of silently failing
         message = {
             "type": event_type,
-            "data": data,
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "critical": True
+            "critical": True,
+            "retry_exhausted": True,  # Add context for failure case
+            **data  # ✅ Spread business data to root level
         }
         await self._store_failed_message(user_id, message, "no_active_connections_after_retry")
         # Don't return silently - emit to user notification system
