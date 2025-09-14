@@ -847,22 +847,22 @@ class TestAgentRegistryFactoryIntegration(SSotAsyncTestCase):
         assert ws_user_2.run_id in run_ids_used
         
         # Test emitter status tracking
-        status_1 = emitter_1.get_emitter_status()
-        status_2 = emitter_2.get_emitter_status()
-        
+        status_1 = emitter_1.get_stats()
+        status_2 = emitter_2.get_stats()
+
         assert status_1['user_id'] == ws_user_1.user_id
         assert status_2['user_id'] == ws_user_2.user_id
-        assert status_1['event_count'] >= 1
-        assert status_2['event_count'] >= 1
+        assert status_1['metrics']['total_events'] >= 1
+        assert status_2['metrics']['total_events'] >= 1
         
         # Test emitter cleanup isolation
         await emitter_1.cleanup()
         
         # Emitter 2 should still be functional after emitter 1 cleanup
         await emitter_2.notify_agent_thinking("test_agent_2", "still working")
-        
-        status_2_after = emitter_2.get_emitter_status()
-        assert status_2_after['event_count'] >= 2
+
+        status_2_after = emitter_2.get_stats()
+        assert status_2_after['metrics']['total_events'] >= 2
         
         await emitter_2.cleanup()
         
