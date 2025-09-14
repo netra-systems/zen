@@ -27,7 +27,7 @@ class TestFactoryLayerDeprecationCompliance(SSotAsyncTestCase):
         """Set up test environment."""
         super().setUp()
         self.factory_module_path = "netra_backend.app.websocket_core.websocket_manager_factory"
-        self.canonical_module_path = "netra_backend.app.websocket_core.unified_manager"
+        self.canonical_module_path = "netra_backend.app.websocket_core.websocket_manager"
 
     def test_factory_module_exists_with_deprecation_notice(self):
         """Test that factory module exists but contains proper deprecation notices."""
@@ -98,7 +98,7 @@ class TestFactoryLayerDeprecationCompliance(SSotAsyncTestCase):
         """Test that factory functions redirect to canonical SSOT implementation."""
         try:
             from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-            from netra_backend.app.websocket_core.unified_manager import WebSocketManager as CanonicalWSM
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CanonicalWSM
         except ImportError as e:
             self.skipTest(f"Required modules not available: {e}")
 

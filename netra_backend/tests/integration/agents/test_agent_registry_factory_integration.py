@@ -535,14 +535,14 @@ class TestAgentRegistryFactoryIntegration(SSotAsyncTestCase):
         metrics = execution_engine_factory.get_factory_metrics()
         assert metrics['total_engines_created'] >= 2
         assert metrics['active_engines_count'] >= 2
-        
+
         # Test cleanup of specific engine
         await execution_engine_factory.cleanup_engine(engine_1)
-        
+
         # Verify engine_1 is cleaned but engine_2 is unaffected
         assert not engine_1.is_active()  # Should be cleaned up
         assert engine_2.is_active()      # Should remain active
-        
+
         # Cleanup remaining engine
         await execution_engine_factory.cleanup_engine(engine_2)
         

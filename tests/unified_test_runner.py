@@ -2559,13 +2559,17 @@ class UnifiedTestRunner:
 
     def _fast_path_collect_tests(self, pattern: str, category: str) -> List[str]:
         """Fast-path test collection bypassing heavy setup"""
-        
+
         # Skip Docker/service setup for simple collection
         if hasattr(self, '_collection_cache'):
             cache_key = f"{pattern}:{category}"
             if cache_key in self._collection_cache:
                 return self._collection_cache[cache_key]
-        
+
+        # E2E-specific optimized collection for large volume directories
+        if category == 'e2e' or 'e2e' in pattern.lower():
+            return self._collect_e2e_optimized(pattern)
+
         # Use simple file discovery instead of full pytest collection
         test_files = []
         test_dirs = [
@@ -2595,7 +2599,46 @@ class UnifiedTestRunner:
         
         return test_files
 
+    def _collect_e2e_optimized(self, pattern: str) -> List[str]:
+        """Optimized E2E test collection using the E2E collection optimizer"""
+        try:
+            # Import the E2E collection optimizer
+            from tests.e2e_collection_optimizer import E2ECollectionOptimizer
 
+            optimizer = E2ECollectionOptimizer(self.project_root)
+            test_files = optimizer.collect_tests_optimized(pattern)
+
+            # Cache the result in our cache as well
+            if not hasattr(self, '_collection_cache'):
+                self._collection_cache = {}
+            self._collection_cache[f"e2e_optimized:{pattern}"] = test_files
+
+            return test_files
+
+        except ImportError as e:
+            print(f"[WARNING] E2E optimizer not available, falling back to standard collection: {e}")
+            return self._fallback_e2e_collection(pattern)
+        except Exception as e:
+            print(f"[WARNING] E2E optimization failed, falling back to standard collection: {e}")
+            return self._fallback_e2e_collection(pattern)
+
+    def _fallback_e2e_collection(self, pattern: str) -> List[str]:
+        """Fallback E2E collection without optimization"""
+        e2e_dir = self.project_root / "tests" / "e2e"
+        if not e2e_dir.exists():
+            return []
+
+        test_files = []
+        if pattern == '*':
+            glob_pattern = "**/*test*.py"
+        else:
+            clean_pattern = pattern.replace('*', '')
+            glob_pattern = f"**/*{clean_pattern}*.py" if clean_pattern else "**/*test*.py"
+
+        pattern_files = list(e2e_dir.rglob(glob_pattern))
+        test_files = [str(f) for f in pattern_files if f.is_file() and 'test_' in f.name]
+
+        return test_files
 
     def _parallel_collect_tests(self, patterns: List[str]) -> Dict[str, List[str]]:
         """Collect tests in parallel for multiple patterns"""

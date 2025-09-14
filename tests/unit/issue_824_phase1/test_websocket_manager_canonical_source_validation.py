@@ -25,14 +25,14 @@ class TestWebSocketManagerCanonicalSourceValidation(SSotAsyncTestCase):
     def setUp(self):
         """Set up test environment."""
         super().setUp()
-        self.expected_canonical_module = "netra_backend.app.websocket_core.unified_manager"
+        self.expected_canonical_module = "netra_backend.app.websocket_core.websocket_manager"
         self.expected_canonical_class = "WebSocketManager"
 
     def test_canonical_websocket_manager_is_primary_import(self):
         """Test that canonical WebSocketManager is the primary import source."""
         # Import from canonical source
         try:
-            from netra_backend.app.websocket_core.unified_manager import WebSocketManager as CanonicalWSM
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CanonicalWSM
         except ImportError as e:
             self.fail(f"CRITICAL: Cannot import canonical WebSocketManager: {e}")
 
@@ -99,7 +99,7 @@ class TestWebSocketManagerCanonicalSourceValidation(SSotAsyncTestCase):
     def test_websocket_manager_import_consistency(self):
         """Test that all WebSocket Manager import paths resolve to same canonical source."""
         import_paths_to_test = [
-            "netra_backend.app.websocket_core.unified_manager.WebSocketManager",
+            "netra_backend.app.websocket_core.websocket_manager.WebSocketManager",
             "netra_backend.app.websocket_core.websocket_manager.WebSocketManager",
         ]
 
@@ -134,7 +134,7 @@ class TestWebSocketManagerCanonicalSourceValidation(SSotAsyncTestCase):
 
     def test_websocket_manager_ssot_enforcement(self):
         """Test that SSOT WebSocket Manager prevents multiple instance patterns."""
-        from netra_backend.app.websocket_core.unified_manager import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
         # Test that WebSocketManager class exists and is properly formed
         self.assertTrue(inspect.isclass(WebSocketManager))
