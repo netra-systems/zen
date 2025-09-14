@@ -16,6 +16,7 @@ from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta, timezone
 import json
 import jwt
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Ensure auth_service path is available
 sys.path.insert(0, os.path.dirname(__file__))
@@ -30,17 +31,18 @@ except ImportError as e:
     IMPORTS_AVAILABLE = False
 
 
-class TestJWTHandlerStandalone(unittest.TestCase):
+class TestJWTHandlerStandalone(SSotBaseTestCase):
     """
     Standalone JWT Handler unit tests
     Test core JWT functionality without external service dependencies
     """
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment"""
+        super().setup_method(method)
         if not IMPORTS_AVAILABLE:
             self.skipTest("Auth service imports not available")
-            
+
         # Mock shared.isolated_environment to avoid backend dependency
         self.env_patcher = patch('shared.isolated_environment.get_env')
         self.mock_env = self.env_patcher.start()
@@ -49,12 +51,12 @@ class TestJWTHandlerStandalone(unittest.TestCase):
             'JWT_SECRET_KEY': 'test-secret-key-for-unit-testing-32chars-long',
             'AUTH_SERVICE_ID': 'test-auth-service'
         }
-        
+
         # Mock AuthConfig to return test values
         self.config_patcher = patch.object(AuthConfig, 'get_jwt_secret')
         self.mock_config = self.config_patcher.start()
         self.mock_config.return_value = 'test-secret-key-for-unit-testing-32chars-long'
-        
+
         # Mock other AuthConfig methods
         with patch.object(AuthConfig, 'get_service_secret', return_value='service-secret'):
             with patch.object(AuthConfig, 'get_service_id', return_value='test-service'):
@@ -65,11 +67,12 @@ class TestJWTHandlerStandalone(unittest.TestCase):
                                 with patch.object(AuthConfig, 'get_environment', return_value='test'):
                                     self.jwt_handler = JWTHandler()
     
-    def tearDown(self):
+    def teardown_method(self, method):
         """Clean up test environment"""
         if IMPORTS_AVAILABLE:
             self.env_patcher.stop()
             self.config_patcher.stop()
+        super().teardown_method(method)
 
     @pytest.mark.unit
     def test_jwt_handler_initialization(self):
