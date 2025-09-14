@@ -150,18 +150,18 @@ class StagingConfig:
                 clean_token = jwt_token.replace("Bearer ", "").strip()
                 # Base64url encode the token for WebSocket subprotocol
                 encoded_token = base64.urlsafe_b64encode(clean_token.encode()).decode().rstrip('=')
-                headers["sec-websocket-protocol"] = f"e2e-testing, jwt.{encoded_token}"
+                headers["sec-websocket-protocol"] = "e2e-testing, jwt-auth"
                 print(f"[STAGING AUTH FIX] Added WebSocket subprotocol: jwt.{encoded_token[:20]}...")
             except Exception as e:
                 print(f"[WARNING] Could not encode JWT for WebSocket subprotocol: {e}")
                 # Fallback: set a recognizable subprotocol for debugging
-                headers["sec-websocket-protocol"] = "e2e-testing, jwt.staging-test-token"
+                headers["sec-websocket-protocol"] = "e2e-testing, jwt-auth"
             
             print(f"[STAGING AUTH FIX] Added JWT token to WebSocket headers (Authorization + subprotocol)")
         else:
             # Fallback test headers (will likely be rejected but enables auth flow testing)
             headers["X-Test-Auth"] = "test-token-for-staging"
-            headers["sec-websocket-protocol"] = "e2e-testing, jwt.test-fallback"
+            headers["sec-websocket-protocol"] = "e2e-testing, jwt-auth"
             print(f"[WARNING] No JWT token available - using test header fallback with subprotocol")
             
         print(f"[STAGING AUTH FIX] WebSocket headers include E2E detection: {list(headers.keys())}")
