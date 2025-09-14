@@ -1587,6 +1587,37 @@ class _UnifiedWebSocketManagerImplementation:
             except Exception as e:
                 logger.error(f"Failed to broadcast to {connection.connection_id}: {e}")
                 await self.remove_connection(connection.connection_id)
+
+    async def broadcast_to_all(self, message: Dict[str, Any], exclude_users: Optional[Set[str]] = None) -> None:
+        """
+        ISSUE #824 FIX: Broadcast message to all connections with optional exclusions.
+
+        This method provides the standard interface expected by SSOT tests and
+        ensures compatibility with existing code that expects broadcast_to_all.
+
+        Args:
+            message: Message to broadcast
+            exclude_users: Optional set of user IDs to exclude from broadcast
+        """
+        # If no exclusions, use the regular broadcast method
+        if not exclude_users:
+            await self.broadcast(message)
+            return
+
+        # CRITICAL FIX: Use safe serialization for broadcast messages
+        safe_message = _serialize_message_safely(message)
+
+        # Broadcast to all connections except excluded users
+        for connection in list(self._connections.values()):
+            # Skip if user is in exclusion list
+            if exclude_users and connection.user_id in exclude_users:
+                continue
+
+            try:
+                await connection.websocket.send_json(safe_message)
+            except Exception as e:
+                logger.error(f"Failed to broadcast to {connection.connection_id}: {e}")
+                await self.remove_connection(connection.connection_id)
     
     def get_stats(self) -> Dict[str, Any]:
         """Get connection statistics."""
