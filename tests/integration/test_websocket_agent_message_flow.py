@@ -83,14 +83,9 @@ class TestWebSocketAgentMessageFlow(SSotAsyncTestCase):
     - Performance requirements for real-time responsive chat
     """
 
-    async def setup_method(self, method):
+    def setup_method(self, method):
         """Set up test environment with real WebSocket infrastructure - pytest entry point."""
-        await super().setup_method(method)
-        await self.async_setup_method(method)
-
-    async def async_setup_method(self, method=None):
-        """Set up test environment with real WebSocket infrastructure."""
-        await super().async_setup_method(method)
+        super().setup_method(method)
 
         # Initialize environment for WebSocket integration testing
         self.env = get_env()
@@ -114,6 +109,13 @@ class TestWebSocketAgentMessageFlow(SSotAsyncTestCase):
             'chat_sessions_completed': 0,
             'real_time_performance_met': 0
         }
+
+        # Initialize test attributes to prevent AttributeError
+        self.websocket_connections = []
+        self.agent_instances = {}
+        self.websocket_manager = None
+        self.websocket_bridge = None
+        self.agent_factory = None
 
         # Initialize real WebSocket infrastructure
         await self._initialize_real_websocket_infrastructure()
@@ -562,21 +564,25 @@ class TestWebSocketAgentMessageFlow(SSotAsyncTestCase):
 
     # === HELPER METHODS FOR WEBSOCKET INTEGRATION ===
 
+    @asynccontextmanager
     async def _get_user_execution_context(self):
         """Get user execution context for WebSocket testing."""
         try:
             if hasattr(self.agent_factory, 'user_execution_scope'):
-                return self.agent_factory.user_execution_scope(
+                async with self.agent_factory.user_execution_scope(
                     user_id=self.test_user_id,
                     thread_id=self.test_thread_id,
                     run_id=self.test_run_id
-                )
+                ) as context:
+                    yield context
+                    return
         except Exception:
             pass
 
-        return self._mock_user_execution_scope(
+        async with self._mock_user_execution_scope(
             self.test_user_id, self.test_thread_id, self.test_run_id
-        )
+        ) as context:
+            yield context
 
     @asynccontextmanager
     async def _mock_user_execution_scope(self, user_id, thread_id, run_id, **kwargs):

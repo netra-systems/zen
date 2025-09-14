@@ -115,6 +115,13 @@ class TestMultiUserMessageIsolation(SSotAsyncTestCase):
             'compliance_requirements_met': 0
         }
 
+        # Initialize test attributes to prevent AttributeError
+        self.active_user_contexts = []
+        self.websocket_connections = {}
+        self.agent_instances = {}
+        self.agent_factory = None
+        self.context_manager = None
+
         # Initialize real user isolation infrastructure
         await self._initialize_real_isolation_infrastructure()
 

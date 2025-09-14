@@ -119,6 +119,14 @@ class TestAgentMessageErrorRecovery(SSotAsyncTestCase):
             'business_continuity_preserved': 0
         }
 
+        # Initialize test attributes to prevent AttributeError
+        self.websocket_connections = {}
+        self.agent_instances = {}
+        self.error_scenarios = []
+        self.agent_factory = None
+        self.websocket_manager = None
+        self.recovery_agents = {}
+
         # Initialize real error recovery infrastructure
         await self._initialize_real_error_recovery_infrastructure()
 
@@ -638,21 +646,25 @@ class TestAgentMessageErrorRecovery(SSotAsyncTestCase):
 
     # === HELPER METHODS FOR ERROR RECOVERY TESTING ===
 
+    @asynccontextmanager
     async def _get_user_execution_context(self):
         """Get user execution context for error recovery testing."""
         try:
             if hasattr(self.agent_factory, 'user_execution_scope'):
-                return self.agent_factory.user_execution_scope(
+                async with self.agent_factory.user_execution_scope(
                     user_id=self.test_user_id,
                     thread_id=self.test_thread_id,
                     run_id=self.test_run_id
-                )
+                ) as context:
+                    yield context
+                    return
         except Exception:
             pass
 
-        return self._mock_user_execution_scope(
+        async with self._mock_user_execution_scope(
             self.test_user_id, self.test_thread_id, self.test_run_id
-        )
+        ) as context:
+            yield context
 
     @asynccontextmanager
     async def _mock_user_execution_scope(self, user_id, thread_id, run_id, **kwargs):

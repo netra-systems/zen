@@ -33,6 +33,29 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.types.core_types import UserID, ensure_user_id
 
 
+def create_user_context_from_id(user_id: str) -> object:
+    """Create proper user_context object from user_id string.
+
+    ISSUE #996 FIX: Convert user_id parameter to user_context object
+    that WebSocket manager constructor expects.
+    """
+    from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+
+    try:
+        # Try to use the real factory if available
+        from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
+        return UserExecutionContextFactory.create_test_context(user_id=user_id)
+    except ImportError:
+        # Fallback to mock context
+        id_manager = UnifiedIDManager()
+        return type('MockUserContext', (), {
+            'user_id': ensure_user_id(user_id) if user_id else id_manager.generate_id(IDType.USER, prefix="test"),
+            'session_id': id_manager.generate_id(IDType.THREAD, prefix="test"),
+            'request_id': id_manager.generate_id(IDType.REQUEST, prefix="test"),
+            'is_test': True
+        })()
+
+
 @dataclass
 class WebSocketManagerImplementation:
     """Data class to track WebSocket Manager implementations."""
@@ -215,7 +238,8 @@ class TestWebSocketManagerSSOTConsolidation(BaseIntegrationTest):
                 elif factory_type == "factory_pattern":
                     # Factory pattern instantiation
                     from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-                    instance = create_websocket_manager(user_id=user_id_typed)
+                    user_context = create_user_context_from_id(str(user_id_typed))
+                    instance = create_websocket_manager(user_context=user_context)
 
                 elif factory_type == "adapter_pattern":
                     # Adapter pattern instantiation
@@ -361,8 +385,10 @@ class TestWebSocketManagerSSOTConsolidation(BaseIntegrationTest):
         from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 
         # Create separate instances for each user
-        manager_a = create_websocket_manager(user_id=user_a)
-        manager_b = create_websocket_manager(user_id=user_b)
+        context_a = create_user_context_from_id(user_a)
+        context_b = create_user_context_from_id(user_b)
+        manager_a = create_websocket_manager(user_context=context_a)
+        manager_b = create_websocket_manager(user_context=context_b)
 
         return {
             'isolated': id(manager_a) != id(manager_b),  # Different instances
@@ -424,7 +450,8 @@ class TestWebSocketManagerSSOTConsolidation(BaseIntegrationTest):
                 elif impl_name == "factory":
                     from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
                     factory = WebSocketManagerFactory()
-                    instance = factory.create_websocket_manager(user_id=ensure_user_id("test_user"))
+                    test_context = create_user_context_from_id("test_user")
+                    instance = factory.create_websocket_manager(user_context=test_context)
 
                 elif impl_name == "adapter":
                     from netra_backend.app.agents.supervisor.agent_registry import WebSocketManagerAdapter

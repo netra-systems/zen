@@ -80,14 +80,9 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
     - Performance meets user experience requirements
     """
 
-    async def setup_method(self, method):
+    def setup_method(self, method):
         """Set up test environment with real agent message infrastructure - pytest entry point."""
-        await super().setup_method(method)
-        await self.async_setup_method(method)
-
-    async def async_setup_method(self, method=None):
-        """Set up test environment with real agent message infrastructure."""
-        await super().async_setup_method(method)
+        super().setup_method(method)
 
         # Initialize environment for integration testing
         self.env = get_env()
@@ -119,13 +114,15 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
         self.llm_manager = None
         self.agent_factory = None
 
+    async def async_setup_method(self, method=None):
+        """Set up async components with real agent message infrastructure."""
+        await super().async_setup_method(method)
         # Initialize real message processing infrastructure
         await self._initialize_real_message_infrastructure()
 
-    async def teardown_method(self, method):
+    def teardown_method(self, method):
         """Clean up test resources - pytest entry point."""
-        await self.async_teardown_method(method)
-        await super().teardown_method(method)
+        super().teardown_method(method)
 
     async def async_teardown_method(self, method=None):
         """Clean up test resources and record chat functionality metrics."""

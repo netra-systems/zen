@@ -44,6 +44,29 @@ from shared.types.core_types import UserID, ensure_user_id
 logger = get_logger(__name__)
 
 
+def create_user_context_from_id(user_id: str) -> object:
+    """Create proper user_context object from user_id string.
+
+    ISSUE #996 FIX: Convert user_id parameter to user_context object
+    that WebSocket manager constructor expects.
+    """
+    from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+
+    try:
+        # Try to use the real factory if available
+        from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
+        return UserExecutionContextFactory.create_test_context(user_id=user_id)
+    except ImportError:
+        # Fallback to mock context
+        id_manager = UnifiedIDManager()
+        return type('MockUserContext', (), {
+            'user_id': ensure_user_id(user_id) if user_id else id_manager.generate_id(IDType.USER, prefix="test"),
+            'session_id': id_manager.generate_id(IDType.THREAD, prefix="test"),
+            'request_id': id_manager.generate_id(IDType.REQUEST, prefix="test"),
+            'is_test': True
+        })()
+
+
 @dataclass
 class ImportPath:
     """Data class to track WebSocket Manager import paths and their results."""
@@ -176,15 +199,26 @@ class TestWebSocketManagerSSOTImportConsolidation(SSotBaseTestCase):
             if import_path.method_name:
                 # Factory function path
                 factory_func = getattr(module, import_path.method_name)
+                user_context = create_user_context_from_id(self.test_user_id)
                 if asyncio.iscoroutinefunction(factory_func):
                     # Handle async factory functions
-                    instance = asyncio.run(factory_func(user_id=self.test_user_id))
+                    instance = asyncio.run(factory_func(user_context=user_context))
                 else:
-                    instance = factory_func(user_id=self.test_user_id)
+                    instance = factory_func(user_context=user_context)
             else:
                 # Direct class import
                 cls = getattr(module, import_path.class_name)
-                instance = cls(user_id=self.test_user_id)
+
+                # ISSUE #996 FIX: Handle protocols differently from concrete classes
+                if hasattr(cls, '__protocol__') or getattr(cls, '_is_protocol', False):
+                    # This is a protocol (interface) - cannot be instantiated directly
+                    # Skip protocol validation in import consolidation test
+                    result.error_message = "Protocol interfaces cannot be instantiated directly"
+                    result.success = False
+                    return result
+
+                user_context = create_user_context_from_id(self.test_user_id)
+                instance = cls(user_context=user_context)
 
             # Record successful creation
             result.success = True

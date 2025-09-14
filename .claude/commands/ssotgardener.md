@@ -60,7 +60,6 @@ ONLY RUN tests that don't require docker, such as unit, integration (no docker),
 
 Do IND_GCIFS_UINF
 
-
 2) EXECUTE THE TEST PLAN for the 20% of NEW SSOT tests : SNST : with new spawned sub agent. audit and review the test. And run the fake test checks. ONLY RUN tests that don't require docker, such as unit, integration (no docker), or e2e on staging gcp remote.
 Do IND_GCIFS_UINF
 
@@ -77,7 +76,7 @@ otherwise go back and ensure that any code changes exclusively add value as one 
 do not introduce new problems.
 5.1) Run and fix changes for every test case in the IND.
 5.2) or each cycle Do IND_GCIFS_UINF until ALL tests in IND pass.
-5.3)  Run startup tests (non docker) fix import or other types of startup issues related to this change.
+5.3) Run startup tests (non docker) fix import or other types of startup issues related to this change.
 
 STOP and repeat step 5 until all tests pass or 10 cycles.
 If still failing after 10 cycles do IND_GCIFS_UINF and STOP and exit PROCESS.
@@ -89,7 +88,3 @@ Make a NEW PR (Pull Request).
 Cross link the prior generated issue so it will close on PR merge.
 
 END PROCESS INSTRUCTIONS
-
-You MUST repeat the entire PROCESS until success.
-EVERY NEW PROCESS ENTRY MUST SPAWN NEW SNST FOR EACH ITEM.
-STOP AFTER 3 PROCESS CYCLES OR IF THE ISSUE IS CLOSED.
