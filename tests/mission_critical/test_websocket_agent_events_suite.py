@@ -152,14 +152,16 @@ class RealWebSocketEventCapture:
 
 class MissionCriticalEventValidator:
     """Validates WebSocket events with extreme rigor for real connections.
-    
-    Supports both flat event format and ServerMessage format for Golden Path compatibility.
-    
+
+    Supports three event formats for comprehensive Golden Path compatibility.
+
     Event Formats Supported:
     1. Flat format: Event data directly in event dict
     2. ServerMessage format: Event data nested in 'payload' field (Issue #892 fix)
-    
-    Maintains backward compatibility while handling WebSocket message format variations.
+    3. Data format: Event data nested in 'data' field (Issue #973 - staging events)
+
+    Maintains backward compatibility while handling WebSocket message format variations
+    across all deployment environments.
     """
     
     REQUIRED_EVENTS = {
@@ -204,11 +206,24 @@ class MissionCriticalEventValidator:
         self.errors: List[str] = []
         self.warnings: List[str] = []
         self.start_time = time.time()
-        
+
+    def _extract_event_type(self, event: Dict) -> str:
+        """Extract event type from any of the three supported formats.
+
+        Handles:
+        1. Flat format: type directly in event
+        2. ServerMessage format: type at top level, data in payload
+        3. Data format: type at top level, data in data field (staging)
+
+        Returns event type or "unknown" if not found.
+        """
+        # All formats should have type at top level
+        return event.get("type", "unknown")
+
     def record(self, event: Dict) -> None:
         """Record an event with detailed tracking."""
         timestamp = time.time() - self.start_time
-        event_type = event.get("type", "unknown")
+        event_type = self._extract_event_type(event)
         
         self.events.append(event)
         self.event_timeline.append((timestamp, event_type, event))
@@ -268,7 +283,7 @@ class MissionCriticalEventValidator:
     
     def _validate_event_sequence(self) -> bool:
         """Validate that events arrive in the expected sequence."""
-        event_types = [event.get('type') for event in self.events if event.get('type') in self.REQUIRED_EVENTS]
+        event_types = [self._extract_event_type(event) for event in self.events if self._extract_event_type(event) in self.REQUIRED_EVENTS]
         
         # Check if we have a reasonable sequence
         sequence_score = 0
@@ -302,11 +317,13 @@ class MissionCriticalEventValidator:
     
     def validate_event_content_structure(self, event: Dict, event_type: str) -> bool:
         """Validate the content structure of specific event types.
-        
-        Handles both flat event format and ServerMessage format where
-        event data is nested in 'payload' field.
-        
-        Issue #892: Fixed to handle ServerMessage format for Golden Path compatibility.
+
+        Handles three event formats for comprehensive Golden Path compatibility:
+        1. Flat format: Event data directly in event dict
+        2. ServerMessage format: Event data nested in 'payload' field (Issue #892)
+        3. Data format: Event data nested in 'data' field (Issue #973 - staging events)
+
+        This maintains backward compatibility while supporting staging environment format.
         """
         required_fields = {
             "agent_started": ["type", "user_id", "thread_id", "timestamp"],
@@ -315,22 +332,27 @@ class MissionCriticalEventValidator:
             "tool_completed": ["type", "tool_name", "results", "duration", "timestamp"],
             "agent_completed": ["type", "status", "final_response", "timestamp"]
         }
-        
+
         if event_type not in required_fields:
             return True  # No specific validation for this event type
-        
-        # Determine if this is ServerMessage format (has payload field)
-        # or flat format (event data directly in event dict)
+
+        # Determine event format and extract event data accordingly
         if "payload" in event and isinstance(event["payload"], dict):
-            # ServerMessage format: event data is in payload
+            # Format 2: ServerMessage format - event data is in payload
             event_data = event["payload"]
-            # 'type' field is at top level in ServerMessage format
             has_type = "type" in event
+            format_type = "ServerMessage"
+        elif "data" in event and isinstance(event["data"], dict):
+            # Format 3: Data format - event data is in data field (staging format)
+            event_data = event["data"]
+            has_type = "type" in event
+            format_type = "data"
         else:
-            # Flat format: event data is directly in event dict
+            # Format 1: Flat format - event data is directly in event dict
             event_data = event
             has_type = "type" in event_data
-        
+            format_type = "flat"
+
         missing_fields = []
         for field in required_fields[event_type]:
             if field == "type":
@@ -341,12 +363,11 @@ class MissionCriticalEventValidator:
                 # All other fields should be in event_data
                 if field not in event_data:
                     missing_fields.append(field)
-        
+
         if missing_fields:
-            format_type = "ServerMessage" if "payload" in event else "flat"
             self.errors.append(f"Event {event_type} ({format_type} format) missing required fields: {missing_fields}")
             return False
-        
+
         return True
     
     def generate_report(self) -> str:
