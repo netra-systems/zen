@@ -49,14 +49,13 @@ from shared.isolated_environment import get_env
 from netra_backend.app.agents.supervisor.agent_registry import (
     AgentRegistry,
     AgentLifecycleManager,
-    UserAgentSession,
-    AgentInstanceFactory
+    UserAgentSession
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 # Supporting Infrastructure
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
@@ -180,7 +179,7 @@ class TestAgentRegistryMultiUserIntegration(SSotAsyncTestCase):
     # ============================================================================
 
     @pytest.mark.integration
-    @pytest.mark.multi_user_security
+    @pytest.mark.asyncio
     async def test_agent_registry_isolated_agent_creation_per_user(self):
         """
         Test that Agent Registry creates isolated agent instances for each user.
@@ -262,7 +261,7 @@ class TestAgentRegistryMultiUserIntegration(SSotAsyncTestCase):
     # ============================================================================
 
     @pytest.mark.integration
-    @pytest.mark.performance_critical
+    @pytest.mark.asyncio
     async def test_agent_registry_concurrent_multi_user_creation(self):
         """
         Test Agent Registry under concurrent multi-user agent creation load.
@@ -384,7 +383,7 @@ class TestAgentRegistryMultiUserIntegration(SSotAsyncTestCase):
     # ============================================================================
 
     @pytest.mark.integration
-    @pytest.mark.memory_management
+    @pytest.mark.asyncio
     async def test_agent_registry_cleanup_and_memory_management(self):
         """
         Test Agent Registry cleanup and memory management across users.
@@ -519,7 +518,7 @@ class TestAgentRegistryMultiUserIntegration(SSotAsyncTestCase):
     # ============================================================================
 
     @pytest.mark.integration
-    @pytest.mark.isolation_critical
+    @pytest.mark.asyncio
     async def test_agent_registry_user_session_isolation_validation(self):
         """
         Test strict user session isolation in Agent Registry.
