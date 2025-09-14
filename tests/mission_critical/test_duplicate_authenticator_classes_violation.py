@@ -29,9 +29,9 @@ class TestDuplicateAuthenticatorClassesViolation(SSotAsyncTestCase):
     This is a business-critical test protecting $500K+ ARR chat functionality.
     """
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment for SSOT violation detection."""
-        super().setUp()
+        super().setup_method(method)
         self.target_file = "/Users/anthony/Desktop/netra-apex/netra_backend/app/websocket_core/unified_websocket_auth.py"
         self.expected_class_name = "UnifiedWebSocketAuthenticator"
     

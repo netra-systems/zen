@@ -1489,13 +1489,18 @@ class _UnifiedWebSocketManagerImplementation:
         for attempt in range(max_retries):
             # Check connection health before sending critical events
             if self.is_connection_active(user_id):
+                # Process business event to ensure proper field structure
+                processed_data = self._process_business_event(event_type, data)
+                if processed_data is None:
+                    logger.warning(f"Business event processing returned None for {event_type}, using fallback")
+                    processed_data = {"type": event_type, "timestamp": time.time(), **data}
+                
                 # Connection exists, try to send
                 message = {
-                    "type": event_type,
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "critical": True,
                     "attempt": attempt + 1 if attempt > 0 else None,
-                    **data  # Spread business data to root level
+                    **processed_data  # Spread processed business data to root level
                 }
                 
                 try:

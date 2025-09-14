@@ -214,13 +214,13 @@ class TestAgentExecutionCoreIntegration:
     def sample_state(self, auth_helper):
         """Sample agent state with real user context using UserExecutionContext."""
         # Use UserExecutionContext instead of DeepAgentState (per Issue #271 security fix)
-        # UserExecutionContext is frozen, so include all fields during creation
+        # UserExecutionContext is frozen, so set agent_context during creation
         state = UserExecutionContext(
             user_id="test-user-123",
             thread_id=f"test-thread-{uuid4()}",
             run_id=f"test-run-{uuid4()}",
             request_id=f"test-request-{uuid4()}",
-            user_request="Integration test request"  # Set during creation since frozen
+            agent_context={"user_request": "Integration test request"}  # Store in agent_context
         )
         return state
 

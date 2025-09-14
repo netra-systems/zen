@@ -32,7 +32,7 @@ from unittest.mock import patch, AsyncMock, MagicMock
 import pytest
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.integration_auth_manager import IntegrationAuthManager
+from test_framework.ssot.integration_auth_manager import IntegrationAuthServiceManager
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ class TestAuthServiceDelegation(SSotAsyncTestCase):
     def setup_method(self, method):
         super().setup_method(method)
         self.backend_path = Path("/Users/anthony/Desktop/netra-apex/netra_backend")
-        self.auth_manager = IntegrationAuthManager()
+        self.auth_manager = IntegrationAuthServiceManager()
         
     @pytest.mark.asyncio
     async def test_auth_integration_only_uses_auth_client(self):

@@ -12,15 +12,21 @@ CRITICAL COMPLIANCE:
 - Validates JWT token flow between services
 - Tests OAuth integration for user onboarding
 - Ensures session management for user retention
+- Implements graceful degradation: real service → mock → skip
 """
 
 import pytest
 import uuid
+import asyncio
+import logging
 from datetime import datetime, timezone
+from unittest.mock import AsyncMock, MagicMock
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from netra_backend.app.clients.auth_client_core import AuthClientCore
+
+logger = logging.getLogger(__name__)
 
 
 class TestAuthServiceIntegrationRealServices(SSotBaseTestCase):
