@@ -122,10 +122,12 @@ class BroadcastFunctionDiscovery:
             "broadcast_user_event",
             "broadcast_event",
             "send_broadcast",
-            "emit_broadcast"
+            "emit_broadcast",
+            "broadcast_to_users"  # Additional pattern
         ]
 
-        return any(pattern in node.name.lower() for pattern in broadcast_patterns)
+        # Direct name match (more specific)
+        return node.name in broadcast_patterns or any(pattern in node.name.lower() for pattern in broadcast_patterns)
 
     def _extract_function_info(self, node: ast.FunctionDef, module_path: str, class_name: Optional[str]) -> BroadcastFunction:
         """Extract information about a function node."""
@@ -286,10 +288,12 @@ class TestBroadcastFunctionSSotCompliance(SSotBaseTestCase):
         """
         print(f"\n=== DUPLICATE IMPLEMENTATION ANALYSIS ===")
 
+        broadcast_functions = self._get_broadcast_functions()
+
         # Check for duplicate logic patterns
         implementations = {}
 
-        for func in self.broadcast_functions:
+        for func in broadcast_functions:
             # Categorize implementation by context
             if "WebSocketEventRouter" in func.full_identifier and func.name == "broadcast_to_user":
                 implementations["singleton_router"] = func
@@ -323,16 +327,18 @@ class TestBroadcastFunctionSSotCompliance(SSotBaseTestCase):
         """
         print(f"\n=== CANONICAL FUNCTION VALIDATION ===")
 
-        if len(self.broadcast_functions) == 0:
+        broadcast_functions = self._get_broadcast_functions()
+
+        if len(broadcast_functions) == 0:
             self.fail("NO BROADCAST FUNCTION: No broadcast functions found. "
                      "System requires at least one canonical broadcast function for WebSocket events.")
 
-        if len(self.broadcast_functions) > 1:
-            self.fail(f"MULTIPLE IMPLEMENTATIONS: Found {len(self.broadcast_functions)} broadcast functions. "
+        if len(broadcast_functions) > 1:
+            self.fail(f"MULTIPLE IMPLEMENTATIONS: Found {len(broadcast_functions)} broadcast functions. "
                      f"SSOT requires exactly one canonical implementation.")
 
         # Single function found - validate it's properly canonical
-        canonical_func = self.broadcast_functions[0]
+        canonical_func = broadcast_functions[0]
 
         print(f"Canonical function: {canonical_func.full_identifier}")
         print(f"Signature: {canonical_func.signature}")
