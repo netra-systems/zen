@@ -1,0 +1,38 @@
+{
+  "total_instances": 1,
+  "completed": 0,
+  "failed": 1,
+  "running": 0,
+  "pending": 0,
+  "instances": {
+    "token-test": {
+      "name": "token-test",
+      "pid": 43036,
+      "status": "failed",
+      "start_time": 1757876837.5564091,
+      "end_time": null,
+      "output": "",
+      "error": "Timeout after 60s",
+      "total_tokens": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cached_tokens": 0,
+      "tool_calls": 0
+    }
+  },
+  "metadata": {
+    "start_datetime": "2025-09-14T12:07:17.555949",
+    "agents": [
+      "token-test"
+    ],
+    "generated_filename": "token-parse-results.json",
+    "token_usage": {
+      "total_tokens": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cached_tokens": 0,
+      "total_tool_calls": 0,
+      "cache_hit_rate": 0.0
+    }
+  }
+}
