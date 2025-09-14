@@ -694,7 +694,6 @@ pytestmark = [
     pytest.mark.integration,
     pytest.mark.websocket,
     pytest.mark.authentication,
-    pytest.mark.protocol_negotiation, 
     pytest.mark.real_services,
     pytest.mark.bug_reproduction
 ]

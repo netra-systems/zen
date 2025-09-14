@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class MockWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -35,9 +35,8 @@ class TestWebSocketConnection:
                     from netra_backend.app.main import app
                     from netra_backend.app.routes.websocket_unified import (
                     UNIFIED_WEBSOCKET_CONFIG)
-                    # SECURITY FIX: Use factory pattern instead of singleton
-                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-                    from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+                    # SSOT CONSOLIDATION: Use canonical import path only
+                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
                     from sqlalchemy.ext.asyncio import AsyncSession
                     from typing import Any, Dict
                     import asyncio

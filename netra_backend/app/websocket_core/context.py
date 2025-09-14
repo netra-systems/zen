@@ -56,8 +56,8 @@ class WebSocketContext:
     connection_id: str
     websocket: WebSocket
     user_id: str
-    thread_id: str
-    run_id: str
+    thread_id: Optional[str] = None
+    run_id: Optional[str] = None
     connected_at: datetime = field(default_factory=datetime.utcnow)
     last_activity: datetime = field(default_factory=datetime.utcnow)
     
@@ -68,12 +68,14 @@ class WebSocketContext:
             raise ValueError("connection_id is required for WebSocketContext")
         if not self.user_id:
             raise ValueError("user_id is required for WebSocketContext")
-        if not self.thread_id:
-            raise ValueError("thread_id is required for WebSocketContext")
-        if not self.run_id:
-            raise ValueError("run_id is required for WebSocketContext")
         if not self.websocket:
             raise ValueError("websocket is required for WebSocketContext")
+            
+        # Auto-generate missing IDs
+        if not self.thread_id:
+            self.thread_id = UnifiedIdGenerator.generate_base_id("thread", include_random=True, random_length=8)
+        if not self.run_id:
+            self.run_id = UnifiedIdGenerator.generate_base_id("run_execution", include_random=True, random_length=8)
         
         # Log context creation
         logger.debug(

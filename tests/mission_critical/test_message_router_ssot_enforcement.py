@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 class TestMessageRouterSSOTEnforcement(SSotBaseTestCase, unittest.TestCase):
     """Test that enforces Single Source of Truth for MessageRouter implementations."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test fixtures."""
         # Initialize SSotBaseTestCase (no super().setUp() needed)
         if hasattr(super(), 'setUp'):

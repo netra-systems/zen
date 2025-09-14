@@ -73,7 +73,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
 # REMOVED_SYNTAX_ERROR: class TestTriageAgentSSOTViolations(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test suite to identify and verify SSOT violations in TriageSubAgent."""
 
-# REMOVED_SYNTAX_ERROR: def setUp(self):
+# REMOVED_SYNTAX_ERROR: def setup_method(self, method):
     # REMOVED_SYNTAX_ERROR: """Set up test fixtures."""
     # REMOVED_SYNTAX_ERROR: self.agent = TriageSubAgent()
     # REMOVED_SYNTAX_ERROR: self.context = UserExecutionContext( )

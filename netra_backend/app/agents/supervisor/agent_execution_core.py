@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
 )
-from netra_backend.app.core.execution_tracker import get_execution_tracker, ExecutionState
+from netra_backend.app.core.agent_execution_tracker import get_execution_tracker, ExecutionState
 # DISABLED: Heartbeat hidden errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
 # from netra_backend.app.core.agent_heartbeat import AgentHeartbeat
 # DISABLED: trace_persistence module removed - functionality no longer needed
@@ -617,12 +617,28 @@ class AgentExecutionCore:
                     
                     # Transition to timeout phase
                     await self.agent_tracker.transition_state(
-                        state_exec_id, 
+                        state_exec_id,
                         AgentExecutionPhase.TIMEOUT,
                         metadata={'error': str(e), 'error_type': 'timeout'},
                         websocket_manager=self.websocket_bridge
                     )
-                    
+
+                    # CRITICAL FIX FOR ISSUE #1025: Send WebSocket error notification to users for timeout scenarios
+                    # This ensures users receive proper feedback when agents timeout, preventing hung agent appearance
+                    if self.websocket_bridge and hasattr(self.websocket_bridge, 'notify_agent_error'):
+                        try:
+                            await self.websocket_bridge.notify_agent_error(
+                                context.run_id,
+                                context.agent_name,
+                                f"Agent '{context.agent_name}' timed out after {execution_timeout}s "
+                                f"(tier: {selected_tier.value}). The AI processing exceeded the allowed time limit. "
+                                f"This may be due to complex analysis or external service delays. "
+                                f"{'Consider upgrading to Enterprise tier for extended processing time.' if selected_tier.value != 'ENTERPRISE' else 'Please contact support if this continues.'}"
+                            )
+                        except Exception as notify_error:
+                            # Don't let notification failures break agent execution flow
+                            logger.error(f"Failed to send timeout notification: {notify_error}")
+
                     # Create detailed timeout result with enhanced context and tier information
                     result = AgentExecutionResult(
                         success=False,
@@ -705,8 +721,20 @@ class AgentExecutionCore:
                         websocket_manager=self.websocket_bridge
                     )
                     
-                    # NOTE: agent_completed event is automatically sent by agent tracker during COMPLETED phase transition
-                    # No need to manually call notify_agent_completed here
+                    # CRITICAL FIX: Send agent_completed event for successful executions
+                    # The agent tracker transition does not guarantee WebSocket notification propagation
+                    if self.websocket_bridge and hasattr(self.websocket_bridge, 'notify_agent_completed'):
+                        try:
+                            await self.websocket_bridge.notify_agent_completed(
+                                run_id=context.run_id,
+                                agent_name=context.agent_name,
+                                result={"status": "completed", "success": True, "duration_ms": result.duration * 1000 if result.duration else 0},
+                                execution_time_ms=result.duration * 1000 if result.duration else 0
+                            )
+                        except Exception as e:
+                            logger.error(f"Failed to send agent_completed notification: {e}")
+                    else:
+                        logger.warning(f"WebSocket bridge not available for completion notification: agent={context.agent_name}, run_id={context.run_id}")
                     
                     # Mark execution as successful in tracker state
                     self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.COMPLETED)
@@ -741,12 +769,18 @@ class AgentExecutionCore:
                     # Removing manual call to prevent duplicate notifications
                     
                     # CRITICAL FIX: Send agent_completed event for error cases
-                    if self.websocket_bridge:
-                        await self.websocket_bridge.notify_agent_completed(
-                            run_id=context.run_id,
-                            agent_name=context.agent_name,
-                            result={"status": "completed", "success": False, "error": result.error or "Agent execution failed"}
-                        )
+                    if self.websocket_bridge and hasattr(self.websocket_bridge, 'notify_agent_completed'):
+                        try:
+                            await self.websocket_bridge.notify_agent_completed(
+                                run_id=context.run_id,
+                                agent_name=context.agent_name,
+                                result={"status": "completed", "success": False, "error": result.error or "Agent execution failed"},
+                                execution_time_ms=result.duration * 1000 if result.duration else 0
+                            )
+                        except Exception as e:
+                            logger.error(f"Failed to send agent_completed error notification: {e}")
+                    else:
+                        logger.warning(f"WebSocket bridge not available for error notification: agent={context.agent_name}, run_id={context.run_id}")
                 
                 # Finish the span
                 trace_context.finish_span(span)

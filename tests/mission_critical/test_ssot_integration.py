@@ -51,6 +51,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union, Set
 from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -272,7 +273,7 @@ class SSotIntegrationUserSimulator:
 
 
 @pytest.mark.usefixtures("isolated_test_env")
-class TestSSotIntegrationWithIsolation(IntegrationTestCase):
+class TestSSotIntegrationWithIsolation(SSotBaseTestCase):
     """
     CRITICAL: SSOT Integration testing with comprehensive isolation.
     
@@ -280,7 +281,7 @@ class TestSSotIntegrationWithIsolation(IntegrationTestCase):
     between concurrent users with zero data leakage across all integration points.
     """
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up integration test environment with strict isolation validation."""
         super().setUp()
         self.start_time = time.time()
@@ -298,7 +299,7 @@ class TestSSotIntegrationWithIsolation(IntegrationTestCase):
         # Initialize test environment manager for user isolation
         self.test_env_manager = get_test_env_manager()
         
-    def tearDown(self):
+    def teardown_method(self, method):
         """Tear down with metrics collection and mock detection."""
         duration = time.time() - self.start_time
         logger.info(f"SSOT integration isolation test {self._testMethodName} took {duration:.2f}s")

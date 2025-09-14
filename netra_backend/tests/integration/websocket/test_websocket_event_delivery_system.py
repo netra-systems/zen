@@ -54,10 +54,9 @@ from netra_backend.app.websocket_core.types import (
 from shared.types.core_types import UserID, ThreadID, ensure_user_id
 from shared.types.user_types import TestUserData
 
-# Agent types for event validation
-from netra_backend.app.agents.supervisor.types import (
-    AgentExecutionState, ToolExecutionStatus
-)
+# Agent types for event validation  
+from shared.types.execution_types import AgentExecutionState
+from netra_backend.app.schemas.core_enums import MCPToolExecutionStatus as ToolExecutionStatus
 
 # Logging
 from netra_backend.app.logging_config import central_logger

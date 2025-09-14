@@ -26,7 +26,7 @@ from typing import List, Dict, Any
 class TestReportingAgentSSOTJSONCompliance(SSotBaseTestCase):
     """Mission critical tests detecting SSOT violations in ReportingSubAgent JSON handling."""
     
-    def setUp(self):
+    def setup_method(self, method):
         # Use absolute paths from the test framework directory structure
         self.reporting_agent_path = Path(__file__).parent.parent.parent / "netra_backend" / "app" / "agents" / "reporting_sub_agent.py"
         self.unified_json_handler_path = Path(__file__).parent.parent.parent / "netra_backend" / "app" / "core" / "serialization" / "unified_json_handler.py"

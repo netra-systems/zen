@@ -32,7 +32,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 class TestExecutionEngineSSotEnforcement(SSotBaseTestCase):
     """Validates ExecutionEngine SSOT compliance and prevents legacy adapter usage."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up SSOT validation test environment."""
         super().setUp()
         self.project_root = Path(__file__).parent.parent.parent

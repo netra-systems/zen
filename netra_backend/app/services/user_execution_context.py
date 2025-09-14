@@ -34,7 +34,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from shared.isolated_environment import IsolatedEnvironment
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
     from fastapi import Request
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class InvalidContextError(Exception):

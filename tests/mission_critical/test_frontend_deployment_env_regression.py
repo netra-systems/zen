@@ -45,7 +45,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
     # REMOVED_SYNTAX_ERROR: '''
 
     # REMOVED_SYNTAX_ERROR: @classmethod
-# REMOVED_SYNTAX_ERROR: def setUpClass(cls):
+# REMOVED_SYNTAX_ERROR: def setup_class(cls):
     # REMOVED_SYNTAX_ERROR: """Define the MANDATORY environment variables required for frontend."""
     # REMOVED_SYNTAX_ERROR: cls.CRITICAL_FRONTEND_VARS = { )
     # REMOVED_SYNTAX_ERROR: "NEXT_PUBLIC_ENVIRONMENT": { )

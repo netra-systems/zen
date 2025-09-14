@@ -24,6 +24,15 @@ from test_framework.ssot.websocket_auth_helper import (
     WebSocketAuthHelper,
 )
 
+# Import types that tests might need - Issue #971 fix
+from netra_backend.app.websocket_core.types import (
+    ConnectionMetadata,
+    AgentEvent,
+    WebSocketMessage,
+    MessageType,
+    WebSocketConnectionState,
+)
+
 # Create WebSocketTestUtility as an alias that combines functionality
 class WebSocketTestUtility(WebSocketBridgeTestHelper):
     """
@@ -75,4 +84,10 @@ __all__ = [
     "WebSocketTestManager",  # Alias for integration tests
     "WebSocketBridgeTestHelper",
     "WebSocketAuthHelper",
+    # Types that tests need - Issue #971 fix
+    "ConnectionMetadata",
+    "AgentEvent",
+    "WebSocketMessage",
+    "MessageType",
+    "WebSocketConnectionState",
 ]

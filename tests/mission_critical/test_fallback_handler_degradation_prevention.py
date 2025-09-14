@@ -31,6 +31,7 @@ from typing import Dict, List, Set, Any, Optional, Tuple
 from unittest.mock import patch, MagicMock
 import threading
 import re
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 
 # CRITICAL: Add project root to Python path for imports  
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -588,7 +589,7 @@ class WebSocketTestClient:
 @pytest.mark.mission_critical
 @pytest.mark.real_services
 @pytest.mark.fallback_prevention
-class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
+class TestFallbackHandlerDegradationPrevention(SSotBaseTestCase):
     """
     Mission Critical Test Suite: Fallback Handler Degradation Prevention
     

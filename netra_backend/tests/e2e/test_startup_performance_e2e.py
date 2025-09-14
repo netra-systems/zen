@@ -31,6 +31,7 @@ CRITICAL REQUIREMENTS:
 
 import asyncio
 import gc
+import json
 import logging
 import memory_profiler
 import os

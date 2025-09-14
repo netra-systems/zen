@@ -11,7 +11,7 @@ CRITICAL PURPOSE: These tests detect the resource leak scenario identified in GC
 where users hit the 20 manager limit due to insufficient cleanup timing and coordination.
 
 PRODUCTION-READY IMPROVEMENTS:
- PASS:  REAL WEBSOCKET COMPONENTS: Replaced AsyncMock with TestWebSocketConnection for authentic testing
+ PASS:  REAL WEBSOCKET COMPONENTS: Replaced AsyncMock with MockWebSocketConnection for authentic testing
  PASS:  ENVIRONMENT-AWARE CONFIGURATION: TestConfiguration automatically adjusts timeouts for CI/GitHub Actions
  PASS:  RACE CONDITION FIXES: Thread-safe isolation key lookup with retry logic and object identity checks  
  PASS:  MEMORY LEAK DETECTION: Real memory usage tracking with psutil and configurable thresholds
@@ -24,7 +24,7 @@ Target Scenarios:
 4. Rapid connection cycles stress test (CI=50 cycles/20s, Test=100 cycles/30s)
 
 Test Architecture:
-- Uses REAL WebSocket test components (TestWebSocketConnection) - NO MOCKING
+- Uses REAL WebSocket test components (MockWebSocketConnection) - NO MOCKING
 - Measures actual timing and memory resource usage with psutil
 - Environment-aware configuration (CI, GitHub Actions, Test, Development, Staging, Production)
 - Race condition protection with thread-safe manager lookup
@@ -68,7 +68,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketConnection:
+class MockWebSocketConnection:
     """Real test WebSocket connection component to replace AsyncMock usage."""
     
     def __init__(self, connection_id: str):
@@ -417,7 +417,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
             user_id = f"test-user-{numeric_suffix}"
         
         # Create real test WebSocket component instead of AsyncMock
-        test_websocket = TestWebSocketConnection(connection_id)
+        test_websocket = MockWebSocketConnection(connection_id)
         
         return WebSocketConnection(
             connection_id=connection_id,

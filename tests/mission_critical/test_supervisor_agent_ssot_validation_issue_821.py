@@ -27,7 +27,7 @@ class TestSupervisorAgentSSOTValidation(SSotBaseTestCase):
     - No legacy imports or references remain
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment."""
         super().setUp()
         self.ssot_module_path = "netra_backend.app.agents.supervisor_ssot"
