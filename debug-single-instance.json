@@ -1,0 +1,11 @@
+{
+  "instances": [
+    {
+      "command": "/refreshgardener",
+      "name": "refreshgardener-debug",
+      "description": "Debug single refreshgardener instance",
+      "permission_mode": "acceptEdits",
+      "output_format": "json"
+    }
+  ]
+}

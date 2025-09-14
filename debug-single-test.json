@@ -1,0 +1,11 @@
+{
+  "instances": [
+    {
+      "command": "/refreshgardener",
+      "name": "debug-test",
+      "description": "Debug test for token parsing",
+      "permission_mode": "acceptEdits",
+      "output_format": "json"
+    }
+  ]
+}

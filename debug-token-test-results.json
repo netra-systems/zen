@@ -1,0 +1,38 @@
+{
+  "total_instances": 1,
+  "completed": 0,
+  "failed": 1,
+  "running": 0,
+  "pending": 0,
+  "instances": {
+    "debug-test": {
+      "name": "debug-test",
+      "pid": 10430,
+      "status": "failed",
+      "start_time": 1757876583.910389,
+      "end_time": null,
+      "output": "",
+      "error": "Timeout after 120s",
+      "total_tokens": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cached_tokens": 0,
+      "tool_calls": 0
+    }
+  },
+  "metadata": {
+    "start_datetime": "2025-09-14T12:03:03.909864",
+    "agents": [
+      "debug-test"
+    ],
+    "generated_filename": "debug-token-test-results.json",
+    "token_usage": {
+      "total_tokens": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cached_tokens": 0,
+      "total_tool_calls": 0,
+      "cache_hit_rate": 0.0
+    }
+  }
+}
