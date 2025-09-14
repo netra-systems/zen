@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "critical_config",
-    "generated_at": "2025-09-13T09:21:34.657125",
-    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
+    "generated_at": "2025-09-13T18:49:19.601605",
+    "root_directory": "C:\\GitHub\\netra-apex",
     "total_literals": 11
   },
   "literals": {
@@ -32,11 +32,11 @@
         "netra_backend/app/auth_integration/auth_permissiveness.py:156",
         "netra_backend/app/auth_integration/auth_permissiveness.py:287",
         "netra_backend/app/auth_integration/auth_permissiveness.py:441",
-        "netra_backend/app/auth_integration/auth_permissiveness.py:485",
-        "netra_backend/app/auth_integration/auth_permissiveness.py:533",
-        "netra_backend/app/auth_integration/auth_permissiveness.py:606",
-        "netra_backend/app/auth_integration/auth_permissiveness.py:689",
-        "netra_backend/app/auth_integration/auth_permissiveness.py:714",
+        "netra_backend/app/auth_integration/auth_permissiveness.py:488",
+        "netra_backend/app/auth_integration/auth_permissiveness.py:536",
+        "netra_backend/app/auth_integration/auth_permissiveness.py:615",
+        "netra_backend/app/auth_integration/auth_permissiveness.py:698",
+        "netra_backend/app/auth_integration/auth_permissiveness.py:723",
         "netra_backend/app/clients/auth_client_core.py:318"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
@@ -48,8 +48,8 @@
         "netra_backend/app/core/auth_startup_validator.py:294",
         "netra_backend/app/core/config_dependencies.py:567",
         "netra_backend/app/core/config_dependencies.py:699",
-        "netra_backend/app/schemas/config.py:1031",
-        "netra_backend/app/schemas/config.py:1223",
+        "netra_backend/app/schemas/config.py:1129",
+        "netra_backend/app/schemas/config.py:1321",
         "auth_service/auth_core/config.py:128",
         "scripts/audit_staging_oauth_secrets.py:106",
         "scripts/demonstrate_config_protection.py:94",
@@ -65,8 +65,8 @@
         "netra_backend/app/core/auth_startup_validator.py:295",
         "netra_backend/app/core/config_dependencies.py:692",
         "netra_backend/app/core/config_dependencies.py:573",
-        "netra_backend/app/schemas/config.py:1032",
-        "netra_backend/app/schemas/config.py:1226",
+        "netra_backend/app/schemas/config.py:1130",
+        "netra_backend/app/schemas/config.py:1324",
         "auth_service/auth_core/config.py:140",
         "scripts/audit_staging_oauth_secrets.py:107",
         "scripts/environment_validator.py:286",
@@ -104,8 +104,8 @@
         "scripts/validate_staging_urls.py:67",
         "scripts/validate_staging_urls.py:332",
         "scripts/verify_cold_start.py:142",
-        "shared/isolated_environment.py:1747",
-        "shared/isolated_environment.py:1776"
+        "shared/isolated_environment.py:1770",
+        "shared/isolated_environment.py:1799"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     },
@@ -119,9 +119,9 @@
         "scripts/scan_string_literals.py:63",
         "scripts/validate_staging_urls.py:76",
         "scripts/validate_staging_urls.py:333",
-        "shared/isolated_environment.py:1749",
-        "shared/isolated_environment.py:1778",
-        "shared/isolated_environment.py:1868"
+        "shared/isolated_environment.py:1772",
+        "shared/isolated_environment.py:1801",
+        "shared/isolated_environment.py:1891"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     },
@@ -133,8 +133,8 @@
         "scripts/deploy_to_gcp_actual.py:298",
         "scripts/scan_string_literals.py:64",
         "scripts/staging_demo_setup.py:86",
-        "shared/isolated_environment.py:1750",
-        "shared/isolated_environment.py:1869"
+        "shared/isolated_environment.py:1773",
+        "shared/isolated_environment.py:1892"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     },
