@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
 """
 Claude Code Instance Orchestrator
-Simple orchestrator for running multiple Claude Code instances in headless mode,
+Simple orchestrator for running 3 Claude Code instances in headless mode,
 each executing specific slash commands.
-
-KEY ARCHITECTURE:
-- BACKGROUND DATA COLLECTION: ALL output is captured in full, regardless of display settings
-- VISUAL DISPLAY: Separate truncation and filtering for console output only
-- COMPLETE OUTPUT SAVED: Full responses available in JSON output file
 
 Multi-platform support with enhanced Mac compatibility for local directories.
 
@@ -21,9 +16,6 @@ Auto runs a set of parallel claude code instance commands
 Saves having to manually sping up terminal windows
 Path towards integration and automation
 collects more data than human readable output, e.g. token use, tool use names etc
-
-IMPORTANT: Visual truncation settings (--max-line-length, --max-console-lines) only affect
-console display. All complete output is always captured and saved to the output file.
 
 Usage Examples:
   python3 claude-instance-orchestrator.py --workspace ~/my-project --dry-run
@@ -393,27 +385,18 @@ class ClaudeInstanceOrchestrator:
         recent_lines_buffer = []
         line_count = 0
 
-        def format_instance_line_for_display(content: str, prefix: str = "") -> str:
-            """Format a line for VISUAL DISPLAY ONLY - does not affect background data collection"""
-            # Create a copy for display formatting (original content preserved in status.output)
-            display_content = content
-
-            # Truncate ONLY for visual display - background keeps full content
-            if len(display_content) > self.max_line_length:
-                # Smart truncation for display - preserve important content
-                if any(keyword in display_content.lower() for keyword in ['tokens', 'tool', 'completed', 'error', 'success']):
-                    # Keep important lines longer for display
-                    if len(display_content) > self.max_line_length * 2:
-                        display_content = display_content[:self.max_line_length*2-3] + "..."
-                else:
-                    display_content = display_content[:self.max_line_length-3] + "..."
+        def format_instance_line(content: str, prefix: str = "") -> str:
+            """Format a line with clear instance separation and truncation"""
+            # Truncate content to max_line_length
+            if len(content) > self.max_line_length:
+                content = content[:self.max_line_length-3] + "..."
 
             # Create clear visual separation
             instance_header = f"╔═[{name}]" + "═" * (20 - len(name) - 4) if len(name) < 16 else f"╔═[{name}]═"
             if prefix:
                 instance_header += f" {prefix} "
 
-            return f"{instance_header}\n║ {display_content}\n╚" + "═" * (len(instance_header) - 1)
+            return f"{instance_header}\n║ {content}\n╚" + "═" * (len(instance_header) - 1)
 
         async def read_stream(stream, prefix):
             nonlocal line_count
@@ -428,44 +411,41 @@ class ClaudeInstanceOrchestrator:
                     # Clean the line
                     clean_line = line_str.strip()
 
-                    # FIRST: Always accumulate FULL output in status (background data collection)
-                    # This happens REGARDLESS of display settings - captures everything
-                    if prefix == "STDOUT":
-                        status.output += line_str  # Full line with all content
-                        # Parse token usage from the COMPLETE line
-                        self._parse_token_usage(clean_line, status)
-                    else:
-                        status.error += line_str  # Full error content
-
-                    # SECOND: Handle visual display (separate from data collection)
-                    # Format line for display only (doesn't affect background data)
-                    display_line = format_instance_line_for_display(clean_line, prefix)
+                    # Add to rolling buffer with formatted display
+                    display_line = format_instance_line(clean_line, prefix)
                     recent_lines_buffer.append(display_line)
 
-                    # Keep only the most recent display lines (visual buffer management)
+                    # Keep only the most recent lines
                     if len(recent_lines_buffer) > self.max_console_lines:
                         recent_lines_buffer.pop(0)
 
-                    # Determine if this line should be shown (visual display decision)
+                    # Only show periodic updates to prevent spam
+                    # Show every 10th line, or important lines (errors, completions)
+                    # Respect quiet mode
                     if self.max_console_lines > 0:
                         should_display = (
-                            line_count % 5 == 0 or  # Every 5th line (increased frequency)
+                            line_count % 10 == 0 or  # Every 10th line
                             prefix == "STDERR" or    # All error lines
                             "completed" in clean_line.lower() or
                             "error" in clean_line.lower() or
                             "failed" in clean_line.lower() or
-                            "success" in clean_line.lower() or
-                            "tokens" in clean_line.lower() or  # Show token information
-                            "tool" in clean_line.lower() or    # Show tool usage
-                            len(clean_line) > 50  # Show substantial content
+                            "success" in clean_line.lower()
                         )
 
                         if should_display:
                             print(f"\n{display_line}\n", flush=True)
                     elif prefix == "STDERR":
-                        # In quiet mode, still show errors (but background still captures all)
-                        error_display = format_instance_line_for_display(clean_line, "ERROR")
+                        # In quiet mode, still show errors
+                        error_display = format_instance_line(clean_line, "ERROR")
                         print(f"\n{error_display}\n", flush=True)
+
+                    # Accumulate output in status (keep full output for saving)
+                    if prefix == "STDOUT":
+                        status.output += line_str
+                        # Parse token usage from Claude output if present
+                        self._parse_token_usage(clean_line, status)
+                    else:
+                        status.error += line_str
             except Exception as e:
                 logger.error(f"Error reading {prefix} for instance {name}: {e}")
 
@@ -806,6 +786,11 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
     """Create default instance configurations"""
     return [
         InstanceConfig(
+            command="/gitcommitgardener",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
             command="/createtestsv2 agent goldenpath messages work, unit",
             permission_mode="acceptEdits",
             output_format=output_format
@@ -827,6 +812,16 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
         ),
         InstanceConfig(
             command="/ssotgardener message routing",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/ssotgardener websockets or auth",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/ssotgardener tests",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
@@ -856,12 +851,12 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
             output_format=output_format
         ),
         InstanceConfig(
-            command="/gitissueprogressorv3 agents p0",
+            command="/gitissueprogressorv3 agents",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            command="/gitissueprogressorv3 tests p0",
+            command="/gitissueprogressorv3 goldenpath",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
@@ -882,6 +877,16 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
         ),
         InstanceConfig(
             command="/gcploggardener",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/ssotgardener removing legacy",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/gitissueprogressorv3 removing legacy",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
@@ -947,14 +952,14 @@ async def main():
                        help="Output format for Claude instances (default: stream-json)")
     parser.add_argument("--timeout", type=int, default=10000,
                        help="Timeout in seconds for each instance (default: 10000)")
-    parser.add_argument("--max-console-lines", type=int, default=10,
-                       help="Maximum recent lines to show per instance on console for DISPLAY ONLY - all output always captured (default: 10)")
+    parser.add_argument("--max-console-lines", type=int, default=5,
+                       help="Maximum recent lines to show per instance on console (default: 5)")
     parser.add_argument("--quiet", action="store_true",
                        help="Minimize console output, show only errors and final summaries")
     parser.add_argument("--startup-delay", type=float, default=5.0,
                        help="Delay in seconds between launching each instance (default: 5.0)")
-    parser.add_argument("--max-line-length", type=int, default=1500,
-                       help="Maximum characters per line in console DISPLAY ONLY - full content always saved (default: 1500)")
+    parser.add_argument("--max-line-length", type=int, default=800,
+                       help="Maximum characters per line in console output (default: 500)")
     parser.add_argument("--status-report-interval", type=int, default=5,
                        help="Seconds between rolling status reports (default: 30)")
 
@@ -1092,9 +1097,7 @@ async def main():
             print(f"  Tool Calls: {status.tool_calls}")
 
         if status.output:
-            # Show preview of FULL captured output (not truncated)
-            output_preview = status.output[:500].replace('\n', ' ').strip()
-            print(f"  Output Preview: {output_preview}...")
+            print(f"  Output Preview: {status.output[:200]}...")
 
         if status.error:
             print(f"  Errors: {status.error[:200]}...")
