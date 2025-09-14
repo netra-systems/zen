@@ -14,7 +14,7 @@ import time
 from unittest.mock import Mock, AsyncMock, MagicMock
 
 
-class TestWebSocketConnection:
+class MockWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
@@ -50,7 +50,7 @@ class TestCriticalWiring:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
 
             # Create mock components
-            websocket = TestWebSocketConnection()
+            websocket = MockWebSocketConnection()
 
             # Create user context for factory pattern
             user_context = UserExecutionContext(
@@ -84,7 +84,7 @@ class TestCriticalWiring:
 
             # Create mock components
             mock_llm = Mock(spec=LLMManager)
-            websocket = TestWebSocketConnection()
+            websocket = MockWebSocketConnection()
 
             # Create user context for factory pattern
             user_context = UserExecutionContext(
@@ -181,7 +181,7 @@ class TestStartupSequenceSmoke:
                     phases_called.append(name)
                     # Set required state attributes
                     if name in ["phase1", "phase2"]:
-                        app.state.websocket = TestWebSocketConnection()
+                        app.state.websocket = MockWebSocketConnection()
                     await asyncio.sleep(0)
                 return mock
 

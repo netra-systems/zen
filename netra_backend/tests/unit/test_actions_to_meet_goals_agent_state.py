@@ -1,7 +1,8 @@
 """Test ActionsToMeetGoalsSubAgent state dependency handling."""
 import pytest
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from netra_backend.app.schemas.agent_models import DeepAgentState, OptimizationsResult, ActionPlanResult
+from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.agents.state import OptimizationsResult, ActionPlanResult
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 from netra_backend.app.agents.base.errors import ValidationError
 from netra_backend.app.agents.base.interface import ExecutionContext
