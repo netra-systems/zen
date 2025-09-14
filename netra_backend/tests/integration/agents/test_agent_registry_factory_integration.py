@@ -45,9 +45,10 @@ from shared.isolated_environment import get_env
 
 # Agent Registry and Factory imports
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, AgentLifecycleManager, UserAgentSession
-from netra_backend.app.agents.execution_engine_unified_factory import (
-    UnifiedExecutionEngineFactory as ExecutionEngineFactory,
-    EngineConfig
+from netra_backend.app.agents.supervisor.execution_engine_factory import (
+    ExecutionEngineFactory,
+    ExecutionEngineFactoryError,
+    configure_execution_engine_factory
 )
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
     AgentInstanceFactory,
@@ -159,12 +160,9 @@ class TestAgentRegistryFactoryIntegration(SSotAsyncTestCase):
     @pytest.fixture
     async def execution_engine_factory(self, mock_websocket_bridge):
         """Real execution engine factory for testing."""
-        # UnifiedExecutionEngineFactory is a classmethod-based factory
-        factory = ExecutionEngineFactory
-        # Configure the factory with the websocket bridge
-        factory.configure(websocket_bridge=mock_websocket_bridge)
+        factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
         yield factory
-        # No shutdown method for the class-based factory
+        await factory.shutdown()
     
     def create_user_test_data(self, user_id: str) -> UserTestData:
         """Create test data for a specific user."""
