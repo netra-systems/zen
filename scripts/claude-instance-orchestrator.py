@@ -886,7 +886,7 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
             command="/gitcommitgardener",
             permission_mode="acceptEdits",
             output_format=output_format
-        ),
+        )
         InstanceConfig(
             command="/ultimate-test-deploy-loop",
             permission_mode="acceptEdits",
@@ -907,17 +907,17 @@ async def main():
     parser.add_argument("--inspect-command", type=str, help="Inspect a specific slash command and exit")
     parser.add_argument("--output-format", choices=["json", "stream-json"], default="stream-json",
                        help="Output format for Claude instances (default: stream-json)")
-    parser.add_argument("--timeout", type=int, default=300,
-                       help="Timeout in seconds for each instance (default: 300)")
+    parser.add_argument("--timeout", type=int, default=10000,
+                       help="Timeout in seconds for each instance (default: 10000)")
     parser.add_argument("--max-console-lines", type=int, default=5,
                        help="Maximum recent lines to show per instance on console (default: 5)")
     parser.add_argument("--quiet", action="store_true",
                        help="Minimize console output, show only errors and final summaries")
-    parser.add_argument("--startup-delay", type=float, default=1.0,
+    parser.add_argument("--startup-delay", type=float, default=2.0,
                        help="Delay in seconds between launching each instance (default: 1.0)")
-    parser.add_argument("--max-line-length", type=int, default=500,
+    parser.add_argument("--max-line-length", type=int, default=800,
                        help="Maximum characters per line in console output (default: 500)")
-    parser.add_argument("--status-report-interval", type=int, default=30,
+    parser.add_argument("--status-report-interval", type=int, default=5,
                        help="Seconds between rolling status reports (default: 30)")
 
     args = parser.parse_args()
