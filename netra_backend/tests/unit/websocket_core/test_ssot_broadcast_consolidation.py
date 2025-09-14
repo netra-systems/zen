@@ -200,7 +200,7 @@ class TestSSOTBroadcastConsolidation:
         ISSUE #1058: This test demonstrates that SSOT service provides all
         capabilities previously scattered across 3 duplicate implementations.
         """
-        user_id = "duplicate_elimination_user"
+        user_id = "duplicate_user_123"
         ssot_service = WebSocketBroadcastService(mock_websocket_manager)
 
         # Test SSOT provides ALL legacy capabilities in ONE service
@@ -292,7 +292,7 @@ class TestSSOTBroadcastConsolidation:
         ISSUE #1058: SSOT consolidation should include rollback mechanisms
         for safe production deployment vs legacy implementations.
         """
-        user_id = "rollback_test_user"
+        user_id = "rollback_user_123"
 
         # Test feature flags can be disabled for rollback scenarios
 
@@ -330,7 +330,7 @@ class TestSSOTBroadcastConsolidation:
         ISSUE #1058: SSOT should provide BETTER error handling than scattered
         implementations by centralizing error management and recovery.
         """
-        user_id = "error_test_user"
+        user_id = "error_user_123"
 
         # Test various error scenarios
 
@@ -406,7 +406,7 @@ class TestSSOTBroadcastConsolidation:
         ISSUE #1058: SSOT should handle concurrent operations better than
         multiple separate broadcast implementations.
         """
-        user_ids = [f"concurrent_user_{i}" for i in range(5)]
+        user_ids = [f"concurrent_user_{i}{i}{i}" for i in range(5)]
 
         # Create concurrent broadcast tasks
         async def broadcast_task(user_id: str, task_id: int):
@@ -460,7 +460,7 @@ class TestSSOTConsolidationIntegrationDemo:
         ssot_service = create_broadcast_service(mock_manager)
 
         # Demonstrate consolidated capabilities
-        demo_user = "integration_demo_user"
+        demo_user = "demo_user_123"
 
         # Capability 1: Agent event broadcasting (was WebSocketEventRouter)
         agent_event = {

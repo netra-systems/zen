@@ -1,22 +1,22 @@
 #!/usr/bin/env python
-# REMOVED_SYNTAX_ERROR: '''Comprehensive Message Flow Test Suite for Netra Apex
+'''Comprehensive Message Flow Test Suite for Netra Apex
 
-# REMOVED_SYNTAX_ERROR: CRITICAL: This test suite validates the entire message pipeline through the Netra stack.
-# REMOVED_SYNTAX_ERROR: Tests 20+ message types flowing from Frontend  ->  Backend  ->  WebSocket  ->  Agent  ->  Tool  ->  Result  ->  Frontend
+CRITICAL: This test suite validates the entire message pipeline through the Netra stack.
+Tests 20+ message types flowing from Frontend  ->  Backend  ->  WebSocket  ->  Agent  ->  Tool  ->  Result  ->  Frontend
 
-# REMOVED_SYNTAX_ERROR: Business Value Justification:
-    # REMOVED_SYNTAX_ERROR: - Segment: Platform/Internal & All User Segments
-    # REMOVED_SYNTAX_ERROR: - Business Goal: System Reliability & User Experience
-    # REMOVED_SYNTAX_ERROR: - Value Impact: Ensures 100% message delivery reliability for core chat functionality
-    # REMOVED_SYNTAX_ERROR: - Strategic Impact: Prevents message loss that would break user trust and cause churn
+Business Value Justification:
+- Segment: Platform/Internal & All User Segments
+- Business Goal: System Reliability & User Experience
+- Value Impact: Ensures 100% message delivery reliability for core chat functionality
+- Strategic Impact: Prevents message loss that would break user trust and cause churn
 
-    # REMOVED_SYNTAX_ERROR: Requirements:
-        # REMOVED_SYNTAX_ERROR: - Tests 20+ message types (text, code, JSON, markdown, large, small, unicode, etc.)
-        # REMOVED_SYNTAX_ERROR: - Validates complete stack flow and transformations
-        # REMOVED_SYNTAX_ERROR: - Tests persistence, corruption detection, and performance
-        # REMOVED_SYNTAX_ERROR: - Uses real services only (no mocks per CLAUDE.md)
-        # REMOVED_SYNTAX_ERROR: - Meets performance requirements: <100ms processing, <500ms E2E, <2s batch, <5s recovery
-        # REMOVED_SYNTAX_ERROR: '''
+Requirements:
+- Tests 20+ message types (text, code, JSON, markdown, large, small, unicode, etc.)
+- Validates complete stack flow and transformations
+- Tests persistence, corruption detection, and performance
+- Uses real services only (no mocks per CLAUDE.md)
+- Meets performance requirements: <100ms processing, <500ms E2E, <2s batch, <5s recovery
+'''
 
         # REMOVED_SYNTAX_ERROR: import asyncio
         # REMOVED_SYNTAX_ERROR: import json
@@ -543,7 +543,7 @@
 # REMOVED_SYNTAX_ERROR: if (typeof handler !== 'function') { )
 # REMOVED_SYNTAX_ERROR: throw new Error('Handler must be a function');
 
-this.handlers.set(messageType, handler);
+# REMOVED_SYNTAX_ERROR: this.handlers.set(messageType, handler);
 
 
 # REMOVED_SYNTAX_ERROR: async processMessage(message) { )
@@ -560,15 +560,15 @@ this.handlers.set(messageType, handler);
 # FIXED: return outside function
 pass
 # REMOVED_SYNTAX_ERROR: success: true,
-result,
-timestamp: Date.now()
+# REMOVED_SYNTAX_ERROR: result,
+# REMOVED_SYNTAX_ERROR: # REMOVED_SYNTAX_ERROR: timestamp: Date.now()
 # REMOVED_SYNTAX_ERROR: };
 # REMOVED_SYNTAX_ERROR: } catch (error) {
 # FIXED: return outside function
 pass
 # REMOVED_SYNTAX_ERROR: success: false,
 # REMOVED_SYNTAX_ERROR: error: error.message,
-timestamp: Date.now()
+# REMOVED_SYNTAX_ERROR: timestamp: Date.now()
 # REMOVED_SYNTAX_ERROR: };
 
 
@@ -576,8 +576,8 @@ timestamp: Date.now()
 # REMOVED_SYNTAX_ERROR: // Queue message for batch processing
 # REMOVED_SYNTAX_ERROR: queueMessage(message) { )
 # REMOVED_SYNTAX_ERROR: this.messageQueue.push({ ))
-passmessage,
-queuedAt: Date.now()
+# REMOVED_SYNTAX_ERROR: passmessage,
+# REMOVED_SYNTAX_ERROR: queuedAt: Date.now()
 # REMOVED_SYNTAX_ERROR: });
 
 

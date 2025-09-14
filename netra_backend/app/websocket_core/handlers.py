@@ -1696,13 +1696,12 @@ class MessageRouter:
             "production_stats": self.get_stats()
         }
     
-    # Quality Handler Integration Stubs (for Phase 2 preparation)
+    # Quality Handler Integration (Phase 2 Implementation)
     async def handle_quality_message(self, user_id: str, message: Dict[str, Any]) -> None:
-        """Handle quality-related messages (Phase 2 integration stub).
+        """Handle quality-related messages with integrated quality router functionality.
         
-        PHASE 1 PREPARATION: Stub for quality message router integration
-        Currently delegates to standard message routing.
-        Will be enhanced in Phase 2 to integrate quality handlers.
+        PHASE 2 IMPLEMENTATION: Full integration of quality message router functionality
+        Routes to appropriate quality handlers based on message type.
         
         Args:
             user_id: User ID for the message
@@ -1711,54 +1710,230 @@ class MessageRouter:
         # Extract and preserve context IDs for session continuity
         thread_id = message.get("thread_id")
         run_id = message.get("run_id")
+        message_type = message.get("type")
         
-        logger.debug(f"Quality message routing (Phase 1 stub) - user: {user_id}, "
-                    f"thread_id: {thread_id}, run_id: {run_id}")
+        logger.info(f"Quality message routing - user: {user_id}, type: {message_type}, "
+                   f"thread_id: {thread_id}, run_id: {run_id}")
         
-        # Phase 1: Delegate to standard routing for now
-        # Phase 2: Will integrate specialized quality handlers
+        # Ensure quality handlers are initialized
+        if not hasattr(self, '_quality_handlers'):
+            await self._initialize_quality_handlers()
+        
+        # Route to appropriate quality handler
+        if self._is_quality_message_type(message_type):
+            await self._route_quality_message(user_id, message, message_type)
+        else:
+            logger.warning(f"Unknown quality message type: {message_type}")
+            await self._handle_unknown_quality_message(user_id, message_type)
+    
+    async def _initialize_quality_handlers(self) -> None:
+        """Initialize quality message handlers."""
         try:
-            # Convert to WebSocket format and delegate to standard routing
-            from fastapi import WebSocket
-            from unittest.mock import Mock
+            # Lazy import to avoid circular dependencies
+            from netra_backend.app.services.websocket.quality_metrics_handler import QualityMetricsHandler
+            from netra_backend.app.services.websocket.quality_alert_handler import QualityAlertHandler
+            from netra_backend.app.services.websocket.quality_validation_handler import QualityValidationHandler
+            from netra_backend.app.services.websocket.quality_report_handler import QualityReportHandler
+            from netra_backend.app.quality_enhanced_start_handler import QualityEnhancedStartAgentHandler
+            from netra_backend.app.services.quality_gate_service import QualityGateService
+            from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
             
-            # Create mock WebSocket for compatibility
-            mock_websocket = Mock(spec=WebSocket)
-            mock_websocket.send_json = Mock()
+            # Create service dependencies - use minimal initialization for now
+            # In production, these would come from dependency injection
+            quality_gate_service = QualityGateService()
+            monitoring_service = QualityMonitoringService()
             
-            # Route through standard message handler
-            await self.route_message(user_id, mock_websocket, message)
+            # Initialize quality handlers mapping
+            self._quality_handlers = {
+                "get_quality_metrics": QualityMetricsHandler(monitoring_service),
+                "subscribe_quality_alerts": QualityAlertHandler(monitoring_service),
+                "start_agent": QualityEnhancedStartAgentHandler(),
+                "validate_content": QualityValidationHandler(quality_gate_service),
+                "generate_quality_report": QualityReportHandler(monitoring_service)
+            }
+            
+            logger.info(f"Initialized {len(self._quality_handlers)} quality handlers")
+            
+        except ImportError as e:
+            logger.error(f"Failed to import quality handlers: {e}")
+            self._quality_handlers = {}
+        except Exception as e:
+            logger.error(f"Failed to initialize quality handlers: {e}")
+            self._quality_handlers = {}
+    
+    def _is_quality_message_type(self, message_type: str) -> bool:
+        """Check if message type is a quality message."""
+        if not hasattr(self, '_quality_handlers') or not self._quality_handlers:
+            return False
+        return message_type in self._quality_handlers
+    
+    async def _route_quality_message(self, user_id: str, message: Dict[str, Any], message_type: str) -> None:
+        """Route message to appropriate quality handler."""
+        try:
+            handler = self._quality_handlers[message_type]
+            payload = message.get("payload", {})
+            
+            # Preserve context IDs for session continuity
+            if message.get("thread_id"):
+                payload["thread_id"] = message["thread_id"]
+            if message.get("run_id"):
+                payload["run_id"] = message["run_id"]
+            
+            # Call quality handler
+            await handler.handle(user_id, payload)
+            logger.info(f"Successfully routed quality message {message_type} to {handler.__class__.__name__}")
             
         except Exception as e:
-            logger.error(f"Error in quality message routing stub: {e}")
+            logger.error(f"Error routing quality message {message_type}: {e}")
+            await self._handle_quality_handler_error(user_id, message_type, e)
+    
+    async def _handle_unknown_quality_message(self, user_id: str, message_type: str) -> None:
+        """Handle unknown quality message type."""
+        logger.warning(f"Unknown quality message type: {message_type}")
+        try:
+            from netra_backend.app.dependencies import get_user_execution_context
+            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            
+            error_message = f"Unknown quality message type: {message_type}"
+            user_context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
+            )
+            manager = await create_websocket_manager(user_context)
+            await manager.send_to_user({"type": "error", "message": error_message})
+        except Exception as e:
+            logger.error(f"Failed to send unknown quality message error to user {user_id}: {e}")
+    
+    async def _handle_quality_handler_error(self, user_id: str, message_type: str, error: Exception) -> None:
+        """Handle quality handler errors."""
+        try:
+            from netra_backend.app.dependencies import get_user_execution_context
+            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            
+            error_message = f"Quality handler error for {message_type}: {str(error)}"
+            user_context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
+            )
+            manager = await create_websocket_manager(user_context)
+            await manager.send_to_user({"type": "error", "message": error_message})
+        except Exception as e:
+            logger.error(f"Failed to send quality handler error to user {user_id}: {e}")
     
     async def broadcast_quality_update(self, update: Dict[str, Any]) -> None:
-        """Broadcast quality updates (Phase 2 integration stub).
+        """Broadcast quality updates to all subscribers.
         
-        PHASE 1 PREPARATION: Stub for quality broadcasting functionality
-        Currently logs the broadcast request.
-        Will be enhanced in Phase 2 with actual quality subscriber management.
+        PHASE 2 IMPLEMENTATION: Full quality update broadcasting functionality
+        Broadcasts updates to all quality monitoring subscribers.
         
         Args:
             update: Quality update to broadcast
         """
-        logger.info(f"Quality update broadcast (Phase 1 stub): {update.get('type', 'unknown')}")
-        # Phase 2: Will implement actual broadcasting to quality subscribers
+        try:
+            # Ensure quality handlers are initialized to access monitoring service
+            if not hasattr(self, '_quality_handlers'):
+                await self._initialize_quality_handlers()
+            
+            # Get monitoring service for subscriber list
+            from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
+            from netra_backend.app.dependencies import get_user_execution_context
+            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            
+            # Create monitoring service to get subscribers
+            monitoring_service = QualityMonitoringService()
+            subscribers = getattr(monitoring_service, 'subscribers', [])
+            
+            logger.info(f"Broadcasting quality update to {len(subscribers)} subscribers: {update.get('type', 'unknown')}")
+            
+            # Broadcast to all subscribers
+            for user_id in subscribers:
+                await self._send_quality_update_to_subscriber(user_id, update)
+                
+        except Exception as e:
+            logger.error(f"Error broadcasting quality update: {e}")
+    
+    async def _send_quality_update_to_subscriber(self, user_id: str, update: Dict[str, Any]) -> None:
+        """Send quality update to a single subscriber."""
+        try:
+            from netra_backend.app.dependencies import get_user_execution_context
+            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            
+            message = {
+                "type": "quality_update",
+                "payload": update
+            }
+            
+            user_context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
+            )
+            manager = await create_websocket_manager(user_context)
+            await manager.send_to_user(message)
+            
+        except Exception as e:
+            logger.error(f"Error broadcasting quality update to {user_id}: {str(e)}")
     
     async def broadcast_quality_alert(self, alert: Dict[str, Any]) -> None:
-        """Broadcast quality alerts (Phase 2 integration stub).
+        """Broadcast quality alerts to all subscribers.
         
-        PHASE 1 PREPARATION: Stub for quality alert broadcasting
-        Currently logs the alert.
-        Will be enhanced in Phase 2 with actual alert delivery.
+        PHASE 2 IMPLEMENTATION: Full quality alert broadcasting functionality
+        Broadcasts alerts to all quality monitoring subscribers with severity handling.
         
         Args:
             alert: Quality alert to broadcast
         """
-        severity = alert.get("severity", "info")
-        logger.warning(f"Quality alert broadcast (Phase 1 stub) - severity: {severity}, "
-                      f"alert: {alert.get('message', 'No message')}")
-        # Phase 2: Will implement actual alert broadcasting to subscribers
+        try:
+            severity = alert.get("severity", "info")
+            logger.warning(f"Broadcasting quality alert - severity: {severity}, "
+                          f"alert: {alert.get('message', 'No message')}")
+            
+            # Ensure quality handlers are initialized to access monitoring service
+            if not hasattr(self, '_quality_handlers'):
+                await self._initialize_quality_handlers()
+            
+            # Get monitoring service for subscriber list
+            from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
+            
+            # Create monitoring service to get subscribers
+            monitoring_service = QualityMonitoringService()
+            subscribers = getattr(monitoring_service, 'subscribers', [])
+            
+            logger.info(f"Broadcasting quality alert to {len(subscribers)} subscribers")
+            
+            # Broadcast alert to all subscribers
+            for user_id in subscribers:
+                await self._send_quality_alert_to_subscriber(user_id, alert)
+                
+        except Exception as e:
+            logger.error(f"Error broadcasting quality alert: {e}")
+    
+    async def _send_quality_alert_to_subscriber(self, user_id: str, alert: Dict[str, Any]) -> None:
+        """Send quality alert to a single subscriber."""
+        try:
+            from netra_backend.app.dependencies import get_user_execution_context
+            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            
+            alert_message = {
+                "type": "quality_alert",
+                "payload": {
+                    **alert,
+                    "severity": alert.get("severity", "info")
+                }
+            }
+            
+            user_context = get_user_execution_context(
+                user_id=user_id,
+                thread_id=None,  # Let session manager handle missing IDs
+                run_id=None      # Let session manager handle missing IDs
+            )
+            manager = await create_websocket_manager(user_context)
+            await manager.send_to_user(alert_message)
+            
+        except Exception as e:
+            logger.error(f"Error broadcasting quality alert to {user_id}: {str(e)}")
 
 
 # Global message router instance

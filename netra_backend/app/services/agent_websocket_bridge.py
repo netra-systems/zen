@@ -3233,9 +3233,14 @@ class AgentWebSocketBridge(MonitorableComponent):
             # Validate user context before creating emitter
             validated_context = validate_user_context(actual_user_context)
 
-            # Create isolated WebSocket manager for this user context using factory pattern
-            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager_sync
-            isolated_manager = create_websocket_manager_sync(user_context=validated_context)
+            # Create isolated WebSocket manager for this user context using SSOT pattern
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
+            import secrets
+            isolated_manager = WebSocketManager(
+                mode=WebSocketManagerMode.UNIFIED,
+                user_context=validated_context,
+                _ssot_authorization_token=secrets.token_urlsafe(32)
+            )
             
             # PHASE 2 REDIRECTION: Always use UnifiedWebSocketEmitter (it's already the SSOT)
             # The feature flag is ready for future optimizations but current architecture is already consolidated
