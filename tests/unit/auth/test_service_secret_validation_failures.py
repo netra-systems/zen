@@ -38,7 +38,6 @@ class TestServiceSecretValidationFailures(BaseIntegrationTest):
     """
 
     @pytest.mark.unit
-    @pytest.mark.auth_failure_reproduction
     async def test_service_secret_mismatch_403_error(self):
         """
         Test SERVICE_SECRET mismatch between services - MUST FAIL with 403 error.
@@ -83,7 +82,6 @@ class TestServiceSecretValidationFailures(BaseIntegrationTest):
                 logger.error(f"   This matches production pattern: service:netra-backend authentication failure")
 
     @pytest.mark.unit
-    @pytest.mark.auth_failure_reproduction
     async def test_missing_service_secret_authentication_failure(self):
         """
         Test scenario where SERVICE_SECRET is None/empty - MUST FAIL appropriately.
@@ -117,7 +115,6 @@ class TestServiceSecretValidationFailures(BaseIntegrationTest):
             logger.error(f"   Error: {result['error']}")
 
     @pytest.mark.unit
-    @pytest.mark.auth_failure_reproduction
     async def test_jwt_validation_with_invalid_service_token(self):
         """
         Test JWT validation failure with service token created using wrong SERVICE_SECRET.
@@ -141,7 +138,6 @@ class TestServiceSecretValidationFailures(BaseIntegrationTest):
             logger.error("✅ REPRODUCTION SUCCESS: JWT validation failure with invalid service token")
 
     @pytest.mark.unit
-    @pytest.mark.auth_failure_reproduction
     async def test_gcp_auth_context_middleware_service_request_rejection(self):
         """
         Test middleware behavior when service authentication fails.
@@ -187,7 +183,6 @@ class TestAuthClientServiceHeaderGeneration(BaseIntegrationTest):
     """Test authentication client header generation failures."""
 
     @pytest.mark.unit
-    @pytest.mark.auth_failure_reproduction
     async def test_service_auth_headers_missing_secret(self):
         """
         Test header generation when SERVICE_SECRET is unavailable.
@@ -212,7 +207,6 @@ class TestAuthClientServiceHeaderGeneration(BaseIntegrationTest):
             logger.error(f"   Headers: {list(headers.keys())}")
 
     @pytest.mark.unit
-    @pytest.mark.auth_failure_reproduction
     async def test_service_auth_headers_signature_mismatch(self):
         """
         Test header generation with mismatched secret causing API signature incompatibility.
@@ -245,7 +239,6 @@ class TestAuthClientServiceHeaderGeneration(BaseIntegrationTest):
 
 
 # Test Execution Helper for Issue #1037
-@pytest.mark.issue_1037_reproduction
 class TestIssue1037ReproductionSuite:
     """
     Complete test suite to reproduce Issue #1037 service authentication failures.

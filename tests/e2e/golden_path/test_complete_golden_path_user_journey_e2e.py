@@ -149,7 +149,21 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
         
         # Create WebSocket bridge for the user context
         self.websocket_bridge = create_agent_websocket_bridge(self.base_user_context)
-        
+
+        # Import business value validators for enhanced validation
+        try:
+            from test_framework.business_value_validators import (
+                validate_agent_business_value,
+                assert_response_has_business_value,
+                assert_cost_optimization_value
+            )
+            self.validate_business_value = validate_agent_business_value
+            self.assert_response_value = assert_response_has_business_value
+            self.assert_cost_value = assert_cost_optimization_value
+        except ImportError as e:
+            self.logger.warning(f"Business value validators not available: {e}")
+            self.validate_business_value = None
+
         self.logger.info(" PASS:  Golden Path test environment initialized with real UserExecutionContext")
     
     @pytest.mark.timeout(60)  # Maximum 60 seconds per CLAUDE.md
