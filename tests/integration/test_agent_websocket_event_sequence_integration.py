@@ -64,7 +64,6 @@ from netra_backend.app.websocket_core.types import MessageType
 
 # Configuration and Tools
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
-from netra_backend.app.core.configuration.services import get_service_config
 
 
 class WebSocketEventSequenceCapture:
