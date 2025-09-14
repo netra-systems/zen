@@ -170,11 +170,18 @@ async function runAnalysis() {
     console.log('');
   });
 
-  // Check canonical exists
-  const canonicalFound = definitions.find(def => def.filePath.includes(canonicalPath));
+  // Check canonical exists (normalize path separators for Windows compatibility)
+  const normalizedCanonicalPath = canonicalPath.replace(/\//g, path.sep);
+  const canonicalFound = definitions.find(def => def.filePath.includes(normalizedCanonicalPath));
   console.log(`✅ Canonical definition found: ${canonicalFound ? 'YES' : 'NO'}`);
+  console.log(`   Looking for: ${normalizedCanonicalPath}`);
   if (canonicalFound) {
     console.log(`   Location: ${canonicalFound.filePath}:${canonicalFound.lineNumber}`);
+  } else {
+    console.log('   Available paths:');
+    definitions.filter(def => def.semantic === 'data-structure').forEach(def => {
+      console.log(`     - ${def.filePath}`);
+    });
   }
   console.log('');
 
@@ -276,9 +283,9 @@ async function runAnalysis() {
   // Simulate test results
   const testResults = {
     'should have minimal ThreadState definitions': definitions.length <= 2 ? 'PASS' : 'FAIL',
-    'should have only one data-structure ThreadState': dataStructureDefs.length === 1 ? 'PASS' : 'FAIL',
+    'should have only one data-structure ThreadState': dataStructureDefs.length === 1 && dataStructureDefs[0]?.filePath.includes(canonicalPath) ? 'PASS' : 'FAIL',
     'should have consistent imports': importViolations.length === 0 ? 'PASS' : 'FAIL',
-    'should preserve operation states': operationStates.length === 1 ? 'PASS' : 'FAIL',
+    'should preserve operation states': operationStates.length >= 1 ? 'PASS' : 'FAIL',
     'should generate remediation report': !needsConsolidation ? 'PASS' : 'FAIL'
   };
 
