@@ -36,7 +36,7 @@ class ClickHouseInitializer:
         self.password = password
         self.client_kwargs = kwargs
         
-        self._client: Optional[Client] = None
+        self._client: Optional[ClickHouseClient] = None
         self.migration_path = Path(__file__).parent.parent.parent / 'migrations' / 'clickhouse'
         
         # Define required databases

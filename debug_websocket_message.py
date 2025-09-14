@@ -33,7 +33,7 @@ async def test_message_construction():
         "context": {"action": "processing"}
     }
 
-    print(f"📋 Test Data: {json.dumps(test_data, indent=2)}")
+    print(f"Test Data: {json.dumps(test_data, indent=2)}")
 
     # Test successful message construction (the code path that works)
     successful_message = {
@@ -44,7 +44,7 @@ async def test_message_construction():
         **test_data  # This spreads the data to root level
     }
 
-    print("✅ SUCCESS PATH Message Structure:")
+    print("SUCCESS PATH Message Structure:")
     print(json.dumps(successful_message, indent=2))
     print()
 
@@ -54,22 +54,22 @@ async def test_message_construction():
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "critical": True,
         "retry_exhausted": True,  # Add context for failure case
-        **test_data  # ✅ Spread business data to root level (this is the fix)
+        **test_data  # Spread business data to root level (this is the fix)
     }
 
-    print("🔧 FAILURE PATH Message Structure (FIXED):")
+    print("FAILURE PATH Message Structure (FIXED):")
     print(json.dumps(failure_message, indent=2))
     print()
 
     # Test old broken failure message construction (what it was before)
     old_broken_failure_message = {
         "type": test_event_type,
-        "data": test_data,  # ❌ This wraps business data (the bug)
+        "data": test_data,  # This wraps business data (the bug)
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "critical": True
     }
 
-    print("❌ OLD BROKEN FAILURE PATH Message Structure:")
+    print("OLD BROKEN FAILURE PATH Message Structure:")
     print(json.dumps(old_broken_failure_message, indent=2))
     print()
 
@@ -77,7 +77,7 @@ async def test_message_construction():
     success_keys = set(successful_message.keys()) - {"attempt"}  # Remove attempt which is success-specific
     failure_keys = set(failure_message.keys()) - {"retry_exhausted"}  # Remove retry_exhausted which is failure-specific
 
-    print("🔍 Structure Consistency Check:")
+    print("Structure Consistency Check:")
     print(f"Success path keys (minus 'attempt'): {sorted(success_keys)}")
     print(f"Failure path keys (minus 'retry_exhausted'): {sorted(failure_keys)}")
 
@@ -87,10 +87,10 @@ async def test_message_construction():
     old_has_wrapped_data = "data" in old_broken_failure_message and isinstance(old_broken_failure_message["data"], dict)
 
     print()
-    print("📊 Business Data Location Check:")
-    print(f"✅ Success path has business data at root level: {success_has_root_data}")
-    print(f"✅ Fixed failure path has business data at root level: {failure_has_root_data}")
-    print(f"❌ Old broken failure path wraps data: {old_has_wrapped_data}")
+    print("Business Data Location Check:")
+    print(f"Success path has business data at root level: {success_has_root_data}")
+    print(f"Fixed failure path has business data at root level: {failure_has_root_data}")
+    print(f"Old broken failure path wraps data: {old_has_wrapped_data}")
 
     if success_has_root_data and failure_has_root_data:
         print()

@@ -700,16 +700,16 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         # Act: Execute both pipelines concurrently
         task_1 = pipeline_executor_1.execute_pipeline(
             pipeline=self.test_pipeline_steps,
-            state=state_1,
+            user_context=user_context_1,
             run_id="concurrent_run_001",
             context={"user_id": "concurrent_user_001", "thread_id": "concurrent_thread_001"},
             db_session=self.mock_db_session
         )
-        
+
         task_2 = pipeline_executor_2.execute_pipeline(
             pipeline=self.test_pipeline_steps,
-            state=state_2,
-            run_id="concurrent_run_002", 
+            user_context=user_context_2,
+            run_id="concurrent_run_002",
             context={"user_id": "concurrent_user_002", "thread_id": "concurrent_thread_002"},
             db_session=self.mock_db_session
         )
