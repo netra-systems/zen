@@ -35,6 +35,13 @@ class TestDuplicateAuthenticatorClassesViolation(SSotAsyncTestCase):
         self.target_file = "/Users/anthony/Desktop/netra-apex/netra_backend/app/websocket_core/unified_websocket_auth.py"
         self.expected_class_name = "UnifiedWebSocketAuthenticator"
     
+    @property
+    def test_metadata(self) -> Dict[str, Any]:
+        """Access test metadata through context."""
+        if hasattr(self, '_test_context') and self._test_context:
+            return self._test_context.metadata
+        return {}
+    
     def test_only_one_unified_websocket_authenticator_class_exists(self):
         """
         CRITICAL TEST: Should FAIL currently - detects duplicate UnifiedWebSocketAuthenticator classes.
@@ -118,12 +125,11 @@ class TestDuplicateAuthenticatorClassesViolation(SSotAsyncTestCase):
         self.logger.info(f"SSOT CONSOLIDATION: Found {len(ssot_indicators['ssot_comments'])} SSOT comments")
         
         # Record metadata for analysis
-        if hasattr(self, '_test_context') and self._test_context:
-            self._test_context.metadata.update({
-                "ssot_deprecation_warnings": len(ssot_indicators['deprecation_warnings']),
-                "ssot_comments": len(ssot_indicators['ssot_comments']),
-                "migration_indicators": ssot_indicators['migration_indicators']
-            })
+        self.test_metadata.update({
+            "ssot_deprecation_warnings": len(ssot_indicators['deprecation_warnings']),
+            "ssot_comments": len(ssot_indicators['ssot_comments']),
+            "migration_indicators": ssot_indicators['migration_indicators']
+        })
         
         # This test is informational - always passes but logs progress
         self.assertTrue(True, "SSOT metadata validation completed")
@@ -214,12 +220,11 @@ class TestDuplicateAuthenticatorClassesViolation(SSotAsyncTestCase):
         self.logger.info(f"FILE STATS: {total_lines} total lines in {self.target_file}")
         
         # Record in test metadata for later analysis
-        if hasattr(self, '_test_context') and self._test_context:
-            self._test_context.metadata.update({
-                "file_total_lines": total_lines,
-                "classes_found": len(class_definitions),
-                "class_locations": [f"Line {cd['line_number']}" for cd in class_definitions]
-            })
+        self.test_metadata.update({
+            "file_total_lines": total_lines,
+            "classes_found": len(class_definitions),
+            "class_locations": [f"Line {cd['line_number']}" for cd in class_definitions]
+        })
     
     def _ranges_overlap(self, range1: tuple, range2: tuple) -> bool:
         """Check if two line number ranges overlap."""
