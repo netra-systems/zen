@@ -3135,7 +3135,40 @@ class UnifiedTestRunner:
                 "errors": error_msg,
                 "category": "cypress"
             }
-    
+
+    def _should_category_use_pattern_filtering(self, category_name: str) -> bool:
+        """
+        Determine if a category should use pattern filtering (-k expressions).
+
+        Issue #1270 Fix: Pattern filtering should only apply to categories that are designed
+        for keyword-based test selection, not categories that use specific files or directories.
+
+        Categories that SHOULD use patterns:
+        - websocket: Uses -k "websocket or ws" by design
+        - security: Uses -k "auth or security" by design
+        - e2e: Pattern filtering can help narrow down e2e tests
+        - e2e_critical: Pattern filtering can help narrow down critical e2e tests
+        - agent: Pattern filtering useful for agent-related tests
+
+        Categories that should NOT use patterns:
+        - unit: Uses directory paths, should run all unit tests
+        - integration: Uses directory paths, should run all integration tests
+        - database: Uses specific test files, should run all database tests
+        - api: Uses specific test files, should run all API tests
+        - smoke: Uses markers, not patterns
+        """
+        pattern_enabled_categories = {
+            'websocket',
+            'security',
+            'e2e',
+            'e2e_critical',
+            'e2e_full',
+            'agent',
+            'performance'  # Performance tests may benefit from pattern filtering
+        }
+
+        return category_name in pattern_enabled_categories
+
     def _build_pytest_command(self, service: str, category_name: str, args: argparse.Namespace) -> str:
         """Build pytest command for backend/auth services."""
         config = self.test_configs[service]
@@ -3241,8 +3274,10 @@ class UnifiedTestRunner:
         else:
             cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])   # 5min for other test categories
         
-        # Add specific test pattern
-        if args.pattern:
+        # Add specific test pattern - only for categories that use pattern-based selection
+        # Issue #1270 Fix: Pattern filtering should not be applied to categories that use
+        # specific files (database, api, unit, integration) as it can cause test deselection
+        if args.pattern and self._should_category_use_pattern_filtering(category_name):
             # Clean up pattern - remove asterisks that are invalid for pytest -k expressions
             # pytest -k expects Python-like expressions, not glob patterns
             clean_pattern = args.pattern.strip('*')

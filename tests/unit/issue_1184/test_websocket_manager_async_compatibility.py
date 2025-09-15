@@ -19,7 +19,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class WebSocketAsyncCompatibilityTests(SSotAsyncTestCase):
+class TestWebSocketAsyncCompatibility(SSotAsyncTestCase):
     """Tests that reproduce the async/await compatibility issue."""
 
     @pytest.mark.issue_1184

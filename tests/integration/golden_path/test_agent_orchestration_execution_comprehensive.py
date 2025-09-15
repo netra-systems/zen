@@ -58,7 +58,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
 logger = central_logger.get_logger(__name__)
 
-class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
+class TestAgentOrchestrationExecution(SSotAsyncTestCase):
     """
     Comprehensive integration tests for agent orchestration and execution.
     
