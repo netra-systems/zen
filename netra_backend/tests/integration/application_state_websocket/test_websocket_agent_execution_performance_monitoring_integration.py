@@ -379,7 +379,7 @@ class TestWebSocketAgentExecutionPerformanceMonitoringIntegration(BaseIntegratio
         """Test performance SLA validation and threshold enforcement."""
         registry, agent = performance_agent_registry
         strict_sla_requirements = {'total_execution_ms': 3000, 'max_inter_event_ms': 800}
-        strict_context = UserExecutionContext(user_id=performance_user_context.user_id, thread_id=performance_user_context.thread_id, run_id=f'{performance_user_context.run_id}_strict', request_id=f'{performance_user_context.request_id}_strict', metadata={**performance_user_context.metadata, 'sla_requirements': strict_sla_requirements, 'performance_tier': 'enterprise_premium'})
+        strict_context = UserExecutionContext(user_id=performance_user_context.user_id, thread_id=performance_user_context.thread_id, run_id=f'{performance_user_context.run_id}_strict', request_id=f'{performance_user_context.request_id}_strict', agent_context={**performance_user_context.agent_context, 'sla_requirements': strict_sla_requirements, 'performance_tier': 'enterprise_premium'})
         websocket_bridge = await self.performance_collector.create_performance_bridge(strict_context)
         execution_engine = ExecutionEngine._init_from_factory(registry=registry, websocket_bridge=websocket_bridge, user_context=strict_context)
         exec_context = AgentExecutionContext(user_id=strict_context.user_id, thread_id=strict_context.thread_id, run_id=strict_context.run_id, request_id=strict_context.request_id, agent_name='performance_optimizer', step=PipelineStep.PROCESSING, execution_timestamp=datetime.now(timezone.utc), pipeline_step_num=1)
