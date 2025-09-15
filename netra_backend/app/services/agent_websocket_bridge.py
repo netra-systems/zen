@@ -40,6 +40,13 @@ except ImportError as e:
     EventDeliveryStatus = None
 from shared.monitoring.interfaces import MonitorableComponent
 
+# CRITICAL FIX: Real agent execution imports for production deployment
+# MOVED TO TYPE_CHECKING to avoid circular import
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcherFactory
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.core.configuration.base import get_config
+
 if TYPE_CHECKING:
     from shared.monitoring.interfaces import ComponentMonitor
     from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -1358,11 +1365,18 @@ class AgentWebSocketBridge(MonitorableComponent):
                 from netra_backend.app.core.unified_id_manager import generate_execution_id
 
                 run_id = generate_execution_id()
+                
+                # CRITICAL FIX: Enhanced UserExecutionContext with user_message and database session
                 user_context = UserExecutionContext(
                     user_id=user_id,
                     thread_id=thread_id,
                     run_id=run_id,
-                    agent_context={"message_type": message_dict.get('type'), "websocket_initiated": True}
+                    agent_context={
+                        "message_type": message_dict.get('type'), 
+                        "websocket_initiated": True,
+                        "user_message": content,  # Add user message for agent execution
+                        "agent_type": "supervisor"
+                    }
                 )
 
                 # Create orchestrator for agent execution
@@ -1410,14 +1424,38 @@ class AgentWebSocketBridge(MonitorableComponent):
                 user_context=user_context
             )
 
-            # Execute the orchestrator with the content
-            # Note: This would typically involve calling the orchestrator's execute method
-            # For now, we'll return a success indication to establish the interface
+            # CRITICAL FIX: Replace mock execution with real SupervisorAgent
+            logger.info(f"Creating real SupervisorAgent for execution - run {user_context.run_id}")
+            
+            # Dynamic import to avoid circular dependency
+            from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
+            
+            # Get configuration and initialize LLM Manager
+            config = get_config()
+            llm_manager = LLMManager(config=config)
+            
+            # Create SupervisorAgent with proper dependencies
+            supervisor_agent = SupervisorAgent(
+                llm_manager=llm_manager,
+                websocket_bridge=self,
+                user_context=user_context
+            )
+            
+            # Execute the supervisor agent with the user context
+            logger.info(f"Executing SupervisorAgent for user {user_context.user_id[:8]} with message content")
+            
+            # Extract user message from context for execution
+            user_message = user_context.agent_context.get('user_message', content)
+            
+            # Execute agent and get real results
+            result = await supervisor_agent.execute(
+                context=user_context,
+                stream_updates=True  # Enable WebSocket streaming
+            )
+            
+            logger.info(f"SupervisorAgent execution completed for run {user_context.run_id}")
 
-            logger.info(f"Orchestrator execution initiated for run {user_context.run_id}")
-            result = {"status": "executed", "content": content, "user_id": user_context.user_id}
-
-            # Emit agent completed event
+            # Emit agent completed event with real results
             await self.notify_agent_completed(
                 run_id=user_context.run_id,
                 agent_name="supervisor",
@@ -1428,7 +1466,14 @@ class AgentWebSocketBridge(MonitorableComponent):
             return result
 
         except Exception as e:
-            logger.error(f"Error in orchestrator execution: {e}")
+            logger.error(f"Error in real SupervisorAgent execution: {e}")
+            # Emit error event for proper error handling
+            await self.notify_agent_error(
+                run_id=user_context.run_id,
+                agent_name="supervisor",
+                error=str(e),
+                user_context=user_context
+            )
             raise
 
     async def _execute_agent_basic(self, content: str, message_dict: Dict[str, Any]) -> bool:
