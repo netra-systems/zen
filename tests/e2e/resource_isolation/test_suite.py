@@ -23,7 +23,7 @@ from tests.e2e.resource_isolation.suite.fixtures import (
     tenant_agents
 )
 from tests.e2e.resource_isolation.suite.test_suite_core import (
-    TestResourceIsolationSuite
+    ResourceIsolationSuiteTests as TestResourceIsolationSuite
 )
 
 __all__ = [

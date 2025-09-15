@@ -37,7 +37,7 @@ from websockets import WebSocketException, ConnectionClosedError
 
 from shared.isolated_environment import IsolatedEnvironment
 from tests.e2e.config import TEST_CONFIG, TestEnvironmentType
-from tests.e2e.test_environment_config import TestEnvironmentConfig
+from tests.e2e.test_environment_config import EnvironmentConfigTests as TestEnvironmentConfig
 
 # CRITICAL INTEGRATION: Import UnifiedDockerManager for actual service startup
 try:

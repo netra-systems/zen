@@ -33,6 +33,7 @@ import asyncio
 import json
 import pytest
 import time
+import unittest
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
@@ -55,7 +56,7 @@ from shared.logging.unified_logging_ssot import get_logger
 from shared.isolated_environment import get_env
 logger = get_logger(__name__)
 
-class AgentExecutionCoreGoldenPathTests(SSotAsyncTestCase):
+class AgentExecutionCoreGoldenPathTests(SSotAsyncTestCase, unittest.TestCase):
     """
     Comprehensive unit tests for agent execution core in the golden path.
     
