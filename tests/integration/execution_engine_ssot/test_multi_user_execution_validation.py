@@ -33,6 +33,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
 
 
 class RealWebSocketSimulator:
@@ -85,8 +86,9 @@ class RealWebSocketSimulator:
 class TestMultiUserExecutionValidation(SSotAsyncTestCase):
     """Integration Test 5: Validate multi-user execution with UserExecutionEngine SSOT"""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test fixtures"""
+        super().setup_method(method)
         self.test_users = [
             {
                 'user_id': f'user_{uuid.uuid4()}',
@@ -123,10 +125,13 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                     websocket_client_id=user_data['connection_id']
                 )
                 
+                # Create AgentInstanceFactory with the user context
+                agent_factory = AgentInstanceFactory(user_context)
+                
                 # Create UserExecutionEngine with the context
                 engine = UserExecutionEngine(
                     context=user_context,
-                    agent_factory=None,  # Using minimal setup for integration test
+                    agent_factory=agent_factory,
                     websocket_emitter=websocket  # The WebSocket simulator
                 )
                 
@@ -297,10 +302,13 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                     websocket_client_id=user_data['connection_id']
                 )
                 
+                # Create AgentInstanceFactory with the user context
+                agent_factory = AgentInstanceFactory(user_context)
+                
                 # Create UserExecutionEngine with the context
                 engine = UserExecutionEngine(
                     context=user_context,
-                    agent_factory=None,  # Using minimal setup for integration test
+                    agent_factory=agent_factory,
                     websocket_emitter=websocket  # The WebSocket simulator
                 )
                 

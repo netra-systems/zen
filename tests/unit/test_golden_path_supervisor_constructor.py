@@ -54,9 +54,14 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
         self.test_user_id = str(uuid.uuid4())
         self.test_thread_id = str(uuid.uuid4())
         self.test_run_id = str(uuid.uuid4())
-        self.user_context = UserExecutionContext.from_request(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
-        # Add mock database session for SupervisorAgent execution  
-        self.user_context.db_session = MagicMock()
+        # Create mock database session for SupervisorAgent execution
+        mock_db_session = MagicMock()
+        self.user_context = UserExecutionContext.from_request(
+            user_id=self.test_user_id, 
+            thread_id=self.test_thread_id, 
+            run_id=self.test_run_id,
+            db_session=mock_db_session
+        )
         self.mock_llm_manager = MagicMock()
         self.mock_llm_manager.get_default_client.return_value = self.mock_factory.create_llm_client_mock()
 
@@ -161,7 +166,9 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
             from unittest.mock import MagicMock
             mock_bridge = MagicMock()
             mock_bridge.notify_agent_started = AsyncMock(return_value=True)
+            mock_bridge.notify_agent_thinking = AsyncMock(return_value=True)
             mock_bridge.notify_agent_completed = AsyncMock(return_value=True)
+            mock_bridge.notify_agent_error = AsyncMock(return_value=True)
             supervisor.websocket_bridge = mock_bridge
             result = await supervisor.execute(context=self.user_context, stream_updates=True)
             self.assertIsNotNone(result, 'SupervisorAgent execution should return result')

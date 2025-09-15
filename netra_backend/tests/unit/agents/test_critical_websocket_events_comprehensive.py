@@ -87,10 +87,10 @@ class TestCriticalWebSocketEventsComprehensive(SSotAsyncTestCase):
         # Create mock user execution context
         self.user_context = UserExecutionContext(
             user_id=self.user_id,
-            execution_id=self.execution_id,
-            connection_id=self.connection_id,
-            jwt_token="mock_jwt_token",
-            metadata={"test_case": method.__name__, "websocket_events_test": True}
+            thread_id=str(uuid.uuid4()),
+            run_id=self.execution_id,
+            websocket_client_id=self.connection_id,
+            agent_context={"test_case": method.__name__, "websocket_events_test": True}
         )
         
         # Initialize WebSocket event components with mocked externals
