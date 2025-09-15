@@ -427,11 +427,13 @@ class TestConcurrentLoad(SSotAsyncTestCase):
             auth_duration = time.perf_counter() - auth_start
             operation_latencies.append(auth_duration)
 
-            # Create user execution context
-            execution_context = UserExecutionContext(
-                user_id=user_context["user_id"],
-                session_id=user_context["session_id"],
-                permissions=["user", "chat"]
+            # Create user execution context using factory method
+            user_id_from_auth = auth_tokens.get("user", {}).get("id", user_context["user_id"])
+            execution_context = UserExecutionContext.from_request(
+                user_id=user_id_from_auth,
+                thread_id=f"thread-{user_context['user_index']}-{uuid.uuid4().hex[:8]}",
+                run_id=f"run-{user_context['user_index']}-{uuid.uuid4().hex[:8]}",
+                request_id=f"req-{user_context['user_index']}-{uuid.uuid4().hex[:8]}"
             )
 
             # Execute specified number of operations
@@ -468,7 +470,7 @@ class TestConcurrentLoad(SSotAsyncTestCase):
                 "operations_completed": operations_completed,
                 "operations_failed": operations_failed,
                 "operation_latencies": operation_latencies,
-                "auth_tokens": {"user_id": auth_tokens["user_id"]},
+                "auth_tokens": {"user_id": auth_tokens.get("user", {}).get("id", f"test-user-{user_context['user_index']}")},
                 "execution_context": execution_context,
                 "success": operations_completed > 0,
                 "timeout": False,

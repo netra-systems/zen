@@ -489,7 +489,7 @@ class TestRaceConditionElimination(SSotAsyncTestCase):
             "connection_duration": connection_duration,
             "message_handling_duration": message_handling_duration,
             "shared_data": user_shared_data,
-            "auth_tokens": {"user_id": auth_tokens["user_id"]},
+            "auth_tokens": {"user_id": auth_tokens.get("user", {}).get("id", user_context["user_id"])},
             "resource_conflicts": 0,  # Count any resource conflicts detected
             "success": True,
             "timestamp": datetime.now(timezone.utc).isoformat()
@@ -542,11 +542,12 @@ class TestRaceConditionElimination(SSotAsyncTestCase):
         # Simulate agent factory creation with potential race conditions
         factory_creation_start = time.perf_counter()
 
-        # Create user execution context
-        execution_context = UserExecutionContext(
+        # Create user execution context using factory method
+        execution_context = UserExecutionContext.from_request(
             user_id=user_context["user_id"],
-            session_id=user_context["session_id"],
-            permissions=["user", "chat"]
+            thread_id=f"thread-factory-{uuid.uuid4().hex[:8]}",
+            run_id=f"run-factory-{uuid.uuid4().hex[:8]}",
+            request_id=f"req-factory-{uuid.uuid4().hex[:8]}"
         )
 
         await asyncio.sleep(0.15)  # Simulate factory creation time
@@ -717,10 +718,11 @@ class TestRaceConditionElimination(SSotAsyncTestCase):
             await asyncio.sleep(0.1)
 
             # Step 3: Agent factory creation
-            execution_context = UserExecutionContext(
+            execution_context = UserExecutionContext.from_request(
                 user_id=user_context["user_id"],
-                session_id=user_context["session_id"],
-                permissions=["user", "chat"]
+                thread_id=f"thread-stress-{uuid.uuid4().hex[:8]}",
+                run_id=f"run-stress-{uuid.uuid4().hex[:8]}",
+                request_id=f"req-stress-{uuid.uuid4().hex[:8]}"
             )
             await asyncio.sleep(0.15)
 
@@ -734,7 +736,7 @@ class TestRaceConditionElimination(SSotAsyncTestCase):
                 "session_id": user_context["session_id"],
                 "duration": total_duration,
                 "shared_data": {"id": f"workflow-data-{user_context['user_id']}"},
-                "auth_tokens": {"user_id": auth_tokens["user_id"]},
+                "auth_tokens": {"user_id": auth_tokens.get("user", {}).get("id", user_context["user_id"])},
                 "execution_context": execution_context,
                 "resource_conflicts": 0,
                 "success": True,

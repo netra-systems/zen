@@ -528,10 +528,16 @@ class TestIntegratedPerformance(SSotAsyncTestCase):
 
         # Step 3: Session creation
         session_start = time.perf_counter()
-        user_context = UserExecutionContext(
-            user_id=auth_tokens["user_id"],
-            session_id=str(uuid.uuid4()),
-            permissions=["user", "chat"]
+        # Extract user_id from the user object in the response
+        user_info = auth_tokens.get("user", {})
+        user_id = user_info.get("id") or user_info.get("user_id") or f"test-user-{uuid.uuid4().hex[:8]}"
+
+        # Use the factory method to create UserExecutionContext
+        user_context = UserExecutionContext.from_request(
+            user_id=user_id,
+            thread_id=f"thread-{uuid.uuid4().hex[:8]}",
+            run_id=f"run-{uuid.uuid4().hex[:8]}",
+            request_id=f"req-{uuid.uuid4().hex[:8]}"
         )
         session_duration = time.perf_counter() - session_start
 
