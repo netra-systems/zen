@@ -33,8 +33,14 @@ Usage Examples:
   python3 claude-instance-orchestrator.py --max-line-length 1000  # Longer output lines
   python3 claude-instance-orchestrator.py --status-report-interval 60  # Status reports every 60s
   python3 claude-instance-orchestrator.py --quiet  # Minimal output, errors only
+  python3 claude-instance-orchestrator.py --start-at "2h"  # Start 2 hours from now
+  python3 claude-instance-orchestrator.py --start-at "30m"  # Start in 30 minutes
+  python3 claude-instance-orchestrator.py --start-at "1am"  # Start at 1 AM (today or tomorrow)
+  python3 claude-instance-orchestrator.py --start-at "14:30"  # Start at 2:30 PM (today or tomorrow)
+  python3 claude-instance-orchestrator.py --start-at "10:30pm"  # Start at 10:30 PM (today or tomorrow)
 
 Features:
+  - Scheduled orchestration: Start entire orchestration at specific time (2h from now, 1am, 14:30, etc.)
   - Soft startup: Configurable delay between instance launches to prevent resource contention
   - Rolling status reports: Periodic updates showing instance status, uptime, and token usage
   - Modern JSON token parsing: Primary JSON parsing with regex fallback for reliability
@@ -64,7 +70,8 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta
+import re
 
 # Setup logging
 logging.basicConfig(
@@ -1081,6 +1088,60 @@ class ClaudeInstanceOrchestrator:
 
 
 
+def parse_start_time(start_at_str: str) -> datetime:
+    """Parse start time specification into a datetime object"""
+    if not start_at_str:
+        return datetime.now()
+
+    start_at_str = start_at_str.strip().lower()
+    now = datetime.now()
+
+    # Relative time patterns (e.g., "2h", "30m", "45s")
+    relative_match = re.match(r'^(\d+(?:\.\d+)?)\s*([hms])$', start_at_str)
+    if relative_match:
+        value = float(relative_match.group(1))
+        unit = relative_match.group(2)
+
+        if unit == 'h':
+            target_time = now + timedelta(hours=value)
+        elif unit == 'm':
+            target_time = now + timedelta(minutes=value)
+        elif unit == 's':
+            target_time = now + timedelta(seconds=value)
+
+        return target_time
+
+    # Named time patterns (e.g., "1am", "2:30pm", "14:30")
+    # Handle formats like "1am", "2pm", "10:30am", "14:30"
+    time_patterns = [
+        (r'^(\d{1,2})\s*am$', lambda h: (int(h) % 12, 0)),  # 1am -> (1, 0)
+        (r'^(\d{1,2})\s*pm$', lambda h: ((int(h) % 12) + 12, 0)),  # 1pm -> (13, 0)
+        (r'^(\d{1,2}):(\d{2})\s*am$', lambda h, m: (int(h) % 12, int(m))),  # 10:30am -> (10, 30)
+        (r'^(\d{1,2}):(\d{2})\s*pm$', lambda h, m: ((int(h) % 12) + 12, int(m))),  # 2:30pm -> (14, 30)
+        (r'^(\d{1,2}):(\d{2})$', lambda h, m: (int(h), int(m)))  # 14:30 -> (14, 30)
+    ]
+
+    for pattern, time_func in time_patterns:
+        match = re.match(pattern, start_at_str)
+        if match:
+            if len(match.groups()) == 1:
+                hour, minute = time_func(match.group(1))
+            else:
+                hour, minute = time_func(match.group(1), match.group(2))
+
+            # Create target time for today
+            target_time = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+
+            # If the time has already passed today, schedule for tomorrow
+            if target_time <= now:
+                target_time += timedelta(days=1)
+
+            return target_time
+
+    # If no pattern matches, raise an error
+    raise ValueError(f"Invalid start time format: '{start_at_str}'. "
+                    f"Supported formats: '2h' (2 hours), '30m' (30 minutes), '14:30' (2:30 PM), '1am', '2:30pm'")
+
 def create_default_instances(output_format: str = "stream-json") -> List[InstanceConfig]:
     """Create default instance configurations"""
     return [
@@ -1266,6 +1327,8 @@ async def main():
                        help="Maximum characters per line in console output (default: 500)")
     parser.add_argument("--status-report-interval", type=int, default=5,
                        help="Seconds between rolling status reports (default: 5)")
+    parser.add_argument("--start-at", type=str, default=None,
+                       help="Schedule orchestration to start at specific time. Examples: '2h' (2 hours from now), '30m' (30 minutes), '14:30' (2:30 PM today), '1am' (1 AM today/tomorrow)")
 
     args = parser.parse_args()
 
@@ -1352,7 +1415,69 @@ async def main():
         for name, config in orchestrator.instances.items():
             cmd = orchestrator.build_claude_command(config)
             print(f"{name}: {' '.join(cmd)}")
+
+        # Show scheduled start time if provided
+        if args.start_at:
+            try:
+                target_time = parse_start_time(args.start_at)
+                wait_seconds = (target_time - datetime.now()).total_seconds()
+                logger.info(f"Orchestration would be scheduled to start at: {target_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                logger.info(f"Wait time would be: {wait_seconds:.1f} seconds ({wait_seconds/3600:.1f} hours)")
+            except ValueError as e:
+                logger.error(f"Invalid start time: {e}")
         return
+
+    # Handle scheduled start time
+    if args.start_at:
+        try:
+            target_time = parse_start_time(args.start_at)
+            now = datetime.now()
+            wait_seconds = (target_time - now).total_seconds()
+
+            if wait_seconds <= 0:
+                logger.warning(f"Target time {target_time.strftime('%Y-%m-%d %H:%M:%S')} is in the past, starting immediately")
+            else:
+                logger.info(f"Orchestration scheduled to start at: {target_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                logger.info(f"Waiting {wait_seconds:.1f} seconds ({wait_seconds/3600:.1f} hours) until start time...")
+
+                # Show countdown for long waits
+                if wait_seconds > 60:
+                    # Show periodic countdown updates
+                    countdown_intervals = [3600, 1800, 900, 300, 60, 30, 10]  # 1h, 30m, 15m, 5m, 1m, 30s, 10s
+
+                    while wait_seconds > 0:
+                        # Find the next appropriate countdown interval
+                        next_update = None
+                        for interval in countdown_intervals:
+                            if wait_seconds > interval:
+                                next_update = interval
+                                break
+
+                        if next_update:
+                            sleep_time = wait_seconds - next_update
+                            await asyncio.sleep(sleep_time)
+                            wait_seconds = next_update
+                            hours = wait_seconds // 3600
+                            minutes = (wait_seconds % 3600) // 60
+                            seconds = wait_seconds % 60
+                            if hours > 0:
+                                logger.info(f"Orchestration starts in {int(hours)}h {int(minutes)}m")
+                            elif minutes > 0:
+                                logger.info(f"Orchestration starts in {int(minutes)}m {int(seconds)}s")
+                            else:
+                                logger.info(f"Orchestration starts in {int(seconds)}s")
+                        else:
+                            # Final countdown
+                            await asyncio.sleep(wait_seconds)
+                            wait_seconds = 0
+                else:
+                    # For short waits, just sleep
+                    await asyncio.sleep(wait_seconds)
+
+                logger.info("Scheduled start time reached - beginning orchestration")
+        except ValueError as e:
+            logger.error(f"Invalid start time: {e}")
+            sys.exit(1)
 
     # Run all instances
     logger.info("Starting Claude Code instance orchestration")
