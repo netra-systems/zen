@@ -82,6 +82,7 @@ markers = [
     "unit: Unit tests (fast, isolated)",
     "integration: Integration tests (component interaction)",
     "e2e: End-to-end tests (full workflow)",
+    "end_to_end: Complete end-to-end user journey tests",
     "smoke: Quick validation tests",
     "critical: Essential system tests",
     "mission_critical: Business-critical functionality tests",
