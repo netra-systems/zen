@@ -26,12 +26,12 @@ from contextlib import asynccontextmanager
 import os
 import socket
 from urllib.parse import urlparse
+from unittest.mock import patch
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.configuration.base import get_config
 from netra_backend.app.db.database_manager import DatabaseManager
 from shared.isolated_environment import IsolatedEnvironment
-from test_framework.ssot.database_test_utility import DatabaseTestUtility
 import sqlalchemy
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError, TimeoutError as SQLTimeoutError
@@ -48,15 +48,17 @@ class TestIssue1263CloudSQLConnectivityIntegration(SSotAsyncTestCase):
         await super().asyncSetUp()
         self.env = IsolatedEnvironment()
         self.config = get_config()
-        self.db_utility = DatabaseTestUtility()
 
-        # Real staging configuration
-        self.staging_config = {
+    @property
+    def staging_config(self):
+        """Real staging configuration for Issue #1263 reproduction"""
+        env = IsolatedEnvironment()
+        return {
             'POSTGRES_HOST': 'postgres.staging.netrasystems.ai',
             'POSTGRES_PORT': '5432',
             'POSTGRES_DB': 'netra_staging',
-            'POSTGRES_USER': self.env.get_env('POSTGRES_USER'),
-            'POSTGRES_PASSWORD': self.env.get_env('POSTGRES_PASSWORD'),
+            'POSTGRES_USER': env.get('POSTGRES_USER', 'netra_user'),
+            'POSTGRES_PASSWORD': env.get('POSTGRES_PASSWORD', 'test_password'),
             'VPC_CONNECTOR': 'projects/netra-staging/locations/us-central1/connectors/netra-staging-vpc-connector',
             'VPC_EGRESS': 'all-traffic'  # The fix from commit 2acf46c8a
         }
