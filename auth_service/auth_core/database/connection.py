@@ -333,7 +333,7 @@ class AuthDatabaseConnection:
         try:
             # Initialize if needed with timeout
             if not self._initialized:
-                await asyncio.wait_for(self.initialize(timeout=20.0), timeout=25.0)
+                await asyncio.wait_for(self.initialize(timeout=20.0), timeout=35.0)
             
             # Test connection with timeout
             async with self.engine.begin() as conn:

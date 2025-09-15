@@ -258,9 +258,9 @@ def get_database_timeout_config(environment: str) -> Dict[str, float]:
             # CRITICAL FIX Issue #1263: Database Connection Timeout - Cloud SQL compatibility
             # Root cause: Insufficient timeout for Cloud SQL with VPC connector socket establishment
             # Cloud SQL requires adequate time for connection setup through VPC connector
-            # Based on test analysis: Need ≥15s initialization, ≥10s connection for Cloud SQL
-            # Increased initialization_timeout to 25.0s to ensure reliable Cloud SQL connectivity
-            "initialization_timeout": 25.0,    # Cloud SQL connection establishment (increased from 20.0)
+            # Based on test analysis: Need ≥35s initialization, ≥15s connection for Cloud SQL
+            # Increased initialization_timeout to 35.0s to ensure reliable Cloud SQL connectivity
+            "initialization_timeout": 35.0,    # Cloud SQL connection establishment (increased from 25.0)
             "table_setup_timeout": 10.0,       # Table verification with Cloud SQL latency
             "connection_timeout": 15.0,        # Cloud SQL socket establishment (sufficient for VPC connector)
             "pool_timeout": 15.0,              # Cloud SQL pool operations
