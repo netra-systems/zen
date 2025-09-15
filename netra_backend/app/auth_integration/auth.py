@@ -47,6 +47,16 @@ import asyncio
 
 logger = logging.getLogger('auth_integration.auth')
 
+# Token session tracking for compatibility with existing cleanup functions
+_active_token_sessions: Dict[str, Dict[str, Any]] = {}
+_token_usage_stats: Dict[str, int] = {
+    'sessions_validated': 0,
+    'reuse_attempts_blocked': 0,
+    'validation_errors': 0,
+    'tokens_expired_cleanup': 0
+}
+_token_cleanup_lock = asyncio.Lock()
+
 security = HTTPBearer()
 optional_security = HTTPBearer(auto_error=False)
 

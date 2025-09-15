@@ -3,6 +3,7 @@ import { UnifiedWebSocketEvent } from '../types/unified-chat';
 import { WebSocketStatus, WebSocketState, WebSocketServiceError } from '../types/domains/websocket';
 import { config } from '@/config';
 import { logger } from '@/lib/logger';
+import { isWindowsPlatform, shouldUseWindowsStagingFallback } from '@/lib/unified-api-config';
 
 interface JWTPayload {
   exp: number;
@@ -41,22 +42,29 @@ interface WebSocketOptions {
 class WebSocketService {
   // Environment-specific timeout configuration
   private getEnvironmentTimeouts() {
-    const isStaging = typeof window !== 'undefined' && 
-      (window.location.hostname.includes('staging') || 
+    const isStaging = typeof window !== 'undefined' &&
+      (window.location.hostname.includes('staging') ||
        process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ||
        process.env.NODE_ENV === 'staging');
-    
-    if (isStaging) {
+
+    // Issue #860: Windows platform compatibility adjustments
+    const isWindows = isWindowsPlatform();
+    const usingWindowsFallback = shouldUseWindowsStagingFallback();
+
+    if (isStaging || usingWindowsFallback) {
+      // Enhanced timeouts for staging or Windows fallback
+      const windowsMultiplier = isWindows ? 1.5 : 1.0; // 50% longer timeouts on Windows
+
       return {
-        baseReconnectDelay: 1000,     // 1s for staging (network latency)
-        maxReconnectDelay: 30000,     // 30s for staging
-        connectionInterval: 3000,     // 3s minimum for staging
-        heartbeatInterval: 30000,     // 30s heartbeat for staging
+        baseReconnectDelay: Math.floor(1000 * windowsMultiplier),     // 1s-1.5s for staging/Windows
+        maxReconnectDelay: Math.floor(30000 * windowsMultiplier),     // 30s-45s for staging/Windows
+        connectionInterval: Math.floor(3000 * windowsMultiplier),     // 3s-4.5s minimum for staging/Windows
+        heartbeatInterval: Math.floor(30000 * windowsMultiplier),     // 30s-45s heartbeat for staging/Windows
         maxMessageAssemblyTime: 300000, // 5 minutes for large messages
-        authCooldown: 10000           // 10s auth cooldown for staging
+        authCooldown: Math.floor(10000 * windowsMultiplier)           // 10s-15s auth cooldown for staging/Windows
       };
     }
-    
+
     return {
       baseReconnectDelay: 100,        // Keep fast for dev
       maxReconnectDelay: 10000,       // 10s for dev
@@ -967,14 +975,21 @@ class WebSocketService {
     this.connectionAttemptId = attemptId;
     this.lastConnectionAttempt = Date.now();
     
+    // Issue #860: Windows platform logging and compatibility
+    const isWindows = isWindowsPlatform();
+    const usingWindowsFallback = shouldUseWindowsStagingFallback();
+
     logger.info('Starting WebSocket connection attempt', undefined, {
       component: 'WebSocketService',
       action: 'connection_attempt_start',
-      metadata: { 
+      metadata: {
         attemptId,
         url,
         hasToken: !!options.token,
-        currentState: this.state
+        currentState: this.state,
+        isWindows,
+        usingWindowsFallback,
+        issue860: isWindows ? 'Windows platform detected' : 'Non-Windows platform'
       }
     });
     
@@ -1133,15 +1148,23 @@ class WebSocketService {
         
         // Only log as error if we're not in a known disconnection state
         const isExpectedError = this.state === 'disconnecting' || this.state === 'disconnected';
+        // Issue #860: Windows platform error context
+        const windowsErrorContext = {
+          isWindows,
+          usingWindowsFallback,
+          issue860Note: isWindows && !usingWindowsFallback ? 'Consider setting NEXT_PUBLIC_ENVIRONMENT=staging for Windows compatibility' : null
+        };
+
         if (!isExpectedError) {
           logger.error('WebSocket error occurred', undefined, {
             component: 'WebSocketService',
             action: 'websocket_error',
-            metadata: { 
+            metadata: {
               attemptId: currentAttemptId,
-              error, 
-              state: this.state, 
-              hasToken: !!this.currentToken 
+              error,
+              state: this.state,
+              hasToken: !!this.currentToken,
+              ...windowsErrorContext
             }
           });
         }
@@ -1164,9 +1187,15 @@ class WebSocketService {
           return;
         }
         
+        // Issue #860: Windows-specific error messages
+        let errorMessage = errorType === 'auth' ? 'Authentication error' : 'WebSocket connection error';
+        if (isWindows && !usingWindowsFallback && errorType === 'connection') {
+          errorMessage = 'WebSocket connection error (Windows detected - try setting NEXT_PUBLIC_ENVIRONMENT=staging for better compatibility)';
+        }
+
         options.onError?.({
           code: 1006,
-          message: errorType === 'auth' ? 'Authentication error' : 'WebSocket connection error',
+          message: errorMessage,
           timestamp: Date.now(),
           type: errorType,
           recoverable: errorType !== 'auth'
