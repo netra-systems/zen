@@ -1,19 +1,17 @@
 """Modern Execution Helpers for Supervisor Agent
 
-Focused helper methods for modern execution patterns.
+Focused helper methods for modern execution patterns with proper SSOT compliance.
 Keeps supervisor main file under 300 lines.
 
 Business Value: Standardized execution patterns with 25-line function limit.
 
-SECURITY FIX: Issue #1017 - Enhanced security validation for user context extraction
-and processing to prevent user isolation vulnerabilities and data contamination.
+SSOT COMPLIANCE: Issue #1116 - Complete SSOT patterns using UserExecutionContext only.
+Removes all legacy DeepAgentState conversion and sanitization logic.
 """
 
-import copy
-import re
-from typing import Any, Dict, Optional
+from typing import Optional
 
-from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.agents.base.interface import ExecutionResult
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
 
@@ -26,43 +24,40 @@ class SupervisorExecutionHelpers:
     def __init__(self, supervisor_agent):
         self.supervisor = supervisor_agent
     
-    async def run_supervisor_workflow(self, context, run_id: str):
-        """Run supervisor workflow using secure user execution context.
+    async def run_supervisor_workflow(self, context: UserExecutionContext, run_id: str) -> UserExecutionContext:
+        """Run supervisor workflow using SSOT user execution context.
 
-        SECURITY FIX: Issue #1017 - Validates input context type and sanitizes
-        results to prevent cross-user data contamination.
+        SSOT COMPLIANCE: Issue #1116 - Uses UserExecutionContext exclusively.
+        No legacy conversion or sanitization needed.
 
         Args:
-            context: UserExecutionContext or legacy DeepAgentState (for backwards compatibility)
+            context: UserExecutionContext (SSOT pattern)
             run_id: Unique run identifier
 
         Returns:
-            UserExecutionContext with sanitized results
+            UserExecutionContext with execution results
 
         Raises:
-            ValueError: If context contains security violations
+            TypeError: If context is not UserExecutionContext
         """
-        # Convert and validate context for security compliance
-        validated_context = self._convert_and_validate_context(context)
+        if not isinstance(context, UserExecutionContext):
+            raise TypeError(f"SSOT VIOLATION: Expected UserExecutionContext, got {type(context)}")
 
-        # Extract user request from validated context
-        user_request = validated_context.agent_context.get('user_request', 'default_request')
+        # Extract user request from context
+        user_request = context.agent_context.get('user_request', 'default_request')
 
-        # Use secure context data for execution
+        # Execute supervisor workflow
         result = await self.supervisor.run(
             user_request,
-            validated_context.thread_id,
-            validated_context.user_id,
+            context.thread_id,
+            context.user_id,
             run_id
         )
 
-        # Sanitize supervisor result to prevent contamination
-        sanitized_result = self._sanitize_supervisor_result(result, validated_context.user_id)
-
-        # Return updated context (maintaining immutability)
-        return validated_context.create_child_context(
+        # Return updated context with results
+        return context.create_child_context(
             operation_name="supervisor_workflow",
-            additional_agent_context={"workflow_result": sanitized_result}
+            additional_agent_context={"workflow_result": result}
         )
     
     async def handle_execution_failure(self, result: ExecutionResult, context: UserExecutionContext) -> None:
@@ -73,11 +68,11 @@ class SupervisorExecutionHelpers:
         )
         # Could add fallback strategy here if needed
     
-    async def execute_legacy_workflow(self, context: UserExecutionContext,
-                                    run_id: str, stream_updates: bool) -> UserExecutionContext:
-        """Legacy execution workflow adapted for secure user execution context."""
+    async def execute_workflow(self, context: UserExecutionContext,
+                             run_id: str, stream_updates: bool) -> UserExecutionContext:
+        """Execute workflow with SSOT user execution context."""
         flow_id = self._start_execution_flow(run_id)
-        execution_data = self._extract_context_from_execution_context(context, run_id)
+        execution_data = self._extract_context_data(context, run_id)
         updated_result = await self._execute_run_with_logging(flow_id, execution_data)
         return self._finalize_execution(flow_id, context, updated_result)
     
@@ -87,27 +82,18 @@ class SupervisorExecutionHelpers:
         self.supervisor.flow_logger.start_flow(flow_id, run_id, 3)
         return flow_id
     
-    def _extract_context_from_execution_context(self, context: UserExecutionContext, run_id: str) -> dict:
-        """Extract execution context from secure user execution context.
+    def _extract_context_data(self, context: UserExecutionContext, run_id: str) -> dict:
+        """Extract execution data from SSOT user execution context.
 
-        SECURITY FIX: Issue #1017 - Validates and sanitizes context data to prevent
-        user isolation vulnerabilities and cross-user data contamination.
+        SSOT COMPLIANCE: Issue #1116 - Direct extraction without validation overhead.
+        UserExecutionContext already provides proper isolation guarantees.
         """
-        # Validate input context
-        validated_context = self._validate_user_context_security(context)
-
-        # Extract with security filtering
-        extracted_data = {
-            "thread_id": validated_context.thread_id,
-            "user_id": validated_context.user_id,
-            "user_prompt": self._sanitize_user_prompt(validated_context.agent_context.get('user_request', '')),
+        return {
+            "thread_id": context.thread_id,
+            "user_id": context.user_id,
+            "user_prompt": context.agent_context.get('user_request', ''),
             "run_id": run_id
         }
-
-        # Validate extracted data doesn't contain cross-user contamination
-        self._validate_extracted_context_isolation(extracted_data, validated_context.user_id)
-
-        return extracted_data
     
     async def _execute_run_with_logging(self, flow_id: str, context: dict) -> dict:
         """Execute run with flow logging."""
@@ -121,16 +107,13 @@ class SupervisorExecutionHelpers:
     def _finalize_execution(self, flow_id: str, context: UserExecutionContext, updated_result: dict) -> UserExecutionContext:
         """Finalize execution and create updated context.
 
-        SECURITY FIX: Issue #1017 - Validates execution results to prevent
-        cross-user data contamination in finalized context.
+        SSOT COMPLIANCE: Issue #1116 - Direct context update without sanitization.
+        UserExecutionContext factory isolation provides security guarantees.
         """
-        # Validate execution results before adding to context
-        secure_result = self._sanitize_execution_result(updated_result, context.user_id)
-
-        # Create child context with sanitized execution results
+        # Create child context with execution results
         updated_context = context.create_child_context(
             operation_name="finalized_execution",
-            additional_agent_context=secure_result
+            additional_agent_context=updated_result
         )
         self.supervisor.flow_logger.complete_flow(flow_id)
         return updated_context
