@@ -196,6 +196,7 @@ class StartupOrchestratorTests(BaseTestCase):
         self.mock_app.state.startup_phase_timings = {}
         self.mock_app.state.startup_completed_phases = []
         self.mock_app.state.startup_failed_phases = []
+        self.mock_app.state.startup_phase_errors = {}
         
         # Service attributes
         critical_services = [
@@ -298,7 +299,7 @@ class StartupOrchestratorTests(BaseTestCase):
         self.assertIn("WebSocket", self.mock_app.state.startup_error)
         self.assertIn("phase", self.mock_app.state.startup_error.lower())
 
-    def test_startup_completion_validation_enforces_business_requirements(self):
+    async def test_startup_completion_validation_enforces_business_requirements(self):
         """Test startup completion validation enforces all business requirements."""
         # Set up all phases as completed (business requirement)
         all_phases = set(StartupPhase)
@@ -313,7 +314,7 @@ class StartupOrchestratorTests(BaseTestCase):
             }
         
         # Test successful completion  
-        self.orchestrator._mark_startup_complete()
+        await self.orchestrator._mark_startup_complete()
         
         # Verify business-critical completion state
         self.assertTrue(self.mock_app.state.startup_complete)
@@ -322,7 +323,7 @@ class StartupOrchestratorTests(BaseTestCase):
         self.assertIsNone(self.mock_app.state.startup_error)
         self.assertEqual(self.mock_app.state.startup_phase, "complete")
 
-    def test_startup_completion_fails_with_missing_phases(self):
+    async def test_startup_completion_fails_with_missing_phases(self):
         """Test startup completion fails if business-critical phases are missing."""
         # Set up incomplete phases (missing critical WEBSOCKET phase)
         incomplete_phases = {StartupPhase.INIT, StartupPhase.DEPENDENCIES, StartupPhase.DATABASE}
@@ -331,7 +332,7 @@ class StartupOrchestratorTests(BaseTestCase):
         
         # Test completion validation
         with self.assertRaises(DeterministicStartupError) as cm:
-            self.orchestrator._mark_startup_complete()
+            await self.orchestrator._mark_startup_complete()
         
         # Verify error indicates missing phases  
         error_message = str(cm.exception)
