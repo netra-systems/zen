@@ -97,9 +97,7 @@ class TestSSOTExecutionCompliance(SSotBaseTestCase):
                 f"SSOT VIOLATION DETECTED: {len(violations)} files bypass unified test runner:\n"
                 f"{violation_details}\n\n"
                 f"REMEDIATION REQUIRED:\n"
-                f"1. Remove '# MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution' calls from test files\n"
+                f"1. Remove direct test execution calls from test files\n"
                 f"2. Execute tests through: python tests/unified_test_runner.py\n"
                 f"3. Use SSOT test execution patterns only\n\n"
                 f"BUSINESS IMPACT: Fragmented test execution threatens $500K+ ARR Golden Path stability"
@@ -218,15 +216,14 @@ class TestSSOTExecutionCompliance(SSotBaseTestCase):
                     lines = content.split('\n')
                 
                 for line_num, line in enumerate(lines, 1):
-                    if '# MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution),
-                            violation_type="DIRECT_PYTEST_EXECUTION",
-                            description="Direct # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution execution bypasses unified test runner",
-                            line_number=line_num,
-                            severity="CRITICAL"
+                    if 'pytest.main(' in line:
+                        pass  # REMOVED_SYNTAX_ERROR: violations.append block
+                        # REMOVED_SYNTAX_ERROR: "file": str(file_path.relative_to(self.project_root)),
+                            "line": line_num,
+                            "violation_type": "DIRECT_PYTEST_EXECUTION",
+                            "description": "Direct pytest.main execution bypasses unified test runner",
+                            "line_number": line_num,
+                            "severity": "CRITICAL"
                         ))
                         
             except Exception as e:

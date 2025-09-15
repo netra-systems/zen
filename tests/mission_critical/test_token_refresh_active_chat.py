@@ -573,6 +573,5 @@ if __name__ == "__main__":
         asyncio.run(TestTokenRefreshPerformance().test_refresh_latency_under_load())
     else:
         # Run all tests
-        # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution
+        print("Please use: python tests/unified_test_runner.py --category mission_critical")
+        print("For more info: reports/TEST_EXECUTION_GUIDE.md")

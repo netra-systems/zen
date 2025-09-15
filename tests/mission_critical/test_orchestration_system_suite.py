@@ -825,9 +825,6 @@
     # REMOVED_SYNTAX_ERROR: print("[U+1F6E1][U+FE0F] Circuit breakers, health propagation, disaster recovery")
     # REMOVED_SYNTAX_ERROR: print("=" * 80)
 
-    # REMOVED_SYNTAX_ERROR: result = # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution
 
     # REMOVED_SYNTAX_ERROR: if result == 0:
         # REMOVED_SYNTAX_ERROR: print(" )

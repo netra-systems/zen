@@ -104,9 +104,7 @@ class TestDirectPytestBypassReproduction(SSotBaseTestCase):
                 tree = ast.parse(content)
                 
                 for node in ast.walk(tree):
-                    # Direct # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution calls
+                    # Direct pytest.main calls detection
                     if (isinstance(node, ast.Call) and 
                         isinstance(node.func, ast.Attribute) and
                         isinstance(node.func.value, ast.Name) and
@@ -153,9 +151,8 @@ class TestDirectPytestBypassReproduction(SSotBaseTestCase):
                 line_clean = line.strip()
                 
                 # Direct pytest.main patterns
-                if ('# MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution and
+                if (line_clean.find('pytest.main') != -1 and
+                    not line_clean.startswith('#') and
                     not line_clean.startswith('"""') and
                     not line_clean.startswith("'")):
                     
@@ -357,9 +354,7 @@ class TestDirectPytestBypassReproduction(SSotBaseTestCase):
         report_lines.extend([
             "",
             "REMEDIATION REQUIRED:",
-            "1. Replace all direct # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution calls with unified_test_runner.py imports", 
+            # REMOVED_SYNTAX_ERROR: "1. Replace all direct pytest.main calls with unified_test_runner.py imports",
             "2. Update all subprocess pytest calls to use unified_test_runner.py",
             "3. Ensure consistent test execution patterns across all test files",
             "4. Maintain SSOT compliance for test infrastructure"

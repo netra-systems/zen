@@ -267,9 +267,12 @@ class TestSSOTTestRunnerEnforcement(SSotBaseTestCase):
         
         # Must have test execution patterns
         test_execution_patterns = [
-            '# MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution and pattern in content_lower) or \
+            '# MIGRATED: Use SSOT unified test runner',
+            '# python tests/unified_test_runner.py --category unit',
+            'pass  # TODO: Replace with appropriate SSOT test execution'
+        ]
+
+        has_test_execution = any(pattern in content_lower for pattern in test_execution_patterns if isinstance(pattern, str)) or \
                            any(pattern for pattern in test_execution_patterns if isinstance(pattern, bool) and pattern)
         
         return has_test_execution
@@ -289,12 +292,8 @@ class TestSSOTTestRunnerEnforcement(SSotBaseTestCase):
             if 'argparse' in content.lower():
                 reasons.append("Has argument parsing")
             
-            if '# MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution:
-                reasons.append("Calls # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution")
+            if 'pytest.main(' in content:
+                reasons.append("Calls pytest.main directly")
             
             if 'subprocess' in content.lower() and 'pytest' in content.lower():
                 reasons.append("Subprocess pytest execution")

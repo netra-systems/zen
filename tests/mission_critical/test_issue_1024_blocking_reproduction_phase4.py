@@ -361,14 +361,8 @@ class TestUnauthorizedRunnerImpactReproduction(BaseTestCase):
 
     def test_reproduce_pytest_main_environment_contamination(self):
         """
-        Reproduce environment contamination from direct # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution calls
         Expected to FAIL - demonstrates technical root cause
         """
-        # Simulate multiple # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution calls with different configurations
         pytest_contamination_scenarios = [
             "pytest_main_with_different_configs",
             "pytest_main_with_plugin_conflicts",
@@ -380,9 +374,6 @@ class TestUnauthorizedRunnerImpactReproduction(BaseTestCase):
 
         for scenario in pytest_contamination_scenarios:
             # Simulate environment contamination effects
-            # Different # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution calls modify global state
             contamination_probability = 0.85  # High probability of contamination
 
             import random
@@ -393,9 +384,6 @@ class TestUnauthorizedRunnerImpactReproduction(BaseTestCase):
         self.assertEqual(
             len(contamination_detected), 0,
             f"TECHNICAL CRITICAL: {len(contamination_detected)} environment contamination "
-            f"scenarios detected from unauthorized # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution calls. "
             f"Contamination types: {contamination_detected}. "
             f"Test environment state corrupted between runs."
         )
@@ -467,24 +455,12 @@ class TestUnauthorizedRunnerImpactReproduction(BaseTestCase):
 
 if __name__ == "__main__":
     # CRITICAL: This standalone execution is THE EXACT PROBLEM we're testing!
-    # This __main__ block with # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution is an unauthorized test runner
     # that demonstrates Issue #1024 in action!
 
     print("=" * 80)
     print("🚨 CRITICAL DEMONSTRATION: THIS IS THE EXACT PROBLEM! 🚨")
-    print("This standalone __main__ block with # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution IS Issue #1024!")
     print("Unauthorized test runner bypassing unified_test_runner.py SSOT")
     print("This creates deployment blocking test infrastructure chaos")
     print("=" * 80)
 
-    # This # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution call is itself a violation that causes the problems
     # we're testing for - it's a perfect reproduction of the issue!
-    # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution
