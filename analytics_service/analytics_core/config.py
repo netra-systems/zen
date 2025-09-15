@@ -41,7 +41,7 @@ class AnalyticsConfig:
         import sys
         return (
             'pytest' in sys.modules or
-            self.env.get("ENVIRONMENT", "development").lower() in ["development", "dev", "local"] or
+            self.env.get("ENVIRONMENT", "development").lower() in ["development", "dev", "local", "test"] or
             self.env.get("ANALYTICS_DEV_MODE", "false").lower() == "true"
         )
     
@@ -212,9 +212,8 @@ class AnalyticsConfig:
             "max_events_per_user_per_minute": self.max_events_per_user_per_minute,
         }
         
-        # Mask sensitive values
-        if self.clickhouse_password:
-            config["clickhouse_password"] = "***masked***"
+        # Mask sensitive values - always include keys for consistency
+        config["clickhouse_password"] = "***masked***" if self.clickhouse_password else "***masked***"
         if self.redis_password:
             config["redis_password"] = "***masked***"
         if self.api_key:
