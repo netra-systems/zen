@@ -50,7 +50,7 @@ def ensure_session_id(value: str) -> SessionID:
 # Full stack components for message routing
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.core.websocket_message_handler import WebSocketMessageHandler
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 
 # Helper function for tests
 def generate_websocket_id() -> str:

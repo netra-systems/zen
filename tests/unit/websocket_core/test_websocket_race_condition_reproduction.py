@@ -101,7 +101,7 @@ class TestWebSocketRaceConditionReproduction(BaseIntegrationTest):
 
                 # Attempt 2: Unified WebSocket Manager (potential singleton conflict)
                 try:
-                    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+                    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
                     instance2 = UnifiedWebSocketManager()
                     initialization_results.append(("unified_manager", id(instance2), time.time() - start_time))
                 except Exception as e:
@@ -311,7 +311,7 @@ class TestWebSocketRaceConditionReproduction(BaseIntegrationTest):
 
                 # Pattern 3: Unified manager (potential singleton issues)
                 try:
-                    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+                    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
                     unified_start = time.time()
                     manager3 = UnifiedWebSocketManager()
                     creation_attempts.append({
@@ -487,7 +487,7 @@ class TestWebSocketRaceConditionReproduction(BaseIntegrationTest):
 
                     # Pattern 3: Unified manager (singleton, may accumulate)
                     try:
-                        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+                        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
                         unified_instance = UnifiedWebSocketManager()
                         created_instances.append(('unified', unified_instance))
                     except ImportError:

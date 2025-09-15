@@ -135,7 +135,7 @@ def test_websocket_utils_pattern_matching():
 def test_websocket_manager_cleanup_integration():
     """Test that WebSocket manager uses new cleanup logic."""
     try:
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
         
         # Test that the manager has the enhanced remove_connection method
         manager = UnifiedWebSocketManager()

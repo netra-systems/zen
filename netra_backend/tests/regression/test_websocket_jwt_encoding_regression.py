@@ -166,7 +166,7 @@ class TestWebSocketAuthenticationIntegration:
     @pytest.mark.asyncio
     async def test_websocket_auth_header_format(self):
         """Test that the auth header is correctly formatted."""
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
         test_token = TEST_JWT_TOKENS[0]
         encoded_token = simulate_frontend_encoding(test_token)
         auth_header = f'Bearer {encoded_token}'

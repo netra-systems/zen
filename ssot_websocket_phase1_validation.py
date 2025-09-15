@@ -57,7 +57,7 @@ def validate_interface_standardization():
 
         # Test 2: Import the SSOT implementation
         print("\n[PASS] Test 2: SSOT Implementation Import")
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
         print(f"   SSOT Implementation: {UnifiedWebSocketManager}")
 
         # Test 3: Create valid context and manager

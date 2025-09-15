@@ -176,9 +176,12 @@ class TestGoogleOAuthUserIDValidation:
         ]
         
         for user_id in google_oauth_user_ids:
-            with pytest.raises(ValueError, match="Invalid user_id format"):
-                # This SHOULD PASS but currently FAILS - testing the broken state
-                ensure_user_id(user_id)
+            # This should PASS after Google OAuth pattern is properly recognized
+            try:
+                result = ensure_user_id(user_id)
+                assert result == UserID(user_id), f"Google OAuth ID {user_id} should be valid"
+            except ValueError as e:
+                pytest.fail(f"Google OAuth ID {user_id} should be valid but failed: {e}")
     
     def test_google_oauth_user_id_pattern_recognition(self):
         """
@@ -192,10 +195,9 @@ class TestGoogleOAuthUserIDValidation:
         ]
         
         for user_id in google_oauth_ids:
-            # This should PASS after the fix is applied
-            result = is_valid_id_format(user_id, IDType.USER)
-            # Currently will FAIL - test documents the broken state
-            assert not result, f"Google OAuth ID {user_id} currently rejected (needs fix)"
+            # This should PASS with the Google OAuth pattern fix
+            result = is_valid_id_format(user_id)
+            assert result, f"Google OAuth ID {user_id} should be valid with pattern r'^\\d{{18,21}}$'"
     
     def test_google_oauth_pattern_regex_validation(self):
         """
@@ -232,22 +234,22 @@ class TestGoogleOAuthUserIDValidation:
         """
         google_user_id = "105945141827451681156"  # From GCP logs
         
-        # This should work after the fix is applied
+        # This should work after the Google OAuth pattern fix
         try:
             # Test user execution context creation with Google OAuth ID
             context = UserExecutionContext(
                 user_id=google_user_id,
-                thread_id="thread_test_123", 
+                thread_id="thread_test_123",
                 run_id="run_test_123"
             )
-            
-            # Should fail currently due to validation error
-            pytest.fail("Expected ValidationError for Google OAuth user ID (not yet fixed)")
-            
+
+            # Should succeed with Google OAuth pattern recognition
+            assert context.user_id == google_user_id
+            assert context.thread_id == "thread_test_123"
+            assert context.run_id == "run_test_123"
+
         except ValueError as e:
-            # This is the expected current behavior - documenting the broken state
-            assert "Invalid user_id format" in str(e)
-            assert google_user_id in str(e)
+            pytest.fail(f"Google OAuth user ID {google_user_id} should be valid: {e}")
     
     def test_existing_user_id_patterns_still_work(self):
         """
@@ -282,15 +284,16 @@ class TestThreadIDConsistencyFix:
         broken_run_id = "websocket_factory_1757413642203"
         
         # This should NOT pass validation (documents broken state)
-        result = is_valid_id_format(broken_run_id, IDType.RUN)
+        result = is_valid_id_format(broken_run_id)
         assert not result, "Factory-generated run_id should follow SSOT format"
-        
-        # Expected SSOT pattern after fix
+
+        # Expected SSOT pattern after fix - generate_run_id requires thread_id parameter
         id_manager = UnifiedIDManager()
-        proper_run_id = id_manager.generate_run_id()
-        
+        test_thread_id = "thread_test_123_456_abcd1234"
+        proper_run_id = UnifiedIDManager.generate_run_id(test_thread_id)
+
         # This SHOULD pass validation
-        proper_result = is_valid_id_format(proper_run_id, IDType.RUN)
+        proper_result = is_valid_id_format(proper_run_id)
         assert proper_result, f"SSOT-generated run_id should be valid: {proper_run_id}"
     
     def test_thread_id_run_id_consistency_validation(self):

@@ -3,7 +3,7 @@
 Integration tests of all performance improvements working together.
 """
 import pytest
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Skip this entire module due to missing dependencies

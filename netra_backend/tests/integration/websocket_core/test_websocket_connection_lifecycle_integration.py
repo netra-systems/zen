@@ -25,7 +25,7 @@ from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, Mock, MagicMock, patch
 from contextlib import asynccontextmanager
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, UserWebSocketEmitter, UserWebSocketContext, UserWebSocketConnection, WebSocketEvent, ConnectionStatus
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = central_logger.get_logger(__name__)

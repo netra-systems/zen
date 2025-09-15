@@ -296,7 +296,7 @@ class TestWebSocketSSOTFactoryPatterns(SSotAsyncTestCase):
         legacy_import_results = {}
 
         legacy_patterns = [
-            ("unified_manager", "from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager"),
+            ("unified_manager", "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager"),
             ("direct_core", "from netra_backend.app.websocket_core import WebSocketManager"),
             ("factory_core", "from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager"),
         ]

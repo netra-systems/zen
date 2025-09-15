@@ -23,7 +23,7 @@ from datetime import datetime
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol, WebSocketManagerProtocolValidator
 from netra_backend.app.websocket_core.protocol_validator import validate_websocket_manager_on_startup, create_protocol_compliance_report, test_critical_method_functionality
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager, IsolatedWebSocketManager
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 

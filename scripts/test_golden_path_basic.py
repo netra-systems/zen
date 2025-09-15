@@ -53,7 +53,7 @@ async def test_basic_imports():
     
     try:
         # Core WebSocket functionality
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
         from netra_backend.app.routes.websocket import websocket_endpoint
         print(" PASS:  WebSocket components imported successfully")
         
@@ -82,7 +82,7 @@ async def test_basic_websocket_manager():
     print(" SEARCH:  Testing WebSocket manager creation...")
     
     try:
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
         
         # Create a basic manager instance
         manager = UnifiedWebSocketManager()

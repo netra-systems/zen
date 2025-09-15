@@ -42,7 +42,7 @@ from test_framework.websocket_helpers import (
 
 try:
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from shared.isolated_environment import get_env
     RELIABILITY_COMPONENTS_AVAILABLE = True

@@ -10,10 +10,10 @@ Business Value: Protects $500K+ ARR Golden Path authentication functionality.
 
 import pytest
 from unittest.mock import Mock, MagicMock, patch
-from test_framework.ssot.base_test_case import SSotTestCase
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestE2EBypassKeyValidationIssue1087(SSotTestCase):
+class TestE2EBypassKeyValidationIssue1087(SSotBaseTestCase):
     """Unit tests for E2E bypass key configuration validation."""
 
     def setUp(self):
