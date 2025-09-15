@@ -122,7 +122,7 @@ class TestIssue889ManagerDuplicationIntegration(SSotAsyncTestCase):
                 })()
                 
                 # Create manager with realistic timing
-                manager = await get_websocket_manager(user_context=user_context)
+                manager = get_websocket_manager(user_context=user_context)
                 
                 creation_record = {
                     'request_index': request_index,
@@ -247,7 +247,7 @@ class TestIssue889ManagerDuplicationIntegration(SSotAsyncTestCase):
                 })()
                 
                 # Create manager from this service context
-                manager = await get_websocket_manager(user_context=service_context)
+                manager = get_websocket_manager(user_context=service_context)
                 service_managers[service_name] = {
                     'manager': manager,
                     'context': service_context,
@@ -371,7 +371,7 @@ class TestIssue889ManagerDuplicationIntegration(SSotAsyncTestCase):
                 })()
                 
                 # Create manager for this demo scenario
-                demo_manager = await get_websocket_manager(user_context=demo_context)
+                demo_manager = get_websocket_manager(user_context=demo_context)
                 demo_managers.append({
                     'manager': demo_manager,
                     'context': demo_context,

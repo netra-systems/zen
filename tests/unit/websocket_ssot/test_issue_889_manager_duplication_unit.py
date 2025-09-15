@@ -86,7 +86,7 @@ class TestIssue889ManagerDuplicationUnit(SSotAsyncTestCase):
         })()
         
         # PATH 1: Create manager through official factory function
-        manager1 = await get_websocket_manager(user_context=test_context)
+        manager1 = get_websocket_manager(user_context=test_context)
         self.created_managers.append(manager1)
         
         # PATH 2: Direct instantiation bypassing factory (VIOLATION)
@@ -135,11 +135,11 @@ class TestIssue889ManagerDuplicationUnit(SSotAsyncTestCase):
         })()
         
         # Scenario 1: Normal creation
-        manager1 = await get_websocket_manager(user_context=demo_context)
+        manager1 = get_websocket_manager(user_context=demo_context)
         self.created_managers.append(manager1)
         
         # Scenario 2: Concurrent creation (simulates race condition)
-        manager2 = await get_websocket_manager(user_context=demo_context)
+        manager2 = get_websocket_manager(user_context=demo_context)
         self.created_managers.append(manager2)
         
         # Check if different manager instances were created (violation)
@@ -188,13 +188,13 @@ class TestIssue889ManagerDuplicationUnit(SSotAsyncTestCase):
         with patch('netra_backend.app.websocket_core.websocket_manager.create_test_user_context', side_effect=track_test_context_creation):
             # Create multiple managers with None user_context
             # This should trigger test manager creation
-            manager1 = await get_websocket_manager(user_context=None)
+            manager1 = get_websocket_manager(user_context=None)
             self.created_managers.append(manager1)
             
-            manager2 = await get_websocket_manager(user_context=None)
+            manager2 = get_websocket_manager(user_context=None)
             self.created_managers.append(manager2)
             
-            manager3 = await get_websocket_manager(user_context=None)
+            manager3 = get_websocket_manager(user_context=None)
             self.created_managers.append(manager3)
             
         # This assertion WILL FAIL initially - multiple test contexts created instead of reusing
@@ -244,7 +244,7 @@ class TestIssue889ManagerDuplicationUnit(SSotAsyncTestCase):
             'is_test': True
         })()
         
-        manager = await get_websocket_manager(user_context=test_context)
+        manager = get_websocket_manager(user_context=test_context)
         self.created_managers.append(manager)
             
         # Now test the bypass scenario
@@ -261,7 +261,7 @@ class TestIssue889ManagerDuplicationUnit(SSotAsyncTestCase):
             mock_import.side_effect = import_side_effect
             
             # This should create a manager without SSOT validation
-            bypass_manager = await get_websocket_manager(user_context=test_context)
+            bypass_manager = get_websocket_manager(user_context=test_context)
             self.created_managers.append(bypass_manager)
             validation_bypassed.append(bypass_manager)
             
@@ -320,7 +320,7 @@ class TestIssue889SSotFactoryComplianceUnit(SSotAsyncTestCase):
         })()
         
         # Create manager through factory (should be allowed)
-        factory_manager = await get_websocket_manager(user_context=test_context)
+        factory_manager = get_websocket_manager(user_context=test_context)
         self.created_managers.append(factory_manager)
         
         # Attempt direct instantiation (should be detected as violation)

@@ -98,7 +98,7 @@ class TestIssue889UserIsolationUnit(SSotAsyncTestCase):
                 'session_token': f'TOKEN_{user_id}_{secrets.token_hex(8)}'
             })()
             
-            manager = await get_websocket_manager(user_context=user_context)
+            manager = get_websocket_manager(user_context=user_context)
             managers_by_user[user_id] = {
                 'manager': manager,
                 'context': user_context
@@ -188,7 +188,7 @@ class TestIssue889UserIsolationUnit(SSotAsyncTestCase):
                 'creation_timestamp': asyncio.get_event_loop().time()
             })()
             
-            manager = await get_websocket_manager(user_context=user_context)
+            manager = get_websocket_manager(user_context=user_context)
             
             return {
                 'user_id': user_id,
@@ -284,7 +284,7 @@ class TestIssue889UserIsolationUnit(SSotAsyncTestCase):
                 'state_marker': f'STATE_MARKER_{user_id}'
             })()
             
-            manager = await get_websocket_manager(user_context=user_context)
+            manager = get_websocket_manager(user_context=user_context)
             user_managers[user_id] = {
                 'manager': manager,
                 'context': user_context
@@ -362,7 +362,7 @@ class TestIssue889UserIsolationUnit(SSotAsyncTestCase):
             'demo_session_data': {'sensitive': 'demo_data', 'timestamp': 1234567890}
         })()
         
-        demo_manager = await get_websocket_manager(user_context=demo_context)
+        demo_manager = get_websocket_manager(user_context=demo_context)
         self.created_managers.append(demo_manager)
         
         # Create production user managers
@@ -378,7 +378,7 @@ class TestIssue889UserIsolationUnit(SSotAsyncTestCase):
                 'production_session_data': {'sensitive': f'prod_data_{i}', 'user_level': 'enterprise'}
             })()
             
-            prod_manager = await get_websocket_manager(user_context=prod_context)
+            prod_manager = get_websocket_manager(user_context=prod_context)
             production_managers[prod_user_id] = {
                 'manager': prod_manager,
                 'context': prod_context
