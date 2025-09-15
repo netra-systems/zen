@@ -38,7 +38,7 @@ from unittest.mock import Mock, AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional, Set
 from concurrent.futures import ThreadPoolExecutor
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuthenticator, WebSocketAuthResult
 from netra_backend.app.services.user_execution_context import UserExecutionContext

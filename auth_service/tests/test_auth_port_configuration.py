@@ -19,7 +19,7 @@ import os
 import asyncio
 from auth_service.auth_core.auth_environment import get_auth_env
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager
 
 # Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
