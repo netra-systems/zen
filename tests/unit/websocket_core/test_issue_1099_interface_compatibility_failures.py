@@ -523,7 +523,7 @@ class TestAdapterPatternFailures:
     Tests demonstrating why adapter patterns fail to solve the incompatibilities.
     """
     
-    def test_adapter_pattern_complexity_failure(self):
+    async def test_adapter_pattern_complexity_failure(self):
         """
         DELIBERATE FAILURE: Adapter pattern introduces excessive complexity
         
@@ -628,7 +628,7 @@ class TestAdapterPatternFailures:
         
         pytest.fail(f"Adapter pattern creates {len(adapter_maintenance_issues)} maintenance issues")
     
-    def test_bidirectional_adapter_impossibility_failure(self):
+    async def test_bidirectional_adapter_impossibility_failure(self):
         """
         DELIBERATE FAILURE: Bidirectional adapters are impossible
         

@@ -18,7 +18,7 @@ SSOT Compliance: All tests follow unified BaseTestCase patterns and real service
 """
 
 # Test discovery imports
-from .test_data_helper_agent_core_functionality import TestDataHelperAgentCoreFunctionality
+from .test_data_helper_agent_core_functionality import DataHelperAgentCoreFunctionalityTests as TestDataHelperAgentCoreFunctionality
 from .test_data_helper_tool_request_generation import TestDataHelperToolRequestGeneration
 from .test_data_helper_agent_user_isolation import TestDataHelperAgentUserIsolation
 from .test_data_helper_integration_patterns import TestDataHelperIntegrationPatterns
