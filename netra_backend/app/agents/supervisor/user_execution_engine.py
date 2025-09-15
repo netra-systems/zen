@@ -96,11 +96,44 @@ class AgentRegistryAdapter:
         # ISSUE #1186 PHASE 2: Removed _agent_cache to eliminate state contamination
         # Each get() call now creates a fresh instance for proper user isolation
     
-    async def get(self, agent_name: str):
+    def get(self, agent_name: str):
         """Get agent instance by name - creates fresh instance each time.
         
         ISSUE #1186 PHASE 2: Eliminated caching to prevent multi-user contamination.
         Each call creates a fresh agent instance bound to the specific user context.
+        
+        Note: This returns a coroutine for async contexts or handles sync contexts appropriately.
+        
+        Args:
+            agent_name: Name of the agent to get
+            
+        Returns:
+            Agent instance or None if not found (may be awaitable)
+        """
+        try:
+            # ISSUE #1186 PHASE 2: No cache checking - always create fresh instance
+            logger.debug(f"Creating fresh agent instance: {agent_name} for user {self.user_context.user_id}")
+            
+            # Get agent class from registry
+            agent_class = self.agent_class_registry.get(agent_name)
+            if not agent_class:
+                logger.debug(f"Agent class not found in registry: {agent_name}")
+                return None
+            
+            # Use factory to create fresh instance (no caching)
+            # This returns a coroutine that the caller needs to await
+            return self.agent_factory.create_instance(
+                agent_name,
+                self.user_context,
+                agent_class=agent_class
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to create agent instance for {agent_name}: {e}")
+            return None
+    
+    async def get_async(self, agent_name: str):
+        """Async version of get() method for explicit async usage.
         
         Args:
             agent_name: Name of the agent to get
@@ -110,7 +143,7 @@ class AgentRegistryAdapter:
         """
         try:
             # ISSUE #1186 PHASE 2: No cache checking - always create fresh instance
-            logger.debug(f"Creating fresh agent instance: {agent_name} for user {self.user_context.user_id}")
+            logger.debug(f"Creating fresh agent instance (async): {agent_name} for user {self.user_context.user_id}")
             
             # Get agent class from registry
             agent_class = self.agent_class_registry.get(agent_name)
@@ -126,7 +159,7 @@ class AgentRegistryAdapter:
             )
             
             # ISSUE #1186 PHASE 2: No caching - return fresh instance
-            logger.info(f"Created fresh agent instance: {agent_name} for user {self.user_context.user_id}")
+            logger.info(f"Created fresh agent instance (async): {agent_name} for user {self.user_context.user_id}")
             return agent_instance
             
         except Exception as e:
