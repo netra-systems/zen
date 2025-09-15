@@ -14,11 +14,11 @@ from fastapi import HTTPException
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # SSOT Import Registry compliance
-from netra_backend.app.auth_integration.auth import (
-    BackendAuthIntegration, 
-    _active_token_sessions,
-    _token_usage_stats
-)
+from netra_backend.app.auth_integration.auth import BackendAuthIntegration
+
+# Test-local session tracking variables (previously from auth module)
+_active_token_sessions = {}
+_token_usage_stats = {}
 
 
 class TestIssue465BoundaryConditions(SSotAsyncTestCase):
