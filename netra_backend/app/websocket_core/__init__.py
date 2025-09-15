@@ -22,105 +22,70 @@ Business Value:
 import warnings
 import inspect
 
-def _check_import_pattern_and_warn():
+# ISSUE #1236 FIX: Simple and reliable warning system
+def _check_direct_import_and_warn():
     """
-    Smart warning logic that only triggers for problematic import patterns.
+    Check if this module is being imported directly and warn appropriately.
     
-    Analyzes the call stack to determine the specific import pattern being used:
-    - WARNS: from netra_backend.app.websocket_core import WebSocketManager (broad import)
-    - SAFE: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager (specific import)
-    - SAFE: from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator (specific import)
+    ISSUE #1236 FIX: This approach detects when someone imports from this __init__.py
+    versus importing from a specific submodule. It only warns for direct imports.
     """
-    try:
-        # Inspect the call stack to find the import statement
-        frame = inspect.currentframe()
-        while frame:
-            frame = frame.f_back
-            if frame is None:
-                break
-                
-            # Look for import-related code in the frame
-            filename = frame.f_code.co_filename
+    import traceback
+    
+    # Get the current call stack
+    stack = traceback.extract_stack()
+    
+    # Look for the frame that contains the import statement
+    for frame in reversed(stack):
+        # Skip this file and internal Python machinery
+        if frame.filename == __file__ or 'importlib' in frame.filename or '<frozen' in frame.filename:
+            continue
             
-            # Skip internal Python import machinery
-            if 'importlib' in filename or '<frozen' in filename:
-                continue
-                
-            # Check if this frame contains an import statement
-            # This occurs when someone does: from netra_backend.app.websocket_core import SomeClass
-            # vs: from netra_backend.app.websocket_core.specific_module import SomeClass
-            if frame.f_code.co_name == '<module>':
-                # Get local variables to see what's being imported
-                frame_locals = frame.f_locals
-                
-                # Check if we're in a direct import from websocket_core (problematic pattern)
-                # The key indicator is when the import statement directly targets this __init__.py
-                # rather than a specific submodule
-                
-                # Look for indicators that this is a direct import from websocket_core
-                # This happens when the import statement is "from netra_backend.app.websocket_core import ..."
-                import sys
-                
-                # Check the module being loaded
-                module_name = frame_locals.get('__name__', '')
-                
-                # If we're being imported directly (not through a submodule), warn
-                # The pattern we want to catch is when someone imports directly from this __init__.py
-                # rather than from a specific submodule like websocket_manager.py
-                
-                # Check if there's an import statement in the current call stack
-                # by examining the bytecode or local context
-                import traceback
-                stack = traceback.extract_stack()
-                
-                # Look for import patterns in the stack
-                for stack_frame in stack:
-                    if stack_frame.filename != __file__:  # Not this __init__.py file
-                        # Read the line to check import pattern
-                        try:
-                            with open(stack_frame.filename, 'r') as f:
-                                lines = f.readlines()
-                                if stack_frame.lineno <= len(lines):
-                                    line = lines[stack_frame.lineno - 1].strip()
-                                    
-                                    # Check for problematic patterns
-                                    # PROBLEMATIC: from netra_backend.app.websocket_core import WebSocketManager
-                                    # SAFE: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-                                    
-                                    if 'from netra_backend.app.websocket_core import' in line:
-                                        # This is a direct import from websocket_core - warn
-                                        if not any(submodule in line for submodule in [
-                                            'websocket_core.websocket_manager',
-                                            'websocket_core.event_validator', 
-                                            'websocket_core.unified_emitter',
-                                            'websocket_core.handlers',
-                                            'websocket_core.types',
-                                            'websocket_core.utils',
-                                            'websocket_core.auth',
-                                            'websocket_core.context',
-                                            'websocket_core.migration_adapter',
-                                            'websocket_core.user_context_extractor'
-                                        ]):
-                                            warnings.warn(
-                                                f"ISSUE #1144: Direct import from 'netra_backend.app.websocket_core' detected in {stack_frame.filename}:{stack_frame.lineno}. "
-                                                f"Line: {line.strip()}. "
-                                                f"Use specific module imports like 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'. "
-                                                f"This import path will be removed in Phase 2 of SSOT consolidation.",
-                                                DeprecationWarning,
-                                                stacklevel=6  # Adjust to point to the actual import line
-                                            )
-                                            return
-                        except (IOError, IndexError):
-                            # Can't read the file or line, skip
-                            continue
-                break
-    except Exception:
-        # If anything goes wrong with the inspection, fail silently
-        # We don't want to break imports due to warning logic issues
-        pass
+        # Read the source line to check the import pattern
+        try:
+            with open(frame.filename, 'r') as f:
+                lines = f.readlines()
+                if frame.lineno <= len(lines):
+                    line = lines[frame.lineno - 1].strip()
+                    
+                    # Check if this is a direct import from websocket_core (should warn)
+                    # vs a specific module import (should not warn)
+                    if 'from netra_backend.app.websocket_core import' in line:
+                        # Check if it's a direct import (should warn) vs specific module import (should not warn)
+                        if not any(submodule in line for submodule in [
+                            'websocket_core.websocket_manager',
+                            'websocket_core.event_validator',
+                            'websocket_core.unified_emitter',
+                            'websocket_core.handlers',
+                            'websocket_core.types',
+                            'websocket_core.utils',
+                            'websocket_core.auth',
+                            'websocket_core.context',
+                            'websocket_core.migration_adapter',
+                            'websocket_core.user_context_extractor',
+                            'websocket_core.protocols',
+                            'websocket_core.race_condition_prevention',
+                            'websocket_core.connection_state_machine',
+                            'websocket_core.message_queue'
+                        ]):
+                            # This is a direct import - issue warning
+                            warnings.warn(
+                                f"ISSUE #1144: Direct import from 'netra_backend.app.websocket_core' is deprecated. "
+                                f"Use specific module imports like 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'. "
+                                f"This import path will be removed in Phase 2 of SSOT consolidation.",
+                                DeprecationWarning,
+                                stacklevel=2
+                            )
+                            return
+        except (IOError, IndexError, OSError):
+            # If we can't read the file, skip this frame
+            continue
+        
+        # Only check the first non-internal frame
+        break
 
-# Call the smart warning check
-_check_import_pattern_and_warn()
+# Call the warning check - this will only warn for direct imports
+_check_direct_import_and_warn()
 
 # ISSUE #824 REMEDIATION: Import from canonical SSOT path only
 from netra_backend.app.websocket_core.websocket_manager import (
@@ -502,6 +467,7 @@ __all__ = [
     # Constants
     "CRITICAL_EVENTS",
 ]
+
 
 # Log consolidation
 from netra_backend.app.logging_config import central_logger
