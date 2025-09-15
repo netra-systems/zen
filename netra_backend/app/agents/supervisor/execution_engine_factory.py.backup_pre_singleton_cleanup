@@ -866,93 +866,49 @@ class ExecutionEngineFactory:
             return {'error': str(e)}
 
 
-# ISSUE #1116 REMEDIATION: Phase 1 Singleton to User-Scoped Factory Migration
-# Replace global singleton with user-scoped factory for multi-user safety
-
-class ExecutionEngineFactoryManager:
-    """User-scoped ExecutionEngineFactory manager for multi-user isolation.
-
-    CRITICAL SECURITY: Prevents cross-user data contamination by ensuring
-    each request gets proper user context isolation.
-
-    Business Value: Enables $500K+ ARR multi-user chat functionality
-    with enterprise-grade user isolation.
-    """
-
-    def __init__(self):
-        """Initialize factory manager with per-user context storage."""
-        self._user_factories: Dict[str, ExecutionEngineFactory] = {}
-        self._lock = asyncio.Lock()
-
-    async def get_factory(self, user_context: Optional[str] = None) -> ExecutionEngineFactory:
-        """Get user-scoped ExecutionEngineFactory instance.
-
-        Args:
-            user_context: User identifier for isolation
-
-        Returns:
-            ExecutionEngineFactory: Isolated factory for the user
-        """
-        # Default context for backward compatibility
-        if user_context is None:
-            user_context = "default_global"
-
-        async with self._lock:
-            if user_context not in self._user_factories:
-                # Try to get configured factory from FastAPI app state first
-                try:
-                    from netra_backend.app.main import app
-                    if hasattr(app.state, 'execution_engine_factory'):
-                        # Get base configuration
-                        base_factory = app.state.execution_engine_factory
-                        # Create user-scoped instance
-                        user_factory = ExecutionEngineFactory(
-                            websocket_bridge=base_factory.websocket_bridge,
-                            database_session_manager=base_factory.database_session_manager,
-                            redis_manager=base_factory.redis_manager
-                        )
-                        self._user_factories[user_context] = user_factory
-                    else:
-                        raise ExecutionEngineFactoryError(
-                            "ExecutionEngineFactory not configured during startup. "
-                            "The factory requires a WebSocket bridge for proper agent execution. "
-                            "Check system initialization in smd.py - ensure ExecutionEngineFactory "
-                            "is created with websocket_bridge parameter during startup."
-                        )
-                except (ImportError, AttributeError) as e:
-                    raise ExecutionEngineFactoryError(
-                        f"ExecutionEngineFactory not configured during startup: {e}"
-                    )
-
-            return self._user_factories[user_context]
-
-    async def clear_user_factory(self, user_context: str) -> None:
-        """Clear factory for specific user (cleanup after session ends)."""
-        async with self._lock:
-            if user_context in self._user_factories:
-                factory = self._user_factories.pop(user_context)
-                # Clean up any resources if needed
-                if hasattr(factory, 'cleanup'):
-                    await factory.cleanup()
-
-# Factory manager instance for creating user-scoped factories
-_factory_manager = ExecutionEngineFactoryManager()
-_factory_lock = asyncio.Lock()  # Keep for backward compatibility
+# Singleton factory instance
+_factory_instance: Optional[ExecutionEngineFactory] = None
+_factory_lock = asyncio.Lock()
 
 
-async def get_execution_engine_factory(user_context: Optional[str] = None) -> ExecutionEngineFactory:
-    """Get user-scoped ExecutionEngineFactory instance.
-
-    Args:
-        user_context: User identifier for isolation (optional for backward compatibility)
-
+async def get_execution_engine_factory() -> ExecutionEngineFactory:
+    """Get configured ExecutionEngineFactory instance.
+    
     Returns:
-        ExecutionEngineFactory: User-isolated factory instance
-
+        ExecutionEngineFactory: Configured factory instance
+        
     Raises:
         ExecutionEngineFactoryError: If factory not configured during startup
     """
-    return await _factory_manager.get_factory(user_context)
+    # Try to get configured factory from FastAPI app state first
+    try:
+        from fastapi import Request
+        from starlette.middleware.base import BaseHTTPMiddleware
+        import contextvars
+        
+        # Try to get from current app context if available
+        try:
+            from netra_backend.app.main import app
+            if hasattr(app.state, 'execution_engine_factory'):
+                return app.state.execution_engine_factory
+        except (ImportError, AttributeError):
+            pass
+    except ImportError:
+        pass
+    
+    # Fallback to singleton pattern with clear error messaging
+    global _factory_instance
+    
+    async with _factory_lock:
+        if _factory_instance is None:
+            raise ExecutionEngineFactoryError(
+                "ExecutionEngineFactory not configured during startup. "
+                "The factory requires a WebSocket bridge for proper agent execution. "
+                "Check system initialization in smd.py - ensure ExecutionEngineFactory "
+                "is created with websocket_bridge parameter during startup."
+            )
+        
+        return _factory_instance
 
 
 async def configure_execution_engine_factory(

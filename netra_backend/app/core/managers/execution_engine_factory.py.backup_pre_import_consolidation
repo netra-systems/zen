@@ -17,7 +17,7 @@ COMPLIANCE NOTES:
 - Provides proper execution engine factory functionality
 
 IMPORT GUIDANCE:
-- DEPRECATED: from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+- DEPRECATED: from netra_backend.app.core.managers.execution_engine_factory import ExecutionEngineFactory
 - RECOMMENDED: from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 """
 

@@ -48,7 +48,12 @@ import statistics
 from contextlib import asynccontextmanager
 import websockets
 import aiohttp
-import resource
+try:
+    import resource
+except ImportError:
+    # Windows doesn't have resource module, use psutil fallback
+    resource = None
+    import psutil
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import RealServicesTestFixtures
 from shared.isolated_environment import get_env

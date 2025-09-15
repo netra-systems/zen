@@ -631,10 +631,59 @@ class AgentWebSocketBridge(MonitorableComponent):
             except Exception as backoff_error:
                 logger.critical(f"Health monitoring restart with backoff failed: {backoff_error}")
     
+    def is_connection_active(self, user_id: str) -> bool:
+        """
+        Check if WebSocket connection is active for the given user.
+
+        SSOT COMPLIANCE: Implements the required WebSocket protocol interface method
+        that is expected by unified_emitter.py for connection health validation.
+
+        This method is called by UnifiedWebSocketEmitter to validate connections
+        before sending events. It should return True if the connection exists
+        and is healthy for the specified user.
+
+        Args:
+            user_id: User ID to check connection for
+
+        Returns:
+            bool: True if connection is active for this user, False otherwise
+        """
+        try:
+            # Check if we have a user context matching the user_id
+            if self.user_context and hasattr(self.user_context, 'user_id'):
+                # For bridge instances with user context, check if user matches
+                if str(user_id) == str(self.user_context.user_id):
+                    # Check if websocket manager exists and is healthy
+                    if hasattr(self, '_websocket_manager') and self._websocket_manager:
+                        # If websocket manager has is_connection_active, use it
+                        if hasattr(self._websocket_manager, 'is_connection_active'):
+                            return self._websocket_manager.is_connection_active(user_id)
+                        # Otherwise, basic health check
+                        return True
+                    # No websocket manager but bridge exists for user
+                    return True
+                else:
+                    # User ID doesn't match this bridge's user context
+                    return False
+            else:
+                # Bridge without specific user context - check websocket manager
+                if hasattr(self, '_websocket_manager') and self._websocket_manager:
+                    if hasattr(self._websocket_manager, 'is_connection_active'):
+                        return self._websocket_manager.is_connection_active(user_id)
+                    # Fallback: assume active if manager exists
+                    return True
+                # No context and no manager - cannot determine connection state
+                return False
+
+        except Exception as e:
+            logger.warning(f"Error checking connection for user {user_id}: {e}")
+            # Conservative approach: assume inactive on error
+            return False
+
     async def health_check(self) -> HealthStatus:
         """
         Comprehensive health check of WebSocket-Agent integration.
-        
+
         Returns:
             HealthStatus with detailed health information
         """

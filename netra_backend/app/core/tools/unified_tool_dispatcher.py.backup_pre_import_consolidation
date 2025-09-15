@@ -176,7 +176,7 @@ class UnifiedToolDispatcher:
             PermissionError: If admin tools requested without admin permission
         """
         import warnings
-        from netra_backend.app.agents.supervisor.tool_dispatcher_factory import get_tool_dispatcher_factory
+        from netra_backend.app.factories.tool_dispatcher_factory import get_tool_dispatcher_factory
         
         # Issue deprecation warning for SSOT compliance tracking
         warnings.warn(
@@ -269,7 +269,7 @@ class UnifiedToolDispatcher:
                 # Automatic cleanup happens here
         """
         import warnings
-        from netra_backend.app.agents.supervisor.tool_dispatcher_factory import get_tool_dispatcher_factory
+        from netra_backend.app.factories.tool_dispatcher_factory import get_tool_dispatcher_factory
         
         # Issue deprecation warning for SSOT compliance tracking
         warnings.warn(
