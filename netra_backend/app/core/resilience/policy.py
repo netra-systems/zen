@@ -13,8 +13,9 @@ from enum import Enum
 from typing import Dict, Any, Optional
 
 from pydantic import BaseModel
+from shared.logging.unified_logging_ssot import get_logger
 
-from netra_backend.app.logging_config import central_logger as logger
+logger = get_logger(__name__)
 
 
 class EnvironmentType(str, Enum):

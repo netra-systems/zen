@@ -50,9 +50,9 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 class TestChatOrchestratorWorkflowsIntegration(BaseIntegrationTest):
     """Comprehensive integration tests for Chat Orchestrator workflows."""
 
-    def setUp(self) -> None:
+    def setup_method(self) -> None:
         """Set up test environment for chat orchestrator testing."""
-        super().setUp()
+        super().setup_method()
         self.orchestration_config = get_orchestration_config()
         self.websocket_utility = WebSocketTestUtility()
         self.user_id = f'test_user_{uuid.uuid4().hex[:8]}'

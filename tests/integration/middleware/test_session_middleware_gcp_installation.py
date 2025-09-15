@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from starlette.middleware.sessions import SessionMiddleware
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestSessionMiddlewareGCPInstallation(SSotBaseTestCase):

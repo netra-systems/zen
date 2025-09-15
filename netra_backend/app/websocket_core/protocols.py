@@ -25,7 +25,7 @@ from typing import Dict, Optional, Set, Any, List, Protocol, runtime_checkable, 
 from datetime import datetime
 from abc import abstractmethod
 
-from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+from netra_backend.app.websocket_core.types import WebSocketConnection
 from shared.logging.unified_logging_ssot import get_logger
 from shared.types.core_types import (
     UserID, ThreadID, ConnectionID, WebSocketID, RequestID,

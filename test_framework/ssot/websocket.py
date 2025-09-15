@@ -310,7 +310,7 @@ class WebSocketTestClient:
                 
                 # Apply strategy-specific connection parameters
                 connection_params = {
-                    "extra_headers": test_headers,
+                    "additional_headers": test_headers,
                     "ping_interval": 20,
                     "ping_timeout": 10,
                     "close_timeout": 10

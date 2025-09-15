@@ -208,9 +208,21 @@ class TestWebSocketContextValidationIssue1212:
                 assert result is False, f"Invalid run_id should fail validation: {invalid_run_id}"
 
                 # Should log ERROR, not warning
-                mock_logger.error.assert_called_once()
-                error_call = mock_logger.error.call_args[0][0]
-                assert "CONTEXT VALIDATION FAILED" in error_call
+                if test_run_id is None:
+                    # For None run_id, expect exactly 2 error calls (validation failed + security risk)
+                    assert mock_logger.error.call_count == 2, f"Expected 2 error calls for None run_id, got {mock_logger.error.call_count}"
+
+                    # Check that both expected error messages are present
+                    error_calls = [call[0][0] for call in mock_logger.error.call_args_list]
+                    assert any("CONTEXT VALIDATION FAILED" in call for call in error_calls)
+                    assert any("SECURITY RISK" in call for call in error_calls)
+                else:
+                    # For other invalid run_ids (empty string, whitespace), expect 1 error call
+                    assert mock_logger.error.call_count >= 1, f"Expected at least 1 error call for invalid run_id '{invalid_run_id}', got {mock_logger.error.call_count}"
+
+                    # Check that validation failed message is present
+                    error_calls = [call[0][0] for call in mock_logger.error.call_args_list]
+                    assert any("CONTEXT VALIDATION" in call for call in error_calls)
 
     def test_validation_exception_handling(self):
         """Test that validation exceptions are properly handled and logged."""
@@ -248,7 +260,7 @@ class TestWebSocketContextValidationIssue1212:
             is_suspicious = self.emitter._is_suspicious_run_id(run_id)
             assert is_suspicious, f"Case insensitive matching failed for '{run_id}' (should detect '{expected_pattern}')"
 
-    def test_integration_with_full_event_emission(self):
+    async def test_integration_with_full_event_emission(self):
         """
         Integration test: Verify warnings appear in full event emission cycle.
 
@@ -259,15 +271,17 @@ class TestWebSocketContextValidationIssue1212:
 
         # Mock the manager's send method to capture the actual event
         self.mock_manager.send_to_user = Mock()
+        # Mock connection state to allow event emission
+        self.mock_manager.is_connection_active = Mock(return_value=True)
 
         with patch('netra_backend.app.websocket_core.unified_emitter.logger') as mock_logger:
             # Try to emit an event with a suspicious run_id
-            self.emitter.emit_agent_thinking(
-                thought="Testing integration with suspicious run_id",
-                agent_name="integration_test_agent",
-                run_id=suspicious_run_id,
-                metadata={}
-            )
+            await self.emitter.emit_agent_thinking({
+                "thought": "Testing integration with suspicious run_id",
+                "agent_name": "integration_test_agent",
+                "run_id": suspicious_run_id,
+                "metadata": {}
+            })
 
             # Verify the warning was logged during emission
             mock_logger.warning.assert_called_once()

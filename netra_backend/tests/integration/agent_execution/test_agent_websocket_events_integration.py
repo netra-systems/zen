@@ -269,8 +269,8 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
     @pytest.mark.real_services
     async def test_websocket_event_data_integrity_and_user_isolation(self, chat_registry, chat_value_agents, mock_llm_manager):
         """Test WebSocket events maintain data integrity and user isolation."""
-        user1_context = UserExecutionContext(user_id='chat_user_1_isolation', thread_id='chat_thread_1', run_id='chat_run_1', request_id='chat_req_1', metadata={'secret_data': 'user_1_confidential', 'user_request': 'User 1 optimization'})
-        user2_context = UserExecutionContext(user_id='chat_user_2_isolation', thread_id='chat_thread_2', run_id='chat_run_2', request_id='chat_req_2', metadata={'secret_data': 'user_2_confidential', 'user_request': 'User 2 analysis'})
+        user1_context = UserExecutionContext(user_id='chat_user_1_isolation', thread_id='chat_thread_1', run_id='chat_run_1', request_id='chat_req_1', agent_context={'secret_data': 'user_1_confidential', 'user_request': 'User 1 optimization'})
+        user2_context = UserExecutionContext(user_id='chat_user_2_isolation', thread_id='chat_thread_2', run_id='chat_run_2', request_id='chat_req_2', agent_context={'secret_data': 'user_2_confidential', 'user_request': 'User 2 analysis'})
         bridge1 = await self.event_tracker.create_bridge(user1_context)
         bridge2 = await self.event_tracker.create_bridge(user2_context)
         engine1 = ExecutionEngine._init_from_factory(registry=chat_registry, websocket_bridge=bridge1, user_context=user1_context)
@@ -394,7 +394,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
         websocket_bridges = []
         execution_engines = []
         for i in range(concurrent_users):
-            context = UserExecutionContext(user_id=f'concurrent_chat_user_{i}', thread_id=f'concurrent_chat_thread_{i}', run_id=f'concurrent_chat_run_{i}', request_id=f'concurrent_chat_req_{i}', metadata={'user_index': i, 'concurrent_test': True})
+            context = UserExecutionContext(user_id=f'concurrent_chat_user_{i}', thread_id=f'concurrent_chat_thread_{i}', run_id=f'concurrent_chat_run_{i}', request_id=f'concurrent_chat_req_{i}', agent_context={'user_index': i, 'concurrent_test': True})
             user_contexts.append(context)
             bridge = await self.event_tracker.create_bridge(context)
             websocket_bridges.append(bridge)

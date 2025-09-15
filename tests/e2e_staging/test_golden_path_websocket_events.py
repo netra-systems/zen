@@ -132,7 +132,7 @@ class TestGoldenPathWebSocketEvents(SSotAsyncTestCase):
             # Connect to WebSocket and trigger Golden Path
             async with websockets.connect(
                 f"{STAGING_WS_URL}",
-                extra_headers={"Authorization": f"Bearer {auth_token}"}
+                additional_headers={"Authorization": f"Bearer {auth_token}"}
             ) as websocket:
                 
                 # Start event collection
@@ -369,7 +369,7 @@ class TestGoldenPathWebSocketEvents(SSotAsyncTestCase):
             # Connect to WebSocket
             async with websockets.connect(
                 f"{STAGING_WS_URL}",
-                extra_headers={"Authorization": f"Bearer {auth_token}"}
+                additional_headers={"Authorization": f"Bearer {auth_token}"}
             ) as websocket:
                 
                 # Start event collection
@@ -443,7 +443,7 @@ class TestGoldenPathWebSocketEvents(SSotAsyncTestCase):
             
             async with websockets.connect(
                 f"{STAGING_WS_URL}",
-                extra_headers={"Authorization": f"Bearer {auth_token}"}
+                additional_headers={"Authorization": f"Bearer {auth_token}"}
             ) as websocket:
                 
                 # Send initial message

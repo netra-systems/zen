@@ -1373,12 +1373,23 @@ class UserExecutionEngine(IExecutionEngine, ToolExecutionEngineInterface):
             if not registry:
                 raise ValueError("Agent registry not available in factory and initialization failed")
             
-            if hasattr(self.agent_factory, '_websocket_bridge'):
+            if hasattr(self.agent_factory, '_websocket_bridge') and self.agent_factory._websocket_bridge is not None:
                 websocket_bridge = self.agent_factory._websocket_bridge
             elif self.websocket_emitter and hasattr(self.websocket_emitter, 'websocket_bridge'):
                 # Get WebSocket bridge from emitter (for tests)
                 websocket_bridge = self.websocket_emitter.websocket_bridge
                 logger.debug("Using WebSocket bridge from websocket_emitter for component initialization")
+            elif self.websocket_emitter:
+                # ISSUE #1186 FIX: For tests that pass WebSocket manager as emitter, create bridge adapter
+                # This handles the case where get_websocket_manager() result is passed as websocket_emitter
+                from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+                try:
+                    # Create proper AgentWebSocketBridge for test compatibility
+                    websocket_bridge = create_agent_websocket_bridge(self.context)
+                    logger.debug("Created AgentWebSocketBridge for test compatibility with websocket_emitter")
+                except Exception as e:
+                    logger.warning(f"Failed to create AgentWebSocketBridge, using emitter directly: {e}")
+                    websocket_bridge = self.websocket_emitter
             else:
                 # Create a mock WebSocket bridge for tests
                 logger.warning("No WebSocket bridge available - creating mock for testing")
@@ -1416,7 +1427,11 @@ class UserExecutionEngine(IExecutionEngine, ToolExecutionEngineInterface):
             # This avoids async initialization issues during component setup
             # The tool dispatcher will be created when first requested, ensuring proper WebSocket integration
             
-            self.agent_core = AgentExecutionCore(registry, websocket_bridge) 
+            # ISSUE #1186 FIX: Add websocket_notifier attribute for mission critical test compatibility
+            # The websocket_notifier provides test access to the WebSocket bridge used by components
+            self.websocket_notifier = websocket_bridge
+
+            self.agent_core = AgentExecutionCore(registry, websocket_bridge)
             # Use minimal fallback manager with user context
             self.fallback_manager = MinimalFallbackManager(self.context)
             

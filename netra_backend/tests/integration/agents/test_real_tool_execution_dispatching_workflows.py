@@ -205,8 +205,8 @@ class TestRealToolExecutionDispatchingWorkflows(SSotAsyncTestCase):
     def setUp(self):
         """Set up real workflow test environment."""
         super().setUp()
-        self.primary_user_context = UserExecutionContext(user_id='workflow_user_001', run_id=f'workflow_run_{int(time.time() * 1000)}', thread_id='workflow_thread_001', session_id='workflow_session_001', metadata={'plan_tier': 'enterprise', 'roles': ['user', 'analyst']})
-        self.secondary_user_context = UserExecutionContext(user_id='workflow_user_002', run_id=f'workflow_run_{int(time.time() * 1000) + 1}', thread_id='workflow_thread_002', session_id='workflow_session_002', metadata={'plan_tier': 'mid', 'roles': ['user']})
+        self.primary_user_context = UserExecutionContext(user_id='workflow_user_001', run_id=f'workflow_run_{int(time.time() * 1000)}', thread_id='workflow_thread_001', agent_context={'plan_tier': 'enterprise', 'roles': ['user', 'analyst']})
+        self.secondary_user_context = UserExecutionContext(user_id='workflow_user_002', run_id=f'workflow_run_{int(time.time() * 1000) + 1}', thread_id='workflow_thread_002', agent_context={'plan_tier': 'mid', 'roles': ['user']})
         self.websocket_manager = IntegratedWorkflowWebSocketManager()
         self.analytics_tool = RealBusinessAnalyticsTool({'supported_metrics': ['revenue', 'growth', 'efficiency', 'satisfaction'], 'data_sources': ['crm', 'finance', 'operations', 'marketing'], 'analysis_depth': 'enterprise'})
         self.visualization_tool = RealDataVisualizationTool({'chart_types': ['executive_dashboard', 'detailed_charts', 'interactive_reports'], 'output_formats': ['interactive', 'pdf', 'svg'], 'styling_themes': ['corporate', 'executive']})

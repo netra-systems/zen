@@ -214,7 +214,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
     @pytest.mark.real_services
     async def test_multiple_concurrent_agents_single_user(self, concurrent_registry, concurrent_agents, mock_llm_manager):
         """Test multiple agents executing concurrently for single user."""
-        user_context = UserExecutionContext(user_id='concurrent_single_user', thread_id='concurrent_single_thread', run_id='concurrent_single_run', request_id='concurrent_single_req', metadata={'concurrent_test': 'single_user_multiple_agents'})
+        user_context = UserExecutionContext(user_id='concurrent_single_user', thread_id='concurrent_single_thread', run_id='concurrent_single_run', request_id='concurrent_single_req', agent_context={'concurrent_test': 'single_user_multiple_agents'})
         websocket_bridge = await self.websocket_manager.create_bridge(user_context)
         engine = ExecutionEngine._init_from_factory(registry=concurrent_registry, websocket_bridge=websocket_bridge, user_context=user_context)
         agent_names = ['fast_agent', 'medium_agent', 'slow_agent', 'cpu_intensive']
@@ -258,7 +258,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
         websocket_bridges = []
         execution_engines = []
         for i in range(concurrent_users):
-            context = UserExecutionContext(user_id=f'concurrent_user_{i}', thread_id=f'concurrent_thread_{i}', run_id=f'concurrent_run_{i}', request_id=f'concurrent_req_{i}', metadata={'user_index': i, 'secret_data': f'user_{i}_confidential', 'concurrent_test': 'multi_user'})
+            context = UserExecutionContext(user_id=f'concurrent_user_{i}', thread_id=f'concurrent_thread_{i}', run_id=f'concurrent_run_{i}', request_id=f'concurrent_req_{i}', agent_context={'user_index': i, 'secret_data': f'user_{i}_confidential', 'concurrent_test': 'multi_user'})
             user_contexts.append(context)
             bridge = await self.websocket_manager.create_bridge(context)
             websocket_bridges.append(bridge)
@@ -309,7 +309,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
     @pytest.mark.real_services
     async def test_resource_contention_and_performance_degradation(self, concurrent_registry, concurrent_agents, mock_llm_manager):
         """Test system behavior under resource contention and performance limits."""
-        user_context = UserExecutionContext(user_id='resource_contention_user', thread_id='resource_contention_thread', run_id='resource_contention_run', request_id='resource_contention_req', metadata={'test_type': 'resource_contention'})
+        user_context = UserExecutionContext(user_id='resource_contention_user', thread_id='resource_contention_thread', run_id='resource_contention_run', request_id='resource_contention_req', agent_context={'test_type': 'resource_contention'})
         websocket_bridge = await self.websocket_manager.create_bridge(user_context)
         engine = ExecutionEngine._init_from_factory(registry=concurrent_registry, websocket_bridge=websocket_bridge, user_context=user_context)
         high_concurrency_count = 10
@@ -360,7 +360,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
         user_contexts = []
         engines = []
         for i in range(deadlock_users):
-            context = UserExecutionContext(user_id=f'deadlock_user_{i}', thread_id=f'deadlock_thread_{i}', run_id=f'deadlock_run_{i}', request_id=f'deadlock_req_{i}', metadata={'deadlock_test': i})
+            context = UserExecutionContext(user_id=f'deadlock_user_{i}', thread_id=f'deadlock_thread_{i}', run_id=f'deadlock_run_{i}', request_id=f'deadlock_req_{i}', agent_context={'deadlock_test': i})
             user_contexts.append(context)
             bridge = await self.websocket_manager.create_bridge(context)
             engine = ExecutionEngine._init_from_factory(registry=concurrent_registry, websocket_bridge=bridge, user_context=context)
@@ -443,7 +443,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
         users = []
         engines = []
         for i in range(pattern['users']):
-            context = UserExecutionContext(user_id=f'pattern_{pattern_index}_user_{i}', thread_id=f'pattern_{pattern_index}_thread_{i}', run_id=f'pattern_{pattern_index}_run_{i}', request_id=f'pattern_{pattern_index}_req_{i}', metadata={'pattern': pattern['type'], 'pattern_index': pattern_index})
+            context = UserExecutionContext(user_id=f'pattern_{pattern_index}_user_{i}', thread_id=f'pattern_{pattern_index}_thread_{i}', run_id=f'pattern_{pattern_index}_run_{i}', request_id=f'pattern_{pattern_index}_req_{i}', agent_context={'pattern': pattern['type'], 'pattern_index': pattern_index})
             users.append(context)
             bridge = await self.websocket_manager.create_bridge(context)
             engine = ExecutionEngine._init_from_factory(registry=registry, websocket_bridge=bridge, user_context=context)

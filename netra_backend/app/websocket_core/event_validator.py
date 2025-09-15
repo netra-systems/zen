@@ -1641,6 +1641,7 @@ def create_mock_critical_events(
 # Backward compatibility aliases
 WebSocketEventValidator = UnifiedEventValidator
 AgentEventValidator = UnifiedEventValidator
+EventValidator = UnifiedEventValidator  # Missing alias for golden path tests (Issue #1249)
 AgentEventValidationResult = ValidationResult
 
 # SSOT Exports
@@ -1664,6 +1665,7 @@ __all__ = [
     
     # Backward compatibility aliases
     "WebSocketEventValidator",
-    "AgentEventValidator", 
+    "AgentEventValidator",
+    "EventValidator",  # Added for golden path tests (Issue #1249)
     "AgentEventValidationResult"
 ]
