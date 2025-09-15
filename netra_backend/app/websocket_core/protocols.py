@@ -22,7 +22,7 @@ preventing future AttributeError and method missing errors.
 
 import asyncio
 from typing import Dict, Optional, Set, Any, List, Protocol, runtime_checkable, Union
-from datetime import datetime
+from datetime import datetime, timezone
 from abc import abstractmethod
 
 from netra_backend.app.websocket_core.types import WebSocketConnection
@@ -271,7 +271,7 @@ class WebSocketProtocolValidator:
             'invalid_signatures': [],
             'method_check_details': {},
             'protocol_version': '1.0.0',
-            'validation_timestamp': datetime.utcnow().isoformat()
+            'validation_timestamp': datetime.now(timezone.utc).isoformat()
         }
         
         # Define required methods with their expected signatures

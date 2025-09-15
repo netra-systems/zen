@@ -24,7 +24,7 @@ Business Value Justification (BVJ):
 import asyncio
 import logging
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, Optional, List
 
 from fastapi import APIRouter, HTTPException, Query, Depends
@@ -103,7 +103,7 @@ class HealthCheckManager:
             service=service_name,
             status="unknown",
             connected=False,
-            checked_at=datetime.utcnow()
+            checked_at=datetime.now(timezone.utc)
         )
         
         try:
@@ -147,7 +147,7 @@ class HealthCheckManager:
         
         # Cache result
         self._cache[service_name] = health_status
-        self._last_check[service_name] = datetime.utcnow()
+        self._last_check[service_name] = datetime.now(timezone.utc)
         
         return health_status
     
@@ -163,7 +163,7 @@ class HealthCheckManager:
             service=service_name,
             status="unknown",
             connected=False,
-            checked_at=datetime.utcnow()
+            checked_at=datetime.now(timezone.utc)
         )
         
         try:
@@ -235,7 +235,7 @@ class HealthCheckManager:
         
         # Cache result
         self._cache[service_name] = health_status
-        self._last_check[service_name] = datetime.utcnow()
+        self._last_check[service_name] = datetime.now(timezone.utc)
         
         return health_status
     
@@ -251,7 +251,7 @@ class HealthCheckManager:
             service=service_name,
             status="unknown",
             connected=False,
-            checked_at=datetime.utcnow()
+            checked_at=datetime.now(timezone.utc)
         )
         
         try:
@@ -332,7 +332,7 @@ class HealthCheckManager:
         
         # Cache result
         self._cache[service_name] = health_status
-        self._last_check[service_name] = datetime.utcnow()
+        self._last_check[service_name] = datetime.now(timezone.utc)
         
         return health_status
     
@@ -378,7 +378,7 @@ class HealthCheckManager:
         return SystemHealthStatus(
             overall_status=overall_status,
             services=services,
-            checked_at=datetime.utcnow(),
+            checked_at=datetime.now(timezone.utc),
             environment=self.environment,
             uptime_seconds=None  # Could add application uptime tracking
         )
@@ -388,7 +388,7 @@ class HealthCheckManager:
         if service_name not in self._cache or service_name not in self._last_check:
             return False
         
-        cache_age = (datetime.utcnow() - self._last_check[service_name]).total_seconds()
+        cache_age = (datetime.now(timezone.utc) - self._last_check[service_name]).total_seconds()
         return cache_age < self._cache_ttl
     
     def _update_response_time(self, service_name: str, response_time: float) -> None:
@@ -573,7 +573,7 @@ async def startup_validation() -> Dict[str, Any]:
         # Additional startup-specific checks
         startup_result = {
             "system_health": system_health,
-            "startup_time": datetime.utcnow().isoformat(),
+            "startup_time": datetime.now(timezone.utc).isoformat(),
             "critical_services_status": {},
             "startup_ready": False
         }
