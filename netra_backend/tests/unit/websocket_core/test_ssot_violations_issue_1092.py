@@ -38,6 +38,10 @@ import warnings
 # Import test framework SSOT utilities
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+# Import logging first
+from shared.logging.unified_logging_ssot import get_logger
+logger = get_logger(__name__)
+
 # Import WebSocket core modules to test for violations
 # Note: Some imports may fail due to circular dependencies - this proves SSOT violations exist
 try:
@@ -94,10 +98,6 @@ except ImportError as e:
     unified_init_module = None
     logger.error(f"SSOT VIOLATION: Failed to import unified_init: {e}")
 
-from shared.logging.unified_logging_ssot import get_logger
-
-logger = get_logger(__name__)
-
 
 class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
     """
@@ -108,9 +108,7 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
 
     def setUp(self):
         """Set up test environment for SSOT violation detection."""
-        super().setUp()
-
-        # Track discovered violations for reporting
+        # Initialize discovered_violations before super().setUp() in case it fails
         self.discovered_violations = {
             'broadcast_methods': [],
             'emit_event_batch_methods': [],
@@ -118,6 +116,8 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
             'import_paths': [],
             'deprecated_references': []
         }
+
+        super().setUp()
 
         logger.info("Starting Issue #1092 WebSocket SSOT violations discovery Phase 1")
 
@@ -128,6 +128,16 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
         This test SHOULD FAIL to prove the SSOT violation exists.
         """
         logger.info("Testing for multiple broadcast() method implementations - EXPECTING FAILURE")
+
+        # Initialize violations tracker if not already set up
+        if not hasattr(self, 'discovered_violations'):
+            self.discovered_violations = {
+                'broadcast_methods': [],
+                'emit_event_batch_methods': [],
+                'factory_patterns': [],
+                'import_paths': [],
+                'deprecated_references': []
+            }
 
         # Modules to check for broadcast methods (skip if failed to import due to SSOT violations)
         modules_to_check = []
@@ -512,7 +522,7 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
             })
 
         # Check for factory methods added to UnifiedWebSocketEmitter class
-        if hasattr(unified_emitter_module, 'UnifiedWebSocketEmitter'):
+        if unified_emitter_module is not None and hasattr(unified_emitter_module, 'UnifiedWebSocketEmitter'):
             emitter_class = unified_emitter_module.UnifiedWebSocketEmitter
             factory_methods = []
             for method_name in dir(emitter_class):
@@ -528,6 +538,15 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
                     'factory_methods': factory_methods,
                     'reason': f'Factory methods {factory_methods} on class violate SSOT direct instantiation'
                 })
+
+        # If unified_emitter module failed to import, that's also a violation
+        if unified_emitter_module is None:
+            factory_class_violations.append({
+                'type': 'module_import_failed',
+                'class_name': 'unified_emitter',
+                'module': 'unified_emitter',
+                'reason': 'unified_emitter module failed to import - cannot check for factory classes'
+            })
 
         logger.error(f"SSOT VIOLATION DISCOVERED: Found {len(factory_class_violations)} emitter factory violations")
         for violation in factory_class_violations:
@@ -550,8 +569,17 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
 
         bypass_violations = []
 
-        # Check unified_manager for authorization token usage
-        unified_manager_source = inspect.getsource(unified_manager_module)
+        # Check unified_manager for authorization token usage (if it could be imported)
+        if unified_manager_module is not None:
+            unified_manager_source = inspect.getsource(unified_manager_module)
+        else:
+            unified_manager_source = ""
+            bypass_violations.append({
+                'type': 'module_import_failed',
+                'module': 'unified_manager',
+                'pattern': 'unified_manager_import_failure',
+                'reason': 'unified_manager module failed to import - cannot check for bypass patterns'
+            })
 
         # Look for _ssot_authorization_token patterns
         if '_ssot_authorization_token' in unified_manager_source:

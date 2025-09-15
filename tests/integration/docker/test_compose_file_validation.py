@@ -29,14 +29,13 @@ class TestDockerComposeFileValidation(SSotBaseTestCase):
     integrations that can cause Alpine build failures and cache key issues.
     """
 
-    @classmethod
-    def setUpClass(cls):
+    def setup_method(self, method):
         """Setup test environment - locate docker-compose files"""
-        super().setUpClass()
-        cls.project_root = Path(__file__).parent.parent.parent.parent
-        cls.docker_dir = cls.project_root / 'docker'
+        super().setup_method(method)
+        self.project_root = Path(__file__).parent.parent.parent.parent
+        self.docker_dir = self.project_root / 'docker'
 
-        cls.compose_files = {
+        self.compose_files = {
             'docker-compose.yml': 'production',
             'docker-compose.staging.yml': 'staging',
             'docker-compose.alpine-test.yml': 'alpine-test',
@@ -45,7 +44,7 @@ class TestDockerComposeFileValidation(SSotBaseTestCase):
             'docker-compose.minimal-test.yml': 'minimal-test'
         }
 
-        cls.logger.info(f'Testing docker-compose files in: {cls.docker_dir}')
+        self.logger.info(f'Testing docker-compose files in: {self.docker_dir}')
 
     def test_compose_files_exist_and_parseable(self):
         """

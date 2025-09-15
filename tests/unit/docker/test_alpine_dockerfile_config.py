@@ -109,7 +109,7 @@ class TestAlpineDockerfileConfigValidation(SSotBaseTestCase):
                 if len(unique_base_images) > 1:
                     base_image_issues.append(
                         f"Inconsistent base images for {service_type}: "
-                        f"{[f\"{img['dockerfile']}={img['image']}\" for img in images]}"
+                        f"{[f'{img['dockerfile']}={img['image']}' for img in images]}"
                     )
 
         assert not base_image_issues, \

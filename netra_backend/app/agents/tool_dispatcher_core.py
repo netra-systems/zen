@@ -73,7 +73,7 @@ class ToolDispatcher:
     @property
     def tools(self) -> Dict[str, Any]:
         """Expose tools registry"""
-        return self.registry.tools
+        return self.registry._registry
     
     @property
     def has_websocket_support(self) -> bool:

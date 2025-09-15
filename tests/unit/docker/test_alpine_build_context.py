@@ -28,18 +28,17 @@ class TestAlpineBuildContextValidation(SSotBaseTestCase):
     causing cache key computation failures in Alpine Docker builds.
     """
 
-    @classmethod
-    def setUpClass(cls):
+    def setup_method(self, method):
         """Setup test environment - locate project root and Docker files"""
-        super().setUpClass()
-        cls.project_root = Path(__file__).parent.parent.parent.parent
-        cls.docker_dir = cls.project_root / 'docker'
-        cls.dockerfiles_dir = cls.project_root / 'dockerfiles'
-        cls.netra_backend_dir = cls.project_root / 'netra_backend'
-        cls.auth_service_dir = cls.project_root / 'auth_service'
-        cls.frontend_dir = cls.project_root / 'frontend'
+        super().setup_method(method)
+        self.project_root = Path(__file__).parent.parent.parent.parent
+        self.docker_dir = self.project_root / 'docker'
+        self.dockerfiles_dir = self.project_root / 'dockerfiles'
+        self.netra_backend_dir = self.project_root / 'netra_backend'
+        self.auth_service_dir = self.project_root / 'auth_service'
+        self.frontend_dir = self.project_root / 'frontend'
 
-        cls.alpine_dockerfiles = [
+        self.alpine_dockerfiles = [
             'backend.alpine.Dockerfile',
             'auth.alpine.Dockerfile',
             'frontend.alpine.Dockerfile',
@@ -48,7 +47,7 @@ class TestAlpineBuildContextValidation(SSotBaseTestCase):
             'frontend.staging.alpine.Dockerfile'
         ]
 
-        cls.logger.info(f'Testing Alpine build context in: {cls.dockerfiles_dir}')
+        self.logger.info(f'Testing Alpine build context in: {self.dockerfiles_dir}')
 
     def test_netra_backend_source_directory_exists_and_accessible(self):
         """

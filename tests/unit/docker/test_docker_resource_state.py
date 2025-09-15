@@ -30,24 +30,23 @@ class TestDockerResourceStateValidation(SSotBaseTestCase):
     that can cause cache key computation failures.
     """
 
-    @classmethod
-    def setUpClass(cls):
+    def setup_method(self, method):
         """Setup test environment - locate Docker-related directories"""
-        super().setUpClass()
-        cls.project_root = Path(__file__).parent.parent.parent.parent
-        cls.docker_dir = cls.project_root / 'docker'
-        cls.dockerfiles_dir = cls.project_root / 'dockerfiles'
+        super().setup_method(method)
+        self.project_root = Path(__file__).parent.parent.parent.parent
+        self.docker_dir = self.project_root / 'docker'
+        self.dockerfiles_dir = self.project_root / 'dockerfiles'
 
         # Common Docker data locations
-        cls.docker_data_locations = [
+        self.docker_data_locations = [
             Path.home() / '.docker',
             Path('/var/lib/docker'),
             Path('/Users') / os.environ.get('USER', 'user') / 'Library/Containers/com.docker.docker',
             Path('/tmp/docker-buildx'),
-            cls.project_root / '.docker-cache'
+            self.project_root / '.docker-cache'
         ]
 
-        cls.logger.info(f'Testing Docker resource state across system locations')
+        self.logger.info(f'Testing Docker resource state across system locations')
 
     def test_available_disk_space_sufficient_for_builds(self):
         """

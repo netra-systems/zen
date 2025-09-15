@@ -195,7 +195,7 @@ class RequestScopedToolDispatcher:
     @property
     def tools(self) -> Dict[str, Any]:
         """Expose tools registry for compatibility."""
-        return self.registry.tools
+        return self.registry._registry
     
     @property
     def has_websocket_support(self) -> bool:
@@ -357,7 +357,7 @@ class RequestScopedToolDispatcher:
             'success_rate': success_rate,
             'avg_execution_time_ms': avg_execution_time,
             'uptime_seconds': (datetime.now(timezone.utc) - self.created_at).total_seconds(),
-            'total_tools_registered': len(self.registry.tools),
+            'total_tools_registered': len(self.registry._registry),
             'has_websocket_support': self.has_websocket_support,
             'is_active': self._is_active
         }
@@ -386,7 +386,7 @@ class RequestScopedToolDispatcher:
                     logger.error(f"Error disposing WebSocket emitter: {e}")
             
             # Clear all state
-            self.registry.tools.clear()
+            self.registry.clear()
             self._metrics.clear()
             
             # Mark as inactive

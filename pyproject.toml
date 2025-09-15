@@ -689,6 +689,9 @@ markers = [
     "ssl_security: SSL/TLS security validation tests",
     "real_time_value: Real-time value delivery and performance validation tests",
     "quality_assurance: Quality assurance and feature accessibility validation tests",
+    "service_dependency: Service dependency integration and resilience tests",
+    "graceful_degradation: Graceful degradation tests for service availability",
+    "health_monitoring: Health monitoring tests for service dependencies",
 ]
 
 # Coverage settings
