@@ -35,18 +35,11 @@ EXPECTED BEHAVIOR:
 - Actionable failure messages for remediation
 - Enable test-driven SSOT compliance enforcement
 """
-
 import pytest
 from pathlib import Path
 from typing import List
-
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from test_framework.ssot.logging_compliance_scanner import (
-    LoggingComplianceScanner,
-    LoggingViolation,
-    LoggingComplianceReport
-)
-
+from test_framework.ssot.logging_compliance_scanner import LoggingComplianceScanner, LoggingViolation, LoggingComplianceReport
 
 class TestLoggingImportCompliance(SSotBaseTestCase):
     """
@@ -54,165 +47,88 @@ class TestLoggingImportCompliance(SSotBaseTestCase):
     
     This test is DESIGNED TO FAIL with current violations to prove detection works.
     """
-    
+
     def setup_method(self, method=None):
         """Set up test with SSOT base test case."""
         super().setup_method(method)
         self.scanner = LoggingComplianceScanner()
         self.base_path = Path.cwd()
-        
-        # Record test category and expected failure
-        self.record_metric("test_category", "logging_ssot_compliance") 
-        self.record_metric("expected_to_fail", True)
-        self.record_metric("detection_mechanism", "import_pattern_scanning")
-    
+        self.record_metric('test_category', 'logging_ssot_compliance')
+        self.record_metric('expected_to_fail', True)
+        self.record_metric('detection_mechanism', 'import_pattern_scanning')
+
     def test_critical_websocket_files_logging_compliance(self):
         """
         Test WebSocket core files for logging SSOT violations.
         
         EXPECTED: This test MUST FAIL due to current violations.
         """
-        critical_websocket_files = [
-            "netra_backend/app/websocket_core/circuit_breaker.py",
-            "netra_backend/app/websocket_core/connection_id_manager.py", 
-            "netra_backend/app/websocket_core/graceful_degradation_manager.py",
-            "netra_backend/app/routes/websocket.py",
-        ]
-        
+        critical_websocket_files = ['netra_backend/app/websocket_core/circuit_breaker.py', 'netra_backend/app/websocket_core/connection_id_manager.py', 'netra_backend/app/websocket_core/graceful_degradation_manager.py', 'netra_backend/app/routes/websocket.py']
         violations_found = []
-        
         for file_path in critical_websocket_files:
             full_path = self.base_path / file_path
             if full_path.exists():
                 file_violations = self.scanner.scan_file(full_path)
                 violations_found.extend(file_violations)
-                self.record_metric(f"violations_in_{Path(file_path).name}", len(file_violations))
-        
-        # Record scan metrics
-        self.record_metric("websocket_files_scanned", len(critical_websocket_files))
-        self.record_metric("websocket_violations_found", len(violations_found))
-        
-        # CRITICAL: This assertion MUST FAIL to prove detection works
-        assert len(violations_found) == 0, (
-            f"LOGGING SSOT VIOLATIONS DETECTED in WebSocket core files!\n"
-            f"Found {len(violations_found)} violations that violate SSOT logging principle.\n\n"
-            f"VIOLATIONS:\n{self._format_violations(violations_found)}\n\n"
-            f"REMEDIATION: Replace direct logging imports with:\n"
-            f"from shared.logging.unified_logger_factory import UnifiedLoggerFactory\n"
-            f"logger = UnifiedLoggerFactory.get_logger(__name__)\n\n"
-            f"WHY THIS FAILS: This test is DESIGNED to fail to prove violation detection works.\n"
-            f"These files currently use direct 'logging.getLogger()' instead of SSOT factory."
-        )
-    
+                self.record_metric(f'violations_in_{Path(file_path).name}', len(file_violations))
+        self.record_metric('websocket_files_scanned', len(critical_websocket_files))
+        self.record_metric('websocket_violations_found', len(violations_found))
+        assert len(violations_found) == 0, f"LOGGING SSOT VIOLATIONS DETECTED in WebSocket core files!\nFound {len(violations_found)} violations that violate SSOT logging principle.\n\nVIOLATIONS:\n{self._format_violations(violations_found)}\n\nREMEDIATION: Replace direct logging imports with:\nfrom shared.logging.unified_logger_factory import UnifiedLoggerFactory\nlogger = UnifiedLoggerFactory.get_logger(__name__)\n\nWHY THIS FAILS: This test is DESIGNED to fail to prove violation detection works.\nThese files currently use direct 'logging.getLogger()' instead of SSOT factory."
+
     def test_critical_auth_service_logging_compliance(self):
         """
         Test Auth Service files for logging SSOT violations.
         
         EXPECTED: This test MUST FAIL due to current violations.
         """
-        critical_auth_files = [
-            "auth_service/services/jwt_service.py",
-            "auth_service/services/oauth_service.py",
-            "auth_service/auth_core/core/jwt_handler.py",
-        ]
-        
+        critical_auth_files = ['auth_service/services/jwt_service.py', 'auth_service/services/oauth_service.py', 'auth_service/auth_core/core/jwt_handler.py']
         violations_found = []
-        
         for file_path in critical_auth_files:
             full_path = self.base_path / file_path
             if full_path.exists():
                 file_violations = self.scanner.scan_file(full_path)
                 violations_found.extend(file_violations)
-                self.record_metric(f"violations_in_{Path(file_path).name}", len(file_violations))
-        
-        # Record scan metrics
-        self.record_metric("auth_files_scanned", len(critical_auth_files))
-        self.record_metric("auth_violations_found", len(violations_found))
-        
-        # CRITICAL: This assertion MUST FAIL to prove detection works
-        assert len(violations_found) == 0, (
-            f"LOGGING SSOT VIOLATIONS DETECTED in Auth Service files!\n"
-            f"Found {len(violations_found)} violations that violate SSOT logging principle.\n\n"
-            f"VIOLATIONS:\n{self._format_violations(violations_found)}\n\n"
-            f"REMEDIATION: Replace direct logging imports with:\n"
-            f"from shared.logging.unified_logger_factory import UnifiedLoggerFactory\n"
-            f"logger = UnifiedLoggerFactory.get_logger(__name__)\n\n"
-            f"WHY THIS FAILS: This test is DESIGNED to fail to prove violation detection works.\n"
-            f"These files currently use direct 'logging.getLogger()' instead of SSOT factory."
-        )
-    
+                self.record_metric(f'violations_in_{Path(file_path).name}', len(file_violations))
+        self.record_metric('auth_files_scanned', len(critical_auth_files))
+        self.record_metric('auth_violations_found', len(violations_found))
+        assert len(violations_found) == 0, f"LOGGING SSOT VIOLATIONS DETECTED in Auth Service files!\nFound {len(violations_found)} violations that violate SSOT logging principle.\n\nVIOLATIONS:\n{self._format_violations(violations_found)}\n\nREMEDIATION: Replace direct logging imports with:\nfrom shared.logging.unified_logger_factory import UnifiedLoggerFactory\nlogger = UnifiedLoggerFactory.get_logger(__name__)\n\nWHY THIS FAILS: This test is DESIGNED to fail to prove violation detection works.\nThese files currently use direct 'logging.getLogger()' instead of SSOT factory."
+
     def test_backend_main_entry_logging_compliance(self):
         """
         Test backend main entry files for logging SSOT violations.
         
         EXPECTED: This test MUST FAIL due to current violations.
         """
-        critical_backend_files = [
-            "netra_backend/app/main.py",
-            "netra_backend/app/auth_integration/auth.py",
-        ]
-        
+        critical_backend_files = ['netra_backend/app/main.py', 'netra_backend/app/auth_integration/auth.py']
         violations_found = []
-        
         for file_path in critical_backend_files:
             full_path = self.base_path / file_path
             if full_path.exists():
                 file_violations = self.scanner.scan_file(full_path)
                 violations_found.extend(file_violations)
-                self.record_metric(f"violations_in_{Path(file_path).name}", len(file_violations))
-        
-        # Record scan metrics
-        self.record_metric("backend_files_scanned", len(critical_backend_files))
-        self.record_metric("backend_violations_found", len(violations_found))
-        
-        # CRITICAL: This assertion MUST FAIL to prove detection works
-        assert len(violations_found) == 0, (
-            f"LOGGING SSOT VIOLATIONS DETECTED in Backend core files!\n"
-            f"Found {len(violations_found)} violations that violate SSOT logging principle.\n\n"
-            f"VIOLATIONS:\n{self._format_violations(violations_found)}\n\n"
-            f"REMEDIATION: Replace direct logging imports with:\n"
-            f"from shared.logging.unified_logger_factory import UnifiedLoggerFactory\n"
-            f"logger = UnifiedLoggerFactory.get_logger(__name__)\n\n"
-            f"WHY THIS FAILS: This test is DESIGNED to fail to prove violation detection works.\n"
-            f"These files currently use direct 'logging.getLogger()' instead of SSOT factory."
-        )
-    
+                self.record_metric(f'violations_in_{Path(file_path).name}', len(file_violations))
+        self.record_metric('backend_files_scanned', len(critical_backend_files))
+        self.record_metric('backend_violations_found', len(violations_found))
+        assert len(violations_found) == 0, f"LOGGING SSOT VIOLATIONS DETECTED in Backend core files!\nFound {len(violations_found)} violations that violate SSOT logging principle.\n\nVIOLATIONS:\n{self._format_violations(violations_found)}\n\nREMEDIATION: Replace direct logging imports with:\nfrom shared.logging.unified_logger_factory import UnifiedLoggerFactory\nlogger = UnifiedLoggerFactory.get_logger(__name__)\n\nWHY THIS FAILS: This test is DESIGNED to fail to prove violation detection works.\nThese files currently use direct 'logging.getLogger()' instead of SSOT factory."
+
     def test_logging_violation_pattern_detection(self):
         """
         Test that the scanner correctly identifies different violation patterns.
         
         EXPECTED: This test validates scanner accuracy and MUST FAIL if violations exist.
         """
-        # Scan all critical files at once
         violations = self.scanner.scan_critical_files()
-        
-        # Analyze violation patterns
         pattern_counts = {}
         for violation in violations:
             pattern = violation.violation_type
             pattern_counts[pattern] = pattern_counts.get(pattern, 0) + 1
-        
-        # Record pattern metrics
         for pattern, count in pattern_counts.items():
-            self.record_metric(f"pattern_{pattern}_count", count)
-        
-        self.record_metric("total_critical_violations", len(violations))
-        self.record_metric("unique_violation_patterns", len(pattern_counts))
-        
-        # Get the compliance report
+            self.record_metric(f'pattern_{pattern}_count', count)
+        self.record_metric('total_critical_violations', len(violations))
+        self.record_metric('unique_violation_patterns', len(pattern_counts))
         report = self.scanner.get_compliance_report()
-        
-        # CRITICAL: This assertion MUST FAIL to prove detection works
-        assert len(violations) == 0, (
-            f"LOGGING SSOT VIOLATIONS DETECTED across critical files!\n"
-            f"Found {len(violations)} total violations across {report.total_files_scanned} files.\n\n"
-            f"VIOLATION PATTERNS:\n{self._format_pattern_summary(pattern_counts)}\n\n"
-            f"DETAILED VIOLATIONS:\n{report.get_detailed_violations()}\n\n"
-            f"COMPLIANCE SUMMARY:\n{report.get_summary()}\n\n"
-            f"WHY THIS FAILS: This test is DESIGNED to fail to prove violation detection works.\n"
-            f"Critical files currently violate SSOT logging principles and need remediation."
-        )
-    
+        assert len(violations) == 0, f'LOGGING SSOT VIOLATIONS DETECTED across critical files!\nFound {len(violations)} total violations across {report.total_files_scanned} files.\n\nVIOLATION PATTERNS:\n{self._format_pattern_summary(pattern_counts)}\n\nDETAILED VIOLATIONS:\n{report.get_detailed_violations()}\n\nCOMPLIANCE SUMMARY:\n{report.get_summary()}\n\nWHY THIS FAILS: This test is DESIGNED to fail to prove violation detection works.\nCritical files currently violate SSOT logging principles and need remediation.'
+
     def test_violation_severity_classification(self):
         """
         Test that violations are correctly classified by severity.
@@ -221,66 +137,37 @@ class TestLoggingImportCompliance(SSotBaseTestCase):
         """
         violations = self.scanner.scan_critical_files()
         report = self.scanner.get_compliance_report()
-        
-        # Count violations by severity
-        critical_violations = self.scanner.get_violations_by_severity("CRITICAL")
-        high_violations = self.scanner.get_violations_by_severity("HIGH")
-        
-        # Record severity metrics
-        self.record_metric("critical_severity_violations", len(critical_violations))
-        self.record_metric("high_severity_violations", len(high_violations))
-        self.record_metric("total_severity_violations", len(violations))
-        
-        # CRITICAL: This assertion MUST FAIL if critical violations exist
-        assert len(critical_violations) == 0, (
-            f"CRITICAL SEVERITY LOGGING VIOLATIONS DETECTED!\n"
-            f"Found {len(critical_violations)} CRITICAL violations in golden path files.\n\n"
-            f"CRITICAL VIOLATIONS:\n{self._format_violations(critical_violations)}\n\n"
-            f"HIGH VIOLATIONS: {len(high_violations)}\n\n"
-            f"SEVERITY BREAKDOWN:\n{report.violations_by_severity}\n\n"
-            f"WHY THIS FAILS: This test is DESIGNED to fail to prove severity detection works.\n"
-            f"Critical golden path files must be SSOT compliant for system stability."
-        )
-    
+        critical_violations = self.scanner.get_violations_by_severity('CRITICAL')
+        high_violations = self.scanner.get_violations_by_severity('HIGH')
+        self.record_metric('critical_severity_violations', len(critical_violations))
+        self.record_metric('high_severity_violations', len(high_violations))
+        self.record_metric('total_severity_violations', len(violations))
+        assert len(critical_violations) == 0, f'CRITICAL SEVERITY LOGGING VIOLATIONS DETECTED!\nFound {len(critical_violations)} CRITICAL violations in golden path files.\n\nCRITICAL VIOLATIONS:\n{self._format_violations(critical_violations)}\n\nHIGH VIOLATIONS: {len(high_violations)}\n\nSEVERITY BREAKDOWN:\n{report.violations_by_severity}\n\nWHY THIS FAILS: This test is DESIGNED to fail to prove severity detection works.\nCritical golden path files must be SSOT compliant for system stability.'
+
     def _format_violations(self, violations: List[LoggingViolation]) -> str:
         """Format violations for readable error messages."""
         if not violations:
-            return "No violations found."
-        
+            return 'No violations found.'
         formatted = []
         for violation in violations:
-            formatted.append(
-                f"  [U+2022] {violation.file_path}:{violation.line_number}\n"
-                f"    Type: {violation.violation_type} (Severity: {violation.severity})\n"
-                f"    Content: {violation.content.strip()}\n"
-                f"    Expected: {violation.expected_usage}"
-            )
-        
-        return "\n".join(formatted)
-    
+            formatted.append(f'  [U+2022] {violation.file_path}:{violation.line_number}\n    Type: {violation.violation_type} (Severity: {violation.severity})\n    Content: {violation.content.strip()}\n    Expected: {violation.expected_usage}')
+        return '\n'.join(formatted)
+
     def _format_pattern_summary(self, pattern_counts: dict) -> str:
         """Format violation pattern summary."""
         if not pattern_counts:
-            return "No patterns detected."
-        
+            return 'No patterns detected.'
         formatted = []
         for pattern, count in sorted(pattern_counts.items()):
-            formatted.append(f"  [U+2022] {pattern}: {count} violations")
-        
-        return "\n".join(formatted)
-    
+            formatted.append(f'  [U+2022] {pattern}: {count} violations')
+        return '\n'.join(formatted)
+
     def teardown_method(self, method=None):
         """Clean up test resources."""
-        # Reset scanner for next test
         if hasattr(self, 'scanner'):
             self.scanner.reset_report()
-        
-        # Call parent teardown
         super().teardown_method(method)
-
-
-# === TEST EXECUTION CONTROL ===
-
-if __name__ == "__main__":
-    # Run this test directly to see violations
-    pytest.main([__file__, "-v", "-s", "--tb=short"])
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

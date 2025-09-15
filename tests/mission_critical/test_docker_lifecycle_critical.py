@@ -98,7 +98,7 @@ def lazy_import(module_path: str, component: str = None):
             # REMOVED_SYNTAX_ERROR: from dataclasses import dataclass
             # REMOVED_SYNTAX_ERROR: from typing import List, Dict, Any, Optional, Set
             # REMOVED_SYNTAX_ERROR: from contextlib import contextmanager
-            # REMOVED_SYNTAX_ERROR: from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+            # REMOVED_SYNTAX_ERROR: 
             # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
             # ABSOLUTE IMPORTS ONLY - CLAUDE.md compliance

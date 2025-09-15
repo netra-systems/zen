@@ -25,36 +25,22 @@ EXPECTED FAILURES:
 - WebSocket connections will fail with 1011 errors
 - Demo mode will be blocked by strict validation
 """
-
 import asyncio
 import pytest
 import json
 from unittest.mock import Mock, patch, AsyncMock
 from typing import Dict, Any, Optional
 from enum import Enum
-
-# Import current auth system to test against
-from netra_backend.app.websocket_core.unified_websocket_auth import (
-    get_websocket_authenticator,
-    authenticate_websocket_ssot
-)
-from netra_backend.app.services.unified_authentication_service import (
-    AuthResult,
-    AuthenticationContext, 
-    AuthenticationMethod
-)
-
-# Base test case
+from netra_backend.app.websocket_core.unified_websocket_auth import get_websocket_authenticator, authenticate_websocket_ssot
+from netra_backend.app.services.unified_authentication_service import AuthResult, AuthenticationContext, AuthenticationMethod
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-
 
 class AuthValidationLevel(Enum):
     """Auth validation levels - NOT YET IMPLEMENTED"""
-    STRICT = "strict"      # Full JWT validation required
-    RELAXED = "relaxed"    # Degraded auth acceptable with warnings
-    DEMO = "demo"          # Demo user context for isolated demos  
-    EMERGENCY = "emergency" # Minimal validation for emergency scenarios
-
+    STRICT = 'strict'
+    RELAXED = 'relaxed'
+    DEMO = 'demo'
+    EMERGENCY = 'emergency'
 
 class TestAuthValidationLevels(SSotBaseTestCase):
     """
@@ -62,72 +48,33 @@ class TestAuthValidationLevels(SSotBaseTestCase):
     
     These tests MUST FAIL INITIALLY to prove current auth system blocks permissive modes.
     """
-    
+
     async def asyncSetUp(self):
         """Set up test environment"""
         await super().asyncSetUp()
-        
-        # Mock WebSocket for testing
         self.mock_websocket = Mock()
         self.mock_websocket.headers = {}
         self.mock_websocket.query_params = {}
-        
-        # Test user contexts for different auth levels
-        self.strict_auth_context = {
-            "jwt_token": "valid.jwt.token",
-            "user_id": "user_123",
-            "auth_level": "STRICT"
-        }
-        
-        self.relaxed_auth_context = {
-            "jwt_token": None,  # Missing JWT
-            "user_id": "user_456", 
-            "auth_level": "RELAXED",
-            "fallback_id": "degraded_user"
-        }
-        
-        self.demo_auth_context = {
-            "jwt_token": None,
-            "user_id": f"demo-user-{int(asyncio.get_event_loop().time())}",
-            "auth_level": "DEMO",
-            "demo_mode": True
-        }
-        
-        self.emergency_auth_context = {
-            "jwt_token": None,
-            "user_id": "emergency_user",
-            "auth_level": "EMERGENCY", 
-            "emergency_mode": True
-        }
-    
+        self.strict_auth_context = {'jwt_token': 'valid.jwt.token', 'user_id': 'user_123', 'auth_level': 'STRICT'}
+        self.relaxed_auth_context = {'jwt_token': None, 'user_id': 'user_456', 'auth_level': 'RELAXED', 'fallback_id': 'degraded_user'}
+        self.demo_auth_context = {'jwt_token': None, 'user_id': f'demo-user-{int(asyncio.get_event_loop().time())}', 'auth_level': 'DEMO', 'demo_mode': True}
+        self.emergency_auth_context = {'jwt_token': None, 'user_id': 'emergency_user', 'auth_level': 'EMERGENCY', 'emergency_mode': True}
+
     async def test_strict_auth_validation_current_behavior(self):
         """
         Test current STRICT auth validation - should pass with valid JWT
         
         This test validates current behavior works correctly.
         """
-        # Set up valid JWT headers
-        self.mock_websocket.headers = {
-            "authorization": "Bearer valid.jwt.token"
-        }
-        
-        # Mock successful JWT validation
+        self.mock_websocket.headers = {'authorization': 'Bearer valid.jwt.token'}
         with patch('netra_backend.app.services.unified_authentication_service.get_unified_auth_service') as mock_auth_service:
             mock_service = AsyncMock()
-            mock_service.authenticate_websocket.return_value = AuthResult(
-                success=True,
-                user_id="user_123",
-                context=AuthenticationContext(method=AuthenticationMethod.JWT_BEARER)
-            )
+            mock_service.authenticate_websocket.return_value = AuthResult(success=True, user_id='user_123', context=AuthenticationContext(method=AuthenticationMethod.JWT_BEARER))
             mock_auth_service.return_value = mock_service
-            
-            # Current auth system should work with valid JWT
             result = await authenticate_websocket_ssot(self.mock_websocket)
-            
-            # Should succeed with valid JWT
             self.assertTrue(result.success)
-            self.assertEqual(result.user_id, "user_123")
-    
+            self.assertEqual(result.user_id, 'user_123')
+
     async def test_strict_auth_blocks_missing_jwt_current_behavior(self):
         """
         Test current STRICT auth blocks missing JWT - EXPECTED TO FAIL
@@ -135,17 +82,10 @@ class TestAuthValidationLevels(SSotBaseTestCase):
         This test proves current system blocks requests without JWT.
         This is the behavior we need to make more permissive.
         """
-        # WebSocket with no auth headers (like after GCP Load Balancer stripping)
         self.mock_websocket.headers = {}
-        
-        # Current auth system should fail
         result = await authenticate_websocket_ssot(self.mock_websocket)
-        
-        # CURRENT BEHAVIOR: Should fail without JWT
-        # This is what causes 1011 errors in production
-        self.assertFalse(result.success, 
-                        "Current auth should FAIL without JWT - this proves the 1011 error issue")
-    
+        self.assertFalse(result.success, 'Current auth should FAIL without JWT - this proves the 1011 error issue')
+
     async def test_relaxed_auth_validation_not_implemented(self):
         """
         Test RELAXED auth validation - MUST FAIL (not implemented yet)
@@ -153,26 +93,12 @@ class TestAuthValidationLevels(SSotBaseTestCase):
         RELAXED mode should accept degraded auth with warnings.
         This test will fail until we implement permissive auth modes.
         """
-        # Set environment to RELAXED mode 
         with patch.dict('os.environ', {'AUTH_VALIDATION_LEVEL': 'RELAXED'}):
-            # WebSocket with missing JWT but some user indication
-            self.mock_websocket.headers = {
-                "x-user-hint": "user_456",
-                "x-auth-degraded": "true"
-            }
-            
-            # Try to authenticate with relaxed validation
-            # THIS SHOULD FAIL because relaxed mode is not implemented
+            self.mock_websocket.headers = {'x-user-hint': 'user_456', 'x-auth-degraded': 'true'}
             with self.assertRaises((AttributeError, NotImplementedError, Exception)) as cm:
                 result = await self.attempt_relaxed_auth_validation()
-                
-            # The failure proves we need to implement relaxed auth
-            self.assertIn(
-                ("relaxed", "RELAXED", "not implemented", "AttributeError"), 
-                str(cm.exception).lower(),
-                f"Expected relaxed auth failure, got: {cm.exception}"
-            )
-    
+            self.assertIn(('relaxed', 'RELAXED', 'not implemented', 'AttributeError'), str(cm.exception).lower(), f'Expected relaxed auth failure, got: {cm.exception}')
+
     async def test_demo_auth_validation_not_implemented(self):
         """
         Test DEMO auth validation - MUST FAIL (not implemented yet)
@@ -180,23 +106,12 @@ class TestAuthValidationLevels(SSotBaseTestCase):
         DEMO mode should bypass auth for isolated demonstration environments.
         This test will fail until we implement demo auth mode.
         """
-        # Set environment to DEMO mode
         with patch.dict('os.environ', {'DEMO_MODE': '1', 'AUTH_VALIDATION_LEVEL': 'DEMO'}):
-            # WebSocket with no auth headers - should create demo user
             self.mock_websocket.headers = {}
-            
-            # Try to authenticate in demo mode
-            # THIS SHOULD FAIL because demo mode is not properly implemented
             with self.assertRaises((AttributeError, NotImplementedError, Exception)) as cm:
                 result = await self.attempt_demo_auth_validation()
-                
-            # The failure proves we need to implement demo auth
-            self.assertIn(
-                ("demo", "DEMO", "not implemented", "AttributeError"),
-                str(cm.exception).lower(), 
-                f"Expected demo auth failure, got: {cm.exception}"
-            )
-    
+            self.assertIn(('demo', 'DEMO', 'not implemented', 'AttributeError'), str(cm.exception).lower(), f'Expected demo auth failure, got: {cm.exception}')
+
     async def test_emergency_auth_validation_not_implemented(self):
         """
         Test EMERGENCY auth validation - MUST FAIL (not implemented yet)
@@ -204,25 +119,12 @@ class TestAuthValidationLevels(SSotBaseTestCase):
         EMERGENCY mode should provide minimal validation for system recovery.
         This test will fail until we implement emergency auth mode.
         """
-        # Set environment to EMERGENCY mode
         with patch.dict('os.environ', {'AUTH_VALIDATION_LEVEL': 'EMERGENCY'}):
-            # WebSocket with minimal headers
-            self.mock_websocket.headers = {
-                "x-emergency-access": "true"
-            }
-            
-            # Try to authenticate in emergency mode  
-            # THIS SHOULD FAIL because emergency mode is not implemented
+            self.mock_websocket.headers = {'x-emergency-access': 'true'}
             with self.assertRaises((AttributeError, NotImplementedError, Exception)) as cm:
                 result = await self.attempt_emergency_auth_validation()
-                
-            # The failure proves we need to implement emergency auth
-            self.assertIn(
-                ("emergency", "EMERGENCY", "not implemented", "AttributeError"),
-                str(cm.exception).lower(),
-                f"Expected emergency auth failure, got: {cm.exception}"
-            )
-    
+            self.assertIn(('emergency', 'EMERGENCY', 'not implemented', 'AttributeError'), str(cm.exception).lower(), f'Expected emergency auth failure, got: {cm.exception}')
+
     async def test_gcp_load_balancer_header_stripping_reproduction(self):
         """
         Test reproduction of GCP Load Balancer header stripping issue.
@@ -233,38 +135,14 @@ class TestAuthValidationLevels(SSotBaseTestCase):
         - Backend receives request without auth
         - WebSocket fails with 1011 error
         """
-        # Simulate frontend sending request with auth header
-        original_headers = {
-            "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-            "connection": "upgrade",
-            "upgrade": "websocket"
-        }
-        
-        # Simulate GCP Load Balancer stripping auth headers
-        stripped_headers = {
-            "connection": "upgrade", 
-            "upgrade": "websocket"
-            # Authorization header MISSING - this is the problem
-        }
-        
+        original_headers = {'authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...', 'connection': 'upgrade', 'upgrade': 'websocket'}
+        stripped_headers = {'connection': 'upgrade', 'upgrade': 'websocket'}
         self.mock_websocket.headers = stripped_headers
-        
-        # Current auth system should fail with stripped headers
         result = await authenticate_websocket_ssot(self.mock_websocket)
-        
-        # This failure reproduces the 1011 error condition
-        self.assertFalse(result.success,
-                        "Auth should fail with stripped headers - this reproduces the 1011 error")
-        
-        # Log the exact error to validate it matches production logs
+        self.assertFalse(result.success, 'Auth should fail with stripped headers - this reproduces the 1011 error')
         if hasattr(result, 'error_message'):
-            # This should match the 1011 error patterns we see in production
-            self.assertIn(
-                ('unauthorized', 'authentication', 'token', 'missing'),
-                result.error_message.lower(),
-                "Error message should indicate missing authentication"
-            )
-    
+            self.assertIn(('unauthorized', 'authentication', 'token', 'missing'), result.error_message.lower(), 'Error message should indicate missing authentication')
+
     async def test_websocket_1011_error_reproduction(self):
         """
         Test reproduction of exact 1011 WebSocket error from production.
@@ -272,42 +150,22 @@ class TestAuthValidationLevels(SSotBaseTestCase):
         This test recreates the exact conditions that cause WebSocket 1011 errors
         to validate our understanding of the problem.
         """
-        # Create WebSocket mock that will fail auth
         mock_websocket = Mock()
-        mock_websocket.headers = {}  # No auth headers (stripped by load balancer)
+        mock_websocket.headers = {}
         mock_websocket.query_params = {}
         mock_websocket.accept = AsyncMock()
         mock_websocket.close = AsyncMock()
-        
-        # Try to establish WebSocket connection without auth
-        # This should trigger the same failure path as production 1011 errors
         with patch('netra_backend.app.websocket_core.unified_websocket_auth.authenticate_websocket_ssot') as mock_auth:
-            # Make auth fail (as it does in production)
-            mock_auth.return_value = AuthResult(
-                success=False,
-                error_message="No valid authentication token found",
-                user_id=None
-            )
-            
-            # Attempt WebSocket authentication
+            mock_auth.return_value = AuthResult(success=False, error_message='No valid authentication token found', user_id=None)
             auth_result = await mock_auth(mock_websocket)
-            
-            # Should fail and trigger 1011 error path
             self.assertFalse(auth_result.success)
             self.assertIsNone(auth_result.user_id)
-            self.assertIn("authentication", auth_result.error_message.lower())
-            
-            # In production, this leads to WebSocket close with 1011 code
-            # We expect the close to be called with error code
+            self.assertIn('authentication', auth_result.error_message.lower())
             if mock_websocket.close.called:
-                # Validate 1011 error code would be sent
                 call_args = mock_websocket.close.call_args
                 if call_args and len(call_args[1]) > 0:
-                    self.assertEqual(call_args[1].get('code', 1011), 1011,
-                                   "WebSocket should close with 1011 error code")
-    
-    # Helper methods for testing unimplemented features
-    
+                    self.assertEqual(call_args[1].get('code', 1011), 1011, 'WebSocket should close with 1011 error code')
+
     async def attempt_relaxed_auth_validation(self):
         """
         Attempt relaxed auth validation - will fail until implemented.
@@ -317,15 +175,10 @@ class TestAuthValidationLevels(SSotBaseTestCase):
         2. Create degraded user context with warnings
         3. Log security event for monitoring
         """
-        # This will fail because relaxed validation is not implemented
-        # The failure proves we need to implement this feature
-        from netra_backend.app.websocket_core.auth_permissiveness import (
-            RelaxedAuthValidator  # Does not exist yet
-        )
-        
-        validator = RelaxedAuthValidator()  # Will raise AttributeError
+        from netra_backend.app.websocket_core.auth_permissiveness import RelaxedAuthValidator
+        validator = RelaxedAuthValidator()
         return await validator.validate(self.mock_websocket)
-    
+
     async def attempt_demo_auth_validation(self):
         """
         Attempt demo auth validation - will fail until implemented.
@@ -335,15 +188,10 @@ class TestAuthValidationLevels(SSotBaseTestCase):
         2. Create demo user context automatically
         3. Log demo mode activation for security
         """
-        # This will fail because demo validation is not implemented
-        # The failure proves we need to implement this feature
-        from netra_backend.app.websocket_core.auth_permissiveness import (
-            DemoAuthValidator  # Does not exist yet
-        )
-        
-        validator = DemoAuthValidator()  # Will raise AttributeError
+        from netra_backend.app.websocket_core.auth_permissiveness import DemoAuthValidator
+        validator = DemoAuthValidator()
         return await validator.validate(self.mock_websocket)
-    
+
     async def attempt_emergency_auth_validation(self):
         """
         Attempt emergency auth validation - will fail until implemented.
@@ -353,67 +201,34 @@ class TestAuthValidationLevels(SSotBaseTestCase):
         2. Create minimal user context for system recovery
         3. Log emergency access for security audit
         """
-        # This will fail because emergency validation is not implemented
-        # The failure proves we need to implement this feature  
-        from netra_backend.app.websocket_core.auth_permissiveness import (
-            EmergencyAuthValidator  # Does not exist yet
-        )
-        
-        validator = EmergencyAuthValidator()  # Will raise AttributeError
+        from netra_backend.app.websocket_core.auth_permissiveness import EmergencyAuthValidator
+        validator = EmergencyAuthValidator()
         return await validator.validate(self.mock_websocket)
-
 
 class TestAuthModeDetection(SSotBaseTestCase):
     """Test detection of auth mode from environment and headers."""
-    
+
     def test_auth_mode_detection_from_environment(self):
         """Test auth mode detection from environment variables."""
-        
-        test_cases = [
-            # Environment variable, Expected mode
-            ({'AUTH_VALIDATION_LEVEL': 'STRICT'}, 'STRICT'),
-            ({'AUTH_VALIDATION_LEVEL': 'RELAXED'}, 'RELAXED'), 
-            ({'DEMO_MODE': '1'}, 'DEMO'),
-            ({'AUTH_VALIDATION_LEVEL': 'EMERGENCY'}, 'EMERGENCY'),
-            ({}, 'STRICT'),  # Default should be strict
-        ]
-        
+        test_cases = [({'AUTH_VALIDATION_LEVEL': 'STRICT'}, 'STRICT'), ({'AUTH_VALIDATION_LEVEL': 'RELAXED'}, 'RELAXED'), ({'DEMO_MODE': '1'}, 'DEMO'), ({'AUTH_VALIDATION_LEVEL': 'EMERGENCY'}, 'EMERGENCY'), ({}, 'STRICT')]
         for env_vars, expected_mode in test_cases:
             with patch.dict('os.environ', env_vars, clear=True):
-                # This will fail because mode detection is not implemented
                 with self.assertRaises((AttributeError, NotImplementedError)) as cm:
-                    from netra_backend.app.websocket_core.auth_permissiveness import (
-                        detect_auth_validation_level  # Does not exist yet
-                    )
-                    
+                    from netra_backend.app.websocket_core.auth_permissiveness import detect_auth_validation_level
                     detected_mode = detect_auth_validation_level()
                     self.assertEqual(detected_mode, expected_mode)
-    
+
     def test_auth_mode_detection_from_headers(self):
         """Test auth mode detection from WebSocket headers."""
-        
-        test_cases = [
-            # Headers, Expected mode
-            ({'x-auth-level': 'relaxed'}, 'RELAXED'),
-            ({'x-demo-mode': 'true'}, 'DEMO'),
-            ({'x-emergency-access': 'true'}, 'EMERGENCY'),
-            ({}, 'STRICT'),  # Default should be strict
-        ]
-        
+        test_cases = [({'x-auth-level': 'relaxed'}, 'RELAXED'), ({'x-demo-mode': 'true'}, 'DEMO'), ({'x-emergency-access': 'true'}, 'EMERGENCY'), ({}, 'STRICT')]
         for headers, expected_mode in test_cases:
             mock_websocket = Mock()
             mock_websocket.headers = headers
-            
-            # This will fail because header-based mode detection is not implemented
             with self.assertRaises((AttributeError, NotImplementedError)) as cm:
-                from netra_backend.app.websocket_core.auth_permissiveness import (
-                    detect_auth_mode_from_headers  # Does not exist yet
-                )
-                
+                from netra_backend.app.websocket_core.auth_permissiveness import detect_auth_mode_from_headers
                 detected_mode = detect_auth_mode_from_headers(mock_websocket)
                 self.assertEqual(detected_mode, expected_mode)
-
-
 if __name__ == '__main__':
-    # Run with asyncio support
-    pytest.main([__file__, '-v'])
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

@@ -5,15 +5,12 @@ experience in staging GCP environment, proving business impact of SSOT violation
 
 Expected: FAILURES in staging GCP environment due to routing inconsistency.
 """
-
 import pytest
 import asyncio
 import json
 from typing import Dict, Any, List
 from datetime import datetime
-
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-
 
 class TestQualityRouterGoldenPathDegradation(SSotAsyncTestCase):
     """E2E tests demonstrating Quality Router fragmentation impact on Golden Path."""
@@ -21,78 +18,10 @@ class TestQualityRouterGoldenPathDegradation(SSotAsyncTestCase):
     def setUp(self):
         """Set up test fixtures for Golden Path quality degradation testing."""
         super().setUp()
-
-        # E2E test configuration
-        self.staging_base_url = "https://api.staging.netrasystems.ai"
-        self.test_user_id = "golden_path_quality_user"
-        self.test_auth_token = None  # Will be set up in auth flow
-
-        # Golden Path quality scenarios
-        self.quality_scenarios = [
-            {
-                "name": "agent_quality_metrics_request",
-                "description": "User requests quality metrics for agent performance",
-                "message": {
-                    "type": "get_quality_metrics",
-                    "thread_id": "gp_metrics_thread_001",
-                    "run_id": "gp_metrics_run_001",
-                    "payload": {
-                        "agent_name": "golden_path_test_agent",
-                        "period_hours": 24,
-                        "include_trends": True
-                    }
-                },
-                "expected_response_type": "quality_metrics",
-                "timeout_seconds": 30
-            },
-            {
-                "name": "quality_alert_subscription",
-                "description": "User subscribes to quality alerts for monitoring",
-                "message": {
-                    "type": "subscribe_quality_alerts",
-                    "thread_id": "gp_alerts_thread_002",
-                    "run_id": "gp_alerts_run_002",
-                    "payload": {
-                        "alert_types": ["performance_degradation", "error_rate_spike"],
-                        "threshold": "medium"
-                    }
-                },
-                "expected_response_type": "subscription_confirmed",
-                "timeout_seconds": 15
-            },
-            {
-                "name": "content_quality_validation",
-                "description": "User validates content quality before processing",
-                "message": {
-                    "type": "validate_content",
-                    "thread_id": "gp_validate_thread_003",
-                    "run_id": "gp_validate_run_003",
-                    "payload": {
-                        "content": "This is test content for quality validation in the golden path scenario.",
-                        "validation_level": "strict",
-                        "check_types": ["grammar", "clarity", "compliance"]
-                    }
-                },
-                "expected_response_type": "validation_result",
-                "timeout_seconds": 25
-            },
-            {
-                "name": "quality_report_generation",
-                "description": "User generates comprehensive quality report",
-                "message": {
-                    "type": "generate_quality_report",
-                    "thread_id": "gp_report_thread_004",
-                    "run_id": "gp_report_run_004",
-                    "payload": {
-                        "report_type": "comprehensive",
-                        "time_range": "last_week",
-                        "include_recommendations": True
-                    }
-                },
-                "expected_response_type": "quality_report",
-                "timeout_seconds": 45
-            }
-        ]
+        self.staging_base_url = 'https://api.staging.netrasystems.ai'
+        self.test_user_id = 'golden_path_quality_user'
+        self.test_auth_token = None
+        self.quality_scenarios = [{'name': 'agent_quality_metrics_request', 'description': 'User requests quality metrics for agent performance', 'message': {'type': 'get_quality_metrics', 'thread_id': 'gp_metrics_thread_001', 'run_id': 'gp_metrics_run_001', 'payload': {'agent_name': 'golden_path_test_agent', 'period_hours': 24, 'include_trends': True}}, 'expected_response_type': 'quality_metrics', 'timeout_seconds': 30}, {'name': 'quality_alert_subscription', 'description': 'User subscribes to quality alerts for monitoring', 'message': {'type': 'subscribe_quality_alerts', 'thread_id': 'gp_alerts_thread_002', 'run_id': 'gp_alerts_run_002', 'payload': {'alert_types': ['performance_degradation', 'error_rate_spike'], 'threshold': 'medium'}}, 'expected_response_type': 'subscription_confirmed', 'timeout_seconds': 15}, {'name': 'content_quality_validation', 'description': 'User validates content quality before processing', 'message': {'type': 'validate_content', 'thread_id': 'gp_validate_thread_003', 'run_id': 'gp_validate_run_003', 'payload': {'content': 'This is test content for quality validation in the golden path scenario.', 'validation_level': 'strict', 'check_types': ['grammar', 'clarity', 'compliance']}}, 'expected_response_type': 'validation_result', 'timeout_seconds': 25}, {'name': 'quality_report_generation', 'description': 'User generates comprehensive quality report', 'message': {'type': 'generate_quality_report', 'thread_id': 'gp_report_thread_004', 'run_id': 'gp_report_run_004', 'payload': {'report_type': 'comprehensive', 'time_range': 'last_week', 'include_recommendations': True}}, 'expected_response_type': 'quality_report', 'timeout_seconds': 45}]
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -101,56 +30,31 @@ class TestQualityRouterGoldenPathDegradation(SSotAsyncTestCase):
 
         This should FAIL - demonstrating routing inconsistency affects real users.
         """
-        # Skip if not in staging environment
         staging_available = await self._check_staging_availability()
         if not staging_available:
-            pytest.skip("Staging environment not available for E2E testing")
-
-        # Track routing outcomes for each scenario
+            pytest.skip('Staging environment not available for E2E testing')
         routing_results = {}
         total_scenarios = len(self.quality_scenarios)
         successful_scenarios = 0
-
         for scenario in self.quality_scenarios:
-            scenario_name = scenario["name"]
-
+            scenario_name = scenario['name']
             try:
-                # Execute quality routing scenario
                 result = await self._execute_quality_scenario(scenario)
                 routing_results[scenario_name] = result
-
-                if result["success"]:
+                if result['success']:
                     successful_scenarios += 1
-
             except Exception as e:
-                routing_results[scenario_name] = {
-                    "success": False,
-                    "error": str(e),
-                    "routing_path": "unknown"
-                }
-
-        # Calculate success rate
+                routing_results[scenario_name] = {'success': False, 'error': str(e), 'routing_path': 'unknown'}
         success_rate = successful_scenarios / total_scenarios
-
-        # Golden Path should have >90% success rate (but fragmentation may cause failures)
-        self.assertGreaterEqual(success_rate, 0.9,
-                              f"Golden Path quality routing success rate too low: {success_rate:.2%}")
-
-        # All scenarios should use consistent routing (but may not due to fragmentation)
-        routing_paths = {name: result.get("routing_path") for name, result in routing_results.items()}
-        unique_paths = set(path for path in routing_paths.values() if path)
-
-        self.assertEqual(len(unique_paths), 1,
-                        f"Multiple routing paths detected: {unique_paths} - indicates fragmentation")
-
-        # Session continuity should be maintained across all scenarios
+        self.assertGreaterEqual(success_rate, 0.9, f'Golden Path quality routing success rate too low: {success_rate:.2%}')
+        routing_paths = {name: result.get('routing_path') for name, result in routing_results.items()}
+        unique_paths = set((path for path in routing_paths.values() if path))
+        self.assertEqual(len(unique_paths), 1, f'Multiple routing paths detected: {unique_paths} - indicates fragmentation')
         session_continuity_issues = []
         for scenario_name, result in routing_results.items():
-            if not result.get("session_continuity", True):
+            if not result.get('session_continuity', True):
                 session_continuity_issues.append(scenario_name)
-
-        self.assertEqual(len(session_continuity_issues), 0,
-                        f"Session continuity issues in scenarios: {session_continuity_issues}")
+        self.assertEqual(len(session_continuity_issues), 0, f'Session continuity issues in scenarios: {session_continuity_issues}')
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -161,55 +65,27 @@ class TestQualityRouterGoldenPathDegradation(SSotAsyncTestCase):
         """
         staging_available = await self._check_staging_availability()
         if not staging_available:
-            pytest.skip("Staging environment not available for E2E testing")
-
-        # Measure response times for quality routing
+            pytest.skip('Staging environment not available for E2E testing')
         response_times = {}
-        performance_threshold_seconds = 5.0  # Golden Path requirement
-
+        performance_threshold_seconds = 5.0
         for scenario in self.quality_scenarios:
-            scenario_name = scenario["name"]
-            expected_timeout = scenario["timeout_seconds"]
-
-            # Measure response time
+            scenario_name = scenario['name']
+            expected_timeout = scenario['timeout_seconds']
             start_time = datetime.now()
             try:
                 result = await self._execute_quality_scenario(scenario)
                 end_time = datetime.now()
                 response_time = (end_time - start_time).total_seconds()
-
-                response_times[scenario_name] = {
-                    "response_time": response_time,
-                    "success": result["success"],
-                    "expected_timeout": expected_timeout
-                }
-
+                response_times[scenario_name] = {'response_time': response_time, 'success': result['success'], 'expected_timeout': expected_timeout}
             except asyncio.TimeoutError:
-                response_times[scenario_name] = {
-                    "response_time": expected_timeout,
-                    "success": False,
-                    "expected_timeout": expected_timeout,
-                    "timed_out": True
-                }
-
-        # Verify all response times meet Golden Path requirements
+                response_times[scenario_name] = {'response_time': expected_timeout, 'success': False, 'expected_timeout': expected_timeout, 'timed_out': True}
         slow_scenarios = []
         for scenario_name, timing in response_times.items():
-            if timing["response_time"] > performance_threshold_seconds:
-                slow_scenarios.append({
-                    "scenario": scenario_name,
-                    "time": timing["response_time"],
-                    "threshold": performance_threshold_seconds
-                })
-
-        # No scenarios should exceed performance threshold (but fragmentation may cause slowness)
-        self.assertEqual(len(slow_scenarios), 0,
-                        f"Quality routing scenarios exceeded performance threshold: {slow_scenarios}")
-
-        # Average response time should be well under threshold
-        avg_response_time = sum(t["response_time"] for t in response_times.values()) / len(response_times)
-        self.assertLess(avg_response_time, performance_threshold_seconds / 2,
-                       f"Average quality routing response time too high: {avg_response_time:.2f}s")
+            if timing['response_time'] > performance_threshold_seconds:
+                slow_scenarios.append({'scenario': scenario_name, 'time': timing['response_time'], 'threshold': performance_threshold_seconds})
+        self.assertEqual(len(slow_scenarios), 0, f'Quality routing scenarios exceeded performance threshold: {slow_scenarios}')
+        avg_response_time = sum((t['response_time'] for t in response_times.values())) / len(response_times)
+        self.assertLess(avg_response_time, performance_threshold_seconds / 2, f'Average quality routing response time too high: {avg_response_time:.2f}s')
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -220,54 +96,31 @@ class TestQualityRouterGoldenPathDegradation(SSotAsyncTestCase):
         """
         staging_available = await self._check_staging_availability()
         if not staging_available:
-            pytest.skip("Staging environment not available for E2E testing")
-
-        # Create multiple concurrent user scenarios
+            pytest.skip('Staging environment not available for E2E testing')
         concurrent_users = 5
         user_scenarios = []
-
         for user_index in range(concurrent_users):
-            user_id = f"concurrent_quality_user_{user_index}"
+            user_id = f'concurrent_quality_user_{user_index}'
             scenario = self.quality_scenarios[user_index % len(self.quality_scenarios)].copy()
-
-            # Modify scenario for user isolation testing
-            scenario["message"]["thread_id"] = f"concurrent_thread_{user_index}"
-            scenario["message"]["run_id"] = f"concurrent_run_{user_index}"
-            scenario["user_id"] = user_id
-
+            scenario['message']['thread_id'] = f'concurrent_thread_{user_index}'
+            scenario['message']['run_id'] = f'concurrent_run_{user_index}'
+            scenario['user_id'] = user_id
             user_scenarios.append(scenario)
-
-        # Execute concurrent quality routing
-        concurrent_tasks = [
-            self._execute_quality_scenario_for_user(scenario, scenario["user_id"])
-            for scenario in user_scenarios
-        ]
-
+        concurrent_tasks = [self._execute_quality_scenario_for_user(scenario, scenario['user_id']) for scenario in user_scenarios]
         concurrent_results = await asyncio.gather(*concurrent_tasks, return_exceptions=True)
-
-        # Analyze user isolation
         user_isolation_issues = []
         response_data_by_user = {}
-
         for i, result in enumerate(concurrent_results):
-            user_id = user_scenarios[i]["user_id"]
+            user_id = user_scenarios[i]['user_id']
             if isinstance(result, Exception):
-                user_isolation_issues.append(f"User {user_id}: Exception - {str(result)}")
+                user_isolation_issues.append(f'User {user_id}: Exception - {str(result)}')
             else:
                 response_data_by_user[user_id] = result
-
-        # No user should experience exceptions due to isolation issues
-        self.assertEqual(len(user_isolation_issues), 0,
-                        f"User isolation issues detected: {user_isolation_issues}")
-
-        # Verify each user received their specific response
+        self.assertEqual(len(user_isolation_issues), 0, f'User isolation issues detected: {user_isolation_issues}')
         for user_id, response in response_data_by_user.items():
             expected_thread_id = f"concurrent_thread_{user_id.split('_')[-1]}"
-            actual_thread_id = response.get("thread_id")
-
-            # Each user should get their own thread context (but fragmentation may cause cross-contamination)
-            self.assertEqual(actual_thread_id, expected_thread_id,
-                           f"User {user_id} received wrong thread context: expected {expected_thread_id}, got {actual_thread_id}")
+            actual_thread_id = response.get('thread_id')
+            self.assertEqual(actual_thread_id, expected_thread_id, f'User {user_id} received wrong thread context: expected {expected_thread_id}, got {actual_thread_id}')
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -278,191 +131,91 @@ class TestQualityRouterGoldenPathDegradation(SSotAsyncTestCase):
         """
         staging_available = await self._check_staging_availability()
         if not staging_available:
-            pytest.skip("Staging environment not available for E2E testing")
-
-        # Test error scenarios that should recover gracefully
-        error_scenarios = [
-            {
-                "name": "invalid_quality_message_type",
-                "message": {
-                    "type": "invalid_quality_operation",
-                    "thread_id": "error_thread_001",
-                    "run_id": "error_run_001",
-                    "payload": {}
-                },
-                "expected_error_type": "unknown_message_type",
-                "should_recover": True
-            },
-            {
-                "name": "malformed_quality_payload",
-                "message": {
-                    "type": "get_quality_metrics",
-                    "thread_id": "error_thread_002",
-                    "run_id": "error_run_002",
-                    "payload": "malformed_payload_string"
-                },
-                "expected_error_type": "payload_error",
-                "should_recover": True
-            },
-            {
-                "name": "missing_quality_context",
-                "message": {
-                    "type": "validate_content",
-                    # Missing thread_id and run_id
-                    "payload": {"content": "test"}
-                },
-                "expected_error_type": "context_error",
-                "should_recover": True
-            }
-        ]
-
+            pytest.skip('Staging environment not available for E2E testing')
+        error_scenarios = [{'name': 'invalid_quality_message_type', 'message': {'type': 'invalid_quality_operation', 'thread_id': 'error_thread_001', 'run_id': 'error_run_001', 'payload': {}}, 'expected_error_type': 'unknown_message_type', 'should_recover': True}, {'name': 'malformed_quality_payload', 'message': {'type': 'get_quality_metrics', 'thread_id': 'error_thread_002', 'run_id': 'error_run_002', 'payload': 'malformed_payload_string'}, 'expected_error_type': 'payload_error', 'should_recover': True}, {'name': 'missing_quality_context', 'message': {'type': 'validate_content', 'payload': {'content': 'test'}}, 'expected_error_type': 'context_error', 'should_recover': True}]
         error_recovery_results = {}
-
         for error_scenario in error_scenarios:
-            scenario_name = error_scenario["name"]
-
+            scenario_name = error_scenario['name']
             try:
-                # Execute error scenario
                 result = await self._execute_quality_error_scenario(error_scenario)
                 error_recovery_results[scenario_name] = result
-
             except Exception as e:
-                error_recovery_results[scenario_name] = {
-                    "recovered": False,
-                    "error": str(e),
-                    "expected_recovery": error_scenario["should_recover"]
-                }
-
-        # Verify error recovery behavior
+                error_recovery_results[scenario_name] = {'recovered': False, 'error': str(e), 'expected_recovery': error_scenario['should_recover']}
         recovery_failures = []
         for scenario_name, result in error_recovery_results.items():
-            expected_recovery = next(s["should_recover"] for s in error_scenarios if s["name"] == scenario_name)
-            actual_recovery = result.get("recovered", False)
-
+            expected_recovery = next((s['should_recover'] for s in error_scenarios if s['name'] == scenario_name))
+            actual_recovery = result.get('recovered', False)
             if expected_recovery != actual_recovery:
-                recovery_failures.append({
-                    "scenario": scenario_name,
-                    "expected_recovery": expected_recovery,
-                    "actual_recovery": actual_recovery
-                })
-
-        # Error recovery should be consistent (but fragmentation may cause inconsistency)
-        self.assertEqual(len(recovery_failures), 0,
-                        f"Error recovery inconsistencies detected: {recovery_failures}")
+                recovery_failures.append({'scenario': scenario_name, 'expected_recovery': expected_recovery, 'actual_recovery': actual_recovery})
+        self.assertEqual(len(recovery_failures), 0, f'Error recovery inconsistencies detected: {recovery_failures}')
 
     async def _check_staging_availability(self) -> bool:
         """Check if staging environment is available for testing."""
         try:
-            # Simple health check to staging environment
-            # In real implementation, this would make an HTTP request
-            # For now, return True to enable testing
             return True
         except Exception:
             return False
 
     async def _execute_quality_scenario(self, scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a quality routing scenario and return results."""
-        # Simulate quality routing execution
-        # In real implementation, this would use WebSocket client to connect to staging
-
-        message = scenario["message"]
-        timeout = scenario["timeout_seconds"]
-
-        # Simulate routing path detection
-        routing_path = self._detect_routing_path(message["type"])
-
-        # Simulate session continuity check
+        message = scenario['message']
+        timeout = scenario['timeout_seconds']
+        routing_path = self._detect_routing_path(message['type'])
         session_continuity = self._check_session_continuity(message)
-
-        # Simulate success/failure based on message type
         success = await self._simulate_quality_routing(message, timeout)
-
-        return {
-            "success": success,
-            "routing_path": routing_path,
-            "session_continuity": session_continuity,
-            "response_type": scenario.get("expected_response_type"),
-            "thread_id": message.get("thread_id"),
-            "run_id": message.get("run_id")
-        }
+        return {'success': success, 'routing_path': routing_path, 'session_continuity': session_continuity, 'response_type': scenario.get('expected_response_type'), 'thread_id': message.get('thread_id'), 'run_id': message.get('run_id')}
 
     async def _execute_quality_scenario_for_user(self, scenario: Dict[str, Any], user_id: str) -> Dict[str, Any]:
         """Execute quality scenario for specific user."""
         result = await self._execute_quality_scenario(scenario)
-        result["user_id"] = user_id
+        result['user_id'] = user_id
         return result
 
     async def _execute_quality_error_scenario(self, error_scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Execute error scenario and check recovery."""
-        message = error_scenario["message"]
-        expected_error = error_scenario["expected_error_type"]
-
-        # Simulate error scenario execution
+        message = error_scenario['message']
+        expected_error = error_scenario['expected_error_type']
         recovered = await self._simulate_error_recovery(message, expected_error)
-
-        return {
-            "recovered": recovered,
-            "error_type": expected_error,
-            "message_type": message.get("type", "unknown")
-        }
+        return {'recovered': recovered, 'error_type': expected_error, 'message_type': message.get('type', 'unknown')}
 
     def _detect_routing_path(self, message_type: str) -> str:
         """Detect which routing path would be used for message type."""
-        # Simulate routing path detection based on current fragmentation
-        # This would vary based on which router is active
-
-        quality_message_types = {"get_quality_metrics", "subscribe_quality_alerts",
-                               "validate_content", "generate_quality_report"}
-
+        quality_message_types = {'get_quality_metrics', 'subscribe_quality_alerts', 'validate_content', 'generate_quality_report'}
         if message_type in quality_message_types:
-            # Fragmentation: could route through either standalone or embedded
-            return "fragmented_routing"  # This indicates the problem
-        return "standard_routing"
+            return 'fragmented_routing'
+        return 'standard_routing'
 
     def _check_session_continuity(self, message: Dict[str, Any]) -> bool:
         """Check if session continuity is maintained."""
-        # Session continuity requires thread_id and run_id
-        has_thread_id = "thread_id" in message
-        has_run_id = "run_id" in message
-
-        # Fragmented routers may handle session continuity differently
+        has_thread_id = 'thread_id' in message
+        has_run_id = 'run_id' in message
         return has_thread_id and has_run_id
 
     async def _simulate_quality_routing(self, message: Dict[str, Any], timeout: int) -> bool:
         """Simulate quality routing execution."""
-        # Simulate routing delay and potential failures
-        await asyncio.sleep(0.1)  # Simulate processing time
-
-        # Quality routing may fail due to fragmentation
-        message_type = message.get("type")
-
-        # Simulate fragmentation-related failures
-        if message_type == "get_quality_metrics":
-            return True  # Usually works
-        elif message_type == "subscribe_quality_alerts":
-            return False  # May fail due to fragmentation
-        elif message_type == "validate_content":
-            return True  # Usually works
-        elif message_type == "generate_quality_report":
-            return False  # May fail due to complexity
-
+        await asyncio.sleep(0.1)
+        message_type = message.get('type')
+        if message_type == 'get_quality_metrics':
+            return True
+        elif message_type == 'subscribe_quality_alerts':
+            return False
+        elif message_type == 'validate_content':
+            return True
+        elif message_type == 'generate_quality_report':
+            return False
         return True
 
     async def _simulate_error_recovery(self, message: Dict[str, Any], expected_error: str) -> bool:
         """Simulate error recovery behavior."""
-        # Simulate error recovery
         await asyncio.sleep(0.05)
-
-        # Recovery success depends on error type and routing path
-        if expected_error == "unknown_message_type":
-            return True  # Should recover gracefully
-        elif expected_error == "payload_error":
-            return False  # May not recover due to fragmentation
-        elif expected_error == "context_error":
-            return False  # May not recover due to session handling differences
-
+        if expected_error == 'unknown_message_type':
+            return True
+        elif expected_error == 'payload_error':
+            return False
+        elif expected_error == 'context_error':
+            return False
         return True
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--tb=short"])
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

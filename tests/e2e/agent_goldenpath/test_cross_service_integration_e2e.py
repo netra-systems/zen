@@ -24,7 +24,6 @@ Test Strategy:
 Coverage Target: Increase from 65-75% to 85%
 Test Focus: Cross-service communication, data persistence, service resilience
 """
-
 import asyncio
 import pytest
 import time
@@ -36,15 +35,12 @@ import httpx
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime, timezone
 import uuid
-
-# SSOT imports
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from tests.e2e.staging_config import get_staging_config, is_staging_available
 from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, AuthenticatedUser
 
-
 @pytest.mark.e2e
-@pytest.mark.gcp_staging 
+@pytest.mark.gcp_staging
 @pytest.mark.agent_goldenpath
 @pytest.mark.cross_service
 @pytest.mark.mission_critical
@@ -61,34 +57,19 @@ class TestCrossServiceIntegrationE2E(SSotAsyncTestCase):
         """Setup cross-service integration test environment."""
         cls.staging_config = get_staging_config()
         cls.logger = logging.getLogger(__name__)
-        
-        # Skip if staging not available
         if not is_staging_available():
-            pytest.skip("Staging environment not available")
-        
-        # Initialize auth helper with staging config
-        cls.auth_helper = E2EWebSocketAuthHelper(environment="staging")
-        
-        # Service endpoints for integration testing
-        cls.service_endpoints = {
-            "backend": cls.staging_config.urls.backend_url,
-            "auth": cls.staging_config.urls.auth_url,
-            "websocket": cls.staging_config.urls.websocket_url,
-            "api": cls.staging_config.urls.api_base_url
-        }
-        
-        cls.logger.info("Cross-service integration e2e tests initialized")
+            pytest.skip('Staging environment not available')
+        cls.auth_helper = E2EWebSocketAuthHelper(environment='staging')
+        cls.service_endpoints = {'backend': cls.staging_config.urls.backend_url, 'auth': cls.staging_config.urls.auth_url, 'websocket': cls.staging_config.urls.websocket_url, 'api': cls.staging_config.urls.api_base_url}
+        cls.logger.info('Cross-service integration e2e tests initialized')
 
     def setup_method(self, method):
         """Setup for each test method."""
         super().setup_method(method)
-        
-        # Generate unique test identifiers
-        self.test_id = f"cross_service_test_{int(time.time())}"
-        self.thread_id = f"thread_{self.test_id}"
-        self.run_id = f"run_{self.test_id}"
-        
-        self.logger.info(f"Cross-service test setup - test_id: {self.test_id}")
+        self.test_id = f'cross_service_test_{int(time.time())}'
+        self.thread_id = f'thread_{self.test_id}'
+        self.run_id = f'run_{self.test_id}'
+        self.logger.info(f'Cross-service test setup - test_id: {self.test_id}')
 
     async def test_auth_service_integration_during_message_processing(self):
         """
@@ -110,162 +91,62 @@ class TestCrossServiceIntegrationE2E(SSotAsyncTestCase):
         """
         auth_integration_start = time.time()
         auth_events = []
-        
-        self.logger.info("🔐 Testing auth service integration during message processing")
-        
+        self.logger.info('🔐 Testing auth service integration during message processing')
         try:
-            # Step 1: Get authenticated user from auth service
-            auth_user = await self.auth_helper.create_authenticated_user(
-                email=f"cross_service_auth_{self.test_id}@test.com",
-                permissions=["read", "write", "chat", "agent_execution"]
-            )
-            
-            auth_events.append({
-                "event": "user_authentication",
-                "timestamp": time.time() - auth_integration_start,
-                "success": True,
-                "user_id": auth_user.user_id
-            })
-            
-            # Step 2: Validate token with auth service directly
+            auth_user = await self.auth_helper.create_authenticated_user(email=f'cross_service_auth_{self.test_id}@test.com', permissions=['read', 'write', 'chat', 'agent_execution'])
+            auth_events.append({'event': 'user_authentication', 'timestamp': time.time() - auth_integration_start, 'success': True, 'user_id': auth_user.user_id})
             async with httpx.AsyncClient() as client:
-                validate_response = await client.get(
-                    f"{self.service_endpoints['auth']}/auth/validate",
-                    headers={"Authorization": f"Bearer {auth_user.jwt_token}"},
-                    timeout=10.0
-                )
-                
-                assert validate_response.status_code == 200, (
-                    f"Auth service token validation failed: {validate_response.status_code}"
-                )
-                
-                auth_events.append({
-                    "event": "token_validation",
-                    "timestamp": time.time() - auth_integration_start,
-                    "success": True,
-                    "status_code": validate_response.status_code
-                })
-                
-                self.logger.info("✅ Direct auth service validation successful")
-            
-            # Step 3: WebSocket connection with auth integration
+                validate_response = await client.get(f"{self.service_endpoints['auth']}/auth/validate", headers={'Authorization': f'Bearer {auth_user.jwt_token}'}, timeout=10.0)
+                assert validate_response.status_code == 200, f'Auth service token validation failed: {validate_response.status_code}'
+                auth_events.append({'event': 'token_validation', 'timestamp': time.time() - auth_integration_start, 'success': True, 'status_code': validate_response.status_code})
+                self.logger.info('✅ Direct auth service validation successful')
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
-            
             headers = self.auth_helper.get_websocket_headers(auth_user.jwt_token)
-            
-            websocket = await asyncio.wait_for(
-                websockets.connect(
-                    self.service_endpoints["websocket"],
-                    additional_headers=headers,
-                    ssl=ssl_context,
-                    ping_interval=30,
-                    ping_timeout=10
-                ),
-                timeout=20.0
-            )
-            
-            auth_events.append({
-                "event": "websocket_auth_connection",
-                "timestamp": time.time() - auth_integration_start,
-                "success": True
-            })
-            
-            self.logger.info("✅ WebSocket connection with auth integration successful")
-            
-            # Step 4: Send message requiring agent processing (tests auth during processing)
-            auth_test_message = {
-                "type": "chat_message",
-                "content": "Test message requiring auth validation during agent processing",
-                "thread_id": self.thread_id,
-                "run_id": self.run_id,
-                "user_id": auth_user.user_id,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "context": {
-                    "test_type": "auth_integration",
-                    "expects_agent_processing": True
-                }
-            }
-            
+            websocket = await asyncio.wait_for(websockets.connect(self.service_endpoints['websocket'], additional_headers=headers, ssl=ssl_context, ping_interval=30, ping_timeout=10), timeout=20.0)
+            auth_events.append({'event': 'websocket_auth_connection', 'timestamp': time.time() - auth_integration_start, 'success': True})
+            self.logger.info('✅ WebSocket connection with auth integration successful')
+            auth_test_message = {'type': 'chat_message', 'content': 'Test message requiring auth validation during agent processing', 'thread_id': self.thread_id, 'run_id': self.run_id, 'user_id': auth_user.user_id, 'timestamp': datetime.now(timezone.utc).isoformat(), 'context': {'test_type': 'auth_integration', 'expects_agent_processing': True}}
             await websocket.send(json.dumps(auth_test_message))
-            
-            auth_events.append({
-                "event": "auth_message_sent",
-                "timestamp": time.time() - auth_integration_start,
-                "success": True
-            })
-            
-            # Step 5: Monitor for agent events (should maintain auth throughout)
+            auth_events.append({'event': 'auth_message_sent', 'timestamp': time.time() - auth_integration_start, 'success': True})
             agent_events = []
             auth_maintained = True
             timeout = 60.0
             collection_start = time.time()
-            
             while time.time() - collection_start < timeout:
                 try:
                     event_data = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                     event = json.loads(event_data)
                     agent_events.append(event)
-                    
-                    event_type = event.get("type", "unknown")
-                    
-                    # Check for auth failures during processing
-                    if "auth" in event_type.lower() and "error" in event_type.lower():
+                    event_type = event.get('type', 'unknown')
+                    if 'auth' in event_type.lower() and 'error' in event_type.lower():
                         auth_maintained = False
-                        self.logger.error(f"Auth failure during processing: {event}")
-                    
-                    # Check for agent completion
-                    if event_type == "agent_completed":
+                        self.logger.error(f'Auth failure during processing: {event}')
+                    if event_type == 'agent_completed':
                         break
-                        
-                    # Check for any error events
-                    if event_type == "error":
-                        error_msg = event.get("message", "")
-                        if "auth" in error_msg.lower() or "unauthorized" in error_msg.lower():
+                    if event_type == 'error':
+                        error_msg = event.get('message', '')
+                        if 'auth' in error_msg.lower() or 'unauthorized' in error_msg.lower():
                             auth_maintained = False
-                            
                 except asyncio.TimeoutError:
                     continue
-            
             processing_time = time.time() - collection_start
-            
-            auth_events.append({
-                "event": "agent_processing_with_auth",
-                "timestamp": time.time() - auth_integration_start,
-                "success": auth_maintained,
-                "processing_time": processing_time,
-                "events_received": len(agent_events)
-            })
-            
+            auth_events.append({'event': 'agent_processing_with_auth', 'timestamp': time.time() - auth_integration_start, 'success': auth_maintained, 'processing_time': processing_time, 'events_received': len(agent_events)})
             await websocket.close()
-            
             total_auth_time = time.time() - auth_integration_start
-            
-            # Validate auth integration
-            assert len(agent_events) > 0, "Should receive agent events with maintained auth"
-            assert auth_maintained, "Auth should be maintained throughout agent processing"
-            
-            # Validate auth service response times
-            auth_validation_time = next(
-                (e["timestamp"] for e in auth_events if e["event"] == "token_validation"), 0
-            )
-            assert auth_validation_time < 5.0, (
-                f"Auth service validation too slow: {auth_validation_time:.2f}s"
-            )
-            
-            self.logger.info("🔐 Auth service integration validation complete")
-            self.logger.info(f"   Total time: {total_auth_time:.2f}s")
-            self.logger.info(f"   Auth events: {len(auth_events)}")
-            self.logger.info(f"   Agent events with auth: {len(agent_events)}")
-            self.logger.info(f"   Auth maintained: {auth_maintained}")
-            
+            assert len(agent_events) > 0, 'Should receive agent events with maintained auth'
+            assert auth_maintained, 'Auth should be maintained throughout agent processing'
+            auth_validation_time = next((e['timestamp'] for e in auth_events if e['event'] == 'token_validation'), 0)
+            assert auth_validation_time < 5.0, f'Auth service validation too slow: {auth_validation_time:.2f}s'
+            self.logger.info('🔐 Auth service integration validation complete')
+            self.logger.info(f'   Total time: {total_auth_time:.2f}s')
+            self.logger.info(f'   Auth events: {len(auth_events)}')
+            self.logger.info(f'   Agent events with auth: {len(agent_events)}')
+            self.logger.info(f'   Auth maintained: {auth_maintained}')
         except Exception as e:
-            self.logger.error(f"❌ Auth service integration failed: {e}")
-            raise AssertionError(
-                f"Auth service integration during message processing failed: {e}. "
-                f"This breaks authentication across service boundaries."
-            )
+            self.logger.error(f'❌ Auth service integration failed: {e}')
+            raise AssertionError(f'Auth service integration during message processing failed: {e}. This breaks authentication across service boundaries.')
 
     async def test_database_persistence_during_agent_processing(self):
         """
@@ -287,163 +168,59 @@ class TestCrossServiceIntegrationE2E(SSotAsyncTestCase):
         """
         db_integration_start = time.time()
         db_operations = []
-        
-        self.logger.info("💾 Testing database persistence during agent processing")
-        
+        self.logger.info('💾 Testing database persistence during agent processing')
         try:
-            # Create authenticated user for database testing
-            db_user = await self.auth_helper.create_authenticated_user(
-                email=f"cross_service_db_{self.test_id}@test.com",
-                permissions=["read", "write", "chat", "history_access"]
-            )
-            
-            # Connect WebSocket for message sending
+            db_user = await self.auth_helper.create_authenticated_user(email=f'cross_service_db_{self.test_id}@test.com', permissions=['read', 'write', 'chat', 'history_access'])
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
-            
-            websocket = await asyncio.wait_for(
-                websockets.connect(
-                    self.service_endpoints["websocket"],
-                    additional_headers=self.auth_helper.get_websocket_headers(db_user.jwt_token),
-                    ssl=ssl_context
-                ),
-                timeout=15.0
-            )
-            
-            # Step 1: Send message that should be persisted
-            persistence_message = {
-                "type": "chat_message",
-                "content": f"Database persistence test message - {self.test_id}",
-                "thread_id": self.thread_id,
-                "run_id": self.run_id,
-                "user_id": db_user.user_id,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "context": {
-                    "test_type": "database_persistence",
-                    "should_persist": True,
-                    "test_identifier": self.test_id
-                }
-            }
-            
+            websocket = await asyncio.wait_for(websockets.connect(self.service_endpoints['websocket'], additional_headers=self.auth_helper.get_websocket_headers(db_user.jwt_token), ssl=ssl_context), timeout=15.0)
+            persistence_message = {'type': 'chat_message', 'content': f'Database persistence test message - {self.test_id}', 'thread_id': self.thread_id, 'run_id': self.run_id, 'user_id': db_user.user_id, 'timestamp': datetime.now(timezone.utc).isoformat(), 'context': {'test_type': 'database_persistence', 'should_persist': True, 'test_identifier': self.test_id}}
             message_send_time = time.time()
             await websocket.send(json.dumps(persistence_message))
-            
-            db_operations.append({
-                "operation": "message_sent_for_persistence",
-                "timestamp": time.time() - db_integration_start,
-                "message_id": self.run_id
-            })
-            
-            # Step 2: Wait for agent processing and response
+            db_operations.append({'operation': 'message_sent_for_persistence', 'timestamp': time.time() - db_integration_start, 'message_id': self.run_id})
             agent_response = None
             agent_completed = False
             processing_timeout = 45.0
             processing_start = time.time()
-            
             while time.time() - processing_start < processing_timeout:
                 try:
                     event_data = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                     event = json.loads(event_data)
-                    
-                    event_type = event.get("type", "unknown")
-                    
-                    if event_type == "agent_completed":
+                    event_type = event.get('type', 'unknown')
+                    if event_type == 'agent_completed':
                         agent_response = event
                         agent_completed = True
                         break
-                        
                 except asyncio.TimeoutError:
                     continue
-            
-            assert agent_completed, "Agent should complete processing for database persistence test"
-            
-            db_operations.append({
-                "operation": "agent_response_received",
-                "timestamp": time.time() - db_integration_start,
-                "response_length": len(str(agent_response))
-            })
-            
+            assert agent_completed, 'Agent should complete processing for database persistence test'
+            db_operations.append({'operation': 'agent_response_received', 'timestamp': time.time() - db_integration_start, 'response_length': len(str(agent_response))})
             await websocket.close()
-            
-            # Step 3: Verify persistence via API (database read)
             async with httpx.AsyncClient() as client:
-                # Check chat history to verify persistence
-                history_response = await client.get(
-                    f"{self.service_endpoints['api']}/chat/history",
-                    headers={"Authorization": f"Bearer {db_user.jwt_token}"},
-                    params={
-                        "thread_id": self.thread_id,
-                        "limit": 10
-                    },
-                    timeout=15.0
-                )
-                
-                db_operations.append({
-                    "operation": "chat_history_read",
-                    "timestamp": time.time() - db_integration_start,
-                    "status_code": history_response.status_code
-                })
-                
-                # Validate history retrieval
+                history_response = await client.get(f"{self.service_endpoints['api']}/chat/history", headers={'Authorization': f'Bearer {db_user.jwt_token}'}, params={'thread_id': self.thread_id, 'limit': 10}, timeout=15.0)
+                db_operations.append({'operation': 'chat_history_read', 'timestamp': time.time() - db_integration_start, 'status_code': history_response.status_code})
                 if history_response.status_code == 200:
                     history_data = history_response.json()
-                    messages = history_data.get("messages", [])
-                    
-                    # Look for our test message in history
-                    test_message_found = any(
-                        self.test_id in str(msg.get("content", ""))
-                        for msg in messages
-                    )
-                    
-                    # Look for agent response in history
-                    agent_response_found = any(
-                        msg.get("type") == "agent_response" or msg.get("role") == "assistant"
-                        for msg in messages
-                    )
-                    
-                    db_operations.append({
-                        "operation": "persistence_validation",
-                        "timestamp": time.time() - db_integration_start,
-                        "messages_found": len(messages),
-                        "test_message_persisted": test_message_found,
-                        "agent_response_persisted": agent_response_found
-                    })
-                    
-                    # Validate persistence
-                    assert len(messages) > 0, "Should find persisted messages in chat history"
-                    assert test_message_found, (
-                        f"Test message should be persisted in database. "
-                        f"Messages found: {[msg.get('content', '')[:50] for msg in messages]}"
-                    )
-                    
-                    self.logger.info(f"✅ Database persistence validated: {len(messages)} messages found")
-                    
+                    messages = history_data.get('messages', [])
+                    test_message_found = any((self.test_id in str(msg.get('content', '')) for msg in messages))
+                    agent_response_found = any((msg.get('type') == 'agent_response' or msg.get('role') == 'assistant' for msg in messages))
+                    db_operations.append({'operation': 'persistence_validation', 'timestamp': time.time() - db_integration_start, 'messages_found': len(messages), 'test_message_persisted': test_message_found, 'agent_response_persisted': agent_response_found})
+                    assert len(messages) > 0, 'Should find persisted messages in chat history'
+                    assert test_message_found, f"Test message should be persisted in database. Messages found: {[msg.get('content', '')[:50] for msg in messages]}"
+                    self.logger.info(f'✅ Database persistence validated: {len(messages)} messages found')
                 else:
-                    # History endpoint might not be available in staging - log warning but continue
-                    self.logger.warning(f"Chat history endpoint returned {history_response.status_code}")
-                    # Don't fail the test if history endpoint is not available
-            
+                    self.logger.warning(f'Chat history endpoint returned {history_response.status_code}')
             total_db_time = time.time() - db_integration_start
-            
-            # Validate database integration performance
-            assert total_db_time < 90.0, (
-                f"Database integration too slow: {total_db_time:.2f}s (max 90s)"
-            )
-            
-            self.logger.info("💾 Database persistence validation complete")
-            self.logger.info(f"   Total time: {total_db_time:.2f}s")
-            self.logger.info(f"   DB operations: {len(db_operations)}")
-            
+            assert total_db_time < 90.0, f'Database integration too slow: {total_db_time:.2f}s (max 90s)'
+            self.logger.info('💾 Database persistence validation complete')
+            self.logger.info(f'   Total time: {total_db_time:.2f}s')
+            self.logger.info(f'   DB operations: {len(db_operations)}')
             for op in db_operations:
                 self.logger.info(f"   - {op['operation']}: {op['timestamp']:.2f}s")
-            
         except Exception as e:
-            self.logger.error(f"❌ Database persistence integration failed: {e}")
-            raise AssertionError(
-                f"Database persistence during agent processing failed: {e}. "
-                f"This breaks data consistency across service boundaries."
-            )
+            self.logger.error(f'❌ Database persistence integration failed: {e}')
+            raise AssertionError(f'Database persistence during agent processing failed: {e}. This breaks data consistency across service boundaries.')
 
     async def test_websocket_event_delivery_across_services(self):
         """
@@ -465,149 +242,58 @@ class TestCrossServiceIntegrationE2E(SSotAsyncTestCase):
         """
         websocket_integration_start = time.time()
         event_flow = []
-        
-        self.logger.info("📡 Testing WebSocket event delivery across services")
-        
+        self.logger.info('📡 Testing WebSocket event delivery across services')
         try:
-            # Create user for WebSocket event testing
-            ws_user = await self.auth_helper.create_authenticated_user(
-                email=f"cross_service_ws_{self.test_id}@test.com",
-                permissions=["read", "write", "chat", "websocket_events"]
-            )
-            
-            # Connect WebSocket with event monitoring
+            ws_user = await self.auth_helper.create_authenticated_user(email=f'cross_service_ws_{self.test_id}@test.com', permissions=['read', 'write', 'chat', 'websocket_events'])
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
-            
-            websocket = await asyncio.wait_for(
-                websockets.connect(
-                    self.service_endpoints["websocket"],
-                    additional_headers=self.auth_helper.get_websocket_headers(ws_user.jwt_token),
-                    ssl=ssl_context,
-                    ping_interval=30,
-                    ping_timeout=10
-                ),
-                timeout=15.0
-            )
-            
-            event_flow.append({
-                "event": "websocket_connected",
-                "timestamp": time.time() - websocket_integration_start,
-                "service": "websocket"
-            })
-            
-            # Send message that will trigger cross-service events
-            event_test_message = {
-                "type": "chat_message",
-                "content": "Test cross-service WebSocket event delivery",
-                "thread_id": self.thread_id,
-                "run_id": self.run_id,
-                "user_id": ws_user.user_id,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "context": {
-                    "test_type": "websocket_events",
-                    "expects_real_time_events": True
-                }
-            }
-            
+            websocket = await asyncio.wait_for(websockets.connect(self.service_endpoints['websocket'], additional_headers=self.auth_helper.get_websocket_headers(ws_user.jwt_token), ssl=ssl_context, ping_interval=30, ping_timeout=10), timeout=15.0)
+            event_flow.append({'event': 'websocket_connected', 'timestamp': time.time() - websocket_integration_start, 'service': 'websocket'})
+            event_test_message = {'type': 'chat_message', 'content': 'Test cross-service WebSocket event delivery', 'thread_id': self.thread_id, 'run_id': self.run_id, 'user_id': ws_user.user_id, 'timestamp': datetime.now(timezone.utc).isoformat(), 'context': {'test_type': 'websocket_events', 'expects_real_time_events': True}}
             message_send_time = time.time()
             await websocket.send(json.dumps(event_test_message))
-            
-            event_flow.append({
-                "event": "message_sent",
-                "timestamp": time.time() - websocket_integration_start,
-                "service": "backend"
-            })
-            
-            # Monitor for all expected WebSocket events
-            expected_events = [
-                "agent_started",
-                "agent_thinking", 
-                "tool_executing",
-                "tool_completed",
-                "agent_completed"
-            ]
-            
+            event_flow.append({'event': 'message_sent', 'timestamp': time.time() - websocket_integration_start, 'service': 'backend'})
+            expected_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
             received_events = []
             event_timestamps = {}
             events_timeout = 60.0
             collection_start = time.time()
-            
             while time.time() - collection_start < events_timeout:
                 try:
                     event_data = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                     event = json.loads(event_data)
-                    
-                    event_type = event.get("type", "unknown")
+                    event_type = event.get('type', 'unknown')
                     event_timestamp = time.time() - websocket_integration_start
-                    
                     received_events.append(event)
                     event_timestamps[event_type] = event_timestamp
-                    
-                    event_flow.append({
-                        "event": f"received_{event_type}",
-                        "timestamp": event_timestamp,
-                        "service": "websocket"
-                    })
-                    
-                    self.logger.info(f"📨 Cross-service event: {event_type} at {event_timestamp:.2f}s")
-                    
-                    # Check for completion
-                    if event_type == "agent_completed":
+                    event_flow.append({'event': f'received_{event_type}', 'timestamp': event_timestamp, 'service': 'websocket'})
+                    self.logger.info(f'📨 Cross-service event: {event_type} at {event_timestamp:.2f}s')
+                    if event_type == 'agent_completed':
                         break
-                        
                 except asyncio.TimeoutError:
                     continue
-            
             await websocket.close()
-            
             total_websocket_time = time.time() - websocket_integration_start
-            
-            # Validate cross-service event delivery
-            assert len(received_events) > 0, "Should receive WebSocket events from cross-service flow"
-            
-            # Validate critical events were received
-            received_event_types = [e.get("type", "unknown") for e in received_events]
-            critical_events_received = [
-                event for event in expected_events 
-                if event in received_event_types
-            ]
-            
-            assert len(critical_events_received) >= 2, (
-                f"Should receive at least 2 critical events from cross-service flow. "
-                f"Expected: {expected_events}, Received: {received_event_types}"
-            )
-            
-            # Validate event timing (should be reasonable across services)
-            if "agent_started" in event_timestamps and "agent_completed" in event_timestamps:
-                processing_duration = (
-                    event_timestamps["agent_completed"] - event_timestamps["agent_started"]
-                )
-                assert processing_duration < 45.0, (
-                    f"Cross-service processing too slow: {processing_duration:.2f}s"
-                )
-            
-            # Validate event ordering (should be logical)
-            if "agent_started" in received_event_types and "agent_completed" in received_event_types:
-                started_index = received_event_types.index("agent_started")
-                completed_index = received_event_types.index("agent_completed")
-                assert started_index < completed_index, (
-                    "Event ordering should be logical across services"
-                )
-            
-            self.logger.info("📡 WebSocket cross-service event delivery validation complete")
-            self.logger.info(f"   Total time: {total_websocket_time:.2f}s")
-            self.logger.info(f"   Events received: {len(received_events)}")
-            self.logger.info(f"   Critical events: {critical_events_received}")
-            self.logger.info(f"   Event flow steps: {len(event_flow)}")
-            
+            assert len(received_events) > 0, 'Should receive WebSocket events from cross-service flow'
+            received_event_types = [e.get('type', 'unknown') for e in received_events]
+            critical_events_received = [event for event in expected_events if event in received_event_types]
+            assert len(critical_events_received) >= 2, f'Should receive at least 2 critical events from cross-service flow. Expected: {expected_events}, Received: {received_event_types}'
+            if 'agent_started' in event_timestamps and 'agent_completed' in event_timestamps:
+                processing_duration = event_timestamps['agent_completed'] - event_timestamps['agent_started']
+                assert processing_duration < 45.0, f'Cross-service processing too slow: {processing_duration:.2f}s'
+            if 'agent_started' in received_event_types and 'agent_completed' in received_event_types:
+                started_index = received_event_types.index('agent_started')
+                completed_index = received_event_types.index('agent_completed')
+                assert started_index < completed_index, 'Event ordering should be logical across services'
+            self.logger.info('📡 WebSocket cross-service event delivery validation complete')
+            self.logger.info(f'   Total time: {total_websocket_time:.2f}s')
+            self.logger.info(f'   Events received: {len(received_events)}')
+            self.logger.info(f'   Critical events: {critical_events_received}')
+            self.logger.info(f'   Event flow steps: {len(event_flow)}')
         except Exception as e:
-            self.logger.error(f"❌ WebSocket cross-service event delivery failed: {e}")
-            raise AssertionError(
-                f"WebSocket event delivery across services failed: {e}. "
-                f"This breaks real-time user experience across service boundaries."
-            )
+            self.logger.error(f'❌ WebSocket cross-service event delivery failed: {e}')
+            raise AssertionError(f'WebSocket event delivery across services failed: {e}. This breaks real-time user experience across service boundaries.')
 
     async def test_service_resilience_during_agent_processing(self):
         """
@@ -628,152 +314,62 @@ class TestCrossServiceIntegrationE2E(SSotAsyncTestCase):
         Coverage: Service resilience, timeout handling, error recovery, system stability
         """
         resilience_test_start = time.time()
-        service_metrics = {
-            "response_times": [],
-            "error_events": [],
-            "recovery_events": [],
-            "timeout_events": []
-        }
-        
-        self.logger.info("🛡️ Testing service resilience during agent processing")
-        
+        service_metrics = {'response_times': [], 'error_events': [], 'recovery_events': [], 'timeout_events': []}
+        self.logger.info('🛡️ Testing service resilience during agent processing')
         try:
-            # Create user for resilience testing
-            resilience_user = await self.auth_helper.create_authenticated_user(
-                email=f"cross_service_resilience_{self.test_id}@test.com",
-                permissions=["read", "write", "chat", "stress_testing"]
-            )
-            
-            # Connect WebSocket
+            resilience_user = await self.auth_helper.create_authenticated_user(email=f'cross_service_resilience_{self.test_id}@test.com', permissions=['read', 'write', 'chat', 'stress_testing'])
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
-            
-            websocket = await asyncio.wait_for(
-                websockets.connect(
-                    self.service_endpoints["websocket"],
-                    additional_headers=self.auth_helper.get_websocket_headers(resilience_user.jwt_token),
-                    ssl=ssl_context
-                ),
-                timeout=15.0
-            )
-            
-            # Send complex message that stresses cross-service communication
-            stress_message = {
-                "type": "chat_message",
-                "content": (
-                    "Please provide a comprehensive analysis of AI cost optimization strategies "
-                    "for a large enterprise with 100,000+ employees, including detailed "
-                    "implementation timelines, ROI calculations, risk assessments, compliance "
-                    "considerations, and technical architecture recommendations. This should "
-                    "stress-test the cross-service communication and processing capabilities."
-                ),
-                "thread_id": self.thread_id,
-                "run_id": self.run_id,
-                "user_id": resilience_user.user_id,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "context": {
-                    "test_type": "service_resilience",
-                    "complexity": "high",
-                    "expects_stress_handling": True
-                }
-            }
-            
+            websocket = await asyncio.wait_for(websockets.connect(self.service_endpoints['websocket'], additional_headers=self.auth_helper.get_websocket_headers(resilience_user.jwt_token), ssl=ssl_context), timeout=15.0)
+            stress_message = {'type': 'chat_message', 'content': 'Please provide a comprehensive analysis of AI cost optimization strategies for a large enterprise with 100,000+ employees, including detailed implementation timelines, ROI calculations, risk assessments, compliance considerations, and technical architecture recommendations. This should stress-test the cross-service communication and processing capabilities.', 'thread_id': self.thread_id, 'run_id': self.run_id, 'user_id': resilience_user.user_id, 'timestamp': datetime.now(timezone.utc).isoformat(), 'context': {'test_type': 'service_resilience', 'complexity': 'high', 'expects_stress_handling': True}}
             message_start = time.time()
             await websocket.send(json.dumps(stress_message))
-            
-            # Monitor for resilience indicators
             events = []
             error_count = 0
             timeout_count = 0
-            max_processing_time = 120.0  # Extended for stress testing
+            max_processing_time = 120.0
             collection_start = time.time()
-            
             while time.time() - collection_start < max_processing_time:
                 try:
                     event_data = await asyncio.wait_for(websocket.recv(), timeout=15.0)
                     event = json.loads(event_data)
                     events.append(event)
-                    
-                    event_type = event.get("type", "unknown")
+                    event_type = event.get('type', 'unknown')
                     event_timestamp = time.time() - collection_start
-                    
-                    # Track error events
-                    if "error" in event_type.lower():
+                    if 'error' in event_type.lower():
                         error_count += 1
-                        service_metrics["error_events"].append({
-                            "type": event_type,
-                            "timestamp": event_timestamp,
-                            "details": event.get("message", "")
-                        })
-                    
-                    # Track response times
-                    service_metrics["response_times"].append(event_timestamp)
-                    
-                    # Check for completion
-                    if event_type == "agent_completed":
+                        service_metrics['error_events'].append({'type': event_type, 'timestamp': event_timestamp, 'details': event.get('message', '')})
+                    service_metrics['response_times'].append(event_timestamp)
+                    if event_type == 'agent_completed':
                         break
-                        
                 except asyncio.TimeoutError:
                     timeout_count += 1
-                    service_metrics["timeout_events"].append({
-                        "timestamp": time.time() - collection_start,
-                        "timeout_duration": 15.0
-                    })
-                    
-                    # Continue monitoring - timeouts may be normal under stress
-                    if timeout_count > 5:  # Too many timeouts
+                    service_metrics['timeout_events'].append({'timestamp': time.time() - collection_start, 'timeout_duration': 15.0})
+                    if timeout_count > 5:
                         break
-            
             processing_time = time.time() - collection_start
             await websocket.close()
-            
             total_resilience_time = time.time() - resilience_test_start
-            
-            # Validate service resilience
-            assert len(events) > 0, "Should receive events even under service stress"
-            
-            # Validate error handling
+            assert len(events) > 0, 'Should receive events even under service stress'
             error_rate = error_count / max(len(events), 1)
-            assert error_rate < 0.3, (
-                f"Error rate too high under stress: {error_rate:.1%} "
-                f"(errors: {error_count}, events: {len(events)})"
-            )
-            
-            # Validate timeout handling
+            assert error_rate < 0.3, f'Error rate too high under stress: {error_rate:.1%} (errors: {error_count}, events: {len(events)})'
             timeout_rate = timeout_count / max(processing_time / 15.0, 1)
-            assert timeout_rate < 0.5, (
-                f"Timeout rate too high: {timeout_rate:.1%} "
-                f"(timeouts: {timeout_count}, expected intervals: {processing_time / 15.0:.1f})"
-            )
-            
-            # Validate overall processing time
-            assert processing_time < max_processing_time, (
-                f"Processing exceeded maximum time: {processing_time:.2f}s"
-            )
-            
-            # Calculate resilience metrics
-            avg_response_time = (
-                sum(service_metrics["response_times"]) / len(service_metrics["response_times"])
-                if service_metrics["response_times"] else 0
-            )
-            
-            self.logger.info("🛡️ Service resilience validation complete")
-            self.logger.info(f"   Total time: {total_resilience_time:.2f}s")
-            self.logger.info(f"   Processing time: {processing_time:.2f}s")
-            self.logger.info(f"   Events received: {len(events)}")
-            self.logger.info(f"   Error events: {error_count}")
-            self.logger.info(f"   Timeout events: {timeout_count}")
-            self.logger.info(f"   Error rate: {error_rate:.1%}")
-            self.logger.info(f"   Timeout rate: {timeout_rate:.1%}")
-            self.logger.info(f"   Avg response time: {avg_response_time:.2f}s")
-            
+            assert timeout_rate < 0.5, f'Timeout rate too high: {timeout_rate:.1%} (timeouts: {timeout_count}, expected intervals: {processing_time / 15.0:.1f})'
+            assert processing_time < max_processing_time, f'Processing exceeded maximum time: {processing_time:.2f}s'
+            avg_response_time = sum(service_metrics['response_times']) / len(service_metrics['response_times']) if service_metrics['response_times'] else 0
+            self.logger.info('🛡️ Service resilience validation complete')
+            self.logger.info(f'   Total time: {total_resilience_time:.2f}s')
+            self.logger.info(f'   Processing time: {processing_time:.2f}s')
+            self.logger.info(f'   Events received: {len(events)}')
+            self.logger.info(f'   Error events: {error_count}')
+            self.logger.info(f'   Timeout events: {timeout_count}')
+            self.logger.info(f'   Error rate: {error_rate:.1%}')
+            self.logger.info(f'   Timeout rate: {timeout_rate:.1%}')
+            self.logger.info(f'   Avg response time: {avg_response_time:.2f}s')
         except Exception as e:
-            self.logger.error(f"❌ Service resilience testing failed: {e}")
-            raise AssertionError(
-                f"Service resilience during agent processing failed: {e}. "
-                f"This indicates system instability under stress."
-            )
+            self.logger.error(f'❌ Service resilience testing failed: {e}')
+            raise AssertionError(f'Service resilience during agent processing failed: {e}. This indicates system instability under stress.')
 
     async def test_end_to_end_service_integration_flow(self):
         """
@@ -792,207 +388,85 @@ class TestCrossServiceIntegrationE2E(SSotAsyncTestCase):
         """
         e2e_integration_start = time.time()
         integration_steps = []
-        
-        self.logger.info("🌐 Testing complete end-to-end service integration flow")
-        
+        self.logger.info('🌐 Testing complete end-to-end service integration flow')
         try:
-            # Step 1: Auth Service Integration
             step_start = time.time()
-            e2e_user = await self.auth_helper.create_authenticated_user(
-                email=f"e2e_integration_{self.test_id}@test.com",
-                permissions=["read", "write", "chat", "agent_execution", "full_access"]
-            )
-            
-            integration_steps.append({
-                "step": "auth_service_integration",
-                "duration": time.time() - step_start,
-                "success": True,
-                "user_id": e2e_user.user_id
-            })
-            
-            # Step 2: WebSocket Service Integration
+            e2e_user = await self.auth_helper.create_authenticated_user(email=f'e2e_integration_{self.test_id}@test.com', permissions=['read', 'write', 'chat', 'agent_execution', 'full_access'])
+            integration_steps.append({'step': 'auth_service_integration', 'duration': time.time() - step_start, 'success': True, 'user_id': e2e_user.user_id})
             step_start = time.time()
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
-            
-            websocket = await asyncio.wait_for(
-                websockets.connect(
-                    self.service_endpoints["websocket"],
-                    additional_headers=self.auth_helper.get_websocket_headers(e2e_user.jwt_token),
-                    ssl=ssl_context,
-                    ping_interval=30,
-                    ping_timeout=10
-                ),
-                timeout=20.0
-            )
-            
-            integration_steps.append({
-                "step": "websocket_service_integration",
-                "duration": time.time() - step_start,
-                "success": True
-            })
-            
-            # Step 3: Backend Service Integration (Agent Processing)
+            websocket = await asyncio.wait_for(websockets.connect(self.service_endpoints['websocket'], additional_headers=self.auth_helper.get_websocket_headers(e2e_user.jwt_token), ssl=ssl_context, ping_interval=30, ping_timeout=10), timeout=20.0)
+            integration_steps.append({'step': 'websocket_service_integration', 'duration': time.time() - step_start, 'success': True})
             step_start = time.time()
-            e2e_message = {
-                "type": "chat_message",
-                "content": (
-                    f"End-to-end service integration test {self.test_id}. "
-                    "Please provide recommendations for AI cost optimization "
-                    "that demonstrates complete service integration."
-                ),
-                "thread_id": self.thread_id,
-                "run_id": self.run_id,
-                "user_id": e2e_user.user_id,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "context": {
-                    "test_type": "e2e_service_integration",
-                    "test_id": self.test_id,
-                    "expects_full_processing": True
-                }
-            }
-            
+            e2e_message = {'type': 'chat_message', 'content': f'End-to-end service integration test {self.test_id}. Please provide recommendations for AI cost optimization that demonstrates complete service integration.', 'thread_id': self.thread_id, 'run_id': self.run_id, 'user_id': e2e_user.user_id, 'timestamp': datetime.now(timezone.utc).isoformat(), 'context': {'test_type': 'e2e_service_integration', 'test_id': self.test_id, 'expects_full_processing': True}}
             await websocket.send(json.dumps(e2e_message))
-            
-            # Step 4: Monitor Complete Processing Flow
             all_events = []
             processing_complete = False
             final_response = None
-            
             processing_timeout = 90.0
             processing_start = time.time()
-            
             while time.time() - processing_start < processing_timeout:
                 try:
                     event_data = await asyncio.wait_for(websocket.recv(), timeout=15.0)
                     event = json.loads(event_data)
                     all_events.append(event)
-                    
-                    event_type = event.get("type", "unknown")
-                    
-                    if event_type == "agent_completed":
+                    event_type = event.get('type', 'unknown')
+                    if event_type == 'agent_completed':
                         final_response = event
                         processing_complete = True
                         break
-                        
-                    # Log significant events
-                    if event_type in ["agent_started", "agent_thinking", "tool_executing", "agent_completed"]:
-                        self.logger.info(f"🔄 E2E event: {event_type}")
-                        
+                    if event_type in ['agent_started', 'agent_thinking', 'tool_executing', 'agent_completed']:
+                        self.logger.info(f'🔄 E2E event: {event_type}')
                 except asyncio.TimeoutError:
                     continue
-            
             backend_processing_time = time.time() - processing_start
-            
-            integration_steps.append({
-                "step": "backend_service_processing",
-                "duration": backend_processing_time,
-                "success": processing_complete,
-                "events_received": len(all_events),
-                "final_response_received": final_response is not None
-            })
-            
-            # Step 5: Validate Response Quality (LLM Service Integration)
+            integration_steps.append({'step': 'backend_service_processing', 'duration': backend_processing_time, 'success': processing_complete, 'events_received': len(all_events), 'final_response_received': final_response is not None})
             step_start = time.time()
             response_valid = False
             response_length = 0
-            
             if final_response:
-                response_data = final_response.get("data", {})
-                result = response_data.get("result", {})
+                response_data = final_response.get('data', {})
+                result = response_data.get('result', {})
                 response_text = str(result)
                 response_length = len(response_text)
-                
-                # Validate response indicates LLM service integration
-                response_valid = (
-                    response_length > 100 and
-                    any(word in response_text.lower() for word in ["cost", "optimization", "recommendation"])
-                )
-            
-            integration_steps.append({
-                "step": "llm_service_integration",
-                "duration": time.time() - step_start,
-                "success": response_valid,
-                "response_length": response_length
-            })
-            
-            # Step 6: Optional Database Service Verification
+                response_valid = response_length > 100 and any((word in response_text.lower() for word in ['cost', 'optimization', 'recommendation']))
+            integration_steps.append({'step': 'llm_service_integration', 'duration': time.time() - step_start, 'success': response_valid, 'response_length': response_length})
             step_start = time.time()
             db_verification = False
-            
             try:
                 async with httpx.AsyncClient() as client:
-                    history_response = await client.get(
-                        f"{self.service_endpoints['api']}/chat/history",
-                        headers={"Authorization": f"Bearer {e2e_user.jwt_token}"},
-                        params={"thread_id": self.thread_id, "limit": 5},
-                        timeout=10.0
-                    )
-                    
+                    history_response = await client.get(f"{self.service_endpoints['api']}/chat/history", headers={'Authorization': f'Bearer {e2e_user.jwt_token}'}, params={'thread_id': self.thread_id, 'limit': 5}, timeout=10.0)
                     if history_response.status_code == 200:
                         db_verification = True
             except Exception as e:
-                self.logger.warning(f"Database verification optional check failed: {e}")
-                # Don't fail the test for optional database verification
-            
-            integration_steps.append({
-                "step": "database_service_verification",
-                "duration": time.time() - step_start,
-                "success": db_verification,
-                "optional": True
-            })
-            
+                self.logger.warning(f'Database verification optional check failed: {e}')
+            integration_steps.append({'step': 'database_service_verification', 'duration': time.time() - step_start, 'success': db_verification, 'optional': True})
             await websocket.close()
-            
             total_e2e_time = time.time() - e2e_integration_start
-            
-            # Validate end-to-end integration
-            required_steps = [s for s in integration_steps if not s.get("optional", False)]
-            successful_steps = [s for s in required_steps if s["success"]]
-            
+            required_steps = [s for s in integration_steps if not s.get('optional', False)]
+            successful_steps = [s for s in required_steps if s['success']]
             success_rate = len(successful_steps) / len(required_steps)
-            
-            assert success_rate >= 0.8, (
-                f"E2E service integration success rate too low: {success_rate:.1%}. "
-                f"Successful: {len(successful_steps)}, Required: {len(required_steps)}"
-            )
-            
-            assert processing_complete, "Should complete full e2e processing flow"
-            assert len(all_events) > 0, "Should receive events from e2e flow"
-            assert final_response is not None, "Should receive final response from e2e flow"
-            
-            # Validate overall timing
-            assert total_e2e_time < 150.0, (
-                f"E2E integration too slow: {total_e2e_time:.2f}s (max 150s)"
-            )
-            
-            self.logger.info("🌐 Complete end-to-end service integration validation SUCCESS")
-            self.logger.info(f"   Total E2E time: {total_e2e_time:.2f}s")
-            self.logger.info(f"   Integration steps: {len(integration_steps)}")
-            self.logger.info(f"   Success rate: {success_rate:.1%}")
-            self.logger.info(f"   Events received: {len(all_events)}")
-            self.logger.info(f"   Response length: {response_length} chars")
-            
+            assert success_rate >= 0.8, f'E2E service integration success rate too low: {success_rate:.1%}. Successful: {len(successful_steps)}, Required: {len(required_steps)}'
+            assert processing_complete, 'Should complete full e2e processing flow'
+            assert len(all_events) > 0, 'Should receive events from e2e flow'
+            assert final_response is not None, 'Should receive final response from e2e flow'
+            assert total_e2e_time < 150.0, f'E2E integration too slow: {total_e2e_time:.2f}s (max 150s)'
+            self.logger.info('🌐 Complete end-to-end service integration validation SUCCESS')
+            self.logger.info(f'   Total E2E time: {total_e2e_time:.2f}s')
+            self.logger.info(f'   Integration steps: {len(integration_steps)}')
+            self.logger.info(f'   Success rate: {success_rate:.1%}')
+            self.logger.info(f'   Events received: {len(all_events)}')
+            self.logger.info(f'   Response length: {response_length} chars')
             for step in integration_steps:
-                status = "✅" if step["success"] else "❌"
-                optional = " (optional)" if step.get("optional") else ""
+                status = '✅' if step['success'] else '❌'
+                optional = ' (optional)' if step.get('optional') else ''
                 self.logger.info(f"   {status} {step['step']}: {step['duration']:.2f}s{optional}")
-            
         except Exception as e:
-            self.logger.error(f"❌ End-to-end service integration failed: {e}")
-            raise AssertionError(
-                f"Complete end-to-end service integration failed: {e}. "
-                f"This indicates fundamental service mesh communication issues."
-            )
-
-
-if __name__ == "__main__":
-    pytest.main([
-        __file__,
-        "-v",
-        "--tb=long",
-        "-s",
-        "--gcp-staging",
-        "--cross-service"
-    ])
+            self.logger.error(f'❌ End-to-end service integration failed: {e}')
+            raise AssertionError(f'Complete end-to-end service integration failed: {e}. This indicates fundamental service mesh communication issues.')
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

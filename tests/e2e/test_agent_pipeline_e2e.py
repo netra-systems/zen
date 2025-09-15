@@ -40,7 +40,7 @@ import random
 import pytest
 from loguru import logger
 from dataclasses import dataclass, field
-from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from shared.isolated_environment import IsolatedEnvironment
 

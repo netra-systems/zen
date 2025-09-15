@@ -35,7 +35,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 import sys
 from pathlib import Path
-from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports

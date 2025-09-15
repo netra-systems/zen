@@ -6,7 +6,7 @@ Tests the core P1 remediation components are working
 
 import sys
 import os
-from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+
 from shared.isolated_environment import IsolatedEnvironment
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 

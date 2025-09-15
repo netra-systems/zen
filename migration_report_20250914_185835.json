@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-09-14T18:58:35.130873",
+  "mode": "live_migration",
+  "statistics": {
+    "total_files_processed": 11,
+    "successful_migrations": 11,
+    "failed_migrations": 0,
+    "total_violations_eliminated": 0,
+    "rollbacks_performed": 0,
+    "syntax_errors_prevented": 0,
+    "total_execution_time_ms": 32.785000000000004
+  },
+  "successful_files": [],
+  "error_files": [],
+  "rollback_files": [],
+  "remaining_violations": 0
+}

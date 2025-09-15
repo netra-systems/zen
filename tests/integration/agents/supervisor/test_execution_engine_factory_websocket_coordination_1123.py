@@ -24,7 +24,6 @@ Test Philosophy:
 - RACE CONDITION REPRODUCTION: Tests demonstrate timing-sensitive failures
 - GOLDEN PATH PROTECTION: Tests validate end-to-end service coordination
 """
-
 import asyncio
 import gc
 import inspect
@@ -34,12 +33,9 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from unittest.mock import patch, MagicMock
-
-# SSOT Test Framework
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.fixtures.real_services_fixtures import RealServicesFixtureMixin
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-
 
 class TestExecutionEngineFactoryWebSocketCoordination1123(SSotAsyncTestCase, RealServicesFixtureMixin):
     """Phase 2 Integration Tests: Factory WebSocket Coordination Issues
@@ -57,54 +53,40 @@ class TestExecutionEngineFactoryWebSocketCoordination1123(SSotAsyncTestCase, Rea
         self.created_contexts = []
         self.websocket_bridges = []
         self.coordination_metrics = []
-
-        # WebSocket event tracking
         self.received_events = []
         self.websocket_errors = []
         self.coordination_failures = []
-
-        # Test configuration
-        self.max_coordination_delay = 5.0  # 5 seconds max for service coordination
-        self.websocket_timeout = 10.0  # 10 seconds max for WebSocket operations
+        self.max_coordination_delay = 5.0
+        self.websocket_timeout = 10.0
 
     async def asyncSetUp(self):
         """Set up real services for integration testing."""
         await super().asyncSetUp()
-        # Initialize real services (no Docker - local PostgreSQL and Redis)
         await self.setup_real_services()
 
     async def asyncTearDown(self):
         """Clean up test resources and real services."""
-        # Cleanup created resources
         for context in self.created_contexts:
             try:
                 if hasattr(context, 'cleanup'):
                     await context.cleanup()
             except Exception:
                 pass
-
         for factory in self.factory_instances:
             try:
                 if hasattr(factory, 'shutdown'):
                     await factory.shutdown()
             except Exception:
                 pass
-
         for bridge in self.websocket_bridges:
             try:
                 if hasattr(bridge, 'cleanup'):
                     await bridge.cleanup()
             except Exception:
                 pass
-
-        # Cleanup real services
         await self.cleanup_real_services()
-
-        # Force garbage collection
         gc.collect()
         await super().asyncTearDown()
-
-    # === SERVICE DEPENDENCY COORDINATION TESTS ===
 
     async def test_factory_service_dependency_resolution_failures(self):
         """FAILING TEST: Reproduce service dependency resolution issues
@@ -113,101 +95,41 @@ class TestExecutionEngineFactoryWebSocketCoordination1123(SSotAsyncTestCase, Rea
         EXPECTED: FAIL - Factory fails to coordinate with database and Redis properly
         ISSUE: Service dependency resolution race conditions cause initialization failures
         """
-        # Import required classes
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
-                ExecutionEngineFactory
-            )
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
         except ImportError as e:
-            self.fail(f"Cannot import required classes: {e}")
-
-        # Test service dependency coordination
+            self.fail(f'Cannot import required classes: {e}')
         coordination_results = []
 
         async def test_service_coordination(test_scenario: str, delay_before_factory: float):
             """Test factory creation with service dependency timing."""
             start_time = time.time()
-
             try:
-                # Add delay to simulate service startup timing
                 if delay_before_factory > 0:
                     await asyncio.sleep(delay_before_factory)
-
-                # Try to access real services before factory creation
                 db_session = await self.get_real_database_session()
                 redis_client = await self.get_real_redis_client()
-
-                # Verify services are available
                 if not db_session or not redis_client:
-                    raise Exception("Real services not available")
-
-                # Create WebSocket bridge with real service dependencies
-                websocket_bridge = AgentWebSocketBridge(
-                    database_session_manager=db_session,
-                    redis_manager=redis_client
-                )
+                    raise Exception('Real services not available')
+                websocket_bridge = AgentWebSocketBridge(database_session_manager=db_session, redis_manager=redis_client)
                 self.websocket_bridges.append(websocket_bridge)
-
-                # Create factory with real service dependencies
-                factory = ExecutionEngineFactory(
-                    websocket_bridge=websocket_bridge,
-                    database_session_manager=db_session,
-                    redis_manager=redis_client
-                )
+                factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge, database_session_manager=db_session, redis_manager=redis_client)
                 self.factory_instances.append(factory)
-
-                # Create test user context
-                context = UserExecutionContext(
-                    user_id=f"coord_test_user_{test_scenario}",
-                    run_id=f"coord_test_run_{test_scenario}_{int(time.time() * 1000)}",
-                    session_id=f"coord_test_session_{test_scenario}",
-                    request_id=f"coord_test_request_{test_scenario}"
-                )
+                context = UserExecutionContext(user_id=f'coord_test_user_{test_scenario}', run_id=f'coord_test_run_{test_scenario}_{int(time.time() * 1000)}', session_id=f'coord_test_session_{test_scenario}', request_id=f'coord_test_request_{test_scenario}')
                 self.created_contexts.append(context)
-
-                # Try to create execution engine (this tests full coordination)
                 engine = await factory.create_for_user(context)
-
                 coordination_time = time.time() - start_time
-
-                # Cleanup
                 await factory.cleanup_engine(engine)
-
-                return {
-                    'scenario': test_scenario,
-                    'success': True,
-                    'coordination_time': coordination_time,
-                    'error': None
-                }
-
+                return {'scenario': test_scenario, 'success': True, 'coordination_time': coordination_time, 'error': None}
             except Exception as e:
                 coordination_time = time.time() - start_time
-                return {
-                    'scenario': test_scenario,
-                    'success': False,
-                    'coordination_time': coordination_time,
-                    'error': str(e)
-                }
-
-        # Test multiple coordination scenarios
-        coordination_scenarios = [
-            ("immediate_factory_creation", 0.0),
-            ("delayed_factory_creation", 0.1),
-            ("slow_service_startup", 0.5)
-        ]
-
-        # Execute coordination tests
-        tasks = [
-            test_service_coordination(scenario, delay)
-            for scenario, delay in coordination_scenarios
-        ]
+                return {'scenario': test_scenario, 'success': False, 'coordination_time': coordination_time, 'error': str(e)}
+        coordination_scenarios = [('immediate_factory_creation', 0.0), ('delayed_factory_creation', 0.1), ('slow_service_startup', 0.5)]
+        tasks = [test_service_coordination(scenario, delay) for scenario, delay in coordination_scenarios]
         results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        # Collect coordination results
         successful_coordinations = 0
         failed_coordinations = 0
-
         for result in results:
             if isinstance(result, dict):
                 coordination_results.append(result)
@@ -217,32 +139,12 @@ class TestExecutionEngineFactoryWebSocketCoordination1123(SSotAsyncTestCase, Rea
                     failed_coordinations += 1
                     self.coordination_failures.append(result)
             else:
-                # Exception occurred
                 failed_coordinations += 1
-                self.coordination_failures.append({
-                    'scenario': 'exception',
-                    'success': False,
-                    'error': str(result)
-                })
-
-        # ASSERTION THAT SHOULD FAIL: All service coordinations should succeed
-        self.assertEqual(
-            failed_coordinations, 0,
-            f"SERVICE COORDINATION FAILURES: {failed_coordinations} out of "
-            f"{len(coordination_scenarios)} coordination tests failed. "
-            f"Factory cannot properly coordinate with real services. "
-            f"Failures: {[f['error'] for f in self.coordination_failures]}"
-        )
-
-        # ASSERTION THAT SHOULD FAIL: Coordination should be fast enough
+                self.coordination_failures.append({'scenario': 'exception', 'success': False, 'error': str(result)})
+        self.assertEqual(failed_coordinations, 0, f"SERVICE COORDINATION FAILURES: {failed_coordinations} out of {len(coordination_scenarios)} coordination tests failed. Factory cannot properly coordinate with real services. Failures: {[f['error'] for f in self.coordination_failures]}")
         for result in coordination_results:
             if result['success']:
-                self.assertLess(
-                    result['coordination_time'], self.max_coordination_delay,
-                    f"SERVICE COORDINATION TOO SLOW: {result['scenario']} took "
-                    f"{result['coordination_time']:.2f}s (limit: {self.max_coordination_delay}s). "
-                    f"Factory service coordination is too slow for production use."
-                )
+                self.assertLess(result['coordination_time'], self.max_coordination_delay, f"SERVICE COORDINATION TOO SLOW: {result['scenario']} took {result['coordination_time']:.2f}s (limit: {self.max_coordination_delay}s). Factory service coordination is too slow for production use.")
 
     async def test_factory_startup_sequence_coordination_race_conditions(self):
         """FAILING TEST: Reproduce startup sequence coordination race conditions
@@ -251,116 +153,52 @@ class TestExecutionEngineFactoryWebSocketCoordination1123(SSotAsyncTestCase, Rea
         EXPECTED: FAIL - Startup sequence coordination causes race conditions
         ISSUE: Service startup timing dependencies cause factory initialization failures
         """
-        # Import required classes
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
-                ExecutionEngineFactory,
-                configure_execution_engine_factory
-            )
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory, configure_execution_engine_factory
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
         except ImportError as e:
-            self.fail(f"Cannot import required classes: {e}")
-
-        # Test different startup sequence orders
+            self.fail(f'Cannot import required classes: {e}')
         startup_sequence_results = []
 
         async def test_startup_sequence(sequence_name: str, service_order: List[str]):
             """Test different service startup sequences."""
             start_time = time.time()
             sequence_services = {}
-
             try:
-                # Initialize services in specified order
                 for service in service_order:
-                    if service == "database":
+                    if service == 'database':
                         sequence_services['database'] = await self.get_real_database_session()
-                        await asyncio.sleep(0.05)  # Simulate database startup time
-
-                    elif service == "redis":
+                        await asyncio.sleep(0.05)
+                    elif service == 'redis':
                         sequence_services['redis'] = await self.get_real_redis_client()
-                        await asyncio.sleep(0.03)  # Simulate Redis startup time
-
-                    elif service == "websocket":
-                        sequence_services['websocket'] = AgentWebSocketBridge(
-                            database_session_manager=sequence_services.get('database'),
-                            redis_manager=sequence_services.get('redis')
-                        )
+                        await asyncio.sleep(0.03)
+                    elif service == 'websocket':
+                        sequence_services['websocket'] = AgentWebSocketBridge(database_session_manager=sequence_services.get('database'), redis_manager=sequence_services.get('redis'))
                         self.websocket_bridges.append(sequence_services['websocket'])
-                        await asyncio.sleep(0.02)  # Simulate WebSocket startup time
-
-                    elif service == "factory":
-                        sequence_services['factory'] = ExecutionEngineFactory(
-                            websocket_bridge=sequence_services.get('websocket'),
-                            database_session_manager=sequence_services.get('database'),
-                            redis_manager=sequence_services.get('redis')
-                        )
+                        await asyncio.sleep(0.02)
+                    elif service == 'factory':
+                        sequence_services['factory'] = ExecutionEngineFactory(websocket_bridge=sequence_services.get('websocket'), database_session_manager=sequence_services.get('database'), redis_manager=sequence_services.get('redis'))
                         self.factory_instances.append(sequence_services['factory'])
-
-                # Verify all services were initialized
                 required_services = ['database', 'redis', 'websocket', 'factory']
-                missing_services = [
-                    svc for svc in required_services
-                    if svc not in sequence_services or sequence_services[svc] is None
-                ]
-
+                missing_services = [svc for svc in required_services if svc not in sequence_services or sequence_services[svc] is None]
                 if missing_services:
-                    raise Exception(f"Failed to initialize services: {missing_services}")
-
-                # Test factory functionality after startup sequence
-                context = UserExecutionContext(
-                    user_id=f"startup_test_user_{sequence_name}",
-                    run_id=f"startup_test_run_{sequence_name}_{int(time.time() * 1000)}",
-                    session_id=f"startup_test_session_{sequence_name}",
-                    request_id=f"startup_test_request_{sequence_name}"
-                )
+                    raise Exception(f'Failed to initialize services: {missing_services}')
+                context = UserExecutionContext(user_id=f'startup_test_user_{sequence_name}', run_id=f'startup_test_run_{sequence_name}_{int(time.time() * 1000)}', session_id=f'startup_test_session_{sequence_name}', request_id=f'startup_test_request_{sequence_name}')
                 self.created_contexts.append(context)
-
                 factory = sequence_services['factory']
                 engine = await factory.create_for_user(context)
-
                 startup_time = time.time() - start_time
-
-                # Cleanup
                 await factory.cleanup_engine(engine)
-
-                return {
-                    'sequence': sequence_name,
-                    'order': service_order,
-                    'success': True,
-                    'startup_time': startup_time,
-                    'error': None
-                }
-
+                return {'sequence': sequence_name, 'order': service_order, 'success': True, 'startup_time': startup_time, 'error': None}
             except Exception as e:
                 startup_time = time.time() - start_time
-                return {
-                    'sequence': sequence_name,
-                    'order': service_order,
-                    'success': False,
-                    'startup_time': startup_time,
-                    'error': str(e)
-                }
-
-        # Test different startup sequences
-        startup_sequences = [
-            ("correct_sequence", ["database", "redis", "websocket", "factory"]),
-            ("reverse_sequence", ["factory", "websocket", "redis", "database"]),
-            ("random_sequence", ["redis", "factory", "database", "websocket"]),
-            ("websocket_first", ["websocket", "database", "redis", "factory"])
-        ]
-
-        # Execute startup sequence tests
-        tasks = [
-            test_startup_sequence(seq_name, order)
-            for seq_name, order in startup_sequences
-        ]
+                return {'sequence': sequence_name, 'order': service_order, 'success': False, 'startup_time': startup_time, 'error': str(e)}
+        startup_sequences = [('correct_sequence', ['database', 'redis', 'websocket', 'factory']), ('reverse_sequence', ['factory', 'websocket', 'redis', 'database']), ('random_sequence', ['redis', 'factory', 'database', 'websocket']), ('websocket_first', ['websocket', 'database', 'redis', 'factory'])]
+        tasks = [test_startup_sequence(seq_name, order) for seq_name, order in startup_sequences]
         results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        # Collect startup sequence results
         successful_sequences = 0
         failed_sequences = 0
         sequence_failures = []
-
         for result in results:
             if isinstance(result, dict):
                 startup_sequence_results.append(result)
@@ -370,45 +208,17 @@ class TestExecutionEngineFactoryWebSocketCoordination1123(SSotAsyncTestCase, Rea
                     failed_sequences += 1
                     sequence_failures.append(result)
             else:
-                # Exception occurred
                 failed_sequences += 1
-                sequence_failures.append({
-                    'sequence': 'exception',
-                    'error': str(result),
-                    'success': False
-                })
-
-        # ASSERTION THAT SHOULD FAIL: At least the correct sequence should work
-        correct_sequence_result = next(
-            (r for r in startup_sequence_results if r['sequence'] == 'correct_sequence'),
-            None
-        )
-
+                sequence_failures.append({'sequence': 'exception', 'error': str(result), 'success': False})
+        correct_sequence_result = next((r for r in startup_sequence_results if r['sequence'] == 'correct_sequence'), None)
         if correct_sequence_result:
-            self.assertTrue(
-                correct_sequence_result['success'],
-                f"STARTUP SEQUENCE FAILURE: Even the correct startup sequence failed. "
-                f"Error: {correct_sequence_result['error']}. "
-                f"Factory startup coordination is fundamentally broken."
-            )
-
-        # ASSERTION THAT SHOULD FAIL: Wrong sequences should fail gracefully, not crash
+            self.assertTrue(correct_sequence_result['success'], f"STARTUP SEQUENCE FAILURE: Even the correct startup sequence failed. Error: {correct_sequence_result['error']}. Factory startup coordination is fundamentally broken.")
         for result in startup_sequence_results:
             if not result['success'] and result['sequence'] != 'correct_sequence':
-                # Check if failure is graceful (no crash/exception)
                 error_msg = result['error'].lower()
                 crash_indicators = ['segmentation', 'core dumped', 'signal', 'abort']
-
-                has_crash = any(indicator in error_msg for indicator in crash_indicators)
-
-                self.assertFalse(
-                    has_crash,
-                    f"STARTUP SEQUENCE CRASH: {result['sequence']} caused a crash. "
-                    f"Error: {result['error']}. "
-                    f"Wrong startup sequences should fail gracefully, not crash."
-                )
-
-    # === WEBSOCKET BRIDGE INTEGRATION TESTS ===
+                has_crash = any((indicator in error_msg for indicator in crash_indicators))
+                self.assertFalse(has_crash, f"STARTUP SEQUENCE CRASH: {result['sequence']} caused a crash. Error: {result['error']}. Wrong startup sequences should fail gracefully, not crash.")
 
     async def test_factory_websocket_bridge_initialization_1011_errors(self):
         """FAILING TEST: Reproduce WebSocket 1011 errors from factory/bridge coordination
@@ -417,117 +227,49 @@ class TestExecutionEngineFactoryWebSocketCoordination1123(SSotAsyncTestCase, Rea
         EXPECTED: FAIL - Factory/WebSocket coordination causes 1011 errors
         ISSUE: Factory initialization timing conflicts with WebSocket handshake
         """
-        # Import required classes
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
-                ExecutionEngineFactory
-            )
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
             from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
         except ImportError as e:
-            self.fail(f"Cannot import required classes: {e}")
-
-        # Test WebSocket bridge coordination
+            self.fail(f'Cannot import required classes: {e}')
         websocket_test_results = []
 
         async def test_websocket_coordination(test_name: str, coordination_delay: float):
             """Test WebSocket bridge coordination with factory."""
             start_time = time.time()
-
             try:
-                # Get real services
                 db_session = await self.get_real_database_session()
                 redis_client = await self.get_real_redis_client()
-
-                # Create WebSocket bridge with potential timing issues
-                websocket_bridge = AgentWebSocketBridge(
-                    database_session_manager=db_session,
-                    redis_manager=redis_client
-                )
+                websocket_bridge = AgentWebSocketBridge(database_session_manager=db_session, redis_manager=redis_client)
                 self.websocket_bridges.append(websocket_bridge)
-
-                # Add coordination delay to simulate timing issues
                 if coordination_delay > 0:
                     await asyncio.sleep(coordination_delay)
-
-                # Create factory with WebSocket bridge
-                factory = ExecutionEngineFactory(
-                    websocket_bridge=websocket_bridge,
-                    database_session_manager=db_session,
-                    redis_manager=redis_client
-                )
+                factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge, database_session_manager=db_session, redis_manager=redis_client)
                 self.factory_instances.append(factory)
-
-                # Create user context for WebSocket testing
-                context = UserExecutionContext(
-                    user_id=f"ws_test_user_{test_name}",
-                    run_id=f"ws_test_run_{test_name}_{int(time.time() * 1000)}",
-                    session_id=f"ws_test_session_{test_name}",
-                    request_id=f"ws_test_request_{test_name}"
-                )
+                context = UserExecutionContext(user_id=f'ws_test_user_{test_name}', run_id=f'ws_test_run_{test_name}_{int(time.time() * 1000)}', session_id=f'ws_test_session_{test_name}', request_id=f'ws_test_request_{test_name}')
                 self.created_contexts.append(context)
-
-                # Create execution engine (tests WebSocket integration)
                 engine = await factory.create_for_user(context)
-
-                # Test WebSocket event delivery
                 if hasattr(engine, 'websocket_emitter') and engine.websocket_emitter:
-                    # Try to send test WebSocket events
-                    await engine.websocket_emitter.send_agent_started("Test agent started")
-                    await asyncio.sleep(0.1)  # Allow event processing
-                    await engine.websocket_emitter.send_agent_thinking("Test thinking")
+                    await engine.websocket_emitter.send_agent_started('Test agent started')
                     await asyncio.sleep(0.1)
-                    await engine.websocket_emitter.send_agent_completed("Test completed")
-
+                    await engine.websocket_emitter.send_agent_thinking('Test thinking')
+                    await asyncio.sleep(0.1)
+                    await engine.websocket_emitter.send_agent_completed('Test completed')
                 coordination_time = time.time() - start_time
-
-                # Cleanup
                 await factory.cleanup_engine(engine)
-
-                return {
-                    'test': test_name,
-                    'success': True,
-                    'coordination_time': coordination_time,
-                    'websocket_events_sent': 3,
-                    'error': None
-                }
-
+                return {'test': test_name, 'success': True, 'coordination_time': coordination_time, 'websocket_events_sent': 3, 'error': None}
             except Exception as e:
                 coordination_time = time.time() - start_time
-
-                # Check for WebSocket 1011 errors specifically
                 error_str = str(e).lower()
                 is_1011_error = '1011' in error_str or 'websocket' in error_str
-
-                return {
-                    'test': test_name,
-                    'success': False,
-                    'coordination_time': coordination_time,
-                    'websocket_events_sent': 0,
-                    'error': str(e),
-                    'is_1011_error': is_1011_error
-                }
-
-        # Test different WebSocket coordination scenarios
-        websocket_scenarios = [
-            ("immediate_websocket", 0.0),
-            ("delayed_websocket", 0.1),
-            ("slow_websocket_startup", 0.3),
-            ("race_condition_timing", 0.05)
-        ]
-
-        # Execute WebSocket coordination tests
-        tasks = [
-            test_websocket_coordination(test_name, delay)
-            for test_name, delay in websocket_scenarios
-        ]
+                return {'test': test_name, 'success': False, 'coordination_time': coordination_time, 'websocket_events_sent': 0, 'error': str(e), 'is_1011_error': is_1011_error}
+        websocket_scenarios = [('immediate_websocket', 0.0), ('delayed_websocket', 0.1), ('slow_websocket_startup', 0.3), ('race_condition_timing', 0.05)]
+        tasks = [test_websocket_coordination(test_name, delay) for test_name, delay in websocket_scenarios]
         results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        # Collect WebSocket test results
         successful_websocket_tests = 0
         failed_websocket_tests = 0
         websocket_1011_errors = []
-
         for result in results:
             if isinstance(result, dict):
                 websocket_test_results.append(result)
@@ -539,36 +281,13 @@ class TestExecutionEngineFactoryWebSocketCoordination1123(SSotAsyncTestCase, Rea
                         websocket_1011_errors.append(result)
                         self.websocket_errors.append(result)
             else:
-                # Exception occurred
                 failed_websocket_tests += 1
                 error_str = str(result).lower()
                 if '1011' in error_str or 'websocket' in error_str:
-                    websocket_1011_errors.append({
-                        'test': 'exception',
-                        'error': str(result),
-                        'is_1011_error': True
-                    })
-                    self.websocket_errors.append({
-                        'test': 'exception',
-                        'error': str(result)
-                    })
-
-        # ASSERTION THAT SHOULD FAIL: No WebSocket 1011 errors should occur
-        self.assertEqual(
-            len(websocket_1011_errors), 0,
-            f"WEBSOCKET 1011 ERRORS DETECTED: {len(websocket_1011_errors)} tests "
-            f"failed with WebSocket 1011 errors. "
-            f"Errors: {[err['error'] for err in websocket_1011_errors]}. "
-            f"Factory/WebSocket coordination is causing Golden Path blocking issues."
-        )
-
-        # ASSERTION THAT SHOULD FAIL: All WebSocket coordination tests should pass
-        self.assertEqual(
-            failed_websocket_tests, 0,
-            f"WEBSOCKET COORDINATION FAILURES: {failed_websocket_tests} out of "
-            f"{len(websocket_scenarios)} WebSocket tests failed. "
-            f"Factory cannot properly coordinate with WebSocket bridge."
-        )
+                    websocket_1011_errors.append({'test': 'exception', 'error': str(result), 'is_1011_error': True})
+                    self.websocket_errors.append({'test': 'exception', 'error': str(result)})
+        self.assertEqual(len(websocket_1011_errors), 0, f"WEBSOCKET 1011 ERRORS DETECTED: {len(websocket_1011_errors)} tests failed with WebSocket 1011 errors. Errors: {[err['error'] for err in websocket_1011_errors]}. Factory/WebSocket coordination is causing Golden Path blocking issues.")
+        self.assertEqual(failed_websocket_tests, 0, f'WEBSOCKET COORDINATION FAILURES: {failed_websocket_tests} out of {len(websocket_scenarios)} WebSocket tests failed. Factory cannot properly coordinate with WebSocket bridge.')
 
     async def test_factory_agent_execution_chain_coordination(self):
         """FAILING TEST: Reproduce execution chain coordination failures
@@ -577,116 +296,52 @@ class TestExecutionEngineFactoryWebSocketCoordination1123(SSotAsyncTestCase, Rea
         EXPECTED: FAIL - Execution engine → WebSocket → agent chain coordination fails
         ISSUE: Chain coordination issues prevent Golden Path completion
         """
-        # Import required classes
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
-                ExecutionEngineFactory
-            )
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
         except ImportError as e:
-            self.fail(f"Cannot import required classes: {e}")
-
-        # Test complete execution chain coordination
+            self.fail(f'Cannot import required classes: {e}')
         chain_test_results = []
 
         async def test_execution_chain(chain_name: str, simulate_load: bool):
             """Test complete execution chain coordination."""
             start_time = time.time()
-
             try:
-                # Get real services
                 db_session = await self.get_real_database_session()
                 redis_client = await self.get_real_redis_client()
-
-                # Create WebSocket bridge
-                websocket_bridge = AgentWebSocketBridge(
-                    database_session_manager=db_session,
-                    redis_manager=redis_client
-                )
+                websocket_bridge = AgentWebSocketBridge(database_session_manager=db_session, redis_manager=redis_client)
                 self.websocket_bridges.append(websocket_bridge)
-
-                # Create factory
-                factory = ExecutionEngineFactory(
-                    websocket_bridge=websocket_bridge,
-                    database_session_manager=db_session,
-                    redis_manager=redis_client
-                )
+                factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge, database_session_manager=db_session, redis_manager=redis_client)
                 self.factory_instances.append(factory)
-
-                # Create user context
-                context = UserExecutionContext(
-                    user_id=f"chain_test_user_{chain_name}",
-                    run_id=f"chain_test_run_{chain_name}_{int(time.time() * 1000)}",
-                    session_id=f"chain_test_session_{chain_name}",
-                    request_id=f"chain_test_request_{chain_name}"
-                )
+                context = UserExecutionContext(user_id=f'chain_test_user_{chain_name}', run_id=f'chain_test_run_{chain_name}_{int(time.time() * 1000)}', session_id=f'chain_test_session_{chain_name}', request_id=f'chain_test_request_{chain_name}')
                 self.created_contexts.append(context)
-
-                # Test execution chain: Factory → Engine → WebSocket → Agent
                 engine = await factory.create_for_user(context)
-
-                # Simulate agent execution load if requested
                 if simulate_load:
-                    # Create multiple concurrent operations
+
                     async def simulate_agent_operation(op_id: int):
                         if hasattr(engine, 'websocket_emitter'):
-                            await engine.websocket_emitter.send_agent_started(f"Agent {op_id} started")
+                            await engine.websocket_emitter.send_agent_started(f'Agent {op_id} started')
                             await asyncio.sleep(0.1)
-                            await engine.websocket_emitter.send_tool_executing(f"Agent {op_id} executing")
+                            await engine.websocket_emitter.send_tool_executing(f'Agent {op_id} executing')
                             await asyncio.sleep(0.1)
-                            await engine.websocket_emitter.send_agent_completed(f"Agent {op_id} completed")
-
-                    # Run multiple agent operations concurrently
+                            await engine.websocket_emitter.send_agent_completed(f'Agent {op_id} completed')
                     load_tasks = [simulate_agent_operation(i) for i in range(3)]
                     await asyncio.gather(*load_tasks)
-
-                else:
-                    # Simple single operation
-                    if hasattr(engine, 'websocket_emitter'):
-                        await engine.websocket_emitter.send_agent_started("Simple agent started")
-                        await engine.websocket_emitter.send_agent_completed("Simple agent completed")
-
+                elif hasattr(engine, 'websocket_emitter'):
+                    await engine.websocket_emitter.send_agent_started('Simple agent started')
+                    await engine.websocket_emitter.send_agent_completed('Simple agent completed')
                 chain_time = time.time() - start_time
-
-                # Cleanup
                 await factory.cleanup_engine(engine)
-
-                return {
-                    'chain': chain_name,
-                    'success': True,
-                    'chain_time': chain_time,
-                    'load_simulation': simulate_load,
-                    'error': None
-                }
-
+                return {'chain': chain_name, 'success': True, 'chain_time': chain_time, 'load_simulation': simulate_load, 'error': None}
             except Exception as e:
                 chain_time = time.time() - start_time
-                return {
-                    'chain': chain_name,
-                    'success': False,
-                    'chain_time': chain_time,
-                    'load_simulation': simulate_load,
-                    'error': str(e)
-                }
-
-        # Test different execution chain scenarios
-        chain_scenarios = [
-            ("simple_chain", False),
-            ("loaded_chain", True)
-        ]
-
-        # Execute chain coordination tests
-        tasks = [
-            test_execution_chain(chain_name, simulate_load)
-            for chain_name, simulate_load in chain_scenarios
-        ]
+                return {'chain': chain_name, 'success': False, 'chain_time': chain_time, 'load_simulation': simulate_load, 'error': str(e)}
+        chain_scenarios = [('simple_chain', False), ('loaded_chain', True)]
+        tasks = [test_execution_chain(chain_name, simulate_load) for chain_name, simulate_load in chain_scenarios]
         results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        # Collect chain test results
         successful_chains = 0
         failed_chains = 0
         chain_failures = []
-
         for result in results:
             if isinstance(result, dict):
                 chain_test_results.append(result)
@@ -696,35 +351,13 @@ class TestExecutionEngineFactoryWebSocketCoordination1123(SSotAsyncTestCase, Rea
                     failed_chains += 1
                     chain_failures.append(result)
             else:
-                # Exception occurred
                 failed_chains += 1
-                chain_failures.append({
-                    'chain': 'exception',
-                    'error': str(result),
-                    'success': False
-                })
-
-        # ASSERTION THAT SHOULD FAIL: All execution chains should work
-        self.assertEqual(
-            failed_chains, 0,
-            f"EXECUTION CHAIN FAILURES: {failed_chains} out of "
-            f"{len(chain_scenarios)} execution chain tests failed. "
-            f"Factory → Engine → WebSocket → Agent chain is broken. "
-            f"Failures: {[f['error'] for f in chain_failures]}"
-        )
-
-        # ASSERTION THAT SHOULD FAIL: Chain execution should be fast enough
+                chain_failures.append({'chain': 'exception', 'error': str(result), 'success': False})
+        self.assertEqual(failed_chains, 0, f"EXECUTION CHAIN FAILURES: {failed_chains} out of {len(chain_scenarios)} execution chain tests failed. Factory → Engine → WebSocket → Agent chain is broken. Failures: {[f['error'] for f in chain_failures]}")
         for result in chain_test_results:
             if result['success']:
                 max_chain_time = 2.0 if not result['load_simulation'] else 5.0
-                self.assertLess(
-                    result['chain_time'], max_chain_time,
-                    f"EXECUTION CHAIN TOO SLOW: {result['chain']} took "
-                    f"{result['chain_time']:.2f}s (limit: {max_chain_time}s). "
-                    f"Execution chain coordination is too slow for real-time chat."
-                )
-
-    # === MULTI-USER CONCURRENT OPERATIONS TESTS ===
+                self.assertLess(result['chain_time'], max_chain_time, f"EXECUTION CHAIN TOO SLOW: {result['chain']} took {result['chain_time']:.2f}s (limit: {max_chain_time}s). Execution chain coordination is too slow for real-time chat.")
 
     async def test_concurrent_multi_user_factory_operations_isolation_failures(self):
         """FAILING TEST: Reproduce multi-user concurrent operation isolation failures
@@ -733,147 +366,61 @@ class TestExecutionEngineFactoryWebSocketCoordination1123(SSotAsyncTestCase, Rea
         EXPECTED: FAIL - Concurrent multi-user operations cause isolation failures
         ISSUE: Factory user isolation breaks under concurrent load
         """
-        # Import required classes
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
-                ExecutionEngineFactory
-            )
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
         except ImportError as e:
-            self.fail(f"Cannot import required classes: {e}")
-
-        # Test concurrent multi-user operations
+            self.fail(f'Cannot import required classes: {e}')
         num_concurrent_users = 5
         concurrent_test_results = []
-
-        # Get real services once for shared factory
         db_session = await self.get_real_database_session()
         redis_client = await self.get_real_redis_client()
-
-        # Create shared WebSocket bridge and factory
-        websocket_bridge = AgentWebSocketBridge(
-            database_session_manager=db_session,
-            redis_manager=redis_client
-        )
+        websocket_bridge = AgentWebSocketBridge(database_session_manager=db_session, redis_manager=redis_client)
         self.websocket_bridges.append(websocket_bridge)
-
-        factory = ExecutionEngineFactory(
-            websocket_bridge=websocket_bridge,
-            database_session_manager=db_session,
-            redis_manager=redis_client
-        )
+        factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge, database_session_manager=db_session, redis_manager=redis_client)
         self.factory_instances.append(factory)
 
         async def test_concurrent_user_operation(user_id: int):
             """Test concurrent operations for a specific user."""
             start_time = time.time()
-
             try:
-                # Create user context
-                context = UserExecutionContext(
-                    user_id=f"concurrent_user_{user_id}",
-                    run_id=f"concurrent_run_{user_id}_{int(time.time() * 1000)}",
-                    session_id=f"concurrent_session_{user_id}",
-                    request_id=f"concurrent_request_{user_id}"
-                )
+                context = UserExecutionContext(user_id=f'concurrent_user_{user_id}', run_id=f'concurrent_run_{user_id}_{int(time.time() * 1000)}', session_id=f'concurrent_session_{user_id}', request_id=f'concurrent_request_{user_id}')
                 self.created_contexts.append(context)
-
-                # Create execution engine for this user
                 engine = await factory.create_for_user(context)
-
-                # Simulate user-specific operations
                 user_operations = []
-                for op in range(3):  # 3 operations per user
+                for op in range(3):
                     if hasattr(engine, 'websocket_emitter'):
-                        await engine.websocket_emitter.send_agent_started(
-                            f"User {user_id} operation {op}"
-                        )
-                        await asyncio.sleep(0.05)  # Small delay between operations
-                        user_operations.append(f"operation_{op}")
-
+                        await engine.websocket_emitter.send_agent_started(f'User {user_id} operation {op}')
+                        await asyncio.sleep(0.05)
+                        user_operations.append(f'operation_{op}')
                 operation_time = time.time() - start_time
-
-                # Verify user isolation
                 engine_context = engine.get_user_context()
-                isolation_valid = (
-                    engine_context.user_id == f"concurrent_user_{user_id}" and
-                    context.user_id in engine_context.user_id
-                )
-
-                # Cleanup
+                isolation_valid = engine_context.user_id == f'concurrent_user_{user_id}' and context.user_id in engine_context.user_id
                 await factory.cleanup_engine(engine)
-
-                return {
-                    'user_id': user_id,
-                    'success': True,
-                    'operation_time': operation_time,
-                    'operations_completed': len(user_operations),
-                    'isolation_valid': isolation_valid,
-                    'error': None
-                }
-
+                return {'user_id': user_id, 'success': True, 'operation_time': operation_time, 'operations_completed': len(user_operations), 'isolation_valid': isolation_valid, 'error': None}
             except Exception as e:
                 operation_time = time.time() - start_time
-                return {
-                    'user_id': user_id,
-                    'success': False,
-                    'operation_time': operation_time,
-                    'operations_completed': 0,
-                    'isolation_valid': False,
-                    'error': str(e)
-                }
-
-        # Execute concurrent user operations
-        user_tasks = [
-            test_concurrent_user_operation(user_id)
-            for user_id in range(num_concurrent_users)
-        ]
+                return {'user_id': user_id, 'success': False, 'operation_time': operation_time, 'operations_completed': 0, 'isolation_valid': False, 'error': str(e)}
+        user_tasks = [test_concurrent_user_operation(user_id) for user_id in range(num_concurrent_users)]
         results = await asyncio.gather(*user_tasks, return_exceptions=True)
-
-        # Collect concurrent operation results
         successful_users = 0
         failed_users = 0
         isolation_failures = []
-
         for result in results:
             if isinstance(result, dict):
                 concurrent_test_results.append(result)
                 if result['success']:
                     successful_users += 1
-                    # Check isolation validity
                     if not result['isolation_valid']:
                         isolation_failures.append(result)
                 else:
                     failed_users += 1
             else:
-                # Exception occurred
                 failed_users += 1
-                concurrent_test_results.append({
-                    'user_id': 'exception',
-                    'success': False,
-                    'error': str(result),
-                    'isolation_valid': False
-                })
-
-        # ASSERTION THAT SHOULD FAIL: All concurrent user operations should succeed
-        self.assertEqual(
-            failed_users, 0,
-            f"CONCURRENT USER OPERATION FAILURES: {failed_users} out of "
-            f"{num_concurrent_users} concurrent user operations failed. "
-            f"Factory cannot handle concurrent multi-user load."
-        )
-
-        # ASSERTION THAT SHOULD FAIL: User isolation should be maintained
-        self.assertEqual(
-            len(isolation_failures), 0,
-            f"USER ISOLATION FAILURES: {len(isolation_failures)} users had "
-            f"isolation validation failures. "
-            f"Multi-user concurrent operations break user isolation. "
-            f"Failed users: {[f['user_id'] for f in isolation_failures]}"
-        )
-
-
+                concurrent_test_results.append({'user_id': 'exception', 'success': False, 'error': str(result), 'isolation_valid': False})
+        self.assertEqual(failed_users, 0, f'CONCURRENT USER OPERATION FAILURES: {failed_users} out of {num_concurrent_users} concurrent user operations failed. Factory cannot handle concurrent multi-user load.')
+        self.assertEqual(len(isolation_failures), 0, f"USER ISOLATION FAILURES: {len(isolation_failures)} users had isolation validation failures. Multi-user concurrent operations break user isolation. Failed users: {[f['user_id'] for f in isolation_failures]}")
 if __name__ == '__main__':
-    # Run the WebSocket coordination tests
-    import pytest
-    pytest.main([__file__, "-v", "--tb=short"])
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

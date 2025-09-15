@@ -26,7 +26,6 @@ ARCHITECTURE ALIGNMENT:
 - Shows $500K+ ARR customer analytics requirement dependencies
 - Validates production analytics pipeline stability requirements
 """
-
 import asyncio
 import importlib
 import pytest
@@ -36,11 +35,8 @@ import traceback
 import uuid
 from typing import Any, Dict, List, Optional, Set, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
-
-# SSOT imports following architecture patterns
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
-
 
 class TestClickHouseDriverAvailability(SSotAsyncTestCase):
     """Test suite for ClickHouse driver availability critical infrastructure gaps."""
@@ -48,7 +44,7 @@ class TestClickHouseDriverAvailability(SSotAsyncTestCase):
     def setup_method(self, method):
         """Setup for each test method."""
         super().setup_method(method)
-        self.test_run_id = f"clickhouse_test_{uuid.uuid4().hex[:8]}"
+        self.test_run_id = f'clickhouse_test_{uuid.uuid4().hex[:8]}'
         self.import_failures = []
         self.dependency_issues = []
 
@@ -61,15 +57,11 @@ class TestClickHouseDriverAvailability(SSotAsyncTestCase):
         """
         try:
             import clickhouse_driver
-            self.assertIsNotNone(clickhouse_driver, "clickhouse_driver module should be available")
-
-            # Test that we can access key components
-            self.assertTrue(hasattr(clickhouse_driver, 'Client'),
-                          "clickhouse_driver.Client should be available")
-
+            self.assertIsNotNone(clickhouse_driver, 'clickhouse_driver module should be available')
+            self.assertTrue(hasattr(clickhouse_driver, 'Client'), 'clickhouse_driver.Client should be available')
         except ImportError as e:
-            self.import_failures.append(f"clickhouse_driver import failed: {e}")
-            pytest.fail(f"CRITICAL: clickhouse_driver module not available: {e}")
+            self.import_failures.append(f'clickhouse_driver import failed: {e}')
+            pytest.fail(f'CRITICAL: clickhouse_driver module not available: {e}')
 
     def test_analytics_layer_clickhouse_dependency(self):
         """
@@ -78,13 +70,11 @@ class TestClickHouseDriverAvailability(SSotAsyncTestCase):
         CRITICAL: This should FAIL if analytics components cannot import ClickHouse dependencies.
         """
         try:
-            # Test analytics layer imports that depend on ClickHouse
             from netra_backend.app.db.clickhouse import ClickHouseClient
-            self.assertIsNotNone(ClickHouseClient, "ClickHouseClient should be importable")
-
+            self.assertIsNotNone(ClickHouseClient, 'ClickHouseClient should be importable')
         except ImportError as e:
-            self.dependency_issues.append(f"Analytics ClickHouse dependency failed: {e}")
-            pytest.fail(f"CRITICAL: Analytics layer ClickHouse dependency broken: {e}")
+            self.dependency_issues.append(f'Analytics ClickHouse dependency failed: {e}')
+            pytest.fail(f'CRITICAL: Analytics layer ClickHouse dependency broken: {e}')
 
     def test_clickhouse_import_failures_detection(self):
         """
@@ -92,27 +82,18 @@ class TestClickHouseDriverAvailability(SSotAsyncTestCase):
 
         CRITICAL: This identifies specific files that fail ClickHouse imports.
         """
-        clickhouse_dependent_files = [
-            "netra_backend.app.db.clickhouse",
-            "netra_backend.app.db.clickhouse_client",
-            "netra_backend.app.services.analytics_service",
-            "netra_backend.app.db.models_analytics"
-        ]
-
+        clickhouse_dependent_files = ['netra_backend.app.db.clickhouse', 'netra_backend.app.db.clickhouse_client', 'netra_backend.app.services.analytics_service', 'netra_backend.app.db.models_analytics']
         import_failures = []
-
         for module_name in clickhouse_dependent_files:
             try:
                 module = importlib.import_module(module_name)
-                self.assertIsNotNone(module, f"{module_name} should be importable")
+                self.assertIsNotNone(module, f'{module_name} should be importable')
             except ImportError as e:
-                import_failures.append(f"{module_name}: {e}")
+                import_failures.append(f'{module_name}: {e}')
             except Exception as e:
-                import_failures.append(f"{module_name}: Unexpected error: {e}")
-
+                import_failures.append(f'{module_name}: Unexpected error: {e}')
         if import_failures:
-            pytest.fail(f"CRITICAL: ClickHouse import failures detected:\n" +
-                     "\n".join(import_failures))
+            pytest.fail(f'CRITICAL: ClickHouse import failures detected:\n' + '\n'.join(import_failures))
 
     def test_runtime_clickhouse_driver_availability(self):
         """
@@ -122,23 +103,15 @@ class TestClickHouseDriverAvailability(SSotAsyncTestCase):
         """
         try:
             import clickhouse_driver
-
-            # Test that we can create a client instance (without connecting)
             client_class = clickhouse_driver.Client
-            self.assertIsNotNone(client_class, "ClickHouse Client class should be available")
-
-            # Test that basic client creation works
+            self.assertIsNotNone(client_class, 'ClickHouse Client class should be available')
             try:
-                # Create client without connecting to test class availability
-                client = client_class(host='localhost', port=9000,
-                                    connect_timeout=1, send_receive_timeout=1)
-                self.assertIsNotNone(client, "ClickHouse client instance should be creatable")
+                client = client_class(host='localhost', port=9000, connect_timeout=1, send_receive_timeout=1)
+                self.assertIsNotNone(client, 'ClickHouse client instance should be creatable')
             except Exception as e:
-                # Client creation failure indicates driver issues
-                pytest.fail(f"CRITICAL: ClickHouse client creation failed: {e}")
-
+                pytest.fail(f'CRITICAL: ClickHouse client creation failed: {e}')
         except ImportError as e:
-            pytest.fail(f"CRITICAL: ClickHouse driver runtime availability failed: {e}")
+            pytest.fail(f'CRITICAL: ClickHouse driver runtime availability failed: {e}')
 
     def test_analytics_query_execution_dependency(self):
         """
@@ -147,18 +120,13 @@ class TestClickHouseDriverAvailability(SSotAsyncTestCase):
         CRITICAL: This should FAIL if query execution components cannot access ClickHouse.
         """
         try:
-            # Test that analytics query components can import ClickHouse dependencies
             from netra_backend.app.db.clickhouse_client import ClickHouseClient
-
-            # Test that the client has necessary methods for analytics
             client_instance = ClickHouseClient()
-            self.assertTrue(hasattr(client_instance, 'execute'),
-                          "ClickHouse client should have execute method")
-
+            self.assertTrue(hasattr(client_instance, 'execute'), 'ClickHouse client should have execute method')
         except ImportError as e:
-            pytest.fail(f"CRITICAL: Analytics query execution ClickHouse dependency failed: {e}")
+            pytest.fail(f'CRITICAL: Analytics query execution ClickHouse dependency failed: {e}')
         except Exception as e:
-            pytest.fail(f"CRITICAL: Analytics ClickHouse client instantiation failed: {e}")
+            pytest.fail(f'CRITICAL: Analytics ClickHouse client instantiation failed: {e}')
 
     def test_clickhouse_connection_pooling_infrastructure(self):
         """
@@ -169,13 +137,10 @@ class TestClickHouseDriverAvailability(SSotAsyncTestCase):
         try:
             import clickhouse_driver
             from clickhouse_driver.connection import Connection
-
-            self.assertTrue(hasattr(clickhouse_driver, 'Client'),
-                          "ClickHouse Client should support connection pooling")
-            self.assertIsNotNone(Connection, "ClickHouse Connection class should be available")
-
+            self.assertTrue(hasattr(clickhouse_driver, 'Client'), 'ClickHouse Client should support connection pooling')
+            self.assertIsNotNone(Connection, 'ClickHouse Connection class should be available')
         except ImportError as e:
-            pytest.fail(f"CRITICAL: ClickHouse connection pooling infrastructure missing: {e}")
+            pytest.fail(f'CRITICAL: ClickHouse connection pooling infrastructure missing: {e}')
 
     def test_database_analytics_layer_integration_dependency(self):
         """
@@ -184,21 +149,16 @@ class TestClickHouseDriverAvailability(SSotAsyncTestCase):
         CRITICAL: This should FAIL if database layer cannot integrate with ClickHouse analytics.
         """
         try:
-            # Test integration between database layer and ClickHouse analytics
             from netra_backend.app.db.database_manager import DatabaseManager
             from netra_backend.app.db.clickhouse import ClickHouseClient
-
-            # Verify that database manager can work with ClickHouse components
             db_manager = DatabaseManager()
             clickhouse_client = ClickHouseClient()
-
-            self.assertIsNotNone(db_manager, "DatabaseManager should be available")
-            self.assertIsNotNone(clickhouse_client, "ClickHouseClient should be available")
-
+            self.assertIsNotNone(db_manager, 'DatabaseManager should be available')
+            self.assertIsNotNone(clickhouse_client, 'ClickHouseClient should be available')
         except ImportError as e:
-            pytest.fail(f"CRITICAL: Database analytics layer ClickHouse integration failed: {e}")
+            pytest.fail(f'CRITICAL: Database analytics layer ClickHouse integration failed: {e}')
         except Exception as e:
-            pytest.fail(f"CRITICAL: Database analytics integration instantiation failed: {e}")
+            pytest.fail(f'CRITICAL: Database analytics integration instantiation failed: {e}')
 
     def test_production_analytics_pipeline_dependency(self):
         """
@@ -206,38 +166,27 @@ class TestClickHouseDriverAvailability(SSotAsyncTestCase):
 
         CRITICAL: This should FAIL if production analytics pipeline cannot access ClickHouse.
         """
-        analytics_pipeline_components = [
-            "netra_backend.app.services.analytics_service",
-            "netra_backend.app.db.clickhouse_client",
-            "netra_backend.app.db.clickhouse"
-        ]
-
+        analytics_pipeline_components = ['netra_backend.app.services.analytics_service', 'netra_backend.app.db.clickhouse_client', 'netra_backend.app.db.clickhouse']
         pipeline_failures = []
-
         for component in analytics_pipeline_components:
             try:
                 module = importlib.import_module(component)
-                self.assertIsNotNone(module, f"Analytics pipeline component {component} should be available")
+                self.assertIsNotNone(module, f'Analytics pipeline component {component} should be available')
             except ImportError as e:
-                pipeline_failures.append(f"{component}: {e}")
+                pipeline_failures.append(f'{component}: {e}')
             except Exception as e:
-                pipeline_failures.append(f"{component}: Unexpected error: {e}")
-
+                pipeline_failures.append(f'{component}: Unexpected error: {e}')
         if pipeline_failures:
-            pytest.fail(f"CRITICAL: Production analytics pipeline ClickHouse dependencies failed:\n" +
-                     "\n".join(pipeline_failures))
+            pytest.fail(f'CRITICAL: Production analytics pipeline ClickHouse dependencies failed:\n' + '\n'.join(pipeline_failures))
 
     def teardown_method(self, method):
         """Cleanup after each test method."""
         super().teardown_method(method)
-
-        # Log any import failures or dependency issues for analysis
         if self.import_failures:
-            self.logger.warning(f"ClickHouse import failures detected: {self.import_failures}")
-
+            self.logger.warning(f'ClickHouse import failures detected: {self.import_failures}')
         if self.dependency_issues:
-            self.logger.warning(f"ClickHouse dependency issues detected: {self.dependency_issues}")
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+            self.logger.warning(f'ClickHouse dependency issues detected: {self.dependency_issues}')
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

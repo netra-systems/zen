@@ -47,7 +47,7 @@
         # REMOVED_SYNTAX_ERROR: from datetime import datetime, timedelta
         # REMOVED_SYNTAX_ERROR: import uuid
         # REMOVED_SYNTAX_ERROR: import socket
-        # REMOVED_SYNTAX_ERROR: from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+        # REMOVED_SYNTAX_ERROR: 
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
         # Add parent directory to path for absolute imports

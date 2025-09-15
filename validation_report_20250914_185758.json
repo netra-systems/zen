@@ -1,0 +1,26 @@
+{
+  "overall_report": {
+    "total_files_validated": 1,
+    "syntax_valid_files": 1,
+    "ssot_compliant_files": 0,
+    "test_executable_files": 1,
+    "remaining_violations": 0,
+    "critical_errors": [],
+    "validation_timestamp": "2025-09-14T18:57:57.967811"
+  },
+  "file_results": [
+    {
+      "file_path": "tests\\unit\\test_issue_1024_unauthorized_test_runners_phase1.py",
+      "syntax_valid": true,
+      "ssot_compliant": false,
+      "pytest_violations_detected": 0,
+      "test_execution_successful": true,
+      "errors": [],
+      "warnings": [
+        "Test file uses pytest.main() instead of SSOT unified runner",
+        "Unauthorized test execution pattern: subprocess.*pytest"
+      ],
+      "execution_time_ms": 666.586
+    }
+  ]
+}

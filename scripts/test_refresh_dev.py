@@ -8,7 +8,7 @@ import sys
 import os
 import logging
 from pathlib import Path
-from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
