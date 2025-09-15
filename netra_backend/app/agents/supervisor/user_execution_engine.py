@@ -75,9 +75,11 @@ logger = central_logger.get_logger(__name__)
 class AgentRegistryAdapter:
     """Adapter to make AgentClassRegistry compatible with AgentExecutionCore interface.
     
+    ISSUE #1186 PHASE 2: Removed singleton caching to prevent state contamination.
+    
     AgentExecutionCore expects a registry with a get() method that returns agent instances,
     but AgentClassRegistry has a get() method that returns agent classes. This adapter
-    instantiates the classes using the agent factory.
+    instantiates the classes using the agent factory with NO CACHING for user isolation.
     """
     
     def __init__(self, agent_class_registry, agent_factory, user_context):
@@ -91,10 +93,14 @@ class AgentRegistryAdapter:
         self.agent_class_registry = agent_class_registry
         self.agent_factory = agent_factory
         self.user_context = user_context
-        self._agent_cache = {}  # Cache instances to avoid recreating
+        # ISSUE #1186 PHASE 2: Removed _agent_cache to eliminate state contamination
+        # Each get() call now creates a fresh instance for proper user isolation
     
-    def get(self, agent_name: str):
-        """Get agent instance by name.
+    async def get(self, agent_name: str):
+        """Get agent instance by name - creates fresh instance each time.
+        
+        ISSUE #1186 PHASE 2: Eliminated caching to prevent multi-user contamination.
+        Each call creates a fresh agent instance bound to the specific user context.
         
         Args:
             agent_name: Name of the agent to get
@@ -103,10 +109,8 @@ class AgentRegistryAdapter:
             Agent instance or None if not found
         """
         try:
-            # Check cache first
-            if agent_name in self._agent_cache:
-                logger.debug(f"Returning cached agent instance: {agent_name}")
-                return self._agent_cache[agent_name]
+            # ISSUE #1186 PHASE 2: No cache checking - always create fresh instance
+            logger.debug(f"Creating fresh agent instance: {agent_name} for user {self.user_context.user_id}")
             
             # Get agent class from registry
             agent_class = self.agent_class_registry.get(agent_name)
@@ -114,16 +118,15 @@ class AgentRegistryAdapter:
                 logger.debug(f"Agent class not found in registry: {agent_name}")
                 return None
             
-            # Use factory to create instance
-            agent_instance = self.agent_factory.create_agent_instance(
+            # Use factory to create fresh instance (no caching)
+            agent_instance = await self.agent_factory.create_instance(
                 agent_name,
                 self.user_context,
                 agent_class=agent_class
             )
             
-            # Cache the instance
-            self._agent_cache[agent_name] = agent_instance
-            logger.info(f"Created and cached agent instance: {agent_name}")
+            # ISSUE #1186 PHASE 2: No caching - return fresh instance
+            logger.info(f"Created fresh agent instance: {agent_name} for user {self.user_context.user_id}")
             return agent_instance
             
         except Exception as e:
