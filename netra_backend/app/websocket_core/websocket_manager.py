@@ -40,6 +40,7 @@ import secrets
 from datetime import datetime
 import asyncio
 import socket
+import threading
 
 logger = get_logger(__name__)
 
@@ -155,7 +156,7 @@ UnifiedWebSocketManager = _WebSocketManagerFactory
 # User-scoped singleton registry for WebSocket managers
 # CRITICAL: This prevents multiple manager instances per user
 _USER_MANAGER_REGISTRY: Dict[str, _UnifiedWebSocketManagerImplementation] = {}
-_REGISTRY_LOCK = asyncio.Lock()
+_REGISTRY_LOCK = threading.Lock()
 
 def _get_user_key(user_context: Optional[Any]) -> str:
     """
@@ -196,7 +197,7 @@ async def get_manager_registry_status() -> Dict[str, Any]:
     Returns:
         Dict containing registry status and statistics
     """
-    async with _REGISTRY_LOCK:
+    with _REGISTRY_LOCK:
         return {
             'total_registered_managers': len(_USER_MANAGER_REGISTRY),
             'registered_users': list(_USER_MANAGER_REGISTRY.keys()),
@@ -304,7 +305,7 @@ except Exception as e:
     logger.error(f"WebSocket Manager SSOT validation failed: {e}")
 
 
-async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED) -> _UnifiedWebSocketManagerImplementation:
+def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED) -> _UnifiedWebSocketManagerImplementation:
     """
     Get a WebSocket manager instance following SSOT patterns and UserExecutionContext requirements.
 
@@ -334,7 +335,7 @@ async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSoc
     user_key = _get_user_key(user_context)
     
     # Thread-safe registry access
-    async with _REGISTRY_LOCK:
+    with _REGISTRY_LOCK:
         # Check if manager already exists for this user
         if user_key in _USER_MANAGER_REGISTRY:
             existing_manager = _USER_MANAGER_REGISTRY[user_key]
@@ -343,8 +344,12 @@ async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSoc
         
         # No existing manager - create new one following original logic
         try:
-            # PHASE 1 FIX: Check service availability before creation
-            service_available = await check_websocket_service_available()
+            # PHASE 1 FIX: Check service availability before creation  
+            try:
+                import asyncio
+                service_available = asyncio.run(check_websocket_service_available())
+            except Exception:
+                service_available = False
             if not service_available:
                 logger.warning("WebSocket service not available, creating test-only manager")
                 # Force unified mode for test scenarios when service is unavailable

@@ -53,9 +53,9 @@ class TestIssue889UserIsolationUnit(SSotAsyncTestCase):
     Focus: User context contamination detection and multi-tenant security validation
     """
     
-    def setUp(self):
-        """Standard setUp following SSOT patterns"""
-        super().setUp()
+    def setup_method(self, method):
+        """Standard setup following SSOT patterns"""
+        super().setup_method(method)
         self.created_managers = []
         self.test_users = [
             "demo-user-001",  # Primary violation pattern from logs
@@ -65,11 +65,11 @@ class TestIssue889UserIsolationUnit(SSotAsyncTestCase):
             "test-user-isolation-002"
         ]
         
-    def tearDown(self):
+    def teardown_method(self, method=None):
         """Cleanup any managers created during testing"""
         # Clean up managers and any shared state
         self.created_managers.clear()
-        super().tearDown()
+        super().teardown_method(method)
         
     @unittest.skipUnless(WEBSOCKET_IMPORTS_AVAILABLE, "WebSocket imports not available")
     async def test_user_context_contamination(self):

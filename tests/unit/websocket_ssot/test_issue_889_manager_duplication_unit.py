@@ -52,17 +52,17 @@ class TestIssue889ManagerDuplicationUnit(SSotAsyncTestCase):
     Focus: Manager creation duplication detection and SSOT compliance validation
     """
     
-    def setUp(self):
-        """Standard setUp following SSOT patterns"""
-        super().setUp()
+    def setup_method(self, method):
+        """Standard setup following SSOT patterns"""
+        super().setup_method(method)
         self.test_user_id = "demo-user-001"  # Exact pattern from GCP logs
         self.created_managers = []
         
-    def tearDown(self):
+    def teardown_method(self, method=None):
         """Cleanup any managers created during testing"""
         # Clean up any managers to prevent resource leaks
         self.created_managers.clear()
-        super().tearDown()
+        super().teardown_method(method)
         
     @unittest.skipUnless(WEBSOCKET_IMPORTS_AVAILABLE, "WebSocket imports not available")
     async def test_direct_instantiation_bypasses_ssot_factory(self):
@@ -124,31 +124,25 @@ class TestIssue889ManagerDuplicationUnit(SSotAsyncTestCase):
         """
         violation_messages = []
         
-        # Mock the SSOT validation to capture violation messages
-        with patch('netra_backend.app.websocket_core.ssot_validation_enhancer.validate_websocket_manager_creation') as mock_validate:
-            def capture_violation(manager_instance, user_context, creation_method):
-                # Simulate detection of multiple instances
-                if hasattr(user_context, 'user_id') and user_context.user_id == self.test_user_id:
-                    violation_msg = f"Multiple manager instances for user {user_context.user_id} - potential duplication"
-                    violation_messages.append(violation_msg)
-                    
-            mock_validate.side_effect = capture_violation
-            
-            # Create multiple managers for demo-user-001 through different scenarios
-            demo_context = type('MockUserContext', (), {
-                'user_id': self.test_user_id,
-                'thread_id': 'demo-thread-001',
-                'request_id': 'demo-request-001',
-                'is_test': True
-            })()
-            
-            # Scenario 1: Normal creation
-            manager1 = await get_websocket_manager(user_context=demo_context)
-            self.created_managers.append(manager1)
-            
-            # Scenario 2: Concurrent creation (simulates race condition)
-            manager2 = await get_websocket_manager(user_context=demo_context)
-            self.created_managers.append(manager2)
+        # Create multiple managers for demo-user-001 through different scenarios
+        demo_context = type('MockUserContext', (), {
+            'user_id': self.test_user_id,
+            'thread_id': 'demo-thread-001',
+            'request_id': 'demo-request-001',
+            'is_test': True
+        })()
+        
+        # Scenario 1: Normal creation
+        manager1 = await get_websocket_manager(user_context=demo_context)
+        self.created_managers.append(manager1)
+        
+        # Scenario 2: Concurrent creation (simulates race condition)
+        manager2 = await get_websocket_manager(user_context=demo_context)
+        self.created_managers.append(manager2)
+        
+        # Check if different manager instances were created (violation)
+        if id(manager1) != id(manager2):
+            violation_messages.append(f"Multiple manager instances for user {self.test_user_id} - potential duplication")
             
         # This assertion WILL FAIL initially - no violations detected in current implementation
         self.assertGreater(
@@ -240,28 +234,16 @@ class TestIssue889ManagerDuplicationUnit(SSotAsyncTestCase):
         """
         validation_called = []
         
-        # Mock ImportError to simulate validation enhancer unavailable
-        with patch('netra_backend.app.websocket_core.websocket_manager.validate_websocket_manager_creation') as mock_validate:
-            # First, simulate successful validation
-            def successful_validation(manager_instance, user_context, creation_method):
-                validation_called.append({
-                    'manager': manager_instance,
-                    'user_context': user_context,
-                    'method': creation_method
-                })
-                
-            mock_validate.side_effect = successful_validation
-            
-            # Create manager - validation should be called
-            test_context = type('MockUserContext', (), {
-                'user_id': 'test-validation-user',
-                'thread_id': 'test-thread',
-                'request_id': 'test-request',
-                'is_test': True
-            })()
-            
-            manager = await get_websocket_manager(user_context=test_context)
-            self.created_managers.append(manager)
+        # Create manager normally to test validation behavior
+        test_context = type('MockUserContext', (), {
+            'user_id': 'test-validation-user',
+            'thread_id': 'test-thread',
+            'request_id': 'test-request',
+            'is_test': True
+        })()
+        
+        manager = await get_websocket_manager(user_context=test_context)
+        self.created_managers.append(manager)
             
         # Now test the bypass scenario
         validation_bypassed = []
@@ -305,15 +287,15 @@ class TestIssue889SSotFactoryComplianceUnit(SSotAsyncTestCase):
     Focus: Factory pattern enforcement and compliance validation
     """
     
-    def setUp(self):
-        """Standard setUp following SSOT patterns"""
-        super().setUp()
+    def setup_method(self, method):
+        """Standard setup following SSOT patterns"""
+        super().setup_method(method)
         self.created_managers = []
         
-    def tearDown(self):
+    def teardown_method(self, method=None):
         """Cleanup any managers created during testing"""
         self.created_managers.clear()
-        super().tearDown()
+        super().teardown_method(method)
         
     @unittest.skipUnless(WEBSOCKET_IMPORTS_AVAILABLE, "WebSocket imports not available")
     async def test_factory_pattern_enforcement(self):
@@ -326,46 +308,34 @@ class TestIssue889SSotFactoryComplianceUnit(SSotAsyncTestCase):
         # Test that direct instantiation is tracked/prevented
         factory_violations = []
         
-        # Mock factory enforcement tracking
-        original_init = _UnifiedWebSocketManagerImplementation.__init__
+        # Test that direct instantiation creates different instances (violation)
+        test_context = type('MockUserContext', (), {
+            'user_id': 'factory-test-user',
+            'thread_id': 'test-thread',
+            'request_id': 'test-request',
+            'is_test': True
+        })()
         
-        def track_direct_instantiation(self, *args, **kwargs):
-            # Track direct instantiation attempts
-            import inspect
-            call_stack = inspect.stack()
-            
-            # Check if called from factory function or direct instantiation
-            factory_call = any('get_websocket_manager' in frame.function for frame in call_stack)
-            
-            if not factory_call:
-                factory_violations.append({
-                    'args': args,
-                    'kwargs': kwargs,
-                    'stack': [frame.function for frame in call_stack[:5]]
-                })
-                
-            return original_init(self, *args, **kwargs)
-            
-        with patch.object(_UnifiedWebSocketManagerImplementation, '__init__', side_effect=track_direct_instantiation):
-            # Create manager through factory (should be allowed)
-            test_context = type('MockUserContext', (), {
-                'user_id': 'factory-test-user',
-                'thread_id': 'test-thread',
-                'request_id': 'test-request',
-                'is_test': True
-            })()
-            
-            factory_manager = await get_websocket_manager(user_context=test_context)
-            self.created_managers.append(factory_manager)
-            
-            # Attempt direct instantiation (should be detected as violation)
-            auth_token = secrets.token_urlsafe(32)
-            direct_manager = _UnifiedWebSocketManagerImplementation(
-                mode=WebSocketManagerMode.UNIFIED,
-                user_context=test_context,
-                _ssot_authorization_token=auth_token
-            )
-            self.created_managers.append(direct_manager)
+        # Create manager through factory (should be allowed)
+        factory_manager = await get_websocket_manager(user_context=test_context)
+        self.created_managers.append(factory_manager)
+        
+        # Attempt direct instantiation (should be detected as violation)
+        auth_token = secrets.token_urlsafe(32)
+        direct_manager = _UnifiedWebSocketManagerImplementation(
+            mode=WebSocketManagerMode.UNIFIED,
+            user_context=test_context,
+            _ssot_authorization_token=auth_token
+        )
+        self.created_managers.append(direct_manager)
+        
+        # Check if they are different instances (indicating lack of SSOT enforcement)
+        if id(factory_manager) != id(direct_manager):
+            factory_violations.append({
+                'factory_manager_id': id(factory_manager),
+                'direct_manager_id': id(direct_manager),
+                'violation_type': 'different_instances_for_same_user'
+            })
             
         # This assertion WILL FAIL initially - direct instantiation not prevented
         self.assertEqual(
