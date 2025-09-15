@@ -12,8 +12,12 @@ message processing pipeline, covering:
 Business Value Justification:
 - Segment: All tiers - Core platform functionality validation
 - Business Goal: Ensure reliable agent-based AI assistance delivery
-- Value Impact: Protects 500K+ USD ARR golden path functionality
+- Value Impact: Protects high-value ARR golden path functionality
 - Revenue Impact: Prevents complete failure of core business value proposition
+
+Business Value: High-value ARR protection through comprehensive validation of
+core chat functionality that delivers 90% of platform value.
+"""
 
 TEST MODULES:
 1. test_complete_message_pipeline_integration.py - Full message processing pipeline

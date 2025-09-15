@@ -24,7 +24,7 @@ Business Value Justification (BVJ):
 - Segment: ALL (Free/Early/Mid/Enterprise/Platform)
 - Business Goal: Agent Step-by-Step Execution - Ensures reliable pipeline processing
 - Value Impact: Validates agent pipeline execution coordination (critical for AI workflows)
-- Revenue Impact: Protects $500K+ ARR by ensuring reliable step-by-step agent execution
+- Revenue Impact: Protects high-value ARR by ensuring reliable step-by-step agent execution
 
 Critical Golden Path Scenarios Tested:
 1. Pipeline step execution: Step-by-step agent execution with proper sequencing
