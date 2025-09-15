@@ -839,7 +839,7 @@ async def oauth_status() -> Dict[str, Any]:
 if __name__ == "__main__":
     import uvicorn
     # @marked: Port binding for container runtime with performance optimizations
-    # Default to 8080 to align with Cloud Run PORT environment variable
+    # Default to 8080 to align with Cloud Run expectations (GCP standard)
     port = int(get_env().get("PORT", "8080"))
     
     # Performance-optimized uvicorn settings

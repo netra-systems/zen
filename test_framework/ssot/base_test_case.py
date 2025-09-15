@@ -1037,7 +1037,20 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
         if not hasattr(self, '_original_env_state'):
             self._original_env_state = None
         super().teardown_method(method)
-    
+
+    async def asyncSetUp(self):
+        """Async setup method for async tests."""
+        # Call parent sync setup to ensure all base attributes are initialized
+        if hasattr(super(), 'setUp'):
+            super().setUp()
+        # This allows subclasses to override asyncSetUp for additional async initialization
+        pass
+
+    async def asyncTearDown(self):
+        """Async teardown method for async tests."""
+        # This allows subclasses to override asyncTearDown for additional async cleanup
+        pass
+
     # === AGENT EXECUTION WITH MONITORING ===
     # PHASE 1 CORE INFRASTRUCTURE: Missing method implementation for Issue #976
 

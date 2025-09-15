@@ -4,9 +4,12 @@ This file redirects to the SSOT UserExecutionEngine to maintain backwards compat
 """
 
 # SSOT redirect for backwards compatibility - Export all key classes
-from netra_backend.app.agents.supervisor.user_execution_engine import (
+# SSOT REMEDIATION Issue #1186: Use canonical imports
+from netra_backend.app.agents.canonical_imports import (
     UserExecutionEngine,
     UserExecutionEngine as ExecutionEngine,  # Also available as ExecutionEngine for compatibility
+)
+from netra_backend.app.agents.supervisor.user_execution_engine import (
     UserExecutionContext,
     AgentExecutionContext,
     AgentExecutionResult,
@@ -102,7 +105,8 @@ def create_execution_engine(*args, **kwargs):
         stacklevel=2
     )
     
-    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+    # SSOT REMEDIATION Issue #1186: Use canonical imports
+    from netra_backend.app.agents.canonical_imports import UserExecutionEngine
     # Return a compatibility stub that can be used in tests
     return ExecutionEngine
 
@@ -133,6 +137,7 @@ async def execute_agent(context, user_context=None, **kwargs):
         stacklevel=2
     )
     # Return a basic mock result for tests
+    # Keep this import as-is since AgentExecutionResult is not in canonical imports yet
     from netra_backend.app.agents.supervisor.user_execution_engine import AgentExecutionResult
     return AgentExecutionResult(
         success=True,

@@ -1,8 +1,7 @@
 """Test Issue #1186: UserExecutionEngine SSOT Consolidation - Phase 1 Reproduction Tests
 
 This test suite is designed to FAIL initially to expose the current UserExecutionEngine
-import pytest
-import fragmentation and singleton violations. These tests demonstrate the problem
+fragmentation and singleton violations. These tests demonstrate the problem
 before SSOT consolidation is implemented.
 
 Expected Behavior: These tests SHOULD FAIL to demonstrate:
@@ -17,6 +16,7 @@ and violates SSOT principles, blocking $500K+ ARR chat functionality scalability
 
 import ast
 import os
+import pytest
 import re
 import sys
 import unittest

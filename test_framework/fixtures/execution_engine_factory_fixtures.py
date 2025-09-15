@@ -28,12 +28,11 @@ from typing import Optional, AsyncGenerator
 from unittest.mock import AsyncMock, MagicMock
 
 # SSOT imports following CLAUDE.md absolute import requirements
+# ISSUE #1186 PHASE 3: Removed singleton imports after singleton elimination
 from netra_backend.app.agents.supervisor.execution_engine_factory import (
     ExecutionEngineFactory,
     configure_execution_engine_factory,
     get_execution_engine_factory,
-    _factory_instance,
-    _factory_lock
 )
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.supervisor.agent_instance_factory import configure_agent_instance_factory
@@ -161,12 +160,9 @@ class ExecutionEngineFactoryTestManager:
                 except Exception as e:
                     logger.warning(f"Factory shutdown error: {e}")
                     
-            # Reset singleton state for next test
-            global _factory_instance
-            async with _factory_lock:
-                _factory_instance = None
-                
-            logger.info("[U+2713] Factory singleton state reset")
+            # ISSUE #1186 PHASE 3: Singleton eliminated - no need to reset singleton state
+            # Factory instances are now created per-request, so no global state to reset
+            logger.info("[U+2713] Factory per-request pattern - no singleton state to reset")
             
             # Run any additional cleanup tasks
             for task in self.cleanup_tasks:

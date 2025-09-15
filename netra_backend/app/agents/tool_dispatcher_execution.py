@@ -73,7 +73,8 @@ class ToolExecutionEngine(ToolExecutionEngineInterface):
             
         try:
             # Import required components
-            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+            # SSOT REMEDIATION Issue #1186: Use canonical imports
+            from netra_backend.app.agents.canonical_imports import UserExecutionEngine
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
             

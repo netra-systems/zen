@@ -1,5 +1,5 @@
 # Staging Environment Connectivity Report
-Generated: 2025-09-15 09:37:34
+Generated: 2025-09-15 13:09:20
 Environment: https://api.staging.netrasystems.ai
 
 ## Executive Summary
@@ -10,17 +10,17 @@ Environment: https://api.staging.netrasystems.ai
 ## Test Results
 ### http_connectivity
 - **Status**:  FAIL:  FAIL
-- **Duration**: 10.048s
+- **Duration**: 10.260s
 - **Error**: 
 
 ### websocket_connectivity
 - **Status**:  FAIL:  FAIL
-- **Duration**: 10.001s
+- **Duration**: 10.007s
 - **Error**: 
 
 ### agent_request_pipeline
 - **Status**:  FAIL:  FAIL
-- **Duration**: 10.001s
+- **Duration**: 9.999s
 - **Error**: 
 
 ## Recommendations

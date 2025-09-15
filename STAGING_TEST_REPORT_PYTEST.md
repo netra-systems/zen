@@ -1,46 +1,26 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-15 10:00:38
+**Generated:** 2025-09-15 14:50:11
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 1
+- **Total Tests:** 0
 - **Passed:** 0 (0.0%)
-- **Failed:** 1 (100.0%)
+- **Failed:** 0 (0.0%)
 - **Skipped:** 0
-- **Duration:** 50.43 seconds
+- **Duration:** 0.47 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
-### NORMAL Priority Tests
-
-| Test Name | Status | Duration | File |
-|-----------|--------|----------|------|
-| test_message_endpoints | FAIL failed | 49.967s | test_2_message_flow_staging.py |
-
-## Failed Tests Details
-
-### FAILED: test_message_endpoints
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_2_message_flow_staging.py
-- **Duration:** 49.967s
-- **Error:** tests/e2e/staging_test_base.py:322: in wrapper
-    return await func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests/e2e/staging/test_2_message_flow_staging.py:53: in test_message_endpoints
-    assert response.status_code == 200
-E   assert 503 == 200
-E    +  where 503 = <Response [503 Service Unavailable]>.status_code...
-
 ## Pytest Output Format
 
 ```
-test_2_message_flow_staging.py::test_message_endpoints FAILED
 
 ==================================================
-0 passed, 1 failed in 50.43s
+0 passed, 0 failed in 0.47s
 ```
 
 ## Test Coverage Matrix

@@ -10,7 +10,7 @@ Prevents breaking changes for existing imports while system transitions to new s
 """
 
 # Import the actual implementations from websocket_core
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as CoreManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CoreManager
 from netra_backend.app.websocket_core.connection_info import ConnectionInfo as CoreConnectionInfo
 from netra_backend.app.websocket_core.types import WebSocketConnectionState, WebSocketMessage
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
@@ -18,7 +18,7 @@ from netra_backend.app.websocket_core.connection_manager import WebSocketConnect
 
 # SSOT COMPLIANCE: Use direct alias instead of class inheritance  
 # This eliminates the duplicate class definition while maintaining backward compatibility
-# DEPRECATED: Use UnifiedWebSocketManager directly
+# DEPRECATED: Use WebSocketManager directly
 ConnectionManager = CoreManager
 
 

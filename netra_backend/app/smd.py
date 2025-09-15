@@ -2064,7 +2064,8 @@ class StartupOrchestrator:
         
         try:
             # 1. Initialize SSOT ExecutionEngineFactory (SSOT CONSOLIDATION COMPLETE)
-            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+            # SSOT REMEDIATION Issue #1186: Use canonical imports
+            from netra_backend.app.agents.canonical_imports import ExecutionEngineFactory
             
             # Note: ExecutionEngineFactory is the SSOT implementation that requires proper instantiation
             # with WebSocket bridge dependency - will be configured later after WebSocket bridge is available
@@ -2109,7 +2110,8 @@ class StartupOrchestrator:
             
             # 5. Configure SSOT ExecutionEngineFactory (SSOT CONSOLIDATION COMPLETE)
             # Use configure_execution_engine_factory function for SSOT configuration
-            from netra_backend.app.agents.supervisor.execution_engine_factory import configure_execution_engine_factory
+            # SSOT REMEDIATION Issue #1186: Use canonical imports
+            from netra_backend.app.agents.canonical_imports import configure_execution_engine_factory
             ssot_factory = await configure_execution_engine_factory(
                 websocket_bridge=self.app.state.agent_websocket_bridge
             )

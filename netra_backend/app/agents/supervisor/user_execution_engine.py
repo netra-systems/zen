@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
+    from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
 
 # SECURITY FIX: Removed DeepAgentState import - migrated to secure UserExecutionContext pattern
 # from netra_backend.app.schemas.agent_models import DeepAgentState  # REMOVED: Security vulnerability
@@ -401,28 +402,31 @@ class UserExecutionEngine(IExecutionEngine, ToolExecutionEngineInterface):
     #
     # This removal eliminates the major performance bottleneck in chat message processing
     
-    def __init__(self, 
-                 context_or_registry=None,
-                 agent_factory_or_websocket_bridge=None,
-                 websocket_emitter_or_user_context=None,
-                 context=None,
-                 agent_factory=None,
-                 websocket_emitter=None):
+    def __init__(self,
+                 context_or_registry: Optional[Any] = None,
+                 agent_factory_or_websocket_bridge: Optional[Any] = None,
+                 websocket_emitter_or_user_context: Optional[Any] = None,
+                 context: Optional[UserExecutionContext] = None,
+                 agent_factory: Optional['AgentInstanceFactory'] = None,
+                 websocket_emitter: Optional['UserWebSocketEmitter'] = None):
         """Initialize per-user execution engine with backward compatibility.
-        
+
+        ISSUE #1186 PHASE 4: Enhanced constructor with strict dependency validation
+        and type annotations to prevent SSOT violations.
+
         Modern signature:
-            UserExecutionEngine(context: UserExecutionContext, 
+            UserExecutionEngine(context: UserExecutionContext,
                                agent_factory: AgentInstanceFactory,
                                websocket_emitter: UserWebSocketEmitter)
-                               
+
         Modern keyword signature:
-            UserExecutionEngine(context=user_context, 
+            UserExecutionEngine(context=user_context,
                                agent_factory=agent_factory,
                                websocket_emitter=websocket_emitter)
-                               
+
         Legacy signature (DEPRECATED):
-            UserExecutionEngine(registry, websocket_bridge, user_context) 
-            
+            UserExecutionEngine(registry, websocket_bridge, user_context)
+
         Args:
             context_or_registry: UserExecutionContext (modern) or AgentRegistry (legacy)
             agent_factory_or_websocket_bridge: AgentInstanceFactory (modern) or WebSocketBridge (legacy)
@@ -430,11 +434,20 @@ class UserExecutionEngine(IExecutionEngine, ToolExecutionEngineInterface):
             context: Keyword argument for UserExecutionContext (modern)
             agent_factory: Keyword argument for AgentInstanceFactory (modern)
             websocket_emitter: Keyword argument for UserWebSocketEmitter (modern)
-            
+
         Raises:
             TypeError: If context is not a valid UserExecutionContext
-            ValueError: If required parameters are missing
+            ValueError: If required parameters are missing or parameterless instantiation attempted
         """
+        # ISSUE #1186 PHASE 4: Prevent parameterless instantiation (constructor dependency violation)
+        if (context_or_registry is None and agent_factory_or_websocket_bridge is None and
+            websocket_emitter_or_user_context is None and context is None and
+            agent_factory is None and websocket_emitter is None):
+            raise ValueError(
+                "ISSUE #1186 CONSTRUCTOR VIOLATION: Parameterless instantiation not allowed. "
+                "UserExecutionEngine requires context, agent_factory, and websocket_emitter. "
+                "Use: UserExecutionEngine(context, agent_factory, websocket_emitter)"
+            )
         # Handle keyword arguments first (modern usage)
         if context is not None or agent_factory is not None or websocket_emitter is not None:
             # Modern keyword signature
