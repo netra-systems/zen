@@ -148,10 +148,10 @@ from netra_backend.app.core.isolated_environment import IsolatedEnvironment  # �
 
 # CRITICAL: Fixed 2025-09-11 - agent_schemas module does not exist
 
-# CRITICAL: Fixed 2025-01-14 - ExecutionEngineFactory import path issue (Issue #1004)
-from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory  # ❌ BROKEN PATH - Module does not exist
-from netra_backend.app.services.user_execution_context import ExecutionEngineFactory  # ❌ BROKEN IMPORT - Not available in user_execution_context
-# USE INSTEAD: from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+# CRITICAL: Fixed 2025-09-14 Issue #1069 Phase 2 - ExecutionEngineFactory import path issue (Issue #1004)
+from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory  # ❌ BROKEN PATH - Module does not exist [FIXED]
+from netra_backend.app.services.user_execution_context import ExecutionEngineFactory  # ❌ BROKEN IMPORT - Not available in user_execution_context [FIXED]
+# ✅ CORRECTED: from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 
 # ISSUE #996 FIX: WebSocket Import Deprecations (2025-09-14)
 from netra_backend.app.websocket_core import WebSocketManager  # ⚠️ DEPRECATED (generates warnings)
@@ -163,11 +163,11 @@ from netra_backend.app.schemas.agent_schemas import RequestModel  # ❌ BROKEN P
 from netra_backend.app.schemas.agent_schemas import AgentExecutionResult  # ❌ BROKEN PATH
 # USE INSTEAD: from shared.types.agent_types import AgentExecutionResult
 
-# CRITICAL: Fixed 2025-09-12 - ExecutionEngine direct instantiation deprecated
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine  # ❌ DEPRECATED: Direct import no longer supported
-# ExecutionEngine() instantiation without parameters  # ❌ BROKEN: Requires specific factory parameters
-# USE INSTEAD: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-# AND: Use create_request_scoped_engine() factory method instead of direct ExecutionEngine() instantiation
+# CRITICAL: Fixed 2025-09-14 Issue #1069 Phase 2 - ExecutionEngine direct instantiation deprecated
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine  # ❌ DEPRECATED: Direct import no longer supported [FIXED]
+# ExecutionEngine() instantiation without parameters  # ❌ BROKEN: Requires specific factory parameters [FIXED]
+# ✅ CORRECTED: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
+# ✅ CORRECTED: Use create_request_scoped_engine() factory method instead of direct ExecutionEngine() instantiation
 
 # CRITICAL: Fixed 2025-09-12 - Missing tool modules for test collection
 from netra_backend.app.tools.search_tool import SearchTool  # ❌ DID NOT EXIST: Placeholder created for test compatibility
