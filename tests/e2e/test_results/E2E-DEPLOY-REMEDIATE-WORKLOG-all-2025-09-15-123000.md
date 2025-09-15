@@ -129,13 +129,48 @@ python -m pytest tests/e2e/staging/[test_file] -v --tb=short
 
 ---
 
-## PHASE 3: ROOT CAUSE ANALYSIS 📝 PENDING
+## PHASE 3: ROOT CAUSE ANALYSIS 📝 ✅ COMPLETED
 
 ### 3.1 Failure Analysis
-(To be populated based on test results)
 
-### 3.2 Five Whys Analysis
-(To be performed for each critical failure)
+**PRIMARY ROOT CAUSE IDENTIFIED**: Missing `websocket_manager_factory.py` module causing cascading import failures
+
+### 3.2 Five Whys Analysis for WebSocket 1011 Errors
+
+**Why 1**: Why are we getting 1011 internal errors?
+- WebSocket connections fail during initialization because WebSocket manager cannot be created
+
+**Why 2**: Why is the WebSocket manager failing internally?
+- The `websocket_manager_factory.py` module is completely missing from the codebase
+
+**Why 3**: Why is initialization failing?
+- Import failures cascade during startup, causing fallback to emergency patterns incompatible with staging
+
+**Why 4**: Why are there SSOT violations?
+- Issue #1226 SSOT migration is incomplete - factory was removed but dependent imports weren't updated
+
+**Why 5**: Why weren't these caught in testing?
+- Test infrastructure has fallback mechanisms that mask the missing factory locally but fail in staging
+
+### 3.3 Critical Findings
+
+**Missing File**: `/netra_backend/app/websocket_core/websocket_manager_factory.py` - **DOES NOT EXIST**
+
+**Failed Import Locations**:
+1. `supervisor_factory.py:394` - Attempts factory import
+2. `unified_init.py:27-31` - Imports WebSocketManagerFactory, IsolatedWebSocketManager, create_websocket_manager
+3. Multiple test files expecting this module
+
+**SSOT Violations (9 identified)**:
+1. manager.py - Deprecated warnings
+2. __init__.py - ISSUE #1144 warnings
+3. unified_init.py - Missing factory import
+4. supervisor_factory.py - Factory import attempt
+5. canonical_imports.py - Compatibility stubs
+6. migration_adapter.py - References to removed factory
+7-9. Multiple test files with deprecated patterns
+
+**Missing WebSocket Events**: All 5 events missing due to manager initialization failure
 
 ---
 

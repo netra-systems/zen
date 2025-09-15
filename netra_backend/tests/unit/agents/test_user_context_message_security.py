@@ -51,7 +51,7 @@ from netra_backend.app.websocket_core.types import (
 )
 from netra_backend.app.websocket_core.validation import MessageValidator
 from netra_backend.app.websocket_core.protocols import WebSocketProtocol
-from netra_backend.app.websocket_core.event_validator import EventValidator
+from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator as EventValidator
 
 # Import security validation components
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
