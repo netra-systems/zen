@@ -15,39 +15,10 @@ from netra_backend.app.agents.supervisor.user_execution_engine import (
 # For missing classes, provide basic compatibility stubs
 from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
 
-# Compatibility stubs for test classes that no longer exist
-class EngineConfig:
-    """Deprecated compatibility stub - use UserExecutionEngine directly"""
-    def __init__(self, **kwargs):
-        pass
+# Removed unused compatibility stubs - Phase 3 cleanup
+# If tests fail, use direct imports from netra_backend.app.agents.supervisor.*
 
-class ExecutionExtension:
-    """Deprecated compatibility stub - extensions integrated into UserExecutionEngine"""
-    pass
-
-class UserExecutionExtension(ExecutionExtension):
-    """Deprecated compatibility stub"""
-    pass
-
-class MCPExecutionExtension(ExecutionExtension):
-    """Deprecated compatibility stub"""
-    pass
-
-class DataExecutionExtension(ExecutionExtension):
-    """Deprecated compatibility stub"""
-    pass
-
-class WebSocketExtension(ExecutionExtension):
-    """Deprecated compatibility stub"""
-    pass
-
-async def execute_agent(*args, **kwargs):
-    """Deprecated compatibility stub - use ExecutionEngine.execute_agent directly"""
-    raise NotImplementedError("Use ExecutionEngine.execute_agent instead")
-
-def execution_engine_context(*args, **kwargs):
-    """Deprecated compatibility stub - use UserExecutionContext directly"""
-    raise NotImplementedError("Use UserExecutionContext instead")
+# Removed unused compatibility functions - Phase 3 cleanup
 
 def create_execution_engine(*args, **kwargs):
     """DEPRECATED: SSOT factory function for ExecutionEngine - creates UserExecutionEngine instance
@@ -84,7 +55,7 @@ def get_execution_engine_factory():
 # Additional compatibility aliases for WebSocket event-related tests
 ExecutionEngineWithWebSocketEvents = ExecutionEngine  # Alias for tests
 
-# Re-export everything for backwards compatibility
+# Re-export core classes for backwards compatibility - Phase 3 cleanup
 __all__ = [
     'ExecutionEngine', 
     'UserExecutionContext',
@@ -92,14 +63,6 @@ __all__ = [
     'AgentExecutionResult', 
     'ExecutionEngineFactory',
     'RequestScopedExecutionEngine',
-    'EngineConfig',
-    'ExecutionExtension',
-    'UserExecutionExtension',
-    'MCPExecutionExtension', 
-    'DataExecutionExtension',
-    'WebSocketExtension',
-    'execute_agent',
-    'execution_engine_context',
     'create_execution_engine',
     'get_execution_engine_factory',
     'ExecutionEngineWithWebSocketEvents'

@@ -60,9 +60,9 @@ class TestStagingAuthenticationServiceHealth(SSotAsyncTestCase):
             run_id="staging_health_test_run"
         )
 
-    async def setUp(self):
+    def setup_method(self, method):
         """Set up staging health validation tests."""
-        await super().setUp()
+        super().setup_method(method)
         self.service_health_status = {}
 
     async def test_staging_auth_service_health_comprehensive(self):

@@ -118,9 +118,9 @@ class TestWebSocketEventsBusinessCriticalStaging(SSotAsyncTestCase):
             run_id="ws_events_test_run"
         )
 
-    async def setUp(self):
+    def setup_method(self, method):
         """Set up WebSocket events validation tests."""
-        await super().setUp()
+        super().setup_method(method)
         self.auth_token = None
         self.user_id = None
 

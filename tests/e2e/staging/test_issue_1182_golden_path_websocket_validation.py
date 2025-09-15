@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from urllib.parse import urljoin
 
-from test_framework.ssot.base_test_case import StagingE2ETestCase
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.logging.unified_logging_ssot import get_logger
 
 logger = get_logger(__name__)
@@ -40,7 +40,7 @@ class GoldenPathValidation:
     performance_metrics: Dict[str, float] = field(default_factory=dict)
 
 
-class TestGoldenPathWebSocketValidation(StagingE2ETestCase):
+class TestGoldenPathWebSocketValidation(SSotAsyncTestCase):
     """
     E2E tests for Issue #1182 Golden Path WebSocket validation in staging environment.
     

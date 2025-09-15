@@ -71,9 +71,9 @@ class TestGoldenPathEndToEndStagingValidation(SSotAsyncTestCase):
             run_id="staging_e2e_test_run"
         )
 
-    async def setUp(self):
+    def setup_method(self, method):
         """Set up staging environment validation tests."""
-        await super().setUp()
+        super().setup_method(method)
         self.auth_token = None
         self.user_id = None
         self.websocket_events = []
