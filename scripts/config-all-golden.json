@@ -1,12 +1,42 @@
 {
   "instances": [
     {
-      "command": "/gitissueprogressorv3 p0",
+      "command": "/gitissueprogressorv3 golden path phase 2.1",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
     {
-      "command": "/gitissueprogressorv3 p0 agents",
+      "command": "/gitissueprogressorv3 golden path phase 2.2",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 golden path phase 2.3",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 golden path phase 2.4",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 golden path phase 3.1",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 golden path phase 3.2",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 1187",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 1188",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
