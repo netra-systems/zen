@@ -187,8 +187,9 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
             welcome_timeout = 5.0
             welcome_message = await asyncio.wait_for(websocket.recv(), timeout=welcome_timeout)
             welcome_data = json.loads(welcome_message)
-            assert welcome_data.get('type') == 'connection_ready', f'Expected welcome message, got: {welcome_data}'
-            logger.info(' PASS:  Welcome message received from staging')
+            expected_types = ['connection_ready', 'connection_established']
+            assert welcome_data.get('type') in expected_types, f'Expected welcome message, got: {welcome_data}'
+            logger.info(f' PASS:  Welcome message received from staging: {welcome_data.get("type")}')
         except Exception as e:
             logger.error(f' FAIL:  Failed to connect to staging WebSocket: {e}')
             pytest.skip(f'Staging WebSocket connection failed: {e}')

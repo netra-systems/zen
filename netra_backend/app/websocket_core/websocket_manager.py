@@ -24,6 +24,7 @@ This eliminates ID collision risks and ensures consistent ID formats across WebS
 from netra_backend.app.websocket_core.types import (
     WebSocketConnection,
     WebSocketManagerMode,
+    create_isolated_mode,
     _serialize_message_safely
 )
 from netra_backend.app.websocket_core.unified_manager import (
@@ -100,6 +101,7 @@ def create_test_fallback_manager(user_context):
 
     This function creates a minimal WebSocket manager suitable for
     test environments where full infrastructure may not be available.
+    ISSUE #889 FIX: Uses isolated mode instances to prevent cross-user contamination.
 
     Args:
         user_context: User context for the manager
@@ -108,7 +110,7 @@ def create_test_fallback_manager(user_context):
         UnifiedWebSocketManager configured for testing
     """
     return _UnifiedWebSocketManagerImplementation(
-        mode=WebSocketManagerMode.UNIFIED,
+        mode=create_isolated_mode("unified"),  # ISSUE #889 FIX: Use isolated mode
         user_context=user_context or create_test_user_context(),
         _ssot_authorization_token=secrets.token_urlsafe(32)  # Stronger token for security
     )
@@ -238,35 +240,178 @@ _REGISTRY_LOCK = threading.Lock()
 
 def _get_user_key(user_context: Optional[Any]) -> str:
     """
-    Extract a unique user key from user context for manager registry.
-    
+    Extract deterministic user key for manager registry.
+
+    CRITICAL: Must return same key for same logical user to prevent duplicates.
+    ISSUE #889 FIX: Eliminates non-deterministic object ID fallback that caused
+    registry misses and manager duplication. Enhanced with validation logging
+    to detect user context contamination.
+
     Args:
         user_context: UserExecutionContext or compatible object
-        
+
     Returns:
-        str: Unique user identifier for manager registry
+        str: Deterministic user identifier for manager registry
     """
     if user_context is None:
-        # For None context, generate a special test key that gets reused
-        return "test_user_context_none"
-    
-    # Extract user_id if available
-    if hasattr(user_context, 'user_id'):
-        return str(user_context.user_id)
-    
-    # Fallback to object id if no user_id available
-    return f"unknown_user_{id(user_context)}"
+        # ISSUE #889 FIX: Use consistent key for null contexts to prevent duplication
+        return "null_user_context_singleton"
+
+    # Primary: Use user_id if available (most deterministic)
+    if hasattr(user_context, 'user_id') and user_context.user_id:
+        user_id = str(user_context.user_id)
+        # ISSUE #889 FIX: Add contamination detection for user_id
+        if not user_id or user_id == 'None' or len(user_id.strip()) == 0:
+            logger.warning(f"Empty or invalid user_id detected in context: {user_context}")
+            # Fall through to secondary methods
+        else:
+            return user_id
+
+    # Secondary: Use thread_id + request_id combination for deterministic fallback
+    thread_id = getattr(user_context, 'thread_id', None)
+    request_id = getattr(user_context, 'request_id', None)
+
+    if thread_id and request_id:
+        combined_key = f"context_{thread_id}_{request_id}"
+        logger.debug(f"Using combined thread+request key for user context: {combined_key}")
+        return combined_key
+
+    # Tertiary: Use string representation (more deterministic than object ID)
+    context_str = str(user_context)
+    if 'user_id' in context_str:
+        # Extract user_id from string representation if available
+        import re
+        user_id_match = re.search(r'user_id[\'\":\s]*([^\s\'\",}]+)', context_str)
+        if user_id_match:
+            extracted_id = f"extracted_{user_id_match.group(1)}"
+            logger.debug(f"Extracted user_id from string representation: {extracted_id}")
+            return extracted_id
+
+    # Quaternary: Generate consistent ID based on context attributes
+    import hashlib
+    context_attrs = []
+    for attr in ['user_id', 'thread_id', 'request_id', 'session_id']:
+        if hasattr(user_context, attr):
+            attr_value = getattr(user_context, attr)
+            if attr_value is not None:
+                context_attrs.append(f"{attr}:{attr_value}")
+
+    if context_attrs:
+        context_signature = '|'.join(sorted(context_attrs))  # Sort for consistency
+        context_hash = hashlib.md5(context_signature.encode()).hexdigest()[:16]
+        derived_key = f"derived_{context_hash}"
+        logger.debug(f"Derived deterministic key from attributes {context_attrs}: {derived_key}")
+        return derived_key
+
+    # ISSUE #889 CRITICAL FIX: Eliminate non-deterministic fallback
+    # Instead of using object ID which changes between calls, use a deterministic
+    # hash based on the context's type and string representation
+    context_type = type(user_context).__name__
+    context_repr = repr(user_context)
+    stable_hash = hashlib.md5(f"{context_type}:{context_repr}".encode()).hexdigest()[:12]
+    fallback_key = f"stable_{stable_hash}"
+
+    logger.warning(f"Using stable hash fallback for user context (type: {context_type}): {fallback_key}")
+    return fallback_key
 
 def _cleanup_user_registry(user_key: str):
     """
     Clean up registry entry for a user.
-    
+
     Args:
         user_key: User key to remove from registry
     """
     if user_key in _USER_MANAGER_REGISTRY:
         del _USER_MANAGER_REGISTRY[user_key]
         logger.debug(f"Cleaned up registry entry for user {user_key}")
+
+def _validate_user_isolation(user_key: str, manager: _UnifiedWebSocketManagerImplementation) -> bool:
+    """
+    ISSUE #889 FIX: Validate that the manager maintains proper user isolation.
+
+    This function detects shared object references between managers that could
+    lead to cross-user data contamination and regulatory compliance violations.
+    Enhanced with comprehensive contamination detection.
+
+    Args:
+        user_key: User key for the manager being validated
+        manager: Manager instance to validate for isolation
+
+    Returns:
+        bool: True if isolation is maintained, False if violation detected
+    """
+    # ISSUE #889 FIX: Enhanced critical attributes list including enum state
+    critical_attributes = [
+        'mode', 'user_context', '_auth_token', '_ssot_authorization_token',
+        '_manager_id', 'manager_id', '_state', 'state', '_internal_state',
+        '_cache', 'cache', '_session_cache', '_connection_registry',
+        '_user_connections', '_thread_connections'
+    ]
+
+    isolation_violations = []
+
+    for existing_user_key, existing_manager in _USER_MANAGER_REGISTRY.items():
+        if existing_user_key == user_key:
+            continue  # Skip self-comparison
+
+        for attr_name in critical_attributes:
+            if hasattr(manager, attr_name) and hasattr(existing_manager, attr_name):
+                manager_attr = getattr(manager, attr_name)
+                existing_attr = getattr(existing_manager, attr_name)
+
+                # Check for shared object references (critical security violation)
+                if manager_attr is existing_attr and manager_attr is not None:
+                    violation = {
+                        'attribute': attr_name,
+                        'new_user': user_key,
+                        'existing_user': existing_user_key,
+                        'shared_object_id': id(manager_attr),
+                        'object_type': type(manager_attr).__name__,
+                        'violation_severity': 'CRITICAL'
+                    }
+                    isolation_violations.append(violation)
+
+                    logger.critical(
+                        f"CRITICAL USER ISOLATION VIOLATION: {attr_name} shared between users {user_key} and {existing_user_key}. "
+                        f"Shared object ID: {id(manager_attr)}, Type: {type(manager_attr).__name__}. "
+                        f"This violates HIPAA, SOC2, and SEC compliance requirements."
+                    )
+
+        # ISSUE #889 FIX: Additional validation for enum sharing (mode attribute)
+        if hasattr(manager, 'mode') and hasattr(existing_manager, 'mode'):
+            manager_mode = getattr(manager, 'mode')
+            existing_mode = getattr(existing_manager, 'mode')
+
+            # Check if they share the exact same enum instance (not just same value)
+            if manager_mode is existing_mode:
+                violation = {
+                    'attribute': 'mode_enum_instance',
+                    'new_user': user_key,
+                    'existing_user': existing_user_key,
+                    'shared_object_id': id(manager_mode),
+                    'enum_value': manager_mode.value if hasattr(manager_mode, 'value') else str(manager_mode),
+                    'violation_severity': 'HIGH'
+                }
+                isolation_violations.append(violation)
+
+                logger.error(
+                    f"HIGH USER ISOLATION VIOLATION: WebSocketManagerMode enum instance shared between users {user_key} and {existing_user_key}. "
+                    f"Enum instance ID: {id(manager_mode)}, Value: {getattr(manager_mode, 'value', str(manager_mode))}. "
+                    f"This can cause state contamination between user sessions."
+                )
+
+    # ISSUE #889 FIX: Log summary of all violations detected
+    if isolation_violations:
+        logger.critical(
+            f"USER ISOLATION VIOLATIONS SUMMARY: {len(isolation_violations)} violations detected for user {user_key}. "
+            f"Violations: {isolation_violations}. "
+            f"Each violation represents potential regulatory compliance failure."
+        )
+        return False
+
+    # Log successful validation
+    logger.debug(f"User isolation validation PASSED for user {user_key} - no shared state detected")
+    return True
 
 async def get_manager_registry_status() -> Dict[str, Any]:
     """
@@ -422,7 +567,7 @@ def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketMan
         
         # No existing manager - create new one following original logic
         try:
-            # PHASE 1 FIX: Check service availability before creation  
+            # PHASE 1 FIX: Check service availability before creation
             try:
                 import asyncio
                 service_available = asyncio.run(check_websocket_service_available())
@@ -434,6 +579,10 @@ def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketMan
                 mode = WebSocketManagerMode.UNIFIED
 
             logger.info(f"Creating NEW WebSocket manager for user {user_key} with mode={mode.value}, service_available={service_available}")
+
+            # ISSUE #889 FIX: Create isolated mode instance to prevent enum sharing
+            isolated_mode = create_isolated_mode(mode.value)
+            logger.debug(f"Created isolated mode instance {isolated_mode.instance_id} for user {user_key}")
 
             # Generate stronger authorization token
             auth_token = secrets.token_urlsafe(32)  # Increase token length to meet new requirements
@@ -454,14 +603,14 @@ def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketMan
                 })()
 
                 manager = _UnifiedWebSocketManagerImplementation(
-                    mode=WebSocketManagerMode.ISOLATED if service_available else WebSocketManagerMode.UNIFIED,
+                    mode=create_isolated_mode("isolated" if service_available else "unified"),
                     user_context=test_context,
                     _ssot_authorization_token=auth_token
                 )
             else:
-                # Production mode with proper user context
+                # Production mode with proper user context - use isolated mode instance
                 manager = _UnifiedWebSocketManagerImplementation(
-                    mode=mode,
+                    mode=isolated_mode,
                     user_context=user_context,
                     _ssot_authorization_token=auth_token
                 )
@@ -477,6 +626,10 @@ def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketMan
             except ImportError:
                 # Validation enhancer not available - continue without validation
                 logger.debug("SSOT validation enhancer not available")
+
+            # ISSUE #889 FIX: Validate user isolation before registration
+            if not _validate_user_isolation(user_key, manager):
+                raise ValueError(f"CRITICAL USER ISOLATION VIOLATION: Manager for user {user_key} failed isolation validation")
 
             # CRITICAL: Register manager in user-scoped registry
             _USER_MANAGER_REGISTRY[user_key] = manager
@@ -499,9 +652,9 @@ def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketMan
                 return fallback_manager
             except Exception as fallback_error:
                 logger.error(f"Failed to create fallback manager for user {user_key}: {fallback_error}")
-                # Final fallback with minimal requirements
+                # Final fallback with minimal requirements - ISSUE #889 FIX: Use isolated mode
                 final_fallback = _UnifiedWebSocketManagerImplementation(
-                    mode=WebSocketManagerMode.EMERGENCY,
+                    mode=create_isolated_mode("emergency"),  # ISSUE #889 FIX: Use isolated mode
                     user_context=create_test_user_context(),
                     _ssot_authorization_token=secrets.token_urlsafe(32)
                 )

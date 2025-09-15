@@ -458,7 +458,8 @@ class TestGoldenPathStaging(SSotAsyncTestCase):
             
             # Test HTTPS endpoints with proper SSL verification
             async with httpx.AsyncClient(timeout=10.0, verify=True) as client:
-                for service_name, url in self.__class__.staging_urls.items():
+                staging_urls = getattr(self.__class__, 'staging_urls', STAGING_URLS)
+            for service_name, url in staging_urls.items():
                     if service_name == "websocket":
                         continue
                     
@@ -501,7 +502,8 @@ class TestGoldenPathStaging(SSotAsyncTestCase):
         failed_services = []
         
         async with httpx.AsyncClient(timeout=5.0, verify=False) as client:
-            for service_name, url in self.__class__.staging_urls.items():
+            staging_urls = getattr(self.__class__, 'staging_urls', STAGING_URLS)
+            for service_name, url in staging_urls.items():
                 if service_name == "websocket":
                     continue
                 
@@ -553,7 +555,8 @@ class TestGoldenPathStaging(SSotAsyncTestCase):
         """Establish secure WebSocket connection to staging"""
         try:
             # Use proper staging WebSocket URL with SSL
-            websocket_url = self.__class__.staging_urls["websocket"]
+            staging_urls = getattr(self.__class__, 'staging_urls', STAGING_URLS)
+            websocket_url = staging_urls["websocket"]
             
             # Setup SSL context for staging
             ssl_context = ssl.create_default_context()

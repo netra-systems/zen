@@ -693,6 +693,9 @@ markers = [
     "service_dependency: Service dependency integration and resilience tests",
     "graceful_degradation: Graceful degradation tests for service availability",
     "health_monitoring: Health monitoring tests for service dependencies",
+
+    # Issue #860 Windows WebSocket Connection Failure markers (2025-09-15)
+    "windows: Windows platform-specific tests for connection failures and compatibility",
 ]
 
 # Coverage settings

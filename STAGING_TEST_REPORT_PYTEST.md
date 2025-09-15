@@ -1,26 +1,48 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-15 04:14:52
+**Generated:** 2025-09-15 04:33:17
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 0
+- **Total Tests:** 1
 - **Passed:** 0 (0.0%)
-- **Failed:** 0 (0.0%)
+- **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 0.00 seconds
+- **Duration:** 2.39 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
+### NORMAL Priority Tests
+
+| Test Name | Status | Duration | File |
+|-----------|--------|----------|------|
+| test_staging_golden_path_complete_infrastructure | FAIL failed | 0.865s | test_golden_path_staging.py |
+
+## Failed Tests Details
+
+### FAILED: test_staging_golden_path_complete_infrastructure
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_staging.py
+- **Duration:** 0.865s
+- **Error:** tests\e2e\staging\test_golden_path_staging.py:324: in test_staging_golden_path_complete_infrastructure
+    assert oauth_validation['valid'], 'Staging OAuth authentication failed'
+E   AssertionError: Staging OAuth authentication failed
+E   assert False
+
+During handling of the above exception, another exception occurred:
+tests\e2e\staging\test_golden_path_staging.py:414: in test_staging_golden_path_complete_infrastructure
+    pytest.fail(
+E   Failed: STAGING INFRASTRUCTURE FAILURE: Staging OAuth a...
+
 ## Pytest Output Format
 
 ```
+test_golden_path_staging.py::test_staging_golden_path_complete_infrastructure FAILED
 
 ==================================================
-0 passed, 0 failed in 0.00s
+0 passed, 1 failed in 2.39s
 ```
 
 ## Test Coverage Matrix

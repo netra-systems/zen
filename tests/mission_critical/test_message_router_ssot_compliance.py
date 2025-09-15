@@ -29,16 +29,11 @@ class TestMessageRouterSSOTCompliance(SSotBaseTestCase):
 
     def setup_method(self, method=None):
         """Set up test fixtures."""
-        super().setup_method(method)
-        # Initialize SSotBaseTestCase (no super().setUp() needed)
-        if hasattr(super(), 'setUp'):
-            super().setUp()
-        
         # Expected SSOT location after remediation
         self.canonical_path = "netra_backend/app/websocket_core/handlers.py"
         self.canonical_class = "MessageRouter"
         self.base_path = Path(__file__).parent.parent.parent
-        
+
         # Initialize logger
         import logging
         self.logger = logging.getLogger(__name__)
