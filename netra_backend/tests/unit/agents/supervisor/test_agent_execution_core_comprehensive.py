@@ -442,14 +442,14 @@ class TestAgentExecutionCoreUserIsolation(SSotAsyncTestCase):
 class TestAgentExecutionCoreErrorHandling(SSotAsyncTestCase):
     """
     BUSINESS VALUE: Error recovery and resilience
-    
+
     Validates error boundaries, circuit breakers, and graceful degradation
     to maintain system stability under failure conditions.
     """
-    
-    async def async_setup_method(self, method=None):
+
+    def setup_method(self, method=None):
         """Set up error handling test fixtures."""
-        await super().async_setup_method(method)
+        super().setup_method(method)
         
         self.mock_registry = MagicMock()
         self.mock_websocket_bridge = AsyncMock()
@@ -467,8 +467,9 @@ class TestAgentExecutionCoreErrorHandling(SSotAsyncTestCase):
         
         self.execution_context = AgentExecutionContext(
             agent_name="error-agent",
-            run_id=uuid4(),
-            thread_id="error-thread"
+            run_id=str(uuid4()),
+            thread_id="error-thread",
+            user_id="error-test-user"
         )
     
     async def test_agent_execution_exception_graceful_recovery(self):
