@@ -386,7 +386,11 @@ class StartupOrchestrator:
             if self.current_phase:
                 self._fail_phase(self.current_phase, e)
             self._handle_startup_failure(e)
-            raise DeterministicStartupError(f"CRITICAL STARTUP FAILURE: {e}") from e
+            # Issue #1278 FIX: Don't wrap DeterministicStartupError in another DeterministicStartupError
+            if isinstance(e, DeterministicStartupError):
+                raise e
+            else:
+                raise DeterministicStartupError(f"CRITICAL STARTUP FAILURE: {e}") from e
     
     async def _phase1_foundation(self) -> None:
         """Phase 1: INIT - Foundation setup and environment validation."""
