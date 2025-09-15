@@ -39,11 +39,11 @@ class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
         """
         logger.info('Testing WebSocket manager import path SSOT compliance - EXPECTING FAILURE')
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as Manager1
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as Manager2
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
             user_context = {'user_id': 'test_user_123', 'thread_id': 'test_thread_456'}
-            manager1 = Manager1(user_context=user_context)
-            manager2 = Manager2(user_context=user_context)
+            manager1 = get_websocket_manager(user_context=user_context)
+            manager2 = UnifiedWebSocketManager(user_context=user_context)
             self.assertIs(manager1, manager2, 'SSOT VIOLATION: Different import paths create different WebSocket manager instances. This proves fragmentation exists and threatens Golden Path reliability.')
         except ImportError as e:
             logger.error(f'Import error indicates WebSocket manager fragmentation: {e}')
