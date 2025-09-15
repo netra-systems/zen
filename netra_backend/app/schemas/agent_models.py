@@ -16,6 +16,7 @@ Usage:
 
 import copy
 import uuid
+import re
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
@@ -187,6 +188,119 @@ class DeepAgentState(BaseModel):
         # Deep copy the entire context dictionary to prevent shared references
         return copy.deepcopy(v)
     
+    @field_validator('agent_input', mode='before')
+    @classmethod
+    def validate_agent_input_security(cls, v: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """SECURITY FIX: Validate agent_input to prevent injection attacks.
+
+        Issue #1017 Resolution: This validator prevents malicious data injection by:
+        1. Detecting and rejecting dangerous system commands
+        2. Preventing code execution payloads
+        3. Blocking malicious API keys and credentials
+        4. Filtering permission bypass attempts
+        5. Sanitizing data extraction directives
+
+        This protects enterprise customers from regulatory violations (HIPAA, SOC2, SEC).
+        """
+        if v is None:
+            return v
+
+        # Deep copy to prevent reference mutation
+        safe_input = copy.deepcopy(v)
+
+        # Apply security filters
+        cls._sanitize_agent_input_recursive(safe_input)
+
+        return safe_input
+
+    @classmethod
+    def _sanitize_agent_input_recursive(cls, data: Any, path: str = "") -> None:
+        """Recursively sanitize agent input data to remove security threats.
+
+        Args:
+            data: The data structure to sanitize
+            path: Current path in the data structure for logging
+        """
+        if isinstance(data, dict):
+            cls._sanitize_dict_values(data, path)
+        elif isinstance(data, list):
+            cls._sanitize_list_values(data, path)
+        elif isinstance(data, str):
+            cls._validate_string_security(data, path)
+
+    @classmethod
+    def _sanitize_dict_values(cls, data_dict: Dict[str, Any], path: str) -> None:
+        """Sanitize dictionary values and keys."""
+        # Check for dangerous keys
+        dangerous_keys = [
+            'system_commands', 'exec', 'eval', 'import', '__class__', '__globals__',
+            'bypass_permissions', 'admin_override', 'backdoor_access', 'extract_pii',
+            'database_password', 'api_key', 'secret_key', 'jwt_secret', 'admin_credentials'
+        ]
+
+        keys_to_remove = []
+        for key in data_dict.keys():
+            if any(dangerous in str(key).lower() for dangerous in dangerous_keys):
+                keys_to_remove.append(key)
+            elif isinstance(data_dict[key], (dict, list)):
+                cls._sanitize_agent_input_recursive(data_dict[key], f"{path}.{key}")
+            elif isinstance(data_dict[key], str):
+                cls._validate_string_security(data_dict[key], f"{path}.{key}")
+
+        # Remove dangerous keys
+        for key in keys_to_remove:
+            del data_dict[key]
+
+    @classmethod
+    def _sanitize_list_values(cls, data_list: List[Any], path: str) -> None:
+        """Sanitize list values."""
+        indices_to_remove = []
+        for i, item in enumerate(data_list):
+            if isinstance(item, str) and cls._is_dangerous_string(item):
+                indices_to_remove.append(i)
+            elif isinstance(item, (dict, list)):
+                cls._sanitize_agent_input_recursive(item, f"{path}[{i}]")
+
+        # Remove dangerous items (in reverse order to maintain indices)
+        for i in reversed(indices_to_remove):
+            data_list.pop(i)
+
+    @classmethod
+    def _validate_string_security(cls, value: str, path: str) -> None:
+        """Validate string values for security threats."""
+        if cls._is_dangerous_string(value):
+            raise ValueError(
+                f"SECURITY VIOLATION: Dangerous content detected in {path}. "
+                f"Input contains potential security threats that are not allowed."
+            )
+
+    @classmethod
+    def _is_dangerous_string(cls, value: str) -> bool:
+        """Check if a string contains dangerous content."""
+        dangerous_patterns = [
+            r'rm\s+-rf\s*/',  # Destructive file operations
+            r'exec\s*\(',     # Code execution
+            r'eval\s*\(',     # Code evaluation
+            r'import\s+os',   # OS module imports
+            r'__class__',     # Python introspection
+            r'__globals__',   # Global access
+            r'cat\s+/etc/passwd',  # System file access
+            r'wget\s+http',   # Remote file downloads
+            r'curl\s+http',   # Remote file access
+            r'sk-[a-zA-Z0-9\-]+',  # API keys
+            r'admin:admin',   # Default credentials
+            r'DROP\s+TABLE',  # SQL injection
+            r'<script>',      # XSS
+            r'javascript:',   # JavaScript injection
+        ]
+
+        value_lower = value.lower()
+        for pattern in dangerous_patterns:
+            if re.search(pattern, value_lower, re.IGNORECASE):
+                return True
+
+        return False
+
     @field_validator('step_count')
     @classmethod
     def validate_step_count(cls, v: int) -> int:
@@ -272,8 +386,144 @@ class DeepAgentState(BaseModel):
         super().__init__(**data)
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert state to dictionary."""
-        return self.model_dump(exclude_none=True, mode='json')
+        """Convert state to dictionary with sensitive data filtering.
+
+        SECURITY FIX: Issue #1017 - Prevents information disclosure by filtering
+        sensitive data from serialization output. This protects enterprise customers
+        from exposing internal secrets, credentials, and system information.
+        """
+        # Get full model data
+        raw_dict = self.model_dump(exclude_none=True, mode='json')
+
+        # Apply security filtering
+        filtered_dict = self._filter_sensitive_data(raw_dict)
+
+        return filtered_dict
+
+    def _filter_sensitive_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Filter sensitive data from dictionary representation.
+
+        This method removes or redacts sensitive information that should not
+        be exposed in serialized output, protecting against information disclosure.
+
+        Args:
+            data: Raw dictionary data from model_dump
+
+        Returns:
+            Filtered dictionary with sensitive data removed/redacted
+        """
+        filtered_data = copy.deepcopy(data)
+
+        # Filter metadata custom_fields for sensitive information
+        if 'metadata' in filtered_data and 'custom_fields' in filtered_data['metadata']:
+            filtered_data['metadata']['custom_fields'] = self._filter_custom_fields(
+                filtered_data['metadata']['custom_fields']
+            )
+
+        # Filter execution_context for sensitive information
+        if 'metadata' in filtered_data and 'execution_context' in filtered_data['metadata']:
+            filtered_data['metadata']['execution_context'] = self._filter_execution_context(
+                filtered_data['metadata']['execution_context']
+            )
+
+        # Filter context_tracking for sensitive information
+        if 'context_tracking' in filtered_data:
+            filtered_data['context_tracking'] = self._filter_context_tracking(
+                filtered_data['context_tracking']
+            )
+
+        # Filter agent_context for sensitive information
+        if 'agent_context' in filtered_data:
+            filtered_data['agent_context'] = self._filter_agent_context(
+                filtered_data['agent_context']
+            )
+
+        return filtered_data
+
+    def _filter_custom_fields(self, custom_fields: Dict[str, Any]) -> Dict[str, Any]:
+        """Filter sensitive data from custom_fields."""
+        if not custom_fields:
+            return custom_fields
+
+        filtered_fields = {}
+        sensitive_patterns = [
+            'api_key', 'secret', 'password', 'token', 'credential', 'admin',
+            'internal', 'system', 'database', 'jwt', 'auth', 'private'
+        ]
+
+        for key, value in custom_fields.items():
+            key_lower = key.lower()
+            if any(pattern in key_lower for pattern in sensitive_patterns):
+                filtered_fields[key] = '[REDACTED]'
+            elif isinstance(value, str) and self._contains_sensitive_content(value):
+                filtered_fields[key] = '[REDACTED]'
+            elif isinstance(value, dict):
+                # Recursively filter nested dictionaries
+                filtered_fields[key] = self._apply_generic_filtering(value)
+            else:
+                filtered_fields[key] = value
+
+        return filtered_fields
+
+    def _filter_execution_context(self, execution_context: Dict[str, Any]) -> Dict[str, Any]:
+        """Filter sensitive data from execution_context."""
+        if not execution_context:
+            return execution_context
+
+        return self._apply_generic_filtering(execution_context)
+
+    def _filter_context_tracking(self, context_tracking: Dict[str, Any]) -> Dict[str, Any]:
+        """Filter sensitive data from context_tracking."""
+        if not context_tracking:
+            return context_tracking
+
+        return self._apply_generic_filtering(context_tracking)
+
+    def _filter_agent_context(self, agent_context: Dict[str, Any]) -> Dict[str, Any]:
+        """Filter sensitive data from agent_context."""
+        if not agent_context:
+            return agent_context
+
+        return self._apply_generic_filtering(agent_context)
+
+    def _apply_generic_filtering(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Apply generic sensitive data filtering to any dictionary."""
+        filtered_data = {}
+        sensitive_key_patterns = [
+            'secret', 'password', 'token', 'key', 'credential', 'admin',
+            'internal', 'system', 'database', 'jwt', 'auth', 'bypass'
+        ]
+
+        for key, value in data.items():
+            key_lower = key.lower()
+            if any(pattern in key_lower for pattern in sensitive_key_patterns):
+                filtered_data[key] = '[REDACTED]'
+            elif isinstance(value, str) and self._contains_sensitive_content(value):
+                filtered_data[key] = '[REDACTED]'
+            elif isinstance(value, dict):
+                filtered_data[key] = self._apply_generic_filtering(value)
+            else:
+                filtered_data[key] = value
+
+        return filtered_data
+
+    def _contains_sensitive_content(self, value: str) -> bool:
+        """Check if a string value contains sensitive content."""
+        sensitive_patterns = [
+            r'sk-[a-zA-Z0-9\-]+',  # API keys
+            r'[a-zA-Z0-9]{32,}',   # Long hex strings (likely tokens/hashes)
+            r'admin:admin',        # Default credentials
+            r'password[_\s]*[:=][_\s]*\w+',  # Password assignments
+            r'secret[_\s]*[:=][_\s]*\w+',    # Secret assignments
+            r'token[_\s]*[:=][_\s]*\w+',     # Token assignments
+        ]
+
+        value_lower = value.lower()
+        for pattern in sensitive_patterns:
+            if re.search(pattern, value_lower, re.IGNORECASE):
+                return True
+
+        return False
     
     def copy_with_updates(self, **updates: Any) -> 'DeepAgentState':
         """Create a new instance with updated fields (immutable pattern)."""
