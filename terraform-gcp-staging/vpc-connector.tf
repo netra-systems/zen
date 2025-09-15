@@ -56,7 +56,7 @@ resource "google_cloud_run_service" "backend" {
       annotations = {
         # CRITICAL: These annotations enable VPC access
         "run.googleapis.com/vpc-access-connector" = google_vpc_access_connector.staging_connector.name
-        "run.googleapis.com/vpc-access-egress"    = "private-ranges-only"
+        "run.googleapis.com/vpc-access-egress"    = "all-traffic"
       }
     }
     

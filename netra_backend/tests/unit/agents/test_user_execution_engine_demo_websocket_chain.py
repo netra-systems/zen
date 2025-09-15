@@ -28,7 +28,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-from netra_backend.app.agents.core.agent_execution_context import AgentExecutionContext
+from netra_backend.app.agents.base.execution_context import AgentExecutionContext
 
 
 class TestUserExecutionEngineDemoWebSocketChain(SSotAsyncTestCase):
