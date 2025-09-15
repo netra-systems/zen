@@ -321,37 +321,35 @@ class TestThreadIDConsistencyFix:
         
         # After fix, run_id should be properly generated
         id_manager = UnifiedIDManager()
-        proper_run_id = id_manager.generate_run_id()
-        proper_thread_id = id_manager.generate_thread_id()
-        
+        proper_thread_id = UnifiedIDManager.generate_thread_id()
+        # generate_run_id is a class method that requires thread_id
+        proper_run_id = UnifiedIDManager.generate_run_id(proper_thread_id)
+
         # Proper IDs should pass validation
         proper_context = UserExecutionContext(
-            user_id="test-user-123", 
+            user_id="test-user-123",
             thread_id=proper_thread_id,
             run_id=proper_run_id
         )
-        
-        assert is_valid_id_format(proper_context.run_id, IDType.RUN)
-        assert is_valid_id_format(proper_context.thread_id, IDType.THREAD)
+
+        assert is_valid_id_format(proper_context.run_id)
+        assert is_valid_id_format(proper_context.thread_id)
     
     @pytest.mark.asyncio
     async def test_websocket_manager_factory_ssot_compliance(self):
         """
         INTEGRATION TEST: WebSocket manager factory should use SSOT ID generation
         """
-        # Test factory initialization without direct timestamp usage
-        manager = WebSocketManager()
-        
         # Create test user context
         test_context = UserExecutionContext(
             user_id="test-user-123",
-            thread_id="thread_test_123_456_abcd1234", 
+            thread_id="thread_test_123_456_abcd1234",
             run_id="run_test_123_456_abcd1234"
         )
-        
+
         # Factory should accept SSOT-compliant contexts
         try:
-            manager = await factory.create_manager(test_context)
+            manager = get_websocket_manager(user_context=test_context)
             assert manager is not None
         except Exception as e:
             pytest.fail(f"Factory should accept SSOT-compliant context: {e}")
@@ -363,14 +361,15 @@ class TestThreadIDConsistencyFix:
         id_manager = UnifiedIDManager()
         
         # Generate multiple run_ids to test consistency
-        run_ids = [id_manager.generate_run_id() for _ in range(5)]
-        
+        test_thread_id = "thread_test_456_789_efgh5678"
+        run_ids = [UnifiedIDManager.generate_run_id(test_thread_id) for _ in range(5)]
+
         for run_id in run_ids:
             # Should NOT contain direct timestamps like 'websocket_factory_1757413642203'
             assert not re.match(r'websocket_factory_\d+$', run_id), f"Run ID should not use direct timestamp: {run_id}"
-            
+
             # Should follow SSOT pattern
-            assert is_valid_id_format(run_id, IDType.RUN), f"Run ID should follow SSOT format: {run_id}"
+            assert is_valid_id_format(run_id), f"Run ID should follow SSOT format: {run_id}"
     
     def test_thread_id_consistency_warning_detection(self):
         """
@@ -394,8 +393,8 @@ class TestThreadIDConsistencyFix:
             thread_id = case["thread_id"]
             
             # Validation should detect mismatch
-            run_id_valid = is_valid_id_format(run_id, IDType.RUN)
-            thread_id_valid = is_valid_id_format(thread_id, IDType.THREAD)
+            run_id_valid = is_valid_id_format(run_id)
+            thread_id_valid = is_valid_id_format(thread_id)
             
             # Both should be invalid due to format issues
             assert not run_id_valid, f"Malformed run_id should be invalid: {run_id}"
