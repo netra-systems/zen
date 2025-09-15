@@ -4,10 +4,10 @@ Tests that should FAIL initially to reproduce real import dependency challenges
 and SSOT violations between MessageRouter and QualityMessageRouter classes.
 
 Business Impact: Protects $500K+ ARR Golden Path by identifying critical
-import pytest
 import consolidation issues that could fragment message routing.
 """
 
+import pytest
 import unittest
 from typing import Dict, Any, List
 from unittest.mock import Mock, patch
