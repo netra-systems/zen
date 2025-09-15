@@ -36,7 +36,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 async def staging_websocket_utility():
     """Create WebSocket test utility for staging environment."""
     # Use staging WebSocket URL
-    staging_ws_url = "wss://staging.netra-apex.com/ws"  # Replace with actual staging URL
+    staging_ws_url = "wss://api.staging.netrasystems.ai/ws"  # Canonical staging domain
     
     async with WebSocketTestUtility(base_url=staging_ws_url) as ws_util:
         yield ws_util
