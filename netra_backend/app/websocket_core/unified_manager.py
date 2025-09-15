@@ -1405,15 +1405,16 @@ class _UnifiedWebSocketManagerImplementation:
         
         # CRITICAL FIX: Add retry logic for staging/production
         from shared.isolated_environment import get_env
-        environment = get_env().get("ENVIRONMENT", "development").lower()
+        env_instance = get_env()
+        environment = env_instance.get("ENVIRONMENT", "development").lower()
         
         # CRITICAL FIX: GCP staging auto-detection to prevent 1011 errors  
         # Environment variable propagation gaps in Cloud Run require auto-detection
         if not environment or environment == "development":
             # Auto-detect GCP staging based on service URLs and project context
-            gcp_project = get_env().get("GCP_PROJECT_ID", "")
-            backend_url = get_env().get("BACKEND_URL", "")
-            auth_service_url = get_env().get("AUTH_SERVICE_URL", "")
+            gcp_project = env_instance.get("GCP_PROJECT_ID", "")
+            backend_url = env_instance.get("BACKEND_URL", "")
+            auth_service_url = env_instance.get("AUTH_SERVICE_URL", "")
             
             if ("staging" in gcp_project or 
                 "staging.netrasystems.ai" in backend_url or 
