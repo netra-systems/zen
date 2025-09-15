@@ -1774,6 +1774,19 @@ class StartupOrchestrator:
         self.app.state.startup_error = None
         self.app.state.startup_phase = "complete"
         
+        # RACE CONDITION FIX: Process queued WebSocket connections now that startup is complete
+        try:
+            from netra_backend.app.websocket_core.gcp_initialization_validator import get_websocket_startup_queue
+            startup_queue = get_websocket_startup_queue()
+            
+            # Process queued connections asynchronously
+            await startup_queue.process_queued_connections_on_startup_complete(self.app.state)
+            
+            self.logger.info("✅ Queued WebSocket connections processed after startup completion")
+        except Exception as queue_error:
+            self.logger.warning(f"Error processing queued WebSocket connections: {queue_error}")
+            # Don't fail startup over queue processing issues
+        
         # Log comprehensive completion summary
         self.logger.info("=" * 80)
         self.logger.info("[U+1F680] DETERMINISTIC STARTUP SEQUENCE COMPLETED SUCCESSFULLY")

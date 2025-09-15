@@ -705,11 +705,26 @@ class WebSocketSSOTRouter:
             
             if app_state:
                 try:
-                    async with gcp_websocket_readiness_guard(app_state, timeout=readiness_timeout) as readiness_result:
+                    async with gcp_websocket_readiness_guard(
+                        app_state, 
+                        timeout=readiness_timeout,
+                        websocket=websocket,
+                        connection_id=connection_id
+                    ) as readiness_result:
+                        # Check if connection was queued during startup
+                        if readiness_result.details.get("connection_queued", False):
+                            logger.info(
+                                f"🔄 WebSocket connection {connection_id} queued during startup - "
+                                f"will be processed when services are ready"
+                            )
+                            # Connection is queued, wait for processing
+                            # The startup queue will handle the connection when ready
+                            return  # Exit early - queue will manage the connection
+                        
                         if not readiness_result.ready:
                             # Race condition detected - reject connection to prevent 1011 error
                             logger.error(
-                                f"[U+1F534] RACE CONDITION: WebSocket connection {connection_id} rejected - "
+                                f"🔴 RACE CONDITION: WebSocket connection {connection_id} rejected - "
                                 f"GCP services not ready. Failed: {readiness_result.failed_services}"
                             )
                             await websocket.close(
@@ -718,7 +733,7 @@ class WebSocketSSOTRouter:
                             )
                             return
                         
-                        logger.info(f" PASS:  GCP readiness validated - accepting WebSocket connection {connection_id}")
+                        logger.info(f"✅ GCP readiness validated - accepting WebSocket connection {connection_id}")
                 except Exception as readiness_error:
                     logger.warning(f"GCP readiness validation failed: {readiness_error} - proceeding with degraded mode")
             else:
