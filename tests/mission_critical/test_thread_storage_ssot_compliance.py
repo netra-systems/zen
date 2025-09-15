@@ -1,53 +1,30 @@
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
-class TestWebSocketConnection:
-    """Real WebSocket connection for testing instead of mocks."""
 
-    def __init__(self):
-        pass
-        self.messages_sent = []
-        self.is_connected = True
-        self._closed = False
+# Import SSOT WebSocket test utility
+from test_framework.ssot.websocket_connection_test_utility import TestWebSocketConnection
 
-        async def send_json(self, message: dict):
-            """Send JSON message."""
-            if self._closed:
-                raise RuntimeError("WebSocket is closed")
-            self.messages_sent.append(message)
+"""
+Mission-Critical Test Suite: Thread Storage SSOT Compliance
 
-            async def close(self, code: int = 1000, reason: str = "Normal closure"):
-                """Close WebSocket connection."""
-                pass
-                self._closed = True
-                self.is_connected = False
+This test suite verifies that thread storage/loading operations follow SSOT principles
+and all legacy code has been properly removed.
+"""
 
-                def get_messages(self) -> list:
-                    """Get all sent messages."""
-                    # FIXED: await outside async - using pass
-                    pass
-                    return self.messages_sent.copy()
+import asyncio
+import pytest
+import inspect
+from typing import List, Optional
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
-                """
-                Mission-Critical Test Suite: Thread Storage SSOT Compliance
-
-                This test suite verifies that thread storage/loading operations follow SSOT principles
-                and all legacy code has been properly removed.
-                """
-
-                import asyncio
-                import pytest
-                import inspect
-                from typing import List, Optional
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-                from test_framework.database.test_database_manager import DatabaseTestManager
-                from auth_service.core.auth_manager import AuthManager
-                from shared.isolated_environment import IsolatedEnvironment
-
-                from netra_backend.app.services import thread_service
-                from netra_backend.app.services.thread_service import ThreadService
-                from netra_backend.app.services.database.thread_repository import ThreadRepository
-                from netra_backend.app.core.unified_id_manager import UnifiedIDManager
-                from netra_backend.app.routes.utils import thread_helpers
-                from netra_backend.app.routes.utils.thread_creators import generate_thread_id
+from netra_backend.app.services import thread_service
+from netra_backend.app.services.thread_service import ThreadService
+from netra_backend.app.services.database.thread_repository import ThreadRepository
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+from netra_backend.app.routes.utils import thread_helpers
+from netra_backend.app.routes.utils.thread_creators import generate_thread_id
                 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
                 from netra_backend.app.db.database_manager import DatabaseManager
                 from netra_backend.app.clients.auth_client_core import AuthServiceClient
