@@ -46,6 +46,8 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.websocket_core.handlers import MessageRouter
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
 from netra_backend.app.services.websocket.message_handler import MessageHandlerService
+# Import SSOT adapters for migration compatibility  
+from netra_backend.app.adapters.legacy_to_ssot_adapter import LegacyToSSOTAdapter
 
 
 @dataclass

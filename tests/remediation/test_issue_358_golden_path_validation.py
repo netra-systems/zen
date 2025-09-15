@@ -35,6 +35,7 @@ import requests
 import websocket
 import json
 import time
+import unittest
 from typing import Dict, List, Optional
 from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -42,7 +43,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID
 
-class Issue358GoldenPathValidationTests(SSotAsyncTestCase):
+class Issue358GoldenPathValidationTests(SSotAsyncTestCase, unittest.TestCase):
     """
     CRITICAL VALIDATION SUITE for Issue #358 Remediation
     

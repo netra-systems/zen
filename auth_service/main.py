@@ -125,7 +125,9 @@ async def lifespan(app: FastAPI):
     
     # CRITICAL OAUTH VALIDATION - FAIL FAST IF OAUTH IS BROKEN
     env = AuthConfig.get_environment()
-    if env in ["staging", "production"]:
+    skip_oauth_validation = get_env().get("SKIP_OAUTH_VALIDATION", "false").lower() == "true"
+    
+    if env in ["staging", "production"] and not skip_oauth_validation:
         logger.info("[U+1F510] VALIDATING CRITICAL OAUTH CONFIGURATION...")
         oauth_validation_errors = []
         

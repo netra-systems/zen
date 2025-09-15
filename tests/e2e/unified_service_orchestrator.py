@@ -21,7 +21,7 @@ from test_framework.unified_docker_manager import UnifiedDockerManager, ServiceM
 # E2E testing specific imports
 from tests.e2e.database_test_connections import DatabaseConnectionManager
 from tests.e2e.real_services_manager import RealServicesManager
-from tests.e2e.test_environment_config import TestEnvironmentConfig
+from tests.e2e.test_environment_config import EnvironmentConfigTests as TestEnvironmentConfig
 
 logger = logging.getLogger(__name__)
 

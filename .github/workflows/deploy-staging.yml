@@ -349,6 +349,9 @@ jobs:
             --max-instances 10 \
             --vpc-connector staging-connector \
             --vpc-egress all-traffic \
+            --timeout 600 \
+            --cpu-boost \
+            --add-cloudsql-instances "${{ env.GCP_PROJECT }}:us-central1:staging-shared-postgres" \
             --set-env-vars="NETRA_ENV=staging" \
             --set-secrets="POSTGRES_HOST=staging-postgres-host:latest" \
             --set-secrets="POSTGRES_PORT=staging-postgres-port:latest" \
@@ -375,6 +378,9 @@ jobs:
             --max-instances 5 \
             --vpc-connector staging-connector \
             --vpc-egress all-traffic \
+            --timeout 600 \
+            --cpu-boost \
+            --add-cloudsql-instances "${{ env.GCP_PROJECT }}:us-central1:staging-shared-postgres" \
             --set-env-vars="NETRA_ENV=staging" \
             --set-secrets="POSTGRES_HOST=staging-postgres-host:latest" \
             --set-secrets="POSTGRES_PORT=staging-postgres-port:latest" \

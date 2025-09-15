@@ -102,7 +102,7 @@ class TestWebSocketUserIDValidationE2E(BaseE2ETest):
                 raise
         websocket_url = f'{auth_config.websocket_url}?token={jwt_token}'
         try:
-            async with websockets.connect(websocket_url, timeout=auth_config.timeout, extra_headers={'Authorization': f'Bearer {jwt_token}'}) as websocket:
+            async with websockets.connect(websocket_url, open_timeout=auth_config.timeout, additional_headers={'Authorization': f'Bearer {jwt_token}'}) as websocket:
                 connection_msg = {'type': 'connection', 'data': {'user_id': failing_user_data['user_id'], 'token': jwt_token, 'connection_id': f'e2e_test_{int(time.time())}'}}
                 await websocket.send(json.dumps(connection_msg))
                 response = await asyncio.wait_for(websocket.recv(), timeout=10.0)

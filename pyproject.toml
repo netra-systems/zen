@@ -76,6 +76,7 @@ markers = [
     "test: Tests for test environment only",
     "dev: Tests for dev environment only",
     "staging: Tests for staging environment only",
+    "staging_gcp: Tests for staging GCP environment specifically",
     "prod: Tests for production environment only",
     
     # Test categories
@@ -141,6 +142,7 @@ markers = [
     "expected_failure: Tests designed to fail initially",
     "issue_1140: Issue #1140 specific tests",
     "timeout: Tests with custom timeout settings",
+    "timeout_reproduction: Tests that reproduce timeout-related issues",
     "skipif: Conditional test skipping",
     "xfail: Expected to fail tests",
     "parametrize: Parameterized tests",
@@ -154,6 +156,7 @@ markers = [
     "execution_tracking: Execution tracking tests",
     "critical_type_safety: Critical type safety tests",
     "database: Database-related tests",
+    "database_timeout: Database timeout-related tests",
     "id_system: ID system tests",
     "business_requirements: Business requirements tests",
     "user_isolation: User isolation tests",
@@ -733,9 +736,11 @@ markers = [
     # Issue #1174 specific marker
     "issue_1174: Issue #1174 auth token validation unit tests",
 
-    # Issue #1278 specific marker
+    # Issue #1278 specific markers for infrastructure reproduction tests
     "issue_1278: Issue #1278 database connectivity and FastAPI lifespan validation tests",
+    "issue_1278_reproduction: Issue #1278 reproduction tests for infrastructure problems",
     "database_connectivity: Database connectivity and timeout validation tests",
+    "cloud_sql: Cloud SQL specific tests for capacity and performance validation",
 ]
 
 # Coverage settings

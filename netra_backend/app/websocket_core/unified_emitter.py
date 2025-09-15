@@ -117,14 +117,35 @@ class UnifiedWebSocketEmitter:
             context: Optional execution context for additional metadata
             performance_mode: Enable high-throughput mode with minimal retries
             websocket_manager: Legacy parameter alias for 'manager' (backward compatibility)
+        
+        Raises:
+            ValueError: If neither manager nor websocket_manager is provided
+            TypeError: If both parameters are provided with different values
         """
-        # PHASE 1 BACKWARD COMPATIBILITY: Handle legacy parameter name
-        if websocket_manager is not None and manager is None:
+        # PHASE 1 COORDINATION FIX: Handle parameter coordination conflicts
+        if websocket_manager is not None and manager is not None:
+            # Both parameters provided - check for conflicts
+            if websocket_manager is not manager:
+                raise TypeError(
+                    "Conflicting parameters: 'manager' and 'websocket_manager' both provided "
+                    "with different values. Use 'manager' parameter (preferred) or migrate "
+                    "from deprecated 'websocket_manager'."
+                )
+            logger.debug("Both 'manager' and 'websocket_manager' provided with same value - using 'manager'")
+        elif websocket_manager is not None and manager is None:
+            # Legacy parameter only
             manager = websocket_manager
             logger.debug("Using legacy 'websocket_manager' parameter (redirected to 'manager')")
+        elif manager is None and websocket_manager is None:
+            # Neither parameter provided
+            raise ValueError(
+                "Manager parameter is required. Provide either 'manager' (preferred) or "
+                "'websocket_manager' (legacy compatibility)."
+            )
         
+        # Validate manager type
         if manager is None:
-            raise ValueError("Either 'manager' or 'websocket_manager' parameter is required")
+            raise ValueError("Manager cannot be None after parameter coordination")
         
         # Extract user_id from context if not provided directly
         if user_id is None and context is not None:
@@ -142,13 +163,27 @@ class UnifiedWebSocketEmitter:
         self.metrics = EmitterMetrics()
         self.metrics.critical_events = {event: 0 for event in self.CRITICAL_EVENTS}
         
-        # PHASE 2: Enhanced event batching and performance optimization
+        # PHASE 4 PERFORMANCE/BATCHING COORDINATION FIX: Unified coordination logic
         self._event_buffer: List[Dict[str, Any]] = []
         self._buffer_lock = asyncio.Lock()
-        self._batch_size = 5 if performance_mode else 10  # Smaller batches for performance mode
-        self._batch_timeout = 0.02 if performance_mode else 0.05  # 20ms vs 50ms for better UX
+        
+        # Coordination logic: performance mode affects batching behavior but doesn't disable it
+        if performance_mode:
+            # Performance mode: smaller batches, shorter timeouts for <50ms delivery
+            self._batch_size = 3  # Smaller batches for immediate delivery
+            self._batch_timeout = 0.01  # 10ms for fast delivery 
+            self._enable_batching = True  # Keep batching for efficiency, but optimized
+            self._high_throughput_optimization = True
+            logger.debug(f"Performance mode enabled for user {user_id}: batch_size=3, timeout=10ms")
+        else:
+            # Standard mode: larger batches, longer timeouts for efficiency
+            self._batch_size = 10  # Larger batches for efficiency
+            self._batch_timeout = 0.05  # 50ms for balanced performance
+            self._enable_batching = True  # Always enable batching
+            self._high_throughput_optimization = False
+            logger.debug(f"Standard mode enabled for user {user_id}: batch_size=10, timeout=50ms")
+        
         self._batch_timer: Optional[asyncio.Task] = None
-        self._enable_batching = not performance_mode  # Disable batching in performance mode for lower latency
         
         # PHASE 2: Connection pool optimization state
         self._connection_health_score = 100  # Start with perfect health
@@ -157,10 +192,12 @@ class UnifiedWebSocketEmitter:
         self._circuit_breaker_open = False
         self._circuit_breaker_timeout = 30.0  # 30 seconds
         
-        # PHASE 2: High-throughput optimization settings
+        # PHASE 4: Coordinated high-throughput optimization settings
         self._high_throughput_mode = performance_mode
         self._throughput_threshold = 100 if performance_mode else 50  # events per minute
         self._adaptive_batching = True
+        self._performance_baseline = 151725.7  # Target: maintain this events/sec baseline
+        self._coordination_mode = "unified"  # Single coordination mode for all operations
         
         # Security validation state (from agent_websocket_bridge.py)
         self._last_validated_run_id: Optional[str] = None
@@ -183,17 +220,59 @@ class UnifiedWebSocketEmitter:
         
         logger.info(f"UnifiedWebSocketEmitter created for user {user_id} (tier: {self._user_tier}, performance_mode: {performance_mode}, batching: {self._enable_batching})")
         
-        # PHASE 2: Start background event processor for batching
+        # PHASE 2: Async coordination fix - defer batch processor until event loop is available
+        self._batch_processor_started = False
         if self._enable_batching:
-            self._start_batch_processor()
+            # Don't start immediately - wait for first async operation
+            logger.debug(f"Batching enabled for user {user_id} - batch processor will start on first async operation")
+    
+    def _normalize_event_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        PHASE 5: Normalize event data for consistent processing across all emit methods.
+        
+        Args:
+            data: Raw event data dictionary
+            
+        Returns:
+            Normalized event data with consistent structure
+        """
+        if not isinstance(data, dict):
+            return {}
+        
+        # Create normalized copy
+        normalized = data.copy()
+        
+        # Ensure required fields exist
+        if 'timestamp' not in normalized:
+            normalized['timestamp'] = time.time()
+        
+        # Normalize metadata structure
+        if 'metadata' not in normalized:
+            normalized['metadata'] = {}
+        
+        # Add coordination metadata
+        normalized['metadata']['coordination_mode'] = self._coordination_mode
+        normalized['metadata']['performance_mode'] = self.performance_mode
+        normalized['metadata']['emitter_type'] = 'UnifiedWebSocketEmitter'
+        
+        return normalized
     
     def _start_batch_processor(self):
         """Start background batch processor for non-critical events."""
-        if not self._enable_batching:
+        if not self._enable_batching or self._batch_processor_started:
+            return
+            
+        # PHASE 2 ASYNC COORDINATION FIX: Ensure event loop is available
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            # No running event loop - defer startup
+            logger.debug(f"No event loop available - deferring batch processor for user {self.user_id}")
             return
             
         # Start the batch processing task
         self._batch_timer = asyncio.create_task(self._process_event_batches())
+        self._batch_processor_started = True
         logger.debug(f"Batch processor started for user {self.user_id} (batch_size: {self._batch_size})")
     
     async def _process_event_batches(self):
@@ -294,79 +373,114 @@ class UnifiedWebSocketEmitter:
                 setattr(self, method_name, make_emit_method(event))
                 logger.warning(f"Auto-generated missing critical method: {method_name}")
     
-    async def emit_agent_started(self, data: Dict[str, Any]):
+    async def emit_agent_started(self, data: Dict[str, Any]) -> bool:
         """
         CRITICAL EVENT: Agent started processing.
         User must see that their request is being processed.
         
         Args:
             data: Event data including agent name, run_id, etc.
+            
+        Returns:
+            bool: True if emission succeeded, False otherwise
         """
-        await self._emit_critical('agent_started', data)
+        return await self._emit_critical('agent_started', data)
     
-    async def emit_agent_thinking(self, data: Dict[str, Any]):
+    async def emit_agent_thinking(self, data: Dict[str, Any]) -> bool:
         """
         CRITICAL EVENT: Agent reasoning visible.
         Shows the AI is actively working on the problem.
         
         Args:
             data: Event data including thought content
+            
+        Returns:
+            bool: True if emission succeeded, False otherwise
         """
-        await self._emit_critical('agent_thinking', data)
+        return await self._emit_critical('agent_thinking', data)
     
-    async def emit_tool_executing(self, data: Dict[str, Any]):
+    async def emit_tool_executing(self, data: Dict[str, Any]) -> bool:
         """
         CRITICAL EVENT: Tool execution started.
         Shows what tools the AI is using to solve the problem.
         
         Args:
             data: Event data including tool name and parameters
+            
+        Returns:
+            bool: True if emission succeeded, False otherwise
         """
-        await self._emit_critical('tool_executing', data)
+        return await self._emit_critical('tool_executing', data)
     
-    async def emit_tool_completed(self, data: Dict[str, Any]):
+    async def emit_tool_completed(self, data: Dict[str, Any]) -> bool:
         """
         CRITICAL EVENT: Tool execution completed.
         Shows the results from tool execution.
         
         Args:
             data: Event data including tool name and results
+            
+        Returns:
+            bool: True if emission succeeded, False otherwise
         """
-        await self._emit_critical('tool_completed', data)
+        return await self._emit_critical('tool_completed', data)
     
-    async def emit_agent_completed(self, data: Dict[str, Any]):
+    async def emit_agent_completed(self, data: Dict[str, Any]) -> bool:
         """
         CRITICAL EVENT: Agent processing finished.
         User must know their request is complete.
         
         Args:
             data: Event data including final results
+            
+        Returns:
+            bool: True if emission succeeded, False otherwise
         """
-        await self._emit_critical('agent_completed', data)
+        return await self._emit_critical('agent_completed', data)
     
-    async def emit(self, event_type: str, data: Dict[str, Any]):
+    async def emit(self, event_type: str, data: Dict[str, Any]) -> bool:
         """
-        Generic emit method for backward compatibility.
-        Routes to appropriate emit method based on event type.
+        PHASE 5: Generic emit method with coordinated signature and behavior.
+        Routes to appropriate emit method based on event type with consistent return values.
         
         Args:
             event_type: The event type to emit
-            data: Event payload
+            data: Event payload (will be normalized)
+            
+        Returns:
+            bool: True if emission succeeded, False otherwise
+            
+        Raises:
+            ValueError: If event_type or data is invalid
         """
-        # Route critical events to their specific methods
-        if event_type == 'agent_started':
-            await self.emit_agent_started(data)
-        elif event_type == 'agent_thinking':
-            await self.emit_agent_thinking(data)
-        elif event_type == 'tool_executing':
-            await self.emit_tool_executing(data)
-        elif event_type == 'tool_completed':
-            await self.emit_tool_completed(data)
-        elif event_type == 'agent_completed':
-            await self.emit_agent_completed(data)
-        else:
-            # Non-critical events go through notify_custom
-            await self.notify_custom(event_type, data)
+        # PHASE 5 COORDINATION FIX: Input validation and normalization
+        if not event_type:
+            raise ValueError("emit() requires non-empty event_type")
+        if not isinstance(data, dict):
+            raise ValueError("emit() requires data to be a dictionary")
+        
+        # Normalize data structure for consistency
+        normalized_data = self._normalize_event_data(data)
+        
+        try:
+            # Route critical events to their specific methods with coordinated signatures
+            if event_type == 'agent_started':
+                return await self.emit_agent_started(normalized_data)
+            elif event_type == 'agent_thinking':
+                return await self.emit_agent_thinking(normalized_data)
+            elif event_type == 'tool_executing':
+                return await self.emit_tool_executing(normalized_data)
+            elif event_type == 'tool_completed':
+                return await self.emit_tool_completed(normalized_data)
+            elif event_type == 'agent_completed':
+                return await self.emit_agent_completed(normalized_data)
+            else:
+                # Non-critical events go through notify_custom
+                await self.notify_custom(event_type, normalized_data)
+                return True
+        except Exception as e:
+            logger.error(f"emit() failed for event_type {event_type}: {e}")
+            return False
     
     async def _emit_critical(self, event_type: str, data: Dict[str, Any]):
         """
@@ -379,6 +493,10 @@ class UnifiedWebSocketEmitter:
             event_type: One of the CRITICAL_EVENTS
             data: Event payload
         """
+        # PHASE 2 ASYNC COORDINATION FIX: Ensure batch processor is started when needed
+        if self._enable_batching and not self._batch_processor_started:
+            self._start_batch_processor()
+        
         # PHASE 1 ENHANCEMENT: Security validation before emission
         # Check run_id from data payload first, then fallback to context
         run_id_to_validate = data.get('run_id') or getattr(self.context, 'run_id', None)
@@ -1492,8 +1610,15 @@ class AuthenticationConnectionMonitor:
 
 class WebSocketEmitterFactory:
     """
-    Factory for creating WebSocket emitters.
-    Consolidates factory patterns from various implementations.
+    PHASE 3: Unified factory for creating WebSocket emitters.
+    Consolidates factory patterns from various implementations and ensures
+    consistent interfaces across all factory methods.
+    
+    This factory addresses Issue #1176 coordination gaps by standardizing:
+    - Parameter naming (manager vs websocket_manager)
+    - Method signatures across all factory patterns
+    - Context handling and validation
+    - Error handling and fallback behavior
     """
     
     @staticmethod
@@ -1507,20 +1632,34 @@ class WebSocketEmitterFactory:
         Create a new emitter instance.
         
         Args:
-            manager: WebSocket manager
+            manager: WebSocket manager (standardized parameter name)
             user_id: Target user ID
             context: Optional execution context
             performance_mode: Enable high-throughput mode
             
         Returns:
             New UnifiedWebSocketEmitter instance
+            
+        Raises:
+            ValueError: If required parameters are missing
+            TypeError: If parameter types are invalid
         """
-        return UnifiedWebSocketEmitter(
-            manager=manager,
-            user_id=user_id,
-            context=context,
-            performance_mode=performance_mode
-        )
+        # PHASE 3 COORDINATION FIX: Standardized parameter validation
+        if not manager:
+            raise ValueError("WebSocketEmitterFactory.create_emitter requires valid manager")
+        if not user_id:
+            raise ValueError("WebSocketEmitterFactory.create_emitter requires valid user_id")
+        
+        try:
+            return UnifiedWebSocketEmitter(
+                manager=manager,  # Use standardized parameter name
+                user_id=user_id,
+                context=context,
+                performance_mode=performance_mode
+            )
+        except Exception as e:
+            logger.error(f"WebSocketEmitterFactory.create_emitter failed for user {user_id}: {e}")
+            raise
     
     @staticmethod
     def create_scoped_emitter(
@@ -1531,20 +1670,32 @@ class WebSocketEmitterFactory:
         Create a context-scoped emitter.
         
         Args:
-            manager: WebSocket manager
+            manager: WebSocket manager (standardized parameter name)
             context: Execution context (required)
             
         Returns:
             New UnifiedWebSocketEmitter with context
+            
+        Raises:
+            ValueError: If required parameters are missing or invalid
         """
-        if not context or not hasattr(context, 'user_id'):
-            raise ValueError("Valid UserExecutionContext required for scoped emitter")
+        # PHASE 3 COORDINATION FIX: Enhanced context validation
+        if not manager:
+            raise ValueError("WebSocketEmitterFactory.create_scoped_emitter requires valid manager")
+        if not context:
+            raise ValueError("WebSocketEmitterFactory.create_scoped_emitter requires valid context")
+        if not hasattr(context, 'user_id') or not context.user_id:
+            raise ValueError("WebSocketEmitterFactory.create_scoped_emitter requires context with valid user_id")
         
-        return UnifiedWebSocketEmitter(
-            manager=manager,
-            user_id=context.user_id,
-            context=context
-        )
+        try:
+            return UnifiedWebSocketEmitter(
+                manager=manager,  # Use standardized parameter name
+                user_id=context.user_id,
+                context=context
+            )
+        except Exception as e:
+            logger.error(f"WebSocketEmitterFactory.create_scoped_emitter failed for user {context.user_id}: {e}")
+            raise
     
     @staticmethod
     def create_performance_emitter(

@@ -261,15 +261,18 @@ class ExecutionEngineFactoryTests(SSotBaseTestCase):
         assert len(self.factory._active_engines) == 0
         assert hasattr(self.factory, '_engine_lock')
         
-        # When: Attempting to create factory without websocket_bridge
-        # Then: Should raise appropriate error
-        with pytest.raises(ExecutionEngineFactoryError) as exc_info:
-            ExecutionEngineFactory(websocket_bridge=None)
+        # When: Creating factory with websocket_bridge=None (Issue #920 validation)
+        # Then: Should handle gracefully with warning instead of error
+        factory_with_none = ExecutionEngineFactory(websocket_bridge=None)
         
-        error_message = str(exc_info.value)
-        assert "requires websocket_bridge" in error_message
-        assert "WebSocket events" in error_message
-        assert "chat business value" in error_message
+        # And: Factory should initialize in compatibility mode
+        assert factory_with_none is not None
+        assert factory_with_none._websocket_bridge is None
+        assert hasattr(factory_with_none, '_active_engines')
+        assert hasattr(factory_with_none, '_engine_lock')
+        
+        # NOTE: Issue #920 fix - ExecutionEngineFactory now accepts None websocket_bridge
+        # for test environments and logs a warning instead of raising an error
         
         self.record_metric("dependency_validation_tested", True)
     

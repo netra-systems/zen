@@ -478,7 +478,7 @@ class RealServicesManager:
     - Error handling and recovery
     """
     
-    def __init__(self, 
+    def __init__(self,
                  project_root: Optional[Path] = None,
                  env_config: Optional[EnvironmentConfigTests] = None,
                  health_check_config: Optional[HealthCheckConfig] = None):

@@ -64,6 +64,7 @@ from typing import Any, Dict, List, Optional, Union, AsyncGenerator, Generator, 
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
+import unittest
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
 # from test_framework.unified import (
@@ -967,7 +968,7 @@ class SSotBaseTestCase:
             )
 
 
-class SSotAsyncTestCase(SSotBaseTestCase):
+class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
     """
     SSOT Async Test Case - For async tests only.
     

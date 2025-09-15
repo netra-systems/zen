@@ -34,7 +34,7 @@ from netra_backend.app.db.models_clickhouse import (
 from netra_backend.app.services.corpus_service import CorpusService
 from netra_backend.tests.clickhouse.helpers.shared_test_types import (
 
-    ErrorHandlingTests as SharedTestErrorHandling,
+    TestErrorHandling as SharedTestErrorHandling,
 
 )
 

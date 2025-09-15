@@ -252,12 +252,16 @@ class RequestScopedSessionFactory:
         
         session = None
         try:
-            # CRITICAL FIX: Use get_system_db() for system users to bypass authentication
-            # System users don't have JWT tokens but represent legitimate internal operations
-            if user_id == "system" or (user_id and user_id.startswith("system")):
-                logger.info(f"Using system database session for user {user_id} - bypassing authentication")
+            # CRITICAL FIX: Use get_system_db() for system and service users to bypass authentication
+            # System and service users don't have JWT tokens but represent legitimate internal operations
+            if user_id == "system" or (user_id and user_id.startswith("system")) or (user_id and user_id.startswith("service:")):
+                if user_id.startswith("service:"):
+                    logger.info(f"Using service database session for user {user_id} - bypassing authentication with service-to-service auth")
+                else:
+                    logger.info(f"Using system database session for user {user_id} - bypassing authentication")
+                
                 from netra_backend.app.database import get_system_db
-                # Use system database session that bypasses authentication
+                # Use system database session that bypasses authentication for both system and service users
                 async with get_system_db() as db_session:
                     session = db_session
                     
@@ -270,11 +274,16 @@ class RequestScopedSessionFactory:
                     session_metrics.state = SessionState.ACTIVE
                     session_metrics.mark_activity()
                     
-                    logger.info(
-                        f" PASS:  SUCCESS: Created SYSTEM database session {session_id} for user {user_id} (auth bypassed)"
-                    )
+                    if user_id.startswith("service:"):
+                        logger.info(
+                            f" PASS:  SUCCESS: Created SERVICE database session {session_id} for user {user_id} (service auth bypassed)"
+                        )
+                    else:
+                        logger.info(
+                            f" PASS:  SUCCESS: Created SYSTEM database session {session_id} for user {user_id} (auth bypassed)"
+                        )
                     
-                    # Yield the system session
+                    # Yield the system/service session
                     yield session
             else:
                 # Create session using the single source of truth for regular users
@@ -397,13 +406,21 @@ class RequestScopedSessionFactory:
                 f"Error: {e}. Full context: {error_context}"
             )
             
-            # Additional targeted logging for system user failures
+            # Additional targeted logging for system and service user failures
             if user_id == "system" or (user_id and user_id.startswith("system")):
                 logger.error(
                     f"SYSTEM USER AUTHENTICATION FAILURE: User '{user_id}' failed authentication. "
                     f"This indicates a service-to-service authentication problem. "
                     f"Request ID: {request_id}, Session ID: {session_id}. "
                     f"Check SERVICE_SECRET, JWT configuration, and inter-service auth setup."
+                )
+            elif user_id and user_id.startswith("service:"):
+                logger.error(
+                    f"SERVICE USER AUTHENTICATION FAILURE: User '{user_id}' failed authentication. "
+                    f"This indicates a service-to-service authentication problem (Issue #484). "
+                    f"Request ID: {request_id}, Session ID: {session_id}. "
+                    f"Check SERVICE_SECRET, SERVICE_ID configuration, and service-to-service auth setup. "
+                    f"Service users should use authentication bypass with get_system_db()."
                 )
             
             raise
