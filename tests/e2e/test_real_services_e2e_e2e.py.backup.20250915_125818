@@ -565,7 +565,7 @@ class TestRealServiceE2ESuite:
         ws_url = f"{self.endpoints.websocket_url}?token={auth_tokens['access_token']}"
         
         try:
-            websocket_conn = await websockets.connect(ws_url, timeout=10.0)
+            websocket_conn = await websockets.connect(ws_url, open_timeout=10.0)
             
             # Send ping to validate connection
             ping_message = {"type": "ping", "timestamp": time.time()}

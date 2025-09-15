@@ -11,7 +11,8 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.quality_monitoring_service import (
     QualityMonitoringService,
 )
-from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
+from netra_backend.app.websocket_core.handlers import BaseMessageHandler
+from netra_backend.app.adapters.legacy_to_ssot_adapter import LegacyToSSOTAdapter
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as create_websocket_manager

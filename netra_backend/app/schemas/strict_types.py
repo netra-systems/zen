@@ -7,7 +7,7 @@ type safety and consistency across the agent system.
 
 from typing import Any, Dict, Generic, Optional, TypeVar, Union
 from datetime import datetime, timezone
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict, field_serializer
 
 T = TypeVar('T')
 ResultType = TypeVar('ResultType')
@@ -29,8 +29,17 @@ class TypedAgentResult(BaseModel, Generic[ResultType]):
         description="Result timestamp"
     )
     
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(
+        # Pydantic V2 configuration
+        arbitrary_types_allowed=True,
+        validate_default=True,
+        extra='forbid'
+    )
+    
+    @field_serializer('timestamp')
+    def serialize_timestamp(self, dt: datetime) -> str:
+        """Serialize datetime to ISO format."""
+        return dt.isoformat()
         
     def unwrap(self) -> ResultType:
         """

@@ -16,7 +16,7 @@ Any service-specific variants should import and extend these base types.
 
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict, field_serializer
 
 from shared.types.core_types import UserID, ThreadID, RunID, ensure_user_id
 
@@ -71,11 +71,16 @@ class AgentExecutionRequest(BaseModel):
             raise ValueError("all permissions must be strings")
         return v
 
-    class Config:
-        """Pydantic configuration."""
-        json_encoders = {
-            datetime: lambda dt: dt.isoformat(),
-        }
+    model_config = ConfigDict(
+        # Pydantic V2 configuration
+        validate_default=True,
+        extra='forbid'
+    )
+    
+    @field_serializer('timestamp')
+    def serialize_timestamp(self, dt: datetime) -> str:
+        """Serialize datetime to ISO format."""
+        return dt.isoformat()
 
 
 # =============================================================================
@@ -136,11 +141,16 @@ class AgentExecutionResult(BaseModel):
             raise ValueError("result_data must be a dictionary")
         return v
     
-    class Config:
-        """Pydantic configuration."""
-        json_encoders = {
-            datetime: lambda dt: dt.isoformat(),
-        }
+    model_config = ConfigDict(
+        # Pydantic V2 configuration
+        validate_default=True,
+        extra='forbid'
+    )
+    
+    @field_serializer('timestamp')
+    def serialize_timestamp(self, dt: datetime) -> str:
+        """Serialize datetime to ISO format."""
+        return dt.isoformat()
 
 
 # Import TypedAgentResult from schemas for additional compatibility  
@@ -208,11 +218,14 @@ class AgentValidationResult(BaseModel):
         if not passed and self.is_valid:
             self.is_valid = False
 
-    class Config:
-        """Pydantic configuration."""
-        json_encoders = {
-            datetime: lambda dt: dt.isoformat(),
-        }
+    model_config = ConfigDict(
+        # Pydantic V2 configuration
+        validate_default=True,
+        extra='forbid'
+    )
+    
+    # Note: AgentValidationResult doesn't have datetime fields
+    # Keeping config for consistency and future expansion
 
 
 # =============================================================================

@@ -1,6 +1,11 @@
 {
   "instances": [
     {
+      "command": "/clear-old-issue-locks",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
       "command": "/gitissueprogressorv3 goldenpath p0",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"

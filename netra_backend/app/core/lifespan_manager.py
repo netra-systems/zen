@@ -72,8 +72,11 @@ async def lifespan(app: FastAPI):
             # CRITICAL: Deterministic startup failures MUST halt the application
             logger.critical(f"DETERMINISTIC STARTUP FAILURE: {startup_error}")
             logger.critical("Application cannot start without critical services")
-            # Re-raise to prevent application from starting in degraded state
-            raise
+            
+            # Issue #1278 FIX: Exit with code 3 for container health checks
+            import sys
+            logger.critical("Exiting with code 3 to signal startup failure")
+            sys.exit(3)
         
         # For non-critical errors, log but continue (backward compatibility)
         logger.error(f"Startup failed in lifespan manager: {startup_error}")

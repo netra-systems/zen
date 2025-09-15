@@ -3992,7 +3992,9 @@ class _UnifiedWebSocketManagerImplementation:
 # UnifiedWebSocketManager export - RESTORED for Issue #1236 import fix
 UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
 
-__all__ = ['WebSocketConnection', '_serialize_message_safely', 'WebSocketManagerMode', 'UnifiedWebSocketManager']
+# ISSUE #1184 REMEDIATION: Remove duplicate exports to eliminate SSOT violations
+# WebSocketConnection, _serialize_message_safely, WebSocketManagerMode are in types.py (SSOT)
+__all__ = ['UnifiedWebSocketManager']
 
 # SSOT Consolidation: Log that direct imports are not supported
 import sys
