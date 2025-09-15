@@ -1336,46 +1336,12 @@ class TestMultiAgentCoordinationNeverFail(SSotBaseTestCase):
 
 
 if __name__ == "__main__":
-    # Configure pytest for mission critical multi-agent coordination testing
-    pytest_args = [
-        __file__,
-        "-v",
-        "-x",  # Stop on first failure
-        "--tb=short",
-        "-m", "mission_critical",
-        "--maxfail=1"  # Stop immediately on first failure - coordination must be perfect
-    ]
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
-    print("Running MISSION CRITICAL Multi-Agent Coordination Tests...")
-    print("=" * 85)
-    print(" TARGET:  MISSION: Protect $100K+ Enterprise revenue from coordination failures")
-    print("[U+1F512] CRITICAL: Agent handoff data integrity validation")
-    print(" ALERT:  CRITICAL: Failed agent recovery and business continuity")
-    print("[U+1F3E2] CRITICAL: Enterprise-scale concurrent agent isolation")
-    print("[U+1F4B0] CRITICAL: Tool result propagation revenue calculation accuracy")
-    print("=" * 85)
-    print(" WARNING: [U+FE0F]  DESIGNED TO FAIL: Tests expose current coordination weaknesses")
-    print(" PASS:  SUCCESS CRITERIA: All coordination must be bulletproof for Enterprise")
-    print("=" * 85)
-
-    result = pytest.main(pytest_args)
-
-    if result == 0:
-        print("\n" + "=" * 85)
-        print(" PASS:  ALL MULTI-AGENT COORDINATION TESTS PASSED")
-        print("[U+1F680] Multi-agent coordination ready for ENTERPRISE DEPLOYMENT")
-        print(" TROPHY:  $100K+ Enterprise revenue protection VALIDATED")
-        print("[U+1F512] Agent handoff data integrity: BULLETPROOF")
-        print(" ALERT:  Failed agent recovery: ENTERPRISE-READY")
-        print("[U+1F3E2] Concurrent isolation: SCALABLE")
-        print("[U+1F4B0] Tool result propagation: REVENUE-ACCURATE")
-        print("=" * 85)
-    else:
-        print("\n" + "=" * 85)
-        print(" FAIL:  MULTI-AGENT COORDINATION TESTS FAILED")
-        print(" ALERT:  Enterprise coordination BROKEN - fix before production")
-        print(" WARNING: [U+FE0F] $100K+ revenue deals at RISK")
-        print("[U+1F527] REQUIRED: Fix coordination issues before Enterprise deployment")
-        print("=" * 85)
-
-    sys.exit(result)
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

@@ -21,7 +21,8 @@ from netra_backend.app.schemas.tool import (
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.tool_dispatcher_core import ToolDispatchResponse
-    from netra_backend.app.websocket_core import WebSocketManager
+    # ISSUE #1144 FIX: Use canonical SSOT import path
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 

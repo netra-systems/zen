@@ -858,11 +858,6 @@ Quick Win Opportunities (check if interested):
 # === Test Runner ===
 
 if __name__ == "__main__":
-    pytest.main([
-        __file__,
-        "-v",
-        "--asyncio-mode=auto",
-        "--tb=short",
-        "--no-header",
-        "-p", "no:warnings"
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

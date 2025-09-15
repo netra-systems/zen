@@ -844,46 +844,12 @@
 
 
                                                             # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-                                                                # Configure pytest for performance testing
-                                                                # REMOVED_SYNTAX_ERROR: pytest_args = [ )
-                                                                # REMOVED_SYNTAX_ERROR: __file__,
-                                                                # REMOVED_SYNTAX_ERROR: "-v",
-                                                                # REMOVED_SYNTAX_ERROR: "-s",  # Show performance outputs
-                                                                # REMOVED_SYNTAX_ERROR: "--tb=short",
-                                                                # REMOVED_SYNTAX_ERROR: "-m", "mission_critical",
-                                                                # REMOVED_SYNTAX_ERROR: "--maxfail=5"  # Allow some failures for performance optimization
-                                                                
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
-                                                                # REMOVED_SYNTAX_ERROR: print("Running ENTERPRISE-SCALE Orchestration Performance & Load Balancing Tests...")
-                                                                # REMOVED_SYNTAX_ERROR: print("=" * 95)
-                                                                # REMOVED_SYNTAX_ERROR: print(" LIGHTNING:  PERFORMANCE MODE: Testing load balancing, failover, auto-scaling at scale")
-                                                                # REMOVED_SYNTAX_ERROR: print("[U+1F680] High-throughput validation: 100K-1M+ requests, sub-100ms response times")
-                                                                # REMOVED_SYNTAX_ERROR: print(" CYCLE:  Auto-scaling: <30s response, accurate trigger detection, efficient resource use")
-                                                                # REMOVED_SYNTAX_ERROR: print("[U+1F6E1][U+FE0F]  Failover: <10s detection, 99.9% availability maintenance, graceful degradation")
-                                                                # REMOVED_SYNTAX_ERROR: print(" CHART:  SLA Validation: Enterprise-ready for 100+ services, millions of daily requests")
-                                                                # REMOVED_SYNTAX_ERROR: print("=" * 95)
-
-                                                                # REMOVED_SYNTAX_ERROR: result = pytest.main(pytest_args)
-
-                                                                # REMOVED_SYNTAX_ERROR: if result == 0:
-                                                                    # REMOVED_SYNTAX_ERROR: print(" )
-                                                                    # REMOVED_SYNTAX_ERROR: " + "=" * 95)
-                                                                    # REMOVED_SYNTAX_ERROR: print(" PASS:  ALL PERFORMANCE & LOAD BALANCING TESTS PASSED")
-                                                                    # REMOVED_SYNTAX_ERROR: print("[U+1F680] Orchestration system PERFORMANCE-VALIDATED for enterprise deployment")
-                                                                    # REMOVED_SYNTAX_ERROR: print(" LIGHTNING:  Load balancing: <5ms overhead, accurate distribution, fast failover")
-                                                                    # REMOVED_SYNTAX_ERROR: print("[U+1F4C8] Auto-scaling: <30s response, efficient resource management, SLA compliance")
-                                                                    # REMOVED_SYNTAX_ERROR: print(" TARGET:  High-throughput: 100K+ RPS sustained, <100ms P95, 99.9%+ success rate")
-                                                                    # REMOVED_SYNTAX_ERROR: print(" TROPHY:  ENTERPRISE-READY for production-scale workloads and strict SLAs")
-                                                                    # REMOVED_SYNTAX_ERROR: print("=" * 95)
-                                                                    # REMOVED_SYNTAX_ERROR: else:
-                                                                        # REMOVED_SYNTAX_ERROR: print(" )
-                                                                        # REMOVED_SYNTAX_ERROR: " + "=" * 95)
-                                                                        # REMOVED_SYNTAX_ERROR: print(" FAIL:  PERFORMANCE & LOAD BALANCING TESTS FAILED")
-                                                                        # REMOVED_SYNTAX_ERROR: print(" ALERT:  Orchestration system NOT ready for enterprise-scale deployment")
-                                                                        # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  Performance issues detected: slow failover, poor load distribution, or scaling problems")
-                                                                        # REMOVED_SYNTAX_ERROR: print("[U+1F527] Optimize load balancing algorithms, auto-scaling triggers, or throughput capacity")
-                                                                        # REMOVED_SYNTAX_ERROR: print("[U+1F4C9] Does not meet enterprise SLA requirements - immediate optimization needed")
-                                                                        # REMOVED_SYNTAX_ERROR: print("=" * 95)
-
-                                                                        # REMOVED_SYNTAX_ERROR: sys.exit(result)
-                                                                        # REMOVED_SYNTAX_ERROR: pass
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

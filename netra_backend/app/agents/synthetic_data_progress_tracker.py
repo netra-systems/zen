@@ -8,7 +8,8 @@ synthetic data generation operations.
 from typing import Any, Dict, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core import get_websocket_manager
+# ISSUE #1144 FIX: Use canonical SSOT import path
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.schemas.generation import GenerationStatus
 
 logger = central_logger.get_logger(__name__)

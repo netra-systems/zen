@@ -786,11 +786,6 @@ if __name__ == "__main__":
     print("\n" + "-" * 80)
     
     # Run comprehensive performance tests
-    pytest.main([
-        __file__,
-        "-v",
-        "-s", 
-        "--tb=short",
-        "--maxfail=2",  # Allow some performance variance
-        "-k", "critical and performance"
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

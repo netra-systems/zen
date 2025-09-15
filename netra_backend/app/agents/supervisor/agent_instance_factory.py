@@ -39,7 +39,8 @@ from netra_backend.app.agents.supervisor.factory_performance_config import (
     get_factory_performance_config
 )
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core import (
+# ISSUE #1144 FIX: Use canonical SSOT import path instead of deprecated module import
+from netra_backend.app.websocket_core.unified_emitter import (
     WebSocketEmitterPool,
 )
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter

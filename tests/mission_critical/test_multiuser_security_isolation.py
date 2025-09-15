@@ -1843,88 +1843,12 @@
 
                                         # Main test execution function
                                         # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-                                            # This allows running the test file directly for debugging
-                                            # REMOVED_SYNTAX_ERROR: import sys
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
-                                            # Check if Docker is available
-                                            # REMOVED_SYNTAX_ERROR: if not is_docker_available():
-                                                # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  Docker not available - some tests may use mocks instead of real services")
-
-                                                # Run tests with pytest
-                                                # REMOVED_SYNTAX_ERROR: exit_code = pytest.main([__file__, "-v", "-s", "--tb=short"])
-                                                # REMOVED_SYNTAX_ERROR: sys.exit(exit_code)
-
-
-                                                # ============================================================================
-                                                # PYTEST CONFIGURATION AND FIXTURES
-                                                # ============================================================================
-
-                                                # Removed problematic line: @pytest.mark.asyncio
-                                                # Removed problematic line: async def test_comprehensive_security_suite():
-                                                    # REMOVED_SYNTAX_ERROR: """Run the comprehensive multi-user security isolation test suite."""
-                                                    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F680] Starting comprehensive multi-user security isolation test suite...")
-
-                                                    # REMOVED_SYNTAX_ERROR: config = RealWebSocketTestConfig()
-                                                    # REMOVED_SYNTAX_ERROR: await config.ensure_services_ready()
-
-                                                    # REMOVED_SYNTAX_ERROR: security_tester = MultiUserSecurityTester(config)
-
-                                                    # Initialize the test environment
-                                                    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F527] Initializing test environment...")
-                                                    # REMOVED_SYNTAX_ERROR: security_tester.create_test_users(count=5)
-
-                                                    # Create instances of all test classes
-                                                    # REMOVED_SYNTAX_ERROR: auth_tests = TestWebSocketAuthenticationVulnerabilities()
-                                                    # REMOVED_SYNTAX_ERROR: isolation_tests = TestUserIsolationVulnerabilities()
-                                                    # REMOVED_SYNTAX_ERROR: singleton_tests = TestSingletonPatternVulnerabilities()
-                                                    # REMOVED_SYNTAX_ERROR: admin_tests = TestAdminPrivilegeVulnerabilities()
-                                                    # REMOVED_SYNTAX_ERROR: race_condition_tests = TestRaceConditionVulnerabilities()
-
-                                                    # Run all vulnerability tests
-                                                    # REMOVED_SYNTAX_ERROR: try:
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F512] Running authentication vulnerability tests...")
-                                                        # REMOVED_SYNTAX_ERROR: await auth_tests.test_invalid_token_rejection(security_tester)
-                                                        # REMOVED_SYNTAX_ERROR: await auth_tests.test_token_extraction_methods(security_tester)
-                                                        # REMOVED_SYNTAX_ERROR: await auth_tests.test_concurrent_authentication_race_conditions(security_tester)
-
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F510] Running user isolation vulnerability tests...")
-                                                        # REMOVED_SYNTAX_ERROR: await isolation_tests.test_websocket_message_isolation(security_tester)
-                                                        # REMOVED_SYNTAX_ERROR: await isolation_tests.test_agent_response_user_isolation(security_tester)
-                                                        # REMOVED_SYNTAX_ERROR: await isolation_tests.test_llm_conversation_isolation(security_tester)
-
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F3D7][U+FE0F] Running singleton pattern vulnerability tests...")
-                                                        # REMOVED_SYNTAX_ERROR: await singleton_tests.test_websocket_manager_isolation(security_tester)
-                                                        # REMOVED_SYNTAX_ERROR: await singleton_tests.test_execution_engine_isolation(security_tester)
-                                                        # REMOVED_SYNTAX_ERROR: await singleton_tests.test_cache_isolation(security_tester)
-
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F451] Running admin privilege vulnerability tests...")
-                                                        # REMOVED_SYNTAX_ERROR: await admin_tests.test_client_side_admin_flag_validation(security_tester)
-                                                        # REMOVED_SYNTAX_ERROR: await admin_tests.test_admin_operation_access_control(security_tester)
-
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F3C3][U+200D][U+2642][U+FE0F] Running race condition vulnerability tests...")
-                                                        # REMOVED_SYNTAX_ERROR: await race_condition_tests.test_concurrent_connection_race_conditions(security_tester)
-                                                        # REMOVED_SYNTAX_ERROR: await race_condition_tests.test_memory_leak_detection(security_tester)
-
-                                                        # REMOVED_SYNTAX_ERROR: except Exception as e:
-                                                            # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
-                                                            # REMOVED_SYNTAX_ERROR: raise
-
-                                                            # Generate final vulnerability report
-                                                            # REMOVED_SYNTAX_ERROR: vulnerability_report = generate_vulnerability_report(security_tester)
-                                                            # REMOVED_SYNTAX_ERROR: print(" )
-                                                            # REMOVED_SYNTAX_ERROR: " + vulnerability_report)
-
-                                                            # Log summary
-                                                            # REMOVED_SYNTAX_ERROR: total_vulnerabilities = len(security_tester.vulnerability_findings)
-                                                            # REMOVED_SYNTAX_ERROR: critical_vulnerabilities = len([ ))
-                                                            # REMOVED_SYNTAX_ERROR: v for v in security_tester.vulnerability_findings
-                                                            # REMOVED_SYNTAX_ERROR: if v["severity"] == "CRITICAL"
-                                                            
-
-                                                            # REMOVED_SYNTAX_ERROR: if total_vulnerabilities > 0:
-                                                                # REMOVED_SYNTAX_ERROR: logger.error("formatted_string" )
-                                                                # REMOVED_SYNTAX_ERROR: "formatted_string")
-                                                                # REMOVED_SYNTAX_ERROR: raise AssertionError("formatted_string")
-                                                                # REMOVED_SYNTAX_ERROR: else:
-                                                                    # REMOVED_SYNTAX_ERROR: logger.success(" PASS:  All multi-user security isolation tests passed!")
-                                                                    # REMOVED_SYNTAX_ERROR: pass
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

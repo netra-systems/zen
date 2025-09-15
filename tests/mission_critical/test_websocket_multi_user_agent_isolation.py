@@ -712,11 +712,6 @@ if __name__ == "__main__":
     print("\n" + "-" * 80)
     
     # Run comprehensive isolation tests
-    pytest.main([
-        __file__,
-        "-v",
-        "-s", 
-        "--tb=short",
-        "--maxfail=1",  # Stop immediately on isolation failure
-        "-k", "critical"
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

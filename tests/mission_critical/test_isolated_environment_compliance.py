@@ -315,4 +315,6 @@ class TestIsolatedEnvironmentCompliance:
                 f"Environment {env_name}: {method_name}() returned {actual_result}, expected {expected_result}"
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

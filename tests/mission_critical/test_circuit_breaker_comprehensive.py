@@ -1845,4 +1845,6 @@ async def test_execute_core_circuit_breaker_error_propagation():
 
 if __name__ == "__main__":
     # Run circuit breaker stress tests
-    pytest.main([__file__, "-v", "--tb=short", "-x"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

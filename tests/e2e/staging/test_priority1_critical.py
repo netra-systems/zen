@@ -85,8 +85,10 @@ class TestCriticalWebSocket:
                     
                     for attempt in range(2):  # Retry logic for Windows asyncio issues
                         try:
-                            # Increased timeout for Windows asyncio + network latency
-                            welcome_response = await asyncio.wait_for(ws.recv(), timeout=30)
+                            # SSOT COMPLIANCE: Use cloud-native timeout from staging config
+                            cloud_timeout = config.get_cloud_native_timeout()
+                            print(f"[SSOT TIMEOUT] Using cloud-native timeout: {cloud_timeout}s")
+                            welcome_response = await asyncio.wait_for(ws.recv(), timeout=cloud_timeout)
                             print(f"WebSocket welcome message: {welcome_response}")
                             welcome_received = True
                             

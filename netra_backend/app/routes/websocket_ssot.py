@@ -70,17 +70,24 @@ from netra_backend.app.websocket_core.websocket_manager import (
     WebSocketManager,
     get_websocket_manager,
 )
-from netra_backend.app.websocket_core import (
+# ISSUE #1144 FIX: Use specific module imports instead of deprecated __init__.py imports
+from netra_backend.app.websocket_core.handlers import (
     MessageRouter,
     get_message_router,
+)
+from netra_backend.app.websocket_core.utils import (
     WebSocketHeartbeat,
     get_connection_monitor,
     safe_websocket_send,
     safe_websocket_close,
+)
+from netra_backend.app.websocket_core.types import (
     create_server_message,
     create_error_message,
     MessageType,
     WebSocketConfig,
+)
+from netra_backend.app.websocket_core.unified_jwt_protocol_handler import (
     negotiate_websocket_subprotocol  # PRIORITY 4 FIX: JWT subprotocol negotiation
 )
 

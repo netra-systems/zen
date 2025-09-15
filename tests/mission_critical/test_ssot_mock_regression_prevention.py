@@ -534,4 +534,6 @@ class TestSSotMockRegressionPrevention(SSotBaseTestCase):
 
 if __name__ == "__main__":
     # Run as standalone test for development and CI integration
-    pytest.main([__file__, "-v", "-x"])  # -x to stop on first failure for faster CI
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution  # -x to stop on first failure for faster CI

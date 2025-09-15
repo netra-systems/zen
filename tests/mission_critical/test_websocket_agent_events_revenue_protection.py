@@ -810,10 +810,6 @@ def pytest_runtest_teardown(pyfuncitem, nextitem):
 
 if __name__ == "__main__":
     # Direct execution for debugging
-    pytest.main([
-        __file__,
-        "-v",
-        "-s", 
-        "--tb=short",
-        "-m", "mission_critical"
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

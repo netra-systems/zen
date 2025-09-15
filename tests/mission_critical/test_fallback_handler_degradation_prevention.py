@@ -1099,45 +1099,12 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
 
 
 if __name__ == "__main__":
-    """
-    Run the fallback handler degradation prevention test suite.
-    
-    This can be run directly or via pytest:
-    
-    Direct execution:
-        python tests/mission_critical/test_fallback_handler_degradation_prevention.py
-    
-    Via pytest:
-        pytest tests/mission_critical/test_fallback_handler_degradation_prevention.py -v
-        
-    Via unified test runner:
-        python tests/unified_test_runner.py --test-file tests/mission_critical/test_fallback_handler_degradation_prevention.py --real-services
-    """
-    import sys
-    
-    if len(sys.argv) > 1 and sys.argv[1] == "--pytest":
-        # Run via pytest
-        pytest.main([__file__, "-v", "--tb=short"])
-    else:
-        # Direct execution
-        print("[U+1F9EA] MISSION CRITICAL: Fallback Handler Degradation Prevention Test Suite")
-        print("[U+1F4CB] This suite tests for fallback handler anti-patterns that degrade business value")
-        print(" WARNING: [U+FE0F]  Tests are designed to FAIL HARD when fallback handlers are detected")
-        print("[U+1F680] Starting test execution...")
-        
-        # Run pytest with specific markers
-        exit_code = pytest.main([
-            __file__,
-            "-v",
-            "-x",  # Stop on first failure
-            "--tb=short",
-            "-m", "mission_critical",
-            "--durations=10"
-        ])
-        
-        if exit_code == 0:
-            print(" PASS:  ALL TESTS PASSED: No fallback handler degradation detected")
-        else:
-            print(" ALERT:  TEST FAILURES: Fallback handler degradation detected - BLOCKS DEPLOYMENT")
-            
-        sys.exit(exit_code)
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

@@ -697,14 +697,6 @@ if __name__ == "__main__":
     print("[U+1F680] Starting Ultra-Comprehensive WebSocket Factory Validation Test Suite")
     
     # Run with maximum verbosity and strict failure reporting
-    pytest.main([
-        __file__,
-        "-v",                    # Verbose output
-        "-s",                    # Don't capture output
-        "--tb=long",            # Long traceback format
-        "--strict-markers",     # Strict marker checking
-        "--strict-config",      # Strict configuration
-        "-x",                   # Stop on first failure
-        "--disable-warnings",   # Clean output
-        "-m", "critical"        # Only run critical tests
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

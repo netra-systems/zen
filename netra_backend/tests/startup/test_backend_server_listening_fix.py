@@ -1,5 +1,5 @@
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 """
@@ -67,16 +67,17 @@ class BackendServerController:
         print(f"Starting backend server from {main_path}")
         
         # Use same environment as current process but ensure proper Python path
-        env = env.get_all()
-        env['PYTHONPATH'] = str(backend_path.parent)
-        env['PYTHONUNBUFFERED'] = '1'
+        current_env = get_env()
+        env_vars = current_env.get_all()
+        env_vars['PYTHONPATH'] = str(backend_path.parent)
+        env_vars['PYTHONUNBUFFERED'] = '1'
         
         # Start server process
         try:
             self.process = subprocess.Popen(
                 [sys.executable, str(main_path)],
                 cwd=str(backend_path.parent),
-                env=env,
+                env=env_vars,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True

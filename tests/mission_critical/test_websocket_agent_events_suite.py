@@ -1501,12 +1501,6 @@ if __name__ == "__main__":
     print("\nRunning with REAL WebSocket connections (NO MOCKS)...")
     
     # Run all comprehensive tests
-    pytest.main([
-        __file__, 
-        "-v", 
-        "-s", 
-        "--tb=short",
-        "--maxfail=3",  # Stop after 3 failures to preserve resources
-        "--durations=10",  # Show 10 slowest tests
-        "-k", "critical"  # Run only critical tests
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

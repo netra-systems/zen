@@ -221,29 +221,12 @@
 
 
     # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-        # REMOVED_SYNTAX_ERROR: pytest_args = [ )
-        # REMOVED_SYNTAX_ERROR: __file__,
-        # REMOVED_SYNTAX_ERROR: "-v",
-        # REMOVED_SYNTAX_ERROR: "--tb=short"
-        
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
-        # REMOVED_SYNTAX_ERROR: print("Running Basic SSOT Orchestration Validation Tests...")
-        # REMOVED_SYNTAX_ERROR: print("=" * 60)
-
-        # REMOVED_SYNTAX_ERROR: result = pytest.main(pytest_args)
-
-        # REMOVED_SYNTAX_ERROR: if result == 0:
-            # REMOVED_SYNTAX_ERROR: print(" )
-            # REMOVED_SYNTAX_ERROR: " + "=" * 60)
-            # REMOVED_SYNTAX_ERROR: print("BASIC SSOT VALIDATION PASSED")
-            # REMOVED_SYNTAX_ERROR: print("SSOT orchestration fundamentals working!")
-            # REMOVED_SYNTAX_ERROR: print("=" * 60)
-            # REMOVED_SYNTAX_ERROR: else:
-                # REMOVED_SYNTAX_ERROR: print(" )
-                # REMOVED_SYNTAX_ERROR: " + "=" * 60)
-                # REMOVED_SYNTAX_ERROR: print("BASIC SSOT VALIDATION FAILED")
-                # REMOVED_SYNTAX_ERROR: print("Fix basic issues before running complex tests")
-                # REMOVED_SYNTAX_ERROR: print("=" * 60)
-
-                # REMOVED_SYNTAX_ERROR: sys.exit(result)
-                # REMOVED_SYNTAX_ERROR: pass
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

@@ -272,6 +272,13 @@ class TestMessageRouterSSOTCompliance(SSotBaseTestCase):
 
 
 if __name__ == "__main__":
-    print("Running MessageRouter SSOT compliance tests...")
-    import pytest
-    pytest.main([__file__, '-v'])
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)
+    pass  # TODO: Replace with appropriate SSOT test execution

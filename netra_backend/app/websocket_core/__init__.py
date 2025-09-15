@@ -11,13 +11,19 @@ Business Value:
 """
 
 # Unified implementations (SSOT)
-# CANONICAL IMPORT: Prefer the canonical import path for better SSOT compliance
+# ISSUE #1144 SSOT CONSOLIDATION: Phase 1 - Deprecate __init__.py imports
 # DEPRECATED: from netra_backend.app.websocket_core import WebSocketManager
 # CANONICAL: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+#
+# MIGRATION PLAN:
+# - Phase 1: Update key consumers to use canonical imports (IN PROGRESS)
+# - Phase 2: Remove __init__.py exports entirely
+# - Phase 3: Consolidate implementation layers
 import warnings
 warnings.warn(
-    "Importing WebSocketManager from 'netra_backend.app.websocket_core' is deprecated. "
-    "Use canonical path 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager' instead.",
+    "ISSUE #1144: Importing from 'netra_backend.app.websocket_core' is deprecated. "
+    "Use specific module imports like 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'. "
+    "This import path will be removed in Phase 2 of SSOT consolidation.",
     DeprecationWarning,
     stacklevel=2
 )

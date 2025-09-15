@@ -647,4 +647,6 @@ class TestWebSocketSSotAgentIntegrationValidation(SSotAsyncTestCase):
 
 if __name__ == "__main__":
     # Run this test directly to validate SSOT agent integration
-    pytest.main([__file__, "-v", "-s"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

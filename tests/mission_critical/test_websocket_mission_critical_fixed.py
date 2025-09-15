@@ -536,7 +536,9 @@ def lazy_import(module_path: str, component: str = None):
 
     # Use pytest to run the tests
     # REMOVED_SYNTAX_ERROR: import pytest
-    # REMOVED_SYNTAX_ERROR: result = pytest.main([ ))
+    # REMOVED_SYNTAX_ERROR: result = # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution)
     # REMOVED_SYNTAX_ERROR: __file__,
     # REMOVED_SYNTAX_ERROR: "-v",
     # REMOVED_SYNTAX_ERROR: "--tb=short",

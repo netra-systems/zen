@@ -30,7 +30,7 @@ from typing import Dict, List, Any
 import time
 import random
 
-# Use unittest.TestCase directly to avoid SSOT base class issues for now
+# Use SSotBaseTestCase for SSOT compliance (Issue #1097)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

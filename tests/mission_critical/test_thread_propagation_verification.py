@@ -379,4 +379,6 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
 if __name__ == "__main__":
     # Run tests with verbose output to see failures
     import sys
-    sys.exit(pytest.main([__file__, "-v", "-s", "--tb=short"]))
+    sys.exit(# MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution)

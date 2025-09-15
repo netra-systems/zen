@@ -360,4 +360,6 @@ if __name__ == '__main__':
     
     Command: python tests/mission_critical/test_database_exception_handling_suite.py
     """
-    pytest.main([__file__, '-v', '--tb=short'])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

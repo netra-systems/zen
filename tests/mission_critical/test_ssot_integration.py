@@ -1183,4 +1183,6 @@ if __name__ == '__main__':
     )
     
     # Run the comprehensive SSOT integration isolation tests
-    pytest.main([__file__, '-v', '--tb=short', '--capture=no', '--maxfail=1'])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

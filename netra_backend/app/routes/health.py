@@ -676,9 +676,28 @@ async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
         redis_required = get_env().get("REDIS_REQUIRED", "false").lower() == "true"
         
         if config.environment == "staging" and not redis_required:
-            # In staging, Redis is optional by default - skip entirely
-            logger.info("Redis skipped in staging environment (optional service - infrastructure may not be available)")
-            redis_status = "skipped_optional"
+            # SSOT COMPLIANCE: Enhanced Redis health check for staging VPC connectivity
+            # Check if Redis is actually available before skipping
+            try:
+                # Quick connectivity test to detect VPC configuration issues
+                from netra_backend.app.redis_manager import redis_manager
+                if redis_manager.enabled:
+                    # Attempt connection with short timeout to detect VPC issues
+                    await asyncio.wait_for(redis_manager.ping(), timeout=1.0)
+                    redis_status = "connected"
+                    logger.info("Redis available in staging environment despite being optional")
+                else:
+                    redis_status = "disabled_optional"
+                    logger.info("Redis disabled in staging environment (optional service)")
+            except Exception as e:
+                # Check if this is a VPC connectivity issue (Error -3 pattern)
+                error_str = str(e).lower()
+                if "error -3" in error_str or "10.166.204.83" in error_str:
+                    logger.warning(f"Redis VPC connectivity issue detected in staging: {e}")
+                    redis_status = "vpc_connectivity_degraded"
+                else:
+                    logger.info(f"Redis not available in staging (optional service): {e}")
+                    redis_status = "skipped_optional"
         else:
             try:
                 # Use shorter timeout for optional environments
