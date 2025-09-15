@@ -37,7 +37,7 @@ import pytest
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.unified_tool_execution import (
     UnifiedToolExecutionEngine,
@@ -141,8 +141,14 @@ class TestMissionCriticalWebSocketEvents:
     @pytest.mark.asyncio
     async def test_websocket_notifier_all_required_methods(self):
         """MISSION CRITICAL: Test that AgentWebSocketBridge has ALL required methods."""
-        ws_manager = WebSocketManager()
-        notifier = AgentWebSocketBridge(ws_manager)
+        # Create user context for Issue #1116 SSOT compliance
+        user_context = UserExecutionContext(
+            user_id="test-user",
+            thread_id="test-thread",
+            run_id="test-run",
+            request_id="test-request"
+        )
+        notifier = AgentWebSocketBridge(user_context)
 
         # Verify all methods exist
         required_methods = [
@@ -167,7 +173,14 @@ class TestMissionCriticalWebSocketEvents:
     @pytest.mark.asyncio
     async def test_tool_dispatcher_enhancement_always_works(self):
         """MISSION CRITICAL: Tool dispatcher MUST be enhanced with WebSocket."""
-        dispatcher = ToolDispatcher()
+        # Create user context for Issue #1116 SSOT compliance
+        user_context = UserExecutionContext(
+            user_id="test-user",
+            thread_id="test-thread",
+            run_id="test-run",
+            request_id="test-request"
+        )
+        dispatcher = ToolDispatcher(user_context)
         ws_manager = WebSocketManager()
 
         # Verify initial state
@@ -190,7 +203,14 @@ class TestMissionCriticalWebSocketEvents:
         class MockLLM:
             pass
 
-        tool_dispatcher = ToolDispatcher()
+        # Create user context for Issue #1116 SSOT compliance
+        user_context = UserExecutionContext(
+            user_id="test-user",
+            thread_id="test-thread",
+            run_id="test-run",
+            request_id="test-request"
+        )
+        tool_dispatcher = ToolDispatcher(user_context)
         registry = AgentRegistry(MockLLM(), tool_dispatcher)
         ws_manager = WebSocketManager()
 
@@ -207,7 +227,14 @@ class TestMissionCriticalWebSocketEvents:
         class MockLLM:
             pass
 
-        registry = AgentRegistry(MockLLM(), ToolDispatcher())
+        # Create user context for Issue #1116 SSOT compliance
+        user_context = UserExecutionContext(
+            user_id="test-user",
+            thread_id="test-thread",
+            run_id="test-run",
+            request_id="test-request"
+        )
+        registry = AgentRegistry(MockLLM(), ToolDispatcher(user_context))
         ws_manager = WebSocketManager()
 
         engine = ExecutionEngine(registry, ws_manager)
@@ -283,8 +310,15 @@ class TestMissionCriticalWebSocketEvents:
     @pytest.mark.asyncio
     async def test_websocket_notifier_sends_all_critical_events(self):
         """MISSION CRITICAL: AgentWebSocketBridge MUST send all required event types."""
-        ws_manager = WebSocketManager()
         validator = MissionCriticalEventValidator()
+
+        # Create user context for Issue #1116 SSOT compliance
+        user_context = UserExecutionContext(
+            user_id="event-user",
+            thread_id="event-thread",
+            run_id="event-test",
+            request_id="event-test"
+        )
 
         # Mock WebSocket calls to capture events
         sent_events = []
@@ -293,9 +327,12 @@ class TestMissionCriticalWebSocketEvents:
             validator.record(message_data)
             return True
 
-        ws_manager.send_to_thread = AsyncMock(side_effect=capture_events)
+        # Create notifier with user context
+        notifier = AgentWebSocketBridge(user_context)
 
-        notifier = AgentWebSocketBridge(ws_manager)
+        # Mock the websocket emitter that AgentWebSocketBridge creates internally
+        if hasattr(notifier, 'websocket_emitter') and notifier.websocket_emitter:
+            notifier.websocket_emitter.send_to_thread = AsyncMock(side_effect=capture_events)
 
         # Create test context
         context = AgentExecutionContext(
@@ -347,7 +384,14 @@ class TestMissionCriticalWebSocketEvents:
                 return {"content": "Mission critical response"}
 
         llm = MockLLM()
-        tool_dispatcher = ToolDispatcher()
+        # Create user context for Issue #1116 SSOT compliance
+        user_context = UserExecutionContext(
+            user_id="mission-user",
+            thread_id="mission-thread",
+            run_id="mission-flow-test",
+            request_id="mission-flow-test"
+        )
+        tool_dispatcher = ToolDispatcher(user_context)
 
         # Create registry with WebSocket
         registry = AgentRegistry(llm, tool_dispatcher)

@@ -21,7 +21,7 @@ class TestTriageInitValidation(BaseTestCase):
         self.llm_manager = Mock(spec=LLMManager)
         self.llm_manager._get_model_name = Mock(return_value='test-model')
         self.llm_manager.ask_llm = AsyncMock(return_value='{"intent": {"primary_intent": "analysis"}, "data_sufficiency": "sufficient"}')
-        self.test_context = UserExecutionContext(user_id='test-user-init', thread_id='test-thread-init', run_id='test-run-init', metadata={'user_request': 'test initialization validation'}).with_db_session(AsyncMock())
+        self.test_context = UserExecutionContext(user_id='test-user-init', thread_id='test-thread-init', run_id='test-run-init', agent_context={'user_request': 'test initialization validation'}).with_db_session(AsyncMock())
 
     def test_triage_agent_initialization(self):
         """Test UnifiedTriageAgent initializes correctly."""
@@ -63,7 +63,7 @@ class TestTriageInitValidation(BaseTestCase):
     async def test_context_validation_missing_metadata(self):
         """Test context validation with missing metadata."""
         triage_agent = UnifiedTriageAgent(llm_manager=self.llm_manager)
-        context_no_request = UserExecutionContext(user_id='test-user', thread_id='test-thread', run_id='test-run', metadata={}).with_db_session(AsyncMock())
+        context_no_request = UserExecutionContext(user_id='test-user', thread_id='test-thread', run_id='test-run', agent_context={}).with_db_session(AsyncMock())
         try:
             result = await triage_agent.execute(context_no_request)
             self.assertIsNotNone(result)
@@ -115,7 +115,7 @@ class TestTriageInitValidation(BaseTestCase):
     async def test_context_database_session_validation(self):
         """Test context database session validation."""
         triage_agent = UnifiedTriageAgent(llm_manager=self.llm_manager)
-        context_no_db = UserExecutionContext(user_id='test-user', thread_id='test-thread', run_id='test-run', metadata={'user_request': 'test request'})
+        context_no_db = UserExecutionContext(user_id='test-user', thread_id='test-thread', run_id='test-run', agent_context={'user_request': 'test request'})
         try:
             result = await triage_agent.execute(context_no_db)
             self.assertIsNotNone(result)
