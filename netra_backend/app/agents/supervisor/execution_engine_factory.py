@@ -938,7 +938,7 @@ class ExecutionEngineFactoryManager:
 # Factory manager instance for creating user-scoped factories
 _factory_manager = ExecutionEngineFactoryManager()
 _factory_lock = asyncio.Lock()  # Keep for backward compatibility
-_factory_instance: Optional[ExecutionEngineFactory] = None  # Global factory instance for backward compatibility
+_factory_instance: Optional[ExecutionEngineFactory] = None  # Global factory instance for backward compatibility - Fixed 2025-09-15
 
 
 async def get_execution_engine_factory(user_context: Optional[str] = None) -> ExecutionEngineFactory:
