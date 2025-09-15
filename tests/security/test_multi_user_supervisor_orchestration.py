@@ -85,7 +85,7 @@ class TestMultiUserSupervisorOrchestrationSecurity(SSotAsyncTestCase):
             # Test 1: Each supervisor should have isolated user context
             for i, supervisor in enumerate(supervisors):
                 assert supervisor._initialization_user_context.user_id == user_contexts[i].user_id
-                assert supervisor._initialization_user_context.session_id == user_contexts[i].session_id
+                assert supervisor._initialization_user_context.thread_id == user_contexts[i].thread_id
 
             # Test 2: No supervisor should share user context with another
             for i, supervisor_1 in enumerate(supervisors):

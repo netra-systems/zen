@@ -61,7 +61,7 @@ class TestSupervisorWebSocketIntegration(SSotAsyncTestCase):
 
         # Track WebSocket events for validation
         self.sent_events = []
-        self.event_tracker = MagicMock()
+        self.event_tracker = AsyncMock()
 
         # Mock WebSocket bridge that tracks events
         self.mock_websocket_bridge = Mock(spec=AgentWebSocketBridge)
@@ -113,7 +113,7 @@ class TestSupervisorWebSocketIntegration(SSotAsyncTestCase):
                 {
                     "agent_name": "Supervisor",
                     "user_id": self.user_context.user_id,
-                    "session_id": self.user_context.session_id,
+                    "session_id": self.user_context.thread_id,
                     "message": "Supervisor orchestration initiated"
                 }
             )
@@ -243,7 +243,7 @@ class TestSupervisorWebSocketIntegration(SSotAsyncTestCase):
                 {
                     "agent_name": "Supervisor",
                     "user_id": self.user_context.user_id,
-                    "session_id": self.user_context.session_id,
+                    "session_id": self.user_context.thread_id,
                     "final_response": "Orchestration complete - AI response generated",
                     "total_execution_time": 15.3
                 }

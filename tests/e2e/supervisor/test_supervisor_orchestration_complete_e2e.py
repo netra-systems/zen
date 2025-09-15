@@ -51,7 +51,7 @@ class TestSupervisorOrchestrationCompleteE2E(SSotAsyncTestCase):
         # Mock LLM manager with realistic responses
         self.mock_llm_manager = Mock(spec=LLMManager)
         self.mock_llm_client = Mock()
-        self.mock_llm_manager.get_client.return_value = self.mock_llm_client
+        self.mock_llm_manager.get_client = Mock(return_value=self.mock_llm_client)
 
         # Track complete workflow
         self.workflow_events = []
@@ -136,7 +136,7 @@ class TestSupervisorOrchestrationCompleteE2E(SSotAsyncTestCase):
                 {
                     "agent_name": "Supervisor",
                     "user_id": self.user_context.user_id,
-                    "session_id": self.user_context.session_id,
+                    "session_id": self.user_context.thread_id,
                     "message": "Golden Path orchestration initiated in staging"
                 }
             )
@@ -227,7 +227,7 @@ class TestSupervisorOrchestrationCompleteE2E(SSotAsyncTestCase):
                 {
                     "agent_name": "Supervisor",
                     "user_id": self.user_context.user_id,
-                    "session_id": self.user_context.session_id,
+                    "session_id": self.user_context.thread_id,
                     "final_response": "Orchestration complete - AI optimization delivered with 23% performance improvement",
                     "total_execution_time": 16.1,
                     "sub_agents_used": ["DataHelperAgent", "TriageAgent", "APEXOptimizerAgent"]

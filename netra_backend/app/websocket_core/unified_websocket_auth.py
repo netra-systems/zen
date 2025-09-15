@@ -31,7 +31,7 @@ import time
 import uuid
 from typing import Dict, Optional, Any, Tuple, List
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from fastapi import HTTPException, WebSocket
 from fastapi.websockets import WebSocketState
@@ -890,8 +890,9 @@ class UnifiedWebSocketAuthenticator:
             websocket: WebSocket connection object
         """
         try:
-            from shared.isolated_environment import get_env_var
+            from shared.isolated_environment import get_env_var, get_env
             environment = get_env_var("ENVIRONMENT", "development").lower()
+            env = get_env()
             is_cloud_run = bool(env.get("K_SERVICE"))  # Detect Cloud Run
             
             # PHASE 1 FIX: Import Windows-safe asyncio patterns
@@ -1451,208 +1452,8 @@ async def authenticate_websocket_ssot(
 
 # PHASE 1 BACKWARD COMPATIBILITY WRAPPERS WITH DEPRECATION WARNINGS
 
-async def authenticate_websocket_connection(
-    websocket: WebSocket, 
-    token: Optional[str] = None,
-    e2e_context: Optional[Dict[str, Any]] = None
-) -> WebSocketAuthResult:
-    """
-    DEPRECATED: Backward compatibility wrapper for standalone authentication.
-    
-    MIGRATION REQUIRED: This function is deprecated as part of SSOT consolidation.
-    Use authenticate_websocket_ssot() instead.
-    
-    This wrapper delegates to the SSOT authenticate_websocket_ssot() function
-    while maintaining backward compatibility for existing code.
-    
-    Args:
-        websocket: WebSocket connection object
-        token: Optional JWT token (IGNORED - token extracted from WebSocket)
-        e2e_context: Optional E2E testing context for bypass support
-        
-    Returns:
-        WebSocketAuthResult with authentication outcome
-    """
-    import warnings
-    warnings.warn(
-        "authenticate_websocket_connection() is deprecated. "
-        "Use authenticate_websocket_ssot() instead. "
-        "This function will be removed in the next release.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    
-    logger.warning(
-        "DEPRECATION: authenticate_websocket_connection() called. "
-        "Migrate to authenticate_websocket_ssot() - this wrapper will be removed."
-    )
-    
-    # Delegate to SSOT function
-    return await authenticate_websocket_ssot(websocket, e2e_context=e2e_context)
-
-
-class UnifiedWebSocketAuthenticator:
-    """
-    DEPRECATED: WebSocket authenticator class - use authenticate_websocket_ssot() instead.
-    
-    MIGRATION REQUIRED: This class is deprecated as part of SSOT consolidation.
-    All authentication should go through the single authenticate_websocket_ssot() function.
-    
-    This class is preserved for backward compatibility but all methods delegate
-    to the SSOT authentication function.
-    """
-    
-    def __init__(self):
-        """Initialize deprecated authenticator with migration warnings."""
-        import warnings
-        warnings.warn(
-            "UnifiedWebSocketAuthenticator is deprecated. "
-            "Use authenticate_websocket_ssot() function instead. "
-            "This class will be removed in the next release.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        logger.warning(
-            "DEPRECATION: UnifiedWebSocketAuthenticator instantiated. "
-            "Migrate to authenticate_websocket_ssot() - this class will be removed."
-        )
-        
-        # Initialize minimal state for backward compatibility
-        self._websocket_auth_attempts = 0
-        self._websocket_auth_successes = 0
-        self._websocket_auth_failures = 0
-    
-    async def authenticate_websocket_connection(
-        self, 
-        websocket: WebSocket, 
-        e2e_context: Optional[Dict[str, Any]] = None,
-        preliminary_connection_id: Optional[str] = None
-    ) -> WebSocketAuthResult:
-        """
-        DEPRECATED: Class method authentication - use authenticate_websocket_ssot() instead.
-        
-        This method delegates to the SSOT authenticate_websocket_ssot() function.
-        """
-        import warnings
-        warnings.warn(
-            "UnifiedWebSocketAuthenticator.authenticate_websocket_connection() is deprecated. "
-            "Use authenticate_websocket_ssot() function instead.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        # Update deprecated stats for backward compatibility
-        self._websocket_auth_attempts += 1
-        
-        # Delegate to SSOT function
-        result = await authenticate_websocket_ssot(
-            websocket, 
-            e2e_context=e2e_context, 
-            preliminary_connection_id=preliminary_connection_id
-        )
-        
-        # Update deprecated stats
-        if result.success:
-            self._websocket_auth_successes += 1
-        else:
-            self._websocket_auth_failures += 1
-        
-        return result
-    
-    async def authenticate_request(self, websocket: WebSocket, token: Optional[str] = None, e2e_context: Optional[Dict[str, Any]] = None) -> WebSocketAuthResult:
-        """DEPRECATED: Use authenticate_websocket_ssot() instead."""
-        import warnings
-        warnings.warn(
-            "UnifiedWebSocketAuthenticator.authenticate_request() is deprecated. "
-            "Use authenticate_websocket_ssot() function instead.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        return await authenticate_websocket_ssot(websocket, e2e_context=e2e_context)
-
-    async def authenticate_token(self, token: str, websocket: Optional[WebSocket] = None) -> WebSocketAuthResult:
-        """
-        DEPRECATED: Direct token authentication method - use authenticate_websocket_ssot() instead.
-
-        This method provides backward compatibility for tests that call authenticate_token() directly.
-        It creates a mock WebSocket if needed and delegates to the SSOT authentication function.
-
-        Args:
-            token: JWT token to authenticate
-            websocket: Optional WebSocket connection (created if not provided)
-
-        Returns:
-            WebSocketAuthResult with authentication outcome
-        """
-        import warnings
-        warnings.warn(
-            "UnifiedWebSocketAuthenticator.authenticate_token() is deprecated. "
-            "Use authenticate_websocket_ssot() function instead.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-
-        # Update deprecated stats for backward compatibility
-        self._websocket_auth_attempts += 1
-
-        try:
-            # If no websocket provided, create a mock one for token validation
-            if websocket is None:
-                from test_framework.websocket_helpers import MockWebSocketConnection
-                websocket = MockWebSocketConnection()
-
-                # Add token to subprotocols for extraction
-                websocket.subprotocols = [f"jwt-auth.{token}"]
-                websocket.headers = {"authorization": f"Bearer {token}"}
-
-            # Delegate to SSOT function
-            result = await authenticate_websocket_ssot(websocket, e2e_context=None)
-
-            # Update deprecated stats
-            if result.success:
-                self._websocket_auth_successes += 1
-            else:
-                self._websocket_auth_failures += 1
-
-            return result
-
-        except Exception as e:
-            # Handle token authentication errors
-            self._websocket_auth_failures += 1
-
-            return WebSocketAuthResult(
-                success=False,
-                user_context=None,
-                auth_result=None,
-                error_message=f"Token authentication failed: {str(e)}",
-                error_code="TOKEN_AUTH_ERROR"
-            )
-    
-    def get_websocket_auth_stats(self) -> Dict[str, Any]:
-        """DEPRECATED: Get authentication statistics (for backward compatibility only)."""
-        import warnings
-        warnings.warn(
-            "UnifiedWebSocketAuthenticator.get_websocket_auth_stats() is deprecated. "
-            "Statistics are managed internally by authenticate_websocket_ssot().",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        success_rate = (self._websocket_auth_successes / max(1, self._websocket_auth_attempts)) * 100
-        
-        return {
-            "deprecated_warning": "This class is deprecated - use authenticate_websocket_ssot()",
-            "websocket_auth_statistics": {
-                "total_attempts": self._websocket_auth_attempts,
-                "successful_authentications": self._websocket_auth_successes,
-                "failed_authentications": self._websocket_auth_failures,
-                "success_rate_percent": round(success_rate, 2)
-            },
-            "migration_required": True,
-            "ssot_function": "authenticate_websocket_ssot",
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
+# SSOT BACKWARD COMPATIBILITY: Deprecated function and class removed
+# All WebSocket authentication now flows through authenticate_websocket_ssot()
 
 
 # Backward compatibility functions for tests
