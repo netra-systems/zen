@@ -1265,7 +1265,8 @@ class MessageRouter:
             UserMessageHandler(), 
             JsonRpcHandler(),
             ErrorHandler(),
-            BatchMessageHandler()  # Add batch processing capability
+            BatchMessageHandler(),  # Add batch processing capability
+            QualityRouterHandler()  # Add quality router handler for SSOT integration
         ]
         self.fallback_handler = BaseMessageHandler([])
         self.routing_stats = {

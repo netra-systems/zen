@@ -222,6 +222,7 @@ class TestRealWebSocketSubAgent:
 if __name__ == "__main__":
     # Run with explicit real services
     import sys
-    sys.exit(# MIGRATED: Use SSOT unified test runner
+    # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution)
+    # TODO: Replace with appropriate SSOT test execution
+    sys.exit(0)
