@@ -2409,13 +2409,23 @@ class UnifiedTestRunner:
                 # Fallback defaults: quick tests that should usually pass
                 categories = ["smoke", "unit", "integration"]
         
-        # Filter categories that exist in the system
-        valid_categories = [cat for cat in categories if cat in self.category_system.categories]
+        # Filter categories that exist in the system - enhanced for combined categories (Issue #1270)
+        def is_valid_category(category: str) -> bool:
+            """Check if a category (simple or combined) is valid."""
+            if '+' in category:
+                # Combined category: validate each part separately
+                parts = [part.strip() for part in category.split('+')]
+                return all(part in self.category_system.categories for part in parts)
+            else:
+                # Simple category: direct validation
+                return category in self.category_system.categories
+
+        valid_categories = [cat for cat in categories if is_valid_category(cat)]
         if valid_categories != categories:
             missing = set(categories) - set(valid_categories)
             if missing:
                 print(f"Warning: Categories not found: {missing}")
-        
+
         return valid_categories
     
     def _get_categories_for_service(self, service: str) -> List[str]:
