@@ -360,7 +360,9 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         for i, test_case in enumerate(test_cases):
             self.mock_llm_client.agenerate.return_value = test_case['llm_response']
             from netra_backend.app.schemas.agent import SubAgentLifecycle
-            supervisor.set_state(SubAgentLifecycle.PENDING)
+            current_state = supervisor.get_state()
+            if current_state != SubAgentLifecycle.PENDING:
+                supervisor.set_state(SubAgentLifecycle.PENDING)
             result = await supervisor.execute(context=self.user_context, stream_updates=True)
             results.append(result)
             assert result is not None, f'Test case {i}: Result should not be None'
@@ -406,8 +408,16 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         validated_context2 = validate_user_context(context2)
         assert validated_context1 == context1, 'Context 1 should be valid'
         assert validated_context2 == context2, 'Context 2 should be valid'
-        managed_context1 = context_manager.create_managed_context(user_id=context1.user_id, request_id=context1.request_id)
-        managed_context2 = context_manager.create_managed_context(user_id=context2.user_id, request_id=context2.request_id)
+        # Create managed contexts using async pattern to avoid asyncio.run() conflict
+        managed_context1 = await create_isolated_execution_context(
+            user_id=context1.user_id, request_id=context1.request_id, thread_id=str(uuid.uuid4())
+        )
+        managed_context2 = await create_isolated_execution_context(
+            user_id=context2.user_id, request_id=context2.request_id, thread_id=str(uuid.uuid4())
+        )
+        # Register contexts with context manager for isolation validation
+        context_manager._contexts[f'{context1.user_id}:{context1.request_id}'] = managed_context1
+        context_manager._contexts[f'{context2.user_id}:{context2.request_id}'] = managed_context2
         context1_key = f'{context1.user_id}:{context1.request_id}'
         context2_key = f'{context2.user_id}:{context2.request_id}'
         is_isolated1 = context_manager.validate_isolation(context1_key)
