@@ -41,6 +41,7 @@ from test_framework.ssot.orchestration import get_orchestration_config
 from test_framework.ssot.websocket_test_utility import WebSocketTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 from netra_backend.app.agents.triage_agent import TriageAgent
@@ -93,17 +94,18 @@ class MultiAgentWorkflowTracker:
 class TestMultiAgentGoldenPathWorkflowsIntegration(SSotAsyncTestCase):
     """Integration tests for Multi-Agent Golden Path workflows."""
 
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def setup_test_environment(self):
         """Set up test environment with real multi-agent components."""
-        super().setUp()
         self.orchestration_config = get_orchestration_config()
         self.websocket_manager = WebSocketTestManager()
         self.user_id = f'test_user_{uuid.uuid4().hex[:8]}'
         self.run_id = f'test_run_{uuid.uuid4().hex[:8]}'
         self.workflow_tracker = MultiAgentWorkflowTracker(self.user_id, self.run_id)
         self.agent_registry = AgentRegistry()
-        self.user_context = UserExecutionContext(user_id=self.user_id, run_id=self.run_id, session_id=f'session_{uuid.uuid4().hex[:8]}', thread_id=f'thread_{uuid.uuid4().hex[:8]}')
-        self.websocket_bridge = AgentWebSocketBridge(user_id=self.user_id, run_id=self.run_id, websocket_manager=Mock())
+        self.user_context = UserExecutionContext(user_id=self.user_id, run_id=self.run_id, thread_id=f'thread_{uuid.uuid4().hex[:8]}')
+        self.websocket_bridge = AgentWebSocketBridge(user_context=self.user_context)
+        self.execution_engine = UserExecutionEngine(user_context=self.user_context)
 
     @pytest.mark.asyncio
     async def test_complete_golden_path_workflow_execution(self):
@@ -114,9 +116,9 @@ class TestMultiAgentGoldenPathWorkflowsIntegration(SSotAsyncTestCase):
             if agent_name in ['supervisor', 'triage', 'data_helper', 'apex_optimizer']:
                 agent_type = AgentType.SUPERVISOR if agent_name == 'supervisor' else AgentType.TRIAGE if agent_name == 'triage' else AgentType.DATA_HELPER if agent_name == 'data_helper' else AgentType.OPTIMIZER
                 await self.workflow_tracker.track_agent_execution(agent_type, event_type, data)
-        with patch.object(UnifiedWebSocketEmitter, 'emit_agent_event') as mock_emit:
+        with patch.object(UnifiedWebSocketEmitter, 'emit') as mock_emit:
             mock_emit.side_effect = track_workflow_events
-            workflow_orchestrator = WorkflowOrchestrator(agent_registry=self.agent_registry, websocket_bridge=self.websocket_bridge, user_context=self.user_context)
+            workflow_orchestrator = WorkflowOrchestrator(agent_registry=self.agent_registry, websocket_manager=self.websocket_manager, user_context=self.user_context)
             complex_message = MessageRequest(message='Analyze my AI infrastructure performance and provide optimization recommendations with data insights', thread_id=self.user_context.thread_id)
             with patch.object(UnifiedToolDispatcher, 'dispatch_tool') as mock_tool:
 
@@ -166,7 +168,7 @@ class TestMultiAgentGoldenPathWorkflowsIntegration(SSotAsyncTestCase):
             agent_name = data.get('agent_name', 'unknown')
             if 'context' in data:
                 state_tracking[f'{agent_name}_{event_type}'] = data['context'].copy()
-        with patch.object(UnifiedWebSocketEmitter, 'emit_agent_event') as mock_emit:
+        with patch.object(UnifiedWebSocketEmitter, 'emit') as mock_emit:
             mock_emit.side_effect = track_state_preservation
             complex_state = DeepAgentState(agent_type=AgentType.SUPERVISOR, current_stage='processing', context={'user_preferences': {'optimization_level': 'aggressive'}, 'session_data': {'previous_analyses': ['performance', 'cost']}, 'workflow_metadata': {'priority': 'high', 'deadline': 'urgent'}}, user_context=self.user_context)
             message_request = MessageRequest(message='Complex multi-step analysis with state preservation requirements', thread_id=self.user_context.thread_id)
@@ -190,9 +192,9 @@ class TestMultiAgentGoldenPathWorkflowsIntegration(SSotAsyncTestCase):
         async def track_failures(event_type: str, data: Dict[str, Any]):
             if 'error' in data or 'failed' in str(data):
                 failure_scenarios.append({'event_type': event_type, 'data': data, 'timestamp': datetime.now().isoformat()})
-        with patch.object(UnifiedWebSocketEmitter, 'emit_agent_event') as mock_emit:
+        with patch.object(UnifiedWebSocketEmitter, 'emit') as mock_emit:
             mock_emit.side_effect = track_failures
-            workflow_orchestrator = WorkflowOrchestrator(agent_registry=self.agent_registry, websocket_bridge=self.websocket_bridge, user_context=self.user_context)
+            workflow_orchestrator = WorkflowOrchestrator(agent_registry=self.agent_registry, websocket_manager=self.websocket_manager, user_context=self.user_context)
             message_request = MessageRequest(message='Test workflow resilience with agent failures', thread_id=self.user_context.thread_id)
             with patch.object(UnifiedToolDispatcher, 'dispatch_tool') as mock_tool:
                 mock_tool.side_effect = [{'result': 'Success'}, Exception('Simulated agent failure'), {'result': 'Recovery successful'}]
@@ -228,7 +230,7 @@ class TestMultiAgentGoldenPathWorkflowsIntegration(SSotAsyncTestCase):
                 await self.workflow_tracker.track_agent_execution(AgentType.SUPERVISOR, event_type, data)
             elif user_id == user_2_id:
                 await workflow_tracker_2.track_agent_execution(AgentType.SUPERVISOR, event_type, data)
-        with patch.object(UnifiedWebSocketEmitter, 'emit_agent_event') as mock_emit:
+        with patch.object(UnifiedWebSocketEmitter, 'emit') as mock_emit:
             mock_emit.side_effect = route_workflow_events
             message_1 = MessageRequest(message='User 1 multi-agent workflow request', thread_id=self.user_context.thread_id)
             message_2 = MessageRequest(message='User 2 multi-agent workflow request', thread_id=user_2_context.thread_id)

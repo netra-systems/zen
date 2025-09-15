@@ -151,6 +151,13 @@ from shared.isolated_environment import get_env
 from netra_backend.app.auth_integration.auth import get_current_user
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
+# Startup phase validation for Phase 2 remediation
+from netra_backend.app.core.startup_phase_validation import (
+    get_startup_validator,
+    ContractPhase,
+    StartupValidationError
+)
+
 logger = get_logger(__name__)
 
 # Custom auth dependency that returns 401 instead of 403 for test compatibility
@@ -1697,6 +1704,7 @@ class WebSocketSSOTRouter:
         try:
             # SSOT PATTERN: Direct manager access for health checks (no user context required)
             manager = get_websocket_manager(user_context=None)
+            manager = get_websocket_manager(user_context=None)
             health_status = {
                 "status": "healthy",
                 "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -1727,7 +1735,7 @@ class WebSocketSSOTRouter:
         try:
             # SSOT PATTERN: Direct manager access for configuration endpoint
             manager = get_websocket_manager(user_context=None)
-
+            
             return {
                 "websocket_config": {
                     "heartbeat_interval": 30,
@@ -1751,6 +1759,7 @@ class WebSocketSSOTRouter:
         """Get detailed WebSocket statistics."""
         try:
             # SSOT PATTERN: Direct manager access for statistics endpoint
+            manager = get_websocket_manager(user_context=None)
             manager = get_websocket_manager(user_context=None)
             message_router = get_message_router()
             
