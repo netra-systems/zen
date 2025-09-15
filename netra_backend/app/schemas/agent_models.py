@@ -263,13 +263,81 @@ class DeepAgentState(BaseModel):
                 cls._sanitize_agent_input_recursive(data_list[i], f"{path}[{i}]")
 
     @classmethod
-    def _validate_string_security(cls, value: str, path: str) -> None:
-        """Validate string values for security threats."""
-        if cls._is_dangerous_string(value):
-            raise ValueError(
-                f"SECURITY VIOLATION: Dangerous content detected in {path}. "
-                f"Input contains potential security threats that are not allowed."
-            )
+    def _sanitize_string_content(cls, value: str, path: str = "") -> str:
+        """Sanitize string content by removing or replacing dangerous patterns.
+
+        Args:
+            value: The string value to sanitize
+            path: Current path in the data structure for logging
+
+        Returns:
+            Sanitized string with dangerous content removed or replaced
+        """
+        if not isinstance(value, str):
+            return value
+
+        sanitized_value = value
+
+        # Define dangerous patterns and their replacements
+        dangerous_patterns = [
+            # XSS patterns
+            (r'<script[^>]*>.*?</script>', '[XSS_SCRIPT_REMOVED]'),
+            (r'<img[^>]*onerror[^>]*>', '[XSS_IMG_REMOVED]'),
+            (r'<svg[^>]*onload[^>]*>', '[XSS_SVG_REMOVED]'),
+            (r'<iframe[^>]*>', '[XSS_IFRAME_REMOVED]'),
+            (r'javascript:', '[JS_URL_REMOVED]:'),
+            (r'onerror\s*=', 'onerror_removed='),
+            (r'onload\s*=', 'onload_removed='),
+
+            # SQL injection patterns
+            (r';\s*DROP\s+TABLE', '; [SQL_DROP_REMOVED]'),
+            (r';\s*DELETE\s+FROM', '; [SQL_DELETE_REMOVED]'),
+            (r';\s*INSERT\s+INTO', '; [SQL_INSERT_REMOVED]'),
+            (r'UNION\s+SELECT', '[SQL_UNION_REMOVED]'),
+            (r"'\s*OR\s*'[^']*'\s*=\s*'[^']*'", "'[SQL_OR_REMOVED]'"),
+            (r"'--", "'[SQL_COMMENT_REMOVED]"),
+            (r"';\s*", "'[SQL_SEMICOLON_REMOVED] "),
+
+            # Command injection patterns
+            (r';\s*rm\s+-rf\s*/', '; [CMD_RM_REMOVED]/'),
+            (r';\s*cat\s+/etc/passwd', '; [CMD_CAT_REMOVED]'),
+            (r'\|\s*nc\s+', '| [CMD_NC_REMOVED] '),
+            (r'&&\s*wget\s+', '&& [CMD_WGET_REMOVED] '),
+            (r'&&\s*curl\s+', '&& [CMD_CURL_REMOVED] '),
+            (r';\s*curl\s+', '; [CMD_CURL_REMOVED] '),
+            (r'curl\s+http', '[CMD_CURL_REMOVED] http'),
+            (r'wget\s+http', '[CMD_WGET_REMOVED] http'),
+            (r';\s+', '; [CMD_SEMICOLON_REMOVED] '),
+            (r'`[^`]*`', '[CMD_BACKTICK_REMOVED]'),
+            (r'\$\([^)]*\)', '[CMD_SUBSHELL_REMOVED]'),
+
+            # Code execution patterns
+            (r'__import__\s*\(', '[CODE_IMPORT_REMOVED]('),
+            (r'exec\s*\(', '[CODE_EXEC_REMOVED]('),
+            (r'eval\s*\(', '[CODE_EVAL_REMOVED]('),
+            (r'import\s+os', '[CODE_OS_IMPORT_REMOVED]'),
+            (r'__class__', '[CODE_CLASS_REMOVED]'),
+            (r'__globals__', '[CODE_GLOBALS_REMOVED]'),
+
+            # Path traversal patterns
+            (r'\.\./', '[PATH_TRAVERSAL_REMOVED]/'),
+            (r'\.\.\\\\', '[PATH_TRAVERSAL_REMOVED]\\\\'),
+            (r'/etc/passwd', '/[SENSITIVE_FILE_REMOVED]'),
+            (r'system32', '[SYSTEM_DIR_REMOVED]'),
+
+            # API keys and credentials
+            (r'sk-[a-zA-Z0-9\-_]{10,}', '[API_KEY_REMOVED]'),
+            (r'admin:admin', '[CREDENTIALS_REMOVED]'),
+            (r'password\s*[:=]\s*\w+', 'password=[REDACTED]'),
+            (r'secret\s*[:=]\s*\w+', 'secret=[REDACTED]'),
+            (r'token\s*[:=]\s*\w+', 'token=[REDACTED]'),
+        ]
+
+        # Apply sanitization patterns
+        for pattern, replacement in dangerous_patterns:
+            sanitized_value = re.sub(pattern, replacement, sanitized_value, flags=re.IGNORECASE | re.DOTALL)
+
+        return sanitized_value
 
     @classmethod
     def _is_dangerous_string(cls, value: str) -> bool:
