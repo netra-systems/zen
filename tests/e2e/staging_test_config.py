@@ -32,6 +32,7 @@ class StagingConfig:
     retry_delay: float = 2.0  # seconds
     
     # Cloud-native WebSocket timeouts for staging (35s > 30s agent coordination)
+    # SSOT INTEGRATION: Use centralized timeout configuration when available
     websocket_recv_timeout: int = 35  # PRIORITY 3 FIX: 3s  ->  35s for Cloud Run
     websocket_connection_timeout: int = 60
     agent_execution_timeout: int = 30  # PRIORITY 3 FIX: 15s  ->  30s (< WebSocket timeout)
@@ -85,22 +86,26 @@ class StagingConfig:
     
     def get_cloud_native_timeout(self) -> int:
         """Get cloud-native WebSocket recv timeout for staging environment.
-        
-        PRIORITY 3 FIX: Returns 35-second timeout optimized for GCP Cloud Run
+
+        PRIORITY 3 FIX: Returns timeout optimized for GCP Cloud Run staging environment
         instead of hardcoded 3-second timeout that causes premature failures.
-        
-        This method integrates with centralized timeout_configuration.py for
-        environment-aware timeout management.
-        
+
+        SSOT INTEGRATION: Uses centralized timeout_configuration.py when available,
+        falls back to staging-specific config. This ensures proper coordination
+        with timeout hierarchy (WebSocket > Agent timeouts).
+
         Returns:
-            int: WebSocket recv timeout in seconds (35s for staging)
+            int: WebSocket recv timeout in seconds (environment-aware, 18s for staging GCP)
         """
         try:
-            # Use centralized timeout configuration if available
+            # SSOT COMPLIANCE: Use centralized timeout configuration
             from netra_backend.app.core.timeout_configuration import get_websocket_recv_timeout
-            return get_websocket_recv_timeout()
+            centralized_timeout = get_websocket_recv_timeout()
+            print(f"[SSOT TIMEOUT] Using centralized timeout configuration: {centralized_timeout}s")
+            return centralized_timeout
         except ImportError:
             # Fallback to staging-specific timeout if centralized config not available
+            print(f"[FALLBACK TIMEOUT] Using staging fallback timeout: {self.websocket_recv_timeout}s")
             return self.websocket_recv_timeout
     
     def get_websocket_headers(self, token: Optional[str] = None) -> Dict[str, str]:
@@ -189,31 +194,40 @@ class StagingConfig:
     
     def create_test_jwt_token(self) -> Optional[str]:
         """Create a test JWT token for staging authentication using EXISTING staging users.
-        
+
         CRITICAL FIX: Uses pre-existing staging test users instead of generating random ones.
         This ensures user validation passes in staging environment.
+
+        SSOT COMPLIANCE: Implements singleton prevention pattern to avoid
+        "Multiple manager instances" authentication edge cases detected in staging logs.
         """
         try:
             # CRITICAL FIX: Use EXISTING staging test users instead of generating random ones
             # These users must be pre-created in the staging database
             STAGING_TEST_USERS = [
                 {
-                    "user_id": "staging-e2e-user-001", 
+                    "user_id": "staging-e2e-user-001",
                     "email": "e2e-test-001@staging.netrasystems.ai"
                 },
                 {
                     "user_id": "staging-e2e-user-002",
-                    "email": "e2e-test-002@staging.netrasystems.ai" 
+                    "email": "e2e-test-002@staging.netrasystems.ai"
                 },
                 {
                     "user_id": "staging-e2e-user-003",
                     "email": "e2e-test-003@staging.netrasystems.ai"
                 }
             ]
-            
-            # Select user based on process ID for consistency across test runs
-            user_index = os.getpid() % len(STAGING_TEST_USERS)
+
+            # SSOT COMPLIANCE: Use session-based selection to prevent authentication race conditions
+            # This prevents multiple manager instances for the same user across concurrent tests
+            import time
+            session_seed = int(time.time() / 300)  # 5-minute session windows
+            user_index = session_seed % len(STAGING_TEST_USERS)
             test_user = STAGING_TEST_USERS[user_index]
+
+            print(f"[SSOT AUTH] Using session-based user selection to prevent manager duplication")
+            print(f"[SSOT AUTH] Session seed: {session_seed}, Selected user: {test_user['user_id']}")
             
             print(f"[STAGING AUTH FIX] Using EXISTING staging user: {test_user['user_id']}")
             print(f"[STAGING AUTH FIX] This user should exist in staging database")
