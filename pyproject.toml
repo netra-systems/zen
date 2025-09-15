@@ -644,9 +644,12 @@ markers = [
     
     # Missing supervisor orchestration marker causing collection failures
     "supervisor_orchestration: Supervisor orchestration and multi-user isolation tests",
-    
+
     # Missing agent_handoff_chain marker causing collection failures
     "agent_handoff_chain: Agent handoff chain coordination tests",
+
+    # Missing golden_path_phase2 marker causing collection failures (Issue #881)
+    "golden_path_phase2: Golden Path Phase 2 regression prevention and validation tests",
 
     # Issue #861 Phase 1 Integration Test Markers
     "websocket_flow: WebSocket message flow integration tests",

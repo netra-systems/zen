@@ -43,7 +43,7 @@ from netra_backend.app.websocket_core.types import (
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
 from netra_backend.app.websocket_core.event_validator import EventValidator
-from netra_backend.app.websocket_core.unified_emitter import UnifiedEventEmitter
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UnifiedEventEmitter
 
 # Import agent WebSocket integration components
 from netra_backend.app.agents.base_agent import BaseAgent
