@@ -292,12 +292,8 @@ class TestSSOTTestRunnerEnforcement(SSotBaseTestCase):
             if 'argparse' in content.lower():
                 reasons.append("Has argument parsing")
             
-            if '# MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution:
-                reasons.append("Calls # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution")
+            if 'pytest.main(' in content:
+                reasons.append("Calls pytest.main directly")
             
             if 'subprocess' in content.lower() and 'pytest' in content.lower():
                 reasons.append("Subprocess pytest execution")

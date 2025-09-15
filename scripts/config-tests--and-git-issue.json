@@ -1,0 +1,104 @@
+{
+  "instances": [
+    {
+      "command": "/gitissueprogressorv3 no labels",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 p0",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+      {
+      "command": "/gitissueprogressorv3 most important",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 critical",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 p0",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 goldenpath blocking",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 ssot",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 agents",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+      {
+      "command": "/gitissueprogressorv3 tests",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 long standing issues",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+      {
+      "command": "/ultimate-test-deploy-loop",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gcploggardener",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/runtests all, unit",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/runtests critical, e2e",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/runtests critical, integration",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/runtests agents, e2e gcp",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },    
+    {
+      "command": "/gitissueprogressorv3 ssot remove legacy",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+      {
+      "command": "/gitissueprogressorv3 upgrade legacy to ssot",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 goldenpath",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 goldenpath p1",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    }
+  ]
+}

@@ -119,20 +119,15 @@ class TestSsotViolationsRemediationComplete(SSotBaseTestCase):
                     with open(py_file, 'r', encoding='utf-8') as f:
                         content = f.read()
                         
-                    # Check for direct # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution usage (excluding SSOT unified_test_runner.py)
-                    if ('# MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution and
+                    # Check for direct pytest.main usage (excluding SSOT unified_test_runner.py)
+                    if ('pytest.main(' in content and
                         not content.strip().startswith('#')):
                         
                         # Additional validation to avoid false positives
                         lines = content.splitlines()
                         for line_num, line in enumerate(lines, 1):
-                            if ('# MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution.startswith('#') and
+                            if ('pytest.main(' in line.strip() and
+                                not line.strip().startswith('#') and
                                 not line.strip().startswith('"""') and
                                 not line.strip().startswith("'")):
                                 violations.append(str(py_file.relative_to(self.project_root)))
@@ -406,9 +401,7 @@ class TestSsotViolationsRemediationComplete(SSotBaseTestCase):
         self.assertEqual(
             pytest_count, 0,
             f"PYTEST BYPASS VIOLATIONS MUST BE ZERO: Found {pytest_count} files still using "
-            f"direct # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution bypassing unified_test_runner.py. "
+            f"direct pytest.main bypassing unified_test_runner.py. "
             f"Violating files: {pytest_files[:5]}{'...' if len(pytest_files) > 5 else ''}"
         )
         
