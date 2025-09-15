@@ -48,8 +48,41 @@ class StartupPhase(Enum):
 
 
 class DeterministicStartupError(Exception):
-    """Raised when a critical service fails during startup."""
-    pass
+    """
+    Raised when a critical service fails during startup.
+    
+    Enhanced to preserve original error context for Issue #1278 debugging.
+    """
+    def __init__(self, message: str, original_error: Exception = None, phase: StartupPhase = None, timeout_duration: float = None):
+        super().__init__(message)
+        self.original_error = original_error
+        self.phase = phase  
+        self.timeout_duration = timeout_duration
+        self.error_context = self._build_error_context(message, original_error, phase, timeout_duration)
+    
+    def _build_error_context(self, message: str, original_error: Exception = None, phase: StartupPhase = None, timeout_duration: float = None) -> dict:
+        """Build comprehensive error context for debugging Issue #1278."""
+        context = {
+            "message": message,
+            "phase": phase.value if phase else None,
+            "timeout_duration": timeout_duration,
+            "original_error_type": type(original_error).__name__ if original_error else None,
+            "original_error_message": str(original_error) if original_error else None,
+        }
+        
+        # Add Cloud SQL specific context for timeout errors
+        if isinstance(original_error, asyncio.TimeoutError):
+            context["timeout_type"] = "asyncio.TimeoutError" 
+            context["is_database_timeout"] = "database" in message.lower() or "postgres" in message.lower()
+            context["is_vpc_connector_related"] = "vpc" in message.lower() or "cloud sql" in message.lower()
+            
+        return context
+    
+    def __str__(self) -> str:
+        base_message = super().__str__()
+        if self.original_error:
+            return f"{base_message} (Original: {type(self.original_error).__name__}: {self.original_error})"
+        return base_message
 
 
 class StartupOrchestrator:
@@ -245,18 +278,37 @@ class StartupOrchestrator:
         self.logger.info("  [U+2713] Step 7: Startup fixes applied")
     
     async def _phase3_database_setup(self) -> None:
-        """Phase 3: DATABASE - Database connections and schema."""
-        self.logger.info("PHASE 3: DATABASE - Database Setup")
+        """Phase 3: DATABASE - Database connections and schema with Issue #1278 graceful degradation."""
+        self.logger.info("PHASE 3: DATABASE - Database Setup with VPC Connector Capacity Awareness")
         
-        # Step 7: Database connection (CRITICAL)
-        await self._initialize_database()
-        if not hasattr(self.app.state, 'db_session_factory') or self.app.state.db_session_factory is None:
-            raise DeterministicStartupError("Database initialization failed - db_session_factory is None")
-        self.logger.info("  [U+2713] Step 7: Database connected")
-        
-        # Step 8: Database schema validation (CRITICAL)
-        await self._validate_database_schema()
-        self.logger.info("  [U+2713] Step 8: Database schema validated")
+        try:
+            # Step 7: Enhanced database connection with capacity awareness (CRITICAL)
+            await self._initialize_database_with_capacity_awareness()
+            if not hasattr(self.app.state, 'db_session_factory') or self.app.state.db_session_factory is None:
+                raise DeterministicStartupError("Database initialization failed - db_session_factory is None")
+            self.logger.info("  [U+2713] Step 7: Database connected with capacity awareness")
+            
+            # Step 8: Database schema validation (CRITICAL)
+            await self._validate_database_schema()
+            self.logger.info("  [U+2713] Step 8: Database schema validated")
+            
+        except Exception as e:
+            # Apply graceful degradation for Issue #1278
+            self.logger.error(f"Database setup failed: {e}")
+            
+            # Check if this is a timeout-related failure (Issue #1278 pattern)
+            timeout_occurred = "timeout" in str(e).lower()
+            
+            # Apply graceful degradation
+            from netra_backend.app.infrastructure.smd_graceful_degradation import handle_startup_phase_failure
+            phase_result = await handle_startup_phase_failure(self.app.state, "database", e, timeout_occurred)
+            
+            if phase_result.status.value == "completed" and phase_result.fallback_applied:
+                self.logger.warning("  [U+26A0] Step 7: Database operating in degraded mode")
+                return  # Continue with degraded database functionality
+            else:
+                # Fallback failed - this is still a critical failure
+                raise DeterministicStartupError(f"Database setup failed and fallback unsuccessful: {e}") from e
     
     async def _phase4_cache_setup(self) -> None:
         """Phase 4: CACHE - Redis and caching systems."""
@@ -961,6 +1013,109 @@ class StartupOrchestrator:
         from netra_backend.app.startup_module import run_database_migrations
         run_database_migrations(self.logger)
     
+    async def _initialize_database_with_progressive_retry(self, base_timeout: float, max_retries: int = 3) -> None:
+        """
+        Initialize database with progressive retry logic for Issue #1278.
+        
+        Implements exponential backoff with jitter to handle VPC connector capacity constraints.
+        """
+        import random
+        from netra_backend.app.core.database_timeout_config import get_progressive_retry_config
+        from shared.isolated_environment import get_env
+        
+        environment = get_env().get("ENVIRONMENT", "development")
+        retry_config = get_progressive_retry_config(environment)
+        
+        last_error = None
+        attempt = 0
+        
+        for attempt in range(retry_config["max_retries"]):
+            try:
+                # Calculate progressive timeout for this attempt
+                timeout_multiplier = 1 + (attempt * 0.5)  # 1.0, 1.5, 2.0, 2.5x base timeout
+                current_timeout = min(base_timeout * timeout_multiplier, retry_config["max_delay"] + base_timeout)
+                
+                self.logger.info(f"Database initialization attempt {attempt + 1}/{retry_config['max_retries']} "
+                               f"with timeout {current_timeout:.1f}s")
+                
+                # Attempt database initialization
+                await self._initialize_database_single_attempt(current_timeout)
+                
+                # Success - log and return
+                if attempt > 0:
+                    self.logger.info(f"Database initialization succeeded on attempt {attempt + 1} "
+                                   f"after {attempt} retries")
+                return
+                
+            except (asyncio.TimeoutError, Exception) as e:
+                last_error = e
+                attempt_type = "timeout" if isinstance(e, asyncio.TimeoutError) else "error"
+                self.logger.warning(f"Database initialization attempt {attempt + 1} failed ({attempt_type}): {e}")
+                
+                # Don't retry on last attempt
+                if attempt >= retry_config["max_retries"] - 1:
+                    break
+                
+                # Calculate delay with exponential backoff and jitter
+                base_delay = retry_config["base_delay"]
+                delay = min(
+                    base_delay * (retry_config["exponential_base"] ** attempt),
+                    retry_config["max_delay"]
+                )
+                
+                if retry_config["jitter"]:
+                    # Add 0-50% jitter to prevent thundering herd
+                    jitter = random.uniform(0, delay * 0.5)
+                    delay += jitter
+                
+                self.logger.info(f"Retrying database initialization in {delay:.1f}s "
+                               f"(attempt {attempt + 2}/{retry_config['max_retries']})")
+                await asyncio.sleep(delay)
+        
+        # All retries failed - raise the last error with context
+        error_msg = (
+            f"Database initialization failed after {retry_config['max_retries']} attempts in {environment} environment. "
+            f"Last error: {last_error}"
+        )
+        self.logger.error(error_msg)
+        
+        # Track failure properly
+        if hasattr(self, 'current_phase') and self.current_phase == StartupPhase.DATABASE:
+            self._fail_phase(StartupPhase.DATABASE, last_error)
+        
+        raise DeterministicStartupError(error_msg, original_error=last_error, phase=StartupPhase.DATABASE) from last_error
+
+    async def _initialize_database_single_attempt(self, timeout: float) -> None:
+        """Single attempt at database initialization with specified timeout."""
+        from netra_backend.app.db.postgres import initialize_postgres
+        from netra_backend.app.startup_module import _ensure_database_tables_exist
+        from shared.isolated_environment import get_env
+        
+        environment = get_env().get("ENVIRONMENT", "development")
+        
+        # Initialize database with specified timeout
+        async_session_factory = await asyncio.wait_for(
+            asyncio.to_thread(initialize_postgres),
+            timeout=timeout
+        )
+        
+        if async_session_factory is None:
+            raise DeterministicStartupError("Database initialization returned None")
+        
+        self.app.state.db_session_factory = async_session_factory
+        self.app.state.database_available = True
+        self.logger.debug("Database session factory successfully initialized")
+        
+        # Ensure tables exist with shorter timeout for table operations
+        table_timeout = min(timeout * 0.6, 25.0)  # 60% of init timeout, max 25s
+        is_staging = environment.lower() == 'staging'
+        graceful_mode = is_staging
+        
+        await asyncio.wait_for(
+            _ensure_database_tables_exist(self.logger, graceful_startup=graceful_mode),
+            timeout=table_timeout
+        )
+
     async def _initialize_database(self) -> None:
         """Initialize database connection - CRITICAL."""
         from netra_backend.app.db.postgres import initialize_postgres
@@ -1015,9 +1170,88 @@ class StartupOrchestrator:
                 f"Cloud SQL instance accessibility."
             )
             self.logger.error(error_msg)
-            raise DeterministicStartupError(error_msg) from e
+            
+            # CRITICAL FIX Issue #1278: Track Phase 3 database timeout failure properly
+            if hasattr(self, 'current_phase') and self.current_phase == StartupPhase.DATABASE:
+                self._fail_phase(StartupPhase.DATABASE, e)
+                self.logger.error(f"Phase {StartupPhase.DATABASE.value} marked as failed due to database timeout")
+            
+            raise DeterministicStartupError(error_msg, original_error=e, phase=StartupPhase.DATABASE, timeout_duration=initialization_timeout) from e
         except Exception as e:
             error_msg = f"Database initialization failed in {environment} environment: {e}"
+            self.logger.error(error_msg)
+            
+            # CRITICAL FIX Issue #1278: Track Phase 3 database failure properly  
+            if hasattr(self, 'current_phase') and self.current_phase == StartupPhase.DATABASE:
+                self._fail_phase(StartupPhase.DATABASE, e)
+                self.logger.error(f"Phase {StartupPhase.DATABASE.value} marked as failed due to database error")
+            
+            raise DeterministicStartupError(error_msg, original_error=e, phase=StartupPhase.DATABASE) from e
+    
+    async def _initialize_database_with_capacity_awareness(self) -> None:
+        """Initialize database connection with VPC connector capacity awareness for Issue #1278."""
+        from netra_backend.app.db.postgres import initialize_postgres
+        from netra_backend.app.startup_module import _ensure_database_tables_exist
+        from netra_backend.app.infrastructure.vpc_connector_monitoring import (
+            start_vpc_monitoring, get_capacity_aware_database_timeout
+        )
+        from netra_backend.app.infrastructure.service_auth_config import validate_service_authentication
+        from shared.isolated_environment import get_env
+        
+        # Get environment-aware configuration
+        environment = get_env().get("ENVIRONMENT", "development")
+        
+        # Validate service authentication configuration (Issue #1278 fix)
+        auth_valid, auth_report = validate_service_authentication(environment)
+        if not auth_valid and environment in ["staging", "production"]:
+            self.logger.error(f"Service authentication validation failed: {auth_report}")
+            # Log details but continue - authentication can be fixed post-deployment
+            self.logger.warning("Continuing with database initialization despite auth configuration issues")
+        
+        # Start VPC connector monitoring for capacity awareness
+        if environment in ["staging", "production"]:
+            await start_vpc_monitoring(environment)
+            self.logger.info("VPC connector capacity monitoring started")
+        
+        # Get capacity-aware timeouts
+        initialization_timeout = get_capacity_aware_database_timeout(environment, "initialization")
+        table_setup_timeout = get_capacity_aware_database_timeout(environment, "table_setup")
+        
+        self.logger.info(f"Initializing database for {environment} with capacity-aware timeouts: "
+                        f"init={initialization_timeout}s, tables={table_setup_timeout}s")
+        
+        # Database initialization with progressive retry and enhanced error handling
+        try:
+            self.logger.debug(f"Starting capacity-aware database initialization with progressive retry...")
+            
+            # Use progressive retry mechanism for resilient initialization
+            await self._initialize_database_with_progressive_retry(initialization_timeout)
+            
+            # Mark as capacity-aware since we used VPC monitoring
+            self.app.state.database_capacity_aware = True
+            self.logger.info("Database session factory successfully initialized with capacity awareness and progressive retry")
+            
+            # Table setup with capacity awareness
+            is_staging = environment.lower() == 'staging'
+            graceful_mode = is_staging  # Staging uses graceful mode
+            
+            self.logger.debug(f"Starting capacity-aware table setup...")
+            await asyncio.wait_for(
+                _ensure_database_tables_exist(self.logger, graceful_startup=graceful_mode),
+                timeout=table_setup_timeout
+            )
+            self.logger.info("Database table setup completed with capacity awareness")
+            
+        except asyncio.TimeoutError as e:
+            error_msg = (
+                f"Database initialization timeout after {initialization_timeout}s in {environment} environment. "
+                f"This may indicate VPC connector capacity pressure or Cloud SQL resource constraints. "
+                f"Issue #1278 pattern detected - recommend investigating VPC connector scaling and Cloud SQL capacity."
+            )
+            self.logger.error(error_msg)
+            raise DeterministicStartupError(error_msg) from e
+        except Exception as e:
+            error_msg = f"Capacity-aware database initialization failed in {environment} environment: {e}"
             self.logger.error(error_msg)
             raise DeterministicStartupError(error_msg) from e
     

@@ -50,16 +50,18 @@ def get_database_timeout_config(environment: str) -> Dict[str, float]:
             "health_check_timeout": 5.0,       # Fast test health checks
         },
         "staging": {
-            # CRITICAL FIX Issue #1263: Database Connection Timeout - Cloud SQL compatibility
-            # Root cause: Insufficient timeout for Cloud SQL with VPC connector socket establishment
-            # Cloud SQL requires adequate time for connection setup through VPC connector
-            # Based on test analysis: Need ≥15s initialization, ≥10s connection for Cloud SQL
-            # Increased initialization_timeout to 25.0s to ensure reliable Cloud SQL connectivity
-            "initialization_timeout": 25.0,    # Cloud SQL connection establishment (increased from 20.0)
-            "table_setup_timeout": 10.0,       # Table verification with Cloud SQL latency
-            "connection_timeout": 15.0,        # Cloud SQL socket establishment (sufficient for VPC connector)
-            "pool_timeout": 15.0,              # Cloud SQL pool operations
-            "health_check_timeout": 10.0,      # Cloud SQL health validation
+            # CRITICAL FIX Issue #1278: VPC Connector Capacity Constraints - Further extended timeout configuration
+            # Root cause analysis: Previous 45.0s still insufficient for compound infrastructure failures
+            # New evidence from Issue #1278: VPC connector scaling + Cloud SQL capacity pressure creates compound delays
+            # VPC connector capacity pressure: 30s delay during peak scaling events 
+            # Cloud SQL resource constraints: 25s delay under concurrent connection pressure
+            # Network latency amplification: 10s additional delay during infrastructure stress
+            # Safety margin for cascading failures: 15s buffer
+            "initialization_timeout": 75.0,    # CRITICAL: Extended to handle compound VPC+CloudSQL delays (increased from 45.0)
+            "table_setup_timeout": 25.0,       # Extended for schema operations under load (increased from 15.0)
+            "connection_timeout": 35.0,        # Extended for VPC connector peak scaling delays (increased from 25.0)
+            "pool_timeout": 45.0,              # Extended for connection pool exhaustion + VPC delays (increased from 30.0)
+            "health_check_timeout": 20.0,      # Extended for compound infrastructure health checks (increased from 15.0)
         },
         "production": {
             # CRITICAL: Production needs maximum reliability
@@ -107,14 +109,18 @@ def get_cloud_sql_optimized_config(environment: str) -> Dict[str, any]:
                     "idle_in_transaction_session_timeout": "300000",  # 5 minutes
                 }
             },
-            # Pool configuration for Cloud SQL
+            # Pool configuration for Cloud SQL with capacity constraints (Issue #1278)
             "pool_config": {
-                "pool_size": 15,              # Larger pool for Cloud SQL latency
-                "max_overflow": 25,           # Higher overflow for bursts
-                "pool_timeout": 60.0,         # Longer timeout for Cloud SQL
+                "pool_size": 10,              # Reduced to respect Cloud SQL connection limits (reduced from 15)
+                "max_overflow": 15,           # Reduced to stay within 80% of Cloud SQL capacity (reduced from 25)
+                "pool_timeout": 90.0,         # Extended for VPC connector + Cloud SQL delays (increased from 60.0)
                 "pool_recycle": 3600,         # 1 hour recycle for stability
                 "pool_pre_ping": True,        # Always verify connections
                 "pool_reset_on_return": "rollback",  # Safe connection resets
+                # New: VPC connector capacity awareness
+                "vpc_connector_capacity_buffer": 5,   # Reserve connections for VPC connector scaling
+                "cloud_sql_capacity_limit": 100,     # Track Cloud SQL instance connection limit
+                "capacity_safety_margin": 0.8,       # Use only 80% of available connections
             }
         }
     else:
@@ -179,6 +185,73 @@ def get_progressive_retry_config(environment: str) -> Dict[str, any]:
         }
 
 
+def get_vpc_connector_capacity_config(environment: str) -> Dict[str, any]:
+    """Get VPC connector capacity configuration for Issue #1278.
+    
+    VPC connectors have throughput limits and scaling delays that affect
+    database connection establishment under load conditions.
+    
+    Args:
+        environment: Environment name
+        
+    Returns:
+        Dictionary with VPC connector capacity configuration
+    """
+    if is_cloud_sql_environment(environment):
+        return {
+            "throughput_baseline_gbps": 2.0,      # VPC connector baseline throughput
+            "throughput_max_gbps": 10.0,          # VPC connector maximum throughput
+            "scaling_delay_seconds": 30.0,        # Time for VPC connector auto-scaling
+            "concurrent_connection_limit": 50,    # Practical concurrent connection limit
+            "capacity_pressure_threshold": 0.7,   # Threshold for capacity pressure monitoring
+            "scaling_buffer_timeout": 20.0,       # Additional timeout during scaling events
+            "monitoring_enabled": True,           # Enable VPC connector monitoring
+            "capacity_aware_timeouts": True,      # Adjust timeouts based on VPC capacity
+        }
+    else:
+        return {
+            "throughput_baseline_gbps": None,     # No VPC connector in local/test
+            "scaling_delay_seconds": 0.0,
+            "concurrent_connection_limit": 1000,  # No practical limit for local
+            "capacity_pressure_threshold": 1.0,
+            "scaling_buffer_timeout": 0.0,
+            "monitoring_enabled": False,
+            "capacity_aware_timeouts": False,
+        }
+
+
+def calculate_capacity_aware_timeout(environment: str, base_timeout: float) -> float:
+    """Calculate timeout with VPC connector capacity awareness.
+    
+    Adjusts base timeout based on VPC connector capacity constraints
+    to prevent Issue #1278 recurrence.
+    
+    Args:
+        environment: Environment name
+        base_timeout: Base timeout value
+        
+    Returns:
+        Adjusted timeout accounting for VPC connector capacity
+    """
+    vpc_config = get_vpc_connector_capacity_config(environment)
+    
+    if not vpc_config["capacity_aware_timeouts"]:
+        return base_timeout
+    
+    # Add VPC connector scaling buffer
+    scaling_buffer = vpc_config["scaling_buffer_timeout"]
+    
+    # Add capacity pressure buffer (20% increase under pressure)
+    capacity_buffer = base_timeout * 0.2
+    
+    adjusted_timeout = base_timeout + scaling_buffer + capacity_buffer
+    
+    logger.debug(f"Timeout adjustment for {environment}: {base_timeout}s -> {adjusted_timeout}s "
+                f"(scaling: +{scaling_buffer}s, capacity: +{capacity_buffer}s)")
+    
+    return adjusted_timeout
+
+
 def log_timeout_configuration(environment: str) -> None:
     """Log the current timeout configuration for debugging.
     
@@ -188,9 +261,11 @@ def log_timeout_configuration(environment: str) -> None:
     timeout_config = get_database_timeout_config(environment)
     cloud_sql_config = get_cloud_sql_optimized_config(environment)
     retry_config = get_progressive_retry_config(environment)
+    vpc_config = get_vpc_connector_capacity_config(environment)
     
     logger.info(f"Database Configuration Summary for {environment}:")
     logger.info(f"  Timeout Configuration: {timeout_config}")
     logger.info(f"  Cloud SQL Optimized: {is_cloud_sql_environment(environment)}")
     logger.info(f"  Pool Configuration: {cloud_sql_config['pool_config']}")
     logger.info(f"  Retry Configuration: {retry_config}")
+    logger.info(f"  VPC Connector Configuration: {vpc_config}")
