@@ -45,7 +45,7 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 from netra_backend.app.agents.triage_agent import TriageAgent
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
-from netra_backend.app.agents.apex_optimizer_agent import ApexOptimizerAgent
+from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter

@@ -1,0 +1,1 @@
+# Issue 1184 - WebSocket Infrastructure Integration Validation Tests
