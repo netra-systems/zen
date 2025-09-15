@@ -16,7 +16,7 @@ import logging
 import time
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
@@ -463,22 +463,97 @@ class UnifiedAuthInterface:
     
     def validate_user_active(self, user: Optional[Dict]) -> bool:
         """Validate if user is active and not blacklisted.
-        
+
         Args:
             user: User dictionary from get_user_by_id
-            
+
         Returns:
             True if user is active and valid, False otherwise
         """
         if not user:
             return False
-            
+
         user_id = str(user.get("id", ""))
         if self.is_user_blacklisted(user_id):
             return False
-            
+
         # Check if user is marked as active
         return user.get("active", False) is True
+
+    async def validateTokenAndGetUser(self, token: str) -> Optional[Dict[str, Any]]:
+        """
+        Validate JWT token and return user data in single operation.
+        This is the missing method that the Golden Path authentication requires.
+
+        Business Value Justification:
+        - Segment: All (Platform/Security)
+        - Business Goal: Restore $500K+ ARR Golden Path authentication functionality
+        - Value Impact: Single API call combines token validation with user lookup for efficient auth
+        - Strategic Impact: Eliminates authentication system blocking and enables complete user flow
+
+        Args:
+            token: JWT token to validate and decode
+
+        Returns:
+            Combined validation and user data dictionary if successful, None if invalid
+
+        Expected return format:
+        {
+            "valid": True,
+            "user_id": "user_123",
+            "user": {
+                "id": "user_123",
+                "email": "user@example.com",
+                "full_name": "User Name",
+                "active": True,
+                ...
+            },
+            "token_data": {
+                "sub": "user_123",
+                "email": "user@example.com",
+                "exp": 1234567890,
+                ...
+            }
+        }
+        """
+        try:
+            # Step 1: Validate JWT token using existing SSOT method
+            token_data = self.validate_token(token, "access")
+            if not token_data:
+                logger.debug("Token validation failed in validateTokenAndGetUser")
+                return None
+
+            # Step 2: Extract user ID from token data
+            user_id = token_data.get('user_id') or token_data.get('sub')
+            if not user_id:
+                logger.warning("No user_id found in validated token data")
+                return None
+
+            # Step 3: Get user data using existing SSOT method
+            # Note: get_user_by_id handles the db parameter internally if None is passed
+            user_data = await self.get_user_by_id(None, user_id)
+
+            if not user_data:
+                logger.debug(f"User {user_id} not found in validateTokenAndGetUser")
+                return None
+
+            # Step 4: Validate user is active and not blacklisted
+            if not self.validate_user_active(user_data):
+                logger.debug(f"User {user_id} is not active or blacklisted")
+                return None
+
+            # Step 5: Return combined result in expected format
+            return {
+                "valid": True,
+                "user_id": user_id,
+                "user": user_data,
+                "token_data": token_data
+            }
+
+        except Exception as e:
+            logger.error(f"validateTokenAndGetUser failed: {e}")
+            return None
+
 
 
 # =======================

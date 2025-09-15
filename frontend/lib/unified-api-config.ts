@@ -39,6 +39,7 @@ interface UnifiedApiConfig {
     authToken: string;
     authRefresh: string;
     authValidate: string;
+    authValidateTokenAndGetUser: string;
     authSession: string;
     authMe: string;
   };
@@ -166,6 +167,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           authToken: 'https://auth.netrasystems.ai/auth/token',
           authRefresh: 'https://auth.netrasystems.ai/auth/refresh',
           authValidate: 'https://auth.netrasystems.ai/auth/validate',
+          authValidateTokenAndGetUser: 'https://auth.netrasystems.ai/auth/validate-token-and-get-user',
           authSession: 'https://auth.netrasystems.ai/auth/session',
           authMe: 'https://auth.netrasystems.ai/auth/me',
         },
@@ -218,6 +220,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           authToken: `${stagingAuthUrl}/auth/token`,
           authRefresh: `${stagingAuthUrl}/auth/refresh`,
           authValidate: `${stagingAuthUrl}/auth/validate`,
+          authValidateTokenAndGetUser: `${stagingAuthUrl}/auth/validate-token-and-get-user`,
           authSession: `${stagingAuthUrl}/auth/session`,
           authMe: `${stagingAuthUrl}/auth/me`,
         },
@@ -263,6 +266,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           authToken: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/token`,
           authRefresh: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/refresh`,
           authValidate: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/validate`,
+          authValidateTokenAndGetUser: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/validate-token-and-get-user`,
           authSession: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/session`,
           authMe: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/me`,
         },
@@ -315,6 +319,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           authToken: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/token`,
           authRefresh: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/refresh`,
           authValidate: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/validate`,
+          authValidateTokenAndGetUser: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/validate-token-and-get-user`,
           authSession: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/session`,
           authMe: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/me`,
         },
