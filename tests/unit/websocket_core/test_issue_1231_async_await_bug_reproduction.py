@@ -81,17 +81,16 @@ class TestIssue1231AsyncAwaitBugReproduction:
         user_context = self.create_test_user_context()
 
         # This is the INCORRECT pattern used in websocket_ssot.py
-        # It should cause a TypeError or RuntimeError
-        with pytest.raises((TypeError, RuntimeError, AttributeError)) as exc_info:
+        # It should cause a TypeError: "object X can't be used in 'await' expression"
+        with pytest.raises(TypeError) as exc_info:
             # This is the BUGGY code pattern from websocket_ssot.py
             manager = await get_websocket_manager(user_context)
 
         error_msg = str(exc_info.value).lower()
 
-        # Verify the error indicates the async/await problem
-        assert any(keyword in error_msg for keyword in [
-            "await", "coroutine", "generator", "async", "object is not awaitable"
-        ]), f"Error should indicate async/await problem. Got: {exc_info.value}"
+        # Verify the error indicates the specific async/await problem
+        assert "can't be used in 'await' expression" in error_msg, \
+            f"Error should indicate 'can't be used in await expression'. Got: {exc_info.value}"
 
     @pytest.mark.asyncio
     async def test_simulated_websocket_ssot_manager_creation_bug(self):
@@ -102,22 +101,20 @@ class TestIssue1231AsyncAwaitBugReproduction:
         """
         async def simulate_websocket_ssot_manager_creation(user_context):
             """Simulate the buggy code from websocket_ssot.py"""
-            try:
-                # This is the EXACT problematic line from websocket_ssot.py
-                manager = await get_websocket_manager(user_context)  # BUG: awaiting non-coroutine
-                return manager
-            except Exception as e:
-                # This exception demonstrates the bug
-                raise RuntimeError(f"WebSocket manager creation failed due to async/await bug: {e}")
+            # This is the EXACT problematic line from websocket_ssot.py
+            # This should raise TypeError directly
+            manager = await get_websocket_manager(user_context)  # BUG: awaiting non-coroutine
+            return manager
 
         user_context = self.create_test_user_context()
 
-        # This should fail, reproducing the bug
-        with pytest.raises(RuntimeError) as exc_info:
+        # This should fail with TypeError, reproducing the exact bug
+        with pytest.raises(TypeError) as exc_info:
             await simulate_websocket_ssot_manager_creation(user_context)
 
-        assert "async/await bug" in str(exc_info.value), \
-            f"Should fail due to async/await bug. Got: {exc_info.value}"
+        error_msg = str(exc_info.value).lower()
+        assert "can't be used in 'await' expression" in error_msg, \
+            f"Should fail with specific await error. Got: {exc_info.value}"
 
     @pytest.mark.asyncio
     async def test_simulated_health_endpoint_bug(self):
@@ -128,19 +125,17 @@ class TestIssue1231AsyncAwaitBugReproduction:
         """
         async def simulate_health_endpoint():
             """Simulate the buggy health endpoint code"""
-            try:
-                # This simulates the buggy pattern from websocket_ssot.py health endpoint
-                manager = await get_websocket_manager(user_context=None)  # BUG: awaiting non-coroutine
-                return {"status": "healthy", "manager": str(manager)}
-            except Exception as e:
-                raise RuntimeError(f"Health endpoint failed due to async/await bug: {e}")
+            # This simulates the buggy pattern from websocket_ssot.py health endpoint
+            manager = await get_websocket_manager(user_context=None)  # BUG: awaiting non-coroutine
+            return {"status": "healthy", "manager": str(manager)}
 
-        # This should fail, reproducing the health endpoint bug
-        with pytest.raises(RuntimeError) as exc_info:
+        # This should fail with TypeError, reproducing the health endpoint bug
+        with pytest.raises(TypeError) as exc_info:
             await simulate_health_endpoint()
 
-        assert "async/await bug" in str(exc_info.value), \
-            f"Health endpoint should fail due to bug. Got: {exc_info.value}"
+        error_msg = str(exc_info.value).lower()
+        assert "can't be used in 'await' expression" in error_msg, \
+            f"Health endpoint should fail with specific await error. Got: {exc_info.value}"
 
     @pytest.mark.asyncio
     async def test_simulated_config_endpoint_bug(self):
@@ -151,19 +146,17 @@ class TestIssue1231AsyncAwaitBugReproduction:
         """
         async def simulate_config_endpoint():
             """Simulate the buggy config endpoint code"""
-            try:
-                # This simulates the buggy pattern from websocket_ssot.py config endpoint
-                manager = await get_websocket_manager(user_context=None)  # BUG: awaiting non-coroutine
-                return {"websocket_config": {"manager": str(manager)}}
-            except Exception as e:
-                raise RuntimeError(f"Config endpoint failed due to async/await bug: {e}")
+            # This simulates the buggy pattern from websocket_ssot.py config endpoint
+            manager = await get_websocket_manager(user_context=None)  # BUG: awaiting non-coroutine
+            return {"websocket_config": {"manager": str(manager)}}
 
-        # This should fail, reproducing the config endpoint bug
-        with pytest.raises(RuntimeError) as exc_info:
+        # This should fail with TypeError, reproducing the config endpoint bug
+        with pytest.raises(TypeError) as exc_info:
             await simulate_config_endpoint()
 
-        assert "async/await bug" in str(exc_info.value), \
-            f"Config endpoint should fail due to bug. Got: {exc_info.value}"
+        error_msg = str(exc_info.value).lower()
+        assert "can't be used in 'await' expression" in error_msg, \
+            f"Config endpoint should fail with specific await error. Got: {exc_info.value}"
 
     @pytest.mark.asyncio
     async def test_simulated_stats_endpoint_bug(self):
@@ -174,19 +167,17 @@ class TestIssue1231AsyncAwaitBugReproduction:
         """
         async def simulate_stats_endpoint():
             """Simulate the buggy stats endpoint code"""
-            try:
-                # This simulates the buggy pattern from websocket_ssot.py stats endpoint
-                manager = await get_websocket_manager(user_context=None)  # BUG: awaiting non-coroutine
-                return {"stats": {"manager": str(manager)}}
-            except Exception as e:
-                raise RuntimeError(f"Stats endpoint failed due to async/await bug: {e}")
+            # This simulates the buggy pattern from websocket_ssot.py stats endpoint
+            manager = await get_websocket_manager(user_context=None)  # BUG: awaiting non-coroutine
+            return {"stats": {"manager": str(manager)}}
 
-        # This should fail, reproducing the stats endpoint bug
-        with pytest.raises(RuntimeError) as exc_info:
+        # This should fail with TypeError, reproducing the stats endpoint bug
+        with pytest.raises(TypeError) as exc_info:
             await simulate_stats_endpoint()
 
-        assert "async/await bug" in str(exc_info.value), \
-            f"Stats endpoint should fail due to bug. Got: {exc_info.value}"
+        error_msg = str(exc_info.value).lower()
+        assert "can't be used in 'await' expression" in error_msg, \
+            f"Stats endpoint should fail with specific await error. Got: {exc_info.value}"
 
     def test_correct_synchronous_usage_works(self):
         """

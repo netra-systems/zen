@@ -333,7 +333,7 @@ class ToolDispatcher:
         )
         
         # Import here to avoid circular imports - now using SSOT factory
-        from netra_backend.app.agents.supervisor.tool_dispatcher_factory import create_tool_dispatcher
+        from netra_backend.app.factories.tool_dispatcher_factory import create_tool_dispatcher
         
         logger.info(f"[U+1F3ED] PASS:  Creating SSOT request-scoped dispatcher for user {user_context.user_id}")
         logger.info("[U+1F512] User context isolation enabled via SSOT factory - no global state risks")
@@ -416,7 +416,7 @@ class ToolDispatcher:
         )
         
         # Import here to avoid circular imports - now using SSOT factory
-        from netra_backend.app.agents.supervisor.tool_dispatcher_factory import tool_dispatcher_scope
+        from netra_backend.app.factories.tool_dispatcher_factory import tool_dispatcher_scope
         
         logger.info(f"[U+1F3ED] PASS:  Creating SSOT scoped dispatcher context for user {user_context.user_id}")
         logger.info("[U+1F512] Automatic cleanup enabled via SSOT factory - memory and security safe")
