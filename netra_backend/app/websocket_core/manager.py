@@ -45,11 +45,22 @@ try:
 except ImportError:
     WebSocketManagerProtocol = None
 
+# Import heartbeat functionality for compatibility
+try:
+    from netra_backend.app.websocket_core.utils import WebSocketHeartbeat
+    # Create compatibility alias for tests expecting WebSocketHeartbeatManager
+    WebSocketHeartbeatManager = WebSocketHeartbeat
+except ImportError:
+    WebSocketHeartbeat = None
+    WebSocketHeartbeatManager = None
+
 # Re-export for compatibility
 __all__ = [
     'WebSocketManager',
-    'WebSocketConnection', 
+    'WebSocketConnection',
     'WebSocketManagerProtocol',
     '_serialize_message_safely',
-    'UnifiedWebSocketManager'
+    'UnifiedWebSocketManager',
+    'WebSocketHeartbeat',
+    'WebSocketHeartbeatManager'  # Compatibility alias
 ]

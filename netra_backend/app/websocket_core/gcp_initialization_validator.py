@@ -42,10 +42,23 @@ SIGNIFICANT TIMEOUT REDUCTIONS IMPLEMENTED:
    - Race condition protection preserved for all environments
    - Graceful degradation enabled in staging for golden path delivery
 
+PHASE 1 IMMEDIATE TIMEOUT EXTENSIONS (2025-09-15):
+==================================================
+IMPLEMENTED CHANGES:
+- Extended WebSocket readiness timeout from 5.0s to 8.0s in queue processing
+- Increased startup phase wait timeout allocation from 40% to 50% of optimized timeout
+- Extended minimum timeout for unknown phase scenarios from 10s to 15s
+- Increased Cloud Run services phase minimum timeout from 8s to 10s
+- Enhanced exponential backoff with intervals up to 2.0s (from 1.0s)
+- Improved logging for timeout occurrences with actionable remediation advice
+- Added detailed progress logging every 30 iterations instead of 50
+- Enhanced success/failure logging with Cloud Run context
+
 ROLLBACK INSTRUCTIONS:
-- Increase timeout_multiplier values in _initialize_environment_timeout_configuration()
-- Restore individual service timeout values in _register_critical_service_checks()
-- Revert environment-aware logic in websocket_ssot.py readiness_timeout calculation
+- Revert timeout values: 8.0s->5.0s, 50%->40%, 15s->10s, 10s->8s, 2.0s->1.0s
+- Restore simple check intervals: [0.05, 0.1, 0.2, 0.5, 1.0]
+- Revert logging frequency from 30 to 50 iterations
+- Remove Phase 1 logging prefixes and enhanced timeout messages
 
 SSOT COMPLIANCE:
 - Uses shared.isolated_environment for environment detection  
@@ -945,11 +958,12 @@ class GCPWebSocketInitializationValidator:
             timeout_seconds = max(timeout_seconds, 10.0)  # Minimum 10s for Cloud Run services phase (increased from 8s)
             self.logger.info(f"Cloud Run detected: Extended timeout to {timeout_seconds}s for services phase")
         
-        # Progressive check intervals: start fast, slow down for heavy phases
-        check_intervals = [0.05, 0.1, 0.2, 0.5, 1.0]  # Start with 50ms, grow to 1s
+        # PHASE 1 EXPONENTIAL BACKOFF: Enhanced progressive check intervals with exponential backoff
+        check_intervals = [0.05, 0.1, 0.2, 0.5, 1.0, 1.5, 2.0]  # Start with 50ms, grow to 2s with exponential backoff
         current_interval_index = 0
-        max_iterations = int(timeout_seconds * 20) + 100  # Circuit breaker based on total time
+        max_iterations = int(timeout_seconds * 15) + 100  # Circuit breaker based on total time (reduced multiplier for longer intervals)
         iteration_count = 0
+        consecutive_same_phase = 0  # Track how long we've been in the same phase for exponential backoff
         
         valid_phases = ['services', 'websocket', 'finalize', 'complete']
         phase_order = ['init', 'dependencies', 'database', 'cache', 'services', 'websocket', 'finalize', 'complete']
@@ -960,9 +974,11 @@ class GCPWebSocketInitializationValidator:
         
         minimum_phase_index = phase_order.index(minimum_phase)
         
+        # PHASE 1 ENHANCED LOGGING: Improved startup phase wait logging with context
         self.logger.info(
-            f"Progressive startup phase wait: '{minimum_phase}' "
-            f"(timeout: {timeout_seconds}s, cloud_run: {self.is_cloud_run})"
+            f"🔄 PHASE 1 PROGRESSIVE WAIT: Starting startup phase wait for '{minimum_phase}' "
+            f"(timeout: {timeout_seconds}s, cloud_run: {self.is_cloud_run}, environment: {self.environment}). "
+            f"This may take longer in Cloud Run due to service initialization."
         )
         
         last_phase = None
@@ -973,25 +989,43 @@ class GCPWebSocketInitializationValidator:
                 if hasattr(self.app_state, 'startup_phase'):
                     current_phase = str(self.app_state.startup_phase).lower()
                     
-                    # Track phase transitions for progress monitoring
+                    # PHASE 1 EXPONENTIAL BACKOFF: Enhanced phase transition tracking with backoff logic
                     if current_phase != last_phase:
                         if last_phase:
                             phase_duration = time.time() - phase_change_time
-                            self.logger.debug(f"Phase transition: {last_phase} -> {current_phase} (duration: {phase_duration:.2f}s)")
+                            self.logger.info(f"✅ Phase transition: {last_phase} -> {current_phase} (duration: {phase_duration:.2f}s)")
                         last_phase = current_phase
                         phase_change_time = time.time()
-                        
-                        # Reset check interval on phase changes for responsiveness
+
+                        # Reset check interval and consecutive phase counter on phase changes for responsiveness
                         current_interval_index = 0
+                        consecutive_same_phase = 0
+                    else:
+                        # EXPONENTIAL BACKOFF: Same phase for multiple iterations
+                        consecutive_same_phase += 1
+
+                        # Apply exponential backoff if stuck in same phase for too long
+                        if consecutive_same_phase > 10 and current_interval_index < len(check_intervals) - 1:
+                            current_interval_index = min(current_interval_index + 1, len(check_intervals) - 1)
+                            if consecutive_same_phase % 20 == 0:  # Log every 20 iterations when stuck
+                                elapsed = time.time() - start_time
+                                self.logger.info(
+                                    f"🔄 EXPONENTIAL BACKOFF: Phase '{current_phase}' stable for {consecutive_same_phase} iterations "
+                                    f"({elapsed:.1f}s), increasing check interval to {check_intervals[current_interval_index]:.2f}s"
+                                )
                     
                     if current_phase in phase_order:
                         current_phase_index = phase_order.index(current_phase)
                         
                         if current_phase_index >= minimum_phase_index:
                             elapsed = time.time() - start_time
+                            # PHASE 1 ENHANCED SUCCESS LOGGING: More detailed success information
                             self.logger.info(
-                                f"✅ Progressive wait SUCCESS: Startup phase '{current_phase}' reached minimum '{minimum_phase}' "
-                                f"after {elapsed:.2f}s (iterations: {iteration_count})"
+                                f"✅ PHASE 1 SUCCESS: Progressive wait completed successfully! "
+                                f"Startup phase '{current_phase}' reached minimum required '{minimum_phase}' "
+                                f"after {elapsed:.2f}s ({iteration_count} iterations). "
+                                f"Cloud Run environment: {self.is_cloud_run}. "
+                                f"WebSocket connections can now proceed safely."
                             )
                             return True
                         else:
@@ -1002,10 +1036,13 @@ class GCPWebSocketInitializationValidator:
                                 current_interval_index = min(current_interval_index, 2)
                             
                             elapsed = time.time() - start_time
-                            if iteration_count % 50 == 0:  # Log every 5s at 100ms intervals
-                                self.logger.debug(
-                                    f"Progressive wait: phase '{current_phase}' < '{minimum_phase}' "
-                                    f"(elapsed: {elapsed:.1f}s, iterations: {iteration_count})"
+                            # PHASE 1 ENHANCED PROGRESS LOGGING: More informative progress messages
+                            if iteration_count % 30 == 0:  # Log every 3-6s depending on interval
+                                progress_pct = (current_phase_index / len(phase_order)) * 100
+                                self.logger.info(
+                                    f"🔄 PHASE 1 PROGRESS: Phase '{current_phase}' -> waiting for '{minimum_phase}' "
+                                    f"({elapsed:.1f}s elapsed, {progress_pct:.0f}% startup progress, "
+                                    f"iterations: {iteration_count}, cloud_run: {self.is_cloud_run})"
                                 )
                     else:
                         self.logger.debug(f"Unknown startup phase '{current_phase}' - continuing progressive wait...")
@@ -1045,17 +1082,22 @@ class GCPWebSocketInitializationValidator:
         elapsed = time.time() - start_time
         current_phase = getattr(self.app_state, 'startup_phase', 'unknown') if self.app_state else 'no_app_state'
         
+        # PHASE 1 ENHANCED TIMEOUT LOGGING: Improved timeout messages with actionable information
         if iteration_count >= max_iterations:
-            self.logger.warning(
-                f"🔄 Progressive wait circuit breaker: phase '{minimum_phase}' not reached - "
-                f"current phase: '{current_phase}' after {iteration_count} iterations ({elapsed:.2f}s). "
-                f"Cloud Run startup may need more time for service initialization."
+            self.logger.error(
+                f"🚨 PHASE 1 CIRCUIT BREAKER: Progressive wait circuit breaker triggered - phase '{minimum_phase}' not reached. "
+                f"Current phase: '{current_phase}' after {iteration_count} iterations ({elapsed:.2f}s). "
+                f"Cloud Run startup may need more time for service initialization. "
+                f"Timeout was {timeout_seconds}s, consider increasing to {timeout_seconds * 1.5:.1f}s. "
+                f"This may indicate a Cloud Run cold start or heavy service initialization."
             )
         else:
-            self.logger.warning(
-                f"⏰ Progressive wait timeout: phase '{minimum_phase}' not reached - "
-                f"current phase: '{current_phase}' after {elapsed:.2f}s ({iteration_count} iterations). "
-                f"Consider increasing timeout for Cloud Run environment."
+            self.logger.error(
+                f"⏰ PHASE 1 TIMEOUT: Progressive wait timeout - phase '{minimum_phase}' not reached within {timeout_seconds}s. "
+                f"Current phase: '{current_phase}' after {elapsed:.2f}s ({iteration_count} iterations). "
+                f"Cloud Run environment detected: {self.is_cloud_run}. "
+                f"Consider increasing timeout to {timeout_seconds * 1.5:.1f}s for Cloud Run environments. "
+                f"This typically indicates Cloud Run cold start delays or complex service dependencies."
             )
         return False
 

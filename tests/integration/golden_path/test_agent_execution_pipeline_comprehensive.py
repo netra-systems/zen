@@ -797,13 +797,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         
         self.mock_websocket_manager.send_to_user.side_effect = capture_detailed_websocket_events
         self.mock_websocket_bridge.emit_agent_event.side_effect = capture_detailed_agent_events
-        
-        # Create supervisor with enhanced WebSocket tracking
-        supervisor = SupervisorAgent(
-            llm_manager=self.mock_llm_manager,
-            websocket_bridge=self.mock_websocket_bridge
-        )
-        
+
         user_context = self.create_test_user_context(
             additional_metadata={
                 'user_request': 'Run comprehensive analysis with full event tracking',
@@ -811,6 +805,13 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
                 'stream_all_events': True
             },
             db_session=real_services_fixture["db"]
+        )
+
+        # Create supervisor with enhanced WebSocket tracking and user context (Issue #1116 compliance)
+        supervisor = SupervisorAgent(
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge,
+            user_context=user_context
         )
         
         # Mock LLM responses that trigger tool usage
@@ -902,12 +903,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         """
         if not real_services_fixture["database_available"]:
             pytest.skip("Database required for business scenario testing")
-        
-        supervisor = SupervisorAgent(
-            llm_manager=self.mock_llm_manager,
-            websocket_bridge=self.mock_websocket_bridge
-        )
-        
+
         # Real business scenario data
         business_context = self.create_test_user_context(
             additional_metadata={
@@ -924,7 +920,13 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
             },
             db_session=real_services_fixture["db"]
         )
-        
+
+        supervisor = SupervisorAgent(
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge,
+            user_context=business_context
+        )
+
         # Mock realistic business analysis responses
         self.mock_llm_manager.generate_response.side_effect = [
             # Triage - recognizes cost optimization scenario
@@ -1084,10 +1086,16 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         """
         if not real_services_fixture["database_available"]:
             pytest.skip("Database required for performance testing")
-        
+
+        # Create default user context for supervisor instantiation (Issue #1116 compliance)
+        default_user_context = self.create_test_user_context(
+            db_session=real_services_fixture["db"]
+        )
+
         supervisor = SupervisorAgent(
             llm_manager=self.mock_llm_manager,
-            websocket_bridge=self.mock_websocket_bridge
+            websocket_bridge=self.mock_websocket_bridge,
+            user_context=default_user_context
         )
         
         # Performance test scenarios
@@ -1265,15 +1273,16 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         failing_websocket_bridge = Mock(spec=AgentWebSocketBridge)
         failing_websocket_bridge.websocket_manager = None  # Simulate missing manager
         failing_websocket_bridge.emit_agent_event = AsyncMock(side_effect=RuntimeError("WebSocket connection failed"))
-        
-        supervisor = SupervisorAgent(
-            llm_manager=self.mock_llm_manager,
-            websocket_bridge=failing_websocket_bridge
-        )
-        
+
         user_context = self.create_test_user_context(
             additional_metadata={'user_request': 'Test with WebSocket failures'},
             db_session=real_services_fixture["db"]
+        )
+
+        supervisor = SupervisorAgent(
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=failing_websocket_bridge,
+            user_context=user_context
         )
         
         # Mock successful agent responses

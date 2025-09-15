@@ -380,7 +380,9 @@ class UnifiedWebSocketEmitter:
             data: Event payload
         """
         # PHASE 1 ENHANCEMENT: Security validation before emission
-        if not self._validate_event_context(getattr(self.context, 'run_id', None), event_type):
+        # Check run_id from data payload first, then fallback to context
+        run_id_to_validate = data.get('run_id') or getattr(self.context, 'run_id', None)
+        if not self._validate_event_context(run_id_to_validate, event_type, data.get('agent_name')):
             logger.error(f"Security validation failed for event {event_type} - blocking emission")
             return False
         
@@ -1031,29 +1033,20 @@ class UnifiedWebSocketEmitter:
         if re.match(uuid_pattern, run_id.lower()):
             return False  # Valid UUID format is not suspicious
 
-        # Suspicious prefix patterns (avoid substring matching issues)
-        suspicious_prefixes = [
-            'undefined', 'null', 'none',      # Falsy values that became strings
+        # Suspicious patterns to check (removed empty string to fix the bug)
+        suspicious_patterns = [
+            'undefined', 'null', 'none',      # Falsy values that became strings (NOTE: removed empty string)
             'test_', 'mock_', 'fake_',        # Test/mock values in production
             'admin', 'system', 'root',        # System-level contexts
-            'debug', 'trace',                 # Debug contexts
-        ]
-
-        # Suspicious substring patterns (be more specific)
-        suspicious_substrings = [
             '__', '{{', '}}', '${',           # Template/variable placeholders
             'localhost', '127.0.0.1',        # Local development patterns
+            'debug', 'trace',                 # Debug contexts
         ]
 
         run_id_lower = run_id.lower()
 
-        # Check prefixes
-        for prefix in suspicious_prefixes:
-            if run_id_lower.startswith(prefix):
-                return True
-
-        # Check specific substrings
-        for pattern in suspicious_substrings:
+        # Check for suspicious patterns
+        for pattern in suspicious_patterns:
             if pattern in run_id_lower:
                 return True
 
