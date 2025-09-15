@@ -32,7 +32,7 @@ python_files = [
     "test_*.py",
     "*_test.py"
 ]
-python_classes = ["Test*"]
+python_classes = ["Test*", "*Tests", "*TestCase"]
 python_functions = ["test_*"]
 
 # Performance optimizations for test collection
