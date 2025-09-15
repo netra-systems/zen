@@ -357,7 +357,7 @@ class ConcurrentAgentLoadTester(SSotAsyncTestCase, StagingTestBase):
         self.logger.info("Load test cleanup completed")
 
 
-class AgentConcurrentExecutionLoadTests:
+class TestAgentConcurrentExecutionLoad:
     """E2E Agent Performance Load Tests for GCP Staging"""
     
     @pytest.mark.asyncio

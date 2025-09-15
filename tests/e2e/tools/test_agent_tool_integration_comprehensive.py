@@ -473,7 +473,7 @@ class AgentToolTester(SSotAsyncTestCase, StagingTestBase):
         self.record_metric("cleanup_completed", time.time())
 
 
-class AgentToolIntegrationComprehensiveTests:
+class TestAgentToolIntegrationComprehensive:
     """E2E Agent Tool Integration Tests for GCP Staging"""
     
     @pytest.mark.asyncio
