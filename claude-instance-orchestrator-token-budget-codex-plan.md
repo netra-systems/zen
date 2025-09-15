@@ -13,6 +13,18 @@
 
 ## Implementation Plan
 
+### Diagram: Budget Flow Overview
+```mermaid
+flowchart LR
+    CLI[CLI Flags & Config] -->|Build InstanceConfig| Orchestrator[ClaudeInstanceOrchestrator]
+    Orchestrator -->|Launches commands| Instances[Claude Instances]
+    Instances -->|Stream / Final Usage| Parsers[_parse_token_usage / _parse_final_output_token_usage]
+    Parsers -->|Token delta| Tracker[TokenBudgetTracker]
+    Tracker -->|Budget state| Orchestrator
+    Orchestrator -->|Status snapshots| Reporter[_print_status_report]
+    Reporter --> Operators[(Operators)]
+```
+
 ### 1. Configuration & CLI Surface
 - Extend InstanceConfig to accept optional max_token_budget (per command) and document the JSON schema update.
 - Introduce orchestrator-level settings: max_total_tokens, max_period_tokens, token_period_seconds, and budget_enforcement_mode (warn-only vs terminate) stored on ClaudeInstanceOrchestrator.
@@ -28,6 +40,30 @@
 - Feed each delta into the tracker, pruning stale entries on every insert to keep the window calculations lightweight.
 
 ### 3. Enforcement Mechanics
+
+### Diagram: Enforcement Sequence
+```mermaid
+sequenceDiagram
+    participant CLI
+    participant Orchestrator
+    participant Tracker
+    participant Instance
+    participant Reporter
+
+    CLI->>Orchestrator: Launch command
+    Orchestrator->>Tracker: Request allowances
+    Tracker-->>Orchestrator: Remaining per/global/period
+    alt Budget available
+        Orchestrator->>Instance: Start process
+        Instance->>Orchestrator: Emit token usage deltas
+        Orchestrator->>Tracker: Record delta
+        Tracker-->>Orchestrator: Updated remaining
+        Orchestrator-->>Reporter: Push status update
+    else Budget exceeded
+        Orchestrator->>Instance: Terminate or skip launch
+        Orchestrator->>Reporter: Emit breach warning
+    end
+```
 - Before launching an instance in _run_instance_with_delay, consult the tracker to skip launches whose per-command budget is already exhausted; mark them as failed with a clear reason.
 - While streaming output, after each delta update check:
   - Command budget: if exceeded, issue a warning, terminate the subprocess (process.terminate() with timeout/fallback kill), and mark status as failed with a budget error.

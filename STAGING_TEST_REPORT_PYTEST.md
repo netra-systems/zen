@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-15 16:48:08
+**Generated:** 2025-09-15 16:53:31
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 3 (100.0%)
 - **Failed:** 0 (0.0%)
 - **Skipped:** 0
-- **Duration:** 14.30 seconds
+- **Duration:** 13.92 seconds
 - **Pass Rate:** 100.0%
 
 ## Test Results by Priority
@@ -21,7 +21,7 @@
 |-----------|--------|----------|------|
 | test_golden_path_user_login_ai_response_flow_with_ssot_router | PASS passed | 0.001s | test_golden_path_message_router_ssot_validation.py |
 | test_multiple_concurrent_users_with_ssot_router | PASS passed | 0.001s | test_golden_path_message_router_ssot_validation.py |
-| test_ssot_router_error_handling_and_recovery | PASS passed | 0.001s | test_golden_path_message_router_ssot_validation.py |
+| test_ssot_router_error_handling_and_recovery | PASS passed | 0.000s | test_golden_path_message_router_ssot_validation.py |
 
 ## Pytest Output Format
 
@@ -31,7 +31,7 @@ test_golden_path_message_router_ssot_validation.py::test_multiple_concurrent_use
 test_golden_path_message_router_ssot_validation.py::test_ssot_router_error_handling_and_recovery PASSED
 
 ==================================================
-3 passed, 0 failed in 14.30s
+3 passed, 0 failed in 13.92s
 ```
 
 ## Test Coverage Matrix

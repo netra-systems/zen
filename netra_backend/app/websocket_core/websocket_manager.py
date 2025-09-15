@@ -169,8 +169,9 @@ class _WebSocketManagerFactory:
 # This enforces factory pattern usage and prevents direct instantiation
 WebSocketManager = _WebSocketManagerFactory
 
-# ISSUE #1184 REMEDIATION: Remove duplicate UnifiedWebSocketManager export
-# Use import from unified_manager.py for UnifiedWebSocketManager (SSOT)
+# ISSUE #1184 REMEDIATION: Export UnifiedWebSocketManager for compatibility
+# Direct access to implementation for type checking and existing imports
+UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
 # For runtime usage, use get_websocket_manager() factory function
 
 # ISSUE #1182 REMEDIATION COMPLETED: WebSocketManagerFactory consolidated into get_websocket_manager()

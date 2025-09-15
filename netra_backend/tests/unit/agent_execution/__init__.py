@@ -17,11 +17,11 @@ platform value through reliable chat interactions and agent responses.
 """
 
 # Package imports for convenience
-from .test_execution_state_transitions import TestExecutionStateTransitions
-from .test_timeout_configuration import TestTimeoutConfiguration  
-from .test_circuit_breaker_logic import TestCircuitBreakerLogic
-from .test_phase_validation_rules import TestPhaseValidationRules
-from .test_context_validation import TestContextValidation
+from .test_execution_state_transitions import ExecutionStateTransitionsTests as TestExecutionStateTransitions
+from .test_timeout_configuration import TimeoutConfigurationTests as TestTimeoutConfiguration  
+from .test_circuit_breaker_logic import CircuitBreakerLogicTests as TestCircuitBreakerLogic
+from .test_phase_validation_rules import PhaseValidationRulesTests as TestPhaseValidationRules
+from .test_context_validation import ContextValidationTests as TestContextValidation
 
 __all__ = [
     'TestExecutionStateTransitions',

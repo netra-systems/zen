@@ -836,29 +836,44 @@ graph TD
 
 ### Plan Completion Matrix
 
-| Document | Status | Completion % | Next Actions |
-|----------|--------|--------------|--------------|
-| **Enhancement Plan** | ✅ Complete | 100% | Ready for implementation |
-| **Integration Plan** | ✅ Complete | 100% | Awaiting deployment foundation |
-| **Universal CLI Plan** | ✅ Complete | 100% | Dependent on package structure |
-| **Deployment Strategies** | ✅ Complete | 100% | Implementation guidelines ready |
-| **Strategy Plan** | ✅ Complete | 100% | Decision framework established |
-| **Modernization Summary** | ✅ Complete | 100% | Implementation complete |
-| **Package Implementation** | 🔄 In Progress | 25% | Setup.py and PyInstaller config |
-| **Security Hardening** | ⏳ Planned | 0% | Code signing and scanning |
-| **Universal CLI Implementation** | ⏳ Planned | 0% | CLI tool registry and single mode |
-| **Netra Integration Implementation** | ⏳ Planned | 0% | Authentication and persistence |
+| Document | Category | Status | Completion % | Next Actions |
+|----------|----------|--------|--------------|--------------|
+| **Core Orchestrator Plans** |||||
+| **Enhancement Plan** | Core | ✅ Complete | 100% | Ready for implementation |
+| **Universal CLI Plan** | Core | ✅ Complete | 100% | Dependent on package structure |
+| **Modernization Summary** | Core | ✅ Complete | 100% | Implementation complete |
+| **Deployment & Distribution Plans** |||||
+| **Deployment Strategies** | Deploy | ✅ Complete | 100% | Implementation guidelines ready |
+| **Strategy Plan** | Deploy | ✅ Complete | 100% | Decision framework established |
+| **Platform Integration Plans** |||||
+| **Integration Plan** | Platform | ✅ Complete | 100% | Awaiting deployment foundation |
+| **Chat Resilience Plan** | Platform | ✅ Complete | 100% | Infrastructure design ready |
+| **Business Critical Plans** |||||
+| **Golden Path Plan (#1197)** | Critical | ✅ Complete | 100% | E2E validation strategy ready |
+| **Agent Modernization** | Critical | ✅ Complete | 100% | Architecture alignment ready |
+| **SSOT Violations (#1065)** | Critical | ✅ Complete | 100% | Remediation strategy ready |
+| **Infrastructure Plan** | Critical | ✅ Complete | 100% | Root cause remediation ready |
+| **Implementation Status** |||||
+| **Package Implementation** | Deploy | 🔄 In Progress | 25% | Setup.py and PyInstaller config |
+| **Security Hardening** | Deploy | ⏳ Planned | 0% | Code signing and scanning |
+| **Universal CLI Implementation** | Core | ⏳ Planned | 0% | CLI tool registry and single mode |
+| **Netra Integration Implementation** | Platform | ⏳ Planned | 0% | Authentication and persistence |
+| **Business Critical Implementation** | Critical | ⏳ Planned | 0% | Golden Path validation execution |
 
 ### Key Achievements to Date
-- ✅ **Comprehensive Planning**: All major enhancement paths documented
-- ✅ **Deployment Strategy**: Six strategies analyzed with recommendations
-- ✅ **JSON Modernization**: Core parsing infrastructure upgraded
-- ✅ **Backward Compatibility**: 100% maintained throughout modernization
-- ✅ **Security Analysis**: Enterprise security requirements identified
-- ✅ **Timeline Established**: Clear 12-week implementation roadmap
+- ✅ **Comprehensive Planning**: All major enhancement paths documented across 4 categories
+- ✅ **Deployment Strategy**: Six strategies analyzed with recommendations and decision framework
+- ✅ **JSON Modernization**: Core parsing infrastructure upgraded with 100% backward compatibility
+- ✅ **Platform Integration**: Chat resilience and Netra integration strategies established
+- ✅ **Business Critical Planning**: Golden Path validation and SSOT remediation strategies ready
+- ✅ **Infrastructure Remediation**: Root cause analysis and unified fix strategies documented
+- ✅ **Agent Modernization**: Architecture alignment strategy for standardization
+- ✅ **Organized Documentation**: Plans categorized by Core, Deployment, Platform, and Business Critical
+- ✅ **Cross-Plan Analysis**: Feature matrix and implementation timeline established
+- ✅ **Timeline Established**: Clear 12-week implementation roadmap with critical path prioritization
 
 ---
 
-**Note:** This index serves as the master reference for all Claude Instance Orchestrator enhancement efforts. Each plan should be reviewed and updated as implementation progresses to ensure alignment with business goals and technical constraints.
+**Note:** This index serves as the master reference for all Claude Instance Orchestrator enhancement efforts and related platform plans. The organized structure provides clear categories for Core Orchestrator functionality, Deployment & Distribution strategies, Platform Integration with Netra, and Business Critical remediation plans. Each plan should be reviewed and updated as implementation progresses to ensure alignment with business goals and technical constraints.
 
-**Last Updated:** 2025-09-15 with deployment analysis and modernization completion
+**Last Updated:** 2025-09-15 with comprehensive plan categorization and business critical plan integration

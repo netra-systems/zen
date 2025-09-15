@@ -87,19 +87,20 @@ def _check_direct_import_and_warn():
 # Call the warning check - this will only warn for direct imports
 _check_direct_import_and_warn()
 
-# ISSUE #1184 REMEDIATION: Import from correct SSOT locations
+# ISSUE #1176 PHASE 2 REMEDIATION: SSOT Canonical Import Consolidation
+# Canonical import paths established to resolve 15+ coordination gaps
+
+# 1. CANONICAL WebSocket Manager (SSOT)
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+
+# 2. CANONICAL Types (SSOT)
 from netra_backend.app.websocket_core.types import WebSocketConnection, _serialize_message_safely
 
-# WebSocketManager and UnifiedWebSocketManager are already imported above
+# 3. CANONICAL Protocols (SSOT) - No fallback, fail fast for missing dependencies
+from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 
-# Import protocol for type checking
-try:
-    from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
-except ImportError:
-    WebSocketManagerProtocol = None
-
+# 4. CANONICAL Emitter (SSOT)
 from netra_backend.app.websocket_core.unified_emitter import (
     UnifiedWebSocketEmitter,
     WebSocketEmitterFactory,
@@ -173,8 +174,7 @@ def create_websocket_manager(user_context=None):
             _ssot_authorization_token=secrets.token_urlsafe(32)
         )
 
-# SSOT COMPLIANCE: Remove duplicate get_websocket_manager function
-# Use the canonical implementation from websocket_manager.py instead
+# 5. CANONICAL Factory Functions (SSOT)
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 from netra_backend.app.websocket_core.migration_adapter import (
@@ -194,14 +194,13 @@ from netra_backend.app.websocket_core.context import (
     WebSocketRequestContext,
 )
 
-# Backward compatibility aliases
-# WebSocketManager is now imported directly
-# SECURITY FIX: Removed singleton websocket_manager - use WebSocketManager() directly instead
+# ISSUE #1176 PHASE 2: Backward compatibility aliases (SSOT-compliant)
+# These provide compatibility without creating new import paths
 WebSocketEventEmitter = UnifiedWebSocketEmitter
 IsolatedWebSocketEventEmitter = UnifiedWebSocketEmitter
 UserWebSocketEmitter = UnifiedWebSocketEmitter
 
-# Import handlers
+# 6. CANONICAL Handlers (SSOT) - Remove WebSocketManager export from handlers
 from netra_backend.app.websocket_core.handlers import (
     MessageRouter,
     UserMessageHandler,
@@ -210,34 +209,19 @@ from netra_backend.app.websocket_core.handlers import (
 
 # Auth imports removed - using SSOT unified_websocket_auth instead
 
-# Try to import existing types (if available)
-try:
-    from netra_backend.app.websocket_core.types import (
-        MessageType,
-        ConnectionInfo,
-        WebSocketMessage,
-        ServerMessage,
-        ErrorMessage,
-        WebSocketStats,
-        WebSocketConfig,
-        AuthInfo,
-        create_server_message,
-        create_error_message,
-    )
-except ImportError:
-    # Minimal fallback types
-    MessageType = str
-    ConnectionInfo = dict
-    WebSocketMessage = dict
-    ServerMessage = dict
-    ErrorMessage = dict
-    WebSocketStats = dict
-    WebSocketConfig = dict
-    AuthInfo = dict
-    
-    # REMOVED: Fallback functions eliminated to fix SSOT violation
-    # The fallback implementations were causing signature mismatches
-    # All imports should succeed from types.py after critical dependency fixes
+# 7. CANONICAL Types (SSOT) - No fallbacks, fail fast for coordination gaps
+from netra_backend.app.websocket_core.types import (
+    MessageType,
+    ConnectionInfo,
+    WebSocketMessage,
+    ServerMessage,
+    ErrorMessage,
+    WebSocketStats,
+    WebSocketConfig,
+    AuthInfo,
+    create_server_message,
+    create_error_message,
+)
 
 # Import JWT protocol handler functions for subprotocol negotiation (Issue #280 fix)
 try:
@@ -359,13 +343,14 @@ CRITICAL_EVENTS = UnifiedWebSocketEmitter.CRITICAL_EVENTS
 
 # Export main interface
 __all__ = [
-    # Unified implementations
-    "WebSocketManager",
-    "UnifiedWebSocketManager",  # Backward compatibility
-    "UnifiedWebSocketEmitter",
-    "WebSocketConnection",
-    "WebSocketEmitterFactory",
-    "WebSocketEmitterPool",
+    # CANONICAL SSOT Implementations (Issue #1176 Phase 2)
+    "WebSocketManager",           # CANONICAL: websocket_manager.py
+    "UnifiedWebSocketManager",    # CANONICAL: unified_manager.py
+    "UnifiedWebSocketEmitter",    # CANONICAL: unified_emitter.py
+    "WebSocketConnection",        # CANONICAL: types.py
+    "WebSocketEmitterFactory",    # CANONICAL: unified_emitter.py
+    "WebSocketEmitterPool",       # CANONICAL: unified_emitter.py
+    "WebSocketManagerProtocol",   # CANONICAL: protocols.py
     
     # SSOT COMPLIANCE: Factory pattern eliminated
     # "WebSocketManagerFactory",
@@ -387,18 +372,15 @@ __all__ = [
     "WebSocketContext",
     "WebSocketRequestContext",
     
-    # Backward compatibility
-    "WebSocketManager",
-    # SECURITY FIX: Removed websocket_manager singleton export
-    # SECURITY: get_websocket_manager removed - causes multi-user data leakage
-    "WebSocketEventEmitter",
-    "IsolatedWebSocketEventEmitter",
-    "UserWebSocketEmitter",
+    # CANONICAL Backward Compatibility (SSOT-compliant aliases)
+    "WebSocketEventEmitter",      # ALIAS: UnifiedWebSocketEmitter
+    "IsolatedWebSocketEventEmitter",  # ALIAS: UnifiedWebSocketEmitter
+    "UserWebSocketEmitter",       # ALIAS: UnifiedWebSocketEmitter
     
-    # Handlers
-    "MessageRouter",
-    "UserMessageHandler",
-    "get_message_router",
+    # CANONICAL Handlers (SSOT)
+    "MessageRouter",              # CANONICAL: handlers.py
+    "UserMessageHandler",         # CANONICAL: handlers.py
+    "get_message_router",         # CANONICAL: handlers.py
     
     # Auth - Removed legacy auth, using SSOT unified_websocket_auth instead
     
@@ -449,17 +431,17 @@ __all__ = [
     "RaceConditionDetector", 
     "HandshakeCoordinator",
     
-    # Types and message creation
-    "MessageType",
-    "ConnectionInfo",
-    "WebSocketMessage",
-    "ServerMessage",
-    "ErrorMessage",
-    "WebSocketStats",
-    "WebSocketConfig",
-    "AuthInfo",
-    "create_server_message",
-    "create_error_message",
+    # CANONICAL Types and Message Creation (SSOT)
+    "MessageType",                # CANONICAL: types.py
+    "ConnectionInfo",             # CANONICAL: types.py
+    "WebSocketMessage",           # CANONICAL: types.py
+    "ServerMessage",              # CANONICAL: types.py
+    "ErrorMessage",               # CANONICAL: types.py
+    "WebSocketStats",             # CANONICAL: types.py
+    "WebSocketConfig",            # CANONICAL: types.py
+    "AuthInfo",                   # CANONICAL: types.py
+    "create_server_message",      # CANONICAL: types.py
+    "create_error_message",       # CANONICAL: types.py
     
     # Constants
     "CRITICAL_EVENTS",
