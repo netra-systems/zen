@@ -207,7 +207,7 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         mock_exec_id = uuid4()
         with patch.object(self.execution_core.execution_tracker, 'register_execution', return_value=mock_exec_id):
             with patch.object(self.execution_core.execution_tracker, 'start_execution'):
-                with patch.object(self.execution_core.execution_tracker, 'complete_execution'):
+                with patch.object(self.execution_core.execution_tracker, 'update_execution_state'):
                     with patch.object(self.execution_core.agent_tracker, 'create_execution', return_value="state-exec-123"):
                         with patch.object(self.execution_core.agent_tracker, 'start_execution', return_value=True):
                             with patch.object(self.execution_core.agent_tracker, 'transition_state'):
@@ -245,7 +245,7 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         mock_exec_id = uuid4()
         with patch.object(self.execution_core.execution_tracker, 'register_execution', return_value=mock_exec_id):
             with patch.object(self.execution_core.execution_tracker, 'start_execution'):
-                with patch.object(self.execution_core.execution_tracker, 'complete_execution'):
+                with patch.object(self.execution_core.execution_tracker, 'update_execution_state'):
                     with patch.object(self.execution_core.agent_tracker, 'create_execution', return_value="state-exec-123"):
                         with patch.object(self.execution_core.agent_tracker, 'start_execution', return_value=True):
                             with patch.object(self.execution_core.agent_tracker, 'transition_state'):
@@ -408,7 +408,7 @@ class TestAgentExecutionCoreUserIsolation(SSotAsyncTestCase):
         # Mock execution infrastructure
         with patch.object(self.execution_core.execution_tracker, 'register_execution', return_value=uuid4()):
             with patch.object(self.execution_core.execution_tracker, 'start_execution'):
-                with patch.object(self.execution_core.execution_tracker, 'complete_execution'):
+                with patch.object(self.execution_core.execution_tracker, 'update_execution_state'):
                     with patch.object(self.execution_core.agent_tracker, 'create_execution', side_effect=[f"exec-{i}" for i in range(5)]):
                         with patch.object(self.execution_core.agent_tracker, 'start_execution', return_value=True):
                             with patch.object(self.execution_core.agent_tracker, 'transition_state'):
@@ -486,7 +486,7 @@ class TestAgentExecutionCoreErrorHandling(SSotAsyncTestCase):
         mock_exec_id = uuid4()
         with patch.object(self.execution_core.execution_tracker, 'register_execution', return_value=mock_exec_id):
             with patch.object(self.execution_core.execution_tracker, 'start_execution'):
-                with patch.object(self.execution_core.execution_tracker, 'complete_execution'):
+                with patch.object(self.execution_core.execution_tracker, 'update_execution_state'):
                     with patch.object(self.execution_core.agent_tracker, 'create_execution', return_value="error-exec-123"):
                         with patch.object(self.execution_core.agent_tracker, 'start_execution', return_value=True):
                             with patch.object(self.execution_core.agent_tracker, 'transition_state'):
@@ -494,7 +494,7 @@ class TestAgentExecutionCoreErrorHandling(SSotAsyncTestCase):
                                 # Act: Execute failing agent
                                 result = await self.execution_core.execute_agent(
                                     context=self.execution_context,
-                                    state=self.user_context
+                                    user_context=self.user_context
                                 )
         
         # Assert: Graceful error handling
@@ -502,7 +502,7 @@ class TestAgentExecutionCoreErrorHandling(SSotAsyncTestCase):
         self.assertIn("Agent processing error", result.error)
         
         # Verify execution was properly cleaned up
-        self.execution_core.execution_tracker.complete_execution.assert_called()
+        self.execution_core.execution_tracker.update_execution_state.assert_called()
     
     async def test_circuit_breaker_prevents_cascade_failures(self):
         """
@@ -546,7 +546,7 @@ class TestAgentExecutionCoreErrorHandling(SSotAsyncTestCase):
         mock_exec_id = uuid4()
         with patch.object(self.execution_core.execution_tracker, 'register_execution', return_value=mock_exec_id):
             with patch.object(self.execution_core.execution_tracker, 'start_execution'):
-                with patch.object(self.execution_core.execution_tracker, 'complete_execution'):
+                with patch.object(self.execution_core.execution_tracker, 'update_execution_state'):
                     with patch.object(self.execution_core.agent_tracker, 'create_execution', return_value="ws-test-123"):
                         with patch.object(self.execution_core.agent_tracker, 'start_execution', return_value=True):
                             with patch.object(self.execution_core.agent_tracker, 'transition_state'):
@@ -554,7 +554,7 @@ class TestAgentExecutionCoreErrorHandling(SSotAsyncTestCase):
                                 # Act: Execute with failing WebSocket
                                 result = await self.execution_core.execute_agent(
                                     context=self.execution_context,
-                                    state=self.user_context
+                                    user_context=self.user_context
                                 )
         
         # Assert: Agent execution succeeded despite WebSocket failure
@@ -688,7 +688,7 @@ class TestAgentExecutionCoreIntegrationPoints(SSotAsyncTestCase):
         mock_exec_id = uuid4()
         with patch.object(self.execution_core.execution_tracker, 'register_execution', return_value=mock_exec_id):
             with patch.object(self.execution_core.execution_tracker, 'start_execution'):
-                with patch.object(self.execution_core.execution_tracker, 'complete_execution'):
+                with patch.object(self.execution_core.execution_tracker, 'update_execution_state'):
                     with patch.object(self.execution_core.agent_tracker, 'create_execution', return_value="ws-exec-123"):
                         with patch.object(self.execution_core.agent_tracker, 'start_execution', return_value=True):
                             with patch.object(self.execution_core.agent_tracker, 'transition_state'):

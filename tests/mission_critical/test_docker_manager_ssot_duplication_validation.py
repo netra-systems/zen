@@ -29,7 +29,7 @@ import unittest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDockerManagerSSOTDuplicationValidation(SSotBaseTestCase):
+class TestDockerManagerSSOTDuplicationValidation(SSotBaseTestCase, unittest.TestCase):
     """
     CRITICAL: Tests that validate Docker Manager SSOT compliance.
 

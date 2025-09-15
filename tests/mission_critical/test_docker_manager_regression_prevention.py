@@ -30,7 +30,7 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDockerManagerRegressionPrevention(SSotBaseTestCase):
+class TestDockerManagerRegressionPrevention(SSotBaseTestCase, unittest.TestCase):
     """
     CRITICAL: Regression prevention tests for Docker Manager SSOT compliance.
 
