@@ -169,72 +169,13 @@ class _WebSocketManagerFactory:
 # This enforces factory pattern usage and prevents direct instantiation
 WebSocketManager = _WebSocketManagerFactory
 
-# ISSUE #824 REMEDIATION: Create public alias for backward compatibility
-# For tests and type checking, provide access to the actual implementation class
+# ISSUE #1184 REMEDIATION: Remove duplicate UnifiedWebSocketManager export
+# Use import from unified_manager.py for UnifiedWebSocketManager (SSOT)
 # For runtime usage, use get_websocket_manager() factory function
-UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
 
-# ISSUE #1182 REMEDIATION: Provide WebSocketManagerFactory interface for legacy tests
-# This eliminates the need for separate websocket_manager_factory.py module
-class WebSocketManagerFactory:
-    """
-    Legacy WebSocketManagerFactory interface consolidated into SSOT websocket_manager.py
-
-    ISSUE #1182 REMEDIATION: This class provides backward compatibility for tests
-    that expect a separate factory module while enforcing SSOT patterns.
-
-    All methods delegate to the canonical get_websocket_manager() function.
-    """
-
-    @staticmethod
-    def create_manager(user_context: Optional[Any] = None, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED) -> _UnifiedWebSocketManagerImplementation:
-        """
-        Create WebSocket manager using SSOT factory function.
-
-        DEPRECATED: Use get_websocket_manager() directly for new code.
-        """
-        import warnings
-        warnings.warn(
-            "WebSocketManagerFactory.create_manager() is deprecated. "
-            "Use get_websocket_manager() directly for SSOT compliance.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        return get_websocket_manager(user_context, mode)
-
-    @staticmethod
-    def get_manager(user_context: Optional[Any] = None) -> _UnifiedWebSocketManagerImplementation:
-        """
-        Get WebSocket manager using SSOT factory function.
-
-        DEPRECATED: Use get_websocket_manager() directly for new code.
-        """
-        import warnings
-        warnings.warn(
-            "WebSocketManagerFactory.get_manager() is deprecated. "
-            "Use get_websocket_manager() directly for SSOT compliance.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        return get_websocket_manager(user_context)
-
-    @staticmethod
-    def create(user_id: str = "test_user") -> _UnifiedWebSocketManagerImplementation:
-        """
-        Create WebSocket manager for tests using SSOT factory function.
-
-        DEPRECATED: Use get_websocket_manager() directly for new code.
-        """
-        import warnings
-        warnings.warn(
-            "WebSocketManagerFactory.create() is deprecated. "
-            "Use get_websocket_manager() directly for SSOT compliance.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        # Create simple test context for backward compatibility
-        test_context = create_test_user_context()
-        return get_websocket_manager(test_context)
+# ISSUE #1182 REMEDIATION COMPLETED: WebSocketManagerFactory consolidated into get_websocket_manager()
+# All legacy test patterns now use the canonical SSOT factory function
+# This eliminates class duplication and enforces SSOT compliance
 
 # User-scoped singleton registry for WebSocket managers
 # CRITICAL: This prevents multiple manager instances per user

@@ -1,7 +1,5 @@
 """Test Environment Configuration
 
-from shared.isolated_environment import get_env
-from shared.isolated_environment import IsolatedEnvironment
 Provides configuration for E2E test environments.
 Now integrates with service availability detection to provide intelligent
 configuration based on actual service availability.
@@ -19,6 +17,9 @@ import os
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
+
+from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import service availability detection
 try:

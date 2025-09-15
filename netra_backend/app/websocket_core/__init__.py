@@ -87,13 +87,10 @@ def _check_direct_import_and_warn():
 # Call the warning check - this will only warn for direct imports
 _check_direct_import_and_warn()
 
-# ISSUE #824 REMEDIATION: Import from canonical SSOT path only
-from netra_backend.app.websocket_core.websocket_manager import (
-    WebSocketManager,
-    UnifiedWebSocketManager,  # Backward compatibility alias
-    WebSocketConnection,
-    _serialize_message_safely
-)
+# ISSUE #1184 REMEDIATION: Import from correct SSOT locations
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.types import WebSocketConnection, _serialize_message_safely
 
 # WebSocketManager and UnifiedWebSocketManager are already imported above
 
