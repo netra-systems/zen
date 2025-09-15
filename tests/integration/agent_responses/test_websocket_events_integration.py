@@ -46,7 +46,8 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
+from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory, create_agent_instance_factory
+from shared.id_generation import UnifiedIdGenerator
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
 
@@ -167,8 +168,15 @@ class WebSocketEventsIntegrationTests(SSotAsyncTestCase):
             # Initialize tool dispatcher
             self.tool_dispatcher = EnhancedToolDispatcher()
             
-            # Initialize agent factory
-            self.agent_factory = get_agent_instance_factory()
+            # Create user execution context for SSOT factory pattern
+            user_context = UserExecutionContext(
+                user_id=f"websocket_events_test_user_{UnifiedIdGenerator.generate_base_id('user')}",
+                thread_id=f"websocket_events_test_thread_{UnifiedIdGenerator.generate_base_id('thread')}",
+                run_id=UnifiedIdGenerator.generate_base_id('run')
+            )
+
+            # Initialize agent factory using SSOT pattern
+            self.agent_factory = create_agent_instance_factory(user_context)
             
             # Initialize execution engine (will create its own WebSocket bridge)
             self.execution_engine = UserExecutionEngine(

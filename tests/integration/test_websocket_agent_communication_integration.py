@@ -60,8 +60,10 @@ try:
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
     from netra_backend.app.agents.supervisor.agent_instance_factory import (
         AgentInstanceFactory,
-        get_agent_instance_factory
+        get_agent_instance_factory,
+        create_agent_instance_factory
     )
+    from shared.id_generation import UnifiedIdGenerator
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.base_agent import BaseAgent
     from netra_backend.app.schemas.agent_models import DeepAgentState
@@ -167,9 +169,16 @@ class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
             # Create real agent-websocket bridge
             self.websocket_bridge = AgentWebSocketBridge()
             
-            # Get real agent factory for integration testing
-            self.agent_factory = get_agent_instance_factory()
-            
+            # Create user execution context for SSOT factory pattern
+            user_context = UserExecutionContext(
+                user_id=f"websocket_comm_test_user_{UnifiedIdGenerator.generate_base_id('user')}",
+                thread_id=f"websocket_comm_test_thread_{UnifiedIdGenerator.generate_base_id('thread')}",
+                run_id=UnifiedIdGenerator.generate_base_id('run')
+            )
+
+            # Create agent factory using SSOT pattern for integration testing
+            self.agent_factory = create_agent_instance_factory(user_context)
+
             # Configure factory with WebSocket components
             if hasattr(self.agent_factory, 'configure'):
                 self.agent_factory.configure(

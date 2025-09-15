@@ -49,9 +49,11 @@ from netra_backend.app.services.agent_websocket_bridge import (
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
-    AgentInstanceFactory, 
-    get_agent_instance_factory
+    AgentInstanceFactory,
+    get_agent_instance_factory,
+    create_agent_instance_factory
 )
+from shared.id_generation import UnifiedIdGenerator
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Mock WebSocket infrastructure for testing
@@ -240,8 +242,15 @@ class WebSocketUserIsolation1116Tests(SSotAsyncTestCase):
         conn1 = await self.mock_ws_manager.register_connection(self.user1_id, self.conn1_id)
         conn2 = await self.mock_ws_manager.register_connection(self.user2_id, self.conn2_id)
         
-        # Get singleton factory (THE PROBLEM - shared routing state)
-        factory = get_agent_instance_factory()
+        # Create user execution context for SSOT factory pattern (FIXES isolation)
+        user_context = UserExecutionContext(
+            user_id=f"isolation_test_user_{UnifiedIdGenerator.generate_base_id('user')}",
+            thread_id=f"isolation_test_thread_{UnifiedIdGenerator.generate_base_id('thread')}",
+            run_id=UnifiedIdGenerator.generate_base_id('run')
+        )
+
+        # Create isolated factory using SSOT pattern (prevents shared routing state)
+        factory = create_agent_instance_factory(user_context)
         factory.configure(websocket_bridge=self.mock_websocket_bridge)
         
         # Create user contexts

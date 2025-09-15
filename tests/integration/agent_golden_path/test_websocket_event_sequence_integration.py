@@ -52,7 +52,8 @@ try:
     from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManager
     from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
     from netra_backend.app.services.user_execution_context import UserExecutionContext
-    from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
+    from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory, create_agent_instance_factory
+    from shared.id_generation import UnifiedIdGenerator
     from shared.types.core_types import UserID, ThreadID, RunID
     REAL_WEBSOCKET_COMPONENTS_AVAILABLE = True
 except ImportError as e:
@@ -202,8 +203,15 @@ class WebSocketEventSequenceIntegrationTests(SSotAsyncTestCase):
             # Initialize real WebSocket bridge for agent integration
             self.websocket_bridge = create_agent_websocket_bridge()
 
-            # Initialize agent factory with WebSocket integration
-            self.agent_factory = get_agent_instance_factory()
+            # Create user execution context for SSOT factory pattern
+            user_context = UserExecutionContext(
+                user_id=f"websocket_sequence_test_user_{UnifiedIdGenerator.generate_base_id('user')}",
+                thread_id=f"websocket_sequence_test_thread_{UnifiedIdGenerator.generate_base_id('thread')}",
+                run_id=UnifiedIdGenerator.generate_base_id('run')
+            )
+
+            # Initialize agent factory using SSOT pattern with WebSocket integration
+            self.agent_factory = create_agent_instance_factory(user_context)
             if hasattr(self.agent_factory, 'configure'):
                 self.agent_factory.configure(
                     websocket_bridge=self.websocket_bridge,

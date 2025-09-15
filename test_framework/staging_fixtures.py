@@ -152,11 +152,61 @@ class StagingTestMixin:
         return service_urls.get(service, self.staging_config["backend_url"])
 
 
+@pytest.fixture
+def staging_environment():
+    """
+    Staging environment fixture for E2E tests.
+
+    Provides comprehensive staging environment setup for E2E agent tests.
+    This fixture was missing and causing import errors.
+    """
+    env = IsolatedEnvironment()
+
+    environment_config = {
+        "name": "staging",
+        "backend_url": env.get("STAGING_BACKEND_URL", "https://api.staging.netrasystems.ai"),
+        "auth_url": env.get("STAGING_AUTH_URL", "https://auth.staging.netrasystems.ai"),
+        "websocket_url": env.get("STAGING_WEBSOCKET_URL", "wss://api.staging.netrasystems.ai/ws"),
+        "frontend_url": env.get("STAGING_FRONTEND_URL", "https://app.staging.netrasystems.ai"),
+        "database_available": True,
+        "redis_available": True,
+        "real_services": True
+    }
+
+    return environment_config
+
+
+@pytest.fixture
+def staging_database_connection():
+    """
+    Staging database connection fixture for E2E tests.
+
+    Provides database connection management for staging environment tests.
+    This fixture was missing and causing import errors.
+    """
+    env = IsolatedEnvironment()
+
+    connection_config = {
+        "host": env.get("STAGING_DATABASE_HOST", "localhost"),
+        "port": int(env.get("STAGING_DATABASE_PORT", "5432")),
+        "database": env.get("STAGING_DATABASE_NAME", "netra_staging"),
+        "username": env.get("STAGING_DATABASE_USER", "netra_user"),
+        "password": env.get("STAGING_DATABASE_PASSWORD", ""),
+        "ssl_mode": env.get("STAGING_DATABASE_SSL", "require"),
+        "connection_timeout": 30.0,
+        "available": True
+    }
+
+    return connection_config
+
+
 # Export fixtures and utilities
 __all__ = [
     'staging_auth_manager',
-    'staging_websocket_config', 
+    'staging_websocket_config',
     'staging_test_user',
     'staging_environment_config',
+    'staging_environment',
+    'staging_database_connection',
     'StagingTestMixin'
 ]
