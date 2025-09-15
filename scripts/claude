@@ -1,0 +1,117 @@
+#!/usr/bin/env python3
+"""
+Simple Claude wrapper that logs metrics directly to CloudSQL.
+No dependencies on NetraOptimizer library.
+"""
+
+import subprocess
+import sys
+import json
+import psycopg2
+from datetime import datetime
+from uuid import uuid4
+
+# Real claude executable
+REAL_CLAUDE = "/opt/homebrew/bin/claude"
+
+# Run the real claude command
+process = subprocess.Popen(
+    [REAL_CLAUDE] + sys.argv[1:],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
+    text=True
+)
+
+# Pass through output and capture metrics
+metrics = None
+for line in process.stdout:
+    print(line, end='')
+
+    # Try to capture metrics
+    try:
+        data = json.loads(line.strip())
+        if 'usage' in data:
+            metrics = data['usage']
+    except:
+        pass
+
+# Wait for completion
+process.wait()
+
+# Save metrics if found
+if metrics and metrics.get('input_tokens', 0) > 0:
+    try:
+        # Direct PostgreSQL connection
+        conn = psycopg2.connect(
+            host='localhost',
+            port=5434,
+            database='netra_optimizer',
+            user='postgres',
+            password='DTprdt5KoQXlEG4Gh9lF'
+        )
+        cur = conn.cursor()
+
+        # Calculate metrics
+        input_tokens = metrics.get('input_tokens', 0)
+        output_tokens = metrics.get('output_tokens', 0)
+        cache_read = metrics.get('cache_read_input_tokens', 0)
+        cache_creation = metrics.get('cache_creation_input_tokens', 0)
+
+        total_tokens = input_tokens + output_tokens
+
+        # Calculate cost
+        cost = (
+            (input_tokens / 1_000_000) * 3.00 +
+            (output_tokens / 1_000_000) * 15.00 +
+            (cache_read / 1_000_000) * 0.30 +
+            (cache_creation / 1_000_000) * 3.75
+        )
+
+        # Calculate cache savings
+        cache_savings = (cache_read / 1_000_000) * (3.00 - 0.30) if cache_read > 0 else 0
+
+        # Insert into database
+        cur.execute("""
+            INSERT INTO command_executions (
+                id, timestamp, command_raw, command_base,
+                input_tokens, output_tokens, cached_tokens, fresh_tokens,
+                total_tokens, cost_usd, cache_savings_usd,
+                cache_hit_rate, status, execution_time_ms
+            ) VALUES (
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s
+            )
+        """, (
+            str(uuid4()),
+            datetime.now(),
+            ' '.join(sys.argv[1:]) if len(sys.argv) > 1 else 'claude',
+            'claude',
+            input_tokens,
+            output_tokens,
+            cache_read,
+            cache_creation,
+            total_tokens,
+            cost,
+            cache_savings,
+            (cache_read / (input_tokens + cache_read) * 100) if (input_tokens + cache_read) > 0 else 0,
+            'completed',
+            0
+        ))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        # Show summary
+        print(f"\n💰 Session cost: ${cost:.4f} ({total_tokens} tokens)")
+        if cache_savings > 0:
+            print(f"💾 Cache saved: ${cache_savings:.4f}")
+
+    except Exception as e:
+        # Silent fail - don't interrupt user
+        pass
+
+# Exit with same code as claude
+sys.exit(process.returncode)

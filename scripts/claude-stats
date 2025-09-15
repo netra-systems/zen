@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Simple script to view Claude usage statistics
+
+export PGPASSWORD=DTprdt5KoQXlEG4Gh9lF
+
+echo "📊 Claude Usage Statistics"
+echo "=========================="
+echo ""
+
+# Today's summary
+echo "Today's Usage:"
+psql -h localhost -p 5434 -U postgres -d netra_optimizer -t -c "
+    SELECT
+        COUNT(*) || ' sessions',
+        COALESCE(SUM(total_tokens), 0) || ' tokens',
+        '$' || ROUND(COALESCE(SUM(cost_usd), 0)::numeric, 4) || ' cost',
+        '$' || ROUND(COALESCE(SUM(cache_savings_usd), 0)::numeric, 4) || ' saved'
+    FROM command_executions
+    WHERE DATE(timestamp) = CURRENT_DATE;
+" | while IFS='|' read sessions tokens cost saved; do
+    echo "  • Sessions: $sessions"
+    echo "  • Tokens: $tokens"
+    echo "  • Cost: $cost"
+    echo "  • Saved: $saved"
+done
+
+echo ""
+echo "Last 5 Commands:"
+echo "----------------"
+psql -h localhost -p 5434 -U postgres -d netra_optimizer -t -c "
+    SELECT
+        TO_CHAR(timestamp, 'HH24:MI'),
+        CASE
+            WHEN LENGTH(command_raw) > 40 THEN LEFT(command_raw, 37) || '...'
+            ELSE command_raw
+        END,
+        total_tokens,
+        ROUND(cost_usd::numeric, 4)
+    FROM command_executions
+    ORDER BY timestamp DESC
+    LIMIT 5;
+" | while IFS='|' read time cmd tokens cost; do
+    printf "%s | %-40s | %6s tokens | $%s\n" "$time" "$cmd" "$tokens" "$cost"
+done
+
+echo ""
+echo "This Week Total:"
+psql -h localhost -p 5434 -U postgres -d netra_optimizer -t -c "
+    SELECT
+        '$' || ROUND(COALESCE(SUM(cost_usd), 0)::numeric, 2),
+        COALESCE(SUM(total_tokens), 0)
+    FROM command_executions
+    WHERE timestamp >= CURRENT_DATE - INTERVAL '7 days';
+" | while IFS='|' read cost tokens; do
+    echo "  • $cost for $tokens tokens"
+done
