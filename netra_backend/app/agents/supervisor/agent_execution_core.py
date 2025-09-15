@@ -126,16 +126,7 @@ class AgentExecutionCore:
         self.timeout_manager = self  # AgentExecutionCore acts as its own timeout manager
         self.state_tracker = self.agent_tracker  # Use agent_tracker as state_tracker
         
-        # TEST COMPATIBILITY: Add register_execution method for backward compatibility
-        # Some tests expect this method on execution_tracker
-        if hasattr(self.execution_tracker, 'register_execution'):
-            # If the execution tracker already has register_execution, use it
-            pass
-        else:
-            # Add compatibility method that delegates to create_execution
-            def register_execution_compat(*args, **kwargs):
-                return self.execution_tracker.create_execution(*args, **kwargs)
-            self.execution_tracker.register_execution = register_execution_compat
+        # TEST COMPATIBILITY: register_execution method is now provided by ExecutionTracker compatibility layer
         
         # Tier-based timeout configuration
         self.default_tier = default_tier or TimeoutTier.FREE

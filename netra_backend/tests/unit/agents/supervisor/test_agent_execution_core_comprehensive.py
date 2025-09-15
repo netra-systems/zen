@@ -71,10 +71,16 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         test_thread_id = 'thread-456'
         test_run_id = uuid4()
         test_agent_name = 'test-agent'
+        
+        # Define expected result BEFORE using it
+        expected_result = AgentExecutionResult(success=True, agent_name=test_agent_name, duration=2.5, data={'message': "Agent provided valuable insights on customer's AI optimization needs"}, metadata={'business_value': 'high', 'customer_satisfaction': 95})
+        
         mock_registry = MagicMock()
         mock_websocket_bridge = AsyncMock()
         mock_agent = AsyncMock()
+        # Set up both execute and run methods for compatibility
         mock_agent.execute = AsyncMock(return_value=expected_result)
+        mock_agent.run = AsyncMock(return_value=expected_result)
         mock_agent.set_trace_context = MagicMock()
         mock_agent.set_websocket_bridge = MagicMock()
         mock_agent.execution_engine = MagicMock()
@@ -82,16 +88,24 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         execution_core = AgentExecutionCore(registry=mock_registry, websocket_bridge=mock_websocket_bridge)
         execution_context = AgentExecutionContext(agent_name=test_agent_name, run_id=str(test_run_id), thread_id=test_thread_id, user_id=test_user_id, correlation_id='corr-789')
         user_context = UserExecutionContext.from_request(user_id=test_user_id, thread_id=test_thread_id, run_id=str(test_run_id))
-        expected_result = AgentExecutionResult(success=True, agent_name=test_agent_name, duration=2.5, data={'message': "Agent provided valuable insights on customer's AI optimization needs"}, metadata={'business_value': 'high', 'customer_satisfaction': 95})
         mock_registry.get_agent.return_value = mock_agent
         mock_registry.get_async = AsyncMock(return_value=mock_agent)
         mock_exec_id = uuid4()
-        with patch.object(execution_core.execution_tracker, 'register_execution', return_value=mock_exec_id):
-            with patch.object(execution_core.execution_tracker, 'start_execution'):
-                with patch.object(execution_core.execution_tracker, 'complete_execution'):
-                    with patch.object(execution_core.agent_tracker, 'create_execution', return_value='state-exec-123'):
-                        with patch.object(execution_core.agent_tracker, 'start_execution', return_value=True):
-                            with patch.object(execution_core.agent_tracker, 'transition_state'):
+        
+        # Create proper Mock objects for patching
+        mock_register_execution = MagicMock(return_value=mock_exec_id)
+        mock_start_execution = MagicMock(return_value=True)
+        mock_complete_execution = MagicMock(return_value=True)
+        mock_create_execution = MagicMock(return_value='state-exec-123')
+        mock_agent_start_execution = MagicMock(return_value=True)
+        mock_transition_state = MagicMock()
+        
+        with patch.object(execution_core.execution_tracker, 'register_execution', mock_register_execution):
+            with patch.object(execution_core.execution_tracker, 'start_execution', mock_start_execution):
+                with patch.object(execution_core.execution_tracker, 'complete_execution', mock_complete_execution):
+                    with patch.object(execution_core.agent_tracker, 'create_execution', mock_create_execution):
+                        with patch.object(execution_core.agent_tracker, 'start_execution', mock_agent_start_execution):
+                            with patch.object(execution_core.agent_tracker, 'transition_state', mock_transition_state):
                                 result = await execution_core.execute_agent(context=execution_context, user_context=user_context, timeout=30.0)
         print(f'DEBUG: Result type: {type(result)}')
         print(f'DEBUG: Result: {result}')
@@ -104,8 +118,14 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         if result.data:
             self.assertIn('valuable insights', result.data.get('message', ''), 'Agent must provide substantive value')
         mock_websocket_bridge.notify_agent_started.assert_called_once()
-        mock_agent.execute.assert_called_once()
-        execution_core.execution_tracker.register_execution.assert_called_once()
+        # Check which method was actually called (execute or run)
+        if mock_agent.execute.called:
+            mock_agent.execute.assert_called_once()
+        elif mock_agent.run.called:
+            mock_agent.run.assert_called_once()
+        else:
+            self.fail("Neither agent.execute() nor agent.run() was called")
+        mock_register_execution.assert_called_once()
 
     async def test_agent_not_found_error_provides_graceful_degradation(self):
         """

@@ -1,8 +1,3 @@
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-
-# Import SSOT WebSocket test utility
-from test_framework.ssot.websocket_connection_test_utility import TestWebSocketConnection
-
 """
 Mission-Critical Test Suite: Thread Storage SSOT Compliance
 
@@ -14,6 +9,11 @@ import asyncio
 import pytest
 import inspect
 from typing import List, Optional
+from unittest.mock import Mock, AsyncMock, patch, MagicMock
+
+# Import SSOT WebSocket test utility
+from test_framework.ssot.websocket_connection_test_utility import TestWebSocketConnection
+
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
@@ -296,8 +296,8 @@ class TestThreadSSOTCompliance:
             check for check, passed in compliance_checks.items() if not passed
         ]
 
-        assert not failed_checks, \
-            f"SSOT compliance failed for: {', '.join(failed_checks)}"
+        assert failed_checks == [], \
+            f"SSOT compliance failed for: {failed_checks}"
 
 
 if __name__ == "__main__":
