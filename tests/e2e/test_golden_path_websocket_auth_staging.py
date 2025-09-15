@@ -352,6 +352,8 @@ class TestWebSocketAuthGoldenPathStaging(SSotAsyncTestCase):
         REAL SERVICES: Yes (staging with network simulation)
         STATUS: May FAIL initially (connection instability), improve after fix
         """
+        # Ensure staging setup is complete
+        await self._ensure_staging_setup()
         correct_protocols = ['jwt-auth', f"jwt.{self.__class__.test_user['encoded_token']}"]
         connection = await self._attempt_staging_websocket_connection(subprotocols=correct_protocols, timeout=25, connection_description='Heartbeat/reconnection test')
         if connection is None:
