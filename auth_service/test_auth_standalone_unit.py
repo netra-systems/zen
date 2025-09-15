@@ -11,11 +11,13 @@ MISSION: Enable auth unit testing without Docker infrastructure dependency
 import os
 import sys
 import pytest
+import unittest
 import unittest.mock
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta, timezone
 import json
 import jwt
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Ensure auth_service path is available
 sys.path.insert(0, os.path.dirname(__file__))
@@ -30,7 +32,7 @@ except ImportError as e:
     IMPORTS_AVAILABLE = False
 
 
-class TestJWTHandlerStandalone(unittest.TestCase):
+class TestJWTHandlerStandalone(SSotBaseTestCase, unittest.TestCase):
     """
     Standalone JWT Handler unit tests
     Test core JWT functionality without external service dependencies
@@ -315,7 +317,7 @@ class TestJWTHandlerStandalone(unittest.TestCase):
             self.assertIsNone(payload, f"Mock token should be rejected: {mock_token}")
 
 
-class TestAuthConfigStandalone(unittest.TestCase):
+class TestAuthConfigStandalone(SSotBaseTestCase, unittest.TestCase):
     """
     Standalone AuthConfig unit tests
     Test configuration handling without external dependencies
