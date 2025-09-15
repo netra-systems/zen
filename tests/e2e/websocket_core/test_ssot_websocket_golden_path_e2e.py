@@ -65,7 +65,8 @@ class TestWebSocketSSOTGoldenPathE2E(SSotAsyncTestCase, unittest.TestCase):
             }
         ]
         
-        logger.info(f"Starting E2E staging test: {method.__name__}")
+        method_name = method.__name__ if method else "unknown_method"
+        logger.info(f"Starting E2E staging test: {method_name}")
 
     def teardown_method(self, method):
         """Clean up E2E test environment."""
@@ -391,7 +392,8 @@ class TestWebSocketSSOTStagingRaceConditionPrevention(SSotAsyncTestCase, unittes
     def setup_method(self, method):
         """Set up race condition prevention tests."""
         super().setup_method(method)
-        logger.info(f"Starting race condition prevention test: {method.__name__}")
+        method_name = method.__name__ if method else "unknown_method"
+        logger.info(f"Starting race condition prevention test: {method_name}")
 
     async def test_websocket_handshake_race_condition_prevention(self):
         """Test WebSocket handshake race condition prevention on staging."""

@@ -250,28 +250,42 @@ class TestWebSocketManagerImportPathFragmentation(SSotAsyncTestCase, unittest.Te
         
         websocket_manager_classes = []
         
-        # Scan all modules for WebSocket Manager classes
-        for module_name, module in sys.modules.items():
+        # Scan only netra-related modules for WebSocket Manager classes
+        # Focus on our codebase to avoid external module issues
+        modules_snapshot = dict(sys.modules.items())
+        relevant_module_prefixes = ['netra_backend', 'test_framework', 'tests']
+        
+        for module_name, module in modules_snapshot.items():
+            # Skip if not our codebase module
+            if not any(module_name.startswith(prefix) for prefix in relevant_module_prefixes):
+                continue
+                
             if module is None or not hasattr(module, '__dict__'):
                 continue
                 
             try:
                 for attr_name in dir(module):
-                    attr = getattr(module, attr_name, None)
-                    
-                    if (inspect.isclass(attr) and
-                        'websocket' in attr_name.lower() and
-                        'manager' in attr_name.lower()):
+                    try:
+                        attr = getattr(module, attr_name, None)
                         
-                        class_info = {
-                            'class_name': attr_name,
-                            'module': module_name,
-                            'class_id': id(attr),
-                            'full_path': f"{module_name}.{attr_name}"
-                        }
-                        websocket_manager_classes.append(class_info)
+                        if (attr is not None and 
+                            inspect.isclass(attr) and
+                            'websocket' in attr_name.lower() and
+                            'manager' in attr_name.lower()):
+                            
+                            class_info = {
+                                'class_name': attr_name,
+                                'module': module_name,
+                                'class_id': id(attr),
+                                'full_path': f"{module_name}.{attr_name}"
+                            }
+                            websocket_manager_classes.append(class_info)
+                    except (AttributeError, TypeError, ImportError, ModuleNotFoundError):
+                        # Skip problematic attributes
+                        continue
                         
-            except (AttributeError, TypeError):
+            except (AttributeError, TypeError, ImportError, ModuleNotFoundError):
+                # Skip problematic modules
                 continue
 
         # Group by class name to find duplicates
