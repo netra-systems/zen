@@ -103,7 +103,7 @@ class TestWebSocketRESTAuthConsistency(SSotAsyncTestCase):
         """Test WebSocket authentication with same auth token"""
         headers = {'Authorization': f'Bearer {self.auth_token}'}
         try:
-            self.websocket_connection = await websockets.connect(self.staging_websocket_url, extra_headers=headers, timeout=30)
+            self.websocket_connection = await websockets.connect(self.staging_websocket_url, additional_headers=headers, timeout=30)
             connection_msg = await asyncio.wait_for(self.websocket_connection.recv(), timeout=10)
             websocket_data = json.loads(connection_msg)
             assert websocket_data['type'] == 'connection_established', 'WebSocket connection established'
@@ -153,7 +153,7 @@ class TestWebSocketRESTAuthConsistency(SSotAsyncTestCase):
         """Get user permissions via WebSocket"""
         if not self.websocket_connection:
             headers = {'Authorization': f'Bearer {self.auth_token}'}
-            self.websocket_connection = await websockets.connect(self.staging_websocket_url, extra_headers=headers, timeout=30)
+            self.websocket_connection = await websockets.connect(self.staging_websocket_url, additional_headers=headers, timeout=30)
         permissions_request = {'type': 'get_permissions', 'request_id': 'permission-check-123'}
         await self.websocket_connection.send(json.dumps(permissions_request))
         try:
@@ -206,7 +206,7 @@ class TestWebSocketRESTAuthConsistency(SSotAsyncTestCase):
         """Test session data via WebSocket"""
         if not self.websocket_connection:
             headers = {'Authorization': f'Bearer {self.auth_token}'}
-            self.websocket_connection = await websockets.connect(self.staging_websocket_url, extra_headers=headers, timeout=30)
+            self.websocket_connection = await websockets.connect(self.staging_websocket_url, additional_headers=headers, timeout=30)
         session_request = {'type': 'get_session_info', 'request_id': 'session-check-456'}
         await self.websocket_connection.send(json.dumps(session_request))
         try:
@@ -274,7 +274,7 @@ class TestWebSocketRESTAuthConsistency(SSotAsyncTestCase):
         headers = {'Authorization': f'Bearer {self.auth_token}'}
         if self.websocket_connection:
             await self.websocket_connection.close()
-        self.websocket_connection = await websockets.connect(self.staging_websocket_url, extra_headers=headers, timeout=30)
+        self.websocket_connection = await websockets.connect(self.staging_websocket_url, additional_headers=headers, timeout=30)
         connection_msg = await asyncio.wait_for(self.websocket_connection.recv(), timeout=10)
         connection_data = json.loads(connection_msg)
         assert connection_data['type'] == 'connection_established', 'WebSocket accepts refreshed token'
