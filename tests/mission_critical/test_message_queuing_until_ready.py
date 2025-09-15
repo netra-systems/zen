@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -102,7 +102,7 @@ class TestMessageQueueingUntilReady:
         
         # Now connect
         mock_ws = AsyncMock(spec=WebSocket)
-        mock_ws.websocket = TestWebSocketConnection()
+        mock_ws.websocket = WebSocketTestHelper()
         mock_ws.client_state = WebSocketState.CONNECTED  # Connected
         
         connection_id = await manager.connect_user(
@@ -130,7 +130,7 @@ class TestMessageQueueingUntilReady:
         
         # Connect WebSocket first
         mock_ws = AsyncMock(spec=WebSocket)
-        mock_ws.websocket = TestWebSocketConnection()
+        mock_ws.websocket = WebSocketTestHelper()
         mock_ws.client_state = WebSocketState.CONNECTED
         
         connection_id = await manager.connect_user(
@@ -171,7 +171,7 @@ class TestMessageQueueingUntilReady:
         
         # Connect without thread_id
         mock_ws = AsyncMock(spec=WebSocket)
-        mock_ws.websocket = TestWebSocketConnection()
+        mock_ws.websocket = WebSocketTestHelper()
         mock_ws.client_state = WebSocketState.CONNECTED
         
         connection_id = await manager.connect_user(
@@ -213,7 +213,7 @@ class TestMessageQueueingUntilReady:
         
         # Connect first
         mock_ws = AsyncMock(spec=WebSocket)
-        mock_ws.websocket = TestWebSocketConnection()
+        mock_ws.websocket = WebSocketTestHelper()
         mock_ws.client_state = WebSocketState.CONNECTED
         
         connection_id = await manager.connect_user(
@@ -246,7 +246,7 @@ class TestMessageQueueingUntilReady:
         
         # First connection
         mock_ws1 = AsyncMock(spec=WebSocket)
-        mock_ws1.websocket = TestWebSocketConnection()
+        mock_ws1.websocket = WebSocketTestHelper()
         mock_ws1.client_state = 1
         
         connection_id1 = await manager.connect_user(user_id, mock_ws1, thread_id=None)
@@ -263,7 +263,7 @@ class TestMessageQueueingUntilReady:
         
         # Reconnect with new connection
         mock_ws2 = AsyncMock(spec=WebSocket)
-        mock_ws2.websocket = TestWebSocketConnection()
+        mock_ws2.websocket = WebSocketTestHelper()
         mock_ws2.client_state = 1
         
         connection_id2 = await manager.connect_user(user_id, mock_ws2, thread_id=thread_id)
@@ -288,7 +288,7 @@ class TestMessageQueueingUntilReady:
         
         # Connect
         mock_ws = AsyncMock(spec=WebSocket)
-        mock_ws.websocket = TestWebSocketConnection()
+        mock_ws.websocket = WebSocketTestHelper()
         mock_ws.client_state = WebSocketState.CONNECTED
         
         connection_id = await manager.connect_user(
@@ -332,7 +332,7 @@ class TestMessageQueueingUntilReady:
         
         # Connect first
         mock_ws = AsyncMock(spec=WebSocket)
-        mock_ws.websocket = TestWebSocketConnection()
+        mock_ws.websocket = WebSocketTestHelper()
         mock_ws.client_state = WebSocketState.CONNECTED
         
         connection_id = await manager.connect_user(
@@ -373,7 +373,7 @@ class TestMessageQueueingUntilReady:
         
         # Connect with mock that fails on third message
         mock_ws = AsyncMock(spec=WebSocket)
-        mock_ws.websocket = TestWebSocketConnection()
+        mock_ws.websocket = WebSocketTestHelper()
         mock_ws.client_state = WebSocketState.CONNECTED
         call_count = 0
         
@@ -420,7 +420,7 @@ class TestMessageQueueingUntilReady:
         
         # Create mock WebSocket
         mock_ws = AsyncMock(spec=WebSocket)
-        mock_ws.websocket = TestWebSocketConnection()
+        mock_ws.websocket = WebSocketTestHelper()
         mock_ws.client_state = WebSocketState.CONNECTED
         
         # Try to send before connection
@@ -455,7 +455,7 @@ class TestMessageQueueingUntilReady:
         
         # Connect first
         mock_ws = AsyncMock(spec=WebSocket)
-        mock_ws.websocket = TestWebSocketConnection()
+        mock_ws.websocket = WebSocketTestHelper()
         mock_ws.client_state = WebSocketState.CONNECTED
         
         # Track actual send timing

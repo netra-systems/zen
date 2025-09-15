@@ -1,0 +1,12 @@
+{
+  "directory": "tests/mission_critical/",
+  "collection_time": 22.974567651748657,
+  "memory_peak_mb": 23.68359375,
+  "memory_average_mb": 23.498857123362445,
+  "files_collected": 0,
+  "tests_collected": 0,
+  "warnings_count": 0,
+  "errors_count": 0,
+  "success": false,
+  "timestamp": "2025-09-15T09:26:55.586433"
+}

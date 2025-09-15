@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -897,9 +897,9 @@ class TestAgentResiliencePatterns:
         agent = ActionsToMeetGoalsSubAgent()
         
         # Test with failing WebSocket
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        websocket = WebSocketTestHelper()  # Real WebSocket implementation
         failing_ws.emit_thinking = AsyncMock(side_effect=RuntimeError("WebSocket error"))
-        failing_ws.websocket = TestWebSocketConnection()
+        failing_ws.websocket = WebSocketTestHelper()
         
         state = DeepAgentState(user_request="Test WebSocket resilience", thread_id="ws_test")
         context = ExecutionContext(
@@ -1095,7 +1095,7 @@ class TestAgentResiliencePatterns:
         )
         
         # Simulate failure and recovery
-        agent.websocket = TestWebSocketConnection()
+        agent.websocket = WebSocketTestHelper()
         
         start_time = time.time()
         try:

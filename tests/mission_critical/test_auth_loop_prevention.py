@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -151,7 +151,7 @@ class TestAuthLoopPrevention:
         auth_service = AuthService()
         
         # Create mock WebSocket manager
-        websocket = TestWebSocketConnection()
+        websocket = WebSocketTestHelper()
         
         # Create a refresh token
         refresh_token = auth_service.jwt_handler.create_refresh_token("test-user-id")

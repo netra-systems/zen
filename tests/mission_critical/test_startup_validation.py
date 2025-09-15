@@ -92,7 +92,7 @@ class ResourceTracker:
         }
 
 
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
