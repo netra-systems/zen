@@ -120,7 +120,7 @@ class TestAgentPipelineCollaboration:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=15.0
             ) as websocket:
                 
@@ -277,7 +277,7 @@ class TestAgentPipelineCollaboration:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=15.0
             ) as websocket:
                 
@@ -427,7 +427,7 @@ class TestAgentPipelineCollaboration:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=15.0
             ) as websocket:
                 

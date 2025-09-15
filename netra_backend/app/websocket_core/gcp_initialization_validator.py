@@ -64,10 +64,12 @@ Business Value Justification:
 import asyncio
 import logging
 import time
-from typing import Dict, Any, Optional, Callable, Tuple
+from typing import Dict, Any, Optional, Callable, Tuple, List
 from enum import Enum
 from dataclasses import dataclass
 from contextlib import asynccontextmanager
+import asyncio
+import weakref
 
 from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
@@ -104,6 +106,207 @@ class GCPReadinessResult:
     failed_services: list[str]
     warnings: list[str]
     details: Dict[str, Any]
+
+
+@dataclass
+class QueuedWebSocketConnection:
+    """Represents a WebSocket connection waiting for startup completion."""
+    websocket_ref: weakref.ref  # Use weak reference to prevent memory leaks
+    queue_time: float
+    connection_id: str
+    timeout_seconds: float = 30.0
+
+
+class WebSocketStartupQueue:
+    """
+    Manages WebSocket connections during startup to prevent 1011 errors.
+    
+    RACE CONDITION SOLUTION: Instead of rejecting WebSocket connections during startup,
+    this queue holds them until the services phase is complete, then processes them.
+    """
+    
+    def __init__(self):
+        self.queued_connections: List[QueuedWebSocketConnection] = []
+        self.startup_complete = False
+        self.max_queue_size = 50  # Prevent memory issues
+        self.max_queue_time = 30.0  # Maximum time to keep connections queued
+        self.processing_lock = asyncio.Lock()
+        self.logger = central_logger.get_logger(__name__)
+    
+    async def queue_websocket_connection(
+        self, 
+        websocket, 
+        connection_id: str,
+        timeout_seconds: float = 30.0
+    ) -> bool:
+        """
+        Queue a WebSocket connection during startup.
+        
+        Args:
+            websocket: The WebSocket connection to queue
+            connection_id: Unique identifier for the connection
+            timeout_seconds: How long to wait for startup completion
+            
+        Returns:
+            bool: True if successfully queued, False if queue is full or startup complete
+        """
+        async with self.processing_lock:
+            # If startup is already complete, don't queue
+            if self.startup_complete:
+                return False
+            
+            # Check queue size limits
+            if len(self.queued_connections) >= self.max_queue_size:
+                self.logger.warning(
+                    f"WebSocket startup queue full ({self.max_queue_size} connections) - "
+                    f"rejecting connection {connection_id}"
+                )
+                return False
+            
+            # Clean up expired connections
+            await self._cleanup_expired_connections()
+            
+            # Add to queue
+            queued_conn = QueuedWebSocketConnection(
+                websocket_ref=weakref.ref(websocket),
+                queue_time=time.time(),
+                connection_id=connection_id,
+                timeout_seconds=timeout_seconds
+            )
+            
+            self.queued_connections.append(queued_conn)
+            
+            self.logger.info(
+                f"🔄 WebSocket connection {connection_id} queued during startup "
+                f"(queue size: {len(self.queued_connections)}, timeout: {timeout_seconds}s)"
+            )
+            
+            return True
+    
+    async def _cleanup_expired_connections(self):
+        """Remove expired or dead connections from the queue."""
+        current_time = time.time()
+        active_connections = []
+        
+        for conn in self.queued_connections:
+            # Check if connection is still alive
+            websocket = conn.websocket_ref()
+            if websocket is None:
+                # WebSocket was garbage collected
+                self.logger.debug(f"Removing garbage collected connection {conn.connection_id} from queue")
+                continue
+            
+            # Check if connection has timed out
+            if current_time - conn.queue_time > conn.timeout_seconds:
+                self.logger.warning(f"Removing timed out connection {conn.connection_id} from queue")
+                try:
+                    await websocket.close(code=1001, reason="Startup timeout")
+                except Exception as e:
+                    self.logger.debug(f"Error closing timed out WebSocket {conn.connection_id}: {e}")
+                continue
+            
+            active_connections.append(conn)
+        
+        removed_count = len(self.queued_connections) - len(active_connections)
+        if removed_count > 0:
+            self.logger.debug(f"Cleaned up {removed_count} expired connections from startup queue")
+        
+        self.queued_connections = active_connections
+    
+    async def process_queued_connections_on_startup_complete(self, app_state):
+        """
+        Process all queued WebSocket connections when startup completes.
+        
+        Args:
+            app_state: The application state to use for connection processing
+        """
+        async with self.processing_lock:
+            if self.startup_complete:
+                return  # Already processed
+            
+            self.startup_complete = True
+            
+            if not self.queued_connections:
+                self.logger.info("✅ Startup complete - no queued WebSocket connections to process")
+                return
+            
+            self.logger.info(
+                f"✅ Startup complete - processing {len(self.queued_connections)} queued WebSocket connections"
+            )
+            
+            # Clean up any expired connections first
+            await self._cleanup_expired_connections()
+            
+            # Process remaining connections
+            processed_count = 0
+            failed_count = 0
+            
+            for conn in self.queued_connections[:]:  # Copy list to avoid modification during iteration
+                websocket = conn.websocket_ref()
+                if websocket is None:
+                    continue  # Already garbage collected
+                
+                try:
+                    # Validate that services are actually ready
+                    validator = GCPWebSocketInitializationValidator(app_state)
+                    result = await validator.validate_gcp_readiness_for_websocket(timeout_seconds=5.0)
+                    
+                    if result.ready:
+                        # Services are ready, connection can proceed
+                        # Note: The actual connection handling will be done by the WebSocket route
+                        self.logger.info(
+                            f"✅ Queued connection {conn.connection_id} validated - services ready "
+                            f"(queued for {time.time() - conn.queue_time:.2f}s)"
+                        )
+                        processed_count += 1
+                    else:
+                        # Services still not ready, close connection
+                        self.logger.warning(
+                            f"❌ Queued connection {conn.connection_id} rejected - services not ready: "
+                            f"{result.failed_services}"
+                        )
+                        await websocket.close(code=1011, reason="Services not ready")
+                        failed_count += 1
+                        
+                except Exception as e:
+                    self.logger.error(f"Error processing queued connection {conn.connection_id}: {e}")
+                    try:
+                        await websocket.close(code=1011, reason="Processing error")
+                    except:
+                        pass  # WebSocket may already be closed
+                    failed_count += 1
+            
+            # Clear the queue
+            self.queued_connections.clear()
+            
+            self.logger.info(
+                f"📊 Startup queue processing complete: {processed_count} successful, "
+                f"{failed_count} failed, {len(self.queued_connections)} remaining"
+            )
+    
+    def get_queue_status(self) -> Dict[str, Any]:
+        """Get current queue status for monitoring."""
+        return {
+            "queue_size": len(self.queued_connections),
+            "startup_complete": self.startup_complete,
+            "max_queue_size": self.max_queue_size,
+            "oldest_connection_age": (
+                time.time() - min(conn.queue_time for conn in self.queued_connections)
+                if self.queued_connections else 0
+            )
+        }
+
+
+# Global startup queue instance
+_startup_queue: Optional[WebSocketStartupQueue] = None
+
+
+def get_websocket_startup_queue() -> WebSocketStartupQueue:
+    """Get the global WebSocket startup queue instance."""
+    global _startup_queue
+    if _startup_queue is None:
+        _startup_queue = WebSocketStartupQueue()
+    return _startup_queue
 
 
 class GCPWebSocketInitializationValidator:
@@ -705,6 +908,157 @@ class GCPWebSocketInitializationValidator:
         self.logger.warning(f"Timeout waiting for app_state readiness after {elapsed:.2f}s")
         return False
     
+    async def _wait_for_startup_phase_completion_with_progressive_delays(
+        self, 
+        minimum_phase: str = 'services',
+        timeout_seconds: float = 30.0
+    ) -> bool:
+        """
+        Wait for startup to reach at least the specified phase with progressive handshake delays.
+        
+        RACE CONDITION FIX: Implements progressive delays for Cloud Run environments to handle
+        the fact that Phase 5 (SERVICES) can take >2.1s due to complex service initialization.
+        
+        Progressive Strategy:
+        1. Quick initial checks for fast startups
+        2. Exponential backoff for Cloud Run cold starts  
+        3. Extended timeout for heavy initialization phases
+        4. Circuit breaker to prevent infinite waits
+        
+        Args:
+            minimum_phase: Minimum phase required ('services', 'websocket', etc.)
+            timeout_seconds: Maximum time to wait for phase completion
+            
+        Returns:
+            bool: True if phase was reached, False if timeout or failure
+        """
+        if not self.app_state:
+            self.logger.warning("Cannot wait for startup phase - no app_state available")
+            return False
+        
+        start_time = time.time()
+        
+        # PROGRESSIVE DELAY CONFIGURATION for Cloud Run optimization
+        if self.is_cloud_run and minimum_phase == 'services':
+            # Extended timeout for Cloud Run SERVICES phase due to heavy initialization
+            # Phase 5 includes: agent supervisor, execution tracker, background tasks, health service
+            timeout_seconds = max(timeout_seconds, 8.0)  # Minimum 8s for Cloud Run services phase
+            self.logger.info(f"Cloud Run detected: Extended timeout to {timeout_seconds}s for services phase")
+        
+        # Progressive check intervals: start fast, slow down for heavy phases
+        check_intervals = [0.05, 0.1, 0.2, 0.5, 1.0]  # Start with 50ms, grow to 1s
+        current_interval_index = 0
+        max_iterations = int(timeout_seconds * 20) + 100  # Circuit breaker based on total time
+        iteration_count = 0
+        
+        valid_phases = ['services', 'websocket', 'finalize', 'complete']
+        phase_order = ['init', 'dependencies', 'database', 'cache', 'services', 'websocket', 'finalize', 'complete']
+        
+        if minimum_phase not in phase_order:
+            self.logger.error(f"Invalid minimum phase '{minimum_phase}' - must be one of {valid_phases}")
+            return False
+        
+        minimum_phase_index = phase_order.index(minimum_phase)
+        
+        self.logger.info(
+            f"Progressive startup phase wait: '{minimum_phase}' "
+            f"(timeout: {timeout_seconds}s, cloud_run: {self.is_cloud_run})"
+        )
+        
+        last_phase = None
+        phase_change_time = start_time
+        
+        while time.time() - start_time < timeout_seconds and iteration_count < max_iterations:
+            try:
+                if hasattr(self.app_state, 'startup_phase'):
+                    current_phase = str(self.app_state.startup_phase).lower()
+                    
+                    # Track phase transitions for progress monitoring
+                    if current_phase != last_phase:
+                        if last_phase:
+                            phase_duration = time.time() - phase_change_time
+                            self.logger.debug(f"Phase transition: {last_phase} -> {current_phase} (duration: {phase_duration:.2f}s)")
+                        last_phase = current_phase
+                        phase_change_time = time.time()
+                        
+                        # Reset check interval on phase changes for responsiveness
+                        current_interval_index = 0
+                    
+                    if current_phase in phase_order:
+                        current_phase_index = phase_order.index(current_phase)
+                        
+                        if current_phase_index >= minimum_phase_index:
+                            elapsed = time.time() - start_time
+                            self.logger.info(
+                                f"✅ Progressive wait SUCCESS: Startup phase '{current_phase}' reached minimum '{minimum_phase}' "
+                                f"after {elapsed:.2f}s (iterations: {iteration_count})"
+                            )
+                            return True
+                        else:
+                            # Check if we're in the target phase that's still initializing
+                            if current_phase == minimum_phase:
+                                # We're in the target phase but may not be complete
+                                # Use shorter intervals for responsiveness
+                                current_interval_index = min(current_interval_index, 2)
+                            
+                            elapsed = time.time() - start_time
+                            if iteration_count % 50 == 0:  # Log every 5s at 100ms intervals
+                                self.logger.debug(
+                                    f"Progressive wait: phase '{current_phase}' < '{minimum_phase}' "
+                                    f"(elapsed: {elapsed:.1f}s, iterations: {iteration_count})"
+                                )
+                    else:
+                        self.logger.debug(f"Unknown startup phase '{current_phase}' - continuing progressive wait...")
+                else:
+                    self.logger.debug("No startup_phase attribute - waiting for startup initialization...")
+                
+                # Check if startup failed
+                if hasattr(self.app_state, 'startup_failed') and self.app_state.startup_failed:
+                    self.logger.error("Startup failed - aborting progressive phase wait")
+                    return False
+                
+                # Progressive delay: adjust check interval based on progress
+                current_interval = check_intervals[min(current_interval_index, len(check_intervals) - 1)]
+                
+                # Adaptive interval adjustment
+                elapsed = time.time() - start_time
+                if elapsed > timeout_seconds * 0.7:  # In final 30% of timeout
+                    # Use faster checks in final phase
+                    current_interval = min(current_interval, 0.1)
+                elif current_phase == minimum_phase:
+                    # We're in target phase, check frequently
+                    current_interval = min(current_interval, 0.2)
+                else:
+                    # Gradually increase interval for efficiency
+                    if iteration_count % 20 == 0 and current_interval_index < len(check_intervals) - 1:
+                        current_interval_index += 1
+                
+                await asyncio.sleep(current_interval)
+                iteration_count += 1
+                
+            except Exception as e:
+                self.logger.warning(f"Error in progressive startup phase check: {e}")
+                await asyncio.sleep(0.5)  # Fixed delay on errors
+                iteration_count += 1
+        
+        # Timeout or circuit breaker reached
+        elapsed = time.time() - start_time
+        current_phase = getattr(self.app_state, 'startup_phase', 'unknown') if self.app_state else 'no_app_state'
+        
+        if iteration_count >= max_iterations:
+            self.logger.warning(
+                f"🔄 Progressive wait circuit breaker: phase '{minimum_phase}' not reached - "
+                f"current phase: '{current_phase}' after {iteration_count} iterations ({elapsed:.2f}s). "
+                f"Cloud Run startup may need more time for service initialization."
+            )
+        else:
+            self.logger.warning(
+                f"⏰ Progressive wait timeout: phase '{minimum_phase}' not reached - "
+                f"current phase: '{current_phase}' after {elapsed:.2f}s ({iteration_count} iterations). "
+                f"Consider increasing timeout for Cloud Run environment."
+            )
+        return False
+
     async def _wait_for_startup_phase_completion(
         self, 
         minimum_phase: str = 'services',
@@ -723,80 +1077,10 @@ class GCPWebSocketInitializationValidator:
         Returns:
             bool: True if phase was reached, False if timeout or failure
         """
-        if not self.app_state:
-            self.logger.warning("Cannot wait for startup phase - no app_state available")
-            return False
-        
-        start_time = time.time()
-        check_interval = 0.1  # Check every 100ms
-        max_iterations = int(timeout_seconds / check_interval) + 100  # Circuit breaker: prevent infinite loops
-        iteration_count = 0
-        
-        valid_phases = ['services', 'websocket', 'finalize', 'complete']
-        phase_order = ['init', 'dependencies', 'database', 'cache', 'services', 'websocket', 'finalize', 'complete']
-        
-        if minimum_phase not in phase_order:
-            self.logger.error(f"Invalid minimum phase '{minimum_phase}' - must be one of {valid_phases}")
-            return False
-        
-        minimum_phase_index = phase_order.index(minimum_phase)
-        
-        self.logger.info(f"Waiting for startup phase to reach '{minimum_phase}' (timeout: {timeout_seconds}s)")
-        
-        while time.time() - start_time < timeout_seconds and iteration_count < max_iterations:
-            try:
-                if hasattr(self.app_state, 'startup_phase'):
-                    current_phase = str(self.app_state.startup_phase).lower()
-                    
-                    if current_phase in phase_order:
-                        current_phase_index = phase_order.index(current_phase)
-                        
-                        if current_phase_index >= minimum_phase_index:
-                            elapsed = time.time() - start_time
-                            self.logger.info(
-                                f"Startup phase '{current_phase}' reached minimum '{minimum_phase}' "
-                                f"after {elapsed:.2f}s"
-                            )
-                            return True
-                        else:
-                            self.logger.debug(
-                                f"Current startup phase '{current_phase}' < minimum '{minimum_phase}' "
-                                f"- waiting... ({time.time() - start_time:.1f}s elapsed)"
-                            )
-                    else:
-                        self.logger.debug(f"Unknown startup phase '{current_phase}' - continuing to wait...")
-                else:
-                    self.logger.debug("No startup_phase attribute - waiting for startup initialization...")
-                
-                # Check if startup failed
-                if hasattr(self.app_state, 'startup_failed') and self.app_state.startup_failed:
-                    self.logger.error("Startup failed - aborting phase wait")
-                    return False
-                
-                await asyncio.sleep(check_interval)
-                iteration_count += 1
-                
-            except Exception as e:
-                self.logger.warning(f"Error checking startup phase: {e}")
-                await asyncio.sleep(check_interval)
-                iteration_count += 1
-        
-        # Timeout or circuit breaker reached
-        elapsed = time.time() - start_time
-        current_phase = getattr(self.app_state, 'startup_phase', 'unknown') if self.app_state else 'no_app_state'
-        
-        if iteration_count >= max_iterations:
-            self.logger.warning(
-                f"Circuit breaker triggered waiting for startup phase '{minimum_phase}' - "
-                f"current phase: '{current_phase}' after {iteration_count} iterations ({elapsed:.2f}s). "
-                f"This prevents infinite loops and test hangs."
-            )
-        else:
-            self.logger.warning(
-                f"Timeout waiting for startup phase '{minimum_phase}' - "
-                f"current phase: '{current_phase}' after {elapsed:.2f}s ({iteration_count} iterations)"
-            )
-        return False
+        # Use progressive delays for improved Cloud Run handling
+        return await self._wait_for_startup_phase_completion_with_progressive_delays(
+            minimum_phase, timeout_seconds
+        )
 
     async def validate_gcp_readiness_for_websocket(
         self,
@@ -863,10 +1147,10 @@ class GCPWebSocketInitializationValidator:
             
             self.current_state = GCPReadinessState.INITIALIZING
             
-            # CRITICAL FIX: Wait for startup to reach services phase before validation
+            # CRITICAL FIX: Enhanced startup phase validation with progressive delays and queueing
             # This prevents race condition where validation runs before Phase 5 completion
             # PERFORMANCE OPTIMIZATION: Use environment-optimized timeout for startup wait
-            wait_timeout = self._get_optimized_timeout(optimized_timeout * 0.3)  # Use 30% of optimized timeout
+            wait_timeout = self._get_optimized_timeout(optimized_timeout * 0.4)  # Increased from 30% to 40%
             
             # ISSUE #919 FIX: Check for GCP environments with startup phase stuck at 'unknown'
             current_phase = getattr(self.app_state, 'startup_phase', 'unknown') if self.app_state else 'no_app_state'
@@ -878,11 +1162,43 @@ class GCPWebSocketInitializationValidator:
                 (self.is_cloud_run or self.environment in ['staging', 'gcp-active-dev'])):
                 self.logger.warning(
                     f"🔄 ISSUE #919 FIX: GCP environment ({self.environment}) startup_phase stuck at 'unknown' - "
-                    f"skipping startup phase wait and proceeding with service validation "
+                    f"applying progressive validation with extended timeouts "
                     f"(graceful degradation for GCP Cloud Run and staging environments) "
                     f"Cloud Run: {self.is_cloud_run}, GCP: {self.is_gcp_environment}"
                 )
-                startup_ready = True  # Skip startup phase requirement for GCP environments with unknown phase
+                
+                # Use extended timeout for unknown phase scenarios
+                extended_timeout = max(wait_timeout, 10.0)  # Minimum 10s for unknown phase
+                startup_ready = await self._wait_for_startup_phase_completion(
+                    minimum_phase='services',
+                    timeout_seconds=extended_timeout
+                )
+                
+                if not startup_ready:
+                    # Still not ready - offer queuing instead of immediate rejection
+                    self.logger.warning(
+                        f"📋 QUEUEING FALLBACK: Startup phase still at 'unknown' after {extended_timeout}s. "
+                        f"WebSocket connections will be queued until services are ready. "
+                        f"This prevents 1011 errors while allowing eventual connection."
+                    )
+                    # Return a special state indicating queueing is available
+                    return GCPReadinessResult(
+                        ready=False,
+                        state=GCPReadinessState.INITIALIZING,
+                        elapsed_time=time.time() - self.validation_start_time,
+                        failed_services=["startup_phase_unknown_queuing_available"],
+                        warnings=[
+                            f"Startup phase unknown after {extended_timeout}s - queuing enabled",
+                            "Connection will be queued until services are ready"
+                        ],
+                        details={
+                            "queue_available": True,
+                            "current_phase": current_phase,
+                            "minimum_required_phase": "services",
+                            "startup_timeout": extended_timeout,
+                            "issue_919_fallback": True
+                        }
+                    )
             else:
                 startup_ready = await self._wait_for_startup_phase_completion(
                     minimum_phase='services', 
@@ -890,23 +1206,59 @@ class GCPWebSocketInitializationValidator:
                 )
             
             if not startup_ready:
-                # Startup didn't reach services phase - this is the race condition
+                # Startup didn't reach services phase - offer enhanced degradation options
                 elapsed_time = time.time() - self.validation_start_time
                 current_phase = getattr(self.app_state, 'startup_phase', 'unknown') if self.app_state else 'no_app_state'
                 
+                # ENHANCED GRACEFUL DEGRADATION: Check if we're close to services phase
+                phase_order = ['init', 'dependencies', 'database', 'cache', 'services', 'websocket', 'finalize', 'complete']
+                if current_phase in phase_order:
+                    current_index = phase_order.index(current_phase)
+                    services_index = phase_order.index('services')
+                    
+                    if current_index >= services_index - 1:  # We're at cache phase or later
+                        self.logger.warning(
+                            f"🔄 NEAR-READY DEGRADATION: Phase '{current_phase}' is close to services. "
+                            f"Offering connection queueing instead of immediate rejection."
+                        )
+                        
+                        return GCPReadinessResult(
+                            ready=False,
+                            state=GCPReadinessState.DEPENDENCIES_READY,  # Indicate progress made
+                            elapsed_time=elapsed_time,
+                            failed_services=["startup_phase_near_ready_queuing_available"],
+                            warnings=[
+                                f"Phase '{current_phase}' close to services - queuing enabled",
+                                "Connection will be processed once services phase is reached"
+                            ],
+                            details={
+                                "queue_available": True,
+                                "current_phase": current_phase,
+                                "minimum_required_phase": "services",
+                                "startup_timeout": wait_timeout,
+                                "near_ready_degradation": True,
+                                "phase_progress": f"{current_index + 1}/{len(phase_order)}"
+                            }
+                        )
+                
+                # Standard race condition detection for early phases
                 self.logger.error(
-                    f"[U+1F534] RACE CONDITION DETECTED: Startup phase '{current_phase}' did not reach 'services' "
-                    f"within {wait_timeout:.1f}s - this would cause WebSocket 1011 errors"
+                    f"🔴 RACE CONDITION DETECTED: Startup phase '{current_phase}' did not reach 'services' "
+                    f"within {wait_timeout:.1f}s - WebSocket connections will be queued to prevent 1011 errors"
                 )
                 
                 return GCPReadinessResult(
                     ready=False,
                     state=GCPReadinessState.FAILED,
                     elapsed_time=elapsed_time,
-                    failed_services=["startup_phase_timeout"],
-                    warnings=[f"Startup did not reach services phase within {wait_timeout:.1f}s"],
+                    failed_services=["startup_phase_timeout_with_queueing"],
+                    warnings=[
+                        f"Startup did not reach services phase within {wait_timeout:.1f}s",
+                        "Connection queueing available to prevent 1011 errors"
+                    ],
                     details={
                         "race_condition_detected": True,
+                        "queue_available": True,
                         "current_phase": current_phase,
                         "minimum_required_phase": "services",
                         "startup_timeout": wait_timeout
@@ -1365,35 +1717,94 @@ def create_gcp_websocket_validator(app_state: Optional[Any] = None) -> GCPWebSoc
 
 # Integration with existing startup sequence  
 @asynccontextmanager
-async def gcp_websocket_readiness_guard(app_state: Any, timeout: float = 120.0):
+async def gcp_websocket_readiness_guard(app_state: Any, timeout: float = 120.0, websocket=None, connection_id: str = None):
     """
-    Context manager for GCP WebSocket readiness validation.
+    Context manager for GCP WebSocket readiness validation with progressive queueing support.
+    
+    RACE CONDITION FIX: Implements progressive queueing instead of immediate rejection
+    to prevent 1011 errors during Cloud Run startup phases.
     
     INTEGRATION: Use this in WebSocket route handlers to prevent 1011 errors.
     
     Usage:
-        async with gcp_websocket_readiness_guard(app.state):
-            # WebSocket connection is safe to accept
+        async with gcp_websocket_readiness_guard(app.state, websocket=websocket, connection_id=conn_id):
+            # WebSocket connection is safe to accept OR has been queued
             await websocket.accept()
     """
     validator = create_gcp_websocket_validator(app_state)
+    startup_queue = get_websocket_startup_queue()
+    logger = central_logger.get_logger(__name__)
     
     try:
         # Validate readiness before yielding
         result = await validator.validate_gcp_readiness_for_websocket(timeout)
         
-        if not result.ready:
-            raise RuntimeError(
-                f"GCP WebSocket readiness validation failed. "
-                f"Failed services: {', '.join(result.failed_services)}. "
-                f"Rejecting WebSocket connection to prevent 1011 errors."
-            )
+        if result.ready:
+            # Services are ready - connection can proceed immediately
+            logger.info(f"✅ WebSocket readiness validated - connection {connection_id} can proceed")
+            yield result
+            return
         
-        # Yield control - WebSocket connection is safe
-        yield result
+        # Services not ready - check if queueing is available
+        queue_available = result.details.get("queue_available", False)
+        
+        if queue_available and websocket and connection_id:
+            # Attempt to queue the connection instead of rejecting
+            logger.info(
+                f"🔄 WebSocket services not ready - attempting to queue connection {connection_id} "
+                f"(reason: {', '.join(result.failed_services)})"
+            )
+            
+            queue_success = await startup_queue.queue_websocket_connection(
+                websocket=websocket,
+                connection_id=connection_id,
+                timeout_seconds=min(timeout, 30.0)  # Cap queue timeout
+            )
+            
+            if queue_success:
+                # Successfully queued - create a special result indicating queued state
+                queued_result = GCPReadinessResult(
+                    ready=True,  # Ready from the perspective that it's handled
+                    state=GCPReadinessState.INITIALIZING,
+                    elapsed_time=result.elapsed_time,
+                    failed_services=[],
+                    warnings=result.warnings + ["Connection queued during startup"],
+                    details={
+                        **result.details,
+                        "connection_queued": True,
+                        "queue_status": startup_queue.get_queue_status()
+                    }
+                )
+                
+                logger.info(
+                    f"🔄 WebSocket connection {connection_id} successfully queued "
+                    f"(queue size: {startup_queue.get_queue_status()['queue_size']})"
+                )
+                
+                yield queued_result
+                return
+            else:
+                # Queue failed (likely full or startup already complete)
+                logger.warning(
+                    f"❌ Failed to queue WebSocket connection {connection_id} - "
+                    f"queue may be full or startup complete"
+                )
+        
+        # Standard rejection path - services not ready and queueing not available/failed
+        error_msg = (
+            f"GCP WebSocket readiness validation failed. "
+            f"Failed services: {', '.join(result.failed_services)}. "
+            f"Queue available: {queue_available}. "
+            f"Rejecting WebSocket connection to prevent 1011 errors."
+        )
+        
+        if queue_available:
+            error_msg += f" (Queue failed for connection {connection_id})"
+        
+        logger.error(error_msg)
+        raise RuntimeError(error_msg)
         
     except Exception as e:
-        logger = central_logger.get_logger(__name__)
         logger.error(f"GCP WebSocket readiness guard error: {e}")
         raise
 

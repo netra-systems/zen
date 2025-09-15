@@ -5,14 +5,11 @@ router implementation is used, proving SSOT violations in routing behavior.
 
 Expected: FAILURES due to routing path differences between implementations.
 """
-
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
-
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-
 
 class TestQualityRouterRoutingInconsistency(SSotAsyncTestCase):
     """Integration tests demonstrating Quality Router routing inconsistency."""
@@ -20,31 +17,8 @@ class TestQualityRouterRoutingInconsistency(SSotAsyncTestCase):
     def setUp(self):
         """Set up test fixtures for routing inconsistency testing."""
         super().setUp()
-
-        # Test data
-        self.test_user_id = "integration_user_123"
-        self.test_messages = [
-            {
-                "type": "get_quality_metrics",
-                "thread_id": "thread_metrics_123",
-                "run_id": "run_metrics_456",
-                "payload": {"agent_name": "test_agent"}
-            },
-            {
-                "type": "subscribe_quality_alerts",
-                "thread_id": "thread_alerts_789",
-                "run_id": "run_alerts_012",
-                "payload": {"alert_types": ["error", "warning"]}
-            },
-            {
-                "type": "validate_content",
-                "thread_id": "thread_validate_345",
-                "run_id": "run_validate_678",
-                "payload": {"content": "test content for validation"}
-            }
-        ]
-
-        # Mock services with realistic behavior
+        self.test_user_id = 'integration_user_123'
+        self.test_messages = [{'type': 'get_quality_metrics', 'thread_id': 'thread_metrics_123', 'run_id': 'run_metrics_456', 'payload': {'agent_name': 'test_agent'}}, {'type': 'subscribe_quality_alerts', 'thread_id': 'thread_alerts_789', 'run_id': 'run_alerts_012', 'payload': {'alert_types': ['error', 'warning']}}, {'type': 'validate_content', 'thread_id': 'thread_validate_345', 'run_id': 'run_validate_678', 'payload': {'content': 'test content for validation'}}]
         self.mock_quality_gate_service = self._create_quality_gate_service_mock()
         self.mock_monitoring_service = self._create_monitoring_service_mock()
         self.mock_db_session_factory = MagicMock()
@@ -53,26 +27,15 @@ class TestQualityRouterRoutingInconsistency(SSotAsyncTestCase):
     def _create_quality_gate_service_mock(self) -> MagicMock:
         """Create realistic quality gate service mock."""
         service = MagicMock()
-        service.validate_content = AsyncMock(return_value={
-            "valid": True,
-            "score": 0.85,
-            "issues": []
-        })
+        service.validate_content = AsyncMock(return_value={'valid': True, 'score': 0.85, 'issues': []})
         return service
 
     def _create_monitoring_service_mock(self) -> MagicMock:
         """Create realistic monitoring service mock."""
         service = MagicMock()
-        service.get_agent_report = AsyncMock(return_value={
-            "agent_name": "test_agent",
-            "quality_score": 0.92,
-            "execution_count": 15
-        })
-        service.get_dashboard_data = AsyncMock(return_value={
-            "overall_score": 0.88,
-            "active_agents": 5
-        })
-        service.subscribers = ["user1", "user2"]
+        service.get_agent_report = AsyncMock(return_value={'agent_name': 'test_agent', 'quality_score': 0.92, 'execution_count': 15})
+        service.get_dashboard_data = AsyncMock(return_value={'overall_score': 0.88, 'active_agents': 5})
+        service.subscribers = ['user1', 'user2']
         return service
 
     @pytest.mark.asyncio
@@ -83,73 +46,33 @@ class TestQualityRouterRoutingInconsistency(SSotAsyncTestCase):
         """
         from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
         from netra_backend.app.websocket_core.handlers import WebSocketHandler
-
-        # Track routing behavior for each implementation
         standalone_routing_behavior = {}
         embedded_routing_behavior = {}
-
-        # Test each message type through both routers
         for test_message in self.test_messages:
-            message_type = test_message["type"]
-
-            # Test standalone router behavior
-            standalone_router = QualityMessageRouter(
-                supervisor=self.mock_supervisor,
-                db_session_factory=self.mock_db_session_factory,
-                quality_gate_service=self.mock_quality_gate_service,
-                monitoring_service=self.mock_monitoring_service
-            )
-
-            # Test embedded handler behavior
+            message_type = test_message['type']
+            standalone_router = QualityMessageRouter(supervisor=self.mock_supervisor, db_session_factory=self.mock_db_session_factory, quality_gate_service=self.mock_quality_gate_service, monitoring_service=self.mock_monitoring_service)
             embedded_handler = WebSocketHandler()
             await embedded_handler._initialize_quality_handlers()
-
-            # Track routing path and behavior
             with patch('netra_backend.app.services.user_execution_context.create_defensive_user_execution_context') as mock_manager:
                 mock_ws_manager = AsyncMock()
                 mock_manager.return_value = mock_ws_manager
-
-                # Route through standalone (should store session data)
                 await standalone_router.handle_message(self.test_user_id, test_message)
                 standalone_thread_id = getattr(standalone_router, '_current_thread_id', None)
                 standalone_run_id = getattr(standalone_router, '_current_run_id', None)
                 standalone_sends = mock_ws_manager.send_to_user.call_count
-
-                # Reset mock for embedded test
                 mock_ws_manager.reset_mock()
-
-                # Route through embedded (may not store session data)
                 await embedded_handler.handle_quality_message(self.test_user_id, test_message)
                 embedded_thread_id = getattr(embedded_handler, '_current_thread_id', None)
                 embedded_run_id = getattr(embedded_handler, '_current_run_id', None)
                 embedded_sends = mock_ws_manager.send_to_user.call_count
-
-                # Store behavior differences
-                standalone_routing_behavior[message_type] = {
-                    "thread_id": standalone_thread_id,
-                    "run_id": standalone_run_id,
-                    "send_calls": standalone_sends
-                }
-                embedded_routing_behavior[message_type] = {
-                    "thread_id": embedded_thread_id,
-                    "run_id": embedded_run_id,
-                    "send_calls": embedded_sends
-                }
-
-        # Verify behavioral differences (THIS SHOULD FAIL)
-        for message_type in [msg["type"] for msg in self.test_messages]:
+                standalone_routing_behavior[message_type] = {'thread_id': standalone_thread_id, 'run_id': standalone_run_id, 'send_calls': standalone_sends}
+                embedded_routing_behavior[message_type] = {'thread_id': embedded_thread_id, 'run_id': embedded_run_id, 'send_calls': embedded_sends}
+        for message_type in [msg['type'] for msg in self.test_messages]:
             standalone_behavior = standalone_routing_behavior[message_type]
             embedded_behavior = embedded_routing_behavior[message_type]
-
-            # Session continuity should be identical (but may not be)
-            self.assertEqual(standalone_behavior["thread_id"], embedded_behavior["thread_id"],
-                           f"Thread ID handling differs for {message_type}")
-            self.assertEqual(standalone_behavior["run_id"], embedded_behavior["run_id"],
-                           f"Run ID handling differs for {message_type}")
-
-            # Message sending behavior should be identical (but may not be)
-            self.assertEqual(standalone_behavior["send_calls"], embedded_behavior["send_calls"],
-                           f"Message sending pattern differs for {message_type}")
+            self.assertEqual(standalone_behavior['thread_id'], embedded_behavior['thread_id'], f'Thread ID handling differs for {message_type}')
+            self.assertEqual(standalone_behavior['run_id'], embedded_behavior['run_id'], f'Run ID handling differs for {message_type}')
+            self.assertEqual(standalone_behavior['send_calls'], embedded_behavior['send_calls'], f'Message sending pattern differs for {message_type}')
 
     @pytest.mark.asyncio
     async def test_quality_handler_dependency_injection_inconsistency(self):
@@ -159,39 +82,19 @@ class TestQualityRouterRoutingInconsistency(SSotAsyncTestCase):
         """
         from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
         from netra_backend.app.websocket_core.handlers import WebSocketHandler
-
-        # Create routers with same dependencies
-        standalone_router = QualityMessageRouter(
-            supervisor=self.mock_supervisor,
-            db_session_factory=self.mock_db_session_factory,
-            quality_gate_service=self.mock_quality_gate_service,
-            monitoring_service=self.mock_monitoring_service
-        )
-
+        standalone_router = QualityMessageRouter(supervisor=self.mock_supervisor, db_session_factory=self.mock_db_session_factory, quality_gate_service=self.mock_quality_gate_service, monitoring_service=self.mock_monitoring_service)
         embedded_handler = WebSocketHandler()
         await embedded_handler._initialize_quality_handlers()
-
-        # Compare dependency injection patterns
-        for handler_type in ["get_quality_metrics", "subscribe_quality_alerts", "validate_content"]:
+        for handler_type in ['get_quality_metrics', 'subscribe_quality_alerts', 'validate_content']:
             if handler_type in standalone_router.handlers and handler_type in embedded_handler._quality_handlers:
                 standalone_handler = standalone_router.handlers[handler_type]
                 embedded_handler_instance = embedded_handler._quality_handlers[handler_type]
-
-                # Check if same type of handler
-                self.assertEqual(type(standalone_handler), type(embedded_handler_instance),
-                               f"Handler types differ for {handler_type}")
-
-                # Check dependency injection consistency
-                # Standalone router uses injected services
+                self.assertEqual(type(standalone_handler), type(embedded_handler_instance), f'Handler types differ for {handler_type}')
                 if hasattr(standalone_handler, 'monitoring_service'):
                     standalone_service = standalone_handler.monitoring_service
-                    # Embedded handler may create new instances (INCONSISTENCY)
                     if hasattr(embedded_handler_instance, 'monitoring_service'):
                         embedded_service = embedded_handler_instance.monitoring_service
-
-                        # Services should be the same but may not be (DI FRAGMENTATION)
-                        self.assertIs(standalone_service, embedded_service,
-                                    f"Monitoring service instances differ for {handler_type}")
+                        self.assertIs(standalone_service, embedded_service, f'Monitoring service instances differ for {handler_type}')
 
     @pytest.mark.asyncio
     async def test_concurrent_quality_message_routing_race_conditions(self):
@@ -201,71 +104,38 @@ class TestQualityRouterRoutingInconsistency(SSotAsyncTestCase):
         """
         from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
         from netra_backend.app.websocket_core.handlers import WebSocketHandler
-
-        # Create multiple router instances
-        standalone_routers = [
-            QualityMessageRouter(
-                supervisor=self.mock_supervisor,
-                db_session_factory=self.mock_db_session_factory,
-                quality_gate_service=self.mock_quality_gate_service,
-                monitoring_service=self.mock_monitoring_service
-            ) for _ in range(3)
-        ]
-
+        standalone_routers = [QualityMessageRouter(supervisor=self.mock_supervisor, db_session_factory=self.mock_db_session_factory, quality_gate_service=self.mock_quality_gate_service, monitoring_service=self.mock_monitoring_service) for _ in range(3)]
         embedded_handlers = [WebSocketHandler() for _ in range(3)]
         for handler in embedded_handlers:
             await handler._initialize_quality_handlers()
-
-        # Track concurrent execution results
         standalone_results = []
         embedded_results = []
 
         async def route_standalone(router, user_id, message):
             try:
                 await router.handle_message(user_id, message)
-                return "success"
+                return 'success'
             except Exception as e:
-                return f"error: {str(e)}"
+                return f'error: {str(e)}'
 
         async def route_embedded(handler, user_id, message):
             try:
                 await handler.handle_quality_message(user_id, message)
-                return "success"
+                return 'success'
             except Exception as e:
-                return f"error: {str(e)}"
-
-        # Execute concurrent routing through both implementations
+                return f'error: {str(e)}'
         with patch('netra_backend.app.services.user_execution_context.create_defensive_user_execution_context') as mock_manager:
             mock_ws_manager = AsyncMock()
             mock_manager.return_value = mock_ws_manager
-
-            # Concurrent standalone routing
-            standalone_tasks = [
-                route_standalone(router, f"user_{i}", self.test_messages[i % len(self.test_messages)])
-                for i, router in enumerate(standalone_routers)
-            ]
+            standalone_tasks = [route_standalone(router, f'user_{i}', self.test_messages[i % len(self.test_messages)]) for i, router in enumerate(standalone_routers)]
             standalone_results = await asyncio.gather(*standalone_tasks, return_exceptions=True)
-
-            # Concurrent embedded routing
-            embedded_tasks = [
-                route_embedded(handler, f"user_{i}", self.test_messages[i % len(self.test_messages)])
-                for i, handler in enumerate(embedded_handlers)
-            ]
+            embedded_tasks = [route_embedded(handler, f'user_{i}', self.test_messages[i % len(self.test_messages)]) for i, handler in enumerate(embedded_handlers)]
             embedded_results = await asyncio.gather(*embedded_tasks, return_exceptions=True)
-
-        # Results should be consistently successful, but may show race conditions
-        standalone_success_rate = sum(1 for result in standalone_results if result == "success") / len(standalone_results)
-        embedded_success_rate = sum(1 for result in embedded_results if result == "success") / len(embedded_results)
-
-        # Success rates should be identical (but may differ due to race conditions)
-        self.assertEqual(standalone_success_rate, embedded_success_rate,
-                        f"Concurrent routing success rates differ: standalone={standalone_success_rate:.2f}, embedded={embedded_success_rate:.2f}")
-
-        # Both should have high success rates (but fragmentation may cause failures)
-        self.assertGreaterEqual(standalone_success_rate, 0.9,
-                              f"Standalone router success rate too low: {standalone_success_rate:.2f}")
-        self.assertGreaterEqual(embedded_success_rate, 0.9,
-                              f"Embedded handler success rate too low: {embedded_success_rate:.2f}")
+        standalone_success_rate = sum((1 for result in standalone_results if result == 'success')) / len(standalone_results)
+        embedded_success_rate = sum((1 for result in embedded_results if result == 'success')) / len(embedded_results)
+        self.assertEqual(standalone_success_rate, embedded_success_rate, f'Concurrent routing success rates differ: standalone={standalone_success_rate:.2f}, embedded={embedded_success_rate:.2f}')
+        self.assertGreaterEqual(standalone_success_rate, 0.9, f'Standalone router success rate too low: {standalone_success_rate:.2f}')
+        self.assertGreaterEqual(embedded_success_rate, 0.9, f'Embedded handler success rate too low: {embedded_success_rate:.2f}')
 
     @pytest.mark.asyncio
     async def test_quality_message_payload_transformation_differences(self):
@@ -275,73 +145,33 @@ class TestQualityRouterRoutingInconsistency(SSotAsyncTestCase):
         """
         from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
         from netra_backend.app.websocket_core.handlers import WebSocketHandler
-
-        # Test message with complex payload
-        complex_message = {
-            "type": "get_quality_metrics",
-            "thread_id": "thread_transform_123",
-            "run_id": "run_transform_456",
-            "payload": {
-                "agent_name": "complex_agent",
-                "filters": {
-                    "time_range": {"start": "2024-01-01", "end": "2024-01-31"},
-                    "severity": ["error", "warning"]
-                },
-                "options": {
-                    "include_raw_data": True,
-                    "format": "detailed"
-                }
-            }
-        }
-
-        # Track payload transformations
+        complex_message = {'type': 'get_quality_metrics', 'thread_id': 'thread_transform_123', 'run_id': 'run_transform_456', 'payload': {'agent_name': 'complex_agent', 'filters': {'time_range': {'start': '2024-01-01', 'end': '2024-01-31'}, 'severity': ['error', 'warning']}, 'options': {'include_raw_data': True, 'format': 'detailed'}}}
         standalone_payloads = []
         embedded_payloads = []
-
-        # Mock handlers to capture payload transformations
         with patch('netra_backend.app.services.websocket.quality_metrics_handler.QualityMetricsHandler.handle') as mock_standalone:
             with patch('netra_backend.app.websocket_core.handlers.WebSocketHandler._route_quality_message') as mock_embedded:
 
-                # Capture standalone payload transformation
                 async def capture_standalone_payload(user_id, payload):
                     standalone_payloads.append(payload.copy())
                 mock_standalone.side_effect = capture_standalone_payload
 
-                # Capture embedded payload transformation
                 async def capture_embedded_payload(user_id, message, message_type):
-                    embedded_payloads.append(message.get("payload", {}).copy())
+                    embedded_payloads.append(message.get('payload', {}).copy())
                 mock_embedded.side_effect = capture_embedded_payload
-
-                # Route through both implementations
-                standalone_router = QualityMessageRouter(
-                    supervisor=self.mock_supervisor,
-                    db_session_factory=self.mock_db_session_factory,
-                    quality_gate_service=self.mock_quality_gate_service,
-                    monitoring_service=self.mock_monitoring_service
-                )
-
+                standalone_router = QualityMessageRouter(supervisor=self.mock_supervisor, db_session_factory=self.mock_db_session_factory, quality_gate_service=self.mock_quality_gate_service, monitoring_service=self.mock_monitoring_service)
                 embedded_handler = WebSocketHandler()
                 await embedded_handler._initialize_quality_handlers()
-
                 await standalone_router.handle_message(self.test_user_id, complex_message)
                 await embedded_handler.handle_quality_message(self.test_user_id, complex_message)
-
-        # Verify payload transformations are identical (but may differ)
-        self.assertEqual(len(standalone_payloads), 1, "Should have captured one standalone payload")
-        self.assertEqual(len(embedded_payloads), 1, "Should have captured one embedded payload")
-
+        self.assertEqual(len(standalone_payloads), 1, 'Should have captured one standalone payload')
+        self.assertEqual(len(embedded_payloads), 1, 'Should have captured one embedded payload')
         standalone_payload = standalone_payloads[0]
         embedded_payload = embedded_payloads[0]
-
-        # Payloads should be identical after transformation (but may differ)
-        self.assertEqual(standalone_payload, embedded_payload,
-                        "Payload transformations differ between router implementations")
-
-        # Context IDs should be preserved (but may be handled differently)
-        self.assertIn("thread_id", standalone_payload, "Thread ID missing from standalone payload")
-        self.assertIn("run_id", standalone_payload, "Run ID missing from standalone payload")
-        self.assertIn("thread_id", embedded_payload, "Thread ID missing from embedded payload")
-        self.assertIn("run_id", embedded_payload, "Run ID missing from embedded payload")
+        self.assertEqual(standalone_payload, embedded_payload, 'Payload transformations differ between router implementations')
+        self.assertIn('thread_id', standalone_payload, 'Thread ID missing from standalone payload')
+        self.assertIn('run_id', standalone_payload, 'Run ID missing from standalone payload')
+        self.assertIn('thread_id', embedded_payload, 'Thread ID missing from embedded payload')
+        self.assertIn('run_id', embedded_payload, 'Run ID missing from embedded payload')
 
     @pytest.mark.asyncio
     async def test_broadcast_functionality_fragmentation(self):
@@ -351,60 +181,29 @@ class TestQualityRouterRoutingInconsistency(SSotAsyncTestCase):
         """
         from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
         from netra_backend.app.websocket_core.handlers import WebSocketHandler
-
-        # Test broadcast data
-        quality_update = {
-            "type": "system_quality_update",
-            "data": {
-                "overall_score": 0.95,
-                "trending": "up",
-                "alerts": 2
-            }
-        }
-
-        # Create routers
-        standalone_router = QualityMessageRouter(
-            supervisor=self.mock_supervisor,
-            db_session_factory=self.mock_db_session_factory,
-            quality_gate_service=self.mock_quality_gate_service,
-            monitoring_service=self.mock_monitoring_service
-        )
-
+        quality_update = {'type': 'system_quality_update', 'data': {'overall_score': 0.95, 'trending': 'up', 'alerts': 2}}
+        standalone_router = QualityMessageRouter(supervisor=self.mock_supervisor, db_session_factory=self.mock_db_session_factory, quality_gate_service=self.mock_quality_gate_service, monitoring_service=self.mock_monitoring_service)
         embedded_handler = WebSocketHandler()
-
-        # Test broadcast capabilities
         with patch('netra_backend.app.services.user_execution_context.create_defensive_user_execution_context') as mock_manager:
             mock_ws_manager = AsyncMock()
             mock_manager.return_value = mock_ws_manager
-
-            # Test standalone broadcast
             standalone_has_broadcast = hasattr(standalone_router, 'broadcast_quality_update')
             if standalone_has_broadcast:
                 await standalone_router.broadcast_quality_update(quality_update)
                 standalone_broadcast_calls = mock_ws_manager.send_to_user.call_count
             else:
                 standalone_broadcast_calls = 0
-
-            # Reset mock
             mock_ws_manager.reset_mock()
-
-            # Test embedded broadcast
             embedded_has_broadcast = hasattr(embedded_handler, 'broadcast_quality_update')
             if embedded_has_broadcast:
                 await embedded_handler.broadcast_quality_update(quality_update)
                 embedded_broadcast_calls = mock_ws_manager.send_to_user.call_count
             else:
                 embedded_broadcast_calls = 0
-
-        # Both should have broadcast capability (but may not)
-        self.assertEqual(standalone_has_broadcast, embedded_has_broadcast,
-                        "Broadcast capability differs between implementations")
-
-        # If both have broadcast, behavior should be identical (but may not be)
+        self.assertEqual(standalone_has_broadcast, embedded_has_broadcast, 'Broadcast capability differs between implementations')
         if standalone_has_broadcast and embedded_has_broadcast:
-            self.assertEqual(standalone_broadcast_calls, embedded_broadcast_calls,
-                           "Broadcast call patterns differ between implementations")
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+            self.assertEqual(standalone_broadcast_calls, embedded_broadcast_calls, 'Broadcast call patterns differ between implementations')
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

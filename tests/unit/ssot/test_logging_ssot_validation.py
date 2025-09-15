@@ -20,7 +20,6 @@ Tests validate:
 CRITICAL: These tests are designed to FAIL initially, proving SSOT violations exist.
 After remediation, these same tests will PASS, validating SSOT compliance.
 """
-
 import pytest
 import logging
 import sys
@@ -28,9 +27,7 @@ import os
 from pathlib import Path
 from typing import Set, List, Dict, Any
 from unittest.mock import patch, MagicMock
-
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-
 
 class TestLoggingSSOTValidation(SSotBaseTestCase):
     """
@@ -39,15 +36,11 @@ class TestLoggingSSOTValidation(SSotBaseTestCase):
     These tests MUST FAIL initially to prove 5 competing logging configurations exist.
     After SSOT remediation, these tests will PASS.
     """
-    
+
     def setup_method(self, method):
         """Set up test environment."""
         super().setup_method(method)
-        
-        # Clear any cached logging state
         logging.getLogger().handlers.clear()
-        
-        # Reset any module-level logging configuration
         if 'netra_backend.app.logging_config' in sys.modules:
             del sys.modules['netra_backend.app.logging_config']
         if 'netra_backend.app.core.logging_config' in sys.modules:
@@ -56,7 +49,7 @@ class TestLoggingSSOTValidation(SSotBaseTestCase):
             del sys.modules['shared.logging.unified_logger_factory']
         if 'analytics_service.analytics_core.utils.logging_config' in sys.modules:
             del sys.modules['analytics_service.analytics_core.utils.logging_config']
-    
+
     def _is_ssot_compatibility_wrapper(self, file_path: Path) -> bool:
         """Check if a file is an SSOT compatibility wrapper."""
         try:
@@ -64,7 +57,7 @@ class TestLoggingSSOTValidation(SSotBaseTestCase):
             return 'SSOT_COMPATIBILITY_WRAPPER = True' in content
         except (UnicodeDecodeError, OSError):
             return False
-    
+
     def test_single_logging_configuration_exists(self):
         """
         CRITICAL TEST: Validates only ONE logging configuration exists.
@@ -77,68 +70,27 @@ class TestLoggingSSOTValidation(SSotBaseTestCase):
         - No duplicate logging initialization patterns
         - Single point of logging configuration truth
         """
-        # Find all logging configuration files
-        project_root = Path(__file__).parents[3]  # Go up to project root
-        
+        project_root = Path(__file__).parents[3]
         logging_config_files = []
-        
-        # Search for all logging_config.py files
-        for config_file in project_root.rglob("**/logging_config.py"):
-            # Skip test files and __pycache__
-            if not any(skip in str(config_file) for skip in ['test', '__pycache__', '.git']):
-                # Check if this is a compatibility wrapper
+        for config_file in project_root.rglob('**/logging_config.py'):
+            if not any((skip in str(config_file) for skip in ['test', '__pycache__', '.git'])):
                 if not self._is_ssot_compatibility_wrapper(config_file):
                     logging_config_files.append(str(config_file))
-        
-        # Search for logger factory files
         logger_factory_files = []
-        for factory_file in project_root.rglob("**/*logger*factory*.py"):
-            if not any(skip in str(factory_file) for skip in ['test', '__pycache__', '.git']):
-                # Check if this is a compatibility wrapper
+        for factory_file in project_root.rglob('**/*logger*factory*.py'):
+            if not any((skip in str(factory_file) for skip in ['test', '__pycache__', '.git'])):
                 if not self._is_ssot_compatibility_wrapper(factory_file):
                     logger_factory_files.append(str(factory_file))
-        
-        # Search for SSOT logging files
         ssot_logging_files = []
-        for ssot_file in project_root.rglob("**/*logging*ssot*.py"):
-            if not any(skip in str(ssot_file) for skip in ['test', '__pycache__', '.git']):
+        for ssot_file in project_root.rglob('**/*logging*ssot*.py'):
+            if not any((skip in str(ssot_file) for skip in ['test', '__pycache__', '.git'])):
                 ssot_logging_files.append(str(ssot_file))
-        
-        # Count actual logging configurations (excluding compatibility wrappers)
         total_actual_configs = len(logging_config_files) + len(logger_factory_files)
-        
-        # Count SSOT configurations (should be exactly 1)
         total_ssot_configs = len(ssot_logging_files)
-        
-        # Total effective configurations = actual configs + SSOT configs
         total_logging_configs = total_actual_configs + total_ssot_configs
-        
-        failure_message = f"""
-SSOT LOGGING COMPLIANCE CHECK:
-
-Found {total_logging_configs} total logging configurations:
-- Actual Config Files: {total_actual_configs} (should be 0)
-- SSOT Config Files: {total_ssot_configs} (should be exactly 1)
-
-Active Logging Config Files ({len(logging_config_files)}):
-{chr(10).join(f"  - {f}" for f in logging_config_files)}
-
-Active Logger Factory Files ({len(logger_factory_files)}):
-{chr(10).join(f"  - {f}" for f in logger_factory_files)}
-
-SSOT Logging Files ({len(ssot_logging_files)}):
-{chr(10).join(f"  - {f}" for f in ssot_logging_files)}
-
-SSOT REQUIREMENT: Exactly 1 SSOT configuration file, 0 active configurations.
-All other logging files should be compatibility wrappers with SSOT_COMPATIBILITY_WRAPPER = True.
-
-BUSINESS IMPACT: Multiple active logging configurations prevent effective debugging
-of Golden Path failures, impacting $500K+ ARR platform reliability.
-"""
-        
-        # PASS if exactly 1 SSOT file and 0 active config files
+        failure_message = f"\nSSOT LOGGING COMPLIANCE CHECK:\n\nFound {total_logging_configs} total logging configurations:\n- Actual Config Files: {total_actual_configs} (should be 0)\n- SSOT Config Files: {total_ssot_configs} (should be exactly 1)\n\nActive Logging Config Files ({len(logging_config_files)}):\n{chr(10).join((f'  - {f}' for f in logging_config_files))}\n\nActive Logger Factory Files ({len(logger_factory_files)}):\n{chr(10).join((f'  - {f}' for f in logger_factory_files))}\n\nSSOT Logging Files ({len(ssot_logging_files)}):\n{chr(10).join((f'  - {f}' for f in ssot_logging_files))}\n\nSSOT REQUIREMENT: Exactly 1 SSOT configuration file, 0 active configurations.\nAll other logging files should be compatibility wrappers with SSOT_COMPATIBILITY_WRAPPER = True.\n\nBUSINESS IMPACT: Multiple active logging configurations prevent effective debugging\nof Golden Path failures, impacting $500K+ ARR platform reliability.\n"
         assert total_actual_configs == 0 and total_ssot_configs == 1, failure_message
-    
+
     def test_no_duplicate_logger_factories(self):
         """
         Validates no duplicate logger factory patterns exist.
@@ -146,20 +98,14 @@ of Golden Path failures, impacting $500K+ ARR platform reliability.
         EXPECTED TO FAIL: Multiple factory patterns currently exist
         """
         project_root = Path(__file__).parents[3]
-        
-        # Find all Python files with logger factory patterns
         factory_patterns = []
-        
-        for py_file in project_root.rglob("**/*.py"):
-            if any(skip in str(py_file) for skip in ['test', '__pycache__', '.git']):
+        for py_file in project_root.rglob('**/*.py'):
+            if any((skip in str(py_file) for skip in ['test', '__pycache__', '.git'])):
                 continue
-                
             try:
                 content = py_file.read_text(encoding='utf-8')
-                
-                # Check for various logger factory patterns
                 patterns_found = []
-                if 'class' in content and 'Logger' in content and 'Factory' in content:
+                if 'class' in content and 'Logger' in content and ('Factory' in content):
                     patterns_found.append('class_logger_factory')
                 if 'def get_logger' in content:
                     patterns_found.append('get_logger_function')
@@ -167,35 +113,13 @@ of Golden Path failures, impacting $500K+ ARR platform reliability.
                     patterns_found.append('direct_getlogger_function')
                 if 'UnifiedLogger' in content and 'class' in content:
                     patterns_found.append('unified_logger_class')
-                
                 if patterns_found:
-                    factory_patterns.append({
-                        'file': str(py_file),
-                        'patterns': patterns_found
-                    })
-                    
+                    factory_patterns.append({'file': str(py_file), 'patterns': patterns_found})
             except (UnicodeDecodeError, OSError):
                 continue
-        
-        failure_message = f"""
-DUPLICATE LOGGER FACTORY VIOLATION DETECTED!
-
-Found {len(factory_patterns)} files with logger factory patterns:
-
-{chr(10).join(f"  {item['file']}: {', '.join(item['patterns'])}" for item in factory_patterns)}
-
-SSOT REQUIREMENT: Only ONE logger factory should exist across entire codebase.
-
-REMEDIATION REQUIRED:
-1. Consolidate all logger factory patterns into single SSOT factory
-2. Remove duplicate get_logger functions
-3. Eliminate service-specific logger creation patterns
-4. Implement unified logger instantiation interface
-"""
-        
-        # Should fail initially - only 1 factory pattern should exist
+        failure_message = f"""\nDUPLICATE LOGGER FACTORY VIOLATION DETECTED!\n\nFound {len(factory_patterns)} files with logger factory patterns:\n\n{chr(10).join((f"  {item['file']}: {', '.join(item['patterns'])}" for item in factory_patterns))}\n\nSSOT REQUIREMENT: Only ONE logger factory should exist across entire codebase.\n\nREMEDIATION REQUIRED:\n1. Consolidate all logger factory patterns into single SSOT factory\n2. Remove duplicate get_logger functions\n3. Eliminate service-specific logger creation patterns\n4. Implement unified logger instantiation interface\n"""
         assert len(factory_patterns) <= 1, failure_message
-    
+
     def test_consistent_log_correlation_id_formats(self):
         """
         Validates consistent log correlation ID formats across all services.
@@ -203,19 +127,13 @@ REMEDIATION REQUIRED:
         EXPECTED TO FAIL: Different correlation ID formats currently exist
         """
         project_root = Path(__file__).parents[3]
-        
         correlation_patterns = {}
-        
-        # Search for correlation ID patterns in logging configurations
-        for py_file in project_root.rglob("**/*logging*.py"):
-            if any(skip in str(py_file) for skip in ['test', '__pycache__', '.git']):
+        for py_file in project_root.rglob('**/*logging*.py'):
+            if any((skip in str(py_file) for skip in ['test', '__pycache__', '.git'])):
                 continue
-                
             try:
                 content = py_file.read_text(encoding='utf-8')
-                
                 patterns = []
-                # Look for various correlation ID patterns
                 if 'request_id' in content:
                     patterns.append('request_id')
                 if 'trace_id' in content:
@@ -226,43 +144,16 @@ REMEDIATION REQUIRED:
                     patterns.append('transaction_id')
                 if 'event_id' in content:
                     patterns.append('event_id')
-                    
                 if patterns:
                     correlation_patterns[str(py_file)] = patterns
-                    
             except (UnicodeDecodeError, OSError):
                 continue
-        
-        # Check for inconsistent correlation ID formats
         all_patterns = set()
         for patterns in correlation_patterns.values():
             all_patterns.update(patterns)
-        
-        failure_message = f"""
-INCONSISTENT CORRELATION ID FORMATS DETECTED!
-
-Found {len(all_patterns)} different correlation ID patterns across {len(correlation_patterns)} files:
-
-Patterns: {', '.join(sorted(all_patterns))}
-
-Files with correlation patterns:
-{chr(10).join(f"  {file}: {', '.join(patterns)}" for file, patterns in correlation_patterns.items())}
-
-SSOT REQUIREMENT: All services must use identical correlation ID format.
-
-REMEDIATION REQUIRED:
-1. Standardize on single correlation ID format (recommend 'request_id')
-2. Update all logging configurations to use consistent format
-3. Implement unified correlation context propagation
-4. Remove conflicting correlation ID patterns
-
-BUSINESS IMPACT: Inconsistent correlation IDs prevent effective
-distributed tracing and Golden Path debugging.
-"""
-        
-        # Should fail initially - multiple correlation patterns exist
+        failure_message = f"""\nINCONSISTENT CORRELATION ID FORMATS DETECTED!\n\nFound {len(all_patterns)} different correlation ID patterns across {len(correlation_patterns)} files:\n\nPatterns: {', '.join(sorted(all_patterns))}\n\nFiles with correlation patterns:\n{chr(10).join((f"  {file}: {', '.join(patterns)}" for file, patterns in correlation_patterns.items()))}\n\nSSOT REQUIREMENT: All services must use identical correlation ID format.\n\nREMEDIATION REQUIRED:\n1. Standardize on single correlation ID format (recommend 'request_id')\n2. Update all logging configurations to use consistent format\n3. Implement unified correlation context propagation\n4. Remove conflicting correlation ID patterns\n\nBUSINESS IMPACT: Inconsistent correlation IDs prevent effective\ndistributed tracing and Golden Path debugging.\n"""
         assert len(all_patterns) <= 1, failure_message
-    
+
     def test_unified_trace_context_propagation(self):
         """
         Validates unified trace context propagation across all logging configurations.
@@ -270,18 +161,13 @@ distributed tracing and Golden Path debugging.
         EXPECTED TO FAIL: Multiple trace context implementations exist
         """
         project_root = Path(__file__).parents[3]
-        
         trace_context_implementations = {}
-        
-        for py_file in project_root.rglob("**/*logging*.py"):
-            if any(skip in str(py_file) for skip in ['test', '__pycache__', '.git']):
+        for py_file in project_root.rglob('**/*logging*.py'):
+            if any((skip in str(py_file) for skip in ['test', '__pycache__', '.git'])):
                 continue
-                
             try:
                 content = py_file.read_text(encoding='utf-8')
-                
                 context_patterns = []
-                # Look for various trace context patterns
                 if 'ContextVar' in content:
                     context_patterns.append('ContextVar')
                 if 'context_processor' in content:
@@ -292,35 +178,13 @@ distributed tracing and Golden Path debugging.
                     context_patterns.append('trace_context')
                 if 'request_context' in content:
                     context_patterns.append('request_context')
-                    
                 if context_patterns:
                     trace_context_implementations[str(py_file)] = context_patterns
-                    
             except (UnicodeDecodeError, OSError):
                 continue
-        
-        failure_message = f"""
-MULTIPLE TRACE CONTEXT IMPLEMENTATIONS DETECTED!
-
-Found trace context implementations in {len(trace_context_implementations)} files:
-
-{chr(10).join(f"  {file}: {', '.join(patterns)}" for file, patterns in trace_context_implementations.items())}
-
-SSOT REQUIREMENT: Only ONE trace context implementation should exist.
-
-REMEDIATION REQUIRED:
-1. Consolidate all trace context implementations into single SSOT module
-2. Remove duplicate context propagation patterns
-3. Implement unified trace context interface
-4. Ensure consistent context propagation across all services
-
-BUSINESS IMPACT: Multiple trace context implementations create
-gaps in distributed tracing, preventing effective Golden Path debugging.
-"""
-        
-        # Should fail initially - only 1 trace context implementation should exist
+        failure_message = f"""\nMULTIPLE TRACE CONTEXT IMPLEMENTATIONS DETECTED!\n\nFound trace context implementations in {len(trace_context_implementations)} files:\n\n{chr(10).join((f"  {file}: {', '.join(patterns)}" for file, patterns in trace_context_implementations.items()))}\n\nSSOT REQUIREMENT: Only ONE trace context implementation should exist.\n\nREMEDIATION REQUIRED:\n1. Consolidate all trace context implementations into single SSOT module\n2. Remove duplicate context propagation patterns\n3. Implement unified trace context interface\n4. Ensure consistent context propagation across all services\n\nBUSINESS IMPACT: Multiple trace context implementations create\ngaps in distributed tracing, preventing effective Golden Path debugging.\n"""
         assert len(trace_context_implementations) <= 1, failure_message
-    
+
     def test_no_competing_logging_patterns(self):
         """
         Validates no competing logging initialization patterns exist.
@@ -328,83 +192,29 @@ gaps in distributed tracing, preventing effective Golden Path debugging.
         EXPECTED TO FAIL: Multiple logging initialization patterns currently exist
         """
         project_root = Path(__file__).parents[3]
-        
-        logging_patterns = {
-            'basicConfig': [],
-            'logging_getLogger': [],
-            'custom_logger_class': [],
-            'structlog_configure': [],
-            'logger_factory_call': []
-        }
-        
-        for py_file in project_root.rglob("**/*.py"):
-            if any(skip in str(py_file) for skip in ['test', '__pycache__', '.git']):
+        logging_patterns = {'basicConfig': [], 'logging_getLogger': [], 'custom_logger_class': [], 'structlog_configure': [], 'logger_factory_call': []}
+        for py_file in project_root.rglob('**/*.py'):
+            if any((skip in str(py_file) for skip in ['test', '__pycache__', '.git'])):
                 continue
-                
             try:
                 content = py_file.read_text(encoding='utf-8')
-                
                 file_path = str(py_file)
-                
                 if 'logging.basicConfig' in content:
                     logging_patterns['basicConfig'].append(file_path)
                 if 'logging.getLogger(' in content:
                     logging_patterns['logging_getLogger'].append(file_path)
-                if 'class' in content and 'Logger' in content and 'def __init__' in content:
+                if 'class' in content and 'Logger' in content and ('def __init__' in content):
                     logging_patterns['custom_logger_class'].append(file_path)
                 if 'structlog.configure' in content:
                     logging_patterns['structlog_configure'].append(file_path)
                 if 'get_logger(' in content and 'def' not in content:
                     logging_patterns['logger_factory_call'].append(file_path)
-                    
             except (UnicodeDecodeError, OSError):
                 continue
-        
-        # Count total competing patterns
-        total_patterns = sum(len(files) for files in logging_patterns.values())
-        
-        failure_message = f"""
-COMPETING LOGGING PATTERNS DETECTED!
-
-Found {total_patterns} instances of competing logging patterns:
-
-basicConfig calls ({len(logging_patterns['basicConfig'])}):
-{chr(10).join(f"  - {f}" for f in logging_patterns['basicConfig'][:5])}
-{'  ... and more' if len(logging_patterns['basicConfig']) > 5 else ''}
-
-logging.getLogger calls ({len(logging_patterns['logging_getLogger'])}):
-{chr(10).join(f"  - {f}" for f in logging_patterns['logging_getLogger'][:5])}
-{'  ... and more' if len(logging_patterns['logging_getLogger']) > 5 else ''}
-
-Custom logger classes ({len(logging_patterns['custom_logger_class'])}):
-{chr(10).join(f"  - {f}" for f in logging_patterns['custom_logger_class'][:5])}
-{'  ... and more' if len(logging_patterns['custom_logger_class']) > 5 else ''}
-
-structlog.configure calls ({len(logging_patterns['structlog_configure'])}):
-{chr(10).join(f"  - {f}" for f in logging_patterns['structlog_configure'][:5])}
-{'  ... and more' if len(logging_patterns['structlog_configure']) > 5 else ''}
-
-Logger factory calls ({len(logging_patterns['logger_factory_call'])}):
-{chr(10).join(f"  - {f}" for f in logging_patterns['logger_factory_call'][:5])}
-{'  ... and more' if len(logging_patterns['logger_factory_call']) > 5 else ''}
-
-SSOT REQUIREMENT: All logging should use unified SSOT pattern.
-
-REMEDIATION REQUIRED:
-1. Replace all logging.basicConfig with SSOT factory
-2. Replace all logging.getLogger with SSOT factory
-3. Remove custom logger classes (use SSOT)
-4. Consolidate structlog.configure calls
-5. Implement single logger factory interface
-
-BUSINESS IMPACT: Competing logging patterns create inconsistent
-log formats and missing correlation, preventing Golden Path debugging.
-"""
-        
-        # Should fail initially - competing patterns exist
-        # Allow minimal patterns for SSOT implementation
+        total_patterns = sum((len(files) for files in logging_patterns.values()))
+        failure_message = f"\nCOMPETING LOGGING PATTERNS DETECTED!\n\nFound {total_patterns} instances of competing logging patterns:\n\nbasicConfig calls ({len(logging_patterns['basicConfig'])}):\n{chr(10).join((f'  - {f}' for f in logging_patterns['basicConfig'][:5]))}\n{('  ... and more' if len(logging_patterns['basicConfig']) > 5 else '')}\n\nlogging.getLogger calls ({len(logging_patterns['logging_getLogger'])}):\n{chr(10).join((f'  - {f}' for f in logging_patterns['logging_getLogger'][:5]))}\n{('  ... and more' if len(logging_patterns['logging_getLogger']) > 5 else '')}\n\nCustom logger classes ({len(logging_patterns['custom_logger_class'])}):\n{chr(10).join((f'  - {f}' for f in logging_patterns['custom_logger_class'][:5]))}\n{('  ... and more' if len(logging_patterns['custom_logger_class']) > 5 else '')}\n\nstructlog.configure calls ({len(logging_patterns['structlog_configure'])}):\n{chr(10).join((f'  - {f}' for f in logging_patterns['structlog_configure'][:5]))}\n{('  ... and more' if len(logging_patterns['structlog_configure']) > 5 else '')}\n\nLogger factory calls ({len(logging_patterns['logger_factory_call'])}):\n{chr(10).join((f'  - {f}' for f in logging_patterns['logger_factory_call'][:5]))}\n{('  ... and more' if len(logging_patterns['logger_factory_call']) > 5 else '')}\n\nSSOT REQUIREMENT: All logging should use unified SSOT pattern.\n\nREMEDIATION REQUIRED:\n1. Replace all logging.basicConfig with SSOT factory\n2. Replace all logging.getLogger with SSOT factory\n3. Remove custom logger classes (use SSOT)\n4. Consolidate structlog.configure calls\n5. Implement single logger factory interface\n\nBUSINESS IMPACT: Competing logging patterns create inconsistent\nlog formats and missing correlation, preventing Golden Path debugging.\n"
         assert total_patterns <= 5, failure_message
-    
+
     def test_logging_environment_configuration_consistency(self):
         """
         Validates consistent environment-based logging configuration.
@@ -412,18 +222,13 @@ log formats and missing correlation, preventing Golden Path debugging.
         EXPECTED TO FAIL: Different environment handling patterns exist
         """
         project_root = Path(__file__).parents[3]
-        
         env_patterns = {}
-        
-        for py_file in project_root.rglob("**/*logging*.py"):
-            if any(skip in str(py_file) for skip in ['test', '__pycache__', '.git']):
+        for py_file in project_root.rglob('**/*logging*.py'):
+            if any((skip in str(py_file) for skip in ['test', '__pycache__', '.git'])):
                 continue
-                
             try:
                 content = py_file.read_text(encoding='utf-8')
-                
                 patterns = []
-                # Look for environment configuration patterns
                 if 'os.environ' in content:
                     patterns.append('os_environ')
                 if 'get_env()' in content:
@@ -434,45 +239,17 @@ log formats and missing correlation, preventing Golden Path debugging.
                     patterns.append('environment_var_access')
                 if 'LOG_LEVEL' in content:
                     patterns.append('log_level_env')
-                    
                 if patterns:
                     env_patterns[str(py_file)] = patterns
-                    
             except (UnicodeDecodeError, OSError):
                 continue
-        
-        # Check for inconsistent environment access patterns
         all_env_patterns = set()
         for patterns in env_patterns.values():
             all_env_patterns.update(patterns)
-        
-        failure_message = f"""
-INCONSISTENT ENVIRONMENT CONFIGURATION DETECTED!
-
-Found {len(all_env_patterns)} different environment access patterns across {len(env_patterns)} files:
-
-Environment Patterns: {', '.join(sorted(all_env_patterns))}
-
-Files with environment patterns:
-{chr(10).join(f"  {file}: {', '.join(patterns)}" for file, patterns in env_patterns.items())}
-
-SSOT REQUIREMENT: All logging configurations must use consistent environment access.
-
-REMEDIATION REQUIRED:
-1. Standardize environment access through IsolatedEnvironment only
-2. Remove direct os.environ access from logging configs
-3. Implement unified environment-based logging level configuration
-4. Consolidate LOG_LEVEL handling patterns
-
-BUSINESS IMPACT: Inconsistent environment handling causes logging
-configuration failures in different deployment environments.
-"""
-        
-        # Should fail initially - multiple environment access patterns exist
-        # SSOT should use only IsolatedEnvironment
+        failure_message = f"""\nINCONSISTENT ENVIRONMENT CONFIGURATION DETECTED!\n\nFound {len(all_env_patterns)} different environment access patterns across {len(env_patterns)} files:\n\nEnvironment Patterns: {', '.join(sorted(all_env_patterns))}\n\nFiles with environment patterns:\n{chr(10).join((f"  {file}: {', '.join(patterns)}" for file, patterns in env_patterns.items()))}\n\nSSOT REQUIREMENT: All logging configurations must use consistent environment access.\n\nREMEDIATION REQUIRED:\n1. Standardize environment access through IsolatedEnvironment only\n2. Remove direct os.environ access from logging configs\n3. Implement unified environment-based logging level configuration\n4. Consolidate LOG_LEVEL handling patterns\n\nBUSINESS IMPACT: Inconsistent environment handling causes logging\nconfiguration failures in different deployment environments.\n"""
         assert 'os_environ' not in all_env_patterns, failure_message
-        assert len(all_env_patterns) <= 2, failure_message  # Allow isolated_environment + one other
-
-
+        assert len(all_env_patterns) <= 2, failure_message
 if __name__ == '__main__':
-    pytest.main([__file__, '-v', '--tb=short'])
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

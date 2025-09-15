@@ -10,60 +10,43 @@ that serve the Golden Path user flow.
 Created: 2025-09-14
 Issue: #1142 - SSOT Agent Factory Singleton violation blocking Golden Path
 """
-
 import pytest
 import asyncio
 from unittest.mock import MagicMock, AsyncMock, patch
 from fastapi import Request
 from typing import Optional
-
-# Test framework imports
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-
-# SSOT imports for dependency testing
-from netra_backend.app.dependencies import (
-    get_agent_instance_factory_dependency,
-    AgentInstanceFactoryDep
-)
+from netra_backend.app.dependencies import get_agent_instance_factory_dependency, AgentInstanceFactoryDep
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-
 
 class MockAppState:
     """Mock FastAPI app state for dependency testing."""
-    
+
     def __init__(self):
         self.agent_websocket_bridge = MagicMock()
         self.llm_manager = MagicMock()
         self.agent_class_registry = MagicMock()
         self.tool_dispatcher = MagicMock()
 
-
 class MockRequest:
     """Mock FastAPI request for dependency testing."""
-    
-    def __init__(self, user_id: Optional[str] = None):
+
+    def __init__(self, user_id: Optional[str]=None):
         self.app = MagicMock()
         self.app.state = MockAppState()
         self.headers = {}
         self.user_id = user_id
-        
-        # Add user ID to headers if provided
         if user_id:
             self.headers['user-id'] = user_id
 
-
 class TestDependenciesSSOTFactory1142(SSotAsyncTestCase):
     """Validate SSOT factory pattern in FastAPI dependencies."""
-    
+
     async def asyncSetUp(self):
         """Set up test fixtures for dependency testing."""
         await super().asyncSetUp()
-        
-        # Test user identifiers
-        self.healthcare_user_id = "healthcare_user_001"
-        self.fintech_user_id = "fintech_user_002"
-        
-        # Mock requests for different users
+        self.healthcare_user_id = 'healthcare_user_001'
+        self.fintech_user_id = 'fintech_user_002'
         self.healthcare_request = MockRequest(self.healthcare_user_id)
         self.fintech_request = MockRequest(self.fintech_user_id)
 
@@ -76,24 +59,11 @@ class TestDependenciesSSOTFactory1142(SSotAsyncTestCase):
         
         Expected: PASS - Each request gets isolated factory instance
         """
-        # Mock the user ID extraction to return specific users
         with patch('netra_backend.app.dependencies._extract_user_id_from_request') as mock_extract:
-            
-            # Configure mock to return specific user IDs
             mock_extract.side_effect = [self.healthcare_user_id, self.fintech_user_id]
-            
-            # Create factories for different users through dependency injection
             factory1 = await get_agent_instance_factory_dependency(self.healthcare_request)
             factory2 = await get_agent_instance_factory_dependency(self.fintech_request)
-            
-            # SSOT VALIDATION: Each request should get separate factory instances
-            assert factory1 is not factory2, (
-                f"DEPENDENCY ISOLATION SUCCESS: Each request gets separate factory. "
-                f"Factory1: {id(factory1)}, Factory2: {id(factory2)}. "
-                f"This proves per-request SSOT pattern is working."
-            )
-            
-            # Verify factories have correct user context binding
+            assert factory1 is not factory2, f'DEPENDENCY ISOLATION SUCCESS: Each request gets separate factory. Factory1: {id(factory1)}, Factory2: {id(factory2)}. This proves per-request SSOT pattern is working.'
             assert factory1._user_context.user_id == self.healthcare_user_id
             assert factory2._user_context.user_id == self.fintech_user_id
 
@@ -106,45 +76,22 @@ class TestDependenciesSSOTFactory1142(SSotAsyncTestCase):
         
         Expected: PASS - No cross-request factory contamination
         """
-        
+
         async def create_factory_via_dependency(request: MockRequest, user_id: str):
             """Simulate FastAPI dependency injection for a specific request."""
             with patch('netra_backend.app.dependencies._extract_user_id_from_request') as mock_extract:
                 mock_extract.return_value = user_id
                 return await get_agent_instance_factory_dependency(request)
-        
-        # Create multiple concurrent requests
-        user_requests = [
-            (MockRequest(f"concurrent_user_{i}"), f"concurrent_user_{i}")
-            for i in range(5)
-        ]
-        
-        # Execute concurrent dependency injections
-        tasks = [
-            create_factory_via_dependency(request, user_id)
-            for request, user_id in user_requests
-        ]
+        user_requests = [(MockRequest(f'concurrent_user_{i}'), f'concurrent_user_{i}') for i in range(5)]
+        tasks = [create_factory_via_dependency(request, user_id) for request, user_id in user_requests]
         factories = await asyncio.gather(*tasks)
-        
-        # SSOT VALIDATION: All factories should be unique instances
         factory_ids = [id(factory) for factory in factories]
         unique_ids = set(factory_ids)
-        
-        assert len(unique_ids) == len(factories), (
-            f"CONCURRENT DEPENDENCY CONTAMINATION: {len(factories)} requests but only "
-            f"{len(unique_ids)} unique factories. This indicates singleton sharing. "
-            f"Factory IDs: {factory_ids}"
-        )
-        
-        # Verify user context isolation in dependency injection
+        assert len(unique_ids) == len(factories), f'CONCURRENT DEPENDENCY CONTAMINATION: {len(factories)} requests but only {len(unique_ids)} unique factories. This indicates singleton sharing. Factory IDs: {factory_ids}'
         user_ids = [factory._user_context.user_id for factory in factories]
-        expected_user_ids = [f"concurrent_user_{i}" for i in range(5)]
-        
+        expected_user_ids = [f'concurrent_user_{i}' for i in range(5)]
         for actual_id, expected_id in zip(user_ids, expected_user_ids):
-            assert actual_id == expected_id, (
-                f"USER CONTEXT DEPENDENCY VIOLATION: Expected {expected_id}, got {actual_id}. "
-                f"This indicates user context contamination in dependency injection."
-            )
+            assert actual_id == expected_id, f'USER CONTEXT DEPENDENCY VIOLATION: Expected {expected_id}, got {actual_id}. This indicates user context contamination in dependency injection.'
 
     async def test_dependency_factory_configuration_isolation(self):
         """
@@ -156,30 +103,14 @@ class TestDependenciesSSOTFactory1142(SSotAsyncTestCase):
         Expected: PASS - Configuration isolation maintained in dependency injection
         """
         with patch('netra_backend.app.dependencies._extract_user_id_from_request') as mock_extract:
-            
-            # Create factories for different users
             mock_extract.side_effect = [self.healthcare_user_id, self.fintech_user_id]
-            
             factory1 = await get_agent_instance_factory_dependency(self.healthcare_request)
             factory2 = await get_agent_instance_factory_dependency(self.fintech_request)
-            
-            # SSOT VALIDATION: Factories should be configured but independent
-            assert hasattr(factory1, '_websocket_bridge'), (
-                "DEPENDENCY CONFIGURATION: Factory1 should be configured with WebSocket bridge"
-            )
-            assert hasattr(factory2, '_websocket_bridge'), (
-                "DEPENDENCY CONFIGURATION: Factory2 should be configured with WebSocket bridge"
-            )
-            
-            # Verify user contexts are properly bound
+            assert hasattr(factory1, '_websocket_bridge'), 'DEPENDENCY CONFIGURATION: Factory1 should be configured with WebSocket bridge'
+            assert hasattr(factory2, '_websocket_bridge'), 'DEPENDENCY CONFIGURATION: Factory2 should be configured with WebSocket bridge'
             assert factory1._user_context.user_id == self.healthcare_user_id
             assert factory2._user_context.user_id == self.fintech_user_id
-            
-            # Verify run IDs are unique between requests
-            assert factory1._user_context.run_id != factory2._user_context.run_id, (
-                f"RUN ID CONTAMINATION: Both factories have same run_id "
-                f"({factory1._user_context.run_id}). This indicates run ID collision."
-            )
+            assert factory1._user_context.run_id != factory2._user_context.run_id, f'RUN ID CONTAMINATION: Both factories have same run_id ({factory1._user_context.run_id}). This indicates run ID collision.'
 
     async def test_dependency_injection_without_user_id(self):
         """
@@ -190,27 +121,14 @@ class TestDependenciesSSOTFactory1142(SSotAsyncTestCase):
         
         Expected: PASS - Graceful fallback to service context
         """
-        # Create request without user ID
         anonymous_request = MockRequest()
-        
         with patch('netra_backend.app.dependencies._extract_user_id_from_request') as mock_extract:
             with patch('netra_backend.app.dependencies.get_service_user_context') as mock_service:
-                
-                # Configure mocks for missing user ID scenario
                 mock_extract.return_value = None
-                mock_service.return_value = "service_user_context"
-                
-                # Create factory through dependency injection
+                mock_service.return_value = 'service_user_context'
                 factory = await get_agent_instance_factory_dependency(anonymous_request)
-                
-                # SSOT VALIDATION: Should create factory with service context
-                assert factory is not None, (
-                    "DEPENDENCY FALLBACK: Should create factory even without user ID"
-                )
-                assert factory._user_context.user_id == "service_user_context", (
-                    f"FALLBACK USER CONTEXT: Expected 'service_user_context', "
-                    f"got '{factory._user_context.user_id}'"
-                )
+                assert factory is not None, 'DEPENDENCY FALLBACK: Should create factory even without user ID'
+                assert factory._user_context.user_id == 'service_user_context', f"FALLBACK USER CONTEXT: Expected 'service_user_context', got '{factory._user_context.user_id}'"
 
     async def test_dependency_infrastructure_validation(self):
         """
@@ -221,23 +139,13 @@ class TestDependenciesSSOTFactory1142(SSotAsyncTestCase):
         
         Expected: PASS - Proper error handling for missing infrastructure
         """
-        # Create request with missing WebSocket bridge
         broken_request = MockRequest(self.healthcare_user_id)
-        # Remove the WebSocket bridge to simulate startup failure
         delattr(broken_request.app.state, 'agent_websocket_bridge')
-        
         with patch('netra_backend.app.dependencies._extract_user_id_from_request') as mock_extract:
             mock_extract.return_value = self.healthcare_user_id
-            
-            # SSOT VALIDATION: Should raise HTTPException for missing infrastructure
             with pytest.raises(Exception) as exc_info:
                 await get_agent_instance_factory_dependency(broken_request)
-            
-            # Verify proper error handling
-            assert "WebSocket bridge not initialized" in str(exc_info.value), (
-                f"INFRASTRUCTURE VALIDATION: Expected WebSocket bridge error, "
-                f"got: {exc_info.value}"
-            )
+            assert 'WebSocket bridge not initialized' in str(exc_info.value), f'INFRASTRUCTURE VALIDATION: Expected WebSocket bridge error, got: {exc_info.value}'
 
     async def test_dependency_user_context_generation(self):
         """
@@ -250,36 +158,15 @@ class TestDependenciesSSOTFactory1142(SSotAsyncTestCase):
         """
         with patch('netra_backend.app.dependencies._extract_user_id_from_request') as mock_extract:
             mock_extract.return_value = self.healthcare_user_id
-            
-            # Create factory through dependency injection
             factory = await get_agent_instance_factory_dependency(self.healthcare_request)
-            
-            # SSOT VALIDATION: User context should be complete and unique
             user_context = factory._user_context
-            
-            assert user_context.user_id == self.healthcare_user_id, (
-                f"USER ID BINDING: Expected {self.healthcare_user_id}, "
-                f"got {user_context.user_id}"
-            )
-            
-            assert user_context.thread_id is not None, (
-                "THREAD ID GENERATION: Thread ID should be generated"
-            )
-            assert user_context.thread_id.startswith("thread"), (
-                f"THREAD ID FORMAT: Expected thread prefix, got {user_context.thread_id}"
-            )
-            
-            assert user_context.run_id is not None, (
-                "RUN ID GENERATION: Run ID should be generated"
-            )
-            assert user_context.run_id.startswith("run"), (
-                f"RUN ID FORMAT: Expected run prefix, got {user_context.run_id}"
-            )
-            
-            assert user_context.websocket_client_id is not None, (
-                "WEBSOCKET CLIENT ID GENERATION: WebSocket client ID should be generated"
-            )
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+            assert user_context.user_id == self.healthcare_user_id, f'USER ID BINDING: Expected {self.healthcare_user_id}, got {user_context.user_id}'
+            assert user_context.thread_id is not None, 'THREAD ID GENERATION: Thread ID should be generated'
+            assert user_context.thread_id.startswith('thread'), f'THREAD ID FORMAT: Expected thread prefix, got {user_context.thread_id}'
+            assert user_context.run_id is not None, 'RUN ID GENERATION: Run ID should be generated'
+            assert user_context.run_id.startswith('run'), f'RUN ID FORMAT: Expected run prefix, got {user_context.run_id}'
+            assert user_context.websocket_client_id is not None, 'WEBSOCKET CLIENT ID GENERATION: WebSocket client ID should be generated'
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

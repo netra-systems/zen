@@ -440,7 +440,7 @@ class HealthCheckValidator:
                 
                 # Check message router
                 try:
-                    from netra_backend.app.websocket_core import get_message_router
+                    from netra_backend.app.websocket_core.handlers import get_message_router
                     message_router = get_message_router()
                     if message_router:
                         details["message_router"] = True

@@ -70,13 +70,13 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Import circuit breaker components
-from netra_backend.app.services.circuit_breaker import (
+from netra_backend.app.core.circuit_breaker import (
     CircuitBreaker,
-    CircuitBreakerConfig,
-    CircuitBreakerManager,
-    CircuitOpenException,
+    CircuitConfig as CircuitBreakerConfig,
+    get_circuit_breaker as CircuitBreakerManager,
+    CircuitBreakerOpenError as CircuitOpenException,
     CircuitState,
-    ServiceCircuitBreakers
+    UnifiedServiceCircuitBreakers as ServiceCircuitBreakers
 )
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
     UnifiedCircuitBreaker,

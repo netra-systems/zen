@@ -1,0 +1,35 @@
+{
+  "timestamp": "2025-09-14T18:53:18.688293",
+  "mode": "dry_run",
+  "statistics": {
+    "total_files_processed": 29,
+    "successful_migrations": 28,
+    "failed_migrations": 1,
+    "total_violations_eliminated": 20,
+    "rollbacks_performed": 0,
+    "syntax_errors_prevented": 0,
+    "total_execution_time_ms": 122.46499999999999
+  },
+  "successful_files": [
+    "tests\\unit\\test_issue_1024_unauthorized_test_runners_phase1.py",
+    "tests\\unit\\test_issue_1151_function_validation.py",
+    "tests\\unit\\test_issue_270_async_health_checker.py",
+    "tests\\unit\\test_issue_378_startup_validation_fix.py",
+    "tests\\unit\\test_issue_402_service_dependency_validation.py",
+    "tests\\unit\\test_issue_403_environment_context_initialization.py",
+    "tests\\unit\\test_issue_449_asgi_scope_validation.py",
+    "tests\\unit\\test_issue_449_uvicorn_error_handling_improvements.py",
+    "tests\\unit\\test_issue_449_uvicorn_middleware_failures.py",
+    "tests\\unit\\test_issue_585_pickle_module_serialization.py"
+  ],
+  "error_files": [
+    {
+      "file": "tests\\unit\\test_issue_1017_input_sanitization_comprehensive.py",
+      "errors": [
+        "Pre-migration syntax error: Syntax error at line 147: unexpected indent"
+      ]
+    }
+  ],
+  "rollback_files": [],
+  "remaining_violations": 0
+}

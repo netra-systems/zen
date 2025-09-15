@@ -595,6 +595,19 @@ class SSotBaseTestCase:
         """Assert that first is not second (different object identity)."""
         assert first is not second, msg or f"Expected {first} is not {second} (different object identity)"
 
+    def fail(self, msg=None):
+        """Fail the test with an optional message.
+
+        This provides unittest compatibility for tests that call self.fail().
+
+        Args:
+            msg: Optional failure message
+        """
+        if msg:
+            pytest.fail(msg)
+        else:
+            pytest.fail("Test failed")
+
     def assert_env_var_set(self, key: str, expected_value: Optional[str] = None) -> None:
         """
         Assert that an environment variable is set.
@@ -713,6 +726,52 @@ class SSotBaseTestCase:
                 f"E2E authentication helper not available: {e}. "
                 f"Ensure test_framework.ssot.e2e_auth_helper is accessible."
             )
+    
+    def create_test_user_execution_context(self, **kwargs):
+        """
+        Create UserExecutionContext for integration and unit tests.
+        
+        This method provides SSOT compatibility for tests that need UserExecutionContext
+        instances with proper validation and enterprise-grade user isolation.
+        
+        Args:
+            **kwargs: Optional arguments to override defaults
+                     user_id: Custom user ID (generates UUID if not provided)
+                     thread_id: Custom thread ID (generates UUID if not provided)
+                     run_id: Custom run ID (generates UUID if not provided)
+                     websocket_client_id: Custom WebSocket connection ID
+                     Other UserExecutionContext fields
+        
+        Returns:
+            UserExecutionContext: Created user execution context with proper isolation
+            
+        Example:
+            context = self.create_test_user_execution_context()
+            context_with_websocket = self.create_test_user_execution_context(
+                websocket_client_id="test-connection-123"
+            )
+        """
+        try:
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            import uuid
+            
+            # Set up defaults with valid UUIDs that pass security validation
+            defaults = {
+                'user_id': f"user_{uuid.uuid4()}",
+                'thread_id': f"thread_{uuid.uuid4()}",
+                'run_id': f"run_{uuid.uuid4()}",
+            }
+            
+            # Merge user provided kwargs with defaults
+            context_args = {**defaults, **kwargs}
+            
+            return UserExecutionContext(**context_args)
+            
+        except ImportError as e:
+            raise ImportError(
+                f"UserExecutionContext not available: {e}. "
+                f"Ensure netra_backend.app.services.user_execution_context is accessible."
+            )
 
 
 class SSotAsyncTestCase(SSotBaseTestCase):
@@ -749,6 +808,7 @@ class SSotAsyncTestCase(SSotBaseTestCase):
     def setup_method(self, method=None):
         """Setup method for async tests - calls parent sync setup."""
         # Call the parent's sync setup method directly
+        # The parent setup_method properly initializes all attributes
         super().setup_method(method)
     
     def teardown_method(self, method=None):
@@ -871,6 +931,22 @@ class SSotAsyncTestCase(SSotBaseTestCase):
             return await asyncio.wait_for(coro, timeout=timeout)
         except asyncio.TimeoutError:
             raise TimeoutError(f"Coroutine timed out after {timeout} seconds")
+
+    # === UNITTEST COMPATIBILITY METHODS ===
+    # Ensure all unittest assertion methods are available in async test case
+
+    def fail(self, msg=None):
+        """Fail the test with an optional message.
+
+        This provides unittest compatibility for async tests that call self.fail().
+
+        Args:
+            msg: Optional failure message
+        """
+        if msg:
+            pytest.fail(msg)
+        else:
+            pytest.fail("Test failed")
 
 
 # === SSOT MIGRATION COMPLETE ===

@@ -32,6 +32,8 @@ from unittest.mock import Mock, AsyncMock
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
 
 
 class RealWebSocketSimulator:
@@ -84,12 +86,13 @@ class RealWebSocketSimulator:
 class TestMultiUserExecutionValidation(SSotAsyncTestCase):
     """Integration Test 5: Validate multi-user execution with UserExecutionEngine SSOT"""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test fixtures"""
+        super().setup_method(method)
         self.test_users = [
             {
-                'user_id': f'integration_user_{i}',
-                'session_id': f'integration_session_{i}',
+                'user_id': f'user_{uuid.uuid4()}',
+                'session_id': f'session_{uuid.uuid4()}',
                 'connection_id': str(uuid.uuid4())
             }
             for i in range(10)  # Test with 10 concurrent users
@@ -114,10 +117,22 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
             websocket = RealWebSocketSimulator(user_id, user_data['connection_id'])
             
             try:
-                engine = UserExecutionEngine(
+                # Create UserExecutionContext first
+                user_context = UserExecutionContext(
                     user_id=user_id,
-                    session_id=user_data['session_id'],
-                    websocket_manager=websocket
+                    thread_id=f"thread_{uuid.uuid4()}",
+                    run_id=f"run_{uuid.uuid4()}",
+                    websocket_client_id=user_data['connection_id']
+                )
+                
+                # Create AgentInstanceFactory with the user context
+                agent_factory = AgentInstanceFactory(user_context)
+                
+                # Create UserExecutionEngine with the context
+                engine = UserExecutionEngine(
+                    context=user_context,
+                    agent_factory=agent_factory,
+                    websocket_emitter=websocket  # The WebSocket simulator
                 )
                 
                 user_engines[user_id] = engine
@@ -186,7 +201,8 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                     user_specific_data['_user_index'] = user_index
                     user_specific_data['_scenario'] = scenario['name']
                     
-                    await engine.send_websocket_event(event_type, user_specific_data)
+                    # Send event through the WebSocket simulator
+                    await user_websockets[user_id].send_agent_event(event_type, user_specific_data)
                     
                     # Realistic delay between events
                     await asyncio.sleep(0.01 + (user_index * 0.001))
@@ -279,10 +295,22 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
             websocket = RealWebSocketSimulator(user_id, user_data['connection_id'])
             
             try:
-                engine = UserExecutionEngine(
+                # Create UserExecutionContext first
+                user_context = UserExecutionContext(
                     user_id=user_id,
-                    session_id=user_data['session_id'],
-                    websocket_manager=websocket
+                    thread_id=f"thread_{uuid.uuid4()}",
+                    run_id=f"run_{uuid.uuid4()}",
+                    websocket_client_id=user_data['connection_id']
+                )
+                
+                # Create AgentInstanceFactory with the user context
+                agent_factory = AgentInstanceFactory(user_context)
+                
+                # Create UserExecutionEngine with the context
+                engine = UserExecutionEngine(
+                    context=user_context,
+                    agent_factory=agent_factory,
+                    websocket_emitter=websocket  # The WebSocket simulator
                 )
                 
                 # Get and validate user context
@@ -291,11 +319,11 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                     user_contexts[user_id] = context
                     
                     # Validate context contains correct user data
-                    if context.get('user_id') != user_id:
-                        context_violations.append(f"User {user_id} context has wrong user_id: {context.get('user_id')}")
+                    if context.user_id != user_id:
+                        context_violations.append(f"User {user_id} context has wrong user_id: {context.user_id}")
                     
-                    if context.get('session_id') != user_data['session_id']:
-                        context_violations.append(f"User {user_id} context has wrong session_id")
+                    if context.websocket_client_id != user_data['connection_id']:
+                        context_violations.append(f"User {user_id} context has wrong connection_id")
                         
                 else:
                     context_violations.append(f"Engine for {user_id} missing get_user_context method")
@@ -317,15 +345,15 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
         
         # Test context data integrity
         for user_id, context in user_contexts.items():
-            # Each context should be a dict
-            if not isinstance(context, dict):
-                context_violations.append(f"User {user_id} context is not a dict: {type(context)}")
+            # Each context should be a UserExecutionContext
+            if not hasattr(context, 'user_id'):
+                context_violations.append(f"User {user_id} context is not a UserExecutionContext: {type(context)}")
                 continue
             
             # Context should contain user-specific data
-            required_fields = ['user_id', 'session_id']
+            required_fields = ['user_id', 'thread_id', 'run_id']
             for field in required_fields:
-                if field not in context:
+                if not hasattr(context, field):
                     context_violations.append(f"User {user_id} context missing {field}")
             
             # Context should not contain other users' data
@@ -348,10 +376,10 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                     context = user_contexts[user_id]
                     
                     # Validate context consistency
-                    if context.get('user_id') != user_id:
+                    if context.user_id != user_id:
                         return f"error_inconsistent_context_{user_id}_{i}"
                     
-                    context_accesses.append(context.get('user_id'))
+                    context_accesses.append(context.user_id)
                     
                     # Small delay to allow thread interleaving
                     time.sleep(0.0001)
@@ -414,16 +442,29 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
         
         async def simulate_user_load(user_index: int):
             """Simulate realistic user load"""
-            user_id = f"load_user_{user_index}"
+            user_id = f"loaduser_{uuid.uuid4()}"
             websocket = RealWebSocketSimulator(user_id, str(uuid.uuid4()))
             
             try:
                 # Time engine creation
                 creation_start = time.perf_counter()
-                engine = UserExecutionEngine(
+                
+                # Create UserExecutionContext first
+                user_context = UserExecutionContext(
                     user_id=user_id,
-                    session_id=f"load_session_{user_index}",
-                    websocket_manager=websocket
+                    thread_id=f"thread_{uuid.uuid4()}",
+                    run_id=f"run_{uuid.uuid4()}",
+                    websocket_client_id=str(uuid.uuid4())
+                )
+                
+                # Create AgentInstanceFactory with the user context
+                agent_factory = AgentInstanceFactory(user_context)
+                
+                # Create UserExecutionEngine with the context
+                engine = UserExecutionEngine(
+                    context=user_context,
+                    agent_factory=agent_factory,
+                    websocket_emitter=websocket  # The WebSocket simulator
                 )
                 creation_time = time.perf_counter() - creation_start
                 
@@ -433,7 +474,8 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                 for event_num in range(events_per_user):
                     event_type = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed'][event_num % 5]
                     
-                    await engine.send_websocket_event(event_type, {
+                    # Send event through the WebSocket simulator
+                    await websocket.send_agent_event(event_type, {
                         'user_index': user_index,
                         'event_num': event_num,
                         'load_test': True,

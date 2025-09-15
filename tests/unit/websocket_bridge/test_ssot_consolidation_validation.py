@@ -12,14 +12,11 @@ SSOT DELEGATION REQUIREMENTS:
 
 These tests are designed to FAIL initially, proving SSOT violations exist.
 """
-
 import pytest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock, call
 from typing import Dict, Any, Optional
-
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-
 
 class TestWebSocketBridgeSSOTDelegation(SSotBaseTestCase):
     """
@@ -30,8 +27,8 @@ class TestWebSocketBridgeSSOTDelegation(SSotBaseTestCase):
     def setUp(self):
         """Set up test environment."""
         super().setUp()
-        self.valid_jwt_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0X3VzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjk5OTk5OTk5OTksImlhdCI6MTYwMDAwMDAwMH0.test_signature"
-        self.invalid_jwt_token = "invalid.jwt.token"
+        self.valid_jwt_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0X3VzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjk5OTk5OTk5OTksImlhdCI6MTYwMDAwMDAwMH0.test_signature'
+        self.invalid_jwt_token = 'invalid.jwt.token'
 
     def test_ssot_delegation_user_context_extractor_calls_jwt_handler(self):
         """
@@ -46,54 +43,27 @@ class TestWebSocketBridgeSSOTDelegation(SSotBaseTestCase):
         After Fix: PASS - Direct delegation to SSOT JWTHandler
         """
         from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
-        
         extractor = UserContextExtractor()
         mock_websocket = Mock()
-        mock_websocket.headers = {"authorization": f"Bearer {self.valid_jwt_token}"}
-        
-        # Mock the SSOT JWTHandler to verify it's called
+        mock_websocket.headers = {'authorization': f'Bearer {self.valid_jwt_token}'}
         with patch('auth_service.auth_core.core.jwt_handler.JWTHandler') as mock_jwt_handler_class:
             mock_jwt_handler = Mock()
-            mock_jwt_handler.validate_token.return_value = {
-                'sub': 'test_user',
-                'email': 'test@example.com', 
-                'exp': 9999999999
-            }
+            mock_jwt_handler.validate_token.return_value = {'sub': 'test_user', 'email': 'test@example.com', 'exp': 9999999999}
             mock_jwt_handler_class.return_value = mock_jwt_handler
-            
-            # Also mock UnifiedAuthInterface to track if it's used instead of direct JWTHandler
             with patch('netra_backend.app.websocket_core.user_context_extractor.get_unified_auth') as mock_get_unified_auth:
                 mock_unified_auth = Mock()
-                mock_unified_auth.validate_token.return_value = {
-                    'user_id': 'test_user',
-                    'sub': 'test_user', 
-                    'email': 'test@example.com'
-                }
+                mock_unified_auth.validate_token.return_value = {'user_id': 'test_user', 'sub': 'test_user', 'email': 'test@example.com'}
                 mock_get_unified_auth.return_value = mock_unified_auth
-                
-                # Execute validation
                 try:
                     result = asyncio.run(extractor.validate_and_decode_jwt(self.valid_jwt_token))
                 except Exception as e:
-                    self.fail(f"Validation failed with exception: {e}")
-                
-                # SSOT DELEGATION CHECKS - These should FAIL initially
+                    self.fail(f'Validation failed with exception: {e}')
                 delegation_violations = []
-                
-                # Violation 1: Check if UnifiedAuthInterface was used instead of direct JWTHandler
                 if mock_get_unified_auth.called or mock_unified_auth.validate_token.called:
-                    delegation_violations.append("uses UnifiedAuthInterface instead of direct JWTHandler delegation")
-                
-                # Violation 2: Check if JWTHandler.validate_token was NOT called directly
+                    delegation_violations.append('uses UnifiedAuthInterface instead of direct JWTHandler delegation')
                 if not mock_jwt_handler.validate_token.called:
-                    delegation_violations.append("does not call JWTHandler.validate_token() directly")
-                
-                # ASSERTION: This should FAIL initially due to improper delegation
-                self.assertEqual(
-                    len(delegation_violations), 0,
-                    f"SSOT DELEGATION VIOLATIONS in UserContextExtractor: {delegation_violations}. "
-                    f"Must call JWTHandler.validate_token() directly, not through intermediary services"
-                )
+                    delegation_violations.append('does not call JWTHandler.validate_token() directly')
+                self.assertEqual(len(delegation_violations), 0, f'SSOT DELEGATION VIOLATIONS in UserContextExtractor: {delegation_violations}. Must call JWTHandler.validate_token() directly, not through intermediary services')
 
     def test_ssot_delegation_no_fallback_validation_paths(self):
         """
@@ -108,45 +78,22 @@ class TestWebSocketBridgeSSOTDelegation(SSotBaseTestCase):
         After Fix: PASS - Single delegation path only
         """
         from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
-        
         extractor = UserContextExtractor()
-        
-        # Mock UnifiedAuthInterface to return None (force fallback)
         with patch('netra_backend.app.websocket_core.user_context_extractor.get_unified_auth', return_value=None):
-            # Mock auth_client_core as fallback 
             with patch('netra_backend.app.clients.auth_client_core.auth_client') as mock_auth_client:
-                mock_auth_client.validate_token = AsyncMock(return_value={
-                    'valid': True,
-                    'payload': {'sub': 'test_user', 'email': 'test@example.com'},
-                    'user_id': 'test_user',
-                    'email': 'test@example.com'
-                })
-                
-                # Execute validation - this should expose fallback path usage
+                mock_auth_client.validate_token = AsyncMock(return_value={'valid': True, 'payload': {'sub': 'test_user', 'email': 'test@example.com'}, 'user_id': 'test_user', 'email': 'test@example.com'})
                 try:
                     result = asyncio.run(extractor.validate_and_decode_jwt(self.valid_jwt_token))
                 except Exception as e:
                     result = None
-                
-                # SSOT VIOLATION CHECKS - These should FAIL initially
                 fallback_violations = []
-                
-                # Violation 1: Check if auth_client fallback was used
                 if mock_auth_client.validate_token.called:
-                    fallback_violations.append("auth_client_core fallback validation path activated")
-                
-                # Violation 2: Check if result was produced via fallback (indicates dual path)
+                    fallback_violations.append('auth_client_core fallback validation path activated')
                 if result is not None:
                     source = result.get('source') if isinstance(result, dict) else None
                     if source == 'auth_service_fallback':
-                        fallback_violations.append("result produced via auth_service_fallback path")
-                
-                # ASSERTION: This should FAIL initially due to fallback paths
-                self.assertEqual(
-                    len(fallback_violations), 0,
-                    f"FALLBACK PATH VIOLATIONS detected: {fallback_violations}. "
-                    f"SSOT architecture requires single delegation path with no fallbacks"
-                )
+                        fallback_violations.append('result produced via auth_service_fallback path')
+                self.assertEqual(len(fallback_violations), 0, f'FALLBACK PATH VIOLATIONS detected: {fallback_violations}. SSOT architecture requires single delegation path with no fallbacks')
 
     def test_ssot_delegation_websocket_auth_uses_single_path(self):
         """
@@ -161,45 +108,26 @@ class TestWebSocketBridgeSSOTDelegation(SSotBaseTestCase):
         After Fix: PASS - Single SSOT delegation path only
         """
         from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
-        
         mock_websocket = Mock()
-        mock_websocket.headers = {"sec-websocket-protocol": f"jwt.{self.valid_jwt_token}"}
-        
-        # Mock remediation authentication to track if it's used
+        mock_websocket.headers = {'sec-websocket-protocol': f'jwt.{self.valid_jwt_token}'}
         with patch('netra_backend.app.websocket_core.auth_remediation.authenticate_websocket_with_remediation') as mock_remediation:
             mock_remediation.return_value = (True, Mock(), None)
-            
-            # Mock SSOT authenticator to track if it's used
             with patch('netra_backend.app.websocket_core.unified_websocket_auth.get_websocket_authenticator') as mock_get_authenticator:
                 mock_authenticator = Mock()
                 mock_auth_result = Mock()
                 mock_auth_result.success = True
                 mock_authenticator.authenticate_websocket_connection.return_value = mock_auth_result
                 mock_get_authenticator.return_value = mock_authenticator
-                
-                # Execute authentication
                 try:
                     result = asyncio.run(authenticate_websocket_ssot(mock_websocket))
                 except Exception as e:
                     result = None
-                
-                # SSOT PATH VIOLATIONS - These should FAIL initially
                 multiple_path_violations = []
-                
-                # Violation 1: Check if remediation path was used
                 if mock_remediation.called:
-                    multiple_path_violations.append("remediation authentication path used instead of SSOT")
-                
-                # Violation 2: Check if SSOT authenticator was used as fallback (indicates dual paths)
+                    multiple_path_violations.append('remediation authentication path used instead of SSOT')
                 if mock_get_authenticator.called:
-                    multiple_path_violations.append("SSOT authenticator used as fallback indicates multiple paths")
-                
-                # ASSERTION: This should FAIL initially due to multiple paths
-                self.assertEqual(
-                    len(multiple_path_violations), 0,
-                    f"MULTIPLE PATH VIOLATIONS in WebSocket auth: {multiple_path_violations}. "
-                    f"Must use single SSOT delegation path only"
-                )
+                    multiple_path_violations.append('SSOT authenticator used as fallback indicates multiple paths')
+                self.assertEqual(len(multiple_path_violations), 0, f'MULTIPLE PATH VIOLATIONS in WebSocket auth: {multiple_path_violations}. Must use single SSOT delegation path only')
 
     def test_ssot_delegation_no_direct_jwt_secret_access(self):
         """
@@ -216,57 +144,30 @@ class TestWebSocketBridgeSSOTDelegation(SSotBaseTestCase):
         import os
         import inspect
         from pathlib import Path
-        
-        # Files to check for direct JWT secret access
-        websocket_files = [
-            "netra_backend/app/websocket_core/user_context_extractor.py",
-            "netra_backend/app/websocket_core/unified_websocket_auth.py"
-        ]
-        
+        websocket_files = ['netra_backend/app/websocket_core/user_context_extractor.py', 'netra_backend/app/websocket_core/unified_websocket_auth.py']
         jwt_secret_violations = []
-        
         for file_path in websocket_files:
             full_path = Path(__file__).parent.parent.parent / file_path
-            
             if not full_path.exists():
                 continue
-                
             try:
                 with open(full_path, 'r', encoding='utf-8') as f:
                     content = f.read()
-                
-                # Check for JWT secret access patterns
-                secret_access_patterns = [
-                    "JWT_SECRET",
-                    "AuthConfig.get_jwt_secret",
-                    "os.environ.get('JWT_SECRET')",
-                    "get_env().get('JWT_SECRET')",
-                    "jwt_secret",
-                    "self.secret"
-                ]
-                
+                secret_access_patterns = ['JWT_SECRET', 'AuthConfig.get_jwt_secret', "os.environ.get('JWT_SECRET')", "get_env().get('JWT_SECRET')", 'jwt_secret', 'self.secret']
                 for pattern in secret_access_patterns:
                     if pattern in content:
-                        # Find the line number for better reporting
                         lines = content.split('\n')
                         for i, line in enumerate(lines, 1):
-                            if pattern in line and not line.strip().startswith('#'):
-                                jwt_secret_violations.append(f"{file_path}:{i} - {pattern}")
-                                
+                            if pattern in line and (not line.strip().startswith('#')):
+                                jwt_secret_violations.append(f'{file_path}:{i} - {pattern}')
             except Exception as e:
-                self.logger.warning(f"Could not check {file_path}: {e}")
-        
-        # ASSERTION: This should FAIL initially due to direct secret access
-        self.assertEqual(
-            len(jwt_secret_violations), 0,
-            f"DIRECT JWT SECRET ACCESS VIOLATIONS: {jwt_secret_violations}. "
-            f"WebSocket components must delegate ALL JWT operations to SSOT JWTHandler"
-        )
+                self.logger.warning(f'Could not check {file_path}: {e}')
+        self.assertEqual(len(jwt_secret_violations), 0, f'DIRECT JWT SECRET ACCESS VIOLATIONS: {jwt_secret_violations}. WebSocket components must delegate ALL JWT operations to SSOT JWTHandler')
 
     def tearDown(self):
         """Clean up test environment."""
         super().tearDown()
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "-s"])
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

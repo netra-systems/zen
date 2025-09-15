@@ -112,7 +112,7 @@ class TestWebSocketSsotConsolidationValidation(SSotAsyncTestCase):
         # TARGET STATE: Get SSOT singleton instance
         try:
             # Future SSOT pattern: Singleton access method
-            from netra_backend.app.websocket_core.unified_manager import get_websocket_manager_singleton
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager_singleton
             
             ssot_manager = get_websocket_manager_singleton()
             self.assertIsNotNone(ssot_manager, "SSOT singleton should be available")

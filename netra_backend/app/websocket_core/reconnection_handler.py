@@ -1,5 +1,5 @@
 # Shim module for backward compatibility
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core import create_websocket_manager
 WebSocketRecoveryManager = UnifiedWebSocketManager

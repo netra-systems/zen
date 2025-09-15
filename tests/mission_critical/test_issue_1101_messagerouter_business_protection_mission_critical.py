@@ -25,8 +25,9 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Import MessageRouter implementations to test business protection
 from netra_backend.app.websocket_core.handlers import MessageRouter, get_message_router
-from netra_backend.app.core.message_router import MessageRouter as ProxyMessageRouter
-from netra_backend.app.services.message_router import MessageRouter as ServicesMessageRouter
+# FIXED: Migrated to canonical imports for Issue #1181 SSOT consolidation
+from netra_backend.app.websocket_core.handlers import MessageRouter as ProxyMessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter as ServicesMessageRouter
 
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from netra_backend.app.services.user_execution_context import UserExecutionContext

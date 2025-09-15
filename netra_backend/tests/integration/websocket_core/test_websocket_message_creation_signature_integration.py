@@ -17,30 +17,15 @@ Integration Test Strategy:
 - Test specific error lines from production code
 - Use real objects where possible (no Docker dependency)
 """
-
 import pytest
 import asyncio
 import json
 import time
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
-
-# SSOT test imports
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-
-# WebSocket core imports
-from netra_backend.app.websocket_core.types import (
-    MessageType, 
-    ServerMessage,
-    create_server_message,
-    WebSocketMessage
-)
-from netra_backend.app.websocket_core.handlers import (
-    get_message_router,
-    get_router_handler_count,
-    list_registered_handlers
-)
-
+from netra_backend.app.websocket_core.types import MessageType, ServerMessage, create_server_message, WebSocketMessage
+from netra_backend.app.websocket_core.handlers import get_message_router, get_router_handler_count, list_registered_handlers
 
 class TestWebSocketMessageCreationSignatureIntegration(SSotAsyncTestCase):
     """Integration tests for create_server_message signature compatibility."""
@@ -48,15 +33,11 @@ class TestWebSocketMessageCreationSignatureIntegration(SSotAsyncTestCase):
     async def asyncSetUp(self):
         """Set up integration test environment."""
         await super().asyncSetUp()
-        
-        # Mock WebSocket for integration testing
         self.mock_websocket = MagicMock()
         self.mock_websocket.send_json = AsyncMock()
         self.mock_websocket.send_text = AsyncMock()
-        
-        # Test user context
-        self.test_user_id = "user_123456"
-        self.test_thread_id = "thread_789012"
+        self.test_user_id = 'user_123456'
+        self.test_thread_id = 'thread_789012'
 
     async def test_handlers_message_creation_integration(self):
         """
@@ -64,28 +45,14 @@ class TestWebSocketMessageCreationSignatureIntegration(SSotAsyncTestCase):
         
         This test should FAIL initially if signature errors exist.
         """
-        # Test the actual pattern used in handlers.py lines around 574
         try:
-            # This pattern appears in handlers.py - should it work?
-            ack_response = create_server_message(
-                MessageType.AGENT_TASK_ACK,
-                {
-                    "task_id": "task_123",
-                    "status": "acknowledged", 
-                    "timestamp": time.time(),
-                    "user_id": self.test_user_id
-                }
-            )
-            
-            # If we get here, the signature works correctly
+            ack_response = create_server_message(MessageType.AGENT_TASK_ACK, {'task_id': 'task_123', 'status': 'acknowledged', 'timestamp': time.time(), 'user_id': self.test_user_id})
             assert isinstance(ack_response, ServerMessage)
             assert ack_response.type == MessageType.AGENT_TASK_ACK
-            self.logger.info(f"Message creation successful: {ack_response}")
-            
+            self.logger.info(f'Message creation successful: {ack_response}')
         except TypeError as e:
-            # This indicates the signature error exists
-            self.logger.error(f"SIGNATURE ERROR DETECTED: {e}")
-            pytest.fail(f"Signature error in handler integration: {e}")
+            self.logger.error(f'SIGNATURE ERROR DETECTED: {e}')
+            pytest.fail(f'Signature error in handler integration: {e}')
 
     async def test_connection_handler_message_patterns(self):
         """
@@ -94,22 +61,12 @@ class TestWebSocketMessageCreationSignatureIntegration(SSotAsyncTestCase):
         Tests patterns from handle_connection_message function.
         """
         try:
-            # Pattern from handlers.py connection handling
-            response = create_server_message(
-                MessageType.SYSTEM_MESSAGE,
-                {
-                    "status": "connected", 
-                    "user_id": self.test_user_id, 
-                    "timestamp": time.time()
-                }
-            )
-            
+            response = create_server_message(MessageType.SYSTEM_MESSAGE, {'status': 'connected', 'user_id': self.test_user_id, 'timestamp': time.time()})
             assert isinstance(response, ServerMessage)
-            assert response.data["status"] == "connected"
-            
+            assert response.data['status'] == 'connected'
         except TypeError as e:
-            self.logger.error(f"Connection handler signature error: {e}")
-            pytest.fail(f"Connection handler failed due to signature: {e}")
+            self.logger.error(f'Connection handler signature error: {e}')
+            pytest.fail(f'Connection handler failed due to signature: {e}')
 
     async def test_ping_heartbeat_message_patterns(self):
         """
@@ -118,27 +75,15 @@ class TestWebSocketMessageCreationSignatureIntegration(SSotAsyncTestCase):
         Tests patterns from handle_ping_heartbeat_message function.
         """
         try:
-            # Pattern for ping response
-            ping_response = create_server_message(
-                MessageType.PONG,
-                {"timestamp": time.time(), "user_id": self.test_user_id}
-            )
-            
+            ping_response = create_server_message(MessageType.PONG, {'timestamp': time.time(), 'user_id': self.test_user_id})
             assert isinstance(ping_response, ServerMessage)
             assert ping_response.type == MessageType.PONG
-            
-            # Pattern for heartbeat response  
-            heartbeat_response = create_server_message(
-                MessageType.HEARTBEAT_ACK,
-                {"timestamp": time.time(), "status": "healthy"}
-            )
-            
+            heartbeat_response = create_server_message(MessageType.HEARTBEAT_ACK, {'timestamp': time.time(), 'status': 'healthy'})
             assert isinstance(heartbeat_response, ServerMessage)
             assert heartbeat_response.type == MessageType.HEARTBEAT_ACK
-            
         except TypeError as e:
-            self.logger.error(f"Ping/heartbeat handler signature error: {e}")
-            pytest.fail(f"Ping/heartbeat handler failed: {e}")
+            self.logger.error(f'Ping/heartbeat handler signature error: {e}')
+            pytest.fail(f'Ping/heartbeat handler failed: {e}')
 
     async def test_agent_message_handler_patterns(self):
         """
@@ -147,80 +92,19 @@ class TestWebSocketMessageCreationSignatureIntegration(SSotAsyncTestCase):
         Tests all agent event patterns: started, thinking, executing, completed.
         """
         try:
-            # Agent started event
-            agent_started_event = create_server_message(
-                MessageType.SYSTEM_MESSAGE,
-                {
-                    "event": "agent_started",
-                    "agent_type": "supervisor",
-                    "user_id": self.test_user_id,
-                    "thread_id": self.test_thread_id,
-                    "timestamp": time.time(),
-                    "golden_path_status": "agent_execution_initiated"
-                }
-            )
-            
-            # Agent thinking event
-            agent_thinking_event = create_server_message(
-                MessageType.AGENT_PROGRESS,
-                {
-                    "event": "agent_thinking", 
-                    "progress": "analyzing_request",
-                    "user_id": self.test_user_id,
-                    "timestamp": time.time()
-                }
-            )
-            
-            # Tool executing event
-            tool_executing_event = create_server_message(
-                MessageType.AGENT_PROGRESS,
-                {
-                    "event": "tool_executing",
-                    "tool_name": "data_analyzer", 
-                    "user_id": self.test_user_id,
-                    "timestamp": time.time()
-                }
-            )
-            
-            # Tool completed event
-            tool_completed_event = create_server_message(
-                MessageType.AGENT_PROGRESS,
-                {
-                    "event": "tool_completed",
-                    "tool_name": "data_analyzer",
-                    "result_summary": "Analysis complete",
-                    "user_id": self.test_user_id,
-                    "timestamp": time.time()
-                }
-            )
-            
-            # Agent completed event
-            agent_completed_event = create_server_message(
-                MessageType.AGENT_RESPONSE_COMPLETE,
-                {
-                    "event": "agent_completed",
-                    "response": "Your analysis is ready",
-                    "user_id": self.test_user_id, 
-                    "thread_id": self.test_thread_id,
-                    "timestamp": time.time(),
-                    "golden_path_status": "agent_response_delivered"
-                }
-            )
-            
-            # Verify all events created successfully
-            events = [
-                agent_started_event, agent_thinking_event, 
-                tool_executing_event, tool_completed_event, agent_completed_event
-            ]
-            
+            agent_started_event = create_server_message(MessageType.SYSTEM_MESSAGE, {'event': 'agent_started', 'agent_type': 'supervisor', 'user_id': self.test_user_id, 'thread_id': self.test_thread_id, 'timestamp': time.time(), 'golden_path_status': 'agent_execution_initiated'})
+            agent_thinking_event = create_server_message(MessageType.AGENT_PROGRESS, {'event': 'agent_thinking', 'progress': 'analyzing_request', 'user_id': self.test_user_id, 'timestamp': time.time()})
+            tool_executing_event = create_server_message(MessageType.AGENT_PROGRESS, {'event': 'tool_executing', 'tool_name': 'data_analyzer', 'user_id': self.test_user_id, 'timestamp': time.time()})
+            tool_completed_event = create_server_message(MessageType.AGENT_PROGRESS, {'event': 'tool_completed', 'tool_name': 'data_analyzer', 'result_summary': 'Analysis complete', 'user_id': self.test_user_id, 'timestamp': time.time()})
+            agent_completed_event = create_server_message(MessageType.AGENT_RESPONSE_COMPLETE, {'event': 'agent_completed', 'response': 'Your analysis is ready', 'user_id': self.test_user_id, 'thread_id': self.test_thread_id, 'timestamp': time.time(), 'golden_path_status': 'agent_response_delivered'})
+            events = [agent_started_event, agent_thinking_event, tool_executing_event, tool_completed_event, agent_completed_event]
             for event in events:
                 assert isinstance(event, ServerMessage)
                 assert hasattr(event, 'type')
                 assert hasattr(event, 'data')
-                
         except TypeError as e:
-            self.logger.error(f"Agent message handler signature error: {e}")
-            pytest.fail(f"Agent message handlers failed: {e}")
+            self.logger.error(f'Agent message handler signature error: {e}')
+            pytest.fail(f'Agent message handlers failed: {e}')
 
     async def test_system_message_helper_integration(self):
         """
@@ -229,28 +113,17 @@ class TestWebSocketMessageCreationSignatureIntegration(SSotAsyncTestCase):
         This tests the actual helper function from handlers.py line 1495.
         """
         try:
-            # This is the exact pattern from line 1495 in handlers.py
-            data = {
-                "status": "test_status",
-                "message": "Test system message",
-                "timestamp": time.time()
-            }
-            
-            # Call the actual helper (but with our mock websocket)
+            data = {'status': 'test_status', 'message': 'Test system message', 'timestamp': time.time()}
             system_msg = create_server_message(MessageType.SYSTEM_MESSAGE, data)
-            
             assert isinstance(system_msg, ServerMessage)
             assert system_msg.type == MessageType.SYSTEM_MESSAGE
             assert system_msg.data == data
-            
-            # Test that it can be serialized (as handlers.py does)
             serialized = system_msg.model_dump(mode='json')
             assert isinstance(serialized, dict)
             assert serialized['type'] == MessageType.SYSTEM_MESSAGE
-            
         except TypeError as e:
-            self.logger.error(f"System message helper signature error: {e}")
-            pytest.fail(f"System message helper failed: {e}")
+            self.logger.error(f'System message helper signature error: {e}')
+            pytest.fail(f'System message helper failed: {e}')
 
     async def test_error_scenario_message_creation(self):
         """
@@ -259,24 +132,12 @@ class TestWebSocketMessageCreationSignatureIntegration(SSotAsyncTestCase):
         Tests patterns used in exception handlers throughout handlers.py.
         """
         try:
-            # Error acknowledgment pattern
-            error_ack = create_server_message(
-                MessageType.SYSTEM_MESSAGE,
-                {
-                    "status": "error_acknowledged",
-                    "error_type": "test_error",
-                    "message": "Error has been logged",
-                    "timestamp": time.time(),
-                    "user_id": self.test_user_id
-                }
-            )
-            
+            error_ack = create_server_message(MessageType.SYSTEM_MESSAGE, {'status': 'error_acknowledged', 'error_type': 'test_error', 'message': 'Error has been logged', 'timestamp': time.time(), 'user_id': self.test_user_id})
             assert isinstance(error_ack, ServerMessage)
-            assert error_ack.data["status"] == "error_acknowledged"
-            
+            assert error_ack.data['status'] == 'error_acknowledged'
         except TypeError as e:
-            self.logger.error(f"Error scenario signature error: {e}")
-            pytest.fail(f"Error scenario message creation failed: {e}")
+            self.logger.error(f'Error scenario signature error: {e}')
+            pytest.fail(f'Error scenario message creation failed: {e}')
 
     async def test_specific_problematic_lines_reproduction(self):
         """
@@ -285,48 +146,15 @@ class TestWebSocketMessageCreationSignatureIntegration(SSotAsyncTestCase):
         Reproduces exact usage patterns from lines 573, 697, 798, 852.
         """
         try:
-            # Line pattern reproduction - handler acknowledgments
-            ack_patterns = [
-                # Pattern 1: Agent task acknowledgment 
-                (MessageType.AGENT_TASK_ACK, {
-                    "task_id": "task_123", 
-                    "status": "acknowledged",
-                    "timestamp": time.time()
-                }),
-                
-                # Pattern 2: System message
-                (MessageType.SYSTEM_MESSAGE, {
-                    "status": "processed",
-                    "timestamp": time.time(),
-                    "user_id": self.test_user_id  
-                }),
-                
-                # Pattern 3: Agent response chunk
-                (MessageType.AGENT_RESPONSE_CHUNK, {
-                    "chunk_id": "chunk_123",
-                    "content": "Test response chunk",
-                    "timestamp": time.time()
-                }),
-                
-                # Pattern 4: Agent status update
-                (MessageType.AGENT_STATUS_UPDATE, {
-                    "status": "processing",
-                    "progress": 0.5,
-                    "timestamp": time.time(),
-                    "user_id": self.test_user_id
-                })
-            ]
-            
-            # Test each pattern
+            ack_patterns = [(MessageType.AGENT_TASK_ACK, {'task_id': 'task_123', 'status': 'acknowledged', 'timestamp': time.time()}), (MessageType.SYSTEM_MESSAGE, {'status': 'processed', 'timestamp': time.time(), 'user_id': self.test_user_id}), (MessageType.AGENT_RESPONSE_CHUNK, {'chunk_id': 'chunk_123', 'content': 'Test response chunk', 'timestamp': time.time()}), (MessageType.AGENT_STATUS_UPDATE, {'status': 'processing', 'progress': 0.5, 'timestamp': time.time(), 'user_id': self.test_user_id})]
             for msg_type, data in ack_patterns:
                 result = create_server_message(msg_type, data)
                 assert isinstance(result, ServerMessage)
                 assert result.type == msg_type
                 assert result.data == data
-                
         except TypeError as e:
-            self.logger.error(f"Problematic line reproduction signature error: {e}")
-            pytest.fail(f"Problematic line patterns failed: {e}")
+            self.logger.error(f'Problematic line reproduction signature error: {e}')
+            pytest.fail(f'Problematic line patterns failed: {e}')
 
     async def test_message_flow_integration_end_to_end(self):
         """
@@ -335,37 +163,17 @@ class TestWebSocketMessageCreationSignatureIntegration(SSotAsyncTestCase):
         This tests the full integration path that handlers.py uses.
         """
         try:
-            # Create message using actual handler pattern
-            message = create_server_message(
-                MessageType.AGENT_RESPONSE_COMPLETE,
-                {
-                    "response": "Integration test complete",
-                    "user_id": self.test_user_id,
-                    "thread_id": self.test_thread_id,
-                    "timestamp": time.time(),
-                    "golden_path_status": "integration_test_passed"
-                }
-            )
-            
-            # Verify message structure
+            message = create_server_message(MessageType.AGENT_RESPONSE_COMPLETE, {'response': 'Integration test complete', 'user_id': self.test_user_id, 'thread_id': self.test_thread_id, 'timestamp': time.time(), 'golden_path_status': 'integration_test_passed'})
             assert isinstance(message, ServerMessage)
-            
-            # Test serialization (as done in handlers.py)
             json_data = message.model_dump(mode='json')
             assert isinstance(json_data, dict)
-            
-            # Test JSON serialization for WebSocket transmission
             json_string = json.dumps(json_data)
             assert isinstance(json_string, str)
-            
-            # Verify can be sent through mock websocket
             await self.mock_websocket.send_json(json_data)
             self.mock_websocket.send_json.assert_called_once_with(json_data)
-            
         except TypeError as e:
-            self.logger.error(f"End-to-end integration signature error: {e}")
-            pytest.fail(f"End-to-end message flow failed: {e}")
-
+            self.logger.error(f'End-to-end integration signature error: {e}')
+            pytest.fail(f'End-to-end message flow failed: {e}')
 
 class TestSignatureErrorScenarios(SSotAsyncTestCase):
     """Test specific signature error scenarios that should fail."""
@@ -376,10 +184,8 @@ class TestSignatureErrorScenarios(SSotAsyncTestCase):
         
         This test validates that the signature error exists when expected.
         """
-        with pytest.raises(TypeError, match="missing 1 required positional argument"):
-            # This should fail with types.py implementation
+        with pytest.raises(TypeError, match='missing 1 required positional argument'):
             create_server_message(MessageType.SYSTEM_MESSAGE)
-            # Missing required 'data' parameter
 
     async def test_none_data_parameter_should_work(self):
         """
@@ -388,18 +194,11 @@ class TestSignatureErrorScenarios(SSotAsyncTestCase):
         This tests if the function can handle None data gracefully.
         """
         try:
-            # Test if None is acceptable for data
-            result = create_server_message(
-                MessageType.SYSTEM_MESSAGE,
-                None  # Explicit None
-            )
-            # If this works, the signature is more flexible than expected
+            result = create_server_message(MessageType.SYSTEM_MESSAGE, None)
             assert isinstance(result, ServerMessage)
-            
         except (TypeError, ValueError) as e:
-            # Expected if data cannot be None
-            self.logger.info(f"None data not allowed (expected): {e}")
-            assert "None" in str(e) or "required" in str(e)
+            self.logger.info(f'None data not allowed (expected): {e}')
+            assert 'None' in str(e) or 'required' in str(e)
 
     async def test_empty_dict_data_parameter(self):
         """
@@ -408,18 +207,13 @@ class TestSignatureErrorScenarios(SSotAsyncTestCase):
         This validates the minimum viable data requirement.
         """
         try:
-            result = create_server_message(
-                MessageType.SYSTEM_MESSAGE,
-                {}  # Empty dict
-            )
-            
+            result = create_server_message(MessageType.SYSTEM_MESSAGE, {})
             assert isinstance(result, ServerMessage)
             assert result.data == {}
-            
         except (TypeError, ValueError) as e:
-            self.logger.error(f"Empty dict not allowed: {e}")
-            pytest.fail(f"Empty dict should be valid data: {e}")
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--tb=short"])
+            self.logger.error(f'Empty dict not allowed: {e}')
+            pytest.fail(f'Empty dict should be valid data: {e}')
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

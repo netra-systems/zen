@@ -74,7 +74,7 @@ class ConnectionExecutionOrchestrator:
 # Compatibility functions
 def get_connection_manager():
     """Get the global connection manager instance."""
-    from netra_backend.app.websocket_core.manager import get_manager
+    from netra_backend.app.websocket_core.websocket_manager import get_manager
     return get_manager()
 
 

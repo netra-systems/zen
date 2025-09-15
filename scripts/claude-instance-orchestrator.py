@@ -1265,7 +1265,7 @@ async def main():
     parser.add_argument("--max-line-length", type=int, default=800,
                        help="Maximum characters per line in console output (default: 500)")
     parser.add_argument("--status-report-interval", type=int, default=5,
-                       help="Seconds between rolling status reports (default: 30)")
+                       help="Seconds between rolling status reports (default: 5)")
 
     args = parser.parse_args()
 

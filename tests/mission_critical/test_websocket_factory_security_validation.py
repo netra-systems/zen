@@ -47,7 +47,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
     get_websocket_manager_factory,
     create_websocket_manager
 )
-from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from shared.isolated_environment import get_env

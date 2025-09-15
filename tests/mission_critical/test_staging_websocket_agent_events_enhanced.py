@@ -56,7 +56,6 @@ try:
 except ImportError:
     websockets = None
     logger.warning("websockets not available, WebSocket tests will be skipped")
-import jwt
 from loguru import logger
 
 # Set up logging

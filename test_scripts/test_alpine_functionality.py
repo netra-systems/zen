@@ -7,7 +7,7 @@ Demonstrates that Alpine container support is working correctly.
 import os
 import sys
 from pathlib import Path
-from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports

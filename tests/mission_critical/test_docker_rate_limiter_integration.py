@@ -35,7 +35,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 import sys
 from pathlib import Path
-from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path for imports
@@ -47,13 +47,25 @@ from test_framework.docker_rate_limiter import (
     docker_health_check,
     DockerCommandResult
 )
-from test_framework.docker_circuit_breaker import (
-    DockerCircuitBreaker,
-    DockerCircuitBreakerError,
-    execute_docker_command_with_circuit_breaker,
-    get_circuit_breaker_manager,
-    CircuitBreakerState
+# Replace missing docker_circuit_breaker with unified circuit breaker
+from netra_backend.app.core.resilience.unified_circuit_breaker import (
+    UnifiedCircuitBreaker as DockerCircuitBreaker,
+    UnifiedCircuitBreakerState as CircuitBreakerState
 )
+from netra_backend.app.core.circuit_breaker import (
+    CircuitBreakerOpenError as DockerCircuitBreakerError,
+    get_circuit_breaker as get_circuit_breaker_manager
+)
+
+# Create wrapper for docker command execution with circuit breaker
+def execute_docker_command_with_circuit_breaker(command, timeout=30):
+    """Execute docker command with circuit breaker protection."""
+    circuit_breaker = DockerCircuitBreaker(
+        failure_threshold=3,
+        timeout_duration=60,
+        expected_exception=Exception
+    )
+    return circuit_breaker.call(lambda: command, timeout=timeout)
 from test_framework.docker_introspection import DockerIntrospector
 from test_framework.port_conflict_fix import DockerPortManager, PortConflictResolver
 from test_framework.unified_docker_manager import UnifiedDockerManager

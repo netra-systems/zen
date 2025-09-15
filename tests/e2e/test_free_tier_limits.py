@@ -23,11 +23,9 @@ Without effective limit enforcement, free users never convert.
 """
 import pytest
 from shared.isolated_environment import IsolatedEnvironment
-
 from tests.e2e.auth_flow_manager import AuthCompleteFlowManager
 from tests.e2e.free_tier_limit_managers import LimitEnforcementManager
 from tests.e2e.free_tier_limit_tester import FreeTierLimitTester
-
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -46,115 +44,70 @@ async def test_free_tier_limit_enforcement_upgrade_flow():
     Must complete in <30 seconds for CI/CD pipeline compatibility.
     """
     manager = AuthCompleteFlowManager()
-    
     async with manager.setup_complete_test_environment() as auth_tester:
         limit_tester = FreeTierLimitTester(auth_tester)
-        
-        # Execute complete limit enforcement and upgrade flow
         results = await limit_tester.execute_complete_limit_enforcement_flow()
-        
-        # Validate all steps completed successfully
-        assert results["success"], f"Limit enforcement flow failed: {results}"
-        assert len(results["steps"]) == 7, f"Expected 7 steps, got {len(results['steps'])}"
-        
-        # Verify business critical validations
-        step_results = {step["step"]: step for step in results["steps"]}
-        
-        # Free user creation with proper limits
-        user_step = step_results["free_user_created"]["data"]
-        assert user_step["free_tier_confirmed"], "Free tier not properly configured"
-        
-        # Normal usage pattern validated
-        usage_step = step_results["normal_usage"]["data"]
-        assert usage_step["successful_requests"] == 7, "Normal usage pattern failed"
-        
-        # Warning triggered at appropriate threshold
-        warning_step = step_results["limit_warning"]["data"]
-        assert warning_step["warning_triggered"], "Limit warning not triggered"
-        
-        # Enforcement activated correctly
-        enforcement_step = step_results["limit_enforcement"]["data"]
-        assert enforcement_step["enforcement_active"], "Limit enforcement failed"
-        
-        # Upgrade prompt quality validation
-        prompt_step = step_results["upgrade_prompt"]["data"]
-        assert prompt_step["timing_optimal"]["timing_optimized"], "Upgrade prompt timing not optimal"
-        
-        # Successful tier upgrade
-        upgrade_step = step_results["tier_upgraded"]["data"]
-        assert upgrade_step["upgrade_successful"], "Tier upgrade failed"
-        assert upgrade_step["new_tier"] == "pro", "Tier not upgraded to Pro"
-        
-        # Service restored with unlimited usage
-        restored_step = step_results["service_restored"]["data"]
-        assert restored_step["unlimited_confirmed"], "Unlimited usage not confirmed"
-        assert restored_step["service_restored"], "Service not properly restored"
-        
-        # Performance validation
-        assert results["execution_time"] < 30.0, f"E2E test exceeded 30s limit: {results['execution_time']}"
-        
+        assert results['success'], f'Limit enforcement flow failed: {results}'
+        assert len(results['steps']) == 7, f"Expected 7 steps, got {len(results['steps'])}"
+        step_results = {step['step']: step for step in results['steps']}
+        user_step = step_results['free_user_created']['data']
+        assert user_step['free_tier_confirmed'], 'Free tier not properly configured'
+        usage_step = step_results['normal_usage']['data']
+        assert usage_step['successful_requests'] == 7, 'Normal usage pattern failed'
+        warning_step = step_results['limit_warning']['data']
+        assert warning_step['warning_triggered'], 'Limit warning not triggered'
+        enforcement_step = step_results['limit_enforcement']['data']
+        assert enforcement_step['enforcement_active'], 'Limit enforcement failed'
+        prompt_step = step_results['upgrade_prompt']['data']
+        assert prompt_step['timing_optimal']['timing_optimized'], 'Upgrade prompt timing not optimal'
+        upgrade_step = step_results['tier_upgraded']['data']
+        assert upgrade_step['upgrade_successful'], 'Tier upgrade failed'
+        assert upgrade_step['new_tier'] == 'pro', 'Tier not upgraded to Pro'
+        restored_step = step_results['service_restored']['data']
+        assert restored_step['unlimited_confirmed'], 'Unlimited usage not confirmed'
+        assert restored_step['service_restored'], 'Service not properly restored'
+        assert results['execution_time'] < 30.0, f"E2E test exceeded 30s limit: {results['execution_time']}"
         print(f"[SUCCESS] Free Tier Limit Enforcement Flow: {results['execution_time']:.2f}s")
-        print(f"[PROTECTED] Free-to-paid conversion pipeline")
-        print(f"[REVENUE] $348-3588/year per successful conversion")
-
+        print(f'[PROTECTED] Free-to-paid conversion pipeline')
+        print(f'[REVENUE] $348-3588/year per successful conversion')
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_limit_enforcement_different_usage_patterns():
     """Test limit enforcement with different usage patterns."""
     manager = AuthCompleteFlowManager()
-    
     async with manager.setup_complete_test_environment() as auth_tester:
-        # Test burst usage pattern
         burst_tester = FreeTierLimitTester(auth_tester)
         limit_manager = LimitEnforcementManager(burst_tester)
-        
-        # Create user and validate limits
         await burst_tester._create_free_user_with_limits()
-        
-        # Test rapid burst of requests
         for i in range(10):
-            await burst_tester._send_single_request(f"Burst request {i+1}")
-            await limit_manager.track_usage_against_limits("burst_request")
-        
-        # Next request should be blocked
+            await burst_tester._send_single_request(f'Burst request {i + 1}')
+            await limit_manager.track_usage_against_limits('burst_request')
         try:
-            await burst_tester._send_single_request("Over limit burst")
-            assert False, "Burst request should have been blocked"
+            await burst_tester._send_single_request('Over limit burst')
+            assert False, 'Burst request should have been blocked'
         except Exception as e:
-            assert "limit exceeded" in str(e).lower(), "Burst limit not enforced"
-        
-        print("[SUCCESS] Burst usage pattern limit enforcement validated")
-
+            assert 'limit exceeded' in str(e).lower(), 'Burst limit not enforced'
+        print('[SUCCESS] Burst usage pattern limit enforcement validated')
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 async def test_limit_enforcement_edge_cases():
     """Test limit enforcement edge cases and boundary conditions."""
     manager = AuthCompleteFlowManager()
-    
     async with manager.setup_complete_test_environment() as auth_tester:
         edge_tester = FreeTierLimitTester(auth_tester)
-        
-        # Create user
         await edge_tester._create_free_user_with_limits()
-        
-        # Test exactly at limit boundary (10 requests)
         for i in range(10):
-            result = await edge_tester._send_single_request(f"Boundary request {i+1}")
-            assert result["success"], f"Request {i+1} should succeed"
-        
-        # 11th request should fail
+            result = await edge_tester._send_single_request(f'Boundary request {i + 1}')
+            assert result['success'], f'Request {i + 1} should succeed'
         try:
-            await edge_tester._send_single_request("Should fail")
-            assert False, "11th request should have been blocked"
+            await edge_tester._send_single_request('Should fail')
+            assert False, '11th request should have been blocked'
         except Exception as e:
-            assert "Daily limit exceeded" in str(e), "Expected limit exceeded error"
-        
-        print("[SUCCESS] Boundary condition limit enforcement validated")
-
-
-if __name__ == "__main__":
-    # Allow direct execution for debugging
-    import sys
-    sys.exit(pytest.main([__file__, "-v", "-s"]))
+            assert 'Daily limit exceeded' in str(e), 'Expected limit exceeded error'
+        print('[SUCCESS] Boundary condition limit enforcement validated')
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

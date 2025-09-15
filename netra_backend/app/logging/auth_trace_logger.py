@@ -169,8 +169,8 @@ class AuthTraceLogger:
                 # Authentication state
                 "auth_state": {
                     "current_state": getattr(context, 'auth_state', None) or "unknown",
-                    "user_type": "system" if (getattr(context, 'user_id', None) == "system") else "regular",
-                    "is_service_call": (getattr(context, 'user_id', None) or "").startswith("system"),
+                    "user_type": self._classify_user_type(getattr(context, 'user_id', None)),
+                    "is_service_call": self._is_service_call(getattr(context, 'user_id', None)),
                     "auth_indicators": self._extract_auth_indicators(context, error)
                 },
                 
@@ -302,6 +302,56 @@ class AuthTraceLogger:
         except Exception:
             return False
     
+    def _classify_user_type(self, user_id: Optional[str]) -> str:
+        """Classify user type based on user_id format.
+        
+        CRITICAL FIX: Properly detect service users in new "service:netra-backend" format.
+        
+        Args:
+            user_id: User identifier to classify
+            
+        Returns:
+            str: User type classification ("service", "system", "regular")
+        """
+        if not user_id:
+            return "regular"
+        
+        # Check for new service format: "service:netra-backend"
+        if user_id.startswith("service:"):
+            return "service"
+        
+        # Check for legacy system user format
+        if user_id == "system":
+            return "system"
+        
+        # Default to regular user
+        return "regular"
+    
+    def _is_service_call(self, user_id: Optional[str]) -> bool:
+        """Determine if this is a service-to-service call.
+        
+        CRITICAL FIX: Properly detect service calls for new "service:netra-backend" format.
+        
+        Args:
+            user_id: User identifier to check
+            
+        Returns:
+            bool: True if this is a service call
+        """
+        if not user_id:
+            return False
+        
+        # Check for new service format: "service:netra-backend"
+        if user_id.startswith("service:"):
+            return True
+        
+        # Check for legacy system user format
+        if user_id == "system":
+            return True
+        
+        # Default to not a service call
+        return False
+
     def _clean_none_values(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Recursively clean None values from dictionary."""
         try:

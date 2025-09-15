@@ -91,8 +91,8 @@ from shared.types.core_types import (
 )
 
 # System Under Test - SSOT imports
-from netra_backend.app.websocket_core.unified_manager import (
-    UnifiedWebSocketManager,
+from netra_backend.app.websocket_core.websocket_manager import (
+    WebSocketManager as UnifiedWebSocketManager,
     WebSocketConnection,
     WebSocketManagerMode
 )
@@ -392,8 +392,9 @@ class TestWebSocketFiveCriticalEventsBusinessValue(SSotAsyncTestCase):
         # Set up base test case
         self.setup_method()
         
-        # Initialize WebSocket testing components
-        self.manager = UnifiedWebSocketManager()
+        # Initialize WebSocket testing components using SSOT factory pattern
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        self.manager = get_websocket_manager()
         self.test_user_id = ensure_user_id("critical-events-user-123")
         self.event_tester = RealWebSocketEventTester()
         

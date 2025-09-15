@@ -19,7 +19,6 @@ Test Philosophy:
 - USER ISOLATION: Tests ensure complete user context isolation in factory operations
 - GOLDEN PATH PROTECTION: Tests protect end-to-end user value delivery
 """
-
 import asyncio
 import gc
 import inspect
@@ -33,11 +32,8 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from unittest.mock import patch, MagicMock
-
-# SSOT Test Framework
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-
 
 class TestExecutionEngineFactorySSOTViolations884(SSotAsyncTestCase):
     """Phase 1 Unit Tests: Execution Engine Factory SSOT Violations
@@ -53,38 +49,28 @@ class TestExecutionEngineFactorySSOTViolations884(SSotAsyncTestCase):
         self.test_users = []
         self.factory_instances = []
         self.created_contexts = []
-
-        # Track SSOT compliance metrics
         self.factory_classes_found = []
         self.import_paths_tested = []
         self.singleton_violations = []
-
-        # Expected canonical factory location (SSOT)
-        self.canonical_factory_module = "netra_backend.app.agents.supervisor.execution_engine_factory"
-        self.canonical_factory_class = "ExecutionEngineFactory"
+        self.canonical_factory_module = 'netra_backend.app.agents.supervisor.execution_engine_factory'
+        self.canonical_factory_class = 'ExecutionEngineFactory'
 
     async def asyncTearDown(self):
         """Clean up test resources."""
-        # Cleanup any created contexts and factories
         for context in self.created_contexts:
             try:
                 if hasattr(context, 'cleanup'):
                     await context.cleanup()
             except Exception:
                 pass
-
         for factory in self.factory_instances:
             try:
                 if hasattr(factory, 'shutdown'):
                     await factory.shutdown()
             except Exception:
                 pass
-
-        # Force garbage collection
         gc.collect()
         await super().asyncTearDown()
-
-    # === FACTORY SSOT COMPLIANCE VALIDATION TESTS ===
 
     async def test_execution_engine_factory_canonical_ssot_location(self):
         """FAILING TEST: Validate ExecutionEngineFactory exists in canonical SSOT location
@@ -94,52 +80,19 @@ class TestExecutionEngineFactorySSOTViolations884(SSotAsyncTestCase):
         ISSUE: Factory implementations scattered across multiple modules
         """
         factory_class = None
-
         try:
-            # Import canonical SSOT factory
             module = importlib.import_module(self.canonical_factory_module)
             factory_class = getattr(module, self.canonical_factory_class, None)
-
         except ImportError as e:
-            self.fail(
-                f"SSOT VIOLATION: Cannot import canonical ExecutionEngineFactory from "
-                f"{self.canonical_factory_module}. ImportError: {e}. "
-                f"Factory must exist in canonical SSOT location."
-            )
-
-        # ASSERTION THAT SHOULD FAIL: Factory class should exist
-        self.assertIsNotNone(
-            factory_class,
-            f"SSOT VIOLATION: {self.canonical_factory_class} not found in "
-            f"{self.canonical_factory_module}. Canonical factory missing from SSOT location."
-        )
-
-        # ASSERTION THAT SHOULD FAIL: Factory should be a proper class
-        self.assertTrue(
-            inspect.isclass(factory_class),
-            f"SSOT VIOLATION: {self.canonical_factory_class} is not a class. "
-            f"Expected class object, got {type(factory_class)}."
-        )
-
-        # ASSERTION THAT SHOULD FAIL: Factory should have required SSOT methods
-        required_ssot_methods = [
-            'create_for_user',
-            'user_execution_scope',
-            'cleanup_engine',
-            'get_factory_metrics',
-            'shutdown'
-        ]
-
+            self.fail(f'SSOT VIOLATION: Cannot import canonical ExecutionEngineFactory from {self.canonical_factory_module}. ImportError: {e}. Factory must exist in canonical SSOT location.')
+        self.assertIsNotNone(factory_class, f'SSOT VIOLATION: {self.canonical_factory_class} not found in {self.canonical_factory_module}. Canonical factory missing from SSOT location.')
+        self.assertTrue(inspect.isclass(factory_class), f'SSOT VIOLATION: {self.canonical_factory_class} is not a class. Expected class object, got {type(factory_class)}.')
+        required_ssot_methods = ['create_for_user', 'user_execution_scope', 'cleanup_engine', 'get_factory_metrics', 'shutdown']
         missing_methods = []
         for method_name in required_ssot_methods:
             if not hasattr(factory_class, method_name):
                 missing_methods.append(method_name)
-
-        self.assertEqual(
-            len(missing_methods), 0,
-            f"SSOT VIOLATION: Canonical ExecutionEngineFactory missing required methods: "
-            f"{missing_methods}. Factory does not implement SSOT interface."
-        )
+        self.assertEqual(len(missing_methods), 0, f'SSOT VIOLATION: Canonical ExecutionEngineFactory missing required methods: {missing_methods}. Factory does not implement SSOT interface.')
 
     async def test_execution_engine_factory_duplicate_implementations_detection(self):
         """FAILING TEST: Detect multiple ExecutionEngineFactory implementations
@@ -149,64 +102,23 @@ class TestExecutionEngineFactorySSOTViolations884(SSotAsyncTestCase):
         ISSUE: Factory implementations scattered across 4+ modules causing conflicts
         """
         factory_implementations = []
-
-        # Search for ExecutionEngineFactory implementations across the codebase
-        factory_modules_to_check = [
-            "netra_backend.app.agents.supervisor.execution_engine_factory",
-            "netra_backend.app.agents.supervisor.request_scoped_execution_engine",
-            "netra_backend.app.agents.supervisor.user_execution_engine",
-            "netra_backend.app.agents.execution_engine_unified_factory",
-            "netra_backend.app.core.managers.execution_engine_factory",
-            "test_framework.fixtures.execution_engine_factory_fixtures",
-            "netra_backend.app.agents.supervisor.mcp_execution_engine"
-        ]
-
+        factory_modules_to_check = ['netra_backend.app.agents.supervisor.execution_engine_factory', 'netra_backend.app.agents.supervisor.request_scoped_execution_engine', 'netra_backend.app.agents.supervisor.user_execution_engine', 'netra_backend.app.agents.execution_engine_unified_factory', 'netra_backend.app.core.managers.execution_engine_factory', 'test_framework.fixtures.execution_engine_factory_fixtures', 'netra_backend.app.agents.supervisor.mcp_execution_engine']
         for module_name in factory_modules_to_check:
             try:
                 module = importlib.import_module(module_name)
-
-                # Look for ExecutionEngineFactory classes or factory-like classes
                 for name in dir(module):
                     obj = getattr(module, name)
-                    if (inspect.isclass(obj) and
-                        ('ExecutionEngineFactory' in name or
-                         'ExecutionEngine' in name or
-                         hasattr(obj, 'create_execution_engine') or
-                         hasattr(obj, 'create_for_user') or
-                         hasattr(obj, 'user_execution_scope'))):
-                        factory_implementations.append({
-                            'module': module_name,
-                            'class': name,
-                            'object': obj
-                        })
-
+                    if inspect.isclass(obj) and ('ExecutionEngineFactory' in name or 'ExecutionEngine' in name or hasattr(obj, 'create_execution_engine') or hasattr(obj, 'create_for_user') or hasattr(obj, 'user_execution_scope')):
+                        factory_implementations.append({'module': module_name, 'class': name, 'object': obj})
             except ImportError:
-                # Module doesn't exist - that's fine
                 continue
-
-        # Track discovered implementations
         self.factory_classes_found = factory_implementations
-
-        # ASSERTION THAT SHOULD FAIL: Only one canonical factory should exist
         detected_implementations = [f"{impl['module']}.{impl['class']}" for impl in factory_implementations]
-
-        self.assertEqual(
-            len(factory_implementations), 1,
-            f"SSOT VIOLATION: Found {len(factory_implementations)} execution engine factory implementations. "
-            f"Should have only 1 canonical ExecutionEngineFactory. "
-            f"Detected: {detected_implementations}"
-        )
-
-        # ASSERTION THAT SHOULD FAIL: All should be the same canonical class
+        self.assertEqual(len(factory_implementations), 1, f'SSOT VIOLATION: Found {len(factory_implementations)} execution engine factory implementations. Should have only 1 canonical ExecutionEngineFactory. Detected: {detected_implementations}')
         if len(factory_implementations) > 1:
             canonical_factory = factory_implementations[0]['object']
             for impl in factory_implementations[1:]:
-                self.assertIs(
-                    impl['object'], canonical_factory,
-                    f"SSOT VIOLATION: {impl['module']}.{impl['class']} "
-                    f"is not the same as canonical factory. "
-                    f"Multiple distinct factory classes exist."
-                )
+                self.assertIs(impl['object'], canonical_factory, f"SSOT VIOLATION: {impl['module']}.{impl['class']} is not the same as canonical factory. Multiple distinct factory classes exist.")
 
     async def test_execution_engine_factory_import_path_consolidation(self):
         """FAILING TEST: Validate all import paths resolve to same canonical factory
@@ -215,62 +127,25 @@ class TestExecutionEngineFactorySSOTViolations884(SSotAsyncTestCase):
         EXPECTED: FAIL - Different import paths lead to different factory classes
         ISSUE: Import fragmentation causes factory initialization conflicts
         """
-        import_paths_to_test = [
-            ("netra_backend.app.agents.supervisor.execution_engine_factory", "ExecutionEngineFactory"),
-            ("netra_backend.app.agents.supervisor.execution_engine_factory", "RequestScopedExecutionEngineFactory"),
-            ("netra_backend.app.agents.supervisor.request_scoped_execution_engine", "RequestScopedExecutionEngine"),
-            ("netra_backend.app.agents.execution_engine_unified_factory", "UnifiedExecutionEngineFactory"),
-            ("netra_backend.app.core.managers.execution_engine_factory", "ExecutionEngineFactory"),
-        ]
-
+        import_paths_to_test = [('netra_backend.app.agents.supervisor.execution_engine_factory', 'ExecutionEngineFactory'), ('netra_backend.app.agents.supervisor.execution_engine_factory', 'RequestScopedExecutionEngineFactory'), ('netra_backend.app.agents.supervisor.request_scoped_execution_engine', 'RequestScopedExecutionEngine'), ('netra_backend.app.agents.execution_engine_unified_factory', 'UnifiedExecutionEngineFactory'), ('netra_backend.app.core.managers.execution_engine_factory', 'ExecutionEngineFactory')]
         imported_factories = {}
         self.import_paths_tested = import_paths_to_test
-
         for module_path, class_name in import_paths_to_test:
             try:
                 module = importlib.import_module(module_path)
                 factory_class = getattr(module, class_name, None)
-
                 if factory_class and inspect.isclass(factory_class):
-                    imported_factories[f"{module_path}.{class_name}"] = factory_class
-
+                    imported_factories[f'{module_path}.{class_name}'] = factory_class
             except ImportError as e:
-                # Track import failures
-                imported_factories[f"{module_path}.{class_name}"] = f"ImportError: {e}"
-
-        # Extract actual factory classes (not error messages)
-        actual_factory_classes = [
-            factory for factory in imported_factories.values()
-            if inspect.isclass(factory)
-        ]
-
-        # ASSERTION THAT SHOULD FAIL: All imports should resolve to the same class
+                imported_factories[f'{module_path}.{class_name}'] = f'ImportError: {e}'
+        actual_factory_classes = [factory for factory in imported_factories.values() if inspect.isclass(factory)]
         if len(actual_factory_classes) > 1:
             canonical_factory = actual_factory_classes[0]
             for i, factory_class in enumerate(actual_factory_classes[1:], 1):
-                self.assertIs(
-                    factory_class, canonical_factory,
-                    f"IMPORT FRAGMENTATION: Factory class from import path {i+1} "
-                    f"({factory_class}) is not the same as canonical factory "
-                    f"({canonical_factory}). Import paths resolve to different classes."
-                )
-
-        # ASSERTION THAT SHOULD FAIL: Should have successful imports for canonical paths
-        import_failures = [
-            path for path, result in imported_factories.items()
-            if isinstance(result, str) and "ImportError" in result
-        ]
-
-        # Allow some import failures for non-canonical paths
-        max_allowed_failures = len(import_paths_to_test) - 1  # Only canonical should work
-
-        self.assertLessEqual(
-            len(import_failures), max_allowed_failures,
-            f"IMPORT FRAGMENTATION: Too many failed imports: {import_failures}. "
-            f"At least canonical factory import path should work."
-        )
-
-    # === SINGLETON PATTERN VIOLATION TESTS ===
+                self.assertIs(factory_class, canonical_factory, f'IMPORT FRAGMENTATION: Factory class from import path {i + 1} ({factory_class}) is not the same as canonical factory ({canonical_factory}). Import paths resolve to different classes.')
+        import_failures = [path for path, result in imported_factories.items() if isinstance(result, str) and 'ImportError' in result]
+        max_allowed_failures = len(import_paths_to_test) - 1
+        self.assertLessEqual(len(import_failures), max_allowed_failures, f'IMPORT FRAGMENTATION: Too many failed imports: {import_failures}. At least canonical factory import path should work.')
 
     async def test_execution_engine_factory_singleton_violations_detection(self):
         """FAILING TEST: Detect singleton pattern violations in execution engine factories
@@ -280,72 +155,25 @@ class TestExecutionEngineFactorySSOTViolations884(SSotAsyncTestCase):
         ISSUE: Global singleton patterns cause cross-user data contamination
         """
         singleton_violations = []
-
-        # Import execution engine factory modules
-        modules_to_check = [
-            "netra_backend.app.agents.supervisor.execution_engine_factory",
-            "netra_backend.app.agents.supervisor.request_scoped_execution_engine",
-            "netra_backend.app.agents.supervisor.user_execution_engine"
-        ]
-
+        modules_to_check = ['netra_backend.app.agents.supervisor.execution_engine_factory', 'netra_backend.app.agents.supervisor.request_scoped_execution_engine', 'netra_backend.app.agents.supervisor.user_execution_engine']
         for module_name in modules_to_check:
             try:
                 module = importlib.import_module(module_name)
-
-                # Check for singleton patterns in module
                 for name in dir(module):
                     obj = getattr(module, name)
-
-                    # Check for singleton instance variables
-                    if (isinstance(obj, object) and
-                        name.startswith('_') and
-                        ('instance' in name.lower() or
-                         'singleton' in name.lower() or
-                         'factory' in name.lower())):
-
-                        singleton_violations.append({
-                            'module': module_name,
-                            'variable': name,
-                            'type': type(obj).__name__,
-                            'violation_type': 'global_singleton_instance'
-                        })
-
-                    # Check for singleton factory methods
-                    if (inspect.isfunction(obj) and
-                        ('get_' in name and 'factory' in name.lower()) or
-                        ('create_' in name and 'singleton' in name.lower())):
-
-                        singleton_violations.append({
-                            'module': module_name,
-                            'function': name,
-                            'violation_type': 'singleton_factory_function'
-                        })
-
-                # Check module-level factory instances
+                    if isinstance(obj, object) and name.startswith('_') and ('instance' in name.lower() or 'singleton' in name.lower() or 'factory' in name.lower()):
+                        singleton_violations.append({'module': module_name, 'variable': name, 'type': type(obj).__name__, 'violation_type': 'global_singleton_instance'})
+                    if inspect.isfunction(obj) and ('get_' in name and 'factory' in name.lower()) or ('create_' in name and 'singleton' in name.lower()):
+                        singleton_violations.append({'module': module_name, 'function': name, 'violation_type': 'singleton_factory_function'})
                 for attr_name in ['_factory_instance', '_execution_engine_factory', '_global_factory']:
                     if hasattr(module, attr_name):
                         attr_value = getattr(module, attr_name)
                         if attr_value is not None:
-                            singleton_violations.append({
-                                'module': module_name,
-                                'attribute': attr_name,
-                                'value_type': type(attr_value).__name__,
-                                'violation_type': 'module_level_singleton'
-                            })
-
+                            singleton_violations.append({'module': module_name, 'attribute': attr_name, 'value_type': type(attr_value).__name__, 'violation_type': 'module_level_singleton'})
             except ImportError:
                 continue
-
-        # Track detected violations
         self.singleton_violations = singleton_violations
-
-        # ASSERTION THAT SHOULD FAIL: No singleton violations should exist
-        self.assertEqual(
-            len(singleton_violations), 0,
-            f"SINGLETON VIOLATIONS DETECTED: Found {len(singleton_violations)} singleton pattern violations. "
-            f"Violations: {singleton_violations}. "
-            f"Singleton patterns prevent proper user isolation and cause data contamination."
-        )
+        self.assertEqual(len(singleton_violations), 0, f'SINGLETON VIOLATIONS DETECTED: Found {len(singleton_violations)} singleton pattern violations. Violations: {singleton_violations}. Singleton patterns prevent proper user isolation and cause data contamination.')
 
     async def test_execution_engine_factory_global_state_contamination(self):
         """FAILING TEST: Reproduce global state contamination in factory patterns
@@ -354,94 +182,43 @@ class TestExecutionEngineFactorySSOTViolations884(SSotAsyncTestCase):
         EXPECTED: FAIL - Global state should contaminate between factory instances
         ISSUE: Shared global state causes cross-user data leakage
         """
-        # Import the execution engine factory
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
-                ExecutionEngineFactory,
-                get_execution_engine_factory,
-                configure_execution_engine_factory
-            )
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory, get_execution_engine_factory, configure_execution_engine_factory
         except ImportError:
-            self.fail("Cannot import ExecutionEngineFactory - SSOT consolidation incomplete")
-
-        # Test global state isolation between factory instances
+            self.fail('Cannot import ExecutionEngineFactory - SSOT consolidation incomplete')
         num_factory_instances = 3
         factory_instances = []
         global_state_contamination = []
-
         for i in range(num_factory_instances):
             try:
-                # Create factory instance
                 factory = ExecutionEngineFactory(websocket_bridge=None)
                 factory_instances.append(factory)
                 self.factory_instances.append(factory)
-
-                # Set unique state on this factory
-                unique_state_key = f"test_state_{i}"
-                unique_state_value = f"factory_{i}_state_{int(time.time() * 1000)}"
-
-                # Try to set factory-specific state
+                unique_state_key = f'test_state_{i}'
+                unique_state_value = f'factory_{i}_state_{int(time.time() * 1000)}'
                 if hasattr(factory, '_test_state'):
                     factory._test_state[unique_state_key] = unique_state_value
                 else:
                     factory._test_state = {unique_state_key: unique_state_value}
-
             except Exception as e:
-                self.fail(f"Failed to create factory instance {i}: {e}")
-
-        # Check for global state contamination between instances
+                self.fail(f'Failed to create factory instance {i}: {e}')
         for i, factory1 in enumerate(factory_instances):
             for j, factory2 in enumerate(factory_instances):
                 if i != j:
-                    # Check if factories share state
-                    if (hasattr(factory1, '_test_state') and
-                        hasattr(factory2, '_test_state')):
-
-                        # Check for shared state references
+                    if hasattr(factory1, '_test_state') and hasattr(factory2, '_test_state'):
                         if factory1._test_state is factory2._test_state:
-                            global_state_contamination.append({
-                                'factory1_index': i,
-                                'factory2_index': j,
-                                'contamination_type': 'shared_state_reference',
-                                'shared_object': 'test_state'
-                            })
-
-                        # Check for shared state values
+                            global_state_contamination.append({'factory1_index': i, 'factory2_index': j, 'contamination_type': 'shared_state_reference', 'shared_object': 'test_state'})
                         shared_keys = set(factory1._test_state.keys()) & set(factory2._test_state.keys())
                         if shared_keys:
-                            global_state_contamination.append({
-                                'factory1_index': i,
-                                'factory2_index': j,
-                                'contamination_type': 'shared_state_keys',
-                                'shared_keys': list(shared_keys)
-                            })
-
-        # Test global singleton access contamination
+                            global_state_contamination.append({'factory1_index': i, 'factory2_index': j, 'contamination_type': 'shared_state_keys', 'shared_keys': list(shared_keys)})
         try:
-            # Test if get_execution_engine_factory() returns same instance
             global_factory_1 = await get_execution_engine_factory()
             global_factory_2 = await get_execution_engine_factory()
-
             if global_factory_1 is global_factory_2:
-                global_state_contamination.append({
-                    'contamination_type': 'global_singleton_access',
-                    'description': 'get_execution_engine_factory() returns same instance'
-                })
-
+                global_state_contamination.append({'contamination_type': 'global_singleton_access', 'description': 'get_execution_engine_factory() returns same instance'})
         except Exception:
-            # Expected - factory might not be configured
             pass
-
-        # ASSERTION THAT SHOULD FAIL: No global state contamination should exist
-        self.assertEqual(
-            len(global_state_contamination), 0,
-            f"GLOBAL STATE CONTAMINATION DETECTED: Found {len(global_state_contamination)} "
-            f"instances of global state sharing between factory instances. "
-            f"Contamination: {global_state_contamination}. "
-            f"Global state sharing prevents proper user isolation."
-        )
-
-    # === FACTORY INTERFACE CONSISTENCY TESTS ===
+        self.assertEqual(len(global_state_contamination), 0, f'GLOBAL STATE CONTAMINATION DETECTED: Found {len(global_state_contamination)} instances of global state sharing between factory instances. Contamination: {global_state_contamination}. Global state sharing prevents proper user isolation.')
 
     async def test_execution_engine_factory_interface_fragmentation(self):
         """FAILING TEST: Detect interface inconsistencies across factory implementations
@@ -450,51 +227,19 @@ class TestExecutionEngineFactorySSOTViolations884(SSotAsyncTestCase):
         EXPECTED: FAIL - Different factory implementations have inconsistent interfaces
         ISSUE: Interface fragmentation causes integration and compatibility issues
         """
-        # Get all factory implementations found earlier
         if not hasattr(self, 'factory_classes_found') or not self.factory_classes_found:
-            # Run discovery if not already done
             await self.test_execution_engine_factory_duplicate_implementations_detection()
-
         interface_inconsistencies = []
-
-        # Define expected SSOT factory interface
-        expected_interface = {
-            'methods': [
-                'create_for_user',
-                'user_execution_scope',
-                'cleanup_engine',
-                'get_factory_metrics',
-                'shutdown'
-            ],
-            'async_methods': [
-                'create_for_user',
-                'user_execution_scope',
-                'cleanup_engine',
-                'shutdown'
-            ],
-            'properties': [
-                '__init__'
-            ]
-        }
-
+        expected_interface = {'methods': ['create_for_user', 'user_execution_scope', 'cleanup_engine', 'get_factory_metrics', 'shutdown'], 'async_methods': ['create_for_user', 'user_execution_scope', 'cleanup_engine', 'shutdown'], 'properties': ['__init__']}
         for impl in self.factory_classes_found:
             factory_class = impl['object']
             class_name = f"{impl['module']}.{impl['class']}"
-
-            # Check for missing methods
             missing_methods = []
             for method_name in expected_interface['methods']:
                 if not hasattr(factory_class, method_name):
                     missing_methods.append(method_name)
-
             if missing_methods:
-                interface_inconsistencies.append({
-                    'factory_class': class_name,
-                    'issue_type': 'missing_methods',
-                    'missing_methods': missing_methods
-                })
-
-            # Check for incorrect method signatures
+                interface_inconsistencies.append({'factory_class': class_name, 'issue_type': 'missing_methods', 'missing_methods': missing_methods})
             signature_issues = []
             for method_name in expected_interface['methods']:
                 if hasattr(factory_class, method_name):
@@ -502,41 +247,14 @@ class TestExecutionEngineFactorySSOTViolations884(SSotAsyncTestCase):
                     if callable(method):
                         try:
                             sig = inspect.signature(method)
-
-                            # Check async methods are actually async
                             if method_name in expected_interface['async_methods']:
                                 if not asyncio.iscoroutinefunction(method):
-                                    signature_issues.append({
-                                        'method': method_name,
-                                        'issue': 'not_async',
-                                        'expected': 'async method',
-                                        'actual': 'sync method'
-                                    })
-
+                                    signature_issues.append({'method': method_name, 'issue': 'not_async', 'expected': 'async method', 'actual': 'sync method'})
                         except Exception as e:
-                            signature_issues.append({
-                                'method': method_name,
-                                'issue': 'signature_inspection_failed',
-                                'error': str(e)
-                            })
-
+                            signature_issues.append({'method': method_name, 'issue': 'signature_inspection_failed', 'error': str(e)})
             if signature_issues:
-                interface_inconsistencies.append({
-                    'factory_class': class_name,
-                    'issue_type': 'signature_issues',
-                    'signature_issues': signature_issues
-                })
-
-        # ASSERTION THAT SHOULD FAIL: All factory interfaces should be consistent
-        self.assertEqual(
-            len(interface_inconsistencies), 0,
-            f"INTERFACE FRAGMENTATION DETECTED: Found {len(interface_inconsistencies)} "
-            f"interface inconsistencies across factory implementations. "
-            f"Inconsistencies: {interface_inconsistencies}. "
-            f"Interface fragmentation prevents reliable factory usage."
-        )
-
-    # === FACTORY LIFECYCLE MANAGEMENT TESTS ===
+                interface_inconsistencies.append({'factory_class': class_name, 'issue_type': 'signature_issues', 'signature_issues': signature_issues})
+        self.assertEqual(len(interface_inconsistencies), 0, f'INTERFACE FRAGMENTATION DETECTED: Found {len(interface_inconsistencies)} interface inconsistencies across factory implementations. Inconsistencies: {interface_inconsistencies}. Interface fragmentation prevents reliable factory usage.')
 
     async def test_execution_engine_factory_cleanup_coordination_failures(self):
         """FAILING TEST: Reproduce factory cleanup coordination failures
@@ -545,137 +263,68 @@ class TestExecutionEngineFactorySSOTViolations884(SSotAsyncTestCase):
         EXPECTED: FAIL - Factory cleanup coordination should fail with multiple implementations
         ISSUE: Multiple factory implementations have inconsistent cleanup behavior
         """
-        # Import the execution engine factory
         try:
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
-                ExecutionEngineFactory
-            )
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
         except ImportError:
-            self.fail("Cannot import ExecutionEngineFactory - SSOT consolidation incomplete")
-
+            self.fail('Cannot import ExecutionEngineFactory - SSOT consolidation incomplete')
         cleanup_coordination_failures = []
-
-        # Test cleanup coordination with multiple factory instances
         num_factories = 3
         factories = []
         user_contexts = []
-
         try:
-            # Create multiple factory instances
             for i in range(num_factories):
                 factory = ExecutionEngineFactory(websocket_bridge=None)
                 factories.append(factory)
                 self.factory_instances.append(factory)
-
-                # Create user context for each factory
-                context = UserExecutionContext(
-                    user_id=f"cleanup_test_user_{i}",
-                    run_id=f"cleanup_test_run_{i}_{int(time.time() * 1000)}",
-                    session_id=f"cleanup_test_session_{i}",
-                    request_id=f"cleanup_test_request_{i}"
-                )
+                context = UserExecutionContext(user_id=f'cleanup_test_user_{i}', run_id=f'cleanup_test_run_{i}_{int(time.time() * 1000)}', session_id=f'cleanup_test_session_{i}', request_id=f'cleanup_test_request_{i}')
                 user_contexts.append(context)
                 self.created_contexts.append(context)
-
-                # Create execution engine with factory
                 try:
                     engine = await factory.create_for_user(context)
-
-                    # Try immediate cleanup
                     await factory.cleanup_engine(engine)
-
                 except Exception as e:
-                    cleanup_coordination_failures.append({
-                        'factory_index': i,
-                        'operation': 'create_and_cleanup',
-                        'error': str(e),
-                        'failure_type': 'immediate_cleanup_failure'
-                    })
-
-            # Test cross-factory cleanup coordination
+                    cleanup_coordination_failures.append({'factory_index': i, 'operation': 'create_and_cleanup', 'error': str(e), 'failure_type': 'immediate_cleanup_failure'})
             if len(factories) >= 2:
                 try:
-                    # Create engine with factory 0
                     context = user_contexts[0]
                     engine = await factories[0].create_for_user(context)
-
-                    # Try to cleanup with factory 1 (should fail)
                     try:
                         await factories[1].cleanup_engine(engine)
-                        # If this succeeds, it's a coordination failure
-                        cleanup_coordination_failures.append({
-                            'factory1_index': 0,
-                            'factory2_index': 1,
-                            'operation': 'cross_factory_cleanup',
-                            'failure_type': 'cross_factory_cleanup_succeeded',
-                            'description': 'Factory 1 cleaned up engine created by Factory 0'
-                        })
+                        cleanup_coordination_failures.append({'factory1_index': 0, 'factory2_index': 1, 'operation': 'cross_factory_cleanup', 'failure_type': 'cross_factory_cleanup_succeeded', 'description': 'Factory 1 cleaned up engine created by Factory 0'})
                     except Exception:
-                        # Expected - cross-factory cleanup should fail
                         pass
-
-                    # Cleanup properly with original factory
                     await factories[0].cleanup_engine(engine)
-
                 except Exception as e:
-                    cleanup_coordination_failures.append({
-                        'operation': 'cross_factory_test',
-                        'error': str(e),
-                        'failure_type': 'cross_factory_test_setup_failure'
-                    })
-
-            # Test shutdown coordination
+                    cleanup_coordination_failures.append({'operation': 'cross_factory_test', 'error': str(e), 'failure_type': 'cross_factory_test_setup_failure'})
             shutdown_failures = []
             for i, factory in enumerate(factories):
                 try:
                     await factory.shutdown()
                 except Exception as e:
-                    shutdown_failures.append({
-                        'factory_index': i,
-                        'error': str(e),
-                        'failure_type': 'shutdown_failure'
-                    })
-
+                    shutdown_failures.append({'factory_index': i, 'error': str(e), 'failure_type': 'shutdown_failure'})
             if shutdown_failures:
                 cleanup_coordination_failures.extend(shutdown_failures)
-
         except Exception as e:
-            cleanup_coordination_failures.append({
-                'operation': 'factory_setup',
-                'error': str(e),
-                'failure_type': 'factory_setup_failure'
-            })
-
-        # ASSERTION THAT SHOULD FAIL: No cleanup coordination failures should occur
-        self.assertEqual(
-            len(cleanup_coordination_failures), 0,
-            f"CLEANUP COORDINATION FAILURES: Found {len(cleanup_coordination_failures)} "
-            f"factory cleanup coordination failures. "
-            f"Failures: {cleanup_coordination_failures}. "
-            f"Inconsistent cleanup behavior prevents reliable resource management."
-        )
-
-    # === TEST RESULT DOCUMENTATION ===
+            cleanup_coordination_failures.append({'operation': 'factory_setup', 'error': str(e), 'failure_type': 'factory_setup_failure'})
+        self.assertEqual(len(cleanup_coordination_failures), 0, f'CLEANUP COORDINATION FAILURES: Found {len(cleanup_coordination_failures)} factory cleanup coordination failures. Failures: {cleanup_coordination_failures}. Inconsistent cleanup behavior prevents reliable resource management.')
 
     def _log_test_failure_details(self, test_name: str, failure_details: Dict[str, Any]):
         """Log detailed test failure information for analysis."""
-        print(f"\n=== EXECUTION ENGINE FACTORY SSOT VIOLATION: {test_name} ===")
-        print(f"Timestamp: {datetime.now().isoformat()}")
-        print(f"Business Impact: Golden Path blocked - $500K+ ARR at risk")
-        print(f"Issue: #884 Execution Engine Factory Fragmentation")
-        print("\nFailure Details:")
+        print(f'\n=== EXECUTION ENGINE FACTORY SSOT VIOLATION: {test_name} ===')
+        print(f'Timestamp: {datetime.now().isoformat()}')
+        print(f'Business Impact: Golden Path blocked - $500K+ ARR at risk')
+        print(f'Issue: #884 Execution Engine Factory Fragmentation')
+        print('\nFailure Details:')
         for key, value in failure_details.items():
-            print(f"  {key}: {value}")
-        print("\nNext Steps:")
-        print("1. Implement SSOT consolidation for ExecutionEngineFactory")
-        print("2. Remove duplicate factory implementations")
-        print("3. Fix singleton pattern violations")
-        print("4. Ensure consistent factory interfaces")
-        print("5. Re-run tests to validate fixes")
-        print("=" * 60)
-
-
+            print(f'  {key}: {value}')
+        print('\nNext Steps:')
+        print('1. Implement SSOT consolidation for ExecutionEngineFactory')
+        print('2. Remove duplicate factory implementations')
+        print('3. Fix singleton pattern violations')
+        print('4. Ensure consistent factory interfaces')
+        print('5. Re-run tests to validate fixes')
+        print('=' * 60)
 if __name__ == '__main__':
-    # Run the SSOT violation tests
-    import pytest
-    pytest.main([__file__, "-v", "--tb=short"])
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

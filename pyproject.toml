@@ -215,6 +215,11 @@ markers = [
     # Final missing markers (last batch)
     "authentication: Authentication tests",
     "flow_context: Flow context tests",
+    "auth_breakdown: Authentication breakdown and failure tests",
+    "issue_1116: Issue #1116 specific tests",
+    "issue_1186_phase3: Issue #1186 UserExecutionEngine SSOT consolidation Phase 3 tests",
+    "issue_1197: Issue #1197 specific tests",
+    "sla_validation: SLA validation tests",
     "ssot_compliance: SSOT compliance tests",
     "user_engine_delegation: User engine delegation tests", 
     "websocket_coordination: WebSocket coordination tests",
@@ -647,9 +652,12 @@ markers = [
     
     # Missing supervisor orchestration marker causing collection failures
     "supervisor_orchestration: Supervisor orchestration and multi-user isolation tests",
-    
+
     # Missing agent_handoff_chain marker causing collection failures
     "agent_handoff_chain: Agent handoff chain coordination tests",
+
+    # Missing golden_path_phase2 marker causing collection failures (Issue #881)
+    "golden_path_phase2: Golden Path Phase 2 regression prevention and validation tests",
 
     # Issue #861 Phase 1 Integration Test Markers
     "websocket_flow: WebSocket message flow integration tests",
@@ -676,6 +684,7 @@ markers = [
     "issue_1058_migration_safety: Issue #1058 migration safety specific tests",
     "issue_1058_broadcast_consolidation: Issue #1058 broadcast consolidation specific tests",
     "integration_demo: Integration demonstration and workflow tests",
+    "ssl_security: SSL/TLS security validation tests",
 ]
 
 # Coverage settings

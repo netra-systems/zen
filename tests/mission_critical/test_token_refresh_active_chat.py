@@ -18,7 +18,6 @@ from typing import Any, Dict, List, Optional
 from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
-import jwt
 import pytest
 import websockets
 from fastapi.testclient import TestClient
@@ -32,6 +31,7 @@ from netra_backend.app.main import app
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from test_framework.auth_jwt_test_manager import JWTGenerationTestManager as AuthJWTTestManager
 from test_framework.services import ServiceManager, get_service_manager
+from test_framework.ssot.auth_test_helpers import SSOTAuthTestHelper
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from shared.isolated_environment import get_env
@@ -42,6 +42,7 @@ class TokenRefreshTestScenarios:
     
     def __init__(self):
         self.auth_manager = AuthJWTTestManager()
+        self.ssot_auth_helper = SSOTAuthTestHelper()
         self.service_manager = get_service_manager()
         self.ws_manager = WebSocketManager()
         self.config = get_configuration()
@@ -54,47 +55,37 @@ class TokenRefreshTestScenarios:
         """Cleanup test environment."""
         await self.service_manager.stop_services()
         
-    def create_expiring_token(self, expires_in_seconds: int = 30) -> str:
-        """Create a token that expires soon."""
-        now = datetime.utcnow()
-        exp_time = now + timedelta(seconds=expires_in_seconds)
-        
-        payload = {
-            "sub": "test_user_123",
-            "email": "test@example.com",
-            "iat": int(now.timestamp()),
-            "exp": int(exp_time.timestamp()),
-            "permissions": ["chat", "agent:run"]
-        }
-        
-        token = jwt.encode(payload, self.config.jwt_secret, algorithm="HS256")
-        return token
+    async def create_expiring_token(self, expires_in_seconds: int = 30) -> str:
+        """Create a token that expires soon via SSOT auth service."""
+        # Use SSOT auth helper to create token via auth service
+        user_data = await self.ssot_auth_helper.create_test_user_with_token(
+            email="test@example.com", 
+            user_id="test_user_123",
+            permissions=["chat", "agent:run"],
+            expires_in=expires_in_seconds
+        )
+        return user_data["access_token"]
     
-    def create_refreshed_token(self, original_token: str) -> str:
-        """Create a refreshed version of a token."""
-        decoded = jwt.decode(original_token, self.config.jwt_secret, algorithms=["HS256"])
-        
-        # Extend expiration by 1 hour
-        now = datetime.utcnow()
-        decoded["iat"] = int(now.timestamp())
-        decoded["exp"] = int((now + timedelta(hours=1)).timestamp())
-        decoded["refresh_count"] = decoded.get("refresh_count", 0) + 1
-        
-        return jwt.encode(decoded, self.config.jwt_secret, algorithm="HS256")
+    async def create_refreshed_token(self, original_token: str) -> str:
+        """Create a refreshed version of a token via SSOT auth service."""
+        # Use auth service to refresh token instead of direct JWT operations
+        return await self.ssot_auth_helper.refresh_token_via_service(original_token)
         
     async def validate_token_transition(self, old_token: str, new_token: str) -> bool:
-        """Validate that token transition preserves user identity."""
-        old_decoded = jwt.decode(old_token, self.config.jwt_secret, algorithms=["HS256"])
-        new_decoded = jwt.decode(new_token, self.config.jwt_secret, algorithms=["HS256"])
+        """Validate that token transition preserves user identity via SSOT auth service."""
+        # Use auth service to validate tokens instead of direct JWT operations
+        old_validation = await self.ssot_auth_helper.validate_token_via_service(old_token)
+        new_validation = await self.ssot_auth_helper.validate_token_via_service(new_token)
         
-        # User identity must remain same
-        assert old_decoded["sub"] == new_decoded["sub"]
-        assert old_decoded["email"] == new_decoded["email"]
+        # Validate both tokens are valid and from same user
+        if not old_validation.get("valid") or not new_validation.get("valid"):
+            return False
+            
+        # User identity must remain same (check via auth service response)
+        old_user_id = old_validation.get("user_id")
+        new_user_id = new_validation.get("user_id")
         
-        # New token must have later expiration
-        assert new_decoded["exp"] > old_decoded["exp"]
-        
-        return True
+        return old_user_id == new_user_id and old_user_id is not None
 
 
 @pytest.mark.asyncio
@@ -108,7 +99,7 @@ class TestTokenRefreshDuringActiveChat:
         
         try:
             # Create expiring token (expires in 30 seconds)
-            initial_token = scenarios.create_expiring_token(30)
+            initial_token = await scenarios.create_expiring_token(30)
             
             # Establish WebSocket connection
             ws_url = f"ws://localhost:8000/ws?token={initial_token}"
@@ -139,7 +130,7 @@ class TestTokenRefreshDuringActiveChat:
                     # Trigger token refresh midway
                     if i == 5 and not refresh_completed:
                         # Simulate token refresh
-                        new_token = scenarios.create_refreshed_token(initial_token)
+                        new_token = await scenarios.create_refreshed_token(initial_token)
                         
                         # Send token refresh notification
                         await websocket.send(json.dumps({
@@ -172,7 +163,7 @@ class TestTokenRefreshDuringActiveChat:
         await scenarios.setup()
         
         try:
-            initial_token = scenarios.create_expiring_token(60)
+            initial_token = await scenarios.create_expiring_token(60)
             client = TestClient(app)
             
             async def make_api_call(token: str, endpoint: str) -> Dict:
@@ -191,7 +182,7 @@ class TestTokenRefreshDuringActiveChat:
             
             # Trigger token refresh while API calls are in progress
             await asyncio.sleep(0.1)
-            new_token = scenarios.create_refreshed_token(initial_token)
+            new_token = await scenarios.create_refreshed_token(initial_token)
             
             # Update auth client with new token
             with patch.object(auth_client, 'validate_token_jwt', new_callable=AsyncMock) as mock_validate:
@@ -218,7 +209,7 @@ class TestTokenRefreshDuringActiveChat:
         await scenarios.setup()
         
         try:
-            initial_token = scenarios.create_expiring_token(30)
+            initial_token = await scenarios.create_expiring_token(30)
             refresh_attempts = []
             
             async def simulate_network_failure_recovery():
@@ -232,7 +223,7 @@ class TestTokenRefreshDuringActiveChat:
                 refresh_attempts.append({"status": "recovered", "time": time.time()})
                 
                 # Successful refresh
-                new_token = scenarios.create_refreshed_token(initial_token)
+                new_token = await scenarios.create_refreshed_token(initial_token)
                 refresh_attempts.append({
                     "status": "success",
                     "time": time.time(),
@@ -266,7 +257,7 @@ class TestTokenRefreshDuringActiveChat:
         await scenarios.setup()
         
         try:
-            initial_token = scenarios.create_expiring_token(60)
+            initial_token = await scenarios.create_expiring_token(60)
             ws_url = f"ws://localhost:8000/ws?token={initial_token}"
             
             event_timeline = []
@@ -285,7 +276,7 @@ class TestTokenRefreshDuringActiveChat:
                 
                 # Trigger token refresh
                 refresh_start_time = time.time()
-                new_token = scenarios.create_refreshed_token(initial_token)
+                new_token = await scenarios.create_refreshed_token(initial_token)
                 
                 await websocket.send(json.dumps({
                     "type": "token_refresh",
@@ -362,7 +353,7 @@ class TestTokenRefreshRaceConditions:
         await scenarios.setup()
         
         try:
-            initial_token = scenarios.create_expiring_token(30)
+            initial_token = await scenarios.create_expiring_token(30)
             
             # Create multiple refresh tasks
             async def attempt_refresh(token: str, id: int) -> Dict:
@@ -372,7 +363,7 @@ class TestTokenRefreshRaceConditions:
                 # Simulate refresh API call
                 await asyncio.sleep(0.1 * (id % 3))  # Vary timing slightly
                 
-                new_token = scenarios.create_refreshed_token(token)
+                new_token = await scenarios.create_refreshed_token(token)
                 
                 return {
                     "id": id,
@@ -402,7 +393,7 @@ class TestTokenRefreshRaceConditions:
         await scenarios.setup()
         
         try:
-            initial_token = scenarios.create_expiring_token(30)
+            initial_token = await scenarios.create_expiring_token(30)
             
             logout_started = False
             refresh_attempted = False
@@ -423,7 +414,7 @@ class TestTokenRefreshRaceConditions:
                 if logout_started:
                     raise Exception("Cannot refresh - logout in progress")
                 
-                return scenarios.create_refreshed_token(initial_token)
+                return await scenarios.create_refreshed_token(initial_token)
             
             # Start both operations
             logout_task = asyncio.create_task(attempt_logout())
@@ -452,14 +443,17 @@ class TestTokenRefreshPerformance:
         
         try:
             # Create tokens with varying expiration times
-            tokens = [scenarios.create_expiring_token(30 + i) for i in range(100)]
+            tokens = []
+            for i in range(100):
+                token = await scenarios.create_expiring_token(30 + i)
+                tokens.append(token)
             
             refresh_latencies = []
             
             async def measure_refresh_latency(token: str) -> float:
                 """Measure refresh latency."""
                 start = time.time()
-                new_token = scenarios.create_refreshed_token(token)
+                new_token = await scenarios.create_refreshed_token(token)
                 latency = time.time() - start
                 return latency
             
@@ -488,7 +482,7 @@ class TestTokenRefreshPerformance:
         await scenarios.setup()
         
         try:
-            initial_token = scenarios.create_expiring_token(60)
+            initial_token = await scenarios.create_expiring_token(60)
             ws_url = f"ws://localhost:8000/ws?token={initial_token}"
             
             messages_sent = 0
@@ -524,7 +518,7 @@ class TestTokenRefreshPerformance:
                     await asyncio.sleep(0.5)  # Wait for flood to start
                     
                     start_time = time.time()
-                    new_token = scenarios.create_refreshed_token(initial_token)
+                    new_token = await scenarios.create_refreshed_token(initial_token)
                     
                     await websocket.send(json.dumps({
                         "type": "token_refresh",

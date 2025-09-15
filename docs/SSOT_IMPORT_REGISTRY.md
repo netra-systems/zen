@@ -9,6 +9,7 @@ Mission: Provide authoritative import mappings for all Netra services
 ### 🏆 CURRENT ACHIEVEMENTS
 - **Issue #863 Agent Registry SSOT**: ✅ **PHASE 3 COMPLETE** - 100% SSOT compliance achieved, both import paths resolve to identical classes
 - **Issue #1116 Agent Factory SSOT**: ✅ **COMPLETE** - Full singleton to factory migration with enterprise user isolation
+- **Issue #1182 WebSocket Manager SSOT**: ✅ **PHASE 1 COMPLETE** - Eliminated duplicate get_websocket_manager functions, consolidated imports to canonical paths
 - **SSOT Compliance**: 87.2% Real System (285 violations in 118 files) - Major Agent Registry violations resolved through direct re-export
 - **Configuration Manager SSOT**: ✅ **PHASE 1 COMPLETE** - Issue #667 unified imports and compatibility
 - **WebSocket Bridge SSOT**: ✅ **COMPLETE** - Comprehensive audit and migration finished with dual pattern analysis
@@ -25,10 +26,11 @@ Mission: Provide authoritative import mappings for all Netra services
 ### 🎯 COMPLETED MIGRATIONS
 1. **Issue #863 Agent Registry SSOT Phase 3** - Complete SSOT consolidation with direct re-export, 100% compliance achieved
 2. **Issue #1116 Agent Factory SSOT** - Complete singleton to factory migration with enterprise user isolation
-3. **Configuration SSOT Phase 1** - Unified configuration imports with compatibility layer
-4. **WebSocket Bridge SSOT** - Complete agent WebSocket bridge migration and audit
-5. **Orchestration SSOT** - Centralized availability checking with thread-safe caching
-6. **Test Infrastructure SSOT** - Unified test runner and base test case consolidation
+3. **Issue #1182 WebSocket Manager SSOT Phase 1** - Eliminated duplicate get_websocket_manager functions and consolidated import paths
+4. **Configuration SSOT Phase 1** - Unified configuration imports with compatibility layer
+5. **WebSocket Bridge SSOT** - Complete agent WebSocket bridge migration and audit
+6. **Orchestration SSOT** - Centralized availability checking with thread-safe caching
+7. **Test Infrastructure SSOT** - Unified test runner and base test case consolidation
 
 ## SERVICE IMPORT PATTERNS
 

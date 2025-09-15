@@ -12,16 +12,13 @@ CRITICAL: These tests prove SSOT violations exist by demonstrating:
 
 Business Value: $500K+ ARR depends on reliable WebSocket event delivery
 """
-
 import asyncio
 import pytest
 from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 from shared.logging.unified_logging_ssot import get_logger
-
 logger = get_logger(__name__)
-
 
 class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
     """Test WebSocket manager singleton enforcement - SHOULD FAIL before SSOT consolidation."""
@@ -39,35 +36,20 @@ class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
         from different paths and verifying they are NOT the same instance.
         After SSOT consolidation, all import paths should return the same instance.
         """
-        logger.info("Testing WebSocket manager import path SSOT compliance - EXPECTING FAILURE")
-
+        logger.info('Testing WebSocket manager import path SSOT compliance - EXPECTING FAILURE')
         try:
-            # Import from different paths that should resolve to same SSOT instance
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as Manager1
             from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation as Manager2
-
-            # Create instances through different import paths
-            user_context = {"user_id": "test_user_123", "thread_id": "test_thread_456"}
-
-            # This should be the same instance if SSOT is properly implemented
+            user_context = {'user_id': 'test_user_123', 'thread_id': 'test_thread_456'}
             manager1 = Manager1(user_context=user_context)
             manager2 = Manager2(user_context=user_context)
-
-            # CRITICAL TEST: These should be the same instance (SSOT)
-            # This will FAIL with current fragmentation but PASS after consolidation
-            self.assertIs(
-                manager1,
-                manager2,
-                "SSOT VIOLATION: Different import paths create different WebSocket manager instances. "
-                "This proves fragmentation exists and threatens Golden Path reliability."
-            )
-
+            self.assertIs(manager1, manager2, 'SSOT VIOLATION: Different import paths create different WebSocket manager instances. This proves fragmentation exists and threatens Golden Path reliability.')
         except ImportError as e:
-            logger.error(f"Import error indicates WebSocket manager fragmentation: {e}")
-            raise AssertionError(f"SSOT VIOLATION: Could not import WebSocket managers from expected paths: {e}")
+            logger.error(f'Import error indicates WebSocket manager fragmentation: {e}')
+            raise AssertionError(f'SSOT VIOLATION: Could not import WebSocket managers from expected paths: {e}')
         except Exception as e:
-            logger.error(f"WebSocket manager instantiation failed: {e}")
-            raise AssertionError(f"SSOT VIOLATION: WebSocket manager creation inconsistency: {e}")
+            logger.error(f'WebSocket manager instantiation failed: {e}')
+            raise AssertionError(f'SSOT VIOLATION: WebSocket manager creation inconsistency: {e}')
 
     async def test_websocket_manager_factory_delegates_to_ssot(self):
         """
@@ -76,34 +58,20 @@ class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
         This test proves that factory functions create multiple instances instead
         of delegating to a single SSOT implementation.
         """
-        logger.info("Testing WebSocket manager factory SSOT delegation - EXPECTING FAILURE")
-
+        logger.info('Testing WebSocket manager factory SSOT delegation - EXPECTING FAILURE')
         try:
-            # Import factory function
             from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-
-            user_context = {"user_id": "test_user_789", "thread_id": "test_thread_101"}
-
-            # Create managers through different creation methods
+            user_context = {'user_id': 'test_user_789', 'thread_id': 'test_thread_101'}
             factory_manager = await create_websocket_manager(user_context=user_context)
             direct_manager = await get_websocket_manager(user_context=user_context)
-
-            # CRITICAL TEST: Factory should delegate to SSOT (same instance)
-            # This will FAIL with current fragmentation but PASS after consolidation
-            self.assertIs(
-                factory_manager,
-                direct_manager,
-                "SSOT VIOLATION: Factory creates separate instances instead of using SSOT. "
-                "This causes WebSocket event delivery inconsistencies."
-            )
-
+            self.assertIs(factory_manager, direct_manager, 'SSOT VIOLATION: Factory creates separate instances instead of using SSOT. This causes WebSocket event delivery inconsistencies.')
         except ImportError as e:
-            logger.error(f"Import error indicates factory fragmentation: {e}")
-            raise AssertionError(f"SSOT VIOLATION: Factory import paths not properly consolidated: {e}")
+            logger.error(f'Import error indicates factory fragmentation: {e}')
+            raise AssertionError(f'SSOT VIOLATION: Factory import paths not properly consolidated: {e}')
         except Exception as e:
-            logger.error(f"Factory delegation test failed: {e}")
-            raise AssertionError(f"SSOT VIOLATION: Factory does not properly delegate to SSOT: {e}")
+            logger.error(f'Factory delegation test failed: {e}')
+            raise AssertionError(f'SSOT VIOLATION: Factory does not properly delegate to SSOT: {e}')
 
     async def test_websocket_manager_instance_sharing_across_contexts(self):
         """
@@ -112,30 +80,17 @@ class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
         This test validates that the WebSocket manager properly implements
         instance sharing for the same user across different execution contexts.
         """
-        logger.info("Testing WebSocket manager instance sharing - EXPECTING FAILURE")
-
+        logger.info('Testing WebSocket manager instance sharing - EXPECTING FAILURE')
         try:
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-
-            # Same user, different contexts
-            user_context1 = {"user_id": "test_user_shared", "thread_id": "thread_1"}
-            user_context2 = {"user_id": "test_user_shared", "thread_id": "thread_2"}
-
+            user_context1 = {'user_id': 'test_user_shared', 'thread_id': 'thread_1'}
+            user_context2 = {'user_id': 'test_user_shared', 'thread_id': 'thread_2'}
             manager1 = await get_websocket_manager(user_context=user_context1)
             manager2 = await get_websocket_manager(user_context=user_context2)
-
-            # CRITICAL TEST: Same user should get same manager instance (SSOT)
-            # This may FAIL if user isolation is incorrectly implemented
-            self.assertEqual(
-                id(manager1),
-                id(manager2),
-                "SSOT VIOLATION: Same user gets different WebSocket manager instances. "
-                "This can cause event delivery race conditions."
-            )
-
+            self.assertEqual(id(manager1), id(manager2), 'SSOT VIOLATION: Same user gets different WebSocket manager instances. This can cause event delivery race conditions.')
         except Exception as e:
-            logger.error(f"Instance sharing test failed: {e}")
-            raise AssertionError(f"SSOT VIOLATION: WebSocket manager instance sharing broken: {e}")
+            logger.error(f'Instance sharing test failed: {e}')
+            raise AssertionError(f'SSOT VIOLATION: WebSocket manager instance sharing broken: {e}')
 
     async def test_websocket_manager_memory_isolation_enforcement(self):
         """
@@ -144,35 +99,20 @@ class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
         This test validates that WebSocket managers properly isolate memory
         state between different users while maintaining SSOT compliance.
         """
-        logger.info("Testing WebSocket manager memory isolation - EXPECTING FAILURE")
-
+        logger.info('Testing WebSocket manager memory isolation - EXPECTING FAILURE')
         try:
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-
-            # Different users
-            context1 = {"user_id": "user_isolation_1", "thread_id": "thread_1"}
-            context2 = {"user_id": "user_isolation_2", "thread_id": "thread_2"}
-
+            context1 = {'user_id': 'user_isolation_1', 'thread_id': 'thread_1'}
+            context2 = {'user_id': 'user_isolation_2', 'thread_id': 'thread_2'}
             manager1 = await get_websocket_manager(user_context=context1)
             manager2 = await get_websocket_manager(user_context=context2)
-
-            # Add test data to first manager
             if hasattr(manager1, 'connections'):
                 manager1.connections['test_key'] = 'user1_data'
-
-            # CRITICAL TEST: Second manager should not see first manager's data
-            # This will FAIL if memory isolation is broken
             if hasattr(manager2, 'connections'):
-                self.assertNotIn(
-                    'test_key',
-                    manager2.connections,
-                    "SSOT VIOLATION: WebSocket managers share memory state between users. "
-                    "This violates user isolation and creates security risks."
-                )
-
+                self.assertNotIn('test_key', manager2.connections, 'SSOT VIOLATION: WebSocket managers share memory state between users. This violates user isolation and creates security risks.')
         except Exception as e:
-            logger.error(f"Memory isolation test failed: {e}")
-            raise AssertionError(f"SSOT VIOLATION: WebSocket manager memory isolation broken: {e}")
+            logger.error(f'Memory isolation test failed: {e}')
+            raise AssertionError(f'SSOT VIOLATION: WebSocket manager memory isolation broken: {e}')
 
     def test_websocket_manager_class_definition_uniqueness(self):
         """
@@ -181,19 +121,10 @@ class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
         This test proves that multiple WebSocket manager class definitions exist,
         violating SSOT principles.
         """
-        logger.info("Testing WebSocket manager class uniqueness - EXPECTING FAILURE")
-
+        logger.info('Testing WebSocket manager class uniqueness - EXPECTING FAILURE')
         websocket_manager_classes = []
-
         try:
-            # Try to import all possible WebSocket manager classes
-            class_imports = [
-                ("netra_backend.app.websocket_core.websocket_manager", "WebSocketManager"),
-                ("netra_backend.app.websocket_core.unified_manager", "_UnifiedWebSocketManagerImplementation"),
-                ("netra_backend.app.websocket_core.websocket_manager_factory", "IsolatedWebSocketManager"),
-                ("test_framework.fixtures.websocket_manager_mock", "MockWebSocketManager"),
-            ]
-
+            class_imports = [('netra_backend.app.websocket_core.websocket_manager', 'WebSocketManager'), ('netra_backend.app.websocket_core.unified_manager', '_UnifiedWebSocketManagerImplementation'), ('netra_backend.app.websocket_core.websocket_manager_factory', 'IsolatedWebSocketManager'), ('test_framework.fixtures.websocket_manager_mock', 'MockWebSocketManager')]
             for module_path, class_name in class_imports:
                 try:
                     module = __import__(module_path, fromlist=[class_name])
@@ -201,23 +132,14 @@ class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
                         cls = getattr(module, class_name)
                         websocket_manager_classes.append((module_path, class_name, cls))
                 except ImportError:
-                    # Expected for some imports
                     pass
-
         except Exception as e:
-            logger.error(f"Class discovery failed: {e}")
-
-        # CRITICAL TEST: Should have only ONE WebSocket manager class (SSOT)
-        # This will FAIL with current fragmentation
+            logger.error(f'Class discovery failed: {e}')
         if len(websocket_manager_classes) > 1:
-            class_info = [f"{path}.{name}" for path, name, _ in websocket_manager_classes]
-            raise AssertionError(
-                f"SSOT VIOLATION: Found {len(websocket_manager_classes)} WebSocket manager classes: {class_info}. "
-                f"SSOT requires exactly ONE canonical class definition."
-            )
-
+            class_info = [f'{path}.{name}' for path, name, _ in websocket_manager_classes]
+            raise AssertionError(f'SSOT VIOLATION: Found {len(websocket_manager_classes)} WebSocket manager classes: {class_info}. SSOT requires exactly ONE canonical class definition.')
         logger.info(f"Found WebSocket manager classes: {[f'{p}.{n}' for p, n, _ in websocket_manager_classes]}")
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

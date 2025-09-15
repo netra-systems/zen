@@ -358,17 +358,54 @@ class _UnifiedWebSocketManagerImplementation:
 
         return False
 
+    def __new__(cls, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, user_context: Optional[Any] = None, config: Optional[Dict[str, Any]] = None, _ssot_authorization_token: Optional[str] = None):
+        """
+        ISSUE #889 REMEDIATION: User-scoped singleton implementation.
+        
+        This ensures that multiple instantiations with the same user context
+        return the same instance, preventing SSOT violations and user isolation failures.
+        """
+        # Import registry functions (avoid circular imports)
+        try:
+            from netra_backend.app.websocket_core.websocket_manager import (
+                _get_user_key, _USER_MANAGER_REGISTRY, _REGISTRY_LOCK
+            )
+            
+            # Extract user key for registry lookup
+            user_key = _get_user_key(user_context)
+            
+            # Check if instance already exists for this user
+            if user_key in _USER_MANAGER_REGISTRY:
+                existing_instance = _USER_MANAGER_REGISTRY[user_key]
+                logger.debug(f"Returning existing manager instance for user {user_key} from __new__")
+                return existing_instance
+                
+        except ImportError:
+            # Registry not available - continue with normal instantiation
+            logger.debug("Registry not available in __new__, continuing with normal instantiation")
+            pass
+        
+        # Create new instance using normal object creation
+        return super().__new__(cls)
+
     def __init__(self, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, user_context: Optional[Any] = None, config: Optional[Dict[str, Any]] = None, _ssot_authorization_token: Optional[str] = None):
         """Initialize UnifiedWebSocketManager - ALL MODES CONSOLIDATED TO UNIFIED.
         
         SSOT MIGRATION NOTICE: All WebSocket modes now use unified initialization.
         User isolation is achieved through UserExecutionContext, not separate modes.
         
+        ISSUE #889 REMEDIATION: If this instance was returned from registry in __new__,
+        skip initialization to prevent reinitializing an existing instance.
+        
         Args:
             mode: DEPRECATED - All modes redirect to UNIFIED (kept for backward compatibility)
             user_context: User execution context for proper user isolation
             config: Configuration dictionary (optional)
         """
+        # Check if this instance is already initialized (returned from registry)
+        if hasattr(self, '_initialized'):
+            logger.debug(f"Instance already initialized for user {getattr(user_context, 'user_id', 'unknown')}, skipping __init__")
+            return
         # ISSUE #712 FIX: SSOT Validation Integration
         from netra_backend.app.websocket_core.ssot_validation_enhancer import (
             validate_websocket_manager_creation,
@@ -485,6 +522,22 @@ class _UnifiedWebSocketManagerImplementation:
         self.on_event_emitted: Optional[callable] = None
         self._event_listeners: List[callable] = []
 
+        # ISSUE #889 REMEDIATION: Register this instance in the user-scoped registry
+        try:
+            from netra_backend.app.websocket_core.websocket_manager import (
+                _get_user_key, _USER_MANAGER_REGISTRY
+            )
+            
+            user_key = _get_user_key(user_context)
+            _USER_MANAGER_REGISTRY[user_key] = self
+            logger.debug(f"Registered new manager instance for user {user_key} in registry")
+            
+        except ImportError:
+            logger.debug("Registry not available, skipping registration")
+
+        # Mark this instance as initialized
+        self._initialized = True
+        
         logger.info("UnifiedWebSocketManager initialized with SSOT unified mode (all legacy modes consolidated)")
 
     def _validate_user_isolation(self, user_id: str, operation: str = "unknown") -> bool:
@@ -3857,6 +3910,145 @@ class _UnifiedWebSocketManagerImplementation:
         
         logger.info(f"Cleanup complete: {cleaned_count} stale connections removed")
         return cleaned_count
+
+    async def shutdown(self):
+        """
+        Shutdown the WebSocket manager and cleanup all resources.
+        
+        This method provides a complete shutdown interface for the WebSocket manager,
+        cleaning up connections, background tasks, and other resources.
+        
+        ISSUE #1199 Phase 2: Adds missing shutdown interface method for test compatibility.
+        
+        Business Value:
+        - Ensures proper resource cleanup in production and test environments
+        - Prevents resource leaks and memory issues
+        - Provides clean shutdown interface for testing frameworks
+        """
+        logger.info("Starting WebSocket manager shutdown...")
+        
+        try:
+            # 1. Shutdown background monitoring first
+            await self.shutdown_background_monitoring()
+            
+            # 2. Clean up all connections
+            connection_ids = list(self._connections.keys())
+            for connection_id in connection_ids:
+                try:
+                    await self.remove_connection(connection_id)
+                except Exception as e:
+                    logger.warning(f"Error removing connection {connection_id} during shutdown: {e}")
+            
+            # 3. Clear user mappings
+            self._user_connections.clear()
+            
+            # 4. Clear event tracking and queues
+            if hasattr(self, '_event_tracking'):
+                self._event_tracking.clear()
+            
+            if hasattr(self, '_event_queues'):
+                self._event_queues.clear()
+                
+            if hasattr(self, '_user_event_queues'):
+                self._user_event_queues.clear()
+            
+            # 5. Clear coordination and transaction data
+            if hasattr(self, '_pending_events'):
+                self._pending_events.clear()
+                
+            if hasattr(self, '_transaction_coordinator'):
+                self._transaction_coordinator = None
+            
+            # 6. Clear metrics and health tracking
+            if hasattr(self, '_metrics'):
+                self._metrics.clear()
+                
+            if hasattr(self, '_health_status'):
+                self._health_status = {'healthy': False, 'shutdown': True}
+            
+            logger.info("WebSocket manager shutdown completed successfully")
+            
+        except Exception as e:
+            logger.error(f"Error during WebSocket manager shutdown: {e}")
+            raise
+
+    # =================== GOLDEN PATH INTERFACE METHODS ===================
+    # These methods provide the interface expected by tests and Golden Path flows
+    
+    async def connect(self, user_id: str, websocket: Any, connection_id: str = None, thread_id: str = None) -> Any:
+        """
+        Connect a WebSocket for a user (Golden Path interface method).
+        
+        CRITICAL: This method provides the interface expected by Golden Path tests
+        and WebSocket validation suites. It's an alias to connect_user() to maintain
+        backward compatibility with existing test expectations.
+        
+        Business Value Justification:
+        - Segment: ALL (Free -> Enterprise)  
+        - Business Goal: Enable reliable Golden Path WebSocket connections
+        - Value Impact: Critical for $500K+ ARR chat functionality
+        - Revenue Impact: Foundation for all AI-powered user interactions
+        
+        Args:
+            user_id: User identifier for the connection
+            websocket: WebSocket instance to connect
+            connection_id: Optional connection ID to use
+            thread_id: Optional thread ID for connection
+            
+        Returns:
+            Connection information or connection ID
+        """
+        logger.debug(f"[Golden Path] Connecting user {user_id[:8]}... via connect() interface")
+        return await self.connect_user(user_id, websocket, connection_id, thread_id)
+    
+    async def disconnect(self, user_id: str, websocket: Any = None, code: int = 1000, reason: str = "Normal closure") -> None:
+        """
+        Disconnect a WebSocket for a user (Golden Path interface method).
+        
+        CRITICAL: This method provides the interface expected by Golden Path tests
+        and WebSocket validation suites. It's an alias to disconnect_user() to maintain
+        backward compatibility with existing test expectations.
+        
+        Business Value Justification:
+        - Segment: ALL (Free -> Enterprise)
+        - Business Goal: Enable clean WebSocket disconnections for Golden Path
+        - Value Impact: Critical for proper connection lifecycle management
+        - Revenue Impact: Prevents connection leaks affecting system stability
+        
+        Args:
+            user_id: User identifier for the disconnection
+            websocket: Optional WebSocket instance to disconnect
+            code: WebSocket close code (default: 1000 for normal closure)
+            reason: Reason for disconnection
+        """
+        logger.debug(f"[Golden Path] Disconnecting user {user_id[:8]}... via disconnect() interface")
+        if websocket:
+            await self.disconnect_user(user_id, websocket, code, reason)
+        else:
+            # Disconnect all connections for the user if no specific websocket provided
+            await self.handle_disconnection(user_id, websocket)
+    
+    async def emit_agent_event(self, user_id: Union[str, UserID], event_type: str, data: Dict[str, Any]) -> None:
+        """
+        Emit agent event to user connections (Golden Path interface method).
+        
+        CRITICAL: This method provides the interface expected by Golden Path tests
+        and agent execution flows. It's an alias to send_agent_event() to maintain
+        backward compatibility with existing test and agent execution expectations.
+        
+        Business Value Justification:
+        - Segment: ALL (Free -> Enterprise)
+        - Business Goal: Enable real-time agent progress updates (90% of platform value)
+        - Value Impact: Critical for chat functionality and user experience
+        - Revenue Impact: Core method for $500K+ ARR AI interaction delivery
+        
+        Args:
+            user_id: Target user ID for the event
+            event_type: Type of agent event (agent_started, agent_thinking, tool_executing, etc.)
+            data: Event payload data
+        """
+        logger.debug(f"[Golden Path] Emitting agent event '{event_type}' to user {str(user_id)[:8]}... via emit_agent_event() interface")
+        await self.send_agent_event(user_id, event_type, data)
 
 
 # SECURITY FIX: Replace singleton with factory pattern

@@ -166,7 +166,7 @@ class TestDataPersistenceRecovery:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=15.0
             ) as websocket:
                 
@@ -258,7 +258,7 @@ class TestDataPersistenceRecovery:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=15.0
             ) as websocket:
                 
@@ -432,7 +432,7 @@ class TestDataPersistenceRecovery:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=15.0
             ) as websocket:
                 
@@ -508,7 +508,7 @@ class TestDataPersistenceRecovery:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=15.0
             ) as websocket:
                 
@@ -688,7 +688,7 @@ class TestDataPersistenceRecovery:
                 
                 async with websockets.connect(
                     self.staging_config.urls.websocket_url,
-                    extra_headers=headers,
+                    additional_headers=headers,
                     open_timeout=20.0
                 ) as websocket:
                     

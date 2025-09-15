@@ -1542,7 +1542,41 @@ class AgentRegistry(BaseAgentRegistry):
     async def get_agent(self, name: str, context: Optional['UserExecutionContext'] = None) -> Optional['BaseAgent']:
         """Get agent with optional context for factory creation."""
         return await self.get_async(name, context)
-    
+
+    async def create(self, agent_type: str, context: Optional['UserExecutionContext'] = None, **kwargs) -> Optional['BaseAgent']:
+        """Create agent instance using factory pattern.
+
+        This method provides the essential 'create' interface expected by SSOT compliance tests.
+        It delegates to the appropriate creation method based on context availability.
+
+        Args:
+            agent_type: Type of agent to create
+            context: Optional user execution context for isolation
+            **kwargs: Additional arguments for agent creation
+
+        Returns:
+            Agent instance or None if creation fails
+        """
+        if not agent_type:
+            raise ValueError("agent_type is required")
+
+        try:
+            if context and hasattr(context, 'user_id'):
+                # Use user-isolated creation if context provided
+                return await self.create_agent_for_user(
+                    user_id=context.user_id,
+                    agent_type=agent_type,
+                    user_context=context,
+                    websocket_manager=kwargs.get('websocket_manager')
+                )
+            else:
+                # Use factory-based creation for non-user-specific contexts
+                return await self.get_async(agent_type, context)
+
+        except Exception as e:
+            logger.error(f"Failed to create agent {agent_type}: {e}")
+            return None
+
     async def reset_all_agents(self) -> Dict[str, Any]:
         """Reset is not needed with factory pattern - returns success."""
         return {

@@ -14,15 +14,12 @@ SSOT COMPLIANCE TARGET:
 - NO direct jwt.decode() calls outside of SSOT
 - NO fallback validation methods
 """
-
 import asyncio
 import pytest
 import jwt
 from unittest.mock import Mock, patch, AsyncMock
 from typing import Dict, Any, Optional
-
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-
 
 class TestWebSocketJWTSSOTCompliance(SSotBaseTestCase):
     """
@@ -33,9 +30,9 @@ class TestWebSocketJWTSSOTCompliance(SSotBaseTestCase):
     def setUp(self):
         """Set up test environment."""
         super().setUp()
-        self.test_jwt_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0X3VzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjk5OTk5OTk5OTksImlhdCI6MTYwMDAwMDAwMH0.test_signature"
+        self.test_jwt_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0X3VzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjk5OTk5OTk5OTksImlhdCI6MTYwMDAwMDAwMH0.test_signature'
         self.mock_websocket = Mock()
-        self.mock_websocket.headers = {"authorization": f"Bearer {self.test_jwt_token}"}
+        self.mock_websocket.headers = {'authorization': f'Bearer {self.test_jwt_token}'}
 
     def test_ssot_violation_detection_user_context_extractor(self):
         """
@@ -51,41 +48,20 @@ class TestWebSocketJWTSSOTCompliance(SSotBaseTestCase):
         After Fix: PASS - Single SSOT path only
         """
         from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
-        
         extractor = UserContextExtractor()
-        
-        # Check for SSOT violations by inspecting the validation method
         validation_method = extractor.validate_and_decode_jwt
-        
-        # Get the source code to detect multiple validation paths
         import inspect
         source_code = inspect.getsource(validation_method)
-        
-        # SSOT VIOLATION CHECKS - These should FAIL initially
         ssot_violations_detected = []
-        
-        # Violation 1: Check for auth_client_core fallback path
-        if "auth_client_core" in source_code:
-            ssot_violations_detected.append("auth_client_core fallback validation path")
-        
-        # Violation 2: Check for UnifiedAuthInterface conditional usage
-        if "if get_unified_auth:" in source_code:
-            ssot_violations_detected.append("conditional UnifiedAuthInterface usage creates dual paths")
-        
-        # Violation 3: Check for validation result building (fallback pattern)
-        if "Build payload from validation result" in source_code:
-            ssot_violations_detected.append("fallback payload building indicates dual validation")
-        
-        # Violation 4: Check for removed method comments (evidence of violations)
-        if "SSOT COMPLIANCE:" in source_code and "REMOVED" in source_code:
-            ssot_violations_detected.append("commented evidence of removed fallback methods")
-        
-        # ASSERTION: This should FAIL initially due to SSOT violations
-        self.assertEqual(
-            len(ssot_violations_detected), 0,
-            f"SSOT VIOLATIONS DETECTED in UserContextExtractor: {ssot_violations_detected}. "
-            f"All JWT validation must go through single SSOT path: JWTHandler.validate_token()"
-        )
+        if 'auth_client_core' in source_code:
+            ssot_violations_detected.append('auth_client_core fallback validation path')
+        if 'if get_unified_auth:' in source_code:
+            ssot_violations_detected.append('conditional UnifiedAuthInterface usage creates dual paths')
+        if 'Build payload from validation result' in source_code:
+            ssot_violations_detected.append('fallback payload building indicates dual validation')
+        if 'SSOT COMPLIANCE:' in source_code and 'REMOVED' in source_code:
+            ssot_violations_detected.append('commented evidence of removed fallback methods')
+        self.assertEqual(len(ssot_violations_detected), 0, f'SSOT VIOLATIONS DETECTED in UserContextExtractor: {ssot_violations_detected}. All JWT validation must go through single SSOT path: JWTHandler.validate_token()')
 
     def test_ssot_violation_detection_unified_websocket_auth(self):
         """
@@ -101,36 +77,18 @@ class TestWebSocketJWTSSOTCompliance(SSotBaseTestCase):
         After Fix: PASS - Single SSOT path only
         """
         from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
-        
-        # Get source code to detect multiple authentication paths
         import inspect
         source_code = inspect.getsource(authenticate_websocket_ssot)
-        
-        # SSOT VIOLATION CHECKS - These should FAIL initially
         ssot_violations_detected = []
-        
-        # Violation 1: Check for remediation authentication fallback
-        if "authenticate_websocket_with_remediation" in source_code:
-            ssot_violations_detected.append("remediation authentication path bypasses SSOT")
-        
-        # Violation 2: Check for legacy authentication fallback
-        if "Legacy SSOT authentication fallback" in source_code:
-            ssot_violations_detected.append("legacy authentication fallback violates SSOT")
-        
-        # Violation 3: Check for dual authentication paths
-        if "try:" in source_code and "except ImportError:" in source_code:
-            ssot_violations_detected.append("import-based dual authentication paths")
-        
-        # Violation 4: Check for _extract_token_from_websocket (should use SSOT extractor)
-        if "_extract_token_from_websocket" in source_code:
-            ssot_violations_detected.append("custom token extraction bypasses SSOT UserContextExtractor")
-        
-        # ASSERTION: This should FAIL initially due to SSOT violations  
-        self.assertEqual(
-            len(ssot_violations_detected), 0,
-            f"SSOT VIOLATIONS DETECTED in UnifiedWebSocketAuth: {ssot_violations_detected}. "
-            f"All JWT validation must go through single SSOT path: UnifiedAuthenticationService"
-        )
+        if 'authenticate_websocket_with_remediation' in source_code:
+            ssot_violations_detected.append('remediation authentication path bypasses SSOT')
+        if 'Legacy SSOT authentication fallback' in source_code:
+            ssot_violations_detected.append('legacy authentication fallback violates SSOT')
+        if 'try:' in source_code and 'except ImportError:' in source_code:
+            ssot_violations_detected.append('import-based dual authentication paths')
+        if '_extract_token_from_websocket' in source_code:
+            ssot_violations_detected.append('custom token extraction bypasses SSOT UserContextExtractor')
+        self.assertEqual(len(ssot_violations_detected), 0, f'SSOT VIOLATIONS DETECTED in UnifiedWebSocketAuth: {ssot_violations_detected}. All JWT validation must go through single SSOT path: UnifiedAuthenticationService')
 
     @pytest.mark.asyncio
     async def test_ssot_violation_jwt_direct_decode_detection(self):
@@ -146,51 +104,30 @@ class TestWebSocketJWTSSOTCompliance(SSotBaseTestCase):
         import os
         import re
         from pathlib import Path
-        
-        # Scan WebSocket core files for direct jwt.decode usage
-        websocket_core_path = Path(__file__).parent.parent.parent / "netra_backend" / "app" / "websocket_core"
-        
+        websocket_core_path = Path(__file__).parent.parent.parent / 'netra_backend' / 'app' / 'websocket_core'
         direct_jwt_decode_violations = []
-        
         if websocket_core_path.exists():
-            for py_file in websocket_core_path.glob("*.py"):
-                if py_file.name in ["__init__.py", "test_*.py"]:
+            for py_file in websocket_core_path.glob('*.py'):
+                if py_file.name in ['__init__.py', 'test_*.py']:
                     continue
-                    
                 try:
                     with open(py_file, 'r', encoding='utf-8') as f:
                         content = f.read()
-                        
-                    # Check for direct jwt.decode calls
-                    jwt_decode_pattern = r'jwt\.decode\s*\('
+                    jwt_decode_pattern = 'jwt\\.decode\\s*\\('
                     matches = re.finditer(jwt_decode_pattern, content)
-                    
                     for match in matches:
-                        # Get surrounding context to determine if this is SSOT compliant
                         start_pos = max(0, match.start() - 100)
-                        end_pos = min(len(content), match.end() + 100) 
+                        end_pos = min(len(content), match.end() + 100)
                         context = content[start_pos:end_pos]
-                        
-                        # Skip if this is in JWTHandler (SSOT allowed)
-                        if "JWTHandler" in context or "jwt_handler.py" in str(py_file):
+                        if 'JWTHandler' in context or 'jwt_handler.py' in str(py_file):
                             continue
-                            
-                        # Skip if this is a comment or docstring
                         if context.strip().startswith('#') or '"""' in context:
                             continue
-                            
-                        direct_jwt_decode_violations.append(f"{py_file.name}:{self._get_line_number(content, match.start())}")
-                        
+                        direct_jwt_decode_violations.append(f'{py_file.name}:{self._get_line_number(content, match.start())}')
                 except Exception as e:
-                    self.logger.warning(f"Could not scan {py_file}: {e}")
-        
-        # ASSERTION: This should FAIL initially due to direct jwt.decode() usage
-        self.assertEqual(
-            len(direct_jwt_decode_violations), 0,
-            f"DIRECT JWT.DECODE() VIOLATIONS DETECTED: {direct_jwt_decode_violations}. "
-            f"All JWT decoding must use JWTHandler.validate_token() SSOT method"
-        )
-    
+                    self.logger.warning(f'Could not scan {py_file}: {e}')
+        self.assertEqual(len(direct_jwt_decode_violations), 0, f'DIRECT JWT.DECODE() VIOLATIONS DETECTED: {direct_jwt_decode_violations}. All JWT decoding must use JWTHandler.validate_token() SSOT method')
+
     def test_ssot_enforcement_single_jwt_handler_import(self):
         """
         TEST DESIGNED TO FAIL: Verify all JWT operations import from single SSOT source.
@@ -204,52 +141,30 @@ class TestWebSocketJWTSSOTCompliance(SSotBaseTestCase):
         from pathlib import Path
         import ast
         import inspect
-        
-        # Files to check for JWT imports
-        files_to_check = [
-            "netra_backend/app/websocket_core/user_context_extractor.py",
-            "netra_backend/app/websocket_core/unified_websocket_auth.py"
-        ]
-        
+        files_to_check = ['netra_backend/app/websocket_core/user_context_extractor.py', 'netra_backend/app/websocket_core/unified_websocket_auth.py']
         jwt_import_violations = []
-        
         for file_path in files_to_check:
             full_path = Path(__file__).parent.parent.parent / file_path
-            
             if not full_path.exists():
                 continue
-                
             try:
                 with open(full_path, 'r', encoding='utf-8') as f:
                     content = f.read()
-                    
-                # Parse AST to find imports
                 tree = ast.parse(content)
-                
                 for node in ast.walk(tree):
                     if isinstance(node, ast.Import):
                         for alias in node.names:
-                            if "jwt" in alias.name.lower():
-                                # Check if this is SSOT compliant import
-                                if "auth_service.auth_core" not in alias.name:
-                                    jwt_import_violations.append(f"{file_path}:{node.lineno} - {alias.name}")
-                    
+                            if 'jwt' in alias.name.lower():
+                                if 'auth_service.auth_core' not in alias.name:
+                                    jwt_import_violations.append(f'{file_path}:{node.lineno} - {alias.name}')
                     elif isinstance(node, ast.ImportFrom):
-                        if node.module and "jwt" in node.module.lower():
-                            # Check if this is SSOT compliant import
-                            if "auth_service.auth_core" not in node.module:
+                        if node.module and 'jwt' in node.module.lower():
+                            if 'auth_service.auth_core' not in node.module:
                                 for alias in node.names:
-                                    jwt_import_violations.append(f"{file_path}:{node.lineno} - from {node.module} import {alias.name}")
-                                    
+                                    jwt_import_violations.append(f'{file_path}:{node.lineno} - from {node.module} import {alias.name}')
             except Exception as e:
-                self.logger.warning(f"Could not parse {file_path}: {e}")
-        
-        # ASSERTION: This should FAIL initially due to non-SSOT JWT imports
-        self.assertEqual(
-            len(jwt_import_violations), 0,
-            f"NON-SSOT JWT IMPORT VIOLATIONS DETECTED: {jwt_import_violations}. "
-            f"All JWT imports must be from auth_service.auth_core.core.jwt_handler SSOT source"
-        )
+                self.logger.warning(f'Could not parse {file_path}: {e}')
+        self.assertEqual(len(jwt_import_violations), 0, f'NON-SSOT JWT IMPORT VIOLATIONS DETECTED: {jwt_import_violations}. All JWT imports must be from auth_service.auth_core.core.jwt_handler SSOT source')
 
     def _get_line_number(self, content: str, position: int) -> int:
         """Get line number from character position in content."""
@@ -258,7 +173,7 @@ class TestWebSocketJWTSSOTCompliance(SSotBaseTestCase):
     def tearDown(self):
         """Clean up test environment."""
         super().tearDown()
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "-s"])
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

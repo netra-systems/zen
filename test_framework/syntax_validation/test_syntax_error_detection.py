@@ -9,7 +9,6 @@ Business Value Justification (BVJ):
 - Value Impact: Without working tests, we cannot validate critical business functionality
 - Strategic Impact: Test infrastructure is foundation for platform reliability
 """
-
 import pytest
 import ast
 import sys
@@ -27,12 +26,10 @@ class TestSyntaxErrorDetection(BaseIntegrationTest):
     def setUp(self):
         """Setup test environment for syntax validation."""
         self.project_root = Path(__file__).parent.parent.parent
-        self.mission_critical_dir = self.project_root / "tests" / "mission_critical"
-        self.test_framework_dir = self.project_root / "test_framework"
-
-        # Known error counts for validation
-        self.expected_critical_errors = 4  # String/f-string/parentheses errors
-        self.expected_total_errors = 67    # All syntax errors
+        self.mission_critical_dir = self.project_root / 'tests' / 'mission_critical'
+        self.test_framework_dir = self.project_root / 'test_framework'
+        self.expected_critical_errors = 4
+        self.expected_total_errors = 67
 
     @pytest.mark.mission_critical
     @pytest.mark.syntax_validation
@@ -43,16 +40,7 @@ class TestSyntaxErrorDetection(BaseIntegrationTest):
         Each failure represents a business-critical blocking issue.
         """
         syntax_errors = self._check_syntax_in_directory(self.mission_critical_dir)
-
-        # This assertion SHOULD FAIL initially - this proves the test works
-        assert len(syntax_errors) == 0, (
-            f"SYNTAX ERRORS BLOCK MISSION CRITICAL TESTS:\n"
-            f"Found {len(syntax_errors)} syntax errors in mission critical tests:\n"
-            + "\n".join([f"  - {error}" for error in syntax_errors[:10]]) +  # Show first 10
-            (f"\n  ... and {len(syntax_errors) - 10} more errors" if len(syntax_errors) > 10 else "") +
-            f"\n\nBUSINESS IMPACT: Cannot validate $500K+ ARR Golden Path functionality!"
-            f"\nREMEDIATION: Follow TEST_PLAN_SYNTAX_ERROR_REMEDIATION.md"
-        )
+        assert len(syntax_errors) == 0, f'SYNTAX ERRORS BLOCK MISSION CRITICAL TESTS:\nFound {len(syntax_errors)} syntax errors in mission critical tests:\n' + '\n'.join([f'  - {error}' for error in syntax_errors[:10]]) + (f'\n  ... and {len(syntax_errors) - 10} more errors' if len(syntax_errors) > 10 else '') + f'\n\nBUSINESS IMPACT: Cannot validate $500K+ ARR Golden Path functionality!\nREMEDIATION: Follow TEST_PLAN_SYNTAX_ERROR_REMEDIATION.md'
 
     @pytest.mark.integration
     @pytest.mark.syntax_validation
@@ -61,13 +49,7 @@ class TestSyntaxErrorDetection(BaseIntegrationTest):
 
         These are P0 priority because they completely block Python parsing.
         """
-        critical_files = [
-            "test_ssot_execution_compliance.py",
-            "test_ssot_test_runner_enforcement.py",
-            "test_ssot_violations_remediation_complete.py",
-            "test_thread_propagation_verification.py"
-        ]
-
+        critical_files = ['test_ssot_execution_compliance.py', 'test_ssot_test_runner_enforcement.py', 'test_ssot_violations_remediation_complete.py', 'test_thread_propagation_verification.py']
         critical_errors = []
         for filename in critical_files:
             file_path = self.mission_critical_dir / filename
@@ -75,17 +57,9 @@ class TestSyntaxErrorDetection(BaseIntegrationTest):
                 error = self._check_file_syntax(file_path)
                 if error:
                     critical_errors.append(error)
-
-        # Document the critical errors for remediation prioritization
         if critical_errors:
-            error_details = "\n".join([f"  - {error}" for error in critical_errors])
-            pytest.fail(
-                f"CRITICAL SYNTAX ERRORS DETECTED (P0 Priority):\n"
-                f"Found {len(critical_errors)} critical syntax errors:\n"
-                f"{error_details}\n\n"
-                f"These errors completely block Python parsing and must be fixed first.\n"
-                f"REMEDIATION: Apply P0 fixes from TEST_PLAN_SYNTAX_ERROR_REMEDIATION.md"
-            )
+            error_details = '\n'.join([f'  - {error}' for error in critical_errors])
+            pytest.fail(f'CRITICAL SYNTAX ERRORS DETECTED (P0 Priority):\nFound {len(critical_errors)} critical syntax errors:\n{error_details}\n\nThese errors completely block Python parsing and must be fixed first.\nREMEDIATION: Apply P0 fixes from TEST_PLAN_SYNTAX_ERROR_REMEDIATION.md')
 
     @pytest.mark.integration
     @pytest.mark.syntax_validation
@@ -94,25 +68,17 @@ class TestSyntaxErrorDetection(BaseIntegrationTest):
 
         WebSocket tests are P1 because they validate chat functionality (90% of platform value).
         """
-        websocket_patterns = ["*websocket*", "*chat*", "*event*"]
+        websocket_patterns = ['*websocket*', '*chat*', '*event*']
         websocket_errors = []
-
         for pattern in websocket_patterns:
             for file_path in self.mission_critical_dir.glob(pattern):
-                if file_path.suffix == ".py":
+                if file_path.suffix == '.py':
                     error = self._check_file_syntax(file_path)
                     if error:
                         websocket_errors.append(error)
-
         if websocket_errors:
-            error_details = "\n".join([f"  - {error}" for error in websocket_errors])
-            pytest.fail(
-                f"WEBSOCKET TEST SYNTAX ERRORS (P1 Priority):\n"
-                f"Found {len(websocket_errors)} WebSocket-related syntax errors:\n"
-                f"{error_details}\n\n"
-                f"BUSINESS IMPACT: Cannot validate chat functionality (90% of platform value)\n"
-                f"REMEDIATION: Apply P1 fixes from TEST_PLAN_SYNTAX_ERROR_REMEDIATION.md"
-            )
+            error_details = '\n'.join([f'  - {error}' for error in websocket_errors])
+            pytest.fail(f'WEBSOCKET TEST SYNTAX ERRORS (P1 Priority):\nFound {len(websocket_errors)} WebSocket-related syntax errors:\n{error_details}\n\nBUSINESS IMPACT: Cannot validate chat functionality (90% of platform value)\nREMEDIATION: Apply P1 fixes from TEST_PLAN_SYNTAX_ERROR_REMEDIATION.md')
 
     @pytest.mark.unit
     @pytest.mark.syntax_validation
@@ -122,13 +88,7 @@ class TestSyntaxErrorDetection(BaseIntegrationTest):
         The test framework itself must work to enable all other testing.
         """
         framework_errors = self._check_syntax_in_directory(self.test_framework_dir)
-
-        assert len(framework_errors) == 0, (
-            f"TEST FRAMEWORK SYNTAX ERRORS:\n"
-            f"Found {len(framework_errors)} errors in test framework:\n"
-            + "\n".join([f"  - {error}" for error in framework_errors]) +
-            f"\n\nCRITICAL: Test framework syntax errors prevent all testing!"
-        )
+        assert len(framework_errors) == 0, f'TEST FRAMEWORK SYNTAX ERRORS:\nFound {len(framework_errors)} errors in test framework:\n' + '\n'.join([f'  - {error}' for error in framework_errors]) + f'\n\nCRITICAL: Test framework syntax errors prevent all testing!'
 
     @pytest.mark.unit
     @pytest.mark.syntax_validation
@@ -137,34 +97,20 @@ class TestSyntaxErrorDetection(BaseIntegrationTest):
 
         This test documents current state and tracks remediation progress.
         """
-        all_errors = self._check_syntax_in_directory(self.project_root / "tests")
-
-        # Document current state for tracking purposes
+        all_errors = self._check_syntax_in_directory(self.project_root / 'tests')
         error_by_type = self._categorize_errors(all_errors)
-
-        # This will fail initially and succeed after remediation
         if len(all_errors) > 0:
-            pytest.fail(
-                f"SYNTAX ERROR PROGRESS TRACKING:\n"
-                f"Total syntax errors: {len(all_errors)} (Target: 0)\n"
-                f"Expected total errors: {self.expected_total_errors}\n"
-                f"Error breakdown:\n"
-                + "\n".join([f"  - {error_type}: {count}" for error_type, count in error_by_type.items()]) +
-                f"\n\nREMEDIATION PROGRESS: {self.expected_total_errors - len(all_errors)}/{self.expected_total_errors} errors fixed"
-            )
+            pytest.fail(f'SYNTAX ERROR PROGRESS TRACKING:\nTotal syntax errors: {len(all_errors)} (Target: 0)\nExpected total errors: {self.expected_total_errors}\nError breakdown:\n' + '\n'.join([f'  - {error_type}: {count}' for error_type, count in error_by_type.items()]) + f'\n\nREMEDIATION PROGRESS: {self.expected_total_errors - len(all_errors)}/{self.expected_total_errors} errors fixed')
 
     def _check_syntax_in_directory(self, directory: Path) -> List[str]:
         """Check all Python files in directory for syntax errors."""
         syntax_errors = []
-
         if not directory.exists():
             return syntax_errors
-
-        for py_file in directory.rglob("*.py"):
+        for py_file in directory.rglob('*.py'):
             error = self._check_file_syntax(py_file)
             if error:
                 syntax_errors.append(error)
-
         return syntax_errors
 
     def _check_file_syntax(self, file_path: Path) -> str:
@@ -175,36 +121,26 @@ class TestSyntaxErrorDetection(BaseIntegrationTest):
             ast.parse(content)
             return None
         except SyntaxError as e:
-            return f"{file_path}:{e.lineno}:{e.offset}: {e.msg}"
+            return f'{file_path}:{e.lineno}:{e.offset}: {e.msg}'
         except Exception as e:
-            return f"{file_path}: {type(e).__name__}: {e}"
+            return f'{file_path}: {type(e).__name__}: {e}'
 
     def _categorize_errors(self, errors: List[str]) -> Dict[str, int]:
         """Categorize syntax errors by type for remediation prioritization."""
-        categories = {
-            "unterminated_f_string": 0,
-            "unterminated_string": 0,
-            "unexpected_indent": 0,
-            "unclosed_parentheses": 0,
-            "other": 0
-        }
-
+        categories = {'unterminated_f_string': 0, 'unterminated_string': 0, 'unexpected_indent': 0, 'unclosed_parentheses': 0, 'other': 0}
         for error in errors:
-            if "unterminated f-string" in error:
-                categories["unterminated_f_string"] += 1
-            elif "unterminated string" in error:
-                categories["unterminated_string"] += 1
-            elif "unexpected indent" in error:
-                categories["unexpected_indent"] += 1
-            elif "was never closed" in error:
-                categories["unclosed_parentheses"] += 1
+            if 'unterminated f-string' in error:
+                categories['unterminated_f_string'] += 1
+            elif 'unterminated string' in error:
+                categories['unterminated_string'] += 1
+            elif 'unexpected indent' in error:
+                categories['unexpected_indent'] += 1
+            elif 'was never closed' in error:
+                categories['unclosed_parentheses'] += 1
             else:
-                categories["other"] += 1
-
+                categories['other'] += 1
         return categories
-
-
-if __name__ == "__main__":
-    # This test suite is designed to FAIL until syntax remediation is complete
-    # Run via: python test_framework/syntax_validation/test_syntax_error_detection.py
-    pytest.main([__file__, "-v", "--tb=short"])
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

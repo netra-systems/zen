@@ -86,7 +86,7 @@ async def create_authenticated_websocket(auth_token: str) -> websockets.WebSocke
     try:
         websocket = await websockets.connect(
             STAGING_WEBSOCKET_URL,
-            extra_headers=headers,
+            additional_headers=headers,
             timeout=30
         )
         logger.info("WebSocket connection established successfully")

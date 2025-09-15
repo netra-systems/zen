@@ -12,7 +12,7 @@ import random
 from pathlib import Path
 from datetime import datetime
 import json
-from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path

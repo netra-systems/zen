@@ -215,7 +215,7 @@ class TestIssue358CompleteGoldenPathFailure(SSotAsyncTestCase):
                         # Attempt WebSocket connection to staging
                         async with websockets.connect(
                             self.staging_websocket_url,
-                            extra_headers=websocket_headers,
+                            additional_headers=websocket_headers,
                             subprotocols=subprotocols,
                             timeout=self.websocket_timeout
                         ) as websocket:
@@ -650,7 +650,7 @@ class TestIssue358CompleteGoldenPathFailure(SSotAsyncTestCase):
             
             async with websockets.connect(
                 self.staging_websocket_url,
-                extra_headers=websocket_headers,
+                additional_headers=websocket_headers,
                 timeout=10.0
             ) as websocket:
                 return {"success": True, "success_details": ["WebSocket connection successful"]}
@@ -793,7 +793,7 @@ class TestIssue358CompleteGoldenPathFailure(SSotAsyncTestCase):
                 # Attempt WebSocket connection with demo mode (no auth)
                 async with websockets.connect(
                     self.staging_websocket_url,
-                    extra_headers=demo_websocket_headers,
+                    additional_headers=demo_websocket_headers,
                     timeout=15.0
                 ) as websocket:
                     

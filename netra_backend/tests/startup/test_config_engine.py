@@ -4,32 +4,23 @@ from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-"""
-Config Validator Tests - Decision Engine and Utilities
-Tests for decision engine, utility functions, and main validation entry point.
-Compliance: <300 lines, 25-line max functions, modular design.
-"""
-
+'\nConfig Validator Tests - Decision Engine and Utilities\nTests for decision engine, utility functions, and main validation entry point.\nCompliance: <300 lines, 25-line max functions, modular design.\n'
 import sys
 from pathlib import Path
-
 import asyncio
 from pathlib import Path
 from typing import Dict, List, Optional
-
 import pytest
-
-# Mock classes that would normally be imported
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional
 
 class ConfigStatus(Enum):
-    VALID = "valid"
-    INVALID = "invalid"
-    STALE = "stale"
-    MISSING = "missing"
-    UNREACHABLE = "unreachable"
+    VALID = 'valid'
+    INVALID = 'invalid'
+    STALE = 'stale'
+    MISSING = 'missing'
+    UNREACHABLE = 'unreachable'
 
 @dataclass
 class ConfigValidationResult:
@@ -37,13 +28,14 @@ class ConfigValidationResult:
     warnings: List[str] = field(default_factory=list)
     errors: List[str] = field(default_factory=list)
 
-@dataclass  
+@dataclass
 class ValidationContext:
     config_path: str
     is_interactive: bool = True
 
 class ConfigDecisionEngine:
     pass
+
     def __init__(self):
         pass
 
@@ -63,8 +55,8 @@ def validate_service_config():
     pass
     return True
 
-# Mock ServicesConfiguration for tests
 class ServicesConfiguration:
+
     def __init__(self):
         self.redis = None
         self.clickhouse = None
@@ -72,15 +64,12 @@ class ServicesConfiguration:
 @pytest.fixture
 def temp_config_path(tmp_path: Path) -> Path:
     """Create temporary config file path."""
-    return tmp_path / ".dev_services.json"
+    return tmp_path / '.dev_services.json'
 
 @pytest.fixture
 def mock_validation_context(temp_config_path: Path) -> ValidationContext:
     """Create mock validation context."""
-    return ValidationContext(
-        config_path=str(temp_config_path),
-        is_interactive=True
-    )
+    return ValidationContext(config_path=str(temp_config_path), is_interactive=True)
 
 class TestConfigDecisionEngine:
     """Test configuration decision engine."""
@@ -89,29 +78,22 @@ class TestConfigDecisionEngine:
         """Test decision for missing config."""
         engine = ConfigDecisionEngine()
         result = ConfigValidationResult(status=ConfigStatus.MISSING)
-        # Mock method for test
-        assert True  # Simplified for syntax fix
+        assert True
 
     def test_should_use_existing_config_valid(self, mock_validation_context: ValidationContext) -> None:
         """Test decision for valid config."""
         engine = ConfigDecisionEngine()
         result = ConfigValidationResult(status=ConfigStatus.VALID)
-        # Mock method for test
-        assert True  # Simplified for syntax fix
+        assert True
 
     def test_basic_functionality(self) -> None:
         """Test basic functionality to ensure syntax is correct."""
-        # Test enum creation
         status = ConfigStatus.VALID
         assert status == ConfigStatus.VALID
-        
-        # Test dataclass creation
         result = ConfigValidationResult(status=ConfigStatus.VALID)
         assert result.status == ConfigStatus.VALID
         assert result.warnings == []
         assert result.errors == []
-        
-        # Test engine creation
         engine = ConfigDecisionEngine()
         assert engine is not None
 
@@ -132,6 +114,7 @@ class TestUtilityFunctions:
         """Test service config validation."""
         result = validate_service_config()
         assert isinstance(result, bool)
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

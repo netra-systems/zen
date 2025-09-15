@@ -187,7 +187,7 @@ class StartupOrchestrator:
             await self._phase7_finalize()
             
             # Success - mark as complete (ONLY after ALL phases complete)
-            self._mark_startup_complete()
+            await self._mark_startup_complete()
             
         except Exception as e:
             # Mark current phase as failed if set
@@ -1747,7 +1747,7 @@ class StartupOrchestrator:
             # In deterministic mode, schema validation failure is critical
             raise DeterministicStartupError("Database schema validation failed - schema inconsistent")
     
-    def _mark_startup_complete(self) -> None:
+    async def _mark_startup_complete(self) -> None:
         """Mark startup as complete - ONLY after ALL 7 phases complete successfully."""
         # Complete the final phase before marking overall completion
         if self.current_phase:
@@ -1773,6 +1773,19 @@ class StartupOrchestrator:
         self.app.state.startup_failed = False
         self.app.state.startup_error = None
         self.app.state.startup_phase = "complete"
+        
+        # RACE CONDITION FIX: Process queued WebSocket connections now that startup is complete
+        try:
+            from netra_backend.app.websocket_core.gcp_initialization_validator import get_websocket_startup_queue
+            startup_queue = get_websocket_startup_queue()
+            
+            # Process queued connections asynchronously
+            await startup_queue.process_queued_connections_on_startup_complete(self.app.state)
+            
+            self.logger.info("✅ Queued WebSocket connections processed after startup completion")
+        except Exception as queue_error:
+            self.logger.warning(f"Error processing queued WebSocket connections: {queue_error}")
+            # Don't fail startup over queue processing issues
         
         # Log comprehensive completion summary
         self.logger.info("=" * 80)
