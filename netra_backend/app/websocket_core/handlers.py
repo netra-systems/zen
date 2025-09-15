@@ -1956,6 +1956,29 @@ class MessageRouter:
         except Exception as e:
             logger.error(f"Error broadcasting quality alert to {user_id}: {str(e)}")
 
+    # PHASE 2B STEP 1: QualityMessageRouter Interface Compatibility
+    async def handle_message(self, user_id: str, message: Dict[str, Any]) -> None:
+        """Handle message with QualityMessageRouter interface compatibility.
+
+        PHASE 2B STEP 1: Provides interface compatibility with QualityMessageRouter.handle_message
+        Routes quality messages through integrated quality handling system.
+
+        Args:
+            user_id: User ID for the message
+            message: Message dictionary to process
+        """
+        message_type = message.get("type")
+
+        logger.info(f"MessageRouter.handle_message processing {message_type} from {user_id}")
+
+        # Route quality messages through integrated quality handler
+        if self._is_quality_message_type(message_type):
+            await self.handle_quality_message(user_id, message)
+        else:
+            # For non-quality messages, log that this interface is for quality integration
+            logger.warning(f"MessageRouter.handle_message received non-quality message type: {message_type}. "
+                          f"This interface is designed for quality message compatibility.")
+
 
 # Global message router instance
 _message_router: Optional[MessageRouter] = None
