@@ -1007,16 +1007,52 @@ class AgentInstanceFactory:
             'summary_timestamp': datetime.now(timezone.utc).isoformat()
         }
     
+    async def create_instance(self, 
+                             agent_name: str,
+                             user_context: UserExecutionContext,
+                             **kwargs) -> BaseAgent:
+        """
+        ISSUE #1186 PHASE 2: Primary factory method for agent instance creation.
+        
+        This is the canonical method for creating agent instances with proper user isolation.
+        It implements the factory pattern that eliminates singleton vulnerabilities.
+        
+        Args:
+            agent_name: Name of the agent to create
+            user_context: User execution context for complete isolation
+            **kwargs: Additional parameters (agent_class, etc.)
+            
+        Returns:
+            BaseAgent: Fresh agent instance with proper user context binding
+            
+        Raises:
+            ValueError: If agent not found or invalid parameters
+            RuntimeError: If agent creation fails
+            
+        Business Impact: Enables enterprise-grade multi-user deployment with
+        guaranteed user isolation and regulatory compliance.
+        """
+        logger.info(f"Factory.create_instance() called for {agent_name} (user: {user_context.user_id})")
+        
+        # Extract agent_class from kwargs if provided
+        agent_class = kwargs.get('agent_class', None)
+        
+        # Use the standard create_agent_instance method
+        return await self.create_agent_instance(
+            agent_name=agent_name,
+            user_context=user_context,
+            agent_class=agent_class
+        )
+
     async def create_agent(self, 
                           agent_name: str,
                           user_context: UserExecutionContext,
                           agent_class: Optional[Type[BaseAgent]] = None) -> BaseAgent:
         """
-        COMPATIBILITY METHOD: create_agent() wrapper for create_agent_instance().
+        COMPATIBILITY METHOD: create_agent() wrapper for create_instance().
         
         This method provides backward compatibility for tests and code that expect
-        a create_agent() method on the AgentInstanceFactory. It wraps the standard
-        create_agent_instance() method with appropriate logging and deprecation warning.
+        a create_agent() method. It redirects to the canonical create_instance() method.
         
         Args:
             agent_name: Name of the agent to create
@@ -1030,13 +1066,12 @@ class AgentInstanceFactory:
             ValueError: If agent not found or invalid parameters
             RuntimeError: If agent creation fails
         """
-        logger.warning(
-            f" CYCLE:  COMPATIBILITY: create_agent() method called - redirecting to create_agent_instance(). "
-            f"Consider updating calling code to use create_agent_instance() directly for {agent_name}"
+        logger.debug(
+            f"COMPATIBILITY: create_agent() redirecting to create_instance() for {agent_name}"
         )
         
-        # Use the standard create_agent_instance method
-        return await self.create_agent_instance(
+        # Use the canonical create_instance method
+        return await self.create_instance(
             agent_name=agent_name,
             user_context=user_context,
             agent_class=agent_class
