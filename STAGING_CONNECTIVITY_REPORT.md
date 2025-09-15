@@ -1,34 +1,38 @@
 # Staging Environment Connectivity Report
-Generated: 2025-09-14 23:45:01
+Generated: 2025-09-15 02:04:45
 Environment: https://api.staging.netrasystems.ai
 
 ## Executive Summary
 - **Total Tests**: 3
-- **Successful**: 2
-- **Success Rate**: 66.7%
+- **Successful**: 3
+- **Success Rate**: 100.0%
 
 ## Test Results
 ### http_connectivity
 - **Status**:  PASS:  PASS
-- **Duration**: 0.539s
+- **Duration**: 0.383s
 - **Health Status**: 200
 - **Service Status**: healthy
 - **Version**: 1.0.0
 
 ### websocket_connectivity
-- **Status**:  FAIL:  FAIL
-- **Duration**: 1.141s
-- **Error**: received 1011 (internal error) main mode error; then sent 1011 (internal error) main mode error
+- **Status**:  PASS:  PASS
+- **Duration**: 0.000s
+- **Connection Time**: 0.716s
+- **Ping Time**: 0.000s
 
 ### agent_request_pipeline
 - **Status**:  PASS:  PASS
-- **Duration**: 1.141s
+- **Duration**: 0.803s
 - **Pipeline Working**: True
-- **Response Type**: error_message
+- **Response Type**: connection_established
 
 ## Recommendations
- WARNING: [U+FE0F] **Some connectivity issues detected**
-- Fix websocket_connectivity: received 1011 (internal error) main mode error; then sent 1011 (internal error) main mode error
+ PASS:  **All connectivity tests passed!**
+- Staging environment is accessible and responding correctly
+- Agent execution pipeline is functional (auth layer working)
+- WebSocket communication is stable
+- Ready for comprehensive agent execution testing
 
 ## Next Steps
 1. Run comprehensive agent execution tests with: `test_real_agent_execution_staging.py`
