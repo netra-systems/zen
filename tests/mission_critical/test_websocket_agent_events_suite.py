@@ -1,4 +1,3 @@
-"""
 # PERFORMANCE: Lazy loading for mission critical tests
 
 _lazy_imports = {}
@@ -25,7 +24,7 @@ Business Value Justification (BVJ):
 - Segment: ALL (Free/Early/Mid/Enterprise/Platform)
 - Business Goal: Agent Step-by-Step Execution - Ensures reliable pipeline processing
 - Value Impact: Validates agent pipeline execution coordination (critical for AI workflows)
-- Revenue Impact: Protects $500K+ ARR by ensuring reliable step-by-step agent execution
+- Revenue Impact: Protects high-value ARR by ensuring reliable step-by-step agent execution
 
 Critical Golden Path Scenarios Tested:
 1. Pipeline step execution: Step-by-step agent execution with proper sequencing
@@ -68,6 +67,7 @@ from netra_backend.app.schemas.agent_state import CheckpointType, StatePersisten
 
 # CRITICAL: Always use real WebSocket connections - NO MOCKS per CLAUDE.md
 # Tests will fail if Docker services are not available (expected behavior)
+from tests.mission_critical.websocket_real_test_base import RealWebSocketTestBase
 WebSocketTestBase = RealWebSocketTestBase
 from test_framework.test_context import WebSocketContext, create_test_context
 from test_framework.websocket_helpers import WebSocketTestHelpers
