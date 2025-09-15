@@ -7,6 +7,7 @@ Business Impact: Protects $500K+ ARR Golden Path by identifying handler
 integration conflicts that could break quality-enhanced message processing.
 """
 
+import pytest
 import unittest
 from typing import Dict, Any, List, Set
 from unittest.mock import Mock, patch, MagicMock
@@ -14,6 +15,7 @@ from unittest.mock import Mock, patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestQualityHandlersConsolidationUnit(SSotBaseTestCase):
     """Test QualityMessageRouter handler consolidation challenges - SHOULD FAIL initially."""
 

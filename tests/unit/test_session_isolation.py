@@ -11,6 +11,7 @@ import pytest
 import asyncio
 from unittest.mock import Mock, patch
 
+@pytest.mark.unit
 class TestSessionIsolation:
     """Test session isolation functionality."""
 

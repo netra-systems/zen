@@ -32,6 +32,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
+@pytest.mark.unit
 class TestSSOTTestRunnerCompliance(SSotBaseTestCase):
     """
     Test class validating SSOT compliance for test runner infrastructure.

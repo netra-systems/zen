@@ -42,6 +42,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.e2e
 class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
@@ -183,7 +184,7 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
             subprotocols = []
             if self.staging_session_token:
                 subprotocols = [f'jwt-auth.{self.staging_session_token}', 'jwt-auth']
-            async with websockets.connect(self.staging_websocket_url, extra_headers=headers, subprotocols=subprotocols if subprotocols else None, timeout=10) as websocket:
+            async with websockets.connect(self.staging_websocket_url, additional_headers=headers, subprotocols=subprotocols if subprotocols else None, timeout=10) as websocket:
                 for event_idx, event in enumerate(self.golden_path_events):
                     message = {'action': 'emit_event', 'event': event, 'user_id': self.staging_user_id, 'connection_id': f'test-conn-{uuid.uuid4().hex[:8]}'}
                     await websocket.send(json.dumps(message))

@@ -17,6 +17,7 @@ Tests verify end-to-end message routing, handler integration, quality message su
 and compatibility with existing WebSocket infrastructure.
 """
 
+import pytest
 import unittest
 import asyncio
 import json
@@ -30,6 +31,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.integration
 class TestIssue1181MessageRouterConsolidationIntegration(SSotAsyncTestCase, unittest.TestCase):
     """Integration test suite for MessageRouter consolidation validation."""
     

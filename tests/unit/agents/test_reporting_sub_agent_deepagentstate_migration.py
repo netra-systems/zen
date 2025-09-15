@@ -41,6 +41,7 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 from shared.types.core_types import UserID, ThreadID, RunID
 
 
+@pytest.mark.unit
 class TestReportingSubAgentDeepAgentStateMigration(SSotAsyncTestCase):
     """
     Unit tests for ReportingSubAgent migration from DeepAgentState to UserExecutionContext.

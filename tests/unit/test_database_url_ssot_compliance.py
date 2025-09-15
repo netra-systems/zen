@@ -12,6 +12,7 @@ pytestmark = [
 ]
 
 
+@pytest.mark.unit
 class TestDatabaseURLSSOTCompliance:
     """Test suite for validating SSOT compliance in database URL construction."""
     

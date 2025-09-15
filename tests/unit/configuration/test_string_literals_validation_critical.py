@@ -15,6 +15,7 @@ from pathlib import Path
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
+@pytest.mark.unit
 class TestStringLiteralsValidationCritical:
     """Test String Literals Index validation and critical configuration protection."""
 
@@ -300,6 +301,7 @@ class TestStringLiteralsValidationCritical:
                 assert not oauth_errors, f"OAuth redirect should be warning, not error in {env_name}: {oauth_errors}"
 
 
+@pytest.mark.unit
 class TestConfigurationCascadeFailurePrevention:
     """Test configuration cascade failure detection and prevention mechanisms."""
 

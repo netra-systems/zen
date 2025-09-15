@@ -26,6 +26,7 @@ from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from tests.e2e.real_services_manager import RealServicesManager, ServiceStatus, ServiceEndpoint
 
+@pytest.mark.unit
 class TestServiceStartupHangingIssueUnit(SSotAsyncTestCase):
     """Unit tests for service startup hanging behavior"""
 
@@ -142,6 +143,7 @@ class TestServiceStartupHangingIssueUnit(SSotAsyncTestCase):
             await self.manager.cleanup()
         await super().tearDown()
 
+@pytest.mark.unit
 class TestServiceStartupTimeouts(SSotAsyncTestCase):
     """Specific timeout behavior tests"""
 

@@ -33,6 +33,7 @@ from datetime import datetime
 import os
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.e2e
 class TestConfigSSotGoldenPathStaging(SSotAsyncTestCase):
     """E2E test suite for Golden Path with SSOT configuration on staging."""
 

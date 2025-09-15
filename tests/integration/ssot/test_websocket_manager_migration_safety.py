@@ -13,6 +13,7 @@ MISSION CRITICAL: Protect $500K+ ARR by ensuring WebSocket migration maintains:
 5. Golden Path preservation (login → AI response flow)
 """
 
+import pytest
 import asyncio
 import uuid
 import time
@@ -49,6 +50,7 @@ from shared.types.core_types import (
 )
 
 
+@pytest.mark.integration
 class TestWebSocketManagerMigrationSafety(SSotAsyncTestCase):
     """
     Migration safety tests validating WebSocket manager migration preserves 

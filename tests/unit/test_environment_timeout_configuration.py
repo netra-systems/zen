@@ -21,6 +21,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 import httpx
 
 
+@pytest.mark.unit
 class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
     """
     Unit tests for environment-specific timeout configuration issues.

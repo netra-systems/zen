@@ -25,6 +25,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
+@pytest.mark.integration
 class TestAgentRegistrySSoTConsolidationIntegration(SSotAsyncTestCase):
     """Integration tests for Agent Registry SSOT consolidation validation"""
 

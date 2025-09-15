@@ -24,6 +24,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.e2e
 class TestIssue174StateMachineCoordination(SSotAsyncTestCase):
     """E2E tests to reproduce Issue #174: State machine connection ID coordination failures."""
 

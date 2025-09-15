@@ -47,6 +47,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.unit
 class TestComprehensiveSSOTArchitectureValidation(SSotAsyncTestCase):
     """
     Master SSOT architecture validation tests for comprehensive WebSocket compliance.

@@ -21,6 +21,7 @@ from typing import Dict, Any, List
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
+@pytest.mark.integration
 class TestUnifiedIdGeneratorAdoption(SSotBaseTestCase):
     """Integration tests validating UnifiedIdGenerator adoption across all components"""
 

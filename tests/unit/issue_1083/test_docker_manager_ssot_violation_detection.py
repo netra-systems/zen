@@ -10,6 +10,7 @@ TESTING CONSTRAINTS:
 - Validate current state before remediation
 """
 
+import pytest
 import unittest
 import os
 import sys
@@ -21,6 +22,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
+@pytest.mark.unit
 class TestDockerManagerSSOTViolationDetection(unittest.TestCase):
     """Test suite to detect Docker Manager SSOT violations."""
 

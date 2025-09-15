@@ -44,7 +44,7 @@ from unittest.mock import AsyncMock, MagicMock, patch, call, Mock, PropertyMock
 from contextlib import asynccontextmanager
 from test_framework.ssot.base import BaseTestCase, AsyncBaseTestCase
 from shared.isolated_environment import get_env
-from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine, RequestScopedExecutionEngine, ExecutionEngineFactory, EngineConfig, AgentExecutionContext, AgentExecutionResult, ExecutionExtension, UserExecutionExtension, MCPExecutionExtension, DataExecutionExtension, WebSocketExtension, execute_agent, execution_engine_context, create_execution_engine, get_execution_engine_factory
+from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine, UserExecutionEngine, RequestScopedExecutionEngine, ExecutionEngineFactory, EngineConfig, AgentExecutionContext, AgentExecutionResult, ExecutionExtension, UserExecutionExtension, MCPExecutionExtension, DataExecutionExtension, WebSocketExtension, execute_agent, execution_engine_context, create_execution_engine, get_execution_engine_factory
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.agent_execution_tracker import ExecutionState
 

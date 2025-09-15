@@ -24,6 +24,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.websocket_helpers import WebSocketTestHelpers
 from shared.isolated_environment import get_env
 
+@pytest.mark.e2e
 class TestE2EDockerExample:
     """
     Example E2E test class showing proper Docker usage.
@@ -115,6 +116,7 @@ class TestE2EDockerExample:
                 print(f'Health check includes: {list(health_data.keys())}')
                 assert health_data.get('status') in ['healthy', 'ok']
 
+@pytest.mark.e2e
 class TestE2EDockerReliability:
     """
     Tests that demonstrate Docker reliability features:

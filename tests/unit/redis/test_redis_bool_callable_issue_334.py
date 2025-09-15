@@ -24,6 +24,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.websocket_core.gcp_initialization_validator import GCPWebSocketInitializationValidator
 
+@pytest.mark.unit
 class TestRedisBoolCallableIssue334(SSotBaseTestCase):
     """
     CRITICAL TEST SUITE: Redis 'bool' object is not callable issue #334

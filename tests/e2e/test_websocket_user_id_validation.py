@@ -51,6 +51,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
+@pytest.mark.e2e
 class TestWebSocketUserIDValidationE2E(BaseE2ETest):
     """
     E2E tests for complete WebSocket user ID validation bug reproduction.

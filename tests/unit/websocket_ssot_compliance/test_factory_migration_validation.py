@@ -35,6 +35,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 from test_framework.ssot.mock_factory import SSotMockFactory
 from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 
+@pytest.mark.unit
 class TestFactoryMigrationValidation(SSotBaseTestCase):
     """
     Tests for validating WebSocket factory migration from deprecated to canonical patterns.
@@ -139,6 +140,7 @@ class TestFactoryMigrationValidation(SSotBaseTestCase):
         self.assertEqual(actual_module, expected_module, f'WebSocketManager import should come from {expected_module} per SSOT Import Registry')
         print('SUCCESS: SSOT Import Registry compliance validated')
 
+@pytest.mark.unit
 class TestFactoryMigrationIntegration(SSotBaseTestCase):
     """
     Integration tests for factory migration patterns.

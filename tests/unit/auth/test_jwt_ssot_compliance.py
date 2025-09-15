@@ -10,6 +10,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestJWTSSOTCompliance(SSotBaseTestCase):
     """Unit tests to validate proper JWT SSOT compliance patterns"""
     

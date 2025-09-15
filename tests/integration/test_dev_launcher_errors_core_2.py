@@ -27,6 +27,7 @@ from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.process_manager import ProcessManager
 
 
+@pytest.mark.integration
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 

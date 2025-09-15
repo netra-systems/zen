@@ -14,6 +14,7 @@ Test Strategy: Multi-threaded simulation and concurrent initialization testing.
 Unit test approach - no Docker dependencies, uses threading to simulate race conditions.
 """
 
+import pytest
 import asyncio
 import threading
 import time
@@ -39,6 +40,7 @@ class RaceConditionTestResult:
     execution_time_ms: float
 
 
+@pytest.mark.unit
 class TestWebSocketManagerRaceConditionReproduction(SSotBaseTestCase, unittest.TestCase):
     """Test suite to reproduce and validate elimination of WebSocket manager race conditions.
 

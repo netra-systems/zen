@@ -33,6 +33,7 @@ from unittest.mock import Mock, patch
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestDeploymentImportPathValidation(SSotBaseTestCase):
     """
     Unit tests for deployment import path validation.
@@ -282,6 +283,7 @@ class TestDeploymentImportPathValidation(SSotBaseTestCase):
                     broken_patterns.append(pattern)
         return broken_patterns
 
+@pytest.mark.unit
 class TestDeploymentImportPathValidationEdgeCases(SSotBaseTestCase):
     """
     Edge case tests for deployment import path validation.

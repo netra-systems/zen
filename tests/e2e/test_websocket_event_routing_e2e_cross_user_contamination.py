@@ -60,6 +60,7 @@ class UserTestSession:
         message_with_meta = {**message, '_sent_at': time.time(), '_user_id': str(self.user_id)}
         self.sent_messages.append(message_with_meta)
 
+@pytest.mark.e2e
 class TestWebSocketE2ECrossUserContamination(SSotBaseTestCase):
     """
     E2E tests to expose cross-user message contamination in production scenarios.

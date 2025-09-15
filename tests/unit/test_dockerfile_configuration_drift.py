@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 from test_framework.ssot.base_test_case import BaseTestCase
 
+@pytest.mark.unit
 class TestDockerfileConfigurationDrift(BaseTestCase):
     """Test suite to detect and validate configuration drift between Dockerfile variants.
     

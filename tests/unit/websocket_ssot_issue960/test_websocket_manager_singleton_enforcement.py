@@ -20,6 +20,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
+@pytest.mark.unit
 class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
     """Test WebSocket manager singleton enforcement - SHOULD FAIL before SSOT consolidation."""
 

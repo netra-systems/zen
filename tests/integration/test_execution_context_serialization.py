@@ -26,6 +26,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.execution_types import StronglyTypedUserExecutionContext, upgrade_legacy_context, downgrade_to_legacy_context
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 
+@pytest.mark.integration
 class TestContextSerializationIntegration:
     """Test context serialization integration with real execution patterns."""
 
@@ -106,6 +107,7 @@ class TestContextSerializationIntegration:
         assert params == {'batch_size': 100, 'timeout': 300}
         assert context.user_id == real_user_context.user_id
 
+@pytest.mark.integration
 class TestContextQueueIntegration:
     """Test ContextQueue integration for background task processing."""
 
@@ -169,6 +171,7 @@ class TestContextQueueIntegration:
             assert result is None
         asyncio.run(test_queue_clear())
 
+@pytest.mark.integration
 class TestStronglyTypedContextSerialization:
     """Test serialization integration with strongly typed contexts."""
 
@@ -200,6 +203,7 @@ class TestStronglyTypedContextSerialization:
         if typed_again.websocket_client_id:
             assert isinstance(typed_again.websocket_client_id, WebSocketID)
 
+@pytest.mark.integration
 class TestExecutionBoundaryContextSerialization:
     """Test context serialization across execution boundaries."""
 

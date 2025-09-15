@@ -44,6 +44,7 @@ class EnterpriseWorkflowScenario:
     business_value: str = ''
     timeout_requirement: int = 300
 
+@pytest.mark.e2e
 class TestEnterpriseStreamingTimeouts(SSotAsyncTestCase):
     """E2E tests for enterprise streaming timeout scenarios on staging."""
 

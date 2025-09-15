@@ -12,6 +12,7 @@ EXPECTED BEHAVIOR:
 Business Value: Validates $500K+ ARR Golden Path DataHelper functionality
 """
 
+import pytest
 import asyncio
 import uuid
 from typing import Dict, Any, Optional
@@ -20,6 +21,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.integration
 class TestDataHelperSSotIntegration(SSotAsyncTestCase):
     """Integration test for DataHelper agent with SSOT compliance through full stack."""
 

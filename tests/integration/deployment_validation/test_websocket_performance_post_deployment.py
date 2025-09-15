@@ -9,6 +9,7 @@ import asyncio
 import time
 import httpx
 
+@pytest.mark.integration
 class TestWebSocketPerformancePostDeployment:
     
     @pytest.mark.asyncio

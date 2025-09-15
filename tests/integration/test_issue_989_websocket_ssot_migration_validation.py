@@ -67,6 +67,7 @@ class ImportPatternAnalysis:
     mixed_pattern_files: int
     import_analysis_by_pattern: Dict[str, List[str]] = field(default_factory=dict)
 
+@pytest.mark.integration
 class TestIssue989WebSocketSSOTMigrationValidation(SSotBaseTestCase):
     """Mission Critical: Issue #989 WebSocket SSOT Migration Validation
 

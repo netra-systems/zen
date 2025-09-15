@@ -48,6 +48,7 @@ class MockWebSocketConnection:
         """Close the connection."""
         self.is_connected = False
 
+@pytest.mark.integration
 class TestToolEventDeliveryConfirmation:
     """Integration tests for tool event delivery confirmation.
     

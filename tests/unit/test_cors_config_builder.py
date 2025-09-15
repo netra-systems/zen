@@ -6,6 +6,7 @@ import pytest
 from shared.cors_config_builder import CORSConfigurationBuilder, CORSEnvironment, CORSSecurityEvent
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.unit
 class TestCORSConfigurationBuilder:
     """Test the main CORS Configuration Builder class."""
 
@@ -45,6 +46,7 @@ class TestCORSConfigurationBuilder:
         assert hasattr(cors, 'websocket')
         assert hasattr(cors, 'static')
 
+@pytest.mark.unit
 class TestOriginsBuilder:
     """Test the Origins sub-builder."""
 
@@ -115,6 +117,7 @@ class TestOriginsBuilder:
             assert valid is False
             assert expected_error in error
 
+@pytest.mark.unit
 class TestHeadersBuilder:
     """Test the Headers sub-builder."""
 
@@ -156,6 +159,7 @@ class TestHeadersBuilder:
         assert cors.headers.is_method_allowed('get') is True
         assert cors.headers.is_method_allowed('TRACE') is False
 
+@pytest.mark.unit
 class TestSecurityBuilder:
     """Test the Security sub-builder."""
 
@@ -196,6 +200,7 @@ class TestSecurityBuilder:
         events = cors.security.get_security_events(2000)
         assert 500 <= len(events) <= 600
 
+@pytest.mark.unit
 class TestServiceDetector:
     """Test the Service Detector sub-builder."""
 
@@ -223,6 +228,7 @@ class TestServiceDetector:
         cors_prod = CORSConfigurationBuilder({'ENVIRONMENT': 'production'})
         assert cors_prod.service_detector.should_bypass_cors(headers) is False
 
+@pytest.mark.unit
 class TestFastAPIBuilder:
     """Test the FastAPI sub-builder."""
 
@@ -245,6 +251,7 @@ class TestFastAPIBuilder:
         kwargs = cors.fastapi.get_middleware_kwargs()
         assert kwargs == cors.fastapi.get_middleware_config()
 
+@pytest.mark.unit
 class TestHealthBuilder:
     """Test the Health sub-builder."""
 
@@ -280,6 +287,7 @@ class TestHealthBuilder:
         assert 'security' in debug
         assert 'sample_origins' in debug
 
+@pytest.mark.unit
 class TestWebSocketBuilder:
     """Test the WebSocket sub-builder."""
 
@@ -295,6 +303,7 @@ class TestWebSocketBuilder:
         assert cors.websocket.is_origin_allowed('https://netrasystems.ai') is True
         assert cors.websocket.is_origin_allowed('https://evil.com') is False
 
+@pytest.mark.unit
 class TestStaticAssetsBuilder:
     """Test the Static Assets sub-builder."""
 
@@ -315,6 +324,7 @@ class TestStaticAssetsBuilder:
         assert config['allow_methods'] == ['GET', 'HEAD', 'OPTIONS']
         assert config['max_age'] == 86400
 
+@pytest.mark.unit
 class TestValidation:
     """Test overall validation methods."""
 
@@ -341,6 +351,7 @@ class TestValidation:
         assert 'development' in message
         assert 'origins allowed' in message
 
+@pytest.mark.unit
 class TestBackwardCompatibility:
     """Test backward compatibility functions."""
 

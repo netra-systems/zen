@@ -54,6 +54,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 from shared.isolated_environment import IsolatedEnvironment, get_env, ValidationResult
 
 
+@pytest.mark.integration
 class TestEnvironmentIsolationCore(SSotBaseTestCase):
     """
     Core environment isolation tests.
@@ -264,6 +265,7 @@ class TestEnvironmentIsolationCore(SSotBaseTestCase):
         env.delete(db_key, "test_cleanup")
 
 
+@pytest.mark.integration
 class TestEnvironmentInheritanceAndOverrides(SSotBaseTestCase):
     """
     Test environment variable inheritance and override behavior.
@@ -441,6 +443,7 @@ class TestEnvironmentInheritanceAndOverrides(SSotBaseTestCase):
         assert len(callback_events) == 3  # Should remain unchanged
 
 
+@pytest.mark.integration
 class TestMultiEnvironmentConfiguration(SSotBaseTestCase):
     """
     Test multi-environment configuration management.
@@ -575,6 +578,7 @@ class TestMultiEnvironmentConfiguration(SSotBaseTestCase):
         self.record_metric("test_defaults_comprehensive", len(test_defaults))
 
 
+@pytest.mark.integration
 class TestEnvironmentValidationAndTypeConversion(SSotBaseTestCase):
     """
     Test environment variable validation and type conversion.
@@ -669,6 +673,7 @@ class TestEnvironmentValidationAndTypeConversion(SSotBaseTestCase):
                 self.record_metric("staging_validation_accepts_valid_config", True)
 
 
+@pytest.mark.integration
 class TestEnvironmentStateManagement(SSotBaseTestCase):
     """
     Test environment state cleanup and restoration.
@@ -797,6 +802,7 @@ class TestEnvironmentStateManagement(SSotBaseTestCase):
         env.delete(test_key, "test_cleanup")
 
 
+@pytest.mark.integration
 class TestEnvironmentNamespacingAndCollisionPrevention(SSotBaseTestCase):
     """
     Test environment variable namespacing and collision prevention.
@@ -891,6 +897,7 @@ class TestEnvironmentNamespacingAndCollisionPrevention(SSotBaseTestCase):
         env.delete(collision_key, "test_cleanup")
 
 
+@pytest.mark.integration
 class TestDynamicEnvironmentSwitching(SSotAsyncTestCase):
     """
     Test dynamic environment switching during runtime.
@@ -985,6 +992,7 @@ class TestDynamicEnvironmentSwitching(SSotAsyncTestCase):
         env.delete(concurrent_key, "test_cleanup")
 
 
+@pytest.mark.integration
 class TestEnvironmentSecurityAndAccessControl(SSotBaseTestCase):
     """
     Test environment security and access control features.
@@ -1085,6 +1093,7 @@ class TestEnvironmentSecurityAndAccessControl(SSotBaseTestCase):
             env.delete(key, "test_cleanup")
 
 
+@pytest.mark.integration
 class TestEnvironmentHealthValidation(SSotBaseTestCase):
     """
     Test environment health validation and monitoring.
@@ -1196,6 +1205,7 @@ class TestEnvironmentHealthValidation(SSotBaseTestCase):
         env.delete(alias_key, "alias_cleanup")
 
 
+@pytest.mark.integration
 class TestEnvironmentMonitoringAndLogging(SSotBaseTestCase):
     """
     Test environment monitoring and logging capabilities.

@@ -10,6 +10,7 @@ import pytest
 import uuid
 from netra_backend.app.services.user_execution_context import UserExecutionContext, UserContextManager, InvalidContextError
 
+@pytest.mark.unit
 def test_user_execution_context_rejects_placeholder_values():
     """Test that UserExecutionContext rejects placeholder/system values."""
     placeholder_inputs = ['placeholder', 'default', 'temp', 'mock', 'example']
@@ -17,6 +18,7 @@ def test_user_execution_context_rejects_placeholder_values():
         with pytest.raises(InvalidContextError):
             UserExecutionContext.from_request(user_id=placeholder_input, thread_id='valid_thread', run_id='valid_run')
 
+@pytest.mark.unit
 def test_user_execution_context_serialization_is_safe():
     """Test that UserExecutionContext serialization doesn't expose system secrets."""
     context = UserExecutionContext.from_request(user_id='test_user', thread_id='test_thread', run_id='test_run')
@@ -26,6 +28,7 @@ def test_user_execution_context_serialization_is_safe():
     for pattern in forbidden_patterns:
         assert pattern not in serialized_str
 
+@pytest.mark.unit
 def test_context_manager_provides_isolation():
     """Test that UserContextManager isolates different users."""
     manager = UserContextManager()
@@ -39,6 +42,7 @@ def test_context_manager_provides_isolation():
     assert retrieved2.user_id == 'user2'
     assert retrieved1.user_id != retrieved2.user_id
 
+@pytest.mark.unit
 def test_child_context_maintains_isolation():
     """Test that child contexts maintain proper isolation."""
     parent = UserExecutionContext.from_request(user_id='parent_user', thread_id='parent_thread', run_id='parent_run')
@@ -49,6 +53,7 @@ def test_child_context_maintains_isolation():
     parent.verify_isolation()
     child.verify_isolation()
 
+@pytest.mark.unit
 def test_migrated_code_uses_secure_patterns():
     """Test that migrated production code uses secure patterns."""
     from netra_backend.app.routes.github_analyzer import _setup_analysis_environment
@@ -61,6 +66,7 @@ def test_migrated_code_uses_secure_patterns():
     audit_data = secure_context.get_audit_trail()
     assert 'security_migration' in audit_data['audit_metadata']
 
+@pytest.mark.unit
 def test_security_vulnerability_prevention_summary():
     """Summary test showing all major vulnerabilities are addressed."""
     with pytest.raises(InvalidContextError):

@@ -21,6 +21,7 @@ from typing import Dict, Any, List, Tuple, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
+@pytest.mark.integration
 class TestCrossServiceIdConsistency(SSotBaseTestCase):
     """Integration tests validating cross-service ID consistency after SSOT migration"""
 

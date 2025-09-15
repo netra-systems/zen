@@ -37,6 +37,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.ssot.mock_factory import SSotMockFactory
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestSSotBaseTestCaseInheritanceAndSetup(SSotBaseTestCase):
     """Test the SSotBaseTestCase inheritance and setup validation - Foundation Infrastructure."""
 
@@ -123,6 +124,7 @@ class TestSSotBaseTestCaseInheritanceAndSetup(SSotBaseTestCase):
         self.record_metric('test_method_execution_success', True)
         logger.info('Test method discovery and execution validation completed')
 
+@pytest.mark.integration
 class TestSSotBaseTestCaseEnvironmentIsolation(SSotBaseTestCase):
     """Test environment isolation validation - Critical for reliable testing."""
 
@@ -202,6 +204,7 @@ class TestSSotBaseTestCaseEnvironmentIsolation(SSotBaseTestCase):
             assert self.get_env_var(concurrent_key) == concurrent_value, f'Concurrent variable {i} must be correctly set'
         logger.info(f'Cross-contamination prevention validated with identifier: {test_identifier}')
 
+@pytest.mark.integration
 class TestSSotBaseTestCaseMockPolicyEnforcement(SSotBaseTestCase):
     """Test mock policy enforcement - Critical for test integrity."""
 
@@ -280,6 +283,7 @@ class TestSSotBaseTestCaseMockPolicyEnforcement(SSotBaseTestCase):
         assert 'real_services_used' in all_metrics, 'Real service usage tracking must be available'
         logger.info('Mock detection and reporting systems validation completed')
 
+@pytest.mark.integration
 class TestSSotBaseTestCaseInfrastructureConsistency(SSotBaseTestCase):
     """Test infrastructure consistency across all test suites."""
 
@@ -362,6 +366,7 @@ class TestSSotBaseTestCaseInfrastructureConsistency(SSotBaseTestCase):
         assert len(test_specific_vars) > 0, 'Test-specific environment variables must be set'
         logger.info(f'Test execution environment standardization validated for environment: {env_name}')
 
+@pytest.mark.integration
 class TestSSotBaseTestCaseRealServiceIntegrationPatterns(SSotBaseTestCase):
     """Test real service integration patterns validation."""
 
@@ -454,6 +459,7 @@ class TestSSotBaseTestCaseRealServiceIntegrationPatterns(SSotBaseTestCase):
         self.record_metric('mock_services_detected', False)
         logger.info('Service mocking detection and prevention validation completed')
 
+@pytest.mark.integration
 class TestSSotBaseTestCaseExecutionAndReporting(SSotBaseTestCase):
     """Test execution lifecycle management and reporting."""
 
@@ -554,6 +560,7 @@ class TestSSotBaseTestCaseExecutionAndReporting(SSotBaseTestCase):
         assert 'operations_per_second' in all_metrics, 'Derived performance metrics must be recorded'
         logger.info(f'Performance metrics collection validated: {len(all_metrics)} total metrics')
 
+@pytest.mark.integration
 class TestSSotAsyncTestCaseIntegration(SSotAsyncTestCase):
     """Test async test case integration - Async Infrastructure."""
 

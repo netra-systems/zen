@@ -19,6 +19,7 @@ from tests.e2e.staging_test_config import get_staging_config
 from tests.helpers.auth_test_utils import TestAuthHelper
 
 
+@pytest.mark.e2e
 class TestMessageFlowStaging(StagingTestBase):
     """Test message flow in staging environment"""
     

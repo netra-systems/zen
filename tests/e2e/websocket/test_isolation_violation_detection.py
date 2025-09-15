@@ -28,6 +28,7 @@ from test_framework.ssot.real_websocket_connection_manager import RealWebSocketC
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 logger = logging.getLogger(__name__)
 
+@pytest.mark.e2e
 class TestIsolationViolationDetection:
     """
     Verification Tests: Ensure isolation violation detection works correctly.
@@ -149,6 +150,7 @@ class TestIsolationViolationDetection:
         assert 'WebSocket isolation test FAILED' in str(exc_info.value)
         logger.info(' PASS:  test_websocket_events_isolation correctly detected violations')
 
+@pytest.mark.e2e
 class TestIsolationViolationScenarios:
     """
     Test various scenarios where isolation violations might occur

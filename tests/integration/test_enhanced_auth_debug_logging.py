@@ -18,6 +18,7 @@ from netra_backend.app.logging.auth_trace_logger import auth_tracer, log_authent
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.integration
 class TestEnhancedAuthDebugLogging(SSotBaseTestCase):
     """Test enhanced authentication debug logging functionality."""
     

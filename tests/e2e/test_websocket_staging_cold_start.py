@@ -91,6 +91,7 @@ class StagingEnvironmentManager:
         except Exception as e:
             return {'healthy': False, 'error': str(e), 'response_time': None, 'status_code': None}
 
+@pytest.mark.e2e
 class TestWebSocketStagingColdStart(SSotAsyncTestCase):
     """E2E tests for WebSocket connections during staging cold starts."""
 

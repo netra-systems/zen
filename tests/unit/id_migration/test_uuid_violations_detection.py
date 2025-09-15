@@ -14,6 +14,7 @@ Test Focus Areas:
 Expected Results: ALL TESTS SHOULD FAIL until SSOT migration complete
 """
 
+import pytest
 import ast
 import os
 import re
@@ -25,6 +26,7 @@ from typing import List, Dict, Set, Tuple, Optional
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
+@pytest.mark.unit
 class TestAuthenticationUuidViolations(unittest.TestCase):
     """Test authentication system uuid.uuid4() violations."""
     
@@ -142,6 +144,7 @@ class TestAuthenticationUuidViolations(unittest.TestCase):
                            "Session ID lengths should be different, proving format inconsistency")
 
 
+@pytest.mark.unit
 class TestWebSocketAuthViolations(unittest.TestCase):
     """Test WebSocket authentication system uuid.uuid4() violations."""
     
@@ -307,6 +310,7 @@ class TestWebSocketAuthViolations(unittest.TestCase):
         return ''.join(lines[start:end])
 
 
+@pytest.mark.unit
 class TestFactoryPatternViolations(unittest.TestCase):
     """Test factory pattern compliance violations."""
     

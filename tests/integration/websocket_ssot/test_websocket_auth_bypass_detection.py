@@ -17,6 +17,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestWebSocketAuthBypassDetection(SSotAsyncTestCase):
     """
     Integration test detecting WebSocket authentication SSOT violations.

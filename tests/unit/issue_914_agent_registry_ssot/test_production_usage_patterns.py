@@ -49,6 +49,7 @@ class RegistryConflict:
     description: str
     severity: str
 
+@pytest.mark.unit
 class TestAgentRegistryProductionUsagePatterns(SSotAsyncTestCase):
     """
     P1 Tests: Analyze production usage patterns for registry consolidation

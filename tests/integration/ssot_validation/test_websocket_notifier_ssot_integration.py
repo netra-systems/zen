@@ -20,6 +20,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from test_framework.ssot.database import SSotDatabaseTestMixin
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.integration
 class TestWebSocketNotifierSSOTIntegrationPatterns(SSotAsyncTestCase, SSotDatabaseTestMixin):
     """Integration tests for SSOT WebSocketNotifier patterns (MIXED RESULTS)"""
 
@@ -183,6 +184,7 @@ class TestWebSocketNotifierSSOTIntegrationPatterns(SSotAsyncTestCase, SSotDataba
         else:
             self.fail('Direct instantiation properly blocked - violation test should fail')
 
+@pytest.mark.integration
 class TestWebSocketNotifierSSOTServiceCoordination(SSotAsyncTestCase):
     """Integration tests for SSOT service coordination (MIXED RESULTS)"""
 

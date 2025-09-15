@@ -14,6 +14,7 @@ Expected Test Behavior:
 - PASSES AFTER: Single SSOT entry point enforced
 """
 
+import pytest
 import asyncio
 import unittest
 from unittest.mock import Mock, AsyncMock, patch
@@ -22,6 +23,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.websocket_helpers import MockWebSocketConnection
 
 
+@pytest.mark.integration
 class TestWebSocketAuthSSOTConsolidationValidation(SSotAsyncTestCase):
     """
     Integration Test: WebSocket Authentication SSOT Entry Point Validation

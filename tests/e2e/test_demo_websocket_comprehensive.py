@@ -29,6 +29,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.routes.demo_websocket import router, execute_real_agent_workflow, DemoAgentSimulator
 
 
+@pytest.mark.e2e
 class TestDemoWebSocketComprehensive(SSotAsyncTestCase):
     """
     Comprehensive tests for demo WebSocket endpoint functionality.

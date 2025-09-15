@@ -23,6 +23,7 @@ REQUIREMENTS:
 Business Value: Enterprise/Platform - Security compliance for HIPAA, SOC2, SEC regulations
 """
 
+import pytest
 import json
 import os
 import uuid
@@ -34,6 +35,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState, AgentMetadata
 from netra_backend.app.models.agent_execution import AgentExecution
 
 
+@pytest.mark.unit
 class TestIssue1017SerializationSecurityVulnerabilities(SSotBaseTestCase):
     """
     Comprehensive serialization security vulnerability tests for Issue #1017.

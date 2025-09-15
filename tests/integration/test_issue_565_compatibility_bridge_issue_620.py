@@ -27,6 +27,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.integration
 class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
     """Integration tests for Issue #565 compatibility bridge functionality."""
     
@@ -249,6 +250,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
         print("✅ Compatibility bridge shutdown works correctly")
 
 
+@pytest.mark.integration
 class TestCompatibilityBridgeAPICompatibility(BaseIntegrationTest):
     """Test that all expected API methods work through compatibility bridge."""
     
@@ -321,6 +323,7 @@ class TestCompatibilityBridgeAPICompatibility(BaseIntegrationTest):
         print("✅ String representations work correctly through compatibility bridge")
 
 
+@pytest.mark.integration
 class TestCompatibilityBridgeWarnings(BaseIntegrationTest):
     """Test that appropriate warnings are issued for deprecated usage."""
     
@@ -377,6 +380,7 @@ class TestCompatibilityBridgeWarnings(BaseIntegrationTest):
         print("✅ Clear migration guidance provided in compatibility bridge")
 
 
+@pytest.mark.integration
 class TestCompatibilityBridgeErrorHandling(BaseIntegrationTest):
     """Test error handling in compatibility bridge."""
     
@@ -420,6 +424,7 @@ class TestCompatibilityBridgeErrorHandling(BaseIntegrationTest):
         print("✅ Compatibility bridge handles invalid WebSocket bridge gracefully")
 
 
+@pytest.mark.integration
 class TestCompatibilityBridgeRealWorldScenarios(BaseIntegrationTest):
     """Test real-world scenarios that use the compatibility bridge."""
     

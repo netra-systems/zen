@@ -47,12 +47,14 @@ DESIGNED TO FAIL INITIALLY:
 - Uses simplified staging readiness validation
 """
 
+import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 from typing import Dict, List, Any
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.e2e
 class TestGCPRedisWebSocketGoldenPathSimple(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

@@ -23,6 +23,7 @@ from typing import Any, Dict, List, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
+@pytest.mark.unit
 class TestWebSocketNotifierMultiImplementationDetection(SSotBaseTestCase):
     """Test 1-6: Multi-Implementation Detection Tests (FAILING)"""
 
@@ -152,6 +153,7 @@ class TestWebSocketNotifierMultiImplementationDetection(SSotBaseTestCase):
         unique_patterns = set(dependency_patterns)
         self.assertGreater(len(unique_patterns), 2, 'VIOLATION: Multiple dependency injection patterns exist')
 
+@pytest.mark.unit
 class TestWebSocketNotifierFactoryViolationDetection(SSotBaseTestCase):
     """Test 7-14: Factory Violation Detection Tests (FAILING)"""
 
@@ -307,6 +309,7 @@ class TestWebSocketNotifierFactoryViolationDetection(SSotBaseTestCase):
         except ImportError:
             self.skipTest('WebSocketEmitterFactory not available')
 
+@pytest.mark.unit
 class TestWebSocketNotifierLegacyCodeDetection(SSotBaseTestCase):
     """Test 15-22: Legacy Code Detection Tests (FAILING)"""
 

@@ -23,6 +23,7 @@ from shared.session_management import UserSessionManager, UserSession, SessionMe
 from shared.id_generation import UnifiedIdGenerator
 from netra_backend.app.services.user_execution_context import UserExecutionContext, InvalidContextError
 
+@pytest.mark.unit
 class TestUserSessionManager:
     """Test UserSessionManager core functionality."""
 
@@ -249,6 +250,7 @@ class TestUserSessionManager:
         assert unified_session is not None
         assert unified_session['thread_id'] == thread_id
 
+@pytest.mark.unit
 class TestGlobalSessionManagerFunctions:
     """Test global session manager utility functions."""
 
@@ -275,6 +277,7 @@ class TestGlobalSessionManagerFunctions:
         assert manager._cleanup_task is not None
         await shutdown_session_manager()
 
+@pytest.mark.unit
 class TestUserSession:
     """Test UserSession data structure."""
 
@@ -309,6 +312,7 @@ class TestUserSession:
         assert 'age_minutes' in session_dict
         assert 'metadata_keys' in session_dict
 
+@pytest.mark.unit
 class TestSessionMetrics:
     """Test SessionMetrics functionality."""
 
@@ -330,6 +334,7 @@ class TestSessionMetrics:
         assert metrics_dict['memory_usage_mb'] == 15.7
         assert 'expired_sessions_cleaned' in metrics_dict
 
+@pytest.mark.unit
 class TestUserSessionManagerIntegration:
     """Integration tests with real system components."""
 

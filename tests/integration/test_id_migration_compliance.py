@@ -57,6 +57,7 @@ from test_framework.performance_helpers import PerformanceProfiler
 from test_framework.environment_isolation import IsolatedEnvironment
 
 
+@pytest.mark.integration
 class TestIDMigrationSSOTCompliance(SSotAsyncTestCase, BaseIntegrationTest):
     """Enhanced compliance tests for UnifiedIDManager migration."""
     

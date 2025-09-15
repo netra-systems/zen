@@ -98,6 +98,7 @@ class UserExecutionContextFactory:
         """
         return UserExecutionContext(user_id=parent_context.user_id, thread_id=parent_context.thread_id, run_id=f'child_{parent_context.run_id}_{operation_name}', parent_request_id=parent_context.request_id, operation_depth=parent_context.operation_depth + 1, websocket_client_id=parent_context.websocket_client_id, agent_context={**parent_context.agent_context, 'child_op': operation_name}, audit_metadata={**parent_context.audit_metadata, 'parent_request': parent_context.request_id, 'operation': operation_name})
 
+@pytest.mark.unit
 class TestUserExecutionContextCorrectPatterns(SSotAsyncTestCase):
     """Test suite demonstrating correct UserExecutionContext usage patterns.
     

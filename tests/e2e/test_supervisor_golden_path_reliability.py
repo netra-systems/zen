@@ -21,6 +21,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.e2e
 class TestSupervisorGoldenPathReliability(SSotAsyncTestCase):
     """E2E tests exposing supervisor reliability issues in Golden Path."""
 
@@ -585,6 +586,7 @@ class TestSupervisorGoldenPathReliability(SSotAsyncTestCase):
 
 
 # After SSOT remediation validation tests (currently skipped)
+@pytest.mark.e2e
 class TestSupervisorGoldenPathValidation(SSotAsyncTestCase):
     """E2E tests that will pass after SSOT remediation."""
     

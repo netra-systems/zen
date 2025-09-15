@@ -35,6 +35,7 @@ from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.websocket_core import create_websocket_manager
 from shared.id_generation import UnifiedIdGenerator
 
+@pytest.mark.unit
 class TestAgentMessageHandlerServiceInitializationFailure:
     """
     CRITICAL REPRODUCTION TESTS: These tests are designed to FAIL initially

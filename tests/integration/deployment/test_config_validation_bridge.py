@@ -25,6 +25,7 @@ SSOT Compliance: Uses SSotBaseTestCase for consistent test infrastructure.
 Real Services: Tests integration points without mocks where possible.
 """
 
+import pytest
 import unittest
 import subprocess
 import sys
@@ -43,6 +44,7 @@ from scripts.deploy_to_gcp_actual import GCPDeployer
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.integration
 class TestConfigValidationBridge(SSotBaseTestCase):
     """
     Integration tests for the configuration validation bridge.

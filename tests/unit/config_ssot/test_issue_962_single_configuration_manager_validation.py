@@ -31,6 +31,7 @@ the Golden Path user flow and directly impact $500K+ ARR.
 This test supports the Configuration Manager SSOT consolidation for Issue #962.
 """
 
+import pytest
 import importlib
 import unittest
 import sys
@@ -41,6 +42,7 @@ import inspect
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestIssue962SingleConfigurationManagerValidation(SSotBaseTestCase, unittest.TestCase):
     """
     Unit tests to enforce single configuration manager SSOT for Issue #962.

@@ -208,6 +208,7 @@ class AuthDatabaseConnectionTimeoutFix:
             self.engine = None
 
 
+@pytest.mark.integration
 class TestAuthServiceDatabaseReadinessFix:
     """Test suite for auth service database readiness fixes."""
     

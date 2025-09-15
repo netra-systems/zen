@@ -53,6 +53,7 @@ except ImportError as e:
     ssot_framework_available = False
     ssot_framework_import_error = str(e)
 
+@pytest.mark.integration
 class TestValidationConsistencyIntegration(SSotAsyncTestCase):
     """
     Integration tests for EventValidator validation consistency with real services.

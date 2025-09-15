@@ -10,6 +10,7 @@ import pytest
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
 
 
+@pytest.mark.unit
 class TestUnifiedDockerManagerParameterValidation:
     """Test parameter validation for UnifiedDockerManager initialization."""
 

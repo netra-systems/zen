@@ -33,6 +33,7 @@ from tests.clients.websocket_client import WebSocketTestClient
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestServiceAvailabilityDemo:
     """Demonstration of service availability detection patterns."""
 
@@ -246,6 +247,7 @@ class TestServiceAvailabilityDemo:
         detector.clear_cache()
         assert True, 'Service cache demo completed'
 
+@pytest.mark.integration
 def test_service_availability_full_demo():
     """Run all service availability demos directly (for manual testing)."""
     print('=' * 80)

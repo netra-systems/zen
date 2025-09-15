@@ -34,6 +34,7 @@ from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.dependencies import get_request_scoped_db_session
 from shared.isolated_environment import get_env
 
+@pytest.mark.websocket
 class TestWebSocketAntiPatternElimination(SSotBaseTestCase):
     """Test suite to validate elimination of WebSocket mock Request anti-patterns.
     

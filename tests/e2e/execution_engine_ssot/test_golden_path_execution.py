@@ -50,6 +50,7 @@ Business Impact: $500K+ ARR Golden Path protection - this IS the core business v
 E2E Level: Tests complete user journey on staging environment with real services
 """
 
+import pytest
 import asyncio
 import json
 import os
@@ -125,6 +126,7 @@ class GoldenPathTracker:
         }
 
 
+@pytest.mark.e2e
 class TestGoldenPathExecution(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

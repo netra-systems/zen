@@ -19,6 +19,7 @@ from typing import Dict, List, Any, Optional
 import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.unit
 class TestMessageRoutingConsistency(SSotAsyncTestCase):
     """Test message routing consistency across MessageRouter implementations."""
 

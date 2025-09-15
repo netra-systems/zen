@@ -50,6 +50,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.unit
 class TestIssue1113UserExecutionEngineConstructorFix(SSotBaseTestCase):
     """
     Test remediation for Issue #1113 UserExecutionEngine constructor validation.
@@ -225,6 +226,7 @@ class TestIssue1113UserExecutionEngineConstructorFix(SSotBaseTestCase):
         self.assertTrue(hasattr(engine, 'websocket_emitter'))
 
 
+@pytest.mark.unit
 class TestIssue1113ConstructorErrorMessages(SSotBaseTestCase):
     """
     Test suite for validating specific error messages in UserExecutionEngine constructor.

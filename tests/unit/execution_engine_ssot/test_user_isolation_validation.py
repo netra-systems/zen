@@ -11,6 +11,7 @@ Expected to PASS after SSOT consolidation (proves UserExecutionEngine works)
 Business Impact: $500K+ ARR Golden Path protection - user isolation prevents data leaks
 """
 
+import pytest
 import asyncio
 import gc
 import sys
@@ -50,6 +51,7 @@ class MockWebSocketManager:
         })
 
 
+@pytest.mark.unit
 class TestUserExecutionEngineIsolationValidation(SSotAsyncTestCase):
     """Unit Test 1: Validate UserExecutionEngine user isolation"""
     

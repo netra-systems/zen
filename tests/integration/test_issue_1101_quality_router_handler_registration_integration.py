@@ -7,6 +7,7 @@ Business Impact: Protects $500K+ ARR Golden Path by identifying integration
 failures that could break quality message routing in production environment.
 """
 
+import pytest
 import unittest
 import asyncio
 from typing import Dict, Any, List
@@ -15,6 +16,7 @@ from unittest.mock import Mock, patch, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestQualityRouterHandlerRegistrationIntegration(SSotAsyncTestCase):
     """Test QualityMessageRouter handler registration integration issues - SHOULD FAIL initially."""
 

@@ -35,6 +35,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
+@pytest.mark.e2e
 class TestMultiUserIsolationValidationE2E(BaseE2ETest):
     """E2E tests for multi-user isolation validation with authenticated concurrent execution."""
 

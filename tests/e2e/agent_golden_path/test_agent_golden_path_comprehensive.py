@@ -41,6 +41,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, Authenti
 from tests.e2e.staging_config import StagingTestConfig
 from shared.isolated_environment import get_env
 
+@pytest.mark.e2e
 class TestAgentGoldenPathComprehensive(SSotAsyncTestCase):
     """
     Comprehensive end-to-end tests for the complete agent golden path.

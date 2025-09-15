@@ -45,6 +45,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import (
 )
 
 
+@pytest.mark.unit
 class TestAuthValidationTimeoutReproduction(SSotBaseTestCase):
     """
     Unit tests that reproduce the auth validation timeout issue.

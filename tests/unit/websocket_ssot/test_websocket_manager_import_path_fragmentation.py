@@ -31,6 +31,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestWebSocketManagerImportPathFragmentation(SSotBaseTestCase):
     """Phase 1 Reproduction Test: Prove import path fragmentation creates different instances."""
     

@@ -8,6 +8,7 @@ Priority: P0 BLOCKER
 Business Impact: $500K+ ARR protection - core WebSocket messaging reliability
 """
 
+import pytest
 import unittest
 import asyncio
 import time
@@ -22,6 +23,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.integration
 class TestMessageRouterConcurrentRoutingConflicts(SSotAsyncTestCase):
     """Integration tests for MessageRouter conflicts in concurrent execution."""
 
@@ -365,6 +367,7 @@ class TestMessageRouterConcurrentRoutingConflicts(SSotAsyncTestCase):
         return False
 
 
+@pytest.mark.integration
 class TestMessageRouterStateConflicts(SSotAsyncTestCase):
     """Test state conflicts between different MessageRouter implementations."""
 

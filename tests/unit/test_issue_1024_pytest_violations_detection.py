@@ -16,6 +16,7 @@ from typing import Dict, List, Set
 import unittest
 
 
+@pytest.mark.unit
 class TestIssue1024PytestViolationsDetection(unittest.TestCase):
     """SSOT violation detection for Issue #1024 remediation."""
 

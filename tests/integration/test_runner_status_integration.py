@@ -14,6 +14,7 @@ Business Value: Platform/Internal - System Stability & Development Velocity
 Ensures accurate test result reporting matches user expectations in CI/CD pipelines.
 """
 
+import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 import tempfile
@@ -28,6 +29,7 @@ from tests.unified_test_runner import UnifiedTestRunner
 from test_framework.category_system import ExecutionPlan
 
 
+@pytest.mark.integration
 class TestRunnerStatusIntegration(SSotBaseTestCase):
     """
     Integration tests for the test runner status aggregation bug.

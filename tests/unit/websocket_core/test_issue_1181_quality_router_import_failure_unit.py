@@ -11,6 +11,7 @@ Business Value Justification:
 CRITICAL ISSUE REPRODUCTION:
 Issue #1181 identifies that QualityMessageRouter has import failures that prevent
 proper integration with the main MessageRouter. This test reproduces the exact
+import pytest
 import dependency failures and validates SSOT consolidation impacts.
 
 Tests verify that quality message routing works correctly and that any
@@ -30,6 +31,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestIssue1181QualityRouterImportFailure(SSotAsyncTestCase, unittest.TestCase):
     """Test suite to reproduce QualityMessageRouter import failures for Issue #1181."""
     

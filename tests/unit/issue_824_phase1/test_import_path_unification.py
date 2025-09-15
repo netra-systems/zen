@@ -7,6 +7,7 @@ Test that deprecated imports redirect properly.
 Business Value: Ensures consistent behavior across all import paths, preventing SSOT fragmentation.
 """
 
+import pytest
 import sys
 import importlib
 import inspect
@@ -19,6 +20,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestImportPathUnificationValidation(SSotAsyncTestCase):
     """Test import path unification for WebSocket Manager SSOT."""
 

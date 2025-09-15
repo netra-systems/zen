@@ -21,6 +21,7 @@ from typing import List, Dict, Any, Tuple
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestAgentLifecycleImportCompliance(SSotBaseTestCase):
     """Test suite validating agent_lifecycle.py SSOT import compliance"""
 

@@ -111,6 +111,7 @@ class MockWebSocketConnection:
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
+@pytest.mark.unit
 class TestLegacyConfigMarker:
     """Test legacy configuration marking and tracking."""
 
@@ -147,6 +148,7 @@ class TestLegacyConfigMarker:
         assert 'migration_status' in report
         assert isinstance(report['legacy_vars'], list)
 
+@pytest.mark.unit
 class TestConfigDependencyMap:
     """Test configuration dependency mapping and impact analysis."""
 
@@ -178,6 +180,7 @@ class TestConfigDependencyMap:
         impact_level = ConfigDependencyMap.get_impact_level(non_critical_var)
         assert impact_level == ConfigImpactLevel.LOW
 
+@pytest.mark.unit
 class TestCrossServiceValidation:
     """Test cross-service configuration validation."""
 
@@ -215,6 +218,7 @@ class TestCrossServiceValidation:
             assert result['safe'] is False
             assert len(result['affected_services']) > 0
 
+@pytest.mark.unit
 class TestConfigRegressionPrevention:
     """Test the integrated configuration regression prevention system."""
 

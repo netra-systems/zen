@@ -4,6 +4,7 @@ This test directly runs the validation to demonstrate legacy factory issues
 without relying on pytest discovery.
 """
 
+import pytest
 import unittest
 import warnings
 from datetime import datetime, timezone
@@ -14,6 +15,7 @@ from shared.types.core_types import ensure_user_id
 logger = get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestIssue1098LegacyWebSocketFactoryProblems(unittest.TestCase):
     """Direct test for Issue #1098 legacy WebSocket factory problems."""
     

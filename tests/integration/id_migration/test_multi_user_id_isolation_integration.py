@@ -14,6 +14,7 @@ Integration Focus Areas:
 Expected Results: ALL TESTS SHOULD FAIL until SSOT migration complete
 """
 
+import pytest
 import asyncio
 import threading
 import time
@@ -77,6 +78,7 @@ class MockWebSocketFactory:
         return len(self.active_managers)
 
 
+@pytest.mark.integration
 class TestWebSocketFactoryResourceLeakIntegration(SSotBaseTestCase):
     """Integration tests for WebSocket factory resource leak patterns."""
     
@@ -308,6 +310,7 @@ class TestWebSocketFactoryResourceLeakIntegration(SSotBaseTestCase):
                         "All cleanup attempts should fail (proving resource leak vulnerability)")
 
 
+@pytest.mark.integration
 class TestAuthSessionMultiUserIntegration(SSotBaseTestCase):
     """Integration tests for multi-user auth session isolation."""
     
@@ -487,6 +490,7 @@ class TestAuthSessionMultiUserIntegration(SSotBaseTestCase):
                      "SSOT session should contain user identification")
 
 
+@pytest.mark.integration
 class TestFactoryPatternResourceLeakIntegration(SSotBaseTestCase):
     """Integration tests for factory pattern resource leak detection."""
     

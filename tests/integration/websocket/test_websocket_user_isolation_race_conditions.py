@@ -10,6 +10,7 @@ These tests should FAIL initially to prove user isolation failures exist.
 CRITICAL: These tests are designed to FAIL and demonstrate user isolation contamination.
 """
 
+import pytest
 import asyncio
 import json
 import threading
@@ -22,6 +23,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.integration
 class TestWebSocketUserIsolationRaceConditions(SSotBaseTestCase):
     """Test suite to detect user isolation race conditions (SHOULD FAIL)"""
 

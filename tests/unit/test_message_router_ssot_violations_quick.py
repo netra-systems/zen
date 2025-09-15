@@ -3,11 +3,13 @@ Quick Unit Tests for MessageRouter SSOT Violations - GitHub Issue #217
 Optimized version for fast execution and verified failure detection.
 """
 
+import pytest
 import ast
 from pathlib import Path
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestMessageRouterSSOTViolationsQuick(SSotBaseTestCase):
     """Quick unit tests to detect MessageRouter SSOT violations."""
     

@@ -36,6 +36,7 @@ import threading
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.performance
 class TestFactoryConsolidationPerformance884(SSotAsyncTestCase):
     """
     Performance Test: Validate factory consolidation performance impact

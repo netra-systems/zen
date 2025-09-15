@@ -51,6 +51,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 
 logger = logging.getLogger(__name__)
 
+@pytest.mark.e2e
 class TestPerformanceScaling:
     """
     E2E Tests for Performance and Scaling in Staging Environment.

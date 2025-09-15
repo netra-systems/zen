@@ -33,6 +33,7 @@ from netra_backend.app.dependencies import get_user_execution_context, get_reque
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.id_generation import UnifiedIdGenerator
 
+@pytest.mark.integration
 class TestWebSocketManagerFactoryInitializationFailure:
     """
     INTEGRATION REPRODUCTION TESTS: These tests reproduce create_websocket_manager

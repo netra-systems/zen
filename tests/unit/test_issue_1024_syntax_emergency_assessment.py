@@ -8,6 +8,7 @@ This test provides a comprehensive inventory of syntax issues to guide
 emergency remediation efforts.
 """
 
+import pytest
 import ast
 import os
 import sys
@@ -16,6 +17,7 @@ from typing import Dict, List, Tuple
 import unittest
 
 
+@pytest.mark.unit
 class TestIssue1024SyntaxEmergencyAssessment(unittest.TestCase):
     """Emergency syntax assessment for Issue #1024 remediation."""
 

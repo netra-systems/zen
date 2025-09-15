@@ -12,6 +12,7 @@ from netra_backend.app.main import app
 from netra_backend.app.dependencies import RequestScopedContext
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.integration
 class TestHttpApiWebSocketIndependence(SSotAsyncTestCase):
     """Test HTTP API independence from WebSocket connections."""
 

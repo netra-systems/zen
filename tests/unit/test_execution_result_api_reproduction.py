@@ -21,6 +21,7 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
 from netra_backend.app.llm.llm_manager import LLMManager
 
+@pytest.mark.unit
 class TestExecutionResultAPIReproduction(SSotAsyncTestCase):
     """Reproduce the exact API format mismatch in Issue #261."""
 

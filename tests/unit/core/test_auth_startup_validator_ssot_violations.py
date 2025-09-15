@@ -19,6 +19,7 @@ Test Strategy:
 Expected Initial Outcome: ALL TESTS SHOULD FAIL (demonstrating violations)
 """
 
+import pytest
 import os
 import sys
 import unittest
@@ -38,6 +39,7 @@ except ImportError as e:
     IsolatedEnvironment = None
 
 
+@pytest.mark.unit
 class TestAuthStartupValidatorSSotViolations(unittest.TestCase):
     """
     Test suite to expose SSOT violations in AuthStartupValidator.
@@ -169,6 +171,7 @@ class TestAuthStartupValidatorSSotViolations(unittest.TestCase):
             mock_os_environ.get.assert_not_called()
 
 
+@pytest.mark.unit
 class TestSSotViolationDetectionMetadata(unittest.TestCase):
     """
     Metadata and reporting tests for SSOT violation detection.

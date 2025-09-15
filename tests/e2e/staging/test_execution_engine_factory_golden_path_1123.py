@@ -25,6 +25,7 @@ Test Philosophy:
 - END-TO-END VALIDATION: Complete user journey from login to AI response
 - BUSINESS VALUE FOCUS: Tests validate actual user value delivery
 """
+import pytest
 import asyncio
 import json
 import time
@@ -36,6 +37,7 @@ from urllib.parse import urlparse
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.fixtures.real_services_fixtures import RealServicesFixtureMixin
 
+@pytest.mark.e2e
 class TestExecutionEngineFactoryGoldenPath1123(SSotAsyncTestCase, RealServicesFixtureMixin):
     """Phase 3 E2E Tests: Factory Golden Path Validation on Staging
 

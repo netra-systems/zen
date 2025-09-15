@@ -20,6 +20,7 @@ Test Philosophy:
 - BUSINESS VALUE FOCUS: Tests validate actual customer value delivery
 - GOLDEN PATH PROTECTION: Tests protect the most critical user flow
 """
+import pytest
 import asyncio
 import gc
 import json
@@ -32,6 +33,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.e2e
 class TestExecutionEngineFactoryGoldenPath884(SSotAsyncTestCase):
     """Phase 1 E2E Tests: Execution Engine Factory Golden Path
 

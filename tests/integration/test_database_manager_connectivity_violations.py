@@ -34,6 +34,7 @@ if project_root not in sys.path:
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestDatabaseManagerConnectivityViolations(SSotAsyncTestCase):
     """Test suite to detect DatabaseManager connectivity violations."""
 

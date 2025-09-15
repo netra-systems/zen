@@ -18,6 +18,7 @@ Created: 2025-09-15
 Priority: P2 (escalated from P3 due to production staging impact)
 """
 
+import pytest
 import asyncio
 import unittest
 from unittest.mock import patch, Mock, MagicMock
@@ -59,6 +60,7 @@ except ImportError as e:
     print(f"WebSocket imports not available: {e}")
 
 
+@pytest.mark.e2e
 class TestIssue889WebSocketManagerDuplicationE2E(SSotAsyncTestCase):
     """
     E2E tests for Issue #889 WebSocket Manager SSOT Violations in Staging Environment

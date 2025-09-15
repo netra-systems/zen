@@ -20,6 +20,7 @@ CRITICAL: These tests use REAL SERVICES (no Docker required) to validate
 actual integration behavior during SSOT consolidation process.
 """
 
+import pytest
 import asyncio
 import time
 import uuid
@@ -30,6 +31,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.integration
 class TestExecutionEngineConsolidationIntegration(SSotAsyncTestCase):
     """Integration tests for execution engine SSOT consolidation."""
 

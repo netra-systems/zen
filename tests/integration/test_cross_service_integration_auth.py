@@ -27,6 +27,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
+@pytest.mark.integration
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 

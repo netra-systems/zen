@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 """Minimal test to debug Docker crash issue"""
 
+import pytest
 import requests
 import time
 
+@pytest.mark.e2e
 def test_docker_health():
     """Test if Docker backend is accessible"""
     print("Testing Docker backend health...")

@@ -319,6 +319,7 @@ class ConfigurationDriftDetector:
         return violations
 
 
+@pytest.mark.integration
 class TestConfigurationDriftDetection:
     """Test configuration drift detection functionality."""
     
@@ -536,6 +537,7 @@ class TestConfigurationDriftDetection:
         assert not drift_report.drift_detected, "Large config without drift should pass"
 
 
+@pytest.mark.integration
 class TestRealTimeConfigurationMonitoring:
     """Test real-time configuration drift monitoring."""
     
@@ -627,6 +629,7 @@ class TestRealTimeConfigurationMonitoring:
         assert "production" in alert_message.lower(), "Alert should specify environment"
 
 
+@pytest.mark.integration
 class TestConfigurationDriftPrevention:
     """Test configuration drift prevention mechanisms."""
     
@@ -768,6 +771,7 @@ class TestConfigurationDriftPrevention:
         assert len(critical_drifts) == 0, f"Docker-compose should have consistent service configuration: {critical_drifts}"
 
 
+@pytest.mark.integration
 class TestConfigurationDriftReporting:
     """Test configuration drift reporting and documentation."""
     

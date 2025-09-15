@@ -11,6 +11,7 @@ Business Value Protection: $500K+ ARR Golden Path reliability
 Priority: Critical infrastructure integration validation
 """
 
+import pytest
 import asyncio
 import logging
 import time
@@ -23,6 +24,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, CategoryType
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.integration
 class TestWebSocketFactoryPatternConsistency(SSotAsyncTestCase):
     """Integration tests for WebSocket factory pattern consistency."""
     

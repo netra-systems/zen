@@ -88,6 +88,7 @@ class GoldenPathUserContextFactory:
         """
         return UserExecutionContext(user_id=user_id, thread_id=f'orch_thread_{user_id[-3:]}', run_id=f'orch_run_{user_id[-3:]}', websocket_client_id=f'ws_orch_{user_id[-3:]}', agent_context={'orchestration_mode': True, 'primary_agent': agent_name, 'sub_agents_enabled': True, 'websocket_events_required': True}, audit_metadata={'journey_stage': 'agent_orchestration', 'orchestration_type': 'multi_agent', 'business_goal': 'ai_optimization', 'compliance_required': True})
 
+@pytest.mark.integration
 class TestUserContextGoldenPathValidation(SSotAsyncTestCase):
     """Integration test suite for Golden Path validation with real UserExecutionContext.
     

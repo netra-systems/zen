@@ -31,6 +31,7 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.e2e
 class TestConfigSSotStagingValidation(SSotAsyncTestCase):
     """E2E tests for configuration SSOT validation on GCP staging environment."""
 

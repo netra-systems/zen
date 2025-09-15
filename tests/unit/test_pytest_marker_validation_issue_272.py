@@ -11,6 +11,7 @@ import sys
 from pathlib import Path
 
 
+@pytest.mark.unit
 class TestPytestMarkerValidationIssue272:
     """Test suite to reproduce missing staging_compatible marker issue"""
     

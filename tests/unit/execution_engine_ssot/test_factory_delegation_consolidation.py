@@ -11,6 +11,7 @@ Expected to PASS after SSOT consolidation (proves all factories use UserExecutio
 Business Impact: $500K+ ARR Golden Path protection - consistent factory patterns prevent execution failures
 """
 
+import pytest
 import asyncio
 import inspect
 import sys
@@ -37,6 +38,7 @@ class MockWebSocketManager:
         self.send_agent_event = AsyncMock()
 
 
+@pytest.mark.unit
 class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
     """Unit Test 2: Validate factory delegation to UserExecutionEngine SSOT"""
     

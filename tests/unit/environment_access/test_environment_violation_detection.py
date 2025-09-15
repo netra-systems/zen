@@ -10,6 +10,7 @@ Protects against configuration drift and ensures consistent environment access p
 CRITICAL: These tests use SSotBaseTestCase and follow SSOT test infrastructure patterns.
 """
 
+import pytest
 import ast
 import os
 import re
@@ -20,6 +21,7 @@ from collections import defaultdict
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestEnvironmentViolationDetection(SSotBaseTestCase):
     """
     Unit tests for detecting environment access SSOT violations.

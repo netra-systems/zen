@@ -19,6 +19,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 env = get_env()
+@pytest.mark.unit
 class TestUnifiedEnvLoading:
     """Test suite for unified environment loading."""
     

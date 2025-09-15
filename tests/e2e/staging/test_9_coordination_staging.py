@@ -4,6 +4,7 @@ Tests multi-agent coordination
 Business Value: Complex workflows
 """
 
+import pytest
 import asyncio
 import uuid
 from typing import List, Dict
@@ -12,6 +13,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from tests.e2e.staging_test_base import StagingTestBase, staging_test
 
 
+@pytest.mark.e2e
 class TestCoordinationStaging(StagingTestBase):
     """Test coordination in staging environment"""
     

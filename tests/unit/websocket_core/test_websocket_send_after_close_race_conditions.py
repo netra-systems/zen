@@ -33,6 +33,7 @@ from shared.types.core_types import UserID, ThreadID, ConnectionID
 from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
+@pytest.mark.unit
 class TestWebSocketSendAfterCloseRaceConditions(SSotAsyncTestCase):
     """Unit tests for WebSocket send after close race conditions."""
 

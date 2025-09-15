@@ -17,6 +17,7 @@ from netra_backend.app.config import get_config, reload_config
 from netra_backend.app.auth_integration.auth_config import AuthPermissivenessConfig, AuthConfigLoader
 from netra_backend.app.clients.auth_client_core import AuthClientCore
 
+@pytest.mark.unit
 class TestAuthServiceConfigurationUnit(SSotBaseTestCase):
     """Unit tests for AUTH_SERVICE_URL configuration validation."""
 

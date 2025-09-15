@@ -33,6 +33,7 @@ class MockAgentResult:
     execution_time_ms: float = 1000.0
     error: Optional[str] = None
 
+@pytest.mark.websocket
 class TestLegacyAPICompatibility(SSotAsyncTestCase):
     """
     Test compatibility with legacy WebSocket emitter APIs.
@@ -115,6 +116,7 @@ class TestLegacyAPICompatibility(SSotAsyncTestCase):
         self.assertEqual(calls[0][1]['event_type'], 'agent_error')
         self.assertEqual(calls[1][1]['event_type'], 'progress_update')
 
+@pytest.mark.websocket
 class TestConsumerIntegrationCompatibility(SSotAsyncTestCase):
     """
     Test integration with actual consumer patterns.
@@ -183,6 +185,7 @@ class TestConsumerIntegrationCompatibility(SSotAsyncTestCase):
         self.assertIn('concurrent_user_1', user_ids)
         self.assertIn('concurrent_user_2', user_ids)
 
+@pytest.mark.websocket
 class TestFactoryCompatibility(SSotAsyncTestCase):
     """
     Test factory method compatibility for consumers.
@@ -233,6 +236,7 @@ class TestFactoryCompatibility(SSotAsyncTestCase):
         self.assertEqual(emitter.manager, self.mock_manager)
         self.assertEqual(emitter.user_id, self.test_user_id)
 
+@pytest.mark.websocket
 class TestErrorHandlingCompatibility(SSotAsyncTestCase):
     """
     Test error handling compatibility for consumers.
@@ -293,6 +297,7 @@ class TestErrorHandlingCompatibility(SSotAsyncTestCase):
         self.assertFalse(result)
         self.assertGreater(call_count, 1)
 
+@pytest.mark.websocket
 class TestPoolCompatibility(SSotAsyncTestCase):
     """
     Test WebSocket emitter pool compatibility.

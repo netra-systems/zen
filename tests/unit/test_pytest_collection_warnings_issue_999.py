@@ -14,6 +14,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 
+@pytest.mark.unit
 class TestWebSocketConnection:
     """
     INTENTIONAL ISSUE: This class has __init__ constructor which causes pytest collection warning.
@@ -45,6 +46,7 @@ class TestWebSocketConnection:
         assert self.is_connected is True
 
 
+@pytest.mark.unit
 class TestDatabaseConnection:
     """
     INTENTIONAL ISSUE: Another test class with __init__ constructor.
@@ -71,6 +73,7 @@ class TestDatabaseConnection:
         assert self.timeout == 30
 
 
+@pytest.mark.unit
 class TestProperTestClass:
     """
     CORRECT PATTERN: Test class without __init__ constructor.
@@ -94,6 +97,7 @@ class TestProperTestClass:
         assert self.mock_service is not None
 
 
+@pytest.mark.unit
 class TestUnittestStyleClass(unittest.TestCase):
     """
     UNITTEST STYLE: Using unittest.TestCase base class.
@@ -119,11 +123,13 @@ class TestUnittestStyleClass(unittest.TestCase):
 
 
 # Test functions (not classes) - these should always be collected properly
+@pytest.mark.unit
 def test_standalone_function():
     """Standalone test function - should be collected without issues"""
     assert True
 
 
+@pytest.mark.unit
 def test_another_standalone_function():
     """Another standalone test function - should be collected without issues"""
     mock_data = {"test": True}

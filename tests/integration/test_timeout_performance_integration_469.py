@@ -93,6 +93,7 @@ class RealisticLoadSimulator:
             load_results = {'concurrent_users': concurrent_users, 'operations_per_user': operations_per_user, 'total_operations': 0, 'response_times': None, 'success_rates': None, 'error': 'No successful operations completed'}
         return load_results
 
+@pytest.mark.integration
 class TestTimeoutPerformanceIntegration(SSotAsyncTestCase):
     """
     Integration tests for timeout performance under realistic conditions (Issue #469).

@@ -38,6 +38,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import authenticate
 from netra_backend.app.services.unified_authentication_service import get_unified_auth_service, AuthResult
 pytestmark = pytest.mark.asyncio
 
+@pytest.mark.integration
 class TestWebSocket1011ErrorReproduction:
     """Test cases that reproduce the original 1011 error conditions."""
 
@@ -82,6 +83,7 @@ class TestWebSocket1011ErrorReproduction:
             _validate_ssot_user_context(empty_user_context)
         assert 'SSOT VIOLATION' in str(exc_info.value) or 'must be non-empty string' in str(exc_info.value)
 
+@pytest.mark.integration
 class TestWebSocket1011ErrorFixValidation:
     """Test cases that validate the SSOT-compliant fix prevents 1011 errors."""
 
@@ -143,6 +145,7 @@ class TestWebSocket1011ErrorFixValidation:
         assert 'ws_' in user_context.websocket_client_id
         assert 'unique_a'[:8] in user_context.websocket_client_id
 
+@pytest.mark.integration
 class TestWebSocketErrorHandlingIntegration:
     """Integration tests for WebSocket error handling and fallback mechanisms."""
 
@@ -172,6 +175,7 @@ class TestWebSocketErrorHandlingIntegration:
             assert 'WebSocket factory initialization failed unexpectedly' in str(exc_info.value)
             assert 'system configuration issue' in str(exc_info.value)
 
+@pytest.mark.integration
 class TestWebSocketValidationDefensiveMeasures:
     """Test defensive validation measures in WebSocket components."""
 
@@ -219,6 +223,7 @@ class TestWebSocketValidationDefensiveMeasures:
         except ValueError as e:
             assert 'UserExecutionContext creation failed' in str(e)
 
+@pytest.mark.integration
 class TestWebSocketErrorDiagnostics:
     """Test enhanced error diagnostics and logging for WebSocket issues."""
 
@@ -264,6 +269,7 @@ class TestWebSocketErrorDiagnostics:
         if result.auth_result:
             assert hasattr(result.auth_result, 'metadata')
 
+@pytest.mark.integration
 class TestWebSocketConnectionFlowIntegration:
     """Integration test simulating complete WebSocket connection flow with error handling."""
 

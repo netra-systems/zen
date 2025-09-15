@@ -6,6 +6,7 @@ CRITICAL MISSION: These tests validate the complete middleware chain setup
 and interaction patterns to identify where SessionMiddleware integration breaks.
 """
 
+import pytest
 import unittest
 import asyncio
 from unittest.mock import patch, MagicMock, AsyncMock
@@ -13,6 +14,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.integration
 class TestMiddlewareStackIntegration(SSotBaseTestCase):
     """Test complete middleware stack integration scenarios."""
     

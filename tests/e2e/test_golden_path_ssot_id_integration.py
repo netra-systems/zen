@@ -25,6 +25,7 @@ These tests protect the complete $500K+ ARR Golden Path by ensuring:
 - Complete audit trail is maintained for compliance and debugging
 """
 
+import pytest
 import asyncio
 import json
 import time
@@ -38,6 +39,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator, TestIdUtils
 
 
+@pytest.mark.e2e
 class TestGoldenPathSsotIdIntegration(SSotAsyncTestCase):
     """E2E tests for Golden Path SSOT ID integration in GCP staging.
     

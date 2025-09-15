@@ -10,6 +10,7 @@ These tests should FAIL initially to prove singleton violations exist.
 CRITICAL: These tests are designed to FAIL and demonstrate singleton contamination problems.
 """
 
+import pytest
 import ast
 import threading
 import time
@@ -21,6 +22,7 @@ from unittest.mock import MagicMock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestWebSocketFactorySingletonVsFactoryViolations(SSotBaseTestCase):
     """Test suite to detect singleton pattern violations (SHOULD FAIL)"""
 

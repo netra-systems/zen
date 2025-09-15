@@ -75,6 +75,7 @@ class StartupPhaseMonitor:
                         gaps.append(f'WebSocket ready at {websocket_ready_time:.3f}s but {dep} not ready until {dep_ready_time:.3f}s')
         return gaps
 
+@pytest.mark.integration
 class TestWebSocketStartupCoordination(SSotAsyncTestCase):
     """Integration tests for WebSocket startup coordination."""
 

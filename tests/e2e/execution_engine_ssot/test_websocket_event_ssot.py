@@ -7,6 +7,7 @@ SHOULD PASS AFTER: Events delivered through UserExecutionEngine only
 Business Value: Prevents $500K+ ARR WebSocket event delivery corruption
 """
 
+import pytest
 import asyncio
 import json
 import time
@@ -88,6 +89,7 @@ class WebSocketEventTracker:
         self.event_sources.clear()
 
 
+@pytest.mark.e2e
 class TestWebSocketEventSSot(SSotAsyncTestCase):
     """Validate WebSocket event delivery through SSOT execution engine."""
 

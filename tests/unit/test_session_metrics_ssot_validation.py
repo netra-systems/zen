@@ -18,6 +18,7 @@ from typing import Optional, Any, Dict
 from unittest.mock import Mock, patch, AsyncMock
 
 # Test that all SSOT imports work correctly
+@pytest.mark.unit
 def test_ssot_imports_work_correctly():
     """Test 1: Validate all import paths work without circular dependencies."""
     
@@ -42,6 +43,7 @@ def test_ssot_imports_work_correctly():
     print("[PASS] All SSOT imports work correctly")
 
 
+@pytest.mark.unit
 def test_database_session_metrics_field_access():
     """Test 2: Validate the critical field access that was causing AttributeError."""
     
@@ -86,6 +88,7 @@ def test_database_session_metrics_field_access():
     print("[PASS] All critical field access patterns work correctly")
 
 
+@pytest.mark.unit
 def test_backend_session_factory_integration():
     """Test 3: Test integration with the backend session factory using SSOT."""
     
@@ -118,6 +121,7 @@ def test_backend_session_factory_integration():
     print("[PASS] Backend session factory integration works correctly")
 
 
+@pytest.mark.unit
 def test_error_handling_stability():
     """Test 4: Validate system stability under error conditions."""
     
@@ -160,6 +164,7 @@ def test_error_handling_stability():
     print("[PASS] Error handling remains stable")
 
 
+@pytest.mark.unit
 def test_backward_compatibility_complete():
     """Test 5: Comprehensive backward compatibility validation."""
     
@@ -207,6 +212,7 @@ def test_backward_compatibility_complete():
     print("[PASS] Complete backward compatibility maintained")
 
 
+@pytest.mark.unit
 def test_performance_no_degradation():
     """Test 6: Ensure no performance degradation from SSOT consolidation."""
     
@@ -235,6 +241,7 @@ def test_performance_no_degradation():
     print(f"[PASS] Performance maintained: {duration:.3f}s for 1000 operations")
 
 
+@pytest.mark.unit
 def test_no_circular_imports():
     """Test 7: Validate no circular import dependencies were introduced."""
     
@@ -267,6 +274,7 @@ def test_no_circular_imports():
         pytest.fail(f"Circular import detected: {e}")
 
 
+@pytest.mark.unit
 def test_ssot_compliance_validation():
     """Test 8: Validate complete SSOT compliance - no duplicate definitions."""
     
@@ -360,6 +368,7 @@ def test_real_database_session_integration():
     print("[PASS] Real database session integration patterns work correctly")
 
 
+@pytest.mark.unit
 def test_system_stability_proof():
     """Test 10: Final system stability proof - comprehensive validation."""
     

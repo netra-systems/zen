@@ -16,6 +16,7 @@ Expected Behavior: Tests should FAIL initially, then PASS after SSOT remediation
 GitHub Issue: https://github.com/netra-systems/netra-apex/issues/982
 """
 
+import pytest
 import asyncio
 import json
 import uuid
@@ -70,6 +71,7 @@ class MockWebSocketConnection:
         self.is_closed = True
 
 
+@pytest.mark.integration
 class TestBroadcastFunctionConsistency(SSotAsyncTestCase):
     """Integration tests for broadcast function consistency."""
 
@@ -246,6 +248,7 @@ class TestBroadcastFunctionConsistency(SSotAsyncTestCase):
             print("✓ Consistent concurrent behavior detected")
 
 
+@pytest.mark.integration
 class TestBroadcastUserIsolationSecurity(SSotAsyncTestCase):
     """Integration tests for user isolation security in broadcast functions."""
 
@@ -464,6 +467,7 @@ class TestBroadcastUserIsolationSecurity(SSotAsyncTestCase):
             print("✓ Memory isolation validated")
 
 
+@pytest.mark.integration
 class TestConvenienceFunctionIntegration(SSotAsyncTestCase):
     """Integration tests for convenience function behavior."""
 

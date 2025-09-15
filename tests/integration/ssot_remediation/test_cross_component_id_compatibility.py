@@ -19,6 +19,7 @@ Expected Behavior:
 - AFTER REMEDIATION: Should PASS - all components use UnifiedIdGenerator SSOT
 """
 
+import pytest
 import asyncio
 import uuid
 from typing import Dict, Any, Optional
@@ -30,6 +31,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.types.core_types import UserID, ThreadID, WebSocketID, ensure_user_id, ensure_thread_id
 
 
+@pytest.mark.integration
 class TestCrossComponentIdCompatibility(SSotBaseTestCase):
     """Test cross-component ID compatibility for SSOT validation."""
 

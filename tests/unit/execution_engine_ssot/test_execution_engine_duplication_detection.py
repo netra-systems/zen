@@ -23,6 +23,7 @@ Test Strategy:
 - Verify proper adapter patterns are in place
 """
 
+import pytest
 import importlib
 import inspect
 import sys
@@ -34,6 +35,7 @@ from unittest import TestCase
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestExecutionEngineDuplicationDetection(SSotBaseTestCase, unittest.TestCase):
     """Unit tests to detect and validate execution engine SSOT violations."""
 

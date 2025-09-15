@@ -19,6 +19,7 @@ Created: 2025-09-12
 Issue: #686 ExecutionEngine consolidation blocking Golden Path
 """
 
+import pytest
 import ast
 import importlib
 import inspect
@@ -32,6 +33,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.unit
 class TestIssue686ExecutionEngineConsolidation(SSotBaseTestCase):
     """Test ExecutionEngine SSOT consolidation compliance."""
 

@@ -22,6 +22,7 @@ from typing import Dict, Any
 from netra_backend.app.websocket_core.connection_state_machine import ApplicationConnectionState
 from shared.types.core_types import UserID, ConnectionID
 
+@pytest.mark.unit
 class TestWebSocketSendAfterCloseSimple:
     """
     Simple test to reproduce send-after-close race condition.

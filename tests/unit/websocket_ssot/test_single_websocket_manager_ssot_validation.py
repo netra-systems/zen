@@ -33,6 +33,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestSingleWebSocketManagerSsotValidation(SSotBaseTestCase):
     """Phase 2 SSOT Validation Test: Validate only one WebSocket manager implementation exists."""
     

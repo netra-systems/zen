@@ -67,6 +67,7 @@ class CORSTestHelper:
         validation['has_access_control_allow_credentials'] = 'access-control-allow-credentials' in cors_headers
         return validation
 
+@pytest.mark.integration
 class TestCORSIntegrationCore:
     """Core CORS integration tests."""
 

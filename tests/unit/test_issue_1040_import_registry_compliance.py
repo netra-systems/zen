@@ -40,6 +40,7 @@ except ImportError:
     SSOT_FRAMEWORK_AVAILABLE = False
 
 
+@pytest.mark.unit
 class TestIssue1040ImportRegistryCompliance(SSotBaseTestCase):
     """
     SSOT Import Registry compliance validation for Issue #1040.
@@ -321,6 +322,7 @@ class TestIssue1040ImportRegistryCompliance(SSotBaseTestCase):
 
 
 # Post-fix validation tests (should be enabled after fix)
+@pytest.mark.unit
 class TestIssue1040ImportRegistryPostFix(SSotBaseTestCase):
     """
     Post-fix validation tests for SSOT Import Registry compliance.

@@ -10,6 +10,7 @@ from unittest.mock import MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncBaseTestCase
 
 
+@pytest.mark.integration
 class TestWebSocketSSOTAgentIntegration(SSotAsyncBaseTestCase):
     """Integration tests for WebSocket SSOT agent bridge functionality."""
 
@@ -173,6 +174,7 @@ class TestWebSocketSSOTAgentIntegration(SSotAsyncBaseTestCase):
         print(" PASS:  SSOT ENFORCEMENT: Only correct SSOT path works")
 
 
+@pytest.mark.integration
 class TestWebSocketSSOTBusinessImpactValidation(SSotAsyncBaseTestCase):
     """Validate the business impact and successful resolution of WebSocket agent bridge SSOT implementation."""
 

@@ -9,6 +9,7 @@ import requests
 import os
 from pathlib import Path
 
+@pytest.mark.unit
 class TestWebSocketTimeoutConfigurationGap:
     
     def test_websocket_timeout_configs_exist_in_codebase(self):

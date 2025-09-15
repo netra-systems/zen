@@ -199,6 +199,7 @@ class StagingBusinessTool:
         else:
             await asyncio.sleep(0.02)
 
+@pytest.mark.e2e
 class TestCompleteToolWorkflowsWithAuthentication(SSotAsyncTestCase):
     """E2E staging tests for complete authenticated tool workflows."""
 

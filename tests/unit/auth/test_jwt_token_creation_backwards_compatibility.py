@@ -14,6 +14,7 @@ from typing import List
 from test_framework.fixtures.auth import create_real_jwt_token
 
 
+@pytest.mark.unit
 class TestJWTTokenCreationBackwardsCompatibility:
     """Test JWT token creation backwards compatibility issues."""
     
@@ -90,6 +91,7 @@ class TestJWTTokenCreationBackwardsCompatibility:
             )
 
 
+@pytest.mark.unit
 class TestJWTTokenCreationExpectedBehavior:
     """Test what the correct calling pattern should look like after fix."""
     

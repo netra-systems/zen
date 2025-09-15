@@ -28,6 +28,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 
+@pytest.mark.integration
 class TestMultiUserExecutionIsolation:
     """Test multi-user execution isolation patterns."""
 
@@ -246,6 +247,7 @@ class TestMultiUserExecutionIsolation:
         assert child2.request_id != user2_typed.request_id
         assert child1.request_id != child2.request_id
 
+@pytest.mark.integration
 class TestMultiUserResourceIsolation:
     """Test resource isolation between multiple users."""
 

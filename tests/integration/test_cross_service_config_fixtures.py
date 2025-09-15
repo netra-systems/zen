@@ -23,6 +23,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
+@pytest.mark.integration
 def test_fastapi_app():
     """Create test FastAPI application."""
     app = FastAPI(title="Cross-Service Test App")
@@ -63,6 +64,7 @@ def temp_project_root():
         
         yield project_root
 
+@pytest.mark.integration
 def test_service_discovery(temp_project_root, cross_service_config):
     """Create fully configured test service discovery."""
     discovery = ServiceDiscovery(temp_project_root)
@@ -108,6 +110,7 @@ def test_service_discovery(temp_project_root, cross_service_config):
     
     return discovery
 
+@pytest.mark.integration
 def test_health_monitor(test_service_discovery):
     """Create test health monitor with service discovery integration."""
     monitor = HealthMonitor(check_interval=0.1)  # Fast interval for testing
@@ -120,6 +123,7 @@ def test_health_monitor(test_service_discovery):
     
     return monitor
 
+@pytest.mark.integration
 def test_fastapi_app():
     """Create test FastAPI application."""
     app = FastAPI(title="Cross-Service Test App")
@@ -146,6 +150,7 @@ def test_fastapi_app():
     
     return app
 
+@pytest.mark.integration
 def test_app_with_cors(test_fastapi_app, test_service_discovery):
     """Create test app with unified CORS configuration."""
     # Add CORS middleware using unified configuration
@@ -154,6 +159,7 @@ def test_app_with_cors(test_fastapi_app, test_service_discovery):
     
     return test_fastapi_app
 
+@pytest.mark.integration
 def test_client(test_app_with_cors):
     """Create test client for the FastAPI app."""
     return TestClient(test_app_with_cors)
@@ -216,6 +222,7 @@ def mock_httpx_responses():
     
     return MockResponses()
 
+@pytest.mark.integration
 def test_helpers():
     """Provide test helper utilities."""
     return CrossServiceTestHelpers()
@@ -230,6 +237,7 @@ def performance_test_config():
     }
 
 
+@pytest.mark.integration
 class TestWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
     

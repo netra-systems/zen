@@ -19,6 +19,7 @@ from typing import List, Dict, Any
 import pytest
 
 
+@pytest.mark.unit
 class TestImportPatternAnalysis:
     """Unit test for import pattern analysis related to Issue #551."""
     
@@ -204,6 +205,7 @@ class TestImportPatternAnalysis:
         assert len(critical_criteria) >= 2, "Should have at least 2 critical validation criteria"
 
 
+@pytest.mark.unit
 class TestImportResolutionMocking:
     """Unit tests with mocked imports to simulate different scenarios."""
     

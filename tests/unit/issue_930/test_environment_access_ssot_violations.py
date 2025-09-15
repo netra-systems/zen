@@ -20,6 +20,7 @@ from test_framework.ssot.base_test_case import SSotTestCase
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
+@pytest.mark.unit
 class TestEnvironmentAccessSSOTViolations(SSotTestCase):
     """Tests identifying SSOT violations in environment variable access patterns."""
 

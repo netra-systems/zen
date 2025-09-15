@@ -11,6 +11,7 @@ from unittest.mock import Mock, patch, MagicMock
 import json
 from typing import Optional
 
+@pytest.mark.unit
 class TestFrontendSentryDSNConfiguration:
     """Test frontend Sentry DSN configuration - expected to FAIL showing gaps"""
 
@@ -72,6 +73,7 @@ class TestFrontendSentryDSNConfiguration:
         assert "environment === 'staging'" in content, 'Staging environment check should exist'
         assert "environment === 'production'" in content, 'Production environment check should exist'
 
+@pytest.mark.unit
 class TestSentryConfigurationSecrets:
     """Test Sentry configuration in secret management - expected to FAIL showing gaps"""
 
@@ -123,6 +125,7 @@ class TestSentryConfigurationSecrets:
         assert 'sentry-dsn' in content, 'Secret creation script should handle sentry-dsn'
         assert 'SENTRY_DSN' in content, 'Script should reference SENTRY_DSN environment variable'
 
+@pytest.mark.unit
 class TestSentryDeploymentConfiguration:
     """Test Sentry configuration in deployment - expected to FAIL showing gaps"""
 
@@ -165,6 +168,7 @@ class TestSentryDeploymentConfiguration:
             from frontend.app.sentry_init import SentryInit
             assert os.environ.get('NEXT_PUBLIC_SENTRY_DSN') is not None
 
+@pytest.mark.unit
 class TestSentryErrorBoundaryIntegration:
     """Test Sentry integration with React Error Boundaries - expected to FAIL showing gaps"""
 
@@ -189,6 +193,7 @@ class TestSentryErrorBoundaryIntegration:
         assert 'setContext' in content, 'Error boundary should set Sentry context'
         assert 'setTag' in content or 'setTags' in content, 'Error boundary should set Sentry tags'
 
+@pytest.mark.unit
 class TestSentryPerformanceMonitoring:
     """Test Sentry performance monitoring configuration - expected to FAIL showing gaps"""
 

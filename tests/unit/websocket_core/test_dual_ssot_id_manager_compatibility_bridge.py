@@ -25,6 +25,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestDualSSOTIDManagerCompatibilityBridge(SSotBaseTestCase):
     """Test compatibility bridge between dual SSOT ID systems."""
 
@@ -145,6 +146,7 @@ class TestDualSSOTIDManagerCompatibilityBridge(SSotBaseTestCase):
         user_prefix = expected_user_id[:8]
         return user_prefix in generated_id or expected_user_id[:4] in generated_id
 
+@pytest.mark.unit
 class TestWebSocketResourceCleanupFix(SSotBaseTestCase):
     """Specific tests for WebSocket 1011 error fix through ID pattern consistency."""
 

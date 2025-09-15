@@ -26,6 +26,7 @@ from shared.jwt_secret_manager import JWTSecretManager, get_jwt_secret_manager, 
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
+@pytest.mark.unit
 class TestJWTSecretStagingFailureReproduction:
     """Reproduce the exact JWT secret staging failures from GCP logs."""
 
@@ -363,6 +364,7 @@ class TestJWTSecretStagingFailureReproduction:
                 )
 
 
+@pytest.mark.unit
 class TestJWTSecretManagerEnvironmentIntegration:
     """Integration tests for JWT secret manager environment access patterns."""
 

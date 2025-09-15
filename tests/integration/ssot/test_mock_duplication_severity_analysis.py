@@ -39,6 +39,7 @@ class MockSeverityMetrics:
     avg_violations_per_file: float
 
 
+@pytest.mark.integration
 class TestMockDuplicationSeverityAnalysis(SSotBaseTestCase):
     """
     Severity analysis for mock duplication violations.

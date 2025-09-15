@@ -12,6 +12,7 @@ CRITICAL: These tests follow claude.md requirements:
 - Real services only (no mocks in integration)
 """
 
+import pytest
 import sys
 import unittest
 import importlib
@@ -26,6 +27,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestWebSocketManagerSSOTViolations(SSotBaseTestCase):
     """Test suite to detect WebSocket Manager SSOT violations.
     

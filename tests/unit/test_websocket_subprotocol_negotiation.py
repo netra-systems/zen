@@ -11,6 +11,7 @@ from unittest.mock import Mock, patch, AsyncMock
 from fastapi import HTTPException, WebSocket
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestWebSocketSubprotocolNegotiation(SSotBaseTestCase):
     """Test WebSocket subprotocol negotiation for JWT authentication"""
 

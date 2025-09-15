@@ -42,6 +42,7 @@ def cors_helper():
     return CORSTestHelper()
 
 @pytest.fixture
+@pytest.mark.integration
 def test_app():
     """Create test FastAPI app with CORS middleware."""
     from fastapi import FastAPI
@@ -57,11 +58,13 @@ def test_app():
     return app
 
 @pytest.fixture
+@pytest.mark.integration
 def test_client(test_app):
     """Create test client."""
     from fastapi.testclient import TestClient
     return TestClient(test_app)
 
+@pytest.mark.integration
 class TestCORSConfiguration:
     """Test CORS configuration functions."""
 
@@ -150,6 +153,7 @@ class TestCORSConfiguration:
         invalid_config = {'allow_origins': 'not a list'}
         assert validate_cors_config(invalid_config) is False
 
+@pytest.mark.integration
 class TestCORSPreflightRequests:
     """Test CORS preflight (OPTIONS) requests."""
 
@@ -195,6 +199,7 @@ class TestCORSPreflightRequests:
             else:
                 assert response.status_code in [200, 204]
 
+@pytest.mark.integration
 class TestCORSActualRequests:
     """Test actual CORS requests (non-preflight)."""
 
@@ -223,6 +228,7 @@ class TestCORSActualRequests:
         response = test_client.get('/health')
         assert response.status_code == 200
 
+@pytest.mark.integration
 class TestCORSErrorResponses:
     """Test CORS headers on error responses."""
 
@@ -258,6 +264,7 @@ class TestCORSErrorResponses:
                 except Exception:
                     pass
 
+@pytest.mark.integration
 class TestCORSTrailingSlashHandling:
     """Test CORS with trailing slash handling."""
 
@@ -272,6 +279,7 @@ class TestCORSTrailingSlashHandling:
                 if response.status_code == 200:
                     assert response.headers.get('Access-Control-Allow-Origin') == origin
 
+@pytest.mark.integration
 class TestCORSIPv6Support:
     """Test CORS with IPv6 localhost support."""
 
@@ -284,6 +292,7 @@ class TestCORSIPv6Support:
             assert response.status_code == 200
             assert response.headers.get('Access-Control-Allow-Origin') == origin
 
+@pytest.mark.integration
 class TestCORSVariHeaders:
     """Test Vary header handling in CORS responses."""
 
@@ -296,6 +305,7 @@ class TestCORSVariHeaders:
             vary_header = response.headers.get('Vary', '')
             assert 'Origin' in vary_header or 'origin' in vary_header.lower()
 
+@pytest.mark.integration
 class TestCORSMaxAge:
     """Test CORS Max-Age header."""
 
@@ -310,6 +320,7 @@ class TestCORSMaxAge:
             assert max_age is not None
             assert int(max_age) > 0
 
+@pytest.mark.integration
 class TestCORSEnvironmentSpecific:
     """Test environment-specific CORS behavior."""
 
@@ -338,6 +349,7 @@ class TestCORSEnvironmentSpecific:
             response = test_client.get('/health', headers=headers)
             assert response.headers.get('Access-Control-Allow-Origin') != origin
 
+@pytest.mark.integration
 class TestCORSSecurityHeaders:
     """Test CORS security headers."""
 
@@ -357,6 +369,7 @@ class TestCORSSecurityHeaders:
                     else:
                         assert header_value == expected_values
 
+@pytest.mark.integration
 class TestCORSStressScenarios:
     """Test CORS under stress conditions."""
 

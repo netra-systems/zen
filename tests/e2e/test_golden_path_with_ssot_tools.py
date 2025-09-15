@@ -238,6 +238,7 @@ class WebSocketEventCollector:
         self.is_connected = False
 
 
+@pytest.mark.e2e
 class TestGoldenPathSSotTools(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

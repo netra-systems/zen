@@ -29,6 +29,7 @@ from typing import Set, List, Dict, Any
 from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestLoggingSSOTValidation(SSotBaseTestCase):
     """
     Unit tests to validate SSOT compliance for logging infrastructure.

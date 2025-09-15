@@ -51,6 +51,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.integration
 class TestUnifiedStateManagerIntegrationCore(SSotAsyncTestCase):
     """Core integration tests for UnifiedStateManager with real services"""
 
@@ -88,6 +89,7 @@ class TestUnifiedStateManagerIntegrationCore(SSotAsyncTestCase):
         self.test_user_ids.add(user_id)
         return UnifiedStateManager(user_id=user_id, redis_client=self.redis_client, config_manager=self.config_manager)
 
+@pytest.mark.integration
 class TestRealRedisIntegration(TestUnifiedStateManagerIntegrationCore):
     """Integration tests with real Redis operations"""
 
@@ -154,6 +156,7 @@ class TestRealRedisIntegration(TestUnifiedStateManagerIntegrationCore):
         final_state = await manager.get_thread_state(thread_id)
         self.assertIn(final_state.get('status'), ['before_failover', 'after_recovery'])
 
+@pytest.mark.integration
 class TestCrossServiceStateCoordination(TestUnifiedStateManagerIntegrationCore):
     """Integration tests for cross-service state coordination"""
 
@@ -207,6 +210,7 @@ class TestCrossServiceStateCoordination(TestUnifiedStateManagerIntegrationCore):
         self.assertEqual(supervisor_final['phase'], 'coordination')
         self.assertEqual(len(supervisor_final['active_agents']), 2)
 
+@pytest.mark.integration
 class TestMultiTenantIsolationIntegration(TestUnifiedStateManagerIntegrationCore):
     """Integration tests for multi-tenant isolation with real services"""
 
@@ -266,6 +270,7 @@ class TestMultiTenantIsolationIntegration(TestUnifiedStateManagerIntegrationCore
         self.assertIn('customer_data', legitimate_enterprise)
         self.assertIn('user_preferences', legitimate_free)
 
+@pytest.mark.integration
 class TestHighLoadConcurrencyIntegration(TestUnifiedStateManagerIntegrationCore):
     """Integration tests for high-load concurrent operations"""
 
@@ -340,6 +345,7 @@ class TestHighLoadConcurrencyIntegration(TestUnifiedStateManagerIntegrationCore)
                 recent_exists += 1
         self.assertGreater(recent_exists, threads_per_cycle * 0.7)
 
+@pytest.mark.integration
 class TestDisasterRecoveryIntegration(TestUnifiedStateManagerIntegrationCore):
     """Integration tests for disaster recovery scenarios"""
 

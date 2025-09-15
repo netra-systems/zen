@@ -22,6 +22,7 @@ from tests.e2e.staging_test_config import get_staging_config
 # Mark all tests in this file as staging and real
 pytestmark = [pytest.mark.staging, pytest.mark.real]
 
+@pytest.mark.e2e
 class TestMediumLowStorage:
     """Tests 71-75: Core Storage Operations - REAL TESTS"""
     
@@ -383,6 +384,7 @@ class TestMediumLowStorage:
         expires = datetime.fromisoformat(file_download["expires_at"])
         assert expires > datetime.utcnow()
 
+@pytest.mark.e2e
 class TestMediumLowDataOps:
     """Tests 76-80: Data Operations - REAL TESTS"""
     
@@ -506,6 +508,7 @@ class TestMediumLowDataOps:
         
         assert retention_policy["compliance"]["gdpr"] is True
 
+@pytest.mark.e2e
 class TestMediumLowCompliance:
     """Tests 81-85: Data Compliance - REAL TESTS"""
     

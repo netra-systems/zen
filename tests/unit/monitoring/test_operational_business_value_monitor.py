@@ -24,6 +24,7 @@ from unittest.mock import patch, MagicMock
 from decimal import Decimal
 
 
+@pytest.mark.unit
 class TestOperationalBusinessValueMonitorCore(SSotBaseTestCase):
     """Core functionality tests for OperationalBusinessValueMonitor"""
     
@@ -94,6 +95,7 @@ class TestOperationalBusinessValueMonitorCore(SSotBaseTestCase):
             assert monitor.alert_cooldown_minutes == 15
 
 
+@pytest.mark.unit
 class TestOperationalBusinessValueMonitorAsync(SSotAsyncTestCase):
     """Async functionality tests for OperationalBusinessValueMonitor"""
     
@@ -168,6 +170,7 @@ class TestOperationalBusinessValueMonitorAsync(SSotAsyncTestCase):
             assert len(retrieved_metrics) > 0
 
 
+@pytest.mark.unit
 class TestOperationalBusinessValueMonitorDataQuality(SSotBaseTestCase):
     """Data quality and validation tests"""
     
@@ -220,6 +223,7 @@ class TestOperationalBusinessValueMonitorDataQuality(SSotBaseTestCase):
                 assert isinstance(score, (int, float, Decimal))
 
 
+@pytest.mark.unit
 class TestOperationalBusinessValueMonitorConfiguration(SSotBaseTestCase):
     """Configuration and environment variable tests"""
     

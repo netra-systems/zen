@@ -104,6 +104,7 @@ class RefreshEvent:
     refresh_count: int = 0
 
 
+@pytest.mark.integration
 class TestJWTTokenLifecycleRefreshIntegration(SSotAsyncTestCase):
     """
     Integration tests for JWT Token Lifecycle Manager refresh mechanisms.

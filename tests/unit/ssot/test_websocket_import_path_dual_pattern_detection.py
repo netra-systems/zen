@@ -10,6 +10,7 @@ These tests should FAIL initially to prove dual pattern violations exist.
 CRITICAL: These tests are designed to FAIL and demonstrate the dual pattern problem.
 """
 
+import pytest
 import ast
 import os
 import sys
@@ -19,6 +20,7 @@ from typing import Dict, List, Set, Tuple
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestWebSocketImportPathDualPatternDetection(SSotBaseTestCase):
     """Test suite to detect multiple import paths for WebSocket managers (SHOULD FAIL)"""
 

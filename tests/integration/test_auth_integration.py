@@ -41,6 +41,7 @@ def setup_database():
 
 
 @pytest.fixture(scope="module")
+@pytest.mark.integration
 def test_user():
     # Create a test user in the database
     # This would require a database connection and user creation logic
@@ -48,6 +49,7 @@ def test_user():
     return {"email": "test@example.com", "password": "testpassword"}
 
 
+@pytest.mark.integration
 def test_dev_login():
     # Ensure environment is set to development for this test
     original_env = env.get("NETRA_ENVIRONMENT")
@@ -65,6 +67,7 @@ def test_dev_login():
             env.delete("NETRA_ENVIRONMENT", "test")
 
 
+@pytest.mark.integration
 def test_login_logout(test_user):
     # Login
     response = client.post("/auth/login", json=test_user)
@@ -89,6 +92,7 @@ def test_login_logout(test_user):
     assert response.status_code == 401
 
 
+@pytest.mark.integration
 def test_refresh_token(test_user):
     # Login to get a refresh token
     response = client.post("/auth/login", json=test_user)

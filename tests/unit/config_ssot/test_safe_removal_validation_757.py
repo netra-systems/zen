@@ -13,6 +13,7 @@ from unittest.mock import patch, MagicMock
 import ast
 import importlib.util
 
+@pytest.mark.unit
 class TestSafeRemovalValidation:
     """Phase 2 Tests - Validate safe removal of deprecated manager"""
 
@@ -131,6 +132,7 @@ class TestSafeRemovalValidation:
         except ImportError as e:
             pytest.fail(f'Cannot test canonical UnifiedConfigManager environment handling: {e}')
 
+@pytest.mark.unit
 class TestMigrationPrerequisites:
     """Validate prerequisites for safe migration"""
 

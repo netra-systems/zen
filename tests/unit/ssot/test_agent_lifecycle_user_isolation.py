@@ -22,6 +22,7 @@ from typing import Dict, Any, List
 import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.unit
 class TestAgentLifecycleUserIsolation(SSotAsyncTestCase):
     """Test suite for multi-user context isolation in AgentLifecycle"""
 

@@ -81,6 +81,7 @@ class PerformanceMetrics:
             index = len(sorted_data) - 1
         return sorted_data[index]
 
+@pytest.mark.e2e
 class TestPerformanceAndScaling(BaseE2ETest):
     """
     Performance and Scaling E2E Tests for Staging Environment.

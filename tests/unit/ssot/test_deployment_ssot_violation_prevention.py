@@ -35,6 +35,7 @@ from unittest.mock import Mock, patch
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestDeploymentSsotViolationPrevention(SSotBaseTestCase):
     """
     Unit tests for SSOT deployment violation prevention.
@@ -292,6 +293,7 @@ class TestDeploymentSsotViolationPrevention(SSotBaseTestCase):
         """Test recovery from configuration drift scenario."""
         return {'success': True, 'recovery_time': 20, 'steps_required': 5}
 
+@pytest.mark.unit
 class TestDeploymentSsotViolationPreventionIntegration(SSotBaseTestCase):
     """
     Integration tests for SSOT violation prevention system.

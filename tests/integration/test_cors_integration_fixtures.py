@@ -1,3 +1,4 @@
+import pytest
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 """Fixtures Tests - Split from test_cors_integration.py"""
@@ -5,6 +6,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import os
 
 
+@pytest.mark.integration
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 

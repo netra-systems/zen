@@ -32,6 +32,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, CategoryType
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestJwtSsotEnforcement(SSotBaseTestCase):
     """
     JWT SSOT Enforcement Tests - Designed to FAIL initially

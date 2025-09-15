@@ -22,6 +22,7 @@ REQUIREMENTS:
 Business Value: Enterprise/Platform - Security compliance for HIPAA, SOC2, SEC regulations
 """
 
+import pytest
 import json
 import os
 import sys
@@ -33,6 +34,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
+@pytest.mark.unit
 class TestIssue1017InputSanitizationVulnerabilities(SSotBaseTestCase):
     """
     Comprehensive security vulnerability tests for Issue #1017.

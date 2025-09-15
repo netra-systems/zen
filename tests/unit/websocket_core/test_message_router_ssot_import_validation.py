@@ -18,6 +18,7 @@ from typing import Set, List, Tuple
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestMessageRouterSSOTImportValidation(SSotBaseTestCase):
     """Test MessageRouter SSOT import path validation."""
 

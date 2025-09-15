@@ -42,6 +42,7 @@ from tests.e2e.staging_config import StagingTestConfig
 from shared.isolated_environment import get_env
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.e2e
 class TestGoldenPathWebSocketChat(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
@@ -326,6 +327,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
         unavailable_indicators = ['connection refused', 'connection failed', 'connection reset', 'no route to host', 'network unreachable', 'timeout', 'refused']
         return any((indicator in error_msg for indicator in unavailable_indicators))
 
+@pytest.mark.e2e
 class TestGoldenPathWebSocketChatResilience(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

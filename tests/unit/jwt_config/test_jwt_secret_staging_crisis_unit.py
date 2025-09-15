@@ -15,6 +15,7 @@ from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = logging.getLogger(__name__)
 
+@pytest.mark.unit
 class TestJWTSecretStagingCrisis(SSotBaseTestCase):
     """Unit tests demonstrating JWT secret resolution failures in staging environment."""
 
@@ -193,6 +194,7 @@ class TestJWTSecretStagingCrisis(SSotBaseTestCase):
             issues_text = ' '.join(validation_result['issues'])
             assert 'staging' in issues_text.lower()
 
+@pytest.mark.unit
 class TestStagingJWTSecretDeploymentScenarios(SSotBaseTestCase):
     """Unit tests for various staging deployment JWT secret scenarios."""
 
@@ -238,6 +240,7 @@ class TestStagingJWTSecretDeploymentScenarios(SSotBaseTestCase):
         mock_env.get.side_effect = lambda key, default=None: base_env.get(key, default)
         return mock_env
 
+@pytest.mark.unit
 class TestJWTConfigurationBusinessImpact(SSotBaseTestCase):
     """Tests demonstrating business impact of JWT configuration failures."""
 

@@ -24,6 +24,7 @@ SSOT Requirements:
 - 497+ files need import path consolidation
 """
 
+import pytest
 import unittest
 import sys
 import importlib
@@ -40,6 +41,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestWebSocketManagerImportConsistency(SSotBaseTestCase, unittest.TestCase):
     """Test WebSocket Manager import consistency for SSOT consolidation."""
     

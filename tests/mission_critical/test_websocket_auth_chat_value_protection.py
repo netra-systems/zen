@@ -158,7 +158,7 @@ class TestWebSocketAuthChatValueProtection:
                     # MISSION CRITICAL: WebSocket connection must succeed
                     async with websockets.connect(
                         self.auth_config.websocket_url,
-                        extra_headers=websocket_headers,
+                        additional_headers=websocket_headers,
                         timeout=self.auth_config.timeout
                     ) as websocket:
                         
@@ -270,7 +270,7 @@ class TestWebSocketAuthChatValueProtection:
             try:
                 async with websockets.connect(
                     self.auth_config.websocket_url,
-                    extra_headers=websocket_headers,
+                    additional_headers=websocket_headers,
                     timeout=self.auth_config.timeout
                 ) as websocket:
                     
@@ -403,7 +403,7 @@ class TestWebSocketAuthChatValueProtection:
             try:
                 async with websockets.connect(
                     self.auth_config.websocket_url,
-                    extra_headers=websocket_headers,
+                    additional_headers=websocket_headers,
                     timeout=self.auth_config.timeout
                 ) as websocket:
                     
@@ -572,7 +572,7 @@ class TestWebSocketAuthChatValueProtection:
                 try:
                     async with websockets.connect(
                         self.auth_config.websocket_url,
-                        extra_headers=websocket_headers,
+                        additional_headers=websocket_headers,
                         timeout=self.auth_config.timeout
                     ) as websocket:
                         
@@ -704,7 +704,7 @@ class TestWebSocketAuthChatValueProtection:
                     
                     async with websockets.connect(
                         self.auth_config.websocket_url,
-                        extra_headers=websocket_headers,
+                        additional_headers=websocket_headers,
                         timeout=self.auth_config.timeout
                     ) as websocket:
                         

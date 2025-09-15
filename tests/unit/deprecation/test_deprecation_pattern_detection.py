@@ -17,6 +17,7 @@ Follows CLAUDE.md requirements:
 - Real pattern detection without mocks
 """
 
+import pytest
 import os
 import re
 import ast
@@ -27,6 +28,7 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestDeprecationPatternDetection(SSotBaseTestCase):
     """Systematic detection and measurement of all deprecation warning patterns."""
 

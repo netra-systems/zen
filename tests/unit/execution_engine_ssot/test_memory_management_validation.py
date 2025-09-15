@@ -11,6 +11,7 @@ Expected to PASS after SSOT consolidation (proves UserExecutionEngine manages me
 Business Impact: $500K+ ARR Golden Path protection - memory leaks cause system instability
 """
 
+import pytest
 import asyncio
 import gc
 import psutil
@@ -107,6 +108,7 @@ class ResourceMonitoringWebSocket:
             })
 
 
+@pytest.mark.unit
 class TestMemoryManagementValidation(SSotAsyncTestCase):
     """Unit Test 4: Validate memory management in UserExecutionEngine"""
     

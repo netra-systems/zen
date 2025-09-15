@@ -21,6 +21,7 @@ from typing import List, Dict, Any, Set
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestIssue1182RaceConditionDetection(SSotBaseTestCase):
     """Unit tests to detect WebSocket Manager race conditions"""
 

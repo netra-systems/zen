@@ -27,6 +27,7 @@ from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
+@pytest.mark.unit
 class TestMessageRouterImportConsolidation(SSotBaseTestCase):
     """Unit tests for MessageRouter import consolidation and SSOT compliance."""
 

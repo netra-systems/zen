@@ -18,6 +18,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from deployment.secrets_config import SecretConfig
 
+@pytest.mark.unit
 class TestOAuthNamingBugReproduction:
     """Reproduction test suite for OAuth configuration naming bug."""
 

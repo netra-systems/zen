@@ -46,6 +46,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.unit
 class TestWebSocketFactoryDualPatternDetection(SSotBaseTestCase):
     """
     SSOT violation detection tests for dual WebSocket patterns in factories.

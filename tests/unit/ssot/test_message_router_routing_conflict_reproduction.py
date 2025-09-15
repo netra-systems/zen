@@ -20,6 +20,7 @@ BUSINESS IMPACT: $500K+ ARR Golden Path failures due to:
 TEST STRATEGY: 20% of MessageRouter SSOT testing strategy focused on conflict reproduction
 """
 
+import pytest
 import unittest
 import asyncio
 import threading
@@ -30,6 +31,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.unit
 class TestMessageRouterRoutingConflictReproduction(SSotAsyncTestCase):
     """Test that reproduces routing conflicts between multiple MessageRouter implementations."""
 
@@ -450,6 +452,7 @@ class TestMessageRouterRoutingConflictReproduction(SSotAsyncTestCase):
         )
 
 
+@pytest.mark.unit
 class TestMessageRouterConcurrencyConflicts(SSotAsyncTestCase):
     """Test concurrency-specific routing conflicts."""
 

@@ -26,6 +26,7 @@ from auth_service.auth_core.core.token_validator import TokenValidator
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.integration
 class TestJWTConfigurationSynchronization:
     """
     Tests JWT configuration synchronization issues (no Docker).
@@ -509,6 +510,7 @@ class TestJWTConfigurationSynchronization:
             env.set(var, "", source="test_clear")
 
 
+@pytest.mark.integration
 class TestCrossServiceJWTIntegration:
     """
     Test JWT integration patterns across services without Docker.

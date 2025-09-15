@@ -92,6 +92,7 @@ except ImportError as e:
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.unit
 class TestConsolidatedExecutionEngineSSotViolationDetection(SSotAsyncTestCase):
     """DESIGNED TO FAIL: Detect SSOT violations in execution engine implementations.
     
@@ -597,6 +598,7 @@ class TestConsolidatedExecutionEngineSSotViolationDetection(SSotAsyncTestCase):
         )
 
 
+@pytest.mark.unit
 class TestExecutionEngineSSotComplianceValidation(SSotAsyncTestCase):
     """Validate SSOT compliance requirements for execution engines.
     

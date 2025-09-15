@@ -152,6 +152,7 @@ class RealWebSocketClient:
             await self.websocket.close()
             self.connected = False
 
+@pytest.mark.integration
 class TestUnifiedWebSocketManagerIntegration(BaseIntegrationTest):
     """Integration test suite for UnifiedWebSocketManager with real connections."""
 

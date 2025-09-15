@@ -54,6 +54,7 @@ class SSotViolation:
     severity: str
     description: str
 
+@pytest.mark.integration
 class TestSSotClassDuplicationDetection(SSotBaseTestCase):
     """
     Test suite for detecting SSOT violations through class duplication analysis.

@@ -59,6 +59,7 @@ def scan_for_import_pattern(pattern: str, file_types: str = "*.py", exclude_dirs
     return violations
 
 
+@pytest.mark.unit
 def test_detect_broken_user_execution_engine_imports():
     """
     FAIL TEST: Detect files with incorrect import paths for UserExecutionEngine.
@@ -88,6 +89,7 @@ def test_detect_broken_user_execution_engine_imports():
     )
 
 
+@pytest.mark.unit
 def test_user_execution_engine_import_validation():
     """
     FAIL TEST: Demonstrate that the old import path fails while new path works.
@@ -121,6 +123,7 @@ def test_user_execution_engine_import_validation():
     assert new_import_works, "🚨 CRITICAL: New import path broken - SSOT target missing"
 
 
+@pytest.mark.unit
 def test_execution_engine_import_patterns_across_codebase():
     """
     FAIL TEST: Analyze all ExecutionEngine import patterns to identify violations.
@@ -166,6 +169,7 @@ def test_execution_engine_import_patterns_across_codebase():
     )
 
 
+@pytest.mark.unit
 def test_request_scoped_execution_engine_imports():
     """
     FAIL TEST: Detect imports of RequestScopedExecutionEngine (potential SSOT violation).

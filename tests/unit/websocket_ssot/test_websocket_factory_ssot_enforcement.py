@@ -20,6 +20,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from typing import Type, Any
 
+@pytest.mark.unit
 class TestWebSocketFactorySSotEnforcement(SSotBaseTestCase, unittest.TestCase):
     """Test WebSocket Factory SSOT enforcement patterns."""
 

@@ -15,6 +15,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestAuthServiceBackendConsistency(SSotAsyncTestCase):
     """
     Integration test validating consistency between auth service and backend JWT handling.

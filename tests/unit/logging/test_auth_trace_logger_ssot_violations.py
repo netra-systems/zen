@@ -27,6 +27,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.logging.auth_trace_logger import AuthTraceLogger
 
 
+@pytest.mark.unit
 class TestAuthTraceLoggerSsotViolations(SSotBaseTestCase):
     """Test suite proving AuthTraceLogger SSOT violations at specific lines."""
 

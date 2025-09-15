@@ -26,6 +26,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
+@pytest.mark.integration
 class TestGoldenPathIntegrationWithoutFactory(SSotAsyncTestCase):
     """
     Validate Golden Path Integration works without WebSocket Manager Factory.

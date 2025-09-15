@@ -156,7 +156,7 @@
                     # Method 1: Authorization header
                     # REMOVED_SYNTAX_ERROR: connection = await websockets.connect( )
                     # REMOVED_SYNTAX_ERROR: self.config.websocket_url,
-                    # REMOVED_SYNTAX_ERROR: extra_headers=user.get_auth_headers()
+                    # REMOVED_SYNTAX_ERROR: additional_headers=user.get_auth_headers()
                     
                     # REMOVED_SYNTAX_ERROR: elif conn_index == 1:
                         # Method 2: Subprotocol authentication
@@ -232,7 +232,7 @@
                 # Attempt connection with invalid token
                 # REMOVED_SYNTAX_ERROR: connection = await websockets.connect( )
                 # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
-                # REMOVED_SYNTAX_ERROR: extra_headers={"authorization": token},
+                # REMOVED_SYNTAX_ERROR: additional_headers={"authorization": token},
                 # REMOVED_SYNTAX_ERROR: timeout=5
                 
 
@@ -290,7 +290,7 @@
                             # REMOVED_SYNTAX_ERROR: try:
                                 # REMOVED_SYNTAX_ERROR: connection1 = await websockets.connect( )
                                 # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
-                                # REMOVED_SYNTAX_ERROR: extra_headers=test_user.get_auth_headers()
+                                # REMOVED_SYNTAX_ERROR: additional_headers=test_user.get_auth_headers()
                                 
                                 # REMOVED_SYNTAX_ERROR: extraction_tests.append({"method": "authorization_header", "success": True})
                                 # REMOVED_SYNTAX_ERROR: await connection1.close()
@@ -349,7 +349,7 @@
     # REMOVED_SYNTAX_ERROR: try:
         # REMOVED_SYNTAX_ERROR: connection = await websockets.connect( )
         # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
-        # REMOVED_SYNTAX_ERROR: extra_headers=user.get_auth_headers(),
+        # REMOVED_SYNTAX_ERROR: additional_headers=user.get_auth_headers(),
         # REMOVED_SYNTAX_ERROR: timeout=10
         
 
@@ -1250,7 +1250,7 @@
                         # Connect as regular user
                         # REMOVED_SYNTAX_ERROR: connection = await websockets.connect( )
                         # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
-                        # REMOVED_SYNTAX_ERROR: extra_headers=user.get_auth_headers()
+                        # REMOVED_SYNTAX_ERROR: additional_headers=user.get_auth_headers()
                         
 
                         # Send escalation attempt
@@ -1367,7 +1367,7 @@
                                         # REMOVED_SYNTAX_ERROR: try:
                                             # REMOVED_SYNTAX_ERROR: connection = await websockets.connect( )
                                             # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
-                                            # REMOVED_SYNTAX_ERROR: extra_headers=user.get_auth_headers()
+                                            # REMOVED_SYNTAX_ERROR: additional_headers=user.get_auth_headers()
                                             
 
                                             # REMOVED_SYNTAX_ERROR: await connection.send(json.dumps(operation["message"]))
@@ -1495,7 +1495,7 @@
         # REMOVED_SYNTAX_ERROR: connect_tasks.append( )
         # REMOVED_SYNTAX_ERROR: websockets.connect( )
         # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
-        # REMOVED_SYNTAX_ERROR: extra_headers=user.get_auth_headers()
+        # REMOVED_SYNTAX_ERROR: additional_headers=user.get_auth_headers()
         
         
 
@@ -1668,7 +1668,7 @@
         # Establish connection
         # REMOVED_SYNTAX_ERROR: connection = await websockets.connect( )
         # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
-        # REMOVED_SYNTAX_ERROR: extra_headers=user.get_auth_headers(),
+        # REMOVED_SYNTAX_ERROR: additional_headers=user.get_auth_headers(),
         # REMOVED_SYNTAX_ERROR: timeout=5
         
 

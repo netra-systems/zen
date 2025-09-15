@@ -6,12 +6,14 @@ This test should FAIL to demonstrate the violation exists.
 Issue #711: Step 4 - Execute test plan to detect remaining SSOT environment access violations
 """
 
+import pytest
 import os
 import sys
 import re
 from pathlib import Path
 
 
+@pytest.mark.unit
 def test_secret_manager_core_violation_exists():
     """
     Test to confirm that the SSOT violation exists in secret_manager_core.py line 47.
@@ -43,6 +45,7 @@ def test_secret_manager_core_violation_exists():
     )
 
 
+@pytest.mark.unit
 def test_broader_codebase_scan_for_environ_violations():
     """
     Broader scan to detect os.environ assignments in key files.
@@ -85,6 +88,7 @@ def test_broader_codebase_scan_for_environ_violations():
     )
 
 
+@pytest.mark.unit
 def test_validation_verification():
     """
     Test to verify our detection mechanism is working.

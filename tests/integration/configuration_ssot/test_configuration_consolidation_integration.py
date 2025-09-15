@@ -19,6 +19,7 @@ Test Strategy:
 CRITICAL: Uses real services (non-docker) for integration validation
 """
 
+import pytest
 import asyncio
 import os
 import sys
@@ -32,6 +33,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.integration
 class TestConfigurationConsolidationIntegration(SSotAsyncTestCase):
     """Integration tests for configuration consolidation across services."""
 

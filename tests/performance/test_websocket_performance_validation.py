@@ -27,6 +27,7 @@ from netra_backend.app.routes.websocket_ssot import WebSocketSSOTRouter
 from netra_backend.app.websocket_core.gcp_initialization_validator import GCPWebSocketInitializationValidator, gcp_websocket_readiness_guard, GCPReadinessState
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.performance
 class TestWebSocketPerformanceValidation(SSotBaseTestCase):
     """Validation tests for WebSocket performance fixes."""
 

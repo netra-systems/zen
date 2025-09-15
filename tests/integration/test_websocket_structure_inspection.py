@@ -15,6 +15,7 @@ from netra_backend.app.factories.websocket_bridge_factory import StandardWebSock
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 
 
+@pytest.mark.integration
 class TestWebSocketStructureInspection:
     """Inspect actual WebSocket event structures to document mismatch."""
 

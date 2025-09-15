@@ -41,6 +41,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.e2e
 class TestGoldenPathEventValidatorIntegration(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

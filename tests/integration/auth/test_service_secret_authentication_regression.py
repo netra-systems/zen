@@ -24,6 +24,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestServiceSecretAuthenticationRegression(SSotAsyncTestCase):
     """
     Integration tests proving Issue #1037 causes real 403 failures.

@@ -34,6 +34,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.e2e
 class TestWebSocketAgentEventsE2E:
     """End-to-end tests for WebSocket agent events."""
     

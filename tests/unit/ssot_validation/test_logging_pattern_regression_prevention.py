@@ -13,6 +13,7 @@ REGRESSION SCENARIOS COVERED:
 4. Logger variable naming inconsistencies
 """
 
+import pytest
 import ast
 import os
 import re
@@ -22,6 +23,7 @@ from typing import List, Dict, Set
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestLoggingPatternRegressionPrevention(SSotBaseTestCase):
     """
     Prevent future mixing of logging patterns in Golden Path.

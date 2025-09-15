@@ -20,6 +20,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.integration
 class TestIssue1182CrossServiceIntegration(SSotBaseTestCase):
     """Integration tests to detect cross-service WebSocket Manager SSOT violations"""
 

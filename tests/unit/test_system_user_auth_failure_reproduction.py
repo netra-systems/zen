@@ -18,6 +18,7 @@ import os
 from unittest.mock import patch, MagicMock
 from shared.isolated_environment import get_env
 
+@pytest.mark.unit
 class TestSystemUserAuthFailureReproduction:
     """Reproduce the exact authentication failure scenarios from Issue #115."""
 
@@ -120,6 +121,7 @@ class TestSystemUserAuthFailureReproduction:
             config_error_keywords = ['service_id', 'service_secret', 'not configured', 'missing', 'required', 'environment', 'config']
             assert any((keyword in error_msg for keyword in config_error_keywords)), f'Expected configuration error mentioning SERVICE_ID or SERVICE_SECRET setup, got: {exc_info.value}. This demonstrates the auth client dependency on proper configuration.'
 
+@pytest.mark.unit
 class TestServiceAuthConfigurationValidation:
     """Additional validation tests for service authentication configuration."""
 

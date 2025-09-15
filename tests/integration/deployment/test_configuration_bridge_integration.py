@@ -15,6 +15,7 @@ These tests use real configuration data without Docker dependencies
 to validate configuration regression prevention works end-to-end.
 """
 
+import pytest
 import unittest
 import sys
 from pathlib import Path
@@ -34,6 +35,7 @@ from deployment.secrets_config import (
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.integration
 class TestConfigurationBridgeIntegration(SSotBaseTestCase):
     """
     Integration tests for configuration bridge functions.
@@ -286,6 +288,7 @@ class TestConfigurationBridgeIntegration(SSotBaseTestCase):
                     )
 
 
+@pytest.mark.integration
 class TestConfigurationBridgeErrorHandling(SSotBaseTestCase):
     """
     Test error handling in configuration bridge functions.

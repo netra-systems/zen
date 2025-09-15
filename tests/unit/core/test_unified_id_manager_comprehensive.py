@@ -49,6 +49,7 @@ from netra_backend.app.core.unified_id_manager import (
 )
 
 
+@pytest.mark.unit
 class TestUnifiedIDManagerCore:
     """Core ID manager functionality tests"""
     
@@ -119,6 +120,7 @@ class TestUnifiedIDManagerCore:
         assert manager._id_counters[IDType.USER] == 2
 
 
+@pytest.mark.unit
 class TestIDRegistration:
     """Test ID registration and tracking functionality"""
     
@@ -174,6 +176,7 @@ class TestIDRegistration:
         assert metadata is None
 
 
+@pytest.mark.unit
 class TestIDValidation:
     """Test ID validation functionality - CRITICAL for data integrity"""
     
@@ -256,6 +259,7 @@ class TestIDValidation:
             assert is_valid_id_format(pattern) is False, f"Should be invalid: {pattern}"
 
 
+@pytest.mark.unit
 class TestIDLifecycleManagement:
     """Test ID lifecycle management - release and cleanup"""
     
@@ -324,6 +328,7 @@ class TestIDLifecycleManagement:
         assert all(uid in active_users for uid in user_ids)
 
 
+@pytest.mark.unit
 class TestThreadSafetyAndConcurrency:
     """Test thread safety under concurrent access - CRITICAL for multi-user system"""
     
@@ -432,6 +437,7 @@ class TestThreadSafetyAndConcurrency:
         assert all(isinstance(count, int) for count in cleanup_results)
 
 
+@pytest.mark.unit
 class TestFormatConversion:
     """Test ID format conversion functionality - supports migration"""
     
@@ -495,6 +501,7 @@ class TestFormatConversion:
             assert "agent" in normalized
 
 
+@pytest.mark.unit
 class TestClassMethodCompatibility:
     """Test class methods for compatibility with existing systems - CRITICAL for startup"""
     
@@ -560,6 +567,7 @@ class TestClassMethodCompatibility:
         assert len(thread_id.split('_')) == 3  # session_timestamp_uuid
 
 
+@pytest.mark.unit
 class TestStatisticsAndMonitoring:
     """Test statistics and monitoring functionality"""
     
@@ -622,6 +630,7 @@ class TestStatisticsAndMonitoring:
         assert all(count == 0 for count in manager._id_counters.values())
 
 
+@pytest.mark.unit
 class TestConvenienceFunctions:
     """Test module-level convenience functions"""
     
@@ -682,6 +691,7 @@ class TestConvenienceFunctions:
         assert normalized is not None
 
 
+@pytest.mark.unit
 class TestPerformanceOptimizations:
     """Test performance under high load - prevents system degradation"""
     
@@ -750,6 +760,7 @@ class TestPerformanceOptimizations:
         assert stats['total_registered'] <= 250  # Cleaned up IDs should be gone
 
 
+@pytest.mark.unit
 class TestBusinessScenarios:
     """Test complete business scenarios - protects $500K+ ARR"""
     

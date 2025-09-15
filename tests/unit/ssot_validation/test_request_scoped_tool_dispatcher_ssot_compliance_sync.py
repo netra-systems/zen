@@ -25,6 +25,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
+@pytest.mark.unit
 class TestRequestScopedToolDispatcherSSotComplianceSync(SSotBaseTestCase):
     """Test SSOT compliance for RequestScopedToolDispatcher system (synchronous)."""
 
@@ -236,6 +237,7 @@ class TestRequestScopedToolDispatcherSSotComplianceSync(SSotBaseTestCase):
         if context_properties:
             self.assertTrue(all(context_properties.values()), f'BASELINE FAILURE: Context properties should match input: {context_properties}')
 
+@pytest.mark.unit
 class TestFactoryPatternComplianceSync(SSotBaseTestCase):
     """Test factory pattern compliance (synchronous)."""
 

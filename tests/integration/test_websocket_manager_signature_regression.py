@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.integration
 class TestWebSocketManagerSignature:
     """Test suite to prevent regression of WebSocket manager signature issues."""
 

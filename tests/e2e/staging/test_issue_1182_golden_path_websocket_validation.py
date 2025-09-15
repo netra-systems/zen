@@ -40,6 +40,7 @@ class GoldenPathValidation:
     performance_metrics: Dict[str, float] = field(default_factory=dict)
 
 
+@pytest.mark.e2e
 class TestGoldenPathWebSocketValidation(SSotAsyncTestCase):
     """
     E2E tests for Issue #1182 Golden Path WebSocket validation in staging environment.

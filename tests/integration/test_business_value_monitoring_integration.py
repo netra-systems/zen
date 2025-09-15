@@ -26,6 +26,7 @@ import json
 from decimal import Decimal
 
 
+@pytest.mark.integration
 class TestBusinessValueMonitoringWebSocketIntegration(SSotAsyncTestCase):
     """Integration tests with WebSocket manager for real-time alerts"""
     
@@ -118,6 +119,7 @@ class TestBusinessValueMonitoringWebSocketIntegration(SSotAsyncTestCase):
                 assert all(alert['user_id'] == user_id for alert in user_alerts)
 
 
+@pytest.mark.integration
 class TestBusinessValueMonitoringDatabaseIntegration(SSotAsyncTestCase):
     """Integration tests with database persistence"""
     
@@ -218,6 +220,7 @@ class TestBusinessValueMonitoringDatabaseIntegration(SSotAsyncTestCase):
                 assert threshold == config['business_value_threshold']
 
 
+@pytest.mark.integration
 class TestBusinessValueMonitoringDashboardIntegration(SSotAsyncTestCase):
     """Integration tests with dashboard endpoints"""
     
@@ -308,6 +311,7 @@ class TestBusinessValueMonitoringDashboardIntegration(SSotAsyncTestCase):
             assert 'formatted_timestamp' in dashboard_alerts[0]
 
 
+@pytest.mark.integration
 class TestBusinessValueMonitoringAlertSystemIntegration(SSotAsyncTestCase):
     """Integration tests with alert system"""
     
@@ -402,6 +406,7 @@ class TestBusinessValueMonitoringAlertSystemIntegration(SSotAsyncTestCase):
             assert len(sent_alerts) == 1
 
 
+@pytest.mark.integration
 class TestBusinessValueMonitoringSystemIntegration(SSotAsyncTestCase):
     """End-to-end system integration tests"""
     

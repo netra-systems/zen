@@ -131,6 +131,7 @@ class MockEventConfirmationSystem:
                 return False
         return False
 
+@pytest.mark.integration
 class TestToolEventDeliveryConfirmationIntegration(SSotAsyncTestCase):
     """Integration tests for tool event delivery confirmation.
     
@@ -306,6 +307,7 @@ class TestToolEventDeliveryConfirmationIntegration(SSotAsyncTestCase):
                 assert degradation_status['confirmation_system_available'] is False
                 assert degradation_status['graceful_degradation_active'] is True
 
+@pytest.mark.integration
 class TestEventConfirmationWebSocketIntegration(SSotAsyncTestCase):
     """Test integration between event confirmation and WebSocket infrastructure.
     

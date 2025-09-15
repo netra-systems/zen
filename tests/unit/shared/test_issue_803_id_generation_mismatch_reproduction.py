@@ -14,10 +14,12 @@ EXPECTED TEST BEHAVIOR:
 - These tests prove the issue exists and will guide the fix
 """
 
+import pytest
 import unittest
 from unittest.mock import patch, MagicMock
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
+@pytest.mark.unit
 class TestIssue803IDGenerationMismatchReproduction(unittest.TestCase):
     """Test suite to reproduce the ID generation mismatch issue."""
 

@@ -41,6 +41,7 @@ from test_framework.docker_port_discovery import DockerPortDiscovery, ServicePor
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestUnifiedDockerManagerOrchestration(SSotBaseTestCase):
     """
     Test suite for Docker Service Orchestration functionality.
@@ -206,6 +207,7 @@ class TestUnifiedDockerManagerOrchestration(SSotBaseTestCase):
         recovery_success = self.docker_manager.orchestrate_services_sync([service_name])
         assert recovery_success, 'Service should be recoverable after failure'
 
+@pytest.mark.integration
 class TestUnifiedDockerManagerResourceManagement(SSotBaseTestCase):
     """
     Test suite for Resource Management and Limits functionality.
@@ -362,6 +364,7 @@ class TestUnifiedDockerManagerResourceManagement(SSotBaseTestCase):
             status = self.docker_manager.get_service_status(service_name)
             assert status in [ServiceStatus.RUNNING, ServiceStatus.HEALTHY]
 
+@pytest.mark.integration
 class TestUnifiedDockerManagerCrossPlatform(SSotBaseTestCase):
     """
     Test suite for Cross-Platform Compatibility.
@@ -519,6 +522,7 @@ class TestUnifiedDockerManagerCrossPlatform(SSotBaseTestCase):
                 status = self.docker_manager.get_service_status(service)
                 assert status in [ServiceStatus.RUNNING, ServiceStatus.HEALTHY, ServiceStatus.STARTING]
 
+@pytest.mark.integration
 class TestUnifiedDockerManagerEnvironmentIsolation(SSotBaseTestCase):
     """
     Test suite for Environment Isolation functionality.
@@ -703,6 +707,7 @@ class TestUnifiedDockerManagerEnvironmentIsolation(SSotBaseTestCase):
         assert status_1 in [ServiceStatus.RUNNING, ServiceStatus.HEALTHY]
         assert status_2 in [ServiceStatus.RUNNING, ServiceStatus.HEALTHY]
 
+@pytest.mark.integration
 class TestUnifiedDockerManagerCIPipeline(SSotBaseTestCase):
     """
     Test suite for CI/CD Pipeline Integration functionality.

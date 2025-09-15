@@ -437,7 +437,7 @@ class TestWebSocketManagerSSOTImportConsolidation(SSotBaseTestCase):
             'connect_user',
             'disconnect_user',
             'send_message',
-            'broadcast_to_user',
+            'broadcast_to_all',  # ISSUE #1182: Fixed method name - was broadcast_to_user
             'get_connection_count'
         ]
 

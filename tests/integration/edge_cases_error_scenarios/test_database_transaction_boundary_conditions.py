@@ -31,6 +31,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.core.config import get_config
 
 
+@pytest.mark.integration
 class TestDatabaseTransactionBoundaryConditions(BaseIntegrationTest):
     """
     Test database transaction boundaries under concurrent access conditions.

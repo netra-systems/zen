@@ -18,6 +18,7 @@ BUSINESS IMPACT: $500K+ ARR Golden Path failures due to:
 TEST STRATEGY: 20% of MessageRouter SSOT testing strategy focused on implementation detection
 """
 
+import pytest
 import unittest
 import importlib
 import inspect
@@ -27,6 +28,7 @@ from typing import Set, List, Dict, Any, Tuple
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestMessageRouterImplementationDetection(SSotBaseTestCase):
     """Test that detects ALL MessageRouter implementations in the codebase."""
 
@@ -325,6 +327,7 @@ class TestMessageRouterImplementationDetection(SSotBaseTestCase):
             )
 
 
+@pytest.mark.unit
 class TestMessageRouterImplementationConflictDetection(SSotBaseTestCase):
     """Test for detecting conflicts between different implementations."""
 

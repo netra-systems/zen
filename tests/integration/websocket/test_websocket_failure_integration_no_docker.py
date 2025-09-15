@@ -38,6 +38,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from shared.types.agent_types import AgentExecutionResult
 from shared.types.core_types import UserID, ThreadID, RunID
 
+@pytest.mark.integration
 class TestWebSocketFailureIntegrationNoDocker(SSotAsyncTestCase):
     """
     Integration tests for WebSocket failure cascades across components.

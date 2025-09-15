@@ -41,6 +41,7 @@ from netra_backend.app.websocket_core import MessageRouter, create_server_messag
 from netra_backend.app.websocket_core.utils import is_websocket_connected, is_websocket_connected_and_ready
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.integration
 class TestWebSocketComponentsRealConnectionIntegration(SSotBaseTestCase):
     """
     Integration tests for real WebSocket connections with authentication.

@@ -33,6 +33,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
 from shared.types.core_types import UserID, ThreadID, RunID
 
+@pytest.mark.unit
 class TestUserExecutionContextValidationSecurity(SSotAsyncTestCase):
     """Test suite for UserExecutionContext security validation in AgentExecutionCore.
     

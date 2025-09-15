@@ -95,6 +95,7 @@ class ScalabilityTestResult:
     scalability_violations: List[str]
 
 
+@pytest.mark.performance
 class TestSSotUserContextPerformance(SSotAsyncTestCase):
     """SSOT Performance: Validate performance impact of UserExecutionContext consolidation"""
     

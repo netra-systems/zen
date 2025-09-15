@@ -27,6 +27,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
+@pytest.mark.unit
 class TestUserIsolationValidation(SSotAsyncTestCase):
     """Test user isolation in RequestScopedToolDispatcher SSOT implementation."""
 
@@ -273,6 +274,7 @@ class TestUserIsolationValidation(SSotAsyncTestCase):
         except Exception as e:
             self.fail(f'Concurrent user execution isolation test failed: {e}')
 
+@pytest.mark.unit
 class TestResourceCleanupIsolation(SSotAsyncTestCase):
     """Test resource cleanup and disposal isolation."""
 

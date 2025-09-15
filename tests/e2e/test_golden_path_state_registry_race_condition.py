@@ -44,6 +44,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 logger = logging.getLogger(__name__)
 
+@pytest.mark.e2e
 class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

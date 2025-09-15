@@ -23,6 +23,7 @@ from datetime import datetime, timezone
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
+@pytest.mark.integration
 class TestStructuredIdPatterns(SSotBaseTestCase):
     """Integration tests validating structured ID patterns after SSOT migration"""
 

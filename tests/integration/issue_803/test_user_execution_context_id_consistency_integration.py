@@ -17,6 +17,7 @@ EXPECTED TEST BEHAVIOR:
 - These tests will pass once the ID generation bug is fixed
 """
 
+import pytest
 import unittest
 import asyncio
 from unittest.mock import patch
@@ -26,6 +27,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.integration
 class TestIssue803UserExecutionContextIDConsistency(SSotAsyncTestCase):
     """Integration tests for UserExecutionContext ID consistency validation."""
 

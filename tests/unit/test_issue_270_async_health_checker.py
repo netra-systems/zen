@@ -26,6 +26,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 from tests.e2e.real_services_manager import AsyncHealthChecker, HealthCheckConfig, CircuitBreakerState, ServiceEndpoint, ServiceStatus, RealServicesManager
 
+@pytest.mark.unit
 class TestAsyncHealthChecker:
     """Test suite for AsyncHealthChecker core functionality."""
 
@@ -183,6 +184,7 @@ class TestAsyncHealthChecker:
         assert health_checker.config.circuit_breaker_enabled == False
         assert health_checker.config.health_check_timeout == 15.0
 
+@pytest.mark.unit
 class TestRealServicesManagerIntegration:
     """Test suite for RealServicesManager integration with AsyncHealthChecker."""
 
@@ -237,6 +239,7 @@ class TestRealServicesManagerIntegration:
         assert len(real_services_manager.health_checker.failure_counts) == 0
         assert len(real_services_manager.health_checker.last_failure_times) == 0
 
+@pytest.mark.unit
 class TestIssue270BusinessValueValidation:
     """Test suite validating business value claims from Issue #270."""
 

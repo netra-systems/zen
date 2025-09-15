@@ -51,6 +51,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from tests.unified_test_runner import UnifiedTestRunner
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerInitialization(SSotBaseTestCase):
     """Test core initialization and configuration of UnifiedTestRunner."""
     
@@ -216,6 +217,7 @@ class TestUnifiedTestRunnerInitialization(SSotBaseTestCase):
         self.record_metric("collection_size_configured", True)
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerCategorySystem(SSotBaseTestCase):
     """Test category-based test discovery and organization functionality."""
     
@@ -372,6 +374,7 @@ class TestUnifiedTestRunnerCategorySystem(SSotBaseTestCase):
         self.record_metric("resumed_categories_count", len(resumed_categories))
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerDockerIntegration(SSotBaseTestCase):
     """Test Docker service management and Alpine container support."""
     
@@ -475,6 +478,7 @@ class TestUnifiedTestRunnerDockerIntegration(SSotBaseTestCase):
         self.record_metric("cleanup_success", cleanup_success)
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerOrchestration(SSotAsyncTestCase):
     """Test orchestration agents and layer-based execution functionality."""
     
@@ -573,6 +577,7 @@ class TestUnifiedTestRunnerOrchestration(SSotAsyncTestCase):
         self.record_metric("execution_results_valid", True)
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerProgressTracking(SSotBaseTestCase):
     """Test progress tracking and reporting functionality."""
     
@@ -738,6 +743,7 @@ class TestUnifiedTestRunnerProgressTracking(SSotBaseTestCase):
         self.record_metric("recording_success", recording_success)
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerCommandBuilding(SSotBaseTestCase):
     """Test pytest and frontend command building functionality."""
     
@@ -903,6 +909,7 @@ class TestUnifiedTestRunnerCommandBuilding(SSotBaseTestCase):
         self.record_metric("frontend_coverage_command_built", True)
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerEnvironmentConfiguration(SSotBaseTestCase):
     """Test environment configuration and isolation functionality."""
     
@@ -994,6 +1001,7 @@ class TestUnifiedTestRunnerEnvironmentConfiguration(SSotBaseTestCase):
         self.record_metric("staging_auth_configured", staging_auth_configured)
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerCypressIntegration(SSotBaseTestCase):
     """Test Cypress test execution and frontend testing functionality."""
     
@@ -1063,6 +1071,7 @@ class TestUnifiedTestRunnerCypressIntegration(SSotBaseTestCase):
         self.record_metric("cypress_execution_success", cypress_execution_handled)
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerServiceAvailability(SSotBaseTestCase):
     """Test service availability checking and validation."""
     
@@ -1107,6 +1116,7 @@ class TestUnifiedTestRunnerServiceAvailability(SSotBaseTestCase):
         self.record_metric("quick_service_check_functional", True)
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerUtilities(SSotBaseTestCase):
     """Test utility functions and helper methods."""
     
@@ -1196,6 +1206,7 @@ class TestUnifiedTestRunnerUtilities(SSotBaseTestCase):
         self.record_metric("report_generation_success", report_generated)
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerWindowsCompatibility(SSotBaseTestCase):
     """Test Windows-specific functionality and cross-platform compatibility."""
     
@@ -1273,6 +1284,7 @@ class TestUnifiedTestRunnerWindowsCompatibility(SSotBaseTestCase):
         self.record_metric("paths_tested", len(paths))
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerErrorHandling(SSotBaseTestCase):
     """Test error handling and recovery mechanisms."""
     
@@ -1354,6 +1366,7 @@ class TestUnifiedTestRunnerErrorHandling(SSotBaseTestCase):
         self.record_metric("cleanup_handled", cleanup_handled)
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerIntegrationPoints(SSotBaseTestCase):
     """Test integration with other system components."""
     
@@ -1433,6 +1446,7 @@ class TestUnifiedTestRunnerIntegrationPoints(SSotBaseTestCase):
 
 # === PERFORMANCE AND STRESS TESTS ===
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerPerformance(SSotBaseTestCase):
     """Test performance characteristics and resource usage."""
     
@@ -1533,6 +1547,7 @@ class TestUnifiedTestRunnerPerformance(SSotBaseTestCase):
 
 # === COMPREHENSIVE INTEGRATION TESTS ===
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerComprehensiveIntegration(SSotAsyncTestCase):
     """Comprehensive integration tests for the unified test runner."""
     
@@ -1669,6 +1684,7 @@ class TestUnifiedTestRunnerComprehensiveIntegration(SSotAsyncTestCase):
 
 # === FINAL VALIDATION TESTS ===
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerSSotCompliance(SSotBaseTestCase):
     """Test SSOT compliance and architectural standards."""
     
@@ -1808,6 +1824,7 @@ class TestUnifiedTestRunnerSSotCompliance(SSotBaseTestCase):
 
 # === MODULE COMPLETION VALIDATION ===
 
+@pytest.mark.unit
 def test_comprehensive_unit_test_suite_completion():
     """
     Final validation that comprehensive unit test suite is complete.

@@ -26,6 +26,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 pytestmark = [pytest.mark.integration, pytest.mark.websocket, pytest.mark.websocket_authentication, pytest.mark.no_docker]
 
+@pytest.mark.integration
 class TestWebSocketAuthenticationHandshakeFlow(SSotAsyncTestCase):
     """
     Integration test suite for WebSocket authentication handshake flow.

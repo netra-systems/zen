@@ -19,6 +19,7 @@ from typing import Dict, Any, Optional, List
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestJWTValidationSSOTEnforcement(SSotAsyncTestCase):
     """
     Integration test validating JWT validation SSOT enforcement.

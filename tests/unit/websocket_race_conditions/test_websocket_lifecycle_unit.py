@@ -35,6 +35,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.isolated_environment import get_env
 
+@pytest.mark.unit
 class TestWebSocketAcceptTiming:
     """
     CRITICAL TEST: Validates accept() completion timing before message handling.
@@ -86,6 +87,7 @@ class TestWebSocketAcceptTiming:
             assert validation_time < 5.0, f'GCP validation took {validation_time}s - too slow even with mocks'
             assert is_ready, 'GCP readiness validation should succeed with healthy services'
 
+@pytest.mark.unit
 class TestMessageHandlerServiceConsistency:
     """
     CRITICAL TEST: Validates consistent constructor signatures across all initialization paths.
@@ -121,6 +123,7 @@ class TestMessageHandlerServiceConsistency:
         except TypeError as signature_error:
             pytest.fail(f'Factory signature mismatch detected: {signature_error}')
 
+@pytest.mark.unit
 class TestBidirectionalHandshakeCompletion:
     """
     CRITICAL TEST: Validates actual send/receive capability before operations.
@@ -174,6 +177,7 @@ class TestBidirectionalHandshakeCompletion:
         except RuntimeError:
             pass
 
+@pytest.mark.unit
 class TestHeartbeatConfigurationAlignment:
     """
     CRITICAL TEST: Validates heartbeat timing matches GCP infrastructure settings.
@@ -229,6 +233,7 @@ class TestHeartbeatConfigurationAlignment:
         await monitor.stop()
         assert not monitor.running, 'Heartbeat monitor should be stopped'
 
+@pytest.mark.unit
 class TestGCPReadinessValidationStaging:
     """
     CRITICAL TEST: Validates staging-appropriate timeout values and readiness checks.

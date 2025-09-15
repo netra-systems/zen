@@ -3,6 +3,7 @@ Unit test to verify the message input logic fix.
 Tests the checkIfFirstMessage and message type determination logic.
 """
 
+import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
@@ -12,6 +13,7 @@ from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.frontend
 class TestMessageInputLogic(SSotBaseTestCase):
     """Test the message input logic for determining message types."""
     

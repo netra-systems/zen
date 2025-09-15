@@ -26,6 +26,7 @@ import os
 sys.path.append('/Users/anthony/Desktop/netra-apex')
 from netra_backend.app.websocket_core.gcp_initialization_validator import GCPWebSocketInitializationValidator, GCPReadinessState, ServiceReadinessCheck, GCPReadinessResult, create_gcp_websocket_validator, gcp_websocket_readiness_guard, gcp_websocket_readiness_check
 
+@pytest.mark.unit
 class TestGCPWebSocketInitializationValidator:
     """Unit tests for GCP WebSocket initialization validator."""
 
@@ -390,6 +391,7 @@ class TestGCPWebSocketInitializationValidator:
         assert result == True
         assert call_count == 2
 
+@pytest.mark.unit
 class TestGCPValidatorFactory:
     """Test validator factory functions."""
 

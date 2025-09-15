@@ -17,6 +17,7 @@ from typing import Dict, Set, Any, List, Callable
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestMessageRouterImplementationUniqueness(SSotBaseTestCase):
     """Test MessageRouter implementation uniqueness across import paths."""
 

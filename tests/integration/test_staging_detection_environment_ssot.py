@@ -24,6 +24,7 @@ from shared.isolated_environment import get_env
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.integration
 class TestStagingDetectionEnvironmentSSot(SSotBaseTestCase):
     """Test suite for staging environment detection SSOT validation."""
 

@@ -110,6 +110,7 @@ class CacheService:
     async def set_with_ttl(self, key, value, ttl_seconds):
         pass
 
+@pytest.mark.integration
 class TestDatabasePersistenceL3Integration:
     """Comprehensive L3 integration tests for database and persistence."""
 

@@ -34,6 +34,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.core.config import get_config
 
 
+@pytest.mark.integration
 class TestThreadSafetyRaceConditionBoundaries(BaseIntegrationTest):
     """
     Test thread safety and race condition boundaries under concurrent execution.

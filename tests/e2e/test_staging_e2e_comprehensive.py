@@ -66,6 +66,7 @@ async def websocket_client(auth_client):
         await client.disconnect()
 
 
+@pytest.mark.e2e
 class TestStagingHealthChecks:
     """Test health endpoints of all staging services."""
     
@@ -104,6 +105,7 @@ class TestStagingHealthChecks:
                 assert "redis" in data["components"]
 
 
+@pytest.mark.e2e
 class TestStagingAuthentication:
     """Test authentication flows against staging."""
     
@@ -158,6 +160,7 @@ class TestStagingAuthentication:
             assert response.status_code == 401
 
 
+@pytest.mark.e2e
 class TestStagingAPIEndpoints:
     """Test API endpoints against staging backend."""
     
@@ -202,6 +205,7 @@ class TestStagingAPIEndpoints:
             assert isinstance(data, (list, dict))
 
 
+@pytest.mark.e2e
 class TestStagingWebSocket:
     """Test WebSocket functionality against staging."""
     
@@ -266,6 +270,7 @@ class TestStagingWebSocket:
         assert success is True
 
 
+@pytest.mark.e2e
 class TestStagingEndToEndScenarios:
     """Test complete end-to-end scenarios."""
     
@@ -331,6 +336,7 @@ class TestStagingEndToEndScenarios:
             await client.disconnect()
 
 
+@pytest.mark.e2e
 class TestStagingErrorHandling:
     """Test error handling in staging environment."""
     

@@ -48,6 +48,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID, ensure_u
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 logger = logging.getLogger(__name__)
 
+@pytest.mark.e2e
 class TestGoldenPathDatabaseFlow:
     """
     Golden Path E2E Database Flow Test Suite.

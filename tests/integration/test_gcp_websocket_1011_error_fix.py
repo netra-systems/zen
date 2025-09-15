@@ -18,6 +18,7 @@ from fastapi.websockets import WebSocketState as FastAPIWebSocketState
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
+@pytest.mark.integration
 class TestWebSocket1011ErrorFix:
     """Regression tests for the specific 1011 WebSocket error scenario."""
 
@@ -199,6 +200,7 @@ class TestWebSocket1011ErrorFix:
         assert app_state_safe == "connected"
 
 
+@pytest.mark.integration
 class TestRegressionPrevention:
     """Ensure this fix prevents future regressions of the 1011 error."""
 
@@ -263,6 +265,7 @@ class TestRegressionPrevention:
             json.dumps(complex_structure)  # Should not raise
 
 
+@pytest.mark.integration
 class TestProductionScenarios:
     """Test scenarios that mirror production conditions where 1011 errors occurred."""
 

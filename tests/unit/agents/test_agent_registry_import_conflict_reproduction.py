@@ -24,6 +24,7 @@ Test Strategy:
 4. Show multi-user isolation issues
 """
 
+import pytest
 import asyncio
 import logging
 import unittest
@@ -63,6 +64,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.unit
 class TestAgentRegistryImportConflictReproduction(SSotAsyncTestCase):
     """
     Test suite to reproduce and validate AgentRegistry SSOT violations.

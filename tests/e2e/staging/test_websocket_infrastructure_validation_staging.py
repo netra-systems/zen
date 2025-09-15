@@ -23,6 +23,7 @@ from shared.isolated_environment import get_env
 from tests.mission_critical.websocket_real_test_base import RealWebSocketTestConfig
 
 
+@pytest.mark.e2e
 class TestWebSocketInfrastructureStaging:
     """E2E tests for WebSocket infrastructure against staging GCP environment."""
     

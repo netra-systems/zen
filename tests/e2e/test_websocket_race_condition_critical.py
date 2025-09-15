@@ -217,6 +217,7 @@ class RaceConditionWebSocketClient:
         await self.websocket.send(json.dumps(request_data))
         return thread_id
 
+@pytest.mark.e2e
 class TestWebSocketRaceConditionCritical:
     """
     CRITICAL E2E test suite for WebSocket race condition bug.

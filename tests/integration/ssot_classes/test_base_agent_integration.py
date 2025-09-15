@@ -45,6 +45,7 @@ from netra_backend.app.core.resilience.unified_retry_handler import UnifiedRetry
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
 from shared.types.core_types import UserID, ThreadID, RunID
 
+@pytest.mark.integration
 class TestBaseAgentForIntegration(BaseAgent):
     """Concrete test agent implementation for testing BaseAgent abstract patterns.
     
@@ -152,6 +153,7 @@ class TestBaseAgentForIntegration(BaseAgent):
         except RuntimeError:
             pass
 
+@pytest.mark.integration
 class TestBaseAgentIntegration(SSotAsyncTestCase):
     """Integration tests for BaseAgent SSOT class functionality.
     

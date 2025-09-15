@@ -100,6 +100,7 @@ class MockLongRunningAgent:
         self.is_running = False
         return results
 
+@pytest.mark.integration
 class TestLongRunningAgentStreaming(SSotAsyncTestCase):
     """Integration tests for long-running agent streaming scenarios."""
 
@@ -351,6 +352,7 @@ class TestLongRunningAgentStreaming(SSotAsyncTestCase):
         self.record_metric('current_websocket_timeout', current_websocket_timeout)
         assert len(progression_gaps) == 0, f"Issue #341 TIMEOUT PROGRESSION REQUIREMENT: Current timeouts inadequate for {len(progression_gaps)}/{len(timeout_progression)} phases. Agent timeout: {current_agent_timeout}s, WebSocket timeout: {current_websocket_timeout}s. Gaps found in phases: {[g['phase'] for g in progression_gaps]}. Maximum required: {max((p['required_timeout'] for p in timeout_progression))}s. This proves Issue #341: Need 60s -> 300s timeout progression for enterprise workflows."
 
+@pytest.mark.integration
 class TestStreamingTimeoutRecovery(SSotAsyncTestCase):
     """Tests for streaming timeout recovery and graceful degradation."""
 

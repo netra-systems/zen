@@ -12,6 +12,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 import importlib
 
+@pytest.mark.integration
 class TestServiceConfigurationIndependence:
     """Phase 2 Tests - Service independence during config migration"""
 
@@ -160,6 +161,7 @@ class TestServiceConfigurationIndependence:
         except ImportError as e:
             pytest.fail(f'Cannot test WebSocket configuration compatibility: {e}')
 
+@pytest.mark.integration
 class TestCrossServiceCommunication:
     """Test cross-service communication during configuration migration"""
 

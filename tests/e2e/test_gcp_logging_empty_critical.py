@@ -88,6 +88,7 @@ from shared.logging.unified_logging_ssot import (
 from auth_service.auth_core.services.auth_service import AuthService
 
 
+@pytest.mark.e2e
 class TestGCPLoggingEmptyCritical(SSotBaseTestCase):
     """
     E2E test suite for GCP logging empty CRITICAL reproduction.

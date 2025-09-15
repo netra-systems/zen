@@ -41,6 +41,7 @@ from tests.clients.websocket_client import WebSocketClient
 from tests.helpers.auth_helper import create_test_user_with_jwt
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.integration
 class TestWebSocketAuthModes(SSotBaseTestCase):
     """
     Integration tests for WebSocket authentication modes.
@@ -281,6 +282,7 @@ class TestWebSocketAuthModes(SSotBaseTestCase):
         env.remove('DEMO_MODE', default=None)
         await super().asyncTearDown()
 
+@pytest.mark.integration
 class TestAuthModeEnvironmentDetection(SSotBaseTestCase):
     """Test detection of authentication modes from environment configuration."""
 

@@ -42,6 +42,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, Authenti
 from tests.e2e.staging_config import StagingTestConfig
 from shared.isolated_environment import get_env
 
+@pytest.mark.e2e
 class TestAgentGoldenPathSmoke(SSotAsyncTestCase):
     """
     Fast smoke tests for agent golden path functionality.
@@ -293,6 +294,7 @@ class TestAgentGoldenPathSmoke(SSotAsyncTestCase):
         unavailable_indicators = ['connection refused', 'connection failed', 'connection reset', 'no route to host', 'network unreachable', 'timeout', 'refused', 'name or service not known', 'nodename nor servname provided']
         return any((indicator in error_msg for indicator in unavailable_indicators))
 
+@pytest.mark.e2e
 class TestAgentGoldenPathSmokeStaging(SSotAsyncTestCase):
     """
     Staging-specific smoke tests with optimizations for GCP Cloud Run.

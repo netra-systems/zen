@@ -45,6 +45,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, Authenti
 from tests.e2e.staging_config import StagingTestConfig, staging_urls
 from shared.isolated_environment import get_env
 
+@pytest.mark.e2e
 class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase):
     """
     CRITICAL E2E Tests for GCP Staging WebSocket Infrastructure
@@ -311,6 +312,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
         self.assertTrue(regression_test_result['regression_prevented'], f'CRITICAL REGRESSION: GitHub issue #113 symptoms detected. WebSocket upgrade with auth headers is not working properly. Full test result: {regression_test_result}')
         print(' PASS:  REGRESSION TEST PASSED: GitHub issue #113 header stripping prevented')
 
+@pytest.mark.e2e
 class TestGCPWebSocketInfrastructureResilience(SSotBaseTestCase, unittest.TestCase):
     """
     Tests for GCP WebSocket infrastructure resilience and error handling.

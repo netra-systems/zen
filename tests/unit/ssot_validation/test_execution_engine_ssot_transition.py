@@ -19,6 +19,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.unit
 class TestExecutionEngineSSotTransition(SSotBaseTestCase):
     """Test SSOT transition compliance for execution engine consolidation."""
     
@@ -293,6 +294,7 @@ class TestExecutionEngineSSotTransition(SSotBaseTestCase):
 
 
 # Golden Path Integration Test
+@pytest.mark.unit
 class TestExecutionEngineGoldenPathProtection(SSotBaseTestCase):
     """Verify execution engine SSOT transition doesn't break Golden Path."""
     

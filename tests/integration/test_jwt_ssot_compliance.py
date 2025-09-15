@@ -36,6 +36,7 @@ from test_framework.ssot.websocket_auth_test_helpers import WebSocketAuthenticat
 
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestJwtSsotComplianceIntegration(SSotAsyncTestCase):
     """
     JWT SSOT Integration Compliance Tests

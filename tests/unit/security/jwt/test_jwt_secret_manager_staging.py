@@ -27,6 +27,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from shared.jwt_secret_manager import JWTSecretManager, get_jwt_secret_manager
 logger = logging.getLogger(__name__)
 
+@pytest.mark.unit
 class TestJWTSecretManagerStaging(SSotBaseTestCase, unittest.TestCase):
     """
     Test JWT Secret Manager staging configuration.

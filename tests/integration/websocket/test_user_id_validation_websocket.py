@@ -47,6 +47,7 @@ from shared.types.core_types import ensure_user_id, UserID
 from shared.jwt_secret_manager import get_unified_jwt_secret
 from shared.isolated_environment import get_env
 
+@pytest.mark.integration
 class TestWebSocketUserIDValidationIntegration(BaseIntegrationTest):
     """
     Integration tests for WebSocket user ID validation bug reproduction.

@@ -407,6 +407,7 @@ class JWTSSOTViolationInventoryCatalog:
         return report
 
 
+@pytest.mark.unit
 class TestJWTSSOTViolationInventory(SSotBaseTestCase):
     """
     Unit Test Suite: JWT SSOT Violation Inventory

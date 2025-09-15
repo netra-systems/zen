@@ -15,6 +15,7 @@ from unittest.mock import patch
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
+@pytest.mark.unit
 class TestIsolatedEnvironmentSSOTCompliance:
     """Test IsolatedEnvironment SSOT compliance patterns to prevent cascade failures."""
 
@@ -161,6 +162,7 @@ class TestIsolatedEnvironmentSSOTCompliance:
         assert env.get(service_secret_key) == new_emergency_value
 
 
+@pytest.mark.unit
 class TestEnvironmentIsolationBoundaries:
     """Test environment isolation boundaries to prevent configuration drift."""
 

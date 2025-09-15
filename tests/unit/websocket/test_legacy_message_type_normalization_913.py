@@ -13,6 +13,7 @@ Root Cause: Missing 'legacy_response' and 'legacy_heartbeat' in LEGACY_MESSAGE_T
 TEST STRATEGY: These tests WILL FAIL initially to reproduce the bug, then PASS after fix.
 """
 
+import pytest
 import unittest
 from typing import Dict, Any
 
@@ -24,6 +25,7 @@ from netra_backend.app.websocket_core.types import (
 )
 
 
+@pytest.mark.unit
 class TestLegacyMessageTypeNormalization913(unittest.TestCase):
     """Test normalize_message_type() function with legacy message types for Issue #913."""
 
@@ -170,6 +172,7 @@ class TestLegacyMessageTypeNormalization913(unittest.TestCase):
                     self.assertIn("Message type must be", error_msg)
 
 
+@pytest.mark.unit
 class TestLegacyMessageTypeFix913(unittest.TestCase):
     """
     Tests that will PASS after Issue #913 fix is implemented.

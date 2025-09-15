@@ -15,6 +15,7 @@ They will detect:
 4. Duplicate implementations across modules
 """
 
+import pytest
 import os
 import sys
 import ast
@@ -29,6 +30,7 @@ sys.path.insert(0, str(project_root))
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestMessageRouterSSOTViolations(SSotBaseTestCase):
     """Unit tests to detect MessageRouter SSOT violations."""
     

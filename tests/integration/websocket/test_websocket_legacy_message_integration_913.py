@@ -14,6 +14,7 @@ TEST STRATEGY: These tests WILL FAIL initially to prove integration issues,
 then PASS after fix is implemented.
 """
 
+import pytest
 import unittest
 import asyncio
 import json
@@ -33,6 +34,7 @@ from netra_backend.app.websocket_core.types import (
 from netra_backend.app.websocket_core.manager import WebSocketManager
 
 
+@pytest.mark.integration
 class TestWebSocketLegacyMessageIntegration913(SSotAsyncTestCase):
     """Test WebSocket message processing with legacy message types for Issue #913."""
 
@@ -223,6 +225,7 @@ class TestWebSocketLegacyMessageIntegration913(SSotAsyncTestCase):
                     await self.websocket_manager.process_message(message)
 
 
+@pytest.mark.integration
 class TestWebSocketLegacyMessageFixValidation913(SSotAsyncTestCase):
     """
     Integration tests that will PASS after Issue #913 fix is implemented.

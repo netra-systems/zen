@@ -14,6 +14,7 @@ Test Strategy: Static analysis of class interfaces and method signatures.
 NO DOCKER required - pure Python AST parsing and interface inspection.
 """
 
+import pytest
 import ast
 import inspect
 from pathlib import Path
@@ -24,6 +25,7 @@ from collections import defaultdict
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestWebSocketManagerInterfaceUnification(SSotBaseTestCase, unittest.TestCase):
     """Test suite to validate interface unification for WebSocket managers.
     

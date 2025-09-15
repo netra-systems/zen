@@ -13,6 +13,7 @@ SCOPE: Non-Docker integration test that validates:
 EXECUTION: python -m pytest tests/integration/test_message_router_ssot_integration.py -v
 """
 
+import pytest
 import unittest
 import asyncio
 import warnings
@@ -20,6 +21,7 @@ from typing import Dict, List, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestMessageRouterSSOTIntegration(SSotAsyncTestCase):
     """Integration tests for MessageRouter SSOT compliance."""
 

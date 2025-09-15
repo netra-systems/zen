@@ -23,6 +23,7 @@ from shared.isolated_environment import IsolatedEnvironment as DevLauncherIsolat
 from shared.isolated_environment import IsolatedEnvironment as BackendIsolatedEnvironment
 
 
+@pytest.mark.integration
 class TestEnvironmentInterfaceConsistency:
     """Test consistency between different IsolatedEnvironment implementations."""
     

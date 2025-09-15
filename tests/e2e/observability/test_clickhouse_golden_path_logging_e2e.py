@@ -94,6 +94,7 @@ from shared.types.core_types import UserID
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.e2e
 class TestClickHouseGoldenPathLoggingE2E(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

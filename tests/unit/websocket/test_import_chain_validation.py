@@ -26,6 +26,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 from test_framework.ssot.base_test_case import BaseTestCase
 
+@pytest.mark.unit
 class TestImportChainValidation(BaseTestCase):
     """
     Unit tests for import chain validation under Cloud Run conditions.
@@ -180,6 +181,7 @@ class TestImportChainValidation(BaseTestCase):
         gc.collect()
         threading.Timer(0.1, lambda: sys.modules.update(removed_modules)).start()
 
+@pytest.mark.unit
 class TestExceptionHandlerImports(BaseTestCase):
     """Test import stability during exception handling scenarios."""
 

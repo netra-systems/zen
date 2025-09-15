@@ -37,6 +37,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.unit
 class TestSecretKeyDeploymentRegression:
     """Test suite to prevent SECRET_KEY deployment regression."""
     
@@ -239,6 +240,7 @@ class TestSecretKeyDeploymentRegression:
         )
 
 
+@pytest.mark.unit
 class TestRedisConfigurationRegression:
     """Test suite to prevent Redis configuration regressions.
     
@@ -294,6 +296,7 @@ class TestRedisConfigurationRegression:
         )
 
 
+@pytest.mark.unit
 class TestOAuthConfigurationRegression:
     """Test suite to prevent OAuth configuration regressions.
     

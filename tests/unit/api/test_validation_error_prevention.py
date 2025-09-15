@@ -90,6 +90,7 @@ PREVIOUSLY_REJECTED_VALID_PATTERNS = [
 ]
 
 
+@pytest.mark.unit
 class TestAPIValidationErrorPrevention(SSotBaseTestCase):
     """Test API validation prevents 422 errors for valid user requests."""
     

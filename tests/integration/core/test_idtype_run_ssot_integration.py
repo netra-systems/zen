@@ -54,6 +54,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker, get_execution_tracker
 
 
+@pytest.mark.integration
 class TestIDTypeRunSSOTIntegration(SSotBaseTestCase):
     """
     Integration tests for IDType.RUN SSOT compliance across system components.

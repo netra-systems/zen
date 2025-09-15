@@ -78,6 +78,7 @@ except ImportError:
     UnifiedWebSocketEmitter = None
 
 
+@pytest.mark.integration
 class TestAgentFactoryWebSocketManagerIntegration(SSotBaseTestCase):
     """Test agent factory and WebSocket manager integration conflicts."""
     
@@ -256,6 +257,7 @@ class TestAgentFactoryWebSocketManagerIntegration(SSotBaseTestCase):
             self.assertIn("bridge", str(e).lower())
 
 
+@pytest.mark.integration
 class TestFactoryPatternCrossComponentIntegration(SSotBaseTestCase):
     """Test factory pattern cross-component integration conflicts."""
     

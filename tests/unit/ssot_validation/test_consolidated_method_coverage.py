@@ -17,6 +17,7 @@ import inspect
 from typing import Dict, List, Any, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestConsolidatedMethodCoverage(SSotBaseTestCase):
     """
     Test that AgentExecutionTracker provides comprehensive method coverage

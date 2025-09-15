@@ -17,6 +17,7 @@ from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.startup_validation import StartupValidator, ComponentValidation, ComponentStatus
 
+@pytest.mark.unit
 class TestDatabaseConfigurationValidationFix(SSotAsyncTestCase):
     """Test suite for the Issue #378 fix in startup validation."""
 

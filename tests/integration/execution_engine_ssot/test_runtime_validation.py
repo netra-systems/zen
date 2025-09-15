@@ -7,6 +7,7 @@ SHOULD PASS AFTER: Only UserExecutionEngine used
 Business Value: Prevents $500K+ ARR runtime user isolation failures
 """
 
+import pytest
 import asyncio
 import gc
 import inspect
@@ -105,6 +106,7 @@ class RuntimeExecutionEngineMonitor:
         return violations
 
 
+@pytest.mark.integration
 class TestRuntimeValidation(SSotAsyncTestCase):
     """Validate runtime execution engine usage for SSOT compliance."""
 

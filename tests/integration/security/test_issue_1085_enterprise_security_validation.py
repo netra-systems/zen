@@ -22,6 +22,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
 
+@pytest.mark.integration
 class TestEnterpriseSecurityValidation:
     """Integration tests for enterprise security compliance scenarios."""
 
@@ -150,6 +151,7 @@ class TestEnterpriseSecurityValidation:
                 vulnerable_segments += 1
         assert vulnerable_segments == len(enterprise_segments), f'All {len(enterprise_segments)} enterprise segments affected by interface vulnerability'
 
+@pytest.mark.integration
 class TestProductionScenarioReproduction:
     """Integration tests reproducing production failure scenarios."""
 

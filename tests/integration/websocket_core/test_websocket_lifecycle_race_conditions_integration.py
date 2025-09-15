@@ -32,6 +32,7 @@ from netra_backend.app.websocket_core.agent_handler import WebSocketAgentHandler
 from shared.types.core_types import UserID, ConnectionID, ThreadID
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.integration
 class TestWebSocketLifecycleRaceConditions(SSotAsyncTestCase):
     """
     Integration tests for WebSocket lifecycle race conditions.
@@ -207,6 +208,7 @@ class TestWebSocketLifecycleRaceConditions(SSotAsyncTestCase):
         overlapping_sends = [t for t in send_times if t >= min_close_time]
         assert len(overlapping_sends) > 0, 'Some sends should have overlapped with connection close'
 
+@pytest.mark.integration
 class TestWebSocketStateTransitionValidation(SSotAsyncTestCase):
     """
     Integration tests for missing state transition validation.

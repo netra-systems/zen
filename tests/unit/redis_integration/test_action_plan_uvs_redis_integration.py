@@ -12,11 +12,13 @@ Test Strategy:
 4. Test error handling and fallback patterns
 """
 
+import pytest
 import unittest
 from unittest.mock import patch, MagicMock, Mock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestActionPlanUvsRedisIntegration(SSotBaseTestCase):
     """
     SSOT Compliance: Action Plan UVS Redis integration validation

@@ -38,6 +38,7 @@ from shared.isolated_environment import get_env
 from test_framework.test_context import TestContext, TestUserContext
 logger = logging.getLogger(__name__)
 
+@pytest.mark.e2e
 class TestAuthServiceBusinessFlowsStagingAPIFix:
     """Test auth service business flows on staging to validate Issue #552 is API-only problem."""
 
@@ -162,6 +163,7 @@ class TestAuthServiceBusinessFlowsStagingAPIFix:
         except requests.exceptions.Timeout:
             pytest.skip('Auth service health check timeout - service may be unavailable')
 
+@pytest.mark.e2e
 class TestDockerAPISignatureVsStagingValidation:
     """Prove that Issue #552 is Docker API problem, not auth service dysfunction."""
 

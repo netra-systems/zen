@@ -12,6 +12,7 @@ import httpx
 from typing import Dict, Any
 from datetime import datetime, timezone
 
+@pytest.mark.e2e
 class TestIssue598HealthEndpointsSimple:
     """
     Simple E2E test to reproduce and diagnose health endpoint 404 errors in staging.

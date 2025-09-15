@@ -147,6 +147,7 @@ class MockWebSocketBridge:
         return [event for event in self.events if event.get('user_id') == user_id]
 
 
+@pytest.mark.integration
 class TestSSotGoldenPathPreservation(SSotAsyncTestCase):
     """SSOT Golden Path: Validate golden path integrity with UserExecutionContext consolidation"""
     

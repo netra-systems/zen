@@ -48,6 +48,7 @@ class GoldenPathSession:
         if self.session_events is None:
             self.session_events = []
 
+@pytest.mark.e2e
 class TestGoldenPathUserIsolationStaging(SSotAsyncTestCase):
     """E2E tests for Golden Path user isolation on GCP staging."""
 

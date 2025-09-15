@@ -32,6 +32,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestAuthTraceLoggerSsotCompliance(SSotBaseTestCase):
     """Unit tests for Auth Trace Logger SSOT configuration compliance."""
 

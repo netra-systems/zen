@@ -13,6 +13,7 @@ import inspect
 from typing import get_type_hints, get_origin, get_args
 from pydantic import BaseModel
 
+@pytest.mark.unit
 class TestDeepAgentStateInterfaceConsistency:
     """Test suite validating DeepAgentState interface consistency"""
 

@@ -25,6 +25,7 @@ from typing import Dict, List, Optional, Any, Set
 import unittest
 
 
+@pytest.mark.integration
 class TestRedisSharedPoolIntegration(SSotAsyncTestCase):
     """Integration tests validating Redis shared pool across all services.
     

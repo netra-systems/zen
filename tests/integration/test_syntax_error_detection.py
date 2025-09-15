@@ -26,6 +26,7 @@ Business Value:
 - Foundation for syntax error prevention system
 - Evidence-based validation of syntax issues
 """
+import pytest
 import ast
 import asyncio
 import glob
@@ -169,6 +170,7 @@ class SyntaxErrorDetector:
                     results['error_summary'].extend([f'{file_path}: {error}' for error in file_result['error_summary']])
         return results
 
+@pytest.mark.integration
 class TestSyntaxErrorDetection(SSotBaseTestCase):
     """
     CRITICAL: Comprehensive Syntax Error Detection Test Suite

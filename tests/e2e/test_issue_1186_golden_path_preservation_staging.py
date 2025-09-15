@@ -54,6 +54,7 @@ class GoldenPathMetrics:
     multi_user_isolation_verified: bool
 
 
+@pytest.mark.e2e
 class TestIssue1186GoldenPathPreservationStaging:
     """E2E staging tests for Issue #1186 UserExecutionEngine SSOT consolidation Golden Path protection."""
     
@@ -536,6 +537,7 @@ class TestIssue1186GoldenPathPreservationStaging:
 
 # Additional helper tests for SSOT consolidation validation
 
+@pytest.mark.e2e
 class TestIssue1186SSotConsolidationValidation:
     """Additional validation tests for UserExecutionEngine SSOT consolidation."""
     

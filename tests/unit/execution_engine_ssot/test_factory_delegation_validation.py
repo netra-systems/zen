@@ -39,6 +39,7 @@ except ImportError as e:
     pytest.skip(f"Backend modules not available: {e}", allow_module_level=True)
 
 
+@pytest.mark.unit
 class TestFactoryDelegationValidation(SSotAsyncTestCase):
     """Comprehensive validation of ExecutionEngineFactory delegation to UserExecutionEngine"""
     

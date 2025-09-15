@@ -58,6 +58,7 @@ from test_framework.deployment_validation import DeploymentValidator
 from test_framework.environment_isolation import IsolatedEnvironment
 
 
+@pytest.mark.e2e
 class TestIDMigrationE2EStagingWorkflows(SSotAsyncTestCase, BaseE2ETest, StagingTestBase):
     """E2E tests for ID migration in GCP staging environment."""
     

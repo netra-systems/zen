@@ -20,6 +20,7 @@ from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
+@pytest.mark.unit
 class TestAuthSessionUuid4Violations(SSotBaseTestCase):
     """Violation detection tests for auth.py session ID generation - EXPECT FAILURE"""
 

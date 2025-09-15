@@ -53,6 +53,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.integration
 class TestCrossServiceAuthCascadeFailures(SSotAsyncTestCase):
     """Test cross-service authentication cascade failures in integration scenarios."""
     
@@ -388,6 +389,7 @@ class TestCrossServiceAuthCascadeFailures(SSotAsyncTestCase):
             )
 
 
+@pytest.mark.integration
 class TestAuthenticationMiddlewareConflicts(SSotAsyncTestCase):
     """Test authentication middleware conflicts causing cascade failures."""
     

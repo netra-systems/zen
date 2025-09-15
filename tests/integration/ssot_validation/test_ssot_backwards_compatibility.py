@@ -77,6 +77,7 @@ class BackwardsCompatibilityTestResult:
     business_risk_assessment: str
 
 
+@pytest.mark.integration
 class TestSSotBackwardsCompatibility(SSotAsyncTestCase):
     """SSOT Backwards Compatibility: Validate API compatibility across UserExecutionContext implementations"""
     

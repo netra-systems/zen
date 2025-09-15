@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
+@pytest.mark.unit
 class TestAuditModelsUuid4Violations(SSotBaseTestCase):
     """Violation detection tests for Audit Models UUID4 usage - EXPECT FAILURE"""
 

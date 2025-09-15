@@ -73,6 +73,7 @@ class MockWebSocketConnection:
         """Get messages of specific event type."""
         return [msg for msg in self.messages_sent if msg['message'].get('event_type') == event_type]
 
+@pytest.mark.e2e
 class TestActionsToMeetGoalsUserExperienceFailures(SSotAsyncTestCase):
     """E2E tests reproducing ActionsToMeetGoalsSubAgent user experience failures.
     

@@ -18,6 +18,7 @@ CRITICAL: These are FAILING tests that prove the issue exists.
 They should fail until import paths are consolidated to use SSOT unified_manager.
 """
 
+import pytest
 import os
 import re
 from typing import Dict, List, Set
@@ -30,6 +31,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestWebSocketManagerImportPathViolations(SSotBaseTestCase):
     """Test suite to detect WebSocket Manager import path violations."""
 

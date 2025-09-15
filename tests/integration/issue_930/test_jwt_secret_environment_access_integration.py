@@ -27,6 +27,7 @@ from shared.jwt_secret_manager import JWTSecretManager, get_jwt_secret_manager
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
+@pytest.mark.integration
 class TestJWTSecretEnvironmentAccessIntegration:
     """Integration tests for JWT secret environment access patterns in staging."""
 

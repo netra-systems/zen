@@ -34,6 +34,7 @@ import websockets
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.e2e
 class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
     """
     E2E tests for SessionMetrics integration with authentication flows.

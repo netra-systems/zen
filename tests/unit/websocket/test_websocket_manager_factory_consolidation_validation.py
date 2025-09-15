@@ -14,6 +14,7 @@ Test Strategy: Static analysis of factory classes and their interfaces.
 NO DOCKER required - pure Python inspection and analysis.
 """
 
+import pytest
 import ast
 import inspect
 from pathlib import Path
@@ -23,6 +24,7 @@ import unittest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestWebSocketManagerFactoryConsolidation(SSotBaseTestCase, unittest.TestCase):
     """Test suite to validate factory consolidation for WebSocket managers.
     

@@ -17,6 +17,7 @@ Tests verify import path equivalence, backward compatibility, migration safety,
 and consistent behavior across old and new import patterns.
 """
 
+import pytest
 import unittest
 import importlib
 import sys
@@ -31,6 +32,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.integration
 class TestIssue1181DeprecatedImportMigrationIntegration(SSotAsyncTestCase):
     """Integration test suite for deprecated import migration validation."""
     

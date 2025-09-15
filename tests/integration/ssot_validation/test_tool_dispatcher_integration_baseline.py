@@ -24,6 +24,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
+@pytest.mark.integration
 class TestToolDispatcherIntegrationBaseline(SSotAsyncTestCase):
     """Integration baseline tests for tool dispatcher SSOT validation."""
 
@@ -236,6 +237,7 @@ class TestToolDispatcherIntegrationBaseline(SSotAsyncTestCase):
                 successful_registrations = sum((1 for v in result.get('registration_results', {}).values() if v is True))
                 self.assertGreater(successful_registrations, 0, f'BASELINE FAILURE: No tools successfully registered in {registry_name}')
 
+@pytest.mark.integration
 class TestCrossComponentIntegrationBaseline(SSotAsyncTestCase):
     """Test cross-component integration baseline for SSOT validation."""
 

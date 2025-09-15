@@ -11,6 +11,7 @@ Business Value Protection: $500K+ ARR Golden Path reliability
 Priority: Critical infrastructure protection
 """
 
+import pytest
 import logging
 import inspect
 import importlib
@@ -24,6 +25,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, CategoryType
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.unit
 class TestWebSocketSSOTDualPatternViolations(SSotBaseTestCase):
     """Test WebSocket SSOT dual pattern violations detection."""
     

@@ -1,3 +1,4 @@
+@pytest.mark.e2e
 class TestWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
 
@@ -60,6 +61,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 logger = central_logger.get_logger(__name__)
 
+@pytest.mark.e2e
 class TestE2EConcurrentIsolation:
     """End-to-end concurrent isolation tests with real production services."""
 

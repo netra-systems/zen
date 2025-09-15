@@ -14,6 +14,7 @@ from typing import Dict, Any, Optional
 import os
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.integration
 class TestEndToEndSentryErrorFlow(SSotAsyncTestCase):
     """Test end-to-end error flow through Sentry - expected to FAIL showing gaps"""
 
@@ -73,6 +74,7 @@ class TestEndToEndSentryErrorFlow(SSotAsyncTestCase):
             mock_set_user.assert_called_with(user_data)
             mock_capture.assert_called_once()
 
+@pytest.mark.integration
 class TestSentryEnvironmentConfiguration(SSotAsyncTestCase):
     """Test Sentry configuration across environments - expected to FAIL showing gaps"""
 
@@ -114,6 +116,7 @@ class TestSentryEnvironmentConfiguration(SSotAsyncTestCase):
         with patch.dict(os.environ, dev_env, clear=True):
             pass
 
+@pytest.mark.integration
 class TestSentryPerformanceIntegration(SSotAsyncTestCase):
     """Test Sentry performance monitoring integration - expected to FAIL showing gaps"""
 
@@ -168,6 +171,7 @@ class TestSentryPerformanceIntegration(SSotAsyncTestCase):
             call_kwargs = mock_span.call_args[1]
             self.assertEqual(call_kwargs['op'], 'llm.request')
 
+@pytest.mark.integration
 class TestSentrySecurityAndPrivacy(SSotAsyncTestCase):
     """Test Sentry security and privacy features - expected to FAIL showing gaps"""
 
@@ -216,6 +220,7 @@ class TestSentrySecurityAndPrivacy(SSotAsyncTestCase):
                 traces_sample_rate = init_kwargs.get('traces_sample_rate', 1.0)
                 self.assertLess(traces_sample_rate, 1.0, 'Production should have reduced trace sampling')
 
+@pytest.mark.integration
 class TestSentryIntegrationCompleteness(SSotAsyncTestCase):
     """Test overall completeness of Sentry integration - expected to FAIL showing gaps"""
 

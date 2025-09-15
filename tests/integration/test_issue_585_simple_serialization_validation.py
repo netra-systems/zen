@@ -10,6 +10,7 @@ from unittest.mock import MagicMock
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
+@pytest.mark.integration
 class TestIssue585SimpleSerializationValidation:
     """Simple validation tests for Issue #585 pickle serialization errors."""
 

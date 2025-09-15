@@ -22,6 +22,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
+@pytest.mark.websocket
 class TestSSOTUserContextValidation:
     """Test SSOT UserExecutionContext validation that prevents 1011 errors."""
 
@@ -91,6 +92,7 @@ class TestSSOTUserContextValidation:
         assert 'SSOT CONTEXT VALIDATION FAILED' in error_message
         assert 'websocket_client_id must be None or non-empty string' in error_message
 
+@pytest.mark.websocket
 class TestWebSocketFactoryExceptionHandling:
     """Test WebSocket factory exception handling to prevent 1011 errors."""
 
@@ -135,6 +137,7 @@ class TestWebSocketFactoryExceptionHandling:
             assert 'Different validation error' in str(exc_info.value)
             assert 'FactoryInitializationError' not in str(type(exc_info.value))
 
+@pytest.mark.websocket
 class TestWebSocketFactoryManagerCreation:
     """Test WebSocket factory manager creation and isolation patterns."""
 
@@ -165,6 +168,7 @@ class TestWebSocketFactoryManagerCreation:
         within_limits = factory.enforce_resource_limits(user_id)
         assert within_limits is True
 
+@pytest.mark.websocket
 class TestWebSocketFactoryErrorRecovery:
     """Test WebSocket factory error recovery and graceful degradation."""
 
@@ -207,6 +211,7 @@ class TestWebSocketFactoryErrorRecovery:
         assert 'does not match manager user_id' in error_message
         assert 'violates user isolation requirements' in error_message
 
+@pytest.mark.websocket
 class TestWebSocketFactoryIntegration:
     """Integration tests for WebSocket factory with real SSOT components."""
 

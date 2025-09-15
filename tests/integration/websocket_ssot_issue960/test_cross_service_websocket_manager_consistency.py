@@ -20,6 +20,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
+@pytest.mark.integration
 class TestCrossServiceWebSocketManagerConsistency(SSotAsyncTestCase):
     """Test cross-service WebSocket manager consistency - SHOULD FAIL before consolidation."""
 

@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple, Optional
 from test_framework.ssot.base_test_case import BaseTestCase
 
+@pytest.mark.integration
 class TestDockerfileConfigurationAnalysis(BaseTestCase):
     """Test suite for static analysis of Dockerfile configurations.
     

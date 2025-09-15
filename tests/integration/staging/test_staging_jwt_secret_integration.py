@@ -28,6 +28,7 @@ from shared.isolated_environment import get_env
 from deployment.secrets_config import SecretConfig
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestStagingJWTSecretIntegration(SSotAsyncTestCase):
     """
     Integration tests for staging JWT secret management.

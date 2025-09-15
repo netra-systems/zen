@@ -143,6 +143,7 @@ class WebSocketEventCapture:
         return required_events - received_events
 
 
+@pytest.mark.e2e
 class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

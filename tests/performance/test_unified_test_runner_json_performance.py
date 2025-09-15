@@ -38,6 +38,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.performance
 class TestUnifiedTestRunnerJsonPerformance(SSotBaseTestCase):
     """Performance tests for JSON output optimization in unified test runner."""
 

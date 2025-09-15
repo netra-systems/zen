@@ -9,6 +9,7 @@ Expected behavior: FAIL initially (collection blocked by syntax errors)
 After fixes: PASS (collection succeeds)
 """
 
+import pytest
 import os
 import sys
 import subprocess
@@ -20,6 +21,7 @@ from typing import List, Dict, Any, Optional
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+@pytest.mark.integration
 class TestGoldenPathTestDiscovery(unittest.TestCase):
     """Test that Golden Path tests can be collected properly."""
     

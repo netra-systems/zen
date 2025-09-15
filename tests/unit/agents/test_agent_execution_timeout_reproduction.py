@@ -29,6 +29,7 @@ except ImportError:
     AgentRegistry = Mock
     ExecutionEngine = Mock
 
+@pytest.mark.unit
 class TestAgentExecutionTimeoutReproduction:
     """Unit tests for agent execution timeout scenarios"""
 

@@ -52,6 +52,7 @@ EXPECTED BEHAVIOR:
 - WILL PASS after SSOT remediation when both files use central_logger.get_logger()
 """
 
+import pytest
 import asyncio
 import logging
 import time
@@ -67,6 +68,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
+@pytest.mark.unit
 class TestGoldenPathLoggingDisconnectionReproduction(SSotBaseTestCase):
     """
     CRITICAL: This test MUST FAIL initially.

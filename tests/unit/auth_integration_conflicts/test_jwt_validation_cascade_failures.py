@@ -43,6 +43,7 @@ from netra_backend.app.auth_integration.auth import (
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.unit
 class TestJWTValidationCascadeFailures(SSotAsyncTestCase):
     """Test JWT validation cascade failures between auth service and backend."""
     
@@ -304,6 +305,7 @@ class TestJWTValidationCascadeFailures(SSotAsyncTestCase):
             )
 
 
+@pytest.mark.unit
 class TestAuthenticationIntegrationConflictsUnit(SSotBaseTestCase):
     """Unit tests for authentication integration conflicts without async dependencies."""
     

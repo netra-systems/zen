@@ -78,6 +78,7 @@ class FactoryTestContext:
     creation_times: Dict[str, float] = field(default_factory=dict)
 
 
+@pytest.mark.integration
 class TestAgentInstanceFactoryComprehensiveIntegration(SSotAsyncTestCase):
     """
     Agent Instance Factory Comprehensive Integration Tests - Issue #870 Phase 1

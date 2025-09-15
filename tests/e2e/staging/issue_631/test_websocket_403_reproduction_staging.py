@@ -23,6 +23,7 @@ from shared.isolated_environment import IsolatedEnvironment
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+@pytest.mark.e2e
 class TestWebSocket403ReproductionStaging(SSotAsyncTestCase):
     """E2E tests reproducing HTTP 403 WebSocket errors in staging environment."""
 
@@ -71,7 +72,7 @@ class TestWebSocket403ReproductionStaging(SSotAsyncTestCase):
         start_time = time.time()
         connection_error = None
         try:
-            async with websockets.connect(self.staging_websocket_url, extra_headers=websocket_headers, timeout=30, ping_interval=None, ping_timeout=None) as websocket:
+            async with websockets.connect(self.staging_websocket_url, additional_headers=websocket_headers, timeout=30, ping_interval=None, ping_timeout=None) as websocket:
                 logger.info('WebSocket connection established - this indicates issue may be resolved')
                 test_message = {'type': 'ping', 'timestamp': time.time()}
                 await websocket.send(json.dumps(test_message))
@@ -115,7 +116,7 @@ class TestWebSocket403ReproductionStaging(SSotAsyncTestCase):
         websocket_headers = {'Authorization': f'Bearer {auth_token}', 'Origin': 'https://netra.ai'}
         connection_successful = False
         try:
-            async with websockets.connect(self.staging_websocket_url, extra_headers=websocket_headers, timeout=15) as websocket:
+            async with websockets.connect(self.staging_websocket_url, additional_headers=websocket_headers, timeout=15) as websocket:
                 connection_successful = True
                 logger.info('WebSocket connection successful with valid JWT')
                 test_message = {'type': 'auth_test', 'user_id': 'test-user'}
@@ -143,7 +144,7 @@ class TestWebSocket403ReproductionStaging(SSotAsyncTestCase):
                 websocket_headers['Origin'] = 'https://netra.ai'
                 got_403_error = False
                 try:
-                    async with websockets.connect(self.staging_websocket_url, extra_headers=websocket_headers, timeout=10) as websocket:
+                    async with websockets.connect(self.staging_websocket_url, additional_headers=websocket_headers, timeout=10) as websocket:
                         logger.warning('WebSocket connection succeeded with invalid token - security issue!')
                 except websockets.exceptions.WebSocketException as e:
                     if '403' in str(e) or 'Forbidden' in str(e):
@@ -188,7 +189,7 @@ class TestWebSocket403ReproductionStaging(SSotAsyncTestCase):
         timeout_occurred = False
         start_time = time.time()
         try:
-            async with websockets.connect(self.staging_websocket_url, extra_headers=websocket_headers, timeout=short_timeout) as websocket:
+            async with websockets.connect(self.staging_websocket_url, additional_headers=websocket_headers, timeout=short_timeout) as websocket:
                 logger.info('WebSocket connection succeeded within short timeout')
         except asyncio.TimeoutError:
             timeout_occurred = True

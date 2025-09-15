@@ -11,6 +11,7 @@ import pytest
 from typing import Optional
 
 
+@pytest.mark.unit
 class TestEnvironmentContextServiceImportFix:
     """Test suite for environment context service import path fix."""
     

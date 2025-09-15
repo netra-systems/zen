@@ -17,6 +17,7 @@ from starlette.types import Scope, Receive, Send
 from netra_backend.app.core.middleware_setup import WebSocketExclusionMiddleware
 from netra_backend.app.routes.websocket_ssot import extract_query_params
 
+@pytest.mark.integration
 class TestWebSocketASGIMiddleware:
     """Integration tests for WebSocket ASGI middleware processing."""
 
@@ -146,6 +147,7 @@ class TestWebSocketASGIMiddleware:
             else:
                 raise
 
+@pytest.mark.integration
 class TestASGIScopeErrorScenarios:
     """Specific error scenario reproduction tests."""
 

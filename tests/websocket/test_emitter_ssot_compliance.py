@@ -23,6 +23,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter, WebSocketEmitterFactory, AuthenticationWebSocketEmitter, WebSocketEmitterPool
 
+@pytest.mark.websocket
 class TestEmitterImportCompliance(SSotAsyncTestCase):
     """
     Test that all WebSocket emitter imports redirect to SSOT.
@@ -69,6 +70,7 @@ class TestEmitterImportCompliance(SSotAsyncTestCase):
         self.assertNotIn('class TransparentWebSocketEmitter(', source_lines, 'transparent_websocket_events should not define its own emitter class')
         self.assertIn('from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as TransparentWebSocketEmitter', source_lines, 'Should redirect via import alias')
 
+@pytest.mark.websocket
 class TestEmitterInstanceCompliance(SSotAsyncTestCase):
     """
     Test that all emitter instances are SSOT types.
@@ -118,6 +120,7 @@ class TestEmitterInstanceCompliance(SSotAsyncTestCase):
             self.assertEqual(transparent_emitter.user_id, self.test_user_id)
             self.assertEqual(transparent_emitter.context, self.test_context)
 
+@pytest.mark.websocket
 class TestEmitterMethodCompliance(SSotAsyncTestCase):
     """
     Test that all emitter instances have required SSOT methods.
@@ -168,6 +171,7 @@ class TestEmitterMethodCompliance(SSotAsyncTestCase):
         for method_name in base_methods:
             self.assertTrue(hasattr(auth_emitter, method_name), f'Auth emitter should have base {method_name} method')
 
+@pytest.mark.websocket
 class TestEmissionSourceCompliance(SSotAsyncTestCase):
     """
     Test emission source compliance.
@@ -240,6 +244,7 @@ class TestEmissionSourceCompliance(SSotAsyncTestCase):
             self.assertEqual(call['manager'], self.mock_manager, 'All emissions should go through SSOT manager')
             self.assertEqual(call['user_id'], self.test_user_id, 'All emissions should have correct user_id')
 
+@pytest.mark.websocket
 class TestSSotConfigurationCompliance(SSotAsyncTestCase):
     """
     Test SSOT configuration compliance.

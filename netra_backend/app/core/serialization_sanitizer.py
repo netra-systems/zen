@@ -27,6 +27,7 @@ import json
 import types
 import inspect
 import logging
+import contextvars
 from typing import Any, Dict, List, Optional, Union, Set, Tuple
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
@@ -41,23 +42,28 @@ logger = central_logger.get_logger(__name__)
 UNPICKLABLE_TYPES = {
     # Function and method types
     types.FunctionType,
-    types.MethodType, 
+    types.MethodType,
     types.BuiltinFunctionType,
     types.BuiltinMethodType,
     types.LambdaType,
-    
-    # Code and frame types  
+
+    # Code and frame types
     types.CodeType,
     types.FrameType,
     types.TracebackType,
-    
+
     # Generator and coroutine types
     types.GeneratorType,
     types.CoroutineType,
     types.AsyncGeneratorType,
-    
+
     # Module types
     types.ModuleType,
+
+    # ContextVar types (Issue #1211)
+    contextvars.ContextVar,
+    contextvars.Token,
+    contextvars.Context,
 }
 
 # Additional unpicklable patterns by name/module
@@ -72,6 +78,10 @@ UNPICKLABLE_PATTERNS = {
     'websocket', 'socket', 'client', 'emitter',
     # File handles
     'file', 'io', '_io',
+    # ContextVar patterns (Issue #1211)
+    'contextvar', 'contextvars', '_contextvars',
+    # Async context patterns
+    'context', 'token', 'trace_context', 'logging_context',
 }
 
 
@@ -205,10 +215,10 @@ class ObjectSanitizer:
     @staticmethod
     def is_picklable(obj: Any) -> bool:
         """Check if an object can be safely pickled.
-        
+
         Args:
             obj: Object to check for pickle compatibility
-            
+
         Returns:
             bool: True if object can be pickled, False otherwise
         """
@@ -218,38 +228,464 @@ class ObjectSanitizer:
         except (pickle.PickleError, TypeError, AttributeError) as e:
             logger.debug(f"Object not picklable: {type(obj).__name__} - {str(e)[:100]}")
             return False
+
+    @staticmethod
+    def _is_context_var_object(obj: Any) -> bool:
+        """Check if object is a ContextVar, Token, or Context object.
+
+        Args:
+            obj: Object to check for ContextVar types
+
+        Returns:
+            bool: True if object is a ContextVar-related type
+        """
+        obj_type = type(obj)
+
+        # Direct type check
+        if obj_type in {contextvars.ContextVar, contextvars.Token, contextvars.Context}:
+            return True
+
+        # Module check for _contextvars types
+        module_name = getattr(obj_type, '__module__', '')
+        if module_name == '_contextvars':
+            return True
+
+        # Check if it's a ContextVar by duck typing
+        if hasattr(obj, 'get') and hasattr(obj, 'set') and hasattr(obj, 'name'):
+            if 'ContextVar' in str(type(obj)):
+                return True
+
+        # Check if it's a Token by duck typing
+        if hasattr(obj, 'var') and hasattr(obj, 'old_value'):
+            if 'Token' in str(type(obj)):
+                return True
+
+        return False
+
+    @staticmethod
+    def _extract_context_var_data(obj: Any) -> Dict[str, Any]:
+        """Extract safe data from ContextVar-related objects.
+
+        Args:
+            obj: ContextVar, Token, or Context object
+
+        Returns:
+            Dict containing safe representation of the object's data
+        """
+        try:
+            obj_type = type(obj)
+
+            # Handle ContextVar objects
+            if isinstance(obj, contextvars.ContextVar) or 'ContextVar' in str(obj_type):
+                # Extract default value safely
+                default_value = getattr(obj, 'default', contextvars.Token.MISSING)
+                if default_value is contextvars.Token.MISSING:
+                    safe_default = '<MISSING>'
+                elif ObjectSanitizer.is_picklable(default_value):
+                    safe_default = default_value
+                else:
+                    safe_default = f"<unpicklable {type(default_value).__name__}>"
+
+                data = {
+                    'type': 'ContextVar',
+                    'name': getattr(obj, 'name', 'unknown'),
+                    'default': safe_default,
+                    'class_name': obj_type.__name__
+                }
+
+                # Try to get current value safely
+                try:
+                    current_value = obj.get()
+                    if ObjectSanitizer.is_picklable(current_value):
+                        data['current_value'] = current_value
+                    else:
+                        data['current_value'] = f"<unpicklable {type(current_value).__name__}>"
+                except LookupError:
+                    data['current_value'] = "<not_set>"
+                except Exception as e:
+                    data['current_value'] = f"<error: {str(e)[:50]}>"
+
+                return data
+
+            # Handle Token objects
+            if isinstance(obj, contextvars.Token) or 'Token' in str(obj_type):
+                data = {
+                    'type': 'ContextVar.Token',
+                    'class_name': obj_type.__name__
+                }
+
+                # Extract token information safely
+                if hasattr(obj, 'var'):
+                    var = obj.var
+                    if hasattr(var, 'name'):
+                        data['var_name'] = var.name
+                    else:
+                        data['var_name'] = str(var)
+
+                if hasattr(obj, 'old_value'):
+                    old_value = obj.old_value
+                    if old_value is contextvars.Token.MISSING:
+                        data['old_value'] = '<MISSING>'
+                    elif ObjectSanitizer.is_picklable(old_value):
+                        data['old_value'] = old_value
+                    else:
+                        data['old_value'] = f"<unpicklable {type(old_value).__name__}>"
+
+                return data
+
+            # Handle Context objects
+            if isinstance(obj, contextvars.Context) or 'Context' in str(obj_type):
+                data = {
+                    'type': 'Context',
+                    'class_name': obj_type.__name__
+                }
+
+                # Try to extract context items safely
+                try:
+                    context_items = {}
+                    for var, value in obj.items():
+                        var_name = getattr(var, 'name', str(var))
+                        if ObjectSanitizer.is_picklable(value):
+                            context_items[var_name] = value
+                        else:
+                            context_items[var_name] = f"<unpicklable {type(value).__name__}>"
+                    data['items'] = context_items
+                except Exception as e:
+                    data['items'] = f"<error extracting items: {str(e)[:50]}>"
+
+                return data
+
+            # Fallback for unknown ContextVar-related types
+            return {
+                'type': 'unknown_contextvar_type',
+                'class_name': obj_type.__name__,
+                'module': getattr(obj_type, '__module__', 'unknown'),
+                'repr': str(obj)[:100]
+            }
+
+        except Exception as e:
+            logger.debug(f"Error extracting ContextVar data: {e}")
+            return {
+                'type': 'contextvar_extraction_error',
+                'error': str(e)[:100],
+                'class_name': type(obj).__name__
+            }
+
+    @staticmethod
+    def _extract_logging_context_data(obj: Any) -> Dict[str, Any]:
+        """Extract safe data from LoggingContext objects.
+
+        Args:
+            obj: LoggingContext object
+
+        Returns:
+            Dict containing safe representation of logging context data
+        """
+        try:
+            data = {
+                'type': 'LoggingContext',
+                'class_name': type(obj).__name__
+            }
+
+            # Extract context values using get_context() method if available
+            if hasattr(obj, 'get_context'):
+                try:
+                    context_values = obj.get_context()
+                    if isinstance(context_values, dict):
+                        data['context_values'] = ObjectSanitizer.sanitize_object(context_values)
+                    else:
+                        data['context_values'] = str(context_values)
+                except Exception as e:
+                    data['context_values'] = f"<error: {str(e)[:50]}>"
+
+            # Extract filtered context if available
+            if hasattr(obj, 'get_filtered_context'):
+                try:
+                    filtered_context = obj.get_filtered_context()
+                    data['filtered_context'] = ObjectSanitizer.sanitize_object(filtered_context)
+                except Exception as e:
+                    data['filtered_context'] = f"<error: {str(e)[:50]}>"
+
+            # Extract individual context vars if directly accessible
+            context_vars = ['request_id', 'user_id', 'trace_id']
+            for var_name in context_vars:
+                if hasattr(obj, f'{var_name}_context'):
+                    try:
+                        context_var = getattr(obj, f'{var_name}_context')
+                        if ObjectSanitizer._is_context_var_object(context_var):
+                            data[f'{var_name}_context'] = ObjectSanitizer._extract_context_var_data(context_var)
+                        else:
+                            data[f'{var_name}_context'] = str(context_var)
+                    except Exception:
+                        data[f'{var_name}_context'] = '<error>'
+
+            return data
+
+        except Exception as e:
+            logger.debug(f"Error extracting LoggingContext data: {e}")
+            return {
+                'type': 'logging_context_extraction_error',
+                'error': str(e)[:100],
+                'class_name': type(obj).__name__
+            }
+
+    @staticmethod
+    def _extract_execution_engine_factory_data(obj: Any) -> Dict[str, Any]:
+        """Extract safe data from ExecutionEngineFactory objects.
+
+        Args:
+            obj: ExecutionEngineFactory object
+
+        Returns:
+            Dict containing safe representation of factory data
+        """
+        try:
+            data = {
+                'type': 'ExecutionEngineFactory',
+                'class_name': type(obj).__name__
+            }
+
+            # Extract factory metrics if available
+            if hasattr(obj, 'get_factory_metrics'):
+                try:
+                    metrics = obj.get_factory_metrics()
+                    data['factory_metrics'] = ObjectSanitizer.sanitize_object(metrics)
+                except Exception as e:
+                    data['factory_metrics'] = f"<error: {str(e)[:50]}>"
+
+            # Extract basic configuration if available
+            config_attrs = ['_factory_metrics', 'factory_id', 'creation_time']
+            for attr in config_attrs:
+                if hasattr(obj, attr):
+                    try:
+                        value = getattr(obj, attr)
+                        if ObjectSanitizer.is_picklable(value):
+                            data[attr] = value
+                        else:
+                            data[attr] = ObjectSanitizer.sanitize_object(value)
+                    except Exception:
+                        data[attr] = '<error>'
+
+            # Extract component references safely
+            component_attrs = ['websocket_bridge', 'database_session_manager', 'redis_manager']
+            for attr in component_attrs:
+                if hasattr(obj, attr):
+                    try:
+                        component = getattr(obj, attr)
+                        if component is not None:
+                            # Just store type and basic info, not the full object
+                            data[f'{attr}_type'] = type(component).__name__
+                            if hasattr(component, 'user_id'):
+                                data[f'{attr}_user_id'] = getattr(component, 'user_id', 'unknown')
+                        else:
+                            data[f'{attr}_type'] = 'None'
+                    except Exception:
+                        data[f'{attr}_type'] = '<error>'
+
+            return data
+
+        except Exception as e:
+            logger.debug(f"Error extracting ExecutionEngineFactory data: {e}")
+            return {
+                'type': 'execution_engine_factory_extraction_error',
+                'error': str(e)[:100],
+                'class_name': type(obj).__name__
+            }
+
+    @staticmethod
+    def _extract_unified_trace_context_data(obj: Any) -> Dict[str, Any]:
+        """Extract safe data from UnifiedTraceContext objects.
+
+        Args:
+            obj: UnifiedTraceContext object
+
+        Returns:
+            Dict containing safe representation of trace context data
+        """
+        try:
+            data = {
+                'type': 'UnifiedTraceContext',
+                'class_name': type(obj).__name__
+            }
+
+            # Extract basic trace identifiers
+            id_attrs = ['request_id', 'user_id', 'trace_id', 'correlation_id', 'thread_id']
+            for attr in id_attrs:
+                if hasattr(obj, attr):
+                    try:
+                        value = getattr(obj, attr)
+                        if isinstance(value, (str, int, float, bool, type(None))):
+                            data[attr] = value
+                        else:
+                            data[attr] = str(value)
+                    except Exception:
+                        data[attr] = '<error>'
+
+            # Extract websocket context if available
+            if hasattr(obj, 'to_websocket_context'):
+                try:
+                    websocket_context = obj.to_websocket_context()
+                    data['websocket_context'] = ObjectSanitizer.sanitize_object(websocket_context)
+                except Exception as e:
+                    data['websocket_context'] = f"<error: {str(e)[:50]}>"
+
+            # Extract spans safely
+            if hasattr(obj, 'spans'):
+                try:
+                    spans = getattr(obj, 'spans', [])
+                    if isinstance(spans, list):
+                        data['spans_count'] = len(spans)
+                        # Extract just basic info from first few spans
+                        span_summaries = []
+                        for span in spans[:3]:  # Limit to first 3 spans
+                            if hasattr(span, 'operation_name'):
+                                span_summaries.append({
+                                    'operation': getattr(span, 'operation_name', 'unknown'),
+                                    'start_time': str(getattr(span, 'start_time', 'unknown')),
+                                    'end_time': str(getattr(span, 'end_time', 'unknown'))
+                                })
+                        data['span_summaries'] = span_summaries
+                    else:
+                        data['spans_count'] = 0
+                except Exception as e:
+                    data['spans_info'] = f"<error: {str(e)[:50]}>"
+
+            # Extract events safely
+            if hasattr(obj, 'events'):
+                try:
+                    events = getattr(obj, 'events', [])
+                    if isinstance(events, list):
+                        data['events_count'] = len(events)
+                        # Extract just event names
+                        event_names = []
+                        for event in events[:5]:  # Limit to first 5 events
+                            if isinstance(event, dict) and 'event_name' in event:
+                                event_names.append(event['event_name'])
+                        data['recent_events'] = event_names
+                    else:
+                        data['events_count'] = 0
+                except Exception as e:
+                    data['events_info'] = f"<error: {str(e)[:50]}>"
+
+            return data
+
+        except Exception as e:
+            logger.debug(f"Error extracting UnifiedTraceContext data: {e}")
+            return {
+                'type': 'unified_trace_context_extraction_error',
+                'error': str(e)[:100],
+                'class_name': type(obj).__name__
+            }
+
+    @staticmethod
+    def _extract_user_execution_context_data(obj: Any) -> Dict[str, Any]:
+        """Extract safe data from UserExecutionContext objects.
+
+        Args:
+            obj: UserExecutionContext object
+
+        Returns:
+            Dict containing safe representation of user execution context data
+        """
+        try:
+            data = {
+                'type': 'UserExecutionContext',
+                'class_name': type(obj).__name__
+            }
+
+            # Extract basic user context attributes
+            basic_attrs = ['user_id', 'thread_id', 'run_id', 'request_id', 'websocket_client_id', 'operation_depth', 'parent_request_id']
+            for attr in basic_attrs:
+                if hasattr(obj, attr):
+                    try:
+                        value = getattr(obj, attr)
+                        if isinstance(value, (str, int, float, bool, type(None))):
+                            data[attr] = value
+                        else:
+                            data[attr] = str(value)
+                    except Exception:
+                        data[attr] = '<error>'
+
+            # Extract timestamps
+            if hasattr(obj, 'created_at'):
+                try:
+                    created_at = getattr(obj, 'created_at')
+                    if hasattr(created_at, 'isoformat'):
+                        data['created_at'] = created_at.isoformat()
+                    else:
+                        data['created_at'] = str(created_at)
+                except Exception:
+                    data['created_at'] = '<error>'
+
+            # Extract dictionaries safely
+            dict_attrs = ['agent_context', 'audit_metadata']
+            for attr in dict_attrs:
+                if hasattr(obj, attr):
+                    try:
+                        value = getattr(obj, attr)
+                        if isinstance(value, dict):
+                            data[attr] = ObjectSanitizer.sanitize_object(value)
+                        else:
+                            data[attr] = str(value)
+                    except Exception:
+                        data[attr] = '<error>'
+
+            # Extract trace context if present
+            if hasattr(obj, 'trace_context'):
+                try:
+                    trace_context = getattr(obj, 'trace_context')
+                    if trace_context is not None:
+                        data['trace_context'] = ObjectSanitizer._extract_unified_trace_context_data(trace_context)
+                    else:
+                        data['trace_context'] = None
+                except Exception:
+                    data['trace_context'] = '<error>'
+
+            return data
+
+        except Exception as e:
+            logger.debug(f"Error extracting UserExecutionContext data: {e}")
+            return {
+                'type': 'user_execution_context_extraction_error',
+                'error': str(e)[:100],
+                'class_name': type(obj).__name__
+            }
     
-    @staticmethod 
+    @staticmethod
     def is_unpicklable_type(obj: Any) -> bool:
         """Check if object is of a known unpicklable type.
-        
+
         Args:
             obj: Object to check
-            
+
         Returns:
             bool: True if object is of an unpicklable type
         """
         obj_type = type(obj)
-        
+
         # Check direct type match
         if obj_type in UNPICKLABLE_TYPES:
             return True
-        
+
+        # Check for ContextVar objects specifically (Issue #1211)
+        if ObjectSanitizer._is_context_var_object(obj):
+            return True
+
         # Check type name patterns
         type_name = obj_type.__name__.lower()
         module_name = getattr(obj_type, '__module__', '').lower()
-        
+
         for pattern in UNPICKLABLE_PATTERNS:
             if pattern in type_name or pattern in module_name:
                 return True
-        
+
         # Check for specific problematic attributes
         if hasattr(obj, '__self__') and callable(obj):  # Bound methods
             return True
-        
+
         if hasattr(obj, '__func__') and callable(obj):  # Unbound methods
             return True
-            
+
         return False
     
     @staticmethod
@@ -263,6 +699,29 @@ class ObjectSanitizer:
             Safe representation (string, dict, or primitive type)
         """
         try:
+            # Handle ContextVar objects first (Issue #1211)
+            if ObjectSanitizer._is_context_var_object(obj):
+                return ObjectSanitizer._extract_context_var_data(obj)
+
+            # Handle specific business objects (Issue #1211)
+            obj_type_name = type(obj).__name__
+
+            # LoggingContext objects
+            if 'LoggingContext' in obj_type_name:
+                return ObjectSanitizer._extract_logging_context_data(obj)
+
+            # ExecutionEngineFactory objects
+            if 'ExecutionEngineFactory' in obj_type_name:
+                return ObjectSanitizer._extract_execution_engine_factory_data(obj)
+
+            # UnifiedTraceContext objects
+            if 'UnifiedTraceContext' in obj_type_name or 'TraceContext' in obj_type_name:
+                return ObjectSanitizer._extract_unified_trace_context_data(obj)
+
+            # UserExecutionContext objects
+            if 'UserExecutionContext' in obj_type_name:
+                return ObjectSanitizer._extract_user_execution_context_data(obj)
+
             # For agent instances, extract key information
             if hasattr(obj, 'agent_name'):
                 return {
@@ -270,11 +729,11 @@ class ObjectSanitizer:
                     'agent_name': getattr(obj, 'agent_name', 'unknown'),
                     'class_name': type(obj).__name__
                 }
-            
+
             # For callable objects
             if callable(obj):
                 return {
-                    'type': 'callable_reference', 
+                    'type': 'callable_reference',
                     'name': getattr(obj, '__name__', 'unknown'),
                     'class_name': type(obj).__name__,
                     'module': getattr(obj, '__module__', 'unknown')
@@ -286,11 +745,14 @@ class ObjectSanitizer:
                 for key, value in obj.__dict__.items():
                     if isinstance(value, (str, int, float, bool, list, dict, type(None))):
                         safe_attrs[key] = value
+                    elif ObjectSanitizer._is_context_var_object(value):
+                        # Extract ContextVar data instead of just marking as unpicklable
+                        safe_attrs[key] = ObjectSanitizer._extract_context_var_data(value)
                     elif ObjectSanitizer.is_picklable(value):
                         safe_attrs[key] = value
                     else:
                         safe_attrs[key] = f"<unpicklable {type(value).__name__}>"
-                
+
                 return {
                     'type': 'object_reference',
                     'class_name': type(obj).__name__,
@@ -327,7 +789,11 @@ class ObjectSanitizer:
         if current_depth < 2 and ObjectSanitizer.is_picklable(obj):
             return obj
         
-        # Handle known unpicklable types
+        # Handle ContextVar objects specifically (Issue #1211)
+        if ObjectSanitizer._is_context_var_object(obj):
+            return ObjectSanitizer._extract_context_var_data(obj)
+
+        # Handle other known unpicklable types
         if ObjectSanitizer.is_unpicklable_type(obj):
             return ObjectSanitizer.get_safe_representation(obj)
         

@@ -24,6 +24,7 @@ from shared.isolated_environment import get_env
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.integration
 class TestCrossServiceEnvironmentConsistency(SSotBaseTestCase):
     """Test suite for cross-service environment variable consistency."""
 

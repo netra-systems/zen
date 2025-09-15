@@ -143,26 +143,58 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
             # Create a custom bridge that uses our WebSocket adapter
             class DemoWebSocketBridge(AgentWebSocketBridge):
                 """Demo WebSocket bridge that sends events directly to the demo WebSocket"""
-                
+
                 def __init__(self, websocket_adapter):
                     super().__init__(user_context=user_context)
                     self.websocket_adapter = websocket_adapter
-                
+                    # Track connection state for demo purposes - assume active when bridge is created
+                    self._connection_active = True
+
+                def is_connection_active(self, user_id: str) -> bool:
+                    """
+                    Check if WebSocket connection is active for the given user.
+
+                    SSOT COMPLIANCE: Implements the required WebSocket protocol interface method
+                    that is expected by unified_emitter.py for connection health validation.
+
+                    For demo purposes, we consider the connection active as long as the bridge
+                    exists and the user_id matches the demo user context.
+
+                    Args:
+                        user_id: User ID to check connection for
+
+                    Returns:
+                        bool: True if connection is active for this user, False otherwise
+                    """
+                    try:
+                        # For demo bridge, connection is active if user matches context and bridge is initialized
+                        if self.user_context and hasattr(self.user_context, 'user_id'):
+                            is_active = str(user_id) == str(self.user_context.user_id) and self._connection_active
+                            logger.debug(f"Demo bridge connection check for user {user_id}: {is_active}")
+                            return is_active
+                        else:
+                            # Fallback: assume active for demo purposes if no specific user context
+                            logger.debug(f"Demo bridge connection check (no context) for user {user_id}: True")
+                            return self._connection_active
+                    except Exception as e:
+                        logger.warning(f"Error checking demo connection for user {user_id}: {e}")
+                        return False
+
                 async def notify_agent_started(self, run_id: str, agent_name: str, **kwargs):
                     return await self.websocket_adapter.notify_agent_started(run_id, agent_name, **kwargs)
-                    
+
                 async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str = "", **kwargs):
                     return await self.websocket_adapter.notify_agent_thinking(run_id, agent_name, reasoning, **kwargs)
-                    
+
                 async def notify_tool_executing(self, run_id: str, tool_name: str, **kwargs):
                     return await self.websocket_adapter.notify_tool_executing(run_id, tool_name, **kwargs)
-                    
+
                 async def notify_tool_completed(self, run_id: str, tool_name: str, **kwargs):
                     return await self.websocket_adapter.notify_tool_completed(run_id, tool_name, **kwargs)
-                    
+
                 async def notify_agent_completed(self, run_id: str, agent_name: str, **kwargs):
                     return await self.websocket_adapter.notify_agent_completed(run_id, agent_name, **kwargs)
-                    
+
                 async def notify_agent_error(self, run_id: str, agent_name: str, error: str, **kwargs):
                     return await self.websocket_adapter.notify_agent_error(run_id, agent_name, error, **kwargs)
             

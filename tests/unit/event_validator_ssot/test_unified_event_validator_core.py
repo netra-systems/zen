@@ -48,6 +48,7 @@ except ImportError as e:
     ssot_framework_available = False
     ssot_framework_import_error = str(e)
 
+@pytest.mark.unit
 class TestUnifiedEventValidatorCore(SSotBaseTestCase, unittest.TestCase):
     """
     Unit tests for EventValidator SSOT core functionality.

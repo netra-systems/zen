@@ -13,6 +13,7 @@ from unittest.mock import patch, MagicMock
 import asyncio
 import time
 
+@pytest.mark.integration
 class TestWebSocketConfigurationStability:
     """Phase 3 Tests - WebSocket-specific configuration stability"""
 
@@ -226,6 +227,7 @@ class TestWebSocketConfigurationStability:
         except ImportError as e:
             pytest.skip(f'Cannot test WebSocket connection pooling stability: {e}')
 
+@pytest.mark.integration
 class TestWebSocketMigrationIntegration:
     """Test WebSocket integration during configuration migration"""
 

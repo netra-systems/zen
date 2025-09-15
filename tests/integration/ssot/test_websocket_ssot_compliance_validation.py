@@ -62,6 +62,7 @@ except ImportError as e:
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.integration
 class TestWebSocketSSOTComplianceValidation(SSotAsyncTestCase):
     """
     Integration Tests: SSOT Compliance Validation

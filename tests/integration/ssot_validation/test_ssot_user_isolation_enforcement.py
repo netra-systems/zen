@@ -91,6 +91,7 @@ class MockSharedResource:
             return data
 
 
+@pytest.mark.integration
 class TestSSotUserIsolationEnforcement(SSotAsyncTestCase):
     """SSOT User Isolation: Validate strict user isolation across UserExecutionContext implementations"""
     

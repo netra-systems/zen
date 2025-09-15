@@ -11,6 +11,7 @@ the single CentralConfigurationValidator from shared/configuration/central_confi
 Business Impact: Ensures consistent OAuth validation prevents $500K+ ARR authentication failures
 """
 
+import pytest
 import asyncio
 import logging
 import unittest
@@ -28,6 +29,7 @@ from shared.configuration.central_config_validator import CentralConfigurationVa
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.integration
 class TestConfigurationValidatorSSOTIntegration(SSotAsyncTestCase, unittest.TestCase):
     """
     SSOT Integration Tests

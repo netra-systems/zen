@@ -55,6 +55,7 @@ except ImportError:
     storage = None
     STORAGE_AVAILABLE = False
 
+@pytest.mark.e2e
 class TestSystemLifecycleGCPCloudRunDeployment(SSotAsyncTestCase):
     """
     Test SystemLifecycle in real GCP Cloud Run environment.
@@ -209,6 +210,7 @@ class TestSystemLifecycleGCPCloudRunDeployment(SSotAsyncTestCase):
         except Exception as e:
             pytest.skip(f'Container lifecycle test issue: {e}')
 
+@pytest.mark.e2e
 class TestSystemLifecycleGCPMonitoringIntegration(SSotAsyncTestCase):
     """
     Test SystemLifecycle integration with GCP monitoring services.
@@ -326,6 +328,7 @@ class TestSystemLifecycleGCPMonitoringIntegration(SSotAsyncTestCase):
         except Exception as e:
             pytest.skip(f'GCP logging test environment issue: {e}')
 
+@pytest.mark.e2e
 class TestSystemLifecycleGCPStorageIntegration(SSotAsyncTestCase):
     """
     Test SystemLifecycle integration with GCP Cloud Storage.
@@ -393,6 +396,7 @@ class TestSystemLifecycleGCPStorageIntegration(SSotAsyncTestCase):
         except Exception as e:
             pytest.skip(f'GCP storage test environment issue: {e}')
 
+@pytest.mark.e2e
 class TestSystemLifecycleGCPPerformanceValidation(SSotAsyncTestCase):
     """
     Test SystemLifecycle performance in real GCP staging environment.
@@ -521,6 +525,7 @@ class TestSystemLifecycleGCPPerformanceValidation(SSotAsyncTestCase):
         except Exception as e:
             pytest.skip(f'Concurrent load performance test issue: {e}')
 
+@pytest.mark.e2e
 class TestSystemLifecycleGCPRealWorldScenarios(SSotAsyncTestCase):
     """
     Test SystemLifecycle in real-world GCP deployment scenarios.

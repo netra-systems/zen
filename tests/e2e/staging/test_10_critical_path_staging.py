@@ -4,6 +4,7 @@ Tests critical execution paths
 Business Value: Core functionality
 """
 
+import pytest
 import asyncio
 import time
 import uuid
@@ -13,6 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from tests.e2e.staging_test_base import StagingTestBase, staging_test
 
 
+@pytest.mark.e2e
 class TestCriticalPathStaging(StagingTestBase):
     """Test critical path in staging environment"""
     

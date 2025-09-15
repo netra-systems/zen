@@ -10,6 +10,7 @@ from typing import Dict, Any, Optional
 from unittest.mock import Mock
 from shared.lifecycle.contract_validation_framework import ParameterInfo, MethodContract, InterfaceContract, ValidationResult, SignatureAnalyzer, ContractValidator, BreakingChangeDetector, FactoryContractRegistry, get_contract_registry, validate_factory_interface, check_parameter_compatibility
 
+@pytest.mark.unit
 class TestParameterMismatchDetection:
     """Test suite specifically for parameter mismatch detection."""
 
@@ -84,6 +85,7 @@ class TestParameterMismatchDetection:
         assert not result.is_valid
         assert any(('async mismatch' in error for error in result.errors))
 
+@pytest.mark.unit
 class TestUserExecutionContextValidation:
     """Test validation of UserExecutionContext specifically."""
 
@@ -120,6 +122,7 @@ class TestUserExecutionContextValidation:
         assert hasattr(context, 'websocket_connection_id')
         assert context.websocket_connection_id == context.websocket_client_id
 
+@pytest.mark.unit
 class TestFactoryPatternValidation:
     """Test validation of factory patterns."""
 
@@ -147,6 +150,7 @@ class TestFactoryPatternValidation:
         except ImportError:
             pytest.skip('Supervisor factory not available')
 
+@pytest.mark.unit
 class TestBreakingChangeDetection:
     """Test breaking change detection."""
 
@@ -194,6 +198,7 @@ class TestBreakingChangeDetection:
         assert len(changes) > 0
         assert any(('Removed required parameters' in change for change in changes))
 
+@pytest.mark.unit
 class TestSignatureAnalyzer:
     """Test signature analysis functionality."""
 
@@ -239,6 +244,7 @@ class TestSignatureAnalyzer:
         assert 'public_method' in method_names
         assert '_private_method' not in method_names
 
+@pytest.mark.unit
 class TestContractRegistry:
     """Test contract registry functionality."""
 
@@ -260,6 +266,7 @@ class TestContractRegistry:
         assert isinstance(result, ValidationResult)
         assert result.interface_name == 'TestFactory'
 
+@pytest.mark.unit
 def test_integration_validation_script():
     """Integration test for the validation script."""
     import subprocess

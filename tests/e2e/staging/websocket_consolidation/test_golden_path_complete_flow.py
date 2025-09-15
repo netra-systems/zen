@@ -41,6 +41,7 @@ except ImportError as e:
     aiohttp = None
     requests = None
 
+@pytest.mark.e2e
 class TestGoldenPathCompleteFlow(SSotAsyncTestCase):
     """
     CRITICAL E2E: This test proves Golden Path is completely broken.
@@ -160,7 +161,7 @@ class TestGoldenPathCompleteFlow(SSotAsyncTestCase):
         try:
             websocket_url = f"{self.staging_config['websocket_url']}/ws"
             headers = {'Authorization': f'Bearer {jwt_token}'}
-            websocket = await websockets.connect(websocket_url, extra_headers=headers, ping_interval=20, ping_timeout=10, close_timeout=10)
+            websocket = await websockets.connect(websocket_url, additional_headers=headers, ping_interval=20, ping_timeout=10, close_timeout=10)
             await websocket.ping()
             return {'success': True, 'websocket': websocket, 'connection_established': True}
         except websockets.exceptions.InvalidStatusCode as e:

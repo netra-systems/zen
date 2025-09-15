@@ -68,6 +68,7 @@ class MockAgent:
         self.run_id = run_id
 
 
+@pytest.mark.unit
 class TestAgentInstanceFactorySingletonViolations1116(SSotAsyncTestCase):
     """
     Unit tests proving singleton pattern violations in AgentInstanceFactory.

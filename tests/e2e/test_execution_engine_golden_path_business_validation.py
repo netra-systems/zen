@@ -24,6 +24,7 @@ Expected Results:
 
 Environment: GCP Staging (no Docker required)
 """
+import pytest
 import asyncio
 import time
 import uuid
@@ -53,6 +54,7 @@ except ImportError as e:
     SUPPORTING_COMPONENTS_AVAILABLE = False
     SUPPORTING_COMPONENTS_ERROR = str(e)
 
+@pytest.mark.e2e
 class TestExecutionEngineGoldenPathBusinessValidation(SSotAsyncTestCase):
     """
     E2E tests to validate Issue #565 SSOT migration preserves business functionality.

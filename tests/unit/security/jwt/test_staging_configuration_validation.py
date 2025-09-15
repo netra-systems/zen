@@ -31,6 +31,7 @@ from shared.jwt_secret_manager import get_jwt_secret_manager
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
+@pytest.mark.unit
 class TestStagingConfigurationValidation(SSotBaseTestCase, unittest.TestCase):
     """
     Test staging configuration validation components.

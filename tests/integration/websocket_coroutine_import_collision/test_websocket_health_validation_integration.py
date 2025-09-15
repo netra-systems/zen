@@ -48,6 +48,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
 from netra_backend.app.config import get_config
 from netra_backend.app.routes.websocket import WebSocketComponentError
 
+@pytest.mark.integration
 class TestWebSocketHealthValidationIntegration(SSotAsyncTestCase):
     """
     INTEGRATION TEST: Reproduce WebSocket coroutine error with real services.

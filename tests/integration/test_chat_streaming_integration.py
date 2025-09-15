@@ -67,6 +67,7 @@ async def app() -> FastAPI:
 
 
 @pytest.fixture
+@pytest.mark.integration
 async def test_client(app: FastAPI) -> AsyncIterator[AsyncClient]:
     """Create async test client."""
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
@@ -86,6 +87,7 @@ async def streaming_client(test_client: AsyncClient, jwt_token: str) -> Streamin
     return StreamingTestClient(test_client, jwt_token)
 
 
+@pytest.mark.integration
 class TestChatStreaming:
     """Test suite for chat streaming functionality."""
     
@@ -251,6 +253,7 @@ class TestChatStreaming:
         logger.info(" PASS:  Error handling validation passed")
 
 
+@pytest.mark.integration
 class TestAgentLifecycleControl:
     """Test suite for agent lifecycle control endpoints."""
     
@@ -330,6 +333,7 @@ class TestAgentLifecycleControl:
         logger.info(" PASS:  Agent status endpoint test passed")
 
 
+@pytest.mark.integration
 class TestHealthChecks:
     """Test suite for health check endpoints."""
     

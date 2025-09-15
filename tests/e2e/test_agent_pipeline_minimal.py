@@ -1,3 +1,4 @@
+@pytest.mark.e2e
 class TestWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
     

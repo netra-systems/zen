@@ -19,6 +19,7 @@ Expected Failures (proving violations exist):
 These failures prove Issue #667 violations exist and require SSOT consolidation.
 """
 
+import pytest
 import unittest
 import importlib
 import inspect
@@ -29,6 +30,7 @@ import sys
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestConfigManagerSSOTViolationsIssue667(SSotBaseTestCase, unittest.TestCase):
     """Unit tests to detect configuration manager SSOT violations for Issue #667."""
     

@@ -25,6 +25,7 @@ from typing import Dict, List, Any
 from shared.isolated_environment import IsolatedEnvironment
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 
+@pytest.mark.e2e
 class TestCLIArgumentParsing:
     """Test CLI argument parsing for new orchestration features"""
 
@@ -52,6 +53,7 @@ class TestCLIArgumentParsing:
         result = subprocess.run([sys.executable, str(PROJECT_ROOT / 'scripts' / 'unified_test_runner.py'), '--layers', 'fast_feedback'], capture_output=True, text=True, cwd=PROJECT_ROOT)
         assert result.returncode is not None
 
+@pytest.mark.e2e
 class TestBackwardCompatibilityE2E:
     """End-to-end tests for backward compatibility"""
 
@@ -72,6 +74,7 @@ class TestBackwardCompatibilityE2E:
         result = subprocess.run([sys.executable, str(PROJECT_ROOT / 'scripts' / 'unified_test_runner.py'), '--show-category-stats'], capture_output=True, text=True, cwd=PROJECT_ROOT)
         assert result.returncode == 0 or 'not available' in result.stdout.lower()
 
+@pytest.mark.e2e
 class TestOrchestrationExecution:
     """Test actual orchestration execution (may be slow)"""
 
@@ -90,6 +93,7 @@ class TestOrchestrationExecution:
         assert result.returncode is not None
         assert len(result.stdout) > 0 or len(result.stderr) > 0
 
+@pytest.mark.e2e
 class TestErrorScenarios:
     """Test error scenarios and edge cases"""
 
@@ -109,6 +113,7 @@ class TestErrorScenarios:
         result = subprocess.run([sys.executable, str(PROJECT_ROOT / 'scripts' / 'unified_test_runner.py'), '--use-layers', '--layers', 'nonexistent_layer'], capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30)
         assert result.returncode != 0 or 'error' in result.stderr.lower()
 
+@pytest.mark.e2e
 class TestProgressOutputModes:
     """Test different progress output modes"""
 

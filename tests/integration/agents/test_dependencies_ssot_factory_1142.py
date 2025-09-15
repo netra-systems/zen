@@ -39,6 +39,7 @@ class MockRequest:
         if user_id:
             self.headers['user-id'] = user_id
 
+@pytest.mark.integration
 class TestDependenciesSSOTFactory1142(SSotAsyncTestCase):
     """Validate SSOT factory pattern in FastAPI dependencies."""
 

@@ -10,6 +10,7 @@ import time
 import socket
 import requests
 
+@pytest.mark.integration
 class TestStagingWebSocketBaseline:
     
     def test_staging_backend_connectivity_baseline(self):

@@ -47,6 +47,7 @@ from scripts.gcp_auth_config import GCPAuthConfig
 from deployment.secrets_config import SecretConfig
 setup_windows_encoding()
 
+@pytest.mark.unit
 class TestServiceConfig(SSotBaseTestCase):
     """Test ServiceConfig dataclass business logic."""
 
@@ -93,6 +94,7 @@ class TestServiceConfig(SSotBaseTestCase):
         assert config.timeout == 1800
         self.record_metric('service_config_defaults_validation', True)
 
+@pytest.mark.unit
 class TestGCPDeployerInitialization(SSotBaseTestCase):
     """Test GCPDeployer initialization and configuration."""
 
@@ -144,6 +146,7 @@ class TestGCPDeployerInitialization(SSotBaseTestCase):
         self.record_metric('container_runtime_detection', True)
         self.record_metric('windows_platform', sys.platform == 'win32')
 
+@pytest.mark.unit
 class TestConfigurationValidation(SSotBaseTestCase):
     """Test deployment configuration validation business logic."""
 
@@ -205,6 +208,7 @@ class TestConfigurationValidation(SSotBaseTestCase):
         self.record_metric('localhost_url_detection', True)
         self.record_metric('staging_url_validation', not is_localhost_url)
 
+@pytest.mark.unit
 class TestDockerOperationsLogic(SSotBaseTestCase):
     """Test Docker operations business logic without actual builds."""
 
@@ -257,6 +261,7 @@ class TestDockerOperationsLogic(SSotBaseTestCase):
         self.record_metric('frontend_dockerfile_logic_validation', True)
         self.record_metric('frontend_build_stages', len(expected_stages))
 
+@pytest.mark.unit
 class TestCloudRunConfiguration(SSotBaseTestCase):
     """Test Cloud Run service configuration generation logic."""
 
@@ -324,6 +329,7 @@ class TestCloudRunConfiguration(SSotBaseTestCase):
         self.record_metric('vpc_connector_config_validation', True)
         self.record_metric('cloud_sql_instance_validation', True)
 
+@pytest.mark.unit
 class TestSecretsManagement(SSotBaseTestCase):
     """Test secrets management business logic."""
 
@@ -379,6 +385,7 @@ class TestSecretsManagement(SSotBaseTestCase):
         assert default_redis_port == '6379'
         self.record_metric('redis_mappings_validation', True)
 
+@pytest.mark.unit
 class TestErrorDetectionAndValidation(SSotBaseTestCase):
     """Test error detection and validation capabilities."""
 
@@ -435,6 +442,7 @@ class TestErrorDetectionAndValidation(SSotBaseTestCase):
         assert deployer.region in expected_command_parts
         self.record_metric('traffic_routing_logic', True)
 
+@pytest.mark.unit
 class TestDeploymentOrchestration(SSotBaseTestCase):
     """Test deployment orchestration and workflow logic."""
 
@@ -496,6 +504,7 @@ class TestDeploymentOrchestration(SSotBaseTestCase):
         self.record_metric('error_recovery_strategy', True)
         self.record_metric('timeout_configurations', True)
 
+@pytest.mark.unit
 class TestWindowsCompatibility(SSotBaseTestCase):
     """Test Windows-specific compatibility logic."""
 
@@ -536,6 +545,7 @@ class TestWindowsCompatibility(SSotBaseTestCase):
         else:
             self.record_metric('non_windows_platform', True)
 
+@pytest.mark.unit
 class TestBusinessValueValidation(SSotBaseTestCase):
     """Test business value scenarios and edge cases."""
 

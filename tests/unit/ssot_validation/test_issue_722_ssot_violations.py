@@ -34,6 +34,7 @@ import inspect
 from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestIssue722SSOTViolations(SSotBaseTestCase):
     """Test suite to detect specific SSOT violations in 4 critical files per Issue #722."""
 
@@ -209,6 +210,7 @@ class TestIssue722SSOTViolations(SSotBaseTestCase):
         """Simulate environment variable access from file's perspective."""
         return None
 
+@pytest.mark.unit
 class TestIssue722IntegrationPatterns(SSotBaseTestCase):
     """Integration tests for Issue #722 SSOT environment access patterns."""
 

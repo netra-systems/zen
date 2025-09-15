@@ -45,6 +45,7 @@ from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.llm.llm_manager import LLMManager
 
+@pytest.mark.integration
 class TestRealWebSocketManagerIntegration(SSotAsyncTestCase):
     """Test Suite 1: Real WebSocket Manager Integration (Protects chat value delivery)
     
@@ -129,6 +130,7 @@ class TestRealWebSocketManagerIntegration(SSotAsyncTestCase):
         except Exception as e:
             self.fail(f'WebSocket adapter integration failed: {e}')
 
+@pytest.mark.integration
 class TestRealToolDispatcherIntegration(SSotAsyncTestCase):
     """Test Suite 2: Real Tool Dispatcher Integration (Protects tool execution reliability)
     
@@ -220,6 +222,7 @@ class TestRealToolDispatcherIntegration(SSotAsyncTestCase):
         except Exception as e:
             self.fail(f'Tool execution integration failed: {e}')
 
+@pytest.mark.integration
 class TestRealDatabaseIntegration(SSotAsyncTestCase):
     """Test Suite 3: Real Database Integration (Protects agent state persistence)
     
@@ -310,6 +313,7 @@ class TestRealDatabaseIntegration(SSotAsyncTestCase):
         except Exception as e:
             self.fail(f'Concurrent database integration failed: {e}')
 
+@pytest.mark.integration
 class TestRealAgentExecutionFlow(SSotAsyncTestCase):
     """Test Suite 4: Real Agent Execution Flow (Protects end-to-end agent orchestration)
     
@@ -402,6 +406,7 @@ class TestRealAgentExecutionFlow(SSotAsyncTestCase):
         except Exception as e:
             self.fail(f'Agent error recovery integration failed: {e}')
 
+@pytest.mark.integration
 class TestRealPerformanceUnderLoad(SSotAsyncTestCase):
     """Test Suite 5: Real Performance Under Load (Protects system scalability)
     

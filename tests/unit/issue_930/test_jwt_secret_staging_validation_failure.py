@@ -19,6 +19,7 @@ from shared.jwt_secret_manager import JWTSecretManager, get_jwt_secret_manager, 
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.unit
 class TestJWTSecretStagingValidationFailure:
     """Test suite reproducing JWT_SECRET_STAGING validation failures from staging logs."""
 
@@ -271,6 +272,7 @@ class TestJWTSecretStagingValidationFailure:
                     )
 
 
+@pytest.mark.unit
 class TestJWTSecretManagerEnvironmentAccessPatterns:
     """Test JWT secret manager environment access patterns causing staging failures."""
 

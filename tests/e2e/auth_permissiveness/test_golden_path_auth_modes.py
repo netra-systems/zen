@@ -51,6 +51,7 @@ from netra_backend.app.db.database_manager import get_database_manager
 from netra_backend.app.db.models_auth import User
 from netra_backend.app.db.models_corpus import Thread, Message
 
+@pytest.mark.e2e
 class TestGoldenPathAuthModes(SSotBaseTestCase):
     """
     E2E tests for complete golden path user flow with auth permissiveness.

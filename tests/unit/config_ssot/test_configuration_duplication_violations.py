@@ -23,6 +23,7 @@ creates technical debt and operational risk.
 - Memory and performance impact of duplication
 """
 
+import pytest
 import unittest
 import warnings
 import gc
@@ -33,6 +34,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestConfigurationDuplicationViolations(SSotBaseTestCase):
     """
     Unit Tests: Configuration Manager Duplication Detection and Validation

@@ -36,6 +36,7 @@ from typing import Dict, Any, List
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
+@pytest.mark.unit
 class TestAgentMessageSecurityValidation(SSotAsyncTestCase):
     """
     Unit tests for agent message security validation functionality.
@@ -300,6 +301,7 @@ class TestAgentMessageSecurityValidation(SSotAsyncTestCase):
         execution_time = time.time() - start_time
         assert execution_time < 3.0, f'Test took {execution_time:.2f}s, expected <3s'
 
+@pytest.mark.unit
 class TestAgentMessageSecurityValidationPerformance(SSotAsyncTestCase):
     """
     Performance validation for agent message security test suite.

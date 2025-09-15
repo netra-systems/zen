@@ -43,6 +43,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 logger = logging.getLogger(__name__)
 pytestmark = [pytest.mark.e2e, pytest.mark.staging, pytest.mark.websocket, pytest.mark.golden_path, pytest.mark.auth, pytest.mark.issue_395]
 
+@pytest.mark.e2e
 class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

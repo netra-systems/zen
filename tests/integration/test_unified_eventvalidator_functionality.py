@@ -34,6 +34,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.integration
 class TestUnifiedEventValidatorFunctionality(SSotBaseTestCase):
     """
     Test unified EventValidator SSOT implementation functionality.

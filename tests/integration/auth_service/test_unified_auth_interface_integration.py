@@ -540,6 +540,7 @@ class MockUnifiedAuthInterface:
         """Get security events for a user"""
         return self.security_events.get(user_id, [])
 
+@pytest.mark.integration
 class TestUnifiedAuthInterfaceIntegrationCore(SSotAsyncTestCase):
     """Core integration tests for UnifiedAuthInterface with real services"""
 
@@ -610,6 +611,7 @@ class TestUnifiedAuthInterfaceIntegrationCore(SSotAsyncTestCase):
             payload.update(extra_claims)
         return jwt.encode(payload, self.private_key_pem, algorithm='RS256')
 
+@pytest.mark.integration
 class TestRealJWTIntegration(TestUnifiedAuthInterfaceIntegrationCore):
     """Integration tests with real JWT cryptographic operations"""
 
@@ -699,6 +701,7 @@ class TestRealJWTIntegration(TestUnifiedAuthInterfaceIntegrationCore):
         self.assertIsNotNone(blacklist_record)
         self.assertEqual(blacklist_record[0], 'security_incident')
 
+@pytest.mark.integration
 class TestRealOAuthIntegration(TestUnifiedAuthInterfaceIntegrationCore):
     """Integration tests with real OAuth provider interactions"""
 
@@ -773,6 +776,7 @@ class TestRealOAuthIntegration(TestUnifiedAuthInterfaceIntegrationCore):
         self.assertTrue(google_token_valid.valid)
         self.assertTrue(github_token_valid.valid)
 
+@pytest.mark.integration
 class TestSessionManagementIntegration(TestUnifiedAuthInterfaceIntegrationCore):
     """Integration tests for session management with real Redis"""
 
@@ -842,6 +846,7 @@ class TestSessionManagementIntegration(TestUnifiedAuthInterfaceIntegrationCore):
         redis_exists = self.redis_client.exists(redis_session_key)
         self.assertEqual(redis_exists, 0)
 
+@pytest.mark.integration
 class TestSecurityIncidentResponse(TestUnifiedAuthInterfaceIntegrationCore):
     """Integration tests for security incident response scenarios"""
 
@@ -926,6 +931,7 @@ class TestSecurityIncidentResponse(TestUnifiedAuthInterfaceIntegrationCore):
         self.assertTrue(post_load_verification.valid)
         self.test_user_ids.add('post-load-verification')
 
+@pytest.mark.integration
 class TestCrossServiceAuthCoordination(TestUnifiedAuthInterfaceIntegrationCore):
     """Integration tests for cross-service authentication coordination"""
 

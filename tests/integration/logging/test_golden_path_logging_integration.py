@@ -70,6 +70,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.integration
 class TestGoldenPathLoggingIntegration(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
@@ -523,6 +524,7 @@ class TestGoldenPathLoggingIntegration(SSotAsyncTestCase):
             """)
 
 
+@pytest.mark.integration
 class TestGoldenPathLoggingPerformance(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

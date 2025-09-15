@@ -15,6 +15,7 @@ This test should FAIL initially, proving the problem exists.
 After implementing the missing functions, this test should PASS.
 """
 
+import pytest
 import unittest
 import sys
 from pathlib import Path
@@ -25,6 +26,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
+@pytest.mark.unit
 class TestMissingBridgeFunctions(unittest.TestCase):
     """
     Test that demonstrates the missing bridge functions issue.
@@ -192,6 +194,7 @@ class TestMissingBridgeFunctions(unittest.TestCase):
             self.fail(f"MISSION CRITICAL IMPORT FAILURE: {e}")
 
 
+@pytest.mark.unit
 class TestConfigurationRegressionBlocking(unittest.TestCase):
     """
     Test that demonstrates how missing functions block configuration protection.

@@ -26,6 +26,7 @@ from netra_backend.app.dependencies import get_user_execution_context, create_us
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator, reset_global_counter
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.integration
 class TestSessionContinuityIntegration:
     """Integration tests for session continuity patterns."""
     
@@ -279,6 +280,7 @@ class TestSessionContinuityIntegration:
         assert context1.run_id     # Should not be None
 
 
+@pytest.mark.integration
 class TestWebSocketHandlerSessionIntegration:
     """Integration tests specifically for WebSocket handler session patterns."""
     
@@ -424,6 +426,7 @@ class TestAsyncSessionContinuity:
                     assert context.run_id != other_context.run_id
 
 
+@pytest.mark.integration
 class TestRegressionPrevention:
     """Tests to prevent regression of the context creation vs getter pattern bug."""
     

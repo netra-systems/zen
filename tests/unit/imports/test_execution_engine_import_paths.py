@@ -39,6 +39,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
+@pytest.mark.unit
 class TestExecutionEngineImportPaths(SSotAsyncTestCase):
     """Test suite for execution engine import paths critical infrastructure gaps."""
 

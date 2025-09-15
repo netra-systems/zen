@@ -146,6 +146,7 @@ class AuthUrlPatternValidator:
         return results
 
 
+@pytest.mark.unit
 class TestAuthUrlPatternRegression:
     """Test suite to prevent auth URL pattern regression."""
     
@@ -288,6 +289,7 @@ class TestAuthUrlPatternRegression:
                 )
 
 
+@pytest.mark.unit
 class TestAuthUrlPatternDocumentation:
     """Test that URL patterns are properly documented."""
     

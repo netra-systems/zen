@@ -16,6 +16,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestMessageRouteAuthDelegation(SSotAsyncTestCase):
     """
     Integration test validating message route authentication SSOT compliance.

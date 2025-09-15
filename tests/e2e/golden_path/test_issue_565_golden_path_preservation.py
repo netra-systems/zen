@@ -17,6 +17,7 @@ CRITICAL: These are end-to-end tests that validate the complete user experience
 from authentication through meaningful AI chat interactions.
 """
 
+import pytest
 import asyncio
 import json
 import time
@@ -34,6 +35,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
+@pytest.mark.e2e
 class TestIssue565GoldenPathPreservation(SSotAsyncTestCase):
     """
     End-to-end test suite validating Golden Path preservation in ExecutionEngine migration.

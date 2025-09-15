@@ -23,6 +23,7 @@ from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
+@pytest.mark.unit
 class TestEnvironmentIsolationThreadSafety:
     """Test thread safety of IsolatedEnvironment under concurrent access."""
 

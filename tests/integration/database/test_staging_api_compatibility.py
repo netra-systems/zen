@@ -28,6 +28,7 @@ from shared.database_url_builder import DatabaseURLBuilder
 from shared.types.core_types import UserID, ensure_user_id
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestStagingDatabaseAPICompatibility:
     """
     Immediate bug reproduction test suite for staging API compatibility issues.
@@ -276,6 +277,7 @@ class TestStagingDatabaseAPICompatibility:
         logger.info(f'   Redis issues detected: {len(redis_issues)}')
         assert True, 'Compatibility detection logic is properly configured'
 
+@pytest.mark.integration
 class TestDatabaseAPIViolationDetection:
     """
     Tests specifically designed to detect SSOT violations in database API usage.

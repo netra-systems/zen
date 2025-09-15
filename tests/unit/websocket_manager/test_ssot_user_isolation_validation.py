@@ -25,6 +25,7 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.websocket_core.ssot_validation_enhancer import SSotValidationError, UserIsolationViolation, enable_strict_validation, validate_user_isolation, get_ssot_validation_summary
 
+@pytest.mark.unit
 class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
     """
     Test suite for validating WebSocket Manager user isolation.
@@ -209,6 +210,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         final_summary = get_ssot_validation_summary()
         self.assertTrue(final_summary['tracked_users'] <= updated_summary['tracked_users'], 'User context not cleaned up after manager destruction')
 
+@pytest.mark.unit
 class TestUserIsolationValidationGapDocumentation(SSotAsyncTestCase):
     """
     Test suite specifically designed to document user isolation validation gaps.

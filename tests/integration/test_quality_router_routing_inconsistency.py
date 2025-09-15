@@ -11,6 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.integration
 class TestQualityRouterRoutingInconsistency(SSotAsyncTestCase):
     """Integration tests demonstrating Quality Router routing inconsistency."""
 

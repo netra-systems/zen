@@ -17,6 +17,7 @@ CRITICAL: These tests validate that factory patterns eliminate architectural
 anti-patterns that could compromise user isolation or system stability.
 """
 
+import pytest
 import asyncio
 import inspect
 import warnings
@@ -35,6 +36,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.integration
 class TestExecutionFactoryCompliance(SSotAsyncTestCase):
     """
     Test suite validating ExecutionEngine factory pattern compliance with SSOT.

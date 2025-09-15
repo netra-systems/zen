@@ -15,6 +15,7 @@ E2E Level: Tests real performance on staging environment with real services - NO
 Test MUST FAIL when performance degrades below business-critical thresholds
 """
 
+import pytest
 import asyncio
 import gc
 import psutil
@@ -240,6 +241,7 @@ class RealPerformanceWebSocketManager:
         }
 
 
+@pytest.mark.e2e
 class TestPerformanceValidation(SSotAsyncTestCase):
     """E2E Test 9: Validate UserExecutionEngine performance meets baseline requirements"""
     

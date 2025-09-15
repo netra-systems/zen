@@ -28,6 +28,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
+@pytest.mark.e2e
 class TestExecutionWorkflowWithAuthentication(SSotBaseTestCase):
     """Test execution workflow with real authentication end-to-end."""
 

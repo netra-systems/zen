@@ -51,6 +51,7 @@ from netra_backend.app.services.database.session_manager import SessionManager
 from netra_backend.app.tools.search_tool import SearchTool
 from netra_backend.app.tools.data_analysis_tool import DataAnalysisTool
 
+@pytest.mark.e2e
 class TestGoldenPathAgentExecution(SSotAsyncTestCase):
     """Test Suite 1: Golden Path Agent Execution (Protects $500K+ ARR core flow)
     
@@ -183,6 +184,7 @@ class TestGoldenPathAgentExecution(SSotAsyncTestCase):
         except Exception:
             return None
 
+@pytest.mark.e2e
 class TestMultiUserEnterpriseIsolation(SSotAsyncTestCase):
     """Test Suite 2: Multi-User Enterprise Isolation (Protects $15K+ MRR per customer)
     
@@ -296,6 +298,7 @@ class TestMultiUserEnterpriseIsolation(SSotAsyncTestCase):
         except Exception:
             return None
 
+@pytest.mark.e2e
 class TestProductionToolExecution(SSotAsyncTestCase):
     """Test Suite 3: Production Tool Execution (Protects agent capabilities)
     
@@ -361,6 +364,7 @@ class TestProductionToolExecution(SSotAsyncTestCase):
         except Exception as e:
             self.fail(f' ALERT:  Tool WebSocket notifications FAILED: {e}')
 
+@pytest.mark.e2e
 class TestProductionPerformanceValidation(SSotAsyncTestCase):
     """Test Suite 4: Production Performance Validation (Protects system scalability)
     

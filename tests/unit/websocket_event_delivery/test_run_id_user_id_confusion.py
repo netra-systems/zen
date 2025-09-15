@@ -32,6 +32,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from shared.types.core_types import UserID, ThreadID, RunID
 
+@pytest.mark.unit
 class TestRunIdUserIdConfusion(SSotAsyncTestCase):
     """Unit tests demonstrating User ID vs Run ID confusion in WebSocket event delivery."""
 

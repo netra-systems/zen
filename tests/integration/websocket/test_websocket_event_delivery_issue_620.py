@@ -30,6 +30,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.integration
 class TestWebSocketEventDeliveryIssue620(BaseIntegrationTest):
     """Test WebSocket event delivery through SSOT ExecutionEngine migration."""
     
@@ -646,6 +647,7 @@ class TestWebSocketEventDeliveryIssue620(BaseIntegrationTest):
         return {'user1_events': user1_events, 'user2_events': user2_events}
 
 
+@pytest.mark.integration
 class TestWebSocketEventValidationRegressionPrevention(BaseIntegrationTest):
     """Prevent regressions in WebSocket event delivery."""
     

@@ -55,6 +55,7 @@ Golden Path Flow:
 Business Impact: Protects core revenue-generating chat functionality during infrastructure changes
 """
 
+import pytest
 import asyncio
 import logging
 import unittest
@@ -73,6 +74,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.e2e
 class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase):
 
     def create_user_context(self) -> UserExecutionContext:

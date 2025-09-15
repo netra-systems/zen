@@ -43,6 +43,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
+@pytest.mark.unit
 class TestWebSocketBridgeInterfaces(SSotAsyncTestCase):
     """Unit tests reproducing WebSocket bridge interface mismatches from Golden Path tests.
     

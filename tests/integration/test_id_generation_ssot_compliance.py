@@ -5,6 +5,7 @@ This test validates system-wide compliance with UnifiedIDManager SSOT patterns
 and detects violations across the entire system.
 """
 
+import pytest
 import unittest
 import uuid
 import asyncio
@@ -15,6 +16,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.integration
 class TestIdGenerationSSOTCompliance(unittest.TestCase):
     """Integration tests for ID generation SSOT compliance across system."""
     

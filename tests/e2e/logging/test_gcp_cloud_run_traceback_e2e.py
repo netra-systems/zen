@@ -37,6 +37,7 @@ from netra_backend.app.core.unified_logging import get_logger
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.e2e
 class TestGCPCloudRunTracebackE2E(SSotAsyncTestCase):
     """End-to-End tests for Cloud Run traceback capture simulation."""
     

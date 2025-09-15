@@ -12,6 +12,7 @@ import inspect
 from pathlib import Path
 import pytest
 
+@pytest.mark.unit
 class TestUnifiedConfigManagerDuplicationCrisis:
     """Phase 1 Tests - DESIGNED TO FAIL exposing duplication crisis"""
 
@@ -79,6 +80,7 @@ class TestUnifiedConfigManagerDuplicationCrisis:
         except ImportError as e:
             pytest.skip(f'Import failed: {e}')
 
+@pytest.mark.unit
 class TestCriticalBusinessImpactAnalysis:
     """Analyze the business-critical impact of this duplication crisis"""
 

@@ -337,9 +337,14 @@ class TestAuthConfigStandalone(unittest.TestCase):
 if __name__ == "__main__":
     # Run tests directly if called as script
     if IMPORTS_AVAILABLE:
-        # Set up environment for direct execution
-        os.environ['ENVIRONMENT'] = 'test'
-        os.environ['JWT_SECRET_KEY'] = 'test-secret-key-for-unit-testing-32chars-long'
+        # Set up environment for direct execution using IsolatedEnvironment
+        import sys
+        from pathlib import Path
+        sys.path.append(str(Path(__file__).parent.parent))
+        from shared.isolated_environment import get_env
+        env = get_env()
+        env.set('ENVIRONMENT', 'test')
+        env.set('JWT_SECRET_KEY', 'test-secret-key-for-unit-testing-32chars-long')
         
         unittest.main(argv=[''], exit=False, verbosity=2)
     else:

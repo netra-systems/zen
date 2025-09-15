@@ -21,6 +21,7 @@ from shared.jwt_secret_manager import get_jwt_secret_manager, get_unified_jwt_se
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.integration
 class TestServiceStartupAuthenticationFailure(SSotAsyncTestCase):
     """Tests reproducing service startup authentication failures from staging logs."""
 

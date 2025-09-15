@@ -76,6 +76,7 @@ class UserSessionData:
     start_time: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+@pytest.mark.integration
 class TestUserExecutionEngineComprehensiveIntegration(SSotAsyncTestCase):
     """
     User Execution Engine Comprehensive Integration Tests - Issue #870 Phase 1

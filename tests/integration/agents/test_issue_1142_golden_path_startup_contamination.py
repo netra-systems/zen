@@ -54,6 +54,7 @@ from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassR
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 
 
+@pytest.mark.integration
 class TestIssue1142GoldenPathStartupContamination(SSotAsyncTestCase):
     """
     Integration tests proving startup contamination blocks golden path.

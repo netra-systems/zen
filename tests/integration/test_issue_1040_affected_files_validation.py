@@ -45,6 +45,7 @@ except ImportError:
     SSOT_FRAMEWORK_AVAILABLE = False
 
 
+@pytest.mark.integration
 class TestIssue1040AffectedFilesValidation(SSotBaseTestCase):
     """
     Validation test for files affected by Issue #1040 ServiceAvailability import issue.

@@ -121,6 +121,7 @@ class APIService:
     async def rotate_api_key(self, old_key):
         pass
 
+@pytest.mark.integration
 class TestCoreAPIL3Integration:
     """Comprehensive L3 integration tests for core API functionality."""
 

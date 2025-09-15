@@ -16,6 +16,7 @@ Business Value:
 - Protects against import-related deployment failures
 """
 
+import pytest
 import unittest
 import asyncio
 import logging
@@ -25,6 +26,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestIssue597AuthImportValidation(SSotBaseTestCase):
     """
     Test suite to demonstrate and validate Issue #597 auth import problem.
@@ -189,6 +191,7 @@ class TestIssue597AuthImportValidation(SSotBaseTestCase):
             self.logger.info(f"✅ EXPECTED FAILURE: Confirmed failing pattern: {pattern}")
 
 
+@pytest.mark.unit
 class TestIssue597IntegrationValidation(SSotBaseTestCase):
     """
     Integration tests for Issue #597 to validate real-world scenarios.

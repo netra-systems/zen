@@ -21,6 +21,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.integration
 class TestFactoryPatternMigration(SSotAsyncTestCase):
     """Test factory pattern migration to UserExecutionEngine SSOT."""
     
@@ -542,6 +543,7 @@ class TestFactoryPatternMigration(SSotAsyncTestCase):
         await super().async_teardown_method(method)
 
 
+@pytest.mark.integration
 class TestFactoryPatternConsistency(SSotAsyncTestCase):
     """Test factory pattern consistency across different factory implementations."""
     

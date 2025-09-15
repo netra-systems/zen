@@ -27,6 +27,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.unit
 class TestGCPHeaderValidation(SSotBaseTestCase):
     """
     Unit tests for GCP header validation patterns in Issue #605.

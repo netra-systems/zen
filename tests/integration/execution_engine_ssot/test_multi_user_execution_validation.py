@@ -12,6 +12,7 @@ Business Impact: $500K+ ARR Golden Path protection - multi-user isolation preven
 Integration Level: Tests with real threading, real async, real WebSocket events (NO DOCKER)
 """
 
+import pytest
 import asyncio
 import concurrent.futures
 import sys
@@ -83,6 +84,7 @@ class RealWebSocketSimulator:
         return contamination
 
 
+@pytest.mark.integration
 class TestMultiUserExecutionValidation(SSotAsyncTestCase):
     """Integration Test 5: Validate multi-user execution with UserExecutionEngine SSOT"""
     

@@ -209,6 +209,7 @@ class StateManager:
         return len(self.state_store)
 
 
+@pytest.mark.unit
 class TestStateEntrySerialization(SSotBaseTestCase):
     """Test StateEntry serialization and deserialization."""
     
@@ -328,6 +329,7 @@ class TestStateEntrySerialization(SSotBaseTestCase):
         self.assertEqual(deserialized.metadata, original_entry.metadata)
 
 
+@pytest.mark.unit
 class TestTTLExpirationLogic(SSotBaseTestCase):
     """Test TTL (Time To Live) expiration logic for state cleanup."""
     
@@ -469,6 +471,7 @@ class TestTTLExpirationLogic(SSotBaseTestCase):
         self.assertEqual(remaining_ids, expected_ids)
 
 
+@pytest.mark.unit
 class TestStateVersioningAndConflicts(SSotBaseTestCase):
     """Test state versioning and conflict resolution."""
     
@@ -571,6 +574,7 @@ class TestStateVersioningAndConflicts(SSotBaseTestCase):
         self.assertEqual(updated.state_data["new_field"], "value")
 
 
+@pytest.mark.unit
 class TestUserStateIsolation(SSotBaseTestCase):
     """Test that state is properly isolated between users."""
     

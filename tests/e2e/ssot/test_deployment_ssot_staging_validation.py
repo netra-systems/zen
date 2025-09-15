@@ -35,6 +35,7 @@ from unittest.mock import patch
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.e2e
 class TestDeploymentSsotStagingValidation(SSotBaseTestCase):
     """
     E2E tests for deployment SSOT compliance in staging environment.
@@ -237,6 +238,7 @@ class TestDeploymentSsotStagingValidation(SSotBaseTestCase):
         except Exception:
             return False
 
+@pytest.mark.e2e
 class TestDeploymentSsotStagingEdgeCases(SSotBaseTestCase):
     """
     Edge case tests for SSOT deployment staging validation.

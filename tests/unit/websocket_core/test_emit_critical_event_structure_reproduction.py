@@ -15,6 +15,7 @@ import json
 from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.unit
 class TestEmitCriticalEventStructureReproduction(SSotAsyncTestCase):
     """Direct test of emit_critical_event structure issue"""
 
