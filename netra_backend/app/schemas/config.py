@@ -493,6 +493,23 @@ class AppConfig(BaseModel):
     otel_excluded_urls: str = Field(default="/health,/metrics,/docs,/openapi.json", description="URLs to exclude from telemetry")
     otel_resource_attributes: Optional[str] = Field(default=None, description="Additional resource attributes")
     
+    # Sentry Error Tracking and Performance Monitoring configuration
+    sentry_enabled: bool = Field(default=True, description="Enable Sentry error tracking and performance monitoring")
+    sentry_dsn: Optional[str] = Field(default=None, description="Sentry Data Source Name (DSN) for error reporting")
+    sentry_environment: Optional[str] = Field(default=None, description="Sentry environment name (development, staging, production)")
+    sentry_release: Optional[str] = Field(default=None, description="Sentry release version for tracking deployments")
+    sentry_server_name: Optional[str] = Field(default=None, description="Server name for Sentry identification")
+    sentry_sample_rate: float = Field(default=1.0, description="Error sampling rate (0.0 to 1.0)")
+    sentry_traces_sample_rate: float = Field(default=0.1, description="Performance traces sampling rate (0.0 to 1.0)")
+    sentry_profiles_sample_rate: float = Field(default=0.1, description="Profiling sampling rate (0.0 to 1.0)")
+    sentry_max_breadcrumbs: int = Field(default=100, description="Maximum breadcrumbs to keep for debugging context")
+    sentry_attach_stacktrace: bool = Field(default=True, description="Attach stack traces to messages")
+    sentry_send_default_pii: bool = Field(default=False, description="Send personally identifiable information")
+    sentry_debug: bool = Field(default=False, description="Enable Sentry debug mode")
+    sentry_before_send_transaction: bool = Field(default=True, description="Enable transaction filtering before sending")
+    sentry_ignore_errors: List[str] = Field(default_factory=lambda: ["KeyboardInterrupt", "SystemExit"], description="List of error types to ignore")
+    sentry_ignore_transactions: List[str] = Field(default_factory=lambda: ["/health", "/metrics"], description="List of transaction names to ignore")
+    
     # Service availability flags for staging infrastructure (pragmatic degradation)
     redis_optional_in_staging: bool = Field(default=False, description="Allow staging to run without Redis (graceful degradation)")
     clickhouse_optional_in_staging: bool = Field(default=False, description="Allow staging to run without ClickHouse (graceful degradation)")
