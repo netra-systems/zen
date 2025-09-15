@@ -97,9 +97,7 @@ class TestSSOTExecutionCompliance(SSotBaseTestCase):
                 f"SSOT VIOLATION DETECTED: {len(violations)} files bypass unified test runner:\n"
                 f"{violation_details}\n\n"
                 f"REMEDIATION REQUIRED:\n"
-                f"1. Remove '# MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution' calls from test files\n"
+                f"1. Remove direct test execution calls from test files\n"
                 f"2. Execute tests through: python tests/unified_test_runner.py\n"
                 f"3. Use SSOT test execution patterns only\n\n"
                 f"BUSINESS IMPACT: Fragmented test execution threatens $500K+ ARR Golden Path stability"

@@ -479,6 +479,3 @@
 
 
         # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-            # REMOVED_SYNTAX_ERROR: # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution

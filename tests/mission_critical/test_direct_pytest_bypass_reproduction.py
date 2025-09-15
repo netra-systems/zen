@@ -104,9 +104,7 @@ class TestDirectPytestBypassReproduction(SSotBaseTestCase):
                 tree = ast.parse(content)
                 
                 for node in ast.walk(tree):
-                    # Direct # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution calls
+                    # Direct pytest.main calls detection
                     if (isinstance(node, ast.Call) and 
                         isinstance(node.func, ast.Attribute) and
                         isinstance(node.func.value, ast.Name) and

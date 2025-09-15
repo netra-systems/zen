@@ -400,7 +400,4 @@ class TestWebSocketConnection:
 
 
                                                                                                                                                                                                                                                                                     if __name__ == "__main__":
-                                                                                                                                                                                                                                                                                        # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution
                                                                                                                                                                                                                                                                                         pass

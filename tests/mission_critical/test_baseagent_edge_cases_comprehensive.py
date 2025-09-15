@@ -1420,7 +1420,4 @@
 
                         # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
                             # Run BaseAgent edge case tests
-                            # REMOVED_SYNTAX_ERROR: # MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution
                             # REMOVED_SYNTAX_ERROR: pass

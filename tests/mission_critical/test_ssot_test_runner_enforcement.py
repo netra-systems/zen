@@ -267,9 +267,12 @@ class TestSSOTTestRunnerEnforcement(SSotBaseTestCase):
         
         # Must have test execution patterns
         test_execution_patterns = [
-            '# MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution and pattern in content_lower) or \
+            '# MIGRATED: Use SSOT unified test runner',
+            '# python tests/unified_test_runner.py --category unit',
+            'pass  # TODO: Replace with appropriate SSOT test execution'
+        ]
+
+        has_test_execution = any(pattern in content_lower for pattern in test_execution_patterns if isinstance(pattern, str)) or \
                            any(pattern for pattern in test_execution_patterns if isinstance(pattern, bool) and pattern)
         
         return has_test_execution
