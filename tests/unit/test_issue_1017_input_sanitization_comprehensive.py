@@ -143,24 +143,24 @@ class TestIssue1017InputSanitizationVulnerabilities(SSotBaseTestCase):
                     }
                 )
 
-                # Convert to dict to simulate database processing
-                state_dict = malicious_state.model_dump()
-                agent_input_str = json.dumps(state_dict.get("agent_input", {}))
+            # Convert to dict to simulate database processing
+            state_dict = malicious_state.model_dump()
+            agent_input_str = json.dumps(state_dict.get("agent_input", {}))
 
-                # VULNERABILITY CHECK: If this passes, SQL injection is possible
-                # These assertions should FAIL to prove vulnerability exists
-                sql_keywords = ["DROP TABLE", "UNION SELECT", "INSERT INTO", "EXEC xp_cmdshell", "WAITFOR DELAY"]
-                for keyword in sql_keywords:
-                    if keyword in payload:
-                        self.assertNotIn(keyword, agent_input_str,
-                            f"VULNERABILITY: SQL keyword '{keyword}' from payload '{payload}' was not sanitized")
+            # VULNERABILITY CHECK: If this passes, SQL injection is possible
+            # These assertions should FAIL to prove vulnerability exists
+            sql_keywords = ["DROP TABLE", "UNION SELECT", "INSERT INTO", "EXEC xp_cmdshell", "WAITFOR DELAY"]
+            for keyword in sql_keywords:
+                if keyword in payload:
+                    self.assertNotIn(keyword, agent_input_str,
+                        f"VULNERABILITY: SQL keyword '{keyword}' from payload '{payload}' was not sanitized")
 
-                # Check for SQL injection patterns
-                sql_patterns = ["'--", "' OR '", "'; ", "/*", "UNION"]
-                for pattern in sql_patterns:
-                    if pattern in payload:
-                        self.assertNotIn(pattern, agent_input_str,
-                            f"VULNERABILITY: SQL pattern '{pattern}' from payload '{payload}' was not sanitized")
+            # Check for SQL injection patterns
+            sql_patterns = ["'--", "' OR '", "'; ", "/*", "UNION"]
+            for pattern in sql_patterns:
+                if pattern in payload:
+                    self.assertNotIn(pattern, agent_input_str,
+                        f"VULNERABILITY: SQL pattern '{pattern}' from payload '{payload}' was not sanitized")
 
     def test_path_traversal_vulnerability_in_agent_input(self):
         """
