@@ -20,69 +20,20 @@ from shared.types.core_types import (
 # Import UnifiedIDManager for SSOT ID generation
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
+# ISSUE #965 REMEDIATION: Import shared types and functions from types.py to resolve circular dependency
+from netra_backend.app.websocket_core.types import (
+    WebSocketConnection,
+    WebSocketManagerMode,
+    serialize_message_safely as _serialize_message_safely,
+    _get_enum_key_representation
+)
+
 # Import the protocol after it's defined to avoid circular imports
 logger = get_logger(__name__)
 
 
-class WebSocketManagerMode(Enum):
-    """DEPRECATED: WebSocket manager modes - CONSOLIDATING TO UNIFIED SSOT.
-    
-    ALL MODES NOW REDIRECT TO UNIFIED MODE FOR SSOT COMPLIANCE.
-    User isolation is handled through UserExecutionContext, not manager modes.
-    
-    MIGRATION NOTICE: This enum will be removed in v2.0. 
-    Use WebSocketManager directly without specifying mode.
-    """
-    UNIFIED = "unified"        # SSOT: Single unified mode with UserExecutionContext isolation
-    ISOLATED = "unified"       # DEPRECATED: Redirects to UNIFIED (isolation via UserExecutionContext)
-    EMERGENCY = "unified"      # DEPRECATED: Redirects to UNIFIED (graceful degradation built-in)
-    DEGRADED = "unified"       # DEPRECATED: Redirects to UNIFIED (auto-recovery built-in)
-
-
-def _get_enum_key_representation(enum_key: Enum) -> str:
-    """
-    Get string representation for enum keys in dictionaries.
-    
-    For enum keys, we use different strategies based on enum type:
-    - WebSocketState enums: Use lowercase names for consistency ("open" vs "1")
-    - Integer enums (IntEnum): Use string value for readability ("1" vs "first")  
-    - String/text enums: Use lowercase names for readability ("option_a" vs "OPTION_A")
-    
-    Args:
-        enum_key: Enum object to convert to string key
-        
-    Returns:
-        String representation suitable for JSON dict keys
-    """
-    if hasattr(enum_key, 'name') and hasattr(enum_key, 'value'):
-        # WEBSOCKET STATE HANDLING: Check if this is a WebSocket state enum
-        enum_name = str(enum_key.name).upper()
-        websocket_state_names = {'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'CONNECTED', 'DISCONNECTED'}
-        
-        # Check if it's from a WebSocket framework module or has WebSocket-like class name
-        module_name = getattr(enum_key.__class__, '__module__', '')
-        framework_modules = ['starlette.websockets', 'fastapi.websockets', 'websockets']
-        is_framework_websocket = any(framework_mod in module_name for framework_mod in framework_modules)
-        
-        class_name = enum_key.__class__.__name__
-        is_websocket_class = 'websocket' in class_name.lower() and 'state' in class_name.lower()
-        
-        # For WebSocket state enums, always use lowercase name for keys
-        if (is_framework_websocket or 
-            (is_websocket_class and enum_name in websocket_state_names)):
-            return str(enum_key.name).lower()
-        
-        # For integer-valued non-WebSocket enums, use the string representation of the value
-        # This makes {"1": "initialized"} instead of {"first": "initialized"}
-        elif isinstance(enum_key.value, int):
-            return str(enum_key.value)
-        else:
-            # For string/other enums, use lowercase names for better JSON readability
-            # This makes {"option_a": "selected"} instead of {"OPTION_A": "selected"}
-            return str(enum_key.name).lower()
-    else:
-        # Fallback to string representation
-        return str(enum_key)
+# ISSUE #965 REMEDIATION: WebSocketManagerMode enum moved to types.py to break circular dependency
+# ISSUE #965 REMEDIATION: _get_enum_key_representation function moved to types.py to break circular dependency
 
 
 def _serialize_message_safely(message: Any) -> Dict[str, Any]:

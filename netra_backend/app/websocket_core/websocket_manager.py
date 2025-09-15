@@ -20,11 +20,14 @@ This eliminates ID collision risks and ensures consistent ID formats across WebS
 """
 
 # ISSUE #824 REMEDIATION: Import from private implementation to enforce SSOT
-from netra_backend.app.websocket_core.unified_manager import (
-    _UnifiedWebSocketManagerImplementation,
+# ISSUE #965 REMEDIATION: Import shared types from types.py to break circular dependency
+from netra_backend.app.websocket_core.types import (
     WebSocketConnection,
-    _serialize_message_safely,
-    WebSocketManagerMode
+    WebSocketManagerMode,
+    _serialize_message_safely
+)
+from netra_backend.app.websocket_core.unified_manager import (
+    _UnifiedWebSocketManagerImplementation
 )
 # SSOT Protocol import consolidated from protocols module
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
