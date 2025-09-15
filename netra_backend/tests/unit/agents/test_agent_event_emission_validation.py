@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 # Import core event emission components
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UnifiedEventEmitter
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
-from netra_backend.app.websocket_core.event_validator import EventValidator
+from netra_backend.app.websocket_core.event_validator import WebSocketEventValidator as EventValidator
 from netra_backend.app.websocket_core.event_delivery_tracker import EventDeliveryTracker
 from netra_backend.app.websocket_core.manager import WebSocketManager
 
