@@ -313,43 +313,56 @@ class ExecutionEngineFactory:
         
         logger.debug(f"User {user_id} engine count: {user_engine_count}/{self._max_engines_per_user}")
     
-    async def _create_user_websocket_emitter(self, 
+    async def _create_user_websocket_emitter(self,
                                             context: UserExecutionContext,
                                             agent_factory) -> UnifiedWebSocketEmitter:
         """Create user WebSocket emitter using websocket bridge (if available).
-        
+
         Args:
             context: User execution context
             agent_factory: Agent instance factory (unused now, kept for compatibility)
-            
+
         Returns:
             UnifiedWebSocketEmitter: User-specific WebSocket emitter
-            
+
         Raises:
             ExecutionEngineFactoryError: If emitter creation fails
         """
         try:
             # Use the websocket_bridge from initialization (can be None in test mode)
             websocket_bridge = self._websocket_bridge
-            
+
             if not websocket_bridge:
                 logger.warning(
                     f" WARNING: [U+FE0F] Creating UnifiedWebSocketEmitter for user {context.user_id} without WebSocket bridge. "
                     f"WebSocket events will be disabled (test/degraded mode)."
                 )
-            
-            # Create user WebSocket emitter (works with None websocket_bridge)
-            # FIX: UnifiedWebSocketEmitter doesn't use thread_id/run_id, uses context instead
-            emitter = UnifiedWebSocketEmitter(
-                user_id=context.user_id,
-                context=context,
-                websocket_manager=websocket_bridge  # Legacy parameter name for WebSocket manager
-            )
-            
+
+                # COMPATIBILITY FIX: Create test fallback manager for test environments
+                from netra_backend.app.websocket_core.websocket_manager import create_test_fallback_manager
+                test_manager = create_test_fallback_manager(context)
+
+                emitter = UnifiedWebSocketEmitter(
+                    user_id=context.user_id,
+                    context=context,
+                    manager=test_manager  # Use test fallback manager for no-op WebSocket functionality
+                )
+
+                logger.debug(f"Created UnifiedWebSocketEmitter with test fallback manager for user {context.user_id}")
+            else:
+                # Production mode: use WebSocket bridge
+                emitter = UnifiedWebSocketEmitter(
+                    user_id=context.user_id,
+                    context=context,
+                    websocket_manager=websocket_bridge  # Legacy parameter name for WebSocket manager
+                )
+
+                logger.debug(f"Created UnifiedWebSocketEmitter with production WebSocket bridge for user {context.user_id}")
+
             logger.debug(f"Created UnifiedWebSocketEmitter for user {context.user_id} "
                         f"(bridge available: {websocket_bridge is not None})")
             return emitter
-            
+
         except Exception as e:
             logger.error(f"Failed to create UnifiedWebSocketEmitter: {e}")
             raise ExecutionEngineFactoryError(f"WebSocket emitter creation failed: {e}")

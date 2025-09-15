@@ -14,7 +14,7 @@ from netra_backend.app.services.quality_gate_service import (
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.dependencies import get_user_execution_context
-from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as create_websocket_manager
 
 logger = central_logger.get_logger(__name__)
 

@@ -22,7 +22,6 @@ This test should PASS if WebSocket events are properly routed through UserExecut
 If it FAILS, it indicates WebSocket integration issues in SSOT consolidation.
 """
 
-import unittest
 import asyncio
 import json
 import time
@@ -30,22 +29,27 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, List, Any, Optional
 import concurrent.futures
 
-# Use unittest.TestCase directly to avoid import issues for now
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocketEventsRouting(unittest.TestCase):
+class TestWebSocketEventsRouting(SSotBaseTestCase):
     """Test WebSocket events routing through UserExecutionEngine."""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment for WebSocket routing tests."""
+        super().setup_method(method)
+        
         self.routing_violations = []
         self.event_delivery_issues = []
         self.cross_user_leaks = []
         self.performance_issues = []
         
+        # Record test context metrics
+        self.record_metric('test_type', 'websocket_events_routing')
+        self.record_metric('test_category', 'mission_critical')
         logger.info("Starting WebSocket events routing testing")
     
     def test_user_specific_event_delivery(self):

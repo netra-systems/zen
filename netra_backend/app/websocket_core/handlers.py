@@ -1334,7 +1334,21 @@ class MessageRouter:
         """Route message to appropriate handler."""
         try:
             raw_type = raw_message.get('type', 'unknown')
-            
+
+            # PHASE 2B STEP 1: Quality message routing integration
+            # Check for quality messages FIRST before standard message handling
+            if self._is_quality_message_type(raw_type):
+                logger.info(f"MessageRouter detected quality message type: {raw_type}")
+                self.routing_stats["messages_routed"] += 1
+                msg_type_str = f"quality_{raw_type}"
+                if msg_type_str in self.routing_stats["message_types"]:
+                    self.routing_stats["message_types"][msg_type_str] += 1
+                else:
+                    self.routing_stats["message_types"][msg_type_str] = 1
+
+                # Route to quality message handler
+                return await self.handle_quality_message(user_id, raw_message)
+
             # Check if this is an unknown message type BEFORE normalization
             is_unknown_type = self._is_unknown_message_type(raw_type)
             if is_unknown_type:
@@ -1343,11 +1357,11 @@ class MessageRouter:
                 self.routing_stats["unhandled_messages"] += 1
                 # Send ack response for unknown message types
                 return await self._send_unknown_message_ack(user_id, websocket, raw_type)
-            
+
             # Convert raw message to standard format
             message = await self._prepare_message(raw_message)
             logger.info(f"MessageRouter processing message type: {message.type} from raw type: {raw_type}")
-            
+
             # Update routing stats
             self.routing_stats["messages_routed"] += 1
             msg_type_str = str(message.type)
@@ -1355,7 +1369,7 @@ class MessageRouter:
                 self.routing_stats["message_types"][msg_type_str] += 1
             else:
                 self.routing_stats["message_types"][msg_type_str] = 1
-            
+
             # Find appropriate handler
             handler = self._find_handler(message.type)
             if handler:
@@ -1763,9 +1777,16 @@ class MessageRouter:
     
     def _is_quality_message_type(self, message_type: str) -> bool:
         """Check if message type is a quality message."""
-        if not hasattr(self, '_quality_handlers') or not self._quality_handlers:
-            return False
-        return message_type in self._quality_handlers
+        # PHASE 2B STEP 1: Quality message type detection for string-based routing
+        # Quality message types from QualityMessageRouter integration
+        quality_message_types = {
+            "get_quality_metrics",
+            "subscribe_quality_alerts",
+            "validate_content",
+            "generate_quality_report"
+            # Note: "start_agent" handled by normal flow but enhanced with quality features
+        }
+        return message_type in quality_message_types
     
     async def _route_quality_message(self, user_id: str, message: Dict[str, Any], message_type: str) -> None:
         """Route message to appropriate quality handler."""
@@ -1792,15 +1813,15 @@ class MessageRouter:
         logger.warning(f"Unknown quality message type: {message_type}")
         try:
             from netra_backend.app.dependencies import get_user_execution_context
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            
+            from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as create_websocket_manager
+
             error_message = f"Unknown quality message type: {message_type}"
             user_context = get_user_execution_context(
                 user_id=user_id,
                 thread_id=None,  # Let session manager handle missing IDs
                 run_id=None      # Let session manager handle missing IDs
             )
-            manager = await get_websocket_manager(user_context)
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:
             logger.error(f"Failed to send unknown quality message error to user {user_id}: {e}")
@@ -1809,15 +1830,15 @@ class MessageRouter:
         """Handle quality handler errors."""
         try:
             from netra_backend.app.dependencies import get_user_execution_context
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            
+            from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as create_websocket_manager
+
             error_message = f"Quality handler error for {message_type}: {str(error)}"
             user_context = get_user_execution_context(
                 user_id=user_id,
                 thread_id=None,  # Let session manager handle missing IDs
                 run_id=None      # Let session manager handle missing IDs
             )
-            manager = await get_websocket_manager(user_context)
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user({"type": "error", "message": error_message})
         except Exception as e:
             logger.error(f"Failed to send quality handler error to user {user_id}: {e}")
@@ -1839,8 +1860,8 @@ class MessageRouter:
             # Get monitoring service for subscriber list
             from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
             from netra_backend.app.dependencies import get_user_execution_context
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            
+            from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as create_websocket_manager
+
             # Create monitoring service to get subscribers
             monitoring_service = QualityMonitoringService()
             subscribers = getattr(monitoring_service, 'subscribers', [])
@@ -1858,8 +1879,8 @@ class MessageRouter:
         """Send quality update to a single subscriber."""
         try:
             from netra_backend.app.dependencies import get_user_execution_context
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            
+            from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as create_websocket_manager
+
             message = {
                 "type": "quality_update",
                 "payload": update
@@ -1870,7 +1891,7 @@ class MessageRouter:
                 thread_id=None,  # Let session manager handle missing IDs
                 run_id=None      # Let session manager handle missing IDs
             )
-            manager = await get_websocket_manager(user_context)
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user(message)
             
         except Exception as e:
@@ -1914,8 +1935,8 @@ class MessageRouter:
         """Send quality alert to a single subscriber."""
         try:
             from netra_backend.app.dependencies import get_user_execution_context
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            
+            from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as create_websocket_manager
+
             alert_message = {
                 "type": "quality_alert",
                 "payload": {
@@ -1929,11 +1950,34 @@ class MessageRouter:
                 thread_id=None,  # Let session manager handle missing IDs
                 run_id=None      # Let session manager handle missing IDs
             )
-            manager = await get_websocket_manager(user_context)
+            manager = await create_websocket_manager(user_context)
             await manager.send_to_user(alert_message)
             
         except Exception as e:
             logger.error(f"Error broadcasting quality alert to {user_id}: {str(e)}")
+
+    # PHASE 2B STEP 1: QualityMessageRouter Interface Compatibility
+    async def handle_message(self, user_id: str, message: Dict[str, Any]) -> None:
+        """Handle message with QualityMessageRouter interface compatibility.
+
+        PHASE 2B STEP 1: Provides interface compatibility with QualityMessageRouter.handle_message
+        Routes quality messages through integrated quality handling system.
+
+        Args:
+            user_id: User ID for the message
+            message: Message dictionary to process
+        """
+        message_type = message.get("type")
+
+        logger.info(f"MessageRouter.handle_message processing {message_type} from {user_id}")
+
+        # Route quality messages through integrated quality handler
+        if self._is_quality_message_type(message_type):
+            await self.handle_quality_message(user_id, message)
+        else:
+            # For non-quality messages, log that this interface is for quality integration
+            logger.warning(f"MessageRouter.handle_message received non-quality message type: {message_type}. "
+                          f"This interface is designed for quality message compatibility.")
 
 
 # Global message router instance

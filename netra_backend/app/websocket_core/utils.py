@@ -1683,7 +1683,7 @@ async def create_websocket_manager(user_context=None, user_id=None):
     Returns:
         WebSocketManager instance configured for the user context
     """
-    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-    
+    from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as factory_create
+
     logger.debug(f"COMPATIBILITY: Creating WebSocket manager via utils.py wrapper (user_id: {user_id})")
-    return await get_websocket_manager(user_context)
+    return await factory_create(user_context)

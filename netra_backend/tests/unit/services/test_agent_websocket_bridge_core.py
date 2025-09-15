@@ -41,8 +41,8 @@ from netra_backend.app.services.agent_websocket_bridge import (
     IntegrationResult,
     IntegrationMetrics
 )
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.websocket_core.canonical_imports import create_defensive_user_execution_context
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.services.user_execution_context import UserExecutionContext, create_defensive_user_execution_context
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.monitoring.interfaces import MonitorableComponent
 
@@ -121,7 +121,11 @@ class TestAgentWebSocketBridgeCore(SSotAsyncTestCase):
         # Create real user context for proper testing
         self.test_user_id = "websocket_user_123"
         self.test_session_id = "websocket_session_456"
-        self.user_context = create_defensive_user_execution_context(user_id=self.test_user_id)
+        self.user_context = UserExecutionContext(
+            user_id=self.test_user_id,
+            session_id=self.test_session_id,
+            context={"websocket_test": True}
+        )
         
         # Create test configuration
         self.test_config = IntegrationConfig(
@@ -364,9 +368,17 @@ class TestAgentWebSocketBridgeCore(SSotAsyncTestCase):
         await self.bridge.initialize()
         
         # Create two different user contexts
-        user1_context = create_defensive_user_execution_context(user_id="user_1")
+        user1_context = UserExecutionContext(
+            user_id="user_1",
+            session_id="session_1",
+            context={}
+        )
         
-        user2_context = create_defensive_user_execution_context(user_id="user_2")
+        user2_context = UserExecutionContext(
+            user_id="user_2", 
+            session_id="session_2",
+            context={}
+        )
         
         # Emit events for different users
         await self.bridge.emit_agent_event(
@@ -670,7 +682,7 @@ class TestAgentWebSocketBridgeCore(SSotAsyncTestCase):
         
         # Create isolated user contexts
         contexts = [
-            create_defensive_user_execution_context(user_id=f"bridge_user_{i}")
+            UserExecutionContext(user_id=f"bridge_user_{i}", session_id=f"bridge_session_{i}", context={})
             for i in range(3)
         ]
         
