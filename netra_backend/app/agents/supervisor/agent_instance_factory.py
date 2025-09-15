@@ -1204,31 +1204,44 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
                                           llm_manager: Optional[Any] = None,
                                           tool_dispatcher: Optional[Any] = None) -> AgentInstanceFactory:
     """
-    DEPRECATED: This function was used for singleton configuration and is being phased out.
+    ISSUE #1186 PHASE 2 - SINGLETON ELIMINATION: Function completely deprecated.
     
-    ISSUE #1142 FIX: This function has been deprecated in favor of per-request pattern.
-    Use create_agent_instance_factory(user_context) instead for proper user isolation.
+    This function was used for singleton configuration and creates security vulnerabilities
+    by sharing state between users. The singleton pattern has been eliminated in Phase 2.
     
-    This function is maintained for backward compatibility during transition but will be removed.
+    MANDATORY MIGRATION:
+    - OLD: configure_agent_instance_factory(components...) 
+    - NEW: create_agent_instance_factory(user_context) + factory.configure(components...)
+    
+    Security Impact: Global factory configuration enables multi-user contamination.
+    Per-request factories with user context binding are now mandatory.
     
     Args:
-        agent_class_registry: Registry containing agent classes (preferred)
-        agent_registry: Legacy agent registry (for backward compatibility)
-        websocket_bridge: WebSocket bridge for notifications (SSOT)
-        websocket_manager: DEPRECATED - Ignored for backward compatibility
-        llm_manager: LLM manager for agent communication
-        tool_dispatcher: Tool dispatcher for agent tools
+        [All parameters ignored - function deprecated]
         
     Returns:
-        AgentInstanceFactory: Factory instance (NOT singleton)
+        AgentInstanceFactory: Per-request factory (no singleton behavior)
+        
+    Raises:
+        DeprecationWarning: To encourage migration to proper patterns
     """
-    logger.warning(
-        "DEPRECATED: configure_agent_instance_factory() called. "
-        "This function creates a factory without user context isolation. "
-        "Migrate to create_agent_instance_factory(user_context) for proper multi-user support."
+    logger.error(
+        "SINGLETON ELIMINATION: configure_agent_instance_factory() deprecated in Phase 2! "
+        "This creates security vulnerabilities through shared factory state. "
+        "Use create_agent_instance_factory(user_context) for proper isolation."
     )
     
-    # ISSUE #1142 FIX: Create new factory instance instead of using singleton
+    # ISSUE #1186 PHASE 2: Still create factory but warn about security implications
+    # This maintains some backward compatibility while encouraging migration
+    import warnings
+    warnings.warn(
+        "configure_agent_instance_factory() is deprecated and creates security vulnerabilities. "
+        "Use create_agent_instance_factory(user_context) for proper user isolation.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    # Create factory without singleton behavior
     factory = AgentInstanceFactory()
     factory.configure(
         agent_class_registry=agent_class_registry,
@@ -1239,5 +1252,5 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
         tool_dispatcher=tool_dispatcher
     )
     
-    logger.info(" PASS:  AgentInstanceFactory configured (non-singleton for backward compatibility)")
+    logger.warning(" WARNING:  Created AgentInstanceFactory without user context - security risk!")
     return factory
