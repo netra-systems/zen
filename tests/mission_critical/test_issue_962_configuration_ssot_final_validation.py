@@ -34,7 +34,6 @@ These tests MUST PASS before Issue #962 can be considered resolved.
 import asyncio
 import os
 import sys
-import unittest
 from pathlib import Path
 from typing import Dict, List, Set, Any, Optional, Tuple
 import importlib
@@ -44,7 +43,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestIssue962ConfigurationSSOTFinalValidation(SSotAsyncTestCase, unittest.TestCase):
+class TestIssue962ConfigurationSSOTFinalValidation(SSotAsyncTestCase):
     """
     MISSION CRITICAL tests for final SSOT configuration validation - Issue #962.
 
@@ -515,4 +514,5 @@ if __name__ == "__main__":
     print("BUSINESS IMPACT: $500K+ ARR Golden Path protection")
     print("=" * 80)
 
-    unittest.main(verbosity=2)
+    import pytest
+    pytest.main([__file__, '-v'])

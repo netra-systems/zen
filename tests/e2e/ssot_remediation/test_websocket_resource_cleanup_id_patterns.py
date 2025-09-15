@@ -25,7 +25,7 @@ from typing import Dict, List, Any, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.types.core_types import (

@@ -27,20 +27,24 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, Any
 
-# SSOT imports using absolute paths - Issue #824 Remediation
+# SSOT imports using absolute paths - Issue #1128 Remediation  
 # Import SSOT WebSocket manager and factory compatibility functions
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager_factory import (
+from netra_backend.app.websocket_core.canonical_imports import (
     ConnectionLifecycleManager,
-    FactoryMetrics,
-    ManagerMetrics,
     FactoryInitializationError,
     get_websocket_manager_factory,
     create_websocket_manager,
     create_websocket_manager_sync,
-    create_defensive_user_execution_context,
     _validate_ssot_user_context,
     _validate_ssot_user_context_staging_safe
+)
+from netra_backend.app.services.user_execution_context import (
+    create_defensive_user_execution_context
+)
+from netra_backend.app.monitoring.websocket_metrics import (
+    FactoryMetrics,
+    ManagerMetrics
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.execution_types import StronglyTypedUserExecutionContext
@@ -509,7 +513,7 @@ class TestWebSocketManagerFactory(SSotBaseTestCase):
         
     def test_component_health_validation(self):
         """Test WebSocket component health validation."""
-        from netra_backend.app.websocket_core.websocket_manager_factory import validate_websocket_component_health
+        from netra_backend.app.websocket_core.canonical_imports import validate_websocket_component_health
 
         # Test health validation function
         health_status = validate_websocket_component_health()

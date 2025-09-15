@@ -46,7 +46,7 @@ from netra_backend.app.services.websocket_event_router import (
     ConnectionInfo,
     get_websocket_router
 )
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -735,7 +735,7 @@ async def broadcast_to_user(user_id: str, event: Dict[str, Any]) -> int:
     try:
         # Import here to avoid circular dependency
         from netra_backend.app.services.websocket_broadcast_service import create_broadcast_service
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
 
         # Get WebSocket manager instance
         websocket_manager = UnifiedWebSocketManager()

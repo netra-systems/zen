@@ -24,7 +24,7 @@ class TestWebSocketFactorySSOTImportValidation(unittest.TestCase):
         self.deprecated_imports = {
             # These imports should be deprecated in favor of SSOT patterns
             "netra_backend.app.websocket_core.manager",
-            "netra_backend.app.websocket_core.factory",
+            "netra_backend.app.websocket_core.canonical_imports",
             "netra_backend.app.core.websocket_cors",
             "netra_backend.app.websocket_core.auth",
         }

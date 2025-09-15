@@ -7,6 +7,7 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { cn } from '@/lib/utils';
 import { useEventManagement } from './event-management';
 import { exportDebugData, DebugExportOptions } from './debug-export';
+import { useResponsiveHeight } from '@/hooks/useWindowSize';
 import { 
   PanelHeader, 
   EventList, 
@@ -36,6 +37,7 @@ export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose })
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const eventManagement = useEventManagement(wsEventBuffer, wsEventBufferVersion);
+  const { secondary, compact } = useResponsiveHeight();
 
   const scrollEventsToBottom = () => {
     if (scrollAreaRef.current && activeTab === 'events') {
@@ -106,9 +108,13 @@ export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose })
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className={cn(
             "fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-2xl z-50",
-            isMaximized ? "h-[80vh]" : "h-[400px]",
-            "transition-[height] duration-300"
+            "transition-[height] duration-300 overflow-hidden"
           )}
+          style={{
+            height: isMaximized ? `${secondary}px` : `${compact}px`,
+            maxHeight: isMaximized ? '80vh' : '60vh'
+          }}
+          data-testid="overflow-panel"
         >
           <PanelHeader
             activeTab={activeTab}

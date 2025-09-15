@@ -22,7 +22,7 @@ Expected Result: Tests should FAIL initially, demonstrating the problems.
 After SSOT consolidation, tests should pass proving unified behavior.
 """
 
-import unittest
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 import sys
 import importlib
 import inspect
@@ -31,28 +31,28 @@ import time
 from typing import Dict, Any, List, Set, Type
 from unittest.mock import MagicMock, patch
 
-class TestAgentRegistrySSotDuplication(unittest.TestCase):
+class TestAgentRegistrySSotDuplication(SSotBaseTestCase):
     """Test suite demonstrating AgentRegistry SSOT duplication issues."""
     
-    @classmethod
-    def setUpClass(cls):
-        """Set up test class with registry paths."""
+    def setup_method(self, method=None):
+        """Set up test with registry paths."""
+        super().setup_method(method)
         
         # Known AgentRegistry implementation paths
-        cls.registry_paths = [
+        self.registry_paths = [
             'netra_backend.app.agents.registry',  # Main registry
             'netra_backend.app.agents.supervisor.agent_registry',  # Supervisor registry
             'netra_backend.app.core.registry.universal_registry',  # Universal registry base
         ]
         
         # Store loaded modules for analysis
-        cls.loaded_registries = {}
+        self.loaded_registries = {}
         
         # Load all registry implementations
-        for path in cls.registry_paths:
+        for path in self.registry_paths:
             try:
                 module = importlib.import_module(path)
-                cls.loaded_registries[path] = module
+                self.loaded_registries[path] = module
                 print(f"✓ Loaded registry from: {path}")
             except ImportError as e:
                 print(f"✗ Failed to load registry from {path}: {e}")
@@ -372,7 +372,7 @@ class TestAgentRegistrySSotDuplication(unittest.TestCase):
                            f"Patterns: {initialization_patterns}")
 
 
-class TestAgentRegistryRuntimeBehaviorInconsistencies(unittest.TestCase):
+class TestAgentRegistryRuntimeBehaviorInconsistencies(SSotBaseTestCase):
     """Test suite for runtime behavior inconsistencies between registries."""
     
     def test_01_concurrent_access_behavior(self):
@@ -422,4 +422,5 @@ if __name__ == '__main__':
     print("="*80)
     
     # Run the tests
-    unittest.main(verbosity=2, buffer=False)
+    import pytest
+    pytest.main([__file__, '-v'])

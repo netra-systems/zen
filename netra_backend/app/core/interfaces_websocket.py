@@ -10,20 +10,8 @@ from typing import Any, Dict, List, Optional, Protocol
 from datetime import datetime
 
 
-class WebSocketProtocol(Protocol):
-    """Protocol for WebSocket implementations."""
-    
-    async def send_message(self, user_id: str, message: Dict[str, Any]) -> bool:
-        """Send message to user via WebSocket."""
-        ...
-    
-    async def broadcast_message(self, message: Dict[str, Any]) -> int:
-        """Broadcast message to all connected users."""
-        ...
-    
-    def get_connection_count(self) -> int:
-        """Get current connection count."""
-        ...
+# WebSocketManagerProtocol removed - use comprehensive protocol from protocols.py
+# from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 
 
 class WebSocketConnectionProtocol(Protocol):
@@ -150,13 +138,13 @@ class WebSocketEventTypes:
 
 
 # Compatibility aliases for interface imports
-WebSocketManagerInterface = WebSocketManagerProtocol
+# WebSocketManagerInterface removed - use WebSocketManagerProtocol from protocols.py
 WebSocketServiceInterface = WebSocketEventHandler  # Most appropriate mapping
 
 
 # Compatibility exports
 __all__ = [
-    'WebSocketManagerProtocol',
+    # 'WebSocketManagerProtocol',  # REMOVED - use comprehensive protocol from protocols.py
     'WebSocketConnectionProtocol', 
     'WebSocketEventHandler',
     'WebSocketBridge',
@@ -164,6 +152,6 @@ __all__ = [
     'WebSocketState',
     'WebSocketEventTypes',
     # Compatibility aliases
-    'WebSocketManagerInterface',
+    # 'WebSocketManagerInterface',  # REMOVED - use WebSocketManagerProtocol from protocols.py
     'WebSocketServiceInterface'
 ]

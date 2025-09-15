@@ -1,7 +1,7 @@
-"Unified WebSocket Manager - SSOT for WebSocket connection management.
+"""Unified WebSocket Manager - SSOT for WebSocket connection management.
 
 This module is the single source of truth for WebSocket connection management.
-"
+"""
 
 import asyncio
 import json
@@ -68,8 +68,7 @@ def _get_enum_key_representation(enum_key: Enum) -> str:
         is_websocket_class = 'websocket' in class_name.lower() and 'state' in class_name.lower()
         
         # For WebSocket state enums, always use lowercase name for keys
-        if (
-            is_framework_websocket or 
+        if (is_framework_websocket or 
             (is_websocket_class and enum_name in websocket_state_names)):
             return str(enum_key.name).lower()
         
@@ -179,8 +178,7 @@ def _serialize_message_safely(message: Any) -> Dict[str, Any]:
             # Treat as WebSocket state if: 
             # 1. From framework module, OR
             # 2. Has WebSocket-like class name AND websocket state name
-            if (
-                is_framework_websocket or 
+            if (is_framework_websocket or 
                 (is_websocket_class and enum_name in websocket_state_names)):
                 return str(message.name).lower()
         
@@ -244,11 +242,11 @@ class WebSocketConnection:
     metadata: Dict[str, Any] = None
     thread_id: Optional[str] = None
     
-    def __post_init__(__self__):
+    def __post_init__(self):
         """Validate connection data after initialization."""
         # Validate user_id is properly formatted
-        if __self__.user_id:
-            __self__.user_id = ensure_user_id(__self__.user_id)
+        if self.user_id:
+            self.user_id = ensure_user_id(self.user_id)
 
 
 class RegistryCompat:
@@ -334,17 +332,15 @@ class _UnifiedWebSocketManagerImplementation:
             try:
                 # Check function name patterns
                 func_name = current_frame.f_code.co_name
-                if (
-                    func_name.startswith('test_') or
+                if (func_name.startswith('test_') or
                     func_name.endswith('_test') or
                     'test' in func_name.lower()):
                     return True
 
                 # Check file path patterns
                 filename = current_frame.f_code.co_filename
-                if (
-                    ('/test' in filename) or
-                    ('\test' in filename) or
+                if (('/test' in filename) or
+                    ('\\test' in filename) or
                     ('_test.py' in filename) or
                     ('test_' in filename) or
                     ('pytest' in filename)):
@@ -1386,7 +1382,7 @@ class _UnifiedWebSocketManagerImplementation:
                         f"INVALID CONNECTION: Connection {conn_id} for user {user_id} "
                         f"has no valid WebSocket. Connection: {connection}"
                     )
-                    failed_connections.append((conn_id, "invalid_websocket")
+                    failed_connections.append((conn_id, "invalid_websocket"))
             
             # If all connections failed, this is critical
             if successful_sends == 0:
@@ -1447,7 +1443,7 @@ class _UnifiedWebSocketManagerImplementation:
         
         Args:
             user_id: Target user ID (accepts both str and UserID)
-            event_type: Type of event (e.g., 'agent_started', 'tool_executing')
+            event_type: Event type (e.g., 'agent_started', 'tool_executing')
             data: Event payload
         """
         # Validate and convert user_id
@@ -1473,11 +1469,10 @@ class _UnifiedWebSocketManagerImplementation:
             backend_url = get_env().get("BACKEND_URL", "")
             auth_service_url = get_env().get("AUTH_SERVICE_URL", "")
             
-            if (
-                ("staging" in gcp_project) or 
-                ("staging.netrasystems.ai" in backend_url) or 
-                ("staging.netrasystems.ai" in auth_service_url) or
-                ("netra-staging" in gcp_project)):
+            if ("staging" in gcp_project or 
+                "staging.netrasystems.ai" in backend_url or 
+                "staging.netrasystems.ai" in auth_service_url or
+                "netra-staging" in gcp_project):
                 logger.info(" SEARCH:  GCP staging environment auto-detected - adjusting WebSocket retry configuration")
                 environment = "staging"
         
@@ -1545,10 +1540,9 @@ class _UnifiedWebSocketManagerImplementation:
         # Store for recovery instead of silently failing
         message = {
             "type": event_type,
+            "data": data,
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "critical": True,
-            "retry_exhausted": True,  # Add context for failure case
-            **data  # ✅ Spread business data to root level
+            "critical": True
         }
         await self._store_failed_message(user_id, message, "no_active_connections_after_retry")
         # Don't return silently - emit to user notification system
@@ -1991,9 +1985,9 @@ class _UnifiedWebSocketManagerImplementation:
         user_id = f"job_{job_id}_{id(websocket)}"
         await self.disconnect_user(user_id, websocket)
     
-    # ============================================================================ 
+    # ============================================================================
     # ENHANCED ERROR HANDLING AND RECOVERY METHODS
-    # ============================================================================ 
+    # ============================================================================
     
     def _get_connection_diagnostics(self, connection: WebSocketConnection) -> Dict[str, Any]:
         """Get detailed diagnostics for a connection with safe serialization."""
@@ -2003,247 +1997,894 @@ class _UnifiedWebSocketManagerImplementation:
                 'has_websocket': websocket is not None,
                 'websocket_type': type(websocket).__name__ if websocket else None,
                 'connection_age_seconds': (datetime.now(timezone.utc) - connection.connected_at).total_seconds(),
-                'metadata': _serialize_message_safely(connection.metadata or {}),
-                'thread_id': connection.thread_id
+                'metadata_present': bool(connection.metadata),
             }
             
-            # Add websocket state if available
-            if websocket and hasattr(websocket, 'client_state'):
-                diagnostics['client_state'] = _serialize_message_safely(websocket.client_state)
-            
+            # CRITICAL FIX: Safe WebSocketState handling
+            if websocket:
+                try:
+                    client_state = getattr(websocket, 'client_state', None)
+                    if client_state is not None:
+                        # Use safe serialization to convert WebSocketState enum to string
+                        diagnostics['websocket_state'] = _serialize_message_safely(client_state)
+                    else:
+                        diagnostics['websocket_state'] = 'unknown'
+                except Exception as state_error:
+                    diagnostics['websocket_state'] = f'error_getting_state_{str(state_error)}'
+            else:
+                diagnostics['websocket_state'] = 'no_websocket'
+                
             return diagnostics
         except Exception as e:
-            return {'error': f"Failed to get diagnostics: {e}"}
+            return {'diagnostics_error': str(e)}
     
-    async def _store_failed_message(self, user_id: str, message: Dict[str, Any], reason: str) -> None:
-        """Store a failed message for later recovery."""
+    async def _store_failed_message(self, user_id: str, message: Dict[str, Any], 
+                                   failure_reason: str) -> None:
+        """Store failed message for potential recovery."""
         if not self._error_recovery_enabled:
             return
-            
-        if user_id not in self._message_recovery_queue:
-            self._message_recovery_queue[user_id] = []
         
-        # Add metadata for recovery
-        recovery_message = {
-            **message,
-            'failed_at': datetime.now(timezone.utc).isoformat(),
-            'failure_reason': reason,
-            'delivery_attempts': 1
-        }
-        
-        self._message_recovery_queue[user_id].append(recovery_message)
-        self._connection_error_count[user_id] = self._connection_error_count.get(user_id, 0) + 1
-        self._last_error_time[user_id] = datetime.now(timezone.utc)
-        
-        logger.warning(f"Stored message for user {user_id} for later recovery (reason: {reason})")
-    
-    async def _process_queued_messages(self, user_id: str) -> None:
-        """Process queued messages for a user after connection is re-established."""
-        if not self._error_recovery_enabled:
-            return
-            
-        if user_id in self._message_recovery_queue:
-            queued_messages = self._message_recovery_queue.pop(user_id, [])
-            logger.info(f"Processing {len(queued_messages)} queued messages for user {user_id}")
-            
-            for message in queued_messages:
-                try:
-                    # Increment delivery attempts
-                    message['delivery_attempts'] = message.get('delivery_attempts', 1) + 1
-                    await self.send_to_user(user_id, message)
-                except Exception as e:
-                    logger.error(f"Failed to send queued message to user {user_id}: {e}")
-                    # Re-queue if it fails again
-                    if user_id not in self._message_recovery_queue:
-                        self._message_recovery_queue[user_id] = []
-                    self._message_recovery_queue[user_id].append(message)
-    
-    async def process_recovery_queue(self, user_id: str) -> None:
-        """
-        ISSUE #824 FIX: Public method to process recovery queue for SSOT test compliance.
-
-        This method provides the standard interface expected by SSOT tests and
-        ensures compatibility with existing code that expects process_recovery_queue.
-
-        Args:
-            user_id: User ID to process recovery queue for
-        """
-        await self._process_queued_messages(user_id)
-
-    async def _emit_connection_error_notification(self, user_id: str, event_type: str) -> None:
-        """Emit a user-facing notification about connection errors."""
         try:
-            # This can be a separate notification system (e.g., UI alert)
-            # For now, we'll log it as a critical event
+            if user_id not in self._message_recovery_queue:
+                self._message_recovery_queue[user_id] = []
+            
+            # Add failure metadata
+            failed_message = {
+                **message,
+                'failure_reason': failure_reason,
+                'failed_at': datetime.now(timezone.utc).isoformat(),
+                'recovery_attempts': 0
+            }
+            
+            self._message_recovery_queue[user_id].append(failed_message)
+            
+            # Increment error count
+            self._connection_error_count[user_id] = self._connection_error_count.get(user_id, 0) + 1
+            self._last_error_time[user_id] = datetime.now(timezone.utc)
+            
+            # Limit queue size to prevent memory issues
+            max_queue_size = 50
+            if len(self._message_recovery_queue[user_id]) > max_queue_size:
+                self._message_recovery_queue[user_id] = self._message_recovery_queue[user_id][-max_queue_size:]
+            
+            logger.info(f"Stored failed message for user {user_id}: {failure_reason}")
+            
+        except Exception as e:
+            logger.error(f"Failed to store failed message for recovery: {e}")
+    
+    async def _emit_connection_error_notification(self, user_id: str, failed_event_type: str) -> None:
+        """Emit a user-visible error notification about connection issues."""
+        try:
+            error_message = {
+                "type": "connection_error",
+                "data": {
+                    "message": f"Connection issue detected. Your {failed_event_type} update may be delayed.",
+                    "event_type": failed_event_type,
+                    "user_friendly_message": "We're having trouble connecting to you. Please refresh your browser if you don't see updates soon.",
+                    "severity": "warning",
+                    "action_required": "Consider refreshing the page if issues persist",
+                    "support_code": f"CONN_ERR_{user_id[:8]}_{failed_event_type}"
+                },
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "critical": True
+            }
+            
+            # Try to send the error notification (even though connection might be bad)
+            # This might reach the user if there are other active connections
+            connection_ids = self.get_user_connections(user_id)
+            for conn_id in connection_ids:
+                connection = self.get_connection(conn_id)
+                if connection and connection.websocket:
+                    try:
+                        # CRITICAL FIX: Use safe serialization for error messages
+                        safe_error_message = _serialize_message_safely(error_message)
+                        await connection.websocket.send_json(safe_error_message)
+                        logger.info(f"Sent connection error notification to user {user_id}")
+                        return
+                    except Exception:
+                        continue  # Try next connection
+            
+            # If we can't send via WebSocket, log for external monitoring
             logger.critical(
-                f"USER NOTIFICATION: Could not deliver critical event '{event_type}' "
-                f"to user {user_id} due to connection issues. "
-                f"The system will attempt to recover, but some updates may be lost."
+                f"USER_NOTIFICATION_FAILED: Could not notify user {user_id} about connection error. "
+                f"User may experience blank screen or missing updates. Support code: {error_message['data']['support_code']}"
             )
+            
         except Exception as e:
             logger.error(f"Failed to emit connection error notification: {e}")
     
-    # ============================================================================ 
-    # TRANSACTION COORDINATION METHODS
-    # ============================================================================ 
+    async def _emit_system_error_notification(self, user_id: str, failed_event_type: str, 
+                                            error_details: str) -> None:
+        """Emit a user-visible system error notification."""
+        try:
+            error_message = {
+                "type": "system_error",
+                "data": {
+                    "message": f"A system error occurred while processing your {failed_event_type}.",
+                    "user_friendly_message": "Something went wrong on our end. Our team has been notified. Please try again in a few moments.",
+                    "event_type": failed_event_type,
+                    "severity": "error",
+                    "action_required": "Try refreshing the page or contact support if the problem persists",
+                    "support_code": f"SYS_ERR_{user_id[:8]}_{failed_event_type}_{datetime.now(timezone.utc).strftime('%H%M%S')}"
+                },
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "critical": True
+            }
+            
+            # DEADLOCK FIX: Send directly to avoid circular dependency with send_to_user
+            connection_ids = self.get_user_connections(user_id)
+            for conn_id in connection_ids:
+                connection = self.get_connection(conn_id)
+                if connection and connection.websocket:
+                    try:
+                        # CRITICAL FIX: Use safe serialization for system error messages
+                        safe_error_message = _serialize_message_safely(error_message)
+                        await connection.websocket.send_json(safe_error_message)
+                        logger.info(f"Sent system error notification to user {user_id}")
+                        return
+                    except Exception:
+                        continue  # Try next connection
+            
+        except Exception as e:
+            logger.critical(
+                f"SYSTEM_ERROR_NOTIFICATION_FAILED: Could not notify user {user_id} "
+                f"about system error in {failed_event_type}: {e}. "
+                f"User may be unaware of the failure. Error details: {error_details}"
+            )
     
-    def set_transaction_coordinator(self, coordinator: Any) -> None:
-        """Set the transaction coordinator for database-aware operations."""
-        self._transaction_coordinator = coordinator
-        self._coordination_enabled = True
-        logger.info("Transaction coordinator set for WebSocket manager")
+    async def attempt_message_recovery(self, user_id: str) -> int:
+        """Attempt to recover failed messages for a user when they reconnect."""
+        if not self._error_recovery_enabled or user_id not in self._message_recovery_queue:
+            return 0
+        
+        failed_messages = self._message_recovery_queue[user_id]
+        recovered_count = 0
+        
+        # Only attempt recovery if user has active connections now
+        if not self.is_connection_active(user_id):
+            logger.debug(f"Skipping message recovery for {user_id} - no active connections")
+            return 0
+        
+        for message in failed_messages[:]:  # Copy list to avoid modification during iteration
+            try:
+                # Increment recovery attempts
+                message['recovery_attempts'] = message.get('recovery_attempts', 0) + 1
+                
+                # Skip messages with too many recovery attempts
+                if message['recovery_attempts'] > 3:
+                    logger.warning(f"Abandoning message recovery after 3 attempts: {message.get('type', 'unknown')}")
+                    failed_messages.remove(message)
+                    continue
+                
+                # Attempt to send the message
+                recovery_message = {k: v for k, v in message.items() 
+                                  if k not in ['failure_reason', 'failed_at', 'recovery_attempts']}
+                recovery_message['recovered'] = True
+                recovery_message['original_failure'] = message['failure_reason']
+                
+                await self.send_to_user(user_id, recovery_message)
+                failed_messages.remove(message)
+                recovered_count += 1
+                
+                logger.info(f"Recovered message for user {user_id}: {message.get('type', 'unknown')}")
+                
+            except Exception as e:
+                logger.warning(f"Message recovery attempt failed for user {user_id}: {e}")
+        
+        if recovered_count > 0:
+            logger.info(f"Message recovery completed for user {user_id}: {recovered_count} messages recovered")
+        
+        return recovered_count
     
-    async def coordinated_send(self, user_id: str, message: Dict[str, Any], transaction_id: str) -> None:
-        """Send a message as part of a coordinated transaction."""
-        if not self._coordination_enabled or not self._transaction_coordinator:
-            logger.warning("Transaction coordination not enabled, sending directly")
-            await self.send_to_user(user_id, message)
+    def get_error_statistics(self) -> Dict[str, Any]:
+        """Get comprehensive error statistics for monitoring."""
+        total_users_with_errors = len(self._connection_error_count)
+        total_error_count = sum(self._connection_error_count.values())
+        total_queued_messages = sum(len(queue) for queue in self._message_recovery_queue.values())
+        
+        # Recent errors (last 5 minutes)
+        recent_errors = 0
+        cutoff_time = datetime.now(timezone.utc)
+        for error_time in self._last_error_time.values():
+            if (cutoff_time - error_time).total_seconds() < 300:  # 5 minutes
+                recent_errors += 1
+        
+        return {
+            'total_users_with_errors': total_users_with_errors,
+            'total_error_count': total_error_count,
+            'total_queued_messages': total_queued_messages,
+            'recent_errors_5min': recent_errors,
+            'error_recovery_enabled': self._error_recovery_enabled,
+            'users_with_queued_messages': len(self._message_recovery_queue),
+            'error_details': {
+                user_id: {
+                    'error_count': self._connection_error_count.get(user_id, 0),
+                    'last_error': self._last_error_time.get(user_id, '').isoformat() if self._last_error_time.get(user_id) else None,
+                    'queued_messages': len(self._message_recovery_queue.get(user_id, []))
+                }
+                for user_id in set(list(self._connection_error_count.keys()) + list(self._message_recovery_queue.keys()))
+            }
+        }
+    
+    async def cleanup_error_data(self, older_than_hours: int = 24) -> Dict[str, int]:
+        """Clean up old error data to prevent memory leaks."""
+        cutoff_time = datetime.now(timezone.utc)
+        
+        # Clean up old error times
+        old_error_users = []
+        for user_id, error_time in self._last_error_time.items():
+            if (cutoff_time - error_time).total_seconds() > (older_than_hours * 3600):
+                old_error_users.append(user_id)
+        
+        for user_id in old_error_users:
+            del self._last_error_time[user_id]
+            if user_id in self._connection_error_count:
+                del self._connection_error_count[user_id]
+        
+        # Clean up old recovery queues for users with no recent activity
+        old_queue_users = []
+        for user_id, messages in self._message_recovery_queue.items():
+            # Remove old messages from queue
+            current_messages = []
+            for message in messages:
+                failed_at_str = message.get('failed_at', '')
+                try:
+                    failed_at = datetime.fromisoformat(failed_at_str.replace('Z', '+00:00'))
+                    if (cutoff_time - failed_at).total_seconds() <= (older_than_hours * 3600):
+                        current_messages.append(message)
+                except (ValueError, AttributeError):
+                    # Keep message if we can't parse the date
+                    current_messages.append(message)
+            
+            if current_messages:
+                self._message_recovery_queue[user_id] = current_messages
+            else:
+                old_queue_users.append(user_id)
+        
+        for user_id in old_queue_users:
+            del self._message_recovery_queue[user_id]
+        
+        return {
+            'cleaned_error_users': len(old_error_users),
+            'cleaned_queue_users': len(old_queue_users),
+            'remaining_error_users': len(self._connection_error_count),
+            'remaining_queue_users': len(self._message_recovery_queue)
+        }
+    
+    # ============================================================================
+    # BACKGROUND TASK MONITORING SYSTEM
+    # ============================================================================
+    
+    async def start_monitored_background_task(self, task_name: str, coro_func, *args, **kwargs) -> str:
+        """Start a background task with monitoring and automatic restart."""
+        async with self._monitoring_lock:
+            if not self._monitoring_enabled:
+                logger.warning("Background task monitoring is disabled")
+                return ""
+            
+            # Store task definition in registry for potential recovery
+            self._task_registry[task_name] = {
+                'func': coro_func,
+                'args': args,
+                'kwargs': kwargs,
+                'created_at': datetime.now(timezone.utc),
+                'restart_count': 0
+            }
+            
+            # Stop existing task if it exists
+            if task_name in self._background_tasks:
+                await self.stop_background_task(task_name)
+            
+            # Create monitored task
+            task = asyncio.create_task(
+                self._run_monitored_task(task_name, coro_func, *args, **kwargs)
+            )
+            
+            self._background_tasks[task_name] = task
+            logger.info(f"Started monitored background task: {task_name}")
+            return task_name
+    
+    async def _run_monitored_task(self, task_name: str, coro_func, *args, **kwargs):
+        """ENHANCED: Run a task with monitoring, error handling, and automatic recovery."""
+        failure_count = 0
+        max_failures = 5  # Increased from 3 for better resilience
+        base_delay = 1.0
+        max_delay = 120.0  # Increased max delay
+        task_start_time = datetime.now(timezone.utc)
+        
+        logger.info(f"MONITORING TASK STARTED: {task_name} with recovery support")
+        
+        while self._monitoring_enabled and not self._shutdown_requested:
+            try:
+                iteration_start = datetime.now(timezone.utc)
+                
+                if asyncio.iscoroutinefunction(coro_func):
+                    await coro_func(*args, **kwargs)
+                else:
+                    # If it's a regular function, run it
+                    result = coro_func(*args, **kwargs)
+                    if asyncio.iscoroutine(result):
+                        await result
+                
+                # Reset failure count on successful execution
+                if failure_count > 0:
+                    logger.info(f"TASK RECOVERY SUCCESS: {task_name} recovered after {failure_count} failures")
+                    failure_count = 0
+                    
+                # Clear failure tracking
+                if task_name in self._task_failures:
+                    del self._task_failures[task_name]
+                if task_name in self._task_last_failure:
+                    del self._task_last_failure[task_name]
+                
+                execution_duration = (datetime.now(timezone.utc) - iteration_start).total_seconds()
+                logger.debug(f"Background task {task_name} completed successfully (duration: {execution_duration:.2f}s)")
+                break  # Task completed successfully
+                
+            except asyncio.CancelledError:
+                logger.info(f"TASK CANCELLED: {task_name} was cancelled gracefully")
+                break
+                
+            except Exception as e:
+                failure_count += 1
+                self._task_failures[task_name] = failure_count
+                self._task_last_failure[task_name] = datetime.now(timezone.utc)
+                
+                # Enhanced error logging with more context
+                task_runtime = (datetime.now(timezone.utc) - task_start_time).total_seconds()
+                logger.critical(
+                    f"BACKGROUND TASK FAILURE: {task_name} failed (attempt {failure_count}/{max_failures}) "
+                    f"after {task_runtime:.1f}s runtime. Error: {e}. Error type: {type(e).__name__}. "
+                    f"Monitoring_enabled: {self._monitoring_enabled}, Shutdown_requested: {self._shutdown_requested}"
+                )
+                
+                # Check if we should attempt automatic recovery
+                if failure_count >= max_failures:
+                    logger.critical(
+                        f"TASK FAILURE THRESHOLD EXCEEDED: {task_name} failed {max_failures} times. "
+                        f"Attempting automatic monitoring restart before abandoning task."
+                    )
+                    
+                    # Attempt one automatic monitoring restart
+                    try:
+                        restart_result = await self.restart_background_monitoring(force_restart=True)
+                        if restart_result.get('monitoring_restarted') and restart_result.get('health_check_passed'):
+                            logger.info(f"AUTOMATIC RECOVERY: Successfully restarted monitoring for {task_name}")
+                            # Reset failure count and continue
+                            failure_count = 0
+                            continue
+                        else:
+                            logger.error(f"AUTOMATIC RECOVERY FAILED: Could not restart monitoring for {task_name}")
+                    except Exception as restart_error:
+                        logger.error(f"AUTOMATIC RECOVERY EXCEPTION: {restart_error}")
+                    
+                    # If automatic recovery failed, abandon task
+                    logger.critical(
+                        f"BACKGROUND TASK ABANDONED: {task_name} failed {max_failures} times and "
+                        f"automatic recovery failed. Manual intervention required."
+                    )
+                    await self._notify_admin_of_task_failure(task_name, e, failure_count)
+                    break
+                
+                # Check if monitoring is still enabled before retry
+                if not self._monitoring_enabled or self._shutdown_requested:
+                    logger.warning(
+                        f"TASK RETRY ABORTED: {task_name} cannot retry due to monitoring state "
+                        f"(enabled: {self._monitoring_enabled}, shutdown: {self._shutdown_requested})"
+                    )
+                    break
+                
+                # Calculate exponential backoff delay with jitter
+                import random
+                base_backoff = min(base_delay * (2 ** (failure_count - 1)), max_delay)
+                jitter = base_backoff * 0.1 * (0.5 - random.random())  #  +/- 5% jitter
+                delay = base_backoff + jitter
+                
+                logger.warning(
+                    f"TASK RETRY SCHEDULED: {task_name} will retry in {delay:.1f}s "
+                    f"(attempt {failure_count + 1}/{max_failures})"
+                )
+                
+                try:
+                    await asyncio.sleep(delay)
+                except asyncio.CancelledError:
+                    logger.info(f"TASK RETRY CANCELLED: {task_name} restart was cancelled")
+                    break
+        
+        # Log final task state
+        total_runtime = (datetime.now(timezone.utc) - task_start_time).total_seconds()
+        logger.info(
+            f"MONITORING TASK ENDED: {task_name} finished after {total_runtime:.1f}s "
+            f"(failures: {failure_count}, monitoring_enabled: {self._monitoring_enabled})"
+        )
+    
+    async def stop_background_task(self, task_name: str) -> bool:
+        """Stop a background task by name."""
+        if task_name not in self._background_tasks:
+            logger.warning(f"Background task {task_name} not found")
+            return False
+        
+        task = self._background_tasks[task_name]
+        task.cancel()
+        
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+        except Exception as e:
+            logger.error(f"Error while stopping background task {task_name}: {e}")
+        
+        del self._background_tasks[task_name]
+        logger.info(f"Stopped background task: {task_name}")
+        return True
+    
+    async def _notify_admin_of_task_failure(self, task_name: str, error: Exception, failure_count: int):
+        """Notify system administrators of critical background task failure."""
+        try:
+            # This would integrate with alerting systems in production
+            alert_message = {
+                "type": "critical_task_failure",
+                "task_name": task_name,
+                "error": str(error),
+                "error_type": type(error).__name__,
+                "failure_count": failure_count,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "requires_manual_intervention": True,
+                "impact": "System functionality may be degraded"
+            }
+            
+            # Log at critical level for monitoring systems
+            logger.critical(
+                f"ADMIN ALERT REQUIRED: Background task {task_name} has failed permanently. "
+                f"Alert: {alert_message}"
+            )
+            
+            # TODO: Integrate with actual alerting systems:
+            # - Send to PagerDuty/OpsGenie
+            # - Email notification to on-call engineers
+            # - Slack/Teams notification
+            # - Create monitoring dashboard alert
+            
+        except Exception as e:
+            logger.error(f"Failed to send admin notification for task failure: {e}")
+    
+    def get_background_task_status(self) -> Dict[str, Any]:
+        """Get status of all background tasks."""
+        task_status = {}
+        
+        for task_name, task in self._background_tasks.items():
+            task_status[task_name] = {
+                'running': not task.done(),
+                'cancelled': task.cancelled(),
+                'exception': str(task.exception()) if task.done() and task.exception() else None,
+                'failure_count': self._task_failures.get(task_name, 0),
+                'last_failure': self._task_last_failure.get(task_name, '').isoformat() if self._task_last_failure.get(task_name) else None
+            }
+        
+        return {
+            'monitoring_enabled': self._monitoring_enabled,
+            'total_tasks': len(self._background_tasks),
+            'running_tasks': len([t for t in self._background_tasks.values() if not t.done()]),
+            'failed_tasks': len(self._task_failures),
+            'tasks': task_status
+        }
+    
+    async def process_recovery_queue(self, user_id: str) -> None:
+        """Process recovery queue messages for a user.
+        
+        Public alias for _process_queued_messages for compatibility.
+        """
+        await self._process_queued_messages(user_id)
+    
+    async def _process_queued_messages(self, user_id: str) -> None:
+        """Process queued messages for a user after connection established.
+        
+        This is called when a new connection is established to deliver
+        any messages that were attempted while the user had no connections.
+        """
+        if user_id not in self._message_recovery_queue:
             return
         
-        # Add transaction metadata
-        message['_transaction_id'] = transaction_id
-        
-        # Use coordinator to send message
-        await self._transaction_coordinator.send_websocket_message(user_id, message)
-    
-    # ============================================================================ 
-    # BACKGROUND TASK MONITORING METHODS
-    # ============================================================================ 
-    
-    def register_background_task(self, task_name: str, task_func: callable, *args, **kwargs) -> None:
-        """Register and start a background task for monitoring."""
-        if not self._monitoring_enabled:
-            logger.warning("Background task monitoring is disabled")
+        messages = self._message_recovery_queue.get(user_id, [])
+        if not messages:
             return
         
-        if task_name in self._background_tasks and not self._background_tasks[task_name].done():
-            logger.warning(f"Task {task_name} is already running")
-            return
+        logger.info(f"Processing {len(messages)} queued messages for user {user_id}")
         
-        # Store task details for recovery
-        self._task_registry[task_name] = {
-            'func': task_func,
-            'args': args,
-            'kwargs': kwargs,
-            'last_started': datetime.now(timezone.utc)
+        # Clear the queue first to prevent re-processing
+        self._message_recovery_queue[user_id] = []
+        
+        # Small delay to ensure connection is fully established
+        await asyncio.sleep(0.1)
+        
+        # Send each queued message with timeout to prevent hanging
+        for msg in messages:
+            try:
+                # Remove recovery metadata before sending
+                clean_msg = {k: v for k, v in msg.items() 
+                           if k not in ['failure_reason', 'failed_at', 'recovery_attempts']}
+                
+                # Add a flag indicating this is a recovered message
+                clean_msg['recovered'] = True
+                
+                # HANG FIX: Add timeout to prevent infinite wait on send_to_user
+                await asyncio.wait_for(
+                    self.send_to_user(user_id, clean_msg),
+                    timeout=3.0  # Reasonable timeout per message
+                )
+                logger.debug(f"Successfully delivered queued message type '{clean_msg.get('type')}' to user {user_id}")
+                
+            except asyncio.TimeoutError:
+                logger.error(f"Timeout delivering queued message to user {user_id}: {clean_msg.get('type', 'unknown')}")
+            except Exception as e:
+                logger.error(f"Failed to deliver queued message to user {user_id}: {e}")
+        
+        logger.info(f"Completed processing queued messages for user {user_id}")
+    
+    async def health_check_background_tasks(self) -> Dict[str, Any]:
+        """Perform health check on background tasks and restart failed ones."""
+        health_report = {
+            'healthy_tasks': 0,
+            'unhealthy_tasks': 0,
+            'restarted_tasks': [],
+            'failed_restarts': []
         }
         
-        # Create and start the task
-        task = asyncio.create_task(self._monitor_task(task_name, task_func, *args, **kwargs))
-        self._background_tasks[task_name] = task
-        logger.info(f"Registered and started background task: {task_name}")
-    
-    async def _monitor_task(self, task_name: str, task_func: callable, *args, **kwargs) -> None:
-        """Monitor a background task and handle failures."""
-        try:
-            await task_func(*args, **kwargs)
-        except asyncio.CancelledError:
-            logger.info(f"Background task {task_name} was cancelled")
-        except Exception as e:
-            logger.error(f"Background task {task_name} failed: {e}")
-            self._task_failures[task_name] = self._task_failures.get(task_name, 0) + 1
-            self._task_last_failure[task_name] = datetime.now(timezone.utc)
-            
-            # Attempt to restart the task
-            await self._restart_task(task_name)
-    
-    async def _restart_task(self, task_name: str) -> None:
-        """Restart a failed background task."""
-        if not self._monitoring_enabled or self._shutdown_requested:
-            logger.warning(f"Not restarting task {task_name} (monitoring disabled or shutdown requested)")
-            return
+        for task_name, task in list(self._background_tasks.items()):
+            if task.done() and not task.cancelled():
+                # Task completed unexpectedly - try to restart
+                logger.warning(f"Background task {task_name} completed unexpectedly - attempting restart")
+                
+                try:
+                    # Remove the completed task
+                    del self._background_tasks[task_name]
+                    
+                    # This would need the original function and args to restart
+                    # For now, just mark as needing manual restart
+                    health_report['unhealthy_tasks'] += 1
+                    health_report['failed_restarts'].append({
+                        'task_name': task_name,
+                        'reason': 'Cannot restart - original function not stored'
+                    })
+                    
+                except Exception as e:
+                    logger.error(f"Failed to restart background task {task_name}: {e}")
+                    health_report['failed_restarts'].append({
+                        'task_name': task_name,
+                        'reason': str(e)
+                    })
+            else:
+                health_report['healthy_tasks'] += 1
         
-        if task_name in self._task_registry:
-            logger.info(f"Attempting to restart task: {task_name}")
-            task_details = self._task_registry[task_name]
-            self.register_background_task(
-                task_name,
-                task_details['func'],
-                *task_details['args'],
-                **task_details['kwargs']
-            )
-        else:
-            logger.error(f"Cannot restart task {task_name}: not found in registry")
+        return health_report
     
-    async def shutdown_monitoring(self) -> None:
-        """Gracefully shut down all monitored background tasks."""
-        self._shutdown_requested = True
-        self._monitoring_enabled = False
+    async def shutdown_background_monitoring(self):
+        """Shutdown all background tasks."""
+        async with self._monitoring_lock:
+            self._shutdown_requested = True
+            self._monitoring_enabled = False
+            
+            # Cancel all tasks
+            for task_name in list(self._background_tasks.keys()):
+                await self.stop_background_task(task_name)
+            
+            logger.info("Background task monitoring shutdown complete")
+    
+    async def _verify_monitoring_health(self) -> bool:
+        """
+        CRITICAL: Verify that monitoring system is healthy and operational.
+        
+        Returns:
+            True if monitoring is healthy, False if issues detected
+        """
+        try:
+            # Check basic monitoring state
+            if not self._monitoring_enabled:
+                logger.error("Monitoring health check failed: monitoring disabled")
+                return False
+            
+            if self._shutdown_requested:
+                logger.error("Monitoring health check failed: shutdown requested")
+                return False
+            
+            # Check task health
+            healthy_tasks = 0
+            total_tasks = len(self._background_tasks)
+            
+            for task_name, task in self._background_tasks.items():
+                if not task.done() and not task.cancelled():
+                    healthy_tasks += 1
+                elif task.done() and task.exception():
+                    logger.warning(f"Task {task_name} has exception: {task.exception()}")
+            
+            # Update health check timestamp
+            self._last_health_check = datetime.now(timezone.utc)
+            self._health_check_failures = 0
+            
+            logger.info(
+                f"Monitoring health check passed: {healthy_tasks}/{total_tasks} tasks healthy, "
+                f"failures_cleared={len(self._task_failures) == 0}"
+            )
+            return True
+            
+        except Exception as e:
+            self._health_check_failures += 1
+            logger.error(f"Monitoring health check exception: {e}")
+            return False
+    
+    async def get_monitoring_health_status(self) -> Dict[str, Any]:
+        """
+        CRITICAL RESILIENCE: Get comprehensive monitoring health status.
+        
+        This provides detailed health information for monitoring dashboard and alerts.
+        
+        Returns:
+            Comprehensive health status dictionary
+        """
+        current_time = datetime.now(timezone.utc)
+        
+        # Calculate task health metrics
+        task_health = {
+            'total_tasks': len(self._background_tasks),
+            'running_tasks': 0,
+            'completed_tasks': 0,
+            'failed_tasks': 0,
+            'cancelled_tasks': 0,
+            'healthy_tasks': []
+        }
         
         for task_name, task in self._background_tasks.items():
             if not task.done():
-                task.cancel()
-                try:
-                    await task
-                except asyncio.CancelledError:
-                    logger.info(f"Task {task_name} cancelled successfully")
+                task_health['running_tasks'] += 1
+                task_health['healthy_tasks'].append(task_name)
+            elif task.cancelled():
+                task_health['cancelled_tasks'] += 1
+            elif task.exception():
+                task_health['failed_tasks'] += 1
+            else:
+                task_health['completed_tasks'] += 1
         
-        self._background_tasks.clear()
-        logger.info("All background tasks shut down")
-    
-    def get_monitoring_status(self) -> Dict[str, Any]:
-        """Get the status of all monitored background tasks."""
+        # Calculate uptime and failure rates
+        last_health_check_age = (current_time - self._last_health_check).total_seconds() if self._last_health_check else None
+        health_check_stale = last_health_check_age is not None and last_health_check_age > 300  # 5 minutes
+        
         return {
             'monitoring_enabled': self._monitoring_enabled,
             'shutdown_requested': self._shutdown_requested,
-            'running_tasks': {
-                name: not task.done()
-                for name, task in self._background_tasks.items()
+            'health_check_failures': self._health_check_failures,
+            'last_health_check': self._last_health_check.isoformat() if self._last_health_check else None,
+            'last_health_check_age_seconds': last_health_check_age,
+            'health_check_stale': health_check_stale,
+            'task_health': task_health,
+            'task_failures': {
+                'total_failed_tasks': len(self._task_failures),
+                'failure_details': {
+                    task_name: {
+                        'failure_count': count,
+                        'last_failure': self._task_last_failure.get(task_name, '').isoformat() if self._task_last_failure.get(task_name) else None
+                    }
+                    for task_name, count in self._task_failures.items()
+                }
             },
-            'task_failures': self._task_failures,
-            'last_health_check': self._last_health_check.isoformat(),
-            'health_check_failures': self._health_check_failures
+            'task_registry': {
+                'registered_tasks': len(self._task_registry),
+                'task_restart_counts': {
+                    task_name: config.get('restart_count', 0)
+                    for task_name, config in self._task_registry.items()
+                }
+            },
+            'overall_health': self._calculate_overall_health_score(task_health, health_check_stale),
+            'alerts': self._generate_health_alerts(task_health, health_check_stale, last_health_check_age)
         }
-
-# ============================================================================ 
-# SINGLETON MANAGEMENT AND FACTORY PATTERN
-# ============================================================================ 
-
-_unified_manager_instance: Optional[_UnifiedWebSocketManagerImplementation] = None
-_manager_lock = asyncio.Lock()
-
-async def get_websocket_manager(
-    mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, 
-    user_context: Optional[Any] = None,
-    force_new: bool = False,
-    **kwargs
-) -> _UnifiedWebSocketManagerImplementation:
-    """Factory function to get the singleton UnifiedWebSocketManager instance.
     
-    This factory ensures that only one instance of the manager is created,
-    and provides a central point for initialization and configuration.
-    
-    Args:
-        mode: DEPRECATED - All modes now use unified behavior
-        user_context: User execution context for user isolation
-        force_new: Force creation of a new instance (for testing)
+    def _calculate_overall_health_score(self, task_health: Dict, health_check_stale: bool) -> Dict[str, Any]:
+        """
+        Calculate overall health score for monitoring system.
         
-    Returns:
-        The singleton UnifiedWebSocketManager instance
-    """
-    global _unified_manager_instance
-    
-    async with _manager_lock:
-        if _unified_manager_instance is None or force_new:
-            logger.info(f"Creating new UnifiedWebSocketManager instance (force_new={force_new})")
+        Args:
+            task_health: Task health metrics
+            health_check_stale: Whether health check is stale
             
-            # Pass SSOT authorization token to allow instantiation
-            _unified_manager_instance = _UnifiedWebSocketManagerImplementation(
-                mode=mode, 
-                user_context=user_context, 
-                config=kwargs,
-                _ssot_authorization_token="ssot_factory_authorized_token_v1"
+        Returns:
+            Health score and status
+        """
+        total_tasks = task_health['total_tasks']
+        running_tasks = task_health['running_tasks']
+        failed_tasks = task_health['failed_tasks']
+        
+        # Calculate base health score
+        if total_tasks == 0:
+            task_score = 100  # No tasks is considered healthy
+        else:
+            task_score = max(0, 100 - (failed_tasks / total_tasks * 100))
+        
+        # Apply penalties
+        health_score = task_score
+        
+        if not self._monitoring_enabled:
+            health_score = 0
+        elif self._shutdown_requested:
+            health_score = min(health_score, 25)
+        elif health_check_stale:
+            health_score = min(health_score, 50)
+        elif self._health_check_failures > 0:
+            health_score = min(health_score, 75)
+        
+        # Determine status
+        if health_score >= 90:
+            status = "healthy"
+        elif health_score >= 70:
+            status = "warning"
+        elif health_score >= 30:
+            status = "degraded"
+        else:
+            status = "critical"
+        
+        return {
+            'score': round(health_score, 1),
+            'status': status,
+            'factors': {
+                'monitoring_enabled': self._monitoring_enabled,
+                'shutdown_requested': self._shutdown_requested,
+                'health_check_stale': health_check_stale,
+                'health_check_failures': self._health_check_failures,
+                'task_failure_rate': (failed_tasks / total_tasks * 100) if total_tasks > 0 else 0
+            }
+        }
+    
+    def _generate_health_alerts(self, task_health: Dict, health_check_stale: bool, last_health_check_age: Optional[float]) -> List[Dict[str, Any]]:
+        """
+        Generate health alerts based on monitoring status.
+        
+        Args:
+            task_health: Task health metrics
+            health_check_stale: Whether health check is stale
+            last_health_check_age: Age of last health check in seconds
+            
+        Returns:
+            List of alert dictionaries
+        """
+        alerts = []
+        
+        # Critical alerts
+        if not self._monitoring_enabled:
+            alerts.append({
+                'severity': 'critical',
+                'message': 'Background monitoring is disabled',
+                'action': 'Call restart_background_monitoring() immediately',
+                'impact': 'System health monitoring and recovery are non-functional'
+            })
+        
+        if self._shutdown_requested:
+            alerts.append({
+                'severity': 'critical',
+                'message': 'Monitoring shutdown has been requested',
+                'action': 'Investigate shutdown cause and restart monitoring',
+                'impact': 'Monitoring will stop accepting new tasks'
+            })
+        
+        # Warning alerts
+        if health_check_stale:
+            alerts.append({
+                'severity': 'warning',
+                'message': f'Health check is stale ({last_health_check_age:.0f}s old)',
+                'action': 'Check monitoring system responsiveness',
+                'impact': 'May not detect recent failures'
+            })
+        
+        if self._health_check_failures > 0:
+            alerts.append({
+                'severity': 'warning',
+                'message': f'{self._health_check_failures} health check failures detected',
+                'action': 'Investigate monitoring system stability',
+                'impact': 'Reduced reliability of health status'
+            })
+        
+        # Task-related alerts
+        if task_health['failed_tasks'] > 0:
+            alerts.append({
+                'severity': 'warning',
+                'message': f"{task_health['failed_tasks']} background tasks have failed",
+                'action': 'Review task failure logs and restart if needed',
+                'impact': 'Reduced system functionality'
+            })
+        
+        if task_health['total_tasks'] > 0 and task_health['running_tasks'] == 0:
+            alerts.append({
+                'severity': 'critical',
+                'message': 'No background tasks are running despite having registered tasks',
+                'action': 'Restart background monitoring immediately',
+                'impact': 'Complete loss of background processing'
+            })
+        
+        return alerts
+    
+    async def enable_background_monitoring(self, restart_previous_tasks: bool = True) -> Dict[str, Any]:
+        """
+        Re-enable background task monitoring with optional task recovery.
+        
+        CRITICAL FIX: Prevents permanent disable of monitoring system by providing
+        a safe way to restart monitoring after shutdown or errors.
+        
+        Args:
+            restart_previous_tasks: Whether to restart tasks that were registered before shutdown
+            
+        Returns:
+            Dictionary with recovery status and counts
+        """
+        recovery_status = {
+            'monitoring_enabled': False,
+            'tasks_restarted': 0,
+            'tasks_failed_restart': 0,
+            'failed_tasks': [],
+            'health_check_reset': False,
+            'previous_state': {
+                'was_shutdown': self._shutdown_requested,
+                'had_failures': len(self._task_failures) > 0
+            }
+        }
+        
+        async with self._monitoring_lock:
+            if self._monitoring_enabled:
+                logger.info("Background monitoring is already enabled")
+                recovery_status['monitoring_enabled'] = True
+                return recovery_status
+            
+            # Reset monitoring state
+            self._monitoring_enabled = True
+            self._shutdown_requested = False
+            self._health_check_failures = 0
+            self._last_health_check = datetime.now(timezone.utc)
+            recovery_status['health_check_reset'] = True
+            
+            logger.info("Background task monitoring re-enabled")
+            recovery_status['monitoring_enabled'] = True
+            
+            # Optionally restart registered tasks
+            if restart_previous_tasks and self._task_registry:
+                logger.info(f"Attempting to restart {len(self._task_registry)} registered tasks")
+                
+                for task_name, task_config in list(self._task_registry.items()):
+                    try:
+                        # Increment restart count
+                        task_config['restart_count'] = task_config.get('restart_count', 0) + 1
+                        
+                        # Don't restart tasks that have failed too many times
+                        if task_config['restart_count'] > 5:
+                            logger.warning(f"Skipping restart of {task_name} - too many restart attempts ({task_config['restart_count']})")
+                            continue
+                        
+                        # Restart the task
+                        restart_result = await self.start_monitored_background_task(
+                            task_name,
+                            task_config['func'],
+                            *task_config['args'],
+                            **task_config['kwargs']
+                        )
+                        
+                        if restart_result:
+                            recovery_status['tasks_restarted'] += 1
+                            logger.info(f"Successfully restarted task: {task_name}")
+                        else:
+                            recovery_status['tasks_failed_restart'] += 1
+                            recovery_status['failed_tasks'].append(task_name)
+                            logger.error(f"Failed to restart task: {task_name}")
+                        
+                    except Exception as e:
+                        recovery_status['tasks_failed_restart'] += 1
+                        recovery_status['failed_tasks'].append(task_name)
+                        logger.error(f"Exception while restarting task {task_name}: {e}")
+            
+            # Clear old failure data for a fresh start
+            self._task_failures.clear()
+            self._task_last_failure.clear()
+            
+            logger.info(
+                f"Monitoring recovery complete: {recovery_status['tasks_restarted']} tasks restarted, "
+                f"{recovery_status['tasks_failed_restart']} failed"
             )
             
-            # Perform any initial configuration here
-            # e.g., _unified_manager_instance.set_transaction_coordinator(...)
-            
-        # If user_context is provided, ensure the manager is in the correct state
-        if user_context:
-            # In unified mode, we don't re-initialize, but we can update context
-            if _unified_manager_instance.user_context != user_context:
-                logger.debug(f"Updating WebSocket manager context for user {getattr(user_context, 'user_id', 'unknown')}")
-                _unified_manager_instance.user_context = user_context
+        return recovery_status
     
     async def restart_background_monitoring(self, force_restart: bool = False) -> Dict[str, Any]:
         """
@@ -3218,11 +3859,38 @@ async def get_websocket_manager(
         return cleaned_count
 
 
+# SECURITY FIX: Replace singleton with factory pattern
+#  ALERT:  SECURITY FIX: Singleton pattern completely removed to prevent multi-user data leakage
+# Use create_websocket_manager(user_context) or WebSocketBridgeFactory instead
 
-# For backward compatibility, we can alias the class name
-UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
+# ISSUE #824 FIX: Removed get_websocket_manager() function causing circular reference
+# This deprecated function was throwing errors and blocking unit tests
+# The working implementation is in websocket_manager.py:182
 
-__all__ = ['UnifiedWebSocketManager', 'WebSocketConnection', '_serialize_message_safely']
+
+# ISSUE #824 REMEDIATION: SSOT CONSOLIDATION
+# This implementation is only accessible through the canonical SSOT import path.
+# Direct imports from this module violate SSOT principles.
+
+# Implementation is available as a private class only
+# Public access must go through: netra_backend.app.websocket_core.websocket_manager
+
+# ISSUE #824 REMEDIATION: EXPORTS REMOVED FOR SSOT CONSOLIDATION
+#
+# This module now contains the implementation but does NOT export classes directly.
+# All imports must go through the canonical SSOT path:
+# from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+#
+# This prevents fragmented import paths and enforces SSOT compliance.
+
+# SSOT CONSOLIDATION COMPLETE - Issue #824 
+# Backward compatibility exports REMOVED to achieve SSOT compliance
+# CANONICAL PATH: Use netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+
+# UnifiedWebSocketManager export removed - use WebSocketManager from websocket_manager.py
+# UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation  # REMOVED
+
+__all__ = ['WebSocketConnection', '_serialize_message_safely', 'WebSocketManagerMode']
 
 # SSOT Consolidation: Log that direct imports are not supported
 import sys

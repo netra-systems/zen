@@ -1681,15 +1681,11 @@ class StartupOrchestrator:
             self.app.state.websocket_bridge_factory = websocket_factory
             self.logger.info("    [U+2713] WebSocketBridgeFactory configured with connection pool")
             
-            # 4. Initialize AgentInstanceFactory
-            agent_instance_factory = await configure_agent_instance_factory(
-                websocket_bridge=self.app.state.agent_websocket_bridge,
-                # SSOT COMPLIANCE: Removed websocket_manager parameter - use AgentWebSocketBridge only
-                llm_manager=self.app.state.llm_manager,
-                tool_dispatcher=None  # Will be created per-request in UserExecutionContext pattern
-            )
-            self.app.state.agent_instance_factory = agent_instance_factory
-            self.logger.info("    [U+2713] AgentInstanceFactory configured")
+            # 4. AgentInstanceFactory - REMOVED SINGLETON PATTERN
+            # ISSUE #1142 FIX: AgentInstanceFactory now created per-request in dependencies.py
+            # to ensure proper user isolation. No singleton instance stored in app.state.
+            # Each request gets its own factory via create_agent_instance_factory(user_context)
+            self.logger.info("    [U+2713] AgentInstanceFactory - per-request pattern (no singleton)")
             
             # 5. Configure SSOT ExecutionEngineFactory (SSOT CONSOLIDATION COMPLETE)
             # Use configure_execution_engine_factory function for SSOT configuration

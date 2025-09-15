@@ -391,7 +391,7 @@ class TestWebSocketSSOTComplianceValidation(SSotBaseTestCase):
                 f"",
                 f"❌ ELIMINATE NON-CANONICAL IMPORTS:",
                 f"   from netra_backend.app.websocket_core.websocket_manager_factory import *",
-                f"   from netra_backend.app.websocket_core.factory import *",
+                f"   from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager",
                 f"   import websocket_factory",
                 f"",
                 f"✅ USE CANONICAL SSOT IMPORTS:",

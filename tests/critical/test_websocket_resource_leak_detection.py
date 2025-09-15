@@ -60,7 +60,7 @@ import logging
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
-from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from shared.isolated_environment import get_env
@@ -207,7 +207,7 @@ class ResourceResourceTestConfiguration:
 class ResourceLeakTracker:
     """Track resource usage and leak detection during tests with memory monitoring."""
     
-    def __init__(self, config: ResourceTestConfiguration):
+    def __init__(self, config: ResourceResourceTestConfiguration):
         self.snapshots: List[Dict[str, Any]] = []
         self.violations: List[Dict[str, Any]] = []
         self.timing_measurements: List[Dict[str, Any]] = []
@@ -353,7 +353,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
     def setup_method(self, method=None):
         """Setup for each test method with resource tracking and configuration."""
         super().setup_method(method)
-        self.test_config = ResourceTestConfiguration()
+        self.test_config = ResourceResourceTestConfiguration()
         self.resource_tracker = ResourceLeakTracker(self.test_config)
         # Use higher limits to test the resource management properly
         self.factory = WebSocketManager()

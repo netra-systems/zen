@@ -81,7 +81,7 @@ resource "google_secret_manager_secret_version" "jwt_secret" {
   secret_data = random_password.jwt_secret.result
 }
 
-# Secret for SERVICE_SECRET (service-to-service authentication)
+# Secret for service-to-service authentication (Issue #1037 fix)
 resource "random_password" "service_secret" {
   length  = 64
   special = true

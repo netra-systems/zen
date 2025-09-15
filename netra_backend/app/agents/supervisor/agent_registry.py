@@ -21,6 +21,8 @@ import weakref
 import time
 from datetime import datetime, timezone
 from collections import defaultdict
+from enum import Enum
+from dataclasses import dataclass, field
 
 # SSOT COMPLIANCE: UnifiedIdGenerator for consistent ID generation
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
@@ -58,6 +60,58 @@ from netra_backend.app.agents.supervisor.agent_execution_prerequisites import (
 )
 
 logger = central_logger.get_logger(__name__)
+
+
+# SSOT CONSOLIDATION: Agent enums moved here to break circular imports
+class AgentStatus(Enum):
+    """Agent status enumeration."""
+    IDLE = "idle"
+    BUSY = "busy"
+    INITIALIZING = "initializing"
+    ERROR = "error"
+    OFFLINE = "offline"
+
+
+class AgentType(Enum):
+    """Agent type enumeration."""
+    SUPERVISOR = "supervisor"
+    TRIAGE = "triage"
+    DATA_HELPER = "data_helper"
+    OPTIMIZER = "optimizer"
+    RESEARCHER = "researcher"
+    ANALYST = "analyst"
+    SYNTHETIC_DATA = "synthetic_data"
+    CORPUS_ADMIN = "corpus_admin"
+
+
+@dataclass
+class AgentInfo:
+    """Agent information structure."""
+    agent_id: str
+    agent_type: AgentType
+    name: str
+    description: str
+    status: AgentStatus = AgentStatus.IDLE
+    created_at: datetime = field(default_factory=datetime.now)
+    last_active: datetime = field(default_factory=datetime.now)
+    execution_count: int = 0
+    error_count: int = 0
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        return {
+            "agent_id": self.agent_id,
+            "agent_type": self.agent_type.value,
+            "name": self.name,
+            "description": self.description,
+            "status": self.status.value,
+            "created_at": self.created_at.isoformat(),
+            "last_active": self.last_active.isoformat(),
+            "execution_count": self.execution_count,
+            "error_count": self.error_count,
+            "metadata": self.metadata
+        }
 
 
 # SSOT CONSOLIDATION: Removed WebSocketManagerAdapter class
@@ -1701,8 +1755,7 @@ class AgentRegistry(BaseAgentRegistry):
         Returns:
             Agent ID for compatibility
         """
-        # Import here to avoid circular imports
-        from netra_backend.app.agents.registry import AgentType, AgentStatus
+        # No more circular imports needed - using local enums
         import uuid
         from datetime import datetime
         
@@ -1719,7 +1772,6 @@ class AgentRegistry(BaseAgentRegistry):
             self._compatibility_instances = {}
         
         # Create AgentInfo for compatibility
-        from netra_backend.app.agents.registry import AgentInfo
         agent_info = AgentInfo(
             agent_id=agent_id,
             agent_type=agent_type,
@@ -1806,7 +1858,6 @@ class AgentRegistry(BaseAgentRegistry):
         Returns:
             True if updated, False if not found
         """
-        from netra_backend.app.agents.registry import AgentStatus
         from datetime import datetime
         
         if not hasattr(self, '_compatibility_agents'):
@@ -1880,7 +1931,6 @@ class AgentRegistry(BaseAgentRegistry):
         Returns:
             List of AgentInfo matching the type
         """
-        from netra_backend.app.agents.registry import AgentType
         
         if not hasattr(self, '_compatibility_agents'):
             return []
@@ -1902,7 +1952,6 @@ class AgentRegistry(BaseAgentRegistry):
         Returns:
             List of AgentInfo matching the status
         """
-        from netra_backend.app.agents.registry import AgentStatus
         
         if not hasattr(self, '_compatibility_agents'):
             return []
@@ -1935,7 +1984,6 @@ class AgentRegistry(BaseAgentRegistry):
         Returns:
             List of available (idle) AgentInfo objects
         """
-        from netra_backend.app.agents.registry import AgentStatus, AgentType
         
         if not hasattr(self, '_compatibility_agents'):
             return []

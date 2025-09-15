@@ -5,7 +5,7 @@ import { User } from '@/types';
 import { AuthConfigResponse } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { unifiedAuthService } from '@/auth/unified-auth-service';
-import { jwtDecode } from 'jwt-decode';
+// PHASE 2 REMEDIATION: Removed jwtDecode import - now using server-side validation
 import { useAuthStore } from '@/store/authStore';
 import { logger } from '@/lib/logger';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
@@ -157,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    if (!unifiedAuthService.needsRefresh(currentToken)) {
+    if (!(await unifiedAuthService.needsRefresh(currentToken))) {
       return;
     }
 
@@ -185,7 +185,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Reset failure count on successful refresh with new token
           refreshFailureCountRef.current = 0;
           
-          const decodedUser = jwtDecode(newToken) as User;
+          // PHASE 2 REMEDIATION: Use server-side validation instead of jwtDecode
+          const validation = await unifiedAuthService.validateTokenAndGetUser(newToken);
+          if (!validation.valid || !validation.user) {
+            logger.error('Server-side validation failed for new token during refresh');
+            refreshFailureCountRef.current++;
+            return;
+          }
+          
+          const decodedUser = validation.user as User;
           
           // Update all auth state atomically using atomic helper
           const atomicUpdate = createAtomicAuthUpdate(newToken, decodedUser);
@@ -227,38 +235,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [syncAuthStore]);
 
   /**
-   * Schedule automatic token refresh check - environment-aware timing
+   * Schedule automatic token refresh check - uses conservative timing without client-side JWT decoding
    */
   const scheduleTokenRefreshCheck = useCallback((tokenToCheck: string) => {
     if (refreshTimeoutRef.current) {
       clearTimeout(refreshTimeoutRef.current);
     }
 
-    // Dynamic check interval based on token lifetime
-    let checkInterval;
-    try {
-      const decoded = jwtDecode(tokenToCheck) as any;
-      if (decoded.exp && decoded.iat) {
-        const tokenLifetime = (decoded.exp - decoded.iat) * 1000;
-        if (tokenLifetime < 5 * 60 * 1000) { // Short tokens (< 5 minutes)
-          // Check every 10 seconds for short tokens
-          checkInterval = 10 * 1000;
-        } else {
-          // Check every 2 minutes for normal tokens
-          checkInterval = 2 * 60 * 1000;
-        }
-      } else {
-        // Default to 2 minutes if can't determine token lifetime
-        checkInterval = 2 * 60 * 1000;
-      }
-    } catch (error) {
-      // Default to 2 minutes if token parsing fails
-      checkInterval = 2 * 60 * 1000;
-      logger.debug('Failed to parse token for refresh scheduling', error as Error);
-    }
+    // PHASE 2 REMEDIATION: Use conservative default interval instead of parsing JWT client-side
+    // This avoids the security risk of client-side JWT decoding while maintaining functionality
+    const checkInterval = 2 * 60 * 1000; // Check every 2 minutes (conservative approach)
 
-    refreshTimeoutRef.current = setTimeout(() => {
-      handleTokenRefresh(tokenToCheck);
+    refreshTimeoutRef.current = setTimeout(async () => {
+      await handleTokenRefresh(tokenToCheck);
       scheduleTokenRefreshCheck(tokenToCheck);
     }, checkInterval);
     
@@ -306,37 +295,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // This ensures user is set on page refresh when token exists in localStorage
         // Process token regardless of whether it was already in state
         try {
-          const decodedUser = jwtDecode(storedToken) as User;
+          // PHASE 2 REMEDIATION: Use server-side validation instead of jwtDecode
+          const validation = await unifiedAuthService.validateTokenAndGetUser(storedToken);
           
-          // Check if token is expired
-          const now = Date.now() / 1000;
-          if (decodedUser.exp && decodedUser.exp < now) {
-            logger.warn('Stored token is expired', {
+          if (!validation.valid || !validation.user) {
+            logger.warn('Stored token validation failed', {
               component: 'AuthContext',
-              action: 'expired_token_detected',
-              expiry: decodedUser.exp,
-              now
+              action: 'invalid_stored_token',
+              error: validation.error
             });
             
             // Try to refresh token if possible
             try {
               await handleTokenRefresh(storedToken);
             } catch (refreshError) {
-              logger.warn('Could not refresh expired token', refreshError as Error);
+              logger.warn('Could not refresh invalid token', refreshError as Error);
               unifiedAuthService.removeToken();
               syncAuthStore(null, null);
               actualUser = null;
               actualToken = null;
             }
           } else {
-            // CRITICAL: Always set user even if token was already in state
-            // This fixes the page refresh logout issue
-            setUser(decodedUser);
-            actualUser = decodedUser; // Track the user we're setting
-            // Sync with Zustand store
-            syncAuthStore(decodedUser, storedToken);
-            // Start automatic token refresh cycle
-            scheduleTokenRefreshCheck(storedToken);
+            const decodedUser = validation.user as User;
+            
+            // Check if token is expired (server-side validation already handles this, but keep for logging)
+            const now = Date.now() / 1000;
+            if (decodedUser.exp && decodedUser.exp < now) {
+              logger.warn('Stored token is expired (server confirmed)', {
+                component: 'AuthContext',
+                action: 'expired_token_detected',
+                expiry: decodedUser.exp,
+                now
+              });
+              
+              // Try to refresh token if possible
+              try {
+                await handleTokenRefresh(storedToken);
+              } catch (refreshError) {
+                logger.warn('Could not refresh expired token', refreshError as Error);
+                unifiedAuthService.removeToken();
+                syncAuthStore(null, null);
+                actualUser = null;
+                actualToken = null;
+              }
+            } else {
+              // CRITICAL: Always set user even if token was already in state
+              // This fixes the page refresh logout issue
+              setUser(decodedUser);
+              actualUser = decodedUser; // Track the user we're setting
+              // Sync with Zustand store
+              syncAuthStore(decodedUser, storedToken);
+              // Start automatic token refresh cycle
+              scheduleTokenRefreshCheck(storedToken);
+            }
           }
         } catch (e) {
           logger.error('Invalid token detected', e as Error, {
@@ -378,7 +389,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (devLoginResponse) {
               setToken(devLoginResponse.access_token);
               actualToken = devLoginResponse.access_token;
-              const decodedUser = jwtDecode(devLoginResponse.access_token) as User;
+              
+              // PHASE 2 REMEDIATION: Use server-side validation instead of jwtDecode
+              const validation = await unifiedAuthService.validateTokenAndGetUser(devLoginResponse.access_token);
+              if (!validation.valid || !validation.user) {
+                logger.error('Dev login token validation failed', {
+                  component: 'AuthContext',
+                  error: validation.error
+                });
+                throw new Error('Dev login token validation failed');
+              }
+              
+              const decodedUser = validation.user as User;
               setUser(decodedUser);
               actualUser = decodedUser; // Track the user we're setting
               // Sync with Zustand store
@@ -486,7 +508,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchAuthConfig();
     
     // Listen for storage events to detect token changes from OAuth callback
-    const handleStorageChange = (e: StorageEvent) => {
+    const handleStorageChange = async (e: StorageEvent) => {
       if (e.key === 'jwt_token' && e.newValue) {
         logger.info('Detected token change via storage event', {
           component: 'AuthContext',
@@ -495,7 +517,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // Update token immediately when detected via storage event
         try {
-          const decodedUser = jwtDecode(e.newValue) as User;
+          // PHASE 2 REMEDIATION: Use server-side validation instead of jwtDecode
+          const validation = await unifiedAuthService.validateTokenAndGetUser(e.newValue);
+          if (!validation.valid || !validation.user) {
+            logger.error('Storage token validation failed', {
+              component: 'AuthContext',
+              error: validation.error
+            });
+            return;
+          }
+          
+          const decodedUser = validation.user as User;
           
           // Update state atomically using atomic helper
           const atomicUpdate = createAtomicAuthUpdate(e.newValue, decodedUser);
@@ -512,7 +544,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             logger.error('Failed to apply atomic auth update from storage event');
           }
         } catch (error) {
-          logger.error('Failed to decode token from storage event', error as Error);
+          logger.error('Failed to validate token from storage event', error as Error);
         }
       }
     };

@@ -26,7 +26,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 # Import the target classes
 # SSOT imports - Issue #824 remediation
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager_factory import (
+from netra_backend.app.websocket_core.canonical_imports import (
     FactoryInitializationError
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext

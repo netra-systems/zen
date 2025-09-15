@@ -88,10 +88,10 @@ class TestWebSocketManagerSSOTConsolidation(BaseIntegrationTest):
         # Known implementations from Issue #824 analysis
         expected_implementations = [
             WebSocketManagerImplementation(
-                name="UnifiedWebSocketManager",
-                module_path="netra_backend.app.websocket_core.unified_manager",
-                class_name="UnifiedWebSocketManager",
-                line_number=294,
+                name="WebSocketManager",
+                module_path="netra_backend.app.websocket_core.websocket_manager",
+                class_name="WebSocketManager",
+                line_number=115,
                 is_active=True,
                 creation_method="direct"
             ),
@@ -156,8 +156,8 @@ class TestWebSocketManagerSSOTConsolidation(BaseIntegrationTest):
 
         # Verify it's the correct SSOT implementation
         remaining_impl = active_implementations[0]
-        assert remaining_impl.name == "UnifiedWebSocketManager", (
-            f"Expected UnifiedWebSocketManager as SSOT, got {remaining_impl.name}"
+        assert remaining_impl.name == "WebSocketManager", (
+            f"Expected WebSocketManager as SSOT, got {remaining_impl.name}"
         )
 
     @pytest.mark.unit
@@ -318,9 +318,10 @@ class TestWebSocketManagerSSOTConsolidation(BaseIntegrationTest):
         consistent user isolation behavior. Multiple implementations may have
         different isolation mechanisms, causing user data leakage.
         """
-        # Test users
-        user_a = ensure_user_id("user_a")
-        user_b = ensure_user_id("user_b")
+        # Test users - use UUID format as required by ensure_user_id validation
+        import uuid
+        user_a = ensure_user_id(str(uuid.uuid4()))
+        user_b = ensure_user_id(str(uuid.uuid4()))
 
         isolation_results = {}
 

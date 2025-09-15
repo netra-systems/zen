@@ -33,7 +33,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.user_execution_context import (
-    UserExecutionContext, create_user_execution_context
+    UserExecutionContext, create_defensive_user_execution_context
 )
 
 logger = central_logger.get_logger(__name__)
@@ -53,9 +53,8 @@ class TestExecutionEngineGoldenPathIntegration1123(SSotAsyncTestCase):
         # Golden Path test context
         self.test_user_id = f"golden_path_user_{uuid.uuid4().hex[:8]}"
         self.test_run_id = f"golden_path_run_{uuid.uuid4().hex[:8]}"
-        self.test_context = create_user_execution_context(
-            user_id=self.test_user_id,
-            run_id=self.test_run_id
+        self.test_context = create_defensive_user_execution_context(
+            user_id=self.test_user_id
         )
         
         # Expected Golden Path events
@@ -505,9 +504,8 @@ class TestExecutionEngineGoldenPathIntegration1123(SSotAsyncTestCase):
         
         # Create 3 concurrent engines
         contexts = [
-            create_user_execution_context(
-                user_id=f"concurrent_user_{i}", 
-                run_id=f"concurrent_run_{i}"
+            create_defensive_user_execution_context(
+                user_id=f"concurrent_user_{i}"
             )
             for i in range(3)
         ]

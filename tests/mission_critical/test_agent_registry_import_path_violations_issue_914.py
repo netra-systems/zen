@@ -22,7 +22,7 @@ Expected Result: Tests FAIL initially showing import path violations.
 After SSOT consolidation, tests pass with single canonical import path.
 """
 
-import unittest
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 import sys
 import importlib
 import importlib.util
@@ -30,32 +30,32 @@ import os
 from typing import Dict, List, Set, Optional, Tuple
 from pathlib import Path
 
-class TestAgentRegistryImportPathViolations(unittest.TestCase):
+class TestAgentRegistryImportPathViolations(SSotBaseTestCase):
     """Test import path SSOT violations for AgentRegistry implementations."""
     
-    @classmethod
-    def setUpClass(cls):
-        """Initialize test class with import path analysis."""
+    def setup_method(self, method=None):
+        """Initialize test with import path analysis."""
+        super().setup_method(method)
         
         # Define all possible AgentRegistry import paths found in codebase
-        cls.known_import_paths = [
+        self.known_import_paths = [
             'netra_backend.app.agents.registry.AgentRegistry',
             'netra_backend.app.agents.supervisor.agent_registry.AgentRegistry',
             'netra_backend.app.core.registry.universal_registry.AgentRegistry',
         ]
         
         # Base paths for registry modules
-        cls.registry_module_paths = [
+        self.registry_module_paths = [
             'netra_backend.app.agents.registry',
             'netra_backend.app.agents.supervisor.agent_registry',
             'netra_backend.app.core.registry.universal_registry',
         ]
         
         # Project root for file system analysis
-        cls.project_root = Path(__file__).parent.parent.parent
+        self.project_root = Path(__file__).parent.parent.parent
         
-        print(f"Project root: {cls.project_root}")
-        print(f"Testing {len(cls.known_import_paths)} import paths")
+        print(f"Project root: {self.project_root}")
+        print(f"Testing {len(self.known_import_paths)} import paths")
     
     def test_01_multiple_agent_registry_import_paths_exist(self):
         """TEST EXPECTED TO FAIL: Only one AgentRegistry import path should exist."""
@@ -415,4 +415,5 @@ if __name__ == '__main__':
     print("="*80)
     
     # Run the tests
-    unittest.main(verbosity=2, buffer=False)
+    import pytest
+    pytest.main([__file__, '-v'])

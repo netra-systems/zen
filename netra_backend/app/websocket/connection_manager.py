@@ -10,7 +10,7 @@ Prevents breaking changes for existing imports while system transitions to new s
 """
 
 # Import the actual implementations from websocket_core
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as CoreManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as CoreManager
 from netra_backend.app.websocket_core.connection_info import ConnectionInfo as CoreConnectionInfo
 from netra_backend.app.websocket_core.types import WebSocketConnectionState, WebSocketMessage
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager

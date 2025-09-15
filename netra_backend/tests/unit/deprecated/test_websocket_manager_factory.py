@@ -44,17 +44,25 @@ from unittest.mock import AsyncMock, Mock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 from test_framework.ssot.mocks import MockFactory
 
-# Import components under test - SSOT paths after Issue #824 remediation
-from netra_backend.app.websocket_core.websocket_manager_factory import (
-    # WebSocketManagerFactory,  # REMOVED: Use WebSocketManager directly 
-    # IsolatedWebSocketManager,  # REMOVED: Use WebSocketManager directly
+# Import components under test - SSOT paths after Issue #1128 remediation
+# SSOT replacement imports for removed websocket_manager_factory module
+from netra_backend.app.websocket_core.canonical_imports import (
     ConnectionLifecycleManager,
-    FactoryMetrics,
-    ManagerMetrics,
+    FactoryInitializationError,
     get_websocket_manager_factory,
     create_websocket_manager,
+    validate_websocket_component_health,
+    _validate_ssot_user_context,
+    _validate_ssot_user_context_staging_safe,
+    # Compatibility aliases for test migration period
+    WebSocketManagerFactory,
+    IsolatedWebSocketManager,
     _factory_instance,
     _factory_lock
+)
+from netra_backend.app.monitoring.websocket_metrics import (
+    FactoryMetrics,
+    ManagerMetrics
 )
 # SSOT import paths for WebSocket management
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager

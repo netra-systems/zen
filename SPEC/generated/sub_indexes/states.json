@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "states",
-    "generated_at": "2025-09-14T14:29:46.629001",
+    "generated_at": "2025-09-14T16:01:13.595873",
     "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 30
   },
@@ -27,7 +27,7 @@
       "value": "Disabled",
       "category": "states",
       "locations": [
-        "netra_backend/app/smd.py:1735",
+        "netra_backend/app/smd.py:1731",
         "scripts/deploy_to_gcp_actual.py:2033"
       ]
     },
@@ -42,7 +42,7 @@
       "value": "Enabled",
       "category": "states",
       "locations": [
-        "netra_backend/app/smd.py:1735",
+        "netra_backend/app/smd.py:1731",
         "scripts/deploy_to_gcp_actual.py:2033",
         "scripts/deploy_to_gcp_actual.py:2035",
         "scripts/deploy_to_gcp_actual.py:2036"
@@ -138,9 +138,9 @@
         "netra_backend/app/business/subscription_manager.py:26",
         "netra_backend/app/core/async_connection_pool.py:592",
         "netra_backend/app/core/managers/unified_state_manager.py:72",
-        "netra_backend/app/core/message_router.py:170",
         "netra_backend/app/core/telemetry.py:38",
-        "netra_backend/app/database/postgresql_pool_manager.py:273"
+        "netra_backend/app/database/postgresql_pool_manager.py:273",
+        "netra_backend/app/db/health_checks.py:98"
       ]
     },
     "busy": {
@@ -180,7 +180,7 @@
         "netra_backend/app/api/health_clickhouse.py:167",
         "netra_backend/app/api/health_clickhouse.py:173",
         "netra_backend/app/core/clickhouse_connection_manager.py:36",
-        "netra_backend/app/core/interfaces_websocket.py:122",
+        "netra_backend/app/core/interfaces_websocket.py:110",
         "netra_backend/app/core/network_handler.py:52",
         "netra_backend/app/core/redis_connection_handler.py:156"
       ]
@@ -206,7 +206,7 @@
       "category": "states",
       "locations": [
         "netra_backend/app/core/clickhouse_connection_manager.py:34",
-        "netra_backend/app/core/interfaces_websocket.py:124",
+        "netra_backend/app/core/interfaces_websocket.py:112",
         "netra_backend/app/core/network_handler.py:53",
         "netra_backend/app/core/websocket_recovery_types.py:17",
         "netra_backend/app/db/clickhouse.py:585",
@@ -269,7 +269,7 @@
       "value": "inactive",
       "category": "states",
       "locations": [
-        "netra_backend/app/agents/supervisor/execution_engine_factory.py:417",
+        "netra_backend/app/agents/supervisor/execution_engine_factory.py:483",
         "netra_backend/app/agents/validation_sub_agent.py:302",
         "netra_backend/app/core/managers/unified_state_manager.py:73",
         "netra_backend/app/database/postgresql_pool_manager.py:273",

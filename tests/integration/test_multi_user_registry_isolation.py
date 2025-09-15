@@ -44,12 +44,14 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 # Registry imports for multi-user testing
 registry_imports = {}
 try:
+    # DEPRECATED - will be removed in Issue #863 Phase 3
     from netra_backend.app.agents.registry import AgentRegistry as BasicAgentRegistry
     registry_imports['basic'] = BasicAgentRegistry
 except ImportError:
     registry_imports['basic'] = None
 
 try:
+    # SSOT Registry - canonical location for multi-user isolation
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry as AdvancedAgentRegistry
     registry_imports['advanced'] = AdvancedAgentRegistry
 except ImportError:

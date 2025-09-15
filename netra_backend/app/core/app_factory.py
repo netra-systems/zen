@@ -28,6 +28,7 @@ from netra_backend.app.core.request_context import (
     create_request_logging_middleware,
 )
 from netra_backend.app.core.telemetry_bootstrap import bootstrap_telemetry
+from netra_backend.app.core.sentry_integration import initialize_sentry
 
 # OAuth now handled by auth service
 
@@ -161,8 +162,9 @@ def setup_root_endpoint(app: FastAPI) -> None:
 
 def create_app() -> FastAPI:
     """Create and fully configure the FastAPI application."""
-    # Initialize telemetry BEFORE creating FastAPI app to ensure automatic instrumentation
+    # Initialize observability stack BEFORE creating FastAPI app to ensure automatic instrumentation
     _initialize_telemetry()
+    _initialize_sentry()
     
     app = create_fastapi_app()
     _configure_app_handlers(app)
@@ -208,6 +210,30 @@ def _initialize_telemetry() -> None:
         # Don't let telemetry initialization break the app
         import logging
         logging.warning(f"Failed to initialize telemetry: {e}")
+
+
+def _initialize_sentry() -> None:
+    """Initialize Sentry error tracking and performance monitoring.
+    
+    Called early in application startup alongside telemetry initialization
+    to ensure error tracking is active before application startup.
+    """
+    try:
+        from netra_backend.app.config import get_config
+        config = get_config()
+        
+        success = initialize_sentry(config)
+        if success:
+            # Use standard logging since central_logger may not be fully initialized yet
+            import logging
+            logging.info("Sentry error tracking initialized successfully")
+        else:
+            import logging
+            logging.debug("Sentry initialization skipped (disabled or unavailable)")
+    except Exception as e:
+        # Don't let Sentry initialization break the app
+        import logging
+        logging.warning(f"Failed to initialize Sentry: {e}")
 
 
 def _install_gcp_error_handlers(app: FastAPI) -> None:

@@ -47,7 +47,7 @@ from netra_backend.app.services.agent_websocket_bridge import (
     create_agent_websocket_bridge
 )
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
     AgentInstanceFactory, 
     get_agent_instance_factory

@@ -15,7 +15,6 @@ Business Impact: OAuth authentication failures threaten $500K+ ARR
 
 import asyncio
 import logging
-import unittest
 from typing import Dict, Any, Optional
 from unittest.mock import patch, MagicMock
 
@@ -31,7 +30,7 @@ from netra_backend.app.core.configuration.validator import ConfigurationValidato
 logger = logging.getLogger(__name__)
 
 
-class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestCase):
+class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase):
     """
     SSOT Violation Reproduction Tests
     
@@ -498,4 +497,5 @@ class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestC
         )
 
 if __name__ == '__main__':
-    unittest.main()
+    import pytest
+    pytest.main([__file__, '-v'])

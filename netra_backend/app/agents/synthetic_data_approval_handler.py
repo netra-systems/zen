@@ -49,7 +49,7 @@ class SyntheticDataApprovalHandler:
         # Store approval result in secure context instead of mutable state
         updated_context = context.create_child_context(
             operation_name="synthetic_data_approval",
-            additional_context={
+            additional_agent_context={
                 "synthetic_data_result": approval_result.model_dump(),
                 "approval_message": approval_message,
                 "requires_approval": True

@@ -11,8 +11,9 @@ Based on CRITICAL_CONFIG_REGRESSION_AUDIT_REPORT.md findings.
 
 import os
 import sys
-import unittest
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 import asyncio
+import pytest
 from pathlib import Path
 from typing import Dict, List, Set, Optional, Tuple
 from unittest.mock import patch, MagicMock
@@ -25,14 +26,14 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.isolated_test_helper import IsolatedTestCase
 
 
-class ConfigurationRegressionTests(IsolatedTestCase, unittest.TestCase):
+class ConfigurationRegressionTests(SSotBaseTestCase):
     """
     Critical tests to prevent configuration regressions that cause cascade failures.
     """
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.critical_configs = {
             'SERVICE_SECRET': 'Critical for inter-service auth',
             'JWT_SECRET': 'Critical for token validation',
@@ -400,14 +401,14 @@ class ConfigurationRegressionTests(IsolatedTestCase, unittest.TestCase):
                               f"Configuration change for {key} not detected")
 
 
-class ConfigurationRegressionIntegrationTests(IsolatedTestCase):
+class ConfigurationRegressionIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for configuration regression prevention.
     """
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.critical_configs = {
             'SERVICE_SECRET': 'Critical for inter-service auth',
             'JWT_SECRET': 'Critical for token validation',
@@ -433,8 +434,8 @@ class ConfigurationRegressionIntegrationTests(IsolatedTestCase):
                     # For now, just verify the expectation exists
                     self.assertIn(config, self.critical_configs)
     
-    @unittest.skipIf(os.getenv('SKIP_DEPLOYMENT_TESTS', 'true').lower() == 'true',
-                     "Deployment tests skipped")
+    @pytest.mark.skipif(os.getenv('SKIP_DEPLOYMENT_TESTS', 'true').lower() == 'true',
+                     reason="Deployment tests skipped")
     def test_deployment_config_validation(self):
         """
         Test that deployment configurations are valid.
@@ -453,12 +454,9 @@ class ConfigurationRegressionIntegrationTests(IsolatedTestCase):
 
 
 if __name__ == '__main__':
-    # Run with verbose output for CI/CD using unittest discovery
-    loader = unittest.TestLoader()
-    suite = loader.loadTestsFromModule(sys.modules[__name__])
-    
-    runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(suite)
+    # Run with verbose output for CI/CD using pytest
+    import pytest
+    result = pytest.main([__file__, '-v'])
     
     # Exit with non-zero if any failures
-    sys.exit(0 if result.wasSuccessful() else 1)
+    sys.exit(result)

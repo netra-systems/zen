@@ -14,7 +14,7 @@ from netra_backend.app.services.billing.token_counter import TokenCounter
 from netra_backend.app.services.token_optimization.context_manager import TokenOptimizationContextManager
 from netra_backend.app.services.token_optimization.session_factory import TokenOptimizationSessionFactory
 from netra_backend.app.services.token_optimization.config_manager import TokenOptimizationConfigManager
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -34,7 +34,7 @@ class TokenOptimizationIntegrationService:
     - Comprehensive cost analysis and optimization
     """
     
-    def __init__(self, websocket_manager: Optional[UnifiedWebSocketManager] = None):
+    def __init__(self, websocket_manager: Optional[WebSocketManager] = None):
         """Initialize integration service with all SSOT components.
         
         Args:
