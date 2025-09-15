@@ -861,6 +861,27 @@ class SSotAsyncTestCase(SSotBaseTestCase):
     This extends the base SSOT test case with async-specific functionality.
     """
     
+    @classmethod
+    def setup_class(cls):
+        """Class-level setup for async tests (Issue #1050 fix)."""
+        super().setup_class()
+        
+        # Initialize async-specific class resources if needed
+        if not hasattr(cls, '_class_event_loop'):
+            cls._class_event_loop = None
+    
+    @classmethod
+    def teardown_class(cls):
+        """Class-level teardown for async tests (Issue #1050 fix)."""
+        # Clean up async-specific class resources
+        if hasattr(cls, '_class_event_loop') and cls._class_event_loop:
+            try:
+                cls._class_event_loop.close()
+            except Exception as e:
+                logger.warning(f"Failed to close class event loop: {e}")
+        
+        super().teardown_class()
+    
     @pytest.fixture
     def event_loop(self):
         """
