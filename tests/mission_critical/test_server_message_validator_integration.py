@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 """
 Mission Critical Server Message Validator Integration Tests
 
@@ -13,18 +14,19 @@ real WebSocket message structures.
 
 import asyncio
 import json
-import unittest
 from datetime import datetime, timezone
 from typing import Dict, List, Any
 
 from tests.mission_critical.test_websocket_agent_events_suite import MissionCriticalEventValidator
 
 
-class TestServerMessageValidatorIntegration(unittest.TestCase):
+class TestServerMessageValidatorIntegration(SSotBaseTestCase):
     """Integration test for MissionCriticalEventValidator with real message formats."""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test validator and sample messages."""
+        super().setup_method(method)
+
         self.validator = MissionCriticalEventValidator()
         self.test_timestamp = datetime.now(timezone.utc).isoformat()
         

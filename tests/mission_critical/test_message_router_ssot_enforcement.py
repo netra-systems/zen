@@ -19,18 +19,19 @@ import inspect
 import os
 import ast
 import importlib.util
-import unittest
 from typing import Dict, List, Set, Optional, Any
 from pathlib import Path
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestMessageRouterSSOTEnforcement(SSotBaseTestCase, unittest.TestCase):
+class TestMessageRouterSSOTEnforcement(SSotBaseTestCase):
     """Test that enforces Single Source of Truth for MessageRouter implementations."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test fixtures."""
+        super().setup_method(method)
+
         # Initialize SSotBaseTestCase (no super().setUp() needed)
         if hasattr(super(), 'setUp'):
             super().setUp()
