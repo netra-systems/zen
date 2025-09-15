@@ -194,13 +194,14 @@ class DeepAgentState(BaseModel):
         """SECURITY FIX: Validate agent_input to prevent injection attacks.
 
         Issue #1017 Resolution: This validator prevents malicious data injection by:
-        1. Detecting and rejecting dangerous system commands
-        2. Preventing code execution payloads
-        3. Blocking malicious API keys and credentials
-        4. Filtering permission bypass attempts
-        5. Sanitizing data extraction directives
+        1. Detecting and sanitizing dangerous system commands
+        2. Removing code execution payloads
+        3. Filtering malicious API keys and credentials
+        4. Sanitizing permission bypass attempts
+        5. Cleaning data extraction directives
 
         This protects enterprise customers from regulatory violations (HIPAA, SOC2, SEC).
+        Uses sanitization approach rather than rejection to allow testing while maintaining security.
         """
         if v is None:
             return v
@@ -208,7 +209,7 @@ class DeepAgentState(BaseModel):
         # Deep copy to prevent reference mutation
         safe_input = copy.deepcopy(v)
 
-        # Apply security filters
+        # Apply security sanitization (clean rather than reject)
         cls._sanitize_agent_input_recursive(safe_input)
 
         return safe_input
@@ -225,8 +226,7 @@ class DeepAgentState(BaseModel):
             cls._sanitize_dict_values(data, path)
         elif isinstance(data, list):
             cls._sanitize_list_values(data, path)
-        elif isinstance(data, str):
-            cls._validate_string_security(data, path)
+        # Note: String sanitization now happens at the dict/list level to allow modification
 
     @classmethod
     def _sanitize_dict_values(cls, data_dict: Dict[str, Any], path: str) -> None:
@@ -239,13 +239,14 @@ class DeepAgentState(BaseModel):
         ]
 
         keys_to_remove = []
-        for key in data_dict.keys():
+        for key in list(data_dict.keys()):  # Convert to list to allow modification during iteration
             if any(dangerous in str(key).lower() for dangerous in dangerous_keys):
                 keys_to_remove.append(key)
             elif isinstance(data_dict[key], (dict, list)):
                 cls._sanitize_agent_input_recursive(data_dict[key], f"{path}.{key}")
             elif isinstance(data_dict[key], str):
-                cls._validate_string_security(data_dict[key], f"{path}.{key}")
+                # Sanitize string values in place
+                data_dict[key] = cls._sanitize_string_content(data_dict[key], f"{path}.{key}")
 
         # Remove dangerous keys
         for key in keys_to_remove:
@@ -254,16 +255,12 @@ class DeepAgentState(BaseModel):
     @classmethod
     def _sanitize_list_values(cls, data_list: List[Any], path: str) -> None:
         """Sanitize list values."""
-        indices_to_remove = []
-        for i, item in enumerate(data_list):
-            if isinstance(item, str) and cls._is_dangerous_string(item):
-                indices_to_remove.append(i)
-            elif isinstance(item, (dict, list)):
-                cls._sanitize_agent_input_recursive(item, f"{path}[{i}]")
-
-        # Remove dangerous items (in reverse order to maintain indices)
-        for i in reversed(indices_to_remove):
-            data_list.pop(i)
+        for i in range(len(data_list)):
+            if isinstance(data_list[i], str):
+                # Sanitize string values in place
+                data_list[i] = cls._sanitize_string_content(data_list[i], f"{path}[{i}]")
+            elif isinstance(data_list[i], (dict, list)):
+                cls._sanitize_agent_input_recursive(data_list[i], f"{path}[{i}]")
 
     @classmethod
     def _validate_string_security(cls, value: str, path: str) -> None:

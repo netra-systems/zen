@@ -26,14 +26,24 @@ class SupervisorExecutionHelpers:
     def __init__(self, supervisor_agent):
         self.supervisor = supervisor_agent
     
-    async def run_supervisor_workflow(self, context: UserExecutionContext, run_id: str) -> UserExecutionContext:
+    async def run_supervisor_workflow(self, context, run_id: str):
         """Run supervisor workflow using secure user execution context.
 
         SECURITY FIX: Issue #1017 - Validates input context type and sanitizes
         results to prevent cross-user data contamination.
+
+        Args:
+            context: UserExecutionContext or legacy DeepAgentState (for backwards compatibility)
+            run_id: Unique run identifier
+
+        Returns:
+            UserExecutionContext with sanitized results
+
+        Raises:
+            ValueError: If context contains security violations
         """
-        # Validate context type and security
-        validated_context = self._validate_user_context_security(context)
+        # Convert and validate context for security compliance
+        validated_context = self._convert_and_validate_context(context)
 
         # Extract user request from validated context
         user_request = validated_context.agent_context.get('user_request', 'default_request')
@@ -400,3 +410,163 @@ class SupervisorExecutionHelpers:
                     return True
 
         return False
+
+    def _sanitize_supervisor_result(self, result: Any, user_id: str) -> Any:
+        """Sanitize supervisor execution result to prevent cross-user contamination.
+
+        SECURITY FIX: Issue #1017 - Sanitizes supervisor execution results to prevent
+        cross-user data contamination and sensitive information disclosure.
+
+        Args:
+            result: The supervisor execution result to sanitize
+            user_id: The user ID for context validation
+
+        Returns:
+            Sanitized result safe for user consumption
+        """
+        if result is None:
+            return result
+
+        # Handle different result types
+        if hasattr(result, 'to_dict'):
+            # If result has to_dict method, use it and sanitize the dict
+            result_dict = result.to_dict()
+            return self._sanitize_execution_result(result_dict, user_id)
+        elif isinstance(result, dict):
+            # If result is already a dict, sanitize directly
+            return self._sanitize_execution_result(result, user_id)
+        elif isinstance(result, str):
+            # If result is a string, check for cross-user contamination
+            return self._sanitize_string_result(result, user_id)
+        else:
+            # For other types, convert to string and sanitize
+            string_result = str(result)
+            return self._sanitize_string_result(string_result, user_id)
+
+    def _sanitize_string_result(self, result_str: str, user_id: str) -> str:
+        """Sanitize string result to prevent cross-user data exposure.
+
+        Args:
+            result_str: String result to sanitize
+            user_id: The user ID for context validation
+
+        Returns:
+            Sanitized string result
+        """
+        if not isinstance(result_str, str):
+            result_str = str(result_str)
+
+        # Check for other user references and redact them
+        if self._contains_other_user_references(result_str, user_id):
+            # Rather than redacting the entire string, try to remove specific user references
+            sanitized = result_str
+
+            # Remove other user IDs
+            user_id_patterns = [
+                r'user_\w+',
+                r'enterprise_user_\w+',
+                r'classified_\w+_\d+',
+                r'admin_user_\w+',
+                r'gov_user_\w+',
+                r'corp_user_\w+'
+            ]
+
+            for pattern in user_id_patterns:
+                matches = re.findall(pattern, sanitized, re.IGNORECASE)
+                for match in matches:
+                    if match != user_id:
+                        sanitized = sanitized.replace(match, '[REDACTED_USER_ID]')
+
+            # Remove sensitive clearance and classification terms
+            sensitive_terms = [
+                'top_secret', 'classified', 'confidential', 'secret',
+                'clearance_level', 'security_clearance', 'classification'
+            ]
+
+            for term in sensitive_terms:
+                if term in sanitized.lower() and term not in user_id.lower():
+                    # Replace the term while preserving context
+                    sanitized = re.sub(
+                        rf'\b{re.escape(term)}\b',
+                        '[REDACTED_CLASSIFICATION]',
+                        sanitized,
+                        flags=re.IGNORECASE
+                    )
+
+            return sanitized
+
+        return result_str
+
+    def _convert_and_validate_context(self, context) -> UserExecutionContext:
+        """Convert and validate context for security compliance.
+
+        SECURITY FIX: Issue #1017 - Converts legacy DeepAgentState to secure
+        UserExecutionContext and validates for security threats.
+
+        Args:
+            context: Input context (UserExecutionContext or DeepAgentState)
+
+        Returns:
+            Validated UserExecutionContext
+
+        Raises:
+            ValueError: If context contains security violations
+        """
+        # Check if it's already a UserExecutionContext
+        if isinstance(context, UserExecutionContext):
+            return self._validate_user_context_security(context)
+
+        # Handle legacy DeepAgentState conversion
+        from netra_backend.app.schemas.agent_models import DeepAgentState
+
+        if isinstance(context, DeepAgentState):
+            logger.warning(
+                f"SECURITY WARNING: Legacy DeepAgentState used for user {context.user_id}. "
+                f"Converting to secure UserExecutionContext for Issue #1017 compliance."
+            )
+
+            # Validate DeepAgentState for security violations first
+            self._validate_deep_agent_state_security(context)
+
+            # Convert to UserExecutionContext
+            user_context = UserExecutionContext(
+                user_id=context.user_id,
+                thread_id=context.chat_thread_id,
+                request_id=context.run_id or f"converted_{context.user_id}",
+                agent_context=copy.deepcopy(context.agent_context)
+            )
+
+            return self._validate_user_context_security(user_context)
+
+        # Reject invalid types
+        raise ValueError(
+            f"SECURITY VIOLATION: Invalid context type {type(context)}. "
+            f"Only UserExecutionContext or DeepAgentState (legacy) allowed."
+        )
+
+    def _validate_deep_agent_state_security(self, state: 'DeepAgentState') -> None:
+        """Validate DeepAgentState for security violations.
+
+        SECURITY FIX: Issue #1017 - Validates legacy DeepAgentState objects
+        for security threats before conversion.
+
+        Args:
+            state: DeepAgentState to validate
+
+        Raises:
+            ValueError: If security violations are detected
+        """
+        # Validate required fields
+        if not state.user_id:
+            raise ValueError("SECURITY VIOLATION: Missing user_id required for user isolation")
+
+        if not state.chat_thread_id:
+            raise ValueError("SECURITY VIOLATION: Missing chat_thread_id required for execution tracking")
+
+        # Validate agent_context if present
+        if state.agent_context:
+            self._validate_agent_context_security(state.agent_context, state.user_id)
+
+        # Validate that agent_input doesn't contain dangerous content
+        if hasattr(state, 'agent_input') and state.agent_input:
+            self._validate_agent_context_security(state.agent_input, state.user_id)
