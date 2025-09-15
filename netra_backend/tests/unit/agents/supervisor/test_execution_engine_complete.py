@@ -1724,7 +1724,7 @@ class TestExecutionEngineUserIsolation(SSotAsyncTestCase):
             user_id="complex_user",
             thread_id="complex_thread", 
             run_id="complex_run",
-            websocket_connection_id="ws_conn_123",
+            websocket_client_id="ws_conn_123",
             metadata={"env": "production", "features": ["feature_a", "feature_b"]}
         )
         

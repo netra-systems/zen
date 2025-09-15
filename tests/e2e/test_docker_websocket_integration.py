@@ -36,7 +36,7 @@
         # REMOVED_SYNTAX_ERROR: import subprocess
         # REMOVED_SYNTAX_ERROR: import psutil
         # REMOVED_SYNTAX_ERROR: import websockets
-        # REMOVED_SYNTAX_ERROR: from websockets.exceptions import ConnectionClosedError
+        # REMOVED_SYNTAX_ERROR: from websockets import ConnectionClosedError
         # REMOVED_SYNTAX_ERROR: from test_framework.docker.unified_docker_manager import UnifiedDockerManager
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 

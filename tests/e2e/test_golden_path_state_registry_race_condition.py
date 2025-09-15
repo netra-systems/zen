@@ -59,7 +59,7 @@ import time
 from typing import Dict, Any, Optional, List
 import requests
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatus, WebSocketException
+from websockets import ConnectionClosed, InvalidStatus, WebSocketException
 
 # Use SSOT testing framework
 from test_framework.ssot.base_test_case import SSotAsyncTestCase

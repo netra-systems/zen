@@ -129,13 +129,13 @@ class TestSupervisorAgentCore(BaseTestCase):
         self.websocket_bridge.websocket_manager = self.websocket_manager
         self.websocket_bridge.emit_agent_event = AsyncMock()
         
-        # Create real UserExecutionContext for testing
-        self.test_context = UserExecutionContext(
+        # Create real UserExecutionContext for testing using modern API
+        self.test_context = UserExecutionContext.from_request(
             user_id=f"test-user-{uuid.uuid4().hex[:8]}",
             thread_id=f"test-thread-{uuid.uuid4().hex[:8]}",
             run_id=f"test-run-{uuid.uuid4().hex[:8]}",
-            websocket_connection_id="test-connection-123",
-            metadata={"user_request": "test request for SupervisorAgent"}
+            websocket_client_id="test-connection-123",
+            agent_context={"user_request": "test request for SupervisorAgent"}
         )
         
         # Mock database session
@@ -174,7 +174,8 @@ class TestSupervisorAgentCore(BaseTestCase):
         # Create real SupervisorAgent instance for testing
         self.supervisor = SupervisorAgent(
             llm_manager=self.llm_manager,
-            websocket_bridge=self.websocket_bridge
+            websocket_bridge=self.websocket_bridge,
+            user_context=self.test_context
         )
         
         # Track resources for cleanup
@@ -262,12 +263,12 @@ class TestSupervisorAgentCore(BaseTestCase):
         # Create multiple user contexts
         contexts = []
         for i in range(5):
-            context = UserExecutionContext(
+            context = UserExecutionContext.from_request(
                 user_id=f"concurrent-user-{i}",
                 thread_id=f"concurrent-thread-{i}",
                 run_id=f"concurrent-run-{i}",
-                websocket_connection_id=f"connection-{i}",
-                metadata={"user_request": f"concurrent test {i}"}
+                websocket_client_id=f"connection-{i}",
+                agent_context={"user_request": f"concurrent test {i}"}
             )
             context = context.with_db_session(AsyncMock())
             contexts.append(context)
@@ -522,14 +523,14 @@ class TestSupervisorAgentCore(BaseTestCase):
     async def test_execution_context_isolation_validation(self):
         """Test that execution contexts are properly isolated between requests."""
         # Create two different contexts
-        context1 = UserExecutionContext(
+        context1 = UserExecutionContext.from_request_supervisor(
             user_id="user-1",
             thread_id="thread-1", 
             run_id="run-1",
             metadata={"test_data": "context1_data"}
         ).with_db_session(AsyncMock())
         
-        context2 = UserExecutionContext(
+        context2 = UserExecutionContext.from_request_supervisor(
             user_id="user-2",
             thread_id="thread-2",
             run_id="run-2", 
@@ -600,7 +601,7 @@ class TestSupervisorAgentCore(BaseTestCase):
             await self.supervisor.execute(None)
         
         # Test with context missing required fields
-        invalid_context = UserExecutionContext(
+        invalid_context = UserExecutionContext.from_request_supervisor(
             user_id="",  # Empty user ID should be invalid
             thread_id="test-thread",
             run_id="test-run"
@@ -611,7 +612,7 @@ class TestSupervisorAgentCore(BaseTestCase):
             await self.supervisor.execute(invalid_context)
         
         # Test with context missing database session
-        context_no_db = UserExecutionContext(
+        context_no_db = UserExecutionContext.from_request_supervisor(
             user_id="test-user",
             thread_id="test-thread", 
             run_id="test-run"
@@ -922,7 +923,7 @@ class TestSupervisorAgentErrorScenarios(BaseTestCase):
     async def test_execution_lock_prevents_concurrent_same_instance(self):
         """Test execution lock prevents concurrent execution on same supervisor instance."""
         # Create test context
-        context = UserExecutionContext(
+        context = UserExecutionContext.from_request_supervisor(
             user_id="test-user",
             thread_id="test-thread",
             run_id="test-run"
@@ -971,7 +972,7 @@ class TestSupervisorAgentErrorScenarios(BaseTestCase):
     async def test_critical_agent_failure_recovery(self):
         """Test recovery when critical agents (like reporting) fail."""
         # Create context
-        context = UserExecutionContext(
+        context = UserExecutionContext.from_request_supervisor(
             user_id="test-user",
             thread_id="test-thread", 
             run_id="test-run"
@@ -1014,7 +1015,7 @@ class TestSupervisorAgentErrorScenarios(BaseTestCase):
 
     async def test_all_agents_fail_scenario(self):
         """Test scenario where all agents fail."""
-        context = UserExecutionContext(
+        context = UserExecutionContext.from_request_supervisor(
             user_id="test-user",
             thread_id="test-thread",
             run_id="test-run"
@@ -1068,7 +1069,7 @@ class TestSupervisorAgentErrorScenarios(BaseTestCase):
             websocket_bridge=failing_bridge
         )
         
-        context = UserExecutionContext(
+        context = UserExecutionContext.from_request_supervisor(
             user_id="test-user",
             thread_id="test-thread",
             run_id="test-run"
@@ -1139,7 +1140,7 @@ class TestSupervisorAgentPerformance(BaseTestCase):
         # Create many concurrent contexts
         contexts = []
         for i in range(10):  # High concurrency test
-            context = UserExecutionContext(
+            context = UserExecutionContext.from_request_supervisor(
                 user_id=f"perf-user-{i}",
                 thread_id=f"perf-thread-{i}",
                 run_id=f"perf-run-{i}",
@@ -1202,7 +1203,7 @@ class TestSupervisorAgentPerformance(BaseTestCase):
         
         # Run many sequential executions 
         for i in range(20):
-            context = UserExecutionContext(
+            context = UserExecutionContext.from_request_supervisor(
                 user_id=f"memory-user-{i}",
                 thread_id=f"memory-thread-{i}", 
                 run_id=f"memory-run-{i}"

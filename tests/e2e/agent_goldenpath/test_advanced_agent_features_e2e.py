@@ -111,7 +111,7 @@ class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
 
         self.logger.info(f"Advanced features test setup - session: {self.advanced_test_session}")
 
-    async def _establish_websocket_connection(self) -> websockets.WebSocketServerProtocol:
+    async def _establish_websocket_connection(self) -> websockets.ServerConnection:
         """Establish WebSocket connection for advanced feature testing."""
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False  # Staging environment

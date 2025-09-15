@@ -50,7 +50,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 # WebSocket client library (real connections)
 try:
     import websockets
-    from websockets.exceptions import ConnectionClosed, InvalidStatus, WebSocketException
+    from websockets import ConnectionClosed, InvalidStatus, WebSocketException
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
     WEBSOCKETS_AVAILABLE = False

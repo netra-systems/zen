@@ -471,7 +471,7 @@ class TestWebSocketSendAfterCloseStagingE2E(SSotAsyncTestCase):
 
         logger.info(f"Authenticated {len(self.auth_tokens)} test users for staging")
 
-    async def _establish_staging_connection(self, user) -> Optional[websockets.WebSocketServerProtocol]:
+    async def _establish_staging_connection(self, user) -> Optional[websockets.ServerConnection]:
         """Establish WebSocket connection to staging environment."""
         try:
             user_id = user['user_id']

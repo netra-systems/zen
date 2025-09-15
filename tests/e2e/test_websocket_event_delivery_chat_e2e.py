@@ -125,7 +125,7 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
     
     async def _monitor_detailed_event_delivery(
         self,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: websockets.ServerConnection,
         user_context: StronglyTypedUserExecutionContext,
         timeout: float = 60.0
     ) -> Tuple[List[WebSocketEventMessage], Dict[str, Any]]:

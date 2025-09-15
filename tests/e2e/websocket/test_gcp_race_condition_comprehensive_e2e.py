@@ -46,7 +46,7 @@ from dataclasses import dataclass
 import pytest
 import websockets
 import aiohttp
-from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
+from websockets import ConnectionClosedError, InvalidStatusCode
 
 from shared.isolated_environment import get_env
 from test_framework.ssot.e2e_auth_helper import (

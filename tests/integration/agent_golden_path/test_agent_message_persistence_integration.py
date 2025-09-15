@@ -51,7 +51,7 @@ from shared.isolated_environment import get_env
 try:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.services.state_persistence_optimized import StatePersistenceOptimized
-    from netra_backend.app.db.clickhouse_client import ClickHouseClient
+    from netra_backend.app.db.clickhouse import ClickHouseClient
     from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
     from shared.types.core_types import UserID, ThreadID, RunID, MessageID
     REAL_PERSISTENCE_COMPONENTS_AVAILABLE = True

@@ -14,7 +14,7 @@ from typing import Dict, List, Optional
 
 import aiohttp
 import websockets
-from websockets.exceptions import ConnectionClosedError
+from websockets import ConnectionClosedError
 
 # Configure logging
 logging.basicConfig(

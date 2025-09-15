@@ -11,6 +11,11 @@
       "output_format": "stream-json"
     },
     {
+      "command": "/gitissueprogressorv3 ssot",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
       "command": "/gitissueprogressorv3 agents",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
@@ -22,6 +27,16 @@
     },
     {
       "command": "/gitissueprogressorv3 long standing issues",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 ssot remove legacy",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+      {
+      "command": "/gitissueprogressorv3 upgrade legacy to ssot",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },

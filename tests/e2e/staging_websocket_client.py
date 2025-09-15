@@ -17,7 +17,7 @@ import time
 from typing import Any, Callable, Dict, List, Optional
 from datetime import datetime
 import websockets
-from websockets.exceptions import WebSocketException
+from websockets import WebSocketException
 
 from tests.e2e.staging_config import get_staging_config
 from tests.e2e.staging_auth_client import StagingAuthClient

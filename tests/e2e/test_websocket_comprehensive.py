@@ -53,7 +53,7 @@ from shared.isolated_environment import IsolatedEnvironment
             # Import websockets only if available (not required for all tests)
             # REMOVED_SYNTAX_ERROR: try:
                 # REMOVED_SYNTAX_ERROR: import websockets
-                # REMOVED_SYNTAX_ERROR: from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
+                # REMOVED_SYNTAX_ERROR: from websockets import ConnectionClosedError, InvalidStatusCode
                 # REMOVED_SYNTAX_ERROR: WEBSOCKETS_AVAILABLE = True
                 # REMOVED_SYNTAX_ERROR: except ImportError:
                     # REMOVED_SYNTAX_ERROR: WEBSOCKETS_AVAILABLE = False

@@ -242,7 +242,7 @@ class TestServiceSecretStagingValidation(SSotAsyncTestCase):
             """Test WebSocket authentication in real staging environment."""
             try:
                 import websockets
-                from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
+                from websockets import ConnectionClosedError, InvalidStatusCode
 
                 # Convert HTTP URL to WebSocket URL
                 ws_url = self.staging_backend_url.replace("https://", "wss://") + "/ws"

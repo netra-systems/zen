@@ -318,7 +318,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         # Initialize metrics and test tracking
         self.golden_path_metrics = GoldenPathMetrics()
         self.test_contexts: Dict[str, GoldenPathTestContext] = {}
-        self.active_websockets: List[websockets.WebSocketServerProtocol] = []
+        self.active_websockets: List[websockets.ServerConnection] = []
         
         # Set up cleanup callback for WebSocket connections
         self.add_cleanup(self._cleanup_websocket_connections)

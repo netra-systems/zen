@@ -409,7 +409,7 @@ class WebSocketTestClient:
         """
         self.auth_helper = auth_helper
         self.validator = validator
-        self.websocket: Optional[websockets.WebSocketServerProtocol] = None
+        self.websocket: Optional[websockets.ServerConnection] = None
         self.received_events: List[Dict[str, Any]] = []
         self.connection_start_time: Optional[float] = None
         self.is_connected = False

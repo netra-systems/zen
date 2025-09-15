@@ -30,7 +30,7 @@ for each TASK in FOCUS_AREA:
         pull latest, and handle merge conflicts
 
     1) DOCS:
-        1.1 Refresh primary readme
+        1.1 Refresh primary readme, including checking links work and removing legacy wording
         1.2 Refresh Work in progress index
         1.3 Refresh other important indexes
         1.4 Refresh string literals
@@ -39,7 +39,10 @@ for each TASK in FOCUS_AREA:
         including GOLDEN_PATH_USER_FLOW_COMPLETE.md
             
         1.7 Refresh SSOT docs
-        1.8 Refresh other important docs
+        1.8 Carefully organize root dir for recently created files that would be better organized into folders
+        be careful to not move anything that must remain in root such as config files
+        only move files you are 98% are newly created and not belong in root.
+        1.9 Refresh other important docs
 
     2) pull latest, and handle merge conflicts, commit and push work to origin.
 

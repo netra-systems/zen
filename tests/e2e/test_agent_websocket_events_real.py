@@ -212,7 +212,7 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
             self._env.disable_isolation(restore_original=True)
         super().teardown_method(method)
     
-    async def _create_real_authenticated_websocket(self, user_data) -> websockets.WebSocketServerProtocol:
+    async def _create_real_authenticated_websocket(self, user_data) -> websockets.ServerConnection:
         """Create REAL authenticated WebSocket connection."""
         try:
             # Connect to REAL WebSocket server with auth header

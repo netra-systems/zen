@@ -67,7 +67,7 @@ class RealRaceConditionTester:
     def __init__(self, websocket_url: str):
         self.websocket_url = websocket_url
         self.results: List[RaceConditionResult] = []
-        self.active_connections: Set[websockets.WebSocketServerProtocol] = set()
+        self.active_connections: Set[websockets.ServerConnection] = set()
         self.start_time = time.time()
         
     async def create_concurrent_authenticated_connections(

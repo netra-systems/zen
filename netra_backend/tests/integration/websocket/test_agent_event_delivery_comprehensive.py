@@ -101,7 +101,7 @@ class TestAgentEventDeliveryComprehensive(BaseIntegrationTest):
         )
         
         self.auth_helper = E2EWebSocketAuthHelper(config=auth_config, environment="test")
-        self.websocket_connections: List[websockets.WebSocketServerProtocol] = []
+        self.websocket_connections: List[websockets.ServerConnection] = []
         self.collected_events: List[Dict[str, Any]] = []
         
         # Verify auth helper can create tokens
@@ -121,7 +121,7 @@ class TestAgentEventDeliveryComprehensive(BaseIntegrationTest):
     
     async def collect_agent_events(
         self,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: websockets.ServerConnection,
         expected_count: int,
         timeout: float = 30.0
     ) -> List[Dict[str, Any]]:

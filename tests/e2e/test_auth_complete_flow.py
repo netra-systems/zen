@@ -34,7 +34,7 @@ import string
 import aiohttp
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosedError, WebSocketException
+from websockets import ConnectionClosedError, WebSocketException
 
 from shared.isolated_environment import get_env
 from test_framework.base_e2e_test import BaseE2ETest

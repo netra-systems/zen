@@ -141,7 +141,7 @@ class TestWebSocketAgentEventsCritical(BaseIntegrationTest):
         )
         
         self.auth_helper = E2EWebSocketAuthHelper(config=auth_config, environment="test")
-        self.websocket_connections: List[websockets.WebSocketServerProtocol] = []
+        self.websocket_connections: List[websockets.ServerConnection] = []
         self.received_events: List[Dict[str, Any]] = []
         
         # Test connectivity to real services
@@ -161,7 +161,7 @@ class TestWebSocketAgentEventsCritical(BaseIntegrationTest):
     
     async def collect_websocket_events(
         self, 
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: websockets.ServerConnection,
         expected_events: Set[str],
         timeout: float = 30.0
     ) -> List[Dict[str, Any]]:

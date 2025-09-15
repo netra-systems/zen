@@ -30,7 +30,7 @@ from datetime import datetime
 
 try:
     import websockets
-    from websockets.exceptions import ConnectionClosedError, InvalidURI
+    from websockets import ConnectionClosedError, InvalidURI
 except ImportError:
     print(" FAIL:  ERROR: websockets library not installed")
     print("Install with: pip install websockets")

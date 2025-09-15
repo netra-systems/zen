@@ -76,7 +76,7 @@ class TestWebSocketErrorHandling(BaseIntegrationTest):
         )
         
         self.auth_helper = E2EWebSocketAuthHelper(config=auth_config, environment="test")
-        self.error_connections: Dict[str, websockets.WebSocketServerProtocol] = {}
+        self.error_connections: Dict[str, websockets.ServerConnection] = {}
         self.error_logs: List[Dict[str, Any]] = []
         self.recovery_attempts: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
         
@@ -109,7 +109,7 @@ class TestWebSocketErrorHandling(BaseIntegrationTest):
         self,
         user_id: str,
         expect_failure: bool = False
-    ) -> Optional[websockets.WebSocketServerProtocol]:
+    ) -> Optional[websockets.ServerConnection]:
         """Create connection for error testing scenarios."""
         try:
             token = self.auth_helper.create_test_jwt_token(user_id=user_id)

@@ -351,7 +351,7 @@ async def test_harness_context(test_name: str, seed_data: bool = False):
         yield harness
 
 
-class UnifiedTestHarnessComplete:
+class UnifiedHarnessComplete:
     """
     Complete test harness for E2E WebSocket authentication testing.
     
@@ -698,9 +698,9 @@ class UnifiedTestHarnessComplete:
 
 
 # Factory function for easy instantiation
-def create_unified_test_harness() -> UnifiedTestHarnessComplete:
+def create_unified_test_harness() -> UnifiedHarnessComplete:
     """Create unified test harness instance for WebSocket authentication testing."""
-    return UnifiedTestHarnessComplete()
+    return UnifiedHarnessComplete()
 
 
 # Issue #732: TestClient and create_minimal_harness implementation
@@ -1000,7 +1000,7 @@ async def create_minimal_harness(test_name: str) -> 'TestHarnessContext':
 
 
 # Compatibility function for existing imports
-def create_test_harness(harness_name: str = "default") -> UnifiedTestHarnessComplete:
+def create_test_harness(harness_name: str = "default") -> UnifiedHarnessComplete:
     """
     Create test harness with optional name parameter.
 
@@ -1010,6 +1010,10 @@ def create_test_harness(harness_name: str = "default") -> UnifiedTestHarnessComp
     Returns:
         UnifiedTestHarnessComplete instance
     """
-    harness = UnifiedTestHarnessComplete()
+    harness = UnifiedHarnessComplete()
     harness.harness_name = harness_name
     return harness
+
+
+# Backward compatibility alias
+UnifiedTestHarnessComplete = UnifiedHarnessComplete

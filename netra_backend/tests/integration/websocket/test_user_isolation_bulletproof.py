@@ -119,7 +119,7 @@ class TestUserIsolationBulletproof(BaseIntegrationTest):
             )
             self.user_auth_helpers[user_name] = E2EWebSocketAuthHelper(config=auth_config, environment="test")
         
-        self.user_connections: Dict[str, websockets.WebSocketServerProtocol] = {}
+        self.user_connections: Dict[str, websockets.ServerConnection] = {}
         self.user_messages: Dict[str, List[Dict[str, Any]]] = {}
         
         # Initialize message tracking for each user
@@ -148,7 +148,7 @@ class TestUserIsolationBulletproof(BaseIntegrationTest):
         self.user_connections.clear()
         await super().async_teardown()
     
-    async def create_isolated_user_connection(self, user_name: str) -> websockets.WebSocketServerProtocol:
+    async def create_isolated_user_connection(self, user_name: str) -> websockets.ServerConnection:
         """
         Create authenticated WebSocket connection for isolated user.
         

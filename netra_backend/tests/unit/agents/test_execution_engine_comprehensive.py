@@ -89,7 +89,7 @@ class MockUserExecutionContext:
             'created_at': datetime.now(timezone.utc).isoformat()
         }
         self.created_at = datetime.now(timezone.utc)
-        self.websocket_connection_id = f"ws_{uuid.uuid4().hex[:8]}"
+        self.websocket_client_id = f"ws_{uuid.uuid4().hex[:8]}"
 
 
 class MockAgentWebSocketBridge:
@@ -337,7 +337,7 @@ class TestExecutionEngineConstruction(SSotAsyncTestCase):
         
         # Direct construction should raise RuntimeError
         with pytest.raises(RuntimeError) as exc_info:
-            UserExecutionEngine(mock_registry, mock_bridge)
+            ExecutionEngine(mock_registry, mock_bridge)
             
         error_message = str(exc_info.value)
         assert "Direct ExecutionEngine instantiation is no longer supported" in error_message
@@ -359,7 +359,7 @@ class TestExecutionEngineConstruction(SSotAsyncTestCase):
         mock_websocket_emitter = MockAgentWebSocketBridge()  # Can serve as emitter
 
         # Modern constructor - use direct instantiation for unit tests
-        engine = UserExecutionEngine(
+        engine = ExecutionEngine(
             context=real_user_context,
             agent_factory=mock_agent_factory,
             websocket_emitter=mock_websocket_emitter
@@ -381,7 +381,7 @@ class TestExecutionEngineConstruction(SSotAsyncTestCase):
 
         # Should fail without proper UserExecutionContext
         with pytest.raises((TypeError, ValueError)) as exc_info:
-            UserExecutionEngine(
+            ExecutionEngine(
                 context=None,
                 agent_factory=mock_agent_factory,
                 websocket_emitter=mock_websocket_emitter
@@ -399,7 +399,7 @@ class TestExecutionEngineConstruction(SSotAsyncTestCase):
 
         # Should fail with invalid context type
         with pytest.raises((TypeError, AttributeError, ValueError)) as exc_info:
-            UserExecutionEngine(
+            ExecutionEngine(
                 context=invalid_context,
                 agent_factory=mock_agent_factory,
                 websocket_emitter=mock_websocket_emitter
@@ -421,12 +421,12 @@ class TestUserExecutionContextIntegration(SSotAsyncTestCase):
         mock_websocket_emitter = MockAgentWebSocketBridge()
 
         # Create engines for different users using modern API
-        engine_1 = UserExecutionEngine(
+        engine_1 = ExecutionEngine(
             context=user_context_1,
             agent_factory=mock_agent_factory,
             websocket_emitter=mock_websocket_emitter
         )
-        engine_2 = UserExecutionEngine(
+        engine_2 = ExecutionEngine(
             context=user_context_2,
             agent_factory=mock_agent_factory,
             websocket_emitter=mock_websocket_emitter
@@ -444,7 +444,7 @@ class TestUserExecutionContextIntegration(SSotAsyncTestCase):
         mock_agent_factory = MockAgentRegistry()
         mock_websocket_emitter = MockAgentWebSocketBridge()
 
-        engine = UserExecutionEngine(
+        engine = ExecutionEngine(
             context=mock_user_context,
             agent_factory=mock_agent_factory,
             websocket_emitter=mock_websocket_emitter

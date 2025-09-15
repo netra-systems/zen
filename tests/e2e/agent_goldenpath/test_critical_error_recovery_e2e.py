@@ -132,7 +132,7 @@ class TestCriticalErrorRecoveryE2E(SSotAsyncTestCase):
 
         self.logger.info(f"Error recovery test setup - recovery_test_id: {self.recovery_test_id}")
 
-    async def _establish_recovery_test_websocket(self) -> websockets.WebSocketServerProtocol:
+    async def _establish_recovery_test_websocket(self) -> websockets.ServerConnection:
         """Establish WebSocket connection for error recovery testing."""
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False  # Staging environment

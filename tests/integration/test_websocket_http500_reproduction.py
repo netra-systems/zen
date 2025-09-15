@@ -20,7 +20,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import websockets
-from websockets.exceptions import InvalidStatus, ConnectionClosedError, WebSocketException
+from websockets import InvalidStatus, ConnectionClosedError, WebSocketException
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from tests.helpers.auth_test_utils import TestAuthHelper

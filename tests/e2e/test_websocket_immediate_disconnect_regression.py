@@ -17,7 +17,7 @@ import asyncio
 import json
 import time
 import websockets
-from websockets.exceptions import ConnectionClosed, WebSocketException
+from websockets import ConnectionClosed, WebSocketException
 import httpx
 from typing import Optional, Dict, Any
 import logging

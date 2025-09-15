@@ -37,13 +37,20 @@ class TestMessageRouterSSOTImportValidation(SSotBaseTestCase):
     def test_single_message_router_implementation_exists(self):
         """
         CRITICAL: Test that only ONE MessageRouter implementation exists.
-        
+
         SHOULD FAIL: Currently 4 different implementations
         WILL PASS: After consolidation to single SSOT implementation
         """
         unique_implementations = set()
-        
-        for path in self.all_import_paths:
+
+        all_import_paths = [
+            "netra_backend.app.websocket_core.handlers",
+            "netra_backend.app.core.message_router",
+            "netra_backend.app.agents.message_router",
+            "netra_backend.app.services.websocket.quality_message_router"
+        ]
+
+        for path in all_import_paths:
             try:
                 module = importlib.import_module(path)
                 if hasattr(module, 'MessageRouter'):

@@ -136,7 +136,7 @@ class RealFirstTimeUserTester(BaseE2ETest):
         self.env = IsolatedEnvironment()
         self.jwt_helper = JWTTestHelper()
         self.http_client: Optional[httpx.AsyncClient] = None
-        self.websocket_connection: Optional[websockets.WebSocketServerProtocol] = None
+        self.websocket_connection: Optional[websockets.ServerConnection] = None
         
     async def setup_test_environment(self):
         """Initialize test environment with real services."""

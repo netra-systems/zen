@@ -27,7 +27,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import httpx
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosedError
+from websockets import ConnectionClosedError
 
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
 from test_framework.real_services import get_real_services

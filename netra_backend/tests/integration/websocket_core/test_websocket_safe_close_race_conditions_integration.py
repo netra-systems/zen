@@ -41,7 +41,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urljoin
 
 import websockets
-from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
+from websockets import ConnectionClosedError, ConnectionClosedOK
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.fixtures.real_services import real_services_fixture

@@ -98,7 +98,7 @@ class WebSocketEventCapture:
         self.start_time = None
 
 
-class WebSocketTestContext:
+class WebSocketContext:
     """
     Main WebSocketTestContext class for WebSocket testing and user context simulation.
 
@@ -648,7 +648,7 @@ class WebSocketTestContext:
 
 
 # Class alias for backward compatibility
-TestContext = WebSocketTestContext
+TestContext = WebSocketContext
 
 # Convenience factory functions
 
@@ -656,7 +656,7 @@ def create_test_context(
     user_id: Optional[str] = None,
     jwt_token: Optional[str] = None,
     websocket_timeout: float = 10.0
-) -> WebSocketTestContext:
+) -> WebSocketContext:
     """
     Factory function to create a TestContext with common defaults.
     
@@ -675,13 +675,13 @@ def create_test_context(
     if jwt_token:
         user_context.jwt_token = jwt_token
     
-    return WebSocketTestContext(
+    return WebSocketContext(
         user_context=user_context,
         websocket_timeout=websocket_timeout
     )
 
 
-def create_isolated_test_contexts(count: int = 2) -> List[WebSocketTestContext]:
+def create_isolated_test_contexts(count: int = 2) -> List[WebSocketContext]:
     """
     Create multiple isolated test contexts for concurrent testing.
     
@@ -689,7 +689,7 @@ def create_isolated_test_contexts(count: int = 2) -> List[WebSocketTestContext]:
         count: Number of contexts to create
         
     Returns:
-        List of isolated WebSocketTestContext instances
+        List of isolated WebSocketContext instances
     """
     contexts = []
     for i in range(count):
@@ -736,3 +736,7 @@ async def multiple_test_contexts():
         # Cleanup all contexts
         cleanup_tasks = [context.cleanup() for context in contexts]
         await asyncio.gather(*cleanup_tasks, return_exceptions=True)
+
+
+# Type alias for backwards compatibility with mission critical tests
+WebSocketTestContext = WebSocketContext

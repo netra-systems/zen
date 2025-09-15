@@ -58,7 +58,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
     AgentInstanceFactory,
-    get_agent_instance_factory
+    create_agent_instance_factory
 )
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.id_generation import UnifiedIdGenerator
@@ -194,9 +194,9 @@ class TestSupervisorAgentSSOTCore(SSotAsyncTestCase):
         # Mock SSOT factory for testing
         self.mock_agent_factory = MockAgentInstanceFactory()
         
-        # Patch SSOT factory getter
+        # Patch SSOT factory creation function (updated for Issue #1116 migration)
         self.factory_patcher = patch(
-            'netra_backend.app.agents.supervisor_ssot.get_agent_instance_factory',
+            'netra_backend.app.agents.supervisor.agent_instance_factory.create_agent_instance_factory',
             return_value=self.mock_agent_factory
         )
         self.factory_patcher.start()
@@ -209,10 +209,11 @@ class TestSupervisorAgentSSOTCore(SSotAsyncTestCase):
         self.session_validation_patcher.start()
         self.add_cleanup(self.session_validation_patcher.stop)
         
-        # Create REAL SupervisorAgent SSOT instance
+        # Create REAL SupervisorAgent SSOT instance (updated for Issue #1116 user_context requirement)
         self.supervisor = SupervisorAgent(
             llm_manager=self.llm_manager,
-            websocket_bridge=self.websocket_bridge
+            websocket_bridge=self.websocket_bridge,
+            user_context=self.test_user_context
         )
         
         # Track performance metrics
@@ -673,11 +674,21 @@ class TestSupervisorAgentSSOTErrorScenarios(SSotAsyncTestCase):
         self.websocket_bridge.notify_agent_completed = AsyncMock()
         self.websocket_bridge.notify_agent_error = AsyncMock()
         
+        # BVJ: Multi-user context isolation is critical for platform scalability
+        self.test_user_context = UserExecutionContext.from_request_supervisor(
+            user_id=f"test-user-{uuid.uuid4().hex[:8]}",
+            thread_id=f"test-thread-{uuid.uuid4().hex[:8]}",
+            run_id=f"test-run-{uuid.uuid4().hex[:8]}",
+            request_id=f"test-req-{uuid.uuid4().hex[:8]}",
+            websocket_connection_id=f"test-ws-{uuid.uuid4().hex[:8]}",
+            metadata={"user_request": "Test scenarios"}
+        )
+        
         # Mock SSOT factory
         self.mock_agent_factory = MockAgentInstanceFactory()
         
         self.factory_patcher = patch(
-            'netra_backend.app.agents.supervisor_ssot.get_agent_instance_factory',
+            'netra_backend.app.agents.supervisor.agent_instance_factory.create_agent_instance_factory',
             return_value=self.mock_agent_factory
         )
         self.factory_patcher.start()
@@ -691,7 +702,8 @@ class TestSupervisorAgentSSOTErrorScenarios(SSotAsyncTestCase):
         
         self.supervisor = SupervisorAgent(
             llm_manager=self.llm_manager,
-            websocket_bridge=self.websocket_bridge
+            websocket_bridge=self.websocket_bridge,
+            user_context=self.test_user_context
         )
 
     async def test_invalid_context_handling_ssot(self):
@@ -743,7 +755,8 @@ class TestSupervisorAgentSSOTErrorScenarios(SSotAsyncTestCase):
         
         supervisor_with_failing_ws = SupervisorAgent(
             llm_manager=self.llm_manager,
-            websocket_bridge=failing_bridge
+            websocket_bridge=failing_bridge,
+            user_context=self.test_user_context
         )
         
         # Mock successful execution despite WebSocket failures
@@ -829,10 +842,20 @@ class TestSupervisorAgentSSOTPerformance(SSotAsyncTestCase):
         self.websocket_bridge.notify_agent_completed = AsyncMock()
         self.websocket_bridge.notify_agent_error = AsyncMock()
         
+        # BVJ: Multi-user context isolation is critical for platform scalability
+        self.test_user_context = UserExecutionContext.from_request_supervisor(
+            user_id=f"test-user-{uuid.uuid4().hex[:8]}",
+            thread_id=f"test-thread-{uuid.uuid4().hex[:8]}",
+            run_id=f"test-run-{uuid.uuid4().hex[:8]}",
+            request_id=f"test-req-{uuid.uuid4().hex[:8]}",
+            websocket_connection_id=f"test-ws-{uuid.uuid4().hex[:8]}",
+            metadata={"user_request": "Test scenarios"}
+        )
+        
         self.mock_agent_factory = MockAgentInstanceFactory()
         
         self.factory_patcher = patch(
-            'netra_backend.app.agents.supervisor_ssot.get_agent_instance_factory',
+            'netra_backend.app.agents.supervisor.agent_instance_factory.create_agent_instance_factory',
             return_value=self.mock_agent_factory
         )
         self.factory_patcher.start()
@@ -846,7 +869,8 @@ class TestSupervisorAgentSSOTPerformance(SSotAsyncTestCase):
         
         self.supervisor = SupervisorAgent(
             llm_manager=self.llm_manager,
-            websocket_bridge=self.websocket_bridge
+            websocket_bridge=self.websocket_bridge,
+            user_context=self.test_user_context
         )
 
     async def test_ssot_performance_concurrent_execution(self):

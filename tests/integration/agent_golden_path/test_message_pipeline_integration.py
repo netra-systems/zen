@@ -50,7 +50,7 @@ try:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.services.message_router import MessageRouter
     from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
-    from netra_backend.app.agents.registry import AgentRegistry
+    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
     from shared.types.core_types import UserID, ThreadID, RunID, AgentExecutionContext
     from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager

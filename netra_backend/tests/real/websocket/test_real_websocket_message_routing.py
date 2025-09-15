@@ -20,7 +20,7 @@ from typing import Any, Dict, List, Optional, Set
 
 import pytest
 import websockets
-from websockets.exceptions import WebSocketException
+from websockets import WebSocketException
 
 from netra_backend.app.websocket_core.types import MessageType
 from netra_backend.tests.real_services_test_fixtures import skip_if_no_real_services

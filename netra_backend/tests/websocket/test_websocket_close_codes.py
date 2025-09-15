@@ -52,7 +52,7 @@ class TestWebSocketCloseCodes:
         })
         
         # Set up mock to return welcome message then simulate close
-        from websockets.exceptions import ConnectionClosed
+        from websockets import ConnectionClosed
         mock_websocket.recv = AsyncMock(side_effect=[
             welcome_message,
             ConnectionClosed(None, None)
@@ -114,7 +114,7 @@ class TestWebSocketCloseCodes:
         })
         
         # Set up mock to return error then close
-        from websockets.exceptions import ConnectionClosedError
+        from websockets import ConnectionClosedError
         mock_websocket.recv = AsyncMock(side_effect=[
             error_response,
             ConnectionClosedError(None, None)
@@ -171,7 +171,7 @@ class TestWebSocketCloseCodes:
         })
         
         # Set up mock to return error then close
-        from websockets.exceptions import ConnectionClosedError
+        from websockets import ConnectionClosedError
         mock_websocket.recv = AsyncMock(side_effect=[
             error_response,
             ConnectionClosedError(None, None)
@@ -231,7 +231,7 @@ class TestWebSocketCloseCodes:
         })
         
         # Set up mock to return error then close
-        from websockets.exceptions import ConnectionClosedError
+        from websockets import ConnectionClosedError
         mock_websocket.recv = AsyncMock(side_effect=[
             error_response,
             ConnectionClosedError(None, None)
@@ -296,7 +296,7 @@ class TestWebSocketCloseCodes:
         })
         
         # Set up mock to return error then close
-        from websockets.exceptions import ConnectionClosedError
+        from websockets import ConnectionClosedError
         mock_websocket.recv = AsyncMock(side_effect=[
             error_response,
             ConnectionClosedError(None, None)
@@ -361,7 +361,7 @@ class TestWebSocketCloseCodes:
         })
         
         # Set up mock to return error then close
-        from websockets.exceptions import ConnectionClosedError
+        from websockets import ConnectionClosedError
         mock_websocket.recv = AsyncMock(side_effect=[
             error_response,
             ConnectionClosedError(None, None)
@@ -431,7 +431,7 @@ class TestWebSocketCloseCodes:
         })
         
         # Set up mock message sequence
-        from websockets.exceptions import ConnectionClosed
+        from websockets import ConnectionClosed
         mock_websocket.recv = AsyncMock(side_effect=[
             welcome_message,
             ping_response,
@@ -516,7 +516,7 @@ class TestWebSocketCloseCodes:
         })
         
         # Set up mock for unexpected disconnect
-        from websockets.exceptions import ConnectionClosedError
+        from websockets import ConnectionClosedError
         mock_websocket.recv = AsyncMock(side_effect=[
             welcome_message,
             ConnectionClosedError(None, None)  # Unexpected disconnect

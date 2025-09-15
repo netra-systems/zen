@@ -92,7 +92,7 @@ class MultiUserIsolationValidator:
         
     def create_isolated_user_context(self, user_id: str) -> UserExecutionContext:
         """Create completely isolated user execution context."""
-        user_context = UserExecutionContext.create_for_request(
+        user_context = UserExecutionContext.from_request(
             user_id=user_id,
             request_id=f"req_{uuid.uuid4().hex[:8]}_{user_id}",
             thread_id=f"thread_{uuid.uuid4().hex[:8]}_{user_id}",

@@ -29,12 +29,48 @@ from netra_backend.app.websocket_core.canonical_imports import (
 # CANONICAL IMPORT PATHS - Single Source of Truth
 # ============================================================================
 
-# CANONICAL: WebSocket Manager Factory (PREFERRED)
-from netra_backend.app.websocket_core.websocket_manager_factory import (
-    create_websocket_manager,
-    FactoryInitializationError,
-    WebSocketComponentError,
+# CANONICAL: WebSocket Manager Factory (PREFERRED) - Migrated to user_execution_context.py
+from netra_backend.app.services.user_execution_context import (
+    create_defensive_user_execution_context as _create_defensive_context,
 )
+
+# Error classes for backward compatibility
+class FactoryInitializationError(Exception):
+    """Exception raised when WebSocket manager factory initialization fails."""
+    pass
+
+class WebSocketComponentError(Exception):
+    """Exception raised for WebSocket component validation errors."""
+    pass
+
+
+# Compatibility wrapper for tests
+async def create_websocket_manager(user_context=None, **kwargs):
+    """
+    Compatibility wrapper for WebSocket manager creation.
+    
+    This function provides backward compatibility for tests and existing code
+    that expects the old factory interface while delegating to the SSOT implementation.
+    
+    Args:
+        user_context: UserExecutionContext object (if provided, extracts user_id)
+        **kwargs: Additional arguments passed to the SSOT function
+        
+    Returns:
+        UserExecutionContext: The created user execution context
+    """
+    if user_context is not None:
+        # Extract user_id from user_context object
+        user_id = getattr(user_context, 'user_id', str(user_context))
+        websocket_client_id = getattr(user_context, 'websocket_client_id', None)
+        return _create_defensive_context(
+            user_id=user_id,
+            websocket_client_id=websocket_client_id,
+            **kwargs
+        )
+    else:
+        # Handle legacy direct user_id call
+        return _create_defensive_context(**kwargs)
 
 # CANONICAL: Unified WebSocket Manager (Direct Use - Use Factory Instead)
 from netra_backend.app.websocket_core.unified_manager import (

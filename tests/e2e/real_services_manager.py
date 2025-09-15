@@ -33,7 +33,7 @@ from enum import Enum
 
 import httpx
 import websockets
-from websockets.exceptions import WebSocketException, ConnectionClosedError
+from websockets import WebSocketException, ConnectionClosedError
 
 from shared.isolated_environment import IsolatedEnvironment
 from tests.e2e.config import TEST_CONFIG, TestEnvironmentType

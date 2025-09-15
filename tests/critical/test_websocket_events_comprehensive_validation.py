@@ -49,7 +49,7 @@ from dataclasses import dataclass, field
 from contextlib import asynccontextmanager
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosedError, WebSocketException
+from websockets import ConnectionClosedError, WebSocketException
 
 # Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))

@@ -39,7 +39,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidURI
+from websockets import ConnectionClosed, InvalidURI
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture

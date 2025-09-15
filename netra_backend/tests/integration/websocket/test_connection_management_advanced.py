@@ -73,7 +73,7 @@ class TestWebSocketConnectionManagementAdvanced(BaseIntegrationTest):
         )
         
         self.auth_helper = E2EWebSocketAuthHelper(config=auth_config, environment="test")
-        self.active_connections: List[websockets.WebSocketServerProtocol] = []
+        self.active_connections: List[websockets.ServerConnection] = []
         self.connection_metrics: Dict[str, Any] = {
             "total_connections": 0,
             "successful_connections": 0,
@@ -105,7 +105,7 @@ class TestWebSocketConnectionManagementAdvanced(BaseIntegrationTest):
         self,
         user_id: Optional[str] = None,
         timeout: float = 10.0
-    ) -> websockets.WebSocketServerProtocol:
+    ) -> websockets.ServerConnection:
         """
         Create authenticated WebSocket connection with metrics tracking.
         
@@ -280,7 +280,7 @@ class TestWebSocketConnectionManagementAdvanced(BaseIntegrationTest):
             establishment_time = time.time() - start_time
             
             # Count successful concurrent connections
-            successful_connections = [conn for conn in connections if isinstance(conn, websockets.WebSocketServerProtocol)]
+            successful_connections = [conn for conn in connections if isinstance(conn, websockets.ServerConnection)]
             failed_connections = [conn for conn in connections if isinstance(conn, Exception)]
             
             # Verify concurrent connection success

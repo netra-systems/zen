@@ -53,7 +53,7 @@ if project_root not in sys.path:
 import pytest
 import aiohttp
 import websockets
-from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
+from websockets import ConnectionClosedError, InvalidStatusCode
 
 # SSOT imports following CLAUDE.md absolute import requirements
 from test_framework.base_e2e_test import BaseE2ETest

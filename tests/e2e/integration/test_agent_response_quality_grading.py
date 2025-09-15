@@ -494,20 +494,15 @@ class TestAgentResponseQualityGrading(BaseE2ETest):
     NO MOCKS - follows TEST_CREATION_GUIDE.md standards.
     """
     
-    def __init__(self):
-        super().__init__()
+    def setup_method(self):
+        """Set up method called before each test method."""
+        super().setup_method()
+        
+        # Initialize instance variables (moved from __init__)
         self.quality_evaluator = EnterpriseAgentQualityEvaluator()
         self.websocket_connections = {}
         self.test_users = []
         self.evaluation_metrics = []  # Track all evaluations for reporting
-    
-    def setup_method(self):
-        """Set up method called before each test method."""
-        super().setup_method()
-        # Additional setup for quality evaluation tests
-        self.websocket_connections.clear()
-        self.test_users.clear()
-        self.evaluation_metrics.clear()
     
     async def cleanup_resources(self):
         """Clean up test resources."""

@@ -454,7 +454,7 @@ class TestWebSocketEventSLACompliance(BaseE2ETest):
 
     # Private helper methods
 
-    async def _establish_authenticated_websocket(self) -> Tuple[websockets.WebSocketServerProtocol, str]:
+    async def _establish_authenticated_websocket(self) -> Tuple[websockets.ServerConnection, str]:
         """Establish authenticated WebSocket connection to staging."""
         # Get authentication token
         auth_token = await self._get_staging_auth_token()

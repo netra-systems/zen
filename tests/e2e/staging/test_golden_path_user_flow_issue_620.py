@@ -329,7 +329,7 @@ class TestGoldenPathUserFlowIssue620(BaseE2ETest):
         
         return test_token
     
-    async def _create_websocket_connection(self, auth_token: str) -> websockets.WebSocketServerProtocol:
+    async def _create_websocket_connection(self, auth_token: str) -> websockets.ServerConnection:
         """Create WebSocket connection to staging environment."""
         
         # Add authentication to WebSocket connection

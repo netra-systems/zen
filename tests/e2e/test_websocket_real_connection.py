@@ -35,7 +35,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosedError
+from websockets import ConnectionClosedError
 from websockets import InvalidStatus
 
 from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS, TestDataFactory

@@ -32,15 +32,18 @@ class TestMessageRouterRaceConditionPrevention(SSotAsyncTestCase):
     async def test_concurrent_message_routing_consistency(self):
         """
         CRITICAL: Test that concurrent message routing is consistent.
-        
+
         SHOULD FAIL: Currently different routers may handle concurrent messages
         WILL PASS: After SSOT ensures consistent routing behavior
         """
+        concurrent_users = 5
+        messages_per_user = 10
+
         try:
             from netra_backend.app.websocket_core.handlers import MessageRouter
-            
+
             # Create multiple router instances (simulating concurrent usage)
-            routers = [MessageRouter() for _ in range(self.concurrent_users)]
+            routers = [MessageRouter() for _ in range(concurrent_users)]
             
             # Track routing results
             routing_results = []
@@ -88,7 +91,7 @@ class TestMessageRouterRaceConditionPrevention(SSotAsyncTestCase):
             
             # Create test messages
             test_messages = []
-            for i in range(self.messages_per_user):
+            for i in range(messages_per_user):
                 test_messages.append({
                     'type': 'test_message',
                     'data': {'message_id': i, 'content': f'Test message {i}'},
@@ -143,13 +146,15 @@ class TestMessageRouterRaceConditionPrevention(SSotAsyncTestCase):
     async def test_websocket_event_delivery_consistency(self):
         """
         CRITICAL: Test WebSocket event delivery consistency under concurrent load.
-        
+
         SHOULD FAIL: Currently different routers may cause inconsistent event delivery
         WILL PASS: After SSOT ensures consistent WebSocket event handling
         """
+        concurrent_users = 5
+
         try:
             from netra_backend.app.websocket_core.handlers import MessageRouter
-            
+
             router = MessageRouter()
             
             # Track WebSocket events
@@ -201,7 +206,7 @@ class TestMessageRouterRaceConditionPrevention(SSotAsyncTestCase):
                     })
             
             # Run concurrent user interactions
-            tasks = [simulate_user_interaction(i) for i in range(self.concurrent_users)]
+            tasks = [simulate_user_interaction(i) for i in range(concurrent_users)]
             await asyncio.gather(*tasks, return_exceptions=True)
             
             # Analyze event delivery consistency
@@ -215,7 +220,7 @@ class TestMessageRouterRaceConditionPrevention(SSotAsyncTestCase):
                     user_events[user_id].append(event)
                 
                 # Each user should have received their events
-                for user_id in range(self.concurrent_users):
+                for user_id in range(concurrent_users):
                     if user_id not in user_events:
                         continue  # Skip if no events for this user
                     

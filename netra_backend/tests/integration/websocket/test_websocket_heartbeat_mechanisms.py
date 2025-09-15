@@ -36,7 +36,7 @@ from collections import defaultdict
 import pytest
 import websockets
 from websockets.asyncio.client import ClientConnection
-from websockets.exceptions import ConnectionClosed, WebSocketException
+from websockets import ConnectionClosed, WebSocketException
 
 # SSOT imports following CLAUDE.md absolute import requirements  
 from test_framework.base_integration_test import BaseIntegrationTest

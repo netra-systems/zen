@@ -116,7 +116,7 @@ class TestComplexAgentOrchestrationE2E(SSotAsyncTestCase):
 
         self.logger.info(f"Orchestration test setup - orchestration_id: {self.orchestration_id}")
 
-    async def _establish_orchestration_websocket(self) -> websockets.WebSocketServerProtocol:
+    async def _establish_orchestration_websocket(self) -> websockets.ServerConnection:
         """Establish WebSocket connection optimized for orchestration workflows."""
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False  # Staging environment

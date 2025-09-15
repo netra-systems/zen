@@ -18,14 +18,14 @@ class StagingConfig:
     # Default environment - CRITICAL: Must be 'staging' for staging tests
     DEFAULT_ENVIRONMENT = "staging"
     
-    # Service URLs - These should match deployed GCP Cloud Run services
+    # Service URLs - Use canonical staging URLs per CLAUDE.md deployment requirements
     SERVICE_URLS = {
         "staging": {
-            "NETRA_BACKEND_URL": f"https://netra-backend-{GCP_PROJECT_NUMBER}.{GCP_REGION}.run.app",
-            "AUTH_SERVICE_URL": f"https://auth-service-{GCP_PROJECT_NUMBER}.{GCP_REGION}.run.app",
-            "FRONTEND_URL": f"https://frontend-{GCP_PROJECT_NUMBER}.{GCP_REGION}.run.app",
-            "NETRA_API_URL": f"https://netra-backend-{GCP_PROJECT_NUMBER}.{GCP_REGION}.run.app",
-            "WEBSOCKET_URL": f"wss://netra-backend-{GCP_PROJECT_NUMBER}.{GCP_REGION}.run.app/ws"
+            "NETRA_BACKEND_URL": "https://api.staging.netrasystems.ai",
+            "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+            "FRONTEND_URL": "https://app.staging.netrasystems.ai",
+            "NETRA_API_URL": "https://api.staging.netrasystems.ai",
+            "WEBSOCKET_URL": "wss://api.staging.netrasystems.ai/ws"
         },
         "development": {
             "NETRA_BACKEND_URL": "http://localhost:8088",
@@ -99,7 +99,8 @@ class StagingConfig:
             url = cls.SERVICE_URLS[env].get(service)
             if not url or "localhost" in url:
                 return False
-            if cls.GCP_PROJECT_NUMBER not in url and cls.GCP_REGION not in url:
+            # Validate canonical staging URLs per CLAUDE.md requirements
+            if "staging.netrasystems.ai" not in url:
                 return False
         
         return True

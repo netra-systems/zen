@@ -29,7 +29,7 @@ from shared.isolated_environment import IsolatedEnvironment
 # For WebSocket connections if available
 try:
     import websockets
-    from websockets.exceptions import ConnectionClosed, WebSocketException
+    from websockets import ConnectionClosed, WebSocketException
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
     WEBSOCKETS_AVAILABLE = False

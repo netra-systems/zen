@@ -73,7 +73,7 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
         self.auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
         
         # Track connections for cleanup
-        self.active_connections: List[websockets.WebSocketServerProtocol] = []
+        self.active_connections: List[websockets.ServerConnection] = []
         self.connection_logs: List[Dict[str, Any]] = []
         
         # Update GCP config with actual staging URL if available
@@ -100,7 +100,7 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
         self.connection_logs.clear()
         super().teardown_method()
         
-    async def _connect_with_auth(self, timeout: Optional[float] = None) -> websockets.WebSocketServerProtocol:
+    async def _connect_with_auth(self, timeout: Optional[float] = None) -> websockets.ServerConnection:
         """
         Create authenticated WebSocket connection with proper error handling.
         

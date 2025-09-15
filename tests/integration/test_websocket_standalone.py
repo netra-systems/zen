@@ -34,7 +34,7 @@ sys.path.insert(0, str(project_root))
 
 try:
     import websockets
-    from websockets.exceptions import ConnectionClosedError, InvalidURI
+    from websockets import ConnectionClosedError, InvalidURI
 except ImportError:
     print("[ERROR] websockets library required. Install with: pip install websockets")
     sys.exit(1)

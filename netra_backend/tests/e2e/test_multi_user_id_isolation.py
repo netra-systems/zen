@@ -46,7 +46,7 @@ from test_framework.fixtures.real_services import real_services_fixture
 try:
     import aiohttp
     import websockets
-    from websockets.exceptions import ConnectionClosedError
+    from websockets import ConnectionClosedError
     WEBSOCKET_AVAILABLE = True
 except ImportError:
     aiohttp = None
