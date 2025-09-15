@@ -60,4 +60,3 @@ BUSINESS_VALUE_INDICATORS = [
     "recommend", "suggest", "analyze", "optimize", "improve",
     "strategy", "solution", "actionable", "next steps", "priority"
 ]
->>>>>>> 8764938e17e7cbfd22700a00d83f352704f5be9d
