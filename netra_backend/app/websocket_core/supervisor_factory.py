@@ -391,7 +391,7 @@ def get_websocket_supervisor_health() -> dict:
         try:
             # SECURITY FIX: Test factory pattern instead of unsafe singleton
             # Health check should verify the secure factory pattern is working
-            from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+            from netra_backend.app.websocket_core.canonical_imports import WebSocketManagerFactory
             
             # Test that factory pattern is available (doesn't require user context for health check)
             factory_available = WebSocketManagerFactory is not None

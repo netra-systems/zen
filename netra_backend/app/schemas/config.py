@@ -766,6 +766,16 @@ class AppConfig(BaseModel):
         Returns:
             str: ClickHouse connection URL
         """
+        # CRITICAL FIX Issue #1270: Check for staging database test mode guards
+        from shared.isolated_environment import get_env
+        env = get_env()
+        test_mode = env.get("DATABASE_CATEGORY_TEST_MODE")
+        clickhouse_mode = env.get("CLICKHOUSE_MODE")
+        
+        if test_mode == "staging" and clickhouse_mode == "mock":
+            # Return mock ClickHouse URL for database category tests in staging
+            return "clickhouse://default:@localhost:8123/test"
+        
         if hasattr(self, 'clickhouse_url') and self.clickhouse_url:
             return self.clickhouse_url
         # Construct from ClickHouse configuration
@@ -774,8 +784,6 @@ class AppConfig(BaseModel):
             protocol = "clickhouse+native"
             return f"{protocol}://{config.user}:{config.password}@{config.host}:{config.port}/{config.database}"
         # Fallback construction
-        from shared.isolated_environment import get_env
-        env = get_env()
         host = env.get('CLICKHOUSE_HOST', 'localhost')
         port = env.get('CLICKHOUSE_PORT', '8126')
         user = env.get('CLICKHOUSE_USER', 'default')

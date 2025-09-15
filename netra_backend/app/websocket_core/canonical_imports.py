@@ -263,14 +263,14 @@ from netra_backend.app.websocket_core.migration_adapter import (
 # ============================================================================
 
 # DEPRECATED: Direct manager imports (use factory instead)
-# from netra_backend.app.websocket_core.manager import WebSocketManager
+# from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 # from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
 
 # DEPRECATED: Multiple interface imports (use canonical protocol instead)  
 # from netra_backend.app.core.interfaces_websocket import WebSocketManagerProtocol
 
 # DEPRECATED: Global function access (use factory pattern instead)
-# from netra_backend.app.websocket_core import get_websocket_manager
+# from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # ============================================================================
 # CANONICAL EXPORT INTERFACE
