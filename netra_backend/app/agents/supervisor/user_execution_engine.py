@@ -648,6 +648,61 @@ class UserExecutionEngine(IExecutionEngine, ToolExecutionEngineInterface):
         logger.warning("WebSocket notifier not available - all methods failed")
         return None
 
+    def set_websocket_emitter(self, websocket_emitter: 'WebSocketEventEmitter') -> None:
+        """Set the WebSocket emitter for event delivery.
+
+        This method provides interface compatibility with components that expect
+        to dynamically configure WebSocket emitters after initialization.
+
+        Args:
+            websocket_emitter: The WebSocketEventEmitter to use for event delivery
+        """
+        logger.info(f"Setting WebSocket emitter for user {self.context.user_id}: {type(websocket_emitter)}")
+        self.websocket_emitter = websocket_emitter
+
+        # Update agent_core if it exists
+        if hasattr(self, 'agent_core') and self.agent_core:
+            try:
+                # Try to create a new websocket bridge for the agent core
+                from netra_backend.app.factories.websocket_bridge_factory import WebSocketBridgeFactory
+                bridge_factory = WebSocketBridgeFactory(self.context)
+                websocket_bridge = bridge_factory.create_bridge()
+                websocket_bridge.set_websocket_emitter(websocket_emitter)
+                self.agent_core.websocket_bridge = websocket_bridge
+                logger.info(f"Updated agent_core WebSocket bridge for user {self.context.user_id}")
+            except Exception as e:
+                logger.warning(f"Failed to update agent_core WebSocket bridge: {e}")
+
+    async def notify_agent_started(self, *args, **kwargs):
+        """Notify that an agent has started execution."""
+        if self.websocket_emitter and hasattr(self.websocket_emitter, 'notify_agent_started'):
+            return await self.websocket_emitter.notify_agent_started(*args, **kwargs)
+        return True
+
+    async def notify_agent_thinking(self, *args, **kwargs):
+        """Notify that an agent is thinking/processing."""
+        if self.websocket_emitter and hasattr(self.websocket_emitter, 'notify_agent_thinking'):
+            return await self.websocket_emitter.notify_agent_thinking(*args, **kwargs)
+        return True
+
+    async def notify_tool_executing(self, *args, **kwargs):
+        """Notify that a tool is executing."""
+        if self.websocket_emitter and hasattr(self.websocket_emitter, 'notify_tool_executing'):
+            return await self.websocket_emitter.notify_tool_executing(*args, **kwargs)
+        return True
+
+    async def notify_tool_completed(self, *args, **kwargs):
+        """Notify that a tool has completed execution."""
+        if self.websocket_emitter and hasattr(self.websocket_emitter, 'notify_tool_completed'):
+            return await self.websocket_emitter.notify_tool_completed(*args, **kwargs)
+        return True
+
+    async def notify_agent_completed(self, *args, **kwargs):
+        """Notify that an agent has completed execution."""
+        if self.websocket_emitter and hasattr(self.websocket_emitter, 'notify_agent_completed'):
+            return await self.websocket_emitter.notify_agent_completed(*args, **kwargs)
+        return True
+
     @classmethod
     def _init_from_factory(cls, registry: 'AgentRegistry', websocket_bridge,
                           user_context: Optional['UserExecutionContext'] = None):
@@ -1401,7 +1456,12 @@ class UserExecutionEngine(IExecutionEngine, ToolExecutionEngineInterface):
                         if self.websocket_emitter and hasattr(self.websocket_emitter, 'notify_agent_started'):
                             return await self.websocket_emitter.notify_agent_started(*args, **kwargs)
                         return True
-                    
+
+                    async def notify_agent_thinking(self, *args, **kwargs):
+                        if self.websocket_emitter and hasattr(self.websocket_emitter, 'notify_agent_thinking'):
+                            return await self.websocket_emitter.notify_agent_thinking(*args, **kwargs)
+                        return True
+
                     async def notify_agent_completed(self, *args, **kwargs):
                         if self.websocket_emitter and hasattr(self.websocket_emitter, 'notify_agent_completed'):
                             return await self.websocket_emitter.notify_agent_completed(*args, **kwargs)
