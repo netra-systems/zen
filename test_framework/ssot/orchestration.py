@@ -102,7 +102,8 @@ class OrchestrationConfig:
             self._availability_cache: Dict[str, Optional[bool]] = {
                 'orchestrator': None,
                 'master_orchestration': None,
-                'background_e2e': None
+                'background_e2e': None,
+                'docker': None
             }
             
             # Import cache for loaded modules
@@ -263,7 +264,35 @@ class OrchestrationConfig:
             error_msg = f"BackgroundE2EAgent check failed: {str(e)}"
             logger.warning(error_msg)
             return False, error_msg
-    
+
+    def _check_docker_availability(self) -> Tuple[bool, Optional[str]]:
+        """
+        Check Docker availability with detailed error reporting.
+
+        Returns:
+            Tuple of (availability, error_message)
+        """
+        try:
+            import docker
+            client = docker.from_env()
+            client.ping()
+
+            if self._debug_mode:
+                logger.debug("Docker service available and responding")
+
+            return True, None
+
+        except ImportError as e:
+            error_msg = f"Docker library unavailable: {str(e)}"
+            if self._debug_mode:
+                logger.debug(error_msg)
+            return False, error_msg
+        except Exception as e:
+            error_msg = f"Docker service unavailable: {str(e)}"
+            if self._debug_mode:
+                logger.debug(error_msg)
+            return False, error_msg
+
     def _check_availability(self, feature_name: str) -> bool:
         """
         Internal method to check and cache availability for a specific feature.
@@ -299,6 +328,8 @@ class OrchestrationConfig:
                     available, error = self._check_master_orchestration_availability()
                 elif feature_name == 'background_e2e':
                     available, error = self._check_background_e2e_availability()
+                elif feature_name == 'docker':
+                    available, error = self._check_docker_availability()
                 else:
                     available, error = False, f"Unknown feature: {feature_name}"
                 
@@ -368,7 +399,21 @@ class OrchestrationConfig:
             True if all BackgroundE2EAgent components are importable
         """
         return self._check_availability('background_e2e')
-    
+
+    @property
+    def docker_available(self) -> bool:
+        """
+        Check if Docker is available for testing.
+
+        This property tests for the availability of:
+        - Docker service running and responding
+        - Docker Python library available
+
+        Returns:
+            True if Docker is available for test orchestration
+        """
+        return self._check_availability('docker')
+
     @property
     def all_orchestration_available(self) -> bool:
         """
@@ -737,6 +782,11 @@ def is_background_e2e_available() -> bool:
     return get_orchestration_config().background_e2e_available
 
 
+def is_docker_available() -> bool:
+    """Convenience function to check Docker availability."""
+    return get_orchestration_config().docker_available
+
+
 def is_all_orchestration_available() -> bool:
     """Convenience function to check if all orchestration is available."""
     return get_orchestration_config().all_orchestration_available
@@ -761,6 +811,7 @@ __all__ = [
     'is_orchestrator_available',
     'is_master_orchestration_available',
     'is_background_e2e_available',
+    'is_docker_available',
     'is_all_orchestration_available',
     'get_orchestration_status'
 ]
