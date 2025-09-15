@@ -1629,11 +1629,9 @@ class MessageRouter:
         
         # Add handler-specific stats
         handler_stats = {}
-        handler_order = []
         
-        for i, handler in enumerate(self.handlers):
+        for handler in self.handlers:
             handler_name = handler.__class__.__name__
-            handler_order.append(f"[{i}] {handler_name}")
             
             if hasattr(handler, 'get_stats'):
                 handler_stats[handler_name] = handler.get_stats()
@@ -1641,7 +1639,7 @@ class MessageRouter:
                 handler_stats[handler_name] = {"status": "active"}
         
         stats["handler_stats"] = handler_stats
-        stats["handler_order"] = handler_order  # Track handler precedence
+        stats["handler_order"] = self.get_handler_order()  # Use consistent format with get_handler_order()
         stats["handler_count"] = len(self.handlers)
         
         # CRITICAL FIX: Add startup grace period status

@@ -201,7 +201,8 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                     user_specific_data['_user_index'] = user_index
                     user_specific_data['_scenario'] = scenario['name']
                     
-                    await engine.send_websocket_event(event_type, user_specific_data)
+                    # Send event through the WebSocket simulator
+                    await user_websockets[user_id].send_agent_event(event_type, user_specific_data)
                     
                     # Realistic delay between events
                     await asyncio.sleep(0.01 + (user_index * 0.001))
@@ -470,7 +471,8 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                 for event_num in range(events_per_user):
                     event_type = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed'][event_num % 5]
                     
-                    await engine.send_websocket_event(event_type, {
+                    # Send event through the WebSocket simulator
+                    await websocket.send_agent_event(event_type, {
                         'user_index': user_index,
                         'event_num': event_num,
                         'load_test': True,
