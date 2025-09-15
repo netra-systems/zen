@@ -96,7 +96,7 @@ class TestWebSocketManagerFactoryFunctions(SSotAsyncTestCase):
             mock_unified.return_value = mock_manager
             
             # Call with user context
-            result = await get_websocket_manager(
+            result = get_websocket_manager(
                 user_context=self.mock_user_context,
                 mode=WebSocketManagerMode.UNIFIED
             )
@@ -134,7 +134,7 @@ class TestWebSocketManagerFactoryFunctions(SSotAsyncTestCase):
             ]
             
             # Call without user context
-            result = await get_websocket_manager(user_context=None)
+            result = get_websocket_manager(user_context=None)
             
             # Verify ID manager was used to create test IDs
             assert mock_id_instance.generate_id.call_count == 3
@@ -166,7 +166,7 @@ class TestWebSocketManagerFactoryFunctions(SSotAsyncTestCase):
             ]
             
             # Call should not raise exception despite internal error
-            result = await get_websocket_manager(user_context=self.mock_user_context)
+            result = get_websocket_manager(user_context=self.mock_user_context)
             
             # Verify emergency fallback was created
             assert result is mock_fallback_manager
@@ -193,7 +193,7 @@ class TestWebSocketManagerFactoryFunctions(SSotAsyncTestCase):
             mock_unified.return_value = mock_manager
             
             # Call with user context
-            result = await get_websocket_manager(user_context=self.mock_user_context)
+            result = get_websocket_manager(user_context=self.mock_user_context)
             
             # Verify SSOT validation was called
             mock_validate.assert_called_once_with(
@@ -215,7 +215,7 @@ class TestWebSocketManagerFactoryFunctions(SSotAsyncTestCase):
             mock_unified.return_value = mock_manager
             
             # Should not raise exception despite import error
-            result = await get_websocket_manager(user_context=self.mock_user_context)
+            result = get_websocket_manager(user_context=self.mock_user_context)
             
             # Should still return manager
             assert result is mock_manager
@@ -342,7 +342,7 @@ class TestWebSocketManagerFactoryEdgeCases(SSotAsyncTestCase):
             mock_unified.return_value = mock_manager
             
             # Call without mode parameter (should default)
-            result = await get_websocket_manager(user_context=self.mock_user_context)
+            result = get_websocket_manager(user_context=self.mock_user_context)
             
             # Should use UNIFIED mode by default
             call_args = mock_unified.call_args
@@ -367,7 +367,7 @@ class TestWebSocketManagerFactoryEdgeCases(SSotAsyncTestCase):
             
             for invalid_ctx in invalid_contexts:
                 # Should not raise exception
-                result = await get_websocket_manager(user_context=invalid_ctx)
+                result = get_websocket_manager(user_context=invalid_ctx)
                 
                 # Should return some manager (possibly fallback)
                 assert result is not None
@@ -391,7 +391,7 @@ class TestWebSocketManagerFactoryEdgeCases(SSotAsyncTestCase):
             mock_unified.return_value = mock_fallback
             
             # Should not raise exception despite ID generation failure
-            result = await get_websocket_manager(user_context=None)
+            result = get_websocket_manager(user_context=None)
             
             # Should get emergency fallback manager
             assert result is mock_fallback
@@ -502,7 +502,7 @@ class TestWebSocketManagerFactoryPerformance(SSotAsyncTestCase):
             
             # Measure creation time
             start_time = time.time()
-            result = await get_websocket_manager(user_context=self.mock_user_context)
+            result = get_websocket_manager(user_context=self.mock_user_context)
             end_time = time.time()
             
             creation_time = end_time - start_time
@@ -537,7 +537,7 @@ class TestWebSocketManagerFactoryPerformance(SSotAsyncTestCase):
                     'is_test': True
                 })()
                 
-                manager = await get_websocket_manager(user_context=ctx)
+                manager = get_websocket_manager(user_context=ctx)
                 managers.append(manager)
             
             # Clean up managers

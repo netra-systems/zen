@@ -115,7 +115,7 @@ class TestIssue1094GoldenPathProtection(BaseIntegrationTest):
 
             try:
                 # Validate correct async interface supports Golden Path
-                websocket_manager = await get_websocket_manager(user_context=user_context)
+                websocket_manager = get_websocket_manager(user_context=user_context)
 
                 # Send all critical Golden Path events
                 for event in critical_events:
@@ -221,7 +221,7 @@ class TestIssue1094GoldenPathProtection(BaseIntegrationTest):
                     user_context = await get_user_session_context(user_id=golden_path_user_id)
 
                     # Use correct async interface (FIX)
-                    websocket_manager = await get_websocket_manager(user_context)
+                    websocket_manager = get_websocket_manager(user_context)
                     await websocket_manager.send_to_user(golden_path_user_id, {"type": "agent_stopped"})
 
                     fix_successful = True

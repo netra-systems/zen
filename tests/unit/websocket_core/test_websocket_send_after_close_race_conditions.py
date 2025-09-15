@@ -55,7 +55,7 @@ class TestWebSocketSendAfterCloseRaceConditions(SSotAsyncTestCase):
         is closed while a send operation is in progress on another task.
         """
         logger.info('🧪 Testing race condition: close during send operation')
-        websocket_manager = await get_websocket_manager(user_context=self.mock_user_context, mode=WebSocketManagerMode.UNIFIED)
+        websocket_manager = get_websocket_manager(user_context=self.mock_user_context, mode=WebSocketManagerMode.UNIFIED)
         mock_websocket = AsyncMock()
         mock_connection = WebSocketConnection(connection_id='test_conn_001', user_id=str(self.mock_user_context.user_id), websocket=mock_websocket, connected_at=datetime.now())
         await websocket_manager.add_connection(mock_connection)

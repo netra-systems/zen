@@ -50,6 +50,7 @@ from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 @pytest.mark.integration
 class TestUnifiedStateManagerIntegrationCore(SSotAsyncTestCase):
@@ -181,7 +182,7 @@ class TestCrossServiceStateCoordination(TestUnifiedStateManagerIntegrationCore):
     async def test_websocket_state_propagation(self):
         """HIGH DIFFICULTY: WebSocket state change propagation"""
         manager = self.create_test_manager('websocket-user')
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         thread_id = 'websocket-thread'
         connection_id = f'conn-{manager.user_id}'
         initial_state = {'websocket_status': 'connected', 'last_message': None}

@@ -54,6 +54,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from netra_backend.app.auth_integration.auth import validate_jwt_token
 from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 logger = central_logger.get_logger(__name__)
 
 class RealWebSocketServer:
@@ -175,7 +176,7 @@ class TestUnifiedWebSocketManagerIntegration(BaseIntegrationTest):
     async def setUp(self):
         """Set up for each test with fresh manager and test data."""
         await super().setUp()
-        self.manager = UnifiedWebSocketManager()
+        self.manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         self.test_user_id = ensure_user_id('integration-user-123')
         self.test_user_id_2 = ensure_user_id('integration-user-456')
         self.websocket_server.received_messages.clear()

@@ -30,6 +30,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from dataclasses import dataclass
 import psutil
 import os
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 from netra_backend.app.logging_config import central_logger
 
@@ -162,7 +163,7 @@ class TestWebSocketManagerPerformanceStability(SSotAsyncTestCase):
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             def create_direct():
-                return UnifiedWebSocketManager()
+                return get_websocket_manager(user_context=getattr(self, 'user_context', None))
             
             manager_creation_tests.append(('Direct-creation', create_direct))
             
@@ -301,7 +302,7 @@ class TestWebSocketManagerPerformanceStability(SSotAsyncTestCase):
             
             # Create a single manager and test concurrent access
             try:
-                shared_manager = UnifiedWebSocketManager()
+                shared_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
                 
                 def concurrent_operation_worker(worker_id: int) -> Tuple[int, bool, str]:
                     """Worker function for concurrent operations on shared manager."""
@@ -409,7 +410,7 @@ class TestWebSocketManagerPerformanceStability(SSotAsyncTestCase):
                 managers = []
                 for i in range(5):
                     try:
-                        manager = UnifiedWebSocketManager()
+                        manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
                         managers.append(manager)
                     except Exception as e:
                         pass  # Some failures expected
@@ -512,7 +513,7 @@ class TestWebSocketManagerPerformanceStability(SSotAsyncTestCase):
             
         try:
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-            direct_manager = UnifiedWebSocketManager()
+            direct_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             managers_to_test.append(('Direct', direct_manager, False))
         except Exception as e:
             stability_violations.append(f"Direct manager unavailable: {e}")

@@ -64,7 +64,6 @@ except ImportError as e:
     AgentExecutionCore = MagicMock
     CircuitBreakerOpenError = Exception
 
-
 class ErrorType(Enum):
     """Types of errors for recovery testing."""
     AGENT_EXECUTION_ERROR = "agent_execution_error"
@@ -73,7 +72,6 @@ class ErrorType(Enum):
     WEBSOCKET_COMMUNICATION_FAILURE = "websocket_communication_failure"
     CIRCUIT_BREAKER_OPEN = "circuit_breaker_open"
     RESOURCE_EXHAUSTION = "resource_exhaustion"
-
 
 @dataclass
 class ErrorScenario:
@@ -84,7 +82,6 @@ class ErrorScenario:
     user_notification_required: bool
     partial_results_expected: bool
     retry_mechanism_available: bool
-
 
 @dataclass
 class RecoveryResult:
@@ -98,7 +95,6 @@ class RecoveryResult:
     recovery_duration_ms: float
     user_experience_maintained: bool
     errors: List[str]
-
 
 class TestAgentErrorRecoveryWorkflows(SSotAsyncTestCase):
     """
@@ -158,15 +154,13 @@ class TestAgentErrorRecoveryWorkflows(SSotAsyncTestCase):
 
     async def _initialize_error_recovery_infrastructure(self):
         """Initialize real error recovery infrastructure for testing."""
-        if not REAL_ERROR_RECOVERY_COMPONENTS_AVAILABLE:
-            self._initialize_mock_error_recovery_infrastructure()
-            return
+        if not REAL_ERROR_RECOVERY_COMPONENTS_AVAILABLE:return
 
         try:
             # Initialize real error recovery components
             self.execution_core = AgentExecutionCore(registry=MagicMock())
             self.websocket_bridge = create_agent_websocket_bridge()
-            self.websocket_manager = await get_websocket_manager()
+            self.websocket_manager = get_websocket_manager()
 
             # Configure error recovery infrastructure for testing
             if hasattr(self.execution_core, 'configure_error_recovery'):
@@ -177,8 +171,10 @@ class TestAgentErrorRecoveryWorkflows(SSotAsyncTestCase):
                 )
 
         except Exception as e:
-            print(f"Failed to initialize real error recovery infrastructure, using mocks: {e}")
-            self._initialize_mock_error_recovery_infrastructure()
+
+            # CLAUDE.md COMPLIANCE: Tests must use real services only
+
+            raise RuntimeError(f"Failed to initialize real infrastructure: {e}") from e
 
     def _initialize_mock_error_recovery_infrastructure(self):
         """Initialize mock error recovery infrastructure for testing."""

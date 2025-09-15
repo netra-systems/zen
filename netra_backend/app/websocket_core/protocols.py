@@ -258,7 +258,7 @@ class WebSocketProtocolValidator:
             
         Example:
             >>> from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            >>> manager = await get_websocket_manager(user_context)
+            >>> manager = get_websocket_manager(user_context)
             >>> result = WebSocketManagerProtocolValidator.validate_manager_protocol(manager)
             >>> if not result['compliant']:
             ...     raise ValueError(f"Manager not protocol compliant: {result['missing_methods']}")

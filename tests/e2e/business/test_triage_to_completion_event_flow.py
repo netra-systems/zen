@@ -24,6 +24,7 @@ import json
 import time
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional, Tuple
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 from test_framework.ssot.e2e_auth_helper import (
     E2EAuthHelper,
@@ -195,7 +196,7 @@ class TestTriageToCompletionEventFlow(BaseE2ETest):
         )
         
         # Set up execution infrastructure
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         websocket_bridge = AgentWebSocketBridge(websocket_manager)
         execution_core = AgentExecutionCore(real_agent_registry, websocket_bridge)
         
@@ -462,7 +463,7 @@ class TestTriageToCompletionEventFlow(BaseE2ETest):
                 pass
         
         # Execute single agent to test event ordering
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         websocket_bridge = AgentWebSocketBridge(websocket_manager)
         execution_core = AgentExecutionCore(real_agent_registry, websocket_bridge)
         
@@ -586,7 +587,7 @@ class TestTriageToCompletionEventFlow(BaseE2ETest):
                     pass
             
             # Set up execution
-            websocket_manager = UnifiedWebSocketManager()
+            websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             websocket_bridge = AgentWebSocketBridge(websocket_manager)
             execution_core = AgentExecutionCore(real_agent_registry, websocket_bridge)
             

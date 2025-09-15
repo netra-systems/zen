@@ -112,7 +112,7 @@ class TestIssue1094ProductionErrorReproduction(BaseIntegrationTest):
 
         # This should work correctly (async interface)
         try:
-            websocket_manager = await get_websocket_manager(user_context=user_context)
+            websocket_manager = get_websocket_manager(user_context=user_context)
             assert websocket_manager is not None, "get_websocket_manager should return manager in staging"
             assert hasattr(websocket_manager, 'send_to_user'), "Manager should have send_to_user method"
         except Exception as e:

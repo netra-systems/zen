@@ -23,6 +23,7 @@ import uuid
 import json
 from datetime import datetime, timezone
 from typing import Dict, Any, List
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user
 from test_framework.base_e2e_test import BaseE2ETest
@@ -334,7 +335,7 @@ class TestAgentExecutionWebSocketEventsComprehensive(BaseE2ETest):
                 pass  # Normal timeout
         
         # Create real WebSocket bridge
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         websocket_bridge = AgentWebSocketBridge(websocket_manager)
         
         # Override bridge to send events to our test client

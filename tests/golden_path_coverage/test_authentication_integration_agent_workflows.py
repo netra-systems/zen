@@ -168,7 +168,7 @@ class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
         await self.auth_service.initialize()
         await self.auth_client.create_test_user(self.test_user_id)
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=f'conv_{self.test_user_id}', run_id=f'run_{uuid.uuid4()}', request_id=f'req_{uuid.uuid4()}')
-        self.websocket_manager = await get_websocket_manager(user_context=user_context)
+        self.websocket_manager = get_websocket_manager(user_context=user_context)
         await self.websocket_manager.initialize()
         self.agent_registry = AgentRegistry()
         self.agent_registry.set_websocket_manager(self.websocket_manager)

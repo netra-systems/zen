@@ -36,6 +36,7 @@ from collections import defaultdict
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.database_test_utilities import DatabaseTestUtilities
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 try:
     from netra_backend.app.services.websocket_error_validator import get_websocket_validator as get_production_validator, reset_websocket_validator as reset_production_validator
     production_validator_available = True
@@ -175,7 +176,7 @@ class TestProductionValidatorDetection(SSotAsyncTestCase):
             self.skipTest('WebSocket manager not available for testing')
         websocket_manager_analysis = {}
         try:
-            manager = UnifiedWebSocketManager()
+            manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             manager_info = {'type': type(manager).__name__, 'module': type(manager).__module__, 'has_event_validator': hasattr(manager, 'event_validator'), 'has_validate_event': hasattr(manager, 'validate_event'), 'has_emit_event': hasattr(manager, 'emit_event')}
             if hasattr(manager, 'event_validator'):
                 validator = getattr(manager, 'event_validator', None)

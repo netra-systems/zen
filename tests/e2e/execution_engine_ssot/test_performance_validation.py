@@ -1,3 +1,4 @@
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 #!/usr/bin/env python
 """
 E2E TEST 9: Real Performance Validation for UserExecutionEngine SSOT
@@ -174,7 +175,7 @@ class RealPerformanceWebSocketManager:
         self.last_event_time = None
         self.connection_start_time = time.perf_counter()
         # REAL WebSocket manager - measures actual system performance
-        self.websocket_manager = UnifiedWebSocketManager()
+        self.websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         self.performance_metrics = []
         
     async def send_agent_event(self, event_type: str, data: Dict[str, Any]) -> float:

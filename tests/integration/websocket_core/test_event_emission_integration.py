@@ -15,6 +15,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 @pytest.mark.integration
 class TestWebSocketEventEmissionIntegration(SSotAsyncTestCase):
@@ -23,7 +24,7 @@ class TestWebSocketEventEmissionIntegration(SSotAsyncTestCase):
     def setup_method(self, method):
         """Set up integration test environment"""
         super().setup_method(method)
-        self.websocket_manager = UnifiedWebSocketManager()
+        self.websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         self.test_user_id = 'integration_user_456'
         self.mock_websocket = AsyncMock()
         self.websocket_manager._connections = {self.test_user_id: {'websocket': self.mock_websocket, 'last_heartbeat': datetime.now(timezone.utc), 'status': 'active'}}

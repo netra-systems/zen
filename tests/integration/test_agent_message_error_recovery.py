@@ -69,7 +69,6 @@ except ImportError as e:
     CircuitBreakerOpen = Exception
     CircuitBreakerTimeout = Exception
 
-
 class TestAgentMessageErrorRecovery(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Agent Message Error Recovery.
@@ -161,9 +160,7 @@ class TestAgentMessageErrorRecovery(SSotAsyncTestCase):
 
     async def _initialize_real_error_recovery_infrastructure(self):
         """Initialize real error recovery infrastructure components for testing."""
-        if not REAL_ERROR_RECOVERY_COMPONENTS_AVAILABLE:
-            self._initialize_mock_error_recovery_infrastructure()
-            return
+        if not REAL_ERROR_RECOVERY_COMPONENTS_AVAILABLE:return
 
         try:
             # Create real circuit breakers for different service components
@@ -186,7 +183,7 @@ class TestAgentMessageErrorRecovery(SSotAsyncTestCase):
             }
 
             # Create real WebSocket manager for error recovery testing
-            self.websocket_manager = await get_websocket_manager()
+            self.websocket_manager = get_websocket_manager()
 
             # Create real WebSocket bridge for error handling
             self.websocket_bridge = create_agent_websocket_bridge()
@@ -198,9 +195,10 @@ class TestAgentMessageErrorRecovery(SSotAsyncTestCase):
             self.error_injectors = {}
 
         except Exception as e:
-            # Fallback to mock infrastructure if real components fail
-            print(f"Failed to initialize real error recovery infrastructure, using mocks: {e}")
-            self._initialize_mock_error_recovery_infrastructure()
+
+            # CLAUDE.md COMPLIANCE: Tests must use real services only
+
+            raise RuntimeError(f"Failed to initialize real infrastructure: {e}") from e
 
     def _initialize_mock_error_recovery_infrastructure(self):
         """Initialize mock error recovery infrastructure for testing when real components unavailable."""

@@ -103,7 +103,7 @@ def create_websocket_manager(user_context=None):
             # This is a legacy compatibility issue - recommend using async version
             raise RuntimeError(
                 "create_websocket_manager cannot be called from async context. "
-                "Use 'await get_websocket_manager(user_context)' instead."
+                "Use 'get_websocket_manager(user_context)' instead."
             )
         else:
             return WebSocketManager(

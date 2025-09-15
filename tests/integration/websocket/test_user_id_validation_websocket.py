@@ -46,6 +46,7 @@ from netra_backend.app.services.unified_authentication_service import UnifiedAut
 from shared.types.core_types import ensure_user_id, UserID
 from shared.jwt_secret_manager import get_unified_jwt_secret
 from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 @pytest.mark.integration
 class TestWebSocketUserIDValidationIntegration(BaseIntegrationTest):
@@ -177,7 +178,7 @@ class TestWebSocketUserIDValidationIntegration(BaseIntegrationTest):
         EXPECTED: SUCCESS after fix
         """
         with patch('netra_backend.app.websocket_core.unified_manager.get_database_manager'):
-            manager = UnifiedWebSocketManager()
+            manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             for user_pattern in failing_user_patterns:
                 token = self._create_jwt_token(user_pattern, jwt_secret)
                 mock_websocket = MockWebSocketConnection()

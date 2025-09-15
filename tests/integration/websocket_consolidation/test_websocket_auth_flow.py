@@ -25,6 +25,7 @@ import time
 from unittest.mock import patch, MagicMock, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from dev_launcher.isolated_environment import IsolatedEnvironment
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 try:
     from netra_backend.app.websocket_core.auth import WebSocketAuthValidator
     from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager
@@ -99,7 +100,7 @@ class TestWebSocketAuthFlow(SSotAsyncTestCase):
         connection_attempts = []
         for attempt in range(3):
             try:
-                websocket_manager = UnifiedWebSocketManager()
+                websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
                 mock_websocket = MagicMock()
                 mock_websocket.headers = {'Authorization': f'Bearer {self.test_jwt_token}', 'User-Agent': 'Netra-Test-Client/1.0'}
                 auth_result = await self._attempt_websocket_auth(websocket_manager, mock_websocket)

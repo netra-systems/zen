@@ -96,8 +96,8 @@ class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL initially if event isolation isn't enforced.
         """
-        manager_a = await get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
-        manager_b = await get_websocket_manager(user_context=self.user_context_b, mode=WebSocketManagerMode.UNIFIED)
+        manager_a = get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
+        manager_b = get_websocket_manager(user_context=self.user_context_b, mode=WebSocketManagerMode.UNIFIED)
         self.websocket_a.clear_messages()
         self.websocket_b.clear_messages()
         if hasattr(manager_a, 'add_connection'):
@@ -128,9 +128,9 @@ class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL if concurrent event isolation isn't enforced.
         """
-        manager_a = await get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
-        manager_b = await get_websocket_manager(user_context=self.user_context_b, mode=WebSocketManagerMode.UNIFIED)
-        manager_c = await get_websocket_manager(user_context=self.user_context_c, mode=WebSocketManagerMode.UNIFIED)
+        manager_a = get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
+        manager_b = get_websocket_manager(user_context=self.user_context_b, mode=WebSocketManagerMode.UNIFIED)
+        manager_c = get_websocket_manager(user_context=self.user_context_c, mode=WebSocketManagerMode.UNIFIED)
         for ws in [self.websocket_a, self.websocket_b, self.websocket_c]:
             ws.clear_messages()
         managers_and_websockets = [(manager_a, self.websocket_a), (manager_b, self.websocket_b), (manager_c, self.websocket_c)]
@@ -164,7 +164,7 @@ class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL if broadcast filtering isn't implemented.
         """
-        manager = await get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
+        manager = get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
         websockets = [self.websocket_a, self.websocket_b, self.websocket_c]
         mock_connections = {}
         for i, websocket in enumerate(websockets):
@@ -205,7 +205,7 @@ class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL if connection cleanup isn't preventing bleeding.
         """
-        manager_a = await get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
+        manager_a = get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
         if hasattr(manager_a, 'add_connection'):
             await manager_a.add_connection(self.websocket_a)
         self.websocket_a.clear_messages()
@@ -242,7 +242,7 @@ class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL if context switching isolation isn't enforced.
         """
-        manager = await get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
+        manager = get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
         if hasattr(manager, 'add_connection'):
             await manager.add_connection(self.websocket_a)
         user_a_event = {'event': 'user_a_private_event', 'data': 'user_a_confidential_data', 'user_id': 'user-alpha'}
@@ -283,8 +283,8 @@ class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL if event queue isolation isn't implemented.
         """
-        manager_a = await get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
-        manager_b = await get_websocket_manager(user_context=self.user_context_b, mode=WebSocketManagerMode.UNIFIED)
+        manager_a = get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
+        manager_b = get_websocket_manager(user_context=self.user_context_b, mode=WebSocketManagerMode.UNIFIED)
         user_a_events = [{'event': 'agent_started', 'data': 'a_start', 'queue_id': 'a1'}, {'event': 'agent_thinking', 'data': 'a_thinking', 'queue_id': 'a2'}, {'event': 'tool_executing', 'data': 'a_tool', 'queue_id': 'a3'}]
         user_b_events = [{'event': 'agent_started', 'data': 'b_start', 'queue_id': 'b1'}, {'event': 'agent_thinking', 'data': 'b_thinking', 'queue_id': 'b2'}, {'event': 'tool_executing', 'data': 'b_tool', 'queue_id': 'b3'}]
         if hasattr(manager_a, 'queue_event') and hasattr(manager_b, 'queue_event'):

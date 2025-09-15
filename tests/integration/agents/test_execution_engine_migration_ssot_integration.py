@@ -26,6 +26,7 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 class TestExecutionEngineMigrationSSotIntegration(SSotAsyncTestCase):
     """Test execution engine migration with real services integration."""
@@ -56,7 +57,7 @@ class TestExecutionEngineMigrationSSotIntegration(SSotAsyncTestCase):
         for attr in services_attrs:
             self.assertTrue(hasattr(user_context, attr), f'SSOT VIOLATION: Services UserExecutionContext missing {attr}')
         try:
-            websocket_manager = UnifiedWebSocketManager()
+            websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             critical_methods = ['notify_agent_started', 'notify_agent_completed', 'notify_agent_error']
             for method in critical_methods:
                 self.assertTrue(hasattr(websocket_manager, method), f'REAL SERVICE FAILURE: WebSocket manager missing critical method: {method}')

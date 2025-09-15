@@ -79,7 +79,7 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
         self.user_context = UserExecutionContext(user_id=self.user_id, thread_id=self.conversation_id, run_id=f'run_{uuid.uuid4()}', request_id=f'req_{uuid.uuid4()}')
         self.state_manager = StateManager(user_context=self.user_context, database_manager=self.database_manager)
         self.optimized_persistence = OptimizedStatePersistence(database_manager=self.database_manager, clickhouse_client=self.clickhouse_client)
-        websocket_manager = await get_websocket_manager(user_context=self.user_context)
+        websocket_manager = get_websocket_manager(user_context=self.user_context)
         self.execution_engine = UserExecutionEngine(user_context=self.user_context, websocket_manager=websocket_manager, state_manager=self.state_manager)
         logger.info('Real database infrastructure initialized')
 
@@ -133,7 +133,7 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
         new_user_context = UserExecutionContext(user_id=self.user_id, thread_id=self.conversation_id, run_id=f'run_{uuid.uuid4()}', request_id=f'req_{uuid.uuid4()}')
         new_state_manager = StateManager(user_context=new_user_context, database_manager=self.database_manager)
         continued_state = await new_state_manager.get_state()
-        new_execution_engine = UserExecutionEngine(user_context=new_user_context, websocket_manager=await get_websocket_manager(user_context=new_user_context), state_manager=new_state_manager)
+        new_execution_engine = UserExecutionEngine(user_context=new_user_context, websocket_manager=get_websocket_manager(user_context=new_user_context), state_manager=new_state_manager)
         result = await new_execution_engine.execute_request('Based on our previous discussion, show me the cost analysis results')
         assert continued_state is not None, 'Previous state should be retrieved'
         assert continued_state.get('conversation_history') is not None, 'Conversation history should be preserved'
@@ -255,7 +255,7 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
         assert 'initial_analysis' in completed_steps, 'All completed steps should be preserved'
         agent_context = recovered_state.get('agent_context', {})
         assert agent_context.get('active_workflow') == 'optimization_pipeline', 'Active workflow should be preserved'
-        new_execution_engine = UserExecutionEngine(user_context=new_user_context, websocket_manager=await get_websocket_manager(user_context=new_user_context), state_manager=new_state_manager)
+        new_execution_engine = UserExecutionEngine(user_context=new_user_context, websocket_manager=get_websocket_manager(user_context=new_user_context), state_manager=new_state_manager)
         continuation_result = await new_execution_engine.execute_request('Continue with the recommendations from our previous analysis')
         assert continuation_result is not None, 'Should be able to continue execution with recovered state'
         logger.info('Verified complete state recovery after system restart')
@@ -327,7 +327,7 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
         for user_id in users:
             user_context = UserExecutionContext(user_id=user_id, thread_id=f'conv_{user_id}', run_id=f'run_{uuid.uuid4()}', request_id=f'req_{uuid.uuid4()}')
             state_manager = StateManager(user_context=user_context, database_manager=self.database_manager)
-            execution_engines[user_id] = UserExecutionEngine(user_context=user_context, websocket_manager=await get_websocket_manager(user_context=user_context), state_manager=state_manager)
+            execution_engines[user_id] = UserExecutionEngine(user_context=user_context, websocket_manager=get_websocket_manager(user_context=user_context), state_manager=state_manager)
 
         async def user_workflow(user_id: str, operation_count: int):
             """Execute a series of operations for a specific user."""

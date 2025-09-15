@@ -182,12 +182,40 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         self.golden_path_metrics = GoldenPathMetrics()
         self.test_contexts: Dict[str, GoldenPathTestContext] = {}
         self.active_websockets: List[websockets.ServerConnection] = []
-        self.add_cleanup(self._cleanup_websocket_connections)
+        self.add_cleanup(self._sync_cleanup_websocket_connections)
         logger.info(f'[U+1F31F] Golden Path test environment initialized')
         logger.info(f'[U+1F4E1] Backend URL: {self.backend_base_url}')
         logger.info(f'[U+1F50C] WebSocket URL: {self.websocket_base_url}')
         logger.info(f"[U+1F30D] Environment: {self.env.get('TEST_ENV', 'test')}")
         yield
+
+    def _sync_cleanup_websocket_connections(self):
+        """Synchronous cleanup for WebSocket connections."""
+        try:
+            # Use asyncio.run() for cleanup if there's an event loop already running
+            if self.active_websockets:
+                import asyncio
+                try:
+                    loop = asyncio.get_event_loop()
+                    if loop.is_running():
+                        # Schedule cleanup as task without awaiting
+                        loop.create_task(self._cleanup_websocket_connections())
+                    else:
+                        # Run cleanup synchronously
+                        asyncio.run(self._cleanup_websocket_connections())
+                except RuntimeError:
+                    # No event loop, clean up synchronously where possible
+                    for ws in self.active_websockets:
+                        try:
+                            if hasattr(ws, 'close') and not getattr(ws, 'closed', False):
+                                # For non-async cleanup, just clear references
+                                pass
+                        except Exception as e:
+                            logger.warning(f'Error during sync WebSocket cleanup: {e}')
+                finally:
+                    self.active_websockets.clear()
+        except Exception as e:
+            logger.warning(f'Error during WebSocket cleanup: {e}')
 
     async def _cleanup_websocket_connections(self):
         """Clean up any active WebSocket connections."""
@@ -495,7 +523,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.golden_path
     @pytest.mark.e2e
     @pytest.mark.priority_p0
-    async def test_complete_golden_path_success_flow(self, golden_path_services, mock_authenticated_user):
+    async def test_complete_golden_path_success_flow(self, setup_golden_path_environment, mock_authenticated_user):
         """
         Test 1: Complete Golden Path Success Flow - Full Happy Path with Real Business Scenario
         
@@ -510,18 +538,18 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         """
         logger.info('[U+1F31F] Starting Test 1: Complete Golden Path Success Flow')
         context = await self.create_authenticated_golden_path_context(scenario_name='ai_cost_optimization', user_email='enterprise_customer@fortune500.com')
-        websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
+        websocket = await self.establish_authenticated_websocket_connection(context, setup_golden_path_environment)
         assert websocket is not None, 'WebSocket connection must be established'
         assert context.connection_established, 'Connection context must be marked as established'
         thread_id = await self.send_golden_path_optimization_request(websocket, context)
         assert thread_id is not None, 'Thread ID must be generated'
         assert context.message_sent, 'Message must be marked as sent'
         assert context.thread_id == thread_id, 'Thread ID must match in context'
-        execution_results = await self.monitor_golden_path_execution(websocket, context, timeout=90.0, services=golden_path_services)
+        execution_results = await self.monitor_golden_path_execution(websocket, context, timeout=90.0, services=setup_golden_path_environment)
         assert execution_results['all_events_received'], f"All 5 mission-critical events must be received. Missing: {[k for k, v in execution_results['mission_critical_events'].items() if not v]}"
         assert execution_results['business_value_delivered'], f"Business value must be delivered. Insights: {len(execution_results['business_insights'])}, Cost optimizations: {len(execution_results['cost_optimizations'])}"
         assert execution_results['sla_compliance'], f'Performance SLA must be met. Connection: {self.golden_path_metrics.websocket_connection_time:.2f}s, First event: {self.golden_path_metrics.first_event_latency:.2f}s, Total: {self.golden_path_metrics.total_response_time:.2f}s'
-        persistence_results = await self.validate_golden_path_persistence(context, golden_path_services)
+        persistence_results = await self.validate_golden_path_persistence(context, setup_golden_path_environment)
         assert persistence_results['thread_persisted'], 'Thread must be persisted to database'
         assert persistence_results['messages_persisted'], 'Messages must be persisted'
         assert persistence_results['run_completed'], 'Run must be marked as completed'
@@ -543,7 +571,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.concurrent
     @pytest.mark.priority_p0
-    async def test_multiple_user_concurrent_golden_path(self, golden_path_services, mock_authenticated_user):
+    async def test_multiple_user_concurrent_golden_path(self, setup_golden_path_environment, mock_authenticated_user):
         """
         Test 2: Multiple User Concurrent Golden Path - 5+ Users Simultaneously Completing Full Journey
         
@@ -583,7 +611,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             assert len(set(thread_ids)) == concurrent_users, 'All thread IDs must be unique (user isolation)'
             logger.info(f' TARGET:  Monitoring {concurrent_users} Golden Path executions concurrently')
             concurrent_timeout = 150.0
-            monitoring_tasks = [self.monitor_golden_path_execution(websocket, context, timeout=concurrent_timeout, services=golden_path_services) for websocket, context in zip(concurrent_websockets, concurrent_contexts)]
+            monitoring_tasks = [self.monitor_golden_path_execution(websocket, context, timeout=concurrent_timeout, services=setup_golden_path_environment) for websocket, context in zip(concurrent_websockets, concurrent_contexts)]
             execution_results = await asyncio.gather(*monitoring_tasks, return_exceptions=True)
             successful_executions = []
             failed_executions = []
@@ -638,7 +666,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.resilience
     @pytest.mark.priority_p1
-    async def test_golden_path_with_service_interruptions(self, golden_path_services, mock_authenticated_user):
+    async def test_golden_path_with_service_interruptions(self, setup_golden_path_environment, mock_authenticated_user):
         """
         Test 3: Golden Path with Service Interruptions - Full Flow with Service Failures and Recovery
         
@@ -653,7 +681,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         """
         logger.info('[U+1F31F] Starting Test 3: Golden Path with Service Interruptions')
         context = await self.create_authenticated_golden_path_context(scenario_name='enterprise_scale_optimization', user_email='resilience_test@enterprise.com')
-        websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
+        websocket = await self.establish_authenticated_websocket_connection(context, setup_golden_path_environment)
         assert websocket is not None, 'Initial WebSocket connection must be established'
         thread_id = await self.send_golden_path_optimization_request(websocket, context)
         assert thread_id is not None, 'Thread ID must be generated before service interruption'
@@ -727,7 +755,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.performance
     @pytest.mark.priority_p1
-    async def test_golden_path_performance_validation(self, golden_path_services, mock_authenticated_user):
+    async def test_golden_path_performance_validation(self, setup_golden_path_environment, mock_authenticated_user):
         """
         Test 4: Golden Path Performance Validation - End-to-End Timing Requirements Met
         
@@ -747,7 +775,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         min_events_per_second = 0.1
         context = await self.create_authenticated_golden_path_context(scenario_name='ai_cost_optimization', user_email='performance_test@premium.com')
         connection_start = time.time()
-        websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
+        websocket = await self.establish_authenticated_websocket_connection(context, setup_golden_path_environment)
         connection_time = time.time() - connection_start
         assert connection_time <= max_connection_time, f'WebSocket connection must complete within {max_connection_time}s. Actual: {connection_time:.2f}s'
         logger.success(f' PASS:  Connection Performance: {connection_time:.2f}s (target: <{max_connection_time}s)')
@@ -824,7 +852,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.business_value
     @pytest.mark.priority_p0
-    async def test_golden_path_business_value_validation(self, golden_path_services, mock_authenticated_user):
+    async def test_golden_path_business_value_validation(self, setup_golden_path_environment, mock_authenticated_user):
         """
         Test 5: Golden Path Business Value Validation - Real Cost Optimization Scenario with Measurable ROI
         
@@ -843,7 +871,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         target_roi_ratio = 10.0
         context = await self.create_authenticated_golden_path_context(scenario_name='enterprise_scale_optimization', user_email='cfo@fortune100.com')
         context.expected_business_value = {'cost_savings_target': target_cost_savings, 'insights_count_target': target_insights_count, 'roi_target': target_roi_ratio, 'business_impact_areas': ['Model Selection Optimization', 'Usage Pattern Analysis', 'Infrastructure Scaling', 'Vendor Negotiation Strategies', 'Automated Cost Controls', 'Performance vs Cost Trade-offs']}
-        websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
+        websocket = await self.establish_authenticated_websocket_connection(context, setup_golden_path_environment)
         enterprise_request_message = {'type': 'user_message', 'content': 'I am the CFO of a Fortune 100 company spending $2.5M annually on AI services. Our current stack includes: OpenAI GPT-4 ($800K/year), Claude ($400K/year), custom model training on AWS ($600K/year), Pinecone vector DB ($200K/year), and various other AI tools ($500K/year). We serve 50,000+ employees and 100M+ customers through AI-powered features. Please provide a comprehensive cost optimization analysis with: 1. Specific dollar savings opportunities 2. Alternative vendor recommendations 3. Usage optimization strategies 4. Infrastructure scaling recommendations 5. ROI projections for each optimization 6. Risk assessment for each recommendation I need actionable insights that our engineering and procurement teams can implement within 90 days to achieve 20%+ cost reduction while maintaining or improving AI service quality.', 'thread_id': generate_thread_id(), 'run_id': UnifiedIDManager.generate_run_id(generate_thread_id()), 'user_id': context.authenticated_user.user_id, 'metadata': {'business_context': 'enterprise_cfo_optimization', 'urgency': 'high', 'budget_authority': '2500000', 'decision_timeline': '90_days'}}
         await websocket.send(json.dumps(enterprise_request_message))
         context.message_sent = True
@@ -987,7 +1015,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.cross_platform
     @pytest.mark.priority_p1
-    async def test_golden_path_cross_platform_validation(self, golden_path_services, mock_authenticated_user):
+    async def test_golden_path_cross_platform_validation(self, setup_golden_path_environment, mock_authenticated_user):
         """
         Test 6: Golden Path Cross-Platform Validation - Windows/Linux Compatibility for Full Flow
         
@@ -1016,9 +1044,9 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                 logger.info(f'[U+1F50C] Connection attempt {connection_attempts} on {current_platform}')
                 if config['use_asyncio_safe_patterns']:
                     logger.info('[U+1FA9F] Using Windows-safe asyncio patterns')
-                    websocket = await self._establish_windows_safe_websocket_connection(context, config['websocket_timeout'], golden_path_services)
+                    websocket = await self._establish_windows_safe_websocket_connection(context, config['websocket_timeout'], setup_golden_path_environment)
                 else:
-                    websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
+                    websocket = await self.establish_authenticated_websocket_connection(context, setup_golden_path_environment)
                 if websocket:
                     logger.success(f' PASS:  Platform connection successful on attempt {connection_attempts}')
                     break
@@ -1103,7 +1131,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.load_test
     @pytest.mark.priority_p1
-    async def test_golden_path_load_test_simulation(self, golden_path_services, mock_authenticated_user):
+    async def test_golden_path_load_test_simulation(self, setup_golden_path_environment, mock_authenticated_user):
         """
         Test 7: Golden Path Load Test Simulation - Enterprise-Scale Concurrent Usage
         
@@ -1148,7 +1176,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                     await asyncio.sleep(user_index * stagger_delay)
                     logger.info(f'[U+1F464] User {user_index + 1} starting Golden Path journey')
                     connection_start = time.time()
-                    websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
+                    websocket = await self.establish_authenticated_websocket_connection(context, setup_golden_path_environment)
                     connection_time = time.time() - connection_start
                     user_metrics['connection_time'] = connection_time
                     load_test_metrics['successful_connections'] += 1
@@ -1157,7 +1185,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                     if current_concurrent > load_test_metrics['concurrent_peak']:
                         load_test_metrics['concurrent_peak'] = current_concurrent
                     thread_id = await self.send_golden_path_optimization_request(websocket, context)
-                    execution_results = await self.monitor_golden_path_execution(websocket, context, timeout=120.0, services=golden_path_services)
+                    execution_results = await self.monitor_golden_path_execution(websocket, context, timeout=120.0, services=setup_golden_path_environment)
                     user_execution_time = time.time() - user_start_time
                     user_metrics['execution_time'] = user_execution_time
                     user_metrics['events_received'] = len(context.received_events)
@@ -1231,7 +1259,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.audit_trail
     @pytest.mark.priority_p1
-    async def test_golden_path_data_audit_trail(self, golden_path_services, mock_authenticated_user):
+    async def test_golden_path_data_audit_trail(self, setup_golden_path_environment, mock_authenticated_user):
         """
         Test 8: Golden Path Data Audit Trail - Complete Audit Logging and Compliance Validation
         
@@ -1254,7 +1282,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         audit_events.append({'event_type': 'user_authentication', 'timestamp': datetime.now(timezone.utc).isoformat(), 'user_id': context.authenticated_user.user_id, 'user_email': context.authenticated_user.email, 'authentication_method': 'jwt_token', 'compliance_context': 'golden_path_audit_test'})
         compliance_metrics['audit_events_captured'] += 1
         compliance_metrics['security_events'] += 1
-        websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
+        websocket = await self.establish_authenticated_websocket_connection(context, setup_golden_path_environment)
         audit_events.append({'event_type': 'websocket_connection', 'timestamp': datetime.now(timezone.utc).isoformat(), 'user_id': context.authenticated_user.user_id, 'connection_ip': '127.0.0.1', 'protocol': 'websocket', 'encryption': 'TLS', 'compliance_context': 'secure_connection_established'})
         compliance_metrics['audit_events_captured'] += 1
         compliance_metrics['security_events'] += 1

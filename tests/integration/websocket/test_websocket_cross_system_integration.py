@@ -21,6 +21,7 @@ from typing import Dict, Any, List, Optional, Union
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from concurrent.futures import ThreadPoolExecutor
 import time
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # Import all the WebSocket-related systems for integration testing
 from netra_backend.app.websocket_core.unified_manager import (
@@ -137,7 +138,7 @@ class TestIntegrationScenario1_AgentToWebSocketFlow:
     async def integration_setup(self):
         """Set up integration test environment."""
         # Create WebSocket manager
-        manager = UnifiedWebSocketManager()
+        manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         
         # Create mock WebSocket connection
         mock_websocket = Mock()
@@ -595,7 +596,7 @@ class TestIntegrationScenario3_ErrorHandlingAndRecovery:
     @pytest.fixture
     async def error_recovery_setup(self):
         """Set up error recovery integration test environment."""
-        manager = UnifiedWebSocketManager()
+        manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         
         # Create connections with different states for testing
         connections = {}
@@ -740,7 +741,7 @@ class TestIntegrationScenario4_PerformanceUnderLoad:
     async def test_high_volume_serialization_performance(self):
         """Test WebSocket serialization performance under high message volume."""
         # Create WebSocket manager
-        manager = UnifiedWebSocketManager()
+        manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         
         # Create multiple connections
         connections = []

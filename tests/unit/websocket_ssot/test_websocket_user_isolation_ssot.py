@@ -55,7 +55,7 @@ class TestWebSocketUserIsolationSSot(SSotAsyncTestCase, unittest.TestCase):
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         managers = []
         for user_context in self.test_users:
-            manager = await get_websocket_manager(user_context=user_context)
+            manager = get_websocket_manager(user_context=user_context)
             managers.append(manager)
             self.websocket_managers.append(manager)
         for i, manager_a in enumerate(managers):
@@ -77,7 +77,7 @@ class TestWebSocketUserIsolationSSot(SSotAsyncTestCase, unittest.TestCase):
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         user_managers = {}
         for user_context in self.test_users:
-            manager = await get_websocket_manager(user_context=user_context)
+            manager = get_websocket_manager(user_context=user_context)
             user_managers[user_context['user_id']] = manager
             self.websocket_managers.append(manager)
         for user_context in self.test_users:
@@ -105,7 +105,7 @@ class TestWebSocketUserIsolationSSot(SSotAsyncTestCase, unittest.TestCase):
         async def create_manager_for_user(user_context: Dict[str, Any]) -> tuple:
             """Create a WebSocket manager for a specific user."""
             try:
-                manager = await get_websocket_manager(user_context=user_context)
+                manager = get_websocket_manager(user_context=user_context)
                 return (user_context['user_id'], manager, None)
             except Exception as e:
                 return (user_context['user_id'], None, str(e))
@@ -144,7 +144,7 @@ class TestWebSocketUserIsolationSSot(SSotAsyncTestCase, unittest.TestCase):
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         user_managers = {}
         for user_context in self.test_users:
-            manager = await get_websocket_manager(user_context=user_context)
+            manager = get_websocket_manager(user_context=user_context)
             user_managers[user_context['user_id']] = manager
             self.websocket_managers.append(manager)
         test_messages = [{'user_id': self.test_users[0]['user_id'], 'message': 'User 0 secret message', 'thread_id': self.test_users[0]['thread_id']}, {'user_id': self.test_users[1]['user_id'], 'message': 'User 1 secret message', 'thread_id': self.test_users[1]['thread_id']}]
@@ -175,7 +175,7 @@ class TestWebSocketUserIsolationSSot(SSotAsyncTestCase, unittest.TestCase):
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         user_managers = {}
         for user_context in self.test_users:
-            manager = await get_websocket_manager(user_context=user_context)
+            manager = get_websocket_manager(user_context=user_context)
             user_managers[user_context['user_id']] = manager
             self.websocket_managers.append(manager)
         initial_manager_count = len(user_managers)
@@ -215,7 +215,7 @@ class TestWebSocketUserIsolationSSot(SSotAsyncTestCase, unittest.TestCase):
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         try:
-            manager_without_context = await get_websocket_manager(user_context=None)
+            manager_without_context = get_websocket_manager(user_context=None)
             if manager_without_context is not None:
                 self.websocket_managers.append(manager_without_context)
                 if hasattr(manager_without_context, 'is_default_manager'):
@@ -226,7 +226,7 @@ class TestWebSocketUserIsolationSSot(SSotAsyncTestCase, unittest.TestCase):
         for invalid_context in invalid_contexts:
             with self.subTest(context=invalid_context):
                 try:
-                    manager = await get_websocket_manager(user_context=invalid_context)
+                    manager = get_websocket_manager(user_context=invalid_context)
                     if manager is not None:
                         self.websocket_managers.append(manager)
                         self.logger.info(f'Factory handled invalid context safely: {invalid_context}')
@@ -236,7 +236,7 @@ class TestWebSocketUserIsolationSSot(SSotAsyncTestCase, unittest.TestCase):
                     self.logger.info(f'Factory correctly rejected invalid context {invalid_context}: {e}')
         valid_context = {'user_id': 'factory_test_user', 'thread_id': 'factory_test_thread'}
         try:
-            valid_manager = await get_websocket_manager(user_context=valid_context)
+            valid_manager = get_websocket_manager(user_context=valid_context)
             self.assertIsNotNone(valid_manager, 'Factory should create manager for valid context')
             self.websocket_managers.append(valid_manager)
         except Exception as e:

@@ -72,7 +72,7 @@ class TestWebSocketManagerImportPathSSOT(SSotBaseTestCase):
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
             user_context = {'user_id': 'event_test_user', 'thread_id': 'event_test_thread'}
-            manager1 = await get_websocket_manager(user_context=user_context)
+            manager1 = get_websocket_manager(user_context=user_context)
             manager2 = await create_websocket_manager(user_context=user_context)
             mock_websocket = MagicMock()
             if hasattr(manager1, 'add_connection'):

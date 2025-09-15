@@ -91,7 +91,7 @@ def fix_websocket_manager_access():
         async def test_websocket_factory():
             try:
                 # Use proper factory pattern
-                ws_manager = await get_websocket_manager()
+                ws_manager = get_websocket_manager()
                 print("✓ WebSocket manager created successfully via factory")
                 return True
             except Exception as e:

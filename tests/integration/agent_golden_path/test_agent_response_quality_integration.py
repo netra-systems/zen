@@ -63,7 +63,6 @@ except ImportError as e:
     UserExecutionContext = MagicMock
     ResponseQualityEvaluator = MagicMock
 
-
 class ResponseQualityLevel(Enum):
     """Response quality levels for evaluation."""
     EXCELLENT = "excellent"
@@ -71,7 +70,6 @@ class ResponseQualityLevel(Enum):
     ACCEPTABLE = "acceptable"
     POOR = "poor"
     UNACCEPTABLE = "unacceptable"
-
 
 @dataclass
 class ResponseQualityMetrics:
@@ -87,7 +85,6 @@ class ResponseQualityMetrics:
     business_value_delivered: bool = False
     user_satisfaction_predicted: float = 0.0
 
-
 @dataclass
 class BusinessScenario:
     """Business scenario for response quality testing."""
@@ -100,7 +97,6 @@ class BusinessScenario:
     quality_criteria: Dict[str, Any]
     success_indicators: List[str]
     minimum_quality_threshold: float = 0.7
-
 
 class TestAgentResponseQualityIntegration(SSotAsyncTestCase):
     """
@@ -182,9 +178,7 @@ class TestAgentResponseQualityIntegration(SSotAsyncTestCase):
 
     async def _initialize_real_response_quality_infrastructure(self):
         """Initialize real response quality infrastructure components."""
-        if not REAL_RESPONSE_COMPONENTS_AVAILABLE:
-            self._initialize_mock_response_quality_infrastructure()
-            return
+        if not REAL_RESPONSE_COMPONENTS_AVAILABLE:return
 
         try:
             # Initialize real agent factory for quality testing
@@ -201,8 +195,10 @@ class TestAgentResponseQualityIntegration(SSotAsyncTestCase):
                 )
 
         except Exception as e:
-            print(f"Failed to initialize real response quality infrastructure, using mocks: {e}")
-            self._initialize_mock_response_quality_infrastructure()
+
+            # CLAUDE.md COMPLIANCE: Tests must use real services only
+
+            raise RuntimeError(f"Failed to initialize real infrastructure: {e}") from e
 
     def _initialize_mock_response_quality_infrastructure(self):
         """Initialize mock response quality infrastructure for fallback testing."""

@@ -143,7 +143,7 @@ class TestWebSocketAgentEventIntegration(SSotAsyncTestCase):
     async def setup_real_websocket_infrastructure(self):
         """Initialize real WebSocket infrastructure components."""
         self.user_context = UserExecutionContext(user_id=self.user_id, thread_id=self.conversation_id, run_id=f'run_{uuid.uuid4()}', request_id=f'req_{uuid.uuid4()}')
-        self.websocket_manager = await get_websocket_manager(user_context=self.user_context)
+        self.websocket_manager = get_websocket_manager(user_context=self.user_context)
         await self.websocket_manager.initialize()
         self.websocket_bridge = AgentWebSocketBridge(websocket_manager=self.websocket_manager)
         self.agent_registry = AgentRegistry()
