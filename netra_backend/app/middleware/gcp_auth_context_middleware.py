@@ -21,6 +21,7 @@ from starlette.responses import Response
 
 from shared.types import StronglyTypedUserExecutionContext, UserID
 from netra_backend.app.services.monitoring.gcp_error_reporter import set_request_context, clear_request_context
+from netra_backend.app.auth_integration.auth import auth_client
 
 # Context variables for async-safe context propagation
 auth_user_context: ContextVar[Optional[StronglyTypedUserExecutionContext]] = ContextVar(
@@ -101,9 +102,25 @@ class GCPAuthContextMiddleware(BaseHTTPMiddleware):
                 jwt_token = auth_header[7:]  # Remove 'Bearer ' prefix
                 auth_context['jwt_token'] = jwt_token
                 
-                # Extract user information from JWT (simplified - in real implementation
-                # this would decode and validate the JWT)
-                auth_context.update(await self._decode_jwt_context(jwt_token))
+                # Delegate JWT validation to auth service (SSOT compliance)
+                # Issue #1195: Replace local JWT decoding with proper auth service delegation
+                try:
+                    jwt_validation_result = await auth_client.validate_token_jwt(jwt_token)
+                    if jwt_validation_result and jwt_validation_result.get('valid'):
+                        auth_context.update({
+                            'auth_method': 'jwt',
+                            'auth_timestamp': 'now',  # Would be actual timestamp from JWT
+                            'permissions': jwt_validation_result.get('permissions', []),
+                            'user_id': jwt_validation_result.get('user_id'),
+                            'user_email': jwt_validation_result.get('email')
+                        })
+                        logger.debug(f"JWT validation successful via auth service for user {jwt_validation_result.get('user_id', 'unknown')[:8]}...")
+                    else:
+                        logger.warning("JWT validation failed via auth service - using fallback context")
+                        auth_context.update({'auth_method': 'jwt_validation_failed'})
+                except Exception as e:
+                    logger.warning(f"Auth service JWT validation failed: {e} - using fallback context")
+                    auth_context.update({'auth_method': 'jwt_validation_error'})
             
             # Extract from session if available - DEFENSIVE SESSION ACCESS
             # CRITICAL FIX: Prevent SessionMiddleware crashes with try-catch and hasattr checks
@@ -239,26 +256,6 @@ class GCPAuthContextMiddleware(BaseHTTPMiddleware):
         
         return state_data
     
-    async def _decode_jwt_context(self, jwt_token: str) -> Dict[str, Any]:
-        """Decode JWT token to extract user context.
-        
-        Args:
-            jwt_token: JWT token string
-            
-        Returns:
-            Dict containing user context from JWT
-        """
-        try:
-            # In a real implementation, this would decode and validate the JWT
-            # For now, return placeholder context
-            return {
-                'auth_method': 'jwt',
-                'auth_timestamp': 'now',  # Would be actual timestamp
-                'permissions': []  # Would be extracted from JWT
-            }
-        except Exception as e:
-            logger.warning(f"Failed to decode JWT context: {e}")
-            return {'auth_method': 'jwt_decode_failed'}
     
     async def _build_user_execution_context(
         self, 
