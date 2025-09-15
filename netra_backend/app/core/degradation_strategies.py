@@ -222,7 +222,7 @@ class WebSocketDegradationStrategy(DegradationStrategy):
     
     async def _test_websocket_health(self) -> bool:
         """Test WebSocket manager health."""
-        from netra_backend.app.websocket_core.manager import websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import websocket_manager
         if websocket_manager and hasattr(websocket_manager, 'core'):
             stats = websocket_manager.get_stats()
             return stats.total_errors < 10  # Configurable threshold

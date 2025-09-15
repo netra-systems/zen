@@ -3972,6 +3972,84 @@ class _UnifiedWebSocketManagerImplementation:
             logger.error(f"Error during WebSocket manager shutdown: {e}")
             raise
 
+    # =================== GOLDEN PATH INTERFACE METHODS ===================
+    # These methods provide the interface expected by tests and Golden Path flows
+    
+    async def connect(self, user_id: str, websocket: Any, connection_id: str = None, thread_id: str = None) -> Any:
+        """
+        Connect a WebSocket for a user (Golden Path interface method).
+        
+        CRITICAL: This method provides the interface expected by Golden Path tests
+        and WebSocket validation suites. It's an alias to connect_user() to maintain
+        backward compatibility with existing test expectations.
+        
+        Business Value Justification:
+        - Segment: ALL (Free -> Enterprise)  
+        - Business Goal: Enable reliable Golden Path WebSocket connections
+        - Value Impact: Critical for $500K+ ARR chat functionality
+        - Revenue Impact: Foundation for all AI-powered user interactions
+        
+        Args:
+            user_id: User identifier for the connection
+            websocket: WebSocket instance to connect
+            connection_id: Optional connection ID to use
+            thread_id: Optional thread ID for connection
+            
+        Returns:
+            Connection information or connection ID
+        """
+        logger.debug(f"[Golden Path] Connecting user {user_id[:8]}... via connect() interface")
+        return await self.connect_user(user_id, websocket, connection_id, thread_id)
+    
+    async def disconnect(self, user_id: str, websocket: Any = None, code: int = 1000, reason: str = "Normal closure") -> None:
+        """
+        Disconnect a WebSocket for a user (Golden Path interface method).
+        
+        CRITICAL: This method provides the interface expected by Golden Path tests
+        and WebSocket validation suites. It's an alias to disconnect_user() to maintain
+        backward compatibility with existing test expectations.
+        
+        Business Value Justification:
+        - Segment: ALL (Free -> Enterprise)
+        - Business Goal: Enable clean WebSocket disconnections for Golden Path
+        - Value Impact: Critical for proper connection lifecycle management
+        - Revenue Impact: Prevents connection leaks affecting system stability
+        
+        Args:
+            user_id: User identifier for the disconnection
+            websocket: Optional WebSocket instance to disconnect
+            code: WebSocket close code (default: 1000 for normal closure)
+            reason: Reason for disconnection
+        """
+        logger.debug(f"[Golden Path] Disconnecting user {user_id[:8]}... via disconnect() interface")
+        if websocket:
+            await self.disconnect_user(user_id, websocket, code, reason)
+        else:
+            # Disconnect all connections for the user if no specific websocket provided
+            await self.handle_disconnection(user_id, websocket)
+    
+    async def emit_agent_event(self, user_id: Union[str, UserID], event_type: str, data: Dict[str, Any]) -> None:
+        """
+        Emit agent event to user connections (Golden Path interface method).
+        
+        CRITICAL: This method provides the interface expected by Golden Path tests
+        and agent execution flows. It's an alias to send_agent_event() to maintain
+        backward compatibility with existing test and agent execution expectations.
+        
+        Business Value Justification:
+        - Segment: ALL (Free -> Enterprise)
+        - Business Goal: Enable real-time agent progress updates (90% of platform value)
+        - Value Impact: Critical for chat functionality and user experience
+        - Revenue Impact: Core method for $500K+ ARR AI interaction delivery
+        
+        Args:
+            user_id: Target user ID for the event
+            event_type: Type of agent event (agent_started, agent_thinking, tool_executing, etc.)
+            data: Event payload data
+        """
+        logger.debug(f"[Golden Path] Emitting agent event '{event_type}' to user {str(user_id)[:8]}... via emit_agent_event() interface")
+        await self.send_agent_event(user_id, event_type, data)
+
 
 # SECURITY FIX: Replace singleton with factory pattern
 #  ALERT:  SECURITY FIX: Singleton pattern completely removed to prevent multi-user data leakage

@@ -457,10 +457,13 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                     websocket_client_id=str(uuid.uuid4())
                 )
                 
+                # Create AgentInstanceFactory with the user context
+                agent_factory = AgentInstanceFactory(user_context)
+                
                 # Create UserExecutionEngine with the context
                 engine = UserExecutionEngine(
                     context=user_context,
-                    agent_factory=None,  # Using minimal setup for load test
+                    agent_factory=agent_factory,
                     websocket_emitter=websocket  # The WebSocket simulator
                 )
                 creation_time = time.perf_counter() - creation_start

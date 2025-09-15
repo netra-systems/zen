@@ -30,7 +30,7 @@ from netra_backend.app.admin.corpus.unified_corpus_admin import (
 if TYPE_CHECKING:
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     from netra_backend.app.llm.llm_manager import LLMManager
-    from netra_backend.app.websocket_core import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 
 
 # Deprecated class mappings

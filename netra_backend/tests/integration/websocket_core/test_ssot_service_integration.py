@@ -31,7 +31,7 @@ from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.websocket_core.factory import create_websocket_manager
 try:
     from netra_backend.app.agents.base_agent import BaseAgent
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     from netra_backend.app.agents.registry import AgentRegistry
     AGENT_INTEGRATION_AVAILABLE = True
 except ImportError as e:

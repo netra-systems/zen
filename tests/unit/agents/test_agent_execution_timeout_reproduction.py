@@ -23,7 +23,7 @@ from netra_backend.app.core.windows_asyncio_safe import windows_safe_sleep, wind
 try:
     from netra_backend.app.agents.base_agent import BaseAgent
     from netra_backend.app.agents.agent_registry import AgentRegistry
-    from netra_backend.app.execution.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 except ImportError:
     BaseAgent = Mock
     AgentRegistry = Mock

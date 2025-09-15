@@ -37,20 +37,9 @@ class TestExecutionEngineConsolidationIntegration(SSotAsyncTestCase):
         """Set up test fixtures for integration testing."""
         super().setup_method(method)
 
-        # Test user contexts for isolation validation
-        self.test_user_context_1 = UserExecutionContext(
-            user_id=f"user_{uuid.uuid4()}",
-            thread_id=f"thread_{uuid.uuid4()}",
-            run_id=f"run_{uuid.uuid4()}",
-            request_id=f"req_{uuid.uuid4()}"
-        )
-
-        self.test_user_context_2 = UserExecutionContext(
-            user_id=f"user_{uuid.uuid4()}",
-            thread_id=f"thread_{uuid.uuid4()}", 
-            run_id=f"run_{uuid.uuid4()}",
-            request_id=f"req_{uuid.uuid4()}"
-        )
+        # Test user contexts for isolation validation using SSOT helper
+        self.test_user_context_1 = self.create_test_user_execution_context()
+        self.test_user_context_2 = self.create_test_user_execution_context()
 
         # Track WebSocket events for validation
         self.websocket_events = []

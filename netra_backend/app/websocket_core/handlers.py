@@ -1639,7 +1639,7 @@ class MessageRouter:
                 handler_stats[handler_name] = {"status": "active"}
         
         stats["handler_stats"] = handler_stats
-        stats["handler_order"] = self.get_handler_order()  # Use consistent format with get_handler_order()
+        stats["handler_order"] = self.get_handler_order()  # Consistent format: List[str] of handler class names
         stats["handler_count"] = len(self.handlers)
         
         # CRITICAL FIX: Add startup grace period status

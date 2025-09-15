@@ -7,11 +7,11 @@ import asyncio
 import sys
 from pathlib import Path
 import pytest
-import jwt
 from datetime import datetime, timedelta, timezone
 from shared.isolated_environment import IsolatedEnvironment
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from tests.utils.asyncio_test_utils import AsyncioTestUtils, EventLoopTestError
+from test_framework.ssot.auth_test_helpers import SSOTAuthTestHelper
 
 class TestJWTAsyncioSafety:
     """Test JWT operations for asyncio safety"""

@@ -35,7 +35,7 @@ except ImportError:
     RequestID = str
 try:
     from netra_backend.app.agents.agent_registry import AgentRegistry
-    from netra_backend.app.execution.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     from netra_backend.app.websocket.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.core.tool_dispatcher import ToolDispatcher
 except ImportError:

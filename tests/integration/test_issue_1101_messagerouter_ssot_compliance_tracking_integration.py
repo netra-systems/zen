@@ -20,9 +20,10 @@ import json
 from typing import Dict, Any, List
 from unittest.mock import Mock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.core.message_router import MessageRouter as ProxyMessageRouter
+# FIXED: Migrated to canonical imports for Issue #1181 SSOT consolidation
 from netra_backend.app.websocket_core.handlers import MessageRouter as CanonicalMessageRouter
-from netra_backend.app.services.message_router import MessageRouter as ServicesMessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter as ProxyMessageRouter  # Now canonical
+from netra_backend.app.websocket_core.handlers import MessageRouter as ServicesMessageRouter  # Now canonical
 from netra_backend.app.websocket_core.handlers import get_message_router
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager

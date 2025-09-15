@@ -726,6 +726,52 @@ class SSotBaseTestCase:
                 f"E2E authentication helper not available: {e}. "
                 f"Ensure test_framework.ssot.e2e_auth_helper is accessible."
             )
+    
+    def create_test_user_execution_context(self, **kwargs):
+        """
+        Create UserExecutionContext for integration and unit tests.
+        
+        This method provides SSOT compatibility for tests that need UserExecutionContext
+        instances with proper validation and enterprise-grade user isolation.
+        
+        Args:
+            **kwargs: Optional arguments to override defaults
+                     user_id: Custom user ID (generates UUID if not provided)
+                     thread_id: Custom thread ID (generates UUID if not provided)
+                     run_id: Custom run ID (generates UUID if not provided)
+                     websocket_client_id: Custom WebSocket connection ID
+                     Other UserExecutionContext fields
+        
+        Returns:
+            UserExecutionContext: Created user execution context with proper isolation
+            
+        Example:
+            context = self.create_test_user_execution_context()
+            context_with_websocket = self.create_test_user_execution_context(
+                websocket_client_id="test-connection-123"
+            )
+        """
+        try:
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            import uuid
+            
+            # Set up defaults with valid UUIDs that pass security validation
+            defaults = {
+                'user_id': f"user_{uuid.uuid4()}",
+                'thread_id': f"thread_{uuid.uuid4()}",
+                'run_id': f"run_{uuid.uuid4()}",
+            }
+            
+            # Merge user provided kwargs with defaults
+            context_args = {**defaults, **kwargs}
+            
+            return UserExecutionContext(**context_args)
+            
+        except ImportError as e:
+            raise ImportError(
+                f"UserExecutionContext not available: {e}. "
+                f"Ensure netra_backend.app.services.user_execution_context is accessible."
+            )
 
 
 class SSotAsyncTestCase(SSotBaseTestCase):

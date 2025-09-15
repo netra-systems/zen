@@ -78,7 +78,7 @@ class TestExecutionEngineSSotMigrationValidationStaging(SSotAsyncTestCase):
             print(f'Staging WebSocket infrastructure note: {e}')
         agent_infrastructure_available = False
         try:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             agent_infrastructure_available = True
         except ImportError as e:
             print(f'Staging agent infrastructure note: {e}')

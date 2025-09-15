@@ -1287,15 +1287,17 @@ class AgentWebSocketBridge(MonitorableComponent):
     # ===================== MESSAGE HANDLING INTERFACE =====================
     # CRITICAL: Interface required by AgentBridgeHandler for WebSocket message routing
 
-    async def handle_message(self, message_dict: Dict[str, Any]) -> bool:
+    async def handle_message(self, *args, **kwargs) -> bool:
         """
         Handle incoming WebSocket messages and route them to appropriate agent execution.
 
+        ISSUE #1199 PHASE 4: This method supports multiple interface signatures for compatibility.
+        
+        Signature 1 (Internal): handle_message(message_dict: Dict[str, Any])
+        Signature 2 (Interface): handle_message(user_id: str, websocket, message)
+
         This method provides the interface expected by AgentBridgeHandler to process
         incoming WebSocket messages and coordinate agent execution with proper event emission.
-
-        Args:
-            message_dict: Dictionary containing message data with 'type' and other fields
 
         Returns:
             bool: True if message was handled successfully, False otherwise
@@ -1310,6 +1312,27 @@ class AgentWebSocketBridge(MonitorableComponent):
         - 'run_agent': Execute agent with message content
         - 'agent_message': Process agent message
         - Other message types gracefully handled with logging
+        """
+        # Handle different method signatures for compatibility
+        if len(args) == 1 and isinstance(args[0], dict):
+            # Signature 1: handle_message(message_dict)
+            return await self._handle_message_dict(args[0])
+        elif len(args) == 3:
+            # Signature 2: handle_message(user_id, websocket, message)
+            return await self._handle_message_interface(args[0], args[1], args[2])
+        else:
+            logger.error(f"Invalid handle_message signature: {len(args)} args, {len(kwargs)} kwargs")
+            return False
+    
+    async def _handle_message_dict(self, message_dict: Dict[str, Any]) -> bool:
+        """
+        Internal handler for dictionary-based message processing.
+        
+        Args:
+            message_dict: Dictionary containing message data with 'type' and other fields
+            
+        Returns:
+            bool: True if message was handled successfully, False otherwise
         """
         try:
             message_type = message_dict.get('type', 'unknown')
@@ -1337,6 +1360,51 @@ class AgentWebSocketBridge(MonitorableComponent):
         except Exception as e:
             logger.error(f"Error handling WebSocket message in AgentWebSocketBridge: {e}")
             logger.error(f"Message content: {message_dict}")
+            return False
+    
+    async def _handle_message_interface(self, user_id: str, websocket, message) -> bool:
+        """
+        Interface handler for test compatibility and interface contracts.
+        
+        ISSUE #1199 PHASE 4: This method handles the interface signature expected by tests:
+        handle_message(user_id, websocket, message)
+        
+        Args:
+            user_id: User ID for the message
+            websocket: WebSocket connection object  
+            message: WebSocketMessage or message object with data
+            
+        Returns:
+            bool: True if message was handled successfully, False otherwise
+        """
+        try:
+            # Convert interface parameters to internal message format
+            if hasattr(message, 'data') and hasattr(message, 'type'):
+                # Handle WebSocketMessage object
+                message_dict = {
+                    'type': message.type.value if hasattr(message.type, 'value') else str(message.type),
+                    'user_id': user_id,
+                    'data': message.data,
+                    'run_id': getattr(message, 'run_id', None)
+                }
+                # Extract message content from data
+                if isinstance(message.data, dict):
+                    message_dict.update(message.data)
+                    message_dict['content'] = message.data.get('user_request', message.data.get('content', ''))
+            else:
+                # Handle dictionary message
+                message_dict = {
+                    'type': 'run_agent',  # Default type for compatibility
+                    'user_id': user_id,
+                    'content': str(message) if isinstance(message, str) else str(message.get('content', message)),
+                    'data': message if isinstance(message, dict) else {'content': str(message)}
+                }
+            
+            # Route to internal dictionary handler
+            return await self._handle_message_dict(message_dict)
+            
+        except Exception as e:
+            logger.error(f"Error in interface handle_message: {e}")
             return False
 
     async def _handle_agent_execution_message(self, message_dict: Dict[str, Any], content: str, user_id: Optional[str], thread_id: Optional[str]) -> bool:

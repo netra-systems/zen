@@ -36,7 +36,8 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, create_a
 from test_framework.ssot.websocket_golden_path_helpers import WebSocketGoldenPathHelper, GoldenPathTestConfig
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 from shared.types.execution_types import StronglyTypedUserExecutionContext
-from netra_backend.app.websocket_core import WebSocketManager, MessageRouter, create_server_message, create_error_message, MessageType, WebSocketConfig
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core import MessageRouter, create_server_message, create_error_message, MessageType, WebSocketConfig
 from netra_backend.app.websocket_core.utils import is_websocket_connected, is_websocket_connected_and_ready
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 

@@ -215,6 +215,7 @@ markers = [
     # Final missing markers (last batch)
     "authentication: Authentication tests",
     "flow_context: Flow context tests",
+    "auth_breakdown: Authentication breakdown and failure tests",
     "issue_1116: Issue #1116 specific tests",
     "issue_1186_phase3: Issue #1186 UserExecutionEngine SSOT consolidation Phase 3 tests",
     "issue_1197: Issue #1197 specific tests",
