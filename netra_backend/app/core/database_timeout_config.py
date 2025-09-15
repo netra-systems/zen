@@ -11,10 +11,215 @@ Business Value Justification (BVJ):
 - Strategic Impact: Prevents staging deployment failures and enables reliable CI/CD
 """
 
-from typing import Dict
+from typing import Dict, Optional, Callable, Any
 import logging
+import time
+import threading
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from collections import deque
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class ConnectionMetrics:
+    """Container for database connection performance metrics."""
+    connection_attempts: int = 0
+    successful_connections: int = 0
+    failed_connections: int = 0
+    total_connection_time: float = 0.0
+    max_connection_time: float = 0.0
+    min_connection_time: float = float('inf')
+    last_connection_time: Optional[float] = None
+    timeout_violations: int = 0
+    recent_connection_times: deque = field(default_factory=lambda: deque(maxlen=100))
+    first_recorded: Optional[datetime] = None
+    last_updated: Optional[datetime] = None
+
+    def add_connection_attempt(self, connection_time: float, success: bool, timeout_threshold: float) -> None:
+        """Record a new connection attempt with timing and success status."""
+        now = datetime.now()
+        if self.first_recorded is None:
+            self.first_recorded = now
+        self.last_updated = now
+
+        self.connection_attempts += 1
+        self.last_connection_time = connection_time
+        self.recent_connection_times.append(connection_time)
+        self.total_connection_time += connection_time
+
+        if connection_time > self.max_connection_time:
+            self.max_connection_time = connection_time
+        if connection_time < self.min_connection_time:
+            self.min_connection_time = connection_time
+
+        if success:
+            self.successful_connections += 1
+        else:
+            self.failed_connections += 1
+
+        if connection_time > timeout_threshold:
+            self.timeout_violations += 1
+
+    def get_average_connection_time(self) -> float:
+        """Calculate average connection time across all attempts."""
+        if self.connection_attempts == 0:
+            return 0.0
+        return self.total_connection_time / self.connection_attempts
+
+    def get_recent_average_connection_time(self, window_size: int = 20) -> float:
+        """Calculate average connection time for recent attempts."""
+        if not self.recent_connection_times:
+            return 0.0
+        recent = list(self.recent_connection_times)[-window_size:]
+        return sum(recent) / len(recent)
+
+    def get_success_rate(self) -> float:
+        """Calculate connection success rate as percentage."""
+        if self.connection_attempts == 0:
+            return 0.0
+        return (self.successful_connections / self.connection_attempts) * 100.0
+
+    def get_timeout_violation_rate(self) -> float:
+        """Calculate timeout violation rate as percentage."""
+        if self.connection_attempts == 0:
+            return 0.0
+        return (self.timeout_violations / self.connection_attempts) * 100.0
+
+
+class DatabaseConnectionMonitor:
+    """Monitor and track database connection performance across environments."""
+
+    def __init__(self):
+        self._metrics_by_environment: Dict[str, ConnectionMetrics] = {}
+        self._lock = threading.Lock()
+        self._alert_callbacks: list[Callable[[str, Dict[str, Any]], None]] = []
+
+    def register_alert_callback(self, callback: Callable[[str, Dict[str, Any]], None]) -> None:
+        """Register a callback function for connection performance alerts."""
+        self._alert_callbacks.append(callback)
+
+    def record_connection_attempt(self, environment: str, connection_time: float,
+                                success: bool, timeout_config: Dict[str, float]) -> None:
+        """Record a database connection attempt with timing and outcome."""
+        with self._lock:
+            if environment not in self._metrics_by_environment:
+                self._metrics_by_environment[environment] = ConnectionMetrics()
+
+            metrics = self._metrics_by_environment[environment]
+            timeout_threshold = timeout_config.get('connection_timeout', 30.0)
+
+            metrics.add_connection_attempt(connection_time, success, timeout_threshold)
+
+            # Check for alert conditions
+            self._check_alert_conditions(environment, metrics, timeout_config)
+
+    def _check_alert_conditions(self, environment: str, metrics: ConnectionMetrics,
+                               timeout_config: Dict[str, float]) -> None:
+        """Check if current metrics warrant performance alerts."""
+        alerts = []
+
+        # Alert on high connection times (>80% of timeout threshold)
+        connection_timeout = timeout_config.get('connection_timeout', 30.0)
+        warning_threshold = connection_timeout * 0.8  # 80% of timeout
+        critical_threshold = connection_timeout * 0.95  # 95% of timeout
+
+        if metrics.last_connection_time:
+            if metrics.last_connection_time > critical_threshold:
+                alerts.append({
+                    'level': 'critical',
+                    'type': 'connection_time',
+                    'message': f'Connection time {metrics.last_connection_time:.2f}s exceeds critical threshold {critical_threshold:.2f}s',
+                    'value': metrics.last_connection_time,
+                    'threshold': critical_threshold
+                })
+            elif metrics.last_connection_time > warning_threshold:
+                alerts.append({
+                    'level': 'warning',
+                    'type': 'connection_time',
+                    'message': f'Connection time {metrics.last_connection_time:.2f}s exceeds warning threshold {warning_threshold:.2f}s',
+                    'value': metrics.last_connection_time,
+                    'threshold': warning_threshold
+                })
+
+        # Alert on low success rate (if we have enough samples)
+        if metrics.connection_attempts >= 10:
+            success_rate = metrics.get_success_rate()
+            if success_rate < 90.0:
+                alerts.append({
+                    'level': 'critical' if success_rate < 80.0 else 'warning',
+                    'type': 'success_rate',
+                    'message': f'Connection success rate {success_rate:.1f}% is below threshold',
+                    'value': success_rate,
+                    'threshold': 90.0
+                })
+
+        # Alert on timeout violation rate
+        if metrics.connection_attempts >= 5:
+            violation_rate = metrics.get_timeout_violation_rate()
+            if violation_rate > 20.0:
+                alerts.append({
+                    'level': 'critical' if violation_rate > 40.0 else 'warning',
+                    'type': 'timeout_violations',
+                    'message': f'Timeout violation rate {violation_rate:.1f}% is above threshold',
+                    'value': violation_rate,
+                    'threshold': 20.0
+                })
+
+        # Fire alerts
+        for alert in alerts:
+            for callback in self._alert_callbacks:
+                try:
+                    callback(environment, alert)
+                except Exception as e:
+                    logger.error(f"Alert callback failed: {e}")
+
+    def get_environment_metrics(self, environment: str) -> Optional[ConnectionMetrics]:
+        """Get connection metrics for a specific environment."""
+        with self._lock:
+            return self._metrics_by_environment.get(environment)
+
+    def get_all_metrics(self) -> Dict[str, ConnectionMetrics]:
+        """Get connection metrics for all environments."""
+        with self._lock:
+            return dict(self._metrics_by_environment)
+
+    def get_performance_summary(self, environment: str) -> Dict[str, Any]:
+        """Get a comprehensive performance summary for an environment."""
+        metrics = self.get_environment_metrics(environment)
+        if not metrics:
+            return {'environment': environment, 'status': 'no_data'}
+
+        return {
+            'environment': environment,
+            'connection_attempts': metrics.connection_attempts,
+            'success_rate': metrics.get_success_rate(),
+            'average_connection_time': metrics.get_average_connection_time(),
+            'recent_average_connection_time': metrics.get_recent_average_connection_time(),
+            'max_connection_time': metrics.max_connection_time,
+            'min_connection_time': metrics.min_connection_time if metrics.min_connection_time != float('inf') else 0.0,
+            'timeout_violation_rate': metrics.get_timeout_violation_rate(),
+            'last_connection_time': metrics.last_connection_time,
+            'monitoring_duration_hours': (
+                (metrics.last_updated - metrics.first_recorded).total_seconds() / 3600
+                if metrics.first_recorded and metrics.last_updated else 0
+            ),
+            'status': 'healthy' if metrics.get_success_rate() > 90 and metrics.get_timeout_violation_rate() < 10 else 'degraded'
+        }
+
+    def reset_metrics(self, environment: Optional[str] = None) -> None:
+        """Reset metrics for specified environment or all environments."""
+        with self._lock:
+            if environment:
+                if environment in self._metrics_by_environment:
+                    del self._metrics_by_environment[environment]
+            else:
+                self._metrics_by_environment.clear()
+
+
+# Global connection monitor instance
+_connection_monitor = DatabaseConnectionMonitor()
 
 
 def get_database_timeout_config(environment: str) -> Dict[str, float]:
@@ -181,16 +386,198 @@ def get_progressive_retry_config(environment: str) -> Dict[str, any]:
 
 def log_timeout_configuration(environment: str) -> None:
     """Log the current timeout configuration for debugging.
-    
+
     Args:
         environment: Environment name
     """
     timeout_config = get_database_timeout_config(environment)
     cloud_sql_config = get_cloud_sql_optimized_config(environment)
     retry_config = get_progressive_retry_config(environment)
-    
+
     logger.info(f"Database Configuration Summary for {environment}:")
     logger.info(f"  Timeout Configuration: {timeout_config}")
     logger.info(f"  Cloud SQL Optimized: {is_cloud_sql_environment(environment)}")
     logger.info(f"  Pool Configuration: {cloud_sql_config['pool_config']}")
     logger.info(f"  Retry Configuration: {retry_config}")
+
+
+def get_connection_monitor() -> DatabaseConnectionMonitor:
+    """Get the global database connection monitor instance.
+
+    Returns:
+        DatabaseConnectionMonitor instance for recording and tracking connection metrics
+    """
+    return _connection_monitor
+
+
+def monitor_connection_attempt(environment: str, connection_time: float, success: bool) -> None:
+    """Helper function to monitor a database connection attempt.
+
+    Args:
+        environment: Environment name (development, test, staging, production)
+        connection_time: Time taken for connection in seconds
+        success: Whether the connection was successful
+    """
+    timeout_config = get_database_timeout_config(environment)
+    _connection_monitor.record_connection_attempt(environment, connection_time, success, timeout_config)
+
+
+def get_connection_performance_summary(environment: str) -> Dict[str, Any]:
+    """Get comprehensive connection performance summary for an environment.
+
+    Args:
+        environment: Environment name
+
+    Returns:
+        Dictionary containing performance metrics and status
+    """
+    return _connection_monitor.get_performance_summary(environment)
+
+
+def register_connection_alert_handler(callback: Callable[[str, Dict[str, Any]], None]) -> None:
+    """Register a callback function to handle connection performance alerts.
+
+    Args:
+        callback: Function that takes (environment, alert_data) and handles the alert
+    """
+    _connection_monitor.register_alert_callback(callback)
+
+
+def check_vpc_connector_performance(environment: str) -> Dict[str, Any]:
+    """Check VPC connector performance for Cloud SQL environments.
+
+    This function provides baseline performance metrics for VPC connector
+    connections to help identify network-level issues.
+
+    Args:
+        environment: Environment name
+
+    Returns:
+        Dictionary with VPC connector performance assessment
+    """
+    if not is_cloud_sql_environment(environment):
+        return {
+            'environment': environment,
+            'vpc_connector_required': False,
+            'status': 'not_applicable',
+            'message': 'VPC connector monitoring only applies to Cloud SQL environments'
+        }
+
+    metrics = _connection_monitor.get_environment_metrics(environment)
+    timeout_config = get_database_timeout_config(environment)
+
+    if not metrics or metrics.connection_attempts == 0:
+        return {
+            'environment': environment,
+            'vpc_connector_required': True,
+            'status': 'no_data',
+            'message': 'No connection attempts recorded yet',
+            'baseline_timeout': timeout_config.get('connection_timeout', 25.0)
+        }
+
+    # VPC connector baseline expectations for Cloud SQL
+    vpc_baseline = {
+        'staging': {
+            'expected_avg_time': 5.0,    # 5s average for staging
+            'warning_threshold': 12.0,   # 80% of 15s timeout
+            'critical_threshold': 20.0,  # Close to 25s timeout
+        },
+        'production': {
+            'expected_avg_time': 8.0,    # 8s average for production
+            'warning_threshold': 48.0,   # 80% of 60s timeout
+            'critical_threshold': 57.0,  # 95% of 60s timeout
+        }
+    }
+
+    baseline = vpc_baseline.get(environment.lower(), vpc_baseline['staging'])
+    avg_time = metrics.get_average_connection_time()
+    recent_avg = metrics.get_recent_average_connection_time()
+
+    # Assess VPC connector performance
+    status = 'healthy'
+    issues = []
+
+    if avg_time > baseline['critical_threshold']:
+        status = 'critical'
+        issues.append(f"Average connection time {avg_time:.2f}s exceeds critical threshold {baseline['critical_threshold']}s")
+    elif avg_time > baseline['warning_threshold']:
+        status = 'warning'
+        issues.append(f"Average connection time {avg_time:.2f}s exceeds warning threshold {baseline['warning_threshold']}s")
+
+    if recent_avg > avg_time * 1.5:
+        status = 'degrading' if status == 'healthy' else status
+        issues.append(f"Recent performance degradation: {recent_avg:.2f}s vs {avg_time:.2f}s average")
+
+    if metrics.get_timeout_violation_rate() > 10.0:
+        status = 'critical' if status != 'critical' else status
+        issues.append(f"High timeout violation rate: {metrics.get_timeout_violation_rate():.1f}%")
+
+    return {
+        'environment': environment,
+        'vpc_connector_required': True,
+        'status': status,
+        'connection_attempts': metrics.connection_attempts,
+        'average_connection_time': avg_time,
+        'recent_average_connection_time': recent_avg,
+        'expected_baseline': baseline['expected_avg_time'],
+        'warning_threshold': baseline['warning_threshold'],
+        'critical_threshold': baseline['critical_threshold'],
+        'timeout_violation_rate': metrics.get_timeout_violation_rate(),
+        'performance_issues': issues,
+        'recommendations': _get_vpc_performance_recommendations(status, issues, environment)
+    }
+
+
+def _get_vpc_performance_recommendations(status: str, issues: list, environment: str) -> list:
+    """Get recommendations for VPC connector performance issues."""
+    recommendations = []
+
+    if status == 'critical':
+        recommendations.extend([
+            "Immediately check VPC connector status and configuration",
+            "Verify Cloud SQL instance is not under heavy load",
+            "Check network connectivity between VPC and Cloud SQL",
+            "Consider increasing timeout thresholds if this is persistent"
+        ])
+    elif status == 'warning':
+        recommendations.extend([
+            "Monitor VPC connector performance over next hour",
+            "Check Cloud SQL instance metrics for resource utilization",
+            "Review recent network changes or deployments"
+        ])
+    elif status == 'degrading':
+        recommendations.extend([
+            "Investigate recent performance degradation",
+            "Check for changes in Cloud SQL instance configuration",
+            "Monitor for continued degradation patterns"
+        ])
+
+    if any('timeout violation' in issue.lower() for issue in issues):
+        recommendations.append(f"Consider reviewing timeout configuration for {environment} environment")
+
+    return recommendations
+
+
+def log_connection_performance_summary(environment: str) -> None:
+    """Log a comprehensive connection performance summary for debugging.
+
+    Args:
+        environment: Environment name
+    """
+    summary = get_connection_performance_summary(environment)
+    vpc_performance = check_vpc_connector_performance(environment)
+
+    logger.info(f"Connection Performance Summary for {environment}:")
+    logger.info(f"  Status: {summary.get('status', 'unknown')}")
+    logger.info(f"  Connection Attempts: {summary.get('connection_attempts', 0)}")
+    logger.info(f"  Success Rate: {summary.get('success_rate', 0):.1f}%")
+    logger.info(f"  Average Connection Time: {summary.get('average_connection_time', 0):.2f}s")
+    logger.info(f"  Recent Average: {summary.get('recent_average_connection_time', 0):.2f}s")
+    logger.info(f"  Timeout Violations: {summary.get('timeout_violation_rate', 0):.1f}%")
+
+    if vpc_performance['vpc_connector_required']:
+        logger.info(f"  VPC Connector Status: {vpc_performance['status']}")
+        if vpc_performance.get('performance_issues'):
+            logger.warning(f"  VPC Performance Issues: {'; '.join(vpc_performance['performance_issues'])}")
+        if vpc_performance.get('recommendations'):
+            logger.info(f"  Recommendations: {'; '.join(vpc_performance['recommendations'])}")
