@@ -191,6 +191,7 @@ class TestAgentExecutionFlowIntegration(SSotAsyncTestCase):
             
         except Exception as e:
             # Fallback to mock infrastructure if real components fail
+            self._initialize_mock_infrastructure()
     
     def _initialize_mock_infrastructure(self):
         """Initialize mock infrastructure for testing when real components unavailable."""
