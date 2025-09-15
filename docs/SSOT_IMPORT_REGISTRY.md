@@ -65,6 +65,10 @@ from netra_backend.app.services.user_execution_context import InvalidContextErro
 from netra_backend.app.services.user_execution_context import managed_user_context, validate_user_context
 from netra_backend.app.services.user_execution_context import create_isolated_execution_context
 
+# Agent Execution Context SSOT (FIXED 2025-09-15 - IMPORT ERROR RESOLVED)
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext  # CANONICAL: Primary implementation (331+ files)
+from netra_backend.app.services.user_execution_context import AgentExecutionContext  # COMPATIBILITY: Lazy import alias for test compatibility
+
 # WebSocket Agent Bridge (CRITICAL - VERIFIED 2025-09-11)
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 

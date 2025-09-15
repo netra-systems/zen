@@ -105,7 +105,7 @@ class TestSSOTEnterpriseComplianceStaging(SSotAsyncTestCase):
             user_compliance_result = ComplianceTestResult(scenario=f'hipaa_{user_id}', compliance_type='HIPAA')
             try:
                 hipaa_headers = {**compliance_auth_headers, 'X-HIPAA-Compliance': 'required', 'X-PHI-Protection': 'enabled', 'X-Healthcare-User': user_id}
-                async with websockets.connect(websocket_url, extra_headers=hipaa_headers, timeout=25) as websocket:
+                async with websockets.connect(websocket_url, additional_headers=hipaa_headers, timeout=25) as websocket:
                     hipaa_connect = {'type': 'connect', 'user_id': user_id, 'compliance_level': 'HIPAA', 'phi_protection': True, 'audit_required': True, 'hipaa_metadata': {'covered_entity': 'Healthcare Provider Test', 'business_associate': 'Netra Apex Platform', 'phi_types': hipaa_scenario.sensitive_data_types}}
                     await websocket.send(json.dumps(hipaa_connect))
                     connect_response = json.loads(await websocket.recv())
@@ -175,7 +175,7 @@ class TestSSOTEnterpriseComplianceStaging(SSotAsyncTestCase):
             criterion_result = ComplianceTestResult(scenario=f'soc2_{criterion_name.lower()}', compliance_type='SOC2')
             try:
                 soc2_headers = {**compliance_auth_headers, 'X-SOC2-Compliance': 'required', 'X-Trust-Criterion': criterion_name, 'X-Business-Data-Protection': 'enabled'}
-                async with websockets.connect(websocket_url, extra_headers=soc2_headers, timeout=20) as websocket:
+                async with websockets.connect(websocket_url, additional_headers=soc2_headers, timeout=20) as websocket:
                     soc2_connect = {'type': 'connect', 'user_id': f'soc2_{criterion_name.lower()}_user', 'compliance_level': 'SOC2', 'trust_criterion': criterion_name, 'business_data_protection': True, 'soc2_metadata': {'service_organization': 'Netra Apex Platform', 'trust_criteria': [criterion_name], 'control_objectives': criterion['tests']}}
                     await websocket.send(json.dumps(soc2_connect))
                     connect_response = json.loads(await websocket.recv())
@@ -231,7 +231,7 @@ class TestSSOTEnterpriseComplianceStaging(SSotAsyncTestCase):
             sec_result = ComplianceTestResult(scenario=f"sec_{regulation.lower().replace(' ', '_')}", compliance_type='SEC')
             try:
                 sec_headers = {**compliance_auth_headers, 'X-SEC-Compliance': 'required', 'X-Financial-Regulation': regulation, 'X-Trading-Data-Protection': 'enabled'}
-                async with websockets.connect(websocket_url, extra_headers=sec_headers, timeout=25) as websocket:
+                async with websockets.connect(websocket_url, additional_headers=sec_headers, timeout=25) as websocket:
                     sec_connect = {'type': 'connect', 'user_id': f"sec_{regulation.lower().replace(' ', '_')}_user", 'compliance_level': 'SEC', 'financial_regulation': regulation, 'trading_data_protection': True, 'sec_metadata': {'broker_dealer': 'Test Financial Institution', 'regulatory_framework': [regulation], 'compliance_controls': controls}}
                     await websocket.send(json.dumps(sec_connect))
                     connect_response = json.loads(await websocket.recv())
@@ -288,7 +288,7 @@ class TestSSOTEnterpriseComplianceStaging(SSotAsyncTestCase):
         audit_requirements = [{'category': 'Authentication', 'events': ['user_login', 'authentication_success', 'session_establishment'], 'retention': '7_years', 'integrity': 'immutable'}, {'category': 'Data_Access', 'events': ['data_request', 'data_retrieval', 'data_transmission'], 'retention': '7_years', 'integrity': 'cryptographically_signed'}, {'category': 'System_Operations', 'events': ['system_access', 'configuration_change', 'security_event'], 'retention': '3_years', 'integrity': 'tamper_evident'}, {'category': 'Compliance_Monitoring', 'events': ['compliance_check', 'policy_enforcement', 'violation_detection'], 'retention': '10_years', 'integrity': 'legally_admissible'}]
         try:
             audit_headers = {**compliance_auth_headers, 'X-Enterprise-Audit': 'required', 'X-Audit-Level': 'comprehensive', 'X-Retention-Requirements': 'regulatory'}
-            async with websockets.connect(websocket_url, extra_headers=audit_headers, timeout=30) as websocket:
+            async with websockets.connect(websocket_url, additional_headers=audit_headers, timeout=30) as websocket:
                 audit_connect = {'type': 'connect', 'user_id': audit_user, 'audit_level': 'enterprise', 'compliance_monitoring': True, 'audit_metadata': {'organization': 'Enterprise Test Customer', 'audit_requirements': [req['category'] for req in audit_requirements], 'retention_policy': 'regulatory_compliance', 'integrity_requirements': 'maximum'}}
                 await websocket.send(json.dumps(audit_connect))
                 connect_response = json.loads(await websocket.recv())

@@ -33,7 +33,7 @@ from netra_backend.app.agents.supervisor.request_scoped_execution_engine import 
 
 # Import actual types that exist in the SSOT implementation
 from netra_backend.app.services.user_execution_context import UserExecutionContext, AgentExecutionContext
-from netra_backend.app.schemas.agent_execution_result import AgentExecutionResult
+from netra_backend.app.schemas.agent_result_types import AgentExecutionResult
 
 # Compatibility aliases for test migration
 ExecutionEngine = UserExecutionEngine

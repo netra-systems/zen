@@ -423,7 +423,7 @@ class TestCriticalWebSocket:
                 else:
                     print("SUCCESS: WebSocket properly enforces authentication")
                     message_sent = True
-            elif "unexpected keyword" in error_str or "extra_headers" in error_str or "additional_headers" in error_str:
+            elif "unexpected keyword" in error_str or "additional_headers" in error_str or "additional_headers" in error_str:
                 print("WARNING: WebSocket library parameter error - falling back to unauthenticated test")
                 # Fall back to testing without headers
                 try:

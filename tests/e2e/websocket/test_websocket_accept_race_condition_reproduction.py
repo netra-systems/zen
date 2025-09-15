@@ -115,7 +115,7 @@ class WebSocketAcceptRaceConditionE2ETest(BaseE2ETest):
             try:
                 connection_start_time = time.time()
                 self._record_e2e_race_event('connection_start', user_id, connection_id, True, timing_data={'connection_start': connection_start_time}, production_scenario='first_time_user')
-                async with websockets.connect(websocket_uri, extra_headers={'Authorization': f'Bearer {auth_token}'}, timeout=self.gcp_accept_timeout) as websocket:
+                async with websockets.connect(websocket_uri, additional_headers={'Authorization': f'Bearer {auth_token}'}, timeout=self.gcp_accept_timeout) as websocket:
                     accept_complete_time = time.time()
                     accept_duration = accept_complete_time - connection_start_time
                     connection_timing['accept_duration'] = accept_duration
@@ -192,7 +192,7 @@ class WebSocketAcceptRaceConditionE2ETest(BaseE2ETest):
             worker_start_time = time.time()
             worker_result = {'worker_id': worker_id, 'user_id': user_id, 'start_time': worker_start_time, 'success': False, 'errors': [], 'timing': {}}
             try:
-                async with websockets.connect(websocket_uri, extra_headers={'Authorization': f'Bearer {auth_token}'}, timeout=self.gcp_accept_timeout) as websocket:
+                async with websockets.connect(websocket_uri, additional_headers={'Authorization': f'Bearer {auth_token}'}, timeout=self.gcp_accept_timeout) as websocket:
                     connection_established_time = time.time()
                     worker_result['timing']['connection_time'] = connection_established_time - worker_start_time
                     self._record_e2e_race_event('connection_start', user_id, connection_id, True, timing_data=worker_result['timing'], production_scenario='concurrent_users')
@@ -267,7 +267,7 @@ class WebSocketAcceptRaceConditionE2ETest(BaseE2ETest):
             connection_id = f'agent_execution_{user_id}_{int(time.time())}'
             websocket_uri = f'{self.base_ws_url}/ws?token={auth_token}'
             try:
-                async with websockets.connect(websocket_uri, extra_headers={'Authorization': f'Bearer {auth_token}'}, timeout=self.gcp_accept_timeout) as websocket:
+                async with websockets.connect(websocket_uri, additional_headers={'Authorization': f'Bearer {auth_token}'}, timeout=self.gcp_accept_timeout) as websocket:
                     user_message = {'type': 'user_message', 'content': 'Analyze the latest market trends in AI technology', 'user_id': user_id, 'timestamp': time.time()}
                     await websocket.send(json.dumps(user_message))
                     self._record_e2e_race_event('user_message', user_id, connection_id, True, agent_data={'message': 'Agent execution trigger sent'}, production_scenario='agent_execution')

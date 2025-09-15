@@ -32,7 +32,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 @pytest.fixture
 async def business_value_websocket_utility():
     """Create WebSocket utility for business value testing."""
-    staging_ws_url = "wss://staging.netra-apex.com/ws"
+    staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
     
     async with WebSocketTestUtility(base_url=staging_ws_url) as ws_util:
         yield ws_util

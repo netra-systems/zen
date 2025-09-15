@@ -38,6 +38,9 @@ from netra_backend.app.websocket_core.message_queue import (
 # Import the protocol after it's defined to avoid circular imports
 logger = get_logger(__name__)
 
+# WEBSOCKET MANAGER SSOT CONSOLIDATION: Connection limits enforcement
+MAX_CONNECTIONS_PER_USER = 10  # Maximum WebSocket connections per user to prevent resource exhaustion
+
 
 # ISSUE #965 REMEDIATION: WebSocketManagerMode enum moved to types.py to break circular dependency
 # ISSUE #965 REMEDIATION: _get_enum_key_representation function moved to types.py to break circular dependency
@@ -624,7 +627,26 @@ class _UnifiedWebSocketManagerImplementation:
             logger.critical(f" ALERT:  GOLDEN PATH CONNECTION VALIDATION FAILURE: Connection {connection.connection_id} validation failed for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
             logger.critical(f" SEARCH:  VALIDATION FAILURE CONTEXT: {json.dumps(validation_failure_context, indent=2)}")
             raise
-            
+
+        # WEBSOCKET MANAGER SSOT CONSOLIDATION: Enforce connection limits per user
+        current_user_connections = len(self._user_connections.get(connection.user_id, set()))
+        if current_user_connections >= MAX_CONNECTIONS_PER_USER:
+            connection_limit_context = {
+                "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
+                "current_connections": current_user_connections,
+                "max_allowed": MAX_CONNECTIONS_PER_USER,
+                "connection_id": connection.connection_id,
+                "rejection_reason": "MAX_CONNECTIONS_PER_USER exceeded",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "golden_path_impact": "CONNECTION_REJECTED - User exceeded connection limit"
+            }
+
+            logger.warning(f" LIMIT: CONNECTION REJECTED: User {connection.user_id[:8] if connection.user_id else 'unknown'} exceeded MAX_CONNECTIONS_PER_USER ({MAX_CONNECTIONS_PER_USER})")
+            logger.warning(f" SEARCH: CONNECTION LIMIT CONTEXT: {json.dumps(connection_limit_context, indent=2)}")
+
+            # Raise specific exception for connection limit exceeded
+            raise ValueError(f"User {connection.user_id} exceeded maximum connections per user limit ({MAX_CONNECTIONS_PER_USER}). Current: {current_user_connections}")
+
         # Use user-specific lock for connection operations
         user_lock = await self._get_user_connection_lock(connection.user_id)
         

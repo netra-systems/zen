@@ -45,6 +45,9 @@ central_logger = CentralLoggerCompat()
 from shared.isolated_environment import IsolatedEnvironment
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
+# TEMPORARY SSOT IMPORT ALIAS: Lazy import canonical AgentExecutionContext for test compatibility
+# This provides backward compatibility while tests migrate to proper SSOT patterns
+
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
     from fastapi import Request
@@ -2953,5 +2956,14 @@ __all__ = [
     'clear_shared_object_registry',
     'create_defensive_user_execution_context',  # Migrated from websocket_manager_factory
     'create_isolated_execution_context',
-    'create_user_execution_context'  # Added for backward compatibility
+    'create_user_execution_context',  # Added for backward compatibility
+    'AgentExecutionContext'  # SSOT import alias
 ]
+
+# SSOT Import Alias: Lazy import to avoid circular dependency
+def __getattr__(name: str):
+    """Provide AgentExecutionContext import compatibility."""
+    if name == 'AgentExecutionContext':
+        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+        return AgentExecutionContext
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")

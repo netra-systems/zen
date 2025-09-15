@@ -349,8 +349,9 @@ def negotiate_websocket_subprotocol(client_protocols: List[str]) -> Optional[str
 
     # PRIORITY 2: Direct protocol match (only if no token-bearing protocols found)
     # ISSUE #886 FIX: Enhanced staging environment support
+    # ISSUE #1032 FIX: Add 'agent_chat' subprotocol support for staging tests
     # Extended supported protocols for backward compatibility and staging environment
-    supported_protocols = ['jwt-auth', 'jwt', 'bearer', 'e2e-testing', 'staging-auth']
+    supported_protocols = ['jwt-auth', 'jwt', 'bearer', 'e2e-testing', 'staging-auth', 'agent_chat']
 
     for protocol in client_protocols:
         if protocol in supported_protocols:
@@ -359,7 +360,7 @@ def negotiate_websocket_subprotocol(client_protocols: List[str]) -> Optional[str
 
     # ISSUE #342 & #886 FIX: Improved error logging for debugging
     logger.warning(f"No supported subprotocols found in client request: {client_protocols}")
-    logger.debug(f"Supported formats: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN, jwt-auth, staging-auth")
+    logger.debug(f"Supported formats: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN, jwt-auth, staging-auth, agent_chat")
     logger.info(f"ISSUE #886: If you're seeing staging test failures, ensure tests request supported subprotocols")
 
     return None

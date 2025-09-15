@@ -129,7 +129,7 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
                     connection_successful = False
                     try:
                         if not NoDockerModeDetector.is_no_docker_mode():
-                            async with websockets.connect(websocket_url, extra_headers=websocket_headers, timeout=5) as websocket:
+                            async with websockets.connect(websocket_url, additional_headers=websocket_headers, timeout=5) as websocket:
                                 connection_successful = True
                                 auth_operations_log.append('Phase2: WebSocket connection established')
                                 logger.info(' PASS:  Phase 2: WebSocket connection successful')
