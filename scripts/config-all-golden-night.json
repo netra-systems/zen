@@ -6,6 +6,11 @@
       "output_format": "stream-json"
     },
     {
+      "command": "/clear-old-issue-locks",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
       "command": "/gitissueprogressorv3 golden path phase 2",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
@@ -134,6 +139,6 @@
       "command": "/runtests agents, e2e gcp",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
-    },
+    }
   ]
 }
