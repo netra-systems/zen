@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Mock WebSocket connection for testing instead of real connections."""
 
     def __init__(self):
@@ -182,7 +182,7 @@ class TestMessageRouterSSOTCompliance(SSotBaseTestCase):
             router = get_message_router()
             
             # Test basic routing functionality
-            test_websocket = TestWebSocketConnection()
+            test_websocket = WebSocketTestHelper()
             test_message = {
                 "type": "ping",
                 "payload": {"test": True},

@@ -32,7 +32,7 @@ from unittest.mock import Mock, AsyncMock, MagicMock, patch
 from fastapi import FastAPI
 
 
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
@@ -250,7 +250,7 @@ class TestWebSocketIntegration:
             )
 
             # Create mock WebSocket
-            mock_websocket = TestWebSocketConnection()
+            mock_websocket = WebSocketTestHelper()
 
             # Create tool dispatcher
             dispatcher = UnifiedToolDispatcherFactory.create_for_request(
@@ -275,7 +275,7 @@ class TestWebSocketIntegration:
             # Create mock components
             mock_llm = Mock(spec=LLMManager)
             mock_tool_dispatcher = Mock()
-            mock_websocket = TestWebSocketConnection()
+            mock_websocket = WebSocketTestHelper()
 
             # Create agent registry
             registry = AgentRegistry(

@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -164,7 +164,7 @@ class TestActionsAgentWebSocketCompliance:
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Mock the WebSocket bridge to capture events
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        websocket = WebSocketTestHelper()  # Real WebSocket implementation
         
         # Create mock bridge
         mock_bridge = Mock()
@@ -374,7 +374,7 @@ class TestActionsAgentWebSocketCompliance:
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Test 1: WebSocket bridge integration
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        websocket = WebSocketTestHelper()  # Real WebSocket implementation
         
         # Create mock bridge
         mock_bridge = Mock()

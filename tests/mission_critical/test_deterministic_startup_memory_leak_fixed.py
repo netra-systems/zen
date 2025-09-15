@@ -62,7 +62,7 @@ except ImportError as e:
     class DeterministicStartupError(Exception): pass
 
 
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
