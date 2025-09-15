@@ -64,7 +64,6 @@ except ImportError as e:
     BaseAgent = MagicMock
     AgentExecutionContext = MagicMock
 
-
 class TestAgentGoldenPathMessages(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Agent Golden Path Message Processing.
@@ -148,13 +147,11 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
 
     async def _initialize_real_message_infrastructure(self):
         """Initialize real message processing infrastructure components for testing."""
-        if not REAL_COMPONENTS_AVAILABLE:
-            self._initialize_mock_infrastructure()
-            return
+        if not REAL_COMPONENTS_AVAILABLE:return
 
         try:
             # Create real WebSocket manager for message notifications
-            self.websocket_manager = await get_websocket_manager()
+            self.websocket_manager = get_websocket_manager()
 
             # Create real WebSocket bridge for agent-websocket integration
             self.websocket_bridge = create_agent_websocket_bridge()
@@ -179,7 +176,6 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
 
         except Exception as e:
             # Fallback to mock infrastructure if real components fail
-            print(f"Failed to initialize real infrastructure, using mocks: {e}")
             self._initialize_mock_infrastructure()
 
     def _initialize_mock_infrastructure(self):

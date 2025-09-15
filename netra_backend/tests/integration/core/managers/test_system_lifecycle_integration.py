@@ -51,7 +51,7 @@ class TestSystemLifecycleRealWebSocketIntegration(SSotAsyncTestCase):
 
     async def test_real_websocket_manager_lifecycle_coordination(self):
         """Test lifecycle coordination with real WebSocket manager."""
-        websocket_manager = await get_websocket_manager()
+        websocket_manager = get_websocket_manager()
         await self.lifecycle.register_component('websocket_manager', websocket_manager, ComponentType.WEBSOCKET_MANAGER)
         success = await self.lifecycle.startup()
         assert success, 'Lifecycle startup should succeed with real WebSocket manager'
@@ -65,7 +65,7 @@ class TestSystemLifecycleRealWebSocketIntegration(SSotAsyncTestCase):
 
     async def test_websocket_event_delivery_during_phase_transitions(self):
         """Test WebSocket events are delivered during all phase transitions."""
-        websocket_manager = await get_websocket_manager()
+        websocket_manager = get_websocket_manager()
         self.lifecycle.set_websocket_manager(websocket_manager)
         expected_events = []
         original_broadcast = websocket_manager.broadcast_system_message
@@ -93,7 +93,7 @@ class TestSystemLifecycleRealWebSocketIntegration(SSotAsyncTestCase):
 
     async def test_websocket_connection_handling_during_shutdown(self):
         """Test WebSocket connections are properly handled during shutdown."""
-        websocket_manager = await get_websocket_manager()
+        websocket_manager = get_websocket_manager()
         await self.lifecycle.register_component('websocket_manager', websocket_manager, ComponentType.WEBSOCKET_MANAGER)
         await self.lifecycle._set_phase(LifecyclePhase.RUNNING)
         await self.lifecycle._shutdown_phase_3_close_websockets()
@@ -101,7 +101,7 @@ class TestSystemLifecycleRealWebSocketIntegration(SSotAsyncTestCase):
 
     async def test_websocket_health_monitoring_integration(self):
         """Test health monitoring with real WebSocket service."""
-        websocket_manager = await get_websocket_manager()
+        websocket_manager = get_websocket_manager()
 
         def websocket_health_check():
             try:
@@ -228,7 +228,7 @@ class TestSystemLifecycleMultiServiceCoordination(SSotAsyncTestCase):
             except Exception:
                 pass
             try:
-                websocket_manager = await get_websocket_manager()
+                websocket_manager = get_websocket_manager()
                 await self.lifecycle.register_component('websocket', websocket_manager, ComponentType.WEBSOCKET_MANAGER)
                 services_registered.append('websocket')
             except Exception:

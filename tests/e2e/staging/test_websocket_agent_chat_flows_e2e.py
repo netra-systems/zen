@@ -1,3 +1,4 @@
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 #!/usr/bin/env python
 """
 E2E Staging Tests for WebSocket Agent Chat Flows
@@ -51,7 +52,7 @@ def staging_auth_helper():
 @pytest.fixture
 async def staging_websocket_manager():
     """Create WebSocket manager connected to staging."""
-    manager = UnifiedWebSocketManager()
+    manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
     await manager.initialize()
     yield manager
     await manager.cleanup()

@@ -72,7 +72,7 @@ class TestIssue1231WebSocketConnectionFailures:
 
             try:
                 # Step 1: This simulates the buggy manager creation from websocket_ssot.py
-                manager = await get_websocket_manager(user_context)  # BUG: awaiting non-coroutine
+                manager = get_websocket_manager(user_context)  # BUG: awaiting non-coroutine
 
                 # Step 2: Attempt to establish WebSocket connection
                 connection_established = await manager.establish_connection(
@@ -120,7 +120,7 @@ class TestIssue1231WebSocketConnectionFailures:
             for user_context in user_contexts:
                 try:
                     # This simulates the buggy factory usage from websocket_ssot.py
-                    manager = await get_websocket_manager(user_context)  # BUG: awaiting non-coroutine
+                    manager = get_websocket_manager(user_context)  # BUG: awaiting non-coroutine
                     managers.append(manager)
                 except Exception as e:
                     raise RuntimeError(f"Factory pattern failed due to async/await bug: {e}")
@@ -152,7 +152,7 @@ class TestIssue1231WebSocketConnectionFailures:
 
             try:
                 # This simulates the buggy manager creation pattern
-                manager = await get_websocket_manager(user_context)  # BUG: awaiting non-coroutine
+                manager = get_websocket_manager(user_context)  # BUG: awaiting non-coroutine
 
                 # Attempt to send critical business events
                 events_to_send = [
@@ -217,7 +217,7 @@ class TestIssue1231WebSocketConnectionFailures:
             for user_context in user_contexts:
                 try:
                     # This simulates the buggy isolated manager creation
-                    manager = await get_websocket_manager(user_context)  # BUG: awaiting non-coroutine
+                    manager = get_websocket_manager(user_context)  # BUG: awaiting non-coroutine
                     isolated_managers[user_context.user_id] = manager
                 except Exception as e:
                     raise RuntimeError(f"Multi-user isolation failed due to async/await bug: {e}")
@@ -250,7 +250,7 @@ class TestIssue1231WebSocketConnectionFailures:
             """Simulate WebSocket health monitoring with buggy manager access"""
             try:
                 # This simulates the buggy health monitoring pattern from websocket_ssot.py
-                manager = await get_websocket_manager(user_context=None)  # BUG: awaiting non-coroutine
+                manager = get_websocket_manager(user_context=None)  # BUG: awaiting non-coroutine
 
                 # Attempt to get health status
                 health_status = {
@@ -313,7 +313,7 @@ class TestIssue1231WebSocketConnectionFailures:
             async def buggy_websocket_operation(operation_id):
                 try:
                     # This simulates concurrent buggy operations
-                    manager = await get_websocket_manager(user_context)  # BUG: awaiting non-coroutine
+                    manager = get_websocket_manager(user_context)  # BUG: awaiting non-coroutine
 
                     # Simulate some WebSocket operation
                     result = await manager.send_to_thread(

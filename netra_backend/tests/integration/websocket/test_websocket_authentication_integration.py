@@ -159,7 +159,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
         token = self.create_test_jwt_token(user_data, expired=False, invalid=False)
         assert token and token != 'invalid_token_format', 'Failed to create valid test token'
         user_context = await self.create_mock_user_context_from_token(token, user_data)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'auth_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = MockAuthenticatedWebSocket(user_data.user_id, connection_id, token)
@@ -196,7 +196,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
                 mock_validate.side_effect = jwt.ExpiredSignatureError('Token has expired')
                 with pytest.raises(jwt.ExpiredSignatureError):
                     user_context = await self.create_mock_user_context_from_token(expired_token, user_data)
-                    manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+                    manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
                     with patch.object(manager, '_websocket_transport', mock_ws):
                         await manager.connect_user(user_id=ensure_user_id(user_data.user_id), websocket=mock_ws, connection_metadata={'tier': user_data.tier, 'auth_token': expired_token, 'authenticated': False})
         except jwt.ExpiredSignatureError:
@@ -223,7 +223,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
                 mock_validate.side_effect = jwt.InvalidTokenError('Invalid token')
                 with pytest.raises(jwt.InvalidTokenError):
                     user_context = await self.create_mock_user_context_from_token(invalid_token, user_data)
-                    manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+                    manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
                     with patch.object(manager, '_websocket_transport', mock_ws):
                         await manager.connect_user(user_id=ensure_user_id(user_data.user_id), websocket=mock_ws, connection_metadata={'tier': user_data.tier, 'auth_token': invalid_token, 'authenticated': False})
         except jwt.InvalidTokenError:
@@ -245,7 +245,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
             user_data = scenario.user_data
             token = self.create_test_jwt_token(user_data, expired=False, invalid=False)
             user_context = await self.create_mock_user_context_from_token(token, user_data)
-            manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+            manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
             self.websocket_managers.append(manager)
             connection_id = f'{user_data.tier}_conn_{uuid.uuid4().hex[:8]}'
             mock_ws = MockAuthenticatedWebSocket(user_data.user_id, connection_id, token)
@@ -284,7 +284,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
             assert user_context.email == test_user_data.email, 'Email should match token'
             assert user_context.tier == test_user_data.tier, 'Tier should match token'
             assert user_context.is_authenticated, 'User should be marked as authenticated'
-            manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+            manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
             self.websocket_managers.append(manager)
             connection_id = f'context_conn_{uuid.uuid4().hex[:8]}'
             mock_ws = MockAuthenticatedWebSocket(test_user_data.user_id, connection_id, token)
@@ -313,7 +313,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
         test_user_data = TestUserData(user_id=f'renewal_user_{uuid.uuid4().hex[:8]}', email='renewal-test@netra.ai', tier='enterprise', thread_id=f'renewal_thread_{uuid.uuid4().hex[:8]}')
         initial_token = self.create_test_jwt_token(test_user_data, expired=False, invalid=False)
         user_context = await self.create_mock_user_context_from_token(initial_token, test_user_data)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'renewal_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = MockAuthenticatedWebSocket(test_user_data.user_id, connection_id, initial_token)

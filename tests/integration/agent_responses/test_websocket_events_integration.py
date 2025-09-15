@@ -31,6 +31,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from collections import defaultdict
 import pytest
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # SSOT imports following established patterns
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -161,7 +162,7 @@ class TestWebSocketEventsIntegration(SSotAsyncTestCase):
         """Initialize real WebSocket infrastructure for testing."""
         try:
             # Initialize WebSocket manager
-            self.websocket_manager = UnifiedWebSocketManager()
+            self.websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             
             # Initialize tool dispatcher
             self.tool_dispatcher = EnhancedToolDispatcher()

@@ -67,7 +67,6 @@ except ImportError as e:
     create_agent_websocket_bridge = MagicMock
     BaseAgent = MagicMock
 
-
 class TestWebSocketAgentMessageFlow(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for WebSocket Agent Message Flow.
@@ -155,13 +154,11 @@ class TestWebSocketAgentMessageFlow(SSotAsyncTestCase):
 
     async def _initialize_real_websocket_infrastructure(self):
         """Initialize real WebSocket infrastructure components for testing."""
-        if not REAL_WEBSOCKET_COMPONENTS_AVAILABLE:
-            self._initialize_mock_websocket_infrastructure()
-            return
+        if not REAL_WEBSOCKET_COMPONENTS_AVAILABLE:return
 
         try:
             # Create real WebSocket manager with test mode
-            self.websocket_manager = await get_websocket_manager(mode=WebSocketManagerMode.UNIFIED)
+            self.websocket_manager = get_websocket_manager(mode=WebSocketManagerMode.UNIFIED)
 
             # Create real WebSocket bridge for agent integration
             self.websocket_bridge = create_agent_websocket_bridge()
@@ -179,9 +176,10 @@ class TestWebSocketAgentMessageFlow(SSotAsyncTestCase):
                 )
 
         except Exception as e:
-            # Fallback to mock infrastructure if real components fail
-            print(f"Failed to initialize real WebSocket infrastructure, using mocks: {e}")
-            self._initialize_mock_websocket_infrastructure()
+
+            # CLAUDE.md COMPLIANCE: Tests must use real services only
+
+            raise RuntimeError(f"Failed to initialize real infrastructure: {e}") from e
 
     def _initialize_mock_websocket_infrastructure(self):
         """Initialize mock WebSocket infrastructure for testing when real components unavailable."""
@@ -726,7 +724,6 @@ class TestWebSocketAgentMessageFlow(SSotAsyncTestCase):
 
         mock_agent.process_user_message = AsyncMock(side_effect=process_with_websocket_recovery)
         return mock_agent
-
 
 class WebSocketEventTracker:
     """Helper class to track WebSocket events during testing."""

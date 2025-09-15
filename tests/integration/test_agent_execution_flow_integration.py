@@ -78,7 +78,6 @@ except ImportError as e:
     UnifiedWebSocketManager = MagicMock
     UnifiedWebSocketEmitter = MagicMock
 
-
 class TestAgentExecutionFlowIntegration(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Agent Execution Flow.
@@ -155,13 +154,12 @@ class TestAgentExecutionFlowIntegration(SSotAsyncTestCase):
     
     async def _initialize_real_agent_infrastructure(self):
         """Initialize real agent infrastructure components for testing."""
-        if not REAL_COMPONENTS_AVAILABLE:
-            self._initialize_mock_infrastructure()
-            return
+        if not REAL_COMPONENTS_AVAILABLE:return
             
         try:
-            # Create real WebSocket manager for agent notifications
-            self.websocket_manager = UnifiedWebSocketManager()
+            # Create real WebSocket manager for agent notifications  
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            self.websocket_manager = get_websocket_manager(user_context=self.user_context)
             
             # Create real WebSocket bridge for agent-websocket integration
             self.websocket_bridge = AgentWebSocketBridge()
@@ -193,8 +191,6 @@ class TestAgentExecutionFlowIntegration(SSotAsyncTestCase):
             
         except Exception as e:
             # Fallback to mock infrastructure if real components fail
-            print(f"Failed to initialize real infrastructure, using mocks: {e}")
-            self._initialize_mock_infrastructure()
     
     def _initialize_mock_infrastructure(self):
         """Initialize mock infrastructure for testing when real components unavailable."""

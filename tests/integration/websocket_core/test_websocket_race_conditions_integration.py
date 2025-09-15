@@ -51,7 +51,7 @@ class TestWebSocketRaceConditionsIntegration(SSotAsyncTestCase):
             self.user_contexts[f'user_{i}'] = user_context
         self.websocket_managers = {}
         for user_key, context in self.user_contexts.items():
-            manager = await get_websocket_manager(user_context=context, mode=WebSocketManagerMode.UNIFIED)
+            manager = get_websocket_manager(user_context=context, mode=WebSocketManagerMode.UNIFIED)
             self.websocket_managers[user_key] = manager
         logger.info(f'Integration test setup complete: {len(self.websocket_managers)} managers created')
 

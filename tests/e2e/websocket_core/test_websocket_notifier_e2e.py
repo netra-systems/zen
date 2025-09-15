@@ -23,6 +23,7 @@ from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 
 class TestWebSocketNotifierE2EAgentFlow(BaseTestCase):
@@ -63,7 +64,7 @@ class TestWebSocketNotifierE2EAgentFlow(BaseTestCase):
     @pytest.fixture
     async def real_websocket_manager(self, authenticated_user):
         """Create real UnifiedWebSocketManager with authenticated user connection."""
-        manager = UnifiedWebSocketManager()
+        manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         
         # Create mock WebSocket connection for testing
         class MockWebSocketForE2E:

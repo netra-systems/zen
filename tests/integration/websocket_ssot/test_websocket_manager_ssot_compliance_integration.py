@@ -86,7 +86,7 @@ class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
             manager1 = WebSocketManager(user_context=self.user_context)
             managers_created.append(('Direct WebSocketManager', manager1))
-            manager2 = await get_websocket_manager(user_context=self.user_context)
+            manager2 = get_websocket_manager(user_context=self.user_context)
             managers_created.append(('get_websocket_manager factory', manager2))
         except Exception as e:
             creation_errors.append(f'SSOT canonical import failed: {e}')
@@ -207,7 +207,7 @@ class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
             start_time = time.time()
             try:
                 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-                manager = await get_websocket_manager(user_context=self.user_context)
+                manager = get_websocket_manager(user_context=self.user_context)
                 end_time = time.time()
                 creation_times.append(('Factory get_websocket_manager', end_time - start_time))
                 return manager

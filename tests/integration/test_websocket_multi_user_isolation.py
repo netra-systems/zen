@@ -140,7 +140,7 @@ class TestWebSocketMultiUserIsolation(SSotAsyncTestCase):
                     })()
                     
                     # Get WebSocket manager
-                    manager = await get_websocket_manager(user_context=user_context)
+                    manager = get_websocket_manager(user_context=user_context)
                     session.websocket_manager = manager
                     
                     # Set sensitive data in manager that must NOT leak
@@ -394,7 +394,7 @@ class TestWebSocketMultiUserIsolation(SSotAsyncTestCase):
                         })()
                         
                         # Get manager in this thread
-                        manager = await get_websocket_manager(user_context=user_context)
+                        manager = get_websocket_manager(user_context=user_context)
                         
                         # Set thread-specific data
                         thread_data = f"thread_data_{user_id}_{thread_id}_{uuid.uuid4().hex}"

@@ -101,7 +101,7 @@ class TestAsyncAwaitInterfaceValidation(BaseIntegrationTest):
         )
         
         # This should work correctly (async interface)
-        websocket_manager = await get_websocket_manager(user_context=user_context)
+        websocket_manager = get_websocket_manager(user_context=user_context)
         
         # Verify we get a manager with expected interface
         assert websocket_manager is not None, "get_websocket_manager should return manager"
@@ -134,7 +134,7 @@ class TestAsyncAwaitInterfaceValidation(BaseIntegrationTest):
             
             # Simulate corrected agent service stop operation
             try:
-                websocket_manager = await get_websocket_manager(user_context=user_context)
+                websocket_manager = get_websocket_manager(user_context=user_context)
                 await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
                 success = True
             except Exception as e:
@@ -174,7 +174,7 @@ class TestAsyncAwaitInterfaceValidation(BaseIntegrationTest):
         )
         
         # Should work asynchronously 
-        manager = await get_websocket_manager(user_context=proper_context)
+        manager = get_websocket_manager(user_context=proper_context)
         assert manager is not None, "Modern function should return manager"
 
     @pytest.mark.unit
@@ -259,7 +259,7 @@ class TestAgentServiceCoreInterfaceFix(BaseIntegrationTest):
                         user_context = await get_user_session_context(user_id=user_id)
                         
                         # Use correct async interface (FIXED)
-                        websocket_manager = await get_websocket_manager(user_context)
+                        websocket_manager = get_websocket_manager(user_context)
                         await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
                         
                         success = True
@@ -316,7 +316,7 @@ class TestAgentServiceCoreInterfaceFix(BaseIntegrationTest):
                         
                         # Fallback to direct manager access (FIXED INTERFACE)
                         fallback_context = await get_user_session_context(user_id=user_id)
-                        websocket_manager = await get_websocket_manager(fallback_context)
+                        websocket_manager = get_websocket_manager(fallback_context)
                         await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
                         
                         success = True
@@ -352,7 +352,7 @@ class TestWebSocketFactorySSotCompliance(BaseIntegrationTest):
         )
         
         # Verify async factory works correctly
-        manager = await get_websocket_manager(user_context=user_context)
+        manager = get_websocket_manager(user_context=user_context)
         assert manager is not None, "SSOT async factory should work"
         
         # Verify sync compatibility function exists but is clearly differentiated
@@ -402,7 +402,7 @@ class TestWebSocketFactorySSotCompliance(BaseIntegrationTest):
             ]
             
             try:
-                websocket_manager = await get_websocket_manager(user_context=user_context)
+                websocket_manager = get_websocket_manager(user_context=user_context)
                 
                 # Send all critical events
                 for event in critical_events:

@@ -34,6 +34,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 class TestAgentWebSocketIntegration(BaseIntegrationTest):
     """Test agent execution with WebSocket event delivery using real services."""
@@ -85,7 +86,7 @@ class TestAgentWebSocketIntegration(BaseIntegrationTest):
         user_context = {'user_id': self.test_user_id, 'request_id': f'req_{uuid.uuid4().hex[:8]}', 'thread_id': self.test_thread_id, 'session_id': f'session_{uuid.uuid4().hex[:8]}', 'auth_token': auth_token}
         async with self.ws_utility.connected_client(user_id=self.test_user_id) as client:
             factory = get_agent_instance_factory()
-            execution_engine = UserExecutionEngine(user_context=user_context, websocket_manager=UnifiedWebSocketManager())
+            execution_engine = UserExecutionEngine(user_context=user_context, websocket_manager=get_websocket_manager(user_context=getattr(self, 'user_context', None)))
             websocket_notifier = WebSocketNotifier.create_for_user(user_context=user_context)
             await execution_engine.set_websocket_notifier(websocket_notifier)
             registry = AgentRegistry()
@@ -183,7 +184,7 @@ class TestAgentWebSocketIntegration(BaseIntegrationTest):
             user_sessions = []
             for user_context in user_contexts:
                 session = UserAgentSession(user_context.user_id)
-                ws_manager = UnifiedWebSocketManager()
+                ws_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
                 await session.set_websocket_manager(ws_manager, user_context)
                 user_sessions.append(session)
             execution_tasks = []
@@ -227,7 +228,7 @@ class TestAgentWebSocketIntegration(BaseIntegrationTest):
         user_context = UserExecutionContext(user_id=self.test_user_id, request_id=f'req_{uuid.uuid4().hex[:8]}', thread_id=self.test_thread_id)
         async with self.ws_utility.connected_client(user_id=self.test_user_id) as client:
             user_session = UserAgentSession(self.test_user_id)
-            ws_manager = UnifiedWebSocketManager()
+            ws_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             await user_session.set_websocket_manager(ws_manager, user_context)
             error_scenarios = [{'name': 'invalid_agent_type', 'request': 'Use nonexistent_agent to help me', 'expected_error_type': 'agent_not_found'}, {'name': 'malformed_request', 'request': '', 'expected_error_type': 'invalid_request'}, {'name': 'tool_execution_failure', 'request': 'Use analyze_costs tool with invalid parameters', 'expected_error_type': 'tool_execution_error'}]
             for scenario in error_scenarios:
@@ -255,7 +256,7 @@ class TestAgentWebSocketIntegration(BaseIntegrationTest):
         user_context = UserExecutionContext(user_id=self.test_user_id, request_id=f'req_{uuid.uuid4().hex[:8]}', thread_id=self.test_thread_id, metadata={'enable_progress_streaming': True, 'progress_interval': 2.0})
         async with self.ws_utility.connected_client(user_id=self.test_user_id) as client:
             user_session = UserAgentSession(self.test_user_id)
-            ws_manager = UnifiedWebSocketManager()
+            ws_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             await user_session.set_websocket_manager(ws_manager, user_context)
             long_running_request = {'agent_type': 'data_analysis_agent', 'request': 'Perform deep analysis of all cloud resources and generate optimization recommendations', 'enable_streaming': True, 'expected_duration': 20}
             start_time = time.time()

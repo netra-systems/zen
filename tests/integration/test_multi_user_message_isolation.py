@@ -71,7 +71,6 @@ except ImportError as e:
     InvalidContextError = Exception
     ContextIsolationError = Exception
 
-
 class TestMultiUserMessageIsolation(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Multi-User Message Isolation.
@@ -155,16 +154,14 @@ class TestMultiUserMessageIsolation(SSotAsyncTestCase):
 
     async def _initialize_real_isolation_infrastructure(self):
         """Initialize real user isolation infrastructure components for testing."""
-        if not REAL_ISOLATION_COMPONENTS_AVAILABLE:
-            self._initialize_mock_isolation_infrastructure()
-            return
+        if not REAL_ISOLATION_COMPONENTS_AVAILABLE:return
 
         try:
             # Create real user context manager for isolation testing
             self.user_context_manager = UserContextManager()
 
             # Create real WebSocket manager with user isolation
-            self.websocket_manager = await get_websocket_manager()
+            self.websocket_manager = get_websocket_manager()
 
             # Create real WebSocket bridge for user-specific events
             self.websocket_bridge = create_agent_websocket_bridge()
@@ -176,9 +173,10 @@ class TestMultiUserMessageIsolation(SSotAsyncTestCase):
             self.active_user_contexts = []
 
         except Exception as e:
-            # Fallback to mock infrastructure if real components fail
-            print(f"Failed to initialize real isolation infrastructure, using mocks: {e}")
-            self._initialize_mock_isolation_infrastructure()
+
+            # CLAUDE.md COMPLIANCE: Tests must use real services only
+
+            raise RuntimeError(f"Failed to initialize real infrastructure: {e}") from e
 
     def _initialize_mock_isolation_infrastructure(self):
         """Initialize mock isolation infrastructure for testing when real components unavailable."""
@@ -803,7 +801,6 @@ class TestMultiUserMessageIsolation(SSotAsyncTestCase):
 
         mock_agent.process_user_message = AsyncMock(side_effect=process_with_load_simulation)
         return mock_agent
-
 
 class WebSocketEventTracker:
     """Helper class to track WebSocket events for isolation testing."""

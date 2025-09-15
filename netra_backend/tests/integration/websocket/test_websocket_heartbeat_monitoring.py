@@ -231,7 +231,7 @@ class TestWebSocketHeartbeatMonitoring(SSotAsyncTestCase):
         enables proactive issue detection and maintains chat reliability.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'heartbeat_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = HeartbeatMonitoringWebSocket(self.test_user.user_id, connection_id)
@@ -263,7 +263,7 @@ class TestWebSocketHeartbeatMonitoring(SSotAsyncTestCase):
         reconnection that maintains chat experience continuity.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'timeout_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = HeartbeatMonitoringWebSocket(self.test_user.user_id, connection_id)
@@ -303,7 +303,7 @@ class TestWebSocketHeartbeatMonitoring(SSotAsyncTestCase):
         and helps prioritize resources for maintaining optimal chat performance.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         test_scenarios = [{'name': 'excellent_connection', 'delay_ms': 50, 'loss_rate': 0.0, 'expected_min_health': 90}, {'name': 'good_connection', 'delay_ms': 150, 'loss_rate': 0.1, 'expected_min_health': 70}, {'name': 'poor_connection', 'delay_ms': 500, 'loss_rate': 0.3, 'expected_min_health': 40}]
         for scenario in test_scenarios:
@@ -337,7 +337,7 @@ class TestWebSocketHeartbeatMonitoring(SSotAsyncTestCase):
         and enables faster recovery by stopping futile reconnection attempts.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'circuit_breaker_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = HeartbeatMonitoringWebSocket(self.test_user.user_id, connection_id)
@@ -377,7 +377,7 @@ class TestWebSocketHeartbeatMonitoring(SSotAsyncTestCase):
         and helps maintain optimal chat experience across different network conditions.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         network_conditions = [{'name': 'optimal', 'delay_ms': 20, 'loss_rate': 0.0}, {'name': 'mobile', 'delay_ms': 100, 'loss_rate': 0.05}, {'name': 'unstable', 'delay_ms': 300, 'loss_rate': 0.15}]
         performance_results = {}

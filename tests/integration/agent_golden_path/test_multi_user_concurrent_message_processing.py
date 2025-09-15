@@ -63,7 +63,6 @@ except ImportError as e:
     UserExecutionContext = MagicMock
     AgentExecutionCore = MagicMock
 
-
 @dataclass
 class UserScenario:
     """Represents a single user's concurrent message processing scenario."""
@@ -76,7 +75,6 @@ class UserScenario:
     expected_agent_type: str
     processing_complexity: str
 
-
 @dataclass
 class ConcurrentExecutionResult:
     """Results from concurrent user message processing."""
@@ -87,7 +85,6 @@ class ConcurrentExecutionResult:
     websocket_events: List[Dict]
     errors: List[str]
     isolation_verified: bool
-
 
 class TestMultiUserConcurrentMessageProcessing(SSotAsyncTestCase):
     """
@@ -144,15 +141,13 @@ class TestMultiUserConcurrentMessageProcessing(SSotAsyncTestCase):
 
     async def _initialize_multi_user_infrastructure(self):
         """Initialize infrastructure for concurrent multi-user testing."""
-        if not REAL_COMPONENTS_AVAILABLE:
-            self._initialize_mock_multi_user_infrastructure()
-            return
+        if not REAL_COMPONENTS_AVAILABLE:return
 
         try:
             # Initialize real components for multi-user testing
             self.agent_factory = get_agent_instance_factory()
             self.execution_core = AgentExecutionCore(registry=MagicMock())  # Use mock registry for testing
-            self.websocket_manager = await get_websocket_manager()
+            self.websocket_manager = get_websocket_manager()
             self.websocket_bridge = create_agent_websocket_bridge()
 
             # Configure for concurrent testing
@@ -163,8 +158,10 @@ class TestMultiUserConcurrentMessageProcessing(SSotAsyncTestCase):
                 )
 
         except Exception as e:
-            print(f"Failed to initialize real multi-user infrastructure, using mocks: {e}")
-            self._initialize_mock_multi_user_infrastructure()
+
+            # CLAUDE.md COMPLIANCE: Tests must use real services only
+
+            raise RuntimeError(f"Failed to initialize real infrastructure: {e}") from e
 
     def _initialize_mock_multi_user_infrastructure(self):
         """Initialize mock infrastructure for multi-user testing."""

@@ -75,7 +75,7 @@ class TestAgentOrchestrationCore(SSotAsyncTestCase):
     async def setup_real_services(self):
         """Initialize real service infrastructure - never mocked."""
         self.user_context = UserExecutionContext(user_id=self.user_id, thread_id=self.conversation_id, run_id=f'run_{uuid.uuid4()}', request_id=f'req_{uuid.uuid4()}')
-        self.websocket_manager = await get_websocket_manager(user_context=self.user_context)
+        self.websocket_manager = get_websocket_manager(user_context=self.user_context)
         self.agent_registry = AgentRegistry()
         self.agent_registry.set_websocket_manager(self.websocket_manager)
         self.execution_engine = UserExecutionEngine(user_context=self.user_context, websocket_manager=self.websocket_manager)

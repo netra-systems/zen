@@ -102,7 +102,7 @@ class TestWebSocketEventEmissionDelivery(SSotAsyncTestCase):
     async def test_websocket_event_emission_basic(self):
         """Test basic WebSocket event emission"""
         user_context = UserExecutionContext(user_id=self.user_id, thread_id=self.session_id, run_id=self.id_manager.generate_id(IDType.RUN))
-        ws_manager = await get_websocket_manager(user_context)
+        ws_manager = get_websocket_manager(user_context)
         mock_connection = MockWebSocketConnection(user_id=self.user_id, session_id=self.session_id)
         ws_manager.register_connection(self.session_id, self.user_id, mock_connection)
         event_data = {'type': 'agent_started', 'agent_id': 'test_agent'}
@@ -113,7 +113,7 @@ class TestWebSocketEventEmissionDelivery(SSotAsyncTestCase):
     async def test_websocket_event_delivery_confirmation(self):
         """Test WebSocket event delivery confirmation"""
         user_context = UserExecutionContext(user_id=self.user_id, thread_id=self.session_id, run_id=self.id_manager.generate_id(IDType.RUN))
-        ws_manager = await get_websocket_manager(user_context)
+        ws_manager = get_websocket_manager(user_context)
         mock_connection = MockWebSocketConnection(user_id=self.user_id, session_id=self.session_id)
         ws_manager.register_connection(self.session_id, self.user_id, mock_connection)
         event_id = self.id_manager.generate_id(IDType.MESSAGE)
@@ -554,7 +554,7 @@ class TestAgentWebSocketCoordination(SSotAsyncTestCase):
     async def test_agent_websocket_bridge_initialization(self):
         """Test initializing Agent-WebSocket bridge"""
         bridge_adapter = WebSocketBridgeAdapter()
-        ws_manager = await get_websocket_manager()
+        ws_manager = get_websocket_manager()
         bridge_adapter.initialize(ws_manager)
         self.assertIsNotNone(bridge_adapter.websocket_manager)
         self.record_metric('bridge_initialization_success', True)
@@ -562,7 +562,7 @@ class TestAgentWebSocketCoordination(SSotAsyncTestCase):
     async def test_agent_websocket_event_coordination(self):
         """Test coordinating events between Agent and WebSocket"""
         bridge_adapter = WebSocketBridgeAdapter()
-        ws_manager = await get_websocket_manager()
+        ws_manager = get_websocket_manager()
         bridge_adapter.initialize(ws_manager)
         mock_connection = MockWebSocketConnection(user_id=self.user_id, session_id=self.session_id)
         await ws_manager.register_connection(self.user_id, mock_connection)
@@ -574,7 +574,7 @@ class TestAgentWebSocketCoordination(SSotAsyncTestCase):
     async def test_agent_lifecycle_websocket_notifications(self):
         """Test WebSocket notifications during agent lifecycle"""
         bridge_adapter = WebSocketBridgeAdapter()
-        ws_manager = await get_websocket_manager()
+        ws_manager = get_websocket_manager()
         bridge_adapter.initialize(ws_manager)
         mock_connection = MockWebSocketConnection(user_id=self.user_id, session_id=self.session_id)
         await ws_manager.register_connection(self.user_id, mock_connection)
@@ -587,7 +587,7 @@ class TestAgentWebSocketCoordination(SSotAsyncTestCase):
     async def test_agent_websocket_user_isolation(self):
         """Test user isolation in Agent-WebSocket coordination"""
         bridge_adapter = WebSocketBridgeAdapter()
-        ws_manager = await get_websocket_manager()
+        ws_manager = get_websocket_manager()
         bridge_adapter.initialize(ws_manager)
         user1_conn = MockWebSocketConnection(user_id=self.user_id, session_id=self.session_id)
         user2_id = self.id_manager.generate_id(IDType.USER)
@@ -602,7 +602,7 @@ class TestAgentWebSocketCoordination(SSotAsyncTestCase):
     async def test_agent_websocket_context_propagation(self):
         """Test context propagation through Agent-WebSocket bridge"""
         bridge_adapter = WebSocketBridgeAdapter()
-        ws_manager = await get_websocket_manager()
+        ws_manager = get_websocket_manager()
         bridge_adapter.initialize(ws_manager)
         mock_connection = MockWebSocketConnection(user_id=self.user_id, session_id=self.session_id)
         await ws_manager.register_connection(self.user_id, mock_connection)
@@ -616,7 +616,7 @@ class TestAgentWebSocketCoordination(SSotAsyncTestCase):
     async def test_agent_websocket_error_handling(self):
         """Test error handling in Agent-WebSocket coordination"""
         bridge_adapter = WebSocketBridgeAdapter()
-        ws_manager = await get_websocket_manager()
+        ws_manager = get_websocket_manager()
         bridge_adapter.initialize(ws_manager)
         event_data = {'agent_id': 'error_agent'}
         result = await bridge_adapter.emit_agent_event('nonexistent_user', 'agent_started', event_data)
@@ -626,7 +626,7 @@ class TestAgentWebSocketCoordination(SSotAsyncTestCase):
     async def test_agent_websocket_performance_monitoring(self):
         """Test performance monitoring of Agent-WebSocket coordination"""
         bridge_adapter = WebSocketBridgeAdapter()
-        ws_manager = await get_websocket_manager()
+        ws_manager = get_websocket_manager()
         bridge_adapter.initialize(ws_manager)
         mock_connection = MockWebSocketConnection(user_id=self.user_id, session_id=self.session_id)
         await ws_manager.register_connection(self.user_id, mock_connection)
@@ -642,7 +642,7 @@ class TestAgentWebSocketCoordination(SSotAsyncTestCase):
     async def test_agent_websocket_concurrent_coordination(self):
         """Test concurrent Agent-WebSocket coordination"""
         bridge_adapter = WebSocketBridgeAdapter()
-        ws_manager = await get_websocket_manager()
+        ws_manager = get_websocket_manager()
         bridge_adapter.initialize(ws_manager)
         mock_connection = MockWebSocketConnection(user_id=self.user_id, session_id=self.session_id)
         await ws_manager.register_connection(self.user_id, mock_connection)
@@ -656,7 +656,7 @@ class TestAgentWebSocketCoordination(SSotAsyncTestCase):
     async def test_agent_websocket_state_synchronization(self):
         """Test state synchronization between Agent and WebSocket"""
         bridge_adapter = WebSocketBridgeAdapter()
-        ws_manager = await get_websocket_manager()
+        ws_manager = get_websocket_manager()
         bridge_adapter.initialize(ws_manager)
         mock_connection = MockWebSocketConnection(user_id=self.user_id, session_id=self.session_id)
         await ws_manager.register_connection(self.user_id, mock_connection)
@@ -674,7 +674,7 @@ class TestAgentWebSocketCoordination(SSotAsyncTestCase):
     async def test_agent_websocket_resource_cleanup(self):
         """Test resource cleanup in Agent-WebSocket coordination"""
         bridge_adapter = WebSocketBridgeAdapter()
-        ws_manager = await get_websocket_manager()
+        ws_manager = get_websocket_manager()
         bridge_adapter.initialize(ws_manager)
         mock_connection = MockWebSocketConnection(user_id=self.user_id, session_id=self.session_id)
         await ws_manager.register_connection(self.user_id, mock_connection)
@@ -688,7 +688,7 @@ class TestAgentWebSocketCoordination(SSotAsyncTestCase):
     async def test_agent_websocket_message_ordering(self):
         """Test message ordering in Agent-WebSocket coordination"""
         bridge_adapter = WebSocketBridgeAdapter()
-        ws_manager = await get_websocket_manager()
+        ws_manager = get_websocket_manager()
         bridge_adapter.initialize(ws_manager)
         mock_connection = MockWebSocketConnection(user_id=self.user_id, session_id=self.session_id)
         await ws_manager.register_connection(self.user_id, mock_connection)
@@ -701,7 +701,7 @@ class TestAgentWebSocketCoordination(SSotAsyncTestCase):
     async def test_agent_websocket_reconnection_handling(self):
         """Test reconnection handling in Agent-WebSocket coordination"""
         bridge_adapter = WebSocketBridgeAdapter()
-        ws_manager = await get_websocket_manager()
+        ws_manager = get_websocket_manager()
         bridge_adapter.initialize(ws_manager)
         mock_connection = MockWebSocketConnection(user_id=self.user_id, session_id=self.session_id)
         await ws_manager.register_connection(self.user_id, mock_connection)

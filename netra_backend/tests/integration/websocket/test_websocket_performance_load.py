@@ -165,7 +165,7 @@ class TestWebSocketPerformanceLoad(SSotAsyncTestCase):
         """Create a user for load testing."""
         user_data = TestUserData(user_id=f'load_user_{user_index}_{uuid.uuid4().hex[:8]}', email=f'load{user_index}@netra-performance.ai', tier='enterprise' if user_index % 4 == 0 else 'mid', thread_id=f'load_thread_{user_index}_{uuid.uuid4().hex[:8]}')
         user_context = type('MockUserContext', (), {'user_id': user_data.user_id, 'thread_id': user_data.thread_id, 'request_id': f'load_request_{user_index}_{uuid.uuid4().hex[:8]}', 'email': user_data.email, 'tier': user_data.tier, 'is_test': True, 'load_test_index': user_index})()
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'perf_conn_{user_index}_{uuid.uuid4().hex[:8]}'
         mock_ws = PerformanceWebSocketMock(user_data.user_id, connection_id)

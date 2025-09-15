@@ -41,7 +41,7 @@ class TestCrossServiceWebSocketManagerConsistency(SSotAsyncTestCase):
             from netra_backend.app.agents.registry import AgentRegistry
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             user_context = {'user_id': 'registry_test_user', 'thread_id': 'registry_test_thread'}
-            direct_websocket_manager = await get_websocket_manager(user_context=user_context)
+            direct_websocket_manager = get_websocket_manager(user_context=user_context)
             agent_registry = AgentRegistry()
             if hasattr(agent_registry, 'websocket_manager'):
                 registry_websocket_manager = agent_registry.websocket_manager
@@ -102,7 +102,7 @@ class TestCrossServiceWebSocketManagerConsistency(SSotAsyncTestCase):
         try:
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             user_context = {'user_id': 'cross_service_user', 'thread_id': 'cross_service_thread'}
-            websocket_manager = await get_websocket_manager(user_context=user_context)
+            websocket_manager = get_websocket_manager(user_context=user_context)
             mock_websocket = MagicMock()
             mock_websocket.send = AsyncMock()
             if hasattr(websocket_manager, 'add_connection'):
@@ -149,7 +149,7 @@ class TestCrossServiceWebSocketManagerConsistency(SSotAsyncTestCase):
 
                 async def get_websocket_manager(self, user_context):
                     from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-                    return await get_websocket_manager(user_context=user_context)
+                    return get_websocket_manager(user_context=user_context)
             injector = MockDependencyInjector()
             user_context = {'user_id': 'di_test_user', 'thread_id': 'di_test_thread'}
             service_managers = {}
@@ -178,7 +178,7 @@ class TestCrossServiceWebSocketManagerConsistency(SSotAsyncTestCase):
         try:
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             user_context = {'user_id': 'cleanup_test_user', 'thread_id': 'cleanup_test_thread'}
-            websocket_manager = await get_websocket_manager(user_context=user_context)
+            websocket_manager = get_websocket_manager(user_context=user_context)
             if hasattr(websocket_manager, 'connections'):
                 websocket_manager.connections['test_connection_1'] = MagicMock()
                 websocket_manager.connections['test_connection_2'] = MagicMock()

@@ -79,7 +79,7 @@ class TestWebSocketManagerDirectInstantiationPrevention(SSotAsyncTestCase):
 
         This test should PASS, demonstrating the correct factory pattern.
         """
-        manager = await get_websocket_manager(user_context=self.mock_user_context, mode=WebSocketManagerMode.UNIFIED)
+        manager = get_websocket_manager(user_context=self.mock_user_context, mode=WebSocketManagerMode.UNIFIED)
         self.assertIsInstance(manager, UnifiedWebSocketManager)
 
     def test_multiple_direct_instantiation_attempts_accumulate_violations(self):
@@ -135,7 +135,7 @@ class TestWebSocketManagerDirectInstantiationPrevention(SSotAsyncTestCase):
         """
         with patch('netra_backend.app.websocket_core.ssot_validation_enhancer._ssot_validator') as mock_validator:
             mock_validator.validate_manager_creation.return_value = True
-            manager = await get_websocket_manager(user_context=self.mock_user_context, mode=WebSocketManagerMode.UNIFIED)
+            manager = get_websocket_manager(user_context=self.mock_user_context, mode=WebSocketManagerMode.UNIFIED)
             mock_validator.validate_manager_creation.assert_called_once()
             call_args = mock_validator.validate_manager_creation.call_args
             self.assertIn('creation_method', call_args.kwargs)
@@ -149,7 +149,7 @@ class TestWebSocketManagerDirectInstantiationPrevention(SSotAsyncTestCase):
         """
         from netra_backend.app.websocket_core.ssot_validation_enhancer import get_ssot_validation_summary
         initial_summary = get_ssot_validation_summary()
-        manager = await get_websocket_manager(user_context=self.mock_user_context, mode=WebSocketManagerMode.UNIFIED)
+        manager = get_websocket_manager(user_context=self.mock_user_context, mode=WebSocketManagerMode.UNIFIED)
         updated_summary = get_ssot_validation_summary()
         self.assertTrue(updated_summary['total_validations'] > initial_summary['total_validations'], 'Validation was not recorded in the enhancer summary')
 

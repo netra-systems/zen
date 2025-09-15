@@ -18,6 +18,7 @@ import json
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, patch, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # SSOT WebSocket Imports
 try:
@@ -95,7 +96,7 @@ class TestWebSocketAwaitExpressionFixes(SSotAsyncTestCase):
         self.mock_connections[user_id] = mock_connection
         
         # Create manager with mocked connection
-        manager = UnifiedWebSocketManager()
+        manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         manager._connections = {user_id: mock_connection}
         
         return manager

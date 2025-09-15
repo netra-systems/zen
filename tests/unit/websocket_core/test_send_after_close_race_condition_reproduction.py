@@ -48,7 +48,7 @@ class TestSendAfterCloseRaceCondition(SSotAsyncTestCase):
         self.connection_id = ConnectionID('conn_race_test_001')
         self.mock_websocket = AsyncMock()
         self.mock_websocket.send_json = AsyncMock()
-        self.manager = await get_websocket_manager(mode=WebSocketManagerMode.ISOLATED, user_context=Mock(user_id=self.user_id))
+        self.manager = get_websocket_manager(mode=WebSocketManagerMode.ISOLATED, user_context=Mock(user_id=self.user_id))
 
     async def test_send_message_to_closing_connection_should_fail(self):
         """

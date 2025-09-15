@@ -487,7 +487,7 @@ class WebSocketStartupHandshakeTimingTests(SSotAsyncTestCase):
                         start_time = time.time()
                         
                         # Create WebSocket manager (triggers protection logic)
-                        manager = await get_websocket_manager(
+                        manager = get_websocket_manager(
                             user_context=self.user_context,
                             mode=WebSocketManagerMode.UNIFIED
                         )

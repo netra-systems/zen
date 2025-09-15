@@ -459,7 +459,7 @@ class TestWebSocketHandshakeRaceConditions(WebSocketIntegrationTest):
             
             try:
                 # Attempt to get WebSocket manager (this can fail during race conditions)
-                websocket_manager = await get_websocket_manager(user_id=user_id)
+                websocket_manager = get_websocket_manager(user_id=user_id)
                 
                 # Validate factory created proper manager
                 assert websocket_manager is not None, "WebSocket manager should not be None"

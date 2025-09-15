@@ -74,7 +74,7 @@ class TestIssue1231AsyncAwaitBugReproduction:
         REPRODUCTION TEST: Demonstrates that awaiting get_websocket_manager() fails
 
         This reproduces the exact bug pattern found in websocket_ssot.py where
-        'await get_websocket_manager()' is used incorrectly.
+        'get_websocket_manager()' is used incorrectly.
 
         EXPECTED: This test should FAIL, demonstrating the bug
         """
@@ -84,7 +84,7 @@ class TestIssue1231AsyncAwaitBugReproduction:
         # It should cause a TypeError: "object X can't be used in 'await' expression"
         with pytest.raises(TypeError) as exc_info:
             # This is the BUGGY code pattern from websocket_ssot.py
-            manager = await get_websocket_manager(user_context)
+            manager = get_websocket_manager(user_context)
 
         error_msg = str(exc_info.value).lower()
 
@@ -103,7 +103,7 @@ class TestIssue1231AsyncAwaitBugReproduction:
             """Simulate the buggy code from websocket_ssot.py"""
             # This is the EXACT problematic line from websocket_ssot.py
             # This should raise TypeError directly
-            manager = await get_websocket_manager(user_context)  # BUG: awaiting non-coroutine
+            manager = get_websocket_manager(user_context)  # BUG: awaiting non-coroutine
             return manager
 
         user_context = self.create_test_user_context()
@@ -126,7 +126,7 @@ class TestIssue1231AsyncAwaitBugReproduction:
         async def simulate_health_endpoint():
             """Simulate the buggy health endpoint code"""
             # This simulates the buggy pattern from websocket_ssot.py health endpoint
-            manager = await get_websocket_manager(user_context=None)  # BUG: awaiting non-coroutine
+            manager = get_websocket_manager(user_context=None)  # BUG: awaiting non-coroutine
             return {"status": "healthy", "manager": str(manager)}
 
         # This should fail with TypeError, reproducing the health endpoint bug
@@ -147,7 +147,7 @@ class TestIssue1231AsyncAwaitBugReproduction:
         async def simulate_config_endpoint():
             """Simulate the buggy config endpoint code"""
             # This simulates the buggy pattern from websocket_ssot.py config endpoint
-            manager = await get_websocket_manager(user_context=None)  # BUG: awaiting non-coroutine
+            manager = get_websocket_manager(user_context=None)  # BUG: awaiting non-coroutine
             return {"websocket_config": {"manager": str(manager)}}
 
         # This should fail with TypeError, reproducing the config endpoint bug
@@ -168,7 +168,7 @@ class TestIssue1231AsyncAwaitBugReproduction:
         async def simulate_stats_endpoint():
             """Simulate the buggy stats endpoint code"""
             # This simulates the buggy pattern from websocket_ssot.py stats endpoint
-            manager = await get_websocket_manager(user_context=None)  # BUG: awaiting non-coroutine
+            manager = get_websocket_manager(user_context=None)  # BUG: awaiting non-coroutine
             return {"stats": {"manager": str(manager)}}
 
         # This should fail with TypeError, reproducing the stats endpoint bug

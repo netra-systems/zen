@@ -64,7 +64,6 @@ except ImportError as e:
     BaseAgent = MagicMock
     AgentExecutionContext = MagicMock
 
-
 class TestAgentWebSocketEventsComprehensive(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Enhanced Agent WebSocket Event Processing.
@@ -158,13 +157,11 @@ class TestAgentWebSocketEventsComprehensive(SSotAsyncTestCase):
 
     async def _initialize_enhanced_websocket_infrastructure(self):
         """Initialize enhanced WebSocket infrastructure components for comprehensive testing."""
-        if not REAL_COMPONENTS_AVAILABLE:
-            self._initialize_mock_enhanced_infrastructure()
-            return
+        if not REAL_COMPONENTS_AVAILABLE:return
 
         try:
             # Create real WebSocket manager for enhanced event notifications
-            self.websocket_manager = await get_websocket_manager()
+            self.websocket_manager = get_websocket_manager()
 
             # Create enhanced WebSocket bridge for comprehensive agent-websocket integration
             self.websocket_bridge = create_agent_websocket_bridge()
@@ -222,8 +219,10 @@ class TestAgentWebSocketEventsComprehensive(SSotAsyncTestCase):
                 )
 
         except Exception as e:
-            print(f"Failed to initialize enhanced infrastructure, using mocks: {e}")
-            self._initialize_mock_enhanced_infrastructure()
+
+            # CLAUDE.md COMPLIANCE: Tests must use real services only
+
+            raise RuntimeError(f"Failed to initialize real infrastructure: {e}") from e
 
     def _initialize_mock_enhanced_infrastructure(self):
         """Initialize enhanced mock infrastructure for testing when real components unavailable."""

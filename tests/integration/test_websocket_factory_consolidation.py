@@ -167,7 +167,7 @@ class TestWebSocketFactoryConsolidation(SSotAsyncTestCase):
             shared_state_violations = []
             
             for i, user_context in enumerate(self.test_user_contexts):
-                manager = await get_websocket_manager(user_context=user_context)
+                manager = get_websocket_manager(user_context=user_context)
                 user_managers[user_context.user_id] = manager
                 
                 # Test that each manager has isolated state
@@ -353,7 +353,7 @@ class TestWebSocketFactoryConsolidation(SSotAsyncTestCase):
             
             # Create managers and modify their state
             for i, user_context in enumerate(self.test_user_contexts):
-                manager = await get_websocket_manager(user_context=user_context)
+                manager = get_websocket_manager(user_context=user_context)
                 
                 # Try to set some state that shouldn't leak between users
                 test_state_key = f"test_state_{user_context.user_id}"

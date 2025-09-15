@@ -63,7 +63,6 @@ except ImportError as e:
     BaseAgent = MagicMock
     AgentExecutionContext = MagicMock
 
-
 class TestMessageProcessingPipeline(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Message Processing Pipeline.
@@ -161,13 +160,11 @@ class TestMessageProcessingPipeline(SSotAsyncTestCase):
 
     async def _initialize_pipeline_infrastructure(self):
         """Initialize message processing pipeline infrastructure for comprehensive testing."""
-        if not REAL_COMPONENTS_AVAILABLE:
-            self._initialize_mock_pipeline_infrastructure()
-            return
+        if not REAL_COMPONENTS_AVAILABLE:return
 
         try:
             # Create real WebSocket manager for pipeline notifications
-            self.websocket_manager = await get_websocket_manager()
+            self.websocket_manager = get_websocket_manager()
 
             # Create WebSocket bridge for pipeline-websocket integration
             self.websocket_bridge = create_agent_websocket_bridge()
@@ -235,8 +232,10 @@ class TestMessageProcessingPipeline(SSotAsyncTestCase):
                 )
 
         except Exception as e:
-            print(f"Failed to initialize pipeline infrastructure, using mocks: {e}")
-            self._initialize_mock_pipeline_infrastructure()
+
+            # CLAUDE.md COMPLIANCE: Tests must use real services only
+
+            raise RuntimeError(f"Failed to initialize real infrastructure: {e}") from e
 
     def _initialize_mock_pipeline_infrastructure(self):
         """Initialize mock pipeline infrastructure for testing when real components unavailable."""

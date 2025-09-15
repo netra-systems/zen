@@ -26,19 +26,20 @@ from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timezone
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-# Import from SSOT consolidated implementation
-from netra_backend.app.websocket_core.event_validator import (
-    UnifiedEventValidator as WebSocketEventValidator,
-    ValidationResult,
-    EventCriticality,
-    get_websocket_validator,
-    reset_websocket_validator,
-    CriticalAgentEventType
-)
+# Import from SSOT consolidated implementation - using specific module imports
+from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator
+from netra_backend.app.websocket_core.event_validator import ValidationResult as EventValidationResult
+from netra_backend.app.websocket_core.event_validator import EventCriticality as EventValidationCriticality
+from netra_backend.app.websocket_core.event_validator import get_websocket_validator
+from netra_backend.app.websocket_core.event_validator import reset_websocket_validator
+from netra_backend.app.websocket_core.event_validator import CriticalAgentEventType
 
-logger = central_logger.get_logger(__name__)
+# Create alias for compatibility
+WebSocketEventValidator = UnifiedEventValidator
+
+logger = get_logger(__name__)
 
 
 class WebSocketErrorType(Enum):
@@ -501,8 +502,8 @@ def is_valid_connection_state(state: str) -> bool:
     return is_valid
 
 
-# Legacy alias for test compatibility
-WebSocketEventValidator = WebSocketErrorValidator
+# Legacy alias for test compatibility - already defined above
+# WebSocketEventValidator = UnifiedEventValidator (defined at line 40)
 
 # Export classes and functions
 __all__ = [

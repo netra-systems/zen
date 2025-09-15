@@ -28,6 +28,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from auth_service.auth_core.config import AuthConfig
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 logger = central_logger.get_logger(__name__)
 MINIMUM_EXECUTION_TIME = 0.1
 MISSION_CRITICAL_EVENTS = {'agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed'}
@@ -169,7 +170,7 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
         start_time = time.time()
         logger.info('[U+1F680] Testing REAL WebSocket manager functionality')
         user_data = await self.auth_helper.create_authenticated_user(email_prefix='websocket_manager_test', password='ManagerTest123!', name='WebSocket Manager Test User')
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         assert websocket_manager is not None, 'WebSocket manager must be initialized'
         websocket = await self._create_real_authenticated_websocket(user_data)
         self.active_connections.append(websocket)
@@ -213,7 +214,7 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
         websocket = await self._create_real_authenticated_websocket(user_data)
         self.active_connections.append(websocket)
         collector = RealWebSocketEventCollector(websocket, user_data.user_id)
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         notifier = WebSocketNotifier.create_for_user(websocket_manager)
         conn_id = f'mission_critical_{user_data.user_id}'
         await websocket_manager.connect_user(user_data.user_id, websocket, conn_id)
@@ -290,7 +291,7 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
             collector = RealWebSocketEventCollector(websocket, user_data.user_id)
             users.append({'user_data': user_data, 'websocket': websocket, 'collector': collector})
             logger.info(f'[U+2713] User {i + 1} authenticated and connected: {user_data.user_id}')
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         notifier = WebSocketNotifier.create_for_user(websocket_manager)
         for i, user in enumerate(users):
             conn_id = f"multi_user_agent_{i}_{user['user_data'].user_id}"

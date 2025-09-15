@@ -103,7 +103,7 @@ class PerformanceAssessment:
                     error_msg = None
                     
                     try:
-                        manager = await get_websocket_manager(mode=mode)
+                        manager = get_websocket_manager(mode=mode)
                         success = manager is not None
                         duration_ms = (time.time() - start_time) * 1000
                         

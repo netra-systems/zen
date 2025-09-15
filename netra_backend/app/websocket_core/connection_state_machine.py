@@ -27,11 +27,11 @@ from enum import Enum
 from typing import Any, Dict, Optional, Set, Callable
 from dataclasses import dataclass, field
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.core.exceptions.agent_exceptions import AgentStateTransitionError
 from shared.types.core_types import UserID, ConnectionID, ensure_user_id
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class ApplicationConnectionState(str, Enum):

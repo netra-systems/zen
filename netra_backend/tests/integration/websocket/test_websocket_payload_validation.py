@@ -242,7 +242,7 @@ class TestWebSocketPayloadValidation(SSotAsyncTestCase):
         protecting user security and maintaining platform trust.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'xss_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = ValidatingWebSocketMock(self.test_user.user_id, connection_id)
@@ -276,7 +276,7 @@ class TestWebSocketPayloadValidation(SSotAsyncTestCase):
         of sensitive data in chat logs and system processing.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'sensitive_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = ValidatingWebSocketMock(self.test_user.user_id, connection_id)
@@ -307,7 +307,7 @@ class TestWebSocketPayloadValidation(SSotAsyncTestCase):
         maliciously large payloads that could impact service performance.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'size_limit_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = ValidatingWebSocketMock(self.test_user.user_id, connection_id)
@@ -340,7 +340,7 @@ class TestWebSocketPayloadValidation(SSotAsyncTestCase):
         consume excessive processing resources through deep nesting.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'depth_limit_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = ValidatingWebSocketMock(self.test_user.user_id, connection_id)
@@ -376,7 +376,7 @@ class TestWebSocketPayloadValidation(SSotAsyncTestCase):
         maliciously crafted JSON that could cause parsing errors.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'json_validation_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = ValidatingWebSocketMock(self.test_user.user_id, connection_id)
@@ -406,7 +406,7 @@ class TestWebSocketPayloadValidation(SSotAsyncTestCase):
         that might combine multiple exploitation techniques.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'comprehensive_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = ValidatingWebSocketMock(self.test_user.user_id, connection_id)

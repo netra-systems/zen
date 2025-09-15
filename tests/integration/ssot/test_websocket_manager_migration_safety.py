@@ -100,11 +100,11 @@ class TestWebSocketManagerMigrationSafety(SSotAsyncTestCase):
         CRITICAL TEST: Validate direct WebSocketManager maintains user isolation.
         """
         # Create managers for different users using direct instantiation
-        manager_alpha = await get_websocket_manager(
+        manager_alpha = get_websocket_manager(
             user_context=self.user_context_alpha,
             mode=WebSocketManagerMode.UNIFIED
         )
-        manager_beta = await get_websocket_manager(
+        manager_beta = get_websocket_manager(
             user_context=self.user_context_beta,
             mode=WebSocketManagerMode.UNIFIED
         )
@@ -124,7 +124,7 @@ class TestWebSocketManagerMigrationSafety(SSotAsyncTestCase):
         reliably both before and after factory migration.
         """
         # Create manager and test event delivery
-        manager = await get_websocket_manager(
+        manager = get_websocket_manager(
             user_context=self.user_context_alpha,
             mode=WebSocketManagerMode.UNIFIED
         )
@@ -147,7 +147,7 @@ class TestWebSocketManagerMigrationSafety(SSotAsyncTestCase):
             self.created_managers.append(factory_manager)
         
         # Test direct manager pattern
-        direct_manager = await get_websocket_manager(
+        direct_manager = get_websocket_manager(
             user_context=self.user_context_alpha,
             mode=WebSocketManagerMode.UNIFIED
         )
@@ -163,7 +163,7 @@ class TestWebSocketManagerMigrationSafety(SSotAsyncTestCase):
         through WebSocket manager migration.
         """
         # Create WebSocket manager for Golden Path test
-        manager = await get_websocket_manager(
+        manager = get_websocket_manager(
             user_context=self.user_context_alpha,
             mode=WebSocketManagerMode.UNIFIED
         )

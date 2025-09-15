@@ -27,7 +27,7 @@ from abc import ABC, abstractmethod
 import logging
 from collections import defaultdict
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
 # Conditional import for test_only decorator - only needed in test environments
 try:
@@ -40,7 +40,7 @@ except ImportError:
             return func
         return decorator
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 # Type variable for generic registry
 T = TypeVar('T')

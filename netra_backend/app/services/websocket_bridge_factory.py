@@ -283,11 +283,11 @@ class WebSocketBridgeFactory:
 
                 # ISSUE #824 FIX: Use canonical SSOT factory pattern
                 if user_context:
-                    self._unified_manager = await get_websocket_manager(user_context)
+                    self._unified_manager = get_websocket_manager(user_context)
                 else:
                     # For testing without user context, create minimal context
                     test_context = type('TestContext', (), {'user_id': 'test_user', 'thread_id': 'test_thread'})()
-                    self._unified_manager = await get_websocket_manager(test_context)
+                    self._unified_manager = get_websocket_manager(test_context)
 
                 # Auto-configure other components if needed
                 if not self._connection_pool:

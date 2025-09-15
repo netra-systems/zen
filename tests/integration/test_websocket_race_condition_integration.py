@@ -119,7 +119,7 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
                 
                 # Attempt WebSocket manager creation during potential startup race
                 manager_start_time = time.time()
-                manager = await get_websocket_manager(
+                manager = get_websocket_manager(
                     user_context=self.user_context,
                     mode=WebSocketManagerMode.UNIFIED
                 )
@@ -201,7 +201,7 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
             """Create WebSocket manager and track timing."""
             try:
                 start_time = time.time()
-                manager = await get_websocket_manager(
+                manager = get_websocket_manager(
                     user_context=context,
                     mode=WebSocketManagerMode.UNIFIED
                 )
@@ -312,7 +312,7 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
                 
                 # Test WebSocket manager creation during delay scenario
                 manager_start_time = time.time()
-                manager = await get_websocket_manager(
+                manager = get_websocket_manager(
                     user_context=self.user_context,
                     mode=WebSocketManagerMode.UNIFIED
                 )
@@ -414,7 +414,7 @@ class WebSocketRaceConditionIntegrationTests(SSotAsyncTestCase):
                 start_time = time.time()
                 
                 # Test connection establishment timing
-                manager = await get_websocket_manager(
+                manager = get_websocket_manager(
                     user_context=user_context,
                     mode=WebSocketManagerMode.UNIFIED
                 )
