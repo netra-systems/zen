@@ -169,7 +169,7 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
                                 # Act: Execute agent
                                 result = await execution_core.execute_agent(
                                     context=execution_context,
-                                    state=user_context,
+                                    user_context=user_context,
                                     timeout=30.0
                                 )
         
