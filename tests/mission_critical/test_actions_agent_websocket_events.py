@@ -6,28 +6,8 @@ import time
 from typing import Dict, Any, List
 from unittest.mock import Mock, patch
 
-class WebSocketTestHelper:
-    """Real WebSocket connection for testing instead of mocks."""
-
-    def __init__(self):
-        self.messages_sent = []
-        self.is_connected = True
-        self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
-            raise RuntimeError("WebSocket is closed")
-        self.messages_sent.append(message)
-
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
-        """Close WebSocket connection."""
-        self._closed = True
-        self.is_connected = False
-
-    def get_messages(self) -> list:
-        """Get all sent messages."""
-        return self.messages_sent.copy()
+# Import SSOT WebSocket test utility
+from test_framework.ssot.websocket_connection_test_utility import TestWebSocketConnection as WebSocketTestHelper
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
