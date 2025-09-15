@@ -31,7 +31,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestWebSocketManagerSSOTSingletonEnforcement(SSotAsyncTestCase):
+class TestWebSocketManagerSSOTSingletonEnforcement(SSotAsyncTestCase, unittest.TestCase):
     """Test WebSocket Manager singleton pattern enforcement."""
 
     def setup_method(self, method):
@@ -42,7 +42,8 @@ class TestWebSocketManagerSSOTSingletonEnforcement(SSotAsyncTestCase):
         from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
         reset_manager_registry()
         
-        logger.info(f"Starting SSOT singleton enforcement test: {method.__name__}")
+        method_name = method.__name__ if method else "unknown_method"
+        logger.info(f"Starting SSOT singleton enforcement test: {method_name}")
 
     def teardown_method(self, method):
         """Clean up test environment."""
@@ -165,7 +166,7 @@ class TestWebSocketManagerSSOTSingletonEnforcement(SSotAsyncTestCase):
         logger.info("Concurrent manager access isolation test PASSED")
 
 
-class TestWebSocketManagerImportPathFragmentation(SSotAsyncTestCase):
+class TestWebSocketManagerImportPathFragmentation(SSotAsyncTestCase, unittest.TestCase):
     """Test detection of fragmented WebSocket Manager import paths."""
 
     def setup_method(self, method):
@@ -308,7 +309,7 @@ class TestWebSocketManagerImportPathFragmentation(SSotAsyncTestCase):
         logger.info(f"Duplicate manager class detection: {len(duplicate_violations)} violations found")
 
 
-class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
+class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase, unittest.TestCase):
     """Test WebSocket Manager user isolation and state contamination detection."""
 
     def setup_method(self, method):

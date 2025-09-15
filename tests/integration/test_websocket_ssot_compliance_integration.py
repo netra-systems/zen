@@ -32,7 +32,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestWebSocketManagerCrossServiceIntegration(SSotAsyncTestCase):
+class TestWebSocketManagerCrossServiceIntegration(SSotAsyncTestCase, unittest.TestCase):
     """Test WebSocket Manager SSOT compliance across service boundaries."""
 
     def setup_method(self, method):
@@ -271,7 +271,7 @@ class TestWebSocketManagerCrossServiceIntegration(SSotAsyncTestCase):
                    f"{len(successful_sessions)} concurrent sessions isolated successfully")
 
 
-class TestWebSocketManagerRealServiceIntegration(SSotAsyncTestCase):
+class TestWebSocketManagerRealServiceIntegration(SSotAsyncTestCase, unittest.TestCase):
     """Test WebSocket Manager integration with real services (no Docker)."""
 
     def setup_method(self, method):
