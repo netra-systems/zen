@@ -687,8 +687,8 @@ markers = [
     "issue_1058_broadcast_consolidation: Issue #1058 broadcast consolidation specific tests",
     "integration_demo: Integration demonstration and workflow tests",
     "ssl_security: SSL/TLS security validation tests",
-    "real_time_value: Real-time value delivery and performance tests",
-    "quality_assurance: Quality assurance and testing validation tests",
+    "real_time_value: Real-time value delivery and performance validation tests",
+    "quality_assurance: Quality assurance and feature accessibility validation tests",
 ]
 
 # Coverage settings
