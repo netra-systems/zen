@@ -169,9 +169,8 @@ class _WebSocketManagerFactory:
 # This enforces factory pattern usage and prevents direct instantiation
 WebSocketManager = _WebSocketManagerFactory
 
-# ISSUE #1184 REMEDIATION: Remove duplicate UnifiedWebSocketManager export
-# Use import from unified_manager.py for UnifiedWebSocketManager (SSOT)
-# For runtime usage, use get_websocket_manager() factory function
+# ISSUE #1184 REMEDIATION: Import UnifiedWebSocketManager from unified_manager.py (SSOT)
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
 # ISSUE #1182 REMEDIATION COMPLETED: WebSocketManagerFactory consolidated into get_websocket_manager()
 # All legacy test patterns now use the canonical SSOT factory function
