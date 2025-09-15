@@ -69,7 +69,7 @@ from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionR
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.core.resilience.unified_retry_handler import UnifiedRetryHandler, RetryConfig
-from netra_backend.app.services.circuit_breaker import CircuitBreakerState
+from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreakerState as CircuitBreakerState
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient

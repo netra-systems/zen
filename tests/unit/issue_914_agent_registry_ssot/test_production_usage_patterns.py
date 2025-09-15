@@ -57,9 +57,9 @@ class TestAgentRegistryProductionUsagePatterns(SSotAsyncTestCase):
     patterns and provide data for SSOT consolidation planning.
     """
 
-    async def async_setup_method(self, method=None):
+    def setup_method(self, method=None):
         """Set up test environment with SSOT patterns"""
-        await super().async_setup_method(method)
+        super().setup_method(method)
         self.env = IsolatedEnvironment()
         self.registry_import_patterns = ['from\\s+netra_backend\\.app\\.agents\\.registry\\s+import\\s+AgentRegistry', 'from\\s+netra_backend\\.app\\.agents\\.registry\\s+import\\s+agent_registry', 'import\\s+netra_backend\\.app\\.agents\\.registry', 'from\\s+netra_backend\\.app\\.agents\\.supervisor\\.agent_registry\\s+import\\s+AgentRegistry', 'from\\s+netra_backend\\.app\\.agents\\.supervisor\\.agent_registry\\s+import\\s+agent_registry', 'from\\s+netra_backend\\.app\\.agents\\.supervisor\\.agent_registry\\s+import\\s+get_agent_registry', 'import\\s+netra_backend\\.app\\.agents\\.supervisor\\.agent_registry', 'agent_registry\\s*=', 'AgentRegistry\\(', 'get_agent_registry\\(']
         self.scan_directories = [Path('netra_backend/app'), Path('tests'), Path('auth_service'), Path('shared')]
@@ -465,12 +465,12 @@ class TestAgentRegistryProductionUsagePatterns(SSotAsyncTestCase):
             context.append(f'{marker} {i + 1:3d}: {file_lines[i]}')
         return '\n'.join(context)
 
-    async def async_teardown_method(self, method=None):
+    def teardown_method(self, method=None):
         """Clean up test resources"""
         self.registry_usage_patterns.clear()
         self.registry_conflicts.clear()
         self.file_registry_usage.clear()
-        await super().async_teardown_method(method)
+        super().teardown_method(method)
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

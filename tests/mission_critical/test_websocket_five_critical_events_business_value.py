@@ -91,8 +91,8 @@ from shared.types.core_types import (
 )
 
 # System Under Test - SSOT imports
-from netra_backend.app.websocket_core.unified_manager import (
-    UnifiedWebSocketManager,
+from netra_backend.app.websocket_core.websocket_manager import (
+    WebSocketManager as UnifiedWebSocketManager,
     WebSocketConnection,
     WebSocketManagerMode
 )

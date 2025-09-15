@@ -595,6 +595,19 @@ class SSotBaseTestCase:
         """Assert that first is not second (different object identity)."""
         assert first is not second, msg or f"Expected {first} is not {second} (different object identity)"
 
+    def fail(self, msg=None):
+        """Fail the test with an optional message.
+
+        This provides unittest compatibility for tests that call self.fail().
+
+        Args:
+            msg: Optional failure message
+        """
+        if msg:
+            pytest.fail(msg)
+        else:
+            pytest.fail("Test failed")
+
     def assert_env_var_set(self, key: str, expected_value: Optional[str] = None) -> None:
         """
         Assert that an environment variable is set.
@@ -749,6 +762,7 @@ class SSotAsyncTestCase(SSotBaseTestCase):
     def setup_method(self, method=None):
         """Setup method for async tests - calls parent sync setup."""
         # Call the parent's sync setup method directly
+        # The parent setup_method properly initializes all attributes
         super().setup_method(method)
     
     def teardown_method(self, method=None):
@@ -871,6 +885,22 @@ class SSotAsyncTestCase(SSotBaseTestCase):
             return await asyncio.wait_for(coro, timeout=timeout)
         except asyncio.TimeoutError:
             raise TimeoutError(f"Coroutine timed out after {timeout} seconds")
+
+    # === UNITTEST COMPATIBILITY METHODS ===
+    # Ensure all unittest assertion methods are available in async test case
+
+    def fail(self, msg=None):
+        """Fail the test with an optional message.
+
+        This provides unittest compatibility for async tests that call self.fail().
+
+        Args:
+            msg: Optional failure message
+        """
+        if msg:
+            pytest.fail(msg)
+        else:
+            pytest.fail("Test failed")
 
 
 # === SSOT MIGRATION COMPLETE ===

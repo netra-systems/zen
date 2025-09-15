@@ -349,7 +349,7 @@ async def websocket_client():
     except Exception as e:
         pytest.skip(f"WebSocket connection failed: {e}")
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 async def staging_services_fixture():
     """
     Staging services fixture providing real staging service connections.
@@ -392,9 +392,30 @@ async def staging_services_fixture():
             "api_url": config.api_url,
             "websocket_url": config.websocket_url,
             "auth_url": config.auth_url,
-            "health_endpoints": config.health_endpoints,
+            "health_endpoint": config.health_endpoint,
             "test_jwt_token": config.test_jwt_token,
             "test_api_key": config.test_api_key
         }
         
         yield services
+
+@pytest.fixture(scope="function")
+async def real_services(staging_services_fixture):
+    """Real services fixture for staging E2E tests - backward compatibility alias."""
+    staging_services = staging_services_fixture
+    services = {
+        "environment": "staging",
+        "database_available": True,
+        "redis_available": True,
+        "clickhouse_available": False,  # Known Issue #1086
+        "backend_url": staging_services.get("backend_url", "https://backend-staging-701982941522.us-central1.run.app"),
+        "api_url": staging_services.get("api_url", "https://api.staging.netrasystems.ai"),
+        "websocket_url": staging_services.get("websocket_url", "wss://api.staging.netrasystems.ai/ws"),
+        "auth_url": staging_services.get("auth_url", "https://auth.staging.netrasystems.ai")
+    }
+    yield services
+
+@pytest.fixture
+def real_llm():
+    """Real LLM fixture for staging tests."""
+    return True  # Staging environment uses real LLM services
