@@ -29,9 +29,9 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 class ContextValidationTests(SSotAsyncTestCase):
     """Unit tests for user execution context validation and security."""
 
-    def setup_method(self):
+    def setup_method(self, method=None):
         """Set up test fixtures."""
-        super().setup_method()
+        super().setup_method(method)
         self.context_manager = AgentExecutionContextManager()
         self.test_user_id = f'user_{uuid.uuid4().hex[:8]}'
         self.test_thread_id = f'thread_{uuid.uuid4().hex[:8]}'
