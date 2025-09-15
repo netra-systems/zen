@@ -5,7 +5,7 @@ argument-hint: "[focus area, defaults to latest]"
 
 Have sub agents use built in github tools or direct `git` or `gh` if needed.
 
-By default, ignore issues with the tag "actively-being-worked-on" and that have an "agent-session-{datetime}" within the last 20 minutes.
+By default, ignore issues with the tag "actively-being-worked-on" and that have an "agent-session-{datetime}" within the last 20 minutes. Note: Expect multiple "agent-session-{datetime}" tags.
 
 ISSUE: ${1 : one recent open issue}
  
