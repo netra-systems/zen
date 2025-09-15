@@ -21,7 +21,7 @@ class TestTriageEntityIntent(BaseTestCase):
         self.llm_manager = Mock(spec=LLMManager)
         self.llm_manager._get_model_name = Mock(return_value='test-model')
         self.llm_manager.ask_llm = AsyncMock(return_value='{"intent": {"primary_intent": "optimization"}, "entities": ["performance", "cost"]}')
-        self.test_context = UserExecutionContext(user_id='test-user-entity', thread_id='test-thread-entity', run_id='test-run-entity', metadata={'user_request': 'test entity intent recognition'}).with_db_session(AsyncMock())
+        self.test_context = UserExecutionContext(user_id='test-user-entity', thread_id='test-thread-entity', run_id='test-run-entity', agent_context={'user_request': 'test entity intent recognition'}).with_db_session(AsyncMock())
         self.triage_agent = UnifiedTriageAgent(llm_manager=self.llm_manager)
         self.track_resource(self.triage_agent)
 

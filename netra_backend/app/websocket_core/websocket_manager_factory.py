@@ -1,110 +1,159 @@
-"""SSOT WebSocket Manager Factory - Issue #1226 Resolution
+"""
+WebSocket Manager Factory: SSOT Factory Interface for WebSocket Management
 
-This module provides the canonical factory pattern for WebSocket manager creation,
-ensuring proper user isolation and SSOT compliance.
-
-CRITICAL: This factory enables the Golden Path user flow by providing:
-- User-isolated WebSocket manager instances
-- Proper factory pattern for multi-user environments
-- SSOT compliance for WebSocket management
-- Support for all 5 critical WebSocket events
+This module provides a centralized factory interface for creating WebSocket managers
+and related components, consolidating imports from various websocket_core modules.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free -> Enterprise)
-- Business Goal: Enable $500K+ ARR Golden Path WebSocket functionality
-- Value Impact: Foundation for reliable AI chat interactions
-- Revenue Impact: Critical infrastructure supporting all user chat sessions
+- Segment: ALL (Free → Enterprise)
+- Business Goal: Maintain SSOT compliance while providing backward compatibility
+- Value Impact: Ensures consistent WebSocket manager creation across all components
+- Revenue Impact: Prevents WebSocket-related failures that could affect $500K+ ARR chat functionality
 
-ISSUE #1226 REMEDIATION: Creates missing factory module to resolve import failures
-in supervisor_factory.py and unified_init.py that were blocking WebSocket functionality.
+Key Components:
+- WebSocketManagerFactory: Factory class for creating WebSocket managers
+- create_websocket_manager: Function for creating WebSocket manager instances
+- IsolatedWebSocketManager: User isolation-aware WebSocket manager
+- Factory functions for user context creation
+
+SSOT Design:
+This module serves as a compatibility layer, re-exporting components from their
+canonical locations while maintaining existing import paths used by tests and
+mission-critical modules.
 """
 
-from typing import Optional, Any
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManagerMode
-from netra_backend.app.services.user_execution_context import UserExecutionContext
+# Re-export core WebSocket manager components from their canonical locations
+from netra_backend.app.websocket_core.websocket_manager import (
+    WebSocketManagerFactory,
+    UnifiedWebSocketManager as IsolatedWebSocketManager  # Alias for compatibility
+)
+
+# Re-export factory functions from canonical imports
+from netra_backend.app.websocket_core.canonical_imports import (
+    create_websocket_manager,
+    create_websocket_manager_sync
+)
+
+# Re-export utilities
+from netra_backend.app.websocket_core.utils import (
+    create_websocket_manager as create_websocket_manager_async
+)
+
+# Import user context creation functions (consolidated for factory usage)
+try:
+    from netra_backend.app.services.user_execution_context import (
+        create_user_execution_context,
+        create_defensive_user_execution_context
+    )
+except ImportError:
+    # Fallback for tests or modules that might not have this available
+    def create_user_execution_context(*args, **kwargs):
+        raise NotImplementedError("User execution context creation not available")
+
+    def create_defensive_user_execution_context(*args, **kwargs):
+        raise NotImplementedError("Defensive user execution context creation not available")
+
+# SSOT logging
 from shared.logging.unified_logging_ssot import get_logger
 
 logger = get_logger(__name__)
 
+# Factory instance for singleton pattern compatibility
+_factory_instance = None
 
-class WebSocketManagerFactory:
-    """Factory for creating isolated WebSocket manager instances.
-
-    This factory ensures proper user isolation and SSOT compliance for WebSocket
-    operations in multi-user environments. Each manager instance is scoped to
-    a specific user context to prevent data contamination.
+def get_websocket_manager_factory():
     """
+    Get or create the singleton WebSocket manager factory instance.
 
-    def __init__(self):
-        """Initialize the WebSocket manager factory."""
-        pass
+    Returns:
+        WebSocketManagerFactory: Singleton factory instance
+    """
+    global _factory_instance
+    if _factory_instance is None:
+        _factory_instance = WebSocketManagerFactory()
+        logger.info("Created WebSocket manager factory singleton instance")
+    return _factory_instance
 
-    async def create_isolated_manager(self, user_id: str, connection_id: str):
-        """Create an isolated WebSocket manager for a specific user.
+def create_websocket_manager_with_context(user_context=None, **kwargs):
+    """
+    Create a WebSocket manager with proper user context isolation.
 
-        Args:
-            user_id: The user identifier for isolation
-            connection_id: The WebSocket connection identifier
-
-        Returns:
-            WebSocket manager instance isolated to the specified user
-        """
-        user_context = UserExecutionContext(
-            user_id=user_id,
-            websocket_client_id=connection_id
-        )
-        return await get_websocket_manager(user_context)
-
-    def create_manager(self, user_context: Optional[UserExecutionContext] = None):
-        """Create a WebSocket manager with the given user context.
-
-        Args:
-            user_context: Optional user execution context for isolation
-
-        Returns:
-            WebSocket manager instance
-        """
-        return get_websocket_manager(user_context)
-
-
-def create_websocket_manager(user_context: Optional[UserExecutionContext] = None):
-    """Create a WebSocket manager with the given user context.
-
-    This function provides a direct interface to WebSocket manager creation
-    while maintaining SSOT compliance and user isolation.
+    This is the recommended factory function for creating WebSocket managers
+    with full user context isolation and SSOT compliance.
 
     Args:
-        user_context: Optional user execution context for isolation
+        user_context: User execution context for isolation
+        **kwargs: Additional arguments for manager creation
 
     Returns:
-        WebSocket manager instance
+        WebSocket manager instance with proper isolation
     """
-    return get_websocket_manager(user_context)
+    try:
+        # Use the canonical factory function
+        return create_websocket_manager(user_context=user_context, **kwargs)
+    except Exception as e:
+        logger.error(f"Failed to create WebSocket manager with context: {e}")
+        raise
 
+def create_isolated_websocket_manager(user_id: str, thread_id: str, run_id: str = None, **kwargs):
+    """
+    Create an isolated WebSocket manager for specific user context.
 
-# Compatibility aliases for existing imports
-IsolatedWebSocketManager = get_websocket_manager
+    This function creates a fully isolated WebSocket manager instance
+    with proper user context boundaries.
 
-
-# Factory instance for global access
-_global_factory_instance = None
-
-
-def get_factory() -> WebSocketManagerFactory:
-    """Get the global WebSocket manager factory instance.
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier for conversation
+        run_id: Optional run identifier
+        **kwargs: Additional arguments for manager creation
 
     Returns:
-        Global factory instance
+        IsolatedWebSocketManager: Manager with user isolation
     """
-    global _global_factory_instance
-    if _global_factory_instance is None:
-        _global_factory_instance = WebSocketManagerFactory()
-    return _global_factory_instance
+    try:
+        # Create user context first
+        user_context = create_user_execution_context(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id
+        )
 
+        # Create manager with context
+        return create_websocket_manager_with_context(user_context=user_context, **kwargs)
 
+    except Exception as e:
+        logger.error(f"Failed to create isolated WebSocket manager: {e}")
+        raise
+
+# Legacy compatibility functions
+def get_websocket_manager(*args, **kwargs):
+    """Legacy compatibility function."""
+    logger.warning("Using deprecated get_websocket_manager - use create_websocket_manager instead")
+    return create_websocket_manager(*args, **kwargs)
+
+# Export all public interfaces
 __all__ = [
+    # Core classes
     'WebSocketManagerFactory',
-    'create_websocket_manager',
     'IsolatedWebSocketManager',
-    'get_factory'
+
+    # Factory functions
+    'create_websocket_manager',
+    'create_websocket_manager_sync',
+    'create_websocket_manager_async',
+    'create_websocket_manager_with_context',
+    'create_isolated_websocket_manager',
+
+    # Singleton access
+    'get_websocket_manager_factory',
+
+    # User context functions
+    'create_user_execution_context',
+    'create_defensive_user_execution_context',
+
+    # Legacy compatibility
+    'get_websocket_manager'
 ]
+
+logger.info("WebSocket manager factory module loaded - SSOT consolidation active")

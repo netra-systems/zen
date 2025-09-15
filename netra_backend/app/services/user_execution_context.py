@@ -2873,6 +2873,72 @@ def create_defensive_user_execution_context(
     )
 
 
+def create_user_execution_context(user_id: str,
+                                  thread_id: str,
+                                  run_id: Optional[str] = None,
+                                  db_session: Optional['AsyncSession'] = None,
+                                  websocket_client_id: Optional[str] = None,
+                                  websocket_connection_id: Optional[str] = None) -> UserExecutionContext:
+    """Create UserExecutionContext for per-request isolation.
+
+     WARNING: [U+FE0F]  DEPRECATED: This function breaks conversation continuity!
+
+    CRITICAL ISSUE: This function always creates NEW contexts instead of maintaining
+    session continuity. This breaks multi-turn conversations and causes memory leaks.
+
+    USE INSTEAD:
+    - get_user_execution_context() for session-based context management
+    - get_request_scoped_user_context() for HTTP requests
+
+    This function is kept for backward compatibility but should be replaced.
+
+    CRITICAL: When db_session is provided, it must be request-scoped only.
+
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier for conversation
+        run_id: Optional run identifier (auto-generated if not provided)
+        db_session: Optional database session (MUST be request-scoped)
+        websocket_client_id: Optional WebSocket client identifier (preferred)
+        websocket_connection_id: Optional WebSocket connection identifier (alias)
+
+    Returns:
+        UserExecutionContext: Isolated context for the request
+
+    Raises:
+        Exception: If context creation fails
+    """
+    logger = get_logger(__name__)
+    logger.warning("Using deprecated create_user_execution_context - consider get_request_scoped_user_context")
+
+    # PRIORITY 1 FIX: Handle both websocket parameter names for compatibility
+    websocket_id = websocket_client_id or websocket_connection_id
+    if websocket_connection_id and websocket_client_id:
+        logger.warning("Both websocket_client_id and websocket_connection_id provided - using websocket_client_id")
+        websocket_id = websocket_client_id
+
+    try:
+        # SSOT COMPLIANCE FIX: Generate run_id using UnifiedIdGenerator if not provided
+        if not run_id:
+            run_id = UnifiedIdGenerator.generate_base_id("run")
+
+        # Create user execution context
+        user_context = UserExecutionContext.from_request(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            db_session=db_session,
+            websocket_client_id=websocket_id  # Use resolved websocket parameter
+        )
+
+        logger.info(f"Created UserExecutionContext for user {user_id}, run {run_id}")
+        return user_context
+
+    except Exception as e:
+        logger.error(f"Failed to create UserExecutionContext: {e}")
+        raise Exception(f"Failed to create user execution context: {str(e)}")
+
+
 # Export all public classes and functions
 __all__ = [
     'UserExecutionContext',
@@ -2886,5 +2952,6 @@ __all__ = [
     'register_shared_object',
     'clear_shared_object_registry',
     'create_defensive_user_execution_context',  # Migrated from websocket_manager_factory
-    'create_isolated_execution_context'
+    'create_isolated_execution_context',
+    'create_user_execution_context'  # Added for backward compatibility
 ]

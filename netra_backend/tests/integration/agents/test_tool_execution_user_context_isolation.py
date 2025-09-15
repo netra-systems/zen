@@ -129,9 +129,9 @@ class TestToolExecutionUserContextIsolation(SSotAsyncTestCase):
     def setUp(self):
         """Set up test environment with multiple user contexts."""
         super().setUp()
-        self.user1_context = UserExecutionContext(user_id='isolation_user_001', run_id=f'run_001_{int(time.time() * 1000)}', thread_id='thread_001_isolation', session_id='session_001_isolation', metadata={'plan_tier': 'early', 'roles': ['user'], 'tenant': 'company_a'})
-        self.user2_context = UserExecutionContext(user_id='isolation_user_002', run_id=f'run_002_{int(time.time() * 1000)}', thread_id='thread_002_isolation', session_id='session_002_isolation', metadata={'plan_tier': 'mid', 'roles': ['user'], 'tenant': 'company_b'})
-        self.user3_context = UserExecutionContext(user_id='isolation_user_003', run_id=f'run_003_{int(time.time() * 1000)}', thread_id='thread_003_isolation', session_id='session_003_isolation', metadata={'plan_tier': 'enterprise', 'roles': ['admin', 'user'], 'tenant': 'company_c'})
+        self.user1_context = UserExecutionContext(user_id='isolation_user_001', run_id=f'run_001_{int(time.time() * 1000)}', thread_id='thread_001_isolation', agent_context={'plan_tier': 'early', 'roles': ['user'], 'tenant': 'company_a'})
+        self.user2_context = UserExecutionContext(user_id='isolation_user_002', run_id=f'run_002_{int(time.time() * 1000)}', thread_id='thread_002_isolation', agent_context={'plan_tier': 'mid', 'roles': ['user'], 'tenant': 'company_b'})
+        self.user3_context = UserExecutionContext(user_id='isolation_user_003', run_id=f'run_003_{int(time.time() * 1000)}', thread_id='thread_003_isolation', agent_context={'plan_tier': 'enterprise', 'roles': ['admin', 'user'], 'tenant': 'company_c'})
         self.websocket_manager = UserIsolationWebSocketManager()
         self.isolation_tool = IsolatedUserTool()
 
@@ -230,7 +230,7 @@ class TestToolExecutionUserContextIsolation(SSotAsyncTestCase):
         user_contexts = []
         dispatchers = []
         for i in range(num_users):
-            context = UserExecutionContext(user_id=f'load_user_{i:03d}', run_id=f'load_run_{i:03d}_{int(time.time() * 1000)}', thread_id=f'load_thread_{i:03d}', session_id=f'load_session_{i:03d}', metadata={'load_test': True, 'user_index': i})
+            context = UserExecutionContext(user_id=f'load_user_{i:03d}', run_id=f'load_run_{i:03d}_{int(time.time() * 1000)}', thread_id=f'load_thread_{i:03d}', agent_context={'load_test': True, 'user_index': i})
             user_contexts.append(context)
             dispatcher = await UnifiedToolDispatcher.create_for_user(user_context=context, websocket_bridge=self.websocket_manager, tools=[self.isolation_tool])
             dispatchers.append(dispatcher)
