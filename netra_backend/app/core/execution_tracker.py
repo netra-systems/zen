@@ -143,6 +143,22 @@ class ExecutionTracker(_SSOT_AgentExecutionTracker):
 
         return self.update_execution_state(execution_id, state, error)
 
+    def register_execution(self, *args, **kwargs) -> str:
+        """
+        Register a new execution - Backward compatibility method.
+
+        This method provides the interface expected by test files while delegating
+        to the SSOT AgentExecutionTracker's create_execution method.
+
+        Args:
+            *args: Arguments passed to create_execution
+            **kwargs: Keyword arguments passed to create_execution
+
+        Returns:
+            str: Execution ID from create_execution
+        """
+        return self.create_execution(*args, **kwargs)
+
 
 # BACKWARD COMPATIBILITY: Redirect to SSOT functions
 def get_execution_tracker() -> ExecutionTracker:

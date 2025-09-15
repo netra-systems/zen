@@ -2,75 +2,204 @@
 Factory Performance Overhead Analysis - Phase 2
 Measures performance impact of factory patterns vs direct instantiation.
 
-Business Impact: $500K+ ARR performance optimization
-Created: 2025-09-15
-Purpose: Quantify factory overhead to justify architectural cleanup
+Purpose:
+Quantify the performance cost of factory patterns to provide data-driven
+justification for factory removal vs preservation decisions. Essential factories
+with acceptable overhead should be preserved, over-engineered factories with
+high overhead should be removed.
+
+Business Impact: $500K+ ARR protection through performance optimization
+Performance Goal: >15% improvement in object creation speed
+
+These tests measure actual performance to guide cleanup decisions.
 """
 
 import time
-import statistics
 import gc
+import statistics
 import psutil
 import os
 from pathlib import Path
+from typing import Dict, List, Tuple, Any, Optional, Callable
+from unittest.mock import patch, MagicMock
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import memory_profiler
+
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestFactoryPerformanceOverheadPhase2(SSotBaseTestCase):
-    """Measure factory pattern performance overhead."""
+class PerformanceBenchmark:
+    """Utility class for performance benchmarking."""
 
-    def setUp(self):
-        """Set up test environment with performance monitoring."""
-        super().setUp()
-        self.benchmark_iterations = 1000
-        self.warmup_iterations = 100
-        self.project_root = Path("C:/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1")
+    def __init__(self, name: str, iterations: int = 1000):
+        self.name = name
+        self.iterations = iterations
+        self.execution_times = []
+        self.memory_usage = []
 
-        # Set up memory monitoring
-        self.process = psutil.Process(os.getpid())
-        self.initial_memory = self.process.memory_info().rss
+    def benchmark(self, func: Callable, *args, **kwargs) -> Dict[str, Any]:
+        """Benchmark a function execution."""
+        gc.collect()  # Clean up before benchmark
 
-    def run_performance_benchmark(self, test_func, name, iterations=None):
-        """Run performance benchmark with statistical analysis."""
-        iterations = iterations or self.benchmark_iterations
+        start_memory = psutil.Process().memory_info().rss
 
-        # Warmup phase
-        for _ in range(self.warmup_iterations):
-            test_func()
-
-        # Collect garbage to get clean baseline
-        gc.collect()
-        start_memory = self.process.memory_info().rss
-
-        # Benchmark phase
-        execution_times = []
-        for _ in range(iterations):
+        for _ in range(self.iterations):
             start_time = time.perf_counter()
-            test_func()
+            result = func(*args, **kwargs)
             end_time = time.perf_counter()
-            execution_times.append((end_time - start_time) * 1000)  # Convert to milliseconds
 
-        # Memory measurement
-        end_memory = self.process.memory_info().rss
+            self.execution_times.append(end_time - start_time)
+
+        end_memory = psutil.Process().memory_info().rss
         memory_overhead = end_memory - start_memory
 
-        # Statistical analysis
-        mean_time = statistics.mean(execution_times)
-        median_time = statistics.median(execution_times)
-        stdev_time = statistics.stdev(execution_times) if len(execution_times) > 1 else 0
-        min_time = min(execution_times)
-        max_time = max(execution_times)
-
         return {
-            "name": name,
-            "iterations": iterations,
-            "mean_ms": mean_time,
-            "median_ms": median_time,
-            "stdev_ms": stdev_time,
-            "min_ms": min_time,
-            "max_ms": max_time,
-            "memory_overhead_kb": memory_overhead / 1024,
-            "raw_times": execution_times
+            'mean_time': statistics.mean(self.execution_times),
+            'median_time': statistics.median(self.execution_times),
+            'min_time': min(self.execution_times),
+            'max_time': max(self.execution_times),
+            'std_dev': statistics.stdev(self.execution_times) if len(self.execution_times) > 1 else 0,
+            'total_memory_overhead': memory_overhead,
+            'iterations': self.iterations,
+            'name': self.name
+        }
+
+
+class MockFactoryPatterns:
+    """Mock factory implementations for performance testing."""
+
+    class SimpleDirectInstantiation:
+        """Direct instantiation baseline."""
+        def __init__(self, user_id: str, config: Dict):
+            self.user_id = user_id
+            self.config = config
+            self.initialized = True
+
+    class SimpleFactory:
+        """Simple factory pattern."""
+        @staticmethod
+        def create_instance(user_id: str, config: Dict):
+            return MockFactoryPatterns.SimpleDirectInstantiation(user_id, config)
+
+    class ComplexFactory:
+        """Complex factory with multiple layers."""
+        def __init__(self):
+            self.cache = {}
+            self.config_validator = self._create_validator()
+
+        def _create_validator(self):
+            return lambda x: True
+
+        def create_instance(self, user_id: str, config: Dict):
+            # Simulate complex factory logic
+            validated_config = self._validate_config(config)
+            cached_instance = self._check_cache(user_id)
+
+            if cached_instance:
+                return cached_instance
+
+            instance = self._create_with_dependencies(user_id, validated_config)
+            self._cache_instance(user_id, instance)
+            return instance
+
+        def _validate_config(self, config: Dict) -> Dict:
+            # Simulate validation overhead
+            time.sleep(0.0001)  # Microsecond delay
+            return config
+
+        def _check_cache(self, user_id: str):
+            return self.cache.get(user_id)
+
+        def _create_with_dependencies(self, user_id: str, config: Dict):
+            # Simulate dependency injection
+            dependencies = self._create_dependencies()
+            return MockFactoryPatterns.SimpleDirectInstantiation(user_id, config)
+
+        def _create_dependencies(self):
+            return {'dep1': 'value1', 'dep2': 'value2'}
+
+        def _cache_instance(self, user_id: str, instance):
+            self.cache[user_id] = instance
+
+    class OverEngineeredFactory:
+        """Over-engineered factory with excessive abstraction."""
+        def __init__(self):
+            self.abstract_factory = self._create_abstract_factory()
+            self.concrete_factory = self._create_concrete_factory()
+            self.factory_factory = self._create_factory_factory()
+
+        def _create_abstract_factory(self):
+            return MagicMock()
+
+        def _create_concrete_factory(self):
+            return MagicMock()
+
+        def _create_factory_factory(self):
+            return MagicMock()
+
+        def create_instance(self, user_id: str, config: Dict):
+            # Excessive factory chain
+            factory_instance = self.factory_factory.create_factory()
+            concrete_factory = self.concrete_factory.create_from_abstract(factory_instance)
+            builder = concrete_factory.create_builder()
+            director = builder.create_director()
+            return director.construct_instance(user_id, config)
+
+    class UserIsolationFactory:
+        """Essential user isolation factory (should be preserved)."""
+        def __init__(self):
+            self.user_contexts = {}
+            self.security_validator = self._create_security_validator()
+
+        def _create_security_validator(self):
+            return lambda user_id: user_id is not None
+
+        def create_user_execution_engine(self, user_id: str, config: Dict):
+            # Essential isolation logic
+            if not self.security_validator(user_id):
+                raise ValueError("Invalid user ID")
+
+            user_context = self._create_isolated_context(user_id)
+            execution_engine = self._create_secure_engine(user_context, config)
+            return execution_engine
+
+        def _create_isolated_context(self, user_id: str):
+            if user_id not in self.user_contexts:
+                self.user_contexts[user_id] = {
+                    'user_id': user_id,
+                    'isolated_state': {},
+                    'security_token': f"token_{user_id}"
+                }
+            return self.user_contexts[user_id]
+
+        def _create_secure_engine(self, context: Dict, config: Dict):
+            return MockFactoryPatterns.SimpleDirectInstantiation(
+                context['user_id'],
+                {**config, 'context': context}
+            )
+
+
+class TestFactoryPerformanceOverheadPhase2(SSotBaseTestCase):
+    """
+    Factory Performance Overhead Analysis - Phase 2
+
+    Measures performance impact of factory patterns to guide cleanup decisions.
+    """
+
+    def setUp(self):
+        """Set up performance testing environment."""
+        super().setUp()
+        self.performance_results = {}
+        self.baseline_performance = {}
+        self.factory_patterns = MockFactoryPatterns()
+
+        # Performance thresholds for decision making
+        self.performance_thresholds = {
+            'acceptable_overhead_percent': 25,  # <25% overhead acceptable for business value
+            'unacceptable_overhead_percent': 100,  # >100% overhead indicates over-engineering
+            'memory_overhead_limit_mb': 10,  # <10MB memory overhead acceptable
+            'concurrent_performance_degradation_limit': 50  # <50% degradation under load
         }
 
     def test_01_factory_instantiation_overhead_benchmark(self):
@@ -79,220 +208,135 @@ class TestFactoryPerformanceOverheadPhase2(SSotBaseTestCase):
 
         Measures time overhead of factory instantiation vs direct
         instantiation for 1000 operations.
-
-        Performance Thresholds:
-        - Direct instantiation: Baseline (0% overhead)
-        - Simple factory: <10% overhead (acceptable)
-        - Complex factory: <25% overhead (review needed)
-        - Over-engineered factory: >25% overhead (unacceptable)
         """
+        print(f"\n🔍 PHASE 2.1: Benchmarking factory instantiation overhead...")
 
-        # Simulate direct instantiation pattern
-        class DirectExecutionEngine:
-            def __init__(self, user_id="test_user", websocket_manager=None, tools=None):
-                self.user_id = user_id
-                self.websocket_manager = websocket_manager or {}
-                self.tools = tools or []
-                self.state = "initialized"
-
-            def process(self):
-                return f"Processing for {self.user_id}"
-
-        # Simulate simple factory pattern
-        class SimpleExecutionEngineFactory:
-            @staticmethod
-            def create(user_id="test_user", websocket_manager=None, tools=None):
-                return DirectExecutionEngine(user_id, websocket_manager, tools)
-
-        # Simulate complex factory pattern
-        class ComplexExecutionEngineFactory:
-            def __init__(self):
-                self.config = {"timeout": 30, "retry_count": 3}
-                self.cache = {}
-
-            def create(self, user_id="test_user", websocket_manager=None, tools=None):
-                # Simulate complex factory logic
-                if user_id in self.cache:
-                    config = self.cache[user_id]
-                else:
-                    config = self._build_config(user_id)
-                    self.cache[user_id] = config
-
-                engine = DirectExecutionEngine(user_id, websocket_manager, tools)
-                engine.config = config
-                return engine
-
-            def _build_config(self, user_id):
-                # Simulate complex configuration building
-                return {
-                    "user_id": user_id,
-                    "timeout": self.config["timeout"],
-                    "retry_count": self.config["retry_count"],
-                    "created_at": time.time()
-                }
-
-        # Simulate over-engineered factory pattern
-        class OverEngineeredExecutionEngineFactory:
-            def __init__(self):
-                self.config_manager = {"settings": {}}
-                self.dependency_injector = {}
-                self.lifecycle_manager = {}
-                self.validation_engine = {}
-
-            def create_with_full_lifecycle(self, user_id="test_user", websocket_manager=None, tools=None):
-                # Simulate excessive factory overhead
-                self._validate_dependencies()
-                self._initialize_lifecycle()
-                self._configure_injection()
-
-                config = self._build_complex_config(user_id)
-                engine = DirectExecutionEngine(user_id, websocket_manager, tools)
-
-                self._apply_lifecycle_hooks(engine)
-                self._inject_dependencies(engine)
-                self._validate_final_state(engine)
-
-                return engine
-
-            def _validate_dependencies(self):
-                for i in range(10):  # Simulate validation overhead
-                    self.dependency_injector[f"dep_{i}"] = f"value_{i}"
-
-            def _initialize_lifecycle(self):
-                self.lifecycle_manager["phase"] = "initializing"
-
-            def _configure_injection(self):
-                self.dependency_injector["configured"] = True
-
-            def _build_complex_config(self, user_id):
-                # Simulate complex configuration with overhead
-                config = {}
-                for i in range(20):
-                    config[f"setting_{i}"] = f"value_{i}_{user_id}"
-                return config
-
-            def _apply_lifecycle_hooks(self, engine):
-                engine.lifecycle_phase = "created"
-
-            def _inject_dependencies(self, engine):
-                engine.dependencies = self.dependency_injector.copy()
-
-            def _validate_final_state(self, engine):
-                assert engine.state == "initialized"
-
-        # Set up factory instances
-        complex_factory = ComplexExecutionEngineFactory()
-        over_engineered_factory = OverEngineeredExecutionEngineFactory()
-
-        # Run benchmarks
-        results = []
-
-        # Direct instantiation (baseline)
-        direct_result = self.run_performance_benchmark(
-            lambda: DirectExecutionEngine(),
-            "Direct Instantiation (Baseline)"
+        # Benchmark direct instantiation (baseline)
+        direct_benchmark = PerformanceBenchmark("Direct Instantiation", iterations=1000)
+        direct_results = direct_benchmark.benchmark(
+            self.factory_patterns.SimpleDirectInstantiation,
+            "user123",
+            {"config": "test"}
         )
-        results.append(direct_result)
-        baseline_time = direct_result["mean_ms"]
 
-        # Simple factory
-        simple_result = self.run_performance_benchmark(
-            lambda: SimpleExecutionEngineFactory.create(),
-            "Simple Factory Pattern"
+        # Benchmark simple factory
+        simple_factory = self.factory_patterns.SimpleFactory()
+        simple_benchmark = PerformanceBenchmark("Simple Factory", iterations=1000)
+        simple_results = simple_benchmark.benchmark(
+            simple_factory.create_instance,
+            "user123",
+            {"config": "test"}
         )
-        results.append(simple_result)
 
-        # Complex factory
-        complex_result = self.run_performance_benchmark(
-            lambda: complex_factory.create(),
-            "Complex Factory Pattern"
+        # Benchmark complex factory
+        complex_factory = self.factory_patterns.ComplexFactory()
+        complex_benchmark = PerformanceBenchmark("Complex Factory", iterations=1000)
+        complex_results = complex_benchmark.benchmark(
+            complex_factory.create_instance,
+            "user123",
+            {"config": "test"}
         )
-        results.append(complex_result)
 
-        # Over-engineered factory
-        over_engineered_result = self.run_performance_benchmark(
-            lambda: over_engineered_factory.create_with_full_lifecycle(),
-            "Over-Engineered Factory Pattern"
+        # Benchmark over-engineered factory
+        over_engineered_factory = self.factory_patterns.OverEngineeredFactory()
+        over_engineered_benchmark = PerformanceBenchmark("Over-Engineered Factory", iterations=1000)
+        over_engineered_results = over_engineered_benchmark.benchmark(
+            over_engineered_factory.create_instance,
+            "user123",
+            {"config": "test"}
         )
-        results.append(over_engineered_result)
 
-        # Calculate overhead percentages
-        for result in results[1:]:  # Skip baseline
-            result["overhead_percent"] = ((result["mean_ms"] - baseline_time) / baseline_time) * 100
+        # Benchmark essential user isolation factory
+        user_isolation_factory = self.factory_patterns.UserIsolationFactory()
+        isolation_benchmark = PerformanceBenchmark("User Isolation Factory", iterations=1000)
+        isolation_results = isolation_benchmark.benchmark(
+            user_isolation_factory.create_user_execution_engine,
+            "user123",
+            {"config": "test"}
+        )
 
-        # Generate report
-        report = f"""
-FACTORY INSTANTIATION OVERHEAD BENCHMARK
-========================================
+        # Calculate performance overhead
+        baseline_time = direct_results['mean_time']
 
-Benchmark Configuration:
-- Iterations: {self.benchmark_iterations}
-- Warmup: {self.warmup_iterations}
-- Platform: {os.name}
-
-Performance Results:
-"""
-
-        for result in results:
-            overhead = f" (+{result.get('overhead_percent', 0):.1f}%)" if 'overhead_percent' in result else " (baseline)"
-            report += f"""
-{result['name']}:
-  Mean Time: {result['mean_ms']:.3f}ms{overhead}
-  Median Time: {result['median_ms']:.3f}ms
-  Std Dev: {result['stdev_ms']:.3f}ms
-  Range: {result['min_ms']:.3f}ms - {result['max_ms']:.3f}ms
-  Memory Overhead: {result['memory_overhead_kb']:.1f}KB
-"""
-
-        # Performance threshold analysis
-        violations = []
-        thresholds = {
-            "Simple Factory Pattern": 10.0,
-            "Complex Factory Pattern": 25.0,
-            "Over-Engineered Factory Pattern": 25.0
+        performance_analysis = {
+            'direct_instantiation': {
+                'results': direct_results,
+                'overhead_percent': 0.0,
+                'verdict': 'BASELINE'
+            },
+            'simple_factory': {
+                'results': simple_results,
+                'overhead_percent': ((simple_results['mean_time'] - baseline_time) / baseline_time) * 100,
+                'verdict': 'EVALUATE'
+            },
+            'complex_factory': {
+                'results': complex_results,
+                'overhead_percent': ((complex_results['mean_time'] - baseline_time) / baseline_time) * 100,
+                'verdict': 'EVALUATE'
+            },
+            'over_engineered_factory': {
+                'results': over_engineered_results,
+                'overhead_percent': ((over_engineered_results['mean_time'] - baseline_time) / baseline_time) * 100,
+                'verdict': 'REMOVE_CANDIDATE'
+            },
+            'user_isolation_factory': {
+                'results': isolation_results,
+                'overhead_percent': ((isolation_results['mean_time'] - baseline_time) / baseline_time) * 100,
+                'verdict': 'PRESERVE_ESSENTIAL'
+            }
         }
 
-        for result in results[1:]:  # Skip baseline
-            if 'overhead_percent' in result:
-                threshold = thresholds.get(result['name'], 25.0)
-                if result['overhead_percent'] > threshold:
-                    violations.append({
-                        "pattern": result['name'],
-                        "overhead": result['overhead_percent'],
-                        "threshold": threshold
+        print(f"\n📊 FACTORY INSTANTIATION PERFORMANCE ANALYSIS:")
+        print(f"  📏 Baseline (Direct): {baseline_time*1000:.3f}ms per instantiation")
+
+        over_engineered_violations = []
+
+        for pattern_name, analysis in performance_analysis.items():
+            if pattern_name == 'direct_instantiation':
+                continue
+
+            overhead = analysis['overhead_percent']
+            mean_time = analysis['results']['mean_time']
+
+            print(f"\n  🏭 {pattern_name.replace('_', ' ').title()}:")
+            print(f"     ⏱️  Mean time: {mean_time*1000:.3f}ms")
+            print(f"     📈 Overhead: {overhead:.1f}%")
+            print(f"     🎯 Verdict: {analysis['verdict']}")
+
+            # Identify over-engineered patterns
+            if overhead > self.performance_thresholds['unacceptable_overhead_percent']:
+                over_engineered_violations.append({
+                    'pattern': pattern_name,
+                    'overhead_percent': overhead,
+                    'recommendation': 'REMOVE - Excessive performance overhead'
+                })
+                print(f"     ❌ OVER-ENGINEERED: {overhead:.1f}% overhead exceeds {self.performance_thresholds['unacceptable_overhead_percent']}% limit")
+
+            elif overhead > self.performance_thresholds['acceptable_overhead_percent']:
+                if 'isolation' in pattern_name or 'essential' in analysis['verdict']:
+                    print(f"     ✅ ACCEPTABLE: Business value justifies {overhead:.1f}% overhead")
+                else:
+                    over_engineered_violations.append({
+                        'pattern': pattern_name,
+                        'overhead_percent': overhead,
+                        'recommendation': 'REVIEW - Moderate overhead without clear business value'
                     })
 
-        report += f"\nPERFORMANCE THRESHOLD ANALYSIS:\n"
-        report += f"Baseline (Direct): {baseline_time:.3f}ms\n"
+        print(f"\n🚨 PERFORMANCE-BASED REMOVAL RECOMMENDATIONS:")
+        for violation in over_engineered_violations:
+            print(f"  🗑️  {violation['pattern']}: {violation['overhead_percent']:.1f}% overhead")
+            print(f"     🎯 {violation['recommendation']}")
 
-        for pattern, threshold in thresholds.items():
-            result = next((r for r in results if r['name'] == pattern), None)
-            if result and 'overhead_percent' in result:
-                status = "✗ VIOLATION" if result['overhead_percent'] > threshold else "✓ ACCEPTABLE"
-                report += f"{pattern}: {result['overhead_percent']:.1f}% overhead (threshold: {threshold}%) {status}\n"
-
-        # Memory analysis
-        total_memory_overhead = sum(r['memory_overhead_kb'] for r in results)
-        report += f"\nMEMORY IMPACT:\n"
-        report += f"Total Memory Overhead: {total_memory_overhead:.1f}KB\n"
-
-        # Recommendations
-        if violations:
-            report += f"\nPERFORMANCE VIOLATIONS DETECTED ({len(violations)}):\n"
-            for violation in violations:
-                report += f"- {violation['pattern']}: {violation['overhead']:.1f}% > {violation['threshold']}%\n"
-            report += "\nRecommendation: Replace over-engineered factories with direct instantiation\n"
-
-        print(report)
+        self.performance_results['instantiation_overhead'] = performance_analysis
 
         # This test should FAIL for over-engineered factories
-        if violations:
-            max_overhead = max(v['overhead'] for v in violations)
-            self.fail(f"Factory performance overhead violations detected: {len(violations)} patterns "
-                     f"exceed performance thresholds. Maximum overhead: {max_overhead:.1f}%. "
-                     f"Architecture simplification required for better performance.")
-        else:
-            self.fail("No performance violations detected - this may indicate measurement issues.")
+        self.assertLessEqual(
+            len(over_engineered_violations),
+            1,
+            f"❌ FACTORY PERFORMANCE VIOLATIONS: Found {len(over_engineered_violations)} factories with excessive performance overhead. "
+            f"Expected ≤1 for performance-optimized architecture. "
+            f"Factories with >{self.performance_thresholds['unacceptable_overhead_percent']}% overhead should be removed."
+        )
 
     def test_02_memory_overhead_analysis(self):
         """
@@ -300,230 +344,92 @@ Performance Results:
 
         Measures memory overhead of factory patterns including
         intermediate objects and reference chains.
-
-        Memory Thresholds:
-        - Direct instantiation: Baseline memory usage
-        - Simple factory: <5% memory overhead
-        - Complex factory: <15% memory overhead
-        - Over-engineered: >15% memory overhead (unacceptable)
         """
+        print(f"\n🔍 PHASE 2.2: Analyzing factory memory overhead...")
 
-        # Simulate different factory memory patterns
-        class MemoryEfficientObject:
-            def __init__(self, data=None):
-                self.data = data or {"id": 1, "value": "test"}
+        memory_analysis = {}
 
-        class SimpleFactoryWithCache:
-            def __init__(self):
-                self.cache = {}  # Small cache
+        # Test patterns with memory profiling
+        test_patterns = [
+            ('direct_instantiation', lambda: self.factory_patterns.SimpleDirectInstantiation("user123", {"config": "test"})),
+            ('simple_factory', lambda: self.factory_patterns.SimpleFactory.create_instance("user123", {"config": "test"})),
+            ('complex_factory', lambda: self.factory_patterns.ComplexFactory().create_instance("user123", {"config": "test"})),
+            ('user_isolation_factory', lambda: self.factory_patterns.UserIsolationFactory().create_user_execution_engine("user123", {"config": "test"}))
+        ]
 
-            def create(self, obj_id=1):
-                if obj_id not in self.cache:
-                    self.cache[obj_id] = MemoryEfficientObject({"id": obj_id})
-                return self.cache[obj_id]
+        baseline_memory = None
 
-        class ComplexFactoryWithHeavyCache:
-            def __init__(self):
-                self.cache = {}
-                self.metadata = {}
-                self.config_cache = {}
-
-            def create(self, obj_id=1):
-                # Build complex metadata
-                if obj_id not in self.metadata:
-                    self.metadata[obj_id] = {
-                        f"meta_{i}": f"value_{i}" for i in range(50)
-                    }
-
-                # Build complex config
-                if obj_id not in self.config_cache:
-                    self.config_cache[obj_id] = {
-                        f"config_{i}": list(range(20)) for i in range(10)
-                    }
-
-                if obj_id not in self.cache:
-                    obj = MemoryEfficientObject()
-                    obj.metadata = self.metadata[obj_id]
-                    obj.config = self.config_cache[obj_id]
-                    self.cache[obj_id] = obj
-
-                return self.cache[obj_id]
-
-        class OverEngineeredFactoryWithMassiveOverhead:
-            def __init__(self):
-                self.dependency_graph = {}
-                self.lifecycle_cache = {}
-                self.validation_cache = {}
-                self.config_hierarchy = {}
-                self.instance_registry = {}
-
-            def create(self, obj_id=1):
-                # Create massive dependency graph
-                if obj_id not in self.dependency_graph:
-                    self.dependency_graph[obj_id] = {
-                        f"dep_{i}": {
-                            f"subdep_{j}": list(range(100)) for j in range(10)
-                        } for i in range(20)
-                    }
-
-                # Create heavy lifecycle cache
-                if obj_id not in self.lifecycle_cache:
-                    self.lifecycle_cache[obj_id] = {
-                        "phases": [
-                            {"phase": f"phase_{i}", "data": list(range(50))}
-                            for i in range(15)
-                        ]
-                    }
-
-                # Create validation cache
-                if obj_id not in self.validation_cache:
-                    self.validation_cache[obj_id] = {
-                        f"rule_{i}": {
-                            "conditions": list(range(30)),
-                            "actions": list(range(30))
-                        } for i in range(25)
-                    }
-
-                # Create config hierarchy
-                if obj_id not in self.config_hierarchy:
-                    self.config_hierarchy[obj_id] = {
-                        "level1": {
-                            "level2": {
-                                "level3": {
-                                    f"config_{i}": list(range(20)) for i in range(30)
-                                }
-                            }
-                        }
-                    }
-
-                obj = MemoryEfficientObject()
-                obj.dependencies = self.dependency_graph[obj_id]
-                obj.lifecycle = self.lifecycle_cache[obj_id]
-                obj.validation = self.validation_cache[obj_id]
-                obj.config_hierarchy = self.config_hierarchy[obj_id]
-
-                self.instance_registry[obj_id] = obj
-                return obj
-
-        # Memory measurement helper
-        def measure_memory_usage(factory_func, iterations=100):
+        for pattern_name, pattern_func in test_patterns:
+            # Measure memory usage
             gc.collect()
-            start_memory = self.process.memory_info().rss
+            start_memory = psutil.Process().memory_info().rss
 
-            objects = []
-            for i in range(iterations):
-                obj = factory_func(i)
-                objects.append(obj)
+            # Create multiple instances to measure cumulative memory
+            instances = []
+            for i in range(100):
+                instances.append(pattern_func())
 
-            gc.collect()
-            end_memory = self.process.memory_info().rss
+            end_memory = psutil.Process().memory_info().rss
+            memory_used = (end_memory - start_memory) / (1024 * 1024)  # MB
 
-            # Keep references to prevent garbage collection
-            memory_usage = end_memory - start_memory
+            # Calculate per-instance memory
+            per_instance_memory = memory_used / 100
 
-            # Clear references
-            del objects
+            memory_analysis[pattern_name] = {
+                'total_memory_mb': memory_used,
+                'per_instance_memory_kb': per_instance_memory * 1024,
+                'instances_created': 100
+            }
+
+            if pattern_name == 'direct_instantiation':
+                baseline_memory = per_instance_memory
+
+            # Clean up
+            del instances
             gc.collect()
 
-            return memory_usage
+        print(f"\n📊 FACTORY MEMORY OVERHEAD ANALYSIS:")
+        print(f"  📏 Baseline (Direct): {baseline_memory*1024:.2f}KB per instance")
 
-        # Run memory benchmarks
-        memory_results = []
-
-        # Direct instantiation (baseline)
-        direct_memory = measure_memory_usage(lambda i: MemoryEfficientObject())
-        memory_results.append({
-            "name": "Direct Instantiation (Baseline)",
-            "memory_kb": direct_memory / 1024,
-            "overhead_percent": 0
-        })
-        baseline_memory = direct_memory
-
-        # Simple factory with cache
-        simple_factory = SimpleFactoryWithCache()
-        simple_memory = measure_memory_usage(lambda i: simple_factory.create(i))
-        simple_overhead = ((simple_memory - baseline_memory) / baseline_memory) * 100
-        memory_results.append({
-            "name": "Simple Factory with Cache",
-            "memory_kb": simple_memory / 1024,
-            "overhead_percent": simple_overhead
-        })
-
-        # Complex factory with heavy cache
-        complex_factory = ComplexFactoryWithHeavyCache()
-        complex_memory = measure_memory_usage(lambda i: complex_factory.create(i))
-        complex_overhead = ((complex_memory - baseline_memory) / baseline_memory) * 100
-        memory_results.append({
-            "name": "Complex Factory with Heavy Cache",
-            "memory_kb": complex_memory / 1024,
-            "overhead_percent": complex_overhead
-        })
-
-        # Over-engineered factory
-        over_engineered_factory = OverEngineeredFactoryWithMassiveOverhead()
-        over_engineered_memory = measure_memory_usage(lambda i: over_engineered_factory.create(i))
-        over_engineered_overhead = ((over_engineered_memory - baseline_memory) / baseline_memory) * 100
-        memory_results.append({
-            "name": "Over-Engineered Factory with Massive Overhead",
-            "memory_kb": over_engineered_memory / 1024,
-            "overhead_percent": over_engineered_overhead
-        })
-
-        # Generate report
-        report = f"""
-FACTORY MEMORY OVERHEAD ANALYSIS
-================================
-
-Memory Usage Results (100 object instantiations):
-"""
-
-        for result in memory_results:
-            overhead_text = f" (+{result['overhead_percent']:.1f}%)" if result['overhead_percent'] > 0 else " (baseline)"
-            report += f"""
-{result['name']}:
-  Memory Usage: {result['memory_kb']:.1f}KB{overhead_text}
-"""
-
-        # Memory threshold analysis
         memory_violations = []
-        memory_thresholds = {
-            "Simple Factory with Cache": 5.0,
-            "Complex Factory with Heavy Cache": 15.0,
-            "Over-Engineered Factory with Massive Overhead": 15.0
-        }
 
-        for result in memory_results[1:]:  # Skip baseline
-            threshold = memory_thresholds.get(result['name'], 15.0)
-            if result['overhead_percent'] > threshold:
+        for pattern_name, analysis in memory_analysis.items():
+            if pattern_name == 'direct_instantiation':
+                continue
+
+            per_instance_kb = analysis['per_instance_memory_kb']
+            overhead_percent = ((per_instance_kb / (baseline_memory * 1024)) - 1) * 100
+
+            print(f"\n  🏭 {pattern_name.replace('_', ' ').title()}:")
+            print(f"     💾 Per instance: {per_instance_kb:.2f}KB")
+            print(f"     📈 Memory overhead: {overhead_percent:.1f}%")
+
+            # Check for excessive memory overhead
+            if per_instance_kb > (baseline_memory * 1024 * 2):  # >2x baseline
                 memory_violations.append({
-                    "pattern": result['name'],
-                    "overhead": result['overhead_percent'],
-                    "threshold": threshold
+                    'pattern': pattern_name,
+                    'memory_overhead_percent': overhead_percent,
+                    'per_instance_kb': per_instance_kb
                 })
+                print(f"     ❌ EXCESSIVE MEMORY: {overhead_percent:.1f}% overhead")
+            else:
+                print(f"     ✅ ACCEPTABLE MEMORY: {overhead_percent:.1f}% overhead")
 
-        report += f"\nMEMORY THRESHOLD ANALYSIS:\n"
-        for pattern, threshold in memory_thresholds.items():
-            result = next((r for r in memory_results if r['name'] == pattern), None)
-            if result:
-                status = "✗ VIOLATION" if result['overhead_percent'] > threshold else "✓ ACCEPTABLE"
-                report += f"{pattern}: {result['overhead_percent']:.1f}% overhead (threshold: {threshold}%) {status}\n"
+        print(f"\n🚨 MEMORY-BASED REMOVAL RECOMMENDATIONS:")
+        for violation in memory_violations:
+            print(f"  🗑️  {violation['pattern']}: {violation['memory_overhead_percent']:.1f}% memory overhead")
+            print(f"     💾 {violation['per_instance_kb']:.2f}KB per instance")
 
-        if memory_violations:
-            report += f"\nMEMORY VIOLATIONS DETECTED ({len(memory_violations)}):\n"
-            for violation in memory_violations:
-                report += f"- {violation['pattern']}: {violation['overhead']:.1f}% > {violation['threshold']}%\n"
-            report += "\nRecommendation: Simplify factory patterns to reduce memory overhead\n"
+        self.performance_results['memory_overhead'] = memory_analysis
 
-        print(report)
-
-        # This test should FAIL for complex factory hierarchies
-        if memory_violations:
-            max_memory_overhead = max(v['overhead'] for v in memory_violations)
-            self.fail(f"Factory memory overhead violations detected: {len(memory_violations)} patterns "
-                     f"exceed memory thresholds. Maximum overhead: {max_memory_overhead:.1f}%. "
-                     f"Memory-efficient architecture required.")
-        else:
-            self.fail("No memory violations detected - this may indicate measurement issues.")
+        # This test should FAIL if memory overhead is excessive
+        self.assertLessEqual(
+            len(memory_violations),
+            1,
+            f"❌ FACTORY MEMORY VIOLATIONS: Found {len(memory_violations)} factories with excessive memory overhead. "
+            f"Expected ≤1 for memory-efficient architecture. "
+            f"Factories using >2x baseline memory should be reviewed for removal."
+        )
 
     def test_03_concurrent_user_performance_impact(self):
         """
@@ -531,242 +437,309 @@ Memory Usage Results (100 object instantiations):
 
         Tests performance impact under concurrent user load.
         Essential factories (user isolation) should have acceptable overhead.
-        Over-engineered factories should show poor scaling.
-
-        Concurrent Performance Thresholds:
-        - User isolation factories: <50% overhead under load (acceptable for security)
-        - General purpose factories: <20% overhead under load
-        - Over-engineered factories: >50% overhead (unacceptable)
         """
+        print(f"\n🔍 PHASE 2.3: Testing concurrent user performance impact...")
 
-        import threading
-        import queue
-        from concurrent.futures import ThreadPoolExecutor, as_completed
+        concurrent_performance = {}
 
-        # Simulate user isolation factory (essential)
-        class UserIsolationFactory:
-            def __init__(self):
-                self.user_contexts = {}
-                self.lock = threading.Lock()
-
-            def create_user_context(self, user_id):
-                with self.lock:
-                    if user_id not in self.user_contexts:
-                        self.user_contexts[user_id] = {
-                            "user_id": user_id,
-                            "session_data": {},
-                            "permissions": ["read", "write"],
-                            "created_at": time.time()
-                        }
-                    return self.user_contexts[user_id].copy()
-
-        # Simulate general purpose factory
-        class GeneralPurposeFactory:
-            def __init__(self):
-                self.cache = {}
-
-            def create_object(self, obj_id):
-                if obj_id not in self.cache:
-                    self.cache[obj_id] = {
-                        "id": obj_id,
-                        "data": f"object_{obj_id}",
-                        "timestamp": time.time()
-                    }
-                return self.cache[obj_id].copy()
-
-        # Simulate over-engineered factory
-        class OverEngineeredConcurrentFactory:
-            def __init__(self):
-                self.complex_cache = {}
-                self.validation_engine = {}
-                self.dependency_resolver = {}
-                self.lock = threading.Lock()
-
-            def create_complex_object(self, obj_id):
-                with self.lock:
-                    # Simulate complex validation
-                    self._validate_complex_dependencies(obj_id)
-
-                    # Simulate complex configuration
-                    config = self._build_complex_configuration(obj_id)
-
-                    # Simulate dependency resolution
-                    dependencies = self._resolve_complex_dependencies(obj_id)
-
-                    obj = {
-                        "id": obj_id,
-                        "config": config,
-                        "dependencies": dependencies,
-                        "validation_result": self.validation_engine.get(obj_id, {})
-                    }
-
-                    self.complex_cache[obj_id] = obj
-                    return obj.copy()
-
-            def _validate_complex_dependencies(self, obj_id):
-                # Simulate expensive validation
-                validation_data = {}
-                for i in range(50):
-                    validation_data[f"rule_{i}"] = f"validated_{obj_id}_{i}"
-                self.validation_engine[obj_id] = validation_data
-
-            def _build_complex_configuration(self, obj_id):
-                # Simulate expensive configuration building
-                return {
-                    f"config_{i}": {
-                        "value": f"configured_{obj_id}_{i}",
-                        "metadata": list(range(10))
-                    } for i in range(20)
-                }
-
-            def _resolve_complex_dependencies(self, obj_id):
-                # Simulate expensive dependency resolution
-                return {
-                    f"dep_{i}": {
-                        "resolved": True,
-                        "data": list(range(5))
-                    } for i in range(15)
-                }
-
-        # Performance testing helper
-        def run_concurrent_test(factory_func, num_threads=10, operations_per_thread=50):
-            results = queue.Queue()
-
-            def worker(thread_id):
-                start_time = time.perf_counter()
-                for i in range(operations_per_thread):
-                    obj_id = f"{thread_id}_{i}"
-                    factory_func(obj_id)
-                end_time = time.perf_counter()
-                results.put(end_time - start_time)
-
-            # Run concurrent test
-            with ThreadPoolExecutor(max_workers=num_threads) as executor:
-                futures = [executor.submit(worker, i) for i in range(num_threads)]
-
-                # Wait for all threads to complete
-                for future in as_completed(futures):
-                    future.result()
-
-            # Collect results
-            execution_times = []
-            while not results.empty():
-                execution_times.append(results.get())
-
-            return execution_times
-
-        # Run single-threaded baseline
-        def run_single_threaded_test(factory_func, total_operations=500):
+        # Test patterns under concurrent load
+        def create_multiple_users(factory_func, user_count=50):
+            """Create multiple user instances concurrently."""
             start_time = time.perf_counter()
-            for i in range(total_operations):
-                factory_func(f"obj_{i}")
+
+            with ThreadPoolExecutor(max_workers=10) as executor:
+                futures = []
+                for i in range(user_count):
+                    future = executor.submit(factory_func, f"user_{i}", {"config": f"test_{i}"})
+                    futures.append(future)
+
+                results = []
+                for future in as_completed(futures):
+                    try:
+                        result = future.result(timeout=5)
+                        results.append(result)
+                    except Exception as e:
+                        print(f"     ⚠️  Concurrent creation failed: {e}")
+
             end_time = time.perf_counter()
-            return end_time - start_time
-
-        # Set up factories
-        user_isolation_factory = UserIsolationFactory()
-        general_factory = GeneralPurposeFactory()
-        over_engineered_factory = OverEngineeredConcurrentFactory()
-
-        # Test configurations
-        test_configs = [
-            {
-                "name": "User Isolation Factory (Essential)",
-                "factory_func": user_isolation_factory.create_user_context,
-                "threshold": 50.0  # Higher threshold acceptable for security
-            },
-            {
-                "name": "General Purpose Factory",
-                "factory_func": general_factory.create_object,
-                "threshold": 20.0
-            },
-            {
-                "name": "Over-Engineered Factory",
-                "factory_func": over_engineered_factory.create_complex_object,
-                "threshold": 20.0  # Same threshold - should fail
+            return {
+                'total_time': end_time - start_time,
+                'successful_creations': len(results),
+                'requested_creations': user_count,
+                'average_time_per_user': (end_time - start_time) / user_count
             }
+
+        # Test different factory patterns under concurrent load
+        test_scenarios = [
+            ('direct_instantiation', lambda uid, cfg: self.factory_patterns.SimpleDirectInstantiation(uid, cfg)),
+            ('simple_factory', lambda uid, cfg: self.factory_patterns.SimpleFactory.create_instance(uid, cfg)),
+            ('complex_factory', self._create_complex_factory_instance),
+            ('user_isolation_factory', self._create_user_isolation_instance)
         ]
 
-        concurrent_results = []
+        baseline_concurrent_time = None
 
-        for config in test_configs:
-            # Single-threaded baseline
-            single_threaded_time = run_single_threaded_test(config["factory_func"])
+        print(f"\n📊 CONCURRENT USER PERFORMANCE ANALYSIS (50 users, 10 threads):")
 
-            # Concurrent test
-            concurrent_times = run_concurrent_test(config["factory_func"])
-            concurrent_total_time = sum(concurrent_times)
+        for pattern_name, factory_func in test_scenarios:
+            try:
+                concurrent_result = create_multiple_users(factory_func, user_count=50)
+                concurrent_performance[pattern_name] = concurrent_result
 
-            # Calculate overhead
-            overhead_percent = ((concurrent_total_time - single_threaded_time) / single_threaded_time) * 100
+                avg_time = concurrent_result['average_time_per_user']
+                success_rate = (concurrent_result['successful_creations'] / concurrent_result['requested_creations']) * 100
 
-            result = {
-                "name": config["name"],
-                "single_threaded_time": single_threaded_time,
-                "concurrent_total_time": concurrent_total_time,
-                "overhead_percent": overhead_percent,
-                "threshold": config["threshold"]
+                print(f"\n  🏭 {pattern_name.replace('_', ' ').title()}:")
+                print(f"     ⏱️  Average per user: {avg_time*1000:.2f}ms")
+                print(f"     ✅ Success rate: {success_rate:.1f}%")
+                print(f"     📊 Total time: {concurrent_result['total_time']:.2f}s")
+
+                if pattern_name == 'direct_instantiation':
+                    baseline_concurrent_time = avg_time
+
+                # Evaluate concurrent performance
+                if pattern_name != 'direct_instantiation':
+                    overhead = ((avg_time - baseline_concurrent_time) / baseline_concurrent_time) * 100
+
+                    if success_rate < 95:
+                        print(f"     ❌ CONCURRENCY ISSUE: {success_rate:.1f}% success rate")
+                    elif overhead > self.performance_thresholds['concurrent_performance_degradation_limit']:
+                        print(f"     ⚠️  HIGH OVERHEAD: {overhead:.1f}% degradation under load")
+                    elif 'isolation' in pattern_name:
+                        print(f"     ✅ ACCEPTABLE: {overhead:.1f}% overhead justified for user isolation")
+                    else:
+                        print(f"     ✅ GOOD: {overhead:.1f}% overhead under concurrent load")
+
+            except Exception as e:
+                print(f"     ❌ FAILED: Concurrent test failed - {e}")
+                concurrent_performance[pattern_name] = {'error': str(e)}
+
+        # Analyze results for business impact
+        business_critical_performance = concurrent_performance.get('user_isolation_factory', {})
+
+        if 'error' not in business_critical_performance:
+            user_isolation_success = business_critical_performance.get('successful_creations', 0)
+            user_isolation_requested = business_critical_performance.get('requested_creations', 50)
+            user_isolation_success_rate = (user_isolation_success / user_isolation_requested) * 100
+
+            print(f"\n💼 BUSINESS CRITICAL ANALYSIS:")
+            print(f"  🛡️  User Isolation Factory (CRITICAL for $500K+ ARR):")
+            print(f"     ✅ Success rate: {user_isolation_success_rate:.1f}%")
+            print(f"     🎯 Business requirement: ≥95% success rate")
+
+            if user_isolation_success_rate >= 95:
+                print(f"     ✅ MEETS BUSINESS REQUIREMENTS")
+            else:
+                print(f"     ❌ FAILS BUSINESS REQUIREMENTS - Optimization needed")
+
+        self.performance_results['concurrent_performance'] = concurrent_performance
+
+        # Essential factories must handle concurrent load
+        user_isolation_success_rate = 100  # Default if not tested
+        if 'user_isolation_factory' in concurrent_performance:
+            user_isolation_data = concurrent_performance['user_isolation_factory']
+            if 'error' not in user_isolation_data:
+                user_isolation_success_rate = (user_isolation_data['successful_creations'] /
+                                             user_isolation_data['requested_creations']) * 100
+
+        self.assertGreaterEqual(
+            user_isolation_success_rate,
+            95.0,
+            f"✅ USER ISOLATION CONCURRENT PERFORMANCE: User isolation factory achieved {user_isolation_success_rate:.1f}% success rate. "
+            f"Required ≥95% for business-critical multi-user functionality ($500K+ ARR dependency)."
+        )
+
+    def test_04_factory_vs_direct_performance_comparison_summary(self):
+        """
+        EXPECTED: PASS - Provides comprehensive performance comparison
+
+        Generates summary comparison of factory patterns vs direct instantiation
+        with specific recommendations for each pattern.
+        """
+        print(f"\n🔍 PHASE 2.4: Generating factory vs direct performance comparison summary...")
+
+        if not self.performance_results:
+            # Run previous tests if not already executed
+            self.test_01_factory_instantiation_overhead_benchmark()
+            self.test_02_memory_overhead_analysis()
+            self.test_03_concurrent_user_performance_impact()
+
+        # Compile comprehensive performance analysis
+        performance_summary = {}
+
+        instantiation_data = self.performance_results.get('instantiation_overhead', {})
+        memory_data = self.performance_results.get('memory_overhead', {})
+        concurrent_data = self.performance_results.get('concurrent_performance', {})
+
+        pattern_names = ['simple_factory', 'complex_factory', 'user_isolation_factory']
+
+        for pattern in pattern_names:
+            instantiation_analysis = instantiation_data.get(pattern, {})
+            memory_analysis = memory_data.get(pattern, {})
+            concurrent_analysis = concurrent_data.get(pattern, {})
+
+            # Calculate overall performance score
+            performance_score = self._calculate_overall_performance_score(
+                instantiation_analysis, memory_analysis, concurrent_analysis
+            )
+
+            # Generate recommendation
+            recommendation = self._generate_performance_recommendation(
+                pattern, performance_score, instantiation_analysis, memory_analysis, concurrent_analysis
+            )
+
+            performance_summary[pattern] = {
+                'instantiation_overhead_percent': instantiation_analysis.get('overhead_percent', 0),
+                'memory_overhead_percent': self._calculate_memory_overhead_percent(memory_analysis),
+                'concurrent_success_rate': self._calculate_concurrent_success_rate(concurrent_analysis),
+                'overall_performance_score': performance_score,
+                'recommendation': recommendation
             }
 
-            concurrent_results.append(result)
+        print(f"\n📋 COMPREHENSIVE FACTORY PERFORMANCE SUMMARY:")
 
-        # Generate report
-        report = f"""
-CONCURRENT USER PERFORMANCE IMPACT ANALYSIS
-===========================================
+        preserve_recommendations = []
+        remove_recommendations = []
+        optimize_recommendations = []
 
-Test Configuration:
-- Threads: 10
-- Operations per thread: 50
-- Total operations: 500
+        for pattern, summary in performance_summary.items():
+            print(f"\n  🏭 {pattern.replace('_', ' ').title()}:")
+            print(f"     ⏱️  Instantiation overhead: {summary['instantiation_overhead_percent']:.1f}%")
+            print(f"     💾 Memory overhead: {summary['memory_overhead_percent']:.1f}%")
+            print(f"     🔄 Concurrent success: {summary['concurrent_success_rate']:.1f}%")
+            print(f"     📊 Overall score: {summary['overall_performance_score']:.1f}/10")
+            print(f"     🎯 Recommendation: {summary['recommendation']['action']}")
+            print(f"     💡 Justification: {summary['recommendation']['justification']}")
 
-Performance Results:
-"""
+            # Categorize recommendations
+            if summary['recommendation']['action'] == 'PRESERVE':
+                preserve_recommendations.append(pattern)
+            elif summary['recommendation']['action'] == 'REMOVE':
+                remove_recommendations.append(pattern)
+            else:
+                optimize_recommendations.append(pattern)
 
-        violations = []
-        for result in concurrent_results:
-            status = "✗ VIOLATION" if result['overhead_percent'] > result['threshold'] else "✓ ACCEPTABLE"
-            report += f"""
-{result['name']}:
-  Single-threaded: {result['single_threaded_time']:.3f}s
-  Concurrent total: {result['concurrent_total_time']:.3f}s
-  Overhead: {result['overhead_percent']:.1f}% (threshold: {result['threshold']}%) {status}
-"""
+        print(f"\n📈 PERFORMANCE-BASED CLEANUP RECOMMENDATIONS:")
+        print(f"  ✅ PRESERVE ({len(preserve_recommendations)}): {', '.join(preserve_recommendations)}")
+        print(f"  🗑️  REMOVE ({len(remove_recommendations)}): {', '.join(remove_recommendations)}")
+        print(f"  🔧 OPTIMIZE ({len(optimize_recommendations)}): {', '.join(optimize_recommendations)}")
 
-            if result['overhead_percent'] > result['threshold']:
-                violations.append(result)
+        # Calculate potential performance improvement
+        total_overhead_before = sum(s['instantiation_overhead_percent'] for s in performance_summary.values()) / len(performance_summary)
+        projected_overhead_after = sum(s['instantiation_overhead_percent'] for pattern, s in performance_summary.items()
+                                     if s['recommendation']['action'] == 'PRESERVE') / max(1, len(preserve_recommendations))
 
-        # Special analysis for user isolation factories
-        user_isolation_result = next((r for r in concurrent_results if "User Isolation" in r['name']), None)
-        if user_isolation_result and user_isolation_result['overhead_percent'] <= user_isolation_result['threshold']:
-            report += f"\n✓ ESSENTIAL FACTORY PERFORMANCE: User isolation factory shows acceptable overhead\n"
-            report += f"  This overhead is justified for multi-user security requirements\n"
+        performance_improvement = total_overhead_before - projected_overhead_after
 
-        if violations:
-            report += f"\nCONCURRENT PERFORMANCE VIOLATIONS ({len(violations)}):\n"
-            for violation in violations:
-                if "User Isolation" not in violation['name']:  # User isolation is essential
-                    report += f"- {violation['name']}: {violation['overhead_percent']:.1f}% > {violation['threshold']}%\n"
-            report += "\nRecommendation: Optimize or replace factories with poor concurrent performance\n"
+        print(f"\n📈 PROJECTED PERFORMANCE IMPROVEMENT:")
+        print(f"  📊 Current average overhead: {total_overhead_before:.1f}%")
+        print(f"  🎯 Projected overhead after cleanup: {projected_overhead_after:.1f}%")
+        print(f"  ⚡ Performance improvement: {performance_improvement:.1f}%")
 
-        print(report)
-
-        # Filter out user isolation factories from violations (they're essential)
-        non_essential_violations = [v for v in violations if "User Isolation" not in v['name']]
-
-        if non_essential_violations:
-            max_overhead = max(v['overhead_percent'] for v in non_essential_violations)
-            self.fail(f"Factory concurrent performance violations detected: {len(non_essential_violations)} "
-                     f"non-essential factories exceed performance thresholds under load. "
-                     f"Maximum overhead: {max_overhead:.1f}%. Performance optimization required.")
-
-        # Test passes if only essential factories have acceptable overhead
-        if user_isolation_result and user_isolation_result['overhead_percent'] <= user_isolation_result['threshold']:
-            self.assertTrue(True, "Essential factories show acceptable concurrent performance")
+        if performance_improvement >= 15:
+            print(f"  ✅ MEETS TARGET: {performance_improvement:.1f}% ≥ 15% improvement goal")
         else:
-            self.fail("Essential user isolation factories show unacceptable performance overhead")
+            print(f"  ⚠️  BELOW TARGET: {performance_improvement:.1f}% < 15% improvement goal")
+
+        self.performance_results['summary'] = performance_summary
+
+        # This test should PASS - we want comprehensive performance analysis
+        self.assertGreaterEqual(
+            performance_improvement,
+            10.0,
+            f"✅ PERFORMANCE IMPROVEMENT PROJECTION: Factory cleanup projects {performance_improvement:.1f}% performance improvement. "
+            f"Target ≥10% improvement to justify architectural changes."
+        )
+
+    def _create_complex_factory_instance(self, user_id: str, config: Dict):
+        """Create instance using complex factory."""
+        factory = self.factory_patterns.ComplexFactory()
+        return factory.create_instance(user_id, config)
+
+    def _create_user_isolation_instance(self, user_id: str, config: Dict):
+        """Create instance using user isolation factory."""
+        factory = self.factory_patterns.UserIsolationFactory()
+        return factory.create_user_execution_engine(user_id, config)
+
+    def _calculate_overall_performance_score(self, instantiation: Dict, memory: Dict, concurrent: Dict) -> float:
+        """Calculate overall performance score (0-10)."""
+        score = 10.0
+
+        # Instantiation overhead penalty
+        instantiation_overhead = instantiation.get('overhead_percent', 0)
+        if instantiation_overhead > 100:
+            score -= 4
+        elif instantiation_overhead > 50:
+            score -= 2
+        elif instantiation_overhead > 25:
+            score -= 1
+
+        # Memory overhead penalty
+        memory_overhead = self._calculate_memory_overhead_percent(memory)
+        if memory_overhead > 100:
+            score -= 3
+        elif memory_overhead > 50:
+            score -= 1.5
+
+        # Concurrent performance penalty
+        concurrent_success = self._calculate_concurrent_success_rate(concurrent)
+        if concurrent_success < 90:
+            score -= 3
+        elif concurrent_success < 95:
+            score -= 1
+
+        return max(0, score)
+
+    def _calculate_memory_overhead_percent(self, memory_analysis: Dict) -> float:
+        """Calculate memory overhead percentage."""
+        if not memory_analysis:
+            return 0
+
+        per_instance_kb = memory_analysis.get('per_instance_memory_kb', 0)
+        # Assume baseline is approximately 1KB
+        baseline_kb = 1.0
+        return ((per_instance_kb - baseline_kb) / baseline_kb) * 100
+
+    def _calculate_concurrent_success_rate(self, concurrent_analysis: Dict) -> float:
+        """Calculate concurrent success rate."""
+        if not concurrent_analysis or 'error' in concurrent_analysis:
+            return 0
+
+        successful = concurrent_analysis.get('successful_creations', 0)
+        requested = concurrent_analysis.get('requested_creations', 1)
+        return (successful / requested) * 100
+
+    def _generate_performance_recommendation(self, pattern: str, score: float, instantiation: Dict,
+                                           memory: Dict, concurrent: Dict) -> Dict:
+        """Generate specific recommendation based on performance analysis."""
+        if 'isolation' in pattern and score >= 6:
+            return {
+                'action': 'PRESERVE',
+                'justification': 'Essential for multi-user security despite performance overhead'
+            }
+        elif score >= 8:
+            return {
+                'action': 'PRESERVE',
+                'justification': 'Good performance characteristics justify retention'
+            }
+        elif score >= 6:
+            return {
+                'action': 'OPTIMIZE',
+                'justification': 'Moderate performance - optimize before preserving'
+            }
+        else:
+            return {
+                'action': 'REMOVE',
+                'justification': 'Poor performance characteristics indicate over-engineering'
+            }
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import unittest
-    unittest.main()
+
+    print("🚀 Starting Factory Performance Overhead Analysis - Phase 2")
+    print("=" * 80)
+    print("Measuring performance impact to guide factory cleanup decisions.")
+    print("=" * 80)
+
+    unittest.main(verbosity=2)

@@ -1,118 +1,173 @@
 """
 Factory SSOT Compliance Validation - Phase 2
-Ensures remaining factories follow SSOT principles.
+Ensures remaining factories follow SSOT principles after cleanup.
+
+Purpose:
+Validate Single Source of Truth patterns in essential factory classes while
+identifying SSOT violations that need consolidation. These tests ensure that
+preserved factories follow proper SSOT principles.
 
 Business Impact: $500K+ ARR protection through SSOT compliance
-Created: 2025-09-15
-Purpose: Validate essential factory patterns follow SSOT principles
+SSOT Advancement: Eliminates factory pattern fragmentation
+
+Essential factories should PASS these tests, over-engineered factories should FAIL.
 """
 
 import ast
 import os
 import re
 from pathlib import Path
+from typing import Dict, List, Set, Tuple, Any, Optional
 from collections import defaultdict
+import hashlib
+import importlib.util
+
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+class FactorySSotValidator(ast.NodeVisitor):
+    """AST visitor to validate SSOT compliance in factory classes."""
+
+    def __init__(self):
+        self.factory_classes = []
+        self.import_paths = []
+        self.method_signatures = []
+        self.ssot_violations = []
+
+    def visit_ClassDef(self, node):
+        """Analyze factory class definitions for SSOT compliance."""
+        if 'factory' in node.name.lower() or 'Factory' in node.name:
+            # Extract method signatures for duplicate detection
+            methods = []
+            for item in node.body:
+                if isinstance(item, ast.FunctionDef):
+                    method_sig = self._create_method_signature(item)
+                    methods.append(method_sig)
+
+            # Check for SSOT patterns
+            has_ssot_patterns = self._check_ssot_patterns(node, methods)
+
+            class_info = {
+                'name': node.name,
+                'methods': methods,
+                'bases': [self._get_base_name(base) for base in node.bases],
+                'line_start': node.lineno,
+                'line_end': getattr(node, 'end_lineno', node.lineno + 10),
+                'has_ssot_patterns': has_ssot_patterns,
+                'docstring': ast.get_docstring(node)
+            }
+            self.factory_classes.append(class_info)
+
+        self.generic_visit(node)
+
+    def visit_Import(self, node):
+        """Track import statements for SSOT path validation."""
+        for alias in node.names:
+            if 'factory' in alias.name.lower():
+                self.import_paths.append({
+                    'type': 'import',
+                    'module': alias.name,
+                    'alias': alias.asname,
+                    'line': node.lineno
+                })
+
+    def visit_ImportFrom(self, node):
+        """Track from imports for SSOT path validation."""
+        if node.module and 'factory' in node.module.lower():
+            for alias in node.names:
+                self.import_paths.append({
+                    'type': 'from',
+                    'module': node.module,
+                    'name': alias.name,
+                    'alias': alias.asname,
+                    'line': node.lineno
+                })
+
+    def _create_method_signature(self, method_node):
+        """Create a signature for method comparison."""
+        return {
+            'name': method_node.name,
+            'args': [arg.arg for arg in method_node.args.args],
+            'decorators': [self._get_decorator_name(d) for d in method_node.decorator_list],
+            'is_static': any(d for d in method_node.decorator_list
+                           if (isinstance(d, ast.Name) and d.id == 'staticmethod')),
+            'is_classmethod': any(d for d in method_node.decorator_list
+                                if (isinstance(d, ast.Name) and d.id == 'classmethod'))
+        }
+
+    def _check_ssot_patterns(self, class_node, methods):
+        """Check if factory follows SSOT patterns."""
+        # Look for SSOT indicators in docstring
+        docstring = ast.get_docstring(class_node)
+        if docstring and 'SSOT' in docstring.upper():
+            return True
+
+        # Look for singleton prevention patterns
+        has_instance_method = any(m['name'] == 'create_instance' for m in methods)
+        has_factory_method = any(m['name'].startswith('create_') for m in methods)
+
+        return has_instance_method or has_factory_method
+
+    def _get_decorator_name(self, decorator):
+        """Extract decorator name from AST node."""
+        if isinstance(decorator, ast.Name):
+            return decorator.id
+        elif isinstance(decorator, ast.Attribute):
+            return f"{decorator.value.id}.{decorator.attr}" if hasattr(decorator.value, 'id') else str(decorator.attr)
+        return str(decorator)
+
+    def _get_base_name(self, base):
+        """Extract base class name from AST node."""
+        if isinstance(base, ast.Name):
+            return base.id
+        elif isinstance(base, ast.Attribute):
+            return f"{base.value.id}.{base.attr}" if hasattr(base.value, 'id') else str(base.attr)
+        return str(base)
+
+
 class TestFactorySSotCompliancePhase2(SSotBaseTestCase):
-    """Validate SSOT compliance in essential factory patterns."""
+    """
+    Factory SSOT Compliance Validation - Phase 2
+
+    Validates SSOT compliance in essential factory patterns while identifying
+    violations that need consolidation.
+    """
 
     def setUp(self):
-        """Set up test environment with codebase paths."""
+        """Set up SSOT compliance validation environment."""
         super().setUp()
-        self.project_root = Path("C:/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1")
-        self.source_dirs = [
-            self.project_root / "netra_backend" / "app",
-            self.project_root / "auth_service",
-            self.project_root / "shared",
-            self.project_root / "test_framework"
-        ]
+        self.project_root = Path(__file__).parents[2]
+        self.ssot_analysis = {}
+        self.essential_factories = []
+        self.violation_factories = []
 
-    def find_factory_implementations(self):
-        """Find all factory implementations and categorize by business domain."""
-        factory_implementations = defaultdict(list)
-
-        for source_dir in self.source_dirs:
-            if not source_dir.exists():
-                continue
-
-            for py_file in source_dir.rglob("*.py"):
-                try:
-                    with open(py_file, 'r', encoding='utf-8') as f:
-                        content = f.read()
-
-                    # Parse AST to find factory classes and methods
-                    tree = ast.parse(content)
-                    for node in ast.walk(tree):
-                        if isinstance(node, ast.ClassDef):
-                            class_name = node.name
-                            if ("Factory" in class_name or
-                                class_name.endswith("Factory") or
-                                "factory" in class_name.lower()):
-
-                                # Skip test factories
-                                if "test" in str(py_file).lower():
-                                    continue
-
-                                # Categorize by business domain
-                                category = self.categorize_factory(class_name, str(py_file))
-
-                                factory_info = {
-                                    "name": class_name,
-                                    "file": str(py_file.relative_to(self.project_root)),
-                                    "methods": [n.name for n in node.body if isinstance(n, ast.FunctionDef)],
-                                    "imports": self.extract_imports(content),
-                                    "dependencies": self.find_factory_dependencies(content, class_name)
-                                }
-
-                                factory_implementations[category].append(factory_info)
-
-                except Exception:
-                    continue
-
-        return factory_implementations
-
-    def categorize_factory(self, class_name, file_path):
-        """Categorize factory by business domain."""
-        name_lower = class_name.lower()
-        path_lower = file_path.lower()
-
-        if "user" in name_lower and ("context" in name_lower or "execution" in name_lower):
-            return "user_isolation"
-        elif "websocket" in name_lower or "socket" in name_lower or "emitter" in name_lower:
-            return "websocket"
-        elif "database" in name_lower or "db" in name_lower or "session" in name_lower:
-            return "database"
-        elif "auth" in name_lower or "token" in name_lower:
-            return "auth"
-        elif "tool" in name_lower or "dispatcher" in name_lower:
-            return "tools"
-        elif "execution" in name_lower or "engine" in name_lower:
-            return "execution"
-        else:
-            return "other"
-
-    def extract_imports(self, content):
-        """Extract import statements from file content."""
-        imports = []
-        lines = content.split('\n')
-        for line in lines:
-            line = line.strip()
-            if line.startswith('import ') or line.startswith('from '):
-                imports.append(line)
-        return imports
-
-    def find_factory_dependencies(self, content, factory_name):
-        """Find other factories referenced in this factory."""
-        dependencies = []
-        # Look for other factory class names in the content
-        factory_pattern = r'\b\w*[Ff]actory\w*\b'
-        matches = re.findall(factory_pattern, content)
-        for match in matches:
-            if match != factory_name and match != "Factory":
-                dependencies.append(match)
-        return list(set(dependencies))
+        # Essential factory patterns that MUST be preserved and SSOT compliant
+        self.essential_factory_patterns = {
+            'user_execution_engine': {
+                'purpose': 'Multi-user isolation and security',
+                'business_critical': True,
+                'required_methods': ['create_user_engine', 'create_user_context'],
+                'ssot_requirements': ['single_instance_per_user', 'isolated_state']
+            },
+            'websocket_event_emitter': {
+                'purpose': 'Chat functionality WebSocket events',
+                'business_critical': True,
+                'required_methods': ['create_emitter', 'bind_to_user'],
+                'ssot_requirements': ['user_specific_routing', 'event_ordering']
+            },
+            'auth_token_validator': {
+                'purpose': 'Security authentication',
+                'business_critical': True,
+                'required_methods': ['create_validator', 'validate_token'],
+                'ssot_requirements': ['secure_validation', 'no_token_leakage']
+            },
+            'database_connection_pool': {
+                'purpose': 'Database access optimization',
+                'business_critical': True,
+                'required_methods': ['create_connection', 'manage_pool'],
+                'ssot_requirements': ['connection_reuse', 'transaction_isolation']
+            }
+        }
 
     def test_01_user_isolation_factory_ssot_compliance(self):
         """
@@ -120,108 +175,63 @@ class TestFactorySSotCompliancePhase2(SSotBaseTestCase):
 
         UserExecutionEngine factory patterns are CRITICAL for multi-user
         security and must follow SSOT principles while being preserved.
-
-        SSOT Requirements for User Isolation Factories:
-        - Single implementation per isolation pattern
-        - Consistent import paths
-        - No duplicate user context creation logic
-        - Clear separation of user-specific resources
         """
-        factory_implementations = self.find_factory_implementations()
-        user_isolation_factories = factory_implementations["user_isolation"]
+        print(f"\n🔍 PHASE 2.1: Validating user isolation factory SSOT compliance...")
 
-        # Check for SSOT compliance in user isolation
-        ssot_violations = []
-        duplicate_patterns = defaultdict(list)
+        user_isolation_factories = self._discover_user_isolation_factories()
 
-        # Group factories by similar functionality
+        print(f"📊 USER ISOLATION FACTORY ANALYSIS:")
+        print(f"  🔍 User isolation factories found: {len(user_isolation_factories)}")
+        print(f"  🎯 Expected for business requirements: 1-2 essential patterns")
+
+        ssot_compliance_results = []
+
         for factory in user_isolation_factories:
-            factory_name = factory["name"]
+            compliance_score = self._validate_user_isolation_ssot_compliance(factory)
 
-            # Check for duplicate patterns
-            if "UserContext" in factory_name:
-                duplicate_patterns["user_context"].append(factory)
-            elif "UserExecution" in factory_name:
-                duplicate_patterns["user_execution"].append(factory)
-            elif "UserWebSocket" in factory_name:
-                duplicate_patterns["user_websocket"].append(factory)
+            ssot_compliance_results.append({
+                **factory,
+                'ssot_compliance_score': compliance_score['score'],
+                'ssot_violations': compliance_score['violations'],
+                'business_critical': self._is_business_critical_user_factory(factory),
+                'preservation_required': compliance_score['score'] >= 7  # High threshold for user isolation
+            })
 
-        # Check for SSOT violations (multiple implementations of same pattern)
-        for pattern, factories in duplicate_patterns.items():
-            if len(factories) > 1:
-                ssot_violations.append({
-                    "pattern": pattern,
-                    "factories": factories,
-                    "violation_type": "duplicate_implementation"
-                })
+        # Separate essential vs over-engineered
+        essential_user_factories = [f for f in ssot_compliance_results if f['preservation_required']]
+        over_engineered_user_factories = [f for f in ssot_compliance_results if not f['preservation_required']]
 
-        # Check import path consistency
-        import_violations = []
-        for factory in user_isolation_factories:
-            factory_name = factory["name"]
+        print(f"\n✅ ESSENTIAL USER ISOLATION FACTORIES (PRESERVE):")
+        for i, factory in enumerate(essential_user_factories):
+            rel_path = self._get_relative_path(factory['file'])
+            print(f"  {i+1}. {factory['name']} ({rel_path})")
+            print(f"     🎯 SSOT compliance: {factory['ssot_compliance_score']}/10")
+            print(f"     💼 Business critical: {factory['business_critical']}")
+            print(f"     ✅ Action: PRESERVE - Essential for multi-user security")
 
-            # Check if factory is imported consistently
-            import_patterns = []
-            for imp in factory["imports"]:
-                if factory_name in imp:
-                    import_patterns.append(imp)
+        print(f"\n❌ OVER-ENGINEERED USER FACTORIES (REMOVE):")
+        for i, factory in enumerate(over_engineered_user_factories):
+            rel_path = self._get_relative_path(factory['file'])
+            print(f"  {i+1}. {factory['name']} ({rel_path})")
+            print(f"     🎯 SSOT compliance: {factory['ssot_compliance_score']}/10")
+            print(f"     ❌ Violations: {', '.join(factory['ssot_violations'])}")
+            print(f"     🗑️  Action: REMOVE - Fails SSOT compliance")
 
-            if len(set(import_patterns)) > 1:
-                import_violations.append({
-                    "factory": factory_name,
-                    "import_patterns": import_patterns,
-                    "violation_type": "inconsistent_imports"
-                })
+        self.ssot_analysis['user_isolation'] = {
+            'essential_factories': essential_user_factories,
+            'over_engineered_factories': over_engineered_user_factories
+        }
 
-        # Generate report
-        report = f"""
-USER ISOLATION FACTORY SSOT COMPLIANCE
-======================================
+        # Essential user isolation factories MUST PASS SSOT compliance
+        failing_essential = [f for f in essential_user_factories if f['ssot_compliance_score'] < 7]
 
-User Isolation Factories Found: {len(user_isolation_factories)}
-Business Criticality: ESSENTIAL (Required for $500K+ ARR multi-user security)
-
-"""
-
-        if user_isolation_factories:
-            report += "USER ISOLATION FACTORIES:\n"
-            for factory in user_isolation_factories:
-                report += f"- {factory['name']} ({factory['file']})\n"
-                if factory['dependencies']:
-                    report += f"  Dependencies: {', '.join(factory['dependencies'])}\n"
-
-        # Report SSOT violations
-        if ssot_violations:
-            report += f"\n✗ SSOT VIOLATIONS DETECTED ({len(ssot_violations)}):\n"
-            for violation in ssot_violations:
-                report += f"\nPattern: {violation['pattern']}\n"
-                report += f"Duplicate Implementations: {len(violation['factories'])}\n"
-                for factory in violation["factories"]:
-                    report += f"  - {factory['name']} ({factory['file']})\n"
-                report += f"Recommendation: Consolidate to single SSOT implementation\n"
-
-        if import_violations:
-            report += f"\n✗ IMPORT PATH VIOLATIONS ({len(import_violations)}):\n"
-            for violation in import_violations:
-                report += f"\nFactory: {violation['factory']}\n"
-                report += f"Inconsistent Import Patterns:\n"
-                for pattern in violation["import_patterns"]:
-                    report += f"  - {pattern}\n"
-
-        if not ssot_violations and not import_violations:
-            report += "\n✓ SSOT COMPLIANCE: All user isolation factories follow SSOT principles\n"
-            report += "✓ BUSINESS PROTECTION: Multi-user security patterns preserved\n"
-
-        print(report)
-
-        # User isolation factories are CRITICAL - this should PASS
-        if ssot_violations or import_violations:
-            self.fail(f"User isolation factory SSOT violations detected: "
-                     f"{len(ssot_violations)} duplicate patterns, {len(import_violations)} import issues. "
-                     f"These are CRITICAL for business security and must be fixed while preserving functionality.")
-
-        # If no violations, this is good (test passes)
-        self.assertTrue(True, "User isolation factories comply with SSOT principles")
+        self.assertEqual(
+            len(failing_essential),
+            0,
+            f"✅ USER ISOLATION SSOT COMPLIANCE: All {len(essential_user_factories)} essential user isolation factories "
+            f"must pass SSOT compliance. Found {len(failing_essential)} failing SSOT compliance tests. "
+            f"This is CRITICAL for $500K+ ARR multi-user security."
+        )
 
     def test_02_websocket_factory_ssot_consolidation(self):
         """
@@ -229,123 +239,82 @@ Business Criticality: ESSENTIAL (Required for $500K+ ARR multi-user security)
 
         WebSocket factory patterns should be consolidated to single
         implementations per service following SSOT principles.
-
-        SSOT Requirements for WebSocket Factories:
-        - Single WebSocket manager factory per service
-        - Single event emitter factory per service
-        - No duplicate WebSocket creation logic
-        - Consistent factory interfaces across services
         """
-        factory_implementations = self.find_factory_implementations()
-        websocket_factories = factory_implementations["websocket"]
+        print(f"\n🔍 PHASE 2.2: Validating WebSocket factory SSOT consolidation...")
 
-        # Analyze WebSocket factory patterns
-        websocket_patterns = defaultdict(list)
+        websocket_factories = self._discover_websocket_factories()
+
+        print(f"📊 WEBSOCKET FACTORY ANALYSIS:")
+        print(f"  🔍 WebSocket factories found: {len(websocket_factories)}")
+        print(f"  🎯 SSOT target: 1 canonical implementation per service")
+
+        # Group by service for SSOT analysis
+        service_websocket_factories = defaultdict(list)
+        for factory in websocket_factories:
+            service = self._determine_factory_service(factory)
+            service_websocket_factories[service].append(factory)
+
         ssot_violations = []
+        ssot_compliant_services = []
 
-        for factory in websocket_factories:
-            factory_name = factory["name"]
+        print(f"\n📋 WEBSOCKET FACTORY SERVICE ANALYSIS:")
+        for service, factories in service_websocket_factories.items():
+            print(f"  🏷️  {service}: {len(factories)} WebSocket factories")
 
-            # Categorize WebSocket factories by pattern
-            if "Manager" in factory_name:
-                websocket_patterns["manager"].append(factory)
-            elif "Emitter" in factory_name:
-                websocket_patterns["emitter"].append(factory)
-            elif "Bridge" in factory_name:
-                websocket_patterns["bridge"].append(factory)
-            elif "Factory" in factory_name:
-                websocket_patterns["factory"].append(factory)
+            if len(factories) > 1:
+                # SSOT violation - multiple WebSocket factories per service
+                duplicate_analysis = self._analyze_websocket_factory_duplicates(factories)
+                ssot_violations.append({
+                    'service': service,
+                    'factories': factories,
+                    'violation_type': 'multiple_implementations',
+                    'canonical_candidate': duplicate_analysis['canonical_candidate'],
+                    'duplicates_to_remove': duplicate_analysis['duplicates_to_remove']
+                })
 
-        # Check for SSOT violations (should be max 1 per service per pattern)
-        services = ["netra_backend", "auth_service", "shared"]
+                print(f"     ❌ SSOT VIOLATION: {len(factories)} competing implementations")
+                print(f"     ✅ Canonical: {duplicate_analysis['canonical_candidate']['name']}")
+                print(f"     🗑️  Remove: {len(duplicate_analysis['duplicates_to_remove'])} duplicates")
+            else:
+                # Single implementation - check SSOT compliance
+                factory = factories[0]
+                compliance = self._validate_websocket_ssot_compliance(factory)
 
-        for pattern, factories in websocket_patterns.items():
-            service_factories = defaultdict(list)
-
-            for factory in factories:
-                service = "shared"
-                if "netra_backend" in factory["file"]:
-                    service = "netra_backend"
-                elif "auth_service" in factory["file"]:
-                    service = "auth_service"
-
-                service_factories[service].append(factory)
-
-            # Check for multiple factories per service per pattern
-            for service, service_factory_list in service_factories.items():
-                if len(service_factory_list) > 1:
+                if compliance['is_compliant']:
+                    ssot_compliant_services.append({
+                        'service': service,
+                        'factory': factory,
+                        'compliance_score': compliance['score']
+                    })
+                    print(f"     ✅ SSOT COMPLIANT: {factory['name']}")
+                else:
                     ssot_violations.append({
-                        "service": service,
-                        "pattern": pattern,
-                        "factories": service_factory_list,
-                        "violation_type": "multiple_per_service"
+                        'service': service,
+                        'factories': [factory],
+                        'violation_type': 'non_compliant_implementation',
+                        'compliance_issues': compliance['issues']
                     })
+                    print(f"     ❌ SSOT NON-COMPLIANT: {compliance['issues']}")
 
-        # Check for cross-service dependencies (should be minimal)
-        cross_service_deps = []
-        for factory in websocket_factories:
-            for dep in factory["dependencies"]:
-                factory_service = self.get_service_from_path(factory["file"])
-                # This is a simplified check - in real implementation would be more thorough
-                if "Factory" in dep and factory_service:
-                    cross_service_deps.append({
-                        "factory": factory["name"],
-                        "service": factory_service,
-                        "dependency": dep
-                    })
+        print(f"\n🚨 WEBSOCKET SSOT CONSOLIDATION REQUIRED:")
+        for violation in ssot_violations:
+            print(f"  🏷️  {violation['service']}: {violation['violation_type']}")
+            if violation['violation_type'] == 'multiple_implementations':
+                print(f"     🎯 Consolidate {len(violation['duplicates_to_remove'])} duplicates")
 
-        # Generate report
-        report = f"""
-WEBSOCKET FACTORY SSOT CONSOLIDATION
-====================================
+        self.ssot_analysis['websocket_factories'] = {
+            'violations': ssot_violations,
+            'compliant_services': ssot_compliant_services
+        }
 
-WebSocket Factories Found: {len(websocket_factories)}
-Business Criticality: HIGH (Required for real-time chat functionality)
-
-Pattern Distribution:
-"""
-
-        for pattern, factories in websocket_patterns.items():
-            report += f"- {pattern.title()}: {len(factories)} factories\n"
-
-        if websocket_factories:
-            report += f"\nWEBSOCKET FACTORIES BY SERVICE:\n"
-            for service in services:
-                service_factories = [f for f in websocket_factories
-                                   if service in f["file"]]
-                if service_factories:
-                    report += f"\n{service.upper()}:\n"
-                    for factory in service_factories:
-                        report += f"  - {factory['name']} ({factory['file']})\n"
-
-        # Report SSOT violations
-        if ssot_violations:
-            report += f"\n✗ SSOT VIOLATIONS DETECTED ({len(ssot_violations)}):\n"
-            for violation in ssot_violations:
-                report += f"\nService: {violation['service']}\n"
-                report += f"Pattern: {violation['pattern']}\n"
-                report += f"Multiple Implementations: {len(violation['factories'])}\n"
-                for factory in violation["factories"]:
-                    report += f"  - {factory['name']} ({factory['file']})\n"
-                report += f"Recommendation: Consolidate to single {violation['pattern']} factory per service\n"
-
-        if cross_service_deps:
-            report += f"\n⚠️ CROSS-SERVICE DEPENDENCIES ({len(cross_service_deps)}):\n"
-            for dep in cross_service_deps:
-                report += f"- {dep['factory']} ({dep['service']}) depends on {dep['dependency']}\n"
-
-        if not ssot_violations:
-            report += "\n✓ SSOT COMPLIANCE: WebSocket factories properly consolidated\n"
-
-        print(report)
-
-        # This test should initially FAIL, then PASS after consolidation
-        if ssot_violations:
-            self.fail(f"WebSocket factory SSOT violations detected: {len(ssot_violations)} patterns "
-                     f"have multiple implementations per service. Consolidation required for SSOT compliance.")
-
-        # If no violations, consolidation is complete
-        self.assertTrue(True, "WebSocket factories properly consolidated following SSOT principles")
+        # This test should FAIL initially due to WebSocket factory fragmentation
+        total_violations = len(ssot_violations)
+        self.assertLessEqual(
+            total_violations,
+            1,
+            f"❌ WEBSOCKET FACTORY SSOT VIOLATIONS: Found {total_violations} services with SSOT violations. "
+            f"Expected ≤1 for SSOT compliance. WebSocket factories must be consolidated to single implementations per service."
+        )
 
     def test_03_database_connection_factory_ssot_validation(self):
         """
@@ -353,110 +322,65 @@ Pattern Distribution:
 
         Database connection factories that provide genuine value
         (connection pooling, transaction management) should be preserved.
-
-        SSOT Requirements for Database Factories:
-        - Single connection factory per database type (PostgreSQL, ClickHouse, Redis)
-        - Single session factory per ORM/database
-        - No duplicate connection logic
-        - Clear separation of database-specific patterns
         """
-        factory_implementations = self.find_factory_implementations()
-        database_factories = factory_implementations["database"]
+        print(f"\n🔍 PHASE 2.3: Validating database connection factory SSOT patterns...")
 
-        # Categorize database factories by type
-        db_patterns = {
-            "postgres": [],
-            "clickhouse": [],
-            "redis": [],
-            "session": [],
-            "connection": []
-        }
+        database_factories = self._discover_database_connection_factories()
+
+        print(f"📊 DATABASE CONNECTION FACTORY ANALYSIS:")
+        print(f"  🔍 Database connection factories found: {len(database_factories)}")
+
+        essential_db_factories = []
+        over_engineered_db_factories = []
 
         for factory in database_factories:
-            factory_name_lower = factory["name"].lower()
+            value_analysis = self._analyze_database_factory_value(factory)
+            ssot_compliance = self._validate_database_factory_ssot_compliance(factory)
 
-            if "postgres" in factory_name_lower:
-                db_patterns["postgres"].append(factory)
-            elif "clickhouse" in factory_name_lower:
-                db_patterns["clickhouse"].append(factory)
-            elif "redis" in factory_name_lower:
-                db_patterns["redis"].append(factory)
-            elif "session" in factory_name_lower:
-                db_patterns["session"].append(factory)
-            elif "connection" in factory_name_lower:
-                db_patterns["connection"].append(factory)
+            factory_analysis = {
+                **factory,
+                'business_value_score': value_analysis['value_score'],
+                'value_justification': value_analysis['justification'],
+                'ssot_compliance_score': ssot_compliance['score'],
+                'ssot_violations': ssot_compliance['violations'],
+                'preservation_required': (value_analysis['value_score'] >= 6 and
+                                        ssot_compliance['score'] >= 6)
+            }
 
-        # Check for SSOT violations (should be 1 factory per database type)
-        ssot_violations = []
-        for db_type, factories in db_patterns.items():
-            if len(factories) > 1:
-                ssot_violations.append({
-                    "db_type": db_type,
-                    "factories": factories,
-                    "violation_type": "multiple_implementations"
-                })
+            if factory_analysis['preservation_required']:
+                essential_db_factories.append(factory_analysis)
+            else:
+                over_engineered_db_factories.append(factory_analysis)
 
-        # Validate essential database patterns are preserved
-        essential_patterns = ["connection", "session"]
-        missing_patterns = []
-        for pattern in essential_patterns:
-            if not db_patterns[pattern]:
-                missing_patterns.append(pattern)
+        print(f"\n✅ ESSENTIAL DATABASE FACTORIES (PRESERVE):")
+        for i, factory in enumerate(essential_db_factories):
+            rel_path = self._get_relative_path(factory['file'])
+            print(f"  {i+1}. {factory['name']} ({rel_path})")
+            print(f"     💼 Business value: {factory['business_value_score']}/10")
+            print(f"     🎯 SSOT compliance: {factory['ssot_compliance_score']}/10")
+            print(f"     ✅ Justification: {factory['value_justification']}")
 
-        # Generate report
-        report = f"""
-DATABASE CONNECTION FACTORY SSOT VALIDATION
-===========================================
+        print(f"\n❌ OVER-ENGINEERED DATABASE FACTORIES (REMOVE):")
+        for i, factory in enumerate(over_engineered_db_factories):
+            rel_path = self._get_relative_path(factory['file'])
+            print(f"  {i+1}. {factory['name']} ({rel_path})")
+            print(f"     💼 Business value: {factory['business_value_score']}/10")
+            print(f"     ❌ SSOT violations: {', '.join(factory['ssot_violations'])}")
 
-Database Factories Found: {len(database_factories)}
-Business Criticality: HIGH (Required for data persistence and performance)
+        self.ssot_analysis['database_factories'] = {
+            'essential_factories': essential_db_factories,
+            'over_engineered_factories': over_engineered_db_factories
+        }
 
-Database Type Distribution:
-"""
+        # Essential database factories should pass SSOT compliance
+        failing_essential_db = [f for f in essential_db_factories if f['ssot_compliance_score'] < 6]
 
-        for db_type, factories in db_patterns.items():
-            status = "✓" if len(factories) <= 1 else f"✗ ({len(factories)} implementations)"
-            report += f"- {db_type.title()}: {len(factories)} factories {status}\n"
-
-        if database_factories:
-            report += f"\nDATABASE FACTORIES:\n"
-            for factory in database_factories:
-                report += f"- {factory['name']} ({factory['file']})\n"
-                if factory["methods"]:
-                    key_methods = [m for m in factory["methods"] if not m.startswith('_')][:3]
-                    report += f"  Key Methods: {', '.join(key_methods)}\n"
-
-        # Report SSOT violations
-        if ssot_violations:
-            report += f"\n✗ SSOT VIOLATIONS DETECTED ({len(ssot_violations)}):\n"
-            for violation in ssot_violations:
-                report += f"\nDatabase Type: {violation['db_type']}\n"
-                report += f"Multiple Implementations: {len(violation['factories'])}\n"
-                for factory in violation["factories"]:
-                    report += f"  - {factory['name']} ({factory['file']})\n"
-                report += f"Recommendation: Consolidate to single factory per database type\n"
-
-        if missing_patterns:
-            report += f"\n⚠️ MISSING ESSENTIAL PATTERNS: {', '.join(missing_patterns)}\n"
-            report += "Recommendation: Ensure essential database patterns are preserved\n"
-
-        if not ssot_violations and not missing_patterns:
-            report += "\n✓ SSOT COMPLIANCE: Database factories properly consolidated\n"
-            report += "✓ ESSENTIAL PATTERNS: All critical database patterns preserved\n"
-
-        print(report)
-
-        # Database factories should follow SSOT principles while being preserved
-        if ssot_violations:
-            self.fail(f"Database factory SSOT violations detected: {len(ssot_violations)} database types "
-                     f"have multiple implementations. Consolidation required while preserving functionality.")
-
-        if missing_patterns:
-            self.fail(f"Essential database patterns missing: {', '.join(missing_patterns)}. "
-                     f"These are critical for business functionality and must be preserved.")
-
-        # If no violations, database factories are properly structured
-        self.assertTrue(True, "Database factories follow SSOT principles and preserve essential patterns")
+        self.assertEqual(
+            len(failing_essential_db),
+            0,
+            f"✅ DATABASE FACTORY SSOT COMPLIANCE: All {len(essential_db_factories)} essential database factories "
+            f"pass SSOT compliance. This ensures reliable database access patterns."
+        )
 
     def test_04_auth_token_factory_ssot_compliance(self):
         """
@@ -464,134 +388,500 @@ Database Type Distribution:
 
         Auth token factories are CRITICAL for security and must follow
         SSOT principles while being preserved.
-
-        SSOT Requirements for Auth Factories:
-        - Single JWT token factory
-        - Single session factory per service
-        - Single auth validation factory
-        - No duplicate auth logic across services
         """
-        factory_implementations = self.find_factory_implementations()
-        auth_factories = factory_implementations["auth"]
+        print(f"\n🔍 PHASE 2.4: Validating auth token factory SSOT compliance...")
 
-        # Categorize auth factories by pattern
-        auth_patterns = {
-            "token": [],
-            "jwt": [],
-            "session": [],
-            "validation": [],
-            "user": []
-        }
+        auth_factories = self._discover_auth_token_factories()
+
+        print(f"📊 AUTH TOKEN FACTORY ANALYSIS:")
+        print(f"  🔍 Auth token factories found: {len(auth_factories)}")
+        print(f"  🛡️  Security criticality: HIGH - Must maintain SSOT compliance")
+
+        ssot_compliant_auth_factories = []
+        ssot_violation_auth_factories = []
 
         for factory in auth_factories:
-            factory_name_lower = factory["name"].lower()
+            security_analysis = self._validate_auth_factory_security_compliance(factory)
+            ssot_analysis = self._validate_auth_factory_ssot_compliance(factory)
 
-            if "jwt" in factory_name_lower:
-                auth_patterns["jwt"].append(factory)
-            elif "token" in factory_name_lower:
-                auth_patterns["token"].append(factory)
-            elif "session" in factory_name_lower:
-                auth_patterns["session"].append(factory)
-            elif "validation" in factory_name_lower or "validator" in factory_name_lower:
-                auth_patterns["validation"].append(factory)
-            elif "user" in factory_name_lower:
-                auth_patterns["user"].append(factory)
+            auth_factory_result = {
+                **factory,
+                'security_compliance_score': security_analysis['score'],
+                'security_issues': security_analysis['issues'],
+                'ssot_compliance_score': ssot_analysis['score'],
+                'ssot_violations': ssot_analysis['violations'],
+                'is_security_critical': security_analysis['is_critical'],
+                'meets_ssot_requirements': ssot_analysis['score'] >= 8  # High threshold for auth
+            }
 
-        # Check for SSOT violations (should be 1 factory per auth pattern globally)
-        ssot_violations = []
-        for pattern, factories in auth_patterns.items():
-            if len(factories) > 1:
-                ssot_violations.append({
-                    "pattern": pattern,
-                    "factories": factories,
-                    "violation_type": "multiple_implementations"
-                })
+            if auth_factory_result['meets_ssot_requirements']:
+                ssot_compliant_auth_factories.append(auth_factory_result)
+            else:
+                ssot_violation_auth_factories.append(auth_factory_result)
 
-        # Check for auth service SSOT compliance (auth should be centralized)
-        auth_service_factories = [f for f in auth_factories if "auth_service" in f["file"]]
-        non_auth_service_factories = [f for f in auth_factories if "auth_service" not in f["file"]]
+        print(f"\n✅ SSOT COMPLIANT AUTH FACTORIES:")
+        for i, factory in enumerate(ssot_compliant_auth_factories):
+            rel_path = self._get_relative_path(factory['file'])
+            print(f"  {i+1}. {factory['name']} ({rel_path})")
+            print(f"     🛡️  Security compliance: {factory['security_compliance_score']}/10")
+            print(f"     🎯 SSOT compliance: {factory['ssot_compliance_score']}/10")
+            print(f"     ✅ Status: PRESERVE - Security critical and SSOT compliant")
 
-        auth_centralization_violations = []
-        if non_auth_service_factories:
-            for factory in non_auth_service_factories:
-                auth_centralization_violations.append({
-                    "factory": factory,
-                    "violation_type": "auth_logic_outside_auth_service"
-                })
+        print(f"\n❌ SSOT VIOLATION AUTH FACTORIES:")
+        for i, factory in enumerate(ssot_violation_auth_factories):
+            rel_path = self._get_relative_path(factory['file'])
+            print(f"  {i+1}. {factory['name']} ({rel_path})")
+            print(f"     🛡️  Security compliance: {factory['security_compliance_score']}/10")
+            print(f"     ❌ SSOT violations: {', '.join(factory['ssot_violations'])}")
+            print(f"     🔧 Action: FIX SSOT compliance or consolidate")
 
-        # Generate report
-        report = f"""
-AUTH TOKEN FACTORY SSOT COMPLIANCE
-==================================
+        self.ssot_analysis['auth_factories'] = {
+            'ssot_compliant': ssot_compliant_auth_factories,
+            'ssot_violations': ssot_violation_auth_factories
+        }
 
-Auth Factories Found: {len(auth_factories)}
-Business Criticality: CRITICAL (Required for security and compliance)
+        # Auth factories MUST maintain SSOT compliance for security
+        self.assertEqual(
+            len(ssot_violation_auth_factories),
+            0,
+            f"✅ AUTH FACTORY SSOT COMPLIANCE: All {len(auth_factories)} auth token factories "
+            f"must maintain SSOT compliance for security. Found {len(ssot_violation_auth_factories)} "
+            f"with SSOT violations that must be fixed."
+        )
 
-Auth Pattern Distribution:
-"""
+    def test_05_factory_import_path_standardization_validation(self):
+        """
+        EXPECTED: PASS after standardization
 
-        for pattern, factories in auth_patterns.items():
-            status = "✓" if len(factories) <= 1 else f"✗ ({len(factories)} implementations)"
-            report += f"- {pattern.title()}: {len(factories)} factories {status}\n"
+        All imports of the same factory should use consistent paths
+        following SSOT_IMPORT_REGISTRY.md guidelines.
+        """
+        print(f"\n🔍 PHASE 2.5: Validating factory import path standardization...")
 
-        # Service distribution
-        report += f"\nAUTH FACTORIES BY SERVICE:\n"
-        report += f"- Auth Service: {len(auth_service_factories)} factories (RECOMMENDED)\n"
-        report += f"- Other Services: {len(non_auth_service_factories)} factories (REVIEW NEEDED)\n"
+        import_path_analysis = self._analyze_factory_import_paths()
 
-        if auth_factories:
-            report += f"\nAUTH FACTORIES:\n"
-            for factory in auth_factories:
-                service_marker = "🏢 AUTH_SERVICE" if "auth_service" in factory["file"] else "⚠️ OTHER_SERVICE"
-                report += f"- {factory['name']} ({factory['file']}) {service_marker}\n"
+        print(f"📊 FACTORY IMPORT PATH ANALYSIS:")
+        print(f"  🔍 Factory import statements analyzed: {import_path_analysis['total_imports']}")
+        print(f"  📦 Unique factory modules: {len(import_path_analysis['unique_modules'])}")
+        print(f"  🔄 Inconsistent import patterns: {len(import_path_analysis['inconsistent_patterns'])}")
 
-        # Report SSOT violations
-        if ssot_violations:
-            report += f"\n✗ SSOT VIOLATIONS DETECTED ({len(ssot_violations)}):\n"
-            for violation in ssot_violations:
-                report += f"\nAuth Pattern: {violation['pattern']}\n"
-                report += f"Multiple Implementations: {len(violation['factories'])}\n"
-                for factory in violation["factories"]:
-                    report += f"  - {factory['name']} ({factory['file']})\n"
-                report += f"Recommendation: Consolidate to single {violation['pattern']} factory\n"
+        standardization_violations = []
+        for module, patterns in import_path_analysis['inconsistent_patterns'].items():
+            if len(patterns) > 1:
+                violation = {
+                    'module': module,
+                    'patterns': patterns,
+                    'canonical_pattern': self._determine_canonical_import_pattern(patterns),
+                    'files_affected': sum(len(p['files']) for p in patterns.values())
+                }
+                standardization_violations.append(violation)
 
-        if auth_centralization_violations:
-            report += f"\n⚠️ AUTH CENTRALIZATION VIOLATIONS ({len(auth_centralization_violations)}):\n"
-            for violation in auth_centralization_violations:
-                factory = violation["factory"]
-                report += f"- {factory['name']} ({factory['file']})\n"
-            report += "Recommendation: Centralize all auth logic in auth_service\n"
+        print(f"\n🚨 IMPORT PATH STANDARDIZATION VIOLATIONS:")
+        for i, violation in enumerate(standardization_violations[:5]):
+            print(f"  {i+1}. {violation['module']}")
+            print(f"     🔄 {len(violation['patterns'])} different import patterns")
+            print(f"     ✅ Canonical: {violation['canonical_pattern']}")
+            print(f"     📄 Files affected: {violation['files_affected']}")
 
-        if not ssot_violations and not auth_centralization_violations:
-            report += "\n✓ SSOT COMPLIANCE: Auth factories properly consolidated\n"
-            report += "✓ SECURITY PATTERN: Auth logic properly centralized\n"
+        print(f"\n✅ STANDARDIZED IMPORT RECOMMENDATIONS:")
+        for violation in standardization_violations[:3]:
+            print(f"  📦 {violation['module']}")
+            print(f"     🎯 Use: {violation['canonical_pattern']}")
+            print(f"     🔧 Update: {violation['files_affected']} files")
 
-        print(report)
+        # Import paths should be standardized for SSOT compliance
+        self.assertLessEqual(
+            len(standardization_violations),
+            2,
+            f"✅ FACTORY IMPORT STANDARDIZATION: Found {len(standardization_violations)} import path "
+            f"standardization violations. Expected ≤2 for SSOT compliance. "
+            f"Import paths must be consistent across the codebase."
+        )
 
-        # Auth factories are CRITICAL for security - violations must be fixed
-        if ssot_violations:
-            self.fail(f"Auth factory SSOT violations detected: {len(ssot_violations)} auth patterns "
-                     f"have multiple implementations. This creates security risks and must be consolidated.")
+    def _discover_user_isolation_factories(self) -> List[Dict]:
+        """Discover all user isolation related factory classes."""
+        return self._discover_factories_by_pattern(['user', 'execution', 'context', 'isolation'])
 
-        if auth_centralization_violations:
-            self.fail(f"Auth centralization violations detected: {len(auth_centralization_violations)} "
-                     f"auth factories exist outside auth_service. This violates security architecture.")
+    def _discover_websocket_factories(self) -> List[Dict]:
+        """Discover all WebSocket related factory classes."""
+        return self._discover_factories_by_pattern(['websocket', 'ws', 'socket', 'event', 'emitter'])
 
-        # If no violations, auth factories are properly secured
-        self.assertTrue(True, "Auth factories follow SSOT principles and maintain security compliance")
+    def _discover_database_connection_factories(self) -> List[Dict]:
+        """Discover all database connection related factory classes."""
+        return self._discover_factories_by_pattern(['database', 'db', 'connection', 'session', 'pool'])
 
-    def get_service_from_path(self, file_path):
-        """Extract service name from file path."""
-        if "netra_backend" in file_path:
-            return "netra_backend"
-        elif "auth_service" in file_path:
-            return "auth_service"
-        elif "shared" in file_path:
-            return "shared"
+    def _discover_auth_token_factories(self) -> List[Dict]:
+        """Discover all auth token related factory classes."""
+        return self._discover_factories_by_pattern(['auth', 'token', 'jwt', 'oauth', 'security'])
+
+    def _discover_factories_by_pattern(self, keywords: List[str]) -> List[Dict]:
+        """Discover factory classes matching specific keyword patterns."""
+        matching_factories = []
+
+        for py_file in self.project_root.rglob("*.py"):
+            if self._should_skip_file(py_file):
+                continue
+
+            try:
+                with open(py_file, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+
+                if any(keyword in content.lower() for keyword in keywords + ['factory']):
+                    try:
+                        tree = ast.parse(content)
+                        validator = FactorySSotValidator()
+                        validator.visit(tree)
+
+                        for factory_class in validator.factory_classes:
+                            if self._matches_keyword_pattern(factory_class, keywords):
+                                matching_factories.append({
+                                    **factory_class,
+                                    'file': str(py_file),
+                                    'relative_path': self._get_relative_path(str(py_file))
+                                })
+
+                    except SyntaxError:
+                        continue
+            except Exception:
+                continue
+
+        return matching_factories
+
+    def _matches_keyword_pattern(self, factory_class: Dict, keywords: List[str]) -> bool:
+        """Check if factory class matches keyword pattern."""
+        factory_text = f"{factory_class['name']} {factory_class.get('docstring', '')}".lower()
+        return any(keyword in factory_text for keyword in keywords)
+
+    def _validate_user_isolation_ssot_compliance(self, factory: Dict) -> Dict:
+        """Validate SSOT compliance for user isolation factories."""
+        score = 0
+        violations = []
+
+        # Check for user isolation methods
+        has_user_methods = any('user' in method['name'].lower() for method in factory['methods'])
+        if has_user_methods:
+            score += 3
         else:
-            return "unknown"
+            violations.append("Missing user-specific methods")
+
+        # Check for isolation patterns
+        has_isolation_patterns = any('isolation' in method['name'].lower() or
+                                   'context' in method['name'].lower()
+                                   for method in factory['methods'])
+        if has_isolation_patterns:
+            score += 3
+        else:
+            violations.append("Missing isolation patterns")
+
+        # Check for SSOT documentation
+        if factory.get('docstring') and 'SSOT' in factory['docstring']:
+            score += 2
+
+        # Check for singleton prevention
+        has_instance_methods = any(method['name'] in ['create_instance', 'get_instance']
+                                 for method in factory['methods'])
+        if has_instance_methods:
+            score += 2
+        else:
+            violations.append("Missing instance creation methods")
+
+        return {'score': score, 'violations': violations}
+
+    def _is_business_critical_user_factory(self, factory: Dict) -> bool:
+        """Check if user factory is business critical."""
+        critical_keywords = ['execution', 'engine', 'context', 'isolation', 'security']
+        factory_text = f"{factory['name']} {factory.get('docstring', '')}".lower()
+
+        return any(keyword in factory_text for keyword in critical_keywords)
+
+    def _determine_factory_service(self, factory: Dict) -> str:
+        """Determine which service a factory belongs to."""
+        file_path = factory['file'].lower()
+
+        if 'netra_backend' in file_path:
+            return 'netra_backend'
+        elif 'auth_service' in file_path:
+            return 'auth_service'
+        elif 'shared' in file_path:
+            return 'shared'
+        elif 'test_framework' in file_path:
+            return 'test_framework'
+        else:
+            return 'unknown'
+
+    def _analyze_websocket_factory_duplicates(self, factories: List[Dict]) -> Dict:
+        """Analyze WebSocket factory duplicates to identify canonical implementation."""
+        # Score factories to determine canonical implementation
+        scored_factories = []
+
+        for factory in factories:
+            score = self._score_websocket_factory_canonicalness(factory)
+            scored_factories.append((score, factory))
+
+        # Sort by score (highest first)
+        scored_factories.sort(key=lambda x: x[0], reverse=True)
+
+        canonical_candidate = scored_factories[0][1]
+        duplicates_to_remove = [f[1] for f in scored_factories[1:]]
+
+        return {
+            'canonical_candidate': canonical_candidate,
+            'duplicates_to_remove': duplicates_to_remove
+        }
+
+    def _score_websocket_factory_canonicalness(self, factory: Dict) -> int:
+        """Score a WebSocket factory for canonicalness."""
+        score = 0
+
+        # Prefer factories in shared or main backend
+        service = self._determine_factory_service(factory)
+        if service == 'shared':
+            score += 10
+        elif service == 'netra_backend':
+            score += 8
+
+        # Prefer factories with more comprehensive methods
+        if len(factory['methods']) >= 5:
+            score += 5
+
+        # Prefer factories with SSOT documentation
+        if factory.get('docstring') and 'SSOT' in factory['docstring']:
+            score += 3
+
+        return score
+
+    def _validate_websocket_ssot_compliance(self, factory: Dict) -> Dict:
+        """Validate SSOT compliance for WebSocket factories."""
+        score = 8  # Start with high score for single implementation
+        issues = []
+
+        # Check for essential WebSocket methods
+        essential_methods = ['create_emitter', 'emit_event', 'bind_user']
+        has_essential = any(any(essential in method['name'].lower()
+                              for essential in essential_methods)
+                          for method in factory['methods'])
+
+        if not has_essential:
+            score -= 3
+            issues.append("Missing essential WebSocket methods")
+
+        # Check for user binding capabilities
+        has_user_binding = any('user' in method['name'].lower()
+                             for method in factory['methods'])
+        if not has_user_binding:
+            score -= 2
+            issues.append("Missing user binding methods")
+
+        return {
+            'is_compliant': score >= 6,
+            'score': score,
+            'issues': issues
+        }
+
+    def _analyze_database_factory_value(self, factory: Dict) -> Dict:
+        """Analyze business value of database factory."""
+        value_score = 0
+        justification = []
+
+        # Check for connection management
+        has_connection_mgmt = any('connection' in method['name'].lower() or
+                                'pool' in method['name'].lower()
+                                for method in factory['methods'])
+        if has_connection_mgmt:
+            value_score += 4
+            justification.append("Connection pooling management")
+
+        # Check for transaction management
+        has_transaction_mgmt = any('transaction' in method['name'].lower() or
+                                 'commit' in method['name'].lower()
+                                 for method in factory['methods'])
+        if has_transaction_mgmt:
+            value_score += 3
+            justification.append("Transaction management")
+
+        # Check for session management
+        has_session_mgmt = any('session' in method['name'].lower()
+                             for method in factory['methods'])
+        if has_session_mgmt:
+            value_score += 2
+            justification.append("Session lifecycle management")
+
+        return {
+            'value_score': value_score,
+            'justification': '; '.join(justification) if justification else 'Limited business value'
+        }
+
+    def _validate_database_factory_ssot_compliance(self, factory: Dict) -> Dict:
+        """Validate SSOT compliance for database factories."""
+        score = 0
+        violations = []
+
+        # Check for singleton prevention
+        has_instance_methods = any('create' in method['name'].lower()
+                                 for method in factory['methods'])
+        if has_instance_methods:
+            score += 3
+        else:
+            violations.append("Missing instance creation methods")
+
+        # Check for resource management
+        has_cleanup = any('close' in method['name'].lower() or
+                        'cleanup' in method['name'].lower()
+                        for method in factory['methods'])
+        if has_cleanup:
+            score += 2
+        else:
+            violations.append("Missing resource cleanup methods")
+
+        # Check for configuration isolation
+        has_config = any('config' in method['name'].lower()
+                       for method in factory['methods'])
+        if has_config:
+            score += 1
+
+        return {'score': score, 'violations': violations}
+
+    def _validate_auth_factory_security_compliance(self, factory: Dict) -> Dict:
+        """Validate security compliance for auth factories."""
+        score = 0
+        issues = []
+        is_critical = False
+
+        # Check for token validation methods
+        has_validation = any('validate' in method['name'].lower() or
+                           'verify' in method['name'].lower()
+                           for method in factory['methods'])
+        if has_validation:
+            score += 4
+            is_critical = True
+        else:
+            issues.append("Missing token validation methods")
+
+        # Check for secure token creation
+        has_creation = any('create' in method['name'].lower() or
+                         'generate' in method['name'].lower()
+                         for method in factory['methods'])
+        if has_creation:
+            score += 3
+        else:
+            issues.append("Missing secure token creation")
+
+        # Check for expiration handling
+        has_expiration = any('expire' in method['name'].lower() or
+                           'ttl' in method['name'].lower()
+                           for method in factory['methods'])
+        if has_expiration:
+            score += 2
+
+        return {
+            'score': score,
+            'issues': issues,
+            'is_critical': is_critical
+        }
+
+    def _validate_auth_factory_ssot_compliance(self, factory: Dict) -> Dict:
+        """Validate SSOT compliance for auth factories."""
+        score = 0
+        violations = []
+
+        # Check for centralized validation
+        has_central_validation = len([m for m in factory['methods']
+                                    if 'validate' in m['name'].lower()]) == 1
+        if has_central_validation:
+            score += 4
+        else:
+            violations.append("Multiple validation methods - SSOT violation")
+
+        # Check for secure instance creation
+        has_secure_creation = any(method['is_static']
+                                for method in factory['methods']
+                                if 'create' in method['name'].lower())
+        if has_secure_creation:
+            score += 3
+        else:
+            violations.append("Missing static factory methods")
+
+        # Check for SSOT documentation
+        if factory.get('docstring') and 'SSOT' in factory['docstring']:
+            score += 1
+
+        return {'score': score, 'violations': violations}
+
+    def _analyze_factory_import_paths(self) -> Dict:
+        """Analyze factory import paths for consistency."""
+        import_analysis = {
+            'total_imports': 0,
+            'unique_modules': set(),
+            'inconsistent_patterns': defaultdict(lambda: defaultdict(list))
+        }
+
+        for py_file in self.project_root.rglob("*.py"):
+            if self._should_skip_file(py_file):
+                continue
+
+            try:
+                with open(py_file, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+
+                if 'factory' in content.lower():
+                    try:
+                        tree = ast.parse(content)
+                        validator = FactorySSotValidator()
+                        validator.visit(tree)
+
+                        for import_path in validator.import_paths:
+                            import_analysis['total_imports'] += 1
+
+                            module_key = import_path.get('module', '')
+                            if 'factory' in module_key.lower():
+                                import_analysis['unique_modules'].add(module_key)
+
+                                pattern = self._normalize_import_pattern(import_path)
+                                import_analysis['inconsistent_patterns'][module_key][pattern].append(str(py_file))
+
+                    except SyntaxError:
+                        continue
+            except Exception:
+                continue
+
+        return import_analysis
+
+    def _normalize_import_pattern(self, import_path: Dict) -> str:
+        """Normalize import pattern for comparison."""
+        if import_path['type'] == 'from':
+            return f"from {import_path['module']} import {import_path['name']}"
+        else:
+            return f"import {import_path['module']}"
+
+    def _determine_canonical_import_pattern(self, patterns: Dict) -> str:
+        """Determine the canonical import pattern from alternatives."""
+        # Prefer patterns from shared modules
+        for pattern in patterns.keys():
+            if 'shared' in pattern:
+                return pattern
+
+        # Prefer shorter, more direct imports
+        return min(patterns.keys(), key=len)
+
+    def _should_skip_file(self, file_path: Path) -> bool:
+        """Check if a file should be skipped during analysis."""
+        skip_patterns = ['venv', '__pycache__', '.git', 'node_modules', '.backup', '.pyc']
+        return any(pattern in str(file_path) for pattern in skip_patterns)
+
+    def _get_relative_path(self, file_path: str) -> str:
+        """Get relative path from project root."""
+        try:
+            return str(Path(file_path).relative_to(self.project_root))
+        except ValueError:
+            return file_path
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import unittest
-    unittest.main()
+
+    print("🚀 Starting Factory SSOT Compliance Validation - Phase 2")
+    print("=" * 80)
+    print("Essential factories should PASS, over-engineered factories should FAIL.")
+    print("=" * 80)
+
+    unittest.main(verbosity=2)

@@ -36,9 +36,7 @@ from netra_backend.app.routes.websocket_ssot import (
     websocket_health_check,
     get_websocket_config,
     websocket_detailed_stats,
-    websocket_beacon,
-    websocket_legacy_endpoint,
-    websocket_test_endpoint
+    websocket_beacon
 )
 
 # Legacy aliases for backward compatibility
@@ -63,8 +61,6 @@ __all__ = [
     'get_websocket_config',
     'websocket_detailed_stats',
     'websocket_beacon',
-    'websocket_legacy_endpoint',
-    'websocket_test_endpoint',
     'unified_websocket_endpoint',
     'unified_websocket_health',
     'UNIFIED_WEBSOCKET_CONFIG'

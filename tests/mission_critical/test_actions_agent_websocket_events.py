@@ -4,7 +4,7 @@ import pytest
 import asyncio
 import time
 from typing import Dict, Any, List
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock
 
 # Import SSOT WebSocket test utility
 from test_framework.ssot.websocket_connection_test_utility import TestWebSocketConnection as WebSocketTestHelper

@@ -184,7 +184,9 @@ class TestWebSocketAgentCommunicationIntegration(SSotAsyncTestCase):
             self.auth_helper = E2EWebSocketAuthHelper(environment="integration")
             
         except Exception as e:
-            print(f"Failed to initialize real WebSocket infrastructure: {e}")def _create_mock_llm_manager(self):
+            print(f"Failed to initialize real WebSocket infrastructure: {e}")
+    
+    def _create_mock_llm_manager(self):
         """Create mock LLM manager for integration tests."""
         mock_llm = MagicMock()
         mock_llm.chat_completion = AsyncMock()

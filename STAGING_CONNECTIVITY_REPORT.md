@@ -1,38 +1,33 @@
 # Staging Environment Connectivity Report
-Generated: 2025-09-15 02:04:45
+Generated: 2025-09-15 09:37:34
 Environment: https://api.staging.netrasystems.ai
 
 ## Executive Summary
 - **Total Tests**: 3
-- **Successful**: 3
-- **Success Rate**: 100.0%
+- **Successful**: 0
+- **Success Rate**: 0.0%
 
 ## Test Results
 ### http_connectivity
-- **Status**:  PASS:  PASS
-- **Duration**: 0.383s
-- **Health Status**: 200
-- **Service Status**: healthy
-- **Version**: 1.0.0
+- **Status**:  FAIL:  FAIL
+- **Duration**: 10.048s
+- **Error**: 
 
 ### websocket_connectivity
-- **Status**:  PASS:  PASS
-- **Duration**: 0.000s
-- **Connection Time**: 0.716s
-- **Ping Time**: 0.000s
+- **Status**:  FAIL:  FAIL
+- **Duration**: 10.001s
+- **Error**: 
 
 ### agent_request_pipeline
-- **Status**:  PASS:  PASS
-- **Duration**: 0.803s
-- **Pipeline Working**: True
-- **Response Type**: connection_established
+- **Status**:  FAIL:  FAIL
+- **Duration**: 10.001s
+- **Error**: 
 
 ## Recommendations
- PASS:  **All connectivity tests passed!**
-- Staging environment is accessible and responding correctly
-- Agent execution pipeline is functional (auth layer working)
-- WebSocket communication is stable
-- Ready for comprehensive agent execution testing
+ WARNING: [U+FE0F] **Some connectivity issues detected**
+- Fix http_connectivity: 
+- Fix websocket_connectivity: 
+- Fix agent_request_pipeline: 
 
 ## Next Steps
 1. Run comprehensive agent execution tests with: `test_real_agent_execution_staging.py`

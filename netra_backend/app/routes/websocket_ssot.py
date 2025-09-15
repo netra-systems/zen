@@ -301,9 +301,7 @@ class WebSocketSSOTRouter:
         # Main SSOT endpoint - handles all modes via parameter
         self.router.websocket("/ws")(self.unified_websocket_endpoint)
         
-        # Legacy endpoint compatibility
-        self.router.websocket("/websocket")(self.legacy_websocket_endpoint)
-        self.router.websocket("/ws/test")(self.test_websocket_endpoint)
+        # Legacy endpoint compatibility removed - deprecated endpoints eliminated
         
         # Mode-specific endpoints for backward compatibility
         self.router.websocket("/ws/factory")(self.factory_websocket_endpoint)
@@ -635,13 +633,7 @@ class WebSocketSSOTRouter:
         """Isolated pattern endpoint for backward compatibility.""" 
         await self._handle_isolated_mode(websocket)
     
-    async def legacy_websocket_endpoint(self, websocket: WebSocket):
-        """Legacy WebSocket endpoint for backward compatibility."""
-        await self._handle_legacy_mode(websocket)
-    
-    async def test_websocket_endpoint(self, websocket: WebSocket):
-        """Test WebSocket endpoint for development."""
-        await self._handle_legacy_mode(websocket)
+    # Deprecated endpoint methods removed - legacy_websocket_endpoint and test_websocket_endpoint eliminated
     
     async def api_websocket_endpoint(self, websocket: WebSocket):
         """
@@ -2011,5 +2003,4 @@ websocket_beacon = ssot_router.websocket_beacon
 # Export mode-specific endpoints
 websocket_factory_endpoint = ssot_router.factory_websocket_endpoint
 websocket_isolated_endpoint = ssot_router.isolated_websocket_endpoint
-websocket_legacy_endpoint = ssot_router.legacy_websocket_endpoint
-websocket_test_endpoint = ssot_router.test_websocket_endpoint
+# Deprecated endpoint exports removed - websocket_legacy_endpoint and websocket_test_endpoint eliminated

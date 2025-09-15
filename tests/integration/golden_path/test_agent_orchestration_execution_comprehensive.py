@@ -217,7 +217,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         mock_db_session = AsyncMock()
         user_context = UserExecutionContext(user_id=realistic_user_context.user_id, thread_id=realistic_user_context.thread_id, run_id=realistic_user_context.run_id, request_id=realistic_user_context.request_id, websocket_client_id=realistic_user_context.websocket_client_id, agent_context=agent_context_data, audit_metadata=realistic_user_context.audit_metadata.copy(), operation_depth=realistic_user_context.operation_depth, parent_request_id=realistic_user_context.parent_request_id, db_session=mock_db_session)
         logger.info(f'✅ New user context created with database session: {user_context.db_session is not None}')
-        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager)
+        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=user_context)
         from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
         websocket_bridge = create_agent_websocket_bridge(user_context)
         mock_websocket_manager = AsyncMock()
@@ -379,7 +379,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         from unittest.mock import AsyncMock
         mock_db_session = AsyncMock()
         user_context = UserExecutionContext(user_id=source_context.user_id, thread_id=source_context.thread_id, run_id=source_context.run_id, request_id=source_context.request_id, websocket_client_id=source_context.websocket_client_id, agent_context=updated_agent_context, audit_metadata=source_context.audit_metadata.copy(), operation_depth=source_context.operation_depth, parent_request_id=source_context.parent_request_id, db_session=mock_db_session)
-        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager)
+        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=user_context)
         event_tracker = []
         from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
         websocket_bridge = create_agent_websocket_bridge(user_context)

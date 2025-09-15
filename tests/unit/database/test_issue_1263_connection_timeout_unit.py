@@ -39,8 +39,10 @@ class TestIssue1263ConnectionTimeoutUnit(SSotAsyncTestCase):
         self.env = IsolatedEnvironment()
         self.config = get_config()
 
-        # Test configuration that should reproduce the issue
-        self.test_database_config = {
+    @property
+    def test_database_config(self):
+        """Test configuration that should reproduce the issue"""
+        return {
             'POSTGRES_HOST': 'postgres.staging.netrasystems.ai',
             'POSTGRES_PORT': '5432',
             'POSTGRES_DB': 'netra_staging',
@@ -68,7 +70,7 @@ class TestIssue1263ConnectionTimeoutUnit(SSotAsyncTestCase):
             config = get_config()
 
             # Get database configuration
-            db_timeout = env.get_env('DATABASE_CONNECTION_TIMEOUT', '10.0')
+            db_timeout = env.get('DATABASE_CONNECTION_TIMEOUT', '10.0')
 
             # This test should FAIL initially - 8.0s timeout indicates VPC issue
             # After fix, timeout should be < 5.0s
@@ -89,10 +91,10 @@ class TestIssue1263ConnectionTimeoutUnit(SSotAsyncTestCase):
             env = IsolatedEnvironment()
 
             # Build connection string components
-            host = env.get_env('POSTGRES_HOST')
-            port = env.get_env('POSTGRES_PORT')
-            database = env.get_env('POSTGRES_DB')
-            user = env.get_env('POSTGRES_USER')
+            host = env.get('POSTGRES_HOST')
+            port = env.get('POSTGRES_PORT')
+            database = env.get('POSTGRES_DB')
+            user = env.get('POSTGRES_USER')
 
             # Validate Cloud SQL connection parameters
             assert host == 'postgres.staging.netrasystems.ai', "Cloud SQL host mismatch"
@@ -118,9 +120,9 @@ class TestIssue1263ConnectionTimeoutUnit(SSotAsyncTestCase):
             env = IsolatedEnvironment()
 
             # Get pool configuration
-            pool_size = int(env.get_env('DATABASE_POOL_SIZE', '5'))
-            max_overflow = int(env.get_env('DATABASE_MAX_OVERFLOW', '2'))
-            timeout = float(env.get_env('DATABASE_CONNECTION_TIMEOUT', '10.0'))
+            pool_size = int(env.get('DATABASE_POOL_SIZE', '5'))
+            max_overflow = int(env.get('DATABASE_MAX_OVERFLOW', '2'))
+            timeout = float(env.get('DATABASE_CONNECTION_TIMEOUT', '10.0'))
 
             # Validate pool settings for staging environment
             assert pool_size >= 5, "Database pool size too small for staging"
@@ -199,12 +201,12 @@ class TestIssue1263ConnectionTimeoutUnit(SSotAsyncTestCase):
             env = IsolatedEnvironment()
 
             for var in required_vars:
-                value = env.get_env(var)
+                value = env.get(var)
                 assert value is not None, f"Required database config {var} is missing"
                 assert len(value.strip()) > 0, f"Database config {var} is empty"
 
             # Validate specific format requirements
-            port = env.get_env('POSTGRES_PORT')
+            port = env.get('POSTGRES_PORT')
             assert port.isdigit(), "POSTGRES_PORT must be numeric"
             assert 1024 <= int(port) <= 65535, "POSTGRES_PORT must be valid port number"
 
@@ -225,8 +227,8 @@ class TestIssue1263ConnectionTimeoutUnit(SSotAsyncTestCase):
         with patch.dict(os.environ, expected_vpc_config):
             env = IsolatedEnvironment()
 
-            vpc_connector = env.get_env('VPC_CONNECTOR')
-            vpc_egress = env.get_env('VPC_EGRESS')
+            vpc_connector = env.get('VPC_CONNECTOR')
+            vpc_egress = env.get('VPC_EGRESS')
 
             # Validate VPC configuration
             assert vpc_connector is not None, "VPC_CONNECTOR must be configured"
@@ -254,8 +256,8 @@ class TestIssue1263ConnectionTimeoutUnit(SSotAsyncTestCase):
             env = IsolatedEnvironment()
 
             # Validate resilience settings
-            retry_count = int(env.get_env('DATABASE_RETRY_COUNT', '1'))
-            retry_delay = float(env.get_env('DATABASE_RETRY_DELAY', '0.5'))
+            retry_count = int(env.get('DATABASE_RETRY_COUNT', '1'))
+            retry_delay = float(env.get('DATABASE_RETRY_DELAY', '0.5'))
 
             assert retry_count >= 3, "Database retry count should be >= 3 for VPC resilience"
             assert retry_delay >= 1.0, "Database retry delay should be >= 1.0s"
@@ -282,7 +284,7 @@ class TestIssue1263DatabaseConfigurationEdgeCases(SSotAsyncTestCase):
         for config in edge_case_configs:
             with patch.dict(os.environ, config):
                 env = IsolatedEnvironment()
-                timeout = float(env.get_env('DATABASE_CONNECTION_TIMEOUT'))
+                timeout = float(env.get('DATABASE_CONNECTION_TIMEOUT'))
 
                 if timeout == 8.0:
                     # This specific timeout indicates the Issue #1263 problem

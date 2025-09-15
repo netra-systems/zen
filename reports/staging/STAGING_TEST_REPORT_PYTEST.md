@@ -1,81 +1,98 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-08 12:18:45
+**Generated:** 2025-09-15 09:15:36
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 4
-- **Passed:** 0 (0.0%)
-- **Failed:** 4 (100.0%)
+- **Total Tests:** 6
+- **Passed:** 2 (33.3%)
+- **Failed:** 4 (66.7%)
 - **Skipped:** 0
-- **Duration:** 60.90 seconds
-- **Pass Rate:** 0.0%
+- **Duration:** 88.03 seconds
+- **Pass Rate:** 33.3%
 
 ## Test Results by Priority
 
-### CRITICAL Priority Tests
+### NORMAL Priority Tests
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_001_http_connectivity | FAIL failed | 10.176s | test_staging_connectivity_validation.py |
-| test_002_websocket_connectivity | FAIL failed | 6.073s | test_staging_connectivity_validation.py |
-| test_003_agent_request_pipeline | FAIL failed | 10.005s | test_staging_connectivity_validation.py |
-| test_004_generate_connectivity_report | FAIL failed | 34.500s | test_staging_connectivity_validation.py |
+| test_staging_health_endpoint_redis_status_failure | FAIL failed | 30.646s | test_redis_golden_path_validation.py |
+| test_staging_websocket_connection_redis_dependency_failure | PASS passed | 4.307s | test_redis_golden_path_validation.py |
+| test_staging_session_management_redis_failure | PASS passed | 0.169s | test_redis_golden_path_validation.py |
+| test_staging_full_golden_path_redis_impact | FAIL failed | 15.336s | test_redis_golden_path_validation.py |
+| test_staging_redis_configuration_diagnosis | FAIL failed | 20.943s | test_redis_golden_path_validation.py |
+| test_staging_service_dependencies_redis_cascade_failure | FAIL failed | 16.020s | test_redis_golden_path_validation.py |
 
 ## Failed Tests Details
 
-### FAILED: test_001_http_connectivity
-- **File:** /Users/rindhujajohnson/Netra/GitHub/netra-apex/tests/e2e/staging/test_staging_connectivity_validation.py
-- **Duration:** 10.176s
-- **Error:** tests/e2e/staging/test_staging_connectivity_validation.py:312: in test_001_http_connectivity
-    assert result["success"], f"HTTP connectivity failed: {result.get('error', 'Unknown error')}"
-E   AssertionError: HTTP connectivity failed: 
-E   assert False...
+### FAILED: test_staging_health_endpoint_redis_status_failure
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_redis_golden_path_validation.py
+- **Duration:** 30.646s
+- **Error:** C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\aiohttp\client_reqrep.py:532: in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\aiohttp\streams.py:672: in read
+    await self._waiter
+E   asyncio.exceptions.CancelledError
 
-### FAILED: test_002_websocket_connectivity
-- **File:** /Users/rindhujajohnson/Netra/GitHub/netra-apex/tests/e2e/staging/test_staging_connectivity_validation.py
-- **Duration:** 6.073s
-- **Error:** tests/e2e/staging/test_staging_connectivity_validation.py:327: in test_002_websocket_connectivity
-    assert result["success"], f"WebSocket connectivity failed: {result.get('error', 'Unknown error')}"
-E   AssertionError: WebSocket connectivity failed: server rejected WebSocket connection: HTTP 503
-E   assert False...
+The above exception was the direct cause of the following exception:
+tests\e2e\staging\test_redis_golden_path_validation.py:56:...
 
-### FAILED: test_003_agent_request_pipeline
-- **File:** /Users/rindhujajohnson/Netra/GitHub/netra-apex/tests/e2e/staging/test_staging_connectivity_validation.py
-- **Duration:** 10.005s
-- **Error:** tests/e2e/staging/test_staging_connectivity_validation.py:342: in test_003_agent_request_pipeline
-    assert result["success"], f"Agent pipeline test failed: {result.get('error', 'Unknown error')}"
-E   AssertionError: Agent pipeline test failed: 
-E   assert False...
+### FAILED: test_staging_full_golden_path_redis_impact
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_redis_golden_path_validation.py
+- **Duration:** 15.336s
+- **Error:** C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\aiohttp\client_reqrep.py:532: in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\aiohttp\streams.py:672: in read
+    await self._waiter
+E   asyncio.exceptions.CancelledError
 
-### FAILED: test_004_generate_connectivity_report
-- **File:** /Users/rindhujajohnson/Netra/GitHub/netra-apex/tests/e2e/staging/test_staging_connectivity_validation.py
-- **Duration:** 34.500s
-- **Error:** tests/e2e/staging/test_staging_connectivity_validation.py:406: in test_004_generate_connectivity_report
-    assert success_rate >= 100.0, f"All connectivity tests should pass for staging validation"
-E   AssertionError: All connectivity tests should pass for staging validation
-E   assert 0.0 >= 100.0...
+The above exception was the direct cause of the following exception:
+tests\e2e\staging\test_redis_golden_path_validation.py:177...
+
+### FAILED: test_staging_redis_configuration_diagnosis
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_redis_golden_path_validation.py
+- **Duration:** 20.943s
+- **Error:** C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\aiohttp\client_reqrep.py:532: in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\aiohttp\streams.py:672: in read
+    await self._waiter
+E   asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+tests\e2e\staging\test_redis_golden_path_validation.py:211...
+
+### FAILED: test_staging_service_dependencies_redis_cascade_failure
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_redis_golden_path_validation.py
+- **Duration:** 16.020s
+- **Error:** tests\e2e\staging\test_redis_golden_path_validation.py:314: in test_staging_service_dependencies_redis_cascade_failure
+    pytest.fail(f"EXPECTED CASCADE FAILURE - Redis config issue affecting multiple services (Issue #1177): {cascade_analysis}")
+E   Failed: EXPECTED CASCADE FAILURE - Redis config issue affecting multiple services (Issue #1177): {'failed_services': ['backend'], 'services_with_redis_issues': ['backend'], 'full_status': {'backend': {'accessible': False, 'error': ''}, 'auth': {'acc...
 
 ## Pytest Output Format
 
 ```
-test_staging_connectivity_validation.py::test_001_http_connectivity FAILED
-test_staging_connectivity_validation.py::test_002_websocket_connectivity FAILED
-test_staging_connectivity_validation.py::test_003_agent_request_pipeline FAILED
-test_staging_connectivity_validation.py::test_004_generate_connectivity_report FAILED
+test_redis_golden_path_validation.py::test_staging_health_endpoint_redis_status_failure FAILED
+test_redis_golden_path_validation.py::test_staging_websocket_connection_redis_dependency_failure PASSED
+test_redis_golden_path_validation.py::test_staging_session_management_redis_failure PASSED
+test_redis_golden_path_validation.py::test_staging_full_golden_path_redis_impact FAILED
+test_redis_golden_path_validation.py::test_staging_redis_configuration_diagnosis FAILED
+test_redis_golden_path_validation.py::test_staging_service_dependencies_redis_cascade_failure FAILED
 
 ==================================================
-0 passed, 4 failed in 60.90s
+2 passed, 4 failed in 88.03s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 1 | 0 | 1 | 0.0% |
-| Agent | 1 | 0 | 1 | 0.0% |
+| WebSocket | 1 | 1 | 0 | 100.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
