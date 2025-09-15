@@ -331,8 +331,8 @@ class WebSocketImportPathSSotConsolidationTest(SSotBaseTestCase):
         non_canonical_patterns = {
             'netra_backend.app.websocket.connection_manager': 'netra_backend.app.websocket_core.websocket_manager',
             'netra_backend.app.websocket.connection_info': 'netra_backend.app.websocket_core.connection_info',
-            'from.*websocket\.connection_manager': 'from netra_backend.app.websocket_core.websocket_manager',
-            'from.*websocket\.': 'from netra_backend.app.websocket_core.'
+            r'from.*websocket\.connection_manager': 'from netra_backend.app.websocket_core.websocket_manager',
+            r'from.*websocket\.': 'from netra_backend.app.websocket_core.'
         }
         
         # Search all Python files
