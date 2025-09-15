@@ -14,7 +14,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: CRITICAL - SSOT violations lead to unmaintainable, bug-prone code
 
 Key Validation Points:
-1. No direct ExecutionEngine() instantiation in production code
+1. No direct UserExecutionEngine() instantiation in production code
 2. Factory is the single source of truth for engine creation
 3. All consumers use factory pattern (no singleton access)
 4. Factory creates engines with proper SSOT configuration
@@ -159,13 +159,13 @@ class TestExecutionEngineSSotFactoryComplianceIntegration(SSotAsyncTestCase):
             # Walk the AST to find ExecutionEngine instantiation
             for node in ast.walk(tree):
                 if isinstance(node, ast.Call):
-                    # Check for direct ExecutionEngine() calls
+                    # Check for direct UserExecutionEngine() calls
                     if isinstance(node.func, ast.Name) and node.func.id == 'ExecutionEngine':
                         violations.append({
                             'type': 'direct_instantiation',
                             'file': str(file_path),
                             'line': node.lineno,
-                            'description': 'Direct ExecutionEngine() instantiation found',
+                            'description': 'Direct UserExecutionEngine() instantiation found',
                             'severity': 'high'
                         })
                     
@@ -254,7 +254,7 @@ class TestExecutionEngineSSotFactoryComplianceIntegration(SSotAsyncTestCase):
     
     @pytest.mark.asyncio
     async def test_no_direct_execution_engine_instantiation_in_codebase(self):
-        """CRITICAL: Validate no direct ExecutionEngine() instantiation in production code.
+        """CRITICAL: Validate no direct UserExecutionEngine() instantiation in production code.
         
         This test scans the entire codebase to ensure that ExecutionEngine instances
         are only created through the factory, not through direct instantiation.
@@ -356,7 +356,7 @@ class TestExecutionEngineSSotFactoryComplianceIntegration(SSotAsyncTestCase):
                 mock_websocket_bridge = Mock()
                 
                 # Attempt direct instantiation (this should still work but be discouraged)
-                direct_engine = ExecutionEngine(
+                direct_engine = UserExecutionEngine(
                     registry=mock_registry,
                     websocket_bridge=mock_websocket_bridge,
                     user_context=user_context

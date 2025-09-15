@@ -23,7 +23,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.isolated_test_helper import create_isolated_user_context
 from netra_backend.app.agents.tool_dispatcher_execution import ToolExecutionEngine
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.schemas.tool import (
     ToolInput,
     ToolResult,

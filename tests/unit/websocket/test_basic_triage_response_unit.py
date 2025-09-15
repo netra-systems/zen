@@ -90,7 +90,7 @@ class TestBasicTriageResponseUnit(SSotAsyncTestCase):
         self.message_router = MessageRouter()
         
         # Create mock MessageHandlerService for AgentMessageHandler initialization
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         from netra_backend.app.services.thread_service import ThreadService
         
         mock_supervisor = Mock(spec=SupervisorAgent)

@@ -46,7 +46,7 @@
         # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
         # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
         # CRITICAL: Add project root to Python path for imports
@@ -64,8 +64,8 @@
             # REMOVED_SYNTAX_ERROR: UnifiedToolExecutionEngine,
             # REMOVED_SYNTAX_ERROR: enhance_tool_dispatcher_with_notifications
             
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient
@@ -137,7 +137,7 @@
     # REMOVED_SYNTAX_ERROR: registry = AgentRegistry(), ToolDispatcher())
     # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
 
-    # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine(registry, ws_manager)
+    # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine(registry, ws_manager)
 
     # Verify WebSocket components exist
     # REMOVED_SYNTAX_ERROR: if not hasattr(engine, 'websocket_notifier'):

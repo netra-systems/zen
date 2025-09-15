@@ -28,10 +28,11 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult, ActionPlanResult
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.state import OptimizationsResult, ActionPlanResult
 from netra_backend.app.schemas.registry import WebSocketMessage, ServerMessage
 from netra_backend.app.schemas.websocket_models import BaseWebSocketPayload
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.types import get_frontend_message_type
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager

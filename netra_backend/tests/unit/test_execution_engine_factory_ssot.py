@@ -200,7 +200,7 @@ class TestUnifiedExecutionEngineFactorySSotCompliance(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory
         except ImportError:
-            pytest.skip("UnifiedExecutionEngineFactory not available")
+            pytest.skip("UnifiedExecutionEngineFactory not available", allow_module_level=True)
             
         # Mock required dependencies
         mock_websocket_bridge = Mock()
@@ -230,7 +230,7 @@ class TestUnifiedExecutionEngineFactorySSotCompliance(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory
         except ImportError:
-            pytest.skip("UnifiedExecutionEngineFactory not available")
+            pytest.skip("UnifiedExecutionEngineFactory not available", allow_module_level=True)
             
         factory = UnifiedExecutionEngineFactory(
             websocket_bridge=Mock(),

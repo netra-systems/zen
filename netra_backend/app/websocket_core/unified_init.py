@@ -203,7 +203,7 @@ async def get_unified_websocket_manager(env=None, user_id: str = None):
             user_id="integration_test_user",
             thread_id="test_thread",
             request_id="test_request",
-            websocket_connection_id="test_connection",
+            websocket_client_id="test_connection",
             run_id="test_run"
         )
         return await get_websocket_manager(test_context)

@@ -9,7 +9,7 @@ import os
 from shared.isolated_environment import IsolatedEnvironment
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.llm.llm_manager import LLMManager

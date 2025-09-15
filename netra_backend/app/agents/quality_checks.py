@@ -6,7 +6,7 @@ to maintain the 450-line and 25-line function limits per CLAUDE.md.
 
 from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.core.interfaces_quality import (
     QualityValidator as CoreQualityValidator,

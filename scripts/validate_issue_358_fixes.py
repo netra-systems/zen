@@ -13,7 +13,7 @@ from typing import Dict, List, Optional
 
 # Staging environment URLs
 BACKEND_URL = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
-AUTH_URL = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+AUTH_URL = "https://auth.staging.netrasystems.ai"
 
 def test_service_health() -> bool:
     """Test if services are healthy"""

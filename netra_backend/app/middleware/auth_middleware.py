@@ -1,9 +1,9 @@
 """
-Auth Middleware for JWT token validation and authentication.
+Auth Middleware for JWT token validation and authentication - SSOT COMPLIANT
 
 Handles authentication middleware chain functionality including:
 - JWT token extraction from Authorization headers
-- Token validation and expiration checking
+- Token validation through auth service delegation (SSOT)
 - User context setup
 - Permission enforcement
 
@@ -12,9 +12,14 @@ Business Value Justification (BVJ):
 - Business Goal: Secure authentication for all API endpoints
 - Value Impact: Prevents unauthorized access, ensures compliance
 - Strategic Impact: Foundation for enterprise-grade security
+
+SSOT COMPLIANCE:
+- All JWT operations delegated to auth service
+- No direct JWT secret access
+- No local JWT validation logic
+- Full dependency on auth service for token validation
 """
 
-# JWT import removed - SSOT compliance: all JWT operations delegated to auth service
 import time
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
@@ -27,25 +32,39 @@ logger = central_logger.get_logger(__name__)
 
 
 class AuthMiddleware:
-    """Authentication middleware for JWT token validation."""
-    
+    """Authentication middleware for JWT token validation - SSOT COMPLIANT.
+
+    This middleware delegates all JWT operations to the auth service (SSOT).
+    No direct JWT secret access or local validation logic.
+    """
+
     def __init__(
         self,
-        jwt_secret: str,
-        jwt_algorithm: str = "HS256",
-        excluded_paths: List[str] = None
+        excluded_paths: List[str] = None,
+        jwt_secret: str = None,  # DEPRECATED: Keep for backward compatibility but don't use
+        jwt_algorithm: str = "HS256"  # DEPRECATED: Keep for backward compatibility but don't use
     ):
-        """Initialize auth middleware.
-        
+        """Initialize auth middleware with SSOT auth service delegation.
+
         Args:
-            jwt_secret: Secret key for JWT validation
-            jwt_algorithm: JWT algorithm to use
             excluded_paths: Paths that don't require authentication
+            jwt_secret: DEPRECATED - No longer used (SSOT compliance)
+            jwt_algorithm: DEPRECATED - No longer used (SSOT compliance)
         """
-        self.jwt_secret = self._validate_and_clean_jwt_secret(jwt_secret)
-        self.jwt_algorithm = jwt_algorithm
+        # SSOT COMPLIANCE: No JWT secret storage
         self.excluded_paths = excluded_paths or []
-        logger.info(f"AuthMiddleware initialized with {len(self.excluded_paths)} excluded paths")
+
+        # SSOT COMPLIANCE: Get auth service client for delegation
+        from netra_backend.app.clients.auth_client_core import auth_client
+        self.auth_client = auth_client
+
+        # Log deprecation warnings if old parameters used
+        if jwt_secret is not None:
+            logger.warning("SSOT COMPLIANCE: jwt_secret parameter is deprecated and ignored. Token validation delegated to auth service.")
+        if jwt_algorithm != "HS256":
+            logger.warning("SSOT COMPLIANCE: jwt_algorithm parameter is deprecated and ignored. Algorithm managed by auth service.")
+
+        logger.info(f"AuthMiddleware initialized with SSOT compliance - {len(self.excluded_paths)} excluded paths, auth service delegation enabled")
     
     async def process(self, context: RequestContext, handler: Callable) -> Any:
         """Process authentication for the request.
@@ -106,30 +125,36 @@ class AuthMiddleware:
         return token
     
     async def _validate_token(self, token: str) -> Dict[str, Any]:
-        """Validate JWT token and extract payload.
-        
+        """Validate JWT token through auth service delegation (SSOT).
+
+        SSOT COMPLIANCE: Pure delegation to auth service for all JWT operations.
+        No local JWT validation, secret access, or algorithm handling.
+
         Args:
             token: JWT token string
-            
+
         Returns:
             Decoded token payload
-            
+
         Raises:
             TokenInvalidError: If token is invalid
             TokenExpiredError: If token is expired
         """
         try:
-            # SSOT COMPLIANCE: Use auth service for token validation
-            from netra_backend.app.clients.auth_client_core import auth_client
-            
-            validation_result = await auth_client.validate_token(token)
+            logger.debug("SSOT AUTH MIDDLEWARE: Delegating token validation to auth service")
+
+            # SSOT COMPLIANCE: Use auth service client for validation
+            validation_result = await self.auth_client.validate_token(token)
+
             if not validation_result or not validation_result.get('valid'):
                 error = validation_result.get('error', 'Token validation failed') if validation_result else 'Auth service unavailable'
+                logger.warning(f"SSOT AUTH MIDDLEWARE: Token validation failed - {error}")
+
                 if 'expired' in error.lower():
                     raise TokenExpiredError(error)
                 else:
                     raise TokenInvalidError(error)
-            
+
             # Return payload in expected format
             payload = validation_result.get('payload', {})
             if not payload:
@@ -142,21 +167,19 @@ class AuthMiddleware:
                     'exp': validation_result.get('exp'),
                     'iat': validation_result.get('iat')
                 }
-            
-            # Additional expiration check
+
+            # Additional expiration check (redundant with auth service but kept for safety)
             exp = payload.get("exp")
             if exp and exp < time.time():
                 raise TokenExpiredError("Token expired")
-            
+
+            logger.debug(f"SSOT AUTH MIDDLEWARE: Token validation successful for user {payload.get('user_id', 'unknown')[:8]}...")
             return payload
-            
+
         except (TokenExpiredError, TokenInvalidError):
             raise
         except Exception as e:
-            logger.error(f"Auth middleware token validation error: {str(e)}")
-            raise TokenInvalidError("Token validation failed")
-        except Exception as e:
-            logger.error(f"Token validation error: {str(e)}")
+            logger.error(f"SSOT AUTH MIDDLEWARE: Token validation error - {str(e)}")
             raise TokenInvalidError("Token validation failed")
     
     def check_permissions(self, required_permissions: List[str], user_permissions: List[str]) -> bool:
@@ -174,36 +197,8 @@ class AuthMiddleware:
         
         return all(perm in user_permissions for perm in required_permissions)
     
-    def _validate_and_clean_jwt_secret(self, jwt_secret: str) -> str:
-        """Validate and clean JWT secret.
-        
-        Args:
-            jwt_secret: Raw JWT secret
-            
-        Returns:
-            Clean, validated JWT secret
-            
-        Raises:
-            ValueError: If JWT secret is invalid
-        """
-        if not jwt_secret:
-            raise ValueError("JWT secret cannot be empty")
-        
-        # CRITICAL: Trim whitespace from secrets (common staging issue)
-        cleaned_secret = jwt_secret.strip()
-        
-        if not cleaned_secret:
-            raise ValueError("JWT secret cannot be empty after trimming whitespace")
-        
-        # Validate minimum length for security  
-        if len(cleaned_secret) < 32:
-            raise ValueError(
-                f"JWT secret must be at least 32 characters for security, "
-                f"got {len(cleaned_secret)} characters"
-            )
-        
-        logger.info(f"JWT secret validated: {len(cleaned_secret)} characters")
-        return cleaned_secret
+    # SSOT COMPLIANCE: JWT secret validation removed
+    # All JWT secret management is handled by auth service
 
 
 class WebSocketAuthMiddleware:

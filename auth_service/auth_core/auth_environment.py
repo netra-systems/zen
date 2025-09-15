@@ -231,25 +231,49 @@ class AuthEnvironment:
             return 30
     
     def get_secret_key(self) -> str:
-        """Get general secret key for encryption with environment-specific behavior."""
-        env = self.get_environment()
-        secret = self.env.get("SECRET_KEY", "")
+        """
+        Get general secret key for encryption with SSOT service authentication priority.
         
+        ISSUE #1037 FIX: Prioritize SERVICE_SECRET for service-to-service authentication consistency.
+        This follows the SSOT configuration pattern established in Issue #521 resolution.
+        
+        Priority order:
+        1. SERVICE_SECRET (preferred for service authentication)  
+        2. SECRET_KEY (legacy compatibility)
+        3. Environment-specific fallbacks
+        """
+        env = self.get_environment()
+        
+        # ISSUE #1037 FIX: Check SERVICE_SECRET first for service authentication
+        service_secret = self.env.get("SERVICE_SECRET", "")
+        if service_secret:
+            logger.debug(f"Using SERVICE_SECRET for service authentication in {env}")
+            return service_secret
+        
+        # Legacy fallback to SECRET_KEY for backwards compatibility
+        secret = self.env.get("SECRET_KEY", "")
+        if secret:
+            logger.debug(f"Using legacy SECRET_KEY in {env} (consider migrating to SERVICE_SECRET)")
+            return secret
+        
+        # Environment-specific fallbacks when neither is set
         if not secret:
             if env == "development":
                 # Development: Generate consistent dev secret
                 import hashlib
                 dev_secret = hashlib.sha256("netra_dev_secret_key".encode()).hexdigest()
                 self.env.set("SECRET_KEY", dev_secret, "auth_env_development")
+                logger.warning("Generated dev secret - set SERVICE_SECRET for production consistency")
                 return dev_secret
             elif env == "test":
                 # Test: Generate consistent test secret  
                 import hashlib
                 test_secret = hashlib.sha256("netra_test_secret_key".encode()).hexdigest()
                 self.env.set("SECRET_KEY", test_secret, "auth_env_test")
+                logger.warning("Generated test secret - set SERVICE_SECRET for production consistency")
                 return test_secret
             elif env in ["staging", "production"]:
-                raise ValueError(f"SECRET_KEY must be explicitly set in {env} environment")
+                raise ValueError(f"SERVICE_SECRET or SECRET_KEY must be explicitly set in {env} environment")
         
         return secret
     

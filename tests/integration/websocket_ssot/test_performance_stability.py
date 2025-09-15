@@ -157,7 +157,7 @@ class TestWebSocketManagerPerformanceStability(SSotAsyncTestCase):
 
         # Test 2: Direct manager creation
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             def create_direct():
                 return UnifiedWebSocketManager()
@@ -295,7 +295,7 @@ class TestWebSocketManagerPerformanceStability(SSotAsyncTestCase):
 
         # Test concurrent access to existing managers
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # Create a single manager and test concurrent access
             try:
@@ -401,7 +401,7 @@ class TestWebSocketManagerPerformanceStability(SSotAsyncTestCase):
 
         # Test 2: Direct managers
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             def create_multiple_direct_managers():
                 managers = []
@@ -509,7 +509,7 @@ class TestWebSocketManagerPerformanceStability(SSotAsyncTestCase):
             stability_violations.append(f"Factory manager unavailable: {e}")
             
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             direct_manager = UnifiedWebSocketManager()
             managers_to_test.append(('Direct', direct_manager, False))
         except Exception as e:

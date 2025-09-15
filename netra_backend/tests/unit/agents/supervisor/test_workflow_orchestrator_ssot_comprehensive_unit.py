@@ -279,7 +279,7 @@ class TestWorkflowOrchestratorSSOTComprehensiveUnit(SSotAsyncTestCase):
         
         self.record_metric("adaptive_workflow_fallback_tests", 1)
     
-    @patch('netra_backend.app.agents.supervisor.workflow_orchestrator.create_agent_websocket_bridge')
+    @patch('netra_backend.app.services.agent_websocket_bridge.create_agent_websocket_bridge')
     async def test_get_user_emitter_factory_pattern(self, mock_create_bridge):
         """
         Test user emitter creation using factory pattern for isolation.
@@ -310,7 +310,7 @@ class TestWorkflowOrchestratorSSOTComprehensiveUnit(SSotAsyncTestCase):
         
         self.record_metric("factory_pattern_emitter_tests", 1)
     
-    @patch('netra_backend.app.agents.supervisor.workflow_orchestrator.create_agent_websocket_bridge')
+    @patch('netra_backend.app.services.agent_websocket_bridge.create_agent_websocket_bridge')
     async def test_get_user_emitter_from_context_creation(self, mock_create_bridge):
         """
         Test user emitter creation from ExecutionContext using factory pattern.
@@ -339,7 +339,7 @@ class TestWorkflowOrchestratorSSOTComprehensiveUnit(SSotAsyncTestCase):
         )
         
         # Test emitter creation from context
-        with patch('netra_backend.app.agents.supervisor.workflow_orchestrator.UserExecutionContext') as mock_user_context_class:
+        with patch('netra_backend.app.services.user_execution_context.UserExecutionContext') as mock_user_context_class:
             emitter = await orchestrator._get_user_emitter_from_context(mock_context)
             
             # Verify UserExecutionContext creation
@@ -427,7 +427,7 @@ class TestWorkflowOrchestratorSSOTComprehensiveUnit(SSotAsyncTestCase):
         
         self.record_metric("step_context_creation_tests", 1)
     
-    @patch('netra_backend.app.agents.supervisor.workflow_orchestrator.create_agent_websocket_bridge')
+    @patch('netra_backend.app.services.agent_websocket_bridge.create_agent_websocket_bridge')
     async def test_send_workflow_started_user_isolation(self, mock_create_bridge):
         """
         Test workflow started notification with proper user isolation.
@@ -474,7 +474,7 @@ class TestWorkflowOrchestratorSSOTComprehensiveUnit(SSotAsyncTestCase):
         
         self.record_metric("workflow_started_isolation_tests", 1)
     
-    @patch('netra_backend.app.agents.supervisor.workflow_orchestrator.create_agent_websocket_bridge')
+    @patch('netra_backend.app.services.agent_websocket_bridge.create_agent_websocket_bridge')
     async def test_send_step_started_notification(self, mock_create_bridge):
         """
         Test step started notification with proper event data.
@@ -524,7 +524,7 @@ class TestWorkflowOrchestratorSSOTComprehensiveUnit(SSotAsyncTestCase):
         
         self.record_metric("step_started_notification_tests", 1)
     
-    @patch('netra_backend.app.agents.supervisor.workflow_orchestrator.create_agent_websocket_bridge')
+    @patch('netra_backend.app.services.agent_websocket_bridge.create_agent_websocket_bridge')
     async def test_send_step_completed_success(self, mock_create_bridge):
         """
         Test step completed notification for successful execution.
@@ -580,7 +580,7 @@ class TestWorkflowOrchestratorSSOTComprehensiveUnit(SSotAsyncTestCase):
         
         self.record_metric("step_completed_success_tests", 1)
     
-    @patch('netra_backend.app.agents.supervisor.workflow_orchestrator.create_agent_websocket_bridge')
+    @patch('netra_backend.app.services.agent_websocket_bridge.create_agent_websocket_bridge')
     async def test_send_step_completed_failure(self, mock_create_bridge):
         """
         Test step completed notification for failed execution.
@@ -636,7 +636,7 @@ class TestWorkflowOrchestratorSSOTComprehensiveUnit(SSotAsyncTestCase):
         
         self.record_metric("step_completed_failure_tests", 1)
     
-    @patch('netra_backend.app.agents.supervisor.workflow_orchestrator.create_agent_websocket_bridge')
+    @patch('netra_backend.app.services.agent_websocket_bridge.create_agent_websocket_bridge')
     async def test_send_workflow_completed_metrics(self, mock_create_bridge):
         """
         Test workflow completed notification with execution metrics.

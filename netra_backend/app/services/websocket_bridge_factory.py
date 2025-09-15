@@ -20,7 +20,7 @@ OLD IMPLEMENTATION REPLACED BY: UnifiedWebSocketEmitter + UnifiedWebSocketManage
 
 # SSOT REDIRECT: Import the unified implementation
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.monitoring.websocket_notification_monitor import get_websocket_notification_monitor
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool, ConnectionInfo
@@ -28,6 +28,7 @@ from netra_backend.app.services.websocket_connection_pool import WebSocketConnec
 import asyncio
 import time
 import uuid
+import secrets
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Callable, TYPE_CHECKING
@@ -178,6 +179,7 @@ class WebSocketFactoryConfig:
             enable_event_batching=env.get('WEBSOCKET_ENABLE_BATCHING', 'true').lower() == 'true',
         )
 
+# SSOT CONSOLIDATION COMPLETE: All functionality provided by UnifiedWebSocketEmitter
 
 class WebSocketBridgeFactory:
     """LEGACY COMPATIBILITY WRAPPER - Redirects to UnifiedWebSocketManager + UnifiedWebSocketEmitter
@@ -237,57 +239,102 @@ class WebSocketBridgeFactory:
         self._agent_registry = agent_registry
         self._health_monitor = health_monitor
         
-        # Get or create the unified WebSocket manager (SSOT)
-        self._unified_manager = UnifiedWebSocketManager()
+        # Unified WebSocket manager will be created on-demand with proper user context
+        # SECURITY FIX: Do not directly instantiate to prevent factory bypass detection
+        self._unified_manager = None
         
         logger.info(" PASS:  WebSocketBridgeFactory configured (SSOT redirect mode)")
         
-    async def create_user_emitter(self, 
-                                user_id: str, 
-                                thread_id: str,
-                                connection_id: str) -> 'UserWebSocketEmitter':
+    async def create_user_emitter(self,
+                                user_context: Optional['UserExecutionContext'] = None,
+                                user_id: Optional[str] = None,
+                                thread_id: Optional[str] = None,
+                                connection_id: Optional[str] = None) -> UnifiedWebSocketEmitter:
         """Create a per-user WebSocket event emitter (SSOT redirect).
-        
+
+        ISSUE #669 REMEDIATION: Unified parameter signature supporting both new and legacy patterns.
+
         Args:
-            user_id: Unique user identifier
-            thread_id: Thread identifier for WebSocket routing
-            connection_id: WebSocket connection identifier
-            
+            user_context: User execution context (preferred new pattern)
+            user_id: Unique user identifier (legacy pattern)
+            thread_id: Thread identifier for WebSocket routing (legacy pattern)
+            connection_id: WebSocket connection identifier (legacy pattern)
+
         Returns:
-            UserWebSocketEmitter: SSOT-backed emitter with full compatibility
+            UnifiedWebSocketEmitter: SSOT emitter with full compatibility
         """
         if not self._unified_manager:
-            raise RuntimeError("Factory not configured - call configure() first")
-        
+            # Create WebSocket manager using proper factory pattern with user context
+            # ISSUE #824 FIX: Use canonical SSOT get_websocket_manager instead of deprecated factory
+            try:
+                # ISSUE #824 FIX: Use canonical SSOT import path
+                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
+
+                # Try different registry import paths - SSOT first
+                # Issue #991: Use SSOT AgentRegistry path only
+                try:
+                    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+                except ImportError:
+                    AgentRegistry = None  # Use None if not available
+                    logger.error("Issue #991: Modern AgentRegistry not available in WebSocketBridgeFactory")
+
+                logger.warning("WebSocketBridgeFactory auto-configuring - creating manager with user context")
+
+                # ISSUE #824 FIX: Use canonical SSOT factory pattern
+                if user_context:
+                    self._unified_manager = await get_websocket_manager(user_context)
+                else:
+                    # For testing without user context, create minimal context
+                    test_context = type('TestContext', (), {'user_id': 'test_user', 'thread_id': 'test_thread'})()
+                    self._unified_manager = await get_websocket_manager(test_context)
+
+                # Auto-configure other components if needed
+                if not self._connection_pool:
+                    self._connection_pool = WebSocketConnectionPool()
+                if not self._agent_registry and AgentRegistry:
+                    self._agent_registry = AgentRegistry()
+
+            except Exception as e:
+                raise RuntimeError(f"Factory not configured - call configure() first. Auto-configuration failed: {e}")
+
+        # ISSUE #669 REMEDIATION: Support both new and legacy parameter patterns
+        if user_context:
+            # NEW pattern (preferred)
+            actual_user_id = user_context.user_id
+            actual_thread_id = getattr(user_context, 'thread_id', None)
+            actual_connection_id = getattr(user_context, 'connection_id', None)
+            if not actual_connection_id:
+                actual_connection_id = f"conn_{actual_user_id}_{actual_thread_id}"
+        elif user_id and thread_id:
+            # LEGACY pattern (backward compatibility)
+            actual_user_id = user_id
+            actual_thread_id = thread_id
+            actual_connection_id = connection_id or f"conn_{user_id}_{thread_id}"
+            # Create minimal context for compatibility
+            user_context = type('Context', (), {
+                'user_id': user_id,
+                'thread_id': thread_id,
+                'connection_id': actual_connection_id
+            })()
+        else:
+            raise ValueError("Either user_context or (user_id + thread_id) required")
+
         # MONITORING: Track bridge initialization start
         correlation_id = self.notification_monitor.track_bridge_initialization_started(
-            user_id, thread_id, connection_id
+            actual_user_id, actual_thread_id, actual_connection_id
         )
-        
+
         start_time = time.time()
-        
+
         try:
-            logger.info(f" CYCLE:  Creating UserWebSocketEmitter  ->  UnifiedWebSocketEmitter for user {user_id}")
-            
-            # Create SSOT emitter with legacy compatibility
+            logger.info(f" CYCLE:  Creating UnifiedWebSocketEmitter (SSOT) for user {actual_user_id}")
+
+            # Create SSOT emitter directly
             unified_emitter = UnifiedWebSocketEmitter(
                 manager=self._unified_manager,
-                user_id=user_id,
-                # Create minimal context for emitter
-                context=type('Context', (), {
-                    'user_id': user_id,
-                    'thread_id': thread_id,
-                    'connection_id': connection_id
-                })()
-            )
-            
-            # Wrap in compatibility layer
-            user_emitter = UserWebSocketEmitter(
-                user_id=user_id,
-                thread_id=thread_id,
-                connection_id=connection_id,
-                unified_emitter=unified_emitter,
-                factory=self
+                user_id=actual_user_id,
+                context=user_context
             )
             
             # Update metrics
@@ -295,25 +342,25 @@ class WebSocketBridgeFactory:
             self._factory_metrics['emitters_active'] += 1
             
             creation_time_ms = (time.time() - start_time) * 1000
-            
+
             # MONITORING: Track successful bridge initialization
             self.notification_monitor.track_bridge_initialization_success(
                 correlation_id, creation_time_ms
             )
-            
-            logger.info(f" PASS:  UserWebSocketEmitter (SSOT) created for user {user_id} in {creation_time_ms:.1f}ms")
-            
-            return user_emitter
-            
+
+            logger.info(f" PASS:  UnifiedWebSocketEmitter (SSOT) created for user {actual_user_id} in {creation_time_ms:.1f}ms")
+
+            return unified_emitter
+
         except Exception as e:
             creation_time_ms = (time.time() - start_time) * 1000
-            
+
             # MONITORING: Track failed bridge initialization
             self.notification_monitor.track_bridge_initialization_failed(
                 correlation_id, str(e), creation_time_ms
             )
-            
-            logger.error(f" FAIL:  Failed to create WebSocket emitter (SSOT) for user {user_id}: {e}")
+
+            logger.error(f" FAIL:  Failed to create WebSocket emitter (SSOT) for user {actual_user_id}: {e}")
             raise RuntimeError(f"WebSocket emitter creation failed: {e}")
     
     async def cleanup_user_context(self, user_id: str, connection_id: str) -> None:
@@ -340,231 +387,7 @@ class WebSocketBridgeFactory:
         }
 
 
-class UserWebSocketEmitter:
-    """LEGACY COMPATIBILITY WRAPPER - Redirects to UnifiedWebSocketEmitter
-    
-    Per-user WebSocket event emitter that redirects all functionality to the SSOT
-    UnifiedWebSocketEmitter while maintaining full backward compatibility.
-    
-    Business Value: Enables reliable real-time notifications via SSOT implementation.
-    """
-    
-    def __init__(self, 
-                 user_id: str,
-                 thread_id: str,
-                 connection_id: str,
-                 unified_emitter: UnifiedWebSocketEmitter,
-                 factory: WebSocketBridgeFactory):
-        
-        self.user_id = user_id
-        self.thread_id = thread_id
-        self.connection_id = connection_id
-        self._unified_emitter = unified_emitter
-        self.factory = factory
-        
-        # Initialize monitoring
-        self.notification_monitor = get_websocket_notification_monitor()
-        
-        # Event tracking (delegated to SSOT)
-        self._events_sent = 0
-        self._events_failed = 0
-        
-        logger.info(f" CYCLE:  UserWebSocketEmitter  ->  UnifiedWebSocketEmitter for user {user_id}")
-        
-    async def notify_agent_started(self, agent_name: str, run_id: str) -> None:
-        """Send agent started notification via SSOT emitter."""
-        async with self.notification_monitor.monitor_notification(
-            user_id=self.user_id,
-            thread_id=self.thread_id,
-            run_id=run_id,
-            agent_name=agent_name,
-            connection_id=self.connection_id
-        ) as correlation_id:
-            try:
-                await self._unified_emitter.emit_agent_started({
-                    "agent_name": agent_name,
-                    "run_id": run_id,
-                    "thread_id": self.thread_id,
-                    "status": "started",
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "message": f"{agent_name} has started processing your request",
-                    "correlation_id": correlation_id
-                })
-                self._events_sent += 1
-                self.factory._factory_metrics['events_sent_total'] += 1
-            except Exception as e:
-                self._events_failed += 1
-                self.factory._factory_metrics['events_failed_total'] += 1
-                logger.error(f" ALERT:  SSOT redirect failed for agent_started: {e}")
-                raise
-        
-    async def notify_agent_thinking(self, agent_name: str, run_id: str, thinking: str) -> None:
-        """Send agent thinking notification via SSOT emitter."""
-        try:
-            await self._unified_emitter.emit_agent_thinking({
-                "agent_name": agent_name,
-                "run_id": run_id,
-                "thread_id": self.thread_id,
-                "thinking": thinking,
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            })
-            self._events_sent += 1
-            self.factory._factory_metrics['events_sent_total'] += 1
-        except Exception as e:
-            self._events_failed += 1
-            self.factory._factory_metrics['events_failed_total'] += 1
-            logger.error(f" ALERT:  SSOT redirect failed for agent_thinking: {e}")
-            raise
-        
-    async def notify_tool_executing(self, agent_name: str, run_id: str, tool_name: str, tool_input: Dict[str, Any]) -> None:
-        """Send tool execution notification via SSOT emitter."""
-        try:
-            await self._unified_emitter.emit_tool_executing({
-                "agent_name": agent_name,
-                "run_id": run_id,
-                "thread_id": self.thread_id,
-                "tool_name": tool_name,
-                "tool_input": self._sanitize_tool_input(tool_input),
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "message": f"{agent_name} is using {tool_name}"
-            })
-            self._events_sent += 1
-            self.factory._factory_metrics['events_sent_total'] += 1
-        except Exception as e:
-            self._events_failed += 1
-            self.factory._factory_metrics['events_failed_total'] += 1
-            logger.error(f" ALERT:  SSOT redirect failed for tool_executing: {e}")
-            raise
-        
-    async def notify_tool_completed(self, agent_name: str, run_id: str, tool_name: str, tool_output: Any) -> None:
-        """Send tool completion notification via SSOT emitter."""
-        try:
-            await self._unified_emitter.emit_tool_completed({
-                "agent_name": agent_name,
-                "run_id": run_id,
-                "thread_id": self.thread_id,
-                "tool_name": tool_name,
-                "tool_output": self._sanitize_tool_output(tool_output),
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "message": f"{agent_name} completed {tool_name}"
-            })
-            self._events_sent += 1
-            self.factory._factory_metrics['events_sent_total'] += 1
-        except Exception as e:
-            self._events_failed += 1
-            self.factory._factory_metrics['events_failed_total'] += 1
-            logger.error(f" ALERT:  SSOT redirect failed for tool_completed: {e}")
-            raise
-        
-    async def notify_agent_completed(self, agent_name: str, run_id: str, result: Any) -> None:
-        """Send agent completion notification via SSOT emitter."""
-        try:
-            await self._unified_emitter.emit_agent_completed({
-                "agent_name": agent_name,
-                "run_id": run_id,
-                "thread_id": self.thread_id,
-                "result": self._sanitize_result(result),
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "message": f"{agent_name} has completed processing your request"
-            })
-            self._events_sent += 1
-            self.factory._factory_metrics['events_sent_total'] += 1
-        except Exception as e:
-            self._events_failed += 1
-            self.factory._factory_metrics['events_failed_total'] += 1
-            logger.error(f" ALERT:  SSOT redirect failed for agent_completed: {e}")
-            raise
-    
-    async def notify_agent_error(self, agent_name: str, run_id: str, error: str) -> None:
-        """Send agent error notification via SSOT emitter."""
-        try:
-            await self._unified_emitter.emit("agent_error", {
-                "agent_name": agent_name,
-                "run_id": run_id,
-                "thread_id": self.thread_id,
-                "error": self._sanitize_error_message(error),
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "message": f"{agent_name} encountered an issue processing your request"
-            })
-            self._events_sent += 1
-            self.factory._factory_metrics['events_sent_total'] += 1
-        except Exception as e:
-            self._events_failed += 1
-            self.factory._factory_metrics['events_failed_total'] += 1
-            logger.error(f" ALERT:  SSOT redirect failed for agent_error: {e}")
-            raise
-    
-    # Security sanitization methods (preserved for compatibility)
-    
-    def _sanitize_tool_input(self, tool_input: Dict[str, Any]) -> Dict[str, Any]:
-        """Sanitize tool input to prevent IP leakage."""
-        if not tool_input:
-            return {}
-            
-        sanitized = {}
-        sensitive_keys = {'password', 'secret', 'key', 'token', 'api_key', 'auth', 'credential'}
-        
-        for key, value in tool_input.items():
-            if any(sensitive in key.lower() for sensitive in sensitive_keys):
-                sanitized[key] = "[REDACTED]"
-            elif isinstance(value, str) and len(value) > 200:
-                sanitized[key] = value[:200] + "..."
-            elif isinstance(value, dict):
-                sanitized[key] = self._sanitize_tool_input(value)
-            else:
-                sanitized[key] = value
-        
-        return sanitized
-    
-    def _sanitize_tool_output(self, output: Any) -> Any:
-        """Sanitize tool output to prevent IP leakage."""
-        if isinstance(output, dict):
-            # Remove potentially sensitive keys
-            sanitized = {k: v for k, v in output.items() 
-                        if k not in ['internal_reasoning', 'debug_info', 'system_prompt']}
-            return sanitized
-        elif isinstance(output, str) and len(output) > 10000:
-            # Truncate very long strings
-            return output[:10000] + "...[truncated]"
-        else:
-            return output
-            
-    def _sanitize_result(self, result: Any) -> Any:
-        """Sanitize agent result to protect business IP."""
-        if hasattr(result, '__dict__'):
-            # Convert to dict and sanitize
-            result_dict = result.__dict__.copy()
-            # Remove internal fields
-            for key in list(result_dict.keys()):
-                if key.startswith('_') or 'internal' in key.lower():
-                    del result_dict[key]
-            return result_dict
-        return result
-        
-    def _sanitize_error_message(self, error: str) -> str:
-        """Sanitize error message for user display."""
-        if not error:
-            return "An error occurred"
-        
-        # Remove file paths and internal details
-        sanitized = error.replace("/Users/", "/home/").replace("/home/", "[PATH]/")
-        
-        # Truncate very long errors
-        if len(sanitized) > 300:
-            sanitized = sanitized[:300] + "..."
-        
-        return sanitized
-        
-    async def cleanup(self) -> None:
-        """Clean up emitter resources (SSOT delegated)."""
-        try:
-            logger.info(f" PASS:  UserWebSocketEmitter (SSOT) cleanup completed for user {self.user_id}")
-            
-            # Notify factory of cleanup
-            await self.factory.cleanup_user_context(self.user_id, self.connection_id)
-            
-        except Exception as e:
-            logger.error(f" FAIL:  UserWebSocketEmitter (SSOT) cleanup failed for user {self.user_id}: {e}")
+# SSOT CONSOLIDATION COMPLETE: UserWebSocketEmitter class removed - use UnifiedWebSocketEmitter directly
 
 
 # Compatibility classes for backward compatibility
@@ -661,7 +484,7 @@ _websocket_bridge_factory: Optional[WebSocketBridgeFactory] = None
 
 def get_websocket_bridge_factory() -> WebSocketBridgeFactory:
     """Get or create the singleton WebSocketBridgeFactory instance (SSOT redirect).
-    
+
     Returns:
         WebSocketBridgeFactory: The singleton factory instance (SSOT-backed)
     """
@@ -670,3 +493,25 @@ def get_websocket_bridge_factory() -> WebSocketBridgeFactory:
         _websocket_bridge_factory = WebSocketBridgeFactory()
         logger.info(" PASS:  WebSocketBridgeFactory singleton created (SSOT redirect mode)")
     return _websocket_bridge_factory
+
+
+# SSOT COMPATIBILITY ALIASES: Export expected names for backwards compatibility
+# These aliases redirect to the SSOT implementations while maintaining test compatibility
+
+# Primary exports that tests expect
+UserWebSocketEmitter = UnifiedWebSocketEmitter  # SSOT redirect alias
+WebSocketBridgeFactory = WebSocketBridgeFactory  # Self-reference for clarity
+
+# Export the factory function
+__all__ = [
+    'UserWebSocketEmitter',           # -> UnifiedWebSocketEmitter
+    'WebSocketBridgeFactory',         # Main factory class
+    'get_websocket_bridge_factory',   # Factory singleton getter
+    'UserWebSocketContext',           # User context data class
+    'WebSocketEvent',                # Event structure
+    'ConnectionStatus',              # Connection status enum
+    'ConnectionNotFound',            # Exception class
+    'ConnectionClosed',             # Exception class
+    'UnifiedWebSocketEmitter',       # Direct SSOT access
+    'UnifiedWebSocketManager',       # Direct SSOT access
+]

@@ -30,13 +30,21 @@ import time
 from typing import Optional, Dict, Any, TYPE_CHECKING, List
 from datetime import datetime, timezone
 from dataclasses import dataclass, field
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
+
+# Use SSOT logging instead of deprecated central_logger
+class CentralLoggerCompat:
+    def get_logger(self, name):
+        return get_logger(name)
+
+central_logger = CentralLoggerCompat()
 
 if TYPE_CHECKING:
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    # ISSUE #824 REMEDIATION: Use canonical SSOT import path
+    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -47,7 +55,7 @@ class EmitterMetrics:
     error_count: int = 0
     retry_count: int = 0
     last_event_time: Optional[datetime] = None
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class UnifiedWebSocketEmitter:
@@ -80,23 +88,23 @@ class UnifiedWebSocketEmitter:
         'auth_failed'
     ]
     
-    # Retry configuration for critical events
+    # Retry configuration for critical events - OPTIMIZED for <50ms delivery
     MAX_RETRIES = 3
     MAX_CRITICAL_RETRIES = 5  # Additional retries for authentication events
-    RETRY_BASE_DELAY = 0.1  # 100ms
-    RETRY_MAX_DELAY = 2.0   # 2 seconds
-    
+    RETRY_BASE_DELAY = 0.005  # 5ms (reduced from 100ms for better UX)
+    RETRY_MAX_DELAY = 0.025   # 25ms (reduced from 2s for <50ms target)
+
     # PERFORMANCE OPTIMIZATION: Fast mode for high-throughput scenarios
     FAST_MODE_MAX_RETRIES = 1  # Minimal retries for performance
-    FAST_MODE_BASE_DELAY = 0.001  # 1ms instead of 100ms
-    FAST_MODE_MAX_DELAY = 0.01   # 10ms instead of 2s
+    FAST_MODE_BASE_DELAY = 0.001  # 1ms for immediate retry
+    FAST_MODE_MAX_DELAY = 0.005   # 5ms maximum delay
     
     def __init__(
         self,
         manager: 'UnifiedWebSocketManager' = None,
         user_id: str = None,
         context: Optional['UserExecutionContext'] = None,
-        performance_mode: bool = False,
+        performance_mode: bool = True,  # Enable by default for <50ms delivery
         # PHASE 1 BACKWARD COMPATIBILITY: Support legacy constructor parameters
         websocket_manager: 'UnifiedWebSocketManager' = None
     ):
@@ -138,13 +146,13 @@ class UnifiedWebSocketEmitter:
         self._event_buffer: List[Dict[str, Any]] = []
         self._buffer_lock = asyncio.Lock()
         self._batch_size = 5 if performance_mode else 10  # Smaller batches for performance mode
-        self._batch_timeout = 0.05 if performance_mode else 0.1  # 50ms vs 100ms
+        self._batch_timeout = 0.02 if performance_mode else 0.05  # 20ms vs 50ms for better UX
         self._batch_timer: Optional[asyncio.Task] = None
         self._enable_batching = not performance_mode  # Disable batching in performance mode for lower latency
         
         # PHASE 2: Connection pool optimization state
         self._connection_health_score = 100  # Start with perfect health
-        self._last_health_check = datetime.utcnow()
+        self._last_health_check = datetime.now(timezone.utc)
         self._consecutive_failures = 0
         self._circuit_breaker_open = False
         self._circuit_breaker_timeout = 30.0  # 30 seconds
@@ -386,7 +394,7 @@ class UnifiedWebSocketEmitter:
         if event_type in self.metrics.critical_events:
             self.metrics.critical_events[event_type] += 1
         self.metrics.total_events += 1
-        self.metrics.last_event_time = datetime.utcnow()
+        self.metrics.last_event_time = datetime.now(timezone.utc)
         
         # Add execution context if available
         if self.context:
@@ -541,7 +549,7 @@ class UnifiedWebSocketEmitter:
             metadata['agent_name'] = agent_name
         
         await self.emit_agent_thinking({
-            'thought': actual_thought,
+            'reasoning': actual_thought,
             'metadata': metadata,
             'type': 'reasoning',
             'timestamp': time.time()
@@ -559,7 +567,7 @@ class UnifiedWebSocketEmitter:
             metadata = {}
         
         await self.emit_tool_executing({
-            'tool': tool_name,
+            'tool_name': tool_name,
             'metadata': metadata,
             'status': 'executing',
             'timestamp': time.time()
@@ -577,7 +585,7 @@ class UnifiedWebSocketEmitter:
             metadata = {}
         
         await self.emit_tool_completed({
-            'tool': tool_name,
+            'tool_name': tool_name,
             'metadata': metadata,
             'status': 'completed',
             'timestamp': time.time()
@@ -701,7 +709,7 @@ class UnifiedWebSocketEmitter:
         Returns:
             Dictionary with metrics and statistics
         """
-        uptime = (datetime.utcnow() - self.metrics.created_at).total_seconds()
+        uptime = (datetime.now(timezone.utc) - self.metrics.created_at).total_seconds()
         
         return {
             'user_id': self.user_id,
@@ -1031,6 +1039,87 @@ class UnifiedWebSocketEmitter:
             return True
             
         return False
+
+    @classmethod
+    def create_user_emitter(
+        cls,
+        manager: 'UnifiedWebSocketManager',
+        user_context: 'UserExecutionContext'
+    ) -> 'UnifiedWebSocketEmitter':
+        """Factory method for user-specific emitter creation.
+
+        Args:
+            manager: UnifiedWebSocketManager instance
+            user_context: User execution context for isolation
+
+        Returns:
+            UnifiedWebSocketEmitter: Configured emitter for the user
+
+        Raises:
+            ValueError: If user_context is invalid
+        """
+        if not user_context:
+            raise ValueError("create_user_emitter requires valid user_context")
+
+        user_id = getattr(user_context, 'user_id', None)
+        if not user_id:
+            raise ValueError("create_user_emitter requires user_id in user_context")
+
+        return cls(
+            manager=manager,
+            user_id=user_id,
+            context=user_context
+        )
+
+    @classmethod
+    def create_auth_emitter(
+        cls,
+        manager: 'UnifiedWebSocketManager',
+        user_context: Optional['UserExecutionContext'] = None,
+        user_id: Optional[str] = None,
+        thread_id: Optional[str] = None,
+        connection_id: Optional[str] = None
+    ) -> 'UnifiedWebSocketEmitter':
+        """Factory method for authentication-specific emitter creation.
+
+        ISSUE #669 REMEDIATION: Support both new and legacy parameter patterns.
+
+        Args:
+            manager: UnifiedWebSocketManager instance
+            user_context: User execution context for auth events (NEW pattern)
+            user_id: User ID (LEGACY pattern)
+            thread_id: Thread ID (LEGACY pattern)
+            connection_id: Connection ID (LEGACY pattern)
+
+        Returns:
+            UnifiedWebSocketEmitter: Configured emitter for auth events
+
+        Raises:
+            ValueError: If neither user_context nor user_id provided
+        """
+        # ISSUE #669 REMEDIATION: Support both new and legacy parameter patterns
+        if user_context:
+            # NEW pattern (preferred)
+            actual_user_id = user_context.user_id
+            actual_user_context = user_context
+        elif user_id:
+            # LEGACY pattern (backward compatibility)
+            actual_user_id = user_id
+            # Create minimal context for compatibility
+            actual_user_context = type('AuthContext', (), {
+                'user_id': user_id,
+                'thread_id': thread_id,
+                'connection_id': connection_id or f"auth_{user_id}"
+            })()
+        else:
+            raise ValueError("create_auth_emitter requires either user_context or user_id")
+
+        # For auth emitters, use standard emitter with enhanced security context
+        return cls(
+            manager=manager,
+            user_id=actual_user_id,
+            context=actual_user_context
+        )
 
 
 class AuthenticationWebSocketEmitter(UnifiedWebSocketEmitter):
@@ -1634,7 +1723,7 @@ class WebSocketEmitterFactory:
             return False
         
         # Check if timeout has passed
-        elapsed = (datetime.utcnow() - self._last_health_check).total_seconds()
+        elapsed = (datetime.now(timezone.utc) - self._last_health_check).total_seconds()
         if elapsed > self._circuit_breaker_timeout:
             self._circuit_breaker_open = False
             logger.info(f"Circuit breaker timeout expired for user {self.user_id} - attempting recovery")
@@ -1654,7 +1743,7 @@ class WebSocketEmitterFactory:
             'high_throughput_mode': self._high_throughput_mode,
             'performance_mode': self.performance_mode,
             'current_buffer_size': len(self._event_buffer),
-            'events_per_minute': self.metrics.total_events / max(1, (datetime.utcnow() - self.metrics.created_at).total_seconds() / 60)
+            'events_per_minute': self.metrics.total_events / max(1, (datetime.now(timezone.utc) - self.metrics.created_at).total_seconds() / 60)
         }
     
     async def cleanup(self):
@@ -2084,7 +2173,7 @@ class WebSocketEmitterPool:
             max_age_seconds: Maximum age for inactive emitters
         """
         async with self._lock:
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             to_remove = []
             
             for user_id, emitter in self._pool.items():

@@ -39,11 +39,11 @@
         # REMOVED_SYNTAX_ERROR: import asyncio
         # REMOVED_SYNTAX_ERROR: import time
         # REMOVED_SYNTAX_ERROR: from typing import Any, Dict, List, Optional
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
         # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
         # REMOVED_SYNTAX_ERROR: import pytest
@@ -349,13 +349,13 @@
     # Removed problematic line: async def test_engine_initialization(self, mock_agent_registry, mock_websocket_bridge):
         # REMOVED_SYNTAX_ERROR: """Test engine initialization with different configurations."""
         # Default configuration
-        # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine()
+        # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine()
         # REMOVED_SYNTAX_ERROR: assert engine.config is not None
         # REMOVED_SYNTAX_ERROR: assert len(engine._extensions) == 0  # No extensions by default
 
         # With user features
         # REMOVED_SYNTAX_ERROR: config = EngineConfig(enable_user_features=True)
-        # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine(config=config)
+        # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine(config=config)
         # REMOVED_SYNTAX_ERROR: assert 'user' in engine._extensions
         # REMOVED_SYNTAX_ERROR: assert isinstance(engine._extensions['user'], UserExecutionExtension)
 
@@ -366,7 +366,7 @@
         # REMOVED_SYNTAX_ERROR: enable_data_features=True,
         # REMOVED_SYNTAX_ERROR: enable_websocket_events=True
         
-        # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine( )
+        # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine( )
         # REMOVED_SYNTAX_ERROR: config=config,
         # REMOVED_SYNTAX_ERROR: registry=mock_agent_registry,
         # REMOVED_SYNTAX_ERROR: websocket_bridge=mock_websocket_bridge
@@ -378,7 +378,7 @@
         # Removed problematic line: async def test_agent_execution_success(self, mock_agent_registry, mock_user_context):
             # REMOVED_SYNTAX_ERROR: """Test successful agent execution."""
             # REMOVED_SYNTAX_ERROR: pass
-            # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine( )
+            # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine( )
             # REMOVED_SYNTAX_ERROR: registry=mock_agent_registry,
             # REMOVED_SYNTAX_ERROR: user_context=mock_user_context
             
@@ -400,7 +400,7 @@
                 # REMOVED_SYNTAX_ERROR: enable_user_features=True,
                 # REMOVED_SYNTAX_ERROR: enable_websocket_events=True
                 
-                # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine( )
+                # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine( )
                 # REMOVED_SYNTAX_ERROR: config=config,
                 # REMOVED_SYNTAX_ERROR: registry=mock_agent_registry,
                 # REMOVED_SYNTAX_ERROR: websocket_bridge=mock_websocket_bridge
@@ -429,7 +429,7 @@
                     
                     # REMOVED_SYNTAX_ERROR: mock_agent_registry.get_agent = MagicMock(return_value=mock_agent)
 
-                    # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine( )
+                    # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine( )
                     # REMOVED_SYNTAX_ERROR: config=EngineConfig(agent_execution_timeout=2.0),
                     # REMOVED_SYNTAX_ERROR: registry=mock_agent_registry
                     
@@ -459,7 +459,7 @@
                             # REMOVED_SYNTAX_ERROR: user_context = Magic            user_context.user_id = "formatted_string"
                             # REMOVED_SYNTAX_ERROR: user_context.request_id = "formatted_string"
 
-                            # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine( )
+                            # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine( )
                             # REMOVED_SYNTAX_ERROR: config=EngineConfig( )
                             # REMOVED_SYNTAX_ERROR: enable_user_features=True,
                             # REMOVED_SYNTAX_ERROR: max_concurrent_agents=10
@@ -670,7 +670,7 @@
     # REMOVED_SYNTAX_ERROR: await dispatcher.registry.register_tool("event_tool", tool_def)
 
     # Create engine with WebSocket
-    # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine( )
+    # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine( )
     # REMOVED_SYNTAX_ERROR: config=EngineConfig(enable_websocket_events=True),
     # REMOVED_SYNTAX_ERROR: registry=mock_agent_registry,
     # REMOVED_SYNTAX_ERROR: websocket_bridge=mock_websocket_bridge,
@@ -704,7 +704,7 @@
 
         # Create dispatcher and engine
         # REMOVED_SYNTAX_ERROR: dispatcher = UnifiedToolDispatcher(enable_metrics=True)
-        # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine( )
+        # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine( )
         # REMOVED_SYNTAX_ERROR: config=config,
         # REMOVED_SYNTAX_ERROR: registry=mock_agent_registry,
         # REMOVED_SYNTAX_ERROR: tool_dispatcher=dispatcher
@@ -785,7 +785,7 @@
                         # REMOVED_SYNTAX_ERROR: enable_websocket_events=False  # No bridge provided
                         
 
-                        # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine( )
+                        # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine( )
                         # REMOVED_SYNTAX_ERROR: config=config,
                         # REMOVED_SYNTAX_ERROR: registry=mock_agent_registry
                         
@@ -857,7 +857,7 @@
             # REMOVED_SYNTAX_ERROR: enable_metrics=True
             
 
-            # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine( )
+            # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine( )
             # REMOVED_SYNTAX_ERROR: config=config,
             # REMOVED_SYNTAX_ERROR: registry=mock_agent_registry
             
@@ -931,7 +931,7 @@
         
         # REMOVED_SYNTAX_ERROR: mock_agent_registry.get_agent = MagicMock(return_value=mock_agent)
 
-        # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine( )
+        # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine( )
         # REMOVED_SYNTAX_ERROR: config=config,
         # REMOVED_SYNTAX_ERROR: registry=mock_agent_registry
         

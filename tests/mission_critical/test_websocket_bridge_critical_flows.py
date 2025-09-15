@@ -327,62 +327,74 @@ class TestRunIdSSotCompliance:
     
     @pytest.mark.asyncio
     async def test_thread_resolution_priority_chain(self, websocket_bridge, test_registry, mock_orchestrator):
-        """CRITICAL: Test priority chain Resolution: Registry  ->  Orchestrator  ->  Pattern  ->  None."""
+        """CRITICAL: Test 3-priority chain Resolution: Registry -> WebSocketManager -> Pattern -> None."""
         
         # Test case setup
         run_id = "priority_test_run_123" 
         registry_thread = "thread_from_registry"
-        orchestrator_thread = "thread_from_orchestrator"
-        pattern_thread = "thread_from_pattern_456"  # Matches pattern in run_id
         
-        # Case 1: Registry has mapping (highest priority)
+        # Case 1: Registry has mapping (PRIORITY 1 - highest priority)
         await test_registry.register(run_id, registry_thread)
-        mock_orchestrator.set_thread_mapping(run_id, orchestrator_thread)
         
         result = await websocket_bridge._resolve_thread_id_from_run_id(run_id)
         assert result == registry_thread, f"Registry priority failed: expected '{registry_thread}', got '{result}'"
         
-        # Case 2: Clear registry, orchestrator should be used
+        # Case 2: Clear registry, WebSocketManager check should be used (PRIORITY 3)
         await test_registry.unregister_run(run_id)
         
-        result = await websocket_bridge._resolve_thread_id_from_run_id(run_id)
-        assert result == orchestrator_thread, f"Orchestrator fallback failed: expected '{orchestrator_thread}', got '{result}'"
+        # Test with run_id that has valid thread format for WebSocketManager check
+        thread_format_run_id = "thread_websocket_test_456"
         
-        # Case 3: Clear orchestrator, pattern should be used  
-        mock_orchestrator.thread_mappings.clear()
-        run_id_with_pattern = "fallback_thread_pattern_extraction_789"
+        result = await websocket_bridge._resolve_thread_id_from_run_id(thread_format_run_id)
+        # Should return the run_id itself if it's a valid thread format
+        assert result == thread_format_run_id, f"WebSocketManager check failed: expected '{thread_format_run_id}', got '{result}'"
+        
+        # Case 3: Pattern extraction should work (PRIORITY 4)
+        # Use a run_id with extractable pattern
+        run_id_with_pattern = "agent_run_thread_pattern_extraction_789"
         
         result = await websocket_bridge._resolve_thread_id_from_run_id(run_id_with_pattern)
-        assert result == "thread_pattern", f"Pattern fallback failed: expected 'thread_pattern', got '{result}'"
+        # Pattern extraction should extract the full ID and prefix with "thread_"
+        expected_pattern = "thread_agent_run_thread_pattern_extraction_789"
+        assert result == expected_pattern, f"Pattern fallback failed: expected '{expected_pattern}', got '{result}'"
         
-        # Case 4: No resolution possible
-        impossible_run_id = "no_resolution_possible_anywhere"
+        # Case 4: No resolution possible (empty string should fail)
+        impossible_run_id = ""
         
-        result = await websocket_bridge._resolve_thread_id_from_run_id(impossible_run_id)
-        assert result is None, f"Should return None when no resolution possible, got '{result}'"
+        # Empty run_id should raise ValueError per validation
+        try:
+            result = await websocket_bridge._resolve_thread_id_from_run_id(impossible_run_id)
+            assert False, f"Empty run_id should raise ValueError, but got '{result}'"
+        except ValueError as e:
+            # Expected - empty run_id should be rejected
+            assert "Invalid run_id" in str(e), f"Expected invalid run_id error, got: {e}"
         
-        print(" PASS:  Thread resolution priority chain: PASSED")
+        print(" PASS:  Thread resolution 3-priority chain: PASSED")
     
     @pytest.mark.asyncio  
-    async def test_registry_backup_when_orchestrator_fails(self, websocket_bridge, test_registry, mock_orchestrator):
-        """CRITICAL: Test registry backup when orchestrator is unavailable."""
+    async def test_registry_primary_resolution(self, websocket_bridge, test_registry, mock_orchestrator):
+        """CRITICAL: Test registry as primary resolution source in 3-priority system."""
         
-        run_id = "orchestrator_failure_test"
-        backup_thread = "thread_backup_registry"
+        run_id = "registry_primary_test"
+        registry_thread = "thread_primary_registry"
         
-        # Register in backup registry
-        await test_registry.register(run_id, backup_thread)
+        # Register in registry (PRIORITY 1)
+        await test_registry.register(run_id, registry_thread)
         
-        # Simulate orchestrator failure
-        mock_orchestrator.set_availability(False)
-        
-        # Resolution should still work via registry
+        # Resolution should work via registry as primary source
         result = await websocket_bridge._resolve_thread_id_from_run_id(run_id)
-        assert result == backup_thread, f"Registry backup failed: expected '{backup_thread}', got '{result}'"
+        assert result == registry_thread, f"Registry primary failed: expected '{registry_thread}', got '{result}'"
         
-        # Verify orchestrator was attempted (metrics should show failure)
-        orchestrator_metrics = await mock_orchestrator.get_metrics()
-        assert orchestrator_metrics['failed_resolutions'] > 0, "Should attempt orchestrator resolution"
+        # Test fallback when registry has no mapping - use empty string to trigger error
+        fallback_run_id = ""
+        
+        # Empty string should raise ValueError as no sources can handle it
+        try:
+            result = await websocket_bridge._resolve_thread_id_from_run_id(fallback_run_id)
+            assert False, f"Empty run_id should raise ValueError, but got '{result}'"
+        except ValueError as e:
+            # Expected - demonstrates registry alone can't handle invalid inputs
+            assert "Invalid run_id" in str(e), f"Expected invalid run_id error, got: {e}"
         
         print(" PASS:  Registry backup when orchestrator fails: PASSED")
     

@@ -45,7 +45,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
     validate_websocket_component_health,
     WebSocketManagerFactory
 )
-from netra_backend.app.core.configuration.base import get_config
+from netra_backend.app.config import get_config
 from netra_backend.app.routes.websocket import WebSocketComponentError
 
 class TestWebSocketHealthValidationIntegration(SSotAsyncTestCase):

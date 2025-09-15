@@ -7,7 +7,7 @@
 
 import { logger } from '@/lib/logger';
 
-export type ThreadState = 
+export type ThreadOperationState = 
   | 'idle'
   | 'creating'
   | 'switching'
@@ -25,7 +25,7 @@ export type ThreadEvent =
   | 'RESET';
 
 export interface ThreadStateData {
-  readonly currentState: ThreadState;
+  readonly currentState: ThreadOperationState;
   readonly targetThreadId: string | null;
   readonly operationId: string | null;
   readonly startTime: number | null;
@@ -37,7 +37,7 @@ export interface ThreadStateData {
  * Mock ThreadStateMachine that maintains state properly
  */
 class MockThreadStateMachine {
-  private currentState: ThreadState = 'idle';
+  private currentState: ThreadOperationState = 'idle';
   private stateData: ThreadStateData = {
     currentState: 'idle',
     targetThreadId: null,
@@ -47,7 +47,7 @@ class MockThreadStateMachine {
     canTransition: true
   };
 
-  public getState(): ThreadState {
+  public getState(): ThreadOperationState {
     return this.currentState;
   }
 
@@ -146,7 +146,7 @@ class MockThreadStateMachineManager {
     return defaultMachine.transition(event, data);
   }
 
-  public getState(): ThreadState {
+  public getState(): ThreadOperationState {
     // Use default machine for backward compatibility
     const defaultMachine = this.getStateMachine('default');
     return defaultMachine.getState();
@@ -159,7 +159,7 @@ export const threadStateMachineManager = new MockThreadStateMachineManager();
 // Export other classes for testing
 export { MockThreadStateMachine as ThreadStateMachine };
 export const createThreadStateMachineConfig = () => ({
-  initialState: 'idle' as ThreadState,
+  initialState: 'idle' as ThreadOperationState,
   transitions: [],
   onStateChange: () => {},
   onTransitionBlocked: () => {}

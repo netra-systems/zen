@@ -125,7 +125,7 @@ JWT_SECRET_KEY=jwt-secret-key-staging:latest
 3. **Check Health Endpoints:**
    ```bash
    curl https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health
-   curl https://netra-auth-service-pnovr5vsba-uc.a.run.app/health
+   curl https://auth.staging.netrasystems.ai/health
    ```
 
 ## 7. Lessons Learned

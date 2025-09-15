@@ -50,20 +50,20 @@
         # REMOVED_SYNTAX_ERROR: import uuid
         # REMOVED_SYNTAX_ERROR: import time
         # REMOVED_SYNTAX_ERROR: from contextlib import asynccontextmanager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
         # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.dependencies import get_db_dependency, get_agent_supervisor
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.logging_config import central_logger
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
@@ -179,7 +179,7 @@
         # REMOVED_SYNTAX_ERROR: llm_manager = Magic        websocket_bridge = Magic
         # First, verify that SupervisorAgent constructor doesn't accept db_session
         # REMOVED_SYNTAX_ERROR: import inspect
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
         # REMOVED_SYNTAX_ERROR: constructor_params = inspect.signature(SupervisorAgent.__init__).parameters
 
@@ -236,7 +236,7 @@
 
         # Test principle: Verify isolation design rather than full instantiation
         # REMOVED_SYNTAX_ERROR: import inspect
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
         # REMOVED_SYNTAX_ERROR: constructor_params = inspect.signature(SupervisorAgent.__init__).parameters
         # REMOVED_SYNTAX_ERROR: assert 'db_session' not in constructor_params, "SupervisorAgent should not accept db_session"
@@ -296,7 +296,7 @@
                         # Direct instantiation should be prevented
 
                         # REMOVED_SYNTAX_ERROR: try:
-                            # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine()
+                            # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine()
                             # If direct instantiation works, check if it properly isolates users
                             # REMOVED_SYNTAX_ERROR: has_global_state = hasattr(engine, 'active_runs') and isinstance(engine.active_runs, dict)
                             # REMOVED_SYNTAX_ERROR: if has_global_state:
@@ -650,7 +650,7 @@
                         # Test principle: SupervisorAgent should not accept session parameters
                         # Rather than fully instantiate (which requires complex setup), verify the design
                         # REMOVED_SYNTAX_ERROR: import inspect
-                        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+                        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
                         # Verify the constructor signature enforces proper isolation
                         # REMOVED_SYNTAX_ERROR: constructor_params = inspect.signature(SupervisorAgent.__init__).parameters

@@ -40,7 +40,7 @@ from netra_backend.app.services.user_execution_context import (
     InvalidContextError, ContextIsolationError
 )
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.agents.supervisor.execution_factory import ExecutionFactory
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory as ExecutionFactory
 from netra_backend.app.agents.supervisor.agent_registry import UserAgentSession
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.logging_config import central_logger

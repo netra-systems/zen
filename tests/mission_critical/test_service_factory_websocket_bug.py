@@ -100,7 +100,7 @@
     # REMOVED_SYNTAX_ERROR: required dependencies provided.
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_service import AgentService
 
     # Mock the required dependencies

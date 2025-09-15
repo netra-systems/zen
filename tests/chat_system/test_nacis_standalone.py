@@ -18,9 +18,9 @@ from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 from shared.isolated_environment import get_env
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
-from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+from netra_backend.app.redis_manager import redis_manager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -124,7 +124,7 @@ async def test_orchestration_mock():
     try:
         from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
 
         # Create mocks
         mock_session = MagicMock()

@@ -12,7 +12,6 @@ ROOT CAUSE RESOLUTION:
 Business Impact: Protects $500K+ ARR by ensuring Golden Path validation works in staging
 """
 
-import os
 import json
 import asyncio
 import aiohttp
@@ -22,6 +21,7 @@ from enum import Enum
 from dataclasses import dataclass
 
 from netra_backend.app.logging_config import central_logger
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class CloudPlatform(Enum):
@@ -29,6 +29,7 @@ class CloudPlatform(Enum):
     CLOUD_RUN = "cloud_run"
     APP_ENGINE = "app_engine" 
     GKE = "gke"
+    GCP = "gcp"  # Generic Google Cloud Platform for broader compatibility
     UNKNOWN = "unknown"
 
 
@@ -205,8 +206,9 @@ class CloudEnvironmentDetector:
         
         Checks ENVIRONMENT variable and other standard indicators.
         """
-        environment_var = os.environ.get("ENVIRONMENT", "").lower()
-        k_service = os.environ.get("K_SERVICE", "")
+        env = IsolatedEnvironment()
+        environment_var = env.get("ENVIRONMENT", "").lower()
+        k_service = env.get("K_SERVICE", "")
         
         if not environment_var and not k_service:
             return None
@@ -261,14 +263,15 @@ class CloudEnvironmentDetector:
         and provides appropriate environment classification with enhanced confidence.
         """
         # Check for common test environment indicators
+        env = IsolatedEnvironment()
         test_indicators = {
-            "PYTEST_CURRENT_TEST": os.environ.get("PYTEST_CURRENT_TEST"),
-            "CI": os.environ.get("CI"),
-            "GITHUB_ACTIONS": os.environ.get("GITHUB_ACTIONS"),
-            "JENKINS_URL": os.environ.get("JENKINS_URL"),
-            "BUILDKITE": os.environ.get("BUILDKITE"),
-            "TRAVIS": os.environ.get("TRAVIS"),
-            "_": os.environ.get("_")  # Could contain pytest
+            "PYTEST_CURRENT_TEST": env.get("PYTEST_CURRENT_TEST"),
+            "CI": env.get("CI"),
+            "GITHUB_ACTIONS": env.get("GITHUB_ACTIONS"),
+            "JENKINS_URL": env.get("JENKINS_URL"),
+            "BUILDKITE": env.get("BUILDKITE"),
+            "TRAVIS": env.get("TRAVIS"),
+            "_": env.get("_")  # Could contain pytest
         }
         
         # Filter out None values
@@ -285,8 +288,8 @@ class CloudEnvironmentDetector:
             return None
         
         # For test contexts, try to infer staging if Cloud Run indicators present
-        k_service = os.environ.get("K_SERVICE", "")
-        google_project = os.environ.get("GOOGLE_CLOUD_PROJECT", "")
+        k_service = env.get("K_SERVICE", "")
+        google_project = env.get("GOOGLE_CLOUD_PROJECT", "")
         
         if k_service or google_project:
             # Analyze service/project names for staging indicators
@@ -328,12 +331,13 @@ class CloudEnvironmentDetector:
         
         Analyzes various GCP environment variables for patterns.
         """
+        env = IsolatedEnvironment()
         gcp_vars = {
-            "GOOGLE_CLOUD_PROJECT": os.environ.get("GOOGLE_CLOUD_PROJECT"),
-            "GCP_PROJECT": os.environ.get("GCP_PROJECT"),
-            "GCLOUD_PROJECT": os.environ.get("GCLOUD_PROJECT"),
-            "K_REVISION": os.environ.get("K_REVISION"),
-            "K_CONFIGURATION": os.environ.get("K_CONFIGURATION"),
+            "GOOGLE_CLOUD_PROJECT": env.get("GOOGLE_CLOUD_PROJECT"),
+            "GCP_PROJECT": env.get("GCP_PROJECT"),
+            "GCLOUD_PROJECT": env.get("GCLOUD_PROJECT"),
+            "K_REVISION": env.get("K_REVISION"),
+            "K_CONFIGURATION": env.get("K_CONFIGURATION"),
         }
         
         # Filter out None values
@@ -380,9 +384,10 @@ class CloudEnvironmentDetector:
         
         Checks for App Engine specific environment variables.
         """
-        gae_application = os.environ.get("GAE_APPLICATION")
-        gae_version = os.environ.get("GAE_VERSION")
-        gae_service = os.environ.get("GAE_SERVICE")
+        env = IsolatedEnvironment()
+        gae_application = env.get("GAE_APPLICATION")
+        gae_version = env.get("GAE_VERSION")
+        gae_service = env.get("GAE_SERVICE")
         
         if not any([gae_application, gae_version, gae_service]):
             return None
@@ -560,8 +565,9 @@ class CloudEnvironmentDetector:
             "ENVIRONMENT", "K_SERVICE", "GOOGLE_CLOUD_PROJECT", 
             "GAE_APPLICATION", "GAE_VERSION", "K_REVISION"
         ]
+        env = IsolatedEnvironment()
         for var in env_vars_to_check:
-            value = os.environ.get(var, "<NOT SET>")
+            value = env.get(var, "<NOT SET>")
             # Mask sensitive values
             if "project" in var.lower() and value != "<NOT SET>":
                 value = f"{value[:6]}...{value[-3:]}" if len(value) > 9 else "***"

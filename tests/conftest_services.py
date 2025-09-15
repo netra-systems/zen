@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock, AsyncMock
 
-class TestWebSocketConnection:
+class MockWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -243,7 +243,7 @@ async def memory_optimization_service():
     if not _lazy_import_phase0():
         # Mock memory service
         mock_service = MagicMock()
-        mock_service.websocket = TestWebSocketConnection()
+        mock_service.websocket = MockWebSocketConnection()
         mock_service.get_memory_stats = MagicMock()
         mock_service.get_active_scopes_count = MagicMock(return_value=0)
         mock_service.request_scope = asynccontextmanager(
@@ -282,7 +282,7 @@ async def session_memory_manager():
     if not _lazy_import_phase0():
         # Mock session manager
         mock_manager = MagicMock()
-        mock_manager.websocket = TestWebSocketConnection()
+        mock_manager.websocket = MockWebSocketConnection()
         mock_manager.cleanup_session = AsyncMock(return_value=True)
         mock_manager.session_scope = asynccontextmanager(
             lambda session_id, user_id, **kwargs: MagicMock()
@@ -333,7 +333,7 @@ async def request_scoped_supervisor(valid_user_execution_context, isolated_db_se
         # Mock supervisor for testing
         mock_supervisor = MagicMock()
         mock_supervisor.user_context = valid_user_execution_context
-        mock_supervisor.websocket = TestWebSocketConnection()
+        mock_supervisor.websocket = MockWebSocketConnection()
         yield mock_supervisor
         return
     
@@ -349,7 +349,7 @@ async def request_scoped_supervisor(valid_user_execution_context, isolated_db_se
             user_id=valid_user_execution_context.user_id,
             thread_id=valid_user_execution_context.thread_id,
             run_id=valid_user_execution_context.run_id,
-            websocket_connection_id=getattr(valid_user_execution_context, 'websocket_connection_id', None)
+            websocket_client_id=getattr(valid_user_execution_context, 'websocket_client_id', None)
         )
         
         # Create supervisor with request-scoped session
@@ -365,9 +365,9 @@ async def request_scoped_supervisor(valid_user_execution_context, isolated_db_se
             
     except Exception as e:
         # Fallback to mock supervisor if creation fails
-        websocket = TestWebSocketConnection()
+        websocket = MockWebSocketConnection()
         mock_supervisor.user_context = valid_user_execution_context
-        mock_supervisor.websocket = TestWebSocketConnection()
+        mock_supervisor.websocket = MockWebSocketConnection()
         yield mock_supervisor
 
 # =============================================================================

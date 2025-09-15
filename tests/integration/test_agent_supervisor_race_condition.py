@@ -42,7 +42,7 @@ from shared.isolated_environment import get_env
 
 # Import system components for race condition simulation
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # Import BusinessValueValidator
 from tests.mission_critical.test_fallback_handler_degradation_prevention import (

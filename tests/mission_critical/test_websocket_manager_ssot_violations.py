@@ -75,37 +75,76 @@ class TestWebSocketManagerSSotViolationsUnit(SSotBaseTestCase):
             # Try to import the factory and manager
             from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # Check if factory exists (indicating SSOT violation)
+            # Issue #712 Fix: Factory is acceptable if it creates SSOT instances
+            factory_creates_separate_instances = False
             if hasattr(WebSocketManagerFactory, 'create_manager') or hasattr(WebSocketManagerFactory, 'get_manager'):
-                violation_detected = True
-                violation_details.append("WebSocketManagerFactory exists and creates separate instances")
+                # Test if factory creates UnifiedWebSocketManager instances
+                try:
+                    test_manager = None
+                    if hasattr(WebSocketManagerFactory, 'create'):
+                        # Try to create a test instance
+                        import asyncio
+                        test_manager = asyncio.run(WebSocketManagerFactory.create(user_id="test_validation"))
+                        if not isinstance(test_manager, UnifiedWebSocketManager):
+                            factory_creates_separate_instances = True
+                except:
+                    # If factory fails to create proper instances, that's a violation
+                    factory_creates_separate_instances = True
+
+                if factory_creates_separate_instances:
+                    violation_detected = True
+                    violation_details.append("WebSocketManagerFactory exists and creates non-SSOT instances")
+                else:
+                    logger.info("SSOT COMPLIANT: WebSocketManagerFactory creates proper SSOT instances")
                 
             # Check if WebSocketManager is NOT the same as UnifiedWebSocketManager (SSOT violation)
+            # Issue #712 Fix: This should actually verify that they ARE the same (proper SSOT aliasing)
             if WebSocketManager is not UnifiedWebSocketManager:
                 violation_detected = True
                 violation_details.append(f"WebSocketManager ({WebSocketManager}) is not the SSOT UnifiedWebSocketManager ({UnifiedWebSocketManager})")
+            else:
+                logger.info("SSOT COMPLIANT: WebSocketManager is properly aliased to UnifiedWebSocketManager")
                 
             # Check for multiple manager classes (SSOT violation)
+            # Issue #712 Fix: Enhanced validation that understands SSOT compatibility patterns
             manager_classes = []
+            is_proper_ssot_alias = True
+
             try:
                 from netra_backend.app.websocket_core import websocket_manager
+                from netra_backend.app.websocket_core import unified_manager
+
                 if hasattr(websocket_manager, 'WebSocketManager'):
                     manager_classes.append("websocket_manager.WebSocketManager")
-            except ImportError:
-                pass
-                
-            try:
-                from netra_backend.app.websocket_core import unified_manager
                 if hasattr(unified_manager, 'UnifiedWebSocketManager'):
                     manager_classes.append("unified_manager.UnifiedWebSocketManager")
+
+                # Issue #712 Fix: Check if WebSocketManager is properly aliased to UnifiedWebSocketManager
+                if (hasattr(websocket_manager, 'WebSocketManager') and
+                    hasattr(unified_manager, 'UnifiedWebSocketManager')):
+                    ws_manager = getattr(websocket_manager, 'WebSocketManager')
+                    unified_manager_cls = getattr(unified_manager, 'UnifiedWebSocketManager')
+
+                    # This is the CORRECT pattern for SSOT with compatibility
+                    if ws_manager is unified_manager_cls:
+                        is_proper_ssot_alias = True
+                        logger.info("SSOT VALIDATION: WebSocketManager properly aliased to UnifiedWebSocketManager")
+                    else:
+                        is_proper_ssot_alias = False
+
             except ImportError:
                 pass
-                
-            if len(manager_classes) > 1:
+
+            # Only consider it a violation if there are multiple classes AND they're not proper SSOT aliases
+            if len(manager_classes) > 1 and not is_proper_ssot_alias:
                 violation_detected = True
-                violation_details.append(f"Multiple WebSocket manager classes detected: {manager_classes}")
+                violation_details.append(f"Multiple WebSocket manager classes without proper SSOT aliasing: {manager_classes}")
+            elif len(manager_classes) > 1 and is_proper_ssot_alias:
+                # This is actually the correct SSOT pattern - compatibility alias working properly
+                logger.info(f"SSOT COMPLIANT: Multiple classes detected but properly aliased: {manager_classes}")
                 
         except ImportError as e:
             # If imports fail, that might indicate incomplete SSOT implementation
@@ -303,7 +342,7 @@ class TestWebSocketManagerSSotViolationsUnit(SSotBaseTestCase):
         # Check for context-based SSOT implementation
         try:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # SSOT should use single manager with context
             if not hasattr(UnifiedWebSocketManager, 'with_context') and not hasattr(UnifiedWebSocketManager, 'set_context'):

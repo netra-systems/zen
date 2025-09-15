@@ -7,7 +7,7 @@ Business Value: Long-term maintainability
 import pytest
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment

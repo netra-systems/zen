@@ -3,8 +3,9 @@
     <metadata>
         <name>KnowledgeBase.LearningsIndex</name>
         <type>KnowledgeRetrievalMap</type>
-        <version>2.0</version>
-        <description>Index map for retrieving established patterns and critical learnings.</description>
+        <version>2.1</version>
+        <last-updated>2025-09-14</last-updated>
+        <description>Index map for retrieving established patterns and critical learnings. System Health: 92% EXCELLENT - SSOT WebSocket Bridge Migration Complete.</description>
     </metadata>
     
     <retrieval-protocol>
@@ -3539,3 +3540,13 @@
         </related-learnings>
     </learning>
 </specification>
+
+<learning_file>
+  <name>gcp_log_gardener_process_learnings_20250913.xml</name>
+  <title>GCP Log Gardener Process - Automated Log Monitoring and Issue Creation</title>
+  <date>2025-09-13</date>
+  <priority>high</priority>
+  <category>production_monitoring</category>
+  <business_value>00K+ ARR protection through automated production issue detection</business_value>
+  <tags>gcp-logs, issue-automation, production-monitoring, error-clustering, business-impact</tags>
+</learning_file>

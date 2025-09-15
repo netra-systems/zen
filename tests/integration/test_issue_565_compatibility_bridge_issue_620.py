@@ -49,7 +49,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
             
-            legacy_engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+            legacy_engine = UserExecutionEngine(mock_registry, mock_websocket_bridge)
         
         # Verify it's using compatibility mode
         assert legacy_engine.is_compatibility_mode(), "Should be in compatibility mode"
@@ -104,7 +104,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
         # Create legacy ExecutionEngine
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            legacy_engine = ExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
+            legacy_engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
         
         # Verify delegation is set up properly
         assert hasattr(legacy_engine, '_ensure_delegated_engine'), "Should have delegation setup"
@@ -145,7 +145,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
         # Create ExecutionEngine via compatibility bridge
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
         
         # Verify WebSocket bridge is preserved
         assert engine.websocket_bridge is mock_websocket_bridge, "WebSocket bridge should be preserved"
@@ -179,7 +179,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            engine_with_context = ExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
+            engine_with_context = UserExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
         
         # Verify user context is preserved
         assert engine_with_context.user_context is user_context, "Should preserve provided user context"
@@ -187,7 +187,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
         # Test 2: Without user context (should create anonymous via bridge)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            engine_without_context = ExecutionEngine(mock_registry, mock_websocket_bridge, None)
+            engine_without_context = UserExecutionEngine(mock_registry, mock_websocket_bridge, None)
         
         # Verify delegation info shows whether user context was provided
         with_context_info = engine_with_context.get_delegation_info()
@@ -213,7 +213,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
         # Create engine via compatibility bridge
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge)
         
         # Test execution stats delegation
         stats = await engine.get_execution_stats()
@@ -241,7 +241,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
         # Create engine via compatibility bridge
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge)
         
         # Test shutdown delegation (should not raise exception)
         await engine.shutdown()
@@ -266,7 +266,7 @@ class TestCompatibilityBridgeAPICompatibility(BaseIntegrationTest):
         # Create engine via compatibility bridge
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge)
         
         # Check for expected API methods
         expected_methods = [
@@ -308,7 +308,7 @@ class TestCompatibilityBridgeAPICompatibility(BaseIntegrationTest):
         # Create engine via compatibility bridge
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge)
         
         # Test string representations
         str_repr = str(engine)
@@ -335,7 +335,7 @@ class TestCompatibilityBridgeWarnings(BaseIntegrationTest):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge)
             
             # Should have deprecation warnings
             deprecation_warnings = [warning for warning in w if issubclass(warning.category, DeprecationWarning)]
@@ -359,7 +359,7 @@ class TestCompatibilityBridgeWarnings(BaseIntegrationTest):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge)
             
             # Get delegation info which should provide migration guidance
             delegation_info = engine.get_delegation_info()
@@ -391,7 +391,7 @@ class TestCompatibilityBridgeErrorHandling(BaseIntegrationTest):
             warnings.simplefilter("ignore", DeprecationWarning)
             
             # Should not crash with None registry during construction
-            engine = ExecutionEngine(None, mock_websocket_bridge)
+            engine = UserExecutionEngine(None, mock_websocket_bridge)
             assert engine is not None, "Should create engine even with None registry"
             
             # Delegation info should indicate the issue
@@ -410,7 +410,7 @@ class TestCompatibilityBridgeErrorHandling(BaseIntegrationTest):
             warnings.simplefilter("ignore", DeprecationWarning)
             
             # Should not crash with None WebSocket bridge during construction
-            engine = ExecutionEngine(mock_registry, None)
+            engine = UserExecutionEngine(mock_registry, None)
             assert engine is not None, "Should create engine even with None websocket_bridge"
             
             # Delegation info should indicate the issue
@@ -459,8 +459,8 @@ class TestCompatibilityBridgeRealWorldScenarios(BaseIntegrationTest):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
             
-            engine1 = ExecutionEngine(mock_registry, mock_websocket_bridge1, user1_context)
-            engine2 = ExecutionEngine(mock_registry, mock_websocket_bridge2, user2_context)
+            engine1 = UserExecutionEngine(mock_registry, mock_websocket_bridge1, user1_context)
+            engine2 = UserExecutionEngine(mock_registry, mock_websocket_bridge2, user2_context)
         
         # Verify they are separate instances with different user contexts
         assert engine1 is not engine2, "Should be different engine instances"
@@ -495,7 +495,7 @@ class TestCompatibilityBridgeRealWorldScenarios(BaseIntegrationTest):
         # Create engine through compatibility bridge
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
         
         # Perform sequential operations
         stats1 = await engine.get_execution_stats()

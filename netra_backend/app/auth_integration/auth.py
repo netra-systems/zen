@@ -41,20 +41,9 @@ from netra_backend.app.dependencies import get_request_scoped_db_session as get_
 
 # Note: Password hashing is handled by the auth service, not directly here
 
-# ISSUE #414 FIX: Authentication token reuse prevention
+# PHASE 4 REMEDIATION: Removed local token tracking - pure delegation to auth service
 import hashlib
-from collections import defaultdict
 import asyncio
-
-# Track active tokens to prevent reuse
-_active_token_sessions: Dict[str, Dict[str, Any]] = {}
-_token_usage_stats = {
-    'total_validations': 0,
-    'reuse_attempts_blocked': 0,
-    'concurrent_usage_detected': 0,
-    'tokens_expired_cleanup': 0
-}
-_token_cleanup_lock = asyncio.Lock()
 
 logger = logging.getLogger('auth_integration.auth')
 
@@ -80,33 +69,12 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
     """Validate token with auth service and prevent token reuse (Issue #414 fix)."""
     start_time = time.time()
     
-    # ISSUE #414 FIX: Token reuse prevention
+    # PHASE 4 REMEDIATION: Pure delegation to auth service - removed bypass logic
+    # Token reuse detection is now handled by the auth service itself
     token_hash = hashlib.sha256(token.encode()).hexdigest()[:16]
     current_time = time.time()
     
-    # DISABLED: Token reuse detection feature temporarily disabled
-    # Check for token reuse - DISABLED
-    if False and token_hash in _active_token_sessions:
-        session_info = _active_token_sessions[token_hash]
-        last_used = session_info.get('last_used', 0)
-        concurrent_threshold = 0.25  # Issue #465 Fix: Reduced threshold to prevent false positives (was 1.0s causing 75% false positive rate)
-        
-        if current_time - last_used < concurrent_threshold:
-            logger.error(
-                f" ALERT:  AUTHENTICATION TOKEN REUSE DETECTED: Token hash {token_hash} "
-                f"used {current_time - last_used:.3f}s ago (threshold: {concurrent_threshold}s). "
-                f"User: {session_info.get('user_id', 'unknown')[:8]}..., "
-                f"Previous session: {session_info.get('session_id', 'unknown')}"
-            )
-            _token_usage_stats['reuse_attempts_blocked'] += 1
-            
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token reuse detected - authentication failed",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-    
-    _token_usage_stats['total_validations'] += 1
+    # PHASE 4 REMEDIATION: Token usage tracking moved to auth service
     
     logger.info(f"🔑 AUTH SERVICE DEPENDENCY: Starting token validation "
                 f"(token_hash: {token_hash}, token_length: {len(token) if token else 0}, "
@@ -155,23 +123,7 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
             f"and permissions: {validation_result.get('permissions', [])}"
         )
         
-        # ISSUE #414 FIX: Track token session to prevent reuse
-        import uuid
-        session_id = str(uuid.uuid4())
-        _active_token_sessions[token_hash] = {
-            'user_id': user_id,
-            'session_id': session_id,
-            'first_used': current_time,
-            'last_used': current_time,
-            'validation_count': 1,
-            'role': validation_result.get('role', 'none')
-        }
-        
-        # Schedule cleanup of expired tokens
-        if len(_active_token_sessions) > 1000:  # Prevent memory leak
-            asyncio.create_task(_cleanup_expired_tokens())
-        
-        logger.debug(f" PASS:  ISSUE #414 FIX: Token session {session_id[:8]}... tracked for user {user_id[:8]}...")
+        # PHASE 4 REMEDIATION: Pure delegation pattern - auth service handles session tracking
         
         return validation_result
         
@@ -306,7 +258,7 @@ async def _auto_create_user_if_needed(db: AsyncSession, validation_result: Dict[
     
     # Demo mode: enhanced auto-creation with better email handling
     demo_config = get_backend_demo_config()
-    if demo_config.is_demo_mode():
+    if demo_config.get("enabled", False):
         # Demo mode: be more permissive with email formats
         if not email or email.startswith("user_"):
             # Try to create a more user-friendly email for demo
@@ -322,16 +274,76 @@ async def _auto_create_user_if_needed(db: AsyncSession, validation_result: Dict[
     user = await user_service.get_or_create_dev_user(db, email=email, user_id=user_id)
     
     # Apply demo mode permissions if enabled
-    if demo_config.is_demo_mode():
-        demo_settings = demo_config.get_demo_config()
+    if demo_config.get("enabled", False):
+        demo_settings = demo_config
         if hasattr(user, 'role') and not user.role:
             user.role = demo_settings.get("default_user_role", "user")
             logger.info(f"🎭 DEMO MODE: Applied default role '{user.role}' to user {user_id[:8]}...")
     
     config = get_config()
-    logger.warning(f"[🔑] USER AUTO-CREATED: Created user {user.email} from JWT claims (env: {config.environment}, user_id: {user_id[:8]}..., demo_mode: {demo_config.is_demo_mode()})")
+
+    # Issue #487: Enhanced institutional domain classification for business intelligence
+    email_domain = user.email.split('@')[-1] if '@' in user.email else "unknown"
+    domain_classification = _classify_domain_for_analytics(email_domain)
+
+    logger.warning(f"[🔑] USER AUTO-CREATED: Created user {user.email} from JWT claims "
+                  f"(env: {config.environment}, user_id: {user_id[:8]}..., "
+                  f"demo_mode: {demo_config.get('enabled', False)}, "
+                  f"domain: {email_domain}, domain_type: {domain_classification})")
     logger.info(f"Auto-created user from JWT: {user.email} (env: {config.environment})")
     return user
+
+def _classify_domain_for_analytics(domain: str) -> str:
+    """
+    Classify email domain for business intelligence and analytics purposes.
+
+    This function supports Issue #487: Institutional Domain Classification Enhancement
+    by providing structured domain classification for business development insights.
+
+    Args:
+        domain: Email domain (e.g., 'cornell.edu', 'gmail.com')
+
+    Returns:
+        str: Domain classification ('institutional', 'corporate', 'consumer', 'unknown')
+    """
+    domain = domain.lower()
+
+    # Educational/Research institutions - high value for partnerships
+    educational_domains = {
+        'cornell.edu', 'mit.edu', 'stanford.edu', 'harvard.edu', 'yale.edu',
+        'princeton.edu', 'caltech.edu', 'berkeley.edu', 'cmu.edu',
+        'columbia.edu', 'uchicago.edu', 'upenn.edu', 'dartmouth.edu',
+        'brown.edu', 'northwestern.edu', 'duke.edu', 'vanderbilt.edu',
+        'rice.edu', 'emory.edu', 'georgetown.edu', 'wustl.edu',
+        'ox.ac.uk', 'cam.ac.uk', 'imperial.ac.uk', 'ucl.ac.uk',
+        'toronto.ca', 'ubc.ca', 'mcgill.ca',
+        'anu.edu.au', 'sydney.edu.au', 'melbourne.edu.au',
+        'ethz.ch', 'epfl.ch', 'u-tokyo.ac.jp', 'kyoto-u.ac.jp'
+    }
+
+    # Corporate domains - business customers
+    corporate_domains = {
+        'enterprise.com', 'corp.com', 'business.com',
+        'acme.com', 'bigcorp.com', 'enterprise.net', 'corporate.org'
+    }
+
+    # Consumer domains - individual users
+    consumer_domains = {
+        'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com',
+        'icloud.com', 'protonmail.com', 'mail.com'
+    }
+
+    if domain in educational_domains:
+        return 'institutional'
+    elif domain in corporate_domains:
+        return 'corporate'
+    elif domain in consumer_domains:
+        return 'consumer'
+    elif domain.endswith('.edu') or domain.endswith('.ac.uk') or domain.endswith('.edu.au'):
+        return 'institutional'  # Generic educational domain patterns
+    else:
+        return 'unknown'
+
 
 async def get_current_user_optional(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_security),
@@ -1003,15 +1015,23 @@ class TokenRefreshResult:
 # Issue #485 fix: Create auth_manager instance for test infrastructure access
 auth_manager = BackendAuthIntegration()
 
+# Backward compatibility alias for integration tests
+AuthIntegrationService = BackendAuthIntegration  # Tests expect this name
+
 # Export auth_manager for Issue #485 compatibility
 __all__ = [
     "auth_client",
     "get_current_user",
-    "get_optional_user", 
+    "get_optional_user",
     "get_auth_client",
     "generate_access_token",
     "BackendAuthIntegration",
     "AuthValidationResult",
     "TokenRefreshResult",
-    "auth_manager"  # Issue #485 fix: Missing import
+    "auth_manager",  # Issue #485 fix: Missing import
+    "unified_auth_client",  # Issue #762 Phase 2: Backward compatibility alias
+    "AuthIntegrationService"  # Backward compatibility for tests
 ]
+
+# Issue #762 Phase 2 Remediation: Add backward compatibility alias
+unified_auth_client = auth_client

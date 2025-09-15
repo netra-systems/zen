@@ -71,12 +71,12 @@
         # REMOVED_SYNTAX_ERROR: from datetime import datetime, timezone, timedelta
         # REMOVED_SYNTAX_ERROR: from typing import Any, Dict, List, Optional, Set, Tuple
         # REMOVED_SYNTAX_ERROR: from sqlalchemy.ext.asyncio import AsyncSession
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
-        # REMOVED_SYNTAX_ERROR: from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.redis_manager import redis_manager
         # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
         # Import the classes under test
@@ -89,7 +89,7 @@
         # REMOVED_SYNTAX_ERROR: register_shared_object
         
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.llm.llm_manager import LLMManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher import ToolDispatcher

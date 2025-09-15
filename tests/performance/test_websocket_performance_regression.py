@@ -34,7 +34,7 @@ from netra_backend.app.core.windows_asyncio_safe import (
 
 # Import WebSocket components
 from netra_backend.app.routes.websocket_ssot import WebSocketSSOTRouter
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # Test framework
 from test_framework.ssot.base_test_case import SSotBaseTestCase

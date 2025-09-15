@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING, Any, Dict, List
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # CRITICAL SECURITY MIGRATION: Issue #271 - DeepAgentState removed for user isolation
-# from netra_backend.app.agents.state import DeepAgentState
+# from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.db.session import get_session_from_factory
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
-    PipelineStep,
+    PipelineStepConfig,
 )
 from netra_backend.app.agents.execution_engine_interface import IExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.observability_flow import (
@@ -26,8 +26,8 @@ from netra_backend.app.schemas.agent_state import (
 from netra_backend.app.services.state_persistence import state_persistence_service
 
 if TYPE_CHECKING:
-    # CANONICAL IMPORT: Use direct import path for better SSOT compliance
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    # SSOT COMPLIANT: Use AgentWebSocketBridge instead of direct WebSocketManager
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
@@ -41,7 +41,7 @@ class PipelineExecutor:
     """
     
     def __init__(self, engine: ExecutionEngine, 
-                 websocket_manager: 'WebSocketManager', 
+                 websocket_manager: 'AgentWebSocketBridge', 
                  user_context=None):
         """Initialize without global session storage.
         
@@ -68,7 +68,7 @@ class PipelineExecutor:
         logger.debug("Using unified state persistence service")
         return state_persistence_service
     
-    async def execute_pipeline(self, pipeline: List[PipelineStep],
+    async def execute_pipeline(self, pipeline: List[PipelineStepConfig],
                               user_context: UserExecutionContext, run_id: str,
                               context: Dict[str, str], db_session) -> None:
         """Execute the agent pipeline.
@@ -107,14 +107,14 @@ class PipelineExecutor:
             "user_id": context["user_id"]
         }
     
-    def _prepare_flow_context(self, pipeline: List[PipelineStep]) -> Dict[str, Any]:
+    def _prepare_flow_context(self, pipeline: List[PipelineStepConfig]) -> Dict[str, Any]:
         """Prepare flow context for pipeline execution."""
         correlation_id = generate_llm_correlation_id()
         flow_id = self.flow_logger.generate_flow_id()
         self.flow_logger.start_flow(flow_id, correlation_id, len(pipeline))
         return {'flow_id': flow_id, 'correlation_id': correlation_id}
     
-    async def _execute_pipeline_with_flow(self, pipeline: List[PipelineStep],
+    async def _execute_pipeline_with_flow(self, pipeline: List[PipelineStepConfig],
                                          user_context: UserExecutionContext,
                                          exec_context: AgentExecutionContext,
                                          flow_context: Dict[str, Any], db_session) -> None:
@@ -124,19 +124,19 @@ class PipelineExecutor:
         """
         await self._run_pipeline_with_hooks(pipeline, user_context, exec_context, flow_context['flow_id'], db_session)
     
-    def _log_step_transitions_start(self, pipeline: List[PipelineStep], flow_id: str) -> None:
+    def _log_step_transitions_start(self, pipeline: List[PipelineStepConfig], flow_id: str) -> None:
         """Log start of all step transitions."""
         for i, step in enumerate(pipeline):
             step_name = getattr(step, 'agent_name', f'step_{i}')
             self.flow_logger.step_started(flow_id, step_name, "agent")
     
-    def _log_step_transitions_complete(self, pipeline: List[PipelineStep], flow_id: str) -> None:
+    def _log_step_transitions_complete(self, pipeline: List[PipelineStepConfig], flow_id: str) -> None:
         """Log completion of all step transitions."""
         for i, step in enumerate(pipeline):
             step_name = getattr(step, 'agent_name', f'step_{i}')
             self.flow_logger.step_completed(flow_id, step_name, "agent")
     
-    async def _run_pipeline_with_hooks(self, pipeline: List[PipelineStep],
+    async def _run_pipeline_with_hooks(self, pipeline: List[PipelineStepConfig],
                                       user_context: UserExecutionContext,
                                       context: AgentExecutionContext,
                                       flow_id: str, db_session) -> None:
@@ -149,7 +149,7 @@ class PipelineExecutor:
         except Exception as e:
             await self._handle_pipeline_error(user_context, e)
     
-    async def _execute_and_process(self, pipeline: List[PipelineStep],
+    async def _execute_and_process(self, pipeline: List[PipelineStepConfig],
                                   user_context: UserExecutionContext,
                                   context: AgentExecutionContext,
                                   flow_id: str, db_session) -> None:
@@ -283,7 +283,7 @@ class PipelineExecutor:
             logger.error(f"Error in user context persistence for user {user_context.user_id}: {e}")
             # Don't re-raise to avoid breaking pipeline execution
 
-    def _log_pipeline_execution_type(self, flow_id: str, pipeline: List[PipelineStep]) -> None:
+    def _log_pipeline_execution_type(self, flow_id: str, pipeline: List[PipelineStepConfig]) -> None:
         """Log pipeline execution type (parallel vs sequential)."""
         agent_names = self._extract_agent_names(pipeline)
         if len(agent_names) > 1:
@@ -291,11 +291,11 @@ class PipelineExecutor:
         else:
             self.flow_logger.log_sequential_execution(flow_id, agent_names)
 
-    def _extract_agent_names(self, pipeline: List[PipelineStep]) -> List[str]:
+    def _extract_agent_names(self, pipeline: List[PipelineStepConfig]) -> List[str]:
         """Extract agent names from pipeline steps."""
         return [step.agent_name for step in pipeline if hasattr(step, 'agent_name')]
 
-    async def _execute_with_step_logging(self, pipeline: List[PipelineStep],
+    async def _execute_with_step_logging(self, pipeline: List[PipelineStepConfig],
                                         context: AgentExecutionContext,
                                         user_context: UserExecutionContext, 
                                         flow_id: str) -> List[AgentExecutionResult]:

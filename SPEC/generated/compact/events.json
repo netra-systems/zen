@@ -16,6 +16,7 @@
     "emit_agent_event",
     "emit_critical_event",
     "emit_event",
+    "emit_user_event",
     "error",
     "failed_event",
     "filtered_by_event",
@@ -43,7 +44,6 @@
     "trigger_event",
     "unsubscribe",
     "validate_user_event",
-    "websocket_event",
     "websocket_send_event"
   ]
 }

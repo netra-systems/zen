@@ -28,7 +28,7 @@ from unittest.mock import MagicMock, AsyncMock, patch
 
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext, create_defensive_user_execution_context
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 
 
@@ -74,24 +74,8 @@ class TestConcurrentUserExecutionIsolationFixed:
     
     def create_concurrent_user_context(self, user_id: str, iteration: int) -> UserExecutionContext:
         """Create user context for concurrent testing."""
-        return UserExecutionContext(
-            user_id=f"concurrent_user_{user_id}_{iteration}_{uuid.uuid4().hex[:8]}",
-            thread_id=f"concurrent_thread_{user_id}_{iteration}_{uuid.uuid4().hex[:8]}",
-            run_id=f"concurrent_run_{user_id}_{iteration}_{uuid.uuid4().hex[:8]}",
-            request_id=f"concurrent_req_{user_id}_{iteration}_{uuid.uuid4().hex[:8]}",
-            websocket_client_id=f"concurrent_ws_{user_id}_{iteration}_{uuid.uuid4().hex[:8]}",
-            agent_context={
-                "concurrent_test": True,
-                "test_user_identifier": user_id,
-                "iteration": iteration,
-                "load_test": "concurrent_isolation"
-            },
-            audit_metadata={
-                "test_type": "concurrent_isolation",
-                "user_identifier": user_id,
-                "iteration_number": iteration,
-                "thread_safety_test": True
-            }
+        return create_defensive_user_execution_context(
+            user_id=f"concurrent_user_{user_id}_{iteration}_{uuid.uuid4().hex[:8]}"
         )
     
     @pytest.mark.asyncio

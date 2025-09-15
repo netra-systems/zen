@@ -64,7 +64,7 @@ async def test_legacy_run_method():
     
     # Test 1: Verify SupervisorAgent has run method
     try:
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         
         # Check if run method exists
         if hasattr(SupervisorAgent, 'run'):

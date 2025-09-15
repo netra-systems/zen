@@ -223,7 +223,7 @@ class WebSocketBridgeE2EValidator:
         """Create minimal startup components for testing."""
         from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.config import settings
         
@@ -399,7 +399,7 @@ class WebSocketBridgeE2EValidator:
             tool_dispatcher = ToolDispatcher(tools=[], websocket_bridge=bridge)
             
             registry = AgentRegistry(llm_manager, tool_dispatcher)
-            engine = ExecutionEngine(registry, bridge)
+            engine = UserExecutionEngine(registry, bridge)
             
             # Test engine has the bridge
             if hasattr(engine, 'websocket_bridge') and engine.websocket_bridge is not None:

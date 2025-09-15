@@ -23,7 +23,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
 # Import configuration management classes to test SSOT violations
-from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from shared.isolated_environment import IsolatedEnvironment
 
 

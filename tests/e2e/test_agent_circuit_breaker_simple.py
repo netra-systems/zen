@@ -39,11 +39,11 @@ from test_framework.fixtures.auth import create_real_jwt_token
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 # Circuit breaker components for integration testing
+from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
     UnifiedCircuitBreaker,
     UnifiedCircuitConfig,
-    UnifiedCircuitBreakerState,
-    CircuitBreakerOpenError
+    UnifiedCircuitBreakerState
 )
 
 # Set up test environment using IsolatedEnvironment - SSOT for env access

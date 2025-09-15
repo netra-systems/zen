@@ -8,13 +8,13 @@ Ensures unique, consistent ID generation for all system components.
 import uuid
 import time
 import threading
-from typing import Dict, Optional, Any, Set
+from typing import Dict, Optional, Any, Set, Union
 from dataclasses import dataclass
 from enum import Enum
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class IDType(Enum):
@@ -30,6 +30,7 @@ class IDType(Enum):
     TRACE = "trace"
     METRIC = "metric"
     THREAD = "thread"
+    RUN = "run"
 
 
 @dataclass
@@ -62,20 +63,31 @@ class UnifiedIDManager:
         logger.info("UnifiedIDManager initialized")
     
     def generate_id(self, 
-                   id_type: IDType,
+                   id_type_or_prefix: Union[IDType, str],
                    prefix: Optional[str] = None,
                    context: Optional[Dict[str, Any]] = None) -> str:
         """
-        Generate a new unique ID.
+        Generate a new unique ID with backward compatibility.
         
         Args:
-            id_type: Type of ID to generate
-            prefix: Optional prefix for the ID
+            id_type_or_prefix: Either IDType enum (new pattern) or string prefix (legacy pattern)
+            prefix: Optional prefix for the ID (only used with IDType pattern)
             context: Additional context metadata
             
         Returns:
             Generated unique ID
         """
+        # Handle backward compatibility for generate_id(prefix) pattern used in tests
+        if isinstance(id_type_or_prefix, str) and prefix is None and context is None:
+            # Legacy pattern: generate_id("user_test") -> "user_test_12345abc"
+            prefix_val = id_type_or_prefix
+            return f"{prefix_val}_{uuid.uuid4().hex[:8]}"
+        
+        # New pattern: generate_id(IDType.USER, "prefix", context)
+        if not isinstance(id_type_or_prefix, IDType):
+            raise TypeError(f"First argument must be IDType enum or string prefix, got {type(id_type_or_prefix)}")
+        
+        id_type = id_type_or_prefix
         with self._lock:
             # Generate base UUID
             base_uuid = str(uuid.uuid4())

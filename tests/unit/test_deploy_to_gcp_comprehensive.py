@@ -51,7 +51,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from shared.windows_encoding import setup_windows_encoding
 
 # Import deployment script components
-from scripts.deploy_to_gcp import GCPDeployer, ServiceConfig
+from scripts.deploy_to_gcp_actual import GCPDeployer, ServiceConfig
 from scripts.gcp_auth_config import GCPAuthConfig
 from deployment.secrets_config import SecretConfig
 

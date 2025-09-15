@@ -5,7 +5,7 @@ argument-hint: "[focus area, defaults to latest]"
 
 # 🚨 ULTRA THINK DEEPLY ALWAYS. COMPLETE FEATURE FREEZE.
 
-**CRITICAL MISSION:** Get Golden Path working - users login and get AI responses back.
+**CRITICAL MISSION:** Get Golden Path working - users login and get real AI responses back.
 Your goals are to:
 1. Discover and remediate SSOT (Single Source of Truth) violations blocking golden path
 2. Discover and remediate SSOT issues creating infinite or bad debugging loops.
@@ -38,13 +38,6 @@ use tools to search through codebase and find the most important SSOT violations
 Minimize noise, focus on just a few readable lines of most critical context. Link to other docs for remaining context.
 Issue name style: SSOT-{context (one of: regression, incomplete-migration, recent-change, {custom})}-{brief human description}}
 
-PRIORITY TAG ASSIGNMENT (MANDATORY):
-Always assign a priority tag based on SSOT violation impact:
-- P0: Critical/blocking - system down, Golden Path broken, data loss, security vulnerability
-- P1: High - major feature broken, significant SSOT violations
-- P2: Medium - minor SSOT issues, moderate impact  
-- P3: Low - cleanup items, nice-to-have improvements
-
 Create a local md file (IND = {issue name}.md) with the same name ending in .md to record your work in progress
 OUTPUT the issue name, .md progress tracker name {issue name}.md, and github link.
 Action: IND; GCIFS
@@ -67,7 +60,6 @@ ONLY RUN tests that don't require docker, such as unit, integration (no docker),
 
 Do IND_GCIFS_UINF
 
-
 2) EXECUTE THE TEST PLAN for the 20% of NEW SSOT tests : SNST : with new spawned sub agent. audit and review the test. And run the fake test checks. ONLY RUN tests that don't require docker, such as unit, integration (no docker), or e2e on staging gcp remote.
 Do IND_GCIFS_UINF
 
@@ -84,6 +76,7 @@ otherwise go back and ensure that any code changes exclusively add value as one 
 do not introduce new problems.
 5.1) Run and fix changes for every test case in the IND.
 5.2) or each cycle Do IND_GCIFS_UINF until ALL tests in IND pass.
+5.3) Run startup tests (non docker) fix import or other types of startup issues related to this change.
 
 STOP and repeat step 5 until all tests pass or 10 cycles.
 If still failing after 10 cycles do IND_GCIFS_UINF and STOP and exit PROCESS.
@@ -95,7 +88,3 @@ Make a NEW PR (Pull Request).
 Cross link the prior generated issue so it will close on PR merge.
 
 END PROCESS INSTRUCTIONS
-
-You MUST repeat the entire PROCESS until success.
-EVERY NEW PROCESS ENTRY MUST SPAWN NEW SNST FOR EACH ITEM.
-STOP AFTER 3 PROCESS CYCLES OR IF THE ISSUE IS CLOSED.

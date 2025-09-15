@@ -66,8 +66,23 @@ class UserRegistrationValidator:
     
     # Business email domains that suggest enterprise usage
     BUSINESS_DOMAINS = {
+        # Corporate domains
         'enterprise.com', 'corp.com', 'business.com',
-        'acme.com', 'bigcorp.com', 'enterprise.net', 'corporate.org'
+        'acme.com', 'bigcorp.com', 'enterprise.net', 'corporate.org',
+
+        # Educational institutions - Issue #487: Institutional Domain Enhancement
+        # Major US universities and research institutions
+        'cornell.edu', 'mit.edu', 'stanford.edu', 'harvard.edu', 'yale.edu',
+        'princeton.edu', 'caltech.edu', 'berkeley.edu', 'cmu.edu',
+        'columbia.edu', 'uchicago.edu', 'upenn.edu', 'dartmouth.edu',
+        'brown.edu', 'northwestern.edu', 'duke.edu', 'vanderbilt.edu',
+        'rice.edu', 'emory.edu', 'georgetown.edu', 'wustl.edu',
+
+        # International educational institutions
+        'ox.ac.uk', 'cam.ac.uk', 'imperial.ac.uk', 'ucl.ac.uk',
+        'toronto.ca', 'ubc.ca', 'mcgill.ca',
+        'anu.edu.au', 'sydney.edu.au', 'melbourne.edu.au',
+        'ethz.ch', 'epfl.ch', 'u-tokyo.ac.jp', 'kyoto-u.ac.jp'
     }
     
     # Personal email domains that indicate individual users

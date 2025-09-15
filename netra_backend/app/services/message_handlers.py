@@ -14,7 +14,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.service_interfaces import IMessageHandlerService
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+    from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
     from netra_backend.app.websocket_core import WebSocketManager
 import json
 

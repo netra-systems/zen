@@ -23,13 +23,17 @@ import asyncio
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Optional, Dict, Any
 
+from shared.isolated_environment import get_env
+
 from netra_backend.app.services.websocket_bridge_factory import (
     WebSocketBridgeFactory,
-    WebSocketFactoryConfig,
-    UserWebSocketContext,
-    WebSocketEvent,
-    ConnectionStatus
+    WebSocketFactoryConfig
 )
+from shared.types.core_types import (
+    WebSocketMessage as WebSocketEvent,
+    ConnectionState as ConnectionStatus
+)
+from netra_backend.app.services.user_execution_context import UserExecutionContext as UserWebSocketContext
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactoryError
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
@@ -176,13 +180,28 @@ class TestWebSocketBridgeFactorySSotValidation:
         Expected Failure: Should validate all required environment variables exist.
         """
         # This should FAIL if environment SSOT validation is missing
-        with patch.dict('os.environ', {}, clear=True):
+        env = get_env()
+        
+        # Save current environment state for restoration
+        original_env_values = {}
+        env_keys_to_test = ['WEBSOCKET_MAX_EVENTS_PER_USER', 'WEBSOCKET_CONNECTION_TIMEOUT', 'WEBSOCKET_MAX_CONNECTIONS']
+        
+        for key in env_keys_to_test:
+            original_env_values[key] = env.get(key)
+            env.unset(key)
+        
+        try:
             # Clear all environment variables - SSOT violation
             config = WebSocketFactoryConfig.from_env()
             
             # Factory should detect missing environment configuration
             assert config.max_events_per_user > 0, \
                 "SSOT violation: Invalid max_events_per_user from environment"
+        finally:
+            # Restore original environment state
+            for key, value in original_env_values.items():
+                if value is not None:
+                    env.set(key, value, source='test_ssot_validation')
     
     @pytest.mark.asyncio
     async def test_user_context_cleanup_ssot_isolation_failure(self):
@@ -242,7 +261,7 @@ class TestWebSocketBridgeFactorySSotValidation:
         SSOT Issue: Multiple factory instances violate SSOT pattern.
         Expected Failure: Should enforce single factory instance or proper isolation.
         """
-        from netra_backend.app.services.websocket_bridge_factory import get_websocket_bridge_factory
+        from netra_backend.app.dependencies import get_websocket_bridge_factory
         
         # Get two instances - should be same instance (SSOT)
         factory1 = get_websocket_bridge_factory()

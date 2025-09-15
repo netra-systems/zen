@@ -42,13 +42,14 @@ import os
 import sys
 import time
 from typing import Dict, List, Set, Any, Optional
+from unittest.mock import Mock, AsyncMock, patch
 import pytest
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
-from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+from netra_backend.app.redis_manager import redis_manager
 from auth_service.core.auth_manager import AuthManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
@@ -57,7 +58,8 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult, ActionPlanResult, PlanStep
+from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.agents.state import OptimizationsResult, ActionPlanResult, PlanStep
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -163,6 +165,9 @@ class TestActionsAgentWebSocketCompliance:
         
         # Mock the WebSocket bridge to capture events
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        
+        # Create mock bridge
+        mock_bridge = Mock()
         
         # Set up bridge
         agent.set_websocket_bridge(mock_bridge, "test-run")
@@ -370,6 +375,9 @@ class TestActionsAgentWebSocketCompliance:
         
         # Test 1: WebSocket bridge integration
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        
+        # Create mock bridge
+        mock_bridge = Mock()
         
         # Should be able to set WebSocket bridge (inherited from BaseAgent)
         agent.set_websocket_bridge(mock_bridge, "compliance-test")

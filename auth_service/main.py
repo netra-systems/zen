@@ -246,14 +246,20 @@ Auth Service startup ABORTED.
     
     # Log Redis configuration status
     try:
-        from auth_service.auth_core.routes.auth_routes import auth_service
-        # Check if redis_client is available (AuthService uses redis_client, not session_manager)
-        if hasattr(auth_service, 'redis_client'):
-            redis_enabled = auth_service.redis_client is not None
-            redis_status = "enabled" if redis_enabled else "disabled"
+        from auth_service.auth_core.core.lazy_auth_service import get_auth_service_safe
+        # Use safe getter to avoid triggering initialization during startup
+        auth_service = get_auth_service_safe()
+        if auth_service:
+            # Check if redis_client is available (AuthService uses redis_client, not session_manager)
+            if hasattr(auth_service, 'redis_client'):
+                redis_enabled = auth_service.redis_client is not None
+                redis_status = "enabled" if redis_enabled else "disabled"
+            else:
+                # Redis client might not be initialized yet
+                redis_status = "will be configured during route initialization"
         else:
-            # Redis client might not be initialized yet
-            redis_status = "will be configured during route initialization"
+            # auth_service not yet initialized - will be created on first use
+            redis_status = "auth service will be initialized on demand"
         logger.info(f"Redis session management: {redis_status}")
     except Exception as e:
         logger.warning(f"Could not determine Redis status: {e}")
@@ -345,7 +351,9 @@ Auth Service startup ABORTED.
     async def close_redis():
         try:
             # AuthService uses redis_client directly, not session_manager
-            if hasattr(auth_service, 'redis_client') and auth_service.redis_client:
+            from auth_service.auth_core.core.lazy_auth_service import get_auth_service_safe
+            auth_service = get_auth_service_safe()
+            if auth_service and hasattr(auth_service, 'redis_client') and auth_service.redis_client:
                 if hasattr(auth_service.redis_client, 'close'):
                     await auth_service.redis_client.close()
                 logger.info("Redis connections closed successfully")
@@ -650,11 +658,11 @@ async def health_auth() -> Dict[str, Any]:
     try:
         # Check JWT capabilities (most critical for Golden Path)
         try:
-            from auth_service.auth_core.services.auth_service import AuthService
-            auth_svc = AuthService()
+            from auth_service.auth_core.core.lazy_auth_service import get_auth_service
+            auth_svc = get_auth_service()
             
             # Verify JWT creation and validation capabilities
-            if hasattr(auth_svc, 'create_access_token') and hasattr(auth_svc, 'verify_token'):
+            if hasattr(auth_svc, 'create_access_token') and hasattr(auth_svc, 'validate_token'):
                 health_response["capabilities"]["jwt_validation"] = True
             
         except Exception as jwt_error:
@@ -662,10 +670,13 @@ async def health_auth() -> Dict[str, Any]:
         
         # Check session management (Redis-based or in-memory)
         try:
-            if hasattr(auth_service, 'redis_client') and auth_service.redis_client:
-                health_response["capabilities"]["session_management"] = True
-            elif hasattr(auth_service, 'session_store'):
-                health_response["capabilities"]["session_management"] = True
+            from auth_service.auth_core.core.lazy_auth_service import get_auth_service_safe
+            auth_service = get_auth_service_safe()
+            if auth_service:
+                if hasattr(auth_service, 'redis_client') and auth_service.redis_client:
+                    health_response["capabilities"]["session_management"] = True
+                elif hasattr(auth_service, 'session_store'):
+                    health_response["capabilities"]["session_management"] = True
                 
         except Exception as session_error:
             logger.warning(f"Session management check failed: {session_error}")

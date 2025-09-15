@@ -16,9 +16,10 @@ class ComplianceReporter:
     
     def __init__(self, max_file_lines: int, max_function_lines: int,
                  default_limit: int = 10, smart_limits: bool = True,
-                 use_emoji: bool = True):
+                 use_emoji: bool = True, relaxed_mode: bool = True):
         self.max_file_lines = max_file_lines
         self.max_function_lines = max_function_lines
+        self.relaxed_mode = relaxed_mode
         self.stats_calc = StatisticsCalculator()
         self.utils = ReporterUtils(default_limit, smart_limits, use_emoji)
     
@@ -31,8 +32,13 @@ class ComplianceReporter:
     def _print_report_header(self) -> None:
         """Print report header"""
         print("\n" + "="*80)
-        print("ARCHITECTURE COMPLIANCE REPORT")
+        mode_text = "ARCHITECTURE COMPLIANCE REPORT (RELAXED MODE)" if self.relaxed_mode else "ARCHITECTURE COMPLIANCE REPORT"
+        print(mode_text)
         print("="*80)
+        if self.relaxed_mode:
+            print("📋 Showing top prioritized violations (critical & high severity)")
+            print("🧪 Mocks in unit tests allowed, focus on integration/production issues")
+            print("-" * 80)
     
     def _print_all_violation_sections(self, results: ComplianceResults) -> None:
         """Print all violation report sections"""

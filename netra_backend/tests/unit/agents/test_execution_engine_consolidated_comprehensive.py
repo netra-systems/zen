@@ -73,7 +73,7 @@ from netra_backend.app.agents.execution_engine_consolidated import (
     get_execution_engine_factory,
 )
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.agent_execution_tracker import ExecutionState
 
 
@@ -693,7 +693,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
         BVJ: Platform/Internal - Infrastructure Stability
         Test ExecutionEngine initializes with proper defaults.
         """
-        engine = ExecutionEngine()
+        engine = UserExecutionEngine()
         
         self.assertIsNotNone(engine.config)
         self.assertIsNotNone(engine.engine_id)
@@ -712,7 +712,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
             max_concurrent_agents=5
         )
         
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=config,
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
@@ -740,7 +740,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
             enable_websocket_events=True
         )
         
-        engine = ExecutionEngine(config=config, websocket_bridge=self.websocket_bridge)
+        engine = UserExecutionEngine(config=config, websocket_bridge=self.websocket_bridge)
         
         self.assertIn("user", engine._extensions)
         self.assertIn("mcp", engine._extensions)
@@ -758,7 +758,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
         Test ExecutionEngine initializes all extensions properly.
         """
         config = EngineConfig(enable_mcp=True)
-        engine = ExecutionEngine(config=config)
+        engine = UserExecutionEngine(config=config)
         
         await engine.initialize()
         
@@ -775,7 +775,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
             enable_websocket_events=True
         )
         
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=config,
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
@@ -804,7 +804,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
         """
         config = EngineConfig(enable_websocket_events=True)
         
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=config,
             registry=self.registry,
             websocket_bridge=self.websocket_bridge
@@ -831,7 +831,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
         """
         config = EngineConfig(agent_execution_timeout=0.1)  # Very short timeout
         
-        engine = ExecutionEngine(config=config, registry=self.registry)
+        engine = UserExecutionEngine(config=config, registry=self.registry)
         await engine.initialize()
         
         result = await engine.execute("slow_agent", "test_task")
@@ -845,7 +845,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
         BVJ: Platform/Internal - Error Handling
         Test ExecutionEngine handles missing agent gracefully.
         """
-        engine = ExecutionEngine(registry=self.registry)
+        engine = UserExecutionEngine(registry=self.registry)
         await engine.initialize()
         
         result = await engine.execute("nonexistent_agent", "test_task")
@@ -859,7 +859,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
         BVJ: Platform/Internal - Configuration Validation
         Test ExecutionEngine requires registry for execution.
         """
-        engine = ExecutionEngine()
+        engine = UserExecutionEngine()
         await engine.initialize()
         
         result = await engine.execute("test_agent", "test_task")
@@ -873,7 +873,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
         BVJ: Platform/Internal - Performance Monitoring
         Test ExecutionEngine collects execution metrics properly.
         """
-        engine = ExecutionEngine()
+        engine = UserExecutionEngine()
         
         # Manually track some metrics
         engine._track_execution_metrics(150.5, True)
@@ -895,7 +895,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
         BVJ: Platform/Internal - Edge Case Handling
         Test ExecutionEngine metrics with no executions.
         """
-        engine = ExecutionEngine()
+        engine = UserExecutionEngine()
         metrics = engine.get_metrics()
         
         self.assertEqual(metrics, {})
@@ -905,7 +905,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
         BVJ: Platform/Internal - Concurrency Management
         Test ExecutionEngine tracks active runs properly.
         """
-        engine = ExecutionEngine(registry=self.registry)
+        engine = UserExecutionEngine(registry=self.registry)
         await engine.initialize()
         
         # Start execution but don't await (to check active runs)
@@ -930,7 +930,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
         Test ExecutionEngine manages run history size limits.
         """
         config = EngineConfig(max_history_size=2)
-        engine = ExecutionEngine(config=config, registry=self.registry)
+        engine = UserExecutionEngine(config=config, registry=self.registry)
         await engine.initialize()
         
         # Execute multiple agents to fill history
@@ -947,7 +947,7 @@ class TestExecutionEngine(AsyncBaseTestCase):
         Test ExecutionEngine cleanup clears all resources.
         """
         config = EngineConfig(enable_user_features=True, enable_mcp=True)
-        engine = ExecutionEngine(config=config, registry=self.registry)
+        engine = UserExecutionEngine(config=config, registry=self.registry)
         await engine.initialize()
         
         # Execute something to create history
@@ -973,7 +973,7 @@ class TestRequestScopedExecutionEngine(AsyncBaseTestCase):
         self.registry.register_agent("test_agent", MockAgent("test_agent", 0.1))
         
         self.user_context = MockUserExecutionContext("user123")
-        self.base_engine = ExecutionEngine(
+        self.base_engine = UserExecutionEngine(
             registry=self.registry,
             user_context=self.user_context
         )
@@ -984,7 +984,7 @@ class TestRequestScopedExecutionEngine(AsyncBaseTestCase):
         Test RequestScopedExecutionEngine creates with proper request ID.
         """
         request_id = "req_12345"
-        scoped_engine = RequestScopedExecutionEngine(self.base_engine, request_id)
+        scoped_engine = UserExecutionEngine(self.base_engine, request_id)
         
         self.assertEqual(scoped_engine.engine, self.base_engine)
         self.assertEqual(scoped_engine.request_id, request_id)
@@ -998,7 +998,7 @@ class TestRequestScopedExecutionEngine(AsyncBaseTestCase):
         """
         await self.base_engine.initialize()
         
-        scoped_engine = RequestScopedExecutionEngine(self.base_engine, "req_12345")
+        scoped_engine = UserExecutionEngine(self.base_engine, "req_12345")
         
         result = await scoped_engine.execute("test_agent", "test_task")
         
@@ -1012,7 +1012,7 @@ class TestRequestScopedExecutionEngine(AsyncBaseTestCase):
         """
         await self.base_engine.initialize()
         
-        scoped_engine = RequestScopedExecutionEngine(self.base_engine, "req_12345")
+        scoped_engine = UserExecutionEngine(self.base_engine, "req_12345")
         await scoped_engine.close()
         
         with self.assertRaises(RuntimeError) as context:
@@ -1027,7 +1027,7 @@ class TestRequestScopedExecutionEngine(AsyncBaseTestCase):
         """
         await self.base_engine.initialize()
         
-        async with RequestScopedExecutionEngine(self.base_engine, "req_12345") as scoped_engine:
+        async with UserExecutionEngine(self.base_engine, "req_12345") as scoped_engine:
             result = await scoped_engine.execute("test_agent", "test_task")
             self.assertTrue(result.success)
             
@@ -1245,7 +1245,7 @@ class TestConcurrentExecution(AsyncBaseTestCase):
         CRITICAL: Test ExecutionEngine handles 10+ concurrent executions within 2s.
         """
         config = EngineConfig(max_concurrent_agents=15)
-        engine = ExecutionEngine(config=config, registry=self.registry)
+        engine = UserExecutionEngine(config=config, registry=self.registry)
         await engine.initialize()
         
         start_time = time.time()
@@ -1284,7 +1284,7 @@ class TestConcurrentExecution(AsyncBaseTestCase):
         config = EngineConfig(enable_user_features=True)
         user_context = MockUserExecutionContext("user123")
         
-        engine = ExecutionEngine(config=config, registry=self.registry, user_context=user_context)
+        engine = UserExecutionEngine(config=config, registry=self.registry, user_context=user_context)
         await engine.initialize()
         
         # Start 5 concurrent executions for same user
@@ -1323,7 +1323,7 @@ class TestPerformanceRequirements(AsyncBaseTestCase):
         BVJ: ALL - Performance SLA
         CRITICAL: Test ExecutionEngine meets <2s response time requirement.
         """
-        engine = ExecutionEngine(registry=self.registry)
+        engine = UserExecutionEngine(registry=self.registry)
         await engine.initialize()
         
         start_time = time.time()
@@ -1342,7 +1342,7 @@ class TestPerformanceRequirements(AsyncBaseTestCase):
         BVJ: Platform/Internal - Performance Monitoring
         Test ExecutionEngine tracks performance metrics accurately.
         """
-        engine = ExecutionEngine(registry=self.registry)
+        engine = UserExecutionEngine(registry=self.registry)
         await engine.initialize()
         
         # Execute multiple times to collect metrics
@@ -1390,7 +1390,7 @@ class TestWebSocketEventIntegration(AsyncBaseTestCase):
         Events: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
         """
         config = EngineConfig(enable_websocket_events=True)
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=config,
             registry=self.registry,
             websocket_bridge=self.websocket_bridge
@@ -1420,7 +1420,7 @@ class TestWebSocketEventIntegration(AsyncBaseTestCase):
         CRITICAL: Test WebSocket events during agent execution failures.
         """
         config = EngineConfig(enable_websocket_events=True)
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=config,
             registry=self.registry,
             websocket_bridge=self.websocket_bridge
@@ -1444,7 +1444,7 @@ class TestWebSocketEventIntegration(AsyncBaseTestCase):
         """
         failing_bridge = MockWebSocketBridge(should_fail=True)
         config = EngineConfig(enable_websocket_events=True)
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=config,
             registry=self.registry,
             websocket_bridge=failing_bridge
@@ -1464,7 +1464,7 @@ class TestWebSocketEventIntegration(AsyncBaseTestCase):
         Test WebSocket events are delivered in correct order with proper timing.
         """
         config = EngineConfig(enable_websocket_events=True)
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=config,
             registry=self.registry,
             websocket_bridge=self.websocket_bridge
@@ -1509,7 +1509,7 @@ class TestErrorHandlingAndRecovery(AsyncBaseTestCase):
         Test ExecutionEngine handles extension initialization failures gracefully.
         """
         config = EngineConfig(enable_mcp=True)
-        engine = ExecutionEngine(config=config)
+        engine = UserExecutionEngine(config=config)
         
         # Mock extension to fail during initialization
         with patch.object(engine._extensions["mcp"], "initialize", side_effect=Exception("Init failed")):
@@ -1525,7 +1525,7 @@ class TestErrorHandlingAndRecovery(AsyncBaseTestCase):
         """
         config = EngineConfig(enable_user_features=True)
         user_context = MockUserExecutionContext("user123")
-        engine = ExecutionEngine(config=config, registry=self.registry, user_context=user_context)
+        engine = UserExecutionEngine(config=config, registry=self.registry, user_context=user_context)
         
         await engine.initialize()
         
@@ -1544,7 +1544,7 @@ class TestErrorHandlingAndRecovery(AsyncBaseTestCase):
         """
         config = EngineConfig(enable_user_features=True)
         user_context = MockUserExecutionContext("user123")
-        engine = ExecutionEngine(config=config, registry=self.registry, user_context=user_context)
+        engine = UserExecutionEngine(config=config, registry=self.registry, user_context=user_context)
         
         # Add a working agent for this test
         self.registry.register_agent("working_agent", MockAgent("working_agent", 0.1))
@@ -1565,7 +1565,7 @@ class TestErrorHandlingAndRecovery(AsyncBaseTestCase):
         Test ExecutionEngine handles extension cleanup failures gracefully.
         """
         config = EngineConfig(enable_user_features=True, enable_mcp=True)
-        engine = ExecutionEngine(config=config)
+        engine = UserExecutionEngine(config=config)
         
         await engine.initialize()
         

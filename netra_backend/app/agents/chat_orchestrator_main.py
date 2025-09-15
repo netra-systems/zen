@@ -29,7 +29,7 @@ from netra_backend.app.agents.chat_orchestrator.pipeline_executor import (
     PipelineExecutor,
 )
 from netra_backend.app.agents.chat_orchestrator.trace_logger import TraceLogger
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
@@ -93,8 +93,8 @@ class ChatOrchestrator(SupervisorAgent):
         self.trace_logger = TraceLogger(self.websocket_bridge)
         
         # Create alias for PipelineExecutor compatibility
-        # PipelineExecutor expects agent_registry but SupervisorAgent provides registry
-        self.agent_registry = self.registry
+        # PipelineExecutor expects agent_registry but SupervisorAgent provides agent_factory
+        self.agent_registry = self.agent_factory
         
         self.pipeline_executor = PipelineExecutor(self)
     

@@ -34,9 +34,10 @@ from netra_backend.app.core.interfaces_service import (
 
 # Import from WebSocket interfaces
 from netra_backend.app.core.interfaces_websocket import (
-    WebSocketManagerInterface,
     WebSocketServiceInterface,
 )
+# Import WebSocketManagerProtocol from protocols module  
+from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol as WebSocketManagerInterface
 
 # Re-export all interfaces for backwards compatibility
 __all__ = [

@@ -35,7 +35,7 @@ from contextlib import asynccontextmanager
 
 if TYPE_CHECKING:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from langchain_core.tools import BaseTool
 
 from netra_backend.app.logging_config import central_logger

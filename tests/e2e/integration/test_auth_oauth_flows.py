@@ -41,7 +41,7 @@ from tests.e2e.real_services_manager import create_real_services_manager
 logger = central_logger.get_logger(__name__)
 
 
-class TestOAuthFlowRunner:
+class OAuthFlowRunner:
     """OAuth flow test execution manager for testing complete OAuth integration"""
     
     def __init__(self):

@@ -14,6 +14,7 @@ import { useLoadingState } from '@/hooks/useLoadingState';
 import { useEventProcessor } from '@/hooks/useEventProcessor';
 import { useThreadNavigation } from '@/hooks/useThreadNavigation';
 import { useInitializationCoordinator } from '@/hooks/useInitializationCoordinator';
+import { useResponsiveHeight } from '@/hooks/useWindowSize';
 import { logger } from '@/lib/logger';
 
 // Helper Functions (8 lines max each)
@@ -117,6 +118,14 @@ const MainChat: React.FC = () => {
   // Ref for MessageInput to enable focus from keyboard shortcuts
   const messageInputRef = useRef<MessageInputRef>(null);
   
+  // Ref for main scrollable content area and scroll position preservation
+  const mainContentRef = useRef<HTMLDivElement>(null);
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [shouldPreserveScroll, setShouldPreserveScroll] = useState(false);
+  
+  // Use responsive height hook for better height management
+  const { primary: responsiveHeight } = useResponsiveHeight();
+  
   // Use new loading state hook for clean state management
   const {
     shouldShowLoading,
@@ -180,6 +189,36 @@ const MainChat: React.FC = () => {
     setHasUserStartedTyping(true);
   };
 
+  // Scroll position preservation logic
+  useEffect(() => {
+    const mainContent = mainContentRef.current;
+    if (!mainContent) return;
+
+    const handleScroll = () => {
+      if (!shouldPreserveScroll) {
+        setScrollPosition(mainContent.scrollTop);
+      }
+    };
+
+    mainContent.addEventListener('scroll', handleScroll, { passive: true });
+    return () => mainContent.removeEventListener('scroll', handleScroll);
+  }, [shouldPreserveScroll]);
+
+  // Preserve scroll position when thread changes
+  useEffect(() => {
+    if (shouldPreserveScroll && mainContentRef.current) {
+      mainContentRef.current.scrollTop = scrollPosition;
+      setShouldPreserveScroll(false);
+    }
+  }, [shouldPreserveScroll, scrollPosition]);
+
+  // Set scroll preservation flag when switching threads
+  useEffect(() => {
+    if (isNavigating || isThreadLoading) {
+      setShouldPreserveScroll(true);
+    }
+  }, [isNavigating, isThreadLoading]);
+
   // Keyboard shortcuts for panels and diagnostics
   useEffect(() => {
     const handleKeyDown = createKeyboardHandler(setIsOverflowOpen, setShowEventDiagnostics, messageInputRef);
@@ -206,14 +245,26 @@ const MainChat: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden" data-testid="main-chat">
+    <div 
+      className="flex flex-col h-full bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden" 
+      data-testid="main-chat"
+      style={{ maxHeight: `${responsiveHeight}px` }}
+    >
       {/* Chat Header - Fixed at top */}
       <div className="flex-shrink-0">
         <ChatHeader />
       </div>
       
-      {/* Scrollable Content Area - Only scrollable element */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden" data-testid="main-content">
+      {/* Scrollable Content Area - Only scrollable element with independent scrolling */}
+      <div 
+        ref={mainContentRef}
+        className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth" 
+        data-testid="main-content"
+        style={{ 
+          scrollBehavior: 'smooth',
+          WebkitOverflowScrolling: 'touch', // iOS smooth scrolling
+        }}
+      >
             {/* Empty State with Example Prompts - shown when no thread is selected OR thread selected but no messages */}
             <AnimatePresence mode="wait">
               {(shouldShowEmptyState || shouldShowExamplePrompts) && (

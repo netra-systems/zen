@@ -41,6 +41,7 @@ import json
 import time
 import uuid
 from contextlib import asynccontextmanager
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Tuple, List, Union
 from enum import Enum
@@ -60,14 +61,17 @@ from starlette.datastructures import QueryParams
 
 # Core infrastructure imports
 from netra_backend.app.core.tracing import TracingManager
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.services.monitoring.gcp_error_reporter import gcp_reportable, set_request_context, clear_request_context
 
 # WebSocket core components (unified across all patterns)
-from netra_backend.app.websocket_core import (
+# PHASE 1 FIX: Import from canonical SSOT sources instead of __init__.py to prevent circular references
+from netra_backend.app.websocket_core.websocket_manager import (
     WebSocketManager,
-    MessageRouter,
     get_websocket_manager,
+)
+from netra_backend.app.websocket_core import (
+    MessageRouter,
     get_message_router,
     WebSocketHeartbeat,
     get_connection_monitor,
@@ -125,7 +129,7 @@ from netra_backend.app.dependencies import (
 )
 
 # Isolated pattern dependencies (for isolated mode)
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as ConnectionScopedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ConnectionScopedWebSocketManager
 from netra_backend.app.websocket.connection_handler import connection_scope
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
@@ -140,7 +144,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.auth_integration.auth import get_current_user
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 # Custom auth dependency that returns 401 instead of 403 for test compatibility
 security_401 = HTTPBearer(auto_error=False)
@@ -173,6 +177,86 @@ async def get_current_user_401(credentials: HTTPAuthorizationCredentials = Depen
     except Exception as e:
         logger.error(f"Authentication failed: {e}")
         raise HTTPException(status_code=401, detail="Authentication required")
+
+
+class AgentBridgeHandler:
+    """Handler for agent WebSocket bridge messages that implements MessageHandler protocol.
+    
+    CRITICAL FIX: This class properly implements the MessageHandler protocol with can_handle method,
+    replacing the raw async function that was causing 'function' object has no attribute 'can_handle' errors.
+    
+    Business Value:
+    - Enables proper agent message routing in Golden Path user flow
+    - Maintains user isolation guarantees through UserExecutionContext
+    - Supports all 5 critical WebSocket events required for chat functionality
+    """
+    
+    def __init__(self, agent_bridge, user_context):
+        """Initialize handler with agent bridge and user context.
+        
+        Args:
+            agent_bridge: The agent WebSocket bridge instance
+            user_context: UserExecutionContext for proper user isolation
+        """
+        self.agent_bridge = agent_bridge
+        self.user_context = user_context
+        self.supported_types = [
+            MessageType.USER_MESSAGE,
+            MessageType.CHAT,
+            MessageType.AGENT_REQUEST,
+            MessageType.START_AGENT,
+            MessageType.AGENT_TASK
+        ]
+        logger.info(f"AgentBridgeHandler initialized for user {user_context.user_id if user_context else 'unknown'} with {len(self.supported_types)} message types")
+    
+    def can_handle(self, message_type: MessageType) -> bool:
+        """Check if handler can process this message type.
+        
+        CRITICAL FIX: This method was missing from the raw async function,
+        causing the MessageRouter to fail when trying to find handlers.
+        
+        Args:
+            message_type: The message type to check
+            
+        Returns:
+            bool: True if this handler supports the message type
+        """
+        can_handle_result = message_type in self.supported_types
+        logger.debug(f"AgentBridgeHandler.can_handle({message_type}) = {can_handle_result}")
+        return can_handle_result
+    
+    async def handle_message(self, user_id: str, websocket: WebSocket, message) -> bool:
+        """Handle agent messages through the bridge.
+        
+        Args:
+            user_id: User ID from the WebSocket connection
+            websocket: The WebSocket connection
+            message: The message to process (Dict or WebSocketMessage)
+            
+        Returns:
+            bool: True if message was handled successfully
+        """
+        try:
+            # Ensure user context matches
+            if self.user_context and self.user_context.user_id != user_id:
+                logger.warning(f"User ID mismatch: handler={self.user_context.user_id}, message={user_id}")
+            
+            # Convert WebSocketMessage to dict if needed
+            message_dict = message.model_dump() if hasattr(message, 'model_dump') else message
+            if hasattr(message, 'payload'):
+                message_dict = message.payload
+            
+            logger.info(f"AgentBridgeHandler processing {message_dict.get('type', 'unknown')} for user {user_id[:8]}...")
+            
+            # Delegate to agent bridge
+            result = await self.agent_bridge.handle_message(message_dict)
+            
+            logger.info(f"AgentBridgeHandler completed processing for user {user_id[:8]}... result: {result}")
+            return bool(result)
+            
+        except Exception as e:
+            logger.error(f"AgentBridgeHandler error for user {user_id}: {e}")
+            return False
 
 
 class WebSocketMode(Enum):
@@ -226,6 +310,12 @@ class WebSocketSSOTRouter:
         self.router.get("/api/v1/websocket")(self.websocket_api_info)
         self.router.post("/api/v1/websocket")(self.websocket_api_create)
         self.router.get("/api/v1/websocket/protected")(self.websocket_api_protected)
+        
+        # CRITICAL FIX: WebSocket protocol endpoint for /api/v1/websocket
+        # Issue: E2E tests expect WebSocket protocol at this path, not REST API
+        # This preserves both REST API functionality (via different HTTP methods) 
+        # and adds WebSocket protocol support for golden path compatibility
+        self.router.websocket("/api/v1/websocket")(self.api_websocket_endpoint)
         
         # PERMISSIVE AUTH ENDPOINTS: Auth circuit breaker and permissiveness status
         self.router.get("/ws/auth/circuit-breaker")(self.auth_circuit_breaker_status)
@@ -446,7 +536,7 @@ class WebSocketSSOTRouter:
         - User-Agent header detection
         - Default: main mode (full functionality)
         """
-        connection_id = f"ssot_{uuid.uuid4().hex[:8]}"
+        connection_id = f"ssot_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
         start_time = time.time()
         
         # CRITICAL: Log connection initiation with all context for Golden Path debugging
@@ -539,6 +629,21 @@ class WebSocketSSOTRouter:
         """Test WebSocket endpoint for development."""
         await self._handle_legacy_mode(websocket)
     
+    async def api_websocket_endpoint(self, websocket: WebSocket):
+        """
+        API WebSocket endpoint for /api/v1/websocket - CRITICAL FIX for Golden Path.
+        
+        This endpoint restores WebSocket protocol support for the /api/v1/websocket path
+        that E2E tests and frontend clients expect. Previously this path only supported 
+        REST API operations, breaking WebSocket connections.
+        
+        Uses main mode to ensure full Golden Path functionality with all 5 critical events:
+        - agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
+        
+        Business Impact: Restores $500K+ ARR chat functionality.
+        """
+        await self._handle_main_mode(websocket)
+    
     async def _handle_main_mode(self, websocket: WebSocket):
         """
         Handle main WebSocket mode - full business logic and Golden Path.
@@ -550,8 +655,8 @@ class WebSocketSSOTRouter:
         - Agent orchestration and tool execution
         - Emergency fallback patterns
         """
-        connection_id = f"main_{uuid.uuid4().hex[:8]}"
-        preliminary_connection_id = f"prelim_{uuid.uuid4().hex[:8]}"
+        connection_id = f"main_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
+        preliminary_connection_id = f"prelim_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
         user_context = None
         ws_manager = None
         
@@ -840,7 +945,7 @@ class WebSocketSSOTRouter:
         - Request-scoped context isolation
         - Health monitoring per user
         """
-        connection_id = f"factory_{uuid.uuid4().hex[:8]}"
+        connection_id = f"factory_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
         user_context = None
         websocket_manager = None
         
@@ -940,7 +1045,7 @@ class WebSocketSSOTRouter:
         - Automatic resource cleanup on disconnect
         - Comprehensive audit logging
         """
-        connection_id = f"isolated_{uuid.uuid4().hex[:8]}"
+        connection_id = f"isolated_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
         user_context = None
         connection_scoped_manager = None
         
@@ -995,9 +1100,9 @@ class WebSocketSSOTRouter:
             user_context = UserExecutionContext(
                 user_id=user_id,
                 thread_id=thread_id,
-                request_id=f"isolated_req_{uuid.uuid4().hex[:8]}",
-                websocket_connection_id=connection_id,
-                run_id=f"isolated_run_{uuid.uuid4().hex[:8]}"
+                request_id=f"isolated_req_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}",
+                websocket_client_id=connection_id,
+                run_id=f"isolated_run_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
             )
             
             # Step 4: Create connection-scoped manager (no shared state)
@@ -1049,7 +1154,7 @@ class WebSocketSSOTRouter:
         Simplified WebSocket handling for legacy clients that don't support
         the new modes but still need basic connectivity and messaging.
         """
-        connection_id = f"legacy_{uuid.uuid4().hex[:8]}"
+        connection_id = f"legacy_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
         
         try:
             logger.info(f"[LEGACY MODE] Starting legacy connection {connection_id}")
@@ -1097,31 +1202,16 @@ class WebSocketSSOTRouter:
             await self._cleanup_connection(websocket, None, None, "legacy")
     
     async def _create_websocket_manager(self, user_context):
-        """Create WebSocket manager with emergency fallback."""
-        try:
-            # SSOT MIGRATION: Direct WebSocketManager instantiation replaces factory pattern
-            manager = await get_websocket_manager(user_context)
-            return manager
-        except Exception as e:
-            logger.error(f"WebSocket manager creation failed: {e}")
-            return self._create_emergency_websocket_manager(user_context)
+        """Create WebSocket manager using SSOT factory pattern.
+
+        PHASE 1 FIX: Removed emergency fallback since circular reference issue is resolved.
+        The proper factory pattern now works correctly with SSOT authorization tokens.
+        """
+        # SSOT MIGRATION: Use proper factory pattern from websocket_manager.py
+        manager = await get_websocket_manager(user_context)
+        logger.info(f"WebSocket manager created successfully for user {getattr(user_context, 'user_id', 'unknown')}")
+        return manager
     
-    def _create_emergency_websocket_manager(self, user_context):
-        """Create emergency WebSocket manager for graceful degradation."""
-        logger.warning("Creating emergency WebSocket manager")
-        
-        class EmergencyWebSocketManager:
-            def __init__(self, user_context):
-                self.user_context = user_context
-                self.connections = {}
-            
-            async def send_message(self, user_id: str, message: Dict[str, Any]):
-                logger.info(f"Emergency manager: message to {user_id[:8]}")
-                
-            async def remove_connection(self, connection_id: str):
-                logger.info(f"Emergency manager: removing connection {connection_id}")
-        
-        return EmergencyWebSocketManager(user_context)
     
     def _validate_websocket_component_health(self, user_context) -> Dict[str, Any]:
         """Validate health of WebSocket components."""
@@ -1151,12 +1241,12 @@ class WebSocketSSOTRouter:
                 # Fix: create_agent_websocket_bridge is synchronous, not async
                 agent_bridge = create_agent_websocket_bridge(user_context)
                 
-                # Register handler with router
-                async def agent_handler(user_id: str, websocket: WebSocket, message: Dict[str, Any]):
-                    return await agent_bridge.handle_message(message)
+                # CRITICAL FIX: Create proper handler class implementing MessageHandler protocol
+                # BUG WAS: Raw async function lacking 'can_handle' method caused routing failures
+                handler = AgentBridgeHandler(agent_bridge, user_context)
                 
-                message_router.add_handler(agent_handler)
-                logger.info("Agent handlers registered successfully")
+                message_router.add_handler(handler)
+                logger.info(f"Agent handlers registered successfully: {handler.__class__.__name__}")
         except Exception as e:
             logger.error(f"Agent handler setup failed: {e}")
     
@@ -1200,8 +1290,9 @@ class WebSocketSSOTRouter:
         
         try:
             while True:
-                # CRITICAL: Check connection state before each message receive
-                if not is_websocket_connected(websocket):
+                # CRITICAL: Check connection state and handshake completion before each message receive
+                # FIX FOR ISSUE #888: Use comprehensive validation to prevent "Need to call 'accept' first" errors
+                if not is_websocket_connected_and_ready(websocket, connection_id):
                     # CRITICAL: Log disconnection with context
                     disconnect_context = {
                         "connection_id": connection_id,
@@ -1409,13 +1500,15 @@ class WebSocketSSOTRouter:
         
         try:
             while True:
-                if not is_websocket_connected(websocket):
+                # FIX FOR ISSUE #888: Use comprehensive validation with user context connection ID
+                connection_id = getattr(user_context, 'websocket_connection_id', None)
+                if not is_websocket_connected_and_ready(websocket, connection_id):
                     break
-                
+
                 try:
                     raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=websocket_timeout)
                     message_data = json.loads(raw_message)
-                    
+
                     # Factory pattern: isolated processing per user
                     response = {
                         "type": "factory_response",
@@ -1449,10 +1542,12 @@ class WebSocketSSOTRouter:
         websocket_timeout = get_websocket_recv_timeout()
         
         logger.info(f"[ISOLATED MODE] Starting zero-leakage message loop for user {user_id[:8]} (websocket_timeout: {websocket_timeout}s)")
-        
+
         try:
             while True:
-                if not is_websocket_connected(websocket):
+                # FIX FOR ISSUE #888: Use comprehensive validation with user context connection ID
+                connection_id = getattr(user_context, 'websocket_connection_id', None)
+                if not is_websocket_connected_and_ready(websocket, connection_id):
                     break
                 
                 try:
@@ -1495,10 +1590,11 @@ class WebSocketSSOTRouter:
         websocket_timeout = get_websocket_recv_timeout()
         
         logger.info(f"[LEGACY MODE] Starting compatibility message loop {connection_id} (websocket_timeout: {websocket_timeout}s)")
-        
+
         try:
             while True:
-                if not is_websocket_connected(websocket):
+                # FIX FOR ISSUE #888: Use comprehensive validation to prevent accept race conditions
+                if not is_websocket_connected_and_ready(websocket, connection_id):
                     break
                 
                 try:
@@ -1577,8 +1673,6 @@ class WebSocketSSOTRouter:
     async def websocket_health_check(self):
         """WebSocket health check endpoint."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            
             # SSOT PATTERN: Direct manager access for health checks (no user context required)
             manager = await get_websocket_manager(user_context=None)
             health_status = {
@@ -1609,8 +1703,6 @@ class WebSocketSSOTRouter:
     async def get_websocket_config(self):
         """Get WebSocket configuration."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            
             # SSOT PATTERN: Direct manager access for configuration endpoint
             manager = await get_websocket_manager(user_context=None)
             
@@ -1636,8 +1728,6 @@ class WebSocketSSOTRouter:
     async def websocket_detailed_stats(self):
         """Get detailed WebSocket statistics."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            
             # SSOT PATTERN: Direct manager access for statistics endpoint
             manager = await get_websocket_manager(user_context=None)
             message_router = get_message_router()
@@ -1750,7 +1840,7 @@ class WebSocketSSOTRouter:
     async def websocket_api_create(self):
         """REST API: WebSocket session preparation (POST /api/v1/websocket)"""
         try:
-            session_id = f"ws_session_{uuid.uuid4().hex[:8]}"
+            session_id = f"ws_session_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
             response_data = {
                 "session_id": session_id,
                 "websocket_url": "/ws", 

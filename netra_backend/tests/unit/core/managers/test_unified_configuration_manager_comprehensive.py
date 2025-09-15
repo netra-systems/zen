@@ -49,18 +49,17 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import Mock, patch
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
-from netra_backend.app.core.managers.unified_configuration_manager import (
-    UnifiedConfigurationManager,
-    ConfigurationManagerFactory,
-    ConfigurationScope,
-    ConfigurationSource,
-    ConfigurationStatus,
-    ConfigurationEntry,
-    ConfigurationValidationResult,
-    get_configuration_manager,
-    get_dashboard_config_manager,
-    get_data_agent_config_manager,
-    get_llm_config_manager
+from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
 )
 
 
@@ -589,7 +588,7 @@ class TestValidationAndErrorHandling:
         assert len(result.critical_errors) == 0
         
         # Test validation failure - create entry with invalid value
-        from netra_backend.app.core.managers.unified_configuration_manager import ConfigurationEntry, ConfigurationSource, ConfigurationScope
+        from netra_backend.app.core.configuration.base import get_config, ConfigurationSource, ConfigurationScope
         invalid_entry = ConfigurationEntry(
             key="database.pool_size",
             value=150,  # Exceeds max_value:100
@@ -1506,7 +1505,7 @@ class TestStatusAndMonitoring:
             pass  # Expected validation failure
         
         # Set the value directly to bypass validation for testing status report
-        from netra_backend.app.core.managers.unified_configuration_manager import ConfigurationEntry, ConfigurationSource, ConfigurationScope
+        from netra_backend.app.core.configuration.base import get_config, ConfigurationSource, ConfigurationScope
         entry = ConfigurationEntry(
             key="status.failing",
             value=50,  # Invalid value

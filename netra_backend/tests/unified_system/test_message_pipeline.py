@@ -27,7 +27,7 @@ from typing import Any, Dict, Optional
 
 import pytest
 
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.db.postgres import get_async_db
 
 from netra_backend.app.logging_config import central_logger

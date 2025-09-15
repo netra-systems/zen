@@ -36,7 +36,7 @@
     # REMOVED_SYNTAX_ERROR: from datetime import datetime
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketConnection
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketConnection
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient

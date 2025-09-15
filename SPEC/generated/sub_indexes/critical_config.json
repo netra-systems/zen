@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "critical_config",
-    "generated_at": "2025-09-12T12:31:30.098047",
-    "root_directory": "C:\\GitHub\\netra-apex",
+    "generated_at": "2025-09-14T16:01:13.245673",
+    "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 11
   },
   "literals": {
@@ -11,16 +11,16 @@
       "value": "DATABASE_URL",
       "category": "critical_config",
       "locations": [
+        "netra_backend/app/core/configuration/compatibility_shim.py:213",
+        "netra_backend/app/core/configuration/compatibility_shim.py:233",
+        "netra_backend/app/core/configuration/compatibility_shim.py:233",
         "netra_backend/app/core/configuration/environment_detector.py:297",
-        "netra_backend/app/core/exceptions/error_policy.py:118",
-        "netra_backend/app/core/exceptions/error_policy.py:133",
+        "netra_backend/app/core/exceptions/error_policy.py:161",
+        "netra_backend/app/core/exceptions/error_policy.py:180",
         "netra_backend/app/infrastructure/drift_detection.py:138",
         "netra_backend/app/infrastructure/drift_detection.py:309",
         "netra_backend/app/infrastructure/monitoring.py:195",
-        "netra_backend/app/services/configuration_service.py:38",
-        "netra_backend/app/services/configuration_service.py:59",
-        "netra_backend/app/services/configuration_service.py:70",
-        "netra_backend/app/startup_module.py:1027"
+        "netra_backend/app/services/configuration_service.py:66"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     },
@@ -32,11 +32,11 @@
         "netra_backend/app/auth_integration/auth_permissiveness.py:156",
         "netra_backend/app/auth_integration/auth_permissiveness.py:287",
         "netra_backend/app/auth_integration/auth_permissiveness.py:441",
-        "netra_backend/app/auth_integration/auth_permissiveness.py:485",
-        "netra_backend/app/auth_integration/auth_permissiveness.py:533",
-        "netra_backend/app/auth_integration/auth_permissiveness.py:606",
-        "netra_backend/app/auth_integration/auth_permissiveness.py:689",
-        "netra_backend/app/auth_integration/auth_permissiveness.py:714",
+        "netra_backend/app/auth_integration/auth_permissiveness.py:488",
+        "netra_backend/app/auth_integration/auth_permissiveness.py:536",
+        "netra_backend/app/auth_integration/auth_permissiveness.py:615",
+        "netra_backend/app/auth_integration/auth_permissiveness.py:698",
+        "netra_backend/app/auth_integration/auth_permissiveness.py:723",
         "netra_backend/app/clients/auth_client_core.py:318"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
@@ -48,8 +48,8 @@
         "netra_backend/app/core/auth_startup_validator.py:294",
         "netra_backend/app/core/config_dependencies.py:567",
         "netra_backend/app/core/config_dependencies.py:699",
-        "netra_backend/app/schemas/config.py:991",
-        "netra_backend/app/schemas/config.py:1182",
+        "netra_backend/app/schemas/config.py:1129",
+        "netra_backend/app/schemas/config.py:1321",
         "auth_service/auth_core/config.py:128",
         "scripts/audit_staging_oauth_secrets.py:106",
         "scripts/demonstrate_config_protection.py:94",
@@ -65,8 +65,8 @@
         "netra_backend/app/core/auth_startup_validator.py:295",
         "netra_backend/app/core/config_dependencies.py:692",
         "netra_backend/app/core/config_dependencies.py:573",
-        "netra_backend/app/schemas/config.py:992",
-        "netra_backend/app/schemas/config.py:1185",
+        "netra_backend/app/schemas/config.py:1130",
+        "netra_backend/app/schemas/config.py:1324",
         "auth_service/auth_core/config.py:140",
         "scripts/audit_staging_oauth_secrets.py:107",
         "scripts/environment_validator.py:286",
@@ -86,9 +86,9 @@
         "netra_backend/app/core/config_dependencies.py:66",
         "netra_backend/app/core/config_dependencies.py:72",
         "netra_backend/app/core/config_dependencies.py:405",
-        "netra_backend/app/core/configuration/base.py:139",
-        "netra_backend/app/core/configuration/staging_validator.py:38",
-        "netra_backend/app/core/configuration/staging_validator.py:219"
+        "netra_backend/app/core/configuration/base.py:149",
+        "netra_backend/app/core/configuration/base.py:256",
+        "netra_backend/app/core/configuration/staging_validator.py:38"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     },
@@ -100,12 +100,12 @@
         "scripts/deploy_to_gcp_actual.py:299",
         "scripts/deploy_to_gcp_actual.py:375",
         "scripts/scan_string_literals.py:61",
+        "scripts/staging_demo_setup.py:84",
         "scripts/validate_staging_urls.py:67",
         "scripts/validate_staging_urls.py:332",
         "scripts/verify_cold_start.py:142",
-        "shared/isolated_environment.py:1671",
-        "shared/isolated_environment.py:1700",
-        "shared/isolated_environment.py:1760"
+        "shared/isolated_environment.py:1770",
+        "shared/isolated_environment.py:1799"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     },
@@ -119,9 +119,9 @@
         "scripts/scan_string_literals.py:63",
         "scripts/validate_staging_urls.py:76",
         "scripts/validate_staging_urls.py:333",
-        "shared/isolated_environment.py:1673",
-        "shared/isolated_environment.py:1702",
-        "shared/isolated_environment.py:1792"
+        "shared/isolated_environment.py:1772",
+        "shared/isolated_environment.py:1801",
+        "shared/isolated_environment.py:1891"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     },
@@ -132,8 +132,9 @@
         "scripts/deploy_to_gcp_actual.py:178",
         "scripts/deploy_to_gcp_actual.py:298",
         "scripts/scan_string_literals.py:64",
-        "shared/isolated_environment.py:1674",
-        "shared/isolated_environment.py:1793"
+        "scripts/staging_demo_setup.py:86",
+        "shared/isolated_environment.py:1773",
+        "shared/isolated_environment.py:1892"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     },
@@ -162,7 +163,7 @@
         "scripts/deploy_to_gcp_actual.py:301",
         "scripts/deploy_to_gcp_actual.py:378",
         "scripts/scan_string_literals.py:62",
-        "scripts/validate_configuration_drift_monitoring.py:191"
+        "scripts/staging_demo_setup.py:85"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     },
@@ -171,15 +172,15 @@
       "category": "critical_config",
       "locations": [
         "netra_backend/app/api/health_checks.py:175",
-        "netra_backend/app/api/health_checks.py:509",
+        "netra_backend/app/api/health_checks.py:511",
         "netra_backend/app/core/auth_constants.py:124",
         "netra_backend/app/core/config_dependencies.py:340",
+        "netra_backend/app/core/configuration/base.py:260",
+        "netra_backend/app/core/configuration/compatibility_shim.py:220",
+        "netra_backend/app/core/configuration/compatibility_shim.py:238",
         "netra_backend/app/core/configuration/environment_detector.py:265",
         "netra_backend/app/core/configuration/environment_detector.py:299",
-        "netra_backend/app/core/configuration/environment_detector.py:299",
-        "netra_backend/app/core/configuration/staging_validator.py:48",
-        "netra_backend/app/core/configuration/staging_validator.py:174",
-        "netra_backend/app/core/configuration_validator.py:585"
+        "netra_backend/app/core/configuration/environment_detector.py:299"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     }

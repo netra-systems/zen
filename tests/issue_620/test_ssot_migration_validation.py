@@ -6,6 +6,12 @@ These tests validate that the migration resolves all SSOT violations.
 Business Impact: Validates $500K+ ARR security fixes and user isolation improvements.
 """
 
+# Enable direct Python execution by adding project root to sys.path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
+sys.path.insert(0, str(PROJECT_ROOT))
+
 import asyncio
 import inspect
 import time
@@ -131,7 +137,7 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
                 mock_registry = Mock()
                 mock_websocket_bridge = Mock()
                 
-                engine = ExecutionEngine(mock_registry, mock_websocket_bridge, context)
+                engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, context)
                 engines.append(engine)
         
         logger.info(f"Created {len(engines)} isolated engine instances")
@@ -237,7 +243,7 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # If this import works, test that it delegates properly
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
             
             # Should either be UserExecutionEngine or delegate to it
             if hasattr(engine, '_delegation_active'):
@@ -339,7 +345,7 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
             
             mock_registry = Mock()
             mock_websocket_bridge = Mock()
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
         
         # Test 1: Basic agent execution
         agent_context = AgentExecutionContext(
@@ -347,8 +353,7 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input="Test functionality equivalence",
-            metadata={"test_type": "functionality_validation"}
+            metadata={"test_type": "functionality_validation", "user_input": "Test functionality equivalence"}
         )
         
         # Mock successful execution
@@ -356,7 +361,7 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
             expected_result = AgentExecutionResult(
                 success=True,
                 agent_name="functionality_test_agent",
-                execution_time=1.5,
+                duration=1.5,  # Changed from execution_time to duration
                 data={
                     "response": "Functionality test successful",
                     "user_isolation": True,
@@ -513,11 +518,11 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input=f"Isolation test with {test_data}",
             metadata={
                 "test_data": test_data,
                 "user_metadata": user_context.audit_metadata,
-                "isolation_test": True
+                "isolation_test": True,
+                "user_input": f"Isolation test with {test_data}"  # moved to metadata
             }
         )
         
@@ -527,7 +532,7 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
                 mock_result = AgentExecutionResult(
                     success=True,
                     agent_name="isolation_validation_agent",
-                    execution_time=0.8,
+                    duration=0.8,  # Changed from execution_time to duration
                     data={
                         "response": f"Processed {test_data}",
                         "user_id": user_context.user_id,
@@ -579,9 +584,9 @@ class TestUserExecutionEngineSpecific(SSotAsyncTestCase):
             
             # Test proper constructor
             engine = UserExecutionEngine(
-                context=user_context,
-                agent_factory=mock_agent_factory,
-                websocket_emitter=mock_websocket_emitter
+                user_context,
+                mock_agent_factory,
+                mock_websocket_emitter
             )
             
             # Validate initialization

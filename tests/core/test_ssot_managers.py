@@ -29,8 +29,17 @@ from netra_backend.app.core.managers.unified_lifecycle_manager import (
     UnifiedLifecycleManager,
     LifecyclePhase
 )
-from netra_backend.app.core.managers.unified_configuration_manager import (
-    UnifiedConfigurationManager
+from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
 )
 from netra_backend.app.core.managers.unified_state_manager import (
     UnifiedStateManager

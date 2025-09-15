@@ -21,7 +21,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.routes.health import health, health_no_slash
 
 
-class TestWebSocketConnection:
+class MockWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):

@@ -425,7 +425,7 @@ class MockExecutionEngineFactory:
         mock_registry = MockExecutionEngineFactory.create_mock_agent_registry()
         mock_bridge = MockExecutionEngineFactory.create_mock_websocket_bridge()
         
-        engine = ExecutionEngine(mock_registry, mock_bridge, user_context)
+        engine = UserExecutionEngine(mock_registry, mock_bridge, user_context)
         return engine
 
 
@@ -473,7 +473,7 @@ class TestDataGenerator:
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input=user_input,
+            # user_input moved to metadata: user_input,
             audit_metadata=default_metadata
         )
     

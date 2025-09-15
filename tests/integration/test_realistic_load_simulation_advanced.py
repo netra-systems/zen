@@ -215,7 +215,7 @@
     # REMOVED_SYNTAX_ERROR: self.auth_url = auth_url
     # REMOVED_SYNTAX_ERROR: self.websocket_url = "formatted_string"
     # REMOVED_SYNTAX_ERROR: self.auth_token: Optional[str] = None
-    # REMOVED_SYNTAX_ERROR: self.websocket: Optional[websockets.WebSocketServerProtocol] = None
+    # REMOVED_SYNTAX_ERROR: self.websocket: Optional[websockets.ServerConnection] = None
     # REMOVED_SYNTAX_ERROR: self.thread_id: Optional[str] = None
     # REMOVED_SYNTAX_ERROR: self.message_queries = [ )
     # REMOVED_SYNTAX_ERROR: "Analyze current system performance and provide optimization recommendations",

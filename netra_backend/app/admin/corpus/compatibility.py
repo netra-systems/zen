@@ -61,7 +61,7 @@ class CorpusAdminSubAgent(BaseAgent):
             user_id="legacy_user",
             request_id="legacy_request",
             thread_id="legacy_thread",
-            session_id="legacy_session"
+            run_id="legacy_run"  # ISSUE #556 FIX: Add required run_id parameter
         )
         self._unified_admin = UnifiedCorpusAdmin(self._context)
     
@@ -128,7 +128,7 @@ class CorpusOperationHandler:
             user_id="legacy_handler",
             request_id="legacy_handler_request",
             thread_id="legacy_handler_thread",
-            session_id="legacy_handler_session"
+            run_id="legacy_handler_run"  # ISSUE #556 FIX: Add required run_id parameter
         )
         self._unified_admin = UnifiedCorpusAdmin(self._context)
     
@@ -149,7 +149,7 @@ class CorpusCRUDOperations:
             user_id="legacy_crud",
             request_id="legacy_crud_request",
             thread_id="legacy_crud_thread",
-            session_id="legacy_crud_session"
+            run_id="legacy_crud_run"  # ISSUE #556 FIX: Add required run_id parameter
         )
         self._unified_admin = UnifiedCorpusAdmin(self._context)
     

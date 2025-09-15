@@ -14,6 +14,7 @@ Usage:
     from netra_backend.app.schemas.agent_models import DeepAgentState, AgentResult, AgentMetadata
 """
 
+import copy
 import uuid
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
@@ -119,9 +120,12 @@ class AgentResult(BaseModel):
 class DeepAgentState(BaseModel):
     """Unified Deep Agent State - single source of truth (replaces old AgentState)."""
     user_request: str = "default_request"  # Default for backward compatibility
+    user_prompt: str = "default_request"   # SSOT MIGRATION FIX: Interface alignment for execution engines (Golden Path)
     chat_thread_id: Optional[str] = None
     user_id: Optional[str] = None
-    
+    run_id: Optional[str] = None           # SSOT MIGRATION FIX: Unique execution run identifier
+    agent_input: Optional[Dict[str, Any]] = None  # SSOT MIGRATION FIX: Agent configuration parameters
+
     # Strongly typed result fields with proper type unions
     triage_result: Optional["TriageResult"] = None
     data_result: Optional[Union[DataAnalysisResponse, AnomalyDetectionResponse]] = None
@@ -131,12 +135,16 @@ class DeepAgentState(BaseModel):
     synthetic_data_result: Optional[SyntheticDataResult] = None
     supply_research_result: Optional[Any] = None # Will be strongly typed when SupplyResearchResult is moved to schemas
     corpus_admin_result: Optional[Any] = None
-    
+    corpus_admin_error: Optional[str] = None  # SSOT MIGRATION FIX: Corpus admin error handling
+
     # Execution tracking
     final_report: Optional[str] = None
     step_count: int = 0
+    current_step: int = 0  # Current pipeline step number for execution tracking
+    messages: List[Dict[str, Any]] = Field(default_factory=list)  # SSOT MIGRATION FIX: E2E test compatibility
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
     quality_metrics: Dict[str, Any] = Field(default_factory=dict)
+    context_tracking: Dict[str, Any] = Field(default_factory=dict)  # SSOT MIGRATION FIX: E2E test compatibility
     
     # PHASE 1 BACKWARDS COMPATIBILITY FIX: Add agent_context for UserExecutionContext compatibility
     # This field provides backwards compatibility with execution code that expects agent_context
@@ -146,10 +154,38 @@ class DeepAgentState(BaseModel):
     @field_validator('metadata', mode='before')
     @classmethod
     def validate_metadata(cls, v: Union[Dict, AgentMetadata]) -> AgentMetadata:
-        """Convert dict metadata to AgentMetadata object."""
+        """Convert dict metadata to AgentMetadata object with deep copy protection.
+        
+        SECURITY FIX: Issue #953 - Prevents shared reference vulnerabilities by
+        creating deep copies of metadata objects to ensure user isolation.
+        """
         if isinstance(v, dict):
-            return AgentMetadata(**v)
-        return v if isinstance(v, AgentMetadata) else AgentMetadata()
+            # Deep copy the dictionary to prevent shared references
+            safe_dict = copy.deepcopy(v)
+            return AgentMetadata(**safe_dict)
+        elif isinstance(v, AgentMetadata):
+            # Deep copy the AgentMetadata object to prevent shared references
+            return copy.deepcopy(v)
+        else:
+            return AgentMetadata()
+    
+    @field_validator('agent_context', mode='before')
+    @classmethod
+    def validate_agent_context(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+        """Deep copy agent_context to prevent cross-user contamination.
+        
+        SECURITY FIX: Issue #953 - Critical security vulnerability fix.
+        Prevents shared reference vulnerabilities by creating deep copies of
+        agent_context dictionaries to ensure complete user isolation.
+        
+        This is the primary fix for the cross-user data contamination vulnerability
+        where multiple users could access each other's sensitive data through
+        shared dictionary references.
+        """
+        if v is None:
+            return {}
+        # Deep copy the entire context dictionary to prevent shared references
+        return copy.deepcopy(v)
     
     @field_validator('step_count')
     @classmethod
@@ -160,7 +196,81 @@ class DeepAgentState(BaseModel):
         if v > 10000:  # Reasonable upper bound
             raise ValueError('Step count exceeds maximum allowed value (10000)')
         return v
-    
+
+    @field_validator('current_step')
+    @classmethod
+    def validate_current_step(cls, v: int) -> int:
+        """Validate current step is within reasonable bounds."""
+        if v < 0:
+            raise ValueError('Current step must be non-negative')
+        if v > 10000:  # Reasonable upper bound
+            raise ValueError('Current step exceeds maximum allowed value (10000)')
+        return v
+
+    @property
+    def thread_id(self) -> Optional[str]:
+        """SSOT INTERFACE COMPATIBILITY: Property to access chat_thread_id as thread_id for backward compatibility.
+
+        This property ensures the SSOT version of DeepAgentState maintains interface compatibility
+        with the deprecated version, preventing 'object has no attribute thread_id' runtime errors.
+
+        Returns:
+            Optional[str]: The chat_thread_id value accessed via thread_id property
+        """
+        return self.chat_thread_id
+
+    @thread_id.setter
+    def thread_id(self, value: Optional[str]) -> None:
+        """SSOT INTERFACE COMPATIBILITY: Setter to update chat_thread_id via thread_id for backward compatibility.
+
+        This setter ensures the SSOT version of DeepAgentState maintains interface compatibility
+        with the deprecated version, allowing thread_id assignment to update chat_thread_id.
+
+        Args:
+            value: The thread ID value to set
+        """
+        self.chat_thread_id = value
+
+    def __init__(self, **data):
+        """Initialize DeepAgentState with SSOT interface compatibility and security protection.
+
+        SSOT INTERFACE COMPATIBILITY: This constructor ensures compatibility with the deprecated
+        version by handling thread_id parameter mapping and maintaining backward compatibility
+        for existing code that passes thread_id instead of chat_thread_id.
+
+        SECURITY FIX: Issue #953 - Implements deep copy protection for mutable objects
+        to prevent shared reference vulnerabilities and ensure user isolation.
+
+        Args:
+            **data: Initialization data, including potential thread_id parameter
+        """
+        # SSOT COMPATIBILITY: Handle thread_id backward compatibility
+        # Map thread_id to chat_thread_id for compatibility with deprecated interface
+        if 'thread_id' in data and 'chat_thread_id' not in data:
+            data['chat_thread_id'] = data.pop('thread_id')
+        elif 'thread_id' in data and 'chat_thread_id' in data:
+            # If both provided, use thread_id as the canonical value
+            data['chat_thread_id'] = data.pop('thread_id')
+
+        # SSOT COMPATIBILITY: Synchronize user_request and user_prompt fields for backward compatibility
+        if 'user_prompt' in data and 'user_request' not in data:
+            data['user_request'] = data['user_prompt']
+        elif 'user_request' in data and 'user_prompt' not in data:
+            data['user_prompt'] = data['user_request']
+        elif 'user_prompt' in data and 'user_request' in data:
+            # If both are provided, prefer user_prompt as it's the expected interface
+            data['user_request'] = data['user_prompt']
+
+        # SECURITY FIX: Deep copy protection for mutable objects to prevent shared references
+        # This ensures user isolation by preventing cross-user data contamination
+        mutable_fields = ['messages', 'quality_metrics', 'context_tracking', 'agent_context', 'agent_input']
+        for field_name in mutable_fields:
+            if field_name in data and data[field_name] is not None:
+                # Deep copy mutable objects to ensure no shared references
+                data[field_name] = copy.deepcopy(data[field_name])
+
+        super().__init__(**data)
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert state to dictionary."""
         return self.model_dump(exclude_none=True, mode='json')
@@ -310,6 +420,38 @@ class DeepAgentState(BaseModel):
         """Create merge data dictionary."""
         step_count = max(self.step_count, other_state.step_count)
         return {'step_count': step_count, 'metadata': metadata, **results}
+
+    def create_child_context(
+        self,
+        operation_name: str,
+        additional_context: Optional[Dict[str, Any]] = None
+    ) -> 'DeepAgentState':
+        """COMPATIBILITY METHOD: Create child context for UserExecutionContext migration.
+        
+        Provides backward compatibility during DeepAgentState → UserExecutionContext transition.
+        Creates new DeepAgentState instance with enhanced context for sub-operations.
+        
+        Args:
+            operation_name: Name of the sub-operation
+            additional_context: Additional context data (maintains existing parameter name)
+            
+        Returns:
+            New DeepAgentState instance with child context data
+        """
+        enhanced_agent_context = self.agent_context.copy()
+        if additional_context:
+            enhanced_agent_context.update(additional_context)
+        
+        enhanced_agent_context.update({
+            'parent_operation': self.agent_context.get('operation_name', 'root'),
+            'operation_name': operation_name,
+            'operation_depth': self.agent_context.get('operation_depth', 0) + 1
+        })
+        
+        return self.copy_with_updates(
+            agent_context=enhanced_agent_context,
+            step_count=self.step_count + 1
+        )
 
 
 # Agent Execution Metrics

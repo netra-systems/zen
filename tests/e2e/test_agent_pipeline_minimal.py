@@ -28,11 +28,11 @@ Tests just the supervisor agent creation without complex dependencies.
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 # Add the project root to Python path
 project_root = Path(__file__).parent.parent.parent
@@ -41,7 +41,7 @@ sys.path.insert(0, str(project_root))
 import asyncio
 import pytest
 
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.config import get_config

@@ -13,8 +13,9 @@ import logging
 from collections import defaultdict
 import time
 
-from clickhouse_driver import Client
+from netra_backend.app.db.clickhouse import get_clickhouse_client, ClickHouseClient
 from clickhouse_driver.errors import ServerException
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +102,7 @@ class ClickHouseTraceWriter:
         self._buffer_lock = asyncio.Lock()
         
         # Client connection
-        self._client: Optional[Client] = None
+        self._client: Optional[ClickHouseClient] = None
         
         # Background flush task
         self._flush_task: Optional[asyncio.Task] = None
@@ -144,17 +145,10 @@ class ClickHouseTraceWriter:
         
         logger.info(f"ClickHouse trace writer stopped. Stats: {self._stats}")
     
-    def _get_client(self) -> Client:
+    def _get_client(self) -> ClickHouseClient:
         """Get or create ClickHouse client."""
         if self._client is None:
-            self._client = Client(
-                host=self.host,
-                port=self.port,
-                user=self.user,
-                password=self.password,
-                database=self.database,
-                **self.client_kwargs
-            )
+            self._client = get_clickhouse_client()
         return self._client
     
     # Core write methods for each table
@@ -194,7 +188,7 @@ class ClickHouseTraceWriter:
         record = {
             'trace_id': trace_id,
             'execution_id': execution_id,
-            'correlation_id': correlation_id or str(uuid.uuid4()),
+            'correlation_id': correlation_id or UnifiedIDManager().generate_id(IDType.TRACE, prefix="corr"),
             'user_id': user_id,
             'organization_id': organization_id or 'default',
             'agent_type': agent_type,
@@ -249,11 +243,12 @@ class ClickHouseTraceWriter:
         elif isinstance(event_type, str):
             event_type = EventType[event_type.upper()].value
         
+        id_manager = UnifiedIDManager()
         record = {
-            'event_id': str(uuid.uuid4()),
+            'event_id': id_manager.generate_id(IDType.TRACE, prefix="event"),
             'trace_id': trace_id,
             'execution_id': execution_id,
-            'correlation_id': correlation_id or str(uuid.uuid4()),
+            'correlation_id': correlation_id or id_manager.generate_id(IDType.TRACE, prefix="corr_evt"),
             'user_id': user_id,
             'event_type': event_type,
             'event_name': event_name,
@@ -298,7 +293,7 @@ class ClickHouseTraceWriter:
             metric_type = MetricType[metric_type.upper()].value
         
         record = {
-            'metric_id': str(uuid.uuid4()),
+            'metric_id': UnifiedIDManager().generate_id(IDType.METRIC, prefix="metric"),
             'trace_id': trace_id,
             'execution_id': execution_id,
             'user_id': user_id,
@@ -350,7 +345,7 @@ class ClickHouseTraceWriter:
             overlap_duration_ms = abs(int((child_start_time - parent_start_time).total_seconds() * 1000))
         
         record = {
-            'correlation_id': str(uuid.uuid4()),
+            'correlation_id': UnifiedIDManager().generate_id(IDType.TRACE, prefix="corr_meta"),
             'parent_trace_id': parent_trace_id,
             'child_trace_id': child_trace_id,
             'relationship_type': relationship_type,
@@ -414,7 +409,7 @@ class ClickHouseTraceWriter:
         severity_value = severity_map.get(severity.lower(), 4)
         
         record = {
-            'error_id': str(uuid.uuid4()),
+            'error_id': UnifiedIDManager().generate_id(IDType.TRACE, prefix="error"),
             'trace_id': trace_id,
             'execution_id': execution_id,
             'user_id': user_id,
@@ -587,9 +582,10 @@ class TraceContext:
         self.agent_type = agent_type
         self.agent_name = agent_name
         
-        self.trace_id = str(uuid.uuid4())
-        self.execution_id = str(uuid.uuid4())
-        self.correlation_id = str(uuid.uuid4())
+        id_manager = UnifiedIDManager()
+        self.trace_id = id_manager.generate_id(IDType.TRACE, prefix="batch")
+        self.execution_id = id_manager.generate_id(IDType.EXECUTION, prefix="batch")
+        self.correlation_id = id_manager.generate_id(IDType.TRACE, prefix="batch_corr")
         
         self.start_time = None
         self.event_sequence = 0

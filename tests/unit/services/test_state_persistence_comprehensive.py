@@ -40,7 +40,7 @@ from netra_backend.app.schemas.agent_state import (
     RecoveryType,
     SerializationFormat
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
 class TestStatePersistenceServiceCore:

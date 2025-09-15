@@ -28,7 +28,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Set, Any
 
 import websockets
-from websockets.exceptions import ConnectionClosedError
+from websockets import ConnectionClosedError
 
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
 from test_framework.ssot.base_test_case import SSotBaseTestCase

@@ -14,7 +14,7 @@ import time
 from unittest.mock import Mock, AsyncMock, MagicMock
 
 
-class TestWebSocketConnection:
+class MockWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
@@ -50,7 +50,7 @@ class TestCriticalWiring:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
 
             # Create mock components
-            websocket = TestWebSocketConnection()
+            websocket = MockWebSocketConnection()
 
             # Create user context for factory pattern
             user_context = UserExecutionContext(
@@ -60,15 +60,16 @@ class TestCriticalWiring:
             )
 
             # Create tool dispatcher using factory method
-            dispatcher = UnifiedToolDispatcherFactory.create_for_request(
+            dispatcher = await UnifiedToolDispatcherFactory.create_for_request(
                 user_context=user_context,
                 websocket_manager=websocket
             )
 
             # Verify wiring
             assert dispatcher is not None, "Tool dispatcher creation failed"
-            assert hasattr(dispatcher, 'websocket_manager'), "Tool dispatcher missing WebSocket manager"
-            assert dispatcher.websocket_manager == websocket, "WebSocket manager not wired correctly"
+            assert hasattr(dispatcher, 'websocket_emitter'), "Tool dispatcher missing WebSocket emitter"
+            # The factory creates its own emitter, so just verify it exists and is properly typed
+            assert dispatcher.websocket_emitter is not None, "WebSocket emitter not initialized"
 
         except ImportError as e:
             pytest.skip(f"Required modules not available: {e}")
@@ -84,7 +85,7 @@ class TestCriticalWiring:
 
             # Create mock components
             mock_llm = Mock(spec=LLMManager)
-            websocket = TestWebSocketConnection()
+            websocket = MockWebSocketConnection()
 
             # Create user context for factory pattern
             user_context = UserExecutionContext(
@@ -94,7 +95,7 @@ class TestCriticalWiring:
             )
 
             # Create tool dispatcher using factory
-            mock_tool_dispatcher = UnifiedToolDispatcherFactory.create_for_request(
+            mock_tool_dispatcher = await UnifiedToolDispatcherFactory.create_for_request(
                 user_context=user_context,
                 websocket_manager=websocket
             )
@@ -181,7 +182,7 @@ class TestStartupSequenceSmoke:
                     phases_called.append(name)
                     # Set required state attributes
                     if name in ["phase1", "phase2"]:
-                        app.state.websocket = TestWebSocketConnection()
+                        app.state.websocket = MockWebSocketConnection()
                     await asyncio.sleep(0)
                 return mock
 

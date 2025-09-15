@@ -22,7 +22,7 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 from netra_backend.app.schemas.config import StagingConfig
-from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from netra_backend.app.core.configuration.staging_validator import StagingConfigurationValidator, validate_staging_config
 
 

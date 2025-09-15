@@ -36,7 +36,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult,
     PipelineStep
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from shared.types.execution_types import StronglyTypedWebSocketEvent, WebSocketEventPriority
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 

@@ -38,7 +38,7 @@ from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngi
 
 # Modern infrastructure components
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 
 # Context and execution models
@@ -96,7 +96,7 @@ class TestWebSocketFailureIntegrationNoDocker(SSotAsyncTestCase):
         BUSINESS IMPACT: Complete loss of user visibility into agent operations.
         """
         # Arrange: Create agent execution chain with failing WebSocket
-        execution_engine = ExecutionEngine()
+        execution_engine = UserExecutionEngine()
         
         # Create failing WebSocket bridge
         failing_bridge = Mock(spec=AgentWebSocketBridge)
@@ -206,7 +206,7 @@ class TestWebSocketFailureIntegrationNoDocker(SSotAsyncTestCase):
         BUSINESS IMPACT: Users see partial progress updates, breaking UX continuity.
         """
         # Arrange: Create realistic multi-component execution scenario
-        execution_engine = ExecutionEngine()
+        execution_engine = UserExecutionEngine()
         tool_dispatcher = UnifiedToolDispatcher()
         
         # Set up failing WebSocket infrastructure across components
@@ -360,7 +360,7 @@ class TestWebSocketFailureIntegrationNoDocker(SSotAsyncTestCase):
             integration_failures['tool_completed'] = True
         
         # Test ExecutionEngine (uses old pattern)
-        execution_engine = ExecutionEngine()
+        execution_engine = UserExecutionEngine()
         failing_bridge = Mock(spec=AgentWebSocketBridge)
         failing_bridge.notify_agent_completed = AsyncMock(side_effect=Exception("Integration failure"))
         execution_engine.websocket_bridge = failing_bridge

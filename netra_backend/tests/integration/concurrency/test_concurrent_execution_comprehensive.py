@@ -25,10 +25,10 @@ from netra_backend.app.core.user_execution_context import UserExecutionContext
 from netra_backend.app.services.unified_authentication_service import UnifiedAuthenticationService
 from netra_backend.app.routes.utils.thread_creators import ThreadCreator
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuth
-from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.websocket_core.websocket_manager_factory import create_defensive_user_execution_context
+from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context
 from test_framework.ssot import AsyncBaseTestCase
 from shared.types import UserID, ThreadID, RunID, RequestID
 

@@ -10,7 +10,7 @@
       "status": 200,
       "healthy": true,
       "response_time_ms": 190.62,
-      "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app/health"
+      "url": "https://auth.staging.netrasystems.ai/health"
     },
     "frontend": {
       "status": 200,

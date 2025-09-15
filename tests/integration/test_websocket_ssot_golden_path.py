@@ -89,11 +89,15 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.golden_path
+@pytest.mark.no_docker
+@pytest.mark.integration
+@pytest.mark.business_critical
 class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
-        return UserExecutionContext.create_for_user(
+        return UserExecutionContext.from_request(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run"

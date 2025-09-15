@@ -9,27 +9,23 @@ from datetime import datetime
 import logging
 from pathlib import Path
 
-# Try to import ClickHouse driver, use no-op if not available
+# Import transaction error handling for specific error types
+from netra_backend.app.db.transaction_errors import (
+    TableCreationError, ColumnModificationError, IndexCreationError,
+    classify_error
+)
+
+# SSOT ClickHouse import and availability check
+from netra_backend.app.db.clickhouse import get_clickhouse_client, ClickHouseClient, CLICKHOUSE_AVAILABLE
 try:
-    from clickhouse_driver import Client
     from clickhouse_driver.errors import ServerException, ErrorCodes
-    CLICKHOUSE_AVAILABLE = True
 except (ImportError, ModuleNotFoundError):
-    CLICKHOUSE_AVAILABLE = False
-    # Create dummy classes for when ClickHouse is not available
-    class Client:
-        def __init__(self, *args, **kwargs):
-            pass
-        def execute(self, *args, **kwargs):
-            raise RuntimeError("ClickHouse driver not available")
-        def disconnect(self):
-            pass
-    
+    # Create dummy exception classes for when ClickHouse is not available
     class ServerException(Exception):
         def __init__(self, *args, **kwargs):
             super().__init__("ClickHouse driver not available")
             self.code = None
-    
+
     class ErrorCodes:
         TABLE_ALREADY_EXISTS = 57
         DATABASE_ALREADY_EXISTS = 81
@@ -77,19 +73,13 @@ class ClickHouseTraceSchema:
         self.password = password
         self.client_kwargs = kwargs
         
-        self._client: Optional[Client] = None
+        self._client: Optional[ClickHouseClient] = None
         self.migration_path = Path(__file__).parent.parent.parent / 'migrations' / 'clickhouse'
         
-    def _get_client(self) -> Client:
+    def _get_client(self) -> ClickHouseClient:
         """Get or create ClickHouse client."""
         if self._client is None:
-            self._client = Client(
-                host=self.host,
-                port=self.port,
-                user=self.user,
-                password=self.password,
-                **self.client_kwargs
-            )
+            self._client = get_clickhouse_client()
         return self._client
     
     async def create_tables(self) -> bool:
@@ -379,7 +369,7 @@ class ClickHouseTraceSchema:
         # Filter out empty statements
         return [s.strip() for s in statements if s.strip()]
     
-    async def _database_exists(self, client: Client) -> bool:
+    async def _database_exists(self, client: ClickHouseClient) -> bool:
         """Check if database exists."""
         try:
             result = await asyncio.get_event_loop().run_in_executor(
@@ -391,7 +381,7 @@ class ClickHouseTraceSchema:
         except Exception:
             return False
     
-    async def _table_exists(self, client: Client, table_name: str) -> bool:
+    async def _table_exists(self, client: ClickHouseClient, table_name: str) -> bool:
         """Check if table exists."""
         try:
             result = await asyncio.get_event_loop().run_in_executor(
@@ -406,7 +396,7 @@ class ClickHouseTraceSchema:
         except Exception:
             return False
     
-    async def _verify_table_structure(self, client: Client, table_name: str) -> bool:
+    async def _verify_table_structure(self, client: ClickHouseClient, table_name: str) -> bool:
         """Verify table has expected structure."""
         try:
             # Get column count
@@ -426,6 +416,249 @@ class ClickHouseTraceSchema:
         except Exception:
             return False
     
+    async def create_table(self, table_name: str, table_schema: str) -> bool:
+        """
+        Create a single table with specific error handling.
+        
+        Args:
+            table_name: Name of the table to create
+            table_schema: SQL schema definition for the table
+            
+        Returns:
+            True if table creation successful, False otherwise
+            
+        Raises:
+            TableCreationError: For table creation specific errors
+        """
+        try:
+            client = self._get_client()
+            await asyncio.get_event_loop().run_in_executor(
+                None, client.execute, table_schema
+            )
+            logger.info(f"Successfully created table {table_name}")
+            return True
+        except Exception as e:
+            # Classify the error for specific handling
+            classified_error = classify_error(e)
+            if isinstance(classified_error, TableCreationError):
+                logger.error(f"Table creation failed for {table_name}: {classified_error}")
+                raise TableCreationError(f"Failed to create table '{table_name}': {classified_error}") from e
+            else:
+                # Re-raise other classified errors
+                logger.error(f"Error creating table {table_name}: {classified_error}")
+                raise classified_error from e
+
+    async def modify_column(self, table_name: str, column_name: str, new_type: str) -> bool:
+        """
+        Modify a column in the specified table.
+        
+        Args:
+            table_name: Name of the table
+            column_name: Name of the column to modify
+            new_type: New column type
+            
+        Returns:
+            True if column modification successful, False otherwise
+            
+        Raises:
+            ColumnModificationError: For column modification specific errors
+        """
+        try:
+            client = self._get_client()
+            alter_query = f"ALTER TABLE {self.database}.{table_name} MODIFY COLUMN {column_name} {new_type}"
+            await asyncio.get_event_loop().run_in_executor(
+                None, client.execute, alter_query
+            )
+            logger.info(f"Successfully modified column {column_name} in {table_name}")
+            return True
+        except Exception as e:
+            # Classify the error for specific handling
+            classified_error = classify_error(e)
+            if isinstance(classified_error, ColumnModificationError):
+                logger.error(f"Column modification failed for {table_name}.{column_name}: {classified_error}")
+                raise ColumnModificationError(
+                    f"Failed to modify column '{column_name}' in table '{table_name}' "
+                    f"from existing type to '{new_type}': {classified_error}"
+                ) from e
+            else:
+                # Re-raise other classified errors
+                logger.error(f"Error modifying column {table_name}.{column_name}: {classified_error}")
+                raise classified_error from e
+
+    async def create_index(self, table_name: str, index_name: str, columns: List[str]) -> bool:
+        """
+        Create an index on the specified table.
+        
+        Args:
+            table_name: Name of the table
+            index_name: Name of the index to create
+            columns: List of column names for the index
+            
+        Returns:
+            True if index creation successful, False otherwise
+            
+        Raises:
+            IndexCreationError: For index creation specific errors
+        """
+        try:
+            client = self._get_client()
+            columns_str = ", ".join(columns)
+            index_query = f"ALTER TABLE {self.database}.{table_name} ADD INDEX {index_name} ({columns_str}) TYPE minmax GRANULARITY 1"
+            await asyncio.get_event_loop().run_in_executor(
+                None, client.execute, index_query
+            )
+            logger.info(f"Successfully created index {index_name} on {table_name}")
+            return True
+        except Exception as e:
+            # Classify the error for specific handling
+            classified_error = classify_error(e)
+            if isinstance(classified_error, IndexCreationError):
+                logger.error(f"Index creation failed for {table_name}.{index_name}: {classified_error}")
+                raise IndexCreationError(
+                    f"Failed to create index '{index_name}' on table '{table_name}' "
+                    f"with columns {columns}: {classified_error}"
+                ) from e
+            else:
+                # Re-raise other classified errors
+                logger.error(f"Error creating index {table_name}.{index_name}: {classified_error}")
+                raise classified_error from e
+
+    async def execute_migration(self, migration_name: str, migration_steps: List[str]) -> bool:
+        """
+        Execute a database migration with rollback context on failure.
+        
+        Args:
+            migration_name: Name of the migration
+            migration_steps: List of SQL statements to execute
+            
+        Returns:
+            True if migration successful, False otherwise
+            
+        Raises:
+            Various schema errors with rollback context
+        """
+        completed_steps = []
+        try:
+            client = self._get_client()
+            
+            for step_num, statement in enumerate(migration_steps, 1):
+                try:
+                    await asyncio.get_event_loop().run_in_executor(
+                        None, client.execute, statement
+                    )
+                    completed_steps.append(statement)
+                    logger.debug(f"Migration {migration_name}: Completed step {step_num}/{len(migration_steps)}")
+                except Exception as e:
+                    # Classify the error and add migration context
+                    classified_error = classify_error(e)
+                    error_message = (
+                        f"Migration Error: Migration '{migration_name}' failed at step {step_num} of {len(migration_steps)}. "
+                        f"Completed Steps: {len(completed_steps)} statements executed successfully. "
+                        f"Failed Statement: {statement[:100]}... "
+                        f"Rollback Required: Consider reversing the {len(completed_steps)} completed operations. "
+                        f"Error: {classified_error}"
+                    )
+                    
+                    # Raise the appropriate error type with migration context
+                    if isinstance(classified_error, TableCreationError):
+                        raise TableCreationError(error_message) from e
+                    elif isinstance(classified_error, ColumnModificationError):
+                        raise ColumnModificationError(error_message) from e
+                    elif isinstance(classified_error, IndexCreationError):
+                        raise IndexCreationError(error_message) from e
+                    else:
+                        # For other classified errors, raise them with context
+                        if hasattr(classified_error, 'context'):
+                            # It's a custom schema error, create new instance with message
+                            raise classified_error.__class__(error_message) from e
+                        else:
+                            # It's a SQLAlchemy or other error, just raise the classified error
+                            raise classified_error from e
+            
+            logger.info(f"Migration {migration_name}: All {len(migration_steps)} steps completed successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Migration {migration_name} failed: {e}")
+            raise
+
+    async def drop_table(self, table_name: str) -> bool:
+        """
+        Drop a table with dependency error handling.
+        
+        Args:
+            table_name: Name of the table to drop
+            
+        Returns:
+            True if table drop successful, False otherwise
+            
+        Raises:
+            Various errors with dependency context
+        """
+        try:
+            client = self._get_client()
+            drop_query = f"DROP TABLE IF EXISTS {self.database}.{table_name}"
+            await asyncio.get_event_loop().run_in_executor(
+                None, client.execute, drop_query
+            )
+            logger.info(f"Successfully dropped table {table_name}")
+            return True
+        except Exception as e:
+            # Classify the error and add dependency context if needed
+            classified_error = classify_error(e)
+            error_str = str(e).lower()
+            
+            # Check for dependency errors
+            if "referenced by" in error_str or "materialized view" in error_str:
+                error_message = (
+                    f"Table Dependency Error: Cannot drop table '{table_name}' due to dependencies. "
+                    f"Error: {classified_error}. "
+                    f"Resolution Steps: 1) Identify dependent objects, 2) Drop dependencies first, 3) Retry table drop."
+                )
+                raise TableCreationError(error_message) from e
+            else:
+                logger.error(f"Error dropping table {table_name}: {classified_error}")
+                raise classified_error from e
+
+    async def validate_table_constraints(self, table_name: str) -> bool:
+        """
+        Validate table constraints.
+        
+        Args:
+            table_name: Name of the table to validate
+            
+        Returns:
+            True if validation successful, False otherwise
+            
+        Raises:
+            Various errors with constraint context
+        """
+        try:
+            client = self._get_client()
+            # Simple validation query - check if table is readable
+            validation_query = f"SELECT count() FROM {self.database}.{table_name} LIMIT 1"
+            await asyncio.get_event_loop().run_in_executor(
+                None, client.execute, validation_query
+            )
+            logger.info(f"Table constraints validated for {table_name}")
+            return True
+        except Exception as e:
+            # Classify the error and add constraint context if needed
+            classified_error = classify_error(e)
+            error_str = str(e).lower()
+            
+            # Check for constraint violation patterns
+            if "constraint" in error_str or "check" in error_str or "violated" in error_str:
+                error_message = (
+                    f"Constraint Violation Error: Table '{table_name}' constraint validation failed. "
+                    f"Error: {classified_error}. "
+                    f"Fix Suggestion: Review table constraints and data integrity."
+                )
+                raise ColumnModificationError(error_message) from e
+            else:
+                logger.error(f"Error validating table constraints for {table_name}: {classified_error}")
+                raise classified_error from e
+
     def close(self):
         """Close ClickHouse connection."""
         if self._client:
@@ -467,5 +700,6 @@ async def verify_clickhouse_schema(
         schema.close()
 
 
-# Backward compatibility alias
+# Backward compatibility aliases
 ClickHouseSchema = ClickHouseTraceSchema
+ClickHouseSchemaManager = ClickHouseTraceSchema

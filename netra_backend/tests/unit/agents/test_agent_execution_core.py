@@ -17,7 +17,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
@@ -35,6 +35,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         
         # Create mock registry and websocket bridge
         self.mock_registry = Mock()
+        self.mock_registry.get_async = AsyncMock()  # Add async mock for get_async method
         self.mock_websocket_bridge = AsyncMock()
         self.mock_execution_tracker = AsyncMock()
         
@@ -47,9 +48,12 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         
         # Setup execution tracker mock
         self.mock_execution_tracker.collect_metrics = AsyncMock(return_value={})
-        self.mock_execution_tracker.register_execution = AsyncMock()
+        self.mock_execution_tracker.create_execution = AsyncMock()
+        self.mock_execution_tracker.register_execution = AsyncMock()  # Backward compatibility
         self.mock_execution_tracker.start_execution = AsyncMock()
         self.mock_execution_tracker.complete_execution = AsyncMock()
+        self.mock_execution_tracker.update_execution_state = Mock()
+        self.mock_execution_tracker.get_metrics = Mock(return_value={})
         
         with patch('netra_backend.app.agents.supervisor.agent_execution_core.get_execution_tracker') as mock_get_tracker:
             mock_get_tracker.return_value = self.mock_execution_tracker
@@ -68,9 +72,13 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
             retry_count=0
         )
         
-        self.test_state = DeepAgentState()
-        self.test_state.user_id = "test_user_123"
-        self.test_state.thread_id = "test_thread_123"
+        # Create UserExecutionContext for security-compliant testing
+        self.test_user_context = UserExecutionContext(
+            user_id="test_user_123",
+            thread_id="test_thread_123",
+            run_id=str(self.test_run_id),
+            agent_context={}
+        )
         
         # Record metrics for business value tracking
         self.record_metric("test_setup_duration", time.time())
@@ -82,8 +90,8 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         """
         # Setup successful agent execution
         exec_id = uuid4()
-        self.mock_execution_tracker.register_execution.return_value = exec_id
-        self.mock_registry.get.return_value = self.mock_agent
+        self.mock_execution_tracker.create_execution.return_value = exec_id
+        self.mock_registry.get_async.return_value = self.mock_agent
         
         # Mock successful agent execution result
         expected_result = AgentExecutionResult(
@@ -97,7 +105,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         start_time = time.time()
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state,
+            user_context=self.test_user_context,
             timeout=30.0
         )
         execution_time = time.time() - start_time
@@ -109,9 +117,9 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         assert result.duration is not None, "Execution duration should be recorded"
         
         # Verify execution tracking for monitoring
-        self.mock_execution_tracker.register_execution.assert_called_once()
+        self.mock_execution_tracker.create_execution.assert_called_once()
         self.mock_execution_tracker.start_execution.assert_called_once_with(exec_id)
-        self.mock_execution_tracker.complete_execution.assert_called_once()
+        self.mock_execution_tracker.update_execution_state.assert_called()
         
         # Verify WebSocket notifications for user feedback
         self.mock_websocket_bridge.notify_agent_started.assert_called_once()
@@ -132,12 +140,12 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Setup agent not found scenario
         exec_id = uuid4()
         self.mock_execution_tracker.register_execution.return_value = exec_id
-        self.mock_registry.get.return_value = None  # Agent not found
+        self.mock_registry.get_async.return_value = None  # Agent not found
         
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify proper error handling
@@ -165,7 +173,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Setup hanging agent
         exec_id = uuid4()
         self.mock_execution_tracker.register_execution.return_value = exec_id
-        self.mock_registry.get.return_value = self.mock_agent
+        self.mock_registry.get_async.return_value = self.mock_agent
         
         # Mock agent that hangs (never returns)
         async def hanging_agent(*args, **kwargs):
@@ -179,7 +187,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         start_time = time.time()
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state,
+            user_context=self.test_user_context,
             timeout=timeout
         )
         execution_time = time.time() - start_time
@@ -209,7 +217,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Setup exception-throwing agent
         exec_id = uuid4()
         self.mock_execution_tracker.register_execution.return_value = exec_id
-        self.mock_registry.get.return_value = self.mock_agent
+        self.mock_registry.get_async.return_value = self.mock_agent
         
         # Mock agent that throws exception
         test_exception = RuntimeError("Test agent failure")
@@ -218,7 +226,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify exception handling
@@ -245,7 +253,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Setup successful execution
         exec_id = uuid4()
         self.mock_execution_tracker.register_execution.return_value = exec_id
-        self.mock_registry.get.return_value = self.mock_agent
+        self.mock_registry.get_async.return_value = self.mock_agent
         self.mock_agent.execute.return_value = AgentExecutionResult(
             success=True,
             agent_name="test_agent"
@@ -254,7 +262,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify WebSocket bridge was set on agent (multiple methods)
@@ -277,7 +285,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         with patch.object(self.execution_core, '_setup_agent_websocket') as mock_setup:
             await self.execution_core.execute_agent(
                 context=self.test_context,
-                state=self.test_state
+                user_context=self.test_user_context
             )
             mock_setup.assert_called_once()
         
@@ -292,13 +300,13 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Setup agent that returns None (death signature)
         exec_id = uuid4()
         self.mock_execution_tracker.register_execution.return_value = exec_id
-        self.mock_registry.get.return_value = self.mock_agent
+        self.mock_registry.get_async.return_value = self.mock_agent
         self.mock_agent.execute.return_value = None  # Dead agent signature
         
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify death detection
@@ -323,7 +331,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Setup successful execution with metrics
         exec_id = uuid4()
         self.mock_execution_tracker.register_execution.return_value = exec_id
-        self.mock_registry.get.return_value = self.mock_agent
+        self.mock_registry.get_async.return_value = self.mock_agent
         self.mock_agent.execute.return_value = AgentExecutionResult(
             success=True,
             agent_name="test_agent",
@@ -341,7 +349,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify metrics collection
@@ -367,7 +375,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Setup execution with trace context
         exec_id = uuid4()
         self.mock_execution_tracker.register_execution.return_value = exec_id
-        self.mock_registry.get.return_value = self.mock_agent
+        self.mock_registry.get_async.return_value = self.mock_agent
         self.mock_agent.execute.return_value = AgentExecutionResult(
             success=True,
             agent_name="test_agent"
@@ -386,7 +394,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
                 # Execute agent
                 result = await self.execution_core.execute_agent(
                     context=self.test_context,
-                    state=self.test_state
+                    user_context=self.test_user_context
                 )
                 
                 # Verify trace context creation
@@ -408,7 +416,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Setup execution
         exec_id = uuid4()
         self.mock_execution_tracker.register_execution.return_value = exec_id
-        self.mock_registry.get.return_value = self.mock_agent
+        self.mock_registry.get_async.return_value = self.mock_agent
         self.mock_agent.execute.return_value = AgentExecutionResult(
             success=True,
             agent_name="test_agent"
@@ -417,7 +425,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify heartbeat is disabled (business requirement)

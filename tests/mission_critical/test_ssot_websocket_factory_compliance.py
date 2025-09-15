@@ -52,7 +52,7 @@ import pytest
 from loguru import logger
 
 # Import SSOT components
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 

@@ -17,6 +17,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.config import get_config
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 logger = central_logger.get_logger(__name__)
 
@@ -33,10 +34,14 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
     4. Sends real WebSocket events as agents execute
     """
     try:
-        # Create demo user context - use UUID format to avoid placeholder validation issues
-        demo_user_id = f"demo-user-{uuid.uuid4()}"
-        thread_id = f"demo-thread-{uuid.uuid4()}"
-        run_id = f"demo-run-{uuid.uuid4()}"
+        # Create demo user context using UnifiedIDManager SSOT methods
+        # ISSUE #584 FIX: Use SSOT ID generation instead of ad-hoc prefixed UUIDs
+        from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+
+        id_manager = UnifiedIDManager()
+        demo_user_id = id_manager.generate_id(IDType.USER, context={"demo": True})
+        thread_id = UnifiedIDManager.generate_thread_id()
+        run_id = UnifiedIDManager.generate_run_id(thread_id)
         
         # Get database session - required for SupervisorAgent
         from netra_backend.app.db.database_manager import DatabaseManager
@@ -49,7 +54,7 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
                 user_id=demo_user_id,
                 thread_id=thread_id,
                 run_id=run_id,
-                request_id=str(uuid.uuid4()),  # Use plain UUID format
+                request_id=id_manager.generate_id(IDType.REQUEST, context={"demo": True}),
                 db_session=db_session,
                 websocket_client_id=connection_id,
                 agent_context={"user_request": user_message, "demo_mode": True},
@@ -170,25 +175,26 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
             # CRITICAL FIX: Initialize agent registry before creating supervisor
             # This ensures the agent factory has a populated registry
             from netra_backend.app.agents.supervisor.agent_class_initialization import initialize_agent_class_registry
-            from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
             
             # Initialize the agent class registry if not already done
             agent_registry = initialize_agent_class_registry()
             logger.info(f"Agent registry initialized with {len(agent_registry)} agents for demo")
             
-            # Configure the agent factory with the registry
-            factory = get_agent_instance_factory()
+            # ISSUE #1116: Migrate to per-request factory for user isolation
+            from netra_backend.app.agents.supervisor.agent_instance_factory import create_agent_instance_factory
+            factory = create_agent_instance_factory(user_context)
             factory.configure(
                 agent_class_registry=agent_registry,
                 websocket_bridge=bridge,
                 llm_manager=llm_manager
             )
             
-            # Import and create supervisor agent using SSOT pattern
+            # Import and create supervisor agent using SSOT pattern with user context
             from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
             supervisor = SupervisorAgent(
                 llm_manager=llm_manager,
-                websocket_bridge=bridge
+                websocket_bridge=bridge,
+                user_context=user_context
             )
                 
             # Execute using SSOT execute method with proper UserExecutionContext

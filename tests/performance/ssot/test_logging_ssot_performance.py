@@ -425,7 +425,7 @@ distributed tracing effectiveness and incident resolution speed.
         
         # Try to use SSOT logger if available, otherwise simulate
         try:
-            from shared.logging.unified_logger_factory import get_logger
+            from shared.logging.unified_logging_ssot import get_logger
             unified_logger = get_logger('ssot_performance_test')
         except ImportError:
             unified_logger = logging.getLogger('ssot_simulated')
@@ -524,7 +524,7 @@ distributed tracing effectiveness and incident resolution speed.
         def ssot_logging_worker():
             thread_start = time.perf_counter()
             try:
-                from shared.logging.unified_logger_factory import get_logger
+                from shared.logging.unified_logging_ssot import get_logger
                 logger = get_logger('ssot_concurrent_test')
             except ImportError:
                 logger = logging.getLogger('ssot_simulated')

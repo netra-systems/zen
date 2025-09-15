@@ -12,6 +12,7 @@ import type {
 import type { WebSocketEventBuffer } from '@/lib/circular-buffer';
 import type { ConnectionState, ConnectionActions } from '@/types/store-types';
 import type { PerformanceMetrics } from '@/types/unified';
+import type { StoreThreadState } from '@shared/types/frontend_types';
 
 // Agent execution tracking
 export interface AgentExecution {
@@ -51,14 +52,9 @@ export interface AgentTrackingState {
   setProcessing: (isProcessing: boolean) => void;
 }
 
-// Thread management slice state
-export interface ThreadState {
-  activeThreadId: string | null;
-  threads: Map<string, unknown>;
-  isThreadLoading: boolean;
-  setActiveThread: (threadId: string | null) => void;
-  setThreadLoading: (isLoading: boolean) => void;
-}
+// Thread management slice state - SSOT import eliminates local ThreadState definition
+// Use StoreThreadState directly to avoid namespace collision with canonical ThreadState
+export type ThreadSliceState = StoreThreadState;
 
 // Connection state slice - import from consolidated types
 export interface ConnectionSlice extends ConnectionState, ConnectionActions {}

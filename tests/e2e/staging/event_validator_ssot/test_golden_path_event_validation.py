@@ -85,7 +85,7 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
-        return UserExecutionContext.create_for_user(
+        return UserExecutionContext.from_request(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run"
@@ -401,10 +401,18 @@ class TestGoldenPathEventValidationStaging(SSotAsyncTestCase):
             headers = {
                 "Authorization": f"Bearer {self.staging_session_token}"
             }
-            
+
+            # ISSUE #886 FIX: Support both Authorization headers and subprotocol-based authentication
+            # Some staging environments may require subprotocol negotiation
+            subprotocols = []
+            if self.staging_session_token:
+                # Try subprotocol-based auth for staging compatibility
+                subprotocols = [f"jwt-auth.{self.staging_session_token}", "jwt-auth"]
+
             async with websockets.connect(
                 self.staging_websocket_url,
                 extra_headers=headers,
+                subprotocols=subprotocols if subprotocols else None,
                 timeout=10
             ) as websocket:
                 

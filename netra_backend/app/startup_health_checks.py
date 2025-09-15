@@ -88,13 +88,29 @@ class StartupHealthChecker:
                 )
             
             llm_manager = self.app.state.llm_manager
+            
+            # SECURITY FIX: LLM manager is intentionally None for security (user isolation)
+            # Check if we have the factory pattern for user-isolated LLM managers
             if llm_manager is None:
-                return HealthCheckResult(
-                    service_name=service_name,
-                    status=ServiceStatus.UNHEALTHY,
-                    message="LLM manager is None",
-                    check_time=datetime.now(timezone.utc)
-                )
+                # Check if we have the factory function for creating user-isolated LLM managers
+                if hasattr(self.app.state, 'llm_manager_factory') and self.app.state.llm_manager_factory:
+                    # This is the correct security pattern - factory creates isolated instances
+                    latency_ms = (asyncio.get_event_loop().time() - start_time) * 1000
+                    return HealthCheckResult(
+                        service_name=service_name,
+                        status=ServiceStatus.HEALTHY,
+                        message="LLM manager factory initialized for user isolation (security compliant)",
+                        check_time=datetime.now(timezone.utc),
+                        latency_ms=latency_ms,
+                        metadata={"security_pattern": "user_isolated_factory"}
+                    )
+                else:
+                    return HealthCheckResult(
+                        service_name=service_name,
+                        status=ServiceStatus.UNHEALTHY,
+                        message="LLM manager is None and no factory available",
+                        check_time=datetime.now(timezone.utc)
+                    )
             
             # Validate LLM manager has required methods
             required_methods = ['ask_llm', 'get_llm_config']

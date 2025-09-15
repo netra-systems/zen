@@ -33,7 +33,7 @@ from dataclasses import dataclass
 from enum import Enum
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidURI
+from websockets import ConnectionClosed, InvalidURI
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture

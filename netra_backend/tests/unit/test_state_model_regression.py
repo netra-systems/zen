@@ -14,7 +14,7 @@ from pydantic import ValidationError
 
 # Import both versions of DeepAgentState to test consistency
 try:
-    from netra_backend.app.agents.state import DeepAgentState as AgentsDeepAgentState
+    from netra_backend.app.schemas.agent_models import DeepAgentState as AgentsDeepAgentState
     from netra_backend.app.schemas.agent_models import (
         DeepAgentState as SchemaDeepAgentState,
     )

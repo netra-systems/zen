@@ -19,7 +19,7 @@ from tests.clients.websocket_client import WebSocketTestClient
 logger = logging.getLogger(__name__)
 
 
-class TestClientFactory:
+class ClientFactory:
     """Factory for creating typed test clients connected to real services."""
     
     def __init__(self, discovery: Optional[ServiceDiscovery] = None):

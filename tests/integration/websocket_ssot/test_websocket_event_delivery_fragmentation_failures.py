@@ -70,8 +70,8 @@ class TestWebSocketEventDeliveryFragmentationFailures(SSotAsyncTestCase):
         
         # Import different WebSocket manager implementations
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as factory1
-        from netra_backend.app.websocket_core.manager import WebSocketManager as DirectManager
-        from netra_backend.app.websocket_core.unified_manager import WebSocketManagerMode
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as DirectManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
         
         try:
             # Create managers via different import paths
@@ -293,7 +293,7 @@ class TestWebSocketEventDeliveryFragmentationFailures(SSotAsyncTestCase):
         logger.info("Testing event deduplication with fragmented managers")
         
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-        from netra_backend.app.websocket_core.unified_manager import WebSocketManagerMode
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
         
         try:
             # Create multiple managers for the same user (potential duplication scenario)

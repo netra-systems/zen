@@ -35,7 +35,7 @@
 
             # REMOVED_SYNTAX_ERROR: import pytest
             # REMOVED_SYNTAX_ERROR: import websockets
-            # REMOVED_SYNTAX_ERROR: from websockets.exceptions import ConnectionClosedError, WebSocketException
+            # REMOVED_SYNTAX_ERROR: from websockets import ConnectionClosedError, WebSocketException
 
             # REMOVED_SYNTAX_ERROR: from tests.e2e.config import setup_test_environment, TestEndpoints, TestUser
             # REMOVED_SYNTAX_ERROR: from test_framework.websocket_helpers import WebSocketTestHelpers

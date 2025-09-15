@@ -21,7 +21,7 @@ import uuid
 
 import pytest
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.tests.fixtures.test_fixtures import (
     mock_database,

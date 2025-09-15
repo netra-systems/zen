@@ -21,8 +21,8 @@ async def get_redis_with_retry(max_retries: int = 3) -> Any:
             # Use SSOT Redis import pattern
             import redis
             client = redis.Redis(
-                host=get_env('REDIS_HOST', 'localhost'),
-                port=int(get_env('REDIS_PORT', '6379')),
+                host=get_env().get('REDIS_HOST', 'localhost'),
+                port=int(get_env().get('REDIS_PORT', '6379')),
                 decode_responses=True
             )
             # Test connection

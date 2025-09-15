@@ -580,7 +580,7 @@ class RealAgentPerformanceMonitoringTester:
 async def performance_monitoring_tester(request):
     """Create and setup the performance monitoring tester for both local and staging."""
     # Check if we should skip staging tests
-    test_env = get_env("E2E_TEST_ENV", None)
+    test_env = get_env().get("E2E_TEST_ENV", None)
     if test_env and test_env != request.param:
         pytest.skip(f"Skipping {request.param} tests (E2E_TEST_ENV={test_env})")
     
@@ -815,7 +815,7 @@ if __name__ == "__main__":
     ]
     
     # Add staging marker if running against staging
-    if get_env("E2E_TEST_ENV", "local") == "staging":
+    if get_env().get("E2E_TEST_ENV", "local") == "staging":
         args.append("-m")
         args.append("staging")
         print(f"Running tests against STAGING environment: {get_e2e_config().backend_url}")

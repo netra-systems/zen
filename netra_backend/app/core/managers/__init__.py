@@ -26,7 +26,8 @@ from .unified_lifecycle_manager import (
     get_lifecycle_manager,
     setup_application_lifecycle
 )
-from .unified_configuration_manager import UnifiedConfigurationManager
+# MIGRATION TO SSOT: Import from canonical SSOT source
+from netra_backend.app.core.configuration.base import UnifiedConfigManager as UnifiedConfigurationManager
 from .unified_state_manager import UnifiedStateManager
 
 # PHASE 2 & 3: Maintain backward compatibility during migration

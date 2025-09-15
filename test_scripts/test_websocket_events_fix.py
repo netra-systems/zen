@@ -88,7 +88,7 @@ class TestWebSocketEventIntegration:
             "Tool dispatcher not enhanced with WebSocket notifications!"
         
         # Create execution engine
-        execution_engine = ExecutionEngine(registry, websocket_manager)
+        execution_engine = UserExecutionEngine(registry, websocket_manager)
         
         return {
             "llm_manager": llm_manager,

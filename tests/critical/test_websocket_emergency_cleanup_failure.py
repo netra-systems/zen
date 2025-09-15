@@ -22,9 +22,9 @@ from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any, List, Optional
 
 # Core imports  
-from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory, FactoryInitializationError
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_imports import FactoryInitializationError
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager_factory import IsolatedWebSocketManager
 from shared.types.core_types import UserID
 
 
@@ -96,9 +96,9 @@ class TestWebSocketEmergencyCleanupFailure:
     @pytest.fixture  
     def mock_factory(self):
         """Create WebSocketManagerFactory with controlled state"""
-        factory = WebSocketManagerFactory()
-        factory.max_managers_per_user = 20
-        return factory
+        manager = WebSocketManager()
+        # Note: WebSocketManager can be configured here
+        return manager
     
     @pytest.fixture
     def create_test_context(self):

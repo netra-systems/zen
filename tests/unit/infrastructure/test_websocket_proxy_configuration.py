@@ -28,7 +28,7 @@ import pytest
 import websockets
 import aiohttp
 import socket
-from websockets.exceptions import ConnectionClosedError, InvalidStatus
+from websockets import ConnectionClosedError, InvalidStatus
 
 # Import SSOT authentication and configuration
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig

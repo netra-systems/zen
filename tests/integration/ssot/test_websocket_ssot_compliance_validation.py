@@ -52,7 +52,7 @@ from loguru import logger
 
 # Import SSOT components for validation
 try:
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
     SSOT_WEBSOCKET_AVAILABLE = True
 except ImportError as e:
     logger.error(f"[SSOT VALIDATION] Critical SSOT import failed: {str(e)}")

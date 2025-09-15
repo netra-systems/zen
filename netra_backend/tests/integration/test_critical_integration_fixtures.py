@@ -67,9 +67,9 @@ from sqlalchemy.orm import sessionmaker
 from starlette.websockets import WebSocketState
 
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
-from netra_backend.app.agents.supervisor_consolidated import (
+from netra_backend.app.agents.supervisor_ssot import (
 
 SupervisorAgent as Supervisor)
 from netra_backend.app.db.base import Base

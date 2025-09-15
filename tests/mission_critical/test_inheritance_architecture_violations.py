@@ -16,7 +16,7 @@ from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 

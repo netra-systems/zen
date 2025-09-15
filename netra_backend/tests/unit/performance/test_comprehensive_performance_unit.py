@@ -24,8 +24,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
 
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import IsolatedEnvironment, get_env
 

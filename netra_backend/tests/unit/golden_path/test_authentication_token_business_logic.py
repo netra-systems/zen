@@ -32,6 +32,7 @@ from enum import Enum
 
 # Import business logic components for testing
 from test_framework.base import BaseTestCase
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from shared.types.core_types import (
     UserID, SessionID, ensure_user_id
 )
@@ -202,13 +203,22 @@ class AuthenticationTokenManager:
                 validation_result["validation_errors"].append("Token has been revoked")
                 return validation_result
             
-            # Business Rule 2: Decode and validate JWT structure
-            decoded_payload = jwt.decode(
-                jwt_token, 
-                self.secret_key, 
-                algorithms=[self.token_algorithm],
-                options={"verify_exp": True}
-            )
+            # Business Rule 2: Decode and validate JWT structure using SSOT auth service
+            # SSOT COMPLIANT: Use auth helper for token validation to follow architectural patterns
+            auth_helper = E2EAuthHelper()
+            decoded_payload = auth_helper._decode_token(jwt_token)
+
+            # Validate that token was successfully decoded (SSOT auth service validation)
+            if not decoded_payload or not isinstance(decoded_payload, dict):
+                validation_result["validation_errors"].append("Invalid token format or structure")
+                return validation_result
+
+            # Validate token expiration using SSOT-compatible timestamp checking
+            if "exp" in decoded_payload:
+                current_time = datetime.now(timezone.utc).timestamp()
+                if decoded_payload["exp"] < current_time:
+                    validation_result["validation_errors"].append("Token has expired")
+                    return validation_result
             
             # Business Rule 3: Validate required business claims are present
             required_claims = ["user_id", "email", "tier", "permissions", "session_id", "business_context"]
@@ -418,7 +428,10 @@ class TestAuthenticationTokenBusinessLogic(BaseTestCase):
         assert len(free_token) > 100, "Token must contain substantial claims data"
         
         # Decode token to verify business claims
-        decoded = jwt.decode(free_token, self.token_manager.secret_key, algorithms=["HS256"])
+        # SSOT: Use E2EAuthHelper for token decoding
+        from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
+        auth_helper = E2EAuthHelper()
+        decoded = auth_helper._decode_token(free_token)
         
         # Business Rule 1: Required user identification claims
         assert decoded["user_id"] == str(self.test_user_free.user_id), "Token must identify correct user"
@@ -448,7 +461,10 @@ class TestAuthenticationTokenBusinessLogic(BaseTestCase):
         # Business Value: Enterprise users must have extended privileges and token lifetime
         
         enterprise_token = self.token_manager.create_jwt_token(self.test_user_enterprise, TokenType.ACCESS_TOKEN)
-        decoded = jwt.decode(enterprise_token, self.token_manager.secret_key, algorithms=["HS256"])
+        # SSOT: Use E2EAuthHelper for token decoding
+        from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
+        auth_helper = E2EAuthHelper()
+        decoded = auth_helper._decode_token(enterprise_token)
         
         # Business Rule 1: Enterprise permissions must be present
         permissions = decoded["permissions"]
@@ -555,7 +571,10 @@ class TestAuthenticationTokenBusinessLogic(BaseTestCase):
         free_token = self.token_manager.create_jwt_token(self.test_user_free)
         
         # Attempt to tamper with token to add enterprise permissions
-        decoded_payload = jwt.decode(free_token, self.token_manager.secret_key, algorithms=["HS256"])
+        # SSOT: Use E2EAuthHelper for token decoding
+        from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
+        auth_helper = E2EAuthHelper()
+        decoded_payload = auth_helper._decode_token(free_token)
         decoded_payload["permissions"].extend(["admin_panel", "user_management"])  # Escalate permissions
         decoded_payload["tier"] = "enterprise"  # Escalate tier
         
@@ -604,8 +623,11 @@ class TestAuthenticationTokenBusinessLogic(BaseTestCase):
         
         # Business Rule 1: Rate limits must scale with tier
         rate_limits = {}
+        # SSOT: Use E2EAuthHelper for token decoding
+        from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
+        auth_helper = E2EAuthHelper()
         for tier, token in tokens.items():
-            decoded = jwt.decode(token, self.token_manager.secret_key, algorithms=["HS256"])
+            decoded = auth_helper._decode_token(token)
             rate_limits[tier] = decoded["business_context"]["rate_limits"]["requests_per_minute"]
         
         assert rate_limits[UserTier.FREE] < rate_limits[UserTier.EARLY], "Early tier must have higher rate limits than Free"
@@ -615,7 +637,8 @@ class TestAuthenticationTokenBusinessLogic(BaseTestCase):
         # Business Rule 2: Business value classification must be tier-appropriate
         business_values = {}
         for tier, token in tokens.items():
-            decoded = jwt.decode(token, self.token_manager.secret_key, algorithms=["HS256"])
+            # SSOT: Use existing auth_helper for token decoding
+            decoded = auth_helper._decode_token(token)
             business_values[tier] = decoded["business_context"]["business_value"]
         
         assert business_values[UserTier.FREE] == "freemium_conversion_funnel", "Free tier must focus on conversion"
@@ -623,7 +646,8 @@ class TestAuthenticationTokenBusinessLogic(BaseTestCase):
         
         # Business Rule 3: Feature access must be tier-appropriate
         for tier, token in tokens.items():
-            decoded = jwt.decode(token, self.token_manager.secret_key, algorithms=["HS256"])
+            # SSOT: Use existing auth_helper for token decoding
+            decoded = auth_helper._decode_token(token)
             features = decoded["business_context"]["features"]
             
             if tier == UserTier.FREE:
@@ -679,7 +703,10 @@ class TestAuthenticationTokenBusinessLogic(BaseTestCase):
         
         # Business Rule 1: Tokens for inactive subscriptions should still be created (for grace period handling)
         token = self.token_manager.create_jwt_token(inactive_user)
-        decoded = jwt.decode(token, self.token_manager.secret_key, algorithms=["HS256"])
+        # SSOT: Use E2EAuthHelper for token decoding
+        from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
+        auth_helper = E2EAuthHelper()
+        decoded = auth_helper._decode_token(token)
         assert decoded["business_context"]["subscription_active"] is False, "Inactive subscription must be reflected in token"
         
         # Business Rule 2: Token validation must catch inactive subscriptions

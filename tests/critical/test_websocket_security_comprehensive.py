@@ -53,8 +53,8 @@ import pytest
 from loguru import logger
 
 # Import security-critical components
-from netra_backend.app.agents.supervisor.user_execution_context import (
-    UserExecutionContext, 
+from netra_backend.app.services.user_execution_context import (
+    UserExecutionContext,
     InvalidContextError,
     validate_user_context
 )
@@ -303,7 +303,7 @@ class TestSingletonPatternPrevention:
             )
             
             # Create isolated execution engine
-            engine = ExecutionEngine(user_context=user_context)
+            engine = UserExecutionEngine(user_context=user_context)
             engines.append(engine)
         
         # Verify isolation

@@ -57,8 +57,7 @@ def real_cache():
     """Use real cache service instance.
     
     This fixture provides access to real Redis services for integration testing.
-    It uses the RedisTestManager to ensure proper test isolation.
+    It uses the redis_manager SSOT pattern to ensure proper test isolation.
     """
     # Initialize real cache service with test configuration
-    redis_manager = RedisTestManager()
-    return redis_manager.get_test_client()
+    return redis_manager

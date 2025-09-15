@@ -43,7 +43,7 @@
 
             # REMOVED_SYNTAX_ERROR: import pytest
             # REMOVED_SYNTAX_ERROR: import websockets
-            # REMOVED_SYNTAX_ERROR: from websockets.exceptions import ConnectionClosed, ConnectionClosedOK, ConnectionClosedError
+            # REMOVED_SYNTAX_ERROR: from websockets import ConnectionClosed, ConnectionClosedOK, ConnectionClosedError
 
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.logging_config import central_logger
             # REMOVED_SYNTAX_ERROR: from test_framework.helpers.auth_helpers import create_test_jwt_token, create_test_auth_headers

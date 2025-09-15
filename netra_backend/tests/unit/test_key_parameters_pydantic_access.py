@@ -6,13 +6,12 @@ import pytest
 from unittest.mock import Mock, MagicMock
 
 from test_framework.database.test_database_manager import DatabaseTestManager
-from test_framework.redis_test_utils import RedisTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 try:
-    from netra_backend.app.agents.state import DeepAgentState
+    from netra_backend.app.schemas.agent_models import DeepAgentState
     from netra_backend.app.agents.triage.unified_triage_agent import KeyParameters, TriageResult
 except ImportError:
     pytest.skip("Data sub agent execution engine has been removed/moved", allow_module_level=True)

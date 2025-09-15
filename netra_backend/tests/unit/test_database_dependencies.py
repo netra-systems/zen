@@ -233,4 +233,4 @@ async def test_real_database_connection():
             break  # Only test one session
     except Exception as e:
         # If database is not available, skip this test
-        pytest.skip(f"Database not available for integration test: {e}")
+        pytest.skip(f"Database not available for integration test: {e}", allow_module_level=True)

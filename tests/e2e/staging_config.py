@@ -72,6 +72,13 @@ class StagingTestConfig:
         self.ws_reconnect_delay = 2
         self.ws_max_reconnect_attempts = 5
         
+        # Compatibility attributes - expose URL properties directly for legacy tests
+        self.backend_url = self.urls.backend_url
+        self.auth_url = self.urls.auth_url
+        self.auth_service_url = self.urls.auth_url  # Alternative name for legacy compatibility
+        self.frontend_url = self.urls.frontend_url
+        self.websocket_url = self.urls.websocket_url
+        
     def get_auth_headers(self, token: str) -> Dict[str, str]:
         """Get authentication headers for API requests."""
         return {
@@ -160,6 +167,33 @@ def get_staging_config() -> StagingTestConfig:
         else:
             logger.info(f"Staging config loaded for environment '{current_env}' - skipping staging validation")
     return _staging_config
+
+
+def is_staging_available() -> bool:
+    """Check if staging environment is available"""
+    import httpx
+    import os
+    # Override for golden path validation testing
+    if os.environ.get("BYPASS_STAGING_HEALTH_CHECK") == "true":
+        logger.info("[TEST OVERRIDE] Bypassing staging health check for golden path validation")
+        return True
+    
+    try:
+        config = get_staging_config()
+        health_url = f"{config.urls.backend_url}/health"
+        
+        with httpx.Client(timeout=10.0, verify=config.verify_ssl) as client:
+            response = client.get(health_url)
+            if response.status_code == 200:
+                logger.info(f"Staging backend health check passed: {health_url}")
+                return True
+            else:
+                logger.warning(f"Staging backend health check failed: {health_url} returned {response.status_code}")
+                return False
+                
+    except Exception as e:
+        logger.error(f"Staging availability check failed: {e}")
+        return False
 
 
 # Export for convenience

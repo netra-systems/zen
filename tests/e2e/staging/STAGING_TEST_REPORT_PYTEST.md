@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-11 09:59:43
+**Generated:** 2025-09-13 09:11:25
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
 - **Total Tests:** 5
-- **Passed:** 2 (40.0%)
-- **Failed:** 3 (60.0%)
+- **Passed:** 3 (60.0%)
+- **Failed:** 2 (40.0%)
 - **Skipped:** 0
-- **Duration:** 0.27 seconds
-- **Pass Rate:** 40.0%
+- **Duration:** 13.10 seconds
+- **Pass Rate:** 60.0%
 
 ## Test Results by Priority
 
@@ -19,60 +19,60 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_enterprise_financial_analysis_timeout_on_staging | PASS passed | 0.032s | test_enterprise_streaming_timeouts.py |
-| test_websocket_streaming_coordination_timeout_staging | FAIL failed | 0.004s | test_enterprise_streaming_timeouts.py |
-| test_enterprise_multi_phase_analytical_workflow_staging | FAIL failed | 0.006s | test_enterprise_streaming_timeouts.py |
-| test_concurrent_enterprise_workflows_timeout_isolation_staging | FAIL failed | 0.008s | test_enterprise_streaming_timeouts.py |
-| test_staging_environment_timeout_configuration_validation | PASS passed | 0.000s | test_enterprise_streaming_timeouts.py |
+| test_message_endpoints | PASS passed | 5.550s | test_2_message_flow_staging.py |
+| test_real_message_api_endpoints | PASS passed | 0.668s | test_2_message_flow_staging.py |
+| test_real_websocket_message_flow | FAIL failed | 0.904s | test_2_message_flow_staging.py |
+| test_real_thread_management | PASS passed | 0.556s | test_2_message_flow_staging.py |
+| test_real_error_handling_flow | FAIL failed | 1.935s | test_2_message_flow_staging.py |
 
 ## Failed Tests Details
 
-### FAILED: test_websocket_streaming_coordination_timeout_staging
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_enterprise_streaming_timeouts.py
-- **Duration:** 0.004s
-- **Error:** test_enterprise_streaming_timeouts.py:276: in test_websocket_streaming_coordination_timeout_staging
-    assert connection_established, "Failed to establish WebSocket connection to staging"
-E   AssertionError: Failed to establish WebSocket connection to staging
-E   assert False...
+### FAILED: test_real_websocket_message_flow
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_2_message_flow_staging.py
+- **Duration:** 0.904s
+- **Error:** ..\staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_2_message_flow_staging.py:120: in test_real_websocket_message_flow
+    async with websockets.connect(
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:587: in __aenter__
+    return await self
+           ^^^^^^^^^^
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in __await_impl__
+    awa...
 
-### FAILED: test_enterprise_multi_phase_analytical_workflow_staging
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_enterprise_streaming_timeouts.py
-- **Duration:** 0.006s
-- **Error:** /opt/homebrew/lib/python3.13/site-packages/httpx/_transports/default.py:101: in map_httpcore_exceptions
-    yield
-/opt/homebrew/lib/python3.13/site-packages/httpx/_transports/default.py:394: in handle_async_request
-    resp = await self._pool.handle_async_request(req)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/opt/homebrew/lib/python3.13/site-packages/httpcore/_async/connection_pool.py:256: in handle_async_request
-    raise exc from None
-/opt/homebrew/lib/python3.13/site-packages/htt...
-
-### FAILED: test_concurrent_enterprise_workflows_timeout_isolation_staging
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_enterprise_streaming_timeouts.py
-- **Duration:** 0.008s
-- **Error:** test_enterprise_streaming_timeouts.py:467: in test_concurrent_enterprise_workflows_timeout_isolation_staging
-    assert "financial_dashboard" in successful_scenarios, (
-E   AssertionError: Quick enterprise scenario should succeed within timeout limits
-E   assert 'financial_dashboard' in []...
+### FAILED: test_real_error_handling_flow
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_2_message_flow_staging.py
+- **Duration:** 1.935s
+- **Error:** ..\staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_2_message_flow_staging.py:314: in test_real_error_handling_flow
+    async with websockets.connect(
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:587: in __aenter__
+    return await self
+           ^^^^^^^^^^
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in __await_impl__
+    await ...
 
 ## Pytest Output Format
 
 ```
-test_enterprise_streaming_timeouts.py::test_enterprise_financial_analysis_timeout_on_staging PASSED
-test_enterprise_streaming_timeouts.py::test_websocket_streaming_coordination_timeout_staging FAILED
-test_enterprise_streaming_timeouts.py::test_enterprise_multi_phase_analytical_workflow_staging FAILED
-test_enterprise_streaming_timeouts.py::test_concurrent_enterprise_workflows_timeout_isolation_staging FAILED
-test_enterprise_streaming_timeouts.py::test_staging_environment_timeout_configuration_validation PASSED
+test_2_message_flow_staging.py::test_message_endpoints PASSED
+test_2_message_flow_staging.py::test_real_message_api_endpoints PASSED
+test_2_message_flow_staging.py::test_real_websocket_message_flow FAILED
+test_2_message_flow_staging.py::test_real_thread_management PASSED
+test_2_message_flow_staging.py::test_real_error_handling_flow FAILED
 
 ==================================================
-2 passed, 3 failed in 0.27s
+3 passed, 2 failed in 13.10s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 2 | 0 | 2 | 0.0% |
+| WebSocket | 1 | 0 | 1 | 0.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*

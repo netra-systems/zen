@@ -24,7 +24,7 @@ from io import StringIO
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
-from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from shared.configuration.redis_pattern_validator import RedisConfigurationPatternValidator, RedisPatternViolation
 
 

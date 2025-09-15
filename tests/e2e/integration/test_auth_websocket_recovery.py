@@ -26,7 +26,7 @@ Test Coverage:
 import asyncio
 import time
 import pytest
-from websockets.exceptions import ConnectionClosedError, WebSocketException
+from websockets import ConnectionClosedError, WebSocketException
 from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.helpers.auth_helpers import (

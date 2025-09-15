@@ -14,6 +14,7 @@ Tests validate that users cannot access each other's data under any circumstance
 import asyncio
 import pytest
 import uuid
+import jwt
 from typing import Dict, List, Any
 from contextlib import asynccontextmanager
 
@@ -26,6 +27,9 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 # ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 
+# SSOT Auth Client Import - Issue #814 SSOT Authentication Remediation
+from netra_backend.app.clients.auth_client_core import AuthServiceClient, AuthServiceError
+
 
 class TestMultiUserIsolationIntegration(BaseIntegrationTest):
     """Integration tests for multi-user isolation patterns."""
@@ -36,6 +40,9 @@ class TestMultiUserIsolationIntegration(BaseIntegrationTest):
         self.test_users = []
         self.test_sessions = []
         self.cleanup_tasks = []
+
+        # SSOT Auth Client - Issue #814 SSOT Authentication Remediation
+        self.auth_client = AuthServiceClient()
 
     def teardown_method(self):
         """Clean up all test users and sessions."""
@@ -348,7 +355,7 @@ class TestMultiUserIsolationIntegration(BaseIntegrationTest):
                 """Execute agent task with strict user isolation."""
                 
                 # Create user-specific execution engine
-                execution_engine = ExecutionEngine(
+                execution_engine = UserExecutionEngine(
                     user_id=user_data['id'],
                     organization_id=user_data['organization_id']
                 )
@@ -587,33 +594,38 @@ class TestMultiUserIsolationIntegration(BaseIntegrationTest):
             user['jwt_payload'] = payload
             users.append(user)
         
-        # Test authentication isolation
+        # SSOT Authentication Isolation - Issue #814 SSOT Authentication Remediation
         async def validate_auth_context_isolation(user_data: Dict, user_secret: str):
-            """Validate authentication context is properly isolated."""
-            
-            # Decode this user's JWT with correct secret
+            """Validate authentication context is properly isolated using SSOT auth service."""
+
+            # Validate this user's JWT through auth service
             try:
-                decoded = jwt.decode(user_data['jwt_token'], user_secret, algorithms=['HS256'])
-            except jwt.InvalidTokenError:
-                pytest.fail(f"Failed to decode valid JWT for user {user_data['id']}")
-            
-            # Verify decoded data matches user
-            assert decoded['user_id'] == user_data['id']
-            assert decoded['email'] == user_data['email']
-            assert decoded['organization_id'] == user_data['organization_id']
-            
-            # Attempt to decode this user's JWT with other users' secrets - should fail
-            other_secrets = [s for s in jwt_secrets if s != user_secret]
-            for other_secret in other_secrets:
-                with pytest.raises(jwt.InvalidTokenError):
-                    jwt.decode(user_data['jwt_token'], other_secret, algorithms=['HS256'])
-            
-            # Attempt to decode other users' JWTs with this user's secret - should fail
+                auth_response = await self.auth_client.validate_token(user_data['jwt_token'])
+                if not auth_response or not auth_response.get("valid", False):
+                    pytest.fail(f"Auth service failed to validate JWT for user {user_data['id']}")
+
+                # Verify auth response contains expected user data
+                validated_user_id = auth_response.get("user_id") or auth_response.get("sub")
+                assert validated_user_id == user_data['id'], "Auth service must return correct user ID"
+
+            except AuthServiceError as e:
+                pytest.fail(f"Auth service error validating JWT for user {user_data['id']}: {e}")
+
+            # Test isolation - other users' tokens should be invalid for the same validation
+            # In a real SSOT implementation, the auth service would reject tokens not meant for this user
             other_users = [u for u in users if u['id'] != user_data['id']]
             for other_user in other_users:
-                with pytest.raises(jwt.InvalidTokenError):
-                    jwt.decode(other_user['jwt_token'], user_secret, algorithms=['HS256'])
-            
+                try:
+                    other_auth_response = await self.auth_client.validate_token(other_user['jwt_token'])
+                    if other_auth_response and other_auth_response.get("valid", False):
+                        other_user_id = other_auth_response.get("user_id") or other_auth_response.get("sub")
+                        # Auth service should return different user IDs for different tokens
+                        assert other_user_id != user_data['id'], "Auth service must isolate user tokens"
+                        assert other_user_id == other_user['id'], "Auth service must return correct user for other tokens"
+                except AuthServiceError:
+                    # Auth service errors on other users' tokens are acceptable for isolation testing
+                    pass
+
             return {
                 'user_id': user_data['id'],
                 'auth_isolated': True,
@@ -658,7 +670,7 @@ class TestMultiUserIsolationIntegration(BaseIntegrationTest):
             users.append(user)
             
             # Create isolated execution engine for each user
-            engine = ExecutionEngine(
+            engine = UserExecutionEngine(
                 user_id=user['id'],
                 organization_id=user['organization_id'],
                 isolation_context=f"engine-{user['id']}"

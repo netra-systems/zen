@@ -720,7 +720,7 @@ class TestRealAgentToolExecution:
 
 if __name__ == "__main__":
     # Support environment selection via E2E_TEST_ENV
-    test_env = get_env("E2E_TEST_ENV", "local")
+    test_env = get_env().get("E2E_TEST_ENV", "local")
     logger.info(f"Running E2E tests against {test_env} environment")
     
     # Run with real services

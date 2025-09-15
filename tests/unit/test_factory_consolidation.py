@@ -19,7 +19,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from test_framework.database.test_database_manager import DatabaseTestManager
-from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -37,7 +37,7 @@ from netra_backend.app.agents.supervisor.factory_performance_config import (
     set_factory_performance_config
 )
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassRegistry
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
@@ -45,7 +45,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketConnection:
+class MockWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):

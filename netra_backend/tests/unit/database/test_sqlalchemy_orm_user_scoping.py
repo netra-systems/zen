@@ -70,7 +70,7 @@ class TestSQLAlchemyORMUserScoping(BaseUnitTest):
         """Set up test environment."""
         super().setUp()
         if not SQLALCHEMY_AVAILABLE:
-            pytest.skip("SQLAlchemy not available for ORM testing")
+            pytest.skip("SQLAlchemy not available for ORM testing", allow_module_level=True)
 
     @pytest.mark.unit
     async def test_orm_queries_automatically_scope_to_user_context(self):

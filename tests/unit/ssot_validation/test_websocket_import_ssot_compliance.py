@@ -265,8 +265,8 @@ class TestWebSocketImportSSotCompliance(SSotBaseTestCase):
             f"\n[U+2022] Files needing remediation: {len(set(v.file_path for v in analysis_result.violations))}"
             f"\n\nIMPORT REMEDIATION GUIDE:"
             f"\n PASS:  USE: from netra_backend.app.websocket_core.canonical_imports import WebSocketManagerFactory"
-            f"\n FAIL:  AVOID: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager"
-            f"\n FAIL:  AVOID: from netra_backend.app.websocket_core.manager import WebSocketManager"
+            f"\n FAIL:  AVOID: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager"
+            f"\n FAIL:  AVOID: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager"
             f"\n\nSee CANONICAL IMPORT GUIDE in canonical_imports.py for complete migration instructions."
         )
 
@@ -303,7 +303,7 @@ class TestWebSocketImportSSotCompliance(SSotBaseTestCase):
             f" PASS:  from netra_backend.app.websocket_core.canonical_imports import WebSocketManagerFactory\n"
             f" PASS:  factory = WebSocketManagerFactory()\n"
             f" PASS:  manager = await factory.create_isolated_manager(user_id, connection_id)\n\n"
-            f" FAIL:  from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager"
+            f" FAIL:  from netra_backend.app.websocket_core.websocket_manager import WebSocketManager"
         )
 
     def test_canonical_import_coverage_progression(self):

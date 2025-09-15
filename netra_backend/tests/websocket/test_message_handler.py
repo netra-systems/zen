@@ -30,7 +30,7 @@ class TestMessageHandlerRealConnections:
     async def setup_real_services(self):
         """Setup real services infrastructure for all tests."""
         self.env = IsolatedEnvironment()
-        self.env.enable()
+        self.env.enable_isolation()
         
         self.real_services = get_real_services()
         await self.real_services.ensure_all_services_available()
@@ -43,7 +43,7 @@ class TestMessageHandlerRealConnections:
         
         # Cleanup
         await self.real_services.close_all()
-        self.env.disable(restore_original=True)
+        self.env.disable_isolation(restore_original=True)
     
     async def create_real_websocket_connection(self, conn_id: str) -> WebSocketTestClient:
         """Create a real WebSocket connection for testing."""
@@ -308,7 +308,7 @@ class TestMessageRoutingReal:
     async def setup_routing_services(self):
         """Setup for message routing tests."""
         self.env = IsolatedEnvironment()
-        self.env.enable()
+        self.env.enable_isolation()
         
         self.real_services = get_real_services()
         await self.real_services.ensure_all_services_available()
@@ -317,7 +317,7 @@ class TestMessageRoutingReal:
         yield
         
         await self.real_services.close_all()
-        self.env.disable(restore_original=True)
+        self.env.disable_isolation(restore_original=True)
     
     async def test_message_routing_real_websocket(self):
         """Test message routing capabilities with real WebSocket connections."""

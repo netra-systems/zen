@@ -1,22 +1,17 @@
 #!/usr/bin/env python3
 """
-Issue #586 Staging Validation: WebSocket Race Condition Prevention Test
+STAGING WEBSOCKET VALIDATION: Issue #773 Deployment Test
+Tests WebSocket infrastructure with staging fallback behavior.
 
-This script validates that the Issue #586 fixes are working correctly in the
-GCP staging environment by testing WebSocket connection behavior.
-
-Key Validation Points:
-1. WebSocket connections should not receive 1011 errors during startup
-2. Conservative timeout values should be applied correctly in GCP
-3. Environment detection should work properly in Cloud Run
-4. Golden Path chat functionality should remain operational
-5. No new breaking changes introduced
+Business Impact: Validates $500K+ ARR WebSocket functionality in staging environment
 """
 
 import asyncio
-import json
-import sys
 import time
+import os
+import sys
+from typing import Dict, Any
+import json
 from datetime import datetime
 
 # Simplified test without external dependencies

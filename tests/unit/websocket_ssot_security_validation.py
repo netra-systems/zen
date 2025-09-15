@@ -151,7 +151,7 @@ class TestWebSocketSingletonSecurityValidation(BaseTestClass):
         
         prohibited_patterns = [
             'from netra_backend.app.websocket_core.manager import',
-            'from netra_backend.app.websocket_core.unified_manager import WebSocketManager',
+            'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
             'import netra_backend.app.websocket_core.manager',
             'from .manager import',
             'from ..websocket_core.manager import'

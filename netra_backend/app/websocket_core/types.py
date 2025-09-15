@@ -19,6 +19,7 @@ from pydantic import BaseModel, Field
 
 # Import UnifiedIdGenerator for SSOT ID generation
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+from shared.isolated_environment import get_env
 
 
 class WebSocketConnectionState(str, Enum):
@@ -49,6 +50,7 @@ class MessageType(str, Enum):
     # Connection lifecycle
     CONNECT = "connect"
     DISCONNECT = "disconnect"
+    CONNECTION_ESTABLISHED = "connection_established"  # Specific connection event
     HEARTBEAT = "heartbeat"
     HEARTBEAT_ACK = "heartbeat_ack"
     PING = "ping"
@@ -68,6 +70,14 @@ class MessageType(str, Enum):
     
     # Agent communication
     START_AGENT = "start_agent"
+    AGENT_STARTED = "agent_started"  # Required for mission critical tests
+    AGENT_START = "agent_start"  # Alias for compatibility
+    AGENT_COMPLETE = "agent_complete"  # Alias for compatibility
+    AGENT_COMPLETED = "agent_completed"  # Required for mission critical tests
+    TOOL_EXECUTE = "tool_execute"  # Alias for compatibility  
+    TOOL_EXECUTING = "tool_executing"  # Required for mission critical tests
+    TOOL_COMPLETE = "tool_complete"  # Alias for compatibility
+    TOOL_COMPLETED = "tool_completed"  # Required for mission critical tests
     AGENT_REQUEST = "agent_request"
     AGENT_TASK = "agent_task"
     AGENT_TASK_ACK = "agent_task_ack"
@@ -342,17 +352,16 @@ class WebSocketConfig(BaseModel):
     @classmethod
     def detect_and_configure_for_environment(cls) -> 'WebSocketConfig':
         """Detect environment and return optimized configuration."""
-        import os
-        
+
         # Detect Cloud Run environment
         is_cloud_run = any([
-            os.getenv('K_SERVICE'),  # Cloud Run service name
-            os.getenv('K_REVISION'),  # Cloud Run revision
-            os.getenv('GOOGLE_CLOUD_PROJECT'),  # GCP project
-            'run.app' in os.getenv('GAE_APPLICATION', ''),  # Cloud Run domain
+            get_env('K_SERVICE'),  # Cloud Run service name
+            get_env('K_REVISION'),  # Cloud Run revision
+            get_env('GOOGLE_CLOUD_PROJECT'),  # GCP project
+            'run.app' in get_env('GAE_APPLICATION', ''),  # Cloud Run domain
         ])
-        
-        environment = os.getenv('ENVIRONMENT', 'development')
+
+        environment = get_env('ENVIRONMENT', 'development')
         
         if is_cloud_run or environment in ['staging', 'production']:
             # Use Cloud Run optimized settings for production environments
@@ -420,7 +429,6 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "connect": MessageType.CONNECT,
     "disconnect": MessageType.DISCONNECT,
     "connected": MessageType.CONNECT,
-    "connection_established": MessageType.CONNECT,
     
     # User messages
     "user": MessageType.USER_MESSAGE,  # Map 'user' to USER_MESSAGE
@@ -446,14 +454,14 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "agent_error": MessageType.AGENT_ERROR,
     "start_agent": MessageType.START_AGENT,
     
-    # Critical agent event types (for frontend chat UI)
-    "agent_started": MessageType.START_AGENT,
-    "agent_thinking": MessageType.AGENT_PROGRESS,
-    "agent_completed": MessageType.AGENT_RESPONSE_COMPLETE,
+    # Critical agent event types (for frontend chat UI) - FIXED for Issue #911
+    "agent_started": MessageType.AGENT_STARTED,
+    "agent_thinking": MessageType.AGENT_THINKING,
+    "agent_completed": MessageType.AGENT_COMPLETED,
     "agent_failed": MessageType.AGENT_ERROR,
     "agent_fallback": MessageType.AGENT_ERROR,
-    "tool_executing": MessageType.AGENT_PROGRESS,
-    "tool_completed": MessageType.AGENT_PROGRESS,
+    "tool_executing": MessageType.TOOL_EXECUTING,
+    "tool_completed": MessageType.TOOL_COMPLETED,
     
     # CRITICAL FIX: Add missing execute_agent mapping (causes Tests 23 & 25 failures)
     "execute_agent": MessageType.START_AGENT,
@@ -476,9 +484,10 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "system_message": MessageType.SYSTEM_MESSAGE,
     
     # Connection establishment messages (websocket_ssot.py patterns)
-    "factory_connection_established": MessageType.CONNECT,
-    "isolated_connection_established": MessageType.CONNECT,  
-    "legacy_connection_established": MessageType.CONNECT,
+    "connection_established": MessageType.CONNECTION_ESTABLISHED,
+    "factory_connection_established": MessageType.CONNECTION_ESTABLISHED,
+    "isolated_connection_established": MessageType.CONNECTION_ESTABLISHED,  
+    "legacy_connection_established": MessageType.CONNECTION_ESTABLISHED,
     
     # Broadcasting
     "broadcast": MessageType.BROADCAST,
@@ -488,7 +497,11 @@ LEGACY_MESSAGE_TYPE_MAP = {
     
     # Testing
     "resilience_test": MessageType.RESILIENCE_TEST,
-    "recovery_test": MessageType.RECOVERY_TEST
+    "recovery_test": MessageType.RECOVERY_TEST,
+
+    # Additional legacy mappings - Issue #913 remediation
+    "legacy_response": MessageType.AGENT_RESPONSE,
+    "legacy_heartbeat": MessageType.HEARTBEAT
 }
 
 # Frontend compatibility mapping - maps backend types to frontend-expected types
@@ -550,13 +563,34 @@ def get_frontend_message_type(message_type: Union[str, MessageType]) -> str:
     return normalized.value
 
 
-def create_standard_message(msg_type: Union[str, MessageType], 
-                          payload: Dict[str, Any],
+def create_standard_message(msg_type: Union[str, MessageType] = None, 
+                          payload: Dict[str, Any] = None,
                           user_id: Optional[str] = None,
-                          thread_id: Optional[str] = None) -> WebSocketMessage:
+                          thread_id: Optional[str] = None,
+                          message_type: Optional[Union[str, MessageType]] = None,
+                          content: Optional[Dict[str, Any]] = None,
+                          **kwargs) -> WebSocketMessage:
     """Create standardized WebSocket message with strict validation."""
     import time
     import uuid
+    
+    # Handle backward compatibility for message_type parameter
+    if message_type is not None:
+        if msg_type is not None:
+            raise ValueError("Cannot specify both msg_type and message_type parameters")
+        msg_type = message_type
+    
+    # Handle backward compatibility for content parameter (alias for payload)
+    if content is not None:
+        if payload is not None:
+            raise ValueError("Cannot specify both payload and content parameters")
+        payload = content
+    
+    # Validate required parameters
+    if msg_type is None:
+        raise ValueError("msg_type (or message_type) is required")
+    if payload is None:
+        payload = {}
     
     # Phase 2 Fix 2b: Strengthen JSON schema validation
     # Validate message type first (this will raise proper errors now)
@@ -663,9 +697,10 @@ def create_error_message(error_code: str,
     )
 
 
-def create_server_message(msg_type_or_dict: Union[str, MessageType, Dict[str, Any]],
+def create_server_message(msg_type_or_dict: Union[str, MessageType, Dict[str, Any]] = None,
                          data: Optional[Dict[str, Any]] = None,
                          correlation_id: Optional[str] = None,
+                         content: Optional[Dict[str, Any]] = None,
                          **kwargs) -> ServerMessage:
     """
     Create standardized server message with hybrid signature support.
@@ -694,6 +729,16 @@ def create_server_message(msg_type_or_dict: Union[str, MessageType, Dict[str, An
         ValueError: If arguments are invalid or ambiguous
     """
     import time
+    
+    # Handle content-only pattern (used by tests)
+    if msg_type_or_dict is None and content is not None:
+        # Default to SYSTEM_MESSAGE for content-only calls
+        msg_type_or_dict = MessageType.SYSTEM_MESSAGE
+        data = content
+    
+    # Handle backward compatibility for content parameter
+    if content is not None and data is None and not isinstance(msg_type_or_dict, dict):
+        data = content
     
     # PATTERN DETECTION: Legacy vs Standard calling patterns
     if isinstance(msg_type_or_dict, dict):
@@ -865,6 +910,45 @@ class MessageBatch(BaseModel):
     created_at: float = Field(default_factory=time.time)
     total_size_bytes: int = 0
     compression_enabled: bool = False
+
+
+# Additional WebSocket types for integration tests
+
+class ConnectionMetadata(BaseModel):
+    """Connection metadata for WebSocket connections."""
+    connection_id: str
+    user_id: str
+    thread_id: Optional[str] = None
+    connected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    client_info: Optional[Dict[str, Any]] = None
+    session_data: Optional[Dict[str, Any]] = None
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        if not self.connection_id:
+            # Generate connection_id using user_id for proper pattern
+            self.connection_id = UnifiedIdGenerator.generate_websocket_connection_id(self.user_id)
+
+
+class AgentEvent(BaseModel):
+    """Agent event data model for WebSocket communication."""
+    event_type: str
+    agent_id: Optional[str] = None
+    user_id: Optional[str] = None
+    thread_id: Optional[str] = None
+    data: Dict[str, Any] = Field(default_factory=dict)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    event_id: Optional[str] = None
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        if not self.event_id:
+            # Generate event_id for tracking
+            self.event_id = UnifiedIdGenerator.generate_base_id(
+                f"evt_{self.event_type}",
+                include_random=True,
+                random_length=8
+            )
 
 
 # Backward compatibility aliases

@@ -32,7 +32,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.state import DeepAgentState  # DEPRECATED - tests are migrating away
+from netra_backend.app.schemas.agent_models import DeepAgentState  # DEPRECATED - tests are migrating away
 from netra_backend.app.core.agent_execution_tracker import get_execution_tracker, ExecutionState
 from netra_backend.app.logging_config import central_logger
 from shared.isolated_environment import IsolatedEnvironment

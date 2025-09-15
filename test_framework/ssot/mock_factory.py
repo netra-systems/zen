@@ -26,6 +26,8 @@ Usage:
 from unittest.mock import AsyncMock, MagicMock, Mock
 from typing import Dict, Any, Optional, List
 from datetime import datetime, UTC
+import time
+import uuid
 
 
 class SSotMockFactory:
@@ -181,7 +183,11 @@ class SSotMockFactory:
         mock_response.choices[0].message.content = response_text
         mock_response.usage.total_tokens = 100
         
+        # FIX: Use proper async mock for LLM operations
         mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
+        mock_client.agenerate = AsyncMock(return_value={"response": response_text, "usage": {"total_tokens": 100}})
+        mock_client.get_default_client = AsyncMock(return_value=mock_client)
+        
         return mock_client
 
     @staticmethod
@@ -251,6 +257,10 @@ class SSotMockFactory:
             "max_tokens": 4000,
             "supports_streaming": True
         })
+        
+        # FIX: Create default client mock properly
+        mock_default_client = SSotMockFactory.create_llm_client_mock()
+        mock_llm_manager.get_default_client = AsyncMock(return_value=mock_default_client)
         
         # Mock streaming support
         async def mock_stream_response():
@@ -373,17 +383,25 @@ class SSotMockFactory:
         user_id: str = "test_user",
         thread_id: str = "test_thread",
         run_id: str = "test_run",
-        request_id: str = "test_request"
+        request_id: str = "test_request",
+        websocket_client_id: Optional[str] = None,
+        connection_id: Optional[str] = None,
+        **kwargs
     ) -> MagicMock:
         """
         Create a standardized user execution context mock for testing.
-        
+
+        ISSUE #669 REMEDIATION: Added websocket_client_id parameter for interface consistency.
+
         Args:
             user_id: Mock user identifier
             thread_id: Mock thread identifier
             run_id: Mock run identifier
             request_id: Mock request identifier
-            
+            websocket_client_id: WebSocket client identifier (ISSUE #669 fix)
+            connection_id: Optional connection identifier
+            **kwargs: Additional arguments for extensibility
+
         Returns:
             MagicMock configured for user context testing
         """
@@ -396,7 +414,54 @@ class SSotMockFactory:
         mock_context.created_at = datetime.now(UTC)
         mock_context.get_state = MagicMock(return_value={})
         mock_context.set_state = MagicMock()
+
+        # ISSUE #669 REMEDIATION: Handle websocket_client_id parameter
+        if websocket_client_id and not connection_id:
+            connection_id = websocket_client_id
+
+        mock_context.connection_id = connection_id or f"conn_{user_id}_{thread_id}"
+        mock_context.websocket_client_id = websocket_client_id or mock_context.connection_id
+
+        # Add any additional kwargs as attributes
+        for key, value in kwargs.items():
+            setattr(mock_context, key, value)
+
         return mock_context
+
+    @staticmethod
+    def create_isolated_execution_context(
+        user_id: str,
+        thread_id: str,
+        websocket_client_id: Optional[str] = None,
+        connection_id: Optional[str] = None,
+        **kwargs
+    ) -> MagicMock:
+        """
+        Create isolated execution context mock for testing.
+
+        ISSUE #669 REMEDIATION: Added websocket_client_id parameter support that
+        was missing and causing test failures.
+
+        Args:
+            user_id: User identifier
+            thread_id: Thread identifier
+            websocket_client_id: WebSocket client identifier (ISSUE #669 fix)
+            connection_id: Optional connection identifier
+            **kwargs: Additional arguments for extensibility
+
+        Returns:
+            MagicMock: Mock execution context with expected interface
+        """
+        # Delegate to create_mock_user_context with the new parameter
+        return SSotMockFactory.create_mock_user_context(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=f"run_{user_id}_{thread_id}_{int(time.time() * 1000)}",
+            request_id=f"req_{user_id}_{thread_id}_{int(time.time() * 1000)}",
+            websocket_client_id=websocket_client_id,
+            connection_id=connection_id,
+            **kwargs
+        )
 
     @classmethod
     def create_mock_suite(cls, mock_types: List[str]) -> Dict[str, Any]:
@@ -446,8 +511,15 @@ class SSotMockFactory:
             return cls.create_database_session_mock()
         elif mock_type == "UserExecutionEngine":
             mock_engine = AsyncMock()
+            # FIX: Properly configure UserExecutionEngine mock
+            mock_engine.engine_id = kwargs.get('engine_id', f"engine_{uuid.uuid4().hex[:8]}")
             mock_engine.execute_agent_pipeline = AsyncMock()
             mock_engine.cleanup = AsyncMock()
+            mock_engine.is_active = AsyncMock(return_value=True)
+            mock_engine.get_user_context = AsyncMock()
+            mock_engine.created_at = time.time()
+            mock_engine.active_runs = []
+            mock_engine.get_user_execution_stats = AsyncMock(return_value={})
             return mock_engine
         elif mock_type == "WebSocketManager":
             return cls.create_websocket_manager_mock(**kwargs)
@@ -455,6 +527,13 @@ class SSotMockFactory:
             return cls.create_mock_llm_manager(**kwargs)
         elif mock_type == "AgentWebSocketBridge":
             return cls.create_mock_agent_websocket_bridge(**kwargs)
+        elif mock_type == "UnifiedWebSocketEmitter":
+            # FIX: Add UnifiedWebSocketEmitter mock support
+            mock_emitter = AsyncMock()
+            mock_emitter.emit_event = AsyncMock()
+            mock_emitter.emit_critical_event = AsyncMock()
+            mock_emitter.send_message = AsyncMock()
+            return mock_emitter
         else:
             # Generic mock for unknown types
             return AsyncMock(**kwargs)

@@ -27,7 +27,7 @@ import threading
 import pytest
 from loguru import logger
 import websockets
-from websockets.exceptions import WebSocketException
+from websockets import WebSocketException
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path
@@ -36,7 +36,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Import production components
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 # SECURITY FIX: Use UserExecutionEngine SSOT instead of deprecated ExecutionEngine
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine

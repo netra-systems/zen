@@ -10,13 +10,13 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.base.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
     ExecutionStrategy,
 )
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 

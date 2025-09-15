@@ -25,7 +25,7 @@ import random
 from shared.isolated_environment import IsolatedEnvironment
 
 import websockets
-from websockets.exceptions import ConnectionClosed
+from websockets import ConnectionClosed
 
 from test_framework.test_context import TestContext, create_test_context
 from test_framework.websocket_helpers import WebSocketTestHelpers

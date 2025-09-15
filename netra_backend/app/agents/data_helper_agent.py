@@ -16,8 +16,8 @@ if TYPE_CHECKING:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 from netra_backend.app.agents.base_agent import BaseAgent
-# SSOT COMPLIANCE: Import from facade that redirects to SSOT
-from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcher
+# SSOT COMPLIANCE: Import from core SSOT location
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.tools.data_helper import DataHelper
@@ -54,25 +54,25 @@ class DataHelperAgent(BaseAgent):
         self.data_helper_tool = DataHelper(llm_manager)
     
     @classmethod
-    def create_agent_with_context(cls, user_context: 'UserExecutionContext') -> 'DataHelperAgent':
+    async def create_agent_with_context(cls, user_context: 'UserExecutionContext') -> 'DataHelperAgent':
         """Create DataHelperAgent with proper UserExecutionContext pattern.
-        
+
         This method provides the correct constructor signature for the factory pattern,
         avoiding the constructor parameter mismatch with BaseAgent.create_agent_with_context.
-        
+
         Args:
             user_context: User execution context for isolation
-            
+
         Returns:
             DataHelperAgent instance configured for the user context
         """
         from netra_backend.app.llm.llm_manager import create_llm_manager
-        # SSOT COMPLIANCE: Import from facade that redirects to SSOT
-        from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcher
-        
+        # SSOT COMPLIANCE: Use factory pattern for tool dispatcher
+        from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcherFactory
+
         # Create dependencies with proper user isolation
         llm_manager = create_llm_manager(user_context)
-        tool_dispatcher = UnifiedToolDispatcher.create_for_user(user_context)
+        tool_dispatcher = await UnifiedToolDispatcherFactory.create_for_request(user_context)
         
         # Create agent with correct constructor signature
         agent = cls(llm_manager=llm_manager, tool_dispatcher=tool_dispatcher)

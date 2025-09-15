@@ -81,7 +81,12 @@ class ExampleResponseFormatter:
         user_tier: str = 'free'
     ) -> FormattedResult:
         """Main formatting method"""
-        
+
+        # Handle non-dict inputs gracefully
+        if not isinstance(result, dict):
+            logger.error(f"Invalid input type for format_response: {type(result)}. Expected dict.")
+            return self._format_error_response(f"Invalid input type: {type(result).__name__}. Expected dictionary.")
+
         optimization_type = result.get('optimization_type', 'general')
         
         try:
@@ -163,13 +168,13 @@ class ExampleResponseFormatter:
         for i, opp in enumerate(opportunities[:3]):  # Limit to top 3
             priority = ['high', 'medium', 'low'][i] if i < 3 else 'low'
             recommendations.append(FormattedRecommendation(
-                title=opp.get('strategy', ''),
-                description=opp.get('description', ''),
+                title=opp.get('strategy', 'Optimization Strategy'),
+                description=opp.get('description', 'Implement cost optimization measures'),
                 priority=priority,
-                impact=opp.get('potential_savings', ''),
-                effort=opp.get('implementation_effort', ''),
+                impact=opp.get('potential_savings', 'High'),
+                effort=opp.get('implementation_effort', 'Medium'),
                 timeline="2-4 weeks",
-                business_value=f"Cost reduction: {opp.get('potential_savings', '')}"
+                business_value=f"Cost reduction: {opp.get('potential_savings', 'Significant savings')}"
             ))
             
         # Implementation steps
@@ -178,6 +183,16 @@ class ExampleResponseFormatter:
         for week, tasks in roadmap.items():
             if isinstance(tasks, list):
                 steps.extend([f"{week.replace('_', ' ').title()}: {task}" for task in tasks])
+
+        # Provide default actionable steps if no roadmap provided
+        if not steps:
+            steps = [
+                "Analyze current cost structure and identify optimization opportunities",
+                "Implement model right-sizing for different request types",
+                "Deploy intelligent caching to reduce redundant processing",
+                "Configure usage monitoring and cost tracking alerts",
+                "Monitor performance and adjust optimization parameters"
+            ]
                 
         return FormattedResult(
             title="[U+1F4B0] Cost Optimization Analysis",
@@ -476,6 +491,16 @@ class ExampleResponseFormatter:
             tasks = details.get('tasks', []) if isinstance(details, dict) else []
             improvement = details.get('expected_improvement', '') if isinstance(details, dict) else ''
             steps.extend([f"{phase.replace('_', ' ').title()}: {task} ({improvement})" for task in tasks])
+
+        # Provide default actionable steps if no timeline provided
+        if not steps:
+            steps = [
+                "Analyze current multi-dimensional constraints and optimization targets",
+                "Implement comprehensive monitoring across cost, latency, and scaling metrics",
+                "Deploy integrated optimization engine with real-time adjustment capabilities",
+                "Configure automated alert system for constraint violations",
+                "Monitor and refine optimization parameters based on business impact"
+            ]
             
         return FormattedResult(
             title="[U+1F680] Advanced Multi-Dimensional Optimization",

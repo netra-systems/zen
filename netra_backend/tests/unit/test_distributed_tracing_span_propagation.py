@@ -29,7 +29,7 @@ except ImportError:
         # TODO: Initialize real service
             """Setup OpenTelemetry tracer for testing."""
             if not OPENTELEMETRY_AVAILABLE:
-                pytest.skip("OpenTelemetry not available - skipping tracing tests")
+                pytest.skip("OpenTelemetry not available - skipping tracing tests", allow_module_level=True)
                 tracer_provider = TracerProvider()
                 trace.set_tracer_provider(tracer_provider)
                 return trace.get_tracer(__name__)

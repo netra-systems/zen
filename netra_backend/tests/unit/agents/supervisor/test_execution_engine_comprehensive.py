@@ -56,7 +56,7 @@ sys.modules['netra_backend.app.websocket_core.get_websocket_manager'] = Mock()
 
 try:
     # Import execution engine components with compatibility bridge
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     from netra_backend.app.agents.supervisor.execution_engine_factory import (
         create_request_scoped_engine,
     )
@@ -78,7 +78,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
     InvalidContextError,
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.agent_execution_tracker import ExecutionState
 
 
@@ -309,7 +309,7 @@ class TestExecutionEngineConstructionComprehensive(AsyncBaseTestCase):
         Test that direct ExecutionEngine construction is blocked with helpful error message.
         """
         with self.assertRaises(RuntimeError) as cm:
-            ExecutionEngine(self.registry, self.websocket_bridge)
+            UserExecutionEngine(self.registry, self.websocket_bridge)
             
         error_message = str(cm.exception)
         # Verify error message contains all required guidance
@@ -326,7 +326,7 @@ class TestExecutionEngineConstructionComprehensive(AsyncBaseTestCase):
         user_context = UserExecutionContext.from_request("user", "thread", "run")
         
         with self.assertRaises(RuntimeError) as cm:
-            ExecutionEngine(self.registry, self.websocket_bridge, user_context)
+            UserExecutionEngine(self.registry, self.websocket_bridge, user_context)
             
         self.assertIn("Direct ExecutionEngine instantiation is no longer supported", str(cm.exception))
         

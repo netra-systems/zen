@@ -1,0 +1,41 @@
+{
+  "terminals": [
+    {
+      "name": "Main Development",
+      "args": [
+        "--project",
+        "netra-apex"
+      ],
+      "working_dir": null
+    },
+    {
+      "name": "Testing Terminal",
+      "args": [
+        "--project",
+        "netra-apex",
+        "--context",
+        "testing"
+      ],
+      "working_dir": null
+    },
+    {
+      "name": "Debugging Session",
+      "args": [
+        "--project",
+        "netra-apex",
+        "--context",
+        "debug"
+      ],
+      "working_dir": null
+    }
+  ],
+  "terminal_type": "auto",
+  "delay_between_launches": 1.0,
+  "headless_options": {
+    "log_output": true,
+    "log_level": "INFO",
+    "auto_restart": false,
+    "restart_delay": 30,
+    "max_restarts": 3
+  }
+}

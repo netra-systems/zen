@@ -31,7 +31,7 @@ from netra_backend.app.services.user_execution_context import (
 
 # Test imports for deprecated DeepAgentState
 try:
-    from netra_backend.app.agents.state import DeepAgentState
+    from netra_backend.app.schemas.agent_models import DeepAgentState
     DEEP_AGENT_STATE_EXISTS = True
 except ImportError:
     DEEP_AGENT_STATE_EXISTS = False
@@ -112,7 +112,7 @@ class TestUserContextSecurity(SSotAsyncTestCase):
         with patch('netra_backend.app.services.user_execution_context.DEEP_AGENT_STATE_SECURITY_CHECK', True):
             with pytest.raises(InvalidContextError) as exc_info:
                 # Simulate code trying to use DeepAgentState
-                from netra_backend.app.agents.state import DeepAgentState
+                from netra_backend.app.schemas.agent_models import DeepAgentState
                 state = DeepAgentState()
                 
                 # This should trigger security validation

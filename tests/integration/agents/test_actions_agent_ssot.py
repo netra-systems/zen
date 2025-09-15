@@ -51,7 +51,7 @@ from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from netra_backend.app.llm.llm_manager import LLMManager
 
 # Import state and data types
@@ -408,7 +408,7 @@ class TestActionsAgentSupervisorIntegration:
         # Create execution infrastructure
         tool_dispatcher = ToolDispatcher()
         agent_registry = AgentRegistry()
-        execution_engine = ExecutionEngine(agent_registry, self.websocket_capture)
+        execution_engine = UserExecutionEngine(agent_registry, self.websocket_capture)
         
         # Get ActionsAgent
         actions_agent = agent_registry.get_agent('actions')

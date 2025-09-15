@@ -65,7 +65,7 @@ except ImportError:
 
 # Import production WebSocket components for validation
 try:
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     # SECURITY FIX: Use UserExecutionEngine SSOT instead of deprecated ExecutionEngine
@@ -497,7 +497,7 @@ class TestWebSocketAgentEventsCore:
         try:
             # Setup real agent execution environment
             agent_registry = AgentRegistry()
-            execution_engine = ExecutionEngine()
+            execution_engine = UserExecutionEngine()
             
             # Mock execution context
             execution_context = MagicMock()

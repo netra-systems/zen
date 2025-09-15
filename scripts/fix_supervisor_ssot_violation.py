@@ -55,14 +55,14 @@ def update_imports_in_file(file_path: Path) -> Tuple[bool, str]:
         # Replace supervisor_agent imports
         content = re.sub(
             r'from\s+netra_backend\.app\.agents\.supervisor_agent\s+import\s+SupervisorAgent',
-            'from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent',
+            'from netra_backend.app.agents.supervisor_ssot import SupervisorAgent',
             content
         )
         
         # Replace supervisor_agent_modern imports
         content = re.sub(
             r'from\s+netra_backend\.app\.agents\.supervisor_agent_modern\s+import\s+SupervisorAgent',
-            'from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent',
+            'from netra_backend.app.agents.supervisor_ssot import SupervisorAgent',
             content
         )
         

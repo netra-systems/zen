@@ -64,8 +64,8 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 
 # Import REAL WebSocket test utilities - NO MOCKS per CLAUDE.md
@@ -250,7 +250,7 @@ class RealAgentPerformanceTester:
         websocket_notifier.send_event = performance_monitored_event_sender
         
         # Create execution engine with performance monitoring
-        execution_engine = ExecutionEngine()
+        execution_engine = UserExecutionEngine()
         execution_engine.set_websocket_notifier(websocket_notifier)
         
         # Create agent context

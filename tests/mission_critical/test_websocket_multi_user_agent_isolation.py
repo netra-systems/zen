@@ -59,8 +59,8 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.llm.llm_manager import LLMManager
 
 # Import REAL WebSocket test utilities - NO MOCKS per CLAUDE.md
@@ -92,7 +92,7 @@ class MultiUserIsolationValidator:
         
     def create_isolated_user_context(self, user_id: str) -> UserExecutionContext:
         """Create completely isolated user execution context."""
-        user_context = UserExecutionContext.create_for_request(
+        user_context = UserExecutionContext.from_request(
             user_id=user_id,
             request_id=f"req_{uuid.uuid4().hex[:8]}_{user_id}",
             thread_id=f"thread_{uuid.uuid4().hex[:8]}_{user_id}",
@@ -187,7 +187,7 @@ class RealAgentExecutionIsolationTest:
         websocket_notifier.send_event = isolated_event_capture
         
         # Create isolated execution engine
-        execution_engine = ExecutionEngine()
+        execution_engine = UserExecutionEngine()
         execution_engine.set_websocket_notifier(websocket_notifier)
         
         # Create isolated agent context

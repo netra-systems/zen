@@ -67,9 +67,9 @@ class TestWebSocketManagerCanonicalImports(SSotBaseTestCase):
         
         # Define expected canonical import mapping
         canonical_mappings = {
-            'WebSocketManagerFactory': {
-                'canonical_path': 'netra_backend.app.websocket_core.websocket_manager_factory',
-                'canonical_class': 'WebSocketManagerFactory',
+            'get_websocket_manager': {
+                'canonical_path': 'netra_backend.app.websocket_core.websocket_manager',
+                'canonical_class': 'get_websocket_manager',
                 'aliases_allowed': [],  # No aliases should exist for factory
             },
             'WebSocketManager': {
@@ -91,7 +91,7 @@ class TestWebSocketManagerCanonicalImports(SSotBaseTestCase):
         
         # Search for actual import paths
         search_modules = [
-            'netra_backend.app.websocket_core.websocket_manager_factory',
+            'netra_backend.app.websocket_core.websocket_manager',
             'netra_backend.app.websocket_core.websocket_manager',
             'netra_backend.app.websocket_core.unified_manager',
             'netra_backend.app.websocket_core.manager',
@@ -199,7 +199,7 @@ class TestWebSocketManagerCanonicalImports(SSotBaseTestCase):
             {
                 'module': 'netra_backend.app.websocket_core.singleton_manager',
                 'class': 'SingletonWebSocketManager', 
-                'replacement': 'netra_backend.app.websocket_core.websocket_manager_factory.WebSocketManagerFactory'
+                'replacement': 'netra_backend.app.websocket_core.websocket_manager.get_websocket_manager'
             },
             # Legacy connection patterns
             {
@@ -215,9 +215,9 @@ class TestWebSocketManagerCanonicalImports(SSotBaseTestCase):
             },
             # Legacy factory patterns
             {
-                'module': 'netra_backend.app.websocket_core.factory',
+                'module': 'netra_backend.app.websocket_core.canonical_imports',
                 'class': 'ManagerFactory',
-                'replacement': 'netra_backend.app.websocket_core.websocket_manager_factory.WebSocketManagerFactory'
+                'replacement': 'netra_backend.app.services.user_execution_context.create_defensive_user_execution_context'
             }
         ]
         
@@ -380,7 +380,7 @@ class TestWebSocketManagerCanonicalImports(SSotBaseTestCase):
         
         # Search through WebSocket modules for potential aliases
         websocket_modules = [
-            'netra_backend.app.websocket_core.websocket_manager_factory',
+            'netra_backend.app.websocket_core.websocket_manager',
             'netra_backend.app.websocket_core.websocket_manager',
             'netra_backend.app.websocket_core.unified_manager',
             'netra_backend.app.websocket_core.manager',
@@ -439,7 +439,7 @@ class TestWebSocketManagerCanonicalImports(SSotBaseTestCase):
         
         # Search for lazy import patterns in WebSocket modules
         modules_to_analyze = [
-            'netra_backend.app.websocket_core.websocket_manager_factory',
+            'netra_backend.app.websocket_core.websocket_manager',
             'netra_backend.app.websocket_core.websocket_manager', 
             'netra_backend.app.websocket_core.unified_manager',
             'netra_backend.app.websocket_core.manager',

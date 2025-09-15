@@ -37,26 +37,26 @@ import json
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 import uuid
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
-from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+from netra_backend.app.redis_manager import redis_manager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.core.configuration.manager import ConfigurationManager
 from netra_backend.app.database import get_db, Base
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.websocket_core import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.models import User, Thread, Message, AgentExecution
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler

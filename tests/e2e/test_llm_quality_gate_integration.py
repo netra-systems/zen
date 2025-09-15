@@ -18,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from tests.e2e.agent_response_test_utilities import (

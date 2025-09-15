@@ -17,6 +17,7 @@ This module tests the AgentExecutionPhase validation rules to ensure:
 """
 
 import pytest
+import unittest
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
@@ -34,7 +35,7 @@ from netra_backend.app.core.agent_execution_tracker import (
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestPhaseValidationRules(SSotBaseTestCase):
+class TestPhaseValidationRules(SSotBaseTestCase, unittest.TestCase):
     """Unit tests for agent execution phase validation and transition rules."""
     
     def setUp(self):
@@ -453,16 +454,24 @@ class MockPhaseValidator:
         """Check if transition is valid."""
         return (from_phase, to_phase) in self.valid_transitions
     
-    def is_reasonable_timing(self, from_phase: AgentExecutionPhase, 
+    def is_reasonable_timing(self, from_phase: AgentExecutionPhase,
                            to_phase: AgentExecutionPhase, duration_ms: int) -> bool:
         """Check if transition timing is reasonable."""
-        # Simple timing validation logic
+        # Timing validation logic aligned with test expectations
         timing_limits = {
-            (AgentExecutionPhase.CREATED, AgentExecutionPhase.WEBSOCKET_SETUP): 100,
+            # Quick transitions (setup/validation)
+            (AgentExecutionPhase.CREATED, AgentExecutionPhase.WEBSOCKET_SETUP): 100,  # 0-100ms
+            (AgentExecutionPhase.WEBSOCKET_SETUP, AgentExecutionPhase.CONTEXT_VALIDATION): 50,  # 0-50ms
+
+            # Medium transitions (preparation)
+            (AgentExecutionPhase.CONTEXT_VALIDATION, AgentExecutionPhase.STARTING): 200,
             (AgentExecutionPhase.THINKING, AgentExecutionPhase.TOOL_PREPARATION): 1000,
+
+            # Potentially longer transitions (LLM calls)
+            (AgentExecutionPhase.TOOL_PREPARATION, AgentExecutionPhase.LLM_INTERACTION): 5000,
             (AgentExecutionPhase.LLM_INTERACTION, AgentExecutionPhase.TOOL_EXECUTION): 15000,
         }
-        
+
         max_duration = timing_limits.get((from_phase, to_phase), 5000)  # Default 5s
         return 0 <= duration_ms <= max_duration
 

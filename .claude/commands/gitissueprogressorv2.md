@@ -18,6 +18,10 @@ ALL Github content must follow @GITHUB_STYLE_GUIDE.md
 - **All work performed on**: develop-long-lived
 - **PR target**: develop-long-lived (current working branch) - NEVER main
 
+Issue Exclusion List (IEL): generally do not create issues for the following cases:
+    1. IEL: merge conflicts
+    2. IEL: local env specific issues
+
 
 FOR EACH ISSUE IN ISSUE_LIST:
 
@@ -42,7 +46,7 @@ FOR EACH ISSUE IN ISSUE_LIST:
         2) STATUS DECISION :
         IF the issue appears to already be resolved:
             close the issue and repeat PROCESS loop, otherwise continue to the next step.
-            If closing issue: remove tag: actively-being-worked-on
+            If closing issue: remove label: actively-being-worked-on
             update the existing comment on the ISSUE with your learnings
 
     OPTIONAL STEPS IF ISSUE IS OPEN:
@@ -70,13 +74,15 @@ FOR EACH ISSUE IN ISSUE_LIST:
 
     6) EXECUTE THE REMEDIATION ITEM SPECIFIC PLAN: SNST :
         6.1) UPDATE the comment on the ISSUE with the results
-        6.2) Git commit work in conceptual batches. 
+        6.2) Run startup tests (non docker) fix import or other types of startup issues related to this change.
+        6.3) Git commit work in conceptual batches. 
         pull latest, and handle merge conflicts
 
     7) PROOF: SNST : Spawn a sub agent PROVE THAT THE CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
     otherwise go back and ensure that any code changes exclusively add value as one atomic package of commit and
     do not introduce new problems.
-    7.1) UPDATE a comment on the ISSUE with PROOF  following @GITHUB_STYLE_GUIDE.md  .
+    7.1)  Run startup tests (non docker) fix import or other types of startup issues related to this change.
+    7.2) UPDATE a comment on the ISSUE with PROOF  following @GITHUB_STYLE_GUIDE.md  .
 
     *Skip step 8 if recently deployed*
     8) Staging Deploy SNST :  Spawn a sub agent PROVE THAT THE CHANGES WORK OR FAIL IN STAGING.
@@ -101,7 +107,7 @@ FOR EACH ISSUE IN ISSUE_LIST:
     9.3) Cross link the prior generated issue so it will close on PR merge.
     9.4) **PR TARGET VALIDATION**: Ensure PR merges back to current working branch (develop-long-lived)
     9.5) Do a final update for this loop
-        If closing issue: remove tag: actively-being-worked-on
+        If closing issue: remove label: actively-being-worked-on
 
     END PROCESS INSTRUCTIONS
 

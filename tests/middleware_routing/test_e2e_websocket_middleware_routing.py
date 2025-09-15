@@ -17,7 +17,7 @@ from unittest.mock import patch, AsyncMock
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketState
-from websockets.exceptions import ConnectionClosed
+from websockets import ConnectionClosed
 from shared.isolated_environment import get_env
 
 

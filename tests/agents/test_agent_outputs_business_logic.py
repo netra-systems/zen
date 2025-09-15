@@ -16,7 +16,7 @@ from decimal import Decimal
 from typing import Dict, Any, List, Optional
 import json
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent

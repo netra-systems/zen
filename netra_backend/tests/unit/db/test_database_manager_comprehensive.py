@@ -1732,7 +1732,7 @@ class TestDatabaseManagerRealIntegration(BaseIntegrationTest):
             try:
                 await db_manager.initialize()
             except Exception as e:
-                pytest.skip(f"Real PostgreSQL not available: {e}")
+                pytest.skip(f"Real PostgreSQL not available: {e}", allow_module_level=True)
             
             try:
                 # Test real database session and query execution
@@ -1795,7 +1795,7 @@ class TestDatabaseManagerRealIntegration(BaseIntegrationTest):
             try:
                 await db_manager.initialize()
             except Exception as e:
-                pytest.skip(f"Real PostgreSQL not available: {e}")
+                pytest.skip(f"Real PostgreSQL not available: {e}", allow_module_level=True)
             
             try:
                 # Create test table
@@ -1882,7 +1882,7 @@ class TestDatabaseManagerRealIntegration(BaseIntegrationTest):
             try:
                 await db_manager.initialize()
             except Exception as e:
-                pytest.skip(f"Real PostgreSQL not available: {e}")
+                pytest.skip(f"Real PostgreSQL not available: {e}", allow_module_level=True)
             
             try:
                 # Test concurrent database access

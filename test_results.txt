@@ -1,0 +1,408 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
+configfile: pyproject.toml
+plugins: anyio-4.9.0, langsmith-0.4.15, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, Faker-37.4.2, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 120.0s
+timeout method: thread
+timeout func_only: False
+collected 78 items
+
+tests\unit\execution_engine_ssot\test_business_function_validation.py 
+[U+1F512] Testing user isolation prevents data leakage...
+F
+[U+1F4E1] Testing WebSocket events sent correctly...
+F
+ CYCLE:  Testing concurrent user WebSocket isolation...
+F
+[U+1F527] Testing tool execution maintains user context...
+F
+[U+1F916] Testing end-to-end agent execution flow...
+F
+ ALERT:  Testing error handling maintains user isolation...
+F
+ LIGHTNING:  Testing performance scalability...
+F
+tests\unit\execution_engine_ssot\test_deprecated_engine_import_analysis.py 
+ SEARCH:  Scanning codebase for deprecated execution engine imports...
+FFFF
+tests\unit\execution_engine_ssot\test_execution_engine_duplication_detection.py 
+DISCOVERED EXECUTION ENGINES (24):
+  IExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\execution_engine_interface.py (line 39)
+  ExecutionEngineCapabilities: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\execution_engine_interface.py (line 156)
+  ExecutionEngineAdapter: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\execution_engine_interface.py (line 243)
+  SupervisorExecutionEngineAdapter: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\execution_engine_legacy_adapter.py (line 42)
+  ConsolidatedExecutionEngineWrapper: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\execution_engine_legacy_adapter.py (line 164)
+  ExecutionEngineFactory: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\core\managers\execution_engine_factory.py (line 49)
+  GenericExecutionEngineAdapter: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\execution_engine_legacy_adapter.py (line 361)
+  UnifiedExecutionEngineFactory: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\execution_engine_unified_factory.py (line 39)
+  ToolExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\services\unified_tool_registry\execution_engine.py (line 31)
+  UnifiedToolExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\unified_tool_execution.py (line 119)
+  BaseExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\base\executor.py (line 266)
+  UserExecutionEngineExtensions: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\data_access_integration.py (line 243)
+  provides a clean way to extend UserExecutionEngine with data access: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\data_access_integration.py (line 247)
+  that creates UserExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\execution_engine_factory.py (line 3)
+  ExecutionEngineFactoryError: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\execution_engine_factory.py (line 50)
+  UserExecutionEngineWrapper: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\execution_factory.py (line 492)
+  IsolatedExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\execution_factory.py (line 535)
+  MCPEnhancedExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\mcp_execution_engine.py (line 194)
+  RequestScopedExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\request_scoped_execution_engine.py (line 80)
+  provides the minimal interface required by UserExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\user_execution_engine.py (line 182)
+  UserExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\user_execution_engine.py (line 239)
+  ExecutionEngineFactoryValidator: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\core\app_state_contracts.py (line 118)
+  RequestScopedExecutionEngineFactory: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\core\managers\execution_engine_factory.py (line 59)
+  is the target SSOT for Issue #686 ExecutionEngine consolidation.: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\core\tools\unified_tool_dispatcher.py (line 103)
+FF
+ENGINES WITH EXECUTION LOGIC (12):
+  IExecutionEngine: ['execute_agent', 'execute_pipeline'] (115 lines)
+  ExecutionEngineAdapter: ['execute_agent_adapted', 'execute_pipeline_adapted'] (103 lines)
+  SupervisorExecutionEngineAdapter: ['execute_agent', 'execute_agent_adapted', 'execute_pipeline', 'execute_pipeline_adapted'] (120 lines)
+  ConsolidatedExecutionEngineWrapper: ['execute_agent', 'execute_pipeline'] (122 lines)
+  GenericExecutionEngineAdapter: ['execute_agent', 'execute_agent_adapted', 'execute_pipeline', 'execute_pipeline_adapted'] (112 lines)
+  ToolExecutionEngine: ['execute_tool', 'execute_unified_tool'] (80 lines)
+  UnifiedToolExecutionEngine: ['execute_tool', 'execute_tool_with_input', 'execute_with_permissions', 'execute_with_state'] (1101 lines)
+  BaseExecutionEngine: ['execute', 'execute_phases'] (280 lines)
+  IsolatedExecutionEngine: ['execute_agent_pipeline'] (256 lines)
+  MCPEnhancedExecutionEngine: ['execute_agent', 'execute_pipeline'] (301 lines)
+  RequestScopedExecutionEngine: ['execute_agent'] (516 lines)
+  UserExecutionEngine: ['execute_agent', 'execute_agent_pipeline', 'execute_pipeline'] (1605 lines)
+FF
+DISCOVERED EXECUTION ENGINE FACTORIES (5):
+  ExecutionEngineFactory: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\core\managers\execution_engine_factory.py
+  UnifiedExecutionEngineFactory: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\execution_engine_unified_factory.py
+  that creates UserExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\execution_engine_factory.py
+  ExecutionEngineFactoryError: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\execution_engine_factory.py
+  RequestScopedExecutionEngineFactory: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\core\managers\execution_engine_factory.py
+F
+ENGINES WITH WEBSOCKET INTEGRATION (12):
+  ExecutionEngineCapabilities: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\execution_engine_interface.py
+  SupervisorExecutionEngineAdapter: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\execution_engine_legacy_adapter.py
+  GenericExecutionEngineAdapter: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\execution_engine_legacy_adapter.py
+  UnifiedExecutionEngineFactory: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\execution_engine_unified_factory.py
+  UnifiedToolExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\unified_tool_execution.py
+  BaseExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\base\executor.py
+  UserExecutionEngineWrapper: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\execution_factory.py
+  IsolatedExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\execution_factory.py
+  MCPEnhancedExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\mcp_execution_engine.py
+  RequestScopedExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\request_scoped_execution_engine.py
+  UserExecutionEngine: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\supervisor\user_execution_engine.py
+  ExecutionEngineFactoryValidator: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\core\app_state_contracts.py
+F
+tests\unit\execution_engine_ssot\test_factory_delegation_consolidation.py 
+ SEARCH:  Testing factory import availability...
+   PASS:  ExecutionEngineFactory imported successfully
+   FAIL:  ConsolidatedFactory not found in module: module 'netra_backend.app.agents.execution_engine_consolidated' has no attribute 'ConsolidatedFactory'
+   PASS:  WebSocketManagerFactory imported successfully
+   PASS:  UserExecutionEngine imported successfully
+   PASS:  3 factory classes imported successfully
+.
+ SEARCH:  Testing ExecutionEngineFactory delegation to UserExecutionEngine...
+F
+ SEARCH:  Testing consolidated factory patterns...
+F
+ SEARCH:  Testing factory async delegation...
+F
+ SEARCH:  Testing factory interface consistency...
+
+ SEARCH:  Testing factory import availability...
+   PASS:  ExecutionEngineFactory imported successfully
+   FAIL:  ConsolidatedFactory not found in module: module 'netra_backend.app.agents.execution_engine_consolidated' has no attribute 'ConsolidatedFactory'
+   PASS:  WebSocketManagerFactory imported successfully
+   PASS:  UserExecutionEngine imported successfully
+   PASS:  3 factory classes imported successfully
+   PASS:  Analyzed 2 factory interfaces
+   PASS:  Found factory patterns: ['create_execution_engine', 'create']
+   PASS:  Reasonable method duplication: 8 total, 7 unique
+   PASS:  Factory classes properly separated into 2 files
+   PASS:  Factory interfaces are consistent and SSOT-compliant
+.
+ SEARCH:  Testing factory memory efficiency...
+F
+tests\unit\execution_engine_ssot\test_factory_delegation_validation.py 
+ SEARCH:  Testing factory creates UserExecutionEngine instances...
+F
+ SEARCH:  Testing factory creates isolated engines for multiple users...
+F
+ SEARCH:  Testing factory WebSocket manager integration...
+F
+ SEARCH:  Testing factory handles concurrent creation...
+F
+ SEARCH:  Testing factory error handling...
+F
+ SEARCH:  Testing factory handles WebSocket manager failures...
+F
+ SEARCH:  Testing factory method compatibility...
+F
+ SEARCH:  Testing factory replaces deprecated creation patterns...
+F
+ SEARCH:  Testing factory instance creation vs reuse behavior...
+F
+ SEARCH:  Testing factory instance patterns...
+F
+tests\unit\execution_engine_ssot\test_memory_management_validation.py 
+ SEARCH:  Testing basic memory cleanup in UserExecutionEngine...
+   PASS:  0/0 engines properly garbage collected
+   PASS:  Memory growth: 0.00MB (tracemalloc)
+   PASS:  Process memory growth: 0.00MB
+F
+ SEARCH:  Testing concurrent memory isolation...
+   PASS:  0/8 concurrent users completed successfully
+   PASS:  Total memory growth: 0.11MB for 8 concurrent users
+F
+ SEARCH:  Testing resource cleanup validation...
+   PASS:  Thread count stable: 2 -> 2
+   PASS:  Handle count stable: 623 -> 622
+F
+ SEARCH:  Testing memory stress validation...
+    Running stress batch 1/10
+    Running stress batch 2/10
+    Running stress batch 3/10
+    Running stress batch 4/10
+    Running stress batch 5/10
+    Running stress batch 6/10
+    Running stress batch 7/10
+    Running stress batch 8/10
+    Running stress batch 9/10
+    Running stress batch 10/10
+   PASS:  Total events sent: 0
+   PASS:  Final memory growth: 0.02MB
+   PASS:  Peak memory growth: 0.00MB
+F
+tests\unit\execution_engine_ssot\test_user_execution_engine_ssot_validation.py 
+ SEARCH:  Validating UserExecutionEngine has all required methods...
+F
+ SEARCH:  Testing UserExecutionEngine initialization and isolation...
+F
+ SEARCH:  Testing factory delegation to UserExecutionEngine...
+F
+ SEARCH:  Testing WebSocket event integration...
+F
+ SEARCH:  Testing tool execution capabilities...
+F
+ SEARCH:  Comparing UserExecutionEngine methods to deprecated engine patterns...
+F
+ SEARCH:  Testing concurrent user isolation...
+F
+ SEARCH:  Testing error handling and cleanup...
+F
+ SEARCH:  Verifying deprecated engines still exist before removal...
+   FAIL:  execution_engine.py MISSING
+   FAIL:  execution_engine_consolidated.py MISSING
+   FAIL:  mcp_execution_engine.py MISSING
+   FAIL:  request_scoped_execution_engine.py MISSING
+   FAIL:  execution_engine.py MISSING
+   FAIL:  execution_engine.py MISSING
+F
+tests\unit\execution_engine_ssot\test_user_isolation_validation.py 
+ SEARCH:  Testing user state isolation in UserExecutionEngine...
+F
+ SEARCH:  Testing memory isolation and leak prevention...
+   PASS:  0/0 engines properly garbage collected
+   PASS:  Stress test completed - rapid creation/destruction
+F
+ SEARCH:  Testing thread safety for concurrent user access...
+   PASS:  0/8 threads completed successfully
+   PASS:  0 engines created
+   PASS:  0 events sent
+F
+tests\unit\execution_engine_ssot\test_websocket_event_consistency.py 
+ SEARCH:  Testing required WebSocket events availability...
+F
+ SEARCH:  Testing WebSocket event ordering consistency...
+  Testing scenario: simple_execution
+F
+ SEARCH:  Testing concurrent WebSocket event isolation...
+F
+ SEARCH:  Testing WebSocket event error handling...
+F
+tests\integration\execution_engine_ssot\test_configuration_integration.py 
+ SEARCH:  Testing configuration system availability...
+F
+ SEARCH:  Testing user-specific configuration isolation...
+F
+ SEARCH:  Testing configuration performance and caching...
+F
+tests\integration\execution_engine_ssot\test_execution_engine_consolidation_integration.py FFailed to test WebSocket integration for netra_backend.app.agents.unified_tool_execution.UnifiedToolExecutionEngine: 'TestExecutionEngineConsolidationIntegration' object has no attribute 'test_user_context_1'
+
+CAPTURED WEBSOCKET EVENTS: 0
+FF
+PERFORMANCE METRICS:
+  direct_user_engine: 0.000s - FAILED: Direct UserExecutionEngine test failed: 'TestExecutionEngineConsolidationIntegration' object has no attribute 'test_user_context_1'
+  legacy_redirect: 0.002s - FAILED: Legacy redirect test failed: Invalid arguments. Use UserExecutionEngine(context, agent_factory, websocket_emitter) or keyword form.
+  tool_execution: 0.001s - SUCCESS
+.
+BACKWARDS COMPATIBILITY RESULTS:
+  supervisor.execution_engine.ExecutionEngine: Import ✗ - No module named 'netra_backend.app.supervisor'
+  agents.tool_dispatcher_execution.ToolExecutionEngine: Import ✓, Instantiation ✓, Methods: 3
+.
+tests\integration\execution_engine_ssot\test_multi_user_execution_validation.py 
+ SEARCH:  Testing concurrent user execution isolation...
+F
+ SEARCH:  Testing user context data isolation in integration scenarios...
+F
+ SEARCH:  Testing performance under multi-user load...
+   CYCLE:  Running load test with 20 concurrent users...
+   PASS:  Load test completed in 0.00 seconds
+   PASS:  0/20 users completed successfully
+F
+tests\integration\execution_engine_ssot\test_tool_dispatcher_integration.py 
+ SEARCH:  Testing tool dispatcher availability and integration...
+F
+ SEARCH:  Testing real tool execution flow...
+F
+ SEARCH:  Testing concurrent tool execution isolation...
+F
+ SEARCH:  Testing tool dispatcher error handling...
+F
+tests\compliance\execution_engine_ssot\test_execution_engine_enforcement.py FFFFFFFFFF
+=== Memory Usage Report ===
+Loaded fixture modules: base, mocks
+Peak memory usage: 255.5 MB
+
+
+============================== warnings summary ===============================
+shared\logging\__init__.py:8
+  C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\shared\logging\__init__.py:8: DeprecationWarning: shared.logging.unified_logger_factory is deprecated. Use 'from shared.logging.unified_logging_ssot import get_logger' instead.
+    from shared.logging.unified_logger_factory import (
+
+netra_backend\app\agents\mixins\websocket_bridge_adapter.py:14
+netra_backend\app\agents\mixins\websocket_bridge_adapter.py:14
+  C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\mixins\websocket_bridge_adapter.py:14: DeprecationWarning: Importing WebSocketManager from 'netra_backend.app.websocket_core' is deprecated. Use canonical path 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager' instead.
+    from netra_backend.app.websocket_core.event_validator import get_websocket_validator
+
+netra_backend\app\websocket_core\unified_manager.py:15
+  C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\websocket_core\unified_manager.py:15: DeprecationWarning: netra_backend.app.logging_config is deprecated. Use 'from shared.logging.unified_logging_ssot import get_logger' instead.
+    from netra_backend.app.logging_config import central_logger
+
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_config.py:323
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_config.py:323
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_config.py:323
+tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_03_detect_execution_engines_with_duplicate_logic
+tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_03_detect_execution_engines_with_duplicate_logic
+tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_03_detect_execution_engines_with_duplicate_logic
+tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_03_detect_execution_engines_with_duplicate_logic
+tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_03_detect_execution_engines_with_duplicate_logic
+tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_03_detect_execution_engines_with_duplicate_logic
+  C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_config.py:323: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
+    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_generate_schema.py:298
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_generate_schema.py:298
+tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_03_detect_execution_engines_with_duplicate_logic
+tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_03_detect_execution_engines_with_duplicate_logic
+tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_03_detect_execution_engines_with_duplicate_logic
+tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_03_detect_execution_engines_with_duplicate_logic
+tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_03_detect_execution_engines_with_duplicate_logic
+tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_03_detect_execution_engines_with_duplicate_logic
+tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_03_detect_execution_engines_with_duplicate_logic
+  C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_generate_schema.py:298: PydanticDeprecatedSince20: `json_encoders` is deprecated. See https://docs.pydantic.dev/2.11/concepts/serialization/#custom-serializers for alternatives. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
+    warnings.warn(
+
+tests/unit/execution_engine_ssot/test_factory_delegation_consolidation.py::TestFactoryDelegationConsolidation::test_factory_imports_available
+  C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but tests/unit/execution_engine_ssot/test_factory_delegation_consolidation.py::TestFactoryDelegationConsolidation::test_factory_imports_available returned <class 'list'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+tests/unit/execution_engine_ssot/test_factory_delegation_consolidation.py::TestFactoryDelegationConsolidation::test_execution_engine_factory_delegation
+  C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\unit\execution_engine_ssot\test_factory_delegation_consolidation.py:102: DeprecationWarning: SupervisorExecutionEngineFactory is deprecated. Use UnifiedExecutionEngineFactory from execution_engine_unified_factory instead.
+    factory = ExecutionEngineFactory()
+
+tests/unit/execution_engine_ssot/test_factory_delegation_consolidation.py::TestFactoryDelegationConsolidation::test_factory_async_delegation
+  C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\unit\execution_engine_ssot\test_factory_delegation_consolidation.py:240: DeprecationWarning: SupervisorExecutionEngineFactory is deprecated. Use UnifiedExecutionEngineFactory from execution_engine_unified_factory instead.
+    factory = ExecutionEngineFactory()
+
+tests/unit/execution_engine_ssot/test_factory_delegation_consolidation.py::TestFactoryDelegationConsolidation::test_factory_memory_efficiency
+  C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\unit\execution_engine_ssot\test_factory_delegation_consolidation.py:408: DeprecationWarning: SupervisorExecutionEngineFactory is deprecated. Use UnifiedExecutionEngineFactory from execution_engine_unified_factory instead.
+    factory = ExecutionEngineFactory()
+
+tests/unit/execution_engine_ssot/test_factory_delegation_validation.py::TestFactoryDelegationValidation::test_factory_singleton_pattern_verification
+  C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\unit\execution_engine_ssot\test_factory_delegation_validation.py:336: DeprecationWarning: SupervisorExecutionEngineFactory is deprecated. Use UnifiedExecutionEngineFactory from execution_engine_unified_factory instead.
+    factory1 = ExecutionEngineFactory()
+
+tests/unit/execution_engine_ssot/test_factory_delegation_validation.py::TestFactoryDelegationValidation::test_factory_singleton_pattern_verification
+  C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\unit\execution_engine_ssot\test_factory_delegation_validation.py:337: DeprecationWarning: SupervisorExecutionEngineFactory is deprecated. Use UnifiedExecutionEngineFactory from execution_engine_unified_factory instead.
+    factory2 = ExecutionEngineFactory()
+
+tests/unit/execution_engine_ssot/test_user_execution_engine_ssot_validation.py::TestUserExecutionEngineSSoTValidation::test_factory_delegation_to_user_execution_engine
+  C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\unit\execution_engine_ssot\test_user_execution_engine_ssot_validation.py:139: DeprecationWarning: SupervisorExecutionEngineFactory is deprecated. Use UnifiedExecutionEngineFactory from execution_engine_unified_factory instead.
+    factory = ExecutionEngineFactory()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/unit/execution_engine_ssot/test_business_function_validation.py::TestBusinessFunctionValidation::test_user_isolation_prevents_data_leakage
+FAILED tests/unit/execution_engine_ssot/test_business_function_validation.py::TestBusinessFunctionValidation::test_websocket_events_sent_correctly
+FAILED tests/unit/execution_engine_ssot/test_business_function_validation.py::TestBusinessFunctionValidation::test_concurrent_user_websocket_isolation
+FAILED tests/unit/execution_engine_ssot/test_business_function_validation.py::TestBusinessFunctionValidation::test_tool_execution_maintains_user_context
+FAILED tests/unit/execution_engine_ssot/test_business_function_validation.py::TestBusinessFunctionValidation::test_agent_execution_end_to_end_flow
+FAILED tests/unit/execution_engine_ssot/test_business_function_validation.py::TestBusinessFunctionValidation::test_error_handling_maintains_user_isolation
+FAILED tests/unit/execution_engine_ssot/test_business_function_validation.py::TestBusinessFunctionValidation::test_performance_scalability
+FAILED tests/unit/execution_engine_ssot/test_deprecated_engine_import_analysis.py::TestDeprecatedEngineImportAnalysis::test_scan_finds_deprecated_imports
+FAILED tests/unit/execution_engine_ssot/test_deprecated_engine_import_analysis.py::TestDeprecatedEngineImportAnalysis::test_categorize_imports_correctly
+FAILED tests/unit/execution_engine_ssot/test_deprecated_engine_import_analysis.py::TestDeprecatedEngineImportAnalysis::test_generate_detailed_report
+FAILED tests/unit/execution_engine_ssot/test_deprecated_engine_import_analysis.py::TestDeprecatedEngineImportAnalysis::test_validate_expected_import_count
+FAILED tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_01_detect_multiple_execution_engine_implementations
+FAILED tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_02_validate_ssot_target_exists_and_is_primary
+FAILED tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_03_detect_execution_engines_with_duplicate_logic
+FAILED tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_04_validate_legacy_engines_are_proper_redirects
+FAILED tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_05_validate_execution_engine_factory_ssot_compliance
+FAILED tests/unit/execution_engine_ssot/test_execution_engine_duplication_detection.py::TestExecutionEngineDuplicationDetection::test_06_validate_websocket_event_routing_ssot
+FAILED tests/unit/execution_engine_ssot/test_factory_delegation_consolidation.py::TestFactoryDelegationConsolidation::test_execution_engine_factory_delegation
+FAILED tests/unit/execution_engine_ssot/test_factory_delegation_consolidation.py::TestFactoryDelegationConsolidation::test_consolidated_factory_patterns
+FAILED tests/unit/execution_engine_ssot/test_factory_delegation_consolidation.py::TestFactoryDelegationConsolidation::test_factory_async_delegation
+FAILED tests/unit/execution_engine_ssot/test_factory_delegation_consolidation.py::TestFactoryDelegationConsolidation::test_factory_memory_efficiency
+FAILED tests/unit/execution_engine_ssot/test_factory_delegation_validation.py::TestFactoryDelegationValidation::test_factory_creates_user_execution_engine_instances
+FAILED tests/unit/execution_engine_ssot/test_factory_delegation_validation.py::TestFactoryDelegationValidation::test_factory_multiple_users_isolation
+FAILED tests/unit/execution_engine_ssot/test_factory_delegation_validation.py::TestFactoryDelegationValidation::test_factory_websocket_integration
+FAILED tests/unit/execution_engine_ssot/test_factory_delegation_validation.py::TestFactoryDelegationValidation::test_factory_concurrent_creation
+FAILED tests/unit/execution_engine_ssot/test_factory_delegation_validation.py::TestFactoryDelegationValidation::test_factory_error_handling
+FAILED tests/unit/execution_engine_ssot/test_factory_delegation_validation.py::TestFactoryDelegationValidation::test_factory_websocket_manager_failure_handling
+FAILED tests/unit/execution_engine_ssot/test_factory_delegation_validation.py::TestFactoryDelegationValidation::test_factory_method_compatibility
+FAILED tests/unit/execution_engine_ssot/test_factory_delegation_validation.py::TestFactoryDelegationValidation::test_factory_replaces_deprecated_patterns
+FAILED tests/unit/execution_engine_ssot/test_factory_delegation_validation.py::TestFactoryDelegationValidation::test_factory_instance_reuse_vs_creation
+FAILED tests/unit/execution_engine_ssot/test_factory_delegation_validation.py::TestFactoryDelegationValidation::test_factory_singleton_pattern_verification
+FAILED tests/unit/execution_engine_ssot/test_memory_management_validation.py::TestMemoryManagementValidation::test_basic_memory_cleanup
+FAILED tests/unit/execution_engine_ssot/test_memory_management_validation.py::TestMemoryManagementValidation::test_concurrent_memory_isolation
+FAILED tests/unit/execution_engine_ssot/test_memory_management_validation.py::TestMemoryManagementValidation::test_resource_cleanup_validation
+FAILED tests/unit/execution_engine_ssot/test_memory_management_validation.py::TestMemoryManagementValidation::test_memory_stress_validation
+FAILED tests/unit/execution_engine_ssot/test_user_execution_engine_ssot_validation.py::TestUserExecutionEngineSSoTValidation::test_user_execution_engine_has_all_required_methods
+FAILED tests/unit/execution_engine_ssot/test_user_execution_engine_ssot_validation.py::TestUserExecutionEngineSSoTValidation::test_user_execution_engine_initialization
+FAILED tests/unit/execution_engine_ssot/test_user_execution_engine_ssot_validation.py::TestUserExecutionEngineSSoTValidation::test_factory_delegation_to_user_execution_engine
+FAILED tests/unit/execution_engine_ssot/test_user_execution_engine_ssot_validation.py::TestUserExecutionEngineSSoTValidation::test_websocket_event_integration
+FAILED tests/unit/execution_engine_ssot/test_user_execution_engine_ssot_validation.py::TestUserExecutionEngineSSoTValidation::test_tool_execution_capabilities
+FAILED tests/unit/execution_engine_ssot/test_user_execution_engine_ssot_validation.py::TestUserExecutionEngineSSoTValidation::test_user_execution_engine_vs_deprecated_methods
+FAILED tests/unit/execution_engine_ssot/test_user_execution_engine_ssot_validation.py::TestUserExecutionEngineSSoTValidation::test_concurrent_user_isolation
+FAILED tests/unit/execution_engine_ssot/test_user_execution_engine_ssot_validation.py::TestUserExecutionEngineSSoTValidation::test_error_handling_and_cleanup
+FAILED tests/unit/execution_engine_ssot/test_user_execution_engine_ssot_validation.py::TestUserExecutionEngineSSoTValidation::test_deprecated_engines_still_exist
+FAILED tests/unit/execution_engine_ssot/test_user_isolation_validation.py::TestUserExecutionEngineIsolationValidation::test_user_state_isolation_complete
+FAILED tests/unit/execution_engine_ssot/test_user_isolation_validation.py::TestUserExecutionEngineIsolationValidation::test_user_memory_isolation_no_leaks
+FAILED tests/unit/execution_engine_ssot/test_user_isolation_validation.py::TestUserExecutionEngineIsolationValidation::test_user_thread_safety_validation
+FAILED tests/unit/execution_engine_ssot/test_websocket_event_consistency.py::TestWebSocketEventConsistency::test_required_websocket_events_available
+FAILED tests/unit/execution_engine_ssot/test_websocket_event_consistency.py::TestWebSocketEventConsistency::test_websocket_event_ordering_consistency
+FAILED tests/unit/execution_engine_ssot/test_websocket_event_consistency.py::TestWebSocketEventConsistency::test_concurrent_websocket_event_isolation
+FAILED tests/unit/execution_engine_ssot/test_websocket_event_consistency.py::TestWebSocketEventConsistency::test_websocket_event_error_handling
+FAILED tests/integration/execution_engine_ssot/test_configuration_integration.py::TestConfigurationIntegration::test_configuration_system_availability
+FAILED tests/integration/execution_engine_ssot/test_configuration_integration.py::TestConfigurationIntegration::test_user_specific_configuration_isolation
+FAILED tests/integration/execution_engine_ssot/test_configuration_integration.py::TestConfigurationIntegration::test_configuration_performance_and_caching
+FAILED tests/integration/execution_engine_ssot/test_execution_engine_consolidation_integration.py::TestExecutionEngineConsolidationIntegration::test_01_cross_service_execution_consistency_validation
+FAILED tests/integration/execution_engine_ssot/test_execution_engine_consolidation_integration.py::TestExecutionEngineConsolidationIntegration::test_02_websocket_event_delivery_during_consolidation
+FAILED tests/integration/execution_engine_ssot/test_execution_engine_consolidation_integration.py::TestExecutionEngineConsolidationIntegration::test_03_user_isolation_during_engine_transitions
+FAILED tests/integration/execution_engine_ssot/test_multi_user_execution_validation.py::TestMultiUserExecutionValidation::test_concurrent_user_execution_isolation
+FAILED tests/integration/execution_engine_ssot/test_multi_user_execution_validation.py::TestMultiUserExecutionValidation::test_user_context_data_isolation_integration
+FAILED tests/integration/execution_engine_ssot/test_multi_user_execution_validation.py::TestMultiUserExecutionValidation::test_performance_under_multi_user_load
+FAILED tests/integration/execution_engine_ssot/test_tool_dispatcher_integration.py::TestToolDispatcherIntegration::test_tool_dispatcher_availability_and_integration
+FAILED tests/integration/execution_engine_ssot/test_tool_dispatcher_integration.py::TestToolDispatcherIntegration::test_real_tool_execution_flow
+FAILED tests/integration/execution_engine_ssot/test_tool_dispatcher_integration.py::TestToolDispatcherIntegration::test_concurrent_tool_execution_isolation
+FAILED tests/integration/execution_engine_ssot/test_tool_dispatcher_integration.py::TestToolDispatcherIntegration::test_tool_dispatcher_error_handling
+FAILED tests/compliance/execution_engine_ssot/test_execution_engine_enforcement.py::TestExecutionEngineSSotEnforcement::test_01_enforce_single_primary_execution_engine_ssot
+FAILED tests/compliance/execution_engine_ssot/test_execution_engine_enforcement.py::TestExecutionEngineSSotEnforcement::test_02_enforce_execution_engine_whitelist_compliance
+FAILED tests/compliance/execution_engine_ssot/test_execution_engine_enforcement.py::TestExecutionEngineSSotEnforcement::test_03_enforce_legacy_redirect_compliance
+FAILED tests/compliance/execution_engine_ssot/test_execution_engine_enforcement.py::TestExecutionEngineSSotEnforcement::test_04_enforce_adapter_pattern_compliance
+FAILED tests/compliance/execution_engine_ssot/test_execution_engine_enforcement.py::TestExecutionEngineSSotEnforcement::test_05_enforce_execution_engine_factory_ssot_compliance
+FAILED tests/compliance/execution_engine_ssot/test_execution_engine_enforcement.py::TestExecutionEngineSSotEnforcement::test_06_enforce_forbidden_pattern_detection
+FAILED tests/compliance/execution_engine_ssot/test_execution_engine_enforcement.py::TestExecutionEngineSSotEnforcement::test_07_enforce_websocket_integration_ssot_compliance
+FAILED tests/compliance/execution_engine_ssot/test_execution_engine_enforcement.py::TestExecutionEngineSSotEnforcement::test_08_enforce_user_context_isolation_compliance
+FAILED tests/compliance/execution_engine_ssot/test_execution_engine_enforcement.py::TestExecutionEngineSSotEnforcement::test_09_enforce_no_circular_dependencies_compliance
+FAILED tests/compliance/execution_engine_ssot/test_execution_engine_enforcement.py::TestExecutionEngineSSotEnforcement::test_10_enforce_execution_method_signature_consistency
+================= 74 failed, 4 passed, 29 warnings in 22.41s ==================

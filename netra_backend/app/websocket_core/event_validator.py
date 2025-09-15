@@ -41,14 +41,22 @@ import asyncio
 import json
 import logging
 import time
-import uuid
+# import uuid - replaced with UnifiedIDManager for Issue #89
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List, Set, Union, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 
 # Consolidated imports from both original implementations
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
+
+# Use SSOT logging instead of deprecated central_logger
+class CentralLoggerCompat:
+    def get_logger(self, name):
+        return get_logger(name)
+
+central_logger = CentralLoggerCompat()
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.isolated_environment import get_env
@@ -294,7 +302,9 @@ class WebSocketEventMessage:
         if self.timestamp is None:
             self.timestamp = datetime.now(timezone.utc)
         if self.message_id is None:
-            self.message_id = f"msg_{uuid.uuid4().hex[:8]}"
+            # Issue #89 Fix: Use UnifiedIDManager for message ID generation
+            id_manager = UnifiedIDManager()
+            self.message_id = id_manager.generate_id(IDType.REQUEST, prefix="msg")
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
@@ -369,6 +379,12 @@ class UnifiedEventValidator:
         "agent_completed": {"run_id", "agent_name", "timestamp", "payload"},
         "progress_update": {"run_id", "timestamp", "payload"},
         "agent_error": {"run_id", "agent_name", "timestamp", "payload"},
+    }
+
+    # SSOT Payload Schema Validation - Critical fields for business value
+    PAYLOAD_SCHEMAS = {
+        "tool_executing": {"tool_name"},  # Users must see which tool is being used
+        "tool_completed": {"results"},    # Users must see actionable tool results
     }
     
     def __init__(self, 
@@ -950,26 +966,25 @@ class UnifiedEventValidator:
             elif not event.data.get("agent"):
                 errors.append("agent_started event missing agent identifier")
         
-        # Validate tool execution content
-        tool_executing_events = [e for e in self.received_events 
+        # Validate tool execution content using SSOT PAYLOAD_SCHEMAS
+        tool_executing_events = [e for e in self.received_events
                                if e.event_type == CriticalAgentEventType.TOOL_EXECUTING.value]
-        
+
         for event in tool_executing_events:
             if not event.data:
                 errors.append("tool_executing event missing data field")
-            elif not event.data.get("tool"):
-                errors.append("tool_executing event missing tool identifier")
-        
-        # Validate tool completion content  
-        tool_completed_events = [e for e in self.received_events 
+            elif not event.data.get("tool_name"):
+                errors.append("tool_executing event missing tool_name field - users cannot see tool transparency")
+
+        # Validate tool completion content using SSOT PAYLOAD_SCHEMAS
+        tool_completed_events = [e for e in self.received_events
                                if e.event_type == CriticalAgentEventType.TOOL_COMPLETED.value]
-        
+
         for event in tool_completed_events:
             if not event.data:
                 errors.append("tool_completed event missing data field")
-            elif not event.data.get("tool"):
-                errors.append("tool_completed event missing tool identifier")
-            # Note: result field is optional - tools may fail
+            elif not event.data.get("results"):
+                errors.append("tool_completed event missing results field - users cannot see actionable insights")
         
         # Validate agent completion content
         completed_events = [e for e in self.received_events 
@@ -1225,11 +1240,12 @@ class UnifiedEventValidator:
         return ValidationResult(is_valid=True)
     
     def _validate_event_type(self, event: Dict[str, Any], event_type: str) -> ValidationResult:
-        """Validate event type specific requirements."""
+        """Validate event type specific requirements including payload structure."""
+        # First, validate basic event structure
         if event_type in self.EVENT_SCHEMAS:
             required_fields = self.EVENT_SCHEMAS[event_type]
             missing_fields = required_fields - event.keys()
-            
+
             if missing_fields:
                 return ValidationResult(
                     is_valid=False,
@@ -1237,7 +1253,36 @@ class UnifiedEventValidator:
                     criticality=self._get_event_criticality(event_type),
                     business_impact=f"Incomplete {event_type} event - user experience degraded"
                 )
-        
+
+        # SSOT Enhancement: Validate critical payload fields for business value
+        if event_type in self.PAYLOAD_SCHEMAS:
+            payload = event.get("payload", {}) or event.get("data", {})
+            required_payload_fields = self.PAYLOAD_SCHEMAS[event_type]
+            missing_payload_fields = required_payload_fields - payload.keys()
+
+            if missing_payload_fields:
+                if event_type == "tool_executing" and "tool_name" in missing_payload_fields:
+                    return ValidationResult(
+                        is_valid=False,
+                        error_message=f"tool_executing event missing tool_name field - users cannot see which tool is being used",
+                        criticality=EventCriticality.MISSION_CRITICAL,
+                        business_impact="Users cannot see tool transparency - breaks AI problem-solving visibility"
+                    )
+                elif event_type == "tool_completed" and "results" in missing_payload_fields:
+                    return ValidationResult(
+                        is_valid=False,
+                        error_message=f"tool_completed event missing results field - users cannot see actionable insights",
+                        criticality=EventCriticality.MISSION_CRITICAL,
+                        business_impact="Users cannot receive tool results - breaks AI value delivery"
+                    )
+                else:
+                    return ValidationResult(
+                        is_valid=False,
+                        error_message=f"{event_type} event missing required payload fields: {missing_payload_fields}",
+                        criticality=self._get_event_criticality(event_type),
+                        business_impact=f"Incomplete {event_type} payload - business value compromised"
+                    )
+
         return ValidationResult(is_valid=True)
     
     def _validate_mission_critical_event(self, event: Dict[str, Any], event_type: str) -> ValidationResult:
@@ -1575,14 +1620,14 @@ def create_mock_critical_events(
             user_id=user_id,
             thread_id=thread_id,
             timestamp=base_time.replace(microsecond=200000),
-            data={"tool": tool_name, "status": "executing"}
+            data={"tool_name": tool_name, "status": "executing"}
         ),
         WebSocketEventMessage(
             event_type=CriticalAgentEventType.TOOL_COMPLETED.value,
             user_id=user_id,
             thread_id=thread_id,
             timestamp=base_time.replace(microsecond=300000),
-            data={"tool": tool_name, "status": "completed", "result": "mock result"}
+            data={"tool_name": tool_name, "status": "completed", "results": {"output": "mock result", "success": True}}
         ),
         WebSocketEventMessage(
             event_type=CriticalAgentEventType.AGENT_COMPLETED.value,

@@ -20,7 +20,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from dataclasses import dataclass
 from enum import Enum
 
-from .logging_config import get_logger
+from shared.logging.unified_logging_ssot import get_logger
 
 logger = get_logger(__name__)
 

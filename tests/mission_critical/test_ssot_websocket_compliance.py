@@ -374,13 +374,13 @@ class TestSSoTWebSocketCompliance(SSotAsyncTestCase):
             
             # Scan common locations for WebSocket manager duplicates
             try:
-                from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                 websocket_classes.append("UnifiedWebSocketManager")
             except ImportError:
                 pass
                 
             try:
-                from netra_backend.app.websocket_core.manager import WebSocketManager as LegacyManager
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as LegacyManager
                 websocket_classes.append("LegacyWebSocketManager")
             except ImportError:
                 pass

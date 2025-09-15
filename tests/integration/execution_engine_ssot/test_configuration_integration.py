@@ -126,7 +126,7 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
         
         # Test 3: Test environment variable access through proper channels
         try:
-            from dev_launcher.isolated_environment import IsolatedEnvironment
+            from shared.isolated_environment import IsolatedEnvironment
             env = IsolatedEnvironment()
             
             # Test accessing common environment variables

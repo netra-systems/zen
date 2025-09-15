@@ -55,7 +55,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_registry import get_agent_registry
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 

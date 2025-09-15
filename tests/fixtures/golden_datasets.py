@@ -15,7 +15,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.triage.models import TriageResult, TriageMetadata, Priority, Complexity
 from netra_backend.app.schemas.agent_state import (
     CheckpointType,

@@ -38,8 +38,8 @@ from netra_backend.app.dependencies import (
     get_db, validate_session_is_request_scoped,
     SessionIsolationError
 )
-from netra_backend.app.agents.supervisor.execution_factory import (
-    ExecutionEngineFactory, ExecutionFactoryConfig
+from netra_backend.app.agents.supervisor.execution_engine_factory import (
+    ExecutionEngineFactory, configure_execution_engine_factory
 )
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
     get_agent_instance_factory, configure_agent_instance_factory

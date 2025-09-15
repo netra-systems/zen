@@ -66,6 +66,19 @@ class UnifiedIdGenerator:
     """
     
     @staticmethod
+    def generate_id(prefix: str) -> str:
+        """Simple ID generation for test compatibility.
+        
+        Args:
+            prefix: String prefix for the ID
+            
+        Returns:
+            ID string with format: prefix_random
+        """
+        random_component = uuid.uuid4().hex[:8]
+        return f"{prefix}_{random_component}"
+    
+    @staticmethod
     def generate_base_id(prefix: str = "id", include_random: bool = True, 
                         random_length: int = 8) -> str:
         """Core ID generation with triple collision protection.
@@ -108,15 +121,16 @@ class UnifiedIdGenerator:
         """
         base_timestamp = int(time.time() * 1000)
         counter_base = _get_next_counter()
-        
-        # CRITICAL FIX: Use proper SSOT format for both thread_id and run_id 
-        # This prevents the pattern mismatch that causes WebSocket manager cleanup failures
-        random_part = secrets.token_hex(4)
-        
-        # Generate SSOT-compliant IDs using proper format: [prefix_]type_counter_uuid8
-        thread_id = f"thread_{operation}_{counter_base}_{random_part}"
-        run_id = f"run_{operation}_{counter_base + 1}_{secrets.token_hex(4)}"
-        request_id = f"req_{operation}_{counter_base + 2}_{secrets.token_hex(4)}"
+
+        # CRITICAL FIX: Use consistent counter and shared UUID for proper correlation
+        # This fixes the Thread/Run ID mismatch that causes WebSocket manager cleanup failures
+        shared_uuid = secrets.token_hex(4)
+
+        # Generate SSOT-compliant IDs using consistent counter and shared UUID for correlation
+        # Both thread_id and run_id use same counter_base and shared_uuid for proper correlation
+        thread_id = f"thread_{operation}_{counter_base}_{shared_uuid}"
+        run_id = f"run_{operation}_{counter_base}_{shared_uuid}"
+        request_id = f"req_{operation}_{counter_base + 1}_{secrets.token_hex(4)}"
         
         return thread_id, run_id, request_id
     

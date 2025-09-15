@@ -8,7 +8,7 @@ import json
 import requests
 import time
 
-async def test_websocket_connection(url: str, attempt_id: int):
+async def websocket_connection_test(url: str, attempt_id: int):
     """Test a single WebSocket connection"""
     print(f"Attempt {attempt_id}: Testing WebSocket connection to {url}")
     
@@ -71,7 +71,7 @@ async def main():
         if i > 0:
             await asyncio.sleep(delay - test_delays[i-1])
         
-        result = await test_websocket_connection(websocket_url, i+1)
+        result = await websocket_connection_test(websocket_url, i+1)
         results.append(result)
     
     # Results summary

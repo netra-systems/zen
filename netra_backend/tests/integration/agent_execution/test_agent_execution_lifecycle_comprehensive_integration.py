@@ -49,7 +49,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, validate_user_context
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 # ISSUE #565 SSOT MIGRATION: create_request_scoped_engine migrated to UserExecutionEngine factory method
-# from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
+# from netra_backend.app.agents.supervisor.user_execution_engine import create_request_scoped_engine
 from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
 
 # WebSocket Integration (Real Services)

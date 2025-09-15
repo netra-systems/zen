@@ -15,6 +15,8 @@
 2. All else is secondary
 3. Staging GCP deployment only (ignore docker)
 4. Minimal fixes, zero new features
+5. Remove legacy entirely and atomically upgrade cleanly and wholly to clear SSOT patterns. (no "fallback" to legacy, no "backward compatibility", must be complete upgrade to SSOT.). search far and wide to remove legacy and refresh associated elements like tests or docs.
+6. Tests that asked for legacy must be updated themsevles (the tests), the real system must always move towards and protect SSOT patterns.
 
 **BETA GOLDEN PATH**
 1. Focus on effective golden path or beta.
@@ -355,6 +357,10 @@ SEE GIT ISSUES, GIT PRs.
 **Follow @git_commit_atomic_units.xml:**
 - Stay on develop-long-lived branch as current branch.
 - ONLY use safe opreations, never filter branch etc.
+
+### Deploy and staging
+Always must use https://auth.staging.netrasystems.ai
+and the other canonical *.staging.netrasystems.ai URLS. NEVER the cloud run urls.
 
 **FINAL REMINDER:** 
 - **GOLDEN PATH PRIORITY:** Users login → get AI responses

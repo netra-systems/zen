@@ -353,9 +353,11 @@ jobs:
             --set-secrets="POSTGRES_DB=staging-postgres-db:latest" \
             --set-secrets="POSTGRES_USER=staging-postgres-user:latest" \
             --set-secrets="POSTGRES_PASSWORD=staging-postgres-password:latest" \
-            --set-secrets="REDIS_URL=staging-redis-url:latest" \
+            --set-secrets="REDIS_HOST=staging-redis-host:latest" \
+            --set-secrets="REDIS_PORT=staging-redis-port:latest" \
+            --set-secrets="REDIS_PASSWORD=staging-redis-password:latest" \
             --set-secrets="JWT_SECRET=staging-jwt-secret:latest"
-            
+
       - name: Deploy Auth Service to Cloud Run
         if: inputs.act_mode != 'true'
         run: |
@@ -375,6 +377,9 @@ jobs:
             --set-secrets="POSTGRES_DB=staging-postgres-db:latest" \
             --set-secrets="POSTGRES_USER=staging-postgres-user:latest" \
             --set-secrets="POSTGRES_PASSWORD=staging-postgres-password:latest" \
+            --set-secrets="REDIS_HOST=staging-redis-host:latest" \
+            --set-secrets="REDIS_PORT=staging-redis-port:latest" \
+            --set-secrets="REDIS_PASSWORD=staging-redis-password:latest" \
             --set-secrets="JWT_SECRET=staging-jwt-secret:latest"
 
   deploy-frontend:

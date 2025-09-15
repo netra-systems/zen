@@ -797,7 +797,10 @@ class TestConfigurationManagementIntegration(BaseIntegrationTest):
             jwt_creation_successful = bool(token)
             
             # Validate JWT token
-            decoded_payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
+            # SSOT: Use E2EAuthHelper for token decoding
+            from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
+            auth_helper = E2EAuthHelper()
+            decoded_payload = auth_helper._decode_token(token)
             jwt_validation_successful = decoded_payload["sub"] == "test_user"
             
             return {

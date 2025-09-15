@@ -1,5 +1,5 @@
 """
-Focused Security Unit Tests for WebSocketManagerFactory - Critical Isolation Tests
+Focused Security Unit Tests for WebSocketManager - Critical Isolation Tests
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free, Early, Mid, Enterprise) 
@@ -24,9 +24,9 @@ from unittest.mock import AsyncMock, Mock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Import the target classes
-from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
-    IsolatedWebSocketManager,
+# SSOT imports - Issue #824 remediation
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_imports import (
     FactoryInitializationError
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -43,7 +43,7 @@ class TestWebSocketSecurityFocused(SSotAsyncTestCase):
     def setup_method(self, method=None):
         """Setup for each test method."""
         super().setup_method(method)
-        self.factory = WebSocketManagerFactory(max_managers_per_user=3)
+        self.factory = WebSocketManager(max_managers_per_user=3)
     
     def teardown_method(self, method=None):
         """Teardown after each test method."""
@@ -304,10 +304,10 @@ class TestWebSocketSecurityFocused(SSotAsyncTestCase):
             await self.factory.create_manager({"user_id": "test"})
     
     def test_manager_initialization_validates_context(self):
-        """Test IsolatedWebSocketManager validates context on initialization."""
+        """Test WebSocketManager validates context on initialization."""
         # Invalid context should raise error
         with pytest.raises(ValueError, match="must be a UserExecutionContext"):
-            IsolatedWebSocketManager("not_a_context")
+            WebSocketManager("not_a_context")
     
     # === COMPREHENSIVE SECURITY VALIDATION ===
     

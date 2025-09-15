@@ -28,7 +28,7 @@ from typing import Any, Dict, List, Optional, Set, Callable
 from enum import Enum
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatusCode, InvalidHandshake
+from websockets import ConnectionClosed, InvalidStatusCode, InvalidHandshake
 
 # Test framework imports
 from test_framework.base_integration_test import BaseIntegrationTest

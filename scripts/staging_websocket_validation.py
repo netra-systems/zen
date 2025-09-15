@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class StagingWebSocketValidator:
     def __init__(self):
         self.backend_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
-        self.auth_url = "https://netra-auth-service-pnovr5vsba-uc.a.run.app" 
+        self.auth_url = "https://auth.staging.netrasystems.ai" 
         self.frontend_url = "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app"
         self.websocket_url = "wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws"
         self.results = {

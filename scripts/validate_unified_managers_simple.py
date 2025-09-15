@@ -29,7 +29,7 @@ def main():
         # Test factory patterns
         print("Testing factory patterns...")
         from netra_backend.app.core.managers.unified_lifecycle_manager import LifecycleManagerFactory
-        from netra_backend.app.core.managers.unified_configuration_manager import ConfigurationManagerFactory
+        from netra_backend.app.core.configuration.base import config_manager
         from netra_backend.app.core.managers.unified_state_manager import StateManagerFactory
         
         # Test lifecycle factory

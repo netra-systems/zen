@@ -51,7 +51,7 @@ CategoryType = ExecutionCategory
 
 
 @dataclass
-class TestResult:
+class ExecutionResult:
     """Individual test execution result."""
     test_id: str
     name: str
@@ -62,6 +62,10 @@ class TestResult:
     traceback: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=datetime.utcnow)
+
+
+# Backward compatibility alias
+TestResult = ExecutionResult
 
 
 class TestReport(BaseModel):

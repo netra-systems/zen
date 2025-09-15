@@ -28,10 +28,10 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocke
 
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.execution_context import (
-    AgentExecutionContext, 
+    AgentExecutionContext,
     AgentExecutionResult
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 
 
@@ -123,13 +123,13 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
     @pytest.fixture
     def sample_state(self):
         """Real DeepAgentState for security-compliant testing.
-        
+
         CRITICAL: Uses real DeepAgentState instead of Mock to pass security validation
         in _ensure_user_execution_context(). Mock objects fail isinstance() checks
         which are required for Issue #159 security compliance.
         """
-        from netra_backend.app.agents.state import DeepAgentState
-        
+        from netra_backend.app.schemas.agent_models import DeepAgentState
+
         state = DeepAgentState(
             user_id=str(UserID("test-user-456")),
             thread_id=str(ThreadID("test-thread-123")),

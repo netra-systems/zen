@@ -56,7 +56,7 @@
             # REMOVED_SYNTAX_ERROR: from datetime import datetime, timezone
             # REMOVED_SYNTAX_ERROR: from concurrent.futures import ThreadPoolExecutor
             # REMOVED_SYNTAX_ERROR: import threading
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
             # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
             # REMOVED_SYNTAX_ERROR: from loguru import logger

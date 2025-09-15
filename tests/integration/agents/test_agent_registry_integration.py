@@ -47,7 +47,7 @@ from test_framework.ssot.websocket import WebSocketTestMetrics, MockWebSocketCon
 # SSOT Import Registry Verified Imports - Agent Framework
 from netra_backend.app.agents.supervisor.agent_registry import (
     AgentRegistry, UserAgentSession, AgentLifecycleManager, 
-    WebSocketManagerAdapter, get_agent_registry
+    get_agent_registry
 )
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext, UserContextManager, UserContextFactory,

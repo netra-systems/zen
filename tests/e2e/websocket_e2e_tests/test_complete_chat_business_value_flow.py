@@ -61,8 +61,8 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 
 # Import E2E test base classes with real services - NO MOCKS
@@ -334,10 +334,11 @@ class RealChatBusinessValueTester:
         jwt_token = auth_result["jwt_token"]
         
         # Create real user execution context
-        user_context = UserExecutionContext.create_for_request(
+        user_context = UserExecutionContext.from_request(
             user_id=user_id,
             request_id=f"chat_req_{uuid.uuid4().hex[:8]}",
-            thread_id=f"chat_thread_{uuid.uuid4().hex[:8]}"
+            thread_id=f"chat_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"chat_run_{uuid.uuid4().hex[:8]}"
         )
         
         # Setup WebSocket notifier with event capture

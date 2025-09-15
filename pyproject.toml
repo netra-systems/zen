@@ -44,7 +44,7 @@ addopts = [
     "-ra",
     "--strict-markers",
     "--strict-config",
-    "--timeout=120",
+    # NOTE: --timeout removed - now handled dynamically by unified_test_runner.py based on environment
     "--tb=short",
     "--maxfail=10",
     "--import-mode=importlib",  # Faster import mode
@@ -91,10 +91,12 @@ markers = [
     "auth: Auth service tests",
     "frontend: Frontend tests",
     "agents: Agent-related tests",
+    "shared_components: Tests for shared component functionality",
     
     # Resource markers
     "real_llm: Requires real LLM API",
     "real_database: Requires real database",
+    "real_redis: Requires real Redis connectivity",
     "real_services: Requires external services",
     "requires_redis: Requires Redis",
     "requires_postgres: Requires PostgreSQL",
@@ -116,8 +118,17 @@ markers = [
     "asyncio: Asynchronous test functions",
     "websocket: WebSocket-related tests",
     "golden_path: Golden path user flow tests",
+    "agent_goldenpath: Agent golden path message tests",
+    "agent_golden_path: Agent golden path integration tests",
+    "multi_user: Multi-user concurrency tests",
+    "concurrency: Concurrency and parallel processing tests",
+    "error_recovery: Error recovery and resilience tests",
+    "business_value: Business value validation tests",
+    "websocket_events: WebSocket event validation tests",
     "deployment: Deployment-related tests",
     "regression: Regression prevention tests",
+    "architecture: Architecture compliance tests",
+    "issue_1140: Issue #1140 specific tests",
     "timeout: Tests with custom timeout settings",
     "skipif: Conditional test skipping",
     "xfail: Expected to fail tests",
@@ -126,6 +137,7 @@ markers = [
     
     # Business and system markers
     "agent_execution: Agent execution tests",
+    "agent_execution_order: Agent execution order validation tests",
     "business_critical: Business-critical functionality tests", 
     "ssot_delegation: Single Source of Truth delegation tests",
     "execution_tracking: Execution tracking tests",
@@ -222,6 +234,10 @@ markers = [
     "health_checks: Health check and service status tests",
     "ssot_violation: SSOT violation detection and remediation tests",
     
+    # Missing marker for auth service secret loader tests (Issue #687)
+    "secret_loader: Secret loader component tests",
+    "ssot: Single Source of Truth pattern tests",
+    
     # Additional comprehensive marker definitions (Issue #553 Resolution)
     "infrastructure_validation: Infrastructure validation tests",
     "sessionmiddleware: Session middleware tests",
@@ -230,6 +246,32 @@ markers = [
     "reproduction_tests: Tests that reproduce specific issues",
     "L3: Level 3 escalation tests",
     "access_logging: Access logging tests",
+    
+    # Issue #762 Agent WebSocket Bridge test markers
+    "websocket_manager_validation: WebSocket manager validation tests",
+    "user_emitter_creation: User emitter creation tests",
+    "health_status: Health status tests",
+    "connection_isolation: Connection isolation tests",
+    "websocket_manager_isolation: WebSocket manager isolation tests",
+    "concurrent_events: Concurrent events tests",
+    "parameter_validation: Parameter validation tests",
+    "integration_errors: Integration errors tests",
+    "health_check_errors: Health check errors tests",
+    "concurrent_errors: Concurrent errors tests",
+    "recovery_mechanisms: Recovery mechanisms tests",
+    "resource_cleanup: Resource cleanup tests",
+    "memory_errors: Memory errors tests",
+    "exception_propagation: Exception propagation tests",
+    "error_logging: Error logging tests",
+    "scoped_emitter: Scoped emitter tests",
+    "concurrent_factory_usage: Concurrent factory usage tests",
+    "integration_result: Integration result tests",
+    "concurrent_access: Concurrent access tests",
+    "isolation_validation: Isolation validation tests",
+    "lock_initialization: Lock initialization tests",
+    "shutdown_handling: Shutdown handling tests",
+    "event_tracking: Event tracking tests",
+    "golden_path_critical: Golden path critical tests",
     "agent: Agent tests",
     "agent_coordination: Agent coordination tests",
     "agent_critical: Agent critical tests",
@@ -550,7 +592,86 @@ markers = [
     "websocket_threading: WebSocket threading tests",
     "websocket_unified_auth: WebSocket unified auth tests",
     "websocket_validation: WebSocket validation tests",
-    "windows_deadlock: Windows deadlock tests"
+    "windows_deadlock: Windows deadlock tests",
+
+    # Import path resolution and test framework markers
+    "ssl_configuration: SSL/TLS configuration tests",
+    "feature_flag: Feature flag controlled tests",
+    "tdd_test: Test-driven development tests",
+    "experimental_test: Experimental feature tests",
+    "experimental: Experimental feature tests (alias)",
+    "requires_feature: Tests requiring specific features",
+    "tdd: Test-driven development workflow tests",
+    "invalid_parameters: Invalid parameters tests",
+    "core_infrastructure: Core infrastructure tests",
+    "multi_user_recovery: Multi-user recovery tests",
+    "concurrent_execution: Concurrent execution tests",
+    "monitoring_setup: Monitoring setup tests",
+    "state_validation: State validation tests",
+    "initialization_idempotency: Initialization idempotency tests",
+    "state_transitions: State transitions tests",
+    "concurrent_initialization: Concurrent initialization tests",
+
+    # Additional missing markers causing collection failures
+    "stress_test: Stress testing under high load conditions",
+    "websocket_continuation: WebSocket event continuation after failures",
+    "auth_coordination: Authentication coordination and handoff tests",
+    "tool_handoffs: Tool execution handoff between agents",
+    "tool_timeout: Tool execution timeout handling tests",
+    "tool_execution: Tool execution tests",
+    "issue_463: Issue #463 specific tests",
+    "issue_465: Issue #465 specific tests",
+    "issue_426_cluster: Issue #426 cluster specific tests",
+    "real_services_not_required: Tests that do not require real external services",
+    
+    # Missing markers from GitHub issue #848
+    "skip_if_staging_unavailable: Skip tests when staging environment unavailable",
+    "production_readiness: Tests validating production deployment readiness",
+    "concurrent_testing: Multi-user concurrent execution validation tests",
+    
+    # Golden path specific markers for issue #843
+    "goldenpath: Golden path integration tests for critical user flows",
+
+    # SLA compliance markers for Issue #865
+    "sla_critical: Service Level Agreement critical validation tests",
+    
+    # Issue #372 specific marker for staging import error tests
+    "issue_372: Issue #372 E2E staging import error tests",
+    
+    # Issue #881 GCP Cloud Run marker for staging E2E tests
+    "gcp_cloud_run: Tests requiring GCP Cloud Run deployment environment",
+    
+    # Missing supervisor orchestration marker causing collection failures
+    "supervisor_orchestration: Supervisor orchestration and multi-user isolation tests",
+    
+    # Missing agent_handoff_chain marker causing collection failures
+    "agent_handoff_chain: Agent handoff chain coordination tests",
+
+    # Issue #861 Phase 1 Integration Test Markers
+    "websocket_flow: WebSocket message flow integration tests",
+    "agent_execution_logic: Agent execution logic and workflow tests",
+    "business_logic_flow: End-to-end business logic flow tests",
+    "e2e_business_logic: End-to-end business logic integration tests",
+    "agent_execution: Agent execution integration tests",
+
+    # Issue #861 Phase 2 E2E Test Markers - Missing markers for new test files
+    "concurrent_scenarios: Concurrent user scenario tests for multi-user validation",
+    "advanced_features: Advanced agent feature tests for golden path enhancements",
+    "error_recovery: Error recovery and resilience tests for system stability",
+    "performance_validation: Performance validation tests for system efficiency",
+    "security_edge_cases: Security edge case tests for authorization and isolation",
+    
+    # Test collection failure remediation markers (2025-09-14)
+    "protocol_negotiation: WebSocket protocol negotiation and handshake tests",
+    "websocket_messaging: WebSocket messaging flow and communication tests",
+    "staging_clickhouse: ClickHouse-related tests in staging environment",
+    "requires_real_services: Tests that explicitly require real external services (not mocks)",
+    "websocket_ssot: WebSocket Single Source of Truth pattern and consolidation tests",
+    "migration_safety: Migration safety and rollback validation tests",
+    "performance_safety: Performance safety and resource management tests",
+    "issue_1058_migration_safety: Issue #1058 migration safety specific tests",
+    "issue_1058_broadcast_consolidation: Issue #1058 broadcast consolidation specific tests",
+    "integration_demo: Integration demonstration and workflow tests",
 ]
 
 # Coverage settings

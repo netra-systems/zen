@@ -172,7 +172,7 @@ class TestServicesPhaseComprehensive(BaseIntegrationTest):
         start_time = time.time()
         
         try:
-            from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+            from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
             from netra_backend.app.llm.llm_manager import LLMManager
             
             # Mock dependencies

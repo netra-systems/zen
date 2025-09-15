@@ -298,7 +298,7 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
             
             # Method 1: Direct ExecutionEngine creation (legacy pattern)
             try:
-                direct_execution_engine = ExecutionEngine()
+                direct_execution_engine = UserExecutionEngine()
                 logger.info("[U+2713] Direct ExecutionEngine creation succeeded")
                 direct_creation_success = True
             except Exception as e:

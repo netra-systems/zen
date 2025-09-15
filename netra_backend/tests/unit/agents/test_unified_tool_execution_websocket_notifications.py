@@ -478,7 +478,7 @@ class TestUnifiedToolExecutionEngineWebSocketNotifications(SSotAsyncTestCase):
         self.assertIs(EnhancedToolExecutionEngine, UnifiedToolExecutionEngine)
         
         # Create instance via alias
-        engine_via_alias = EnhancedToolExecutionEngine(
+        engine_via_alias = UserExecutionEngine(
             websocket_bridge=self.websocket_bridge
         )
         

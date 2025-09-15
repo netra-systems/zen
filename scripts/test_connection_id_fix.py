@@ -31,7 +31,7 @@ async def test_connection_id_passthrough():
     
     manager = UnifiedWebSocketManager()
     mock_websocket = Mock()
-    test_user_id = "test_user_123"
+    test_user_id = "usr_4a8f9c2b1e5d"
     preliminary_connection_id = "ws_1234567890_12345"
     
     try:
@@ -59,7 +59,7 @@ async def test_connection_id_passthrough():
     auth_service = UnifiedAuthenticationService()
     mock_auth_result = AuthResult(
         success=True,
-        user_id="test_user_123",
+        user_id="usr_4a8f9c2b1e5d",
         permissions=["read", "write"],
         metadata={}
     )

@@ -93,7 +93,7 @@ class TestExecutionEngineSSotViolationsDetection565(SSotBaseTestCase):
         deprecated_import_patterns = [
             r'from\s+netra_backend\.app\.agents\.supervisor\.execution_engine\s+import',
             r'import\s+netra_backend\.app\.agents\.supervisor\.execution_engine',
-            r'from\s+.*\.execution_engine\s+import\s+ExecutionEngine(?!\s+as)',  # Not aliased
+            r'from\s+.*\.execution_engine\s+import\s+UserExecutionEngine(?!\s+as)',  # Not aliased
         ]
         
         # Scan all Python files in the project

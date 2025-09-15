@@ -27,11 +27,11 @@
     # REMOVED_SYNTAX_ERROR: """Unit tests for WebSocket notification functionality."""
 
     # REMOVED_SYNTAX_ERROR: import asyncio
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
     # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: import pytest
@@ -139,7 +139,7 @@
             # Removed problematic line: async def test_enhanced_execution_engine_sends_notifications():
                 # REMOVED_SYNTAX_ERROR: """Test that enhanced execution engine sends proper notifications."""
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
 
                 # Create mocks
                 # REMOVED_SYNTAX_ERROR: mock_registry = Magic    mock_ws_manager = Magic    mock_ws_manager.websocket = TestWebSocketConnection()

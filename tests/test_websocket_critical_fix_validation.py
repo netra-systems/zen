@@ -119,8 +119,8 @@ def lazy_import(module_path: str, component: str = None):
                 # REMOVED_SYNTAX_ERROR: UnifiedToolExecutionEngine,
                 # REMOVED_SYNTAX_ERROR: enhance_tool_dispatcher_with_notifications
                 
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.llm.llm_manager import LLMManager
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
@@ -500,7 +500,7 @@ def lazy_import(module_path: str, component: str = None):
     # REMOVED_SYNTAX_ERROR: registry.set_websocket_manager(ws_manager)
 
     # Create execution engine
-    # REMOVED_SYNTAX_ERROR: execution_engine = ExecutionEngine(registry, ws_manager)
+    # REMOVED_SYNTAX_ERROR: execution_engine = UserExecutionEngine(registry, ws_manager)
 
     # Create execution context
     # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )
@@ -628,7 +628,7 @@ def lazy_import(module_path: str, component: str = None):
                 # REMOVED_SYNTAX_ERROR: registry.register("multi_tool_agent", test_agent)
 
                 # Create execution engine
-                # REMOVED_SYNTAX_ERROR: execution_engine = ExecutionEngine(registry, ws_manager)
+                # REMOVED_SYNTAX_ERROR: execution_engine = UserExecutionEngine(registry, ws_manager)
 
                 # Create execution context
                 # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )

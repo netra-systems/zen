@@ -39,9 +39,16 @@ import threading
 
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.unified_manager import WebSocketConnection, UnifiedWebSocketManager
-from netra_backend.app.logging_config import central_logger
+# ISSUE #824 REMEDIATION: Import from canonical SSOT path
+from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection, UnifiedWebSocketManager
+from shared.logging.unified_logging_ssot import get_logger
 
+# Use SSOT logging instead of deprecated central_logger
+class CentralLoggerCompat:
+    def get_logger(self, name):
+        return get_logger(name)
+
+central_logger = CentralLoggerCompat()
 logger = central_logger.get_logger(__name__)
 
 

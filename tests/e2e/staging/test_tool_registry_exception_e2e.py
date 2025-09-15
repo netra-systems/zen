@@ -40,7 +40,7 @@ class TestToolRegistryE2EExceptionHandling(SSotAsyncTestCase):
         
         # Get staging environment configuration
         env = IsolatedEnvironment()
-        cls.base_url = env.get_env("STAGING_BASE_URL", "https://staging-backend-svc-netra-staging.uc.r.appspot.com")
+        cls.base_url = env.get_env().get("STAGING_BASE_URL", "https://staging-backend-svc-netra-staging.uc.r.appspot.com")
         cls.auth_token = None
         cls.test_session = None
         
@@ -518,7 +518,7 @@ class TestToolRegistryE2EProductionReadiness(SSotAsyncTestCase):
         """Set up production readiness tests."""
         super().setUp()
         env = IsolatedEnvironment()
-        self.base_url = env.get_env("STAGING_BASE_URL", "https://staging-backend-svc-netra-staging.uc.r.appspot.com")
+        self.base_url = env.get_env().get("STAGING_BASE_URL", "https://staging-backend-svc-netra-staging.uc.r.appspot.com")
 
     async def test_exception_handling_performance_staging(self):
         """

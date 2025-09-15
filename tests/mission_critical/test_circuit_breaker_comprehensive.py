@@ -53,12 +53,12 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Set, Any, Optional, Callable
 import threading
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
-from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+from netra_backend.app.redis_manager import redis_manager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
@@ -821,7 +821,7 @@ async def test_circuit_breaker_state_transitions_under_load(circuit_breaker_stre
 async def test_circuit_breaker_websocket_notifications():
     """Test circuit breaker state changes trigger WebSocket notifications."""
     try:
-        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     except ImportError:
         pytest.skip("WebSocket components not available")
@@ -875,7 +875,7 @@ async def test_circuit_breaker_websocket_notifications():
 async def test_circuit_breaker_websocket_event_sequence():
     """Test proper sequence of WebSocket events during circuit breaker lifecycle."""
     try:
-        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
@@ -956,7 +956,7 @@ async def test_circuit_breaker_websocket_event_sequence():
 async def test_circuit_breaker_websocket_error_notifications():
     """Test WebSocket error notifications during circuit breaker failures."""
     try:
-        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
@@ -1007,7 +1007,7 @@ async def test_circuit_breaker_websocket_error_notifications():
 async def test_circuit_breaker_websocket_concurrent_notifications():
     """Test WebSocket notifications work correctly with concurrent circuit breaker operations."""
     try:
-        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
@@ -1093,7 +1093,7 @@ async def test_circuit_breaker_execute_core_integration():
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
         pytest.skip("Required components not available")
@@ -1187,7 +1187,7 @@ async def test_execute_core_circuit_breaker_recovery_patterns():
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
         pytest.skip("Required components not available")
@@ -1274,7 +1274,7 @@ async def test_execute_core_circuit_breaker_timing():
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
         pytest.skip("Required components not available")
@@ -1374,7 +1374,7 @@ async def test_execute_core_circuit_breaker_resource_management():
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
         pytest.skip("Required components not available")
@@ -1482,7 +1482,7 @@ async def test_execute_core_circuit_breaker_state_consistency():
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         from netra_backend.app.schemas.agent import SubAgentLifecycle
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
@@ -1606,7 +1606,7 @@ async def test_execute_core_circuit_breaker_concurrent_safety():
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
         pytest.skip("Required components not available")
@@ -1720,7 +1720,7 @@ async def test_execute_core_circuit_breaker_error_propagation():
     try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     except ImportError:
         pytest.skip("Required components not available")

@@ -70,11 +70,57 @@ def lazy_import(module_path: str, component: str = None):
     
     return _lazy_imports[module_path]
 
-cleanup_test_environment,
-wait_for_service,
-get_available_port,
-kill_process_tree,
-create_test_user_with_oauth
+
+# Missing test utility functions - stub implementations
+def cleanup_test_environment():
+    """Clean up test environment."""
+    pass
+
+def wait_for_service(url: str, timeout: float = 30.0) -> bool:
+    """Wait for service to become available."""
+    import time
+    import requests
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            response = requests.get(url, timeout=5)
+            if response.status_code == 200:
+                return True
+        except:
+            pass
+        time.sleep(1)
+    return False
+
+def get_available_port(start_port: int = 8000) -> int:
+    """Get an available port."""
+    import socket
+    for port in range(start_port, start_port + 100):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('localhost', port))
+                return port
+        except OSError:
+            continue
+    raise RuntimeError("No available ports found")
+
+def kill_process_tree(pid: int):
+    """Kill process tree."""
+    try:
+        import psutil
+        parent = psutil.Process(pid)
+        for child in parent.children(recursive=True):
+            child.kill()
+        parent.kill()
+    except:
+        pass
+
+def create_test_user_with_oauth(email: str = "test@example.com"):
+    """Create test user with OAuth."""
+    return {
+        "id": "test_user_123",
+        "email": email,
+        "oauth_provider": "test"
+    }
 
 
 

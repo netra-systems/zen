@@ -29,7 +29,7 @@ from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+    from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
     from netra_backend.app.llm.client_unified import ResilientLLMClient
 
 logger = central_logger.get_logger(__name__)
@@ -139,7 +139,7 @@ async def create_supervisor_core(
             return db_session
         
         # Create isolated SupervisorAgent using factory method
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         
         # Extract LLM manager from client if needed
         if hasattr(llm_client, '_llm_manager'):
@@ -296,8 +296,8 @@ async def create_streaming_supervisor(
                     run_id=run_id
                 )
                 
-                from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-                websocket_manager = await create_websocket_manager(user_context)
+                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                websocket_manager = await get_websocket_manager(user_context)
                 
                 # Get tool classes for UserContext pattern
                 from netra_backend.app.tools import get_default_tool_classes

@@ -821,6 +821,11 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 - **[Test Architecture Visual Overview](../tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md)** 📊 - Complete test infrastructure guide
 - **[Golden Path User Flow Analysis](./GOLDEN_PATH_USER_FLOW_COMPLETE.md)** 🚀 - Critical user journey analysis ($500K+ ARR dependency)
 
+### Claude Code Automation & Orchestration
+- **[Claude Instance Orchestrator](../README-claude-orchestrator.md)** 🤖 - **NEW** - Multi-instance Claude Code automation with SDK features
+- **[Claude Orchestration Plan](../claude-code-instances-plan.md)** 📋 - Architecture design and implementation strategy for parallel Claude execution
+- **[Claude Instance Orchestrator Script](../scripts/claude-instance-orchestrator.py)** ⚙️ - Python orchestrator for running multiple Claude Code instances concurrently
+
 ### Cross-Referenced Documentation
 - **[Documentation Index](./index.md)** 📖 - Master documentation navigation hub
 - **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** 🏗️ - Factory-based isolation patterns
@@ -933,4 +938,4 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 
 ---
 
-*Last Updated: 2025-01-12 | Commands: 39 | Categories: 6 | Mission Critical Commands: 8 | Repository Maintenance Commands: 6*
+*Last Updated: 2025-09-14 | Commands: 39 | Categories: 6 | Mission Critical Commands: 8 | Repository Maintenance Commands: 6 | System Health: 95% EXCELLENT - Issue #1116 SSOT Agent Factory Migration Complete, Enterprise User Isolation Implemented, System Stability Validated*

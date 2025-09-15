@@ -29,6 +29,7 @@ from netra_backend.app.core.circuit_breaker_types import (
 # Import unified circuit breaker system
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
     UnifiedCircuitBreaker,
+    UnifiedCircuitBreakerState,
     UnifiedCircuitConfig,
     UnifiedCircuitBreakerManager,
     get_unified_circuit_breaker_manager,
@@ -92,6 +93,7 @@ __all__ = [
     
     # Unified Circuit Breaker System
     'UnifiedCircuitBreaker',
+    'UnifiedCircuitBreakerState',
     'UnifiedCircuitConfig',
     'UnifiedCircuitBreakerManager',
     'get_unified_circuit_breaker_manager',

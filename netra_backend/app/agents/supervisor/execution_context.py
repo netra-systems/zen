@@ -6,7 +6,7 @@ from enum import Enum
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
 # DeepAgentState removed - using UserExecutionContext pattern
-# from netra_backend.app.agents.state import DeepAgentState
+# from netra_backend.app.schemas.agent_models import DeepAgentState
 
 # Import ExecutionStrategy from the authoritative source for compatibility
 from netra_backend.app.core.interfaces_execution import ExecutionStrategy

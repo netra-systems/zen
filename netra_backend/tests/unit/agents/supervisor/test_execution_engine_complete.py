@@ -40,7 +40,7 @@ sys.modules['netra_backend.app.websocket_core.get_websocket_manager'] = Mock()
 
 try:
     # Import execution engine components with compatibility bridge
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     from netra_backend.app.agents.supervisor.execution_engine_factory import (
         create_request_scoped_engine,
     )
@@ -62,7 +62,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
     InvalidContextError,
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.agent_execution_tracker import ExecutionState
 
 
@@ -155,14 +155,14 @@ class TestExecutionEngineConstruction(SSotAsyncTestCase):
     def test_direct_construction_blocked(self):
         """Test that direct ExecutionEngine construction raises RuntimeError."""
         with self.expect_exception(RuntimeError, "Direct ExecutionEngine instantiation is no longer supported") as exc_info:
-            ExecutionEngine(self.registry, self.websocket_bridge)
+            UserExecutionEngine(self.registry, self.websocket_bridge)
             
         assert "create_request_scoped_engine" in str(exc_info.value)
         
     def test_direct_construction_error_message_details(self):
         """Test detailed error message for direct construction."""
         with self.expect_exception(RuntimeError, "user isolation") as exc_info:
-            ExecutionEngine(self.registry, self.websocket_bridge, None)
+            UserExecutionEngine(self.registry, self.websocket_bridge, None)
             
         error_msg = str(exc_info.value)
         assert "concurrent execution safety" in error_msg
@@ -1724,7 +1724,7 @@ class TestExecutionEngineUserIsolation(SSotAsyncTestCase):
             user_id="complex_user",
             thread_id="complex_thread", 
             run_id="complex_run",
-            websocket_connection_id="ws_conn_123",
+            websocket_client_id="ws_conn_123",
             metadata={"env": "production", "features": ["feature_a", "feature_b"]}
         )
         

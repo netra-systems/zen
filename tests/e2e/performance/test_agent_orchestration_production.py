@@ -27,7 +27,7 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.user_plan import PlanTier
@@ -38,7 +38,7 @@ class TestableSubAgent(BaseAgent):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
-        return UserExecutionContext.create_for_user(
+        return UserExecutionContext.from_request(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run"
@@ -142,7 +142,7 @@ class TestAgentOrchestrationProduction:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
-        return UserExecutionContext.create_for_user(
+        return UserExecutionContext.from_request(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run"
@@ -323,7 +323,7 @@ class TestEnterpriseAgentScenarios:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
-        return UserExecutionContext.create_for_user(
+        return UserExecutionContext.from_request(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run"

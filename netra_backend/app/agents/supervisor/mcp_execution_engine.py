@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    # CANONICAL IMPORT: Use direct import path for better SSOT compliance
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    # SSOT COMPLIANT: Use AgentWebSocketBridge instead of direct WebSocketManager
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 from netra_backend.app.agents.mcp_integration.context_manager import MCPContextManager
@@ -18,7 +18,7 @@ from netra_backend.app.agents.mcp_integration.mcp_intent_detector import (
     MCPIntentDetector,
 )
 # DeepAgentState removed - using UserExecutionContext pattern
-# from netra_backend.app.agents.state import DeepAgentState
+# from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
@@ -170,7 +170,7 @@ class MCPExecutionPlanner:
 
 def create_mcp_enhanced_engine(user_context: 'UserExecutionContext',
                              registry: 'AgentRegistry',
-                             websocket_bridge: 'WebSocketManager') -> 'MCPEnhancedExecutionEngine':
+                             websocket_bridge: 'AgentWebSocketBridge') -> 'MCPEnhancedExecutionEngine':
     """Factory method to create MCPEnhancedExecutionEngine for safe concurrent usage.
     
     This factory method ensures proper user isolation and follows the SSOT pattern
@@ -197,7 +197,7 @@ class MCPEnhancedExecutionEngine(ExecutionEngine):
     MAX_CONCURRENT_AGENTS = 10  # Support 5 concurrent users (2 agents each)
     AGENT_EXECUTION_TIMEOUT = 30.0  # 30 seconds max per agent
     
-    def __init__(self, registry: 'AgentRegistry', websocket_manager: 'WebSocketManager', 
+    def __init__(self, registry: 'AgentRegistry', websocket_manager: 'AgentWebSocketBridge', 
                  user_context: Optional['UserExecutionContext'] = None):
         """Private initializer - use factory methods instead.
         
@@ -211,7 +211,7 @@ class MCPEnhancedExecutionEngine(ExecutionEngine):
         )
     
     @classmethod
-    def _init_from_factory(cls, registry: 'AgentRegistry', websocket_manager: 'WebSocketManager',
+    def _init_from_factory(cls, registry: 'AgentRegistry', websocket_manager: 'AgentWebSocketBridge',
                           user_context: Optional['UserExecutionContext'] = None):
         """Internal factory initializer for creating request-scoped MCP engines.
         

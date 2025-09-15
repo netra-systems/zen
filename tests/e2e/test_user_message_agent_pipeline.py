@@ -19,13 +19,13 @@ from typing import Any, Dict, List, Optional
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
 from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 UnifiedWebSocketManager = WebSocketManager  # Alias for backward compatibility
 from tests.e2e.helpers.llm_config_detector import llm_detector, get_llm_config_for_test
 

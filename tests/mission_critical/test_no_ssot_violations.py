@@ -31,7 +31,7 @@
     # REMOVED_SYNTAX_ERROR: from collections import defaultdict
     # REMOVED_SYNTAX_ERROR: import threading
     # REMOVED_SYNTAX_ERROR: import random
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
     # Real service imports - NO MOCKS
     # REMOVED_SYNTAX_ERROR: from test_framework.environment_isolation import isolated_test_env, get_test_env_manager

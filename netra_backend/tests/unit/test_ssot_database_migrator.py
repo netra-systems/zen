@@ -74,7 +74,7 @@ class TestSSOTDatabaseMigrator(SSotBaseTestCase):
         self.database_url = env.get("DATABASE_URL")
         
         if not self.database_url or "mock" in self.database_url.lower():
-            pytest.skip("Real database required - mocks forbidden in migration unit tests")
+            pytest.skip("Real database required - mocks forbidden in migration unit tests", allow_module_level=True)
         
         # Initialize DatabaseMigrator for testing
         self.migrator = DatabaseMigrator(self.database_url)
@@ -213,7 +213,7 @@ class TestSSOTDatabaseMigrator(SSotBaseTestCase):
             self.record_metric("head_revision_detection_error", str(e))
             # This could indicate missing or corrupted migration scripts
             if "alembic.ini" in str(e) or "script_location" in str(e):
-                pytest.skip(f"Alembic configuration issue (deployment problem): {e}")
+                pytest.skip(f"Alembic configuration issue (deployment problem, allow_module_level=True): {e}", allow_module_level=True)
             else:
                 pytest.fail(f"Head revision detection failed: {e}")
                 
@@ -286,7 +286,7 @@ class TestSSOTDatabaseMigrator(SSotBaseTestCase):
         except FileNotFoundError as e:
             # This indicates missing alembic.ini file - a deployment issue
             self.record_metric("alembic_ini_missing", True)
-            pytest.skip(f"Alembic configuration missing (deployment issue): {e}")
+            pytest.skip(f"Alembic configuration missing (deployment issue, allow_module_level=True): {e}", allow_module_level=True)
             
         except Exception as e:
             self.record_metric("alembic_config_creation_error", str(e))

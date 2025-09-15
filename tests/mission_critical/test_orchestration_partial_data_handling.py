@@ -18,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler

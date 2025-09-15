@@ -20,6 +20,12 @@ Tests cover:
 5. Multi-tool execution sequence visibility
 """
 
+# Enable direct Python execution by adding project root to sys.path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
+sys.path.insert(0, str(PROJECT_ROOT))
+
 import asyncio
 import json
 import pytest
@@ -37,7 +43,7 @@ from netra_backend.app.core.tool_models import ToolExecutionResult
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.isolated_environment import get_env
 
@@ -470,7 +476,7 @@ class TestToolExecutionUserVisibilityE2E(SSotAsyncTestCase):
         EXPECTED TO FAIL: Missing confirmation system in staging deployment.
         """
         # Skip if not in staging environment
-        env = get_env("ENVIRONMENT", "local")
+        env = get_env().get("ENVIRONMENT", "local")
         if env != "staging":
             pytest.skip("Staging test - run with ENVIRONMENT=staging")
         

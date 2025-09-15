@@ -89,7 +89,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
         )
         
         self.auth_helper = E2EWebSocketAuthHelper(config=auth_config, environment="test")
-        self.websocket_connections: List[websockets.WebSocketServerProtocol] = []
+        self.websocket_connections: List[websockets.ServerConnection] = []
         
         # Validate auth helper functionality
         try:

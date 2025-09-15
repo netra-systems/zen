@@ -53,7 +53,7 @@ if project_root not in sys.path:
 from shared.isolated_environment import get_env
 
 # Import core agent pipeline components
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.agent_class_registry import get_agent_class_registry
 from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
@@ -64,10 +64,10 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
 # WebSocket and real-time communication
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 # LLM and core infrastructure
@@ -537,7 +537,7 @@ class AgentPipelineE2ETest:
         
         try:
             # Use execution engine for standardized execution
-            execution_engine = ExecutionEngine(
+            execution_engine = UserExecutionEngine(
                 agent_registry=self.agent_registry,
                 websocket_bridge=self.websocket_bridge,
                 user_context=user_context

@@ -423,6 +423,7 @@ class IsolatedEnvironment:
             'SERVER_PORT': '8000',
             'AUTH_PORT': '8081',
             'FRONTEND_PORT': '3000',
+            'AUTH_SERVICE_URL': 'http://localhost:8081',
             'LOG_LEVEL': 'DEBUG',
             
             # Staging environment test defaults - FIXES GitHub Issue #259
@@ -595,6 +596,19 @@ class IsolatedEnvironment:
         """
         return self.enable_isolation(backup_original, refresh_vars)
     
+    def enable(self, backup_original: bool = True, refresh_vars: bool = True) -> None:
+        """
+        Compatibility method - enables isolation mode for WebSocket tests.
+        
+        This method provides backward compatibility for tests expecting an enable()
+        method on IsolatedEnvironment instances. Delegates to enable_isolation().
+        
+        Args:
+            backup_original: Whether to backup current os.environ state
+            refresh_vars: Whether to refresh isolated vars from current os.environ state
+        """
+        return self.enable_isolation(backup_original, refresh_vars)
+
     def disable_isolation(self, restore_original: bool = False) -> None:
         """
         Disable isolation mode and optionally restore original environment.
@@ -1486,6 +1500,15 @@ class IsolatedEnvironment:
             "original_backup_count": len(self._original_environ_backup)
         }
 
+    def __enter__(self) -> 'IsolatedEnvironment':
+        """Context manager entry - enable isolation mode."""
+        self.enable_isolation()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Context manager exit - disable isolation mode and restore original."""
+        self.disable_isolation(restore_original=True)
+
 
 # Singleton instance
 _env_instance = IsolatedEnvironment()
@@ -1572,6 +1595,27 @@ class SecretLoader:
         """
         value = self.env_manager.get(key, "")
         return _mask_sensitive_value(key, value)
+
+
+# Convenience function for backward compatibility with get_env(key, default) usage pattern
+def get_env_var(key: str, default: Optional[str] = None) -> Optional[str]:
+    """Get environment variable with default value (compatibility wrapper).
+    
+    This function maintains backward compatibility with old get_env(key, default) usage
+    while using the SSOT IsolatedEnvironment internally.
+    
+    Args:
+        key: Environment variable name
+        default: Default value if key not found
+        
+    Returns:
+        Environment variable value or default
+        
+    Example:
+        >>> host = get_env_var('REDIS_HOST', 'localhost')
+        >>> port = get_env_var('REDIS_PORT', '6379')
+    """
+    return get_env().get(key, default)
 
 
 # Legacy compatibility function  

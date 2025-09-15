@@ -29,13 +29,12 @@ from typing import Dict, Any, List, Optional
 from unittest.mock import MagicMock, patch
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from netra_backend.app.agents.state import (
+from netra_backend.app.schemas.agent_models import (
     DeepAgentState, 
-    OptimizationsResult,
-    ActionPlanResult,
-    ReportResult,
     AgentMetadata
 )
+# DEPRECATED: Other classes moved to specific schemas
+# OptimizationsResult, ActionPlanResult, ReportResult - check specific result schemas
 from netra_backend.app.schemas.agent_models import AgentMetadata as SchemaAgentMetadata
 
 

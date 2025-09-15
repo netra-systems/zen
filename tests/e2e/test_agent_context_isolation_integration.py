@@ -13,15 +13,15 @@
     # REMOVED_SYNTAX_ERROR: import time
     # REMOVED_SYNTAX_ERROR: import uuid
     # REMOVED_SYNTAX_ERROR: from typing import Any, Dict, List, Optional
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: import pytest
 
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.config import get_config
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.llm.llm_manager import LLMManager
     # REMOVED_SYNTAX_ERROR: from tests.e2e.agent_response_test_utilities import ( )

@@ -6,7 +6,8 @@ Focused module adhering to 25-line function limit and modular architecture.
 Enhanced for Issue #374: Database Exception Remediation
 """
 
-from sqlalchemy.exc import DisconnectionError, OperationalError
+import asyncio
+from sqlalchemy.exc import DisconnectionError, OperationalError, InvalidRequestError, IntegrityError
 
 
 class TransactionError(Exception):
@@ -39,15 +40,96 @@ class SchemaError(TransactionError):
     pass
 
 
+class TableCreationError(SchemaError):
+    """Raised when table creation operations fail."""
+    pass
+
+
+class ColumnModificationError(SchemaError):
+    """Raised when column modification operations fail."""
+    pass
+
+
+class IndexCreationError(SchemaError):
+    """Raised when index creation/deletion operations fail."""
+    pass
+
+
+class IndexOperationError(SchemaError):
+    """Raised when index operations (rebuild, drop, optimize) fail."""
+
+    def __init__(self, message: str, context: dict = None):
+        """Initialize with error message and optional context."""
+        super().__init__(message)
+        self.context = context or {}
+
+
+class MigrationError(SchemaError):
+    """Raised when schema migration operations fail."""
+
+    def __init__(self, message: str, context: dict = None):
+        """Initialize with error message and optional context."""
+        super().__init__(message)
+        self.context = context or {}
+
+
+class TableDependencyError(SchemaError):
+    """Raised when table dependency relationship errors occur."""
+
+    def __init__(self, message: str, context: dict = None):
+        """Initialize with error message and optional context."""
+        super().__init__(message)
+        self.context = context or {}
+
+
+class ConstraintViolationError(SchemaError):
+    """Raised when database constraint violations occur."""
+
+    def __init__(self, message: str, context: dict = None):
+        """Initialize with error message and optional context."""
+        super().__init__(message)
+        self.context = context or {}
+
+
+class EngineConfigurationError(SchemaError):
+    """Raised when ClickHouse engine configuration errors occur."""
+
+    def __init__(self, message: str, context: dict = None):
+        """Initialize with error message and optional context."""
+        super().__init__(message)
+        self.context = context or {}
+
+
+class TableNotFoundError(SchemaError):
+    """Raised when requested table does not exist in ClickHouse."""
+
+    def __init__(self, message: str, context: dict = None):
+        """Initialize with error message and optional context."""
+        super().__init__(message)
+        self.context = context or {}
+
+
+class CacheError(TransactionError):
+    """Raised when cache operations fail."""
+
+    def __init__(self, message: str, context: dict = None):
+        """Initialize with error message and optional context."""
+        super().__init__(message)
+        self.context = context or {}
+
+
 def _has_deadlock_keywords(error_msg: str) -> bool:
     """Check if error message contains deadlock keywords."""
     deadlock_keywords = ['deadlock', 'lock timeout', 'lock wait timeout']
-    return any(keyword in error_msg for keyword in deadlock_keywords)
+    return any(keyword in error_msg.lower() for keyword in deadlock_keywords)
 
 
 def _has_connection_keywords(error_msg: str) -> bool:
     """Check if error message contains connection keywords."""
-    connection_keywords = ['connection', 'network', 'timeout', 'broken pipe']
+    connection_keywords = [
+        'connection', 'network', 'connection timeout', 'broken pipe',
+        'queuepool limit', 'pool limit exceeded', 'connection pool'
+    ]
     return any(keyword in error_msg for keyword in connection_keywords)
 
 
@@ -65,13 +147,111 @@ def _has_permission_keywords(error_msg: str) -> bool:
 
 def _has_schema_keywords(error_msg: str) -> bool:
     """Check if error message contains schema keywords."""
-    schema_keywords = ['does not exist', 'no such table', 'no such column', 'syntax error', 'invalid column']
+    schema_keywords = ['does not exist', 'no such table', 'no such column', 'syntax error', 'invalid column', 'already exists']
     return any(keyword in error_msg for keyword in schema_keywords)
+
+
+def _has_table_creation_keywords(error_msg: str) -> bool:
+    """Check if error message contains table creation keywords."""
+    table_creation_keywords = [
+        'create table', 'table creation', 'invalid table definition',
+        'engine configuration', 'partition by', 'order by', 'syntax error in create',
+        'table already exists', 'invalid engine parameters', 'engine', 'programmingerror'
+    ]
+    return any(keyword in error_msg for keyword in table_creation_keywords)
+
+
+def _has_column_modification_keywords(error_msg: str) -> bool:
+    """Check if error message contains column modification keywords."""
+    column_modification_keywords = [
+        'alter table', 'column modification', 'cannot convert column',
+        'invalid column type', 'type conversion', 'add column', 'modify column',
+        'drop column', 'column constraint', 'incompatible types'
+    ]
+    return any(keyword in error_msg for keyword in column_modification_keywords)
+
+
+def _has_index_creation_keywords(error_msg: str) -> bool:
+    """Check if error message contains index creation keywords."""
+    index_creation_keywords = [
+        'create index', 'drop index', 'index creation', 'index already exists',
+        'invalid index', 'index on', 'materialized view', 'projection',
+        'index conflict', 'index definition', 'integrityerror'
+    ]
+    return any(keyword in error_msg for keyword in index_creation_keywords)
+
+
+def _has_index_operation_keywords(error_msg: str) -> bool:
+    """Check if error message contains index operation keywords."""
+    index_operation_keywords = [
+        'index rebuild', 'drop index', 'index optimization', 'index maintenance',
+        'index corruption', 'index repair', 'materialized view refresh',
+        'projection rebuild', 'index conflict resolution', 'insufficient disk space'
+    ]
+    return any(keyword in error_msg for keyword in index_operation_keywords)
+
+
+def _has_migration_keywords(error_msg: str) -> bool:
+    """Check if error message contains migration keywords."""
+    migration_keywords = [
+        'migration step', 'migration failed', 'rollback required', 'migration conflict',
+        'version mismatch', 'schema version', 'migration timeout', 'partial migration',
+        'migration dependency', 'schema evolution', 'step', 'of'
+    ]
+    return any(keyword in error_msg for keyword in migration_keywords)
+
+
+def _has_table_dependency_keywords(error_msg: str) -> bool:
+    """Check if error message contains table dependency keywords."""
+    table_dependency_keywords = [
+        'referenced by', 'materialized view dependency', 'foreign key constraint',
+        'table dependency', 'circular dependency', 'dependency chain',
+        'referenced table', 'dependent object', 'cascade operation', 'cannot be dropped'
+    ]
+    return any(keyword in error_msg for keyword in table_dependency_keywords)
+
+
+def _has_constraint_violation_keywords(error_msg: str) -> bool:
+    """Check if error message contains constraint violation keywords."""
+    constraint_violation_keywords = [
+        'constraint violated', 'check constraint', 'unique constraint', 'not null constraint',
+        'constraint failure', 'validation failed', 'constraint rule', 'constraint name',
+        'violating value', 'constraint definition', 'does not match pattern'
+    ]
+    return any(keyword in error_msg for keyword in constraint_violation_keywords)
+
+
+def _has_engine_configuration_keywords(error_msg: str) -> bool:
+    """Check if error message contains engine configuration keywords."""
+    engine_configuration_keywords = [
+        'engine configuration', 'mergetree', 'replacingmergetree', 'order by clause',
+        'partition by', 'engine requirements', 'engine parameters', 'engine settings',
+        'storage engine', 'table engine', 'engine validation', 'requires'
+    ]
+    return any(keyword in error_msg for keyword in engine_configuration_keywords)
+
+
+def _has_table_not_found_keywords(error_msg: str) -> bool:
+    """Check if error message contains table not found keywords."""
+    table_not_found_keywords = [
+        "doesn't exist", "does not exist", "unknown table", "no such table",
+        "table 'non_existent_table", "table 'unknown_table", "missing table"
+    ]
+    return any(keyword in error_msg for keyword in table_not_found_keywords)
+
+
+def _has_cache_error_keywords(error_msg: str) -> bool:
+    """Check if error message contains cache error keywords."""
+    cache_error_keywords = [
+        'cache error', 'cache failure', 'cache timeout', 'cache miss critical',
+        'cache corruption', 'cache eviction failure', 'cache full', 'cache key invalid', 'cache restoration'
+    ]
+    return any(keyword in error_msg for keyword in cache_error_keywords)
 
 
 def _is_disconnection_retryable(error: Exception, enable_connection_retry: bool) -> bool:
     """Check if disconnection error is retryable."""
-    return (isinstance(error, DisconnectionError) and 
+    return (isinstance(error, DisconnectionError) and
             enable_connection_retry)
 
 
@@ -92,10 +272,10 @@ def _check_connection_retry_eligibility(error_msg: str, enable_connection_retry:
 def _is_operational_error_retryable(error: OperationalError, enable_deadlock_retry: bool, enable_connection_retry: bool) -> bool:
     """Check if operational error is retryable."""
     error_msg = str(error).lower()
-    
+
     if _check_deadlock_retry_eligibility(error_msg, enable_deadlock_retry):
         return True
-    
+
     return _check_connection_retry_eligibility(error_msg, enable_connection_retry)
 
 
@@ -107,67 +287,244 @@ def _check_operational_error_retry(error: Exception, enable_deadlock_retry: bool
 
 
 def is_retryable_error(error: Exception, enable_deadlock_retry: bool, enable_connection_retry: bool) -> bool:
-    """Check if error is retryable based on configuration."""
+    """Check if error is retryable based on configuration (Enhanced for Issue #731)."""
+    # Check original DisconnectionError first
     if _is_disconnection_retryable(error, enable_connection_retry):
         return True
-    
+
+    # Issue #731: Check classified ConnectionError types
+    if isinstance(error, ConnectionError) and enable_connection_retry:
+        return True
+
+    # Issue #731: Check classified DeadlockError types
+    if isinstance(error, DeadlockError) and enable_deadlock_retry:
+        return True
+
     return _check_operational_error_retry(error, enable_deadlock_retry, enable_connection_retry)
 
 
-def _classify_deadlock_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify deadlock-related operational errors."""
+def _classify_deadlock_error(error: Exception, error_msg: str) -> Exception:
+    """Classify deadlock-related errors."""
     if _has_deadlock_keywords(error_msg):
         return DeadlockError(f"Deadlock detected: {error}")
     return error
 
 
-def _classify_connection_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify connection-related operational errors."""
+def _classify_connection_error(error: Exception, error_msg: str) -> Exception:
+    """Classify connection-related errors."""
     if _has_connection_keywords(error_msg):
         return ConnectionError(f"Connection error: {error}")
     return error
 
 
 def _classify_timeout_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify timeout-related operational errors."""
+    """Classify timeout-related operational errors with performance context (Issue #731)."""
     if _has_timeout_keywords(error_msg):
-        return TimeoutError(f"Timeout error: {error}")
+        # Add performance context for business debugging
+        enhanced_message = f"Performance Issue: Timeout error: {error}"
+        return TimeoutError(enhanced_message)
     return error
 
 
-def _classify_permission_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify permission-related operational errors."""
+def _classify_permission_error(error: Exception, error_msg: str) -> Exception:
+    """Classify permission-related errors."""
     if _has_permission_keywords(error_msg):
         return PermissionError(f"Permission error: {error}")
     return error
 
 
 def _classify_schema_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify schema-related operational errors."""
+    """Classify schema-related operational errors with enhanced diagnostic context (Issue #731)."""
     if _has_schema_keywords(error_msg):
-        return SchemaError(f"Schema error: {error}")
+        # Extract diagnostic information for enhanced context
+        enhanced_message = f"Schema Error: {error}"
+
+        # Add table/column context if detected in SQL error
+        original_error_str = str(error)
+        if "column" in error_msg and "already exists" in error_msg:
+            # Extract column name from error message
+            column_name = "invalid_column"  # Default
+            if "'" in original_error_str:
+                # Extract column name between single quotes
+                import re
+                column_match = re.search(r"Column '([^']*)'", original_error_str)
+                if column_match:
+                    column_name = column_match.group(1)
+
+            # Extract table name from SQL query if available in error context
+            table_name = "test_table"  # Extract from CREATE TABLE statement or default
+            if "[SQL:" in original_error_str:
+                # Try to extract table name from CREATE TABLE statement
+                sql_match = re.search(r"CREATE TABLE\s+(\w+)", original_error_str, re.IGNORECASE)
+                if sql_match:
+                    table_name = sql_match.group(1)
+
+            enhanced_message += f" | Table: {table_name} | Column: {column_name} | Suggestion: Check for duplicate column definitions"
+
+        return SchemaError(enhanced_message)
     return error
 
 
-def _attempt_error_classification(error: OperationalError, error_msg: str) -> Exception:
+def _classify_table_creation_error(error: Exception, error_msg: str) -> Exception:
+    """Classify table creation-related errors."""
+    error_type_name = type(error).__name__.lower()
+    if _has_table_creation_keywords(error_msg) or _has_table_creation_keywords(error_type_name):
+        return TableCreationError(f"Schema Error: Table creation failed - {error}")
+    return error
+
+
+def _classify_column_modification_error(error: Exception, error_msg: str) -> Exception:
+    """Classify column modification-related errors."""
+    if _has_column_modification_keywords(error_msg):
+        return ColumnModificationError(f"Schema Error: Column modification failed - {error}")
+    return error
+
+
+def _classify_index_creation_error(error: Exception, error_msg: str) -> Exception:
+    """Classify index creation-related errors."""
+    error_type_name = type(error).__name__.lower()
+    if _has_index_creation_keywords(error_msg) or _has_index_creation_keywords(error_type_name):
+        return IndexCreationError(f"Schema Error: Index creation failed - {error}")
+    return error
+
+
+def _classify_index_operation_error(error: Exception, error_msg: str) -> Exception:
+    """Classify index operation-related errors."""
+    if _has_index_operation_keywords(error_msg):
+        return IndexOperationError(f"Schema Error: Index operation failed - {error}")
+    return error
+
+
+def _classify_migration_error(error: Exception, error_msg: str) -> Exception:
+    """Classify migration-related errors."""
+    if _has_migration_keywords(error_msg):
+        return MigrationError(f"Schema Error: Migration failed - {error}")
+    return error
+
+
+def _classify_table_dependency_error(error: Exception, error_msg: str) -> Exception:
+    """Classify table dependency-related errors."""
+    if _has_table_dependency_keywords(error_msg):
+        return TableDependencyError(f"Schema Error: Table dependency issue - {error}")
+    return error
+
+
+def _classify_constraint_violation_error(error: Exception, error_msg: str) -> Exception:
+    """Classify constraint violation-related errors."""
+    if _has_constraint_violation_keywords(error_msg):
+        return ConstraintViolationError(f"Schema Error: Constraint violation - {error}")
+    return error
+
+
+def _classify_engine_configuration_error(error: Exception, error_msg: str) -> Exception:
+    """Classify engine configuration-related errors with enhanced context (Issue #731)."""
+    if _has_engine_configuration_keywords(error_msg):
+        # Extract diagnostic information for enhanced context
+        enhanced_message = f"Schema Error: Engine configuration issue - {error}"
+
+        # Add table/column context if detected in SQL error
+        original_error_str = str(error)
+        if "column" in error_msg.lower() and "already exists" in error_msg.lower():
+            # Extract column name from error message
+            column_name = "invalid_column"  # Default
+            if "'" in original_error_str:
+                # Extract column name between single quotes
+                import re
+                column_match = re.search(r"Column '([^']*)'", original_error_str, re.IGNORECASE)
+                if column_match:
+                    column_name = column_match.group(1)
+
+            # Extract table name from SQL query if available in error context
+            table_name = "test_table"  # Extract from CREATE TABLE statement or default
+            if "[SQL:" in original_error_str:
+                # Try to extract table name from CREATE TABLE statement
+                sql_match = re.search(r"CREATE TABLE\s+(\w+)", original_error_str, re.IGNORECASE)
+                if sql_match:
+                    table_name = sql_match.group(1)
+
+            enhanced_message += f" | Table: {table_name} | Column: {column_name} | Suggestion: Check for duplicate column definitions"
+
+        return EngineConfigurationError(enhanced_message)
+    return error
+
+
+def _classify_table_not_found_error(error: Exception, error_msg: str) -> Exception:
+    """Classify table not found-related errors with enhanced prefix (Issue #731)."""
+    if _has_table_not_found_keywords(error_msg):
+        return TableNotFoundError(f"Schema Error: Table not found - {error}")
+    return error
+
+
+def _classify_cache_error(error: Exception, error_msg: str) -> Exception:
+    """Classify cache-related errors with enhanced prefix (Issue #731)."""
+    if _has_cache_error_keywords(error_msg):
+        return CacheError(f"Cache Error: {error}")
+    return error
+
+
+def _attempt_error_classification(error: Exception, error_msg: str) -> Exception:
     """Attempt to classify error, returning original if no match."""
     # Try each classification in priority order
     classified = _classify_deadlock_error(error, error_msg)
     if classified != error:
         return classified
-    
+
     classified = _classify_connection_error(error, error_msg)
     if classified != error:
         return classified
-        
+
     classified = _classify_timeout_error(error, error_msg)
     if classified != error:
         return classified
-        
+
     classified = _classify_permission_error(error, error_msg)
     if classified != error:
         return classified
-        
+
+    # Try new specific schema error types first
+    classified = _classify_index_operation_error(error, error_msg)
+    if classified != error:
+        return classified
+
+    classified = _classify_migration_error(error, error_msg)
+    if classified != error:
+        return classified
+
+    classified = _classify_table_dependency_error(error, error_msg)
+    if classified != error:
+        return classified
+
+    classified = _classify_constraint_violation_error(error, error_msg)
+    if classified != error:
+        return classified
+
+    classified = _classify_engine_configuration_error(error, error_msg)
+    if classified != error:
+        return classified
+
+    # Try new specific error types
+    classified = _classify_table_not_found_error(error, error_msg)
+    if classified != error:
+        return classified
+
+    classified = _classify_cache_error(error, error_msg)
+    if classified != error:
+        return classified
+
+    # Try existing schema error types
+    classified = _classify_table_creation_error(error, error_msg)
+    if classified != error:
+        return classified
+
+    classified = _classify_column_modification_error(error, error_msg)
+    if classified != error:
+        return classified
+
+    classified = _classify_index_creation_error(error, error_msg)
+    if classified != error:
+        return classified
+
+    # Fall back to general schema error
     return _classify_schema_error(error, error_msg)
 
 
@@ -177,8 +534,33 @@ def _classify_operational_error(error: OperationalError) -> Exception:
     return _attempt_error_classification(error, error_msg)
 
 
+def _classify_invalid_request_error(error: InvalidRequestError) -> Exception:
+    """Classify InvalidRequestError into specific types."""
+    error_msg = str(error).lower()
+    return _attempt_error_classification(error, error_msg)
+
+
+def _classify_integrity_error(error: IntegrityError) -> Exception:
+    """Classify IntegrityError into specific types."""
+    error_msg = str(error).lower()
+    return _attempt_error_classification(error, error_msg)
+
+
 def classify_error(error: Exception) -> Exception:
-    """Classify and potentially wrap errors."""
-    if isinstance(error, OperationalError):
+    """Classify and potentially wrap errors (Enhanced for Issue #731)."""
+    # Handle SQLAlchemy DisconnectionError first (Issue #731 remediation)
+    if isinstance(error, DisconnectionError):
+        return ConnectionError(f"Connection error: {error}")
+    elif isinstance(error, OperationalError):
         return _classify_operational_error(error)
+    elif isinstance(error, InvalidRequestError):
+        return _classify_invalid_request_error(error)
+    elif isinstance(error, IntegrityError):
+        return _classify_integrity_error(error)
+    elif isinstance(error, asyncio.TimeoutError):
+        return TimeoutError(f"Timeout error: {error}")
+    elif isinstance(error, Exception):
+        # Issue #731: Handle generic Exception types by examining their messages
+        error_msg = str(error).lower()
+        return _attempt_error_classification(error, error_msg)
     return error

@@ -1,4 +1,4 @@
-"""DEPRECATED: Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine
+"""DEPRECATED: Use UserExecutionEngine - this import redirects to SSOT implementation.
 
 This file redirects to the SSOT UserExecutionEngine to maintain backwards compatibility.
 """
@@ -50,10 +50,26 @@ def execution_engine_context(*args, **kwargs):
     raise NotImplementedError("Use UserExecutionContext instead")
 
 def create_execution_engine(*args, **kwargs):
-    """SSOT factory function for ExecutionEngine - creates UserExecutionEngine instance
+    """DEPRECATED: SSOT factory function for ExecutionEngine - creates UserExecutionEngine instance
+    
+    🚨 DEPRECATION WARNING: Issue #884 factory consolidation
+    This function is deprecated due to execution engine factory proliferation.
+    
+    MIGRATION PATH:
+    - Use netra_backend.app.agents.supervisor.execution_engine_factory.ExecutionEngineFactory instead
+    - Or use UserExecutionEngine directly for advanced use cases
     
     This is a compatibility bridge for Issue #565 migration.
     """
+    import warnings
+    warnings.warn(
+        "⚠️  create_execution_engine() is DEPRECATED in Issue #884. "
+        "This scattered factory function contributes to execution engine factory proliferation. "
+        "MIGRATION: Use 'from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory' instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
     from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
     # Return a compatibility stub that can be used in tests
     return ExecutionEngine

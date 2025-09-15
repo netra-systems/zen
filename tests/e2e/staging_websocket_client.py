@@ -17,7 +17,7 @@ import time
 from typing import Any, Callable, Dict, List, Optional
 from datetime import datetime
 import websockets
-from websockets.exceptions import WebSocketException
+from websockets import WebSocketException
 
 from tests.e2e.staging_config import get_staging_config
 from tests.e2e.staging_auth_client import StagingAuthClient
@@ -263,6 +263,28 @@ class StagingWebSocketClient:
             logger.error(f"Agent failed: {error.get('error')}")
         
         return False
+    
+    async def receive_message(self, timeout: float = 10.0) -> Optional[Dict[str, Any]]:
+        """
+        Receive any message from the WebSocket (generic version of wait_for_message).
+        
+        Args:
+            timeout: Maximum time to wait for a message
+            
+        Returns:
+            The next message received, or None if timeout
+        """
+        start_time = time.time()
+        initial_count = len(self.received_messages)
+        
+        while time.time() - start_time < timeout:
+            # Check if we have new messages
+            if len(self.received_messages) > initial_count:
+                return self.received_messages[initial_count]
+            
+            await asyncio.sleep(0.1)
+        
+        return None
     
     async def disconnect(self) -> None:
         """Disconnect from WebSocket server."""

@@ -7,7 +7,7 @@ Maximum 300 lines, functions  <= 8 lines.
 import asyncio
 from typing import Any, Dict
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.triage.unified_triage_agent import (
     Priority,
     TriageResult,

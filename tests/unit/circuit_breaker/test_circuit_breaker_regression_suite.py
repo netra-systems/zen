@@ -117,9 +117,10 @@ class TestCircuitBreakerRegressionSuite:
         
         for import_statement, symbol_name in legacy_patterns:
             try:
-                # Execute import and verify symbol exists
-                exec(import_statement)
-                symbol = eval(symbol_name)
+                # Execute import and verify symbol exists (Issue #768 fix: use shared namespace)
+                namespace = {}
+                exec(import_statement, namespace)
+                symbol = eval(symbol_name, namespace)
                 assert symbol is not None, f"{symbol_name} should not be None"
                 successful_imports += 1
             except Exception as e:

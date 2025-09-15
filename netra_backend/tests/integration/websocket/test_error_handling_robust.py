@@ -112,7 +112,7 @@ class TestWebSocketErrorHandlingRobust(BaseIntegrationTest):
         )
         
         self.auth_helper = E2EWebSocketAuthHelper(config=auth_config, environment="test")
-        self.active_connections: List[websockets.WebSocketServerProtocol] = []
+        self.active_connections: List[websockets.ServerConnection] = []
         self.error_events: List[Dict[str, Any]] = []
         
         # Test auth helper functionality
@@ -132,7 +132,7 @@ class TestWebSocketErrorHandlingRobust(BaseIntegrationTest):
     
     async def collect_error_events(
         self,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: websockets.ServerConnection,
         timeout: float = 15.0
     ) -> List[Dict[str, Any]]:
         """

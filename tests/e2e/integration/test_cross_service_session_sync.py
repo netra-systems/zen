@@ -37,7 +37,7 @@ import jwt
 import pytest
 import redis.asyncio as redis
 import websockets
-from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
+from websockets import ConnectionClosedError, ConnectionClosedOK
 
 # Test infrastructure
 try:

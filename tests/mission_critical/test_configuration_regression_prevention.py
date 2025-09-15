@@ -11,8 +11,9 @@ Based on CRITICAL_CONFIG_REGRESSION_AUDIT_REPORT.md findings.
 
 import os
 import sys
-import unittest
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 import asyncio
+import pytest
 from pathlib import Path
 from typing import Dict, List, Set, Optional, Tuple
 from unittest.mock import patch, MagicMock
@@ -25,16 +26,15 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.isolated_test_helper import IsolatedTestCase
 
 
-class ConfigurationRegressionTests(IsolatedTestCase):
+class ConfigurationRegressionTests(SSotBaseTestCase):
     """
     Critical tests to prevent configuration regressions that cause cascade failures.
     """
     
-    @classmethod
-    def setUpClass(cls):
+    def setup_method(self, method=None):
         """Set up test environment."""
-        super().setUpClass()
-        cls.critical_configs = {
+        super().setup_method(method)
+        self.critical_configs = {
             'SERVICE_SECRET': 'Critical for inter-service auth',
             'JWT_SECRET': 'Critical for token validation',
             'AUTH_SERVICE_URL': 'Critical for auth connectivity',
@@ -401,10 +401,21 @@ class ConfigurationRegressionTests(IsolatedTestCase):
                               f"Configuration change for {key} not detected")
 
 
-class ConfigurationRegressionIntegrationTests(IsolatedTestCase):
+class ConfigurationRegressionIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for configuration regression prevention.
     """
+    
+    def setup_method(self, method=None):
+        """Set up test environment."""
+        super().setup_method(method)
+        self.critical_configs = {
+            'SERVICE_SECRET': 'Critical for inter-service auth',
+            'JWT_SECRET': 'Critical for token validation',
+            'AUTH_SERVICE_URL': 'Critical for auth connectivity',
+            'DATABASE_URL': 'Critical for data persistence',
+            'REDIS_URL': 'Critical for caching and sessions'
+        }
     
     def test_cross_service_config_consistency(self):
         """
@@ -423,8 +434,8 @@ class ConfigurationRegressionIntegrationTests(IsolatedTestCase):
                     # For now, just verify the expectation exists
                     self.assertIn(config, self.critical_configs)
     
-    @unittest.skipIf(os.getenv('SKIP_DEPLOYMENT_TESTS', 'true').lower() == 'true',
-                     "Deployment tests skipped")
+    @pytest.mark.skipif(os.getenv('SKIP_DEPLOYMENT_TESTS', 'true').lower() == 'true',
+                     reason="Deployment tests skipped")
     def test_deployment_config_validation(self):
         """
         Test that deployment configurations are valid.
@@ -442,27 +453,10 @@ class ConfigurationRegressionIntegrationTests(IsolatedTestCase):
                               f"Invalid secret mappings for {env_name}: {errors}")
 
 
-def suite():
-    """Create test suite for CI/CD pipeline."""
-    suite = unittest.TestSuite()
-    
-    # Add critical tests that must pass
-    suite.addTest(ConfigurationRegressionTests('test_service_secret_presence_all_environments'))
-    suite.addTest(ConfigurationRegressionTests('test_jwt_secret_resolution_consistency'))
-    suite.addTest(ConfigurationRegressionTests('test_oauth_dual_naming_consistency'))
-    suite.addTest(ConfigurationRegressionTests('test_config_validation_at_startup'))
-    suite.addTest(ConfigurationRegressionTests('test_service_secret_strength_validation'))
-    
-    # Add integration tests
-    suite.addTest(ConfigurationRegressionIntegrationTests('test_cross_service_config_consistency'))
-    
-    return suite
-
-
 if __name__ == '__main__':
-    # Run with verbose output for CI/CD
-    runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(suite())
+    # Run with verbose output for CI/CD using pytest
+    import pytest
+    result = pytest.main([__file__, '-v'])
     
     # Exit with non-zero if any failures
-    sys.exit(0 if result.wasSuccessful() else 1)
+    sys.exit(result)

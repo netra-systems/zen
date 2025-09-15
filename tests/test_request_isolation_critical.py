@@ -82,7 +82,7 @@ import threading
 import random
 import time
 from unittest.mock import AsyncMock
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
@@ -93,7 +93,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -129,7 +129,7 @@ class TestConcurrentUserIsolation:
         registry = AgentRegistry()
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
-        engine = ExecutionEngine(registry, websocket_bridge)
+        engine = UserExecutionEngine(registry, websocket_bridge)
         
         # Create 10 concurrent users
         users = [UserContext(f"user_{i}") for i in range(10)]
@@ -186,7 +186,7 @@ class TestConcurrentUserIsolation:
         registry = AgentRegistry()
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
-        engine = ExecutionEngine(registry, websocket_bridge)
+        engine = UserExecutionEngine(registry, websocket_bridge)
         
         # Track execution order and timing
         execution_order = []
@@ -304,7 +304,7 @@ class TestWebSocketEventIsolation:
         registry = AgentRegistry()
         registry.set_websocket_bridge(websocket_bridge)
         
-        engine = ExecutionEngine(registry, websocket_bridge)
+        engine = UserExecutionEngine(registry, websocket_bridge)
         
         # Execute agents for each user concurrently
         async def execute_for_user(user_id: str):
@@ -490,7 +490,7 @@ class TestGlobalStateExecutionPath:
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
         # Single global engine (as in production)
-        engine = ExecutionEngine(registry, websocket_bridge)
+        engine = UserExecutionEngine(registry, websocket_bridge)
         
         # Track conflicts
         conflicts = []
@@ -608,7 +608,7 @@ class TestThreadUserContextMixing:
         registry = AgentRegistry()
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
-        engine = ExecutionEngine(registry, websocket_bridge)
+        engine = UserExecutionEngine(registry, websocket_bridge)
         
         # Track context confusion
         context_issues = []
@@ -755,7 +755,7 @@ class TestScalabilityLimits:
         registry = AgentRegistry()
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
-        engine = ExecutionEngine(registry, websocket_bridge)
+        engine = UserExecutionEngine(registry, websocket_bridge)
         
         # Simulate 10 concurrent users (2x the business target)
         start_time = time.time()

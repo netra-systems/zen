@@ -10,7 +10,7 @@ from typing import Dict, Any
 from unittest.mock import AsyncMock, Mock
 
 from netra_backend.app.services.agent_service_core import AgentService
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 
 class TestAgentServiceParameterMismatch:

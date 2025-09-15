@@ -217,7 +217,7 @@ class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
         Critical Path: ExecutionEngine  ->  Agent execution  ->  Success result
         """
         # Arrange: Create ExecutionEngine with real business logic
-        execution_engine = ExecutionEngine(
+        execution_engine = UserExecutionEngine(
             registry=self.mock_agent_registry,
             websocket_bridge=self.mock_websocket_bridge,
             user_context=self.test_user_context_1
@@ -261,13 +261,13 @@ class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
         Critical Path: User1 execution [U+2225] User2 execution (no cross-contamination)
         """
         # Arrange: Create two execution engines for different users
-        engine1 = ExecutionEngine(
+        engine1 = UserExecutionEngine(
             registry=self.mock_agent_registry,
             websocket_bridge=self.mock_websocket_bridge,
             user_context=self.test_user_context_1
         )
         
-        engine2 = ExecutionEngine(
+        engine2 = UserExecutionEngine(
             registry=self.mock_agent_registry,
             websocket_bridge=self.mock_websocket_bridge,
             user_context=self.test_user_context_2
@@ -330,7 +330,7 @@ class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
         Critical Events: agent_started, agent_thinking, agent_completed
         """
         # Arrange: Create ExecutionEngine
-        execution_engine = ExecutionEngine(
+        execution_engine = UserExecutionEngine(
             registry=self.mock_agent_registry,
             websocket_bridge=self.mock_websocket_bridge,
             user_context=self.test_user_context_1
@@ -384,7 +384,7 @@ class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
         BVJ: Platform scalability - supports 5+ concurrent users with controlled resource usage
         """
         # Arrange: Create ExecutionEngine with limited concurrency
-        execution_engine = ExecutionEngine(
+        execution_engine = UserExecutionEngine(
             registry=self.mock_agent_registry,
             websocket_bridge=self.mock_websocket_bridge,
             user_context=self.test_user_context_1
@@ -454,7 +454,7 @@ class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
         BVJ: System reliability - prevents hung agents from blocking user experience
         """
         # Arrange: Create ExecutionEngine with short timeout for testing
-        execution_engine = ExecutionEngine(
+        execution_engine = UserExecutionEngine(
             registry=self.mock_agent_registry,
             websocket_bridge=self.mock_websocket_bridge,
             user_context=self.test_user_context_1
@@ -495,7 +495,7 @@ class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
         BVJ: System reliability - graceful error handling maintains user experience
         """
         # Arrange: Create ExecutionEngine
-        execution_engine = ExecutionEngine(
+        execution_engine = UserExecutionEngine(
             registry=self.mock_agent_registry,
             websocket_bridge=self.mock_websocket_bridge,
             user_context=self.test_user_context_1
@@ -536,7 +536,7 @@ class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
         BVJ: Agent orchestration - enables complex multi-agent workflows
         """
         # Arrange: Create ExecutionEngine
-        execution_engine = ExecutionEngine(
+        execution_engine = UserExecutionEngine(
             registry=self.mock_agent_registry,
             websocket_bridge=self.mock_websocket_bridge,
             user_context=self.test_user_context_1
@@ -589,7 +589,7 @@ class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
         BVJ: Platform performance - 80% faster response times on repeat queries
         """
         # Arrange: Create ExecutionEngine  
-        execution_engine = ExecutionEngine(
+        execution_engine = UserExecutionEngine(
             registry=self.mock_agent_registry,
             websocket_bridge=self.mock_websocket_bridge,
             user_context=self.test_user_context_1
@@ -643,7 +643,7 @@ class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
         BVJ: Architecture compliance - proper delegation to SSOT user engine
         """
         # Arrange: Create ExecutionEngine with UserExecutionContext
-        execution_engine = ExecutionEngine(
+        execution_engine = UserExecutionEngine(
             registry=self.mock_agent_registry,
             websocket_bridge=self.mock_websocket_bridge,
             user_context=self.test_user_context_1
@@ -691,7 +691,7 @@ class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
         BVJ: Platform monitoring - provides metrics for performance optimization
         """
         # Arrange: Create ExecutionEngine
-        execution_engine = ExecutionEngine(
+        execution_engine = UserExecutionEngine(
             registry=self.mock_agent_registry,
             websocket_bridge=self.mock_websocket_bridge,
             user_context=self.test_user_context_1
@@ -745,14 +745,14 @@ class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
         BVJ: Security compliance - validates user isolation implementation
         """
         # Arrange: Create ExecutionEngine with UserExecutionContext
-        execution_engine_with_context = ExecutionEngine(
+        execution_engine_with_context = UserExecutionEngine(
             registry=self.mock_agent_registry,
             websocket_bridge=self.mock_websocket_bridge,
             user_context=self.test_user_context_1
         )
         
         # Create ExecutionEngine without UserExecutionContext
-        execution_engine_without_context = ExecutionEngine(
+        execution_engine_without_context = UserExecutionEngine(
             registry=self.mock_agent_registry,
             websocket_bridge=self.mock_websocket_bridge,
             user_context=None

@@ -1,6 +1,6 @@
-"""Comprehensive unit tests for IsolatedWebSocketManager.
+"""Comprehensive unit tests for WebSocketManager.
 
-This test suite provides 100% method coverage of the IsolatedWebSocketManager class
+This test suite provides 100% method coverage of the WebSocketManager class
 with focus on security, user isolation, and strongly typed ID integration.
 
 Business Value Justification (BVJ):
@@ -27,8 +27,8 @@ from datetime import datetime, timezone
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any
 
-# Core imports
-from netra_backend.app.websocket_core.websocket_manager_factory import IsolatedWebSocketManager
+# Core imports - SSOT after Issue #824 remediation
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from shared.types.core_types import (
@@ -38,8 +38,8 @@ from shared.types.core_types import (
 from fastapi.websockets import WebSocketState
 
 
-class TestIsolatedWebSocketManagerComprehensive:
-    """Comprehensive test suite for IsolatedWebSocketManager."""
+class TestWebSocketManagerComprehensive:
+    """Comprehensive test suite for WebSocketManager."""
     
     @pytest.fixture
     def user_context(self):
@@ -106,7 +106,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_init_valid_context(self, user_context):
         """Test successful initialization with valid UserExecutionContext."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         assert manager.user_context == user_context
         assert manager._is_active is True
@@ -127,12 +127,12 @@ class TestIsolatedWebSocketManagerComprehensive:
     def test_init_invalid_context_type(self):
         """Test initialization fails with invalid context type."""
         with pytest.raises(ValueError, match="user_context must be a UserExecutionContext instance"):
-            IsolatedWebSocketManager("invalid_context")
+            WebSocketManager("invalid_context")
     
     def test_init_none_context(self):
         """Test initialization fails with None context."""
         with pytest.raises(ValueError, match="user_context must be a UserExecutionContext instance"):
-            IsolatedWebSocketManager(None)
+            WebSocketManager(None)
 
     # ==========================================================================
     # CONNECTION MANAGEMENT TESTS
@@ -141,7 +141,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_add_connection_success(self, user_context, websocket_connection):
         """Test successful connection addition."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         await manager.add_connection(websocket_connection)
         
@@ -153,7 +153,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_add_connection_wrong_user_security_violation(self, user_context, different_user_connection):
         """Test security violation when adding connection for wrong user."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         with pytest.raises(ValueError, match="Connection user_id .* does not match manager user_id"):
             await manager.add_connection(different_user_connection)
@@ -165,7 +165,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_add_connection_inactive_manager(self, user_context, websocket_connection):
         """Test adding connection to inactive manager fails."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._is_active = False
         
         with pytest.raises(RuntimeError, match="WebSocket manager .* is no longer active"):
@@ -174,7 +174,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_remove_connection_success(self, user_context, websocket_connection):
         """Test successful connection removal."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         # Add connection first
         await manager.add_connection(websocket_connection)
@@ -190,7 +190,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_remove_connection_nonexistent(self, user_context):
         """Test removing non-existent connection."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         # Should not raise error, just log debug message
         await manager.remove_connection("nonexistent-connection")
@@ -200,7 +200,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_remove_connection_wrong_user_security(self, user_context, different_user_connection):
         """Test security check when removing connection with wrong user."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         # Manually add connection to bypass add_connection security (simulating corruption)
         manager._connections[different_user_connection.connection_id] = different_user_connection
@@ -214,7 +214,7 @@ class TestIsolatedWebSocketManagerComprehensive:
 
     def test_get_connection_success(self, user_context, websocket_connection):
         """Test successful connection retrieval."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._connections[websocket_connection.connection_id] = websocket_connection
         
         retrieved = manager.get_connection(websocket_connection.connection_id)
@@ -223,7 +223,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_get_connection_nonexistent(self, user_context):
         """Test retrieving non-existent connection returns None."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         result = manager.get_connection("nonexistent")
         
@@ -231,7 +231,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_get_connection_inactive_manager(self, user_context, websocket_connection):
         """Test getting connection from inactive manager fails."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._is_active = False
         
         with pytest.raises(RuntimeError, match="WebSocket manager .* is no longer active"):
@@ -239,7 +239,7 @@ class TestIsolatedWebSocketManagerComprehensive:
 
     def test_get_user_connections(self, user_context, websocket_connection):
         """Test getting all connection IDs for user."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._connections[websocket_connection.connection_id] = websocket_connection
         manager._connection_ids.add(websocket_connection.connection_id)
         
@@ -251,7 +251,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_get_user_connections_empty(self, user_context):
         """Test getting connections when none exist."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         connections = manager.get_user_connections()
         
@@ -264,7 +264,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_is_connection_active_valid_user(self, user_context, websocket_connection):
         """Test connection activity check for valid user."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._connections[websocket_connection.connection_id] = websocket_connection
         manager._connection_ids.add(websocket_connection.connection_id)
         
@@ -274,7 +274,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_is_connection_active_different_user_security(self, user_context, different_user_context):
         """Test security violation when checking different user's connections."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         is_active = manager.is_connection_active(different_user_context.user_id)
         
@@ -282,7 +282,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_is_connection_active_no_connections(self, user_context):
         """Test connection activity when no connections exist."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         is_active = manager.is_connection_active(user_context.user_id)
         
@@ -290,7 +290,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_is_connection_active_invalid_websocket(self, user_context):
         """Test connection activity when WebSocket is None."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         # Create connection with None websocket
         bad_connection = WebSocketConnection(
@@ -313,7 +313,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_send_to_user_success(self, user_context, websocket_connection):
         """Test successful message delivery to user."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._connections[websocket_connection.connection_id] = websocket_connection
         manager._connection_ids.add(websocket_connection.connection_id)
         
@@ -329,7 +329,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_send_to_user_no_connections(self, user_context):
         """Test message delivery when no connections exist."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         message = {"type": "test_message", "data": "test_data"}
         
@@ -344,7 +344,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_send_to_user_websocket_send_error(self, user_context, websocket_connection):
         """Test message delivery with WebSocket send error."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._connections[websocket_connection.connection_id] = websocket_connection
         manager._connection_ids.add(websocket_connection.connection_id)
         
@@ -364,7 +364,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_send_to_user_websocket_disconnected(self, user_context, websocket_connection):
         """Test message delivery to disconnected WebSocket."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._connections[websocket_connection.connection_id] = websocket_connection
         manager._connection_ids.add(websocket_connection.connection_id)
         
@@ -382,7 +382,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_send_to_user_inactive_manager(self, user_context):
         """Test sending message from inactive manager fails."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._is_active = False
         
         message = {"type": "test_message", "data": "test_data"}
@@ -393,7 +393,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_emit_critical_event_success(self, user_context, websocket_connection):
         """Test successful critical event emission."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._connections[websocket_connection.connection_id] = websocket_connection
         manager._connection_ids.add(websocket_connection.connection_id)
         
@@ -414,7 +414,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_emit_critical_event_empty_type(self, user_context):
         """Test critical event emission with empty event type."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         with pytest.raises(ValueError, match="event_type cannot be empty"):
             await manager.emit_critical_event("", {"data": "test"})
@@ -422,7 +422,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_emit_critical_event_send_failure(self, user_context, websocket_connection):
         """Test critical event emission failure handling."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._connections[websocket_connection.connection_id] = websocket_connection
         manager._connection_ids.add(websocket_connection.connection_id)
         
@@ -446,7 +446,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_update_connection_thread_success(self, user_context, websocket_connection):
         """Test successful thread ID update."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._connections[websocket_connection.connection_id] = websocket_connection
         
         new_thread_id = "new-thread-12345"
@@ -457,7 +457,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_update_connection_thread_nonexistent_connection(self, user_context):
         """Test thread update for non-existent connection."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         result = manager.update_connection_thread("nonexistent", "thread-123")
         
@@ -465,7 +465,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_update_connection_thread_no_thread_attribute(self, user_context):
         """Test thread update when connection lacks thread_id attribute."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         # Create connection without thread_id attribute
         mock_connection = Mock()
@@ -478,7 +478,7 @@ class TestIsolatedWebSocketManagerComprehensive:
 
     def test_get_connection_id_by_websocket_found(self, user_context, websocket_connection):
         """Test finding connection ID by WebSocket instance."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._connections[websocket_connection.connection_id] = websocket_connection
         
         found_id = manager.get_connection_id_by_websocket(websocket_connection.websocket)
@@ -487,7 +487,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_get_connection_id_by_websocket_not_found(self, user_context):
         """Test WebSocket lookup when not found."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         mock_websocket = Mock()
         
         found_id = manager.get_connection_id_by_websocket(mock_websocket)
@@ -497,7 +497,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_send_to_thread_compatibility(self, user_context, websocket_connection):
         """Test thread-based message sending compatibility method."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         websocket_connection.thread_id = "target-thread-123"
         manager._connections[websocket_connection.connection_id] = websocket_connection
         manager._connection_ids.add(websocket_connection.connection_id)
@@ -515,7 +515,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_get_connection_health_valid_user(self, user_context, websocket_connection):
         """Test connection health check for valid user."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._connections[websocket_connection.connection_id] = websocket_connection
         manager._connection_ids.add(websocket_connection.connection_id)
         
@@ -535,7 +535,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_get_connection_health_different_user_isolation(self, user_context, different_user_context):
         """Test health check isolation for different user."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         health = manager.get_connection_health(different_user_context.user_id)
         
@@ -544,7 +544,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_get_manager_stats(self, user_context, websocket_connection):
         """Test comprehensive manager statistics."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._connections[websocket_connection.connection_id] = websocket_connection
         manager._connection_ids.add(websocket_connection.connection_id)
         manager._connection_error_count = 3
@@ -567,7 +567,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_cleanup_all_connections(self, user_context, websocket_connection):
         """Test complete manager cleanup."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._connections[websocket_connection.connection_id] = websocket_connection
         manager._connection_ids.add(websocket_connection.connection_id)
         manager._message_recovery_queue.append({"test": "message"})
@@ -587,7 +587,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_strongly_typed_id_integration(self, user_context):
         """Test integration with strongly typed IDs from shared.types.core_types."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         # Test ensure_* utility functions work correctly
         user_id = ensure_user_id("test-user-123")
@@ -605,7 +605,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_connection_id_type_safety(self, user_context, mock_websocket):
         """Test ConnectionID type safety in WebSocket operations."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         # Create connection with typed ID
         connection_id = ConnectionID("typed-conn-123")
@@ -629,7 +629,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_validate_active_inactive_manager(self, user_context):
         """Test _validate_active method with inactive manager."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._is_active = False
         
         with pytest.raises(RuntimeError, match="WebSocket manager .* is no longer active"):
@@ -637,7 +637,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     
     def test_update_activity_metrics(self, user_context):
         """Test _update_activity updates metrics correctly."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         initial_time = manager._metrics.last_activity
         
         # Small delay to ensure time difference
@@ -652,7 +652,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_message_serialization_safety(self, user_context, websocket_connection):
         """Test safe message serialization with complex objects."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         manager._connections[websocket_connection.connection_id] = websocket_connection
         manager._connection_ids.add(websocket_connection.connection_id)
         
@@ -673,7 +673,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio
     async def test_concurrent_connection_operations(self, user_context, mock_websocket):
         """Test thread safety of concurrent connection operations."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         # Create multiple connections
         connections = []
@@ -703,7 +703,7 @@ class TestIsolatedWebSocketManagerComprehensive:
     @pytest.mark.asyncio 
     async def test_memory_leak_prevention(self, user_context, websocket_connection):
         """Test that cleanup prevents memory leaks."""
-        manager = IsolatedWebSocketManager(user_context)
+        manager = WebSocketManager(user_context)
         
         # Add connection and fill recovery queue
         await manager.add_connection(websocket_connection)

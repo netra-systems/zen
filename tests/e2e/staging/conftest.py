@@ -38,7 +38,7 @@ class TestResultCollector:
             "failed": self.failed,
             "skipped": self.skipped,
             "errors": self.errors,
-            "duration": (self.end_time - self.start_time) if self.end_time else 0,
+            "duration": (self.end_time - self.start_time) if (self.end_time and self.start_time) else 0,
             "pass_rate": (self.passed / self.total_tests * 100) if self.total_tests > 0 else 0
         }
 
@@ -138,6 +138,23 @@ def pytest_configure(config):
     # Issue tracking markers
     config.addinivalue_line(
         "markers", "issue_395: mark test related to issue #395 (WebSocket auth golden path)"
+    )
+    config.addinivalue_line(
+        "markers", "issue_426: mark test related to issue #426 (WebSocket subprotocol negotiation)"
+    )
+
+    # Connectivity markers
+    config.addinivalue_line(
+        "markers", "connectivity: mark test for connectivity validation"
+    )
+    config.addinivalue_line(
+        "markers", "timeout: mark test with custom timeout"
+    )
+    config.addinivalue_line(
+        "markers", "slow: mark test as slow running"
+    )
+    config.addinivalue_line(
+        "markers", "asyncio: mark test as asynchronous"
     )
 
 def pytest_sessionstart(session):

@@ -644,9 +644,19 @@ def setup_security_services(app: FastAPI, key_manager: KeyManager) -> None:
     """Setup security and LLM services."""
     app.state.key_manager = key_manager
     app.state.security_service = SecurityService(key_manager)
-    # SSOT FIX: Use factory pattern for LLM manager creation
+    # SECURITY FIX Issue #566: Use factory pattern that creates user-isolated LLM managers
+    # Instead of creating a shared singleton LLM manager that compromises cache isolation,
+    # store a factory function that creates user-isolated instances on demand
     from netra_backend.app.llm.llm_manager import create_llm_manager
-    app.state.llm_manager = create_llm_manager()
+    
+    def create_user_isolated_llm_manager(user_context=None):
+        """Factory function to create user-isolated LLM managers for secure cache isolation."""
+        return create_llm_manager(user_context)
+    
+    # Store factory function instead of shared instance to prevent cache contamination
+    app.state.llm_manager_factory = create_user_isolated_llm_manager
+    # Keep backward compatibility for startup sequences that expect app.state.llm_manager
+    app.state.llm_manager = None  # Will be created on-demand with user context
     
     # CRITICAL FIX: Set ClickHouse availability flag based on configuration
     config = get_config()
@@ -1140,7 +1150,7 @@ def _create_agent_supervisor(app: FastAPI) -> None:
 
 def _build_supervisor_agent(app: FastAPI):
     """Build supervisor agent instance."""
-    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+    from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
     from netra_backend.app.logging_config import central_logger
     logger = central_logger.get_logger(__name__)
     
@@ -1168,11 +1178,12 @@ def _build_supervisor_agent(app: FastAPI):
     
     # Create the proper websocket bridge instance  
     websocket_bridge = AgentWebSocketBridge()
-    logger.debug(f"Creating supervisor with dependencies: db_session_factory={app.state.db_session_factory}, llm_manager={app.state.llm_manager}")
+    logger.debug(f"Creating supervisor with dependencies: db_session_factory={app.state.db_session_factory}, llm_manager=None (security fix)")
     
-    # CRITICAL: No tool_dispatcher - created per-request for isolation
+    # SECURITY FIX: Supervisor created without global LLM manager to prevent user data mixing
+    # LLM managers are created per-request with user context for proper isolation
     return SupervisorAgent(
-        app.state.llm_manager, 
+        None,  # No global LLM manager - created per-request with user context
         websocket_bridge  # Correct AgentWebSocketBridge instance
         # NO tool_dispatcher - created per-request
     )
@@ -1381,20 +1392,22 @@ def log_startup_complete(start_time: float, logger: logging.Logger) -> None:
 async def initialize_monitoring_integration(handlers: dict = None) -> bool:
     """
     Initialize monitoring integration between ChatEventMonitor and AgentWebSocketBridge.
-    
-    CRITICAL FIX: Now accepts handlers parameter to ensure monitoring is initialized
-    AFTER handlers are registered, preventing "ZERO handlers" warnings during startup.
-    
+
+    ARCHITECTURE: WebSocket handlers are registered per-connection, not during startup.
+    Zero handlers during startup is EXPECTED and CORRECT behavior - this indicates
+    proper per-connection architecture implementation.
+
     This function connects the ChatEventMonitor with the AgentWebSocketBridge to enable
     comprehensive monitoring coverage where the monitor can audit the bridge without
     creating tight coupling.
-    
+
     CRITICAL DESIGN: Both components work independently if integration fails.
     The system continues operating even if monitoring integration is not available.
-    
+
     Args:
-        handlers: Dictionary of registered handlers (ensures monitoring happens after registration)
-    
+        handlers: Optional dictionary of registered handlers (mainly used during testing)
+                 None/empty during startup is expected for per-connection architecture
+
     Returns:
         bool: True if integration successful, False if integration failed but components
               are still operating independently
@@ -1402,12 +1415,17 @@ async def initialize_monitoring_integration(handlers: dict = None) -> bool:
     logger = central_logger.get_logger(__name__)
     
     try:
-        # CRITICAL FIX: Log handler registration status at monitoring initialization
+        # ARCHITECTURE CLARIFICATION: WebSocket handlers are registered per-connection, not during startup
+        # This is the correct design - handlers need active WebSocket connections to function
         handler_count = len(handlers) if handlers else 0
-        logger.info(f"Initializing monitoring integration with {handler_count} registered handlers...")
-        
+
         if handler_count == 0:
-            logger.warning(" WARNING: [U+FE0F] Monitoring initialized with zero handlers - may indicate registration timing issue")
+            # This is EXPECTED during startup - handlers are registered per-connection
+            logger.info("Monitoring initialized during startup - handlers will be registered per WebSocket connection")
+            logger.debug("Per-connection handler architecture: Zero startup handlers is expected and correct")
+        else:
+            # If handlers are provided (e.g., during testing), log their count
+            logger.info(f"Initializing monitoring integration with {handler_count} registered handlers...")
         
         # Import monitoring components
         from netra_backend.app.websocket_core.event_monitor import chat_event_monitor

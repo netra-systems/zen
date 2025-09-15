@@ -468,10 +468,13 @@ class RelaxedAuthValidator:
             from shared.id_generation import UnifiedIdGenerator
             
             # Use token-based user ID if available, otherwise generate one
+            # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for user ID generation
             if token and len(token) > 10:
                 user_id = f"relaxed_{hash(token) % 10000:04d}"
             else:
-                user_id = f"relaxed_{uuid.uuid4().hex[:8]}"
+                # Generate SSOT-compliant user ID for relaxed auth
+                relaxed_user_id = UnifiedIdGenerator.generate_base_id("relaxed_user", True, 8)
+                user_id = f"relaxed_{relaxed_user_id.split('_')[-1]}"
             
             user_context = UserExecutionContext(
                 user_id=user_id,
@@ -593,11 +596,17 @@ class DemoAuthValidator:
         # Create consistent demo user ID
         demo_user_id = "demo-user-001"
         
+        # Fix Issue #803: Replace separate generate_base_id() calls with unified method
+        # This eliminates counter mismatch between thread_id and run_id that causes websocket cleanup issues
+        thread_id, run_id, request_id = UnifiedIdGenerator.generate_user_context_ids(
+            user_id=demo_user_id, operation="demo_auth"
+        )
+        
         user_context = UserExecutionContext(
             user_id=demo_user_id,
-            thread_id=UnifiedIdGenerator.generate_base_id("demo_thread"),
-            run_id=UnifiedIdGenerator.generate_base_id("demo_run"),
-            request_id=UnifiedIdGenerator.generate_base_id("demo_req"),
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=request_id,
             websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id(demo_user_id),
             agent_context={
                 "auth_level": "demo",

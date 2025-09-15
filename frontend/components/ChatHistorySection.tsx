@@ -156,6 +156,12 @@ export const ChatHistorySection: React.FC = () => {
     return date.toLocaleDateString();
   };
 
+  // Constants for conversation limiting
+  const MAX_VISIBLE_CONVERSATIONS = 4;
+  const visibleThreads = threads.slice(0, MAX_VISIBLE_CONVERSATIONS);
+  const hasMoreConversations = threads.length > MAX_VISIBLE_CONVERSATIONS;
+  const hiddenCount = threads.length - MAX_VISIBLE_CONVERSATIONS;
+
   if (!isAuthenticated) {
     return (
       <div className="flex-1 flex items-center justify-center p-4">
@@ -183,9 +189,9 @@ export const ChatHistorySection: React.FC = () => {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-2 pb-4 space-y-1">
+      <div className="flex-1 overflow-y-auto px-2 pb-4 space-y-1" data-testid="chat-history-list">
         <AnimatePresence>
-          {threads.map((thread) => (
+          {visibleThreads.map((thread) => (
             <motion.div
               key={thread.id}
               initial={{ opacity: 0, x: -20 }}
@@ -199,6 +205,7 @@ export const ChatHistorySection: React.FC = () => {
                 }
               `}
               onClick={() => handleSelectThread(thread.id)}
+              data-testid={`chat-history-item-${thread.id}`}
             >
               <div className="flex items-start gap-2">
                 <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
@@ -271,6 +278,26 @@ export const ChatHistorySection: React.FC = () => {
             </motion.div>
           ))}
         </AnimatePresence>
+
+        {/* Overflow indicator for additional conversations */}
+        {hasMoreConversations && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="px-3 py-2 text-center border-t border-gray-100 mt-2"
+            data-testid="conversation-overflow-indicator"
+          >
+            <p className="text-xs text-muted-foreground">
+              +{hiddenCount} more conversation{hiddenCount > 1 ? 's' : ''}
+            </p>
+            <button 
+              className="text-xs text-primary hover:text-primary/80 underline mt-1"
+              onClick={() => {/* TODO: Implement view all conversations */}}
+            >
+              View all
+            </button>
+          </motion.div>
+        )}
 
         {threads.length === 0 && (
           <div className="text-center py-6 text-gray-500">

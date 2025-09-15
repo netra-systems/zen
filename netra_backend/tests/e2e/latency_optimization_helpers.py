@@ -5,7 +5,7 @@ Maximum 300 lines, functions  <= 8 lines.
 """
 
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.agent import SubAgentLifecycle

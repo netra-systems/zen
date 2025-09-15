@@ -393,8 +393,16 @@ class UnifiedLoggingSSOT:
             pass
     
     def _configure_handlers(self):
-        """Configure unified logging handlers."""
+        """Configure unified logging handlers with enhanced safety."""
         is_testing = self._is_testing_mode()
+        
+        # Ensure config is loaded
+        if self._config is None:
+            self._config = self._load_config()
+        
+        # Validate config exists
+        if not self._config or not isinstance(self._config, dict):
+            self._config = self._get_fallback_config()
         
         # Remove existing handlers safely
         try:
@@ -412,7 +420,8 @@ class UnifiedLoggingSSOT:
             return
         
         # Suppress SQLAlchemy verbose logging unless in TRACE mode
-        if self._config['log_level'] != 'TRACE':
+        log_level = self._config.get('log_level', 'INFO')
+        if log_level != 'TRACE':
             logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
             logging.getLogger("sqlalchemy.pool").setLevel(logging.WARNING)
             logging.getLogger("sqlalchemy.dialects").setLevel(logging.WARNING)
@@ -458,85 +467,136 @@ class UnifiedLoggingSSOT:
             )
     
     def _get_json_formatter(self):
-        """Get JSON formatter for GCP Cloud Run compatibility."""
+        """Get JSON formatter for GCP Cloud Run compatibility with bulletproof error handling."""
         def json_formatter(record):
-            """Format log record as JSON for GCP Cloud Logging with robust error handling."""
+            """Format log record as JSON for GCP Cloud Logging with multiple error recovery layers."""
             try:
-                # Extract context safely
-                context = self._context.get_context_safe()
+                # Layer 1: Primary formatting with enhanced safety
+                context = self._context.get_context_safe() if hasattr(self, '_context') else {}
                 
-                # Build log entry with safe field access
+                # Enhanced message extraction with multiple fallbacks
+                message = self._get_safe_field(record, 'message', None)
+                if not message or str(message).strip() == '':
+                    # Try alternate message fields
+                    message = (self._get_safe_field(record, 'msg', None) or 
+                              self._get_safe_field(record, 'text', None) or 
+                              'Log entry without message')
+                
+                # Build log entry with enhanced validation
                 log_entry = {
                     'timestamp': self._get_safe_timestamp(),
                     'severity': self._get_safe_level_name(record),
-                    'service': self._service_name,
+                    'service': self._service_name or 'unknown-service',
                     'logger': self._get_safe_field(record, 'name', 'root'),
-                    'message': self._get_safe_field(record, 'message', 'Empty log message')
+                    'message': str(message).strip() or 'Empty log message detected'
                 }
                 
-                # Add context if present
-                if context:
-                    log_entry.update(context)
+                # Add context if present and valid
+                if context and isinstance(context, dict):
+                    try:
+                        safe_context = self._filter_serializable_data(context)
+                        log_entry.update(safe_context)
+                    except Exception:
+                        log_entry['context_error'] = 'Failed to serialize context'
                 
-                # Add extra data safely
-                extra = self._get_safe_field(record, 'extra', None)
-                if extra and isinstance(extra, dict):
-                    # Filter out non-serializable values
-                    safe_extra = self._filter_serializable_data(extra)
-                    log_entry.update(safe_extra)
+                # Add extra data with enhanced safety
+                try:
+                    extra = self._get_safe_field(record, 'extra', None)
+                    if extra and isinstance(extra, dict):
+                        safe_extra = self._filter_serializable_data(extra)
+                        log_entry.update(safe_extra)
+                except Exception:
+                    log_entry['extra_error'] = 'Failed to serialize extra data'
                 
-                # Add exception info if present
-                exception = self._get_safe_field(record, 'exception', None)
-                if exception:
-                    log_entry['error'] = self._serialize_exception_safely(exception)
+                # Add exception info with enhanced safety
+                try:
+                    exception = self._get_safe_field(record, 'exception', None)
+                    if exception:
+                        log_entry['error'] = self._serialize_exception_safely(exception)
+                except Exception:
+                    log_entry['exception_error'] = 'Failed to serialize exception'
                 
-                # Validate GCP format before returning
+                # Layer 2: Validate GCP format with enhanced checks
                 validated_entry = self._validate_gcp_format(log_entry)
-                return json.dumps(validated_entry, separators=(',', ':'), default=str)
                 
-            except Exception as e:
-                # Fallback: Create minimal valid log entry
-                fallback_entry = {
-                    'timestamp': datetime.now(timezone.utc).isoformat(),
-                    'severity': 'ERROR',
-                    'service': self._service_name,
-                    'logger': 'json_formatter_fallback',
-                    'message': f'Log formatting failed: {str(e)}',
-                    'original_level': str(getattr(record, 'level', 'UNKNOWN')),
-                    'formatting_error': True
+                # Layer 3: JSON serialization with fallback
+                try:
+                    return json.dumps(validated_entry, separators=(',', ':'), default=str)
+                except (TypeError, ValueError) as json_error:
+                    # Create ultra-safe entry for JSON failures
+                    ultra_safe_entry = {
+                        'timestamp': self._get_safe_timestamp(),
+                        'severity': 'ERROR',
+                        'service': self._service_name or 'unknown-service',
+                        'logger': 'json_serialization_fallback',
+                        'message': f'JSON serialization failed: {str(json_error)}',
+                        'original_message': str(message)[:200] if message else 'None',
+                        'serialization_error': True
+                    }
+                    return json.dumps(ultra_safe_entry, separators=(',', ':'))
+                
+            except Exception as outer_error:
+                # Layer 4: Ultimate fallback for any catastrophic failure
+                try:
+                    timestamp = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+                except Exception:
+                    timestamp = '2025-01-01T00:00:00Z'
+                    
+                ultimate_fallback = {
+                    'timestamp': timestamp,
+                    'severity': 'CRITICAL',
+                    'service': getattr(self, '_service_name', 'unknown-service'),
+                    'logger': 'ultimate_fallback',
+                    'message': f'Complete log formatting failure: {str(outer_error)}',
+                    'fallback_level': 4,
+                    'catastrophic_error': True
                 }
-                return json.dumps(fallback_entry, separators=(',', ':'))
+                return json.dumps(ultimate_fallback, separators=(',', ':'))
         
         return json_formatter
     
     def _get_safe_timestamp(self) -> str:
-        """Get timestamp with robust fallbacks for edge cases."""
+        """Get timestamp with robust fallbacks for edge cases - always returns UTC with Z suffix."""
         try:
-            # Primary: UTC timestamp
-            return datetime.now(timezone.utc).isoformat()
+            # Primary: UTC timestamp with Z suffix for GCP compatibility
+            return datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
         except Exception:
             try:
-                # Fallback 1: UTC now without timezone
+                # Fallback 1: UTC now without timezone, add Z
                 return datetime.utcnow().isoformat() + 'Z'
             except Exception:
                 try:
-                    # Fallback 2: Local time
-                    return datetime.now().isoformat()
+                    # Fallback 2: Current time with UTC indicator
+                    return datetime.now().isoformat() + 'Z'
                 except Exception:
                     # Fallback 3: Static timestamp for extreme edge cases
-                    return '2024-01-01T00:00:00Z'
+                    return '2025-01-01T00:00:00Z'
     
     def _get_safe_field(self, record: Any, field_name: str, default: Any = None) -> Any:
-        """Safely extract field from record with default fallback."""
+        """Safely extract field from record with robust validation - never returns empty values."""
         try:
+            value = None
             if hasattr(record, field_name):
-                return getattr(record, field_name, default)
+                value = getattr(record, field_name, default)
             elif isinstance(record, dict):
-                return record.get(field_name, default)
+                value = record.get(field_name, default)
             else:
-                return default
-        except (KeyError, AttributeError, TypeError):
-            return default
+                value = default
+            
+            # Enhanced validation - ensure non-empty values
+            if value is None:
+                return default if default is not None else "Missing field"
+            
+            # Convert to string and check for emptiness
+            str_value = str(value).strip()
+            if not str_value:
+                return default if default is not None else f"Empty {field_name}"
+            
+            return value
+        except (KeyError, AttributeError, TypeError, ValueError) as e:
+            # Log the error for debugging but return safe default
+            safe_default = default if default is not None else f"Error accessing {field_name}: {type(e).__name__}"
+            return safe_default
     
     def _get_safe_level_name(self, record: Any) -> str:
         """Safely extract log level name with validation."""
@@ -552,46 +612,111 @@ class UnifiedLoggingSSOT:
             return 'INFO'
     
     def _serialize_exception_safely(self, exception: Any) -> Dict[str, Any]:
-        """Safely serialize exception with circular reference protection."""
+        """Safely serialize exception with enhanced error handling for all exception types."""
         try:
             if not exception:
-                return {'type': 'None', 'message': 'No exception', 'traceback': ''}
+                return {'type': 'None', 'message': 'No exception provided', 'traceback': '', 'severity': 'INFO'}
             
-            # Handle different exception object formats
-            if hasattr(exception, 'type') and hasattr(exception, 'value'):
-                # Loguru exception format
-                exc_type = getattr(exception.type, '__name__', str(exception.type))
-                exc_message = str(exception.value) if exception.value else 'No message'
-                exc_traceback = str(exception.traceback) if exception.traceback else ''
-            elif isinstance(exception, Exception):
-                # Direct exception object
-                exc_type = type(exception).__name__
-                exc_message = str(exception)
-                exc_traceback = ''
-            else:
-                # Unknown format
-                exc_type = str(type(exception).__name__)
-                exc_message = str(exception)
-                exc_traceback = ''
+            # Initialize with safe defaults
+            exc_type = 'UnknownException'
+            exc_message = 'No message available'
+            exc_traceback = ''
+            exc_args = []
             
-            # Truncate long values to prevent JSON bloat
+            # Enhanced exception type detection
+            try:
+                if hasattr(exception, 'type') and hasattr(exception, 'value'):
+                    # Loguru exception format
+                    exc_type = getattr(exception.type, '__name__', str(exception.type))
+                    exc_message = str(exception.value) if exception.value else 'No message'
+                    exc_traceback = str(exception.traceback) if exception.traceback else ''
+                elif isinstance(exception, BaseException):
+                    # Standard Python exception
+                    exc_type = type(exception).__name__
+                    exc_message = str(exception) if str(exception) else f'Empty {exc_type}'
+                    exc_args = list(exception.args) if hasattr(exception, 'args') else []
+                    # Try to get traceback if available
+                    if hasattr(exception, '__traceback__') and exception.__traceback__:
+                        import traceback
+                        exc_traceback = ''.join(traceback.format_tb(exception.__traceback__))
+                elif hasattr(exception, '__dict__'):
+                    # Object with attributes
+                    exc_type = type(exception).__name__
+                    exc_message = str(exception)
+                    # Try to extract useful info from object
+                    obj_info = {}
+                    for attr in ['message', 'msg', 'error', 'description']:
+                        if hasattr(exception, attr):
+                            obj_info[attr] = str(getattr(exception, attr))
+                    if obj_info:
+                        exc_message += f' | Object info: {obj_info}'
+                else:
+                    # Fallback for any other type
+                    exc_type = str(type(exception).__name__)
+                    exc_message = str(exception)
+            except Exception as type_error:
+                exc_type = 'TypeDetectionError'
+                exc_message = f'Failed to detect exception type: {str(type_error)}'
+            
+            # Enhanced message validation and fallbacks
+            if not exc_message or exc_message.strip() == '':
+                exc_message = f'Empty {exc_type} message'
+            
+            # Safe truncation with enhanced context preservation
             if len(exc_message) > 1000:
-                exc_message = exc_message[:1000] + '... (truncated)'
+                # Preserve beginning and end for context
+                exc_message = exc_message[:400] + f'... [{len(exc_message)} chars total] ...' + exc_message[-400:]
             if len(exc_traceback) > 2000:
-                exc_traceback = exc_traceback[:2000] + '... (truncated)'
+                # Preserve most recent traceback frames
+                lines = exc_traceback.split('\n')
+                if len(lines) > 50:
+                    exc_traceback = '\n'.join(lines[:20]) + '\n... [traceback truncated] ...\n' + '\n'.join(lines[-20:])
+                else:
+                    exc_traceback = exc_traceback[:2000] + '... (truncated)'
             
-            return {
+            # Build comprehensive exception info
+            result = {
                 'type': exc_type,
                 'message': exc_message,
-                'traceback': exc_traceback
+                'traceback': exc_traceback,
+                'severity': 'ERROR',
+                'timestamp': self._get_safe_timestamp()
             }
             
-        except Exception as e:
-            # Ultimate fallback for exception serialization
+            # Add args if available and useful
+            if exc_args and len(exc_args) > 0:
+                try:
+                    # Filter out non-serializable args
+                    safe_args = []
+                    for arg in exc_args[:5]:  # Limit to first 5 args
+                        try:
+                            json.dumps(arg, default=str)
+                            safe_args.append(arg)
+                        except (TypeError, ValueError):
+                            safe_args.append(f'<non-serializable: {type(arg).__name__}>')
+                    result['args'] = safe_args
+                except Exception:
+                    result['args_error'] = 'Failed to serialize exception args'
+            
+            return result
+            
+        except Exception as serialization_error:
+            # Ultimate fallback with maximum safety
+            try:
+                error_type = type(serialization_error).__name__
+                error_msg = str(serialization_error)
+            except Exception:
+                error_type = 'CatastrophicError'
+                error_msg = 'Complete exception serialization failure'
+            
             return {
-                'type': 'SerializationError',
-                'message': f'Exception serialization failed: {str(e)}',
-                'traceback': 'Traceback unavailable due to serialization error'
+                'type': 'ExceptionSerializationFailure',
+                'message': f'Exception serialization failed with {error_type}: {error_msg}',
+                'traceback': 'Traceback unavailable due to serialization error',
+                'severity': 'CRITICAL',
+                'timestamp': '2025-01-01T00:00:00Z',
+                'original_exception_type': str(type(exception).__name__) if exception else 'None',
+                'fallback_level': 'ultimate'
             }
     
     def _filter_serializable_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -610,25 +735,65 @@ class UnifiedLoggingSSOT:
         return safe_data
     
     def _validate_gcp_format(self, log_entry: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate and ensure GCP Cloud Logging format compliance."""
-        # Ensure required fields are present and non-empty
-        if not log_entry.get('message') or str(log_entry.get('message')).strip() == '':
-            log_entry['message'] = 'Empty log message detected - formatted safely'
+        """Validate and ensure GCP Cloud Logging format compliance with zero-empty-log guarantee."""
         
-        # Ensure severity is valid GCP level
-        severity = log_entry.get('severity', 'INFO')
+        # CRITICAL: Message validation with multiple fallbacks
+        message = log_entry.get('message')
+        if not message or str(message).strip() == '':
+            # Try alternative message sources
+            message = (log_entry.get('textPayload') or 
+                      log_entry.get('text') or 
+                      log_entry.get('msg') or 
+                      f'Empty log entry detected at {self._get_safe_timestamp()}')
+        
+        # Ensure message is never empty or whitespace-only
+        message_str = str(message).strip()
+        if not message_str:
+            message_str = f'Zero-content log entry intercepted from {log_entry.get("logger", "unknown")}-{log_entry.get("service", "unknown")}'
+        
+        log_entry['message'] = message_str
+        
+        # Enhanced severity validation with business context
+        severity = str(log_entry.get('severity', 'INFO')).upper()
         valid_severities = {'DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY'}
         if severity not in valid_severities:
-            log_entry['severity'] = 'INFO'
             log_entry['original_severity'] = severity
+            log_entry['severity'] = 'INFO'  # Safe default
+        else:
+            log_entry['severity'] = severity
         
-        # Ensure timestamp is properly formatted
+        # CRITICAL: Special handling for CRITICAL level logs - never allow empty
+        if severity == 'CRITICAL' and len(message_str) < 10:
+            log_entry['message'] = f'CRITICAL: {message_str} | Enhanced context: Service={log_entry.get("service", "unknown")}, Logger={log_entry.get("logger", "unknown")}, Time={self._get_safe_timestamp()}'
+        
+        # Enhanced timestamp validation
         timestamp = log_entry.get('timestamp')
-        if not timestamp or not isinstance(timestamp, str):
+        if not timestamp or not isinstance(timestamp, str) or timestamp.strip() == '':
             log_entry['timestamp'] = self._get_safe_timestamp()
+        elif not timestamp.endswith('Z') and '+' not in timestamp:
+            # Ensure UTC format for GCP
+            log_entry['timestamp'] = timestamp.rstrip('Z') + 'Z'
         
-        # Add textPayload for GCP compatibility (required field)
-        log_entry['textPayload'] = log_entry.get('message', 'Log entry')
+        # Service name validation
+        service = log_entry.get('service')
+        if not service or str(service).strip() == '':
+            log_entry['service'] = self._service_name or 'unknown-service'
+        
+        # Logger name validation
+        logger = log_entry.get('logger')
+        if not logger or str(logger).strip() == '':
+            log_entry['logger'] = 'default-logger'
+        
+        # GCP required fields
+        log_entry['textPayload'] = log_entry['message']
+        
+        # Add validation metadata for troubleshooting
+        log_entry['validation'] = {
+            'validated_at': self._get_safe_timestamp(),
+            'message_length': len(log_entry['message']),
+            'severity': log_entry['severity'],
+            'zero_empty_guarantee': True
+        }
         
         return log_entry
     

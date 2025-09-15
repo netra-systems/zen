@@ -1,4 +1,8 @@
-"""Tool interfaces - Single source of truth.
+"""Tool interfaces - SSOT Compatibility Layer for Issue #686.
+
+PHASE 1 SSOT CONSOLIDATION:
+This module now provides a compatibility layer that redirects to UnifiedToolExecutionEngine
+as the single source of truth for all tool execution operations.
 
 Main ToolExecutionEngine implementation with proper modular design.
 Follows 450-line limit and 25-line functions.
@@ -31,28 +35,32 @@ logger = central_logger.get_logger(__name__)
 
 
 class ToolExecutionEngine:
-    """Unified tool execution engine with permission checks and validation."""
-    
+    """SSOT Compatibility Layer - Redirects to UnifiedToolExecutionEngine for Issue #686 consolidation.
+
+    This class provides backward compatibility while ensuring all tool execution
+    goes through the UnifiedToolExecutionEngine SSOT implementation.
+    """
+
     def __init__(self, permission_service: Optional['ToolPermissionService'] = None):
-        """Initialize tool execution engine."""
+        """Initialize tool execution engine with SSOT redirection."""
         self.permission_service = permission_service
+        # PHASE 1 SSOT CONSOLIDATION: Redirect to UnifiedToolExecutionEngine SSOT
+        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+        self._ssot_engine = UnifiedToolExecutionEngine(
+            websocket_bridge=None,  # Core engine doesn't need WebSocket
+            permission_service=permission_service
+        )
     
     async def execute_tool(self, tool_input: 'ToolInput', tool: Any, kwargs: Dict[str, Any]) -> 'ToolResult':
-        """Execute tool with simple interface and return typed result."""
-        try:
-            result = await self._run_tool_by_interface(tool, kwargs)
-            return self._create_success_result(tool_input, result)
-        except Exception as e:
-            return self._create_error_result(tool_input, str(e))
+        """Execute tool with simple interface and return typed result - redirects to SSOT."""
+        # PHASE 1 SSOT CONSOLIDATION: Redirect to UnifiedToolExecutionEngine SSOT
+        return await self._ssot_engine.execute_tool_with_input(tool_input, tool, kwargs)
     
     async def execute_with_state(self, tool: Any, tool_name: str, parameters: Dict[str, Any],
                                 state: Any, run_id: str) -> Dict[str, Any]:
-        """Execute tool with state and comprehensive error handling."""
-        try:
-            result = await self._execute_by_tool_type(tool, parameters, state, run_id)
-            return self._create_success_response(result, tool_name, run_id)
-        except Exception as e:
-            return self._create_error_response(e, tool_name, run_id)
+        """Execute tool with state and comprehensive error handling - redirects to SSOT."""
+        # PHASE 1 SSOT CONSOLIDATION: Redirect to UnifiedToolExecutionEngine SSOT
+        return await self._ssot_engine.execute_with_state(tool, tool_name, parameters, state, run_id)
     
     async def execute_with_permissions(self, tool: UnifiedTool, arguments: Dict[str, Any],
                                      user: 'User') -> ToolExecutionResult:

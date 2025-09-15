@@ -21,6 +21,7 @@ import json
 import time
 import uuid
 from datetime import datetime, timedelta, timezone
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import desc, func, select, update
@@ -388,7 +389,7 @@ class StatePersistenceService:
     async def recover_agent_state(self, request: StateRecoveryRequest,
                                  db_session: AsyncSession) -> Tuple[bool, Optional[str]]:
         """Recover agent state from a specific checkpoint."""
-        recovery_id = str(uuid.uuid4())
+        recovery_id = UnifiedIdGenerator.generate_base_id("state_persistence")
         return await self._execute_recovery_with_error_handling(request, recovery_id, db_session)
 
     async def _execute_recovery_with_error_handling(self, request: StateRecoveryRequest, 
@@ -418,7 +419,7 @@ class StatePersistenceService:
         # Skip state persistence for run_ prefixed IDs (these are test/temporary IDs)
         if request.user_id and request.user_id.startswith("run_"):
             logger.debug(f"Skipping state persistence for temporary run ID: {request.user_id}")
-            return str(uuid.uuid4())  # Return a dummy snapshot ID
+            return UnifiedIdGenerator.generate_base_id("state_persistence")  # Return a dummy snapshot ID
         
         # Handle missing user_id by setting to None to avoid FK constraint
         if not request.user_id:
@@ -439,7 +440,7 @@ class StatePersistenceService:
                     logger.error(f"Failed to create dev user {request.user_id}: {e}")
                     raise
         
-        snapshot_id = str(uuid.uuid4())
+        snapshot_id = UnifiedIdGenerator.generate_base_id("state_persistence")
         snapshot = await self._prepare_snapshot_for_database(snapshot_id, request)
         return await self._insert_snapshot_to_database(snapshot, db_session, snapshot_id)
 
@@ -460,7 +461,7 @@ class StatePersistenceService:
     async def _log_state_transaction(self, snapshot_id: str, request: StatePersistenceRequest,
                                     operation_type: str, db_session: AsyncSession) -> str:
         """Log state transaction for audit trail."""
-        transaction_id = str(uuid.uuid4())
+        transaction_id = UnifiedIdGenerator.generate_base_id("state_persistence")
         transaction = self._build_transaction_record(transaction_id, snapshot_id, request, operation_type)
         return await self._insert_transaction_to_database(transaction, db_session, transaction_id)
 
@@ -1030,7 +1031,7 @@ class StatePersistenceService:
         except Exception as e:
             logger.warning(f"Failed to calculate state hash: {e}")
             # Return random hash to disable deduplication for this state
-            return str(uuid.uuid4())
+            return UnifiedIdGenerator.generate_base_id("state_persistence")
     
     def _update_state_cache(self, cache_key: str, state_hash: str) -> None:
         """Update the state cache with new state hash."""
@@ -1040,7 +1041,7 @@ class StatePersistenceService:
             oldest_key = next(iter(self._state_cache))
             del self._state_cache[oldest_key]
         
-        snapshot_id = str(uuid.uuid4())
+        snapshot_id = UnifiedIdGenerator.generate_base_id("state_persistence")
         self._state_cache[cache_key] = {
             'state_hash': state_hash,
             'snapshot_id': snapshot_id,
@@ -1053,7 +1054,7 @@ class StatePersistenceService:
         for cache_key, cache_info in self._state_cache.items():
             if cache_key.startswith(f"{run_id}:"):
                 return cache_info.get('snapshot_id')
-        return str(uuid.uuid4())  # Return dummy ID if not found
+        return UnifiedIdGenerator.generate_base_id("state_persistence")  # Return dummy ID if not found
     
     def _optimize_state_data(self, request: StatePersistenceRequest) -> StatePersistenceRequest:
         """Apply optimizations to state data before persistence."""
@@ -1166,3 +1167,16 @@ class StateCacheManager:
     
     async def cache_legacy_state(self, run_id, state_data):
         return await self._service.cache_legacy_state(run_id, state_data)
+
+
+# BACKWARD COMPATIBILITY ALIASES - Issue #762 Phase 2 Remediation
+# These aliases resolve import mismatches in Golden Path tests
+
+# Alias for tests expecting OptimizedStatePersistence
+OptimizedStatePersistence = StatePersistenceService
+
+# Alias for tests expecting UnifiedStatePersistence
+UnifiedStatePersistence = StatePersistenceService
+
+# Legacy alias support
+StatePersistence = StatePersistenceService

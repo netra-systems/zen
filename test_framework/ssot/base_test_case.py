@@ -181,6 +181,8 @@ class SSotBaseTestCase:
             self._test_completed = False
         if not hasattr(self, '_original_env_state'):
             self._original_env_state: Optional[Dict[str, str]] = None
+        if not hasattr(self, 'logger'):
+            self.logger = logging.getLogger(self.__class__.__name__)
         
         # Start timing
         self._metrics.start_timing()
@@ -577,6 +579,22 @@ class SSotBaseTestCase:
             diff = abs(first - second)
             assert diff <= tolerance, msg or f"Expected {first} ≈ {second} (places={places}), but difference was {diff}"
     
+    def assertIsInstance(self, obj, cls, msg=None):
+        """Assert that obj is an instance of cls."""
+        assert isinstance(obj, cls), msg or f"Expected {obj} to be instance of {cls}, got {type(obj)}"
+    
+    def assertNotIsInstance(self, obj, cls, msg=None):
+        """Assert that obj is not an instance of cls."""
+        assert not isinstance(obj, cls), msg or f"Expected {obj} to not be instance of {cls}"
+
+    def assertIs(self, first, second, msg=None):
+        """Assert that first is second (same object identity)."""
+        assert first is second, msg or f"Expected {first} is {second} (same object identity)"
+
+    def assertIsNot(self, first, second, msg=None):
+        """Assert that first is not second (different object identity)."""
+        assert first is not second, msg or f"Expected {first} is not {second} (different object identity)"
+
     def assert_env_var_set(self, key: str, expected_value: Optional[str] = None) -> None:
         """
         Assert that an environment variable is set.
@@ -706,10 +724,27 @@ class SSotAsyncTestCase(SSotBaseTestCase):
     
     @pytest.fixture
     def event_loop(self):
-        """Provide event loop for async tests."""
+        """
+        Provide event loop for async tests.
+        
+        FIX: Ensure proper event loop lifecycle to prevent false positives
+        where async code appears to execute but doesn't actually run.
+        """
         loop = asyncio.new_event_loop()
-        yield loop
-        loop.close()
+        asyncio.set_event_loop(loop)
+        try:
+            yield loop
+        finally:
+            # Ensure all pending tasks are completed before closing
+            try:
+                # Get all pending tasks and wait for completion
+                pending_tasks = [task for task in asyncio.all_tasks(loop) if not task.done()]
+                if pending_tasks:
+                    loop.run_until_complete(asyncio.gather(*pending_tasks, return_exceptions=True))
+            except Exception as e:
+                logger.warning(f"Error cleaning up async tasks: {e}")
+            finally:
+                loop.close()
     
     def setup_method(self, method=None):
         """Setup method for async tests - calls parent sync setup."""

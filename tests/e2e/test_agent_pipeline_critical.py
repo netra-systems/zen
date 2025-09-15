@@ -63,8 +63,8 @@ import pytest
 import json
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent  
@@ -74,7 +74,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.db.clickhouse import get_clickhouse_service
-from test_framework.real_llm_config import configure_real_llm_testing
+from test_framework.llm_config_manager import configure_real_llm_testing
 from tests.e2e.agent_collaboration_helpers import AgentCollaborationTestCore
 
 

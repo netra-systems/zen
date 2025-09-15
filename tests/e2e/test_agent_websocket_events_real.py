@@ -28,7 +28,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from auth_service.auth_core.config import AuthConfig
@@ -212,7 +212,7 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
             self._env.disable_isolation(restore_original=True)
         super().teardown_method(method)
     
-    async def _create_real_authenticated_websocket(self, user_data) -> websockets.WebSocketServerProtocol:
+    async def _create_real_authenticated_websocket(self, user_data) -> websockets.ServerConnection:
         """Create REAL authenticated WebSocket connection."""
         try:
             # Connect to REAL WebSocket server with auth header

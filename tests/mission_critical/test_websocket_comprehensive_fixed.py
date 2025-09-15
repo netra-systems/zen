@@ -28,7 +28,7 @@
             # REMOVED_SYNTAX_ERROR: import uuid
             # REMOVED_SYNTAX_ERROR: from datetime import datetime, timezone
             # REMOVED_SYNTAX_ERROR: from typing import Dict, List, Any, Optional
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
             # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
             # CRITICAL: Add project root to Python path
@@ -44,7 +44,7 @@
 
                 # Import current SSOT implementations
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
@@ -234,7 +234,7 @@
 
     # Create registry and engine
     # REMOVED_SYNTAX_ERROR: registry = AgentRegistry(), ToolDispatcher())
-    # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine(registry, self.ws_manager)
+    # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine(registry, self.ws_manager)
 
     # Verify WebSocket components
     # REMOVED_SYNTAX_ERROR: assert hasattr(engine, 'websocket_notifier'), "ExecutionEngine missing websocket_notifier"

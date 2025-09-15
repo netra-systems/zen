@@ -1487,7 +1487,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
             # Get current process
             process = psutil.Process(os.getpid())
         except ImportError:
-            pytest.skip("psutil not available - skipping memory efficiency test")
+            pytest.skip("psutil not available - skipping memory efficiency test", allow_module_level=True)
         
         # Clear garbage and get baseline memory
         gc.collect()

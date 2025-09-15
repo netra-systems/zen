@@ -53,6 +53,7 @@ from netra_backend.app.websocket_core.unified_manager import (
     _serialize_message_safely,
     _get_enum_key_representation
 )
+from netra_backend.app.websocket_core import create_websocket_manager
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
@@ -180,8 +181,9 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         self.env.set("ENVIRONMENT", "test", "websocket_unit_test")
         self.env.set("WEBSOCKET_TEST_TIMEOUT", "5", "websocket_unit_test")
         
-        # Create fresh manager instance for each test
-        self.manager = UnifiedWebSocketManager()
+        # Note: Manager will be created in individual tests using factory pattern
+        # to avoid async setup issues
+        self.manager = None
         
         # Test metrics for performance validation
         self.test_metrics = {
@@ -271,6 +273,12 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         Business Impact: Data leakage between users would be a $100K+ security breach.
         This test validates the core security promise of the platform.
         """
+        # Create manager using factory pattern
+        from unittest.mock import Mock
+        mock_user_context = Mock()
+        mock_user_context.user_id = "test_user_123"
+        self.manager = await create_websocket_manager(mock_user_context)
+        
         # Create connections for different users using proper IDs
         user_a_id = self.id_manager.generate_id(IDType.USER, prefix="test_user_a")
         user_b_id = self.id_manager.generate_id(IDType.USER, prefix="test_user_b")

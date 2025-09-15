@@ -29,10 +29,10 @@ async def test_startup_with_missing_jwt_secret():
     os.environ['SERVICE_SECRET'] = 'test-service-secret-long-enough-32chars'
     
     try:
-        from netra_backend.app.core.auth_startup_validator import validate_auth_at_startup
+        from netra_backend.app.core.auth_startup_validator import validate_auth_startup
         
         print("\nAttempting to validate auth configuration...")
-        await validate_auth_at_startup()
+        await validate_auth_startup()
         
         print("\nERROR: Auth validation should have failed!")
         print("System would have started with missing JWT secret - CRITICAL BUG!")
@@ -65,10 +65,10 @@ async def test_startup_with_invalid_auth_service_url():
     os.environ['SERVICE_SECRET'] = 'test-service-secret-long-enough-32chars'
     
     try:
-        from netra_backend.app.core.auth_startup_validator import validate_auth_at_startup
+        from netra_backend.app.core.auth_startup_validator import validate_auth_startup
         
         print("\nAttempting to validate auth configuration in production...")
-        await validate_auth_at_startup()
+        await validate_auth_startup()
         
         print("\nERROR: Auth validation should have failed!")
         print("System would have started with HTTP in production - SECURITY BUG!")

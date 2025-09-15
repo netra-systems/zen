@@ -25,7 +25,7 @@
     # REMOVED_SYNTAX_ERROR: from typing import Dict, List, Set, Any, Optional, Tuple
     # REMOVED_SYNTAX_ERROR: import threading
     # REMOVED_SYNTAX_ERROR: from dataclasses import dataclass, field
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
     # Add project root to Python path for imports
@@ -40,7 +40,7 @@
         # REMOVED_SYNTAX_ERROR: from test_framework.websocket_helpers import WebSocketTestHelpers
 
         # Import core WebSocket and agent components for integration testing
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine

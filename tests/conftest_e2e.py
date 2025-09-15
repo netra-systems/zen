@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class MockWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -485,7 +485,7 @@ async def throughput_client(test_user_token, high_volume_server):
                     import logging
                     logging.warning(f"WebSocket connection failed after {max_retries} attempts: {e} - using stub client")
                     # Create stub client for testing
-                    websocket = TestWebSocketConnection()
+                    websocket = MockWebSocketConnection()
                     class StubHighVolumeClient:
                         def __init__(self):
                             self.websocket = websocket
@@ -502,7 +502,7 @@ async def throughput_client(test_user_token, high_volume_server):
         
     except ImportError:
         # Mock client if performance_base not available
-        websocket = TestWebSocketConnection()
+        websocket = MockWebSocketConnection()
         try:
             yield mock_client
         finally:

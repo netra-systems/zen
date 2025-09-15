@@ -1452,7 +1452,7 @@ class TestAuthStartupValidatorValidateAll(BaseIntegrationTest):
 
 
 class TestAuthStartupValidatorConvenienceFunction(BaseIntegrationTest):
-    """Test the validate_auth_at_startup convenience function."""
+    """Test the validate_auth_startup convenience function."""
     
     def setup_method(self):
         super().setup_method()
@@ -1460,8 +1460,8 @@ class TestAuthStartupValidatorConvenienceFunction(BaseIntegrationTest):
         self.env.clear_cache()
     
     @pytest.mark.asyncio
-    async def test_validate_auth_at_startup_success(self):
-        """Test validate_auth_at_startup succeeds with valid configuration."""
+    async def test_validate_auth_startup_success(self):
+        """Test validate_auth_startup succeeds with valid configuration."""
         self.env.set("ENVIRONMENT", "development", source="test")
         self.env.set("JWT_SECRET_KEY", "development_jwt_secret_with_32_chars", source="test")
         self.env.set("SERVICE_ID", "netra-backend-service", source="test")
@@ -1473,8 +1473,8 @@ class TestAuthStartupValidatorConvenienceFunction(BaseIntegrationTest):
             await validate_auth_startup()
     
     @pytest.mark.asyncio
-    async def test_validate_auth_at_startup_critical_failure_raises_exception(self):
-        """Test validate_auth_at_startup raises AuthValidationError on critical failure."""
+    async def test_validate_auth_startup_critical_failure_raises_exception(self):
+        """Test validate_auth_startup raises AuthValidationError on critical failure."""
         self.env.set("ENVIRONMENT", "development", source="test")
         self.env.set("JWT_SECRET_KEY", "development_jwt_secret_with_32_chars", source="test")
         self.env.set("SERVICE_ID", "netra-backend-service", source="test")
@@ -1488,8 +1488,8 @@ class TestAuthStartupValidatorConvenienceFunction(BaseIntegrationTest):
             assert "service_credentials" in str(exc_info.value).lower()
     
     @pytest.mark.asyncio
-    async def test_validate_auth_at_startup_warning_only_succeeds(self):
-        """Test validate_auth_at_startup succeeds with warnings but no critical failures."""
+    async def test_validate_auth_startup_warning_only_succeeds(self):
+        """Test validate_auth_startup succeeds with warnings but no critical failures."""
         self.env.set("ENVIRONMENT", "development", source="test")
         self.env.set("JWT_SECRET_KEY", "development_jwt_secret_with_32_chars", source="test")
         self.env.set("SERVICE_ID", "netra-backend-service", source="test")

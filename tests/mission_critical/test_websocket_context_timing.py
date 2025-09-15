@@ -43,10 +43,10 @@ import json
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager, get_websocket_manager
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler

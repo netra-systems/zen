@@ -19,7 +19,7 @@ import json
 import time
 from typing import Optional, Dict, Any
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatus
+from websockets import ConnectionClosed, InvalidStatus
 
 # Use SSOT testing framework 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase

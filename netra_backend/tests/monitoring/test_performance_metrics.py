@@ -468,7 +468,7 @@ class TestSupervisorObservabilityIntegration:
     
     def test_workflow_trace_with_timing(self):
         """Test workflow trace with timing collection."""
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         observability = SupervisorObservability()
         
@@ -532,7 +532,7 @@ class TestSupervisorObservabilityIntegration:
     
     def test_get_timing_breakdown(self):
         """Test getting timing breakdown for specific execution."""
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         observability = SupervisorObservability()
         

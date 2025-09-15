@@ -85,7 +85,7 @@ from netra_backend.app.schemas.tool_permission import (
 )
 
 # State and context management
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 # Logging
@@ -367,7 +367,7 @@ class TestUnifiedToolExecutionEngineBasics(AsyncBaseTestCase):
         assert EnhancedToolExecutionEngine is UnifiedToolExecutionEngine
         
         # Test instantiation works through alias
-        engine = EnhancedToolExecutionEngine()
+        engine = UserExecutionEngine()
         assert isinstance(engine, UnifiedToolExecutionEngine)
 
 
@@ -1413,7 +1413,7 @@ class TestToolExecutionEngineRegressionTests(AsyncBaseTestCase):
         """Regression: Ensure backward compatibility aliases work correctly."""
         # EnhancedToolExecutionEngine should be identical to UnifiedToolExecutionEngine
         unified = UnifiedToolExecutionEngine()
-        enhanced = EnhancedToolExecutionEngine()
+        enhanced = UserExecutionEngine()
         
         # Should be same class
         assert type(unified) == type(enhanced)

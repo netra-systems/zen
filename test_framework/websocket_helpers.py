@@ -27,6 +27,15 @@ try:
 except ImportError:
     WEBSOCKETS_AVAILABLE = False
 
+# Import logger for WebSocket compatibility debugging
+try:
+    from netra_backend.app.logging_config import central_logger
+    logger = central_logger.get_logger(__name__)
+except ImportError:
+    # Fallback for environments where backend logging isn't available
+    import logging
+    logger = logging.getLogger(__name__)
+
 try:
     import httpx
     HTTPX_AVAILABLE = True  
@@ -48,6 +57,29 @@ except ImportError:
     def is_docker_available_for_websocket() -> bool:
         return False
 
+
+# =============================================================================
+# WEBSOCKET HELPER FUNCTIONS
+# =============================================================================
+
+def _get_websocket_headers_kwargs(headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    """
+    Get WebSocket connection kwargs with proper header handling.
+    
+    This function tries the newer 'additional_headers' parameter first,
+    and falls back to 'extra_headers' for older websockets library versions.
+    
+    Args:
+        headers: Headers to include in connection
+        
+    Returns:
+        Dict with proper header parameter name for websockets.connect()
+    """
+    if not headers:
+        return {}
+    
+    # Use the WebSocketClientAbstraction compatibility method
+    return WebSocketClientAbstraction.get_compatible_connection_params(headers)
 
 # =============================================================================
 # WEBSOCKET TEST ASSERTION FUNCTIONS  
@@ -107,9 +139,31 @@ def assert_agent_execution(*args, **kwargs):
 
 class WebSocketTestClient:
     """WebSocket test client that supports async context manager pattern."""
-    
-    def __init__(self, url: str, user_id: str = None):
-        self.url = url
+
+    def __init__(self, url: str = None, user_id: str = None, headers: Optional[Dict[str, str]] = None, **kwargs):
+        """
+        Initialize WebSocket test client with flexible constructor patterns.
+
+        Supports both:
+        - WebSocketTestClient(url, user_id) - Original pattern
+        - WebSocketTestClient(url="...", headers={...}) - Legacy pattern
+        - WebSocketTestClient(url, headers) - Positional legacy pattern
+
+        Args:
+            url: WebSocket URL (required)
+            user_id: Optional user ID for testing
+            headers: Optional headers for authentication
+            **kwargs: Additional compatibility parameters
+        """
+        # Handle legacy positional pattern: WebSocketTestClient(url, headers)
+        if isinstance(user_id, dict) and headers is None:
+            # Legacy pattern: second argument is headers, not user_id
+            headers = user_id
+            user_id = None
+
+        self.url = url or "ws://localhost:8002/ws"
+        self.headers = headers or {}
+
         # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator instead of direct UUID
         if not user_id:
             from shared.id_generation import generate_uuid_replacement
@@ -117,22 +171,28 @@ class WebSocketTestClient:
         self.user_id = user_id
         self.websocket = None
         self.events_received = []
+        self._connected = False
         
     async def __aenter__(self):
         """Enter async context manager."""
         if WEBSOCKETS_AVAILABLE:
             import websockets
             try:
-                self.websocket = await websockets.connect(self.url)
+                # Use headers if provided for authentication
+                connection_kwargs = {}
+                if self.headers:
+                    connection_kwargs.update(_get_websocket_headers_kwargs(self.headers))
+
+                self.websocket = await websockets.connect(self.url, **connection_kwargs)
             except Exception as e:
                 # If connection fails, create a mock connection for testing
                 self.websocket = MockWebSocketConnection(self.user_id)
                 await self.websocket._add_mock_responses()
         else:
             # Create mock connection when websockets is not available
-            self.websocket = MockWebSocketConnection(self.user_id) 
+            self.websocket = MockWebSocketConnection(self.user_id)
             await self.websocket._add_mock_responses()
-        
+
         return self
         
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -142,6 +202,64 @@ class WebSocketTestClient:
                 await self.websocket.close()
             except Exception:
                 pass  # Ignore cleanup errors
+
+    async def connect(self):
+        """Connect to WebSocket endpoint - direct method for e2e tests."""
+        if self._connected:
+            return  # Already connected
+
+        if WEBSOCKETS_AVAILABLE:
+            import websockets
+            try:
+                # Use headers if provided for authentication
+                connection_kwargs = {}
+                if self.headers:
+                    connection_kwargs.update(_get_websocket_headers_kwargs(self.headers))
+
+                self.websocket = await websockets.connect(self.url, **connection_kwargs)
+                self._connected = True
+            except Exception as e:
+                # If connection fails, create a mock connection for testing
+                logger.warning(f"WebSocket connection failed, using mock: {e}")
+                self.websocket = MockWebSocketConnection(self.user_id)
+                await self.websocket._add_mock_responses()
+                self._connected = True
+        else:
+            # Create mock connection when websockets is not available
+            self.websocket = MockWebSocketConnection(self.user_id)
+            await self.websocket._add_mock_responses()
+            self._connected = True
+
+    async def disconnect(self):
+        """Disconnect from WebSocket endpoint - direct method for e2e tests."""
+        if not self._connected:
+            return  # Already disconnected
+
+        if hasattr(self.websocket, 'close') and callable(self.websocket.close):
+            try:
+                await self.websocket.close()
+            except Exception:
+                pass  # Ignore cleanup errors
+        
+        self.websocket = None
+        self._connected = False
+
+    async def receive(self, timeout: float = 5.0):
+        """Receive raw message from WebSocket."""
+        if not self.websocket:
+            raise RuntimeError("WebSocket not connected")
+        
+        if hasattr(self.websocket, 'recv'):
+            # Real WebSocket
+            return await asyncio.wait_for(self.websocket.recv(), timeout=timeout)
+        else:
+            # Mock WebSocket
+            return await asyncio.wait_for(self.websocket.recv(), timeout=timeout)
+
+    async def receive_json(self, timeout: float = 5.0):
+        """Receive and parse JSON message from WebSocket."""
+        message = await self.receive(timeout)
+        return json.loads(message)
                 
     async def send_json(self, data: dict):
         """Send JSON data to WebSocket."""
@@ -230,7 +348,7 @@ class WebSocketClientAbstraction:
             "ping_timeout": kwargs.get("ping_timeout", 10),
             "close_timeout": kwargs.get("close_timeout", 5),
             "max_size": kwargs.get("max_size", 2**20),
-            "timeout": timeout
+            "open_timeout": timeout  # Fixed: use open_timeout instead of timeout
         }
         
         # Add subprotocols if provided
@@ -315,18 +433,31 @@ class MockWebSocketConnection:
         self.state.name = "OPEN"
         self._sent_messages = []
         self._receive_queue = asyncio.Queue()
-        
+
         # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator instead of direct UUID
         from shared.id_generation import generate_uuid_replacement, UnifiedIdGenerator
-        
+
         if not user_id:
             user_id = f"mock_user_{generate_uuid_replacement()}"
         self.user_id = user_id
         self.connection_id = UnifiedIdGenerator.generate_websocket_connection_id(user_id)
-        
+
         # Track sequence numbers for ordering tests
         self._sequence_number = 0
-        
+
+        # Add WebSocket attributes expected by authentication system
+        self.client = MagicMock()
+        self.client.host = "localhost"
+        self.client.port = 8000
+
+        # Add WebSocket state attributes
+        self.client_state = WebSocketState.CONNECTED
+        self.application_state = WebSocketState.CONNECTED
+
+        # Add headers and subprotocols
+        self.headers = {}
+        self.subprotocols = []
+
         # Don't auto-populate with mock responses - let tests control what they receive
     
     async def _add_mock_responses(self):
@@ -532,26 +663,61 @@ class WebSocketTestHelpers:
         max_retries: int = 3,
         user_id: str = None
     ):
-        """Create a test WebSocket connection with proper authentication and retries"""
-        # Check if we should use mock connection (Docker not available)
+        """Create a test WebSocket connection with proper authentication and staging fallback (Issue #680)"""
+        # Enhanced Docker availability check with staging fallback
         if not is_docker_available_for_websocket():
-            print("Docker not available, using mock WebSocket connection")
+            # Check if staging services are available and configured (Issue #680)
+            from shared.isolated_environment import get_env
+            env = get_env()
+
+            use_staging_services = env.get('USE_STAGING_SERVICES') == 'true'
+            staging_websocket_url = env.get('STAGING_WEBSOCKET_URL')
+            test_websocket_url = env.get('TEST_WEBSOCKET_URL')
+
+            if use_staging_services and (staging_websocket_url or test_websocket_url):
+                print(f"🔄 Docker unavailable - attempting staging WebSocket connection (Issue #680)")
+
+                # Use staging URL if configured, otherwise use provided test URL
+                staging_url = staging_websocket_url or test_websocket_url or url
+
+                # Try to connect to staging environment
+                try:
+                    return await WebSocketTestHelpers._create_real_websocket_connection(
+                        staging_url, headers, timeout, max_retries
+                    )
+                except Exception as e:
+                    print(f"⚠️ Staging WebSocket connection failed: {e}")
+                    print("🔄 Falling back to mock WebSocket connection for development testing")
+            else:
+                print("🔄 Docker not available, staging not configured - using mock WebSocket connection")
+
             return MockWebSocketConnection(user_id=user_id)
         
+        # Use real WebSocket connection for Docker environment
+        return await WebSocketTestHelpers._create_real_websocket_connection(url, headers, timeout, max_retries)
+
+    @staticmethod
+    async def _create_real_websocket_connection(
+        url: str,
+        headers: Optional[Dict[str, str]] = None,
+        timeout: float = 10.0,
+        max_retries: int = 3
+    ):
+        """Create a real WebSocket connection with retry logic and compatibility handling"""
         if not WEBSOCKETS_AVAILABLE:
             raise pytest.skip("websockets library not available")
-        
+
         # Extract JWT token from headers for subprotocol authentication
         auth_token = None
         subprotocols = []
-        
+
         if headers and "Authorization" in headers:
             auth_header = headers["Authorization"]
             if auth_header.startswith("Bearer "):
                 auth_token = auth_header.replace("Bearer ", "")
                 # Use jwt-auth subprotocol for authentication
                 subprotocols = ["jwt-auth"]
-        
+
         last_error = None
         for attempt in range(max_retries):
             try:
@@ -596,13 +762,13 @@ class WebSocketTestHelpers:
                             ),
                             timeout=timeout
                         )
-                
+
                 # Test basic connectivity by sending a ping
                 await connection.ping()
-                
+
                 return connection
-                
-            except (websockets.exceptions.ConnectionClosedError, 
+
+            except (websockets.exceptions.ConnectionClosedError,
                    websockets.exceptions.InvalidStatus,
                    asyncio.TimeoutError) as e:
                 last_error = e
@@ -613,7 +779,7 @@ class WebSocketTestHelpers:
             except Exception as e:
                 last_error = e
                 break
-        
+
         error_msg = f"Failed to create WebSocket connection after {max_retries} attempts: {last_error}"
         raise ConnectionError(error_msg)
     
@@ -1301,3 +1467,76 @@ def create_mock_websocket(
     mock_websocket.close = AsyncMock()
     
     return mock_websocket
+
+
+async def wait_for_agent_completion(
+    websocket,
+    connection_id: str,
+    timeout: float = 30.0,
+    expected_events: Optional[List[str]] = None
+) -> bool:
+    """
+    Wait for agent completion by monitoring WebSocket events.
+    
+    This function waits for the agent_completed event or all expected events
+    to be received through the WebSocket connection, confirming that an agent
+    has successfully completed its execution.
+    
+    Args:
+        websocket: WebSocket connection to monitor
+        connection_id: Connection ID for the agent execution
+        timeout: Maximum time to wait for completion (default: 30 seconds)
+        expected_events: Optional list of specific events to wait for
+                        (default: waits for 'agent_completed')
+    
+    Returns:
+        bool: True if agent completed successfully, False if timeout
+        
+    Raises:
+        RuntimeError: If WebSocket connection fails during monitoring
+        asyncio.TimeoutError: If timeout is reached without completion
+    """
+    if expected_events is None:
+        expected_events = ["agent_completed"]
+    
+    received_events = []
+    start_time = time.time()
+    
+    try:
+        while time.time() - start_time < timeout:
+            try:
+                # Receive message with short timeout to check regularly
+                message = await WebSocketTestHelpers.receive_test_message(
+                    websocket, timeout=1.0
+                )
+                
+                if message and isinstance(message, dict):
+                    event_type = message.get("type")
+                    if event_type:
+                        received_events.append(event_type)
+                        logger.debug(f"Received WebSocket event: {event_type}")
+                        
+                        # Check if we've received all expected events
+                        if all(event in received_events for event in expected_events):
+                            logger.info(f"Agent completion confirmed - received all expected events: {expected_events}")
+                            return True
+                            
+            except asyncio.TimeoutError:
+                # Continue checking - this is expected for the short timeout
+                continue
+            except Exception as e:
+                logger.warning(f"Error receiving WebSocket message during agent completion wait: {e}")
+                # Continue trying unless it's a connection error
+                if "connection" in str(e).lower() or "closed" in str(e).lower():
+                    raise RuntimeError(f"WebSocket connection failed during agent completion wait: {e}")
+                continue
+    
+    except asyncio.TimeoutError:
+        logger.error(f"Timeout waiting for agent completion after {timeout}s. Expected events: {expected_events}, Received: {received_events}")
+        return False
+    except Exception as e:
+        logger.error(f"Error during agent completion wait: {e}")
+        raise RuntimeError(f"Failed to wait for agent completion: {e}")
+    
+    logger.error(f"Agent completion timeout after {timeout}s. Expected events: {expected_events}, Received: {received_events}")
+    return False

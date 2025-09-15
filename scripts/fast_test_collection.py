@@ -1,105 +1,124 @@
 #!/usr/bin/env python3
-
 """
-Fast Test Collection Script
-===========================
-Quick test collection for development and debugging
+Fast Test Collection Wrapper
 
-Usage:
-    python3 scripts/fast_test_collection.py --pattern "*agent*"
-    python3 scripts/fast_test_collection.py --category agent --count-only
+Optimized test collection with all performance enhancements enabled.
 """
-
+import os
 import sys
 import time
-import argparse
+import subprocess
 from pathlib import Path
-import glob
 
-PROJECT_ROOT = Path(__file__).parent.parent.absolute()
+PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-def fast_collect_tests(pattern: str = "*", category: str = "all") -> dict:
-    """Fast test collection without heavy imports"""
+def run_fast_collection():
+    """Run optimized test collection"""
+    print("🚀 Running optimized test collection...")
+    
+    # Set optimization environment
+    env = os.environ.copy()
+    env.update({
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONHASHSEED": "0",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        "PYTEST_COLLECTION_PHASE": "1"
+    })
+    
     start_time = time.time()
     
-    # Test directories to search
-    test_dirs = [
-        PROJECT_ROOT / "netra_backend" / "tests",
-        PROJECT_ROOT / "tests",
-        PROJECT_ROOT / "auth_service" / "tests",
-        PROJECT_ROOT / "frontend" / "src" / "__tests__"
+    # Run unified test runner with fast collection
+    cmd = [
+        sys.executable, "tests/unified_test_runner.py",
+        "--fast-collection",
+        "--quiet",
+        "--collection-timeout", "60"
     ]
     
-    results = {
-        "total_files": 0,
-        "by_directory": {},
-        "files": []
-    }
-    
-    for test_dir in test_dirs:
-        if test_dir.exists():
-            # Use glob for fast file discovery
-            search_pattern = f"*{pattern.replace('*', '')}*.py"
-            files = list(test_dir.rglob(search_pattern))
-            
-            valid_files = [f for f in files if f.is_file() and f.name.startswith("test_")]
-            
-            results["by_directory"][str(test_dir)] = len(valid_files)
-            results["total_files"] += len(valid_files)
-            results["files"].extend([str(f) for f in valid_files])
-    
-    results["collection_time"] = time.time() - start_time
-    return results
-
-def main():
-    parser = argparse.ArgumentParser(description="Fast test collection")
-    parser.add_argument('--pattern', default="*", help='Test pattern to search for')
-    parser.add_argument('--category', default="all", help='Test category')
-    parser.add_argument('--count-only', action='store_true', help='Only show counts')
-    parser.add_argument('--time-limit', type=float, default=5.0, 
-                       help='Maximum collection time in seconds')
-    
-    args = parser.parse_args()
-    
-    print(f"🔍 Fast collecting tests: pattern='{args.pattern}', category='{args.category}'")
-    
-    # Set timeout
-    start_time = time.time()
     try:
-        results = fast_collect_tests(args.pattern, args.category)
+        result = subprocess.run(
+            cmd, 
+            cwd=PROJECT_ROOT,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=300  # 5 minute max
+        )
         
-        collection_time = results["collection_time"]
+        duration = time.time() - start_time
         
-        if collection_time > args.time_limit:
-            print(f"⚠️  Collection time {collection_time:.2f}s exceeded limit {args.time_limit}s")
+        if result.returncode == 0:
+            print(f"✅ Fast collection completed in {duration:.2f}s")
+            print(result.stdout.split('\n')[-2])  # Last meaningful line
+            return True
         else:
-            print(f"✅ Collection completed in {collection_time:.2f}s")
-        
-        print(f"📊 Found {results['total_files']} test files")
-        
-        if not args.count_only:
-            for directory, count in results["by_directory"].items():
-                if count > 0:
-                    print(f"   {Path(directory).name}: {count} files")
-        
-        # Performance rating
-        if collection_time < 1.0:
-            rating = "🚀 EXCELLENT"
-        elif collection_time < 5.0:
-            rating = "✅ GOOD"
-        elif collection_time < 15.0:
-            rating = "⚠️  FAIR"
-        else:
-            rating = "❌ POOR"
-        
-        print(f"Performance: {rating} ({collection_time:.2f}s)")
-        
-        return 0
-        
+            print(f"❌ Collection failed: {result.stderr}")
+            return False
+            
+    except subprocess.TimeoutExpired:
+        print("⏱️  Collection timed out after 5 minutes")
+        return False
     except Exception as e:
-        print(f"❌ Collection failed: {e}")
-        return 1
+        print(f"❌ Error during collection: {e}")
+        return False
 
-if __name__ == '__main__':
-    sys.exit(main())
+def run_validation_collection():
+    """Run validation collection to measure improvement"""
+    print("📊 Running validation collection...")
+    
+    start_time = time.time()
+    
+    cmd = [
+        sys.executable, "-m", "pytest",
+        "--collect-only",
+        "--quiet",
+        "tests/"
+    ]
+    
+    try:
+        result = subprocess.run(
+            cmd,
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=180
+        )
+        
+        duration = time.time() - start_time
+        
+        if result.returncode == 0:
+            lines = result.stdout.count('\n')
+            print(f"📈 Validation: {lines} tests discovered in {duration:.2f}s")
+            return lines, duration
+        else:
+            print(f"❌ Validation failed: {result.stderr}")
+            return 0, duration
+            
+    except Exception as e:
+        print(f"❌ Validation error: {e}")
+        return 0, 0
+
+if __name__ == "__main__":
+    print("🔧 Test Collection Performance Optimization")
+    print("=" * 50)
+    
+    # Run fast collection
+    fast_success = run_fast_collection()
+    
+    if fast_success:
+        # Run validation
+        test_count, duration = run_validation_collection()
+        
+        print("\n📊 Performance Summary:")
+        print(f"   Tests discovered: {test_count}")
+        print(f"   Collection time: {duration:.2f}s")
+        print(f"   Collection rate: {test_count/duration if duration > 0 else 0:.1f} tests/second")
+        
+        # Compare to baseline
+        baseline_count = 4148  # From task description
+        if test_count > baseline_count:
+            improvement = test_count - baseline_count
+            print(f"✅ Improvement: +{improvement} tests discovered ({improvement/baseline_count*100:.1f}% increase)")
+        
+    sys.exit(0 if fast_success else 1)

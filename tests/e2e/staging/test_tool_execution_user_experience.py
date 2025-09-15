@@ -88,7 +88,7 @@ class ToolExecutionUserExperienceE2ETest:
             logger.warning(f"Staging auth error: {e}, using mock token")
             return "mock_token_for_staging_test"
 
-    async def _connect_to_staging_websocket(self) -> Optional[websockets.WebSocketServerProtocol]:
+    async def _connect_to_staging_websocket(self) -> Optional[websockets.ServerConnection]:
         """Connect to staging WebSocket service."""
         try:
             headers = {"Authorization": f"Bearer {self.auth_token}"}

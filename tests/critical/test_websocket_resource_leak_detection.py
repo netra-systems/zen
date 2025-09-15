@@ -11,8 +11,8 @@ CRITICAL PURPOSE: These tests detect the resource leak scenario identified in GC
 where users hit the 20 manager limit due to insufficient cleanup timing and coordination.
 
 PRODUCTION-READY IMPROVEMENTS:
- PASS:  REAL WEBSOCKET COMPONENTS: Replaced AsyncMock with TestWebSocketConnection for authentic testing
- PASS:  ENVIRONMENT-AWARE CONFIGURATION: TestConfiguration automatically adjusts timeouts for CI/GitHub Actions
+ PASS:  REAL WEBSOCKET COMPONENTS: Replaced AsyncMock with WebSocketConnectionMock for authentic testing
+ PASS:  ENVIRONMENT-AWARE CONFIGURATION: ResourceTestConfiguration automatically adjusts timeouts for CI/GitHub Actions
  PASS:  RACE CONDITION FIXES: Thread-safe isolation key lookup with retry logic and object identity checks  
  PASS:  MEMORY LEAK DETECTION: Real memory usage tracking with psutil and configurable thresholds
  PASS:  CONFIGURATION-BASED TIMEOUTS: No more hardcoded values - all timeouts adapt to environment
@@ -24,7 +24,7 @@ Target Scenarios:
 4. Rapid connection cycles stress test (CI=50 cycles/20s, Test=100 cycles/30s)
 
 Test Architecture:
-- Uses REAL WebSocket test components (TestWebSocketConnection) - NO MOCKING
+- Uses REAL WebSocket test components (WebSocketConnectionMock) - NO MOCKING
 - Measures actual timing and memory resource usage with psutil
 - Environment-aware configuration (CI, GitHub Actions, Test, Development, Staging, Production)
 - Race condition protection with thread-safe manager lookup
@@ -59,12 +59,8 @@ from typing import Dict, List, Set, Optional, Any
 import logging
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
-    IsolatedWebSocketManager,
-    get_websocket_manager_factory,
-    create_websocket_manager
-)
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from shared.isolated_environment import get_env
@@ -72,7 +68,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketConnection:
+class WebSocketConnectionMock:
     """Real test WebSocket connection component to replace AsyncMock usage."""
     
     def __init__(self, connection_id: str):
@@ -120,7 +116,7 @@ class TestWebSocketState:
     CLOSED = 3
 
 
-class TestConfiguration:
+class ResourceResourceTestConfiguration:
     """Environment-aware test configuration to replace hardcoded values."""
     
     def __init__(self):
@@ -211,7 +207,7 @@ class TestConfiguration:
 class ResourceLeakTracker:
     """Track resource usage and leak detection during tests with memory monitoring."""
     
-    def __init__(self, config: TestConfiguration):
+    def __init__(self, config: ResourceResourceTestConfiguration):
         self.snapshots: List[Dict[str, Any]] = []
         self.violations: List[Dict[str, Any]] = []
         self.timing_measurements: List[Dict[str, Any]] = []
@@ -229,7 +225,7 @@ class ResourceLeakTracker:
             logger.warning(f"Failed to get memory usage: {e}")
             return 0.0
     
-    def take_snapshot(self, description: str, factory: WebSocketManagerFactory) -> Dict[str, Any]:
+    def take_snapshot(self, description: str, factory: WebSocketManager) -> Dict[str, Any]:
         """Take a resource usage snapshot with memory tracking."""
         stats = factory.get_factory_stats()
         current_memory_mb = self._get_memory_usage_mb()
@@ -357,10 +353,10 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
     def setup_method(self, method=None):
         """Setup for each test method with resource tracking and configuration."""
         super().setup_method(method)
-        self.test_config = TestConfiguration()
+        self.test_config = ResourceResourceTestConfiguration()
         self.resource_tracker = ResourceLeakTracker(self.test_config)
         # Use higher limits to test the resource management properly
-        self.factory = WebSocketManagerFactory(max_managers_per_user=20, connection_timeout_seconds=300)
+        self.factory = WebSocketManager()
         self.test_user_contexts = {}
         
         logger.info(f"Test setup with environment: {self.test_config.environment_type}")
@@ -421,7 +417,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
             user_id = f"test-user-{numeric_suffix}"
         
         # Create real test WebSocket component instead of AsyncMock
-        test_websocket = TestWebSocketConnection(connection_id)
+        test_websocket = WebSocketConnectionMock(connection_id)
         
         return WebSocketConnection(
             connection_id=connection_id,
@@ -1280,7 +1276,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
         assert len(test_methods) >= 5, f"Expected at least 5 critical tests, found {len(test_methods)}"
         
         # Additional coverage validation for new components
-        assert hasattr(self, 'test_config'), "TestConfiguration not initialized"
+        assert hasattr(self, 'test_config'), "ResourceTestConfiguration not initialized"
         assert hasattr(self, 'resource_tracker'), "ResourceLeakTracker not initialized"
         
         # Verify environment-specific configurations are working

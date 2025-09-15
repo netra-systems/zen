@@ -149,7 +149,7 @@ class TestWebSocketSSotConfigurationViolations(SSotBaseTestCase):
         
         # Test default configurations in different components
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             # Check manager defaults
             manager = UnifiedWebSocketManager()

@@ -79,12 +79,12 @@ from unittest.mock import AsyncMock, MagicMock
 from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
 # CONSOLIDATED: from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
 # CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.base_test_case import SSotAsyncTestCase
-# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
-# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
+from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
 # CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.real_services_test_fixtures import real_services_fixture
-# CONSOLIDATED: # CONSOLIDATED: from test_framework.websocket_helpers import (
-#     WebSocketTestHelpers, assert_websocket_events, WebSocketTestClient
-# )
+from test_framework.websocket_helpers import (
+    WebSocketTestHelpers, assert_websocket_events, WebSocketTestClient
+)
 
 # Core system imports for integration
 from shared.types.execution_types import StronglyTypedUserExecutionContext
@@ -92,7 +92,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocke
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # Database and persistence imports
 import httpx

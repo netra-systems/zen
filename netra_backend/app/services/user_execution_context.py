@@ -34,8 +34,16 @@ import logging
 from contextlib import asynccontextmanager
 
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
+
+# Use SSOT logging instead of deprecated central_logger
+class CentralLoggerCompat:
+    def get_logger(self, name):
+        return get_logger(name)
+
+central_logger = CentralLoggerCompat()
 from shared.isolated_environment import IsolatedEnvironment
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -105,7 +113,7 @@ class UserExecutionContext:
     user_id: str
     thread_id: str  
     run_id: str
-    request_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    request_id: str = field(default_factory=lambda: UnifiedIdGenerator.generate_base_id("user_request"))
     
     # Session and connection management
     db_session: Optional['AsyncSession'] = field(default=None, repr=False, compare=False)
@@ -124,7 +132,7 @@ class UserExecutionContext:
     cleanup_callbacks: List[Callable] = field(default_factory=list, repr=False, compare=False)
     
     # ISSUE #414 FIX: Enhanced isolation and memory leak prevention
-    _isolation_token: str = field(default_factory=lambda: str(uuid.uuid4()), repr=False, compare=False)
+    _isolation_token: str = field(default_factory=lambda: UnifiedIdGenerator.generate_base_id("isolation_token"), repr=False, compare=False)
     _memory_refs: List[Any] = field(default_factory=list, repr=False, compare=False)
     _validation_fingerprint: Optional[str] = field(default=None, repr=False, compare=False)
     
@@ -524,7 +532,7 @@ class UserExecutionContext:
             user_id=user_id,
             thread_id=thread_id,
             run_id=run_id,
-            request_id=request_id or str(uuid.uuid4()),
+            request_id=request_id or UnifiedIdGenerator.generate_base_id("user_request"),
             agent_context=agent_context or {},
             audit_metadata=audit_metadata or {}
         )
@@ -566,13 +574,53 @@ class UserExecutionContext:
             user_id=user_id,
             thread_id=thread_id,
             run_id=run_id,
-            request_id=request_id or str(uuid.uuid4()),
+            request_id=request_id or UnifiedIdGenerator.generate_base_id("user_request"),
             db_session=db_session,
             websocket_client_id=websocket_client_id,
             agent_context=agent_context or {},
             audit_metadata=audit_metadata or {}
         )
-    
+
+    @classmethod
+    def create_for_user(
+        cls,
+        user_id: str,
+        thread_id: str,
+        run_id: str,
+        **kwargs
+    ) -> 'UserExecutionContext':
+        """Factory method to create context for user with minimal required parameters.
+
+        This is a simplified factory method that tests and other code expect.
+        It provides a clean interface for creating UserExecutionContext instances
+        with just the essential user, thread, and run identifiers.
+
+        Args:
+            user_id: User identifier
+            thread_id: Thread identifier
+            run_id: Run identifier
+            **kwargs: Additional optional parameters passed to from_request()
+
+        Returns:
+            New UserExecutionContext instance
+
+        Raises:
+            InvalidContextError: If any required parameters are invalid
+
+        Example:
+            context = UserExecutionContext.create_for_user(
+                user_id="user123",
+                thread_id="thread456",
+                run_id="run789"
+            )
+        """
+        return cls.from_request(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            **kwargs
+        )
+
     @classmethod
     def from_websocket_request(
         cls,
@@ -656,6 +704,81 @@ class UserExecutionContext:
                 f"WebSocket context creation failed due to ID generation error: {id_error}. "
                 f"This indicates a system configuration issue with SSOT ID generation."
             ) from id_error
+
+    @classmethod
+    def create_defensive_user_execution_context(
+        cls,
+        user_id: str, 
+        websocket_client_id: Optional[str] = None,
+        fallback_context: Optional[Dict[str, Any]] = None
+    ) -> 'UserExecutionContext':
+        """
+        Create a defensive UserExecutionContext with proper validation.
+        
+        This function provides backward compatibility for the unified authentication service
+        that expects defensive context creation during WebSocket authentication flows.
+        
+        SSOT Migration: This function was moved from websocket_manager_factory.py as part
+        of the Phase 3 factory deprecation. All defensive context creation now uses this
+        canonical SSOT implementation.
+        
+        Business Value Justification (BVJ):
+        - Segment: ALL (Free -> Enterprise) - WebSocket Authentication Infrastructure  
+        - Business Goal: Ensure reliable WebSocket authentication with proper fallback
+        - Value Impact: Prevents authentication failures that block Golden Path chat functionality
+        - Revenue Impact: Protects $500K+ ARR by ensuring reliable user authentication
+        
+        Args:
+            user_id: User identifier for the context
+            websocket_client_id: Optional WebSocket connection ID
+            fallback_context: Optional fallback context data
+            
+        Returns:
+            UserExecutionContext: Properly configured context for WebSocket authentication
+            
+        Raises:
+            InvalidContextError: If user_id is invalid or context creation fails
+        """
+        logger.debug(f"Creating defensive UserExecutionContext for user: {user_id}")
+        
+        if not user_id or not isinstance(user_id, str) or not user_id.strip():
+            raise InvalidContextError(
+                f"user_id must be a non-empty string for defensive context, got: {user_id!r}"
+            )
+        
+        # Use ID manager for consistent ID generation
+        from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+        id_manager = UnifiedIDManager()
+        
+        # Generate IDs if not provided in fallback_context
+        if fallback_context and 'thread_id' in fallback_context:
+            thread_id = fallback_context['thread_id']
+        else:
+            thread_id = id_manager.generate_thread_id()
+            
+        if fallback_context and 'run_id' in fallback_context:
+            run_id = fallback_context['run_id']
+        else:
+            run_id = id_manager.generate_run_id(thread_id)
+        
+        # Create defensive context with proper validation
+        context = cls(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=f"defensive_auth_{user_id}_{websocket_client_id or 'no_ws'}",
+            websocket_client_id=websocket_client_id,
+            agent_context=fallback_context or {},
+            audit_metadata={
+                'context_source': 'defensive_creation',
+                'creation_method': 'create_defensive_user_execution_context',
+                'migrated_from': 'websocket_manager_factory',
+                'ssot_compliant': True
+            }
+        )
+        
+        logger.debug(f"Created defensive context: user={user_id}, ws_id={websocket_client_id}")
+        return context
     
     @classmethod 
     def from_fastapi_request(
@@ -687,7 +810,7 @@ class UserExecutionContext:
             InvalidContextError: If required data is missing or invalid
         """
         # Generate request ID
-        request_id = str(uuid.uuid4())
+        request_id = UnifiedIdGenerator.generate_base_id("user_request")
         
         # Extract audit information from request
         audit_metadata = {
@@ -775,7 +898,7 @@ class UserExecutionContext:
             user_id=self.user_id,
             thread_id=self.thread_id,
             run_id=self.run_id,
-            request_id=str(uuid.uuid4()),
+            request_id=UnifiedIdGenerator.generate_base_id("user_request"),
             db_session=self.db_session,
             websocket_client_id=self.websocket_client_id,
             created_at=datetime.now(timezone.utc),
@@ -1153,7 +1276,7 @@ class UserExecutionContext:
             user_id=user_id,
             thread_id=thread_id,
             run_id=run_id,
-            request_id=request_id or str(uuid.uuid4()),
+            request_id=request_id or UnifiedIdGenerator.generate_base_id("user_request"),
             db_session=db_session,
             websocket_client_id=websocket_connection_id,  # Map supervisor field name
             agent_context=agent_context,
@@ -1210,7 +1333,7 @@ class UserExecutionContext:
             user_id=self.user_id,
             thread_id=self.thread_id,
             run_id=self.run_id,
-            request_id=str(uuid.uuid4()),
+            request_id=UnifiedIdGenerator.generate_base_id("user_request"),
             db_session=self.db_session,
             websocket_connection_id=self.websocket_client_id,
             metadata=child_metadata
@@ -1380,7 +1503,7 @@ class UserExecutionContext:
             ExecutionContext instance compatible with existing agent infrastructure
         """
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         # Create minimal state for compatibility
         state = DeepAgentState()
@@ -2223,7 +2346,7 @@ class UserContextManager:
         id_manager = UnifiedIDManager()
         thread_id = id_manager.generate_thread_id()
         run_id = id_manager.generate_run_id()
-        request_id = str(uuid.uuid4())
+        request_id = UnifiedIdGenerator.generate_base_id("user_request")
         
         context = UserExecutionContext.from_request(
             user_id=user_id,
@@ -2314,7 +2437,7 @@ class UserContextManager:
             event_data: Event data
         """
         try:
-            from netra_backend.app.websocket_core.notifier import WebSocketNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             
             notifier = WebSocketNotifier()
             await notifier.send_event(user_id, event_name, event_data)
@@ -2409,7 +2532,7 @@ class UserContextManager:
         # Create context with transaction
         thread_id = f"tx_thread_{int(time.time())}"
         run_id = f"tx_run_{int(time.time())}"
-        request_id = str(uuid.uuid4())
+        request_id = UnifiedIdGenerator.generate_base_id("user_request")
         
         context = UserExecutionContext.from_request(
             user_id=user_id,
@@ -2722,6 +2845,34 @@ class UserContextManager:
                 self._audit_trail[context_key] = self._audit_trail[context_key][-max_events_per_context:]
 
 
+# ===== MODULE-LEVEL COMPATIBILITY FUNCTIONS =====
+
+def create_defensive_user_execution_context(
+    user_id: str, 
+    websocket_client_id: Optional[str] = None,
+    fallback_context: Optional[Dict[str, Any]] = None
+) -> 'UserExecutionContext':
+    """
+    Module-level function for defensive UserExecutionContext creation.
+    
+    This provides the same interface as the original websocket_manager_factory function
+    but delegates to the SSOT class method for consistent behavior.
+    
+    Args:
+        user_id: User identifier for the context
+        websocket_client_id: Optional WebSocket connection ID
+        fallback_context: Optional fallback context data
+        
+    Returns:
+        UserExecutionContext: Properly configured context for WebSocket authentication
+    """
+    return UserExecutionContext.create_defensive_user_execution_context(
+        user_id=user_id,
+        websocket_client_id=websocket_client_id,
+        fallback_context=fallback_context
+    )
+
+
 # Export all public classes and functions
 __all__ = [
     'UserExecutionContext',
@@ -2734,5 +2885,6 @@ __all__ = [
     'managed_user_context',
     'register_shared_object',
     'clear_shared_object_registry',
+    'create_defensive_user_execution_context',  # Migrated from websocket_manager_factory
     'create_isolated_execution_context'
 ]

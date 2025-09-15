@@ -51,7 +51,7 @@ from shared.isolated_environment import get_env
 from test_framework.service_availability import check_service_availability
 
 # Production components
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
@@ -60,12 +60,12 @@ from netra_backend.app.agents.unified_tool_execution import (
     UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from netra_backend.app.core.configuration import UnifiedConfigManager
 from netra_backend.app.db.postgres import get_postgres_db
 from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -233,7 +233,7 @@ class ErrorRecoveryTester:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
-        return UserExecutionContext.create_for_user(
+        return UserExecutionContext.from_request(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run"
@@ -398,7 +398,7 @@ class TestCompleteAgentWorkflow(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
-        return UserExecutionContext.create_for_user(
+        return UserExecutionContext.from_request(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run"
@@ -537,7 +537,7 @@ class TestAgentHandoffAndContextPreservation(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
-        return UserExecutionContext.create_for_user(
+        return UserExecutionContext.from_request(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run"
@@ -665,7 +665,7 @@ class TestErrorRecoveryDuringExecution(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
-        return UserExecutionContext.create_for_user(
+        return UserExecutionContext.from_request(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run"
@@ -818,7 +818,7 @@ class TestPerformanceAndProductionReadiness(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
-        return UserExecutionContext.create_for_user(
+        return UserExecutionContext.from_request(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run"

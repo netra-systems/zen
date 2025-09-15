@@ -53,7 +53,7 @@ from psycopg2 import sql
 # SSOT Imports - Following SSOT_IMPORT_REGISTRY.md
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
-from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.isolated_environment import IsolatedEnvironment
 

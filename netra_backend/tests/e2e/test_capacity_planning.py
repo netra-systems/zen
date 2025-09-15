@@ -15,7 +15,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.services.quality_gate_service import (

@@ -44,7 +44,7 @@ class TestDemoModeAuthIntegration(SSotAsyncTestCase):
         """Setup for integration tests."""
         super().setup_method(method)
         self.env = IsolatedEnvironment()
-        self.original_demo_mode = self.env.get_env("DEMO_MODE", "false")
+        self.original_demo_mode = self.env.get("DEMO_MODE", "false")
         
         # Setup service instances
         self.auth_service = AuthService()
@@ -177,7 +177,7 @@ class TestDemoModeAuthIntegration(SSotAsyncTestCase):
             
             # This would integrate with actual agent execution system
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-            execution_engine = ExecutionEngine()
+            execution_engine = UserExecutionEngine()
             
             result = await execution_engine.execute_with_demo_user(
                 agent_request,

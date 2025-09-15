@@ -1,229 +1,210 @@
-"""Unified Execution Engine Factory - SSOT Redirect
+"""UnifiedExecutionEngineFactory - SSOT Compatibility Wrapper.
 
-This module provides a simple redirect to the consolidated SSOT ExecutionEngineFactory
-during the final phase of SSOT consolidation. It maintains backward compatibility
-while delegating all work to the proper SSOT implementation.
+This module provides backward compatibility for code expecting UnifiedExecutionEngineFactory
+while delegating to the canonical ExecutionEngineFactory implementation.
 
-Business Value:
-- Single point of engine creation for SSOT compliance
-- Zero breaking changes during consolidation
-- Automatic migration path to consolidated engine
-- Protection of Golden Path during transition
+CRITICAL: This is a compatibility shim only. All new code should use:
+- netra_backend.app.agents.supervisor.execution_engine_factory.ExecutionEngineFactory
+- netra_backend.app.agents.supervisor.execution_engine_factory.configure_execution_engine_factory()
+
+Business Value Justification:
+- Segment: Platform/Internal
+- Business Goal: Stability & Compatibility
+- Value Impact: Prevents production outages during SSOT migration
+- Strategic Impact: Maintains Golden Path functionality during factory pattern consolidation
 """
 
-from __future__ import annotations
-
+import asyncio
 import warnings
-from typing import Any, Dict, Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-    from netra_backend.app.services.user_execution_context import UserExecutionContext
-    from netra_backend.app.agents.tool_dispatcher_consolidated import UnifiedToolDispatcher
 
-from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
-# SSOT MIGRATION: Direct delegation to SSOT UserExecutionEngine factory
 from netra_backend.app.agents.supervisor.execution_engine_factory import (
-    ExecutionEngineFactory as SSotExecutionEngineFactory,
-    get_execution_engine_factory
+    ExecutionEngineFactory,
+    configure_execution_engine_factory,
+    ExecutionEngineFactoryError
 )
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-# Simple configuration for engine creation
-EngineConfig = Dict[str, Any]
-
 
 class UnifiedExecutionEngineFactory:
-    """Unified factory redirecting to SSOT ExecutionEngineFactory.
-    
-    This factory serves as a backward compatibility bridge during the final
-    phase of SSOT consolidation. All methods delegate to the proper SSOT
-    ExecutionEngineFactory implementation.
+    """COMPATIBILITY WRAPPER: Provides backward compatibility for legacy UnifiedExecutionEngineFactory usage.
+
+    DEPRECATED: This class is a compatibility shim only.
+
+    All new code should use:
+    - ExecutionEngineFactory from netra_backend.app.agents.supervisor.execution_engine_factory
+    - configure_execution_engine_factory() function for SSOT initialization
+
+    This wrapper delegates all operations to the canonical ExecutionEngineFactory
+    while providing the expected interface for legacy code.
     """
-    
-    @classmethod
-    def set_defaults(
-        cls,
-        config: Optional[EngineConfig] = None,
-        registry: Optional['AgentRegistry'] = None,
-        websocket_bridge: Optional['AgentWebSocketBridge'] = None,
-        tool_dispatcher: Optional['UnifiedToolDispatcher'] = None
-    ) -> None:
-        """Set default configuration - delegates to SSOT factory."""
-        logger.info("UnifiedExecutionEngineFactory.set_defaults - delegating to SSOT factory")
-        # SSOT factory doesn't use global defaults - this is a no-op for compatibility
-    
-    @classmethod
-    def configure(
-        cls,
-        config: Optional[EngineConfig] = None,
-        registry: Optional['AgentRegistry'] = None,
-        websocket_bridge: Optional['AgentWebSocketBridge'] = None,
-        tool_dispatcher: Optional['UnifiedToolDispatcher'] = None
-    ) -> None:
-        """Configure the unified factory - delegates to SSOT factory."""
-        logger.info("UnifiedExecutionEngineFactory.configure - delegating to SSOT factory")
-        # SSOT factory doesn't use global configuration - this is a no-op for compatibility
-    
-    @classmethod
-    async def create_engine(
-        cls,
-        config: Optional[Dict] = None,
-        registry: Optional['AgentRegistry'] = None,
-        websocket_bridge: Optional['AgentWebSocketBridge'] = None,
-        user_context: Optional['UserExecutionContext'] = None,
-        tool_dispatcher: Optional['UnifiedToolDispatcher'] = None,
-        **kwargs
-    ) -> IExecutionEngine:
-        """Create execution engine - delegates to SSOT factory.
-        
-        Returns:
-            IExecutionEngine: SSOT UserExecutionEngine instance
+
+    def __init__(self,
+                 websocket_bridge: Optional['AgentWebSocketBridge'] = None,
+                 database_session_manager=None,
+                 redis_manager=None):
+        """Initialize compatibility wrapper by delegating to ExecutionEngineFactory.
+
+        Args:
+            websocket_bridge: WebSocket bridge for agent notifications
+            database_session_manager: Database session manager
+            redis_manager: Redis manager
         """
-        if not user_context:
-            raise ValueError("SSOT ExecutionEngine requires user_context for proper isolation")
-        
-        logger.info("UnifiedExecutionEngineFactory.create_engine - delegating to SSOT factory")
-        
-        # Get SSOT factory and create engine
-        factory = await get_execution_engine_factory()
-        return await factory.create_execution_engine(user_context=user_context)
-    
-    @classmethod
-    async def create_user_engine(
-        cls,
-        user_context: 'UserExecutionContext',
-        config: Optional[EngineConfig] = None,
-        **kwargs
-    ) -> IExecutionEngine:
-        """Create user-specific execution engine - delegates to SSOT factory."""
-        logger.info(f"UnifiedExecutionEngineFactory.create_user_engine - delegating to SSOT factory for user: {user_context.user_id}")
-        
-        factory = await get_execution_engine_factory()
-        return await factory.create_execution_engine(user_context=user_context)
-    
-    @classmethod
-    async def create_request_scoped_engine(
-        cls,
-        request_id: str,
-        user_context: Optional['UserExecutionContext'] = None,
-        **kwargs
-    ) -> IExecutionEngine:
-        """Create request-scoped execution engine - delegates to SSOT factory."""
-        if not user_context:
-            raise ValueError("SSOT ExecutionEngine requires user_context for proper isolation")
-        
-        logger.info(f"UnifiedExecutionEngineFactory.create_request_scoped_engine - delegating to SSOT factory for request: {request_id}")
-        
-        factory = await get_execution_engine_factory()
-        return await factory.create_execution_engine(user_context=user_context)
-    
-    # ============================================================================
-    # LEGACY COMPATIBILITY METHODS
-    # ============================================================================
-    
-    @classmethod
-    async def create_for_user(cls, user_context: 'UserExecutionContext') -> IExecutionEngine:
-        """Legacy method - delegates to SSOT factory."""
+        # Issue deprecation warning
         warnings.warn(
-            "create_for_user is deprecated. Use create_user_engine instead.",
+            "UnifiedExecutionEngineFactory is deprecated. Use ExecutionEngineFactory "
+            "from netra_backend.app.agents.supervisor.execution_engine_factory instead. "
+            "This compatibility wrapper will be removed in a future version.",
             DeprecationWarning,
             stacklevel=2
         )
-        return await cls.create_user_engine(user_context)
-    
-    @classmethod
-    async def get_default_engine(cls, **kwargs) -> IExecutionEngine:
-        """Create engine with default configuration - delegates to SSOT factory."""
-        warnings.warn(
-            "get_default_engine is deprecated. Use create_engine instead.",
-            DeprecationWarning,
-            stacklevel=2
+
+        logger.warning(
+            "🚨 COMPATIBILITY MODE: UnifiedExecutionEngineFactory is deprecated. "
+            "Using ExecutionEngineFactory via compatibility wrapper. "
+            "Update code to use ExecutionEngineFactory directly."
         )
-        user_context = kwargs.get('user_context')
-        if not user_context:
-            raise ValueError("SSOT ExecutionEngine requires user_context")
-        return await cls.create_engine(**kwargs)
+
+        # Delegate to canonical ExecutionEngineFactory
+        self._delegate = ExecutionEngineFactory(
+            websocket_bridge=websocket_bridge,
+            database_session_manager=database_session_manager,
+            redis_manager=redis_manager
+        )
+
+        # SSOT ENHANCEMENT: Track backwards compatibility usage
+        if hasattr(self._delegate, '_factory_metrics'):
+            self._delegate._factory_metrics['backwards_compatibility_usage'] += 1
+        if hasattr(self._delegate, '_ssot_validation_state'):
+            self._delegate._ssot_validation_state['backwards_compatibility_active'] = True
+
+        logger.info("✅ UnifiedExecutionEngineFactory compatibility wrapper initialized")
+
+    @classmethod
+    async def configure(cls,
+                       websocket_bridge: 'AgentWebSocketBridge',
+                       database_session_manager=None,
+                       redis_manager=None) -> 'UnifiedExecutionEngineFactory':
+        """Configure UnifiedExecutionEngineFactory - COMPATIBILITY METHOD.
+
+        DEPRECATED: Use configure_execution_engine_factory() from the supervisor module instead.
+
+        This method provides backward compatibility for code expecting:
+        UnifiedExecutionEngineFactory.configure()
+
+        Args:
+            websocket_bridge: WebSocket bridge for agent notifications
+            database_session_manager: Database session manager
+            redis_manager: Redis manager
+
+        Returns:
+            UnifiedExecutionEngineFactory: Compatibility wrapper instance
+        """
+        logger.warning(
+            "🚨 COMPATIBILITY: UnifiedExecutionEngineFactory.configure() is deprecated. "
+            "Use configure_execution_engine_factory() from supervisor.execution_engine_factory instead."
+        )
+
+        try:
+            # Use the canonical SSOT configuration function
+            canonical_factory = await configure_execution_engine_factory(
+                websocket_bridge=websocket_bridge,
+                database_session_manager=database_session_manager,
+                redis_manager=redis_manager
+            )
+
+            # Create wrapper that delegates to canonical factory
+            wrapper = cls.__new__(cls)  # Create without calling __init__
+            wrapper._delegate = canonical_factory
+
+            # SSOT ENHANCEMENT: Track backwards compatibility usage in configure method
+            if hasattr(canonical_factory, '_factory_metrics'):
+                canonical_factory._factory_metrics['backwards_compatibility_usage'] += 1
+            if hasattr(canonical_factory, '_ssot_validation_state'):
+                canonical_factory._ssot_validation_state['backwards_compatibility_active'] = True
+
+            logger.info("✅ UnifiedExecutionEngineFactory.configure() compatibility wrapper created")
+            return wrapper
+
+        except Exception as e:
+            logger.error(f"❌ UnifiedExecutionEngineFactory.configure() compatibility wrapper failed: {e}")
+            raise ExecutionEngineFactoryError(f"UnifiedExecutionEngineFactory configuration failed: {e}")
+
+    # Delegate all methods to canonical ExecutionEngineFactory
+    async def create_for_user(self, context):
+        """Create execution engine for user - delegates to canonical factory."""
+        return await self._delegate.create_for_user(context)
+
+    async def create_execution_engine(self, user_context):
+        """Create execution engine - delegates to canonical factory."""
+        return await self._delegate.create_execution_engine(user_context)
+
+    def user_execution_scope(self, context):
+        """User execution scope context manager - delegates to canonical factory."""
+        return self._delegate.user_execution_scope(context)
+
+    async def cleanup_engine(self, engine):
+        """Cleanup engine - delegates to canonical factory."""
+        return await self._delegate.cleanup_engine(engine)
+
+    async def cleanup_user_context(self, user_id: str):
+        """Cleanup user context - delegates to canonical factory."""
+        return await self._delegate.cleanup_user_context(user_id)
+
+    async def cleanup_all_contexts(self):
+        """Cleanup all contexts - delegates to canonical factory."""
+        return await self._delegate.cleanup_all_contexts()
+
+    async def shutdown(self):
+        """Shutdown factory - delegates to canonical factory."""
+        return await self._delegate.shutdown()
+
+    def get_factory_metrics(self):
+        """Get factory metrics - delegates to canonical factory."""
+        return self._delegate.get_factory_metrics()
+
+    def get_active_engines_summary(self):
+        """Get active engines summary - delegates to canonical factory."""
+        return self._delegate.get_active_engines_summary()
+
+    def get_active_contexts(self):
+        """Get active contexts - delegates to canonical factory."""
+        return self._delegate.get_active_contexts()
+
+    def set_tool_dispatcher_factory(self, tool_dispatcher_factory):
+        """Set tool dispatcher factory - delegates to canonical factory."""
+        return self._delegate.set_tool_dispatcher_factory(tool_dispatcher_factory)
 
 
-class ExecutionEngineFactory(UnifiedExecutionEngineFactory):
-    """Alias for UnifiedExecutionEngineFactory for backward compatibility."""
-    pass
+# Provide function-level compatibility as well
+async def configure_unified_execution_engine_factory(
+    websocket_bridge: 'AgentWebSocketBridge',
+    database_session_manager=None,
+    redis_manager=None
+) -> UnifiedExecutionEngineFactory:
+    """Configure unified execution engine factory - COMPATIBILITY FUNCTION.
 
+    DEPRECATED: Use configure_execution_engine_factory() from supervisor module instead.
 
-# ============================================================================
-# MIGRATION HELPERS
-# ============================================================================
+    Args:
+        websocket_bridge: WebSocket bridge for agent notifications
+        database_session_manager: Database session manager
+        redis_manager: Redis manager
 
-async def migrate_legacy_factory_call(legacy_factory: Any, method_name: str, *args, **kwargs) -> IExecutionEngine:
-    """Helper to migrate legacy factory calls to SSOT factory."""
-    logger.warning(
-        f"Migrating legacy factory call: {method_name}. "
-        f"Consider updating to use SSOT ExecutionEngineFactory directly."
+    Returns:
+        UnifiedExecutionEngineFactory: Compatibility wrapper
+    """
+    return await UnifiedExecutionEngineFactory.configure(
+        websocket_bridge=websocket_bridge,
+        database_session_manager=database_session_manager,
+        redis_manager=redis_manager
     )
-    
-    # Map common legacy method names to unified factory methods
-    method_mapping = {
-        'create_for_user': 'create_user_engine',
-        'create_engine': 'create_engine',
-        'get_default': 'create_engine',
-        'create_default': 'create_engine',
-        'create_scoped': 'create_request_scoped_engine'
-    }
-    
-    unified_method_name = method_mapping.get(method_name, 'create_engine')
-    unified_method = getattr(UnifiedExecutionEngineFactory, unified_method_name)
-    
-    return await unified_method(*args, **kwargs)
 
 
-def detect_legacy_factory_usage() -> Dict[str, Any]:
-    """Detect usage of legacy factory patterns in the codebase."""
-    return {
-        'legacy_patterns_detected': False,
-        'recommended_migrations': [
-            "Use SSOT ExecutionEngineFactory directly from supervisor.execution_engine_factory",
-            "Update import statements to use SSOT factory",
-            "Migrate to async factory methods",
-            "Ensure user_context is always provided"
-        ],
-        'migration_status': 'ssot_redirect_phase',
-        'ssot_compliance': 'achieved_via_delegation'
-    }
-
-
-# ============================================================================
-# CONVENIENCE FUNCTIONS
-# ============================================================================
-
-async def create_execution_engine_async(
-    user_context: Optional['UserExecutionContext'] = None,
-    **kwargs
-) -> IExecutionEngine:
-    """Async convenience function for engine creation - delegates to SSOT factory."""
-    if not user_context:
-        raise ValueError("SSOT ExecutionEngine requires user_context")
-    
-    return await UnifiedExecutionEngineFactory.create_engine(user_context=user_context, **kwargs)
-
-
-async def create_user_execution_engine_async(
-    user_context: 'UserExecutionContext',
-    **kwargs
-) -> IExecutionEngine:
-    """Async convenience function for user engine creation - delegates to SSOT factory."""
-    return await UnifiedExecutionEngineFactory.create_user_engine(user_context, **kwargs)
-
-
-# Re-export main components
-__all__ = [
-    'UnifiedExecutionEngineFactory',
-    'ExecutionEngineFactory',  # Backward compatibility alias
-    'migrate_legacy_factory_call',
-    'detect_legacy_factory_usage',
-    'create_execution_engine_async',
-    'create_user_execution_engine_async'
-]
+# Legacy aliases for complete backward compatibility
+RequestScopedUnifiedExecutionEngineFactory = UnifiedExecutionEngineFactory

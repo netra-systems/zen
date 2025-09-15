@@ -104,7 +104,7 @@ class TestWebSocketConnectionHandlerGoldenPath(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
-        return UserExecutionContext.create_for_user(
+        return UserExecutionContext.from_request(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run"
@@ -137,7 +137,7 @@ class TestWebSocketConnectionHandlerGoldenPath(SSotBaseTestCase):
         self.auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
         
         # Track connections for cleanup
-        self.active_connections: List[websockets.WebSocketServerProtocol] = []
+        self.active_connections: List[websockets.ServerConnection] = []
         
         # Track received events for validation
         self.websocket_events_received: List[Dict[str, Any]] = []
@@ -174,7 +174,7 @@ class TestWebSocketConnectionHandlerGoldenPath(SSotBaseTestCase):
         self.agent_responses_received.clear()
         super().teardown_method()
         
-    async def _create_authenticated_connection(self) -> websockets.WebSocketServerProtocol:
+    async def _create_authenticated_connection(self) -> websockets.ServerConnection:
         """
         Create authenticated WebSocket connection using SSOT patterns.
         
@@ -208,7 +208,7 @@ class TestWebSocketConnectionHandlerGoldenPath(SSotBaseTestCase):
             logger.error(f" FAIL:  Failed to create authenticated WebSocket connection: {e}")
             raise
             
-    async def _send_agent_request(self, websocket: websockets.WebSocketServerProtocol, 
+    async def _send_agent_request(self, websocket: websockets.ServerConnection, 
                                  agent_name: str = "data_analysis_agent") -> str:
         """
         Send agent execution request through WebSocket.
@@ -243,7 +243,7 @@ class TestWebSocketConnectionHandlerGoldenPath(SSotBaseTestCase):
         
         return request_id
         
-    async def _collect_websocket_responses(self, websocket: websockets.WebSocketServerProtocol,
+    async def _collect_websocket_responses(self, websocket: websockets.ServerConnection,
                                          request_id: str,
                                          timeout: float) -> Dict[str, Any]:
         """

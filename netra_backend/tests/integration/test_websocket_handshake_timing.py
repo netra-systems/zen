@@ -194,7 +194,7 @@ class TestWebSocketHandshakeTiming(BaseIntegrationTest):
         connection_count = 5
         max_handshake_time = 15.0  # Allow more time for concurrent connections
         
-        async def create_authenticated_connection(user_index: int) -> Tuple[float, websockets.WebSocketServerProtocol]:
+        async def create_authenticated_connection(user_index: int) -> Tuple[float, websockets.ServerConnection]:
             """Create a single authenticated WebSocket connection."""
             start_time = time.time()
             

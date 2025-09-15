@@ -27,7 +27,7 @@ from test_framework.fixtures.real_services import real_services_fixture
 from shared.isolated_environment import get_env
 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
+from netra_backend.app.agents.supervisor.user_execution_engine import create_request_scoped_engine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, AgentExecutionResult
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge

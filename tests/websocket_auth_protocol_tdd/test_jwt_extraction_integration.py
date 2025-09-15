@@ -459,7 +459,7 @@ class JWTExtractionIntegrationTest(SSotAsyncTestCase):
             user_id=auth_result.user_id,
             thread_id="test_thread_123",
             request_id="test_request_456", 
-            websocket_connection_id="test_ws_conn_789",
+            websocket_client_id="test_ws_conn_789",
             run_id="test_run_012",
             permissions=auth_result.permissions,
             metadata={

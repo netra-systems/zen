@@ -35,7 +35,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 # E2E test utilities 
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
-from test_framework.ssot.real_services_test_fixtures import RealServicesTestFixtures
+from test_framework.ssot.real_services_test_fixtures import E2ETestFixture
 
 # System components for E2E validation
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
@@ -52,9 +52,9 @@ except ImportError:
 class TestIDMigrationE2EStagingWorkflows(SSotAsyncTestCase):
     """E2E tests validating ID consistency in staging environment workflows."""
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Setup for E2E staging workflow tests."""
-        super().setUp()
+        super().setup_method(method)
         self.env = IsolatedEnvironment()
         
         # Skip if not in staging environment
@@ -67,7 +67,7 @@ class TestIDMigrationE2EStagingWorkflows(SSotAsyncTestCase):
         self.user_isolation_violations = []
         
         # Test fixtures for real services
-        self.fixtures = RealServicesTestFixtures()
+        self.fixtures = E2ETestFixture()
         self.auth_helper = E2EAuthHelper()
         
         # E2E test user management
@@ -167,7 +167,7 @@ class TestIDMigrationE2EStagingWorkflows(SSotAsyncTestCase):
             "   - Implement workflow-level ID validation"
         ])
         
-        self.fail("\n".join(report_lines))
+        pytest.fail("\n".join(report_lines))
 
     async def test_multi_user_concurrent_isolation_e2e_EXPECT_FAILURE(self):
         """
@@ -267,7 +267,7 @@ class TestIDMigrationE2EStagingWorkflows(SSotAsyncTestCase):
             "   - Ensure resource cleanup per-user boundaries"
         ])
         
-        self.fail("\n".join(report_lines))
+        pytest.fail("\n".join(report_lines))
 
     async def test_websocket_connection_lifecycle_e2e_EXPECT_FAILURE(self):
         """
@@ -343,7 +343,7 @@ class TestIDMigrationE2EStagingWorkflows(SSotAsyncTestCase):
             "   - Verify connection cleanup with proper ID tracking"
         ])
         
-        self.fail("\n".join(report_lines))
+        pytest.fail("\n".join(report_lines))
 
     async def test_agent_execution_thread_run_consistency_e2e_EXPECT_FAILURE(self):
         """
@@ -419,7 +419,7 @@ class TestIDMigrationE2EStagingWorkflows(SSotAsyncTestCase):
             "   - Verify execution cleanup with ID relationships"
         ])
         
-        self.fail("\n".join(report_lines))
+        pytest.fail("\n".join(report_lines))
 
     async def test_session_persistence_recovery_e2e_EXPECT_FAILURE(self):
         """
@@ -492,13 +492,13 @@ class TestIDMigrationE2EStagingWorkflows(SSotAsyncTestCase):
             "   - Implement robust session validation with new ID formats"
         ])
         
-        self.fail("\n".join(report_lines))
+        pytest.fail("\n".join(report_lines))
 
     # Helper methods for E2E workflow testing
 
     def _is_staging_environment(self) -> bool:
         """Check if running in staging environment."""
-        env_name = self.env.get_env_var('ENVIRONMENT', '').lower()
+        env_name = self.env.get('ENVIRONMENT', '').lower()
         return env_name in ['staging', 'stage', 'gcp-staging']
 
     async def _test_user_registration_e2e(self) -> Dict[str, Any]:

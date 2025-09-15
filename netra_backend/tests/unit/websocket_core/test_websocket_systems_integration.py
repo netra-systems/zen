@@ -26,11 +26,8 @@ from netra_backend.app.websocket_core.unified_manager import (
     UnifiedWebSocketManager,
     WebSocketConnection
 )
-from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
-    IsolatedWebSocketManager,
-    create_websocket_manager
-)
+# SSOT imports - Issue #824 remediation
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
@@ -174,8 +171,8 @@ class TestSystem1_UnifiedWebSocketManager:
         json.dumps(sent_message)
 
 
-class TestSystem2_WebSocketManagerFactory:
-    """Tests for System 2: WebSocketManagerFactory with complex serialization."""
+class TestSystem2_WebSocketManager:
+    """Tests for System 2: WebSocketManager with complex serialization."""
     
     @pytest.fixture
     def mock_user_context(self):
@@ -189,7 +186,7 @@ class TestSystem2_WebSocketManagerFactory:
     
     @pytest.fixture
     def manager_factory(self):
-        return WebSocketManagerFactory(max_managers_per_user=3)
+        return WebSocketManager(max_managers_per_user=3)
     
     async def test_factory_creates_manager_with_enum_support(self, manager_factory, mock_user_context):
         """Test factory creates managers that handle enum serialization."""

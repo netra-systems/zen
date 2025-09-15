@@ -223,7 +223,7 @@ class TestAgentExecutionPipeline(BaseIntegrationTest):
         mock_db.commit = AsyncMock()
         
         # Mock agent state model
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         # Create initial agent state
         initial_state = MagicMock(spec=DeepAgentState)

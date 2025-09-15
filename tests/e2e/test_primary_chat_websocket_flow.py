@@ -37,7 +37,7 @@
         # REMOVED_SYNTAX_ERROR: from test_framework.real_services import get_real_services, RealServicesManager
 
         # Production imports - using absolute paths only
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
@@ -47,7 +47,7 @@
         # REMOVED_SYNTAX_ERROR: UnifiedToolExecutionEngine,
         # REMOVED_SYNTAX_ERROR: enhance_tool_dispatcher_with_notifications
         
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.llm.llm_manager import LLMManager
 
 
@@ -393,7 +393,7 @@
     # REMOVED_SYNTAX_ERROR: "Tool dispatcher not enhanced with WebSocket notifications - REGRESSION!"
 
     # Create execution engine
-    # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine(registry, ws_manager)
+    # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine(registry, ws_manager)
 
     # Create execution context
     # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )
@@ -729,7 +729,7 @@
     # REMOVED_SYNTAX_ERROR: assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
     # REMOVED_SYNTAX_ERROR: "Tool dispatcher not enhanced - complete journey will fail"
 
-    # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine(registry, ws_manager)
+    # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine(registry, ws_manager)
 
     # Simulate complete user chat session
     # REMOVED_SYNTAX_ERROR: user_message = "Hi! Can you check the current system status and let me know if everything is running smoothly? I want to make sure our services are healthy."

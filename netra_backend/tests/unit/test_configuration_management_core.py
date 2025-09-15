@@ -21,16 +21,37 @@ import time
 from typing import Any, Dict, List, Optional
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
+from enum import Enum
 
 import pytest
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.managers.unified_configuration_manager import (
-    UnifiedConfigurationManager,
-    ConfigurationScope,
-    ConfigurationError
+from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
 )
+
+
+class ConfigurationScope(Enum):
+    """Configuration scope levels for testing purposes.
+
+    This enum is defined locally for unit testing the configuration management
+    core functionality. It represents the legacy scope-based configuration
+    approach that was used before the SSOT migration.
+    """
+    GLOBAL = "global"
+    SERVICE = "service"
+    USER = "user"
+    ENVIRONMENT = "environment"
 
 
 class TestConfigurationManagementCore(SSotBaseTestCase):
@@ -66,9 +87,9 @@ class TestConfigurationManagementCore(SSotBaseTestCase):
         self.test_user_id = "test-user-12345"
         
         # Mock configuration manager (since it's a complex class)
-        with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment') as mock_env_class:
+        with patch('shared.isolated_environment.IsolatedEnvironment') as mock_env_class:
             mock_env_class.return_value = self.mock_isolated_env
-            self.config_manager = UnifiedConfigurationManager()
+            self.config_manager = UnifiedConfigManager()
             
     @pytest.mark.unit
     def test_configuration_scope_validation(self):

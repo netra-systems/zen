@@ -28,6 +28,7 @@ from typing import Any, Dict
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
+from shared.isolated_environment import get_env
 from test_framework.fixtures.isolated_environment import isolated_env
 from test_framework.containers_utils import ensure_redis_container
 
@@ -102,7 +103,11 @@ class TestGCPWebSocketRedisRaceConditionIntegration(BaseIntegrationTest):
     ):
         """Test Redis readiness validation with real Redis in GCP environment."""
         
-        with patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'K_SERVICE': 'netra-backend'}):
+        env = get_env()
+        env.set('ENVIRONMENT', 'staging', source='test_gcp_redis_race_condition')
+        env.set('K_SERVICE', 'netra-backend', source='test_gcp_redis_race_condition')
+        
+        try:
             validator = create_gcp_websocket_validator(mock_app_state_with_real_redis)
             
             # Verify GCP environment detection
@@ -123,6 +128,10 @@ class TestGCPWebSocketRedisRaceConditionIntegration(BaseIntegrationTest):
             # Verify Redis is actually reachable
             ping_result = await real_redis_connection.ping()
             assert ping_result is True
+        finally:
+            # Clean up test environment variables
+            env.unset('ENVIRONMENT')
+            env.unset('K_SERVICE')
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -133,7 +142,11 @@ class TestGCPWebSocketRedisRaceConditionIntegration(BaseIntegrationTest):
     ):
         """Test full WebSocket readiness validation with real Redis services."""
         
-        with patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'K_SERVICE': 'netra-backend'}):
+        env = get_env()
+        env.set('ENVIRONMENT', 'staging', source='test_gcp_redis_race_condition')
+        env.set('K_SERVICE', 'netra-backend', source='test_gcp_redis_race_condition')
+        
+        try:
             validator = create_gcp_websocket_validator(mock_app_state_with_real_redis)
             
             # Run full readiness validation
@@ -150,6 +163,10 @@ class TestGCPWebSocketRedisRaceConditionIntegration(BaseIntegrationTest):
             # Verify Redis was included in validation
             assert result.details["gcp_detected"] is True
             assert result.details["is_cloud_run"] is True
+        finally:
+            # Clean up test environment variables
+            env.unset('ENVIRONMENT')
+            env.unset('K_SERVICE')
     
     @pytest.mark.integration
     @pytest.mark.real_services

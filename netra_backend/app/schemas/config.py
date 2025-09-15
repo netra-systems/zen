@@ -15,7 +15,7 @@ from shared.isolated_environment import get_env
 # SSOT: Import SERVICE_ID constant
 from shared.constants.service_identifiers import SERVICE_ID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 from netra_backend.app.schemas.auth_types import (
     AuthConfigResponse,
@@ -69,10 +69,48 @@ SECRET_CONFIG: List[SecretReference] = [
 ]
 
 class RedisConfig(BaseModel):
-    host: str = 'redis-10504.fcrce190.us-east-1-1.ec2.redns.redis-cloud.com'
-    port: int = 10504
+    host: str = 'localhost'
+    port: int = 6379
     username: str = "default"
     password: Optional[str] = None
+    db: int = 0
+    ssl: bool = False
+
+    def __init__(self, **data):
+        # Load from environment if not provided in data
+        env = get_env()
+
+        # Map environment variables to field names if not already in data
+        env_mappings = {
+            'host': 'REDIS_HOST',
+            'port': 'REDIS_PORT',
+            'username': 'REDIS_USERNAME',
+            'password': 'REDIS_PASSWORD',
+            'db': 'REDIS_DB',
+            'ssl': 'REDIS_SSL'
+        }
+
+        for field_name, env_var in env_mappings.items():
+            if field_name not in data:
+                env_value = env.get(env_var)
+                if env_value is not None:
+                    # Convert types as needed
+                    if field_name == 'port':
+                        try:
+                            data[field_name] = int(env_value)
+                        except (ValueError, TypeError):
+                            pass
+                    elif field_name == 'db':
+                        try:
+                            data[field_name] = int(env_value)
+                        except (ValueError, TypeError):
+                            pass
+                    elif field_name == 'ssl':
+                        data[field_name] = env_value.lower() in ('true', '1', 'yes', 'on')
+                    else:
+                        data[field_name] = env_value
+
+        super().__init__(**data)
 
 class GoogleCloudConfig(BaseModel):
     project_id: str = "cryptic-net-466001-n0"
@@ -455,6 +493,23 @@ class AppConfig(BaseModel):
     otel_excluded_urls: str = Field(default="/health,/metrics,/docs,/openapi.json", description="URLs to exclude from telemetry")
     otel_resource_attributes: Optional[str] = Field(default=None, description="Additional resource attributes")
     
+    # Sentry Error Tracking and Performance Monitoring configuration
+    sentry_enabled: bool = Field(default=True, description="Enable Sentry error tracking and performance monitoring")
+    sentry_dsn: Optional[str] = Field(default=None, description="Sentry Data Source Name (DSN) for error reporting")
+    sentry_environment: Optional[str] = Field(default=None, description="Sentry environment name (development, staging, production)")
+    sentry_release: Optional[str] = Field(default=None, description="Sentry release version for tracking deployments")
+    sentry_server_name: Optional[str] = Field(default=None, description="Server name for Sentry identification")
+    sentry_sample_rate: float = Field(default=1.0, description="Error sampling rate (0.0 to 1.0)")
+    sentry_traces_sample_rate: float = Field(default=0.1, description="Performance traces sampling rate (0.0 to 1.0)")
+    sentry_profiles_sample_rate: float = Field(default=0.1, description="Profiling sampling rate (0.0 to 1.0)")
+    sentry_max_breadcrumbs: int = Field(default=100, description="Maximum breadcrumbs to keep for debugging context")
+    sentry_attach_stacktrace: bool = Field(default=True, description="Attach stack traces to messages")
+    sentry_send_default_pii: bool = Field(default=False, description="Send personally identifiable information")
+    sentry_debug: bool = Field(default=False, description="Enable Sentry debug mode")
+    sentry_before_send_transaction: bool = Field(default=True, description="Enable transaction filtering before sending")
+    sentry_ignore_errors: List[str] = Field(default_factory=lambda: ["KeyboardInterrupt", "SystemExit"], description="List of error types to ignore")
+    sentry_ignore_transactions: List[str] = Field(default_factory=lambda: ["/health", "/metrics"], description="List of transaction names to ignore")
+    
     # Service availability flags for staging infrastructure (pragmatic degradation)
     redis_optional_in_staging: bool = Field(default=False, description="Allow staging to run without Redis (graceful degradation)")
     clickhouse_optional_in_staging: bool = Field(default=False, description="Allow staging to run without ClickHouse (graceful degradation)")
@@ -630,6 +685,104 @@ class AppConfig(BaseModel):
         ),
     }
 
+    def get_database_url(self) -> str:
+        """Get the database URL for PostgreSQL connection.
+        
+        Uses SSOT DatabaseURLBuilder for consistent URL construction.
+        Maintains backward compatibility with existing database connections.
+
+        SSOT compliant implementation using DatabaseURLBuilder for URL construction.
+        Maintains backward compatibility with existing functionality.
+
+        Returns:
+            str: Database connection URL
+        """
+        if self.database_url:
+            return self.database_url
+
+        try:
+            # Use SSOT DatabaseURLBuilder with sync format for compatibility
+            from shared.database_url_builder import DatabaseURLBuilder
+            from shared.isolated_environment import get_env
+            import logging
+
+            logger = logging.getLogger(__name__)
+            builder = DatabaseURLBuilder(get_env().get_all())
+            url = builder.get_url_for_environment(sync=True)
+
+            if url:
+                logger.info("Database URL constructed via SSOT DatabaseURLBuilder")
+                return url
+            else:
+                # Fallback if SSOT builder returns None
+                return self._fallback_manual_url_construction()
+
+        except ImportError as e:
+            import logging
+            logging.getLogger(__name__).warning(f"SSOT DatabaseURLBuilder not available: {e}")
+            return self._fallback_manual_url_construction()
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"SSOT database URL construction failed: {e}")
+            return self._fallback_manual_url_construction()
+
+    def _fallback_manual_url_construction(self) -> str:
+        """Fallback manual URL construction for emergency compatibility."""
+        from shared.isolated_environment import get_env
+        import logging
+        logger = logging.getLogger(__name__)
+        env = get_env()
+
+        try:
+            # Use SSOT DatabaseURLBuilder with current environment
+            url_builder = DatabaseURLBuilder(env)
+
+            # Get environment-appropriate URL in sync mode (matching original behavior)
+            ssot_url = url_builder.get_url_for_environment(sync=True)
+
+            if ssot_url:
+                logger.debug(f"Using SSOT DatabaseURLBuilder for URL construction: {DatabaseURLBuilder.mask_url_for_logging(ssot_url)}")
+                return ssot_url
+            else:
+                logger.warning("SSOT DatabaseURLBuilder returned None, using fallback construction")
+
+        except Exception as e:
+            logger.warning(f"SSOT DatabaseURLBuilder failed: {e}, using fallback construction")
+
+        # Backward compatibility fallback - maintains exact original behavior
+        host = env.get('POSTGRES_HOST', 'localhost')
+        port = env.get('POSTGRES_PORT', '5432')
+        user = env.get('POSTGRES_USER', 'postgres')
+        password = env.get('POSTGRES_PASSWORD', '')
+        database = env.get('POSTGRES_DB', 'postgres')
+
+        fallback_url = f"postgresql://{user}:{password}@{host}:{port}/{database}"
+        logger.info(f"Using fallback URL construction: {DatabaseURLBuilder.mask_url_for_logging(fallback_url)}")
+        return fallback_url
+
+    def get_clickhouse_url(self) -> str:
+        """Get the ClickHouse database URL.
+
+        Returns:
+            str: ClickHouse connection URL
+        """
+        if hasattr(self, 'clickhouse_url') and self.clickhouse_url:
+            return self.clickhouse_url
+        # Construct from ClickHouse configuration
+        if hasattr(self, 'clickhouse_native') and self.clickhouse_native:
+            config = self.clickhouse_native
+            protocol = "clickhouse+native"
+            return f"{protocol}://{config.user}:{config.password}@{config.host}:{config.port}/{config.database}"
+        # Fallback construction
+        from shared.isolated_environment import get_env
+        env = get_env()
+        host = env.get('CLICKHOUSE_HOST', 'localhost')
+        port = env.get('CLICKHOUSE_PORT', '8126')
+        user = env.get('CLICKHOUSE_USER', 'default')
+        password = env.get('CLICKHOUSE_PASSWORD', '')
+        database = env.get('CLICKHOUSE_DB', 'default')
+        return f"clickhouse+native://{user}:{password}@{host}:{port}/{database}"
+
 class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""
     debug: bool = True
@@ -682,6 +835,9 @@ class DevelopmentConfig(AppConfig):
         
         # Load API keys from environment for development
         self._load_api_keys_from_environment(env, data)
+        
+        # Load Sentry configuration from environment for development
+        self._load_sentry_config_from_environment(env, data)
         
         super().__init__(**data)
     
@@ -833,6 +989,45 @@ class DevelopmentConfig(AppConfig):
         clickhouse_mode = env.get('CLICKHOUSE_MODE')
         if clickhouse_mode:
             data['clickhouse_mode'] = clickhouse_mode
+    
+    def _load_sentry_config_from_environment(self, env, data: dict) -> None:
+        """Load Sentry configuration from environment variables for development."""
+        # Load Sentry configuration from environment
+        sentry_mappings = {
+            'SENTRY_DSN': 'sentry_dsn',
+            'SENTRY_ENVIRONMENT': 'sentry_environment',
+            'SENTRY_RELEASE': 'sentry_release',
+            'SENTRY_SERVER_NAME': 'sentry_server_name',
+            'SENTRY_SAMPLE_RATE': 'sentry_sample_rate',
+            'SENTRY_TRACES_SAMPLE_RATE': 'sentry_traces_sample_rate',
+            'SENTRY_PROFILES_SAMPLE_RATE': 'sentry_profiles_sample_rate',
+            'SENTRY_DEBUG': 'sentry_debug',
+            'SENTRY_SEND_DEFAULT_PII': 'sentry_send_default_pii',
+        }
+        
+        for env_var, field_name in sentry_mappings.items():
+            value = env.get(env_var)
+            if value:
+                # Convert string values to appropriate types
+                if field_name in ['sentry_sample_rate', 'sentry_traces_sample_rate', 'sentry_profiles_sample_rate']:
+                    try:
+                        data[field_name] = float(value)
+                    except ValueError:
+                        pass  # Keep default if conversion fails
+                elif field_name in ['sentry_debug', 'sentry_send_default_pii']:
+                    data[field_name] = value.lower() in ('true', '1', 'yes', 'on')
+                else:
+                    data[field_name] = value
+        
+        # Set defaults for development if not provided
+        if 'sentry_environment' not in data and not env.get('SENTRY_ENVIRONMENT'):
+            data['sentry_environment'] = 'development'
+        
+        # Development-specific Sentry settings
+        if not env.get('SENTRY_DEBUG'):
+            data['sentry_debug'] = True  # Enable debug in development
+        if not env.get('SENTRY_TRACES_SAMPLE_RATE'):
+            data['sentry_traces_sample_rate'] = 0.2  # Higher sampling in development
 
 class ProductionConfig(AppConfig):
     """Production-specific settings with MANDATORY services."""
@@ -893,6 +1088,8 @@ class ProductionConfig(AppConfig):
         self._load_secrets_from_environment(data)
         # Load API keys from environment for production
         self._load_api_keys_from_environment(env, data)
+        # Load Sentry configuration from environment for production
+        self._load_sentry_config_from_environment(env, data)
         # Load database URL after secrets are available
         self._load_database_url_from_unified_config_production(data)
         super().__init__(**data)
@@ -1051,6 +1248,45 @@ class ProductionConfig(AppConfig):
                 "JWT_SECRET_KEY is MANDATORY in production. "
                 "Set a secure JWT secret of at least 32 characters"
             )
+    
+    def _load_sentry_config_from_environment(self, env, data: dict) -> None:
+        """Load Sentry configuration from environment variables for production."""
+        # Load Sentry configuration from environment
+        sentry_mappings = {
+            'SENTRY_DSN': 'sentry_dsn',
+            'SENTRY_ENVIRONMENT': 'sentry_environment',
+            'SENTRY_RELEASE': 'sentry_release',
+            'SENTRY_SERVER_NAME': 'sentry_server_name',
+            'SENTRY_SAMPLE_RATE': 'sentry_sample_rate',
+            'SENTRY_TRACES_SAMPLE_RATE': 'sentry_traces_sample_rate',
+            'SENTRY_PROFILES_SAMPLE_RATE': 'sentry_profiles_sample_rate',
+            'SENTRY_DEBUG': 'sentry_debug',
+            'SENTRY_SEND_DEFAULT_PII': 'sentry_send_default_pii',
+        }
+        
+        for env_var, field_name in sentry_mappings.items():
+            value = env.get(env_var)
+            if value:
+                # Convert string values to appropriate types
+                if field_name in ['sentry_sample_rate', 'sentry_traces_sample_rate', 'sentry_profiles_sample_rate']:
+                    try:
+                        data[field_name] = float(value)
+                    except ValueError:
+                        pass  # Keep default if conversion fails
+                elif field_name in ['sentry_debug', 'sentry_send_default_pii']:
+                    data[field_name] = value.lower() in ('true', '1', 'yes', 'on')
+                else:
+                    data[field_name] = value
+        
+        # Set defaults for production if not provided
+        if 'sentry_environment' not in data and not env.get('SENTRY_ENVIRONMENT'):
+            data['sentry_environment'] = 'production'
+        
+        # Production-specific Sentry settings
+        if not env.get('SENTRY_DEBUG'):
+            data['sentry_debug'] = False  # Disable debug in production
+        if not env.get('SENTRY_TRACES_SAMPLE_RATE'):
+            data['sentry_traces_sample_rate'] = 0.05  # Lower sampling in production for cost control
 
 class StagingConfig(AppConfig):
     """Staging-specific settings with MANDATORY services."""
@@ -1084,6 +1320,8 @@ class StagingConfig(AppConfig):
         self._load_secrets_from_environment(data)
         # Load API keys from environment for staging
         self._load_api_keys_from_environment(env, data)
+        # Load Sentry configuration from environment for staging
+        self._load_sentry_config_from_environment(env, data)
         # Load database URL after secrets are available
         self._load_database_url_from_unified_config_staging(data)
         super().__init__(**data)
@@ -1228,7 +1466,40 @@ class StagingConfig(AppConfig):
         redis_url = env.get('REDIS_URL')
         if redis_url:
             data['redis_url'] = redis_url
-        
+
+        # Load Redis configuration for staging
+        redis_host = env.get('REDIS_HOST')
+        redis_port = env.get('REDIS_PORT')
+        redis_password = env.get('REDIS_PASSWORD')
+        redis_db = env.get('REDIS_DB')
+        redis_ssl = env.get('REDIS_SSL')
+
+        # Ensure we have redis configuration dictionary
+        if 'redis' not in data:
+            data['redis'] = {}
+
+        # Load Redis configuration values if available
+        if redis_host:
+            data['redis']['host'] = redis_host
+        if redis_port:
+            try:
+                data['redis']['port'] = int(redis_port)
+            except (ValueError, TypeError):
+                pass
+        if redis_password:
+            data['redis']['password'] = redis_password
+        if redis_db:
+            try:
+                data['redis']['db'] = int(redis_db)
+            except (ValueError, TypeError):
+                pass
+        if redis_ssl:
+            data['redis']['ssl'] = redis_ssl.lower() in ('true', '1', 'yes', 'on')
+
+        # If we have any Redis configuration, create RedisConfig with our data
+        if redis_host or redis_port or redis_password or redis_db or redis_ssl:
+            data['redis'] = RedisConfig(**data['redis'])
+
         # Load ClickHouse configuration for staging
         clickhouse_host = env.get('CLICKHOUSE_HOST')
         clickhouse_port = env.get('CLICKHOUSE_PORT')
@@ -1321,6 +1592,44 @@ class StagingConfig(AppConfig):
                     "or #removed-legacyis provided."
                 )
     
+    def _load_sentry_config_from_environment(self, env, data: dict) -> None:
+        """Load Sentry configuration from environment variables for staging."""
+        # Load Sentry configuration from environment
+        sentry_mappings = {
+            'SENTRY_DSN': 'sentry_dsn',
+            'SENTRY_ENVIRONMENT': 'sentry_environment',
+            'SENTRY_RELEASE': 'sentry_release',
+            'SENTRY_SERVER_NAME': 'sentry_server_name',
+            'SENTRY_SAMPLE_RATE': 'sentry_sample_rate',
+            'SENTRY_TRACES_SAMPLE_RATE': 'sentry_traces_sample_rate',
+            'SENTRY_PROFILES_SAMPLE_RATE': 'sentry_profiles_sample_rate',
+            'SENTRY_DEBUG': 'sentry_debug',
+            'SENTRY_SEND_DEFAULT_PII': 'sentry_send_default_pii',
+        }
+        
+        for env_var, field_name in sentry_mappings.items():
+            value = env.get(env_var)
+            if value:
+                # Convert string values to appropriate types
+                if field_name in ['sentry_sample_rate', 'sentry_traces_sample_rate', 'sentry_profiles_sample_rate']:
+                    try:
+                        data[field_name] = float(value)
+                    except ValueError:
+                        pass  # Keep default if conversion fails
+                elif field_name in ['sentry_debug', 'sentry_send_default_pii']:
+                    data[field_name] = value.lower() in ('true', '1', 'yes', 'on')
+                else:
+                    data[field_name] = value
+        
+        # Set defaults for staging if not provided
+        if 'sentry_environment' not in data and not env.get('SENTRY_ENVIRONMENT'):
+            data['sentry_environment'] = 'staging'
+        
+        # Staging-specific Sentry settings
+        if not env.get('SENTRY_DEBUG'):
+            data['sentry_debug'] = False  # Disable debug in staging for performance
+        if not env.get('SENTRY_TRACES_SAMPLE_RATE'):
+            data['sentry_traces_sample_rate'] = 0.1  # Moderate sampling in staging
 
 class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""
@@ -1346,12 +1655,10 @@ class NetraTestingConfig(AppConfig):
         
         env = get_env()
         
-        # CRITICAL FIX: For test scenarios using patch.dict(os.environ), we need to 
-        # merge isolated variables with os.environ, giving priority to os.environ
+        # SSOT FIX: For test scenarios using patch.dict(os.environ), use 
+        # IsolatedEnvironment's built-in sync method instead of direct os.environ access
+        env._sync_with_os_environ()  # Sync test patches with isolated environment
         env_dict = env.as_dict()
-        for key, value in os.environ.items():
-            if key not in env_dict or env_dict[key] != value:
-                env_dict[key] = value
         
         # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
         builder = DatabaseURLBuilder(env_dict)

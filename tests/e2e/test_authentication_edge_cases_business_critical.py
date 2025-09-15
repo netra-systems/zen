@@ -78,7 +78,7 @@ from typing import Dict, List, Optional, Any
 import pytest
 import httpx
 import websockets
-from websockets.exceptions import ConnectionClosed, WebSocketException
+from websockets import ConnectionClosed, WebSocketException
 
 # SSOT Test Infrastructure (per SSOT_IMPORT_REGISTRY.md)
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -103,7 +103,7 @@ from shared.isolated_environment import get_env
 
 # SSOT WebSocket Infrastructure (verified from registry) 
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # SSOT Database Models (verified from registry)
 from netra_backend.app.db.models_user import User

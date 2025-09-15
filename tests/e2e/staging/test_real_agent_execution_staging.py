@@ -51,18 +51,22 @@ class MockWebSocket:
         if not request:
             return False
             
-        # Check for invalid agent types
-        agent_type = request.get("agent_type", "")
+        # Extract payload from message structure 
+        payload = request.get("payload", {})
+        if not payload:
+            return False
+            
+        # Check for invalid agent types (now in payload)
+        agent_type = payload.get("agent_type", "")
         if agent_type in ["nonexistent_agent", "invalid_agent"]:
             return True
             
-        # Check for malformed data patterns
-        data = request.get("data", {})
-        if isinstance(data, dict):
+        # Check for malformed data patterns (now spread into payload)
+        if isinstance(payload, dict):
             # Check for explicit invalid fields
-            if "invalid_field" in data or "malformed_data" in data:
+            if "invalid_field" in payload or "malformed_data" in payload:
                 return True
-            if data.get("missing_required_fields") is True:
+            if payload.get("missing_required_fields") is True:
                 return True
         
         return False

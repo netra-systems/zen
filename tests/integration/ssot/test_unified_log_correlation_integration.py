@@ -215,7 +215,7 @@ incident resolution for authentication-related issues.
         
         # Analytics service logging
         try:
-            from analytics_service.analytics_core.utils.logging_config import get_logger as analytics_get_logger
+            from shared.logging.unified_logging_ssot import get_logger as analytics_get_logger
             analytics_logger = analytics_get_logger('multi_service_test')
             
             analytics_logger.info("Analytics processing", extra={
@@ -374,7 +374,7 @@ debugging of real-time chat functionality issues.
         
         # Simulate analytics service involvement
         try:
-            from analytics_service.analytics_core.utils.logging_config import get_logger as analytics_get_logger
+            from shared.logging.unified_logging_ssot import get_logger as analytics_get_logger
             analytics_logger = analytics_get_logger('agent_correlation_test')
             
             analytics_logger.info("Agent metrics collection", extra={

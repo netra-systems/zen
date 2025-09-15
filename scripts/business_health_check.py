@@ -108,7 +108,7 @@ class BusinessHealthChecker:
                 EnhancedToolExecutionEngine
             )
             
-            engine = EnhancedToolExecutionEngine()
+            engine = UserExecutionEngine()
             # Basic initialization test
             chat_health['agent_execution'] = True
             self.successes.append("Agent execution engine ready")
@@ -224,7 +224,7 @@ class BusinessHealthChecker:
         
         try:
             # Try to run a simple chat test
-            from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+            from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
             
             supervisor = SupervisorAgent()
             # Just check it initializes

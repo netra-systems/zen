@@ -1,11 +1,11 @@
 import type { StateCreator } from 'zustand';
-import type { ThreadState } from './types';
+import type { ThreadSliceState } from './types';
 
 export const createThreadSlice: StateCreator<
-  ThreadState,
+  ThreadSliceState,
   [],
   [],
-  ThreadState
+  ThreadSliceState
 > = (set) => ({
   activeThreadId: null,
   threads: new Map(),

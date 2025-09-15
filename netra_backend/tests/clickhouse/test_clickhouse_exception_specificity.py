@@ -65,9 +65,9 @@ class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
         Expected Failure: This test should fail because current code doesn't
         classify connection errors using TransactionConnectionError.
         """
-        # Mock ClickHouse database to raise connection error
-        with patch.object(clickhouse_client, '_database') as mock_db:
-            mock_db.execute_query.side_effect = OperationalError(
+        # Mock ClickHouse client to raise connection error
+        with patch.object(clickhouse_client, '_client') as mock_client:
+            mock_client.execute.side_effect = OperationalError(
                 "connection timeout", None, None
             )
             
@@ -90,9 +90,9 @@ class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
         Expected Failure: This test should fail because current code doesn't
         provide specific exception types for different query failures.
         """
-        # Mock ClickHouse database to raise table not found error
-        with patch.object(clickhouse_client, '_database') as mock_db:
-            mock_db.execute_query.side_effect = OperationalError(
+        # Mock ClickHouse client to raise table not found error
+        with patch.object(clickhouse_client, '_client') as mock_client:
+            mock_client.execute.side_effect = OperationalError(
                 "Table 'non_existent_table' doesn't exist", None, None
             )
             
@@ -122,8 +122,8 @@ class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
         don't include enough diagnostic information.
         """
         # Mock schema operation failure
-        with patch.object(clickhouse_client, '_database') as mock_db:
-            mock_db.execute_query.side_effect = OperationalError(
+        with patch.object(clickhouse_client, '_client') as mock_client:
+            mock_client.execute.side_effect = OperationalError(
                 "Column 'invalid_column' already exists", None, None
             )
             
@@ -163,8 +163,8 @@ class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
             {"id": 2, "name": "test2"},
         ]
         
-        with patch.object(clickhouse_client, '_database') as mock_db:
-            mock_db.execute_query.side_effect = OperationalError(
+        with patch.object(clickhouse_client, '_client') as mock_client:
+            mock_client.execute.side_effect = OperationalError(
                 "deadlock detected during bulk insert", None, None
             )
             
@@ -198,45 +198,37 @@ class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
             "ClickHouse module should import TransactionError base class"
 
     @pytest.mark.asyncio
-    async def test_query_retry_logic_not_using_retryable_classification(self, clickhouse_client):
+    async def test_query_retry_logic_using_retryable_classification(self, clickhouse_client):
         """
-        EXPECTED TO FAIL: Test demonstrates query retry doesn't use proper error classification.
-        
-        Current Problem: ClickHouse query retry logic doesn't use is_retryable_error()
+        Test validates query retry logic uses proper error classification.
+
+        Validates: ClickHouse query retry logic properly uses is_retryable_error()
         to determine which errors should be retried.
-        
-        Expected Failure: This test should fail because current code doesn't
-        implement proper retry logic with error classification.
+
+        Expected Success: This test validates that proper retry logic with
+        error classification is working correctly.
         """
         # Mock retryable connection error
-        with patch.object(clickhouse_client, '_database') as mock_db:
-            mock_db.execute_query.side_effect = DisconnectionError(
+        with patch.object(clickhouse_client, '_client') as mock_client:
+            mock_client.execute.side_effect = DisconnectionError(
                 "network error", None, None
             )
             
-            # Attempt query with retry logic
-            retry_count = 0
-            max_retries = 3
-            
-            while retry_count < max_retries:
-                try:
-                    result = await clickhouse_client.execute_query(
-                        "SELECT 1", user_id="test_user"
-                    )
-                    break
-                except Exception as e:
-                    # This should use is_retryable_error() but currently doesn't
-                    assert is_retryable_error(
-                        e, enable_deadlock_retry=True, enable_connection_retry=True
-                    ), f"Network error should be retryable: {e}"
-                    
-                    retry_count += 1
-                    if retry_count >= max_retries:
-                        # This should be classified as ConnectionError but isn't
-                        classified_error = classify_error(e)
-                        assert isinstance(classified_error, TransactionConnectionError), \
-                            f"Should be classified as ConnectionError: {classified_error}"
-                        raise
+            # Test that query execution properly raises classified connection errors
+            try:
+                result = await clickhouse_client.execute_query(
+                    "SELECT 1", user_id="test_user"
+                )
+                # Should not reach here with network error
+                assert False, "Expected ConnectionError to be raised"
+            except TransactionConnectionError as e:
+                # This validates that errors are properly classified as ConnectionError
+                assert "Connection error:" in str(e), f"Error message should include connection context: {e}"
+
+                # This validates that the error is retryable
+                assert is_retryable_error(
+                    e, enable_deadlock_retry=True, enable_connection_retry=True
+                ), f"Network error should be retryable: {e}"
 
     @pytest.mark.asyncio
     async def test_cache_operations_lack_error_specificity(self, clickhouse_client):
@@ -250,8 +242,8 @@ class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
         provide specific error types for cache failures.
         """
         # Mock cache operation failure
-        with patch.object(clickhouse_client, '_cache') as mock_cache:
-            mock_cache.get.side_effect = Exception("Cache connection failed")
+        with patch('netra_backend.app.db.clickhouse._clickhouse_cache.cache') as mock_cache_dict:
+            mock_cache_dict.get.side_effect = Exception("Cache connection failed")
             
             # This should raise a specific CacheError but currently raises generic Exception
             with pytest.raises(Exception) as exc_info:
@@ -278,8 +270,8 @@ class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
         classify performance-related query failures.
         """
         # Mock performance-related error
-        with patch.object(clickhouse_client, '_database') as mock_db:
-            mock_db.execute_query.side_effect = OperationalError(
+        with patch.object(clickhouse_client, '_client') as mock_client:
+            mock_client.execute.side_effect = OperationalError(
                 "Query execution timeout exceeded", None, None
             )
             

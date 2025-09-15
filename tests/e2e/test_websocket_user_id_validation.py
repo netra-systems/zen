@@ -31,6 +31,12 @@ EXPECTED BEHAVIOR:
 CRITICAL: ALL E2E tests MUST use authentication - no exceptions per CLAUDE.md requirements.
 """
 
+# Enable direct Python execution by adding project root to sys.path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
+sys.path.insert(0, str(PROJECT_ROOT))
+
 import pytest
 import asyncio
 import websockets
@@ -73,9 +79,9 @@ class TestWebSocketUserIDValidationE2E(BaseE2ETest):
     def auth_config(self) -> E2EAuthConfig:
         """Create E2E auth configuration for testing."""
         return E2EAuthConfig(
-            auth_service_url=get_env("TEST_AUTH_SERVICE_URL", "http://localhost:8083"),
-            backend_url=get_env("TEST_BACKEND_URL", "http://localhost:8002"),  
-            websocket_url=get_env("TEST_WEBSOCKET_URL", "ws://localhost:8002/ws"),
+            auth_service_url=get_env().get("TEST_AUTH_SERVICE_URL", "http://localhost:8083"),
+            backend_url=get_env().get("TEST_BACKEND_URL", "http://localhost:8002"),  
+            websocket_url=get_env().get("TEST_WEBSOCKET_URL", "ws://localhost:8002/ws"),
             test_user_email="e2e_validation_test@example.com",
             test_user_password="secure_test_password_123",
             timeout=30.0
@@ -122,7 +128,7 @@ class TestWebSocketUserIDValidationE2E(BaseE2ETest):
                 "environment": "test"
             },
             {
-                "user_id": "concurrent_user_99",
+                "user_id": "usr_9f2e8c4b7a1d",
                 "email": "concurrent_user_99@example.com",
                 "environment": "test"
             }
@@ -540,6 +546,5 @@ if __name__ == "__main__":
         __file__, 
         "-v", 
         "--tb=short", 
-        "-m", "real_services",
-        "--real-services"
+        "-m", "real_services"
     ])

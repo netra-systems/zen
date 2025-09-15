@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 # System imports for integration testing
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.services.state_persistence_optimized import OptimizedStatePersistenceService
-from netra_backend.app.core.configuration.base import get_config
+from netra_backend.app.config import get_config
 from netra_backend.app.db.clickhouse_client import ClickHouseClient
 from netra_backend.app.core.redis_manager import RedisManager
 

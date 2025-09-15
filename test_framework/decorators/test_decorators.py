@@ -340,33 +340,45 @@ def requires_feature(*feature_names: str):
     return decorator
 
 
-def tdd_test(func: Callable) -> Callable:
+def tdd_test(feature_name: str = None):
     """Decorator to mark tests as part of TDD (Test-Driven Development) workflow.
-    
+
     This decorator applies the 'tdd' pytest marker and identifies tests
     written as part of test-driven development process.
-    
+
     Args:
-        func: Test function to decorate
-        
+        feature_name: Optional feature name being developed with TDD
+
     Returns:
-        Decorated test function with tdd marker
+        Decorator function or decorated test function
     """
-    
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        return func(*args, **kwargs)
-    
-    # Apply pytest marker
-    marked_func = pytest.mark.tdd(wrapper)
-    
-    # Add metadata for test discovery
-    marked_func._tdd_test = True
-    marked_func._test_type = 'tdd'
-    
-    logger.debug(f"Test {func.__name__} marked as TDD test")
-    
-    return marked_func
+
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        # Apply pytest marker
+        marked_func = pytest.mark.tdd_test(wrapper)
+
+        # Add metadata for test discovery
+        marked_func._tdd_test = True
+        marked_func._test_type = 'tdd'
+        if feature_name:
+            marked_func._tdd_feature = feature_name
+
+        logger.debug(f"Test {func.__name__} marked as TDD test" + (f" for feature '{feature_name}'" if feature_name else ""))
+
+        return marked_func
+
+    # Support both @tdd_test and @tdd_test("feature_name") usage
+    if isinstance(feature_name, str) or feature_name is None:
+        return decorator
+    else:
+        # Called as @tdd_test without parentheses, feature_name is actually the function
+        func = feature_name
+        feature_name = None
+        return decorator(func)
 
 
 # Export all decorators for easy importing

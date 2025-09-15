@@ -45,7 +45,7 @@ from unittest.mock import Mock, AsyncMock, patch
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID
 

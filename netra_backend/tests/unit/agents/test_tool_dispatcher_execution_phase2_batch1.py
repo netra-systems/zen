@@ -18,7 +18,7 @@ from typing import Dict, Any, List
 from datetime import datetime, timezone, timedelta
 
 from netra_backend.app.agents.tool_dispatcher_execution import ToolExecutionEngine
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.schemas.tool import (
     ToolInput,

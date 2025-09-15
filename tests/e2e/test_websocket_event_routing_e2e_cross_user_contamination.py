@@ -53,7 +53,7 @@ class UserTestSession:
     user_id: UserID
     email: str
     jwt_token: str
-    websocket_connection: Optional[websockets.WebSocketServerProtocol] = None
+    websocket_connection: Optional[websockets.ServerConnection] = None
     thread_id: Optional[ThreadID] = None
     received_messages: List[Dict[str, Any]] = field(default_factory=list)
     sent_messages: List[Dict[str, Any]] = field(default_factory=list)

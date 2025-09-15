@@ -1,5 +1,5 @@
 from shared.isolated_environment import get_env
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python
 """MISSION CRITICAL: WebSocket Bridge Lifecycle Audit 20250902
@@ -55,7 +55,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, AgentExecutionResult
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.core.agent_heartbeat import AgentHeartbeat
 from netra_backend.app.schemas.agent import SubAgentLifecycle
@@ -251,7 +251,7 @@ class WebSocketBridgeLifecycleAuditor:
         
         # Create execution engine with first bridge (for single-user tests)
         first_bridge = list(self.bridge_instances.values())[0]
-        self.execution_engine = ExecutionEngine(self.registry, first_bridge)
+        self.execution_engine = UserExecutionEngine(self.registry, first_bridge)
         
         return self.execution_engine, self.registry, self.bridge_instances
     

@@ -38,7 +38,7 @@ type LoadingState = 'validating' | 'loading' | 'loaded' | 'error';
  * Dynamic thread chat page component
  */
 const ThreadPage: React.FC<ThreadPageProps> = ({ params }) => {
-  const { threadId } = React.use(params);
+  const [threadId, setThreadId] = useState<string | null>(null);
   const [loadingState, setLoadingState] = useState<LoadingState>('validating');
   const [errorMessage, setErrorMessage] = useState<string>('');
   
@@ -46,11 +46,29 @@ const ThreadPage: React.FC<ThreadPageProps> = ({ params }) => {
   const activeThreadId = useUnifiedChatStore(state => state.activeThreadId);
   const { switchToThread } = useThreadSwitching();
   
+  // Handle Promise-based params from Next.js 15 or synchronous params from Next.js 14
   useEffect(() => {
-    initializeThread(threadId, activeThreadId, switchToThread, setLoadingState, setErrorMessage, router);
+    const resolveParams = async () => {
+      try {
+        // Check if params is a Promise
+        const resolvedParams = await Promise.resolve(params);
+        setThreadId(resolvedParams.threadId);
+      } catch (error) {
+        setErrorMessage('Failed to load thread parameters');
+        setLoadingState('error');
+      }
+    };
+    
+    resolveParams();
+  }, [params]);
+  
+  useEffect(() => {
+    if (threadId) {
+      initializeThread(threadId, activeThreadId, switchToThread, setLoadingState, setErrorMessage, router);
+    }
   }, [threadId, activeThreadId, switchToThread, router]);
   
-  if (loadingState === 'validating') {
+  if (loadingState === 'validating' || !threadId) {
     return createValidatingView();
   }
   
@@ -87,7 +105,8 @@ const initializeThread = async (
   }
   
   // Validate thread ID format
-  if (!validateThreadId(threadId)) {
+  const isValid = await validateThreadId(threadId);
+  if (!isValid) {
     handleInvalidThread(setLoadingState, setErrorMessage, router);
     return;
   }

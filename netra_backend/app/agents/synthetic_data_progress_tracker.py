@@ -48,7 +48,7 @@ class SyntheticDataProgressTracker:
         """Send progress update via WebSocket manager"""
         try:
             if user_context:
-                from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+                from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as create_websocket_manager
                 websocket_manager = await create_websocket_manager(user_context)
                 await self._send_websocket_update(websocket_manager, run_id, status, thread_id, user_id)
             else:

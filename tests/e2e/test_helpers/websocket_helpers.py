@@ -16,6 +16,36 @@ from websockets import ConnectionClosed, InvalidStatus
 
 logger = logging.getLogger(__name__)
 
+async def wait_for_websocket_event(
+    websocket,
+    event_type: str,
+    timeout: float = 30.0
+) -> Optional[Dict[str, Any]]:
+    """Wait for specific WebSocket event type
+    
+    Args:
+        websocket: WebSocket connection to listen on
+        event_type: The event type to wait for
+        timeout: Maximum time to wait in seconds
+        
+    Returns:
+        Dict containing the event data if found, None if timeout
+    """
+    start_time = asyncio.get_event_loop().time()
+    
+    while asyncio.get_event_loop().time() - start_time < timeout:
+        try:
+            response = await asyncio.wait_for(websocket.recv(), timeout=1)
+            data = json.loads(response)
+            if data.get("type") == event_type:
+                return data
+        except asyncio.TimeoutError:
+            continue
+        except json.JSONDecodeError:
+            continue
+    
+    return None
+
 class MockWebSocketServer:
     """Mock WebSocket server for E2E testing"""
     

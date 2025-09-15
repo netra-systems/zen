@@ -598,8 +598,9 @@ class UnifiedAuthenticationService:
                 logger.error(f"Cannot create UserExecutionContext: empty user_id after validation")
                 raise ValueError("user_id cannot be empty after string conversion and stripping")
             
-            # CRITICAL FIX: Use defensive UserExecutionContext creation
-            from netra_backend.app.websocket_core.websocket_manager_factory import create_defensive_user_execution_context
+            # CRITICAL FIX: Use direct UserExecutionContext creation
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            from netra_backend.app.core.unified_id_manager import UnifiedIDManager
             
             # PASS-THROUGH FIX: Use preliminary connection ID if provided
             if preliminary_connection_id:
@@ -658,8 +659,8 @@ class UnifiedAuthenticationService:
                 
                 logger.warning(f"UNIFIED AUTH: Attempting fallback UserExecutionContext creation for user {fallback_user_id[:8]}...")
                 
-                # Use defensive creation as fallback
-                from netra_backend.app.websocket_core.websocket_manager_factory import create_defensive_user_execution_context
+                # Use defensive creation as fallback - SSOT import path
+                from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context
                 
                 fallback_context = create_defensive_user_execution_context(
                     user_id=fallback_user_id,

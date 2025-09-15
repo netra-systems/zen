@@ -41,7 +41,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
+from netra_backend.app.agents.supervisor.user_execution_engine import create_request_scoped_engine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from netra_backend.app.models.agent_execution import AgentExecution

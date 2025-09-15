@@ -148,7 +148,7 @@ class TestWebSocketManagerGoldenPathFailures(SSotAsyncTestCase):
                 
                 try:
                     # Pattern 2: Direct instantiation
-                    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                     direct_manager = UnifiedWebSocketManager()
                     managers_created.append(('direct', direct_manager))
                     
@@ -331,7 +331,7 @@ class TestWebSocketManagerGoldenPathFailures(SSotAsyncTestCase):
             pass
         
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             direct_manager = UnifiedWebSocketManager()
             managers_to_test.append(('direct', direct_manager))
         except ImportError:

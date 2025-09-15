@@ -59,7 +59,7 @@ import time
 from typing import Dict, Any, Optional, List
 import requests
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatus, WebSocketException
+from websockets import ConnectionClosed, InvalidStatus, WebSocketException
 
 # Use SSOT testing framework
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -74,7 +74,7 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
-        return UserExecutionContext.create_for_user(
+        return UserExecutionContext.from_request(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run"

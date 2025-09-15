@@ -53,7 +53,7 @@ from shared.isolated_environment import IsolatedEnvironment
 # Agent coordination imports
 from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher

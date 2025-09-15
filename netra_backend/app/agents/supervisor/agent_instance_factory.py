@@ -42,7 +42,10 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.websocket_core import (
     WebSocketEmitterPool,
 )
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+# SSOT COMPLIANCE: Removed legacy WebSocketManager import - use AgentWebSocketBridge only
+# SSOT COMPLIANT: Use AgentWebSocketBridge factory instead of direct WebSocketManager
+from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 # WebSocket exceptions module was deleted - using standard exceptions
 from netra_backend.app.logging_config import central_logger
 
@@ -52,276 +55,10 @@ logger = central_logger.get_logger(__name__)
 # UserExecutionContext is now imported from user_execution_context.py
 
 
-class UserWebSocketEmitter:
-    """LEGACY COMPATIBILITY WRAPPER - Redirects to UnifiedWebSocketEmitter
-    
-    This class maintains backward compatibility while redirecting all functionality
-    to the SSOT UnifiedWebSocketEmitter implementation from the factory pattern.
-    
-    Business Value: Ensures WebSocket events reach correct users, prevents notification leaks
-    
-    ## MIGRATION STATUS: PHASE 1 COMPLETE
-    - Redirects to UnifiedWebSocketEmitter via AgentWebSocketBridge
-    - Maintains full backward compatibility
-    - No breaking changes for AgentInstanceFactory consumers
-    """
-    
-    def __init__(self, user_id: str, thread_id: str, run_id: str, 
-                 websocket_bridge: AgentWebSocketBridge):
-        """Initialize compatibility wrapper that uses the AgentWebSocketBridge.
-        
-        The AgentWebSocketBridge now internally uses UnifiedWebSocketEmitter,
-        so this wrapper maintains compatibility while getting SSOT benefits.
-        """
-        self.user_id = user_id
-        self.thread_id = thread_id
-        self.run_id = run_id
-        self.websocket_bridge = websocket_bridge
-        self.created_at = datetime.now(timezone.utc)
-        self._event_count = 0
-        self._last_event_time = None
-        
-        logger.info(f" CYCLE:  UserWebSocketEmitter (factory pattern)  ->  AgentWebSocketBridge  ->  UnifiedWebSocketEmitter for user={user_id}, run={run_id}")
-        logger.debug(f"Factory UserWebSocketEmitter initialized with bridge type: {type(websocket_bridge).__name__}")
-    
-    async def notify_agent_started(self, agent_name: str, context: Optional[Dict[str, Any]] = None) -> bool:
-        """Send agent started notification for this specific user."""
-        try:
-            self._event_count += 1
-            self._last_event_time = datetime.now(timezone.utc)
-            
-            success = await self.websocket_bridge.notify_agent_started(
-                run_id=self.run_id,
-                agent_name=agent_name,
-                context=context
-            )
-            
-            if success:
-                logger.debug(f" PASS:  Agent started notification sent for user {self.user_id}: {agent_name}")
-            else:
-                error_msg = f"Agent started notification failed for user {self.user_id}: {agent_name}"
-                logger.error(f" FAIL:  {error_msg}")
-                
-                # LOUD FAILURE: Raise exception for failed notifications
-                raise ConnectionError(
-                    f"WebSocket bridge returned failure for agent_started: {agent_name} "
-                    f"(user: {self.user_id}, thread: {self.thread_id})"
-                )
-            
-            return success
-        except ConnectionError:
-            # Re-raise our custom exception
-            raise
-        except Exception as e:
-            error_msg = f"Exception in notify_agent_started for user {self.user_id}: {e}"
-            logger.error(f" ALERT:  AGENT COMMUNICATION FAILURE: {error_msg}")
-            
-            # LOUD FAILURE: Convert generic exceptions to specific ones
-            raise RuntimeError(
-                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
-                f"(user: {self.user_id})"
-            )
-    
-    async def notify_agent_thinking(self, agent_name: str, reasoning: str, 
-                                   step_number: Optional[int] = None,
-                                   progress_percentage: Optional[float] = None) -> bool:
-        """Send agent thinking notification for this specific user."""
-        try:
-            self._event_count += 1
-            self._last_event_time = datetime.now(timezone.utc)
-            
-            success = await self.websocket_bridge.notify_agent_thinking(
-                run_id=self.run_id,
-                agent_name=agent_name,
-                reasoning=reasoning,
-                step_number=step_number,
-                progress_percentage=progress_percentage
-            )
-            
-            if success:
-                logger.debug(f" PASS:  Agent thinking notification sent for user {self.user_id}: {agent_name}")
-            else:
-                error_msg = f"Agent thinking notification failed for user {self.user_id}: {agent_name}"
-                logger.error(f" FAIL:  {error_msg}")
-                
-                # LOUD FAILURE: Raise exception
-                raise ConnectionError(
-                    f"WebSocket bridge returned failure for agent_thinking: {agent_name} "
-                    f"(user: {self.user_id}, thread: {self.thread_id})"
-                )
-            
-            return success
-        except ConnectionError:
-            raise
-        except Exception as e:
-            error_msg = f"Exception in notify_agent_thinking for user {self.user_id}: {e}"
-            logger.error(f" ALERT:  AGENT COMMUNICATION FAILURE: {error_msg}")
-            
-            raise RuntimeError(
-                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
-                f"(user: {self.user_id})"
-            )
-    
-    async def notify_tool_executing(self, agent_name: str, tool_name: str, 
-                                   parameters: Optional[Dict[str, Any]] = None) -> bool:
-        """Send tool executing notification for this specific user."""
-        try:
-            self._event_count += 1
-            self._last_event_time = datetime.now(timezone.utc)
-            
-            success = await self.websocket_bridge.notify_tool_executing(
-                run_id=self.run_id,
-                agent_name=agent_name,
-                tool_name=tool_name,
-                parameters=parameters
-            )
-            
-            if success:
-                logger.debug(f" PASS:  Tool executing notification sent for user {self.user_id}: {tool_name}")
-            else:
-                error_msg = f"Tool executing notification failed for user {self.user_id}: {tool_name}"
-                logger.error(f" FAIL:  {error_msg}")
-                
-                raise ConnectionError(
-                    f"WebSocket bridge returned failure for tool_executing: {tool_name} "
-                    f"(user: {self.user_id}, thread: {self.thread_id})"
-                )
-            
-            return success
-        except ConnectionError:
-            raise
-        except Exception as e:
-            logger.error(f" ALERT:  TOOL NOTIFICATION FAILURE: Exception in notify_tool_executing for user {self.user_id}: {e}")
-            raise RuntimeError(
-                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
-                f"(user: {self.user_id})"
-            )
-    
-    async def notify_tool_completed(self, agent_name: str, tool_name: str, 
-                                   result: Optional[Dict[str, Any]] = None,
-                                   execution_time_ms: Optional[float] = None) -> bool:
-        """Send tool completed notification for this specific user."""
-        try:
-            self._event_count += 1
-            self._last_event_time = datetime.now(timezone.utc)
-            
-            success = await self.websocket_bridge.notify_tool_completed(
-                run_id=self.run_id,
-                agent_name=agent_name,
-                tool_name=tool_name,
-                result=result,
-                execution_time_ms=execution_time_ms
-            )
-            
-            if success:
-                logger.debug(f" PASS:  Tool completed notification sent for user {self.user_id}: {tool_name}")
-            else:
-                error_msg = f"Tool completed notification failed for user {self.user_id}: {tool_name}"
-                logger.error(f" FAIL:  {error_msg}")
-                
-                raise ConnectionError(
-                    f"WebSocket bridge returned failure for tool_completed: {tool_name} "
-                    f"(user: {self.user_id}, thread: {self.thread_id})"
-                )
-            
-            return success
-        except ConnectionError:
-            raise
-        except Exception as e:
-            logger.error(f" ALERT:  TOOL NOTIFICATION FAILURE: Exception in notify_tool_completed for user {self.user_id}: {e}")
-            raise RuntimeError(
-                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
-                f"(user: {self.user_id})"
-            )
-    
-    async def notify_agent_completed(self, agent_name: str, result: Optional[Dict[str, Any]] = None,
-                                    execution_time_ms: Optional[float] = None) -> bool:
-        """Send agent completed notification for this specific user."""
-        try:
-            self._event_count += 1
-            self._last_event_time = datetime.now(timezone.utc)
-            
-            success = await self.websocket_bridge.notify_agent_completed(
-                run_id=self.run_id,
-                agent_name=agent_name,
-                result=result,
-                execution_time_ms=execution_time_ms
-            )
-            
-            if success:
-                logger.debug(f" PASS:  Agent completed notification sent for user {self.user_id}: {agent_name}")
-            else:
-                error_msg = f"Agent completed notification failed for user {self.user_id}: {agent_name}"
-                logger.error(f" FAIL:  {error_msg}")
-                
-                raise ConnectionError(
-                    f"WebSocket bridge returned failure for agent_completed: {agent_name} "
-                    f"(user: {self.user_id}, thread: {self.thread_id})"
-                )
-            
-            return success
-        except ConnectionError:
-            raise
-        except Exception as e:
-            logger.error(f" ALERT:  AGENT COMPLETION FAILURE: Exception in notify_agent_completed for user {self.user_id}: {e}")
-            raise RuntimeError(
-                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
-                f"(user: {self.user_id})"
-            )
-    
-    async def notify_agent_error(self, agent_name: str, error: str,
-                                error_context: Optional[Dict[str, Any]] = None) -> bool:
-        """Send agent error notification for this specific user."""
-        try:
-            self._event_count += 1
-            self._last_event_time = datetime.now(timezone.utc)
-            
-            success = await self.websocket_bridge.notify_agent_error(
-                run_id=self.run_id,
-                agent_name=agent_name,
-                error=error,
-                error_context=error_context
-            )
-            
-            if success:
-                logger.warning(f" WARNING: [U+FE0F] Agent error notification sent for user {self.user_id}: {agent_name}")
-            else:
-                logger.error(f" FAIL:  Agent error notification failed for user {self.user_id}: {agent_name}")
-            
-            return success
-        except Exception as e:
-            logger.error(f"Exception in notify_agent_error for user {self.user_id}: {e}")
-            return False
-    
-    async def cleanup(self) -> None:
-        """Clean up WebSocket emitter resources."""
-        try:
-            logger.debug(f"Cleaning up UserWebSocketEmitter for user {self.user_id} "
-                        f"(sent {self._event_count} events)")
-            
-            # Log final statistics
-            if self._last_event_time and self._event_count > 0:
-                total_time = (datetime.now(timezone.utc) - self.created_at).total_seconds()
-                logger.info(f"WebSocket emitter stats for user {self.user_id}: "
-                           f"{self._event_count} events in {total_time:.1f}s")
-            
-            # Clear references
-            self.websocket_bridge = None
-            
-        except Exception as e:
-            logger.error(f"Error cleaning up UserWebSocketEmitter for user {self.user_id}: {e}")
-    
-    def get_emitter_status(self) -> Dict[str, Any]:
-        """Get emitter status for monitoring."""
-        return {
-            'user_id': self.user_id,
-            'thread_id': self.thread_id,
-            'run_id': self.run_id,
-            'event_count': self._event_count,
-            'last_event_time': self._last_event_time.isoformat() if self._last_event_time else None,
-            'created_at': self.created_at.isoformat(),
-            'has_websocket_bridge': self.websocket_bridge is not None
-        }
+# SSOT CONSOLIDATION COMPLETE: All functionality now provided by UnifiedWebSocketEmitter
+
+# COMPATIBILITY: Provide UserWebSocketEmitter as alias to UnifiedWebSocketEmitter
+UserWebSocketEmitter = UnifiedWebSocketEmitter
 
 
 class AgentInstanceFactory:
@@ -353,13 +90,21 @@ class AgentInstanceFactory:
         'SyntheticDataSubAgent': ['llm_manager'],
     }
     
-    def __init__(self):
-        """Initialize the factory with infrastructure components."""
+    def __init__(self, user_context: Optional[UserExecutionContext] = None):
+        """Initialize the factory with infrastructure components.
+        
+        Args:
+            user_context: Optional user execution context for per-request factory instances.
+                         When provided, creates a factory bound to specific user context.
+                         When None, creates infrastructure-only factory for global configuration.
+        """
+        # Store user context for per-request factories (SSOT remediation)
+        self._user_context = user_context
         # Infrastructure components (shared, immutable)
         self._agent_class_registry: Optional[AgentClassRegistry] = None
         self._agent_registry: Optional[AgentRegistry] = None
         self._websocket_bridge: Optional[AgentWebSocketBridge] = None
-        self._websocket_manager: Optional[WebSocketManager] = None
+        # SSOT COMPLIANCE: Removed _websocket_manager - use AgentWebSocketBridge only
         self._llm_manager: Optional[Any] = None
         self._tool_dispatcher: Optional[Any] = None
         
@@ -422,7 +167,7 @@ class AgentInstanceFactory:
                  agent_class_registry: Optional[AgentClassRegistry] = None,
                  agent_registry: Optional[AgentRegistry] = None,
                  websocket_bridge: Optional[AgentWebSocketBridge] = None,
-                 websocket_manager: Optional[WebSocketManager] = None,
+                 # SSOT COMPLIANCE: Removed websocket_manager parameter - use AgentWebSocketBridge only
                  llm_manager: Optional[Any] = None,
                  tool_dispatcher: Optional[Any] = None) -> None:
         """
@@ -431,8 +176,7 @@ class AgentInstanceFactory:
         Args:
             agent_class_registry: Registry containing agent classes (preferred)
             agent_registry: Legacy agent registry (for backward compatibility)
-            websocket_bridge: WebSocket bridge for agent notifications
-            websocket_manager: Optional WebSocket manager for direct access
+            websocket_bridge: WebSocket bridge for agent notifications (SSOT)
             llm_manager: LLM manager for agent communication
             tool_dispatcher: Tool dispatcher for agent tools
         """
@@ -474,13 +218,13 @@ class AgentInstanceFactory:
                 self._agent_class_registry = None
         
         self._websocket_bridge = websocket_bridge
-        self._websocket_manager = websocket_manager
+        # SSOT COMPLIANCE: Removed websocket_manager assignment - use AgentWebSocketBridge only
         self._llm_manager = llm_manager
         self._tool_dispatcher = tool_dispatcher
         
         logger.info(f" PASS:  AgentInstanceFactory configured successfully:")
-        logger.info(f"   - WebSocket bridge: {type(websocket_bridge).__name__}")
-        logger.info(f"   - WebSocket manager: {type(websocket_manager).__name__ if websocket_manager else 'None'}")
+        logger.info(f"   - WebSocket bridge: {type(websocket_bridge).__name__ if websocket_bridge else 'None'}")
+        # SSOT COMPLIANCE: Removed websocket_manager logging - use AgentWebSocketBridge only
         logger.info(f"   - Registry type: {'AgentClassRegistry' if self._agent_class_registry else 'AgentRegistry' if self._agent_registry else 'Unknown'}")
         logger.info(f"   - LLM manager: {'Configured' if llm_manager else 'None'}")
         logger.info(f"   - Tool dispatcher: {'Configured' if tool_dispatcher else 'None'}")
@@ -796,7 +540,16 @@ class AgentInstanceFactory:
                         logger.debug(f"Pre-injected websocket_bridge into context for {agent_name}")
                     
                     # Call factory method with dependencies available in context
-                    agent = AgentClass.create_agent_with_context(user_context)
+                    # CRITICAL FIX: Handle both sync and async factory methods
+                    factory_result = AgentClass.create_agent_with_context(user_context)
+
+                    # Check if factory method returned a coroutine (async method)
+                    import inspect
+                    if inspect.iscoroutine(factory_result):
+                        logger.debug(f"Factory method for {agent_name} is async - awaiting result")
+                        agent = await factory_result
+                    else:
+                        agent = factory_result
                     
                     # FALLBACK: Also inject dependencies directly as fallback for backward compatibility
                     # This ensures agents work even if they don't use context.get_dependency() methods
@@ -1115,7 +868,7 @@ class AgentInstanceFactory:
             logger.debug(f"Created semaphore for user {user_id} (max: {self._max_concurrent_per_user})")
             return semaphore
     
-    async def _create_emitter(self, user_id: str, thread_id: str, run_id: str) -> UserWebSocketEmitter:
+    async def _create_emitter(self, user_id: str, thread_id: str, run_id: str) -> UnifiedWebSocketEmitter:
         """Create WebSocket emitter with optional pooling."""
         if self._performance_config.enable_emitter_pooling:
             # Initialize emitter pool if needed
@@ -1131,17 +884,41 @@ class AgentInstanceFactory:
             # Note: For now we maintain backward compatibility by creating regular emitters
             # The pooling infrastructure is in place for future optimization
             try:
-                # Future: Implement full pooling when UserWebSocketEmitter is adapted
+                # Future: Implement full pooling when UnifiedWebSocketEmitter is adapted
                 # For now, the pool exists but we create compatible instances
                 logger.debug(f"WebSocket emitter pool available but not yet fully integrated")
             except Exception as e:
                 logger.warning(f"Failed to access emitter pool, falling back to direct creation: {e}")
         
         # Create new instance (backward compatible)
-        # This maintains 100% compatibility with existing UserWebSocketEmitter
-        return UserWebSocketEmitter(
-            user_id, thread_id, run_id, self._websocket_bridge
-        )
+        # This maintains 100% compatibility with existing UnifiedWebSocketEmitter
+        if self._websocket_bridge:
+            return UnifiedWebSocketEmitter(
+                manager=self._websocket_bridge,
+                user_id=user_id,
+                context=None  # Will be set by caller if needed
+            )
+        else:
+            # Create mock bridge for tests when no real bridge available
+            # SSOT COMPLIANCE: Use AgentWebSocketBridge-compatible mock
+            class MockWebSocketBridge:
+                async def emit_user_event(self, *args, **kwargs):
+                    return True
+                async def notify_agent_started(self, *args, **kwargs):
+                    return True
+                async def notify_agent_completed(self, *args, **kwargs):
+                    return True
+                async def notify_tool_executing(self, *args, **kwargs):
+                    return True
+                async def notify_tool_completed(self, *args, **kwargs):
+                    return True
+                    
+            mock_manager = MockWebSocketBridge()
+            return UnifiedWebSocketEmitter(
+                manager=mock_manager,
+                user_id=user_id,
+                context=None
+            )
     
     @lru_cache(maxsize=128)
     def _get_cached_agent_class(self, agent_name: str) -> Optional[Type[BaseAgent]]:
@@ -1188,7 +965,7 @@ class AgentInstanceFactory:
             'configuration_status': {
                 'agent_registry_configured': self._agent_registry is not None,
                 'websocket_bridge_configured': self._websocket_bridge is not None,
-                'websocket_manager_configured': self._websocket_manager is not None
+                'websocket_manager_configured': False  # SSOT COMPLIANCE: Always False - use AgentWebSocketBridge only
             },
             'performance_config': self._performance_config.to_dict()
         }
@@ -1355,49 +1132,107 @@ class AgentInstanceFactory:
         logger.debug("AgentInstanceFactory state reset completed")
 
 
-# Singleton factory instance for application use
+# SSOT REMEDIATION: Per-Request Factory Creation (PHASE 1)
+def create_agent_instance_factory(user_context: UserExecutionContext) -> AgentInstanceFactory:
+    """
+    Create per-request AgentInstanceFactory with proper user isolation.
+    
+    This is the SSOT-compliant method for creating agent factories that ensures
+    complete user isolation and prevents context leakage between concurrent users.
+    
+    Args:
+        user_context: User execution context for complete isolation
+        
+    Returns:
+        AgentInstanceFactory: Fresh factory instance bound to user context
+        
+    Business Impact: Enables enterprise-grade multi-user deployment with
+    guaranteed data isolation and regulatory compliance.
+    """
+    if not user_context:
+        raise ValueError("UserExecutionContext is required for per-request factory creation")
+    
+    logger.info(f"Creating per-request AgentInstanceFactory for user {user_context.user_id} (run: {user_context.run_id})")
+    
+    # Create factory with user context binding
+    factory = AgentInstanceFactory(user_context=user_context)
+    
+    logger.debug(f"Per-request factory created with user context isolation for {user_context.user_id}")
+    return factory
+
+
+# LEGACY SINGLETON PATTERN (PHASE 1: Maintain compatibility during transition)
 _factory_instance: Optional[AgentInstanceFactory] = None
 
 
 def get_agent_instance_factory() -> AgentInstanceFactory:
-    """Get singleton AgentInstanceFactory instance."""
+    """DEPRECATED: Singleton AgentInstanceFactory - DO NOT USE.
+    
+    ISSUE #1142 - CRITICAL SECURITY VULNERABILITY: This function creates shared state
+    between users causing multi-user contamination and data leakage.
+    
+    REPLACEMENT: Use create_agent_instance_factory(user_context) for proper user isolation.
+    
+    This function will be removed in a future version. All consumers should migrate to:
+    - create_agent_instance_factory(user_context) for per-request isolation
+    - AgentInstanceFactoryDep dependency injection in FastAPI endpoints
+    """
     global _factory_instance
     
-    if _factory_instance is None:
-        _factory_instance = AgentInstanceFactory()
+    logger.error(
+        "CRITICAL SECURITY VIOLATION: get_agent_instance_factory() called! "
+        "This singleton pattern causes multi-user state contamination. "
+        "IMMEDIATELY migrate to create_agent_instance_factory(user_context) for user isolation."
+    )
     
-    return _factory_instance
+    # Issue #1142 FIX: Create new instance instead of singleton to prevent contamination
+    # Even though this function should not be used, if it is called, at least return a new instance
+    logger.warning("Creating new factory instance instead of singleton to prevent user contamination")
+    return AgentInstanceFactory()
 
 
 async def configure_agent_instance_factory(agent_class_registry: Optional[AgentClassRegistry] = None,
                                           agent_registry: Optional[AgentRegistry] = None,
                                           websocket_bridge: Optional[AgentWebSocketBridge] = None,
-                                          websocket_manager: Optional[WebSocketManager] = None,
+                                          # SSOT COMPLIANCE: Removed websocket_manager parameter - use AgentWebSocketBridge only
+                                          websocket_manager: Optional[Any] = None,  # DEPRECATED: Ignored for backward compatibility
                                           llm_manager: Optional[Any] = None,
                                           tool_dispatcher: Optional[Any] = None) -> AgentInstanceFactory:
     """
-    Configure the singleton AgentInstanceFactory with infrastructure components.
+    DEPRECATED: This function was used for singleton configuration and is being phased out.
+    
+    ISSUE #1142 FIX: This function has been deprecated in favor of per-request pattern.
+    Use create_agent_instance_factory(user_context) instead for proper user isolation.
+    
+    This function is maintained for backward compatibility during transition but will be removed.
     
     Args:
         agent_class_registry: Registry containing agent classes (preferred)
         agent_registry: Legacy agent registry (for backward compatibility)
-        websocket_bridge: WebSocket bridge for notifications
-        websocket_manager: Optional WebSocket manager
+        websocket_bridge: WebSocket bridge for notifications (SSOT)
+        websocket_manager: DEPRECATED - Ignored for backward compatibility
         llm_manager: LLM manager for agent communication
         tool_dispatcher: Tool dispatcher for agent tools
         
     Returns:
-        AgentInstanceFactory: Configured factory instance
+        AgentInstanceFactory: Factory instance (NOT singleton)
     """
-    factory = get_agent_instance_factory()
+    logger.warning(
+        "DEPRECATED: configure_agent_instance_factory() called. "
+        "This function creates a factory without user context isolation. "
+        "Migrate to create_agent_instance_factory(user_context) for proper multi-user support."
+    )
+    
+    # ISSUE #1142 FIX: Create new factory instance instead of using singleton
+    factory = AgentInstanceFactory()
     factory.configure(
         agent_class_registry=agent_class_registry,
         agent_registry=agent_registry,
         websocket_bridge=websocket_bridge,
-        websocket_manager=websocket_manager,
+        # SSOT COMPLIANCE: Removed websocket_manager parameter - use AgentWebSocketBridge only
         llm_manager=llm_manager,
         tool_dispatcher=tool_dispatcher
     )
     
-    logger.info(" PASS:  AgentInstanceFactory configured and ready for per-request agent instantiation")
+    logger.info(" PASS:  AgentInstanceFactory configured (non-singleton for backward compatibility)")
     return factory

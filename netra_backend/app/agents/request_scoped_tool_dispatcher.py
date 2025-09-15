@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 # DeepAgentState removed - using UserExecutionContext pattern
-# from netra_backend.app.agents.state import DeepAgentState
+# from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.registry.universal_registry import ToolRegistry
 from netra_backend.app.agents.tool_dispatcher_validation import ToolValidator
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
@@ -40,12 +40,10 @@ from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
 )
-from netra_backend.app.websocket_core import (
-    WebSocketEventEmitter,
-)
-# WebSocketEventEmitterFactory is actually UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitterFactory
-from netra_backend.app.logging_config import central_logger
+# Import the correct WebSocketEventEmitter and WebSocketEmitterFactory classes
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter, WebSocketEmitterFactory
+from shared.logging.unified_logging_ssot import get_logger
+
 from netra_backend.app.schemas.tool import (
     SimpleToolPayload,
     ToolInput,
@@ -53,7 +51,7 @@ from netra_backend.app.schemas.tool import (
     ToolStatus,
 )
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class RequestScopedToolDispatcher:

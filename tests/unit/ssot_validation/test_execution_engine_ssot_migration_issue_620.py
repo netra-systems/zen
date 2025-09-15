@@ -61,7 +61,7 @@ class TestExecutionEngineSSotMigrationIssue620(BaseIntegrationTest):
         # Create ExecutionEngine instance (should use compatibility bridge)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)  # Suppress expected deprecation warnings
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge)
         
         # Verify it's in compatibility mode
         assert hasattr(engine, 'is_compatibility_mode'), "ExecutionEngine should have compatibility mode check"
@@ -115,7 +115,7 @@ class TestExecutionEngineSSotMigrationIssue620(BaseIntegrationTest):
         # Create ExecutionEngine with suppressed warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
         
         # Test that delegation is set up correctly
         assert hasattr(engine, '_ensure_delegated_engine'), "Should have delegation setup method"
@@ -205,7 +205,7 @@ class TestExecutionEngineSSotMigrationIssue620(BaseIntegrationTest):
             mock_registry = Mock()
             mock_websocket_bridge = Mock()
             
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge)
             
             # Verify deprecation warning was issued
             deprecation_warnings = [warning for warning in w if issubclass(warning.category, DeprecationWarning)]

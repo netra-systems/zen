@@ -158,9 +158,8 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
         
         # 4. CRITICAL FIX: Enhanced Cloud Run environment detection and state validation
         # Root cause: is_websocket_connected() incorrectly returns False in GCP Cloud Run
-        from shared.isolated_environment import get_env
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
+        from shared.isolated_environment import get_env_var
+        environment = get_env_var("ENVIRONMENT", "development").lower()
         
         # GCP Cloud Run specific WebSocket state validation
         if environment in ["staging", "production"]:
@@ -206,10 +205,9 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
         # CRITICAL FIX: Enhanced error handling for connection state validation issues
         # Root cause: Connection churning causes resource accumulation
         import traceback
-        from shared.isolated_environment import get_env
-        
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
+        from shared.isolated_environment import get_env_var
+
+        environment = get_env_var("ENVIRONMENT", "development").lower()
         
         # Enhanced error context for debugging connection issues
         error_context = {
@@ -298,9 +296,8 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
                     # The state machine is created asynchronously and may not exist yet for valid connections
                     logger.debug(f"No state machine found for connection {connection_id} - allowing connection to proceed")
                     # In production environments, we still need to be conservative but not block valid connections
-                    from shared.isolated_environment import get_env
-                    env = get_env()
-                    environment = env.get("ENVIRONMENT", "development").lower()
+                    from shared.isolated_environment import get_env_var
+                    environment = get_env_var("ENVIRONMENT", "development").lower()
                     
                     if environment in ["staging", "production"]:
                         # CRITICAL REGRESSION FIX: Don't block connections that are legitimately establishing
@@ -323,9 +320,8 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
                 # Error accessing state machine - this indicates a problem
                 logger.warning(f"Error accessing state machine for {connection_id}: {e}")
                 # In production, treat state machine errors as not ready
-                from shared.isolated_environment import get_env
-                env = get_env()
-                environment = env.get("ENVIRONMENT", "development").lower()
+                from shared.isolated_environment import get_env_var
+                environment = get_env_var("ENVIRONMENT", "development").lower()
                 
                 if environment in ["staging", "production"]:
                     logger.debug(f"Cloud environment {environment}: state machine error indicates not ready")
@@ -335,9 +331,8 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
             # This is common during initial connection establishment before connection_id assignment
             logger.debug("No connection_id provided - using transport-only validation")
             # In production environments, log but don't block connections during legitimate setup
-            from shared.isolated_environment import get_env
-            env = get_env()
-            environment = env.get("ENVIRONMENT", "development").lower()
+            from shared.isolated_environment import get_env_var
+            environment = get_env_var("ENVIRONMENT", "development").lower()
             
             if environment in ["staging", "production"]:
                 logger.debug(f"Cloud environment {environment}: proceeding with transport validation - connection_id not yet assigned")
@@ -366,9 +361,8 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
             # Fall through to environment-specific logic
         
         # PHASE 4: Environment-Specific Validation with Race Condition Detection
-        from shared.isolated_environment import get_env
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
+        from shared.isolated_environment import get_env_var
+        environment = get_env_var("ENVIRONMENT", "development").lower()
         
         # Initialize race condition detector for pattern tracking
         try:
@@ -407,9 +401,8 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
         # Log error pattern if race detector is available
         try:
             from netra_backend.app.websocket_core.race_condition_prevention import RaceConditionDetector
-            from shared.isolated_environment import get_env
-            env = get_env()
-            environment = env.get("ENVIRONMENT", "development").lower()
+            from shared.isolated_environment import get_env_var
+            environment = get_env_var("ENVIRONMENT", "development").lower()
             
             race_detector = RaceConditionDetector(environment=environment)
             race_detector.add_detected_pattern(
@@ -447,9 +440,8 @@ async def validate_websocket_handshake_completion(websocket: WebSocket, timeout_
     """
     try:
         # Environment-specific timeout configuration
-        from shared.isolated_environment import get_env
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
+        from shared.isolated_environment import get_env_var
+        environment = get_env_var("ENVIRONMENT", "development").lower()
         
         # Cloud environments need longer validation due to network latency
         if environment in ["staging", "production"]:
@@ -530,9 +522,8 @@ async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], 
         return False
     
     # CRITICAL FIX: Environment-aware retry configuration
-    from shared.isolated_environment import get_env
-    env = get_env()
-    environment = env.get("ENVIRONMENT", "development").lower()
+    from shared.isolated_environment import get_env_var
+    environment = get_env_var("ENVIRONMENT", "development").lower()
     
     # Staging/production needs more aggressive retry logic due to network latency
     if environment in ["staging", "production"]:
@@ -585,26 +576,88 @@ async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], 
     return False
 
 
-async def safe_websocket_close(websocket: WebSocket, code: int = 1000, 
+async def safe_websocket_close(websocket: WebSocket, code: int = 1000,
                              reason: str = "Normal closure") -> None:
     """
-    Safely close WebSocket connection.
-    
+    Safely close WebSocket connection with enhanced production state validation.
+
     CRITICAL FIX: Enhanced error handling for connection state issues during close.
+    Addresses Issue #335: WebSocket "send after close" runtime errors with comprehensive
+    state validation and production-specific race condition handling.
     """
-    # Try to close even if connection check fails - websocket might be in transitional state
+    # Enhanced state validation before attempting close
+    connection_already_closed = False
+    close_attempted = False
+
     try:
+        # PRODUCTION FIX: Comprehensive pre-close state validation
+        # Check multiple state indicators to determine if connection is already closed
+        if hasattr(websocket, 'client_state'):
+            client_state = websocket.client_state
+            if client_state == WebSocketState.DISCONNECTED:
+                logger.debug(f"WebSocket already disconnected (client_state: {_safe_websocket_state_for_logging(client_state)}), skipping close")
+                connection_already_closed = True
+            elif client_state == WebSocketState.CONNECTING:
+                logger.debug(f"WebSocket still connecting (client_state: {_safe_websocket_state_for_logging(client_state)}), attempting graceful close")
+
+        # Additional application state check for Cloud Run environments
+        if hasattr(websocket, 'application_state') and not connection_already_closed:
+            app_state = websocket.application_state
+            if app_state == WebSocketState.DISCONNECTED:
+                logger.debug(f"WebSocket already disconnected (application_state: {_safe_websocket_state_for_logging(app_state)}), skipping close")
+                connection_already_closed = True
+
+        # Skip close attempt if we've determined the connection is already closed
+        if connection_already_closed:
+            logger.debug(f"Skipping WebSocket close operation - connection already closed")
+            return
+
+        # PRODUCTION FIX: Try close with enhanced error categorization
+        close_attempted = True
         await websocket.close(code=code, reason=reason)
-        logger.debug(f"WebSocket closed successfully with code {code}")
+        logger.debug(f"WebSocket closed successfully with code {code}, reason: {reason}")
+
     except RuntimeError as e:
-        # CRITICAL FIX: Handle connection state errors during close
+        # CRITICAL FIX: Enhanced RuntimeError handling for production edge cases
         error_message = str(e)
-        if "Need to call 'accept' first" in error_message or "WebSocket is not connected" in error_message:
-            logger.debug(f"WebSocket already disconnected or not accepted during close: {error_message}")
+
+        # Known recoverable state errors that indicate connection already closed
+        recoverable_errors = [
+            "Need to call 'accept' first",
+            "WebSocket is not connected",
+            "Connection is already closed",
+            "Cannot send to a closing connection",
+            "Cannot send to a closed connection"
+        ]
+
+        if any(error_text in error_message for error_text in recoverable_errors):
+            logger.debug(f"WebSocket close skipped - connection already in closed state: {error_message}")
         else:
-            logger.warning(f"Runtime error closing WebSocket: {e}")
+            # Unknown RuntimeError - log as warning for production debugging
+            logger.warning(f"Unexpected RuntimeError during WebSocket close (code: {code}): {error_message}")
+
+    except WebSocketDisconnect as e:
+        # PRODUCTION FIX: Handle WebSocketDisconnect during close attempts
+        # This can happen in Cloud Run when connection drops during close
+        logger.debug(f"WebSocket disconnected during close attempt (code: {code}): {e}")
+
+    except ConnectionError as e:
+        # PRODUCTION FIX: Handle network-level connection errors
+        # Common in Cloud Run environments with timeout/infrastructure issues
+        logger.debug(f"Connection error during WebSocket close (code: {code}): {e}")
+
     except Exception as e:
-        logger.warning(f"Error closing WebSocket: {e}")
+        # PRODUCTION FIX: Enhanced general exception handling with better context
+        error_type = type(e).__name__
+        logger.warning(f"Unexpected {error_type} during WebSocket close (code: {code}, attempted: {close_attempted}): {e}")
+
+        # Additional context for production debugging
+        if hasattr(websocket, 'client_state'):
+            try:
+                current_state = _safe_websocket_state_for_logging(websocket.client_state)
+                logger.debug(f"WebSocket client_state during error: {current_state}")
+            except Exception as state_error:
+                logger.debug(f"Could not read WebSocket state during error: {state_error}")
 
 
 class WebSocketMessageQueue:
@@ -1299,9 +1352,8 @@ async def validate_connection_with_race_detection(websocket: WebSocket, connecti
     """
     try:
         # Get environment for race condition detection
-        from shared.isolated_environment import get_env
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
+        from shared.isolated_environment import get_env_var
+        environment = get_env_var("ENVIRONMENT", "development").lower()
         
         # Create race condition detector
         race_detector = create_race_condition_detector(environment)
@@ -1395,11 +1447,10 @@ def _get_rate_limit_for_environment(environment: Optional[str] = None) -> Dict[s
     Returns rate limiting configuration for the specified environment.
     This is a minimal implementation for test compatibility.
     """
-    from shared.isolated_environment import get_env
-    
+    from shared.isolated_environment import get_env_var
+
     if environment is None:
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
+        environment = get_env_var("ENVIRONMENT", "development").lower()
     
     # Return basic rate limiting configuration
     if environment in ["staging", "production"]:
@@ -1429,11 +1480,10 @@ def _get_staging_optimized_timeouts(environment: Optional[str] = None) -> Dict[s
     Returns timeout configuration optimized for the specified environment.
     This is a minimal implementation for test compatibility.
     """
-    from shared.isolated_environment import get_env
-    
+    from shared.isolated_environment import get_env_var
+
     if environment is None:
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
+        environment = get_env_var("ENVIRONMENT", "development").lower()
     
     # Return environment-specific timeout configuration
     if environment == "staging":
@@ -1618,7 +1668,7 @@ def get_cleanup_priority(id_string: str) -> int:
         return 1  # Default low priority
 
 
-def create_websocket_manager(user_context=None, user_id=None):
+async def create_websocket_manager(user_context=None, user_id=None):
     """
     Create WebSocket manager instance - Compatibility wrapper.
     
@@ -1633,7 +1683,7 @@ def create_websocket_manager(user_context=None, user_id=None):
     Returns:
         WebSocketManager instance configured for the user context
     """
-    from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager as factory_create
-    
+    from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as factory_create
+
     logger.debug(f"COMPATIBILITY: Creating WebSocket manager via utils.py wrapper (user_id: {user_id})")
-    return factory_create(user_context=user_context, user_id=user_id)
+    return await factory_create(user_context)

@@ -26,7 +26,7 @@ from netra_backend.app.services.user_execution_context import (
     UserContextManager
 )
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
 class TestUserExecutionContextIsolation(BaseIntegrationTest):

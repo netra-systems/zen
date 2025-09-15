@@ -121,7 +121,7 @@ services:
         aliases:
           - auth
     build:
-      context: .
+      context: ..
       dockerfile: ./dockerfiles/auth.Dockerfile
       args:
         BUILD_ENV: development
@@ -176,8 +176,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
-    networks:
-      - default
     restart: unless-stopped
     deploy:
       resources:
@@ -196,7 +194,7 @@ services:
         aliases:
           - backend
     build:
-      context: .
+      context: ..
       dockerfile: ./dockerfiles/backend.Dockerfile
       args:
         BUILD_ENV: development
@@ -269,8 +267,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
-    networks:
-      - default
     restart: unless-stopped
     deploy:
       resources:
@@ -284,7 +280,7 @@ services:
   dev-frontend:
     image: netra-dev-frontend:latest
     build:
-      context: .
+      context: ..
       dockerfile: ./dockerfiles/frontend.Dockerfile
       args:
         BUILD_ENV: development

@@ -157,10 +157,18 @@ class StagingAgentExecutionTestRunner:
             ws_url = self.get_websocket_url()
             headers = {"Authorization": f"Bearer {self.access_token}"}
             received_events = []
-            
+
+            # ISSUE #886 FIX: Support both Authorization headers and subprotocol-based authentication
+            # Some staging environments may require subprotocol negotiation
+            subprotocols = []
+            if self.access_token:
+                # Try subprotocol-based auth for staging compatibility
+                subprotocols = [f"jwt-auth.{self.access_token}", "jwt-auth"]
+
             async with websockets.connect(
                 ws_url,
                 extra_headers=headers,
+                subprotocols=subprotocols if subprotocols else None,
                 ping_interval=20,
                 ping_timeout=10,
                 close_timeout=10

@@ -131,7 +131,7 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
         if hasattr(self.db_manager, 'close'):
             await self.db_manager.close()
 
-    async def create_authenticated_websocket_connection(self, user_email: str) -> Tuple[websockets.WebSocketServerProtocol, str]:
+    async def create_authenticated_websocket_connection(self, user_email: str) -> Tuple[websockets.ServerConnection, str]:
         """Create authenticated WebSocket connection for event testing."""
         user_context = await create_authenticated_user_context(
             user_email=user_email,
@@ -233,7 +233,7 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
             "expected_events": len(events_to_emit)
         }
 
-    async def collect_websocket_events(self, websocket: websockets.WebSocketServerProtocol, timeout: float = 10.0) -> List[Dict[str, Any]]:
+    async def collect_websocket_events(self, websocket: websockets.ServerConnection, timeout: float = 10.0) -> List[Dict[str, Any]]:
         """Collect WebSocket events with timeout."""
         events = []
         start_time = time.time()

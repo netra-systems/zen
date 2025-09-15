@@ -19,7 +19,7 @@ def test_detect_single_parameter_create_error_message_calls():
     websocket_ssot_path = "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/routes/websocket_ssot.py"
     
     if not os.path.exists(websocket_ssot_path):
-        pytest.skip(f"websocket_ssot.py not found at {websocket_ssot_path}")
+        pytest.skip(f"websocket_ssot.py not found at {websocket_ssot_path}", allow_module_level=True)
     
     with open(websocket_ssot_path, 'r') as f:
         content = f.read()

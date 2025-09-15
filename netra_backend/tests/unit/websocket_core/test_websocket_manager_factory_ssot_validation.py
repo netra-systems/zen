@@ -1,8 +1,8 @@
 """
-Unit Tests for WebSocketManagerFactory SSOT Validation Failures
+Unit Tests for WebSocketManager SSOT Validation Failures
 
 These tests are DESIGNED TO FAIL initially to prove SSOT validation issues
-exist in the WebSocketManagerFactory implementation. The tests demonstrate
+exist in the WebSocketManager implementation. The tests demonstrate
 specific SSOT violations that prevent proper factory initialization.
 
 Test Categories:
@@ -24,16 +24,19 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 
-from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
-    FactoryInitializationError,
+# SSOT imports - Issue #824 remediation
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_imports import (
+    FactoryInitializationError
+)
+from netra_backend.app.services.user_execution_context import (
     create_defensive_user_execution_context
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestWebSocketManagerFactorySSotValidation:
-    """Test SSOT validation failures in WebSocketManagerFactory."""
+class TestWebSocketManagerSSotValidation:
+    """Test SSOT validation failures in WebSocketManager."""
     
     def test_websocket_manager_factory_initialization_ssot_validation(self):
         """
@@ -44,7 +47,7 @@ class TestWebSocketManagerFactorySSotValidation:
         """
         # This should FAIL with SSOT validation error
         with pytest.raises(FactoryInitializationError, match="dependencies"):
-            WebSocketManagerFactory(
+            WebSocketManager(
                 # Missing required SSOT dependencies
                 connection_pool=None,  # SSOT violation: None dependency
                 user_context_factory=None,  # SSOT violation: None dependency
@@ -123,7 +126,7 @@ class TestWebSocketManagerFactorySSotValidation:
         mock_user_context_factory = Mock()
         mock_id_manager = Mock()
         
-        factory = WebSocketManagerFactory(
+        factory = WebSocketManager(
             connection_pool=mock_connection_pool,
             user_context_factory=mock_user_context_factory,
             id_manager=mock_id_manager
@@ -151,7 +154,7 @@ class TestWebSocketManagerFactorySSotValidation:
         invalid_connection_pool = "not_a_connection_pool"  # SSOT violation: wrong type
         
         with pytest.raises(TypeError, match="connection.*pool"):
-            WebSocketManagerFactory(
+            WebSocketManager(
                 connection_pool=invalid_connection_pool,  # SSOT violation: invalid type
                 user_context_factory=Mock(),
                 id_manager=Mock()
@@ -168,7 +171,7 @@ class TestWebSocketManagerFactorySSotValidation:
         invalid_id_manager = "not_an_id_manager"  # SSOT violation: wrong type
         
         with pytest.raises(TypeError, match="ID.*manager"):
-            WebSocketManagerFactory(
+            WebSocketManager(
                 connection_pool=Mock(),
                 user_context_factory=Mock(),
                 id_manager=invalid_id_manager  # SSOT violation: invalid type
@@ -185,7 +188,7 @@ class TestWebSocketManagerFactorySSotValidation:
         mock_user_context_factory = Mock()
         mock_id_manager = Mock()
         
-        factory = WebSocketManagerFactory(
+        factory = WebSocketManager(
             connection_pool=mock_connection_pool,
             user_context_factory=mock_user_context_factory,
             id_manager=mock_id_manager
@@ -227,7 +230,7 @@ class TestWebSocketManagerFactorySSotValidation:
         mock_user_context_factory = Mock()
         mock_id_manager = Mock()
         
-        factory = WebSocketManagerFactory(
+        factory = WebSocketManager(
             connection_pool=mock_connection_pool,
             user_context_factory=mock_user_context_factory,
             id_manager=mock_id_manager
@@ -264,7 +267,7 @@ class TestWebSocketManagerFactorySSotValidation:
         mock_user_context_factory = Mock() 
         mock_id_manager = Mock()
         
-        factory = WebSocketManagerFactory(
+        factory = WebSocketManager(
             connection_pool=mock_connection_pool,
             user_context_factory=mock_user_context_factory,
             id_manager=mock_id_manager
@@ -300,7 +303,7 @@ class TestWebSocketManagerFactorySSotValidation:
         mock_user_context_factory = Mock()
         mock_id_manager = Mock()
         
-        factory = WebSocketManagerFactory(
+        factory = WebSocketManager(
             connection_pool=mock_connection_pool,
             user_context_factory=mock_user_context_factory,
             id_manager=mock_id_manager
@@ -333,7 +336,7 @@ class TestWebSocketManagerFactorySSotValidation:
         """
         # This should FAIL - invalid configuration should be rejected
         with pytest.raises(ValueError, match="configuration"):
-            WebSocketManagerFactory(
+            WebSocketManager(
                 connection_pool=Mock(),
                 user_context_factory=Mock(),
                 id_manager=Mock(),
@@ -372,7 +375,7 @@ class TestWebSocketManagerFactorySSotValidation:
         mock_user_context_factory = Mock()
         mock_id_manager = Mock()
         
-        factory = WebSocketManagerFactory(
+        factory = WebSocketManager(
             connection_pool=mock_connection_pool,
             user_context_factory=mock_user_context_factory,
             id_manager=mock_id_manager
@@ -405,13 +408,13 @@ class TestWebSocketManagerFactorySSotValidation:
         Expected Failure: Should enforce single factory instance or proper isolation.
         """
         # Create two factory instances
-        factory1 = WebSocketManagerFactory(
+        factory1 = WebSocketManager(
             connection_pool=Mock(),
             user_context_factory=Mock(),
             id_manager=Mock()
         )
         
-        factory2 = WebSocketManagerFactory(
+        factory2 = WebSocketManager(
             connection_pool=Mock(),
             user_context_factory=Mock(),
             id_manager=Mock()
@@ -419,6 +422,6 @@ class TestWebSocketManagerFactorySSotValidation:
         
         # This should FAIL if SSOT singleton pattern is required but violated
         # (This test may pass if singleton pattern is not required for this factory)
-        if hasattr(WebSocketManagerFactory, '_instance'):
+        if hasattr(WebSocketManager, '_instance'):
             assert factory1 is factory2, \
                 "SSOT violation: Multiple factory instances detected, should be singleton"

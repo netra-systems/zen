@@ -16,6 +16,7 @@ This module tests the ExecutionState enum transitions and validation logic to en
 """
 
 import pytest
+import unittest
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any
@@ -30,7 +31,7 @@ from netra_backend.app.core.agent_execution_tracker import (
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestExecutionStateTransitions(SSotBaseTestCase):
+class TestExecutionStateTransitions(unittest.TestCase, SSotBaseTestCase):
     """Unit tests for ExecutionState enum transitions and validation."""
     
     def setUp(self):
@@ -172,7 +173,7 @@ class TestExecutionStateTransitions(SSotBaseTestCase):
             with self.assertRaises(ValueError) as context:
                 self.tracker.update_execution_state(execution_id, invalid_state)
             
-            self.assertIn("dict object", str(context.exception))
+            self.assertIn("Dict object", str(context.exception))
             self.assertIn("Issue #305", str(context.exception))
     
     def test_non_execution_state_enum_rejection(self):

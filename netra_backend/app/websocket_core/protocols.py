@@ -26,13 +26,13 @@ from datetime import datetime
 from abc import abstractmethod
 
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from shared.types.core_types import (
     UserID, ThreadID, ConnectionID, WebSocketID, RequestID,
     ensure_user_id, ensure_thread_id, ensure_websocket_id
 )
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 @runtime_checkable
@@ -257,8 +257,8 @@ class WebSocketProtocolValidator:
             Dictionary with validation results and compliance details
             
         Example:
-            >>> from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-            >>> manager = create_websocket_manager(user_context)
+            >>> from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            >>> manager = await get_websocket_manager(user_context)
             >>> result = WebSocketManagerProtocolValidator.validate_manager_protocol(manager)
             >>> if not result['compliant']:
             ...     raise ValueError(f"Manager not protocol compliant: {result['missing_methods']}")
@@ -587,84 +587,25 @@ def ensure_websocket_id_type(websocket_id: Union[str, WebSocketID, None]) -> Opt
     return ensure_websocket_id(websocket_id)
 
 
-def adapt_manager_for_legacy_code(manager: WebSocketProtocol) -> 'LegacyWebSocketManagerAdapter':
+def adapt_manager_for_legacy_code(manager: WebSocketProtocol) -> WebSocketProtocol:
     """
-    Create a legacy adapter wrapper around a typed WebSocket manager.
-    
-    This adapter allows legacy code that expects string-based APIs to work
-    with the new strongly-typed WebSocket manager implementations.
-    
+    SSOT CONSOLIDATION: Legacy adapter removed - return manager directly.
+
+    The legacy adapter pattern has been removed to reduce redundant implementations.
+    Use the WebSocketManager interface directly with proper type handling.
+
     Args:
         manager: Typed WebSocket manager instance
-        
+
     Returns:
-        Legacy adapter wrapper
+        The manager instance directly (no adapter wrapper)
     """
-    return LegacyWebSocketManagerAdapter(manager)
+    return manager
 
 
-class LegacyWebSocketManagerAdapter:
-    """
-    Adapter that provides string-based APIs for legacy compatibility.
-    
-    This wrapper converts between legacy string-based method calls and
-    the new strongly-typed WebSocket manager interface.
-    """
-    
-    def __init__(self, typed_manager: WebSocketProtocol):
-        """
-        Initialize legacy adapter.
-        
-        Args:
-            typed_manager: Strongly-typed WebSocket manager to wrap
-        """
-        self._typed_manager = typed_manager
-        self._logger = central_logger.get_logger(__name__)
-    
-    async def add_connection(self, connection) -> None:
-        """Legacy add_connection with automatic type conversion."""
-        return await self._typed_manager.add_connection(connection)
-    
-    async def remove_connection(self, connection_id: str) -> None:
-        """Legacy remove_connection with automatic type conversion."""
-        return await self._typed_manager.remove_connection(connection_id)
-    
-    def get_connection(self, connection_id: str):
-        """Legacy get_connection with automatic type conversion."""
-        return self._typed_manager.get_connection(connection_id)
-    
-    def get_user_connections(self, user_id: str) -> Set[str]:
-        """Legacy get_user_connections with automatic type conversion."""
-        return self._typed_manager.get_user_connections(user_id)
-    
-    def is_connection_active(self, user_id: str) -> bool:
-        """Legacy is_connection_active with automatic type conversion."""
-        return self._typed_manager.is_connection_active(user_id)
-    
-    def get_connection_id_by_websocket(self, websocket) -> Optional[str]:
-        """Legacy get_connection_id_by_websocket returning string."""
-        result = self._typed_manager.get_connection_id_by_websocket(websocket)
-        return str(result) if result else None
-    
-    def update_connection_thread(self, connection_id: str, thread_id: str) -> bool:
-        """Legacy update_connection_thread with automatic type conversion."""
-        return self._typed_manager.update_connection_thread(connection_id, thread_id)
-    
-    async def send_to_user(self, user_id: str, message: Dict[str, Any]) -> None:
-        """Legacy send_to_user with automatic type conversion."""
-        return await self._typed_manager.send_to_user(user_id, message)
-    
-    async def emit_critical_event(self, user_id: str, event_type: str, data: Dict[str, Any]) -> None:
-        """Legacy emit_critical_event with automatic type conversion."""
-        return await self._typed_manager.emit_critical_event(user_id, event_type, data)
-    
-    def get_connection_health(self, user_id: str) -> Dict[str, Any]:
-        """Legacy get_connection_health with automatic type conversion."""
-        return self._typed_manager.get_connection_health(user_id)
-    
-    async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
-        """Legacy send_to_thread with automatic type conversion."""
-        return await self._typed_manager.send_to_thread(thread_id, message)
+# SSOT CONSOLIDATION: LegacyWebSocketManagerAdapter removed to reduce redundancy
+# Use WebSocketManager directly with proper type conversion as needed
+# Class removed for SSOT consolidation
 
 
 # =============================================================================
@@ -758,7 +699,7 @@ __all__ = [
     'ensure_thread_id_type',
     'ensure_websocket_id_type',
     'adapt_manager_for_legacy_code',
-    'LegacyWebSocketManagerAdapter',
+    # 'LegacyWebSocketManagerAdapter',  # REMOVED: SSOT consolidation
     # Migration Helpers
     'validate_migration_compatibility'
 ]

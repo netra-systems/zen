@@ -743,10 +743,11 @@ class E2EAuthHelper:
         staging_user_id = f"e2e-staging-{hash(email) & 0xFFFFFFFF:08x}"
         
         # Create token with staging-appropriate claims
+        # PHASE 2 FIX: Include agent permissions for WebSocket agent events
         payload = {
             "sub": staging_user_id,
             "email": email,
-            "permissions": ["read", "write", "e2e_test"],
+            "permissions": ["read", "write", "execute", "basic_chat", "agent_access", "e2e_test"],
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=30),
             "type": "access",
@@ -1092,6 +1093,64 @@ class E2EAuthHelper:
                 "details": f"Unexpected error: {str(e)}"
             }
 
+    def get_jwt_token_for_user(
+        self,
+        user_id: str,
+        email: str,
+        permissions: Optional[List[str]] = None,
+        exp_minutes: int = 30
+    ) -> str:
+        """
+        Get JWT token for specific user (instance method).
+
+        This method provides the same functionality as the standalone function
+        but as an instance method for tests that expect it on E2EAuthHelper.
+
+        Args:
+            user_id: User ID for the token
+            email: User email address
+            permissions: User permissions (defaults to ["read", "write"])
+            exp_minutes: Token expiry in minutes
+
+        Returns:
+            Valid JWT token string
+        """
+        return self.create_test_jwt_token(
+            user_id=user_id,
+            email=email,
+            permissions=permissions if permissions is not None else ["read", "write"],
+            exp_minutes=exp_minutes
+        )
+
+    async def create_test_user_with_token(self, user_id: str) -> str:
+        """
+        REMEDIATION FIX: Create test user with token - missing method for Issue #861.
+
+        This method was missing and causing 21 integration test failures with AttributeError.
+        All integration tests expect this method to exist on E2EAuthHelper instances.
+
+        The method creates a test user and returns just the JWT token (not full user data).
+        This is the specific API that integration tests are calling.
+
+        Args:
+            user_id: User ID to create token for (required)
+
+        Returns:
+            Valid JWT token string for the user
+        """
+        # Generate email from user_id for consistency
+        email = f"{user_id}@test.example.com"
+
+        # Create JWT token using existing SSOT method
+        jwt_token = self.create_test_jwt_token(
+            user_id=user_id,
+            email=email,
+            permissions=["read", "write"],  # Standard test permissions
+            exp_minutes=30
+        )
+
+        return jwt_token
+
 
 class E2EWebSocketAuthHelper(E2EAuthHelper):
     """
@@ -1355,25 +1414,27 @@ async def create_authenticated_user(
     environment: str = "test",
     user_id: Optional[str] = None,
     email: Optional[str] = None,
-    permissions: Optional[List[str]] = None
+    permissions: Optional[List[str]] = None,
+    user_prefix: str = "user"
 ) -> Tuple[str, Dict[str, Any]]:
     """
     Create an authenticated user and return token and user data.
     This is a convenience function that wraps E2EAuthHelper.
-    
+
     Args:
         environment: Test environment ('test', 'staging', etc.)
         user_id: Optional user ID (auto-generated if not provided)
-        email: Optional email (uses default if not provided) 
+        email: Optional email (uses default if not provided)
         permissions: Optional permissions list
-        
+        user_prefix: Prefix for auto-generated user ID (default: "user")
+
     Returns:
         Tuple of (jwt_token, user_data)
     """
     auth_helper = E2EAuthHelper(environment=environment)
     
-    # Generate user ID if not provided
-    user_id = user_id or f"test-user-{uuid.uuid4().hex[:8]}"
+    # Generate user ID if not provided, using the user_prefix parameter
+    user_id = user_id or f"{user_prefix}-{uuid.uuid4().hex[:8]}"
     email = email or auth_helper.config.test_user_email
     permissions = permissions if permissions is not None else ["read", "write"]
     
@@ -1538,6 +1599,35 @@ def get_test_jwt_token(
     )
 
 
+def get_user_auth_token(
+    user_id: str = "test-user",
+    email: Optional[str] = None,
+    permissions: Optional[List[str]] = None
+) -> str:
+    """
+    Get authentication token for user in E2E tests.
+    
+    This function provides a simplified interface for getting JWT tokens
+    for E2E test authentication scenarios.
+    
+    Args:
+        user_id: User ID to authenticate
+        email: User email (generated if not provided)
+        permissions: User permissions (defaults to ["read", "write"])
+        
+    Returns:
+        JWT authentication token string
+    """
+    email = email or f"{user_id}@test.netra.ai"
+    permissions = permissions or ["read", "write"]
+    
+    return get_jwt_token_for_user(
+        user_id=user_id,
+        email=email,
+        permissions=permissions
+    )
+
+
 def get_test_user_context(
     user_id: Optional[str] = None,
     email: Optional[str] = None,
@@ -1586,6 +1676,8 @@ __all__ = [
     "create_authenticated_user_context",
     "get_test_user_context",             # Convenience function for test context
     "get_test_jwt_token",
+    "validate_authenticated_session",    # NEW: Session validation function
+    "get_authenticated_user_context",   # NEW: User context function
     # Compatibility functions for legacy tests
     "create_test_user",
     "get_authenticated_headers", 
@@ -1650,3 +1742,108 @@ create_authenticated_test_user = create_authenticated_user
 
 # Compatibility aliases for integration tests (Issue #308)
 get_test_user_context = create_authenticated_user_context  # Integration test compatibility alias
+
+
+async def validate_authenticated_session(
+    session: aiohttp.ClientSession,
+    base_url: str = None,
+    environment: str = "test"
+) -> bool:
+    """
+    Validate that an authenticated session is working correctly.
+    
+    This function tests that the provided session can successfully make
+    authenticated requests to protected endpoints.
+    
+    Args:
+        session: aiohttp ClientSession with authentication configured
+        base_url: Base URL for validation (uses staging URL if not provided)
+        environment: Environment to validate against ('test', 'staging', etc.)
+    
+    Returns:
+        bool: True if session is valid and authenticated, False otherwise
+    """
+    try:
+        # Determine the validation URL
+        if base_url is None:
+            config = StagingTestConfig(environment=environment)
+            base_url = config.base_url
+            
+        # Try to access a protected endpoint that requires authentication
+        validation_url = f"{base_url}/api/v1/auth/validate"
+        
+        async with session.get(validation_url, timeout=10.0) as response:
+            if response.status == 200:
+                logger.info(f"Session validation successful for {base_url}")
+                return True
+            elif response.status in [401, 403]:
+                logger.warning(f"Session authentication failed (status: {response.status})")
+                return False
+            else:
+                logger.warning(f"Unexpected response status during session validation: {response.status}")
+                return False
+                
+    except asyncio.TimeoutError:
+        logger.error("Timeout during session validation")
+        return False
+    except Exception as e:
+        logger.error(f"Error during session validation: {e}")
+        return False
+
+
+async def get_authenticated_user_context(
+    user_id: Optional[str] = None,
+    email: Optional[str] = None,
+    permissions: Optional[List[str]] = None,
+    environment: str = "test"
+) -> Dict[str, Any]:
+    """
+    Get authenticated user context for E2E testing.
+    
+    This function creates a complete user context that includes JWT token,
+    user data, and session information for use in E2E tests that need
+    to simulate authenticated user interactions.
+    
+    Args:
+        user_id: Optional user ID (auto-generated if not provided)
+        email: Optional email (uses test default if not provided)
+        permissions: Optional permissions list (uses default ['read', 'write'])
+        environment: Test environment ('test', 'staging', etc.)
+    
+    Returns:
+        Dict containing user context with keys:
+        - user_id: User identifier
+        - email: User email
+        - jwt_token: Valid JWT token
+        - headers: Authentication headers
+        - permissions: User permissions
+        - environment: Environment context
+        - created_at: Context creation timestamp
+    """
+    # Create authenticated user
+    jwt_token, user_data = await create_authenticated_user(
+        environment=environment,
+        user_id=user_id,
+        email=email,
+        permissions=permissions
+    )
+    
+    # Build complete user context
+    auth_helper = E2EAuthHelper(environment=environment)
+    headers = auth_helper.get_auth_headers(jwt_token)
+    
+    user_context = {
+        "user_id": user_data["user_id"],
+        "email": user_data["email"], 
+        "jwt_token": jwt_token,
+        "headers": headers,
+        "permissions": user_data.get("permissions", permissions or ["read", "write"]),
+        "environment": environment,
+        "created_at": time.time(),
+        "websocket_headers": auth_helper.get_websocket_headers(jwt_token),
+        "websocket_subprotocols": auth_helper.get_websocket_subprotocols(jwt_token)
+    }
+    
+    logger.info(f"Created authenticated user context for {user_data['email']} in {environment}")
+    
+    return user_context

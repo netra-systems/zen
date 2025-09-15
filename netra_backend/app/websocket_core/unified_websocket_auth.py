@@ -98,6 +98,7 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
             )
         
         # Check environment variables for E2E indicators
+        from shared.isolated_environment import get_env
         env = get_env()
         
         # CRITICAL FIX: Enhanced E2E detection for GCP staging environments
@@ -232,6 +233,32 @@ class WebSocketAuthResult:
     error_message: Optional[str] = None
     error_code: Optional[str] = None
     
+    # Backward compatibility properties for tests
+    @property
+    def is_valid(self) -> bool:
+        """Compatibility property: Returns True if authentication was successful."""
+        return self.success
+
+    @property
+    def user_id(self) -> Optional[str]:
+        """Compatibility property: Returns user ID from user context."""
+        return self.user_context.user_id if self.user_context else None
+
+    @property
+    def email(self) -> Optional[str]:
+        """Compatibility property: Returns email from auth result."""
+        return self.auth_result.email if self.auth_result else None
+
+    @property
+    def subscription_tier(self) -> Optional[str]:
+        """Compatibility property: Returns subscription tier from user context."""
+        return self.user_context.subscription_tier if self.user_context else None
+
+    @property
+    def permissions(self) -> Optional[List[str]]:
+        """Compatibility property: Returns permissions from auth result."""
+        return self.auth_result.permissions if self.auth_result else None
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for compatibility."""
         result = {
@@ -239,7 +266,7 @@ class WebSocketAuthResult:
             "error_message": self.error_message,
             "error_code": self.error_code
         }
-        
+
         if self.user_context:
             result.update({
                 "user_id": self.user_context.user_id,
@@ -247,14 +274,14 @@ class WebSocketAuthResult:
                 "thread_id": self.user_context.thread_id,
                 "run_id": self.user_context.run_id
             })
-        
+
         if self.auth_result:
             result.update({
                 "email": self.auth_result.email,
                 "permissions": self.auth_result.permissions,
                 "validated_at": self.auth_result.validated_at
             })
-            
+
         return result
 
 
@@ -817,9 +844,8 @@ class UnifiedWebSocketAuthenticator:
             True if handshake is properly completed, False otherwise
         """
         try:
-            from shared.isolated_environment import get_env
-            env = get_env()
-            environment = env.get("ENVIRONMENT", "development").lower()
+            from shared.isolated_environment import get_env_var
+            environment = get_env_var("ENVIRONMENT", "development").lower()
             
             # Check basic connection state
             if not hasattr(websocket, 'client_state'):
@@ -864,9 +890,8 @@ class UnifiedWebSocketAuthenticator:
             websocket: WebSocket connection object
         """
         try:
-            from shared.isolated_environment import get_env
-            env = get_env()
-            environment = env.get("ENVIRONMENT", "development").lower()
+            from shared.isolated_environment import get_env_var
+            environment = get_env_var("ENVIRONMENT", "development").lower()
             is_cloud_run = bool(env.get("K_SERVICE"))  # Detect Cloud Run
             
             # PHASE 1 FIX: Import Windows-safe asyncio patterns
@@ -1275,7 +1300,9 @@ async def authenticate_websocket_ssot(
         WebSocketAuthResult with authentication outcome
     """
     start_time = time.time()
-    connection_id = preliminary_connection_id or str(uuid.uuid4())
+    # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for connection ID generation
+    from shared.id_generation import UnifiedIdGenerator
+    connection_id = preliminary_connection_id or UnifiedIdGenerator.generate_base_id("ws_conn_prelim", True, 8)
     
     logger.info(f"SSOT AUTH: Starting consolidated WebSocket authentication for connection {connection_id}")
     
@@ -1300,12 +1327,12 @@ async def authenticate_websocket_ssot(
         
         # STEP 4: Perform authentication with circuit breaker and retry logic
         # (consolidated from UnifiedWebSocketAuthenticator logic)
-        auth_result = await auth_service.authenticate_websocket(
-            websocket, 
+        auth_result, user_context_from_auth = await auth_service.authenticate_websocket(
+            websocket,
             e2e_context=e2e_context,
             preliminary_connection_id=connection_id
         )
-        
+
         # STEP 5: Handle authentication result
         if not auth_result.success:
             logger.warning(f"SSOT AUTH: Authentication failed for connection {connection_id}: {auth_result.error}")
@@ -1543,6 +1570,64 @@ class UnifiedWebSocketAuthenticator:
             stacklevel=2
         )
         return await authenticate_websocket_ssot(websocket, e2e_context=e2e_context)
+
+    async def authenticate_token(self, token: str, websocket: Optional[WebSocket] = None) -> WebSocketAuthResult:
+        """
+        DEPRECATED: Direct token authentication method - use authenticate_websocket_ssot() instead.
+
+        This method provides backward compatibility for tests that call authenticate_token() directly.
+        It creates a mock WebSocket if needed and delegates to the SSOT authentication function.
+
+        Args:
+            token: JWT token to authenticate
+            websocket: Optional WebSocket connection (created if not provided)
+
+        Returns:
+            WebSocketAuthResult with authentication outcome
+        """
+        import warnings
+        warnings.warn(
+            "UnifiedWebSocketAuthenticator.authenticate_token() is deprecated. "
+            "Use authenticate_websocket_ssot() function instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
+        # Update deprecated stats for backward compatibility
+        self._websocket_auth_attempts += 1
+
+        try:
+            # If no websocket provided, create a mock one for token validation
+            if websocket is None:
+                from test_framework.websocket_helpers import MockWebSocketConnection
+                websocket = MockWebSocketConnection()
+
+                # Add token to subprotocols for extraction
+                websocket.subprotocols = [f"jwt-auth.{token}"]
+                websocket.headers = {"authorization": f"Bearer {token}"}
+
+            # Delegate to SSOT function
+            result = await authenticate_websocket_ssot(websocket, e2e_context=None)
+
+            # Update deprecated stats
+            if result.success:
+                self._websocket_auth_successes += 1
+            else:
+                self._websocket_auth_failures += 1
+
+            return result
+
+        except Exception as e:
+            # Handle token authentication errors
+            self._websocket_auth_failures += 1
+
+            return WebSocketAuthResult(
+                success=False,
+                user_context=None,
+                auth_result=None,
+                error_message=f"Token authentication failed: {str(e)}",
+                error_code="TOKEN_AUTH_ERROR"
+            )
     
     def get_websocket_auth_stats(self) -> Dict[str, Any]:
         """DEPRECATED: Get authentication statistics (for backward compatibility only)."""
@@ -1615,8 +1700,9 @@ def create_authenticated_user_context(
     from netra_backend.app.core.unified_id_manager import IDType
     
     # Create user context with SSOT pattern matching UserExecutionContext signature
+    # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for fallback user ID
     user_context = UserExecutionContext(
-        user_id=getattr(auth_result, 'user_id', str(uuid.uuid4())),
+        user_id=getattr(auth_result, 'user_id', UnifiedIdGenerator.generate_base_id('fallback_user', True, 8)),
         thread_id=resolved_thread_id,
         run_id=id_manager.generate_run_id(resolved_thread_id),
         websocket_client_id=id_manager.generate_id(IDType.WEBSOCKET, prefix="ws", context={"test": True}),
@@ -1664,8 +1750,9 @@ async def validate_websocket_token_business_logic(token: str) -> Optional[Dict[s
             
         # For backward compatibility with tests, handle "valid" tokens specially
         if "valid" in token.lower() and len(token) > 10:
+            # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for test user ID
             return {
-                'sub': str(uuid.uuid4()),
+                'sub': UnifiedIdGenerator.generate_base_id('test_user', True, 8),
                 'email': 'test@enterprise.com', 
                 'exp': 9999999999,  # Far future for tests
                 'permissions': ['execute_agents']

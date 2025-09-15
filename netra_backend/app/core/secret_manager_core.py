@@ -6,6 +6,7 @@ Provides the main EnhancedSecretManager class for secure secret management.
 import os
 from typing import Any, Dict, Optional
 
+from shared.isolated_environment import get_env
 from netra_backend.app.core.secret_manager_types import SecretAccessLevel, SecretMetadata
 from netra_backend.app.schemas.config_types import EnvironmentType
 
@@ -43,12 +44,14 @@ class EnhancedSecretManager:
             environment=self.environment
         )
         
-        # Set in environment (for development/testing)
-        os.environ[secret_name] = value
+        # Set in environment (for development/testing) using SSOT IsolatedEnvironment
+        env = get_env()
+        env.set(secret_name, value, "enhanced_secret_manager")
     
     def has_secret(self, secret_name: str) -> bool:
-        """Check if secret exists."""
-        return secret_name in os.environ
+        """Check if secret exists using SSOT IsolatedEnvironment."""
+        env = get_env()
+        return env.get(secret_name) is not None
     
     def get_metadata(self, secret_name: str) -> Optional[SecretMetadata]:
         """Get secret metadata."""

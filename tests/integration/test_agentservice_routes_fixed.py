@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 from fastapi import FastAPI
 
 from netra_backend.app.services.agent_service_core import AgentService
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.routes.agents_execute import router
 
 

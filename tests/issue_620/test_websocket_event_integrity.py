@@ -145,8 +145,8 @@ class TestWebSocketEventIntegrity(SSotAsyncTestCase):
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input="Execute comprehensive workflow with all WebSocket events",
             metadata={
+                "user_input": "Execute comprehensive workflow with all WebSocket events",
                 "test_case": "critical_sequence_validation",
                 "requires_all_events": True,
                 "websocket_critical": True
@@ -259,7 +259,7 @@ class TestWebSocketEventIntegrity(SSotAsyncTestCase):
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input="Test WebSocket error recovery",
+            # user_input moved to metadata: "Test WebSocket error recovery",
             metadata={
                 "test_case": "error_recovery",
                 "simulate_errors": True
@@ -323,7 +323,7 @@ class TestWebSocketEventIntegrity(SSotAsyncTestCase):
                 user_id=user_context.user_id,
                 thread_id=user_context.thread_id,
                 run_id=f"{user_context.run_id}_perf_{i}",
-                user_input=f"Performance test event {i}",
+                # user_input moved to metadata: f"Performance test event {i}",
                 metadata={"performance_test": i, "batch_size": num_events}
             )
             
@@ -458,7 +458,7 @@ class TestWebSocketEventIntegrity(SSotAsyncTestCase):
             mock_registry = Mock()
             websocket_bridge = self._create_monitored_websocket_bridge(monitor)
             
-            engine = ExecutionEngine(mock_registry, websocket_bridge, user_context)
+            engine = UserExecutionEngine(mock_registry, websocket_bridge, user_context)
             logger.info("Created ExecutionEngine for WebSocket testing")
             return engine
             
@@ -505,7 +505,7 @@ class TestWebSocketEventIntegrity(SSotAsyncTestCase):
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input=f"WebSocket test for {pattern['name']}",
+            # user_input moved to metadata: f"WebSocket test for {pattern['name']}",
             metadata={
                 "test_pattern": pattern["name"],
                 "websocket_test": True,
@@ -717,7 +717,7 @@ class TestWebSocketEventIntegrity(SSotAsyncTestCase):
             
         except ImportError:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-            engine = ExecutionEngine(Mock(), websocket_bridge, user_context)
+            engine = UserExecutionEngine(Mock(), websocket_bridge, user_context)
             return engine
     
     def _create_user_isolated_websocket_bridge(self, monitor: WebSocketEventMonitor, 
@@ -748,7 +748,7 @@ class TestWebSocketEventIntegrity(SSotAsyncTestCase):
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input=f"Isolated WebSocket test for user {user_index}",
+            # user_input moved to metadata: f"Isolated WebSocket test for user {user_index}",
             metadata={
                 "user_index": user_index,
                 "isolation_test": True,
@@ -793,7 +793,7 @@ class TestWebSocketEventIntegrity(SSotAsyncTestCase):
             return engine
         except ImportError:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-            engine = ExecutionEngine(Mock(), error_bridge, user_context)
+            engine = UserExecutionEngine(Mock(), error_bridge, user_context)
             return engine
     
     def _create_error_recovery_websocket_bridge(self, monitor: WebSocketEventMonitor):

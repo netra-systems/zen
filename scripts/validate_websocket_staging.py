@@ -22,12 +22,12 @@ from typing import Dict, Optional
 
 try:
     import websockets
-    from websockets.exceptions import WebSocketException, ConnectionClosedError
+    from websockets import WebSocketException, ConnectionClosedError
     try:
-        from websockets.exceptions import InvalidStatusCode
+        from websockets import InvalidStatusCode
     except ImportError:
         # In newer versions, this might be renamed or moved
-        from websockets.exceptions import InvalidStatus as InvalidStatusCode
+        from websockets import InvalidStatus as InvalidStatusCode
 except ImportError:
     print(" FAIL:  websockets library not found. Install with: pip install websockets")
     sys.exit(1)

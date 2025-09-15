@@ -722,16 +722,15 @@ class CentralConfigurationValidator:
                 # During test context, try to get the value from test defaults if available
                 try:
                     from shared.isolated_environment import get_env
-                    import os
                     env = get_env()
-                    
+
                     # CRITICAL FIX: More robust test context detection during pytest collection
                     # The isolated environment's _is_test_context() may fail during collection
                     is_test_context = (
-                        env._is_test_context() or 
-                        os.environ.get('PYTEST_CURRENT_TEST') or 
+                        env._is_test_context() or
+                        env.get('PYTEST_CURRENT_TEST') or
                         environment == Environment.TEST or
-                        'pytest' in str(os.environ.get('_', ''))
+                        'pytest' in str(env.get('_', ''))
                     )
                     
                     if is_test_context and hasattr(env, '_get_test_environment_defaults'):
@@ -1234,10 +1233,10 @@ class CentralConfigurationValidator:
     
     def _check_and_warn_legacy_configs(self) -> None:
         """Check for legacy configuration usage and log warnings."""
+        # SSOT FIX: Use IsolatedEnvironment instead of direct os.environ access
         # Collect all environment variables
-        current_configs = {}
-        for key in os.environ:
-            current_configs[key] = os.environ.get(key)
+        env = get_env()
+        current_configs = env.get_all()
         
         # Check for legacy usage
         warnings = LegacyConfigMarker.check_legacy_usage(current_configs)

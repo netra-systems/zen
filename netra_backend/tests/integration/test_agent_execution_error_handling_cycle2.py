@@ -24,7 +24,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from shared.types import UserID, ThreadID, RunID
 from shared.isolated_environment import get_env
@@ -46,7 +46,7 @@ class TestAgentExecutionErrorHandling(BaseIntegrationTest):
         await bridge.ensure_integration()
         
         agent_registry = bridge.get_orchestrator().agent_registry
-        execution_engine = ExecutionEngine(agent_registry=agent_registry)
+        execution_engine = UserExecutionEngine(agent_registry=agent_registry)
         
         user_id = UserID("invalid_agent_test_user")
         thread_id = ThreadID("invalid_agent_thread")
@@ -106,7 +106,7 @@ class TestAgentExecutionErrorHandling(BaseIntegrationTest):
         await bridge.ensure_integration()
         
         agent_registry = bridge.get_orchestrator().agent_registry
-        execution_engine = ExecutionEngine(agent_registry=agent_registry)
+        execution_engine = UserExecutionEngine(agent_registry=agent_registry)
         
         # Test various malformed contexts
         malformed_contexts = [
@@ -192,7 +192,7 @@ class TestAgentExecutionErrorHandling(BaseIntegrationTest):
         await bridge.ensure_integration()
         
         agent_registry = bridge.get_orchestrator().agent_registry
-        execution_engine = ExecutionEngine(agent_registry=agent_registry)
+        execution_engine = UserExecutionEngine(agent_registry=agent_registry)
         
         user_id = UserID("timeout_test_user")
         thread_id = ThreadID("timeout_thread")
@@ -264,7 +264,7 @@ class TestAgentExecutionErrorHandling(BaseIntegrationTest):
         await bridge.ensure_integration()
         
         agent_registry = bridge.get_orchestrator().agent_registry
-        execution_engine = ExecutionEngine(agent_registry=agent_registry)
+        execution_engine = UserExecutionEngine(agent_registry=agent_registry)
         
         user_id = UserID("partial_failure_user")
         thread_id = ThreadID("partial_failure_thread")
@@ -399,7 +399,7 @@ class TestAgentExecutionErrorHandling(BaseIntegrationTest):
         
         # Act: Execute all concurrent requests
         async def execute_single(label, context):
-            execution_engine = ExecutionEngine(agent_registry=agent_registry)
+            execution_engine = UserExecutionEngine(agent_registry=agent_registry)
             try:
                 result = await execution_engine.execute_agent(context)
                 return {

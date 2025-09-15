@@ -48,7 +48,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 # WebSocket testing utilities
 try:
     import websockets
-    from websockets.exceptions import ConnectionClosed, InvalidStatusCode
+    from websockets import ConnectionClosed, InvalidStatusCode
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
     WEBSOCKETS_AVAILABLE = False

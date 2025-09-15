@@ -206,7 +206,7 @@ class TestUserIsolationConsistency(SSotAsyncTestCase):
             # Create engines with different user contexts
             for context in self.user_contexts[:2]:  # Test 2 users
                 try:
-                    engine = ExecutionEngine(mock_registry, mock_bridge, context)
+                    engine = UserExecutionEngine(mock_registry, mock_bridge, context)
                     engines.append((engine, context))
                 except Exception as e:
                     self.isolation_violations[f"legacy_engine_creation_{context.user_id}"] = str(e)
@@ -253,7 +253,7 @@ class TestUserIsolationConsistency(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, PipelineStep
-            from netra_backend.app.agents.state import DeepAgentState
+            from netra_backend.app.schemas.agent_models import DeepAgentState
             from datetime import datetime, timezone
             
             # Create engines for concurrent testing

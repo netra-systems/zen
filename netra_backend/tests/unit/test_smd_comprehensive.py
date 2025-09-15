@@ -829,11 +829,11 @@ class TestEnvironmentConfigurationIsolation(BaseTestCase):
     def test_get_env_wrapper_function(self):
         """Test that get_env wrapper function works correctly."""
         # Test with default value
-        result = get_env("NONEXISTENT_KEY", "default_value")
+        result = get_env().get("NONEXISTENT_KEY", "default_value")
         self.assertEqual(result, "default_value")
         
         # Test with empty string default (should return default)
-        result = get_env("NONEXISTENT_KEY", "")
+        result = get_env().get("NONEXISTENT_KEY", "")
         self.assertEqual(result, "")
     
     def test_environment_isolation_in_get_env(self):
@@ -842,7 +842,7 @@ class TestEnvironmentConfigurationIsolation(BaseTestCase):
         from netra_backend.app.smd import get_env as test_get_env
         
         # Test with existing environment variable or default
-        result = test_get_env("TEST_KEY", "default")
+        result = test_get_env().get("TEST_KEY", "default")
         
         # Should return the default if key doesn't exist
         self.assertIsInstance(result, str)
@@ -978,7 +978,7 @@ class TestAuthValidationAndSecurity(BaseTestCase):
     
     async def test_auth_configuration_validation_success(self):
         """Test successful auth configuration validation."""
-        with patch('netra_backend.app.smd.validate_auth_at_startup') as mock_validate:
+        with patch('netra_backend.app.smd.validate_auth_startup') as mock_validate:
             mock_validate.return_value = None  # Success
             
             # Should not raise exception
@@ -986,7 +986,7 @@ class TestAuthValidationAndSecurity(BaseTestCase):
     
     async def test_auth_configuration_validation_failure_is_fatal(self):
         """Test that auth validation failure causes fatal startup failure."""
-        with patch('netra_backend.app.smd.validate_auth_at_startup') as mock_validate:
+        with patch('netra_backend.app.smd.validate_auth_startup') as mock_validate:
             mock_validate.side_effect = Exception("Auth validation failed - insecure configuration")
             
             # Should raise DeterministicStartupError
@@ -998,7 +998,7 @@ class TestAuthValidationAndSecurity(BaseTestCase):
     
     async def test_auth_validation_import_error_is_fatal(self):
         """Test that missing auth validator causes fatal failure."""
-        with patch('netra_backend.app.smd.validate_auth_at_startup', side_effect=ImportError("Module not found")):
+        with patch('netra_backend.app.smd.validate_auth_startup', side_effect=ImportError("Module not found")):
             
             # Should raise DeterministicStartupError
             with self.assertRaises(DeterministicStartupError) as context:

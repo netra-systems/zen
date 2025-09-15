@@ -80,9 +80,9 @@ export {
 } from './domains/messages';
 
 // Thread domain - Only verified working functions
+// NOTE: createThreadState and setActiveThread moved to @shared/types/frontend_types
 export {
   createThread,
-  createThreadState,
   createThreadWithTitle,
   filterActiveThreads,
   filterThreadsByTag,
@@ -96,9 +96,21 @@ export {
   isThreadActive,
   isValidThread,
   searchThreads,
-  setActiveThread,
   sortThreadsByDate
 } from './domains/threads';
+
+// Thread state management - use canonical source
+export {
+  createThreadState,
+  updateThreadState
+} from '@shared/types/frontend_types';
+
+// Thread state types
+export type {
+  ThreadState,
+  BaseThreadState,
+  StoreThreadState
+} from '@shared/types/frontend_types';
 
 // WebSocket domain - Type-only exports for interfaces, runtime exports for functions
 export type {

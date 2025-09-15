@@ -51,6 +51,7 @@ class GCPAuthConfig:
     KEY_SEARCH_PATHS = [
         PRIMARY_KEY_PATH,
         PROJECT_ROOT / "config" / "netra-staging-7a1059b7cf26.json",
+        PROJECT_ROOT / "config" / "gcp-staging-sa-key.json",  # ISSUE #699 FIX: Add missing config path
         Path.home() / ".netra" / "gcp-staging-sa-key.json",
         Path.home() / ".gcp" / "netra-deployer.json",
         PROJECT_ROOT / "netra-deployer-netra-staging.json",

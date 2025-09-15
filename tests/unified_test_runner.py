@@ -262,11 +262,624 @@ except ImportError:
         # Fallback: check if pytest can load the cov plugin
         import subprocess
         import sys
-        result = subprocess.run([sys.executable, "-m", "pytest", "--help"], 
-                              capture_output=True, text=True, timeout=10)
-        PYTEST_COV_AVAILABLE = "--cov" in result.stdout
+        import shutil
+        import platform
+
+        # Use platform-aware Python command detection (same logic as _detect_python_command)
+        if platform.system() == 'Windows':
+            python_commands = ['python', 'py', 'python3']
+        else:
+            python_commands = ['python3', 'python', 'py']
+
+        # Find a working Python command
+        python_cmd = None
+        for cmd in python_commands:
+            if shutil.which(cmd):
+                try:
+                    version_result = subprocess.run(
+                        [cmd, '--version'], capture_output=True, text=True, timeout=5
+                    )
+                    if version_result.returncode == 0 and 'Python 3' in version_result.stdout:
+                        python_cmd = cmd
+                        break
+                except:
+                    continue
+
+        if python_cmd:
+            result = subprocess.run([python_cmd, "-m", "pytest", "--help"],
+                                  capture_output=True, text=True, timeout=10)
+            PYTEST_COV_AVAILABLE = "--cov" in result.stdout
+        else:
+            # Final fallback to sys.executable
+            result = subprocess.run([sys.executable, "-m", "pytest", "--help"],
+                                  capture_output=True, text=True, timeout=10)
+            PYTEST_COV_AVAILABLE = "--cov" in result.stdout
     except Exception:
         PYTEST_COV_AVAILABLE = False
+
+
+# =============================================================================
+# JSON OUTPUT SIZE OPTIMIZATION SYSTEM
+# =============================================================================
+# Business Value Protection: $500K+ ARR (Development velocity and CI/CD efficiency)
+# Addresses issue: Large JSON outputs (127KB+) causing memory and performance issues
+# Implementation follows TDD approach with comprehensive test validation
+
+class JsonSizeExceedsLimitError(Exception):
+    """Raised when JSON output exceeds configured size limits."""
+    pass
+
+
+class JsonSizeAnalyzer:
+    """Analyzes JSON data size and provides metrics."""
+
+    def __init__(self):
+        self.size_cache = {}
+
+    def get_size_metrics(self, data_or_file) -> Dict[str, any]:
+        """
+        Get comprehensive size metrics for JSON data or file.
+
+        Args:
+            data_or_file: Either dict/list JSON data or Path to JSON file
+
+        Returns:
+            Dict with size metrics including bytes, KB, and analysis
+        """
+        if isinstance(data_or_file, (str, Path)):
+            # File path provided
+            file_path = Path(data_or_file)
+            if not file_path.exists():
+                return {"error": "File does not exist", "size_bytes": 0, "size_kb": 0}
+
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                size_bytes = len(content.encode('utf-8'))
+            except Exception as e:
+                return {"error": f"Failed to read file: {e}", "size_bytes": 0, "size_kb": 0}
+        else:
+            # JSON data provided
+            try:
+                json_str = json.dumps(data_or_file, indent=2, default=str)
+                size_bytes = len(json_str.encode('utf-8'))
+            except Exception as e:
+                return {"error": f"Failed to serialize JSON: {e}", "size_bytes": 0, "size_kb": 0}
+
+        size_kb = size_bytes / 1024
+        size_mb = size_kb / 1024
+
+        return {
+            "size_bytes": size_bytes,
+            "size_kb": size_kb,
+            "size_mb": size_mb,
+            "exceeds_limit": False,  # Will be set by caller with specific limit
+            "human_readable": self._format_size_human(size_bytes)
+        }
+
+    def _format_size_human(self, size_bytes: int) -> str:
+        """Format size in human readable format."""
+        if size_bytes < 1024:
+            return f"{size_bytes} B"
+        elif size_bytes < 1024 * 1024:
+            return f"{size_bytes / 1024:.1f} KB"
+        else:
+            return f"{size_bytes / 1024 / 1024:.1f} MB"
+
+
+class JsonOutputOptimizer:
+    """Core JSON output optimization controller."""
+
+    def __init__(self, default_size_limit_kb: int = 100):
+        self.default_size_limit_kb = default_size_limit_kb
+        self.size_analyzer = JsonSizeAnalyzer()
+        self.verbosity_controller = None  # Will be initialized when needed
+
+    def detect_large_output(self, data_or_file, size_limit_kb: Optional[int] = None) -> bool:
+        """
+        Detect if JSON output exceeds size limits.
+
+        Args:
+            data_or_file: JSON data (dict/list) or file path
+            size_limit_kb: Size limit in KB (uses default if None)
+
+        Returns:
+            True if output exceeds limit, False otherwise
+        """
+        limit_kb = size_limit_kb or self.default_size_limit_kb
+        metrics = self.get_size_metrics(data_or_file)
+
+        if "error" in metrics:
+            return False  # Can't determine size, assume not large
+
+        return metrics["size_kb"] > limit_kb
+
+    def get_size_metrics(self, data_or_file) -> Dict[str, any]:
+        """Get size metrics with limit checking."""
+        metrics = self.size_analyzer.get_size_metrics(data_or_file)
+        if "error" not in metrics:
+            metrics["exceeds_limit"] = metrics["size_kb"] > self.default_size_limit_kb
+        return metrics
+
+
+class JsonVerbosityController:
+    """Controls JSON output verbosity with 5 levels of detail."""
+
+    VERBOSITY_LEVELS = {
+        1: "minimal",      # Summary only
+        2: "standard",     # Summary + basic results
+        3: "verbose",      # All details
+        4: "debug",        # Debug information included
+        5: "full"          # Complete details with internal data
+    }
+
+    def __init__(self):
+        self.current_level = 2  # Standard by default
+
+    def apply_verbosity_level(self, data: Dict[str, any], level: int) -> Dict[str, any]:
+        """
+        Apply verbosity level to JSON data.
+
+        Args:
+            data: Original JSON data
+            level: Verbosity level (1-5)
+
+        Returns:
+            Filtered JSON data according to verbosity level
+        """
+        if level not in self.VERBOSITY_LEVELS:
+            level = 2  # Default to standard
+
+        result = {}
+
+        # Level 1: Minimal (summary only)
+        if level >= 1:
+            if "summary" in data:
+                result["summary"] = data["summary"]
+
+        # Level 2: Standard (summary + basic results)
+        if level >= 2:
+            if "categories" in data:
+                result["categories"] = self._filter_categories_basic(data["categories"])
+            if "overall_success" in data:
+                result["overall_success"] = data["overall_success"]
+            if "total_duration" in data:
+                result["total_duration"] = data["total_duration"]
+            # Include basic results info but not detailed output
+            if "detailed_results" in data and level == 2:
+                basic_results = []
+                for item in data["detailed_results"]:
+                    if isinstance(item, dict):
+                        basic_item = {
+                            key: value for key, value in item.items()
+                            if key not in ["detailed_output", "stack_trace", "metadata"]
+                        }
+                        basic_results.append(basic_item)
+                    else:
+                        basic_results.append(item)
+                result["detailed_results"] = basic_results
+
+        # Level 3: Verbose (all main details)
+        if level >= 3:
+            if "detailed_results" in data:
+                result["detailed_results"] = self._filter_detailed_results(data["detailed_results"])
+            if "execution_plan" in data:
+                result["execution_plan"] = data["execution_plan"]
+            if "category_statistics" in data:
+                result["category_statistics"] = data["category_statistics"]
+
+        # Level 4: Debug (include debug information)
+        if level >= 4:
+            if "progress_tracking" in data:
+                result["progress_tracking"] = data["progress_tracking"]
+            if "debug_info" in data:
+                result["debug_info"] = data["debug_info"]
+
+        # Level 5: Full (everything including internal data)
+        if level >= 5:
+            # Include all original data
+            result = data.copy()
+
+        return result
+
+    def _filter_categories_basic(self, categories: Dict) -> Dict:
+        """Filter categories to basic information only."""
+        filtered = {}
+        for name, details in categories.items():
+            filtered[name] = {
+                "success": details.get("success", False),
+                "duration": details.get("duration", 0)
+            }
+            # Include failure information if present
+            if not details.get("success", True):
+                filtered[name]["error"] = details.get("error", "Unknown error")
+        return filtered
+
+    def _filter_detailed_results(self, detailed_results: List) -> List:
+        """Filter detailed results to essential information."""
+        if not detailed_results:
+            return []
+
+        # For large result sets, limit to first 50 + failed tests
+        if len(detailed_results) > 100:
+            # Take first 50 and any failed tests
+            filtered = detailed_results[:50]
+            failed_tests = [r for r in detailed_results[50:] if r.get("status") == "FAILED"]
+            filtered.extend(failed_tests[:25])  # Limit failed tests to 25
+            return filtered
+
+        return detailed_results
+
+
+class JsonTruncator:
+    """Truncates JSON data while preserving essential information."""
+
+    def __init__(self):
+        self.essential_fields = ["summary", "overall_success", "total_duration", "failed_tests"]
+
+    def truncate_preserving_essentials(self, data: Dict[str, any],
+                                     target_size_kb: int,
+                                     preserve_fields: Optional[List[str]] = None) -> Dict[str, any]:
+        """
+        Truncate JSON data to target size while preserving essential fields.
+
+        Args:
+            data: Original JSON data
+            target_size_kb: Target size in KB
+            preserve_fields: List of fields to always preserve
+
+        Returns:
+            Truncated JSON data
+        """
+        preserve_fields = preserve_fields or self.essential_fields
+        target_size_bytes = target_size_kb * 1024
+
+        # Start with essential fields
+        result = {}
+        for field in preserve_fields:
+            if field in data:
+                result[field] = data[field]
+
+        # Check if we're already under target size
+        current_size = len(json.dumps(result, default=str).encode('utf-8'))
+        if current_size >= target_size_bytes:
+            # Essential fields alone exceed target, return minimal summary
+            return {"summary": data.get("summary", {}), "truncated": True}
+
+        # Add other fields in order of importance
+        remaining_size = target_size_bytes - current_size
+
+        # Priority order for additional fields
+        priority_fields = [
+            "categories", "execution_plan", "category_statistics",
+            "detailed_results", "progress_tracking", "debug_info"
+        ]
+
+        for field in priority_fields:
+            if field in data and field not in result:
+                field_data = data[field]
+
+                # Estimate field size
+                field_json = json.dumps({field: field_data}, default=str)
+                field_size = len(field_json.encode('utf-8'))
+
+                if field_size <= remaining_size:
+                    result[field] = field_data
+                    remaining_size -= field_size
+                elif field == "detailed_results" and isinstance(field_data, list):
+                    # Try to include partial detailed results
+                    partial_results = self._truncate_detailed_results(
+                        field_data, remaining_size
+                    )
+                    if partial_results:
+                        result[field] = partial_results
+                        result["truncated_detailed_results"] = True
+                    break
+                else:
+                    break
+
+        result["truncated"] = True
+        result["original_size_estimate"] = len(json.dumps(data, default=str).encode('utf-8'))
+        result["target_size_kb"] = target_size_kb
+
+        return result
+
+    def _truncate_detailed_results(self, results: List, max_size_bytes: int) -> List:
+        """Truncate detailed results to fit within size limit."""
+        if not results:
+            return []
+
+        truncated = []
+        current_size = 0
+
+        # Always include failed tests first
+        failed_results = [r for r in results if r.get("status") == "FAILED"]
+        for result in failed_results:
+            result_json = json.dumps(result, default=str)
+            result_size = len(result_json.encode('utf-8'))
+
+            if current_size + result_size > max_size_bytes:
+                break
+
+            truncated.append(result)
+            current_size += result_size
+
+        # Add passed tests until size limit
+        passed_results = [r for r in results if r.get("status") != "FAILED"]
+        for result in passed_results:
+            result_json = json.dumps(result, default=str)
+            result_size = len(result_json.encode('utf-8'))
+
+            if current_size + result_size > max_size_bytes:
+                break
+
+            truncated.append(result)
+            current_size += result_size
+
+        return truncated
+
+
+class JsonSizeLimiter:
+    """Enforces JSON size limits with validation and auto-truncation."""
+
+    def __init__(self, max_size_mb: float = 1.0):
+        self.max_size_mb = max_size_mb
+        self.max_size_bytes = int(max_size_mb * 1024 * 1024)
+        self.truncator = JsonTruncator()
+
+    def validate_and_process(self, data: Dict[str, any]) -> Dict[str, any]:
+        """
+        Validate JSON size and raise exception if exceeds limit.
+
+        Args:
+            data: JSON data to validate
+
+        Returns:
+            Original data if within limits
+
+        Raises:
+            JsonSizeExceedsLimitError: If data exceeds size limits
+        """
+        json_str = json.dumps(data, default=str)
+        size_bytes = len(json_str.encode('utf-8'))
+
+        if size_bytes > self.max_size_bytes:
+            size_mb = size_bytes / 1024 / 1024
+            raise JsonSizeExceedsLimitError(
+                f"JSON size ({size_mb:.2f} MB) exceeds limit ({self.max_size_mb} MB)"
+            )
+
+        return data
+
+    def process_with_auto_truncation(self, data: Dict[str, any]) -> Dict[str, any]:
+        """
+        Process JSON data with automatic truncation if exceeds limits.
+
+        Args:
+            data: JSON data to process
+
+        Returns:
+            Original data if within limits, truncated data otherwise
+        """
+        json_str = json.dumps(data, default=str)
+        size_bytes = len(json_str.encode('utf-8'))
+
+        if size_bytes > self.max_size_bytes:
+            # Auto-truncate to 80% of limit to provide buffer
+            target_size_kb = int(self.max_size_mb * 1024 * 0.8)
+            return self.truncator.truncate_preserving_essentials(data, target_size_kb)
+
+        return data
+
+
+class ProgressiveDetailController:
+    """Controls detail level based on data size and test count."""
+
+    def __init__(self):
+        self.size_thresholds = {
+            "small": 100,    # < 100 tests
+            "medium": 1000,  # 100-1000 tests
+            "large": 5000    # > 1000 tests
+        }
+
+    def apply_progressive_detail(self, data: Dict[str, any]) -> Dict[str, any]:
+        """
+        Apply progressive detail reduction based on data size.
+
+        Args:
+            data: Original test data
+
+        Returns:
+            Data with appropriate detail level
+        """
+        test_count = self._estimate_test_count(data)
+
+        if test_count < self.size_thresholds["small"]:
+            # Small suites: Full detail
+            return data
+        elif test_count < self.size_thresholds["medium"]:
+            # Medium suites: Reduced detail
+            return self._apply_medium_detail(data)
+        else:
+            # Large suites: Minimal detail
+            return self._apply_minimal_detail(data)
+
+    def _estimate_test_count(self, data: Dict[str, any]) -> int:
+        """Estimate number of tests from data structure."""
+        # Try multiple ways to estimate test count
+        if "summary" in data and "total_tests" in data["summary"]:
+            return data["summary"]["total_tests"]
+
+        if "detailed_results" in data and isinstance(data["detailed_results"], list):
+            return len(data["detailed_results"])
+
+        if "categories" in data:
+            total = 0
+            for category_data in data["categories"].values():
+                if isinstance(category_data, dict) and "test_count" in category_data:
+                    total += category_data["test_count"]
+            if total > 0:
+                return total
+
+        # Default estimate based on data structure
+        return 100
+
+    def _apply_medium_detail(self, data: Dict[str, any]) -> Dict[str, any]:
+        """Apply medium detail level (reduced but comprehensive)."""
+        result = {
+            "summary": data.get("summary", {}),
+            "overall_success": data.get("overall_success", True),
+            "total_duration": data.get("total_duration", 0),
+            "categories": data.get("categories", {})
+        }
+
+        # Include limited detailed results
+        if "detailed_results" in data:
+            detailed = data["detailed_results"]
+            if isinstance(detailed, list) and len(detailed) > 50:
+                # Include failed tests + sample of passed tests
+                failed = [r for r in detailed if r.get("status") == "FAILED"]
+                passed = [r for r in detailed if r.get("status") != "FAILED"]
+
+                result["detailed_results"] = failed + passed[:30]  # Up to 30 passed tests
+                result["detailed_results_truncated"] = len(detailed)
+            else:
+                result["detailed_results"] = detailed
+
+        return result
+
+    def _apply_minimal_detail(self, data: Dict[str, any]) -> Dict[str, any]:
+        """Apply minimal detail level (summary focus)."""
+        result = {
+            "summary": data.get("summary", {}),
+            "overall_success": data.get("overall_success", True),
+            "total_duration": data.get("total_duration", 0)
+        }
+
+        # Include only failed test information
+        if "detailed_results" in data:
+            detailed = data["detailed_results"]
+            if isinstance(detailed, list):
+                failed = [r for r in detailed if r.get("status") == "FAILED"]
+                if failed:
+                    result["failed_tests"] = failed[:20]  # Up to 20 failed tests
+
+        # Basic category summary
+        if "categories" in data:
+            category_summary = {}
+            for name, details in data["categories"].items():
+                category_summary[name] = {
+                    "success": details.get("success", True),
+                    "duration": details.get("duration", 0)
+                }
+            result["category_summary"] = category_summary
+
+        result["detail_level"] = "minimal"
+        result["large_suite_optimization"] = True
+
+        return result
+
+
+class JsonFormatter:
+    """Handles JSON formatting options for size optimization."""
+
+    def __init__(self):
+        self.compact_separators = (',', ':')  # No spaces
+        self.pretty_separators = (', ', ': ')  # With spaces
+
+    def format_compact(self, data: Dict[str, any]) -> str:
+        """Format JSON in compact mode (no extra whitespace)."""
+        return json.dumps(data, separators=self.compact_separators, default=str)
+
+    def format_pretty(self, data: Dict[str, any], indent: int = 2) -> str:
+        """Format JSON in pretty-print mode with indentation."""
+        return json.dumps(data, indent=indent, separators=self.pretty_separators, default=str)
+
+    def format_auto(self, data: Dict[str, any], size_threshold_kb: int = 50) -> str:
+        """
+        Automatically choose format based on data size.
+
+        Args:
+            data: JSON data to format
+            size_threshold_kb: Size threshold for switching to compact mode
+
+        Returns:
+            Formatted JSON string
+        """
+        # Try compact first to check size
+        compact_json = self.format_compact(data)
+        compact_size_kb = len(compact_json.encode('utf-8')) / 1024
+
+        if compact_size_kb > size_threshold_kb:
+            return compact_json
+        else:
+            # Use pretty format for smaller data
+            return self.format_pretty(data)
+
+
+class JsonFieldFilter:
+    """Filters JSON fields to reduce output size."""
+
+    def __init__(self):
+        self.default_essential_fields = [
+            "summary", "overall_success", "total_duration",
+            "categories", "failed_tests"
+        ]
+
+    def filter_fields(self, data: Dict[str, any],
+                     include_fields: Optional[List[str]] = None,
+                     exclude_fields: Optional[List[str]] = None) -> Dict[str, any]:
+        """
+        Filter JSON data to include/exclude specific fields.
+
+        Args:
+            data: Original JSON data
+            include_fields: Fields to include (whitelist approach)
+            exclude_fields: Fields to exclude (blacklist approach)
+
+        Returns:
+            Filtered JSON data
+        """
+        if include_fields is not None:
+            # Whitelist approach: only include specified fields
+            result = {}
+            for field in include_fields:
+                if field in data:
+                    if field == "detailed_results" and isinstance(data[field], list):
+                        # Apply field filtering to detailed results as well
+                        result[field] = self._filter_detailed_results_fields(
+                            data[field], include_fields
+                        )
+                    else:
+                        result[field] = data[field]
+            return result
+
+        elif exclude_fields is not None:
+            # Blacklist approach: exclude specified fields
+            result = data.copy()
+            for field in exclude_fields:
+                result.pop(field, None)
+            return result
+
+        else:
+            # No filtering specified, return original
+            return data
+
+    def _filter_detailed_results_fields(self, results: List, include_fields: List[str]) -> List:
+        """Filter fields within detailed results."""
+        filtered_results = []
+
+        for result in results:
+            if isinstance(result, dict):
+                filtered_result = {}
+                for field in include_fields:
+                    if field in result:
+                        filtered_result[field] = result[field]
+                filtered_results.append(filtered_result)
+            else:
+                filtered_results.append(result)
+
+        return filtered_results
 
 
 class UnifiedTestRunner:
@@ -294,7 +907,13 @@ class UnifiedTestRunner:
         
         # Initialize test execution tracker
         self.test_tracker = TestExecutionTracker(self.project_root) if TestExecutionTracker else None
-        
+
+        # Initialize JSON output optimization system
+        self.json_optimizer = None  # Will be initialized with args when needed
+        self.json_verbosity_controller = JsonVerbosityController()
+        self.json_formatter = JsonFormatter()
+        self.json_field_filter = JsonFieldFilter()
+
         # Initialize Cypress runner lazily to avoid Docker issues during init
         self.cypress_runner = None
         
@@ -336,14 +955,27 @@ class UnifiedTestRunner:
     def _detect_python_command(self) -> str:
         """Detect the correct Python command for the current platform."""
         import shutil
-        
-        # Try Python commands in order of preference
-        commands_to_try = ['python3', 'python', 'py']
-        
+        import platform
+
+        # Platform-aware command ordering
+        if platform.system() == 'Windows':
+            # On Windows, 'python' and 'py' are more reliable than 'python3'
+            commands_to_try = ['python', 'py', 'python3']
+            default_fallback = 'python'
+        else:
+            # On Unix-like systems, prefer python3
+            commands_to_try = ['python3', 'python', 'py']
+            default_fallback = 'python3'
+
+        print(f"[DEBUG] Detecting Python command on {platform.system()}...")
+        print(f"[DEBUG] Trying commands in order: {commands_to_try}")
+
         for cmd in commands_to_try:
+            print(f"[DEBUG] Checking if '{cmd}' is available...")
             if shutil.which(cmd):
                 # Verify it's actually Python 3
                 try:
+                    print(f"[DEBUG] Testing '{cmd}' for Python 3 compatibility...")
                     result = subprocess.run(
                         [cmd, '--version'],
                         capture_output=True,
@@ -351,13 +983,30 @@ class UnifiedTestRunner:
                         timeout=5
                     )
                     if result.returncode == 0 and 'Python 3' in result.stdout:
+                        print(f"[INFO] Successfully detected Python command: '{cmd}' -> {result.stdout.strip()}")
                         return cmd
-                except (subprocess.TimeoutExpired, Exception):
+                    else:
+                        print(f"[DEBUG] '{cmd}' version check failed: {result.stdout.strip()}")
+                except (subprocess.TimeoutExpired, Exception) as e:
+                    print(f"[DEBUG] '{cmd}' execution failed: {e}")
                     continue
-        
-        # Fallback to python3 if nothing found (will error later if not available)
-        print("[WARNING] Could not detect Python 3 command, defaulting to 'python3'")
-        return 'python3'
+            else:
+                print(f"[DEBUG] '{cmd}' not found in PATH")
+
+        # Enhanced fallback with platform awareness
+        print(f"[WARNING] Could not detect working Python 3 command from {commands_to_try}")
+        print(f"[WARNING] Falling back to '{default_fallback}' - this may fail if not available")
+
+        # Final verification of fallback
+        if shutil.which(default_fallback):
+            print(f"[INFO] Fallback command '{default_fallback}' is available")
+            return default_fallback
+        else:
+            # If even fallback doesn't exist, raise an error with helpful message
+            raise RuntimeError(
+                f"No working Python 3 command found on {platform.system()}. "
+                f"Tried: {commands_to_try}. Please ensure Python 3 is installed and available in PATH."
+            )
     
     def initialize_components(self, args: argparse.Namespace):
         """Initialize test execution components based on arguments."""
@@ -1782,7 +2431,8 @@ class UnifiedTestRunner:
                     should_stop, decision = self.fail_fast_strategy.should_fail_fast(
                         current_stats=self.progress_tracker.get_current_progress() if self.progress_tracker else None
                     )
-                    if should_stop and decision:
+                    # Check if --no-phase-dependencies flag allows continuing despite failures
+                    if should_stop and decision and not getattr(args, 'no_phase_dependencies', False):
                         print(f"\1Stopping execution: {decision.reason}")
                         # Mark remaining categories as skipped
                         for remaining_phase in execution_plan.phases[phase_num + 1:]:
@@ -1795,6 +2445,9 @@ class UnifiedTestRunner:
                                     "skipped": True
                                 }
                         break
+                    elif should_stop and decision and getattr(args, 'no_phase_dependencies', False):
+                        print(f"\1Phase dependency override: Continuing despite failures ({decision.reason})")
+                        # Continue with next phase despite failures
         
         return results
     
@@ -1906,13 +2559,17 @@ class UnifiedTestRunner:
 
     def _fast_path_collect_tests(self, pattern: str, category: str) -> List[str]:
         """Fast-path test collection bypassing heavy setup"""
-        
+
         # Skip Docker/service setup for simple collection
         if hasattr(self, '_collection_cache'):
             cache_key = f"{pattern}:{category}"
             if cache_key in self._collection_cache:
                 return self._collection_cache[cache_key]
-        
+
+        # E2E-specific optimized collection for large volume directories
+        if category == 'e2e' or 'e2e' in pattern.lower():
+            return self._collect_e2e_optimized(pattern)
+
         # Use simple file discovery instead of full pytest collection
         test_files = []
         test_dirs = [
@@ -1922,8 +2579,17 @@ class UnifiedTestRunner:
         
         for test_dir in test_dirs:
             if test_dir.exists():
-                # Use glob for fast file discovery
-                pattern_files = list(test_dir.rglob(f"*{pattern.replace('*', '')}*.py"))
+                # Use glob for fast file discovery with safe pattern
+                if pattern == '*':
+                    glob_pattern = "**/*test*.py"
+                else:
+                    clean_pattern = pattern.replace('*', '')
+                    if clean_pattern:
+                        glob_pattern = f"**/*{clean_pattern}*.py"
+                    else:
+                        glob_pattern = "**/*test*.py"
+
+                pattern_files = list(test_dir.rglob(glob_pattern))
                 test_files.extend([str(f) for f in pattern_files if f.is_file()])
         
         # Cache result
@@ -1933,7 +2599,46 @@ class UnifiedTestRunner:
         
         return test_files
 
+    def _collect_e2e_optimized(self, pattern: str) -> List[str]:
+        """Optimized E2E test collection using the E2E collection optimizer"""
+        try:
+            # Import the E2E collection optimizer
+            from tests.e2e_collection_optimizer import E2ECollectionOptimizer
 
+            optimizer = E2ECollectionOptimizer(self.project_root)
+            test_files = optimizer.collect_tests_optimized(pattern)
+
+            # Cache the result in our cache as well
+            if not hasattr(self, '_collection_cache'):
+                self._collection_cache = {}
+            self._collection_cache[f"e2e_optimized:{pattern}"] = test_files
+
+            return test_files
+
+        except ImportError as e:
+            print(f"[WARNING] E2E optimizer not available, falling back to standard collection: {e}")
+            return self._fallback_e2e_collection(pattern)
+        except Exception as e:
+            print(f"[WARNING] E2E optimization failed, falling back to standard collection: {e}")
+            return self._fallback_e2e_collection(pattern)
+
+    def _fallback_e2e_collection(self, pattern: str) -> List[str]:
+        """Fallback E2E collection without optimization"""
+        e2e_dir = self.project_root / "tests" / "e2e"
+        if not e2e_dir.exists():
+            return []
+
+        test_files = []
+        if pattern == '*':
+            glob_pattern = "**/*test*.py"
+        else:
+            clean_pattern = pattern.replace('*', '')
+            glob_pattern = f"**/*{clean_pattern}*.py" if clean_pattern else "**/*test*.py"
+
+        pattern_files = list(e2e_dir.rglob(glob_pattern))
+        test_files = [str(f) for f in pattern_files if f.is_file() and 'test_' in f.name]
+
+        return test_files
 
     def _parallel_collect_tests(self, patterns: List[str]) -> Dict[str, List[str]]:
         """Collect tests in parallel for multiple patterns"""
@@ -1989,7 +2694,9 @@ class UnifiedTestRunner:
         # Debug output
         if args.verbose:
             print(f"[DEBUG] Running command for {service}: {cmd}")
-        
+            print(f"[DEBUG] Python command used: {self.python_command}")
+            print(f"[DEBUG] Working directory: {config['path']}")
+
         # Execute tests with timeout
         start_time = time.time()
         # Set timeout based on service type and category
@@ -2014,9 +2721,14 @@ class UnifiedTestRunner:
             except (ValueError, OSError):
                 pass  # Skip flush if stderr is closed or has issues
             
-            # Prepare environment for subprocess with proper isolation and Windows encoding
-            env_manager = get_env()
-            subprocess_env = env_manager.get_subprocess_env()
+            # TEMPORARY FIX: Use regular environment instead of isolated environment
+            # to test if isolation is causing the pytest issue
+            subprocess_env = dict(os.environ)
+            print(f"[TEMP_DEBUG] Using regular os.environ instead of isolated environment")
+
+            # # Original code with isolated environment:
+            # env_manager = get_env()
+            # subprocess_env = env_manager.get_subprocess_env()
             
             # CRITICAL: Apply Windows encoding fixes to subprocess environment
             if sys.platform == "win32":
@@ -2041,6 +2753,13 @@ class UnifiedTestRunner:
                     'PYTHONDONTWRITEBYTECODE': '1',  # Prevent .pyc files during testing
                 })
                 
+                # DEBUG: Log subprocess details
+                print(f"[SUBPROCESS_DEBUG] Command: {cmd}")
+                print(f"[SUBPROCESS_DEBUG] Working dir: {config['path']}")
+                print(f"[SUBPROCESS_DEBUG] Environment PATH first 100 chars: {subprocess_env.get('PATH', 'NOT_SET')[:100]}...")
+                print(f"[SUBPROCESS_DEBUG] Environment PYTHON: {subprocess_env.get('PYTHON', 'NOT_SET')}")
+                print(f"[SUBPROCESS_DEBUG] Environment PYTHONPATH: {subprocess_env.get('PYTHONPATH', 'NOT_SET')}")
+
                 # CRITICAL: Use explicit encoding and error handling for Windows Unicode issues
                 process = subprocess.Popen(
                     cmd,
@@ -2068,6 +2787,11 @@ class UnifiedTestRunner:
                     process.stdin.close()
                     stdout, stderr = process.communicate(timeout=timeout_seconds)
                     returncode = process.returncode
+
+                    # DEBUG: Log subprocess results
+                    print(f"[SUBPROCESS_DEBUG] Return code: {returncode}")
+                    print(f"[SUBPROCESS_DEBUG] Stdout (first 200 chars): {stdout[:200]!r}")
+                    print(f"[SUBPROCESS_DEBUG] Stderr (first 200 chars): {stderr[:200]!r}")
                 except subprocess.TimeoutExpired:
                     # Clean up hanging process on timeout
                     cleanup_subprocess(process, timeout=5)
@@ -2432,10 +3156,24 @@ class UnifiedTestRunner:
         if args.fast_fail:
             cmd_parts.append("-x")
         
-        # Add timeout for unit tests to prevent hanging
-        # DISABLED: pytest-timeout conflicts with subprocess timeout causing hangs
-        # if category_name == "unit":
-        #     cmd_parts.extend(["--timeout=120", "--timeout-method=thread"])
+        # Environment-aware timeout configuration - replaces global pyproject.toml timeout
+        # This provides sophisticated timeout handling for different environments and test types
+        if args.env == 'staging':
+            # Staging environment needs longer timeouts due to network latency and GCP constraints
+            if category_name == "unit":
+                cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])  # 5min for staging unit tests
+            elif category_name in ["e2e", "integration", "e2e_critical", "e2e_full"]:
+                cmd_parts.extend(["--timeout=900", "--timeout-method=thread"])  # 15min for staging e2e tests
+            else:
+                cmd_parts.extend(["--timeout=600", "--timeout-method=thread"])  # 10min for staging integration tests
+        elif category_name == "unit":
+            cmd_parts.extend(["--timeout=180", "--timeout-method=thread"])  # 3min for local unit tests
+        elif category_name in ["e2e", "integration", "e2e_critical", "e2e_full"]:
+            cmd_parts.extend(["--timeout=600", "--timeout-method=thread"])   # 10min for local e2e tests
+        elif category_name == "frontend":
+            cmd_parts.extend(["--timeout=120", "--timeout-method=thread"])   # 2min for frontend tests
+        else:
+            cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])   # 5min for other test categories
         
         # Add specific test pattern
         if args.pattern:
@@ -2727,10 +3465,47 @@ class UnifiedTestRunner:
             if progress_data:
                 report_data["progress_tracking"] = progress_data
         
-        # Save JSON report
+        # Save JSON report with optimization
         json_report = report_dir / f"test_report_{timestamp}.json"
-        with open(json_report, "w") as f:
-            json.dump(report_data, f, indent=2, default=str)
+        optimized_data, optimization_info = self._optimize_json_output(report_data, args)
+
+        try:
+            with open(json_report, "w") as f:
+                if args.json_format == "compact":
+                    json_content = self.json_formatter.format_compact(optimized_data)
+                elif args.json_format == "pretty":
+                    json_content = self.json_formatter.format_pretty(optimized_data)
+                else:  # auto
+                    json_content = self.json_formatter.format_auto(optimized_data, args.json_size_limit)
+
+                f.write(json_content)
+
+            # Log optimization results if significant changes were made
+            if optimization_info.get("optimized", False):
+                original_size = optimization_info.get("original_size_kb", 0)
+                final_size = optimization_info.get("final_size_kb", 0)
+                savings = optimization_info.get("size_reduction_percent", 0)
+                print(f"\nJSON Optimization Applied:")
+                print(f"  Original size: {original_size:.1f} KB")
+                print(f"  Optimized size: {final_size:.1f} KB")
+                print(f"  Size reduction: {savings:.1f}%")
+                if optimization_info.get("truncated", False):
+                    print(f"  Applied truncation to stay within {args.json_size_limit} KB limit")
+
+        except JsonSizeExceedsLimitError as e:
+            if args.json_auto_truncate:
+                print(f"WARNING: JSON output exceeded size limit, auto-truncating: {e}")
+                # Try again with auto-truncation
+                limiter = JsonSizeLimiter(max_size_mb=args.json_size_limit / 1024)
+                truncated_data = limiter.process_with_auto_truncation(report_data)
+                with open(json_report, "w") as f:
+                    json_content = self.json_formatter.format_compact(truncated_data)
+                    f.write(json_content)
+                print(f"JSON report auto-truncated and saved to: {json_report}")
+            else:
+                print(f"ERROR: JSON output exceeded size limit: {e}")
+                print(f"Use --json-auto-truncate to enable automatic truncation")
+                raise
         
         # Print summary
         print(f"\1{'='*60}")
@@ -2750,6 +3525,82 @@ class UnifiedTestRunner:
         overall_status = " PASS:  PASSED" if report_data['overall_success'] else " FAIL:  FAILED"
         self._safe_print_unicode(f"\nOverall: {overall_status}")
         print(f"Report: {json_report}")
+
+    def _optimize_json_output(self, report_data: Dict[str, any], args: argparse.Namespace) -> Tuple[Dict[str, any], Dict[str, any]]:
+        """
+        Optimize JSON output based on configured settings.
+
+        Args:
+            report_data: Original report data
+            args: Command line arguments with optimization settings
+
+        Returns:
+            Tuple of (optimized_data, optimization_info)
+        """
+        # Initialize JSON optimizer with configured size limit
+        if self.json_optimizer is None:
+            self.json_optimizer = JsonOutputOptimizer(default_size_limit_kb=args.json_size_limit)
+
+        # Get original size metrics
+        original_metrics = self.json_optimizer.get_size_metrics(report_data)
+        original_size_kb = original_metrics.get("size_kb", 0)
+
+        optimization_info = {
+            "original_size_kb": original_size_kb,
+            "optimized": False,
+            "truncated": False,
+            "size_reduction_percent": 0.0
+        }
+
+        # Start with the original data
+        optimized_data = report_data.copy()
+
+        # Apply verbosity level filtering
+        if args.json_verbosity != 3:  # 3 is the default "verbose" level
+            optimized_data = self.json_verbosity_controller.apply_verbosity_level(
+                optimized_data, args.json_verbosity
+            )
+            optimization_info["optimized"] = True
+
+        # Apply progressive detail reduction for large test suites
+        progressive_controller = ProgressiveDetailController()
+        progressive_optimized = progressive_controller.apply_progressive_detail(optimized_data)
+        if progressive_optimized != optimized_data:
+            optimized_data = progressive_optimized
+            optimization_info["optimized"] = True
+
+        # Check if data exceeds size limit
+        if self.json_optimizer.detect_large_output(optimized_data, args.json_size_limit):
+            if args.json_auto_truncate:
+                # Apply truncation with preserved fields
+                truncator = JsonTruncator()
+                optimized_data = truncator.truncate_preserving_essentials(
+                    optimized_data,
+                    target_size_kb=args.json_size_limit,
+                    preserve_fields=args.json_preserve_fields
+                )
+                optimization_info["optimized"] = True
+                optimization_info["truncated"] = True
+            else:
+                # Check if we should raise an exception
+                final_metrics = self.json_optimizer.get_size_metrics(optimized_data)
+                if final_metrics.get("size_kb", 0) > args.json_size_limit:
+                    raise JsonSizeExceedsLimitError(
+                        f"JSON output ({final_metrics.get('size_kb', 0):.1f} KB) "
+                        f"exceeds configured limit ({args.json_size_limit} KB). "
+                        f"Use --json-auto-truncate to enable automatic size reduction."
+                    )
+
+        # Calculate final metrics and savings
+        final_metrics = self.json_optimizer.get_size_metrics(optimized_data)
+        final_size_kb = final_metrics.get("size_kb", 0)
+
+        if final_size_kb > 0 and original_size_kb > 0:
+            size_reduction = ((original_size_kb - final_size_kb) / original_size_kb) * 100
+            optimization_info["size_reduction_percent"] = max(0, size_reduction)
+            optimization_info["final_size_kb"] = final_size_kb
+
+        return optimized_data, optimization_info
 
 
 async def execute_orchestration_mode(args) -> int:
@@ -3023,7 +3874,13 @@ def main():
         action="store_true",
         help="Use real backend services (Docker or local) for frontend tests"
     )
-    
+
+    parser.add_argument(
+        "--staging-e2e",
+        action="store_true",
+        help="Run staging-based E2E tests (Docker-independent validation of business-critical functionality)"
+    )
+
     parser.add_argument(
         "--no-docker",
         "--skip-docker",
@@ -3053,9 +3910,15 @@ def main():
     
     parser.add_argument(
         "--no-dependencies",
-        "--skip-deps", 
+        "--skip-deps",
         action="store_true",
         help="Skip dependency resolution - run only the specified categories without their dependencies"
+    )
+
+    parser.add_argument(
+        "--no-phase-dependencies",
+        action="store_true",
+        help="Allow later phases to run even if earlier phases fail (remove phase dependency restrictions)"
     )
     
     parser.add_argument(
@@ -3186,10 +4049,46 @@ def main():
         action="store_true",
         help="Generate JSON test report"
     )
-    
+
+    # JSON Output Optimization Arguments
+    parser.add_argument(
+        "--json-verbosity",
+        type=int,
+        choices=[1, 2, 3, 4, 5],
+        default=2,
+        help="JSON output verbosity level (1=minimal, 2=standard, 3=verbose, 4=debug, 5=full)"
+    )
+
+    parser.add_argument(
+        "--json-size-limit",
+        type=int,
+        default=100,
+        help="JSON output size limit in KB (default: 100KB)"
+    )
+
+    parser.add_argument(
+        "--json-auto-truncate",
+        action="store_true",
+        help="Automatically truncate large JSON outputs instead of failing"
+    )
+
+    parser.add_argument(
+        "--json-format",
+        choices=["compact", "pretty", "auto"],
+        default="auto",
+        help="JSON formatting mode (compact=minimal size, pretty=readable, auto=size-based)"
+    )
+
+    parser.add_argument(
+        "--json-preserve-fields",
+        nargs="*",
+        default=["summary", "overall_success", "total_duration", "failed_tests"],
+        help="Fields to preserve when truncating JSON (space-separated list)"
+    )
+
     parser.add_argument(
         "--html-output",
-        action="store_true", 
+        action="store_true",
         help="Generate HTML test report"
     )
     
@@ -3548,21 +4447,32 @@ def main():
         # Create a simple runner for fast collection
         from pathlib import Path
         
-        # Determine test pattern 
+        # Determine test pattern
         pattern = getattr(args, 'pattern', '*')
         if not pattern:
             pattern = '*'
-        
+
+        # Create proper glob pattern - avoid creating invalid patterns like "**.py"
+        if pattern == '*':
+            glob_pattern = "**/*test*.py"
+        else:
+            # Clean pattern and create safe glob
+            clean_pattern = pattern.replace('*', '')
+            if clean_pattern:
+                glob_pattern = f"**/*{clean_pattern}*.py"
+            else:
+                glob_pattern = "**/*test*.py"
+
         # Fast test discovery
         test_dirs = [
             PROJECT_ROOT / "netra_backend" / "tests",
             PROJECT_ROOT / "tests"
         ]
-        
+
         total_files = 0
         for test_dir in test_dirs:
             if test_dir.exists():
-                files = list(test_dir.rglob(f"*{pattern.replace('*', '')}*.py"))
+                files = list(test_dir.rglob(glob_pattern))
                 valid_files = [f for f in files if f.is_file() and 'test' in f.name]
                 total_files += len(valid_files)
                 print(f"Found {len(valid_files)} test files in {test_dir.name}")
@@ -3656,6 +4566,23 @@ def main():
     if hasattr(args, 'docker_production') and args.docker_production:
         env.set('TEST_USE_PRODUCTION_IMAGES', 'true', 'docker_args')
     
+    # Handle staging-e2e flag first (Docker-independent e2e testing)
+    if hasattr(args, 'staging_e2e') and args.staging_e2e:
+        print("[INFO] Running staging-based E2E tests (Docker-independent validation)")
+        print("[INFO] Validating business-critical $500K+ ARR functionality via staging environment")
+
+        import subprocess
+        staging_tests = [
+            "tests/e2e/staging/test_priority1_critical.py",
+            "tests/e2e/staging/test_real_agent_execution_staging.py",
+            "tests/mission_critical/test_staging_websocket_agent_events.py"
+        ]
+
+        cmd = [sys.executable, "-m", "pytest"] + staging_tests + ["-v", "--tb=short"]
+        print(f"[INFO] Executing: {' '.join(cmd)}")
+        result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+        sys.exit(result.returncode)
+
     # CRITICAL: Set USE_REAL_SERVICES early BEFORE any test imports or TestRunner creation
     # This ensures environment isolation respects real services flag from the start
     running_e2e = (args.category in ['e2e', 'websocket', 'agent'] if args.category else False) or \

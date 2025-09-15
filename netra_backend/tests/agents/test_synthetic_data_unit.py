@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
 import pytest
 from netra_backend.app.agents.synthetic_data_presets import DataGenerationType, WorkloadProfile
 from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry

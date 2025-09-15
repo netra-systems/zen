@@ -55,16 +55,16 @@ from typing import Dict, Any, List, Optional, Callable, Awaitable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 import random
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
-from netra_backend.app.core.agent_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 # Import the components we're testing
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.core_enums import ExecutionStatus
@@ -851,7 +851,7 @@ class TestAgentResiliencePatterns:
         import time
         from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         agent = ActionsToMeetGoalsSubAgent()
         
@@ -892,7 +892,7 @@ class TestAgentResiliencePatterns:
         """Test WebSocket integration resilience."""
         from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         agent = ActionsToMeetGoalsSubAgent()
         
@@ -923,7 +923,7 @@ class TestAgentResiliencePatterns:
         import asyncio
         from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         agent = ActionsToMeetGoalsSubAgent()
         
@@ -966,7 +966,7 @@ class TestAgentResiliencePatterns:
         """Test resilience against state corruption."""
         from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         agent = ActionsToMeetGoalsSubAgent()
         
@@ -998,7 +998,7 @@ class TestAgentResiliencePatterns:
         import time
         from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         agent = ActionsToMeetGoalsSubAgent()
         
@@ -1050,7 +1050,7 @@ class TestAgentResiliencePatterns:
         """Test resilience against cascading failures."""
         from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         agent = ActionsToMeetGoalsSubAgent()
         
@@ -1082,7 +1082,7 @@ class TestAgentResiliencePatterns:
         import time
         from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         agent = ActionsToMeetGoalsSubAgent()
         

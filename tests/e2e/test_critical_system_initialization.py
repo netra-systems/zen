@@ -94,7 +94,7 @@ if get_env().get('DATABASE_URL') == 'sqlite+aiosqlite:///:memory:':
 from dev_launcher.config import LauncherConfig
 from dev_launcher.service_startup import ServiceStartupCoordinator
 from dev_launcher.health_monitor import HealthMonitor
-from dev_launcher.docker_services import DockerServiceManager
+# DockerServiceManager not used in this test - removed import
 from dev_launcher.websocket_validator import WebSocketValidator
 from dev_launcher.port_manager import PortManager
 from dev_launcher.crash_recovery import CrashRecoveryManager

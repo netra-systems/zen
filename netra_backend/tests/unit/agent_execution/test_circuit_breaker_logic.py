@@ -273,11 +273,11 @@ class TestCircuitBreakerLogic(SSotBaseTestCase):
         """Test circuit breaker tracks metrics for monitoring."""
         circuit_breaker = MockCircuitBreaker(self.timeout_config)
         
-        # Should track failure count accurately
+        # Should track failure count accurately - count continues even after circuit opens
         for i in range(5):
             circuit_breaker.record_failure()
-            self.assertEqual(circuit_breaker.failure_count, min(i + 1, 
-                           self.timeout_config.failure_threshold))
+            # Failure count should continue to increment (not be capped at threshold)
+            self.assertEqual(circuit_breaker.failure_count, i + 1)
         
         # Should track success count in HALF_OPEN
         circuit_breaker.state = CircuitBreakerState.HALF_OPEN

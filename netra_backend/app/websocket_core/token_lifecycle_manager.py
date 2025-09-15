@@ -649,7 +649,10 @@ class TokenLifecycleManager:
         """Generate a refreshed token for testing purposes."""
         # This is a simplified implementation for testing
         # Real implementation would get new JWT from auth service
-        return f"refreshed_token_{connection_state.refresh_count + 1}_{uuid.uuid4().hex[:8]}"
+        # Issue #89 Fix: Use UnifiedIDManager for token generation
+        id_manager = UnifiedIDManager()
+        token_suffix = id_manager.generate_id(IDType.REQUEST, prefix="refresh")
+        return f"refreshed_token_{connection_state.refresh_count + 1}_{token_suffix}"
     
     async def _notify_connection_event(self, connection_id: str, event_type: str, event_data: Dict[str, Any]):
         """Notify registered callbacks of connection events."""

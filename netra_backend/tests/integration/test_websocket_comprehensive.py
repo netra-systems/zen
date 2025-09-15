@@ -30,7 +30,7 @@ from typing import Any, Dict, List, Optional
 
 try:
     import websockets
-    from websockets.exceptions import ConnectionClosed, InvalidStatus
+    from websockets import ConnectionClosed, InvalidStatus
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
     WEBSOCKETS_AVAILABLE = False

@@ -69,7 +69,7 @@ from dataclasses import dataclass, field
 
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosedError, WebSocketException
+from websockets import ConnectionClosedError, WebSocketException
 
 # SSOT imports with absolute paths
 from shared.isolated_environment import get_env
@@ -147,7 +147,7 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
-        return UserExecutionContext.create_for_user(
+        return UserExecutionContext.from_request(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run"
@@ -259,7 +259,7 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
         
         logger.info(" CELEBRATION:  WebSocket Message to Agent Golden Path Test completed")
     
-    async def _establish_authenticated_websocket_connection(self, event_capture: WebSocketEventCapture) -> websockets.WebSocketServerProtocol:
+    async def _establish_authenticated_websocket_connection(self, event_capture: WebSocketEventCapture) -> websockets.ServerConnection:
         """Establish authenticated WebSocket connection following golden path."""
         try:
             # Use SSOT authentication helper for WebSocket connection
@@ -282,7 +282,7 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
             logger.error(f" FAIL:  Failed to establish WebSocket connection: {e}")
             raise AssertionError(f"WebSocket connection failed: {e}")
     
-    async def _listen_for_websocket_events(self, websocket: websockets.WebSocketServerProtocol, event_capture: WebSocketEventCapture, timeout: float):
+    async def _listen_for_websocket_events(self, websocket: websockets.ServerConnection, event_capture: WebSocketEventCapture, timeout: float):
         """Listen for WebSocket events during agent execution."""
         start_time = time.time()
         events_received = 0

@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from dataclasses import dataclass, field
 
 from pydantic import BaseModel, Field
+from shared.isolated_environment import get_env
 
 # Note: BaseAgent import removed due to dependency issues
 # Note: Configuration import removed - not used in this module
@@ -152,7 +153,8 @@ def initialize_corpus_context(context: UserExecutionContext, corpus_base_path: s
         UserExecutionContext with corpus-specific metadata initialized
     """
     if corpus_base_path is None:
-        corpus_base_path = os.getenv('CORPUS_BASE_PATH', '/data/corpus')
+        env = get_env()
+        corpus_base_path = env.get('CORPUS_BASE_PATH', '/data/corpus')
     
     corpus_path = os.path.join(corpus_base_path, context.user_id)
     
@@ -278,7 +280,8 @@ class UnifiedCorpusAdmin(CorpusAdminBase):
     
     def _get_user_corpus_path(self, user_id: str) -> Path:
         """Get isolated corpus path for user"""
-        base_path = Path(os.getenv('CORPUS_BASE_PATH', '/data/corpus'))
+        env = get_env()
+        base_path = Path(env.get('CORPUS_BASE_PATH', '/data/corpus'))
         
         if self.isolation_strategy == IsolationStrategy.PER_USER_CORPUS:
             return base_path / user_id

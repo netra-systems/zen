@@ -39,7 +39,7 @@ def _create_supervisor_agent(db_session: AsyncSession, llm_manager: LLMManager):
     CRITICAL: No import-time WebSocket manager creation. WebSocket bridge will be
     created per-request when UserExecutionContext is available.
     """
-    from netra_backend.app.agents.supervisor_consolidated import (
+    from netra_backend.app.agents.supervisor_ssot import (
         SupervisorAgent as Supervisor,
     )
     

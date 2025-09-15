@@ -75,7 +75,8 @@
                 
 
                 # Keep legacy imports for state objects that still exist
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult, ActionPlanResult
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.agents.state import OptimizationsResult, ActionPlanResult
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.websocket_models import ( )
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
