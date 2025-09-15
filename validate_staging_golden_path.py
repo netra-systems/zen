@@ -34,7 +34,7 @@ class GoldenPathValidator:
             
             self.websocket = await websockets.connect(
                 ws_url,
-                timeout=30,
+                open_timeout=30,
                 ping_interval=20,
                 ping_timeout=10
             )
