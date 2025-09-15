@@ -28,7 +28,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
 from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
@@ -175,7 +175,7 @@ class TestWebSocketSilentFailurePatternsUnit(SSotAsyncTestCase):
         except Exception:
             pass
         try:
-            from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             import inspect
             source = inspect.getsource(ExecutionEngine)
             if 'logger.warning' in source:

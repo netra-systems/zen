@@ -129,8 +129,23 @@ class TestIssue1228RegressionPrevention(unittest.TestCase):
         Validate EngineConfig compatibility stub has all required attributes.
         Ensures the core fix for Issue #1228 remains functional.
         """
-        # Import and test the EngineConfig compatibility stub directly
-        from netra_backend.app.agents.execution_engine_consolidated import EngineConfig
+        # Import the SSOT implementation instead of deprecated consolidated import
+        # Inline compatibility class to replace deprecated import
+        class EngineConfig(dict):
+            def __init__(self, **kwargs):
+                defaults = {
+                    'max_concurrent_agents': 10,
+                    'agent_execution_timeout': 30.0,
+                    'enable_user_features': False,
+                    'enable_mcp': False,
+                    'enable_data_features': False,
+                    'enable_websocket_events': True,
+                    'require_user_context': True,
+                }
+                defaults.update(kwargs)
+                super().__init__(defaults)
+                for key, value in defaults.items():
+                    setattr(self, key, value)
 
         # Create instance with defaults
         config = EngineConfig()

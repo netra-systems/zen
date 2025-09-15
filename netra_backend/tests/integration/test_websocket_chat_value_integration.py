@@ -37,7 +37,7 @@ from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmi
 from netra_backend.app.schemas.websocket_message_types import WebSocketConnectionState, ClientMessage, ServerMessage
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.app.core.exceptions.websocket_exceptions import WebSocketEventEmissionError
-from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types import UserID, ThreadID, RunID, RequestID
 from shared.isolated_environment import get_env

@@ -198,9 +198,9 @@ class TestUnifiedExecutionEngineFactorySSotCompliance(SSotAsyncTestCase):
         """
         # Import the unified factory
         try:
-            from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory as UnifiedExecutionEngineFactory
         except ImportError:
-            pytest.skip("UnifiedExecutionEngineFactory not available", allow_module_level=True)
+            pytest.skip("ExecutionEngineFactory not available", allow_module_level=True)
             
         # Mock required dependencies
         mock_websocket_bridge = Mock()
@@ -228,9 +228,9 @@ class TestUnifiedExecutionEngineFactorySSotCompliance(SSotAsyncTestCase):
         AFTER REMEDIATION: Should PASS when deprecated methods are removed.
         """
         try:
-            from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory as UnifiedExecutionEngineFactory
         except ImportError:
-            pytest.skip("UnifiedExecutionEngineFactory not available", allow_module_level=True)
+            pytest.skip("ExecutionEngineFactory not available", allow_module_level=True)
             
         factory = UnifiedExecutionEngineFactory(
             websocket_bridge=Mock(),

@@ -43,7 +43,7 @@ class TestWebSocketSourceCodeAnalysis(SSotBaseTestCase):
         except Exception as e:
             findings['ReportingSubAgent'] = {'error': str(e)}
         try:
-            from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             source = inspect.getsource(ExecutionEngine)
             warning_count = source.count('logger.warning')
             critical_count = source.count('logger.critical')
@@ -104,7 +104,7 @@ class TestWebSocketSourceCodeAnalysis(SSotBaseTestCase):
         except Exception as e:
             line_findings.append({'error': f'ReportingSubAgent analysis failed: {e}'})
         try:
-            from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             source_lines = inspect.getsourcelines(ExecutionEngine)[0]
             for i, line in enumerate(source_lines, 1):
                 if 'logger.warning' in line and ('Failed to emit' in line or 'agent' in line):
