@@ -9,7 +9,9 @@ This index catalogs all planning documents related to the Claude Instance Orches
 
 ## 📋 Plan Documents Index
 
-### 1. [Claude Instance Orchestrator Enhancement Plan](claude-instance-orchestrator-enhancement-plan.md)
+### A. Core Orchestrator Plans
+
+#### 1. [Claude Instance Orchestrator Enhancement Plan](claude-instance-orchestrator-enhancement-plan.md)
 **Status:** Phase 0 - Discovery & Alignment
 **Scope:** Multi-mode orchestrator with dependency chaining
 
@@ -42,54 +44,7 @@ graph TD
     D --> D4[Conditional Logic]
 ```
 
-### 2. [Netra Application Integration Plan](CLAUDE_INSTANCE_ORCHESTRATOR_NETRA_INTEGRATION_PLAN.md)
-**Status:** Planning Phase
-**Scope:** Enterprise integration with Netra platform
-
-**Key Features:**
-- Authentication & authorization integration
-- 3-tier state persistence (Redis/PostgreSQL/ClickHouse)
-- Chat system integration with WebSocket events
-- Dynamic optimization advice from Netra API
-- Enterprise orchestration dashboard
-
-```mermaid
-graph TB
-    subgraph "Phase 1: Foundation"
-        A1[Authentication Integration]
-        A2[Credential Storage]
-        A3[User Context Isolation]
-    end
-
-    subgraph "Phase 2: Core Integration"
-        B1[3-Tier Persistence]
-        B2[Chat Integration]
-        B3[WebSocket Events]
-        B4[API Integration]
-    end
-
-    subgraph "Phase 3: Advanced Features"
-        C1[Orchestration Patterns]
-        C2[Enterprise Dashboard]
-        C3[Performance Optimization]
-    end
-
-    subgraph "Phase 4: Enterprise"
-        D1[Security Features]
-        D2[Custom Workflows]
-        D3[Customer Tools]
-    end
-
-    A1 --> B1
-    A2 --> B2
-    A3 --> B3
-    B4 --> C1
-    C2 --> D1
-    C3 --> D2
-    D3 --> E[Production Ready]
-```
-
-### 3. [Universal CLI Orchestrator Enhancement Plan](../scripts/universal-cli-orchestrator-enhancement-plan.md)
+#### 2. [Universal CLI Orchestrator Enhancement Plan](../scripts/universal-cli-orchestrator-enhancement-plan.md)
 **Status:** Design Phase
 **Scope:** Universal CLI tool orchestration platform
 
@@ -136,81 +91,7 @@ graph LR
     P6 --> P9
 ```
 
-### 4. [Deployment Strategies Analysis](claude-orchestrator-deployment-strategies-plan.md)
-**Status:** Comprehensive Analysis Complete
-**Scope:** Six deployment strategies with security and business impact analysis
-
-**Key Strategies Analyzed:**
-- Python Pip Package (Low effort, quick deployment)
-- Compiled Executable with PyInstaller/Nuitka (Security hardened)
-- Language Rewrite in Rust (Maximum performance/security)
-- Node.js/TypeScript Rewrite (JavaScript ecosystem alignment)
-- Secure Container Distribution (Enterprise-ready)
-- Hybrid Web Application (Full platform approach)
-
-```mermaid
-graph TB
-    subgraph "Deployment Options"
-        D1[Pip Package<br/>✅ Quick<br/>❌ Source Exposed]
-        D2[PyInstaller<br/>✅ Executable<br/>⚠️ Size/Performance]
-        D3[Rust Rewrite<br/>✅ Performance<br/>❌ Dev Time]
-        D4[Node.js<br/>✅ Ecosystem<br/>⚠️ Runtime Deps]
-        D5[Container<br/>✅ Security<br/>⚠️ Complexity]
-        D6[Web App<br/>✅ Full Platform<br/>❌ Infrastructure]
-    end
-
-    subgraph "Recommended Phases"
-        P1[Phase 1: PyInstaller + Pip<br/>Weeks 1-4]
-        P2[Phase 2: Container + Signing<br/>Weeks 5-12]
-        P3[Phase 3: Language Evaluation<br/>Months 4-8]
-    end
-
-    D1 --> P1
-    D2 --> P1
-    P1 --> P2
-    D5 --> P2
-    P2 --> P3
-    D3 --> P3
-    D6 --> P3
-```
-
-### 5. [Deployment Strategy Plan](claude-orchestrator-deployment-strategy-plan.md)
-**Status:** Implementation Focused
-**Scope:** Tactical deployment decisions with timeline and dependencies
-
-**Key Decision Points:**
-- Alignment with existing plans from the orchestrator index
-- Security vs effort trade-off analysis with quadrant mapping
-- 10-week execution plan from stabilization to enterprise delivery
-- Decision gates for rewrite spikes (Rust vs Node.js)
-
-```mermaid
-graph LR
-    subgraph "Effort vs Security Quadrant"
-        Q1[Quick Wins<br/>Pip Package]
-        Q2[Strategic Bets<br/>Rust + Container]
-        Q3[Incremental<br/>Python Executable]
-        Q4[Heavy Lift<br/>Full Rewrite]
-    end
-
-    subgraph "Execution Timeline"
-        W1[Weeks 1-2: Stabilize]
-        W2[Weeks 2-3: Pip Pilot]
-        W3[Weeks 3-5: Security Track]
-        W4[Weeks 5-7: Rewrite Spike]
-        W5[Week 8: Decision Gate]
-        W6[Weeks 8-10: Enterprise Prep]
-    end
-
-    Q1 --> W1
-    Q1 --> W2
-    Q3 --> W3
-    Q2 --> W4
-    W4 --> W5
-    W5 --> W6
-```
-
-### 6. [Modernization Summary](../scripts/claude-orchestrator-modernization-summary.md)
+#### 3. [Modernization Summary](../scripts/claude-orchestrator-modernization-summary.md)
 **Status:** Implementation Complete ✅
 **Scope:** JSON-first token parsing modernization with backward compatibility
 
@@ -254,6 +135,345 @@ graph TD
     B3 --> C3
     B4 --> C4
     B4 --> C5
+```
+
+### B. Deployment & Distribution Plans
+
+#### 4. [Deployment Strategies Analysis](claude-orchestrator-deployment-strategies-plan.md)
+**Status:** Comprehensive Analysis Complete
+**Scope:** Six deployment strategies with security and business impact analysis
+
+**Key Strategies Analyzed:**
+- Python Pip Package (Low effort, quick deployment)
+- Compiled Executable with PyInstaller/Nuitka (Security hardened)
+- Language Rewrite in Rust (Maximum performance/security)
+- Node.js/TypeScript Rewrite (JavaScript ecosystem alignment)
+- Secure Container Distribution (Enterprise-ready)
+- Hybrid Web Application (Full platform approach)
+
+```mermaid
+graph TB
+    subgraph "Deployment Options"
+        D1[Pip Package<br/>✅ Quick<br/>❌ Source Exposed]
+        D2[PyInstaller<br/>✅ Executable<br/>⚠️ Size/Performance]
+        D3[Rust Rewrite<br/>✅ Performance<br/>❌ Dev Time]
+        D4[Node.js<br/>✅ Ecosystem<br/>⚠️ Runtime Deps]
+        D5[Container<br/>✅ Security<br/>⚠️ Complexity]
+        D6[Web App<br/>✅ Full Platform<br/>❌ Infrastructure]
+    end
+
+    subgraph "Recommended Phases"
+        P1[Phase 1: PyInstaller + Pip<br/>Weeks 1-4]
+        P2[Phase 2: Container + Signing<br/>Weeks 5-12]
+        P3[Phase 3: Language Evaluation<br/>Months 4-8]
+    end
+
+    D1 --> P1
+    D2 --> P1
+    P1 --> P2
+    D5 --> P2
+    P2 --> P3
+    D3 --> P3
+    D6 --> P3
+```
+
+#### 5. [Deployment Strategy Plan](claude-orchestrator-deployment-strategy-plan.md)
+**Status:** Implementation Focused
+**Scope:** Tactical deployment decisions with timeline and dependencies
+
+**Key Decision Points:**
+- Alignment with existing plans from the orchestrator index
+- Security vs effort trade-off analysis with quadrant mapping
+- 10-week execution plan from stabilization to enterprise delivery
+- Decision gates for rewrite spikes (Rust vs Node.js)
+
+```mermaid
+graph LR
+    subgraph "Effort vs Security Quadrant"
+        Q1[Quick Wins<br/>Pip Package]
+        Q2[Strategic Bets<br/>Rust + Container]
+        Q3[Incremental<br/>Python Executable]
+        Q4[Heavy Lift<br/>Full Rewrite]
+    end
+
+    subgraph "Execution Timeline"
+        W1[Weeks 1-2: Stabilize]
+        W2[Weeks 2-3: Pip Pilot]
+        W3[Weeks 3-5: Security Track]
+        W4[Weeks 5-7: Rewrite Spike]
+        W5[Week 8: Decision Gate]
+        W6[Weeks 8-10: Enterprise Prep]
+    end
+
+    Q1 --> W1
+    Q1 --> W2
+    Q3 --> W3
+    Q2 --> W4
+    W4 --> W5
+    W5 --> W6
+```
+
+### C. Netra Platform Integration Plans
+
+#### 6. [Netra Application Integration Plan](CLAUDE_INSTANCE_ORCHESTRATOR_NETRA_INTEGRATION_PLAN.md)
+**Status:** Planning Phase
+**Scope:** Enterprise integration with Netra platform
+
+**Key Features:**
+- Authentication & authorization integration
+- 3-tier state persistence (Redis/PostgreSQL/ClickHouse)
+- Chat system integration with WebSocket events
+- Dynamic optimization advice from Netra API
+- Enterprise orchestration dashboard
+
+```mermaid
+graph TB
+    subgraph "Phase 1: Foundation"
+        A1[Authentication Integration]
+        A2[Credential Storage]
+        A3[User Context Isolation]
+    end
+
+    subgraph "Phase 2: Core Integration"
+        B1[3-Tier Persistence]
+        B2[Chat Integration]
+        B3[WebSocket Events]
+        B4[API Integration]
+    end
+
+    subgraph "Phase 3: Advanced Features"
+        C1[Orchestration Patterns]
+        C2[Enterprise Dashboard]
+        C3[Performance Optimization]
+    end
+
+    subgraph "Phase 4: Enterprise"
+        D1[Security Features]
+        D2[Custom Workflows]
+        D3[Customer Tools]
+    end
+
+    A1 --> B1
+    A2 --> B2
+    A3 --> B3
+    B4 --> C1
+    C2 --> D1
+    C3 --> D2
+    D3 --> E[Production Ready]
+```
+
+#### 7. [Chat Resilience Enhancement Plan](CHAT_RESILIENCE_ENHANCEMENT_PLAN.md)
+**Status:** Infrastructure Design
+**Scope:** Chat interface availability and resilience improvements
+
+**Expected Improvements:**
+- WebSocket uptime: 95% → 99.5%
+- Response time (95th percentile): ~3s → <2s
+- Recovery time from network issues: 2-3min → <30s
+- Message delivery success: ~95% → 99.9%
+- Zero data loss during graceful shutdowns
+
+```mermaid
+graph TB
+    subgraph "Current Strengths"
+        CS1[Health Infrastructure]
+        CS2[WebSocket Management]
+        CS3[Error Boundaries]
+        CS4[Graceful Shutdown]
+    end
+
+    subgraph "Enhancement Areas"
+        EA1[Deep Health Checks]
+        EA2[Horizontal Scaling]
+        EA3[Smart Reconnection]
+        EA4[Request Draining]
+        EA5[SLO Monitoring]
+    end
+
+    subgraph "Business Impact"
+        BI1[99.5% Uptime]
+        BI2[<2s Response Time]
+        BI3[<30s Recovery]
+        BI4[Zero Data Loss]
+    end
+
+    CS1 --> EA1
+    CS2 --> EA2
+    CS3 --> EA3
+    CS4 --> EA4
+    EA1 --> BI1
+    EA2 --> BI2
+    EA3 --> BI3
+    EA4 --> BI4
+    EA5 --> BI1
+```
+
+### D. Business Critical & Remediation Plans
+
+#### 8. [Issue #1197 Golden Path Comprehensive Remediation Plan](ISSUE_1197_GOLDEN_PATH_COMPREHENSIVE_REMEDIATION_PLAN.md)
+**Status:** P0 - Business Critical
+**Scope:** $500K+ ARR Golden Path functionality validation and enterprise readiness
+
+**Business Impact:**
+- Golden Path user flow (Login → AI Responses) validation
+- Comprehensive E2E test validation infrastructure
+- Enterprise deployment confidence
+- System health: 95% overall with "FULLY OPERATIONAL" Golden Path
+
+```mermaid
+graph TB
+    subgraph "Current State Assessment"
+        CSA1[✅ 95% System Health]
+        CSA2[✅ Infrastructure Operational]
+        CSA3[✅ 60+ Test Files Exist]
+        CSA4[❌ E2E Validation Gap]
+        CSA5[❌ Test Infrastructure Issues]
+    end
+
+    subgraph "Remediation Strategy"
+        RS1[Validation Enhancement]
+        RS2[Test Infrastructure Fix]
+        RS3[Business Value Tracking]
+        RS4[Comprehensive Execution]
+    end
+
+    subgraph "Expected Outcomes"
+        EO1[Enterprise Ready]
+        EO2[$500K+ ARR Protected]
+        EO3[Complete E2E Coverage]
+        EO4[Deployment Confidence]
+    end
+
+    CSA1 --> RS1
+    CSA3 --> RS2
+    CSA4 --> RS3
+    CSA5 --> RS4
+    RS1 --> EO1
+    RS2 --> EO2
+    RS3 --> EO3
+    RS4 --> EO4
+```
+
+#### 9. [Agent Modernization Plan](agents/AGENT_MODERNIZATION_PLAN.md)
+**Status:** Architecture Alignment
+**Scope:** Standardize all agents to modern execution pattern
+
+**Modern Agent Standard:**
+- BaseExecutionInterface with standardized contracts
+- ReliabilityManager with circuit breaker and retry logic
+- ExecutionMonitor for performance tracking
+- Structured error management and fallback strategies
+
+```mermaid
+graph LR
+    subgraph "Current Agent Types"
+        CAT1[Legacy Pattern ~80%]
+        CAT2[Modern Pattern ~20%]
+    end
+
+    subgraph "Modern Standards"
+        MS1[BaseExecutionInterface]
+        MS2[ReliabilityManager]
+        MS3[ExecutionMonitor]
+        MS4[ErrorHandler]
+    end
+
+    subgraph "Benefits Achieved"
+        BA1[Circuit Breaker Protection]
+        BA2[Retry Logic with Backoff]
+        BA3[Performance Monitoring]
+        BA4[Graceful Degradation]
+    end
+
+    CAT1 --> MS1
+    CAT2 --> MS2
+    MS1 --> BA1
+    MS2 --> BA2
+    MS3 --> BA3
+    MS4 --> BA4
+```
+
+#### 10. [SSOT Violations Remediation Plan - Issue #1065](SSOT_VIOLATIONS_REMEDIATION_PLAN_ISSUE_1065.md)
+**Status:** Comprehensive Remediation
+**Scope:** 27,944 SSOT violations across mock, infrastructure, and import patterns
+
+**Violation Breakdown:**
+- Mock Duplication: 22,886 violations (82% of total)
+- Test Infrastructure: 2,053 violations (7% of total)
+- Import Patterns: 3,005 violations (11% of total)
+
+```mermaid
+graph TD
+    subgraph "Violation Types"
+        VT1[Mock Duplication<br/>22,886 (82%)]
+        VT2[Test Infrastructure<br/>2,053 (7%)]
+        VT3[Import Patterns<br/>3,005 (11%)]
+    end
+
+    subgraph "Remediation Phases"
+        RP1[Phase 1: Mock Consolidation]
+        RP2[Phase 2: Infrastructure SSOT]
+        RP3[Phase 3: Import Standardization]
+        RP4[Phase 4: Validation & Testing]
+    end
+
+    subgraph "Expected Benefits"
+        EB1[Zero Violations]
+        EB2[Simplified Maintenance]
+        EB3[Consistent Patterns]
+        EB4[System Stability]
+    end
+
+    VT1 --> RP1
+    VT2 --> RP2
+    VT3 --> RP3
+    RP1 --> EB1
+    RP2 --> EB2
+    RP3 --> EB3
+    RP4 --> EB4
+```
+
+#### 11. [Unified Infrastructure Remediation Plan](UNIFIED_INFRASTRUCTURE_REMEDIATION_PLAN.md)
+**Status:** Root Cause Remediation
+**Scope:** Infrastructure connectivity cluster issues (#395, #372, #367)
+
+**Critical Issues Addressed:**
+- Service-to-service communication failures
+- VPC networking configuration drift
+- Deployment state inconsistencies
+- Authentication and WebSocket connection timeouts
+
+```mermaid
+graph TB
+    subgraph "Root Causes"
+        RC1[Service Communication]
+        RC2[VPC Networking]
+        RC3[Deployment Drift]
+        RC4[Auth/WebSocket Timeouts]
+    end
+
+    subgraph "Unified Solutions"
+        US1[Communication Protocol Fix]
+        US2[VPC Configuration Sync]
+        US3[State Management Overhaul]
+        US4[Connection Optimization]
+    end
+
+    subgraph "Business Recovery"
+        BR1[Golden Path Restored]
+        BR2[$500K+ ARR Protected]
+        BR3[Customer Experience Fixed]
+        BR4[Dev Velocity Restored]
+    end
+
+    RC1 --> US1
+    RC2 --> US2
+    RC3 --> US3
+    RC4 --> US4
+    US1 --> BR1
+    US2 --> BR2
+    US3 --> BR3
+    US4 --> BR4
 ```
 
 ## 🏗️ Architecture Overview
@@ -409,29 +629,37 @@ sequenceDiagram
 
 ### Feature Matrix
 
-| Feature | Enhancement Plan | Integration Plan | Universal Plan | Deployment Analysis | Strategy Plan | Modernization |
-|---------|------------------|------------------|----------------|-------------------|---------------|---------------|
-| Single Instance Mode | ✅ Phase 1 | ➖ | ✅ Phase 1 | ➖ | ➖ | ➖ |
-| Generic CLI Support | ✅ Phase 2 | ➖ | ✅ Foundation | ➖ | ➖ | ➖ |
-| Dependency Chaining | ✅ Phase 3 | ➖ | ✅ Phase 2 | ➖ | ➖ | ➖ |
-| Netra Auth Integration | ➖ | ✅ Phase 1 | ➖ | ➖ | ➖ | ➖ |
-| State Persistence | ➖ | ✅ Phase 2 | ➖ | ➖ | ➖ | ➖ |
-| Chat Integration | ➖ | ✅ Phase 2 | ➖ | ➖ | ➖ | ➖ |
-| Enterprise Dashboard | ➖ | ✅ Phase 4 | ➖ | ➖ | ➖ | ➖ |
-| Multi-Tool Pipelines | ➖ | ➖ | ✅ Phase 3 | ➖ | ➖ | ➖ |
-| Deployment Security | ➖ | ➖ | ➖ | ✅ 6 Strategies | ✅ Decision Framework | ➖ |
-| Package Distribution | ➖ | ➖ | ➖ | ✅ Pip/Executable | ✅ Implementation | ➖ |
-| Container Strategy | ➖ | ➖ | ➖ | ✅ Secure Dist | ✅ Timeline | ➖ |
-| Language Rewrite Options | ➖ | ➖ | ➖ | ✅ Rust/Node Analysis | ✅ Spike Plan | ➖ |
-| JSON Token Parsing | ➖ | ➖ | ➖ | ➖ | ➖ | ✅ Complete |
-| Backward Compatibility | ➖ | ➖ | ➖ | ➖ | ➖ | ✅ 100% |
-| Performance Improvements | ➖ | ➖ | ➖ | ➖ | ➖ | ✅ Achieved |
+| Feature | Core Plans | Deployment Plans | Platform Plans | Business Critical Plans |
+|---------|------------|------------------|----------------|-------------------------|
+| **Core Orchestrator Features** ||||
+| Single Instance Mode | ✅ Enhancement Plan | ➖ | ➖ | ➖ |
+| Generic CLI Support | ✅ Enhancement + Universal | ➖ | ➖ | ➖ |
+| Dependency Chaining | ✅ Enhancement + Universal | ➖ | ➖ | ➖ |
+| JSON Token Parsing | ✅ Modernization Complete | ➖ | ➖ | ➖ |
+| Backward Compatibility | ✅ Modernization 100% | ➖ | ➖ | ➖ |
+| **Deployment & Security** ||||
+| Package Distribution | ➖ | ✅ 6 Strategies Analysis | ➖ | ➖ |
+| Container Strategy | ➖ | ✅ Security + Timeline | ➖ | ➖ |
+| Language Rewrite Options | ➖ | ✅ Rust/Node Analysis | ➖ | ➖ |
+| Deployment Security | ➖ | ✅ Comprehensive Framework | ➖ | ➖ |
+| **Platform Integration** ||||
+| Netra Auth Integration | ➖ | ➖ | ✅ Integration Plan | ➖ |
+| State Persistence | ➖ | ➖ | ✅ 3-Tier Architecture | ➖ |
+| Chat Integration | ➖ | ➖ | ✅ Integration + Resilience | ➖ |
+| WebSocket Resilience | ➖ | ➖ | ✅ Chat Resilience Plan | ➖ |
+| Enterprise Dashboard | ➖ | ➖ | ✅ Integration Phase 4 | ➖ |
+| **Business Critical & Infrastructure** ||||
+| Golden Path Validation | ➖ | ➖ | ➖ | ✅ Issue #1197 Plan |
+| Agent Modernization | ➖ | ➖ | ➖ | ✅ Agent Plan |
+| SSOT Violations Fix | ➖ | ➖ | ➖ | ✅ Issue #1065 Plan |
+| Infrastructure Remediation | ➖ | ➖ | ➖ | ✅ Unified Infrastructure |
+| Multi-Tool Pipelines | ✅ Universal Plan | ➖ | ➖ | ➖ |
 
 ### Implementation Priority
 
 ```mermaid
 gantt
-    title Claude Orchestrator Implementation Timeline
+    title Claude Orchestrator & Platform Implementation Timeline
     dateFormat  X
     axisFormat %s
 
@@ -443,22 +671,27 @@ gantt
     Package Strategy        :active, package, 1, 3
     PyInstaller Build       :active, pyinst, 2, 4
 
-    section Short Term
+    section Core Orchestrator
     Universal CLI Support   :foundation, 3, 5
     Single Instance Mode    :single, 3, 5
     Container Security      :container, 4, 6
-
-    section Medium Term
     Dependency Engine       :depends, 5, 7
     Graph Execution        :graph, 5, 7
-    Language Evaluation    :lang-eval, 6, 8
 
-    section Netra Integration
-    Authentication         :auth, 7, 9
-    State Persistence      :state, 7, 9
+    section Business Critical
+    Golden Path Validation  :critical, golden, 2, 4
+    SSOT Violations Fix     :critical, ssot, 3, 5
+    Infrastructure Fix      :critical, infra, 3, 6
+    Agent Modernization     :agent-mod, 4, 7
+
+    section Platform Integration
+    Authentication         :auth, 6, 8
+    State Persistence      :state, 6, 8
+    Chat Resilience        :chat-res, 7, 9
     Chat Integration       :chat, 8, 10
 
-    section Enterprise
+    section Enterprise Ready
+    Language Evaluation    :lang-eval, 8, 10
     Dashboard             :dashboard, 9, 11
     Advanced Patterns     :patterns, 9, 11
     Production Ready      :prod, 10, 12
