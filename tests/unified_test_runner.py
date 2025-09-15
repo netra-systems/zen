@@ -1110,7 +1110,12 @@ class UnifiedTestRunner:
                 if args.pattern:
                     results = {}
                     for category in categories_to_run:
-                        tests = self._fast_path_collect_tests(args.pattern, category)
+                        # Only apply pattern filtering for E2E categories
+                        if category in {'e2e', 'e2e_critical', 'cypress', 'e2e_full'}:
+                            tests = self._fast_path_collect_tests(args.pattern, category)
+                        else:
+                            # For non-E2E categories, ignore pattern and collect all tests
+                            tests = self._fast_path_collect_tests('*', category)
                         results[category] = {
                             "success": True,
                             "duration": 0.0,
@@ -3242,7 +3247,7 @@ class UnifiedTestRunner:
             cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])   # 5min for other test categories
         
         # Add specific test pattern
-        if args.pattern:
+        if args.pattern and category_name in {'e2e', 'e2e_critical', 'cypress', 'e2e_full'}:
             # Clean up pattern - remove asterisks that are invalid for pytest -k expressions
             # pytest -k expects Python-like expressions, not glob patterns
             clean_pattern = args.pattern.strip('*')
