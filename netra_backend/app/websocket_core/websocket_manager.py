@@ -238,35 +238,103 @@ _REGISTRY_LOCK = threading.Lock()
 
 def _get_user_key(user_context: Optional[Any]) -> str:
     """
-    Extract a unique user key from user context for manager registry.
-    
+    Extract deterministic user key for manager registry.
+
+    CRITICAL: Must return same key for same logical user to prevent duplicates.
+    ISSUE #889 FIX: Eliminates non-deterministic object ID fallback that caused
+    registry misses and manager duplication.
+
     Args:
         user_context: UserExecutionContext or compatible object
-        
+
     Returns:
-        str: Unique user identifier for manager registry
+        str: Deterministic user identifier for manager registry
     """
     if user_context is None:
-        # For None context, generate a special test key that gets reused
-        return "test_user_context_none"
-    
-    # Extract user_id if available
-    if hasattr(user_context, 'user_id'):
+        return "no_user_context"
+
+    # Primary: Use user_id if available
+    if hasattr(user_context, 'user_id') and user_context.user_id:
         return str(user_context.user_id)
-    
-    # Fallback to object id if no user_id available
-    return f"unknown_user_{id(user_context)}"
+
+    # Secondary: Use thread_id + request_id combination for deterministic fallback
+    thread_id = getattr(user_context, 'thread_id', None)
+    request_id = getattr(user_context, 'request_id', None)
+
+    if thread_id and request_id:
+        return f"context_{thread_id}_{request_id}"
+
+    # Tertiary: Use string representation (more deterministic than object ID)
+    context_str = str(user_context)
+    if 'user_id' in context_str:
+        # Extract user_id from string representation if available
+        import re
+        user_id_match = re.search(r'user_id[\'\":\s]*([^\s\'\",}]+)', context_str)
+        if user_id_match:
+            return f"extracted_{user_id_match.group(1)}"
+
+    # Final fallback: Generate consistent ID based on context attributes
+    import hashlib
+    context_attrs = []
+    for attr in ['user_id', 'thread_id', 'request_id', 'session_id']:
+        if hasattr(user_context, attr):
+            context_attrs.append(f"{attr}:{getattr(user_context, attr)}")
+
+    if context_attrs:
+        context_hash = hashlib.md5('|'.join(context_attrs).encode()).hexdigest()[:16]
+        return f"derived_{context_hash}"
+
+    # Emergency fallback (should log warning)
+    logger.warning("Unable to derive deterministic user key from context, using object representation")
+    return f"emergency_{hash(str(user_context)) % 1000000}"  # Bounded hash instead of object ID
 
 def _cleanup_user_registry(user_key: str):
     """
     Clean up registry entry for a user.
-    
+
     Args:
         user_key: User key to remove from registry
     """
     if user_key in _USER_MANAGER_REGISTRY:
         del _USER_MANAGER_REGISTRY[user_key]
         logger.debug(f"Cleaned up registry entry for user {user_key}")
+
+def _validate_user_isolation(user_key: str, manager: _UnifiedWebSocketManagerImplementation) -> bool:
+    """
+    ISSUE #889 FIX: Validate that the manager maintains proper user isolation.
+
+    This function detects shared object references between managers that could
+    lead to cross-user data contamination and regulatory compliance violations.
+
+    Args:
+        user_key: User key for the manager being validated
+        manager: Manager instance to validate for isolation
+
+    Returns:
+        bool: True if isolation is maintained, False if violation detected
+    """
+    # Check for shared object references in critical attributes
+    critical_attributes = ['mode', 'user_context', '_auth_token', '_ssot_authorization_token']
+
+    for existing_user_key, existing_manager in _USER_MANAGER_REGISTRY.items():
+        if existing_user_key == user_key:
+            continue  # Skip self-comparison
+
+        for attr_name in critical_attributes:
+            if hasattr(manager, attr_name) and hasattr(existing_manager, attr_name):
+                manager_attr = getattr(manager, attr_name)
+                existing_attr = getattr(existing_manager, attr_name)
+
+                # Check for shared object references (critical security violation)
+                if manager_attr is existing_attr and manager_attr is not None:
+                    logger.critical(
+                        f"CRITICAL USER ISOLATION VIOLATION: {attr_name} shared between users {user_key} and {existing_user_key}. "
+                        f"Shared object ID: {id(manager_attr)}. "
+                        f"This violates HIPAA, SOC2, and SEC compliance requirements."
+                    )
+                    return False
+
+    return True
 
 async def get_manager_registry_status() -> Dict[str, Any]:
     """
@@ -477,6 +545,10 @@ def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketMan
             except ImportError:
                 # Validation enhancer not available - continue without validation
                 logger.debug("SSOT validation enhancer not available")
+
+            # ISSUE #889 FIX: Validate user isolation before registration
+            if not _validate_user_isolation(user_key, manager):
+                raise ValueError(f"CRITICAL USER ISOLATION VIOLATION: Manager for user {user_key} failed isolation validation")
 
             # CRITICAL: Register manager in user-scoped registry
             _USER_MANAGER_REGISTRY[user_key] = manager

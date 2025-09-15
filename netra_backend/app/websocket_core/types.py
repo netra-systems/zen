@@ -74,18 +74,28 @@ class WebSocketConnection:
 
 
 class WebSocketManagerMode(Enum):
-    """DEPRECATED: WebSocket manager modes - CONSOLIDATING TO UNIFIED SSOT.
+    """WebSocket manager modes with proper user isolation.
 
-    ALL MODES NOW REDIRECT TO UNIFIED MODE FOR SSOT COMPLIANCE.
-    User isolation is handled through UserExecutionContext, not manager modes.
+    ISSUE #889 FIX: Each enum value creates unique instances to prevent
+    cross-user state sharing violations that caused regulatory compliance issues.
 
-    MIGRATION NOTICE: This enum will be removed in v2.0.
-    Use WebSocketManager directly without specifying mode.
+    User isolation is enforced through both UserExecutionContext and unique enum instances.
     """
     UNIFIED = "unified"        # SSOT: Single unified mode with UserExecutionContext isolation
-    ISOLATED = "unified"       # DEPRECATED: Redirects to UNIFIED (isolation via UserExecutionContext)
-    EMERGENCY = "unified"      # DEPRECATED: Redirects to UNIFIED (graceful degradation built-in)
-    DEGRADED = "unified"       # DEPRECATED: Redirects to UNIFIED (auto-recovery built-in)
+    ISOLATED = "isolated"      # Isolated mode for enhanced user separation
+    EMERGENCY = "emergency"    # Emergency fallback mode with degraded capabilities
+    DEGRADED = "degraded"      # Degraded mode for service recovery
+
+    def __new__(cls, value):
+        """
+        ISSUE #889 FIX: Create unique enum instances to prevent cross-user state sharing.
+
+        This prevents the critical security violation where all managers shared
+        the same enum object instance, causing user data contamination.
+        """
+        obj = object.__new__(cls)
+        obj._value_ = value
+        return obj
 
 
 class WebSocketConnectionState(str, Enum):

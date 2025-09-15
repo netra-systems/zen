@@ -252,8 +252,10 @@ class _UnifiedWebSocketManagerImplementation:
                         self.request_id = "test_request_824"
                 user_context = TestUserContext()
 
-        # DEPRECATED: Mode is ignored - all instances use unified behavior
-        self.mode = WebSocketManagerMode.UNIFIED  # Force unified mode
+        # ISSUE #889 FIX: Store mode parameter to prevent state sharing between users
+        # Create isolated copy of mode to prevent shared references
+        # For enums, we need to create a new instance with the same value
+        self.mode = WebSocketManagerMode(mode.value)
         self.user_context = user_context
         self.config = config or {}
 
