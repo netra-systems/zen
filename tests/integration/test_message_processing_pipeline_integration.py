@@ -54,7 +54,7 @@ except ImportError:
     MessageProcessor = None
 
 try:
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 except ImportError:
     ExecutionEngine = None
 
