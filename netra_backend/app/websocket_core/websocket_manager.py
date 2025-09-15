@@ -674,6 +674,47 @@ WebSocketEventEmitter = UnifiedWebSocketEmitter
 # For tests and type checking, provide access to the actual implementation class
 WebSocketConnectionManager = _UnifiedWebSocketManagerImplementation
 
+# WEBSOCKET MANAGER SSOT CONSOLIDATION: Legacy factory function compatibility
+def create_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, **kwargs) -> _UnifiedWebSocketManagerImplementation:
+    """
+    Create WebSocket manager - Legacy compatibility function.
+
+    DEPRECATED: Use get_websocket_manager() directly for new code.
+    This function provides backward compatibility for existing tests and modules.
+
+    Args:
+        user_context: UserExecutionContext for user isolation
+        mode: WebSocket manager mode (all modes redirect to UNIFIED)
+        **kwargs: Additional arguments (ignored for compatibility)
+
+    Returns:
+        UnifiedWebSocketManager instance
+    """
+    import warnings
+    warnings.warn(
+        "create_websocket_manager() is deprecated. "
+        "Use get_websocket_manager() directly for SSOT compliance.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return get_websocket_manager(user_context, mode)
+
+# WEBSOCKET MANAGER SSOT CONSOLIDATION: Synchronous factory function alias
+def create_websocket_manager_sync(user_context: Optional[Any] = None, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, **kwargs) -> _UnifiedWebSocketManagerImplementation:
+    """
+    Create WebSocket manager synchronously - Legacy compatibility function.
+
+    DEPRECATED: Use get_websocket_manager() directly for new code.
+    """
+    import warnings
+    warnings.warn(
+        "create_websocket_manager_sync() is deprecated. "
+        "Use get_websocket_manager() directly for SSOT compliance.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return get_websocket_manager(user_context, mode)
+
 # Export the protocol for type checking and SSOT compliance
 __all__ = [
     'WebSocketManager',  # SSOT: Canonical WebSocket Manager import
@@ -685,6 +726,8 @@ __all__ = [
     'WebSocketManagerMode',  # SSOT: Manager modes enum
     '_serialize_message_safely',
     'get_websocket_manager',  # SSOT: Factory function (preferred)
+    'create_websocket_manager',  # DEPRECATED: Legacy compatibility function
+    'create_websocket_manager_sync',  # DEPRECATED: Legacy sync function
     'check_websocket_service_available',  # Service availability check
     'create_test_user_context',  # Test context helper
     'create_test_fallback_manager',  # Test fallback helper
