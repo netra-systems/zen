@@ -2736,6 +2736,9 @@ class UnifiedTestRunner:
                 subprocess_env = get_subprocess_env(subprocess_env)
             
             subprocess_env.update({'PYTHONUNBUFFERED': '1', 'PYTHONUTF8': '1'})
+
+            # CRITICAL: Set PYTHONPATH to ensure test_framework can be imported
+            subprocess_env['PYTHONPATH'] = str(self.project_root)
             
             # Use subprocess.Popen for better process control on Windows 
             # CRITICAL FIX: Apply Windows file handle management to all services, not just frontend

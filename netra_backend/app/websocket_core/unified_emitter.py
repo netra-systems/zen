@@ -1010,34 +1010,57 @@ class UnifiedWebSocketEmitter:
     def _is_suspicious_run_id(self, run_id: str) -> bool:
         """
         Check if a run_id contains suspicious patterns that might indicate invalid context.
-        
+
         This helps detect potentially invalid run_ids that could cause security issues
         or indicate bugs in run_id generation.
-        
+
         Args:
             run_id: The run_id to check
-            
+
         Returns:
             bool: True if the run_id contains suspicious patterns
         """
-        suspicious_patterns = [
-            'undefined', 'null', 'none', '',  # Falsy values that became strings
+        import re
+
+        # Basic validation first
+        if not run_id or not isinstance(run_id, str):
+            return True
+
+        # Check if it's a valid UUID format (most run_ids should be UUIDs)
+        uuid_pattern = r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+        if re.match(uuid_pattern, run_id.lower()):
+            return False  # Valid UUID format is not suspicious
+
+        # Suspicious prefix patterns (avoid substring matching issues)
+        suspicious_prefixes = [
+            'undefined', 'null', 'none',      # Falsy values that became strings
             'test_', 'mock_', 'fake_',        # Test/mock values in production
             'admin', 'system', 'root',        # System-level contexts
-            '__', '{{', '}}', '${',           # Template/variable placeholders
-            'localhost', '127.0.0.1',        # Local development patterns
             'debug', 'trace',                 # Debug contexts
         ]
-        
+
+        # Suspicious substring patterns (be more specific)
+        suspicious_substrings = [
+            '__', '{{', '}}', '${',           # Template/variable placeholders
+            'localhost', '127.0.0.1',        # Local development patterns
+        ]
+
         run_id_lower = run_id.lower()
-        for pattern in suspicious_patterns:
+
+        # Check prefixes
+        for prefix in suspicious_prefixes:
+            if run_id_lower.startswith(prefix):
+                return True
+
+        # Check specific substrings
+        for pattern in suspicious_substrings:
             if pattern in run_id_lower:
                 return True
-                
+
         # Check for unusual characters that might indicate encoding issues
         if any(ord(char) > 127 for char in run_id):  # Non-ASCII characters
             return True
-            
+
         return False
 
     @classmethod

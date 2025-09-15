@@ -247,9 +247,9 @@ class WebSocketStartupQueue:
                     continue  # Already garbage collected
                 
                 try:
-                    # Validate that services are actually ready
+                    # PHASE 1 TIMEOUT EXTENSION: Validate that services are actually ready with extended timeout
                     validator = GCPWebSocketInitializationValidator(app_state)
-                    result = await validator.validate_gcp_readiness_for_websocket(timeout_seconds=5.0)
+                    result = await validator.validate_gcp_readiness_for_websocket(timeout_seconds=8.0)  # Increased from 5.0s to 8.0s
                     
                     if result.ready:
                         # Services are ready, connection can proceed
@@ -940,9 +940,9 @@ class GCPWebSocketInitializationValidator:
         
         # PROGRESSIVE DELAY CONFIGURATION for Cloud Run optimization
         if self.is_cloud_run and minimum_phase == 'services':
-            # Extended timeout for Cloud Run SERVICES phase due to heavy initialization
+            # PHASE 1 TIMEOUT EXTENSION: Extended timeout for Cloud Run SERVICES phase due to heavy initialization
             # Phase 5 includes: agent supervisor, execution tracker, background tasks, health service
-            timeout_seconds = max(timeout_seconds, 8.0)  # Minimum 8s for Cloud Run services phase
+            timeout_seconds = max(timeout_seconds, 10.0)  # Minimum 10s for Cloud Run services phase (increased from 8s)
             self.logger.info(f"Cloud Run detected: Extended timeout to {timeout_seconds}s for services phase")
         
         # Progressive check intervals: start fast, slow down for heavy phases
@@ -1149,8 +1149,8 @@ class GCPWebSocketInitializationValidator:
             
             # CRITICAL FIX: Enhanced startup phase validation with progressive delays and queueing
             # This prevents race condition where validation runs before Phase 5 completion
-            # PERFORMANCE OPTIMIZATION: Use environment-optimized timeout for startup wait
-            wait_timeout = self._get_optimized_timeout(optimized_timeout * 0.4)  # Increased from 30% to 40%
+            # PHASE 1 TIMEOUT EXTENSION: Increased from 40% to 50% of optimized timeout for Cloud Run startup delays
+            wait_timeout = self._get_optimized_timeout(optimized_timeout * 0.5)  # Increased from 40% to 50%
             
             # ISSUE #919 FIX: Check for GCP environments with startup phase stuck at 'unknown'
             current_phase = getattr(self.app_state, 'startup_phase', 'unknown') if self.app_state else 'no_app_state'
@@ -1167,8 +1167,8 @@ class GCPWebSocketInitializationValidator:
                     f"Cloud Run: {self.is_cloud_run}, GCP: {self.is_gcp_environment}"
                 )
                 
-                # Use extended timeout for unknown phase scenarios
-                extended_timeout = max(wait_timeout, 10.0)  # Minimum 10s for unknown phase
+                # PHASE 1 TIMEOUT EXTENSION: Increased minimum timeout from 10s to 15s for unknown phase scenarios
+                extended_timeout = max(wait_timeout, 15.0)  # Minimum 15s for unknown phase (increased from 10s)
                 startup_ready = await self._wait_for_startup_phase_completion(
                     minimum_phase='services',
                     timeout_seconds=extended_timeout
