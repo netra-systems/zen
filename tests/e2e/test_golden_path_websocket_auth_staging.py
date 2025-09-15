@@ -61,7 +61,7 @@ class TestWebSocketAuthGoldenPathStaging(SSotAsyncTestCase):
             self.__class__.staging_backend_url = self.__class__.staging_config.websocket_url
             self.__class__.staging_auth_url = self.__class__.staging_config.auth_service_url
             self.__class__.auth_client = StagingAuthClient()
-            self.__class__.websocket_client = RealWebSocketClient()
+            self.__class__.websocket_client = RealWebSocketClient(ws_url=self.__class__.staging_backend_url)
             await self._verify_staging_services()
             self.__class__.test_user = await self._create_golden_path_test_user()
             self.logger.info('Staging E2E test setup completed')

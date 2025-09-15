@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -828,7 +828,7 @@ async def test_circuit_breaker_websocket_notifications():
     
     # Mock WebSocket manager
     websocket_manager = AsyncMock(spec=WebSocketManager)
-    websocket_manager.websocket = TestWebSocketConnection()
+    websocket_manager.websocket = WebSocketTestHelper()
     websocket_notifier = WebSocketNotifier.create_for_user(websocket_manager)
     
     # Create circuit breaker with WebSocket integration

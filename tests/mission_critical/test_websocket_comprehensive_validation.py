@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -246,7 +246,7 @@ class WebSocketFactoryTestHarness:
         # Configure factory with real WebSocket manager
         self.factory.configure(
             connection_pool=self.mock_pool,
-            websocket = TestWebSocketConnection()  # Real WebSocket implementation,  # Mock registry
+            websocket = WebSocketTestHelper()  # Real WebSocket implementation,  # Mock registry
         )
         
         self.user_emitters: Dict[str, UserWebSocketEmitter] = {}
