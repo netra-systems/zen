@@ -204,34 +204,13 @@ class TestMessageRouterSSOTCompliance(SSotBaseTestCase):
 
 
 if __name__ == "__main__":
-    print("Running MessageRouter SSOT compliance tests...")
-    
-    # Create test suite
-    import pytest
-    result = pytest.main([__file__, '-v'])
-    
-    # Print summary
-    print("\n" + "="*60)
-    print("FINAL RESULTS")
-    print("="*60)
-    
-    if result.wasSuccessful():
-        print("SUCCESS! ALL CRITICAL TESTS PASSED!")
-        print("\n[OK] MessageRouter SSOT violation is FIXED")
-        print("[OK] AgentMessageHandler registration works")
-        print("[OK] WebSocket routing compatibility verified")
-        print("[OK] Staging should now work correctly")
-        print("\nNext steps:")
-        print("1. Commit these changes")
-        print("2. Deploy to staging: python scripts/deploy_to_gcp.py --project netra-staging --build-local")
-        print("3. Monitor logs for successful AgentMessageHandler registration")
-    else:
-        print("[FAIL] TESTS FAILED - Fix required before deploying to staging!")
-        if result.failures:
-            print("   Failures:")
-            for test, traceback in result.failures:
-                print(f"   - {test}: {traceback.split('AssertionError:')[-1].strip()}")
-        if result.errors:
-            print("   Errors:")
-            for test, traceback in result.errors:
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)
                 print(f"   - {test}: {traceback.split('Error:')[-1].strip()}")

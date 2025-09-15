@@ -381,4 +381,6 @@ class TestAgentRegistrySSoTViolationReproduction(SSotAsyncTestCase):
 
 if __name__ == "__main__":
     # Allow running individual test file
-    pytest.main([__file__, "-v"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

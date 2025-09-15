@@ -602,20 +602,12 @@ class TestWebSocketConnectionHandlerGoldenPath(SSotBaseTestCase):
 
 
 if __name__ == "__main__":
-    """
-    Run golden path tests directly for debugging.
-    
-    Usage:
-        python -m pytest tests/mission_critical/test_websocket_connectionhandler_golden_path.py -v -s
-        
-    For staging environment:
-        TEST_ENV=staging python -m pytest tests/mission_critical/test_websocket_connectionhandler_golden_path.py -v -s
-    """
-    import sys
-    import os
-    
-    # Add project root to path
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    
-    # Run tests
-    pytest.main([__file__, "-v", "-s", "--tb=short"])
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

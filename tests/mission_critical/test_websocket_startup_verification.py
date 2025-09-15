@@ -411,8 +411,12 @@ def test_websocket_startup_verification_test_discovery():
 
 
 if __name__ == "__main__":
-    print("WebSocket Startup Verification Test Suite")
-    print("Business Value: Platform/Critical - $500K+ ARR Protection")  
-    print("Test Categories: Unit, Integration, Mission Critical")
-    print("SSOT Compliance: SSotAsyncTestCase base for all tests")
-    print("\nRun with: pytest tests/mission_critical/test_websocket_startup_verification.py -v")
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

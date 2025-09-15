@@ -390,4 +390,6 @@ class TestCriticalTimestampValidationRegressionPrevention:
 
 if __name__ == "__main__":
     # Run all critical tests
-    pytest.main([__file__, "-v", "--tb=short", "--maxfail=1", "--timeout=30"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

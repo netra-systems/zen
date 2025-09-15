@@ -310,31 +310,12 @@ def validate_critical_agent_events(events: List[Dict[str, Any]]) -> Dict[str, An
 
 
 if __name__ == "__main__":
-    """Run the critical tests directly."""
-    import sys
-    
-    # Set UTF-8 encoding for Windows
-    if sys.platform.startswith('win'):
-        import io
-        sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
-        sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding='utf-8')
-    
-    print("[U+1F680] Running Mission Critical WebSocket Agent Events Tests (Fixed Version)")
-    
-    # Run with pytest
-    pytest_args = [
-        __file__,
-        "-v",
-        "-s", 
-        "--tb=short",
-        "-m", "critical"
-    ]
-    
-    exit_code = pytest.main(pytest_args)
-    
-    if exit_code == 0:
-        print(" PASS:  All mission critical tests passed!")
-    else:
-        print(" FAIL:  Some mission critical tests failed!")
-        
-    sys.exit(exit_code)
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

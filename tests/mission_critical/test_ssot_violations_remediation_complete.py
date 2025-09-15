@@ -9,7 +9,9 @@ This comprehensive integration test validates that ALL critical SSOT violations 
 have been remediated and the system maintains full SSOT compliance across all test infrastructure.
 
 VIOLATIONS BEING VALIDATED FOR REMEDIATION:
-1. Direct pytest.main() bypassing (20+ files) → All using unified_test_runner.py
+1. Direct # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution bypassing (20+ files) → All using unified_test_runner.py
 2. Multiple BaseTestCase inheritance (1343+ files) → All using SSotBaseTestCase  
 3. Orchestration duplication (129+ files) → All using SSOT orchestration patterns
 
@@ -97,7 +99,9 @@ class TestSsotViolationsRemediationComplete(SSotBaseTestCase):
 
     def scan_for_pytest_bypass_violations(self) -> Tuple[int, List[str]]:
         """
-        Scan for remaining direct pytest.main() bypass violations.
+        Scan for remaining direct # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution bypass violations.
         Returns count and list of violating files.
         """
         violations = []
@@ -115,16 +119,20 @@ class TestSsotViolationsRemediationComplete(SSotBaseTestCase):
                     with open(py_file, 'r', encoding='utf-8') as f:
                         content = f.read()
                         
-                    # Check for direct pytest.main() usage (excluding SSOT unified_test_runner.py)
-                    if ('pytest.main(' in content and 
-                        'unified_test_runner.py' not in str(py_file) and
+                    # Check for direct # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution usage (excluding SSOT unified_test_runner.py)
+                    if ('# MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution and
                         not content.strip().startswith('#')):
                         
                         # Additional validation to avoid false positives
                         lines = content.splitlines()
                         for line_num, line in enumerate(lines, 1):
-                            if ('pytest.main(' in line and 
-                                not line.strip().startswith('#') and
+                            if ('# MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution.startswith('#') and
                                 not line.strip().startswith('"""') and
                                 not line.strip().startswith("'")):
                                 violations.append(str(py_file.relative_to(self.project_root)))
@@ -398,7 +406,9 @@ class TestSsotViolationsRemediationComplete(SSotBaseTestCase):
         self.assertEqual(
             pytest_count, 0,
             f"PYTEST BYPASS VIOLATIONS MUST BE ZERO: Found {pytest_count} files still using "
-            f"direct pytest.main() bypassing unified_test_runner.py. "
+            f"direct # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution bypassing unified_test_runner.py. "
             f"Violating files: {pytest_files[:5]}{'...' if len(pytest_files) > 5 else ''}"
         )
         

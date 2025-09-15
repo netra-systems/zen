@@ -183,6 +183,40 @@ class WebSocketAuthPatternMonitor:
             "issue_ref": "WebSocket security - No auth bypass allowed"
         }
     }
+
+    # PYTEST.MAIN() PATTERNS: Issue #1024 - Unauthorized test runners blocking Golden Path
+    PYTEST_MAIN_VIOLATION_PATTERNS = {
+        "direct_pytest_main": {
+            "pattern": r"pytest\.main\s*\(",
+            "description": "Direct pytest.main() call bypassing SSOT unified test runner - Issue #1024",
+            "suggestion": "Use tests/unified_test_runner.py --category <category> instead",
+            "severity": ViolationSeverity.ERROR,
+            "issue_ref": "GitHub Issue #1024 - SSOT test runner enforcement",
+            "business_impact": "$500K+ ARR at risk from test infrastructure chaos"
+        },
+        "unauthorized_test_runner": {
+            "pattern": r"if\s+__name__\s*==\s*[\"']__main__[\"'].*pytest",
+            "description": "Unauthorized test runner in __main__ block - Issue #1024",
+            "suggestion": "Remove __main__ test execution, use unified test runner",
+            "severity": ViolationSeverity.ERROR,
+            "issue_ref": "GitHub Issue #1024 - Unauthorized test runners",
+            "business_impact": "Golden Path test reliability degraded from ~60% to >95%"
+        },
+        "subprocess_pytest": {
+            "pattern": r"subprocess.*pytest|os\.system.*pytest",
+            "description": "Subprocess-based pytest execution bypassing SSOT - Issue #1024",
+            "suggestion": "Use tests/unified_test_runner.py through proper imports",
+            "severity": ViolationSeverity.ERROR,
+            "issue_ref": "GitHub Issue #1024 - SSOT bypass prevention"
+        },
+        "pytest_cmdline_main": {
+            "pattern": r"pytest\.cmdline\.main\s*\(",
+            "description": "Direct pytest.cmdline.main() bypassing SSOT test infrastructure",
+            "suggestion": "Replace with tests/unified_test_runner.py execution",
+            "severity": ViolationSeverity.ERROR,
+            "issue_ref": "GitHub Issue #1024 - Test infrastructure chaos prevention"
+        }
+    }
     
     def __init__(self, project_root: Optional[Path] = None):
         """Initialize WebSocket auth pattern monitor."""
@@ -259,8 +293,9 @@ class WebSocketAuthPatternMonitor:
             # Combine all pattern dictionaries
             all_patterns = {
                 **self.CRITICAL_JWT_BYPASS_PATTERNS,
-                **self.SSOT_VIOLATION_PATTERNS, 
-                **self.FALLBACK_AUTH_PATTERNS
+                **self.SSOT_VIOLATION_PATTERNS,
+                **self.FALLBACK_AUTH_PATTERNS,
+                **self.PYTEST_MAIN_VIOLATION_PATTERNS
             }
             
             for line_idx, line in enumerate(lines):

@@ -573,4 +573,6 @@ if __name__ == "__main__":
         asyncio.run(TestTokenRefreshPerformance().test_refresh_latency_under_load())
     else:
         # Run all tests
-        pytest.main([__file__, "-v"])
+        # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

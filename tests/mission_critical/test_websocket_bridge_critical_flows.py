@@ -1437,11 +1437,6 @@ class TestBusinessMetrics:
 
 if __name__ == "__main__":
     # Run comprehensive critical flows test suite
-    pytest.main([
-        __file__,
-        "-v",
-        "--tb=short", 
-        "--asyncio-mode=auto",
-        "-s",  # Show print statements
-        "--maxfail=5"  # Stop after 5 failures for faster feedback
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

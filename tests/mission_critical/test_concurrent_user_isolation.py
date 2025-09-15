@@ -1376,12 +1376,6 @@ class TestRealConcurrentUserIsolation:
 
 if __name__ == "__main__":
     # Run mission critical concurrent user isolation tests with real services
-    pytest.main([
-        __file__,
-        "-v",
-        "--tb=short",
-        "--no-cov",
-        "-s",  # Show output for debugging
-        "--maxfail=1",  # Stop on first failure for immediate attention
-        "-m", "mission_critical"  # Only run mission critical tests
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

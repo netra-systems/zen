@@ -768,11 +768,6 @@ class TestWebSocketEventContent:
 
 if __name__ == "__main__":
     # Run critical WebSocket validation tests
-    pytest.main([
-        __file__,
-        "-v",
-        "--tb=short",
-        "--asyncio-mode=auto",
-        "-s",  # Show print output
-        "--maxfail=3"  # Stop after 3 failures for faster feedback
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

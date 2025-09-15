@@ -223,4 +223,6 @@ async def test_recovery_queue_processing():
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

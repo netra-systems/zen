@@ -703,39 +703,12 @@
 
 
                                                 # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-                                                    # Configure pytest for multi-service integration testing
-                                                    # REMOVED_SYNTAX_ERROR: pytest_args = [ )
-                                                    # REMOVED_SYNTAX_ERROR: __file__,
-                                                    # REMOVED_SYNTAX_ERROR: "-v",
-                                                    # REMOVED_SYNTAX_ERROR: "-x",  # Stop on first failure
-                                                    # REMOVED_SYNTAX_ERROR: "--tb=short",
-                                                    # REMOVED_SYNTAX_ERROR: "-m", "mission_critical",
-                                                    # REMOVED_SYNTAX_ERROR: "--maxfail=5"  # Allow multiple failures for comprehensive reporting
-                                                    
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
-                                                    # REMOVED_SYNTAX_ERROR: print("Running COMPREHENSIVE Multi-Service Orchestration Integration Tests...")
-                                                    # REMOVED_SYNTAX_ERROR: print("=" * 85)
-                                                    # REMOVED_SYNTAX_ERROR: print("[U+1F310] INTEGRATION MODE: Testing enterprise multi-service coordination")
-                                                    # REMOVED_SYNTAX_ERROR: print(" SEARCH:  Service mesh, distributed transactions, event-driven architecture")
-                                                    # REMOVED_SYNTAX_ERROR: print("[U+1F517] Cross-service dependencies, API gateways, observability correlation")
-                                                    # REMOVED_SYNTAX_ERROR: print(" CYCLE:  SAGA patterns, message brokers, multi-tenant isolation")
-                                                    # REMOVED_SYNTAX_ERROR: print("=" * 85)
-
-                                                    # REMOVED_SYNTAX_ERROR: result = pytest.main(pytest_args)
-
-                                                    # REMOVED_SYNTAX_ERROR: if result == 0:
-                                                        # REMOVED_SYNTAX_ERROR: print(" )
-                                                        # REMOVED_SYNTAX_ERROR: " + "=" * 85)
-                                                        # REMOVED_SYNTAX_ERROR: print(" PASS:  ALL MULTI-SERVICE INTEGRATION TESTS PASSED")
-                                                        # REMOVED_SYNTAX_ERROR: print("[U+1F680] Multi-service orchestration ready for ENTERPRISE DEPLOYMENT")
-                                                        # REMOVED_SYNTAX_ERROR: print("[U+1F3D7][U+FE0F] Service mesh, distributed transactions, event coordination VERIFIED")
-                                                        # REMOVED_SYNTAX_ERROR: print("=" * 85)
-                                                        # REMOVED_SYNTAX_ERROR: else:
-                                                            # REMOVED_SYNTAX_ERROR: print(" )
-                                                            # REMOVED_SYNTAX_ERROR: " + "=" * 85)
-                                                            # REMOVED_SYNTAX_ERROR: print(" FAIL:  MULTI-SERVICE INTEGRATION TESTS FAILED")
-                                                            # REMOVED_SYNTAX_ERROR: print(" ALERT:  Multi-service coordination BROKEN - fix before deployment")
-                                                            # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F] Enterprise integration requirements not met")
-                                                            # REMOVED_SYNTAX_ERROR: print("=" * 85)
-
-                                                            # REMOVED_SYNTAX_ERROR: sys.exit(result)
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

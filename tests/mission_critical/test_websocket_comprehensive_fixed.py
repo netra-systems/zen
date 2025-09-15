@@ -418,13 +418,12 @@
                             # ============================================================================
 
                             # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-                                # REMOVED_SYNTAX_ERROR: logger.info("\
-                                # REMOVED_SYNTAX_ERROR: " + "=" * 80)
-                                # REMOVED_SYNTAX_ERROR: logger.info("MISSION CRITICAL: WebSocket Infrastructure Test Suite")
-                                # REMOVED_SYNTAX_ERROR: logger.info("=" * 80)
-                                # REMOVED_SYNTAX_ERROR: logger.info("Testing ALL 5 required WebSocket events with comprehensive validation")
-                                # REMOVED_SYNTAX_ERROR: logger.info("Events: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed")
-                                # REMOVED_SYNTAX_ERROR: logger.info("=" * 80)
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
-                                # Run with pytest
-                                # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v", "--tb=short", "-s", "--maxfail=1"])
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

@@ -471,52 +471,12 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
 
 # Standalone execution for monitoring mode
 if __name__ == "__main__":
-    import argparse
-    
-    parser = argparse.ArgumentParser(description="SSOT Regression Prevention Monitor")
-    parser.add_argument("--monitor-mode", action="store_true", 
-                       help="Run in monitoring mode (continuous checks)")
-    parser.add_argument("--generate-baseline", action="store_true",
-                       help="Generate violation baseline for regression detection")
-    
-    # Parse known args to avoid conflicts with pytest
-    args, unknown = parser.parse_known_args()
-    
-    if args.monitor_mode:
-        print("[U+1F680] SSOT REGRESSION PREVENTION MONITOR MODE")
-        print("=" * 60)
-        
-        # Run monitoring mode
-        if MONITORING_AVAILABLE:
-            project_root = Path(__file__).parent.parent.parent
-            monitor = SSOTComplianceMonitor(project_root)
-            
-            try:
-                print("Running single monitoring scan...")
-                report = monitor.run_monitoring_scan(websocket_only=True)
-                monitor.print_monitoring_report(report, verbose=True)
-                
-                # Save report
-                report_file = monitor.save_monitoring_report(report)
-                print(f"\n[U+1F4C4] Report saved to: {report_file}")
-                
-                # Exit with appropriate code
-                if report.security_critical_count > 0:
-                    print("\n[U+1F534] CRITICAL security violations detected!")
-                    sys.exit(2)
-                elif report.regression_violations > 0:
-                    print("\n ALERT:  REGRESSION violations detected!")
-                    sys.exit(1)
-                else:
-                    print("\n PASS:  No violations detected")
-                    sys.exit(0)
-                    
-            except Exception as e:
-                print(f"\n FAIL:  Monitoring failed: {e}")
-                sys.exit(3)
-        else:
-            print(" FAIL:  Monitoring components not available")
-            sys.exit(3)
-    else:
-        # Run as pytest
-        pytest.main([__file__] + unknown)
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

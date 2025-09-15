@@ -570,4 +570,6 @@ if __name__ == "__main__":
     print(" FIRE:  These tests MUST FAIL initially to demonstrate the business impact")
     print(" FIRE:  After implementing the fix in LEGACY_MESSAGE_TYPE_MAP, these should pass")
     
-    pytest.main([__file__, "-v", "--tb=short", "-x"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

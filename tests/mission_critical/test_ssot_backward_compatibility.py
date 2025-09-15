@@ -1184,4 +1184,6 @@ if __name__ == '__main__':
     import unittest
     
     # Run the tests
-    pytest.main([__file__, '-v', '--tb=short', '--capture=no'])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

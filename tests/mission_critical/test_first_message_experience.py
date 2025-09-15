@@ -1150,10 +1150,6 @@ Load Test Results:
 
 if __name__ == "__main__":
     # Run with real services
-    pytest.main([
-        __file__,
-        "-v",
-        "--tb=short",
-        "--no-header",
-        "-q"
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution
