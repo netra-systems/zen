@@ -239,8 +239,9 @@ class StartupOrchestrator:
             self.logger.info(f" PASS:  PHASE COMPLETED: {phase.value.upper()} ({duration:.3f}s)")
         
     def _fail_phase(self, phase: StartupPhase, error: Exception) -> None:
-        """Mark a phase as failed and update error tracking."""
+        """Mark a phase as failed and update error tracking with enhanced context for Issue #1278."""
         # Complete timing for failed phase
+        duration = None
         if phase in self.phase_timings:
             end_time = time.time()
             duration = end_time - self.phase_timings[phase]['start_time']
@@ -250,10 +251,95 @@ class StartupOrchestrator:
         self.failed_phases.add(phase)
         self.app.state.startup_failed_phases = [p.value for p in self.failed_phases]
         self.app.state.startup_failed = True
+        
+        # Enhanced error context for Issue #1278 debugging
+        error_context = {
+            "phase": phase.value,
+            "error_type": type(error).__name__,
+            "error_message": str(error),
+            "duration": duration,
+            "timestamp": time.time(),
+        }
+        
+        # Add database-specific context for Phase 3 failures
+        if phase == StartupPhase.DATABASE:
+            error_context.update({
+                "is_timeout_error": isinstance(error, asyncio.TimeoutError),
+                "circuit_breaker_state": self.database_circuit_breaker.state.state,
+                "circuit_failure_count": self.database_circuit_breaker.state.failure_count,
+                "is_vpc_connector_related": "vpc" in str(error).lower() or "cloud sql" in str(error).lower(),
+                "database_available": getattr(self.app.state, 'database_available', False),
+                "database_capacity_aware": getattr(self.app.state, 'database_capacity_aware', False),
+            })
+        
+        # Store detailed error context for debugging
+        if not hasattr(self.app.state, 'startup_phase_errors'):
+            self.app.state.startup_phase_errors = {}
+        self.app.state.startup_phase_errors[phase.value] = error_context
+        
+        # Set primary startup error message
         self.app.state.startup_error = f"Phase {phase.value} failed: {str(error)}"
         
-        self.logger.error(f" FAIL:  PHASE FAILED: {phase.value.upper()} - {error}")
+        # Enhanced logging with context
+        log_message = f" FAIL:  PHASE FAILED: {phase.value.upper()} - {error}"
+        if duration:
+            log_message += f" (after {duration:.2f}s)"
+        if phase == StartupPhase.DATABASE and isinstance(error, asyncio.TimeoutError):
+            log_message += f" [TIMEOUT - Circuit: {self.database_circuit_breaker.state.state}]"
         
+        self.logger.error(log_message)
+        
+        # Log detailed context for debugging
+        if phase == StartupPhase.DATABASE:
+            self.logger.error(f"Database failure context: {error_context}")
+            
+            # Issue #1278: Additional monitoring for database timeout patterns
+            self._log_database_timeout_diagnostics(error, error_context)
+    
+    def _log_database_timeout_diagnostics(self, error: Exception, error_context: dict) -> None:
+        """Log enhanced diagnostics for database timeout issues - Issue #1278 monitoring."""
+        from shared.isolated_environment import get_env
+        
+        environment = get_env().get("ENVIRONMENT", "development")
+        
+        # Log Issue #1278 pattern detection
+        if isinstance(error, asyncio.TimeoutError):
+            self.logger.error("=" * 80)
+            self.logger.error("ISSUE #1278 DATABASE TIMEOUT PATTERN DETECTED")
+            self.logger.error("=" * 80)
+            self.logger.error(f"Environment: {environment}")
+            self.logger.error(f"Timeout Duration: {error_context.get('duration', 'Unknown')}s")
+            self.logger.error(f"Circuit Breaker State: {error_context.get('circuit_breaker_state', 'Unknown')}")
+            self.logger.error(f"Failure Count: {error_context.get('circuit_failure_count', 'Unknown')}")
+            self.logger.error(f"VPC Connector Related: {error_context.get('is_vpc_connector_related', False)}")
+            self.logger.error(f"Database Available: {error_context.get('database_available', False)}")
+            self.logger.error(f"Error Message: {error}")
+            
+            # Log specific recommendations based on pattern
+            if environment.lower() == "staging":
+                self.logger.error("STAGING ENVIRONMENT RECOMMENDATIONS:")
+                self.logger.error("- Check VPC connector capacity and scaling status")
+                self.logger.error("- Verify Cloud SQL instance connection limits")
+                self.logger.error("- Review concurrent deployment activities")
+                self.logger.error("- Consider increasing initialization_timeout beyond 75.0s")
+            
+            self.logger.error("=" * 80)
+        
+        # Log system resource context
+        try:
+            import psutil
+            memory_info = psutil.virtual_memory()
+            self.logger.error(f"System Memory: {memory_info.percent}% used ({memory_info.available / 1024 / 1024 / 1024:.1f}GB available)")
+        except ImportError:
+            self.logger.debug("psutil not available for system resource monitoring")
+        
+        # Log environment-specific database configuration
+        try:
+            from netra_backend.app.core.database_timeout_config import log_timeout_configuration
+            log_timeout_configuration(environment)
+        except Exception as config_error:
+            self.logger.warning(f"Could not log timeout configuration: {config_error}")
+    
     async def initialize_system(self) -> None:
         """
         Initialize system in strict deterministic order.
@@ -1103,16 +1189,33 @@ class StartupOrchestrator:
         attempt = 0
         
         for attempt in range(retry_config["max_retries"]):
+            # Check circuit breaker before attempting
+            can_execute, circuit_reason = self.database_circuit_breaker.can_execute()
+            if not can_execute:
+                self.logger.warning(f"Circuit breaker preventing database attempt {attempt + 1}: {circuit_reason}")
+                if attempt >= retry_config["max_retries"] - 1:
+                    # If this is the last attempt and circuit is open, fail immediately
+                    raise DeterministicStartupError(
+                        f"Database circuit breaker is open: {circuit_reason}",
+                        phase=StartupPhase.DATABASE
+                    )
+                # Wait for circuit breaker timeout
+                await asyncio.sleep(min(30, retry_config["base_delay"] * (2 ** attempt)))
+                continue
+            
             try:
                 # Calculate progressive timeout for this attempt
                 timeout_multiplier = 1 + (attempt * 0.5)  # 1.0, 1.5, 2.0, 2.5x base timeout
                 current_timeout = min(base_timeout * timeout_multiplier, retry_config["max_delay"] + base_timeout)
                 
                 self.logger.info(f"Database initialization attempt {attempt + 1}/{retry_config['max_retries']} "
-                               f"with timeout {current_timeout:.1f}s")
+                               f"with timeout {current_timeout:.1f}s (circuit: {self.database_circuit_breaker.state.state})")
                 
                 # Attempt database initialization
                 await self._initialize_database_single_attempt(current_timeout)
+                
+                # Record success in circuit breaker
+                self.database_circuit_breaker.record_success()
                 
                 # Success - log and return
                 if attempt > 0:
@@ -1124,6 +1227,9 @@ class StartupOrchestrator:
                 last_error = e
                 attempt_type = "timeout" if isinstance(e, asyncio.TimeoutError) else "error"
                 self.logger.warning(f"Database initialization attempt {attempt + 1} failed ({attempt_type}): {e}")
+                
+                # Record failure in circuit breaker
+                self.database_circuit_breaker.record_failure()
                 
                 # Don't retry on last attempt
                 if attempt >= retry_config["max_retries"] - 1:
