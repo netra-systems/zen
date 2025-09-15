@@ -96,6 +96,207 @@ The Netra AI Optimization Platform is a sophisticated, production-ready system d
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
+### Mission-Critical Architecture Diagrams
+
+The following Mermaid diagrams visualize the golden-path components that keep "login → real AI response" healthy. Each view
+highlights SSOT ownership and shows how the core services collaborate to protect the chat flow that drives 90% of platform
+value.
+
+#### Golden Path Service Topology
+
+```mermaid
+graph LR
+    classDef client fill:#e1f5fe,stroke:#0d47a1,stroke-width:2px
+    classDef frontend fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef backend fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
+    classDef service fill:#ede7f6,stroke:#512da8,stroke-width:2px
+    classDef data fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef observability fill:#e0f7fa,stroke:#006064,stroke-width:2px
+
+    User[End User<br/>Browser/Client]:::client
+
+    subgraph Frontend Service (Next.js)
+        UI[Chat UI<br/>AuthGuard + Providers]:::frontend
+        APIProxy[API Proxy Routes]:::frontend
+        WSClient[WebSocket Service]:::frontend
+    end
+
+    subgraph Auth Service (FastAPI)
+        OAuth[OAuth Controller]:::service
+        JWT[JWT Issuer & Validator]:::service
+        SessionMgr[Session Manager]:::service
+    end
+
+    subgraph Backend Service (FastAPI)
+        HTTPAPI[REST API Routes]:::backend
+        WSCore[Unified WebSocket Core]:::backend
+        Factory[ExecutionEngineFactory]:::backend
+        Engine[UserExecutionEngine]:::backend
+        Bridge[AgentWebSocketBridge]:::backend
+    end
+
+    subgraph Agent Orchestration
+        Supervisor[SupervisorAgent]:::service
+        Registry[AgentRegistry]:::service
+        Dispatcher[UnifiedToolDispatcher]:::service
+        Subagents[Specialized Sub-Agents]:::service
+    end
+
+    subgraph Data & State
+        Threads[(PostgreSQL<br/>Threads & Messages)]:::data
+        Runs[(PostgreSQL<br/>Agent Runs)]:::data
+        Analytics[(ClickHouse<br/>Streaming Analytics)]:::data
+        Cache[(Redis<br/>Session/Cache)]:::data
+        AuthDB[(Auth PostgreSQL)]:::data
+        AuthCache[(Auth Redis)]:::data
+    end
+
+    subgraph Observability
+        Logging[Central Logger]:::observability
+        Metrics[Monitoring & Tracing]:::observability
+    end
+
+    User --> UI
+    UI --> APIProxy
+    UI --> WSClient
+    APIProxy --> HTTPAPI
+    WSClient --> WSCore
+
+    UI --> OAuth
+    OAuth --> JWT
+    JWT --> SessionMgr
+    SessionMgr --> AuthCache
+    JWT --> AuthDB
+    JWT -- JWT Delivery --> UI
+
+    HTTPAPI --> Factory
+    WSCore --> Factory
+    Factory --> Engine
+    Engine --> Bridge
+    Bridge --> Supervisor
+    Supervisor --> Registry
+    Registry -->|Instantiate| Subagents
+    Supervisor --> Dispatcher
+    Dispatcher --> Subagents
+    Subagents --> Dispatcher
+
+    Engine --> Threads
+    Engine --> Runs
+    Engine --> Cache
+    Subagents --> Analytics
+
+    HTTPAPI --> Threads
+    HTTPAPI --> Cache
+    HTTPAPI --> Analytics
+
+    Bridge --> WSCore
+    WSCore --> WSClient
+    WSClient --> UI
+
+    HTTPAPI -.-> Logging
+    WSCore -.-> Logging
+    OAuth -.-> Logging
+    Bridge -.-> Metrics
+    Engine -.-> Metrics
+    JWT -.-> Metrics
+```
+
+**Why it matters**: This map shows the SSOT boundaries that guarantee login, token validation, agent execution, and WebSocket
+streaming stay isolated yet coordinated. Breaking any arrow here directly harms the golden path.
+
+#### Authentication & Token Validation Sequence
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend as Frontend (Next.js AuthGuard)
+    participant AuthSvc as Auth Service (FastAPI)
+    participant AuthRedis as Auth Redis (Session Store)
+    participant AuthDB as Auth PostgreSQL
+    participant Backend as Backend (FastAPI)
+    participant AuthClient as AuthServiceClient
+    participant BackendDB as Backend PostgreSQL
+
+    User->>Frontend: Request /chat
+    Frontend->>Frontend: Check AuthContext
+    alt Missing or expired JWT
+        Frontend->>AuthSvc: Initiate OAuth login
+        AuthSvc->>AuthDB: Upsert user profile
+        AuthSvc->>AuthRedis: Create session state
+        AuthSvc-->>Frontend: Return JWT + refresh token
+        Frontend->>Frontend: Persist token via AuthProvider
+    else Valid token cached
+        Frontend-->>Frontend: Reuse stored JWT
+    end
+
+    Frontend->>Backend: API/WebSocket request (Bearer JWT)
+    Backend->>AuthClient: Resolve auth dependency
+    AuthClient->>AuthSvc: POST /auth/validate
+    AuthSvc->>AuthRedis: Verify active session
+    AuthSvc->>AuthDB: Load canonical claims
+    AuthSvc-->>AuthClient: Validation payload (user_id, roles, demo flag)
+    AuthClient-->>Backend: Authenticated identity
+    Backend->>BackendDB: Sync user & thread context
+    Backend-->>Frontend: Authorized response / connection ready
+
+    opt Demo mode (DEMO_MODE=1)
+        Frontend->>Backend: Demo request without OAuth
+        Backend->>AuthClient: Permissive validation branch
+        AuthClient-->>Backend: Demo context generated
+        Backend-->>Frontend: Demo WebSocket welcome
+    end
+```
+
+**Why it matters**: The sequence locks the golden path to a single validation authority. Both REST and WebSocket flows rely on
+`AuthServiceClient → Auth Service → Redis/PostgreSQL`, eliminating legacy token shortcuts.
+
+#### Agent Execution & WebSocket Event Pipeline
+
+```mermaid
+graph TD
+    classDef client fill:#e1f5fe,stroke:#0d47a1,stroke-width:2px
+    classDef gateway fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef execution fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
+    classDef agents fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef data fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef streaming fill:#ede7f6,stroke:#512da8,stroke-width:2px
+
+    UserMessage[User Message]:::client --> WSClient[Frontend WebSocket Service]:::client
+    WSClient --> Gateway[UnifiedWebSocketAuth<br/>+ ConnectionExecutor]:::gateway
+    Gateway --> Context[UserExecutionContext Factory]:::gateway
+    Context --> Factory[ExecutionEngineFactory]:::execution
+    Factory --> Engine[UserExecutionEngine]:::execution
+    Engine --> Bridge[AgentWebSocketBridge]:::execution
+    Bridge --> Emitter[UnifiedWebSocketEmitter]:::streaming
+    Emitter --> EventBus{{agent_started<br/>agent_thinking<br/>tool_executing<br/>tool_completed<br/>agent_completed}}:::streaming
+    EventBus --> WSClient
+    WSClient --> UI[Chat Interface Updates]:::client
+
+    Engine --> Supervisor[SupervisorAgent]:::agents
+    Supervisor --> Registry[AgentRegistry]:::agents
+    Registry -->|Instantiate| Instances[Request-Scoped Sub-Agents]:::agents
+    Instances --> Dispatcher[UnifiedToolDispatcher]:::agents
+    Dispatcher --> Tools[Optimization Tools & External APIs]:::agents
+
+    Instances --> Threads[(PostgreSQL<br/>Threads & Messages)]:::data
+    Instances --> Runs[(PostgreSQL<br/>Agent Runs)]:::data
+    Instances --> Analytics[(ClickHouse<br/>Streaming Analytics)]:::data
+    Engine --> Cache[(Redis<br/>Session Context)]:::data
+
+    Engine --> Cleanup[Lifecycle Manager & Cleanup]:::execution
+    Cleanup --> Factory
+
+    subgraph Persistence
+        Threads
+        Runs
+        Analytics
+        Cache
+    end
+```
+
+**Why it matters**: This flow enforces the SSOT factory → engine → bridge pipeline that streams mandatory WebSocket events while
+persisting every run. Removing any hop would break agent_started/agent_completed delivery and jeopardize AI response integrity.
+
 ## Architecture Principles
 
 ### Design Principles
