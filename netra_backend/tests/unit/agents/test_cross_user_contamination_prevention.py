@@ -28,7 +28,7 @@ import gc
 import sys
 import weakref
 from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, Optional, List, Set, WeakSet
+from typing import Dict, Any, Optional, List, Set
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from dataclasses import dataclass
 import threading

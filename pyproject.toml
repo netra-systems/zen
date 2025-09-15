@@ -215,6 +215,10 @@ markers = [
     # Final missing markers (last batch)
     "authentication: Authentication tests",
     "flow_context: Flow context tests",
+    "issue_1116: Issue #1116 specific tests",
+    "issue_1186_phase3: Issue #1186 UserExecutionEngine SSOT consolidation Phase 3 tests",
+    "issue_1197: Issue #1197 specific tests",
+    "sla_validation: SLA validation tests",
     "ssot_compliance: SSOT compliance tests",
     "user_engine_delegation: User engine delegation tests", 
     "websocket_coordination: WebSocket coordination tests",
@@ -676,6 +680,7 @@ markers = [
     "issue_1058_migration_safety: Issue #1058 migration safety specific tests",
     "issue_1058_broadcast_consolidation: Issue #1058 broadcast consolidation specific tests",
     "integration_demo: Integration demonstration and workflow tests",
+    "ssl_security: SSL/TLS security validation tests",
 ]
 
 # Coverage settings

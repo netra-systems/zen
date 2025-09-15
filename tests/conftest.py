@@ -49,6 +49,8 @@ try:
         real_redis_fixture,
         real_services_fixture
     )
+    # Create alias for backward compatibility with existing tests
+    real_services = real_services_fixture
 except ImportError:
     # Real services fixtures not available
     pass
@@ -324,3 +326,29 @@ def pytest_sessionfinish(session, exitstatus):
     except (ValueError, OSError):
         # Silently skip if there are I/O issues
         pass
+
+# =============================================================================
+# CRITICAL FIXTURE STANDARDIZATION (Issue #1199 Phase 2)
+# =============================================================================
+
+@pytest.fixture(scope="function")
+@memory_profile("Real services fixture for backward compatibility", "MEDIUM")
+async def real_services(real_services_fixture):
+    """
+    Real services fixture standardization for Issue #1199 Phase 2.
+    
+    This fixture provides a standardized real_services interface across all test suites,
+    ensuring consistency in fixture naming and dependencies.
+    
+    CRITICAL: This fixes the missing real_services fixture issue that was blocking
+    mission critical tests and standardizes fixture access patterns.
+    
+    Args:
+        real_services_fixture: The actual real services implementation
+        
+    Yields:
+        Real services configuration and connections
+    """
+    # Delegate to the actual real services fixture implementation
+    async for services in real_services_fixture:
+        yield services
