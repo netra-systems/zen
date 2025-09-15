@@ -21,7 +21,7 @@ from typing import Dict, Any, Optional
 
 from netra_backend.app.websocket_core.unified_websocket_auth import (
     extract_e2e_context_from_websocket,
-    authenticate_websocket_connection,
+    authenticate_websocket_ssot,
     create_authenticated_user_context,
     validate_websocket_token_business_logic,
     get_websocket_authenticator
@@ -141,7 +141,7 @@ class TestUnifiedWebSocketAuthBusinessLogic:
         
         # When: Authenticating WebSocket connection
         with patch('netra_backend.app.services.unified_authentication_service.get_unified_auth_service', return_value=mock_auth_service):
-            result = await authenticate_websocket_connection(mock_websocket)
+            result = await authenticate_websocket_ssot(mock_websocket)
         
         # Then: Should return valid authentication result
         assert result is not None
@@ -308,9 +308,9 @@ class TestUnifiedWebSocketAuthBusinessLogic:
                 mock_auth_service = Mock()
                 mock_auth_service.authenticate_websocket.side_effect = Exception(expected_message)
                 
-                with patch('netra_backend.app.services.unified_authentication_service.get_unified_auth_service', 
+                with patch('netra_backend.app.services.unified_authentication_service.get_unified_auth_service',
                           return_value=mock_auth_service):
-                    result = await authenticate_websocket_connection(mock_websocket)
+                    result = await authenticate_websocket_ssot(mock_websocket)
                 
                 # Then: Should handle error gracefully and return failure result
                 assert result is not None

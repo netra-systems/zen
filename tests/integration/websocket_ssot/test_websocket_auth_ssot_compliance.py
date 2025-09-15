@@ -36,16 +36,28 @@ class TestWebSocketAuthSSOTCompliance(SSotAsyncTestCase):
         VALIDATES: WebSocket connection establishment uses auth service
         ENSURES: No direct JWT handling in WebSocket connection logic
         """
-        with patch('netra_backend.app.websocket_core.auth.auth_client') as mock_auth_client:
-            mock_auth_client.validate_websocket_token.return_value = self.valid_auth_response
-            from netra_backend.app.websocket_core.auth import WebSocketAuthenticator
-            authenticator = WebSocketAuthenticator()
-            test_token = 'websocket-connection-token'
-            auth_result = await authenticator.authenticate_connection(test_token)
-            mock_auth_client.validate_websocket_token.assert_called_once_with(test_token)
-            assert auth_result.authenticated is True, 'WebSocket connection authenticated'
-            assert auth_result.user_id == 'websocket-user-123', 'User ID from auth service'
-            assert auth_result.session_id == 'ws-session-456', 'Session from auth service'
+        # ISSUE #1076 SSOT REMEDIATION: Updated to use SSOT unified_websocket_auth
+        with patch('netra_backend.app.services.unified_authentication_service.get_unified_auth_service') as mock_auth_service:
+            mock_auth_service.return_value.authenticate_websocket.return_value = (
+                Mock(success=True, user_id='websocket-user-123', email='ws@example.com'),
+                Mock(websocket_client_id='ws-session-456')
+            )
+            from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
+
+            # Create mock WebSocket with token
+            mock_websocket = Mock()
+            mock_websocket.headers = {"authorization": "Bearer websocket-connection-token"}
+            mock_websocket.client = Mock()
+            mock_websocket.client.host = "localhost"
+            mock_websocket.client.port = 8000
+
+            # Call SSOT authentication function
+            auth_result = await authenticate_websocket_ssot(mock_websocket)
+
+            # Verify SSOT authentication flow
+            assert auth_result.success is True, 'WebSocket connection authenticated via SSOT'
+            assert auth_result.user_context.user_id == 'websocket-user-123', 'User ID from SSOT auth service'
+            assert auth_result.user_context.websocket_client_id == 'ws-session-456', 'WebSocket client ID from SSOT'
 
     async def test_websocket_manager_uses_auth_service_context(self):
         """

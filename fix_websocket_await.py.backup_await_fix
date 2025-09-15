@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+"""
+Fix WebSocket await get_websocket_manager calls
+This fixes the synchronous function being called with await
+"""
+
+import os
+import glob
+import re
+
+def fix_await_websocket_manager():
+    """Fix all await get_websocket_manager calls in Python files."""
+
+    # Pattern to match
+    pattern = r'await get_websocket_manager\('
+    replacement = r'get_websocket_manager('
+
+    # Find all Python files
+    python_files = []
+    for root, dirs, files in os.walk('.'):
+        # Skip certain directories
+        skip_dirs = {'.git', '__pycache__', '.pytest_cache', 'node_modules', '.venv', 'venv'}
+        dirs[:] = [d for d in dirs if d not in skip_dirs]
+
+        for file in files:
+            if file.endswith('.py'):
+                python_files.append(os.path.join(root, file))
+
+    fixed_files = []
+
+    for file_path in python_files:
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # Check if file contains the pattern
+            if 'await get_websocket_manager(' in content:
+                # Create backup
+                backup_path = file_path + '.backup_await_fix'
+                with open(backup_path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+
+                # Apply fix
+                new_content = re.sub(pattern, replacement, content)
+
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(new_content)
+
+                # Count fixes
+                fixes_count = len(re.findall(pattern, content))
+                fixed_files.append((file_path, fixes_count))
+                print(f"Fixed {fixes_count} await calls in {file_path}")
+
+        except Exception as e:
+            print(f"Error processing {file_path}: {e}")
+
+    print(f"\nFixed {len(fixed_files)} files total")
+    for file_path, count in fixed_files:
+        print(f"  {file_path}: {count} fixes")
+
+if __name__ == "__main__":
+    fix_await_websocket_manager()
