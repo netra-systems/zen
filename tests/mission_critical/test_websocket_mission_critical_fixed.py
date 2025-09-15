@@ -148,17 +148,15 @@ class TestMissionCriticalWebSocketEvents:
             run_id="test-run",
             request_id="test-request"
         )
-        notifier = AgentWebSocketBridge(user_context)
+        notifier = create_agent_websocket_bridge(user_context)
 
-        # Verify all methods exist
+        # Verify all methods exist (Updated for Issue #1116 SSOT compliance)
         required_methods = [
-            'send_agent_started',
-            'send_agent_thinking',
-            'send_partial_result',
-            'send_tool_executing',
-            'send_tool_completed',
-            'send_final_report',
-            'send_agent_completed'
+            'notify_agent_started',
+            'notify_agent_thinking',
+            'notify_tool_executing',
+            'notify_tool_completed',
+            'notify_agent_completed'
         ]
 
         missing_methods = []
@@ -328,7 +326,7 @@ class TestMissionCriticalWebSocketEvents:
             return True
 
         # Create notifier with user context
-        notifier = AgentWebSocketBridge(user_context)
+        notifier = create_agent_websocket_bridge(user_context)
 
         # Mock the websocket emitter that AgentWebSocketBridge creates internally
         if hasattr(notifier, 'websocket_emitter') and notifier.websocket_emitter:
