@@ -45,6 +45,8 @@ from netra_backend.app.services.websocket.message_handler import (
     UserMessageHandler, 
     ThreadHistoryHandler
 )
+# Import SSOT adapters for migration compatibility
+from netra_backend.app.adapters.legacy_to_ssot_adapter import LegacyToSSOTAdapter
 from netra_backend.app.dependencies import get_user_execution_context, create_user_execution_context
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
