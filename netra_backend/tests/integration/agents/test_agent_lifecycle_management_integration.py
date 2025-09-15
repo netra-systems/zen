@@ -66,7 +66,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 
 # Service and infrastructure imports
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 
 
 class TestAgentLifecycleManagementIntegration(SSotAsyncTestCase):

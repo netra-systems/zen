@@ -41,7 +41,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 from netra_backend.app.routes.websocket import websocket_endpoint
 from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry, get_connection_state_machine, ApplicationConnectionState
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from fastapi import WebSocket
 try:
     import websockets

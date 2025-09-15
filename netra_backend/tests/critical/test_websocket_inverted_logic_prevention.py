@@ -8,7 +8,7 @@ are in other test files in the WebSocket test directories.
 
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # Test framework import - using pytest fixtures instead

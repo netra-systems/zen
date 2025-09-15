@@ -6,7 +6,7 @@ Focuses on memory efficiency and system resource utilization.
 """
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 import asyncio
 import time

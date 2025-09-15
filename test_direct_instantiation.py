@@ -7,7 +7,7 @@ Quick test to verify direct instantiation prevention is working.
 import sys
 sys.path.insert(0, '.')
 
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketManagerMode
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketManagerMode
 
 # Mock user context
 class MockUserContext:

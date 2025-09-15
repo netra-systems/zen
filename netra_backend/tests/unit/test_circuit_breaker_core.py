@@ -16,7 +16,7 @@ from collections import deque
 from datetime import datetime, timedelta
 from unittest.mock import Mock, AsyncMock
 
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.core.resilience.unified_circuit_breaker import (

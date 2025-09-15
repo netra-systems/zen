@@ -15,7 +15,7 @@ import pytest
 import asyncio
 from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, Mock, patch
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.types import WebSocketMessage
 from dataclasses import dataclass
 from enum import Enum

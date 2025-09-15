@@ -49,7 +49,7 @@ from netra_backend.app.websocket_core.websocket_manager import (
     WebSocketManagerProtocol,
     _serialize_message_safely
 )
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 
 
 class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
@@ -101,7 +101,7 @@ class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
         assert WebSocketManagerFromCompat is SSOTWebSocketManager, "WebSocketManager compatibility broken"
         
         # Test that it's actually the UnifiedWebSocketManager (as per current implementation)
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
         assert WebSocketManagerFromCompat is UnifiedWebSocketManager, "WebSocketManager should be UnifiedWebSocketManager"
 
     def test_websocket_connection_import_compatibility(self):
@@ -177,7 +177,7 @@ class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
         UnifiedManagerFromCompat = websocket_manager_compatibility.UnifiedWebSocketManager
         
         # Verify it's the same class as SSOT implementation
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as SSOTUnified
+        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as SSOTUnified
         assert UnifiedManagerFromCompat is SSOTUnified, "UnifiedWebSocketManager compatibility broken"
 
     def test_legacy_import_patterns_still_work(self):

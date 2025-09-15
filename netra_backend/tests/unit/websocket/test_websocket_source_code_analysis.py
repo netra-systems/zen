@@ -58,7 +58,7 @@ class TestWebSocketSourceCodeAnalysis(SSotBaseTestCase):
         except Exception as e:
             modern_infrastructure['UnifiedWebSocketEmitter'] = {'error': str(e)}
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
             modern_infrastructure['UnifiedWebSocketManager'] = {'has_emit_critical_event': hasattr(UnifiedWebSocketManager, 'emit_critical_event'), 'has_send_event': hasattr(UnifiedWebSocketManager, 'send_event')}
         except Exception as e:
             modern_infrastructure['UnifiedWebSocketManager'] = {'error': str(e)}

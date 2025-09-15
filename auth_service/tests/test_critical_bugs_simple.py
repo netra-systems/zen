@@ -31,7 +31,7 @@ def lazy_import(module_path: str, component: str=None):
 '\nSimple failing tests for critical bugs - no complex setup required.\nThese tests demonstrate the bugs without requiring database connections.\n'
 import pytest
 import asyncio
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager as DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 

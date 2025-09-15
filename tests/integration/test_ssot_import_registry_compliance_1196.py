@@ -37,7 +37,7 @@ class TestSSotImportRegistryComplianceIssue1196(unittest.TestCase):
                 "canonical": "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
                 "alternatives": [
                     "from netra_backend.app.websocket_core import WebSocketManager",  # Deprecated
-                    "from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager",  # SSOT but different name
+                    "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager",  # SSOT but different name
                     "from netra_backend.app.websocket_core.manager import WebSocketManager",  # Legacy
                 ]
             },
@@ -325,7 +325,7 @@ class TestSSotImportRegistryComplianceIssue1196(unittest.TestCase):
         # Common import patterns we know exist but might not be documented
         undocumented_patterns = [
             "from netra_backend.app.websocket_core.manager import WebSocketManager",
-            "from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager",
+            "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager",
             "from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry",
             "from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine",
         ]

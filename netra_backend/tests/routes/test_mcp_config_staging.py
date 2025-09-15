@@ -6,7 +6,7 @@ for different client types and environments.
 """
 import pytest
 from typing import Dict, Any
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.routes.mcp.config import get_mcp_config, get_claude_config, get_cursor_config, get_standard_mcp_config, get_http_config, get_websocket_config
 

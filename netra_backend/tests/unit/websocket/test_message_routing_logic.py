@@ -28,7 +28,7 @@ from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from typing import Dict, Any, List, Optional
 
 # Import WebSocket core modules to test routing logic
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.connection_manager import ConnectionManager
 from netra_backend.app.websocket_core.message_queue import MessageQueue
 from netra_backend.app.websocket_core.types import (

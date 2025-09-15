@@ -34,7 +34,7 @@ from shared.isolated_environment import get_env
 
 from netra_backend.app.websocket.connection_handler import ConnectionHandler, ConnectionContext
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, ThreadID, WebSocketID
 

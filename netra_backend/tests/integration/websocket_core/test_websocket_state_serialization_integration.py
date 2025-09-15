@@ -23,7 +23,7 @@ from enum import Enum
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, Mock, MagicMock
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketConnection, _serialize_message_safely
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection, _serialize_message_safely
 from netra_backend.app.schemas.agent import AgentStatus, AgentStarted
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from test_framework.ssot.base_test_case import SSotBaseTestCase

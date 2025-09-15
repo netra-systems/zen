@@ -54,7 +54,7 @@ from test_framework.ssot.e2e_auth_helper import (
 )
 
 # Application imports using absolute paths - FIXED: Use SSOT WebSocket imports
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.circuit_breaker.service_health_monitor import ServiceHealthMonitor

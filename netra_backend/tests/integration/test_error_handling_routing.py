@@ -26,7 +26,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
 from netra_backend.app.services.websocket.message_handler import MessageHandlerService, BaseMessageHandler
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler, websocket_error_handler
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.core.exceptions_base import NetraException
