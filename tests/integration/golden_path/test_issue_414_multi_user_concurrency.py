@@ -71,6 +71,7 @@ class UserExecutionResult:
     execution_time: float = 0.0
     errors: List[str] = field(default_factory=list)
 
+@pytest.mark.integration
 class TestMultiUserConcurrency(SSotAsyncTestCase):
     """Integration tests reproducing multi-user concurrency issues from Issue #414."""
 

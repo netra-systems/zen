@@ -15,6 +15,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.supervisor.execution_factory import ExecutionFactory
 
+@pytest.mark.integration
 class TestIssue585AgentPipelineSerializationIntegration(SSotAsyncTestCase):
     """Integration tests for agent pipeline pickle serialization issues."""
 

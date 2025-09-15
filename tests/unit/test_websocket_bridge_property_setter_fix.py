@@ -39,6 +39,7 @@ class MockWebSocketManagerInvalid:
         """This mock doesn't implement send_to_thread."""
         pass
 
+@pytest.mark.unit
 class TestWebSocketBridgePropertySetterFix:
     """Test suite for WebSocket Bridge property setter fix."""
 
@@ -155,6 +156,7 @@ class TestWebSocketBridgePropertySetterFix:
         assert True in results
         logger.info(' PASS:  Basic thread safety verification passed')
 
+@pytest.mark.unit
 class TestIntegrationTestCompatibility:
     """Test suite for integration test compatibility."""
 

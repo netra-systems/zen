@@ -70,6 +70,7 @@ class SingletonPatternScanner:
                     shared_state_patterns.append({'pattern': line.strip(), 'line': i, 'module': module_path, 'type': 'shared_state'})
         return shared_state_patterns
 
+@pytest.mark.unit
 class TestSingletonPatternRegression1142(SSotBaseTestCase):
     """Test suite to prevent singleton pattern regression."""
 

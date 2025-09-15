@@ -34,6 +34,7 @@ from unittest.mock import Mock, patch, MagicMock
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestDeploymentCanonicalSourceValidation(SSotBaseTestCase):
     """
     Unit tests for deployment canonical source validation.
@@ -242,6 +243,7 @@ class TestDeploymentCanonicalSourceValidation(SSotBaseTestCase):
                     deployment_scripts.append(script)
         return deployment_scripts
 
+@pytest.mark.unit
 class TestDeploymentCanonicalSourceEdgeCases(SSotBaseTestCase):
     """
     Edge case tests for deployment canonical source validation.

@@ -1,49 +1,26 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-14 21:39:41
+**Generated:** 2025-09-14 23:55:54
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 1
+- **Total Tests:** 0
 - **Passed:** 0 (0.0%)
-- **Failed:** 1 (100.0%)
+- **Failed:** 0 (0.0%)
 - **Skipped:** 0
-- **Duration:** 0.54 seconds
+- **Duration:** 0.00 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
-### NORMAL Priority Tests
-
-| Test Name | Status | Duration | File |
-|-----------|--------|----------|------|
-| test_staging_environment_readiness_summary | FAIL failed | 0.350s | test_staging_authentication_service_health.py |
-
-## Failed Tests Details
-
-### FAILED: test_staging_environment_readiness_summary
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_staging_authentication_service_health.py
-- **Duration:** 0.350s
-- **Error:** tests/e2e/staging/test_staging_authentication_service_health.py:174: in test_staging_auth_service_e2e_authentication_flow
-    self.assertEqual(
-test_framework/ssot/base_test_case.py:530: in assertEqual
-    assert first == second, msg or f"Expected {first} == {second}"
-           ^^^^^^^^^^^^^^^
-E   AssertionError: Authentication failed with status 401:
-E   Response: {"detail":"E2E bypass key required"}
-E   This completely blocks Golden Path user authentication.
-
-During handling of the above exce...
-
 ## Pytest Output Format
 
 ```
-test_staging_authentication_service_health.py::test_staging_environment_readiness_summary FAILED
 
 ==================================================
-0 passed, 1 failed in 0.54s
+0 passed, 0 failed in 0.00s
 ```
 
 ## Test Coverage Matrix

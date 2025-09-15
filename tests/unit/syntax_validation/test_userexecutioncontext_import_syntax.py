@@ -9,6 +9,7 @@ Expected behavior: FAIL initially (demonstrating syntax errors exist)
 After fixes: PASS (validating syntax is correct)
 """
 
+import pytest
 import ast
 import os
 import sys
@@ -20,6 +21,7 @@ from typing import List, Dict, Any
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+@pytest.mark.unit
 class TestUserExecutionContextImportSyntax(unittest.TestCase):
     """Test syntax validation for UserExecutionContext imports in affected files."""
     

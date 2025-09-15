@@ -25,6 +25,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 
+@pytest.mark.e2e
 class TestGoldenPathRegistryConsolidation(SSotAsyncTestCase):
     """Critical P0 tests ensuring Golden Path (login → AI responses) survives registry consolidation"""
 

@@ -10,6 +10,7 @@ import inspect
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestWebSocketSSOTComplianceValidation(SSotBaseTestCase):
     """NEW TESTS: Comprehensive SSOT compliance validation for WebSocket agent bridge."""
     
@@ -160,6 +161,7 @@ class TestWebSocketSSOTComplianceValidation(SSotBaseTestCase):
             pytest.fail(f"Backward compatibility validation failed: {e}")
 
 
+@pytest.mark.unit
 class TestWebSocketSSOTRegressionPrevention(SSotBaseTestCase):
     """NEW TESTS: Regression prevention for WebSocket SSOT implementation."""
 
@@ -301,6 +303,7 @@ class TestWebSocketSSOTRegressionPrevention(SSotBaseTestCase):
         print(f" PASS:  BUSINESS VALUE STATUS: {operational_percentage}% operational")
 
 
+@pytest.mark.unit
 class TestWebSocketSSOTArchitecturalCompliance(SSotBaseTestCase):
     """NEW TESTS: Architectural compliance validation for WebSocket SSOT implementation."""
 

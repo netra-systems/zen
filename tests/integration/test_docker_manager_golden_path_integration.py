@@ -25,6 +25,7 @@ CRITICAL REQUIREMENTS:
 - Tests production-like service configurations
 """
 
+import pytest
 import asyncio
 import time
 import unittest
@@ -35,6 +36,7 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestDockerManagerGoldenPathIntegration(SSotAsyncTestCase):
     """
     CRITICAL: Integration tests validating Docker Manager supports Golden Path workflows.

@@ -15,6 +15,7 @@ Protects multi-user chat functionality and prevents security vulnerabilities fro
 CRITICAL: These tests must fail when singleton patterns exist and pass when eliminated.
 """
 
+import pytest
 import asyncio
 import gc
 import weakref
@@ -33,6 +34,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
+@pytest.mark.unit
 class TestExecutionEngineSingletonElimination(SSotAsyncTestCase):
     """
     Test suite validating singleton pattern elimination in ExecutionEngine migration.

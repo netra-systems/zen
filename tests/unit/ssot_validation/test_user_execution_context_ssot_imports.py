@@ -37,6 +37,7 @@ from loguru import logger
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.unit
 class TestUserExecutionContextSSotImports(SSotAsyncTestCase):
     """SSOT Import Compliance: Validate single canonical import path for UserExecutionContext"""
     

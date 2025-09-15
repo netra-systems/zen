@@ -33,6 +33,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.integration
 class TestUserExecutionEngineFactoryConsistency884(SSotAsyncTestCase):
     """
     Integration Test: Validate consolidated factory creates consistent UserExecutionEngine instances

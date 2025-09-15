@@ -18,6 +18,7 @@ from unittest.mock import Mock, patch, AsyncMock, call
 from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestWebSocketBridgeSSOTDelegation(SSotBaseTestCase):
     """
     Tests that validate proper SSOT delegation in WebSocket bridge components.

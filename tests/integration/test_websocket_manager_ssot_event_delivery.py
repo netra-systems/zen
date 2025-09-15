@@ -26,6 +26,7 @@ INTEGRATION REQUIREMENTS:
 - Real multi-user concurrent session testing
 """
 
+import pytest
 import asyncio
 import unittest
 import json
@@ -46,6 +47,7 @@ from shared.types.core_types import UserID, ThreadID, ConnectionID
 logger = get_logger(__name__)
 
 
+@pytest.mark.integration
 class TestWebSocketManagerSSOTEventDelivery(SSotAsyncTestCase, unittest.TestCase):
     """Integration test for WebSocket Manager SSOT event delivery."""
     

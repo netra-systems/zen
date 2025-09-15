@@ -454,6 +454,7 @@ class DatabaseConnectionPoolAnalyzer:
         }
 
 
+@pytest.mark.integration
 class TestGCPServiceIntegrationErrors(SSotAsyncTestCase):
     """Integration tests for GCP service integration error scenarios."""
     

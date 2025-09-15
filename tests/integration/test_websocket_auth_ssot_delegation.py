@@ -21,6 +21,7 @@ from fastapi import WebSocket
 from fastapi.testclient import TestClient
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.integration
 class TestWebSocketAuthSSOTIntegration(SSotBaseTestCase):
     """
     Integration tests that validate SSOT delegation in WebSocket authentication flows.

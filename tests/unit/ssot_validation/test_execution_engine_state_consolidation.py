@@ -18,6 +18,7 @@ import ast
 from typing import Dict, List, Any, Set, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestExecutionEngineStateConsolidation(SSotBaseTestCase):
     """
     Test that all execution engines use consolidated state management.

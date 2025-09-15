@@ -18,6 +18,7 @@ SSOT Violations This Module Proves:
 4. Import paths fragment access patterns
 """
 
+import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import os
 import inspect
@@ -32,6 +33,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestWebSocketManagerSSotViolationDiscovery(SSotBaseTestCase):
     """
     Core tests to systematically discover WebSocket manager SSOT violations.

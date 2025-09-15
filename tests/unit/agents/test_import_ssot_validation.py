@@ -23,6 +23,7 @@ These tests SHOULD FAIL initially, demonstrating existing import path violations
 After SSOT consolidation, these tests should pass, confirming canonical import paths.
 """
 
+import pytest
 import ast
 import importlib
 import importlib.util
@@ -39,6 +40,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestImportSSotValidation(SSotBaseTestCase):
     """Test suite for validating Import SSOT compliance."""
     

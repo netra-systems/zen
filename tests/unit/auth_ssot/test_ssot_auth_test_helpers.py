@@ -21,6 +21,7 @@ Expected Results:
 - Mock service should support isolation testing
 """
 
+import pytest
 import asyncio
 import tempfile
 import os
@@ -29,6 +30,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.unit
 class TestSSOTAuthTestHelpers(SSotAsyncTestCase):
     """
     Tests for SSOT Auth Test Helpers functionality.
@@ -459,6 +461,7 @@ class TestSSOTAuthTestHelpers(SSotAsyncTestCase):
             self.fail(f"Multiple user creation should work via auth service: {e}")
 
 
+@pytest.mark.unit
 class TestSSOTAuthTestHelpersConvenienceFunctions(SSotAsyncTestCase):
     """
     Tests for SSOT Auth Test Helpers convenience functions.
@@ -577,6 +580,7 @@ class TestSSOTAuthTestHelpersConvenienceFunctions(SSotAsyncTestCase):
             self.fail(f"Convenience functions should handle errors gracefully: {e}")
 
 
+@pytest.mark.unit
 class TestSSOTAuthTestHelpersAsyncContextManager(SSotAsyncTestCase):
     """
     Tests for SSOT Auth Test Helpers async context manager functionality.
@@ -655,6 +659,7 @@ class TestSSOTAuthTestHelpersAsyncContextManager(SSotAsyncTestCase):
             self.fail(f"Context manager cleanup should work: {e}")
 
 
+@pytest.mark.unit
 class TestSSOTAuthTestHelpersErrorHandling(SSotAsyncTestCase):
     """
     Tests for SSOT Auth Test Helpers error handling.

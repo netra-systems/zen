@@ -19,6 +19,7 @@ Test Philosophy:
 - USER ISOLATION: Tests ensure complete user context isolation
 - GOLDEN PATH PROTECTION: Tests protect end-to-end user value delivery
 """
+import pytest
 import asyncio
 import gc
 import inspect
@@ -35,6 +36,7 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.unit
 class TestExecutionEngineFactoryFragmentation1123(SSotAsyncTestCase):
     """Phase 1 Unit Tests: Factory Fragmentation Reproduction
 

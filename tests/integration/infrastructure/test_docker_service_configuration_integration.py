@@ -23,6 +23,7 @@ from tests.mission_critical.websocket_real_test_base import RealWebSocketTestCon
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.integration
 class TestDockerServiceConfigurationIntegration:
     """Integration tests for Docker service configuration coordination failures."""
 

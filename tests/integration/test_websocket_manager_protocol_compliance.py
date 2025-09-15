@@ -27,6 +27,7 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
+@pytest.mark.integration
 class TestWebSocketManagerProtocolCompliance:
     """
     Test suite to ensure WebSocket managers implement WebSocketManagerProtocol.

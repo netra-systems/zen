@@ -73,6 +73,7 @@ class ConcurrencyTestResult:
     errors: List[str] = field(default_factory=list)
 
 
+@pytest.mark.integration
 class TestReportingAgentMultiUserConcurrencySecurity(SSotAsyncTestCase):
     """
     Integration tests for multi-user concurrent ReportingSubAgent execution security.

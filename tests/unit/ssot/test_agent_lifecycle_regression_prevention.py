@@ -21,6 +21,7 @@ from typing import Any, Dict
 import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.unit
 class TestAgentLifecycleRegressionPrevention(SSotAsyncTestCase):
     """Test suite preventing AgentLifecycleMixin SSOT regression"""
 

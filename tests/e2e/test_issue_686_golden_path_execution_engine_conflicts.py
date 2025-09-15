@@ -26,6 +26,7 @@ Test Strategy:
 - Focus on end-to-end user experience that delivers business value
 """
 
+import pytest
 import unittest
 import asyncio
 import json
@@ -34,6 +35,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 
+@pytest.mark.e2e
 class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
     """
     E2E tests demonstrating how ExecutionEngine SSOT violations break Golden Path.

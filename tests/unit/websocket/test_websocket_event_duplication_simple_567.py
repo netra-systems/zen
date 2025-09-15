@@ -7,6 +7,7 @@ WebSocket event duplication prevention patterns.
 Business Impact: Protects $500K+ ARR by ensuring chat functionality reliability
 """
 
+import pytest
 import unittest
 import time
 import asyncio
@@ -14,6 +15,7 @@ from typing import Dict, List, Set
 from unittest.mock import Mock, AsyncMock
 
 
+@pytest.mark.unit
 class TestWebSocketEventDuplicationSimple567(unittest.TestCase):
     """
     Simple unit tests for WebSocket event duplication prevention.

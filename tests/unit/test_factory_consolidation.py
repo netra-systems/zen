@@ -148,6 +148,7 @@ def maximum_performance_config():
     return config
 
 
+@pytest.mark.unit
 class TestFactoryConsolidation:
     """Test suite for factory consolidation."""
 

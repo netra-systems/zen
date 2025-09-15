@@ -34,6 +34,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.integration
 class TestWebSocketEventReliabilitySsotImprovement(SSotAsyncTestCase):
     """Phase 2 SSOT Validation Test: Validate 100% reliable event delivery with consolidated SSOT manager."""
     

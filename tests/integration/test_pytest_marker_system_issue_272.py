@@ -12,6 +12,7 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.integration
 class TestPytestMarkerSystemIssue272(SSotBaseTestCase):
     """Integration tests for pytest marker collection system"""
     

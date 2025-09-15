@@ -40,6 +40,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
+@pytest.mark.integration
 class TestExecutionEngineSSotFactoryComplianceIntegration(SSotAsyncTestCase):
     """SSOT Integration test for ExecutionEngineFactory compliance validation.
     

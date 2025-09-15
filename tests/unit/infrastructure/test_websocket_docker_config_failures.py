@@ -23,6 +23,7 @@ from tests.mission_critical.websocket_real_test_base import RealWebSocketTestCon
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
 
 
+@pytest.mark.unit
 class TestWebSocketDockerConfigurationFailures:
     """Tests that FAIL to demonstrate Docker infrastructure configuration issues."""
 
@@ -263,6 +264,7 @@ class TestWebSocketDockerConfigurationFailures:
                 )
 
 
+@pytest.mark.unit
 class TestWebSocketInfrastructureBusinessImpact:
     """Tests documenting the business impact of WebSocket infrastructure failures."""
     

@@ -40,6 +40,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 
+@pytest.mark.e2e
 class TestWebSocketAgentEventIntegrationLoadE2E(BaseE2ETest):
     """E2E tests for WebSocket agent event integration under load with authenticated full-stack testing."""
 

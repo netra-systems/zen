@@ -26,6 +26,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
+@pytest.mark.unit
 class TestWebSocketFactoryImportValidation(SSotAsyncTestCase):
     """
     Validate WebSocket Factory Import patterns for safe SSOT transition.

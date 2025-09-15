@@ -11,6 +11,7 @@ import pytest
 from pathlib import Path
 import importlib.util
 
+@pytest.mark.unit
 class TestSSOTComplianceFinalValidation:
     """Phase 4 Tests - Final SSOT compliance validation"""
 
@@ -188,6 +189,7 @@ class TestSSOTComplianceFinalValidation:
         print(f'✅ SSOT principles fully implemented: {ssot_score}/{total_checks} checks passed')
         print(f'SSOT compliance details: {ssot_compliance_checks}')
 
+@pytest.mark.unit
 class TestConfigurationMigrationCompleteness:
     """Validate migration completeness and system stability"""
 

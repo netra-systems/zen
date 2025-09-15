@@ -20,6 +20,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
+@pytest.mark.websocket
 class TestEmergencyWebSocketManager:
     """Test emergency WebSocket manager stub functionality."""
 
@@ -199,6 +200,7 @@ class TestEmergencyWebSocketManager:
         assert cleaned_count == 3
         assert len(manager.get_user_connections()) == 0
 
+@pytest.mark.websocket
 class TestFallbackAgentHandler:
     """Test fallback agent handler for E2E testing scenarios."""
 
@@ -298,6 +300,7 @@ class TestFallbackAgentHandler:
         assert result is False
         mock_websocket.send_json.assert_called()
 
+@pytest.mark.websocket
 class TestEmergencyWebSocketIntegration:
     """Integration tests for emergency WebSocket patterns."""
 

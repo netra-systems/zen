@@ -24,6 +24,7 @@ BUSINESS VALUE:
 - Revenue Impact: Prevents WebSocket initialization failures affecting chat
 """
 
+import pytest
 import unittest
 import sys
 import importlib
@@ -36,6 +37,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.unit
 class TestWebSocketFactoryImportValidationFixed(unittest.TestCase):
     """
     Validate WebSocket Factory Import patterns for safe SSOT transition.

@@ -34,6 +34,7 @@ from netra_backend.app.core.logging_formatters import LogFormatter, SensitiveDat
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.unit
 class TestGCPTracebackFormatterValidation(SSotBaseTestCase):
     """Unit tests for GCP JSON formatter traceback handling."""
     

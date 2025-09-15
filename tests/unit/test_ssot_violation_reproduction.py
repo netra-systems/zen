@@ -23,6 +23,7 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestSSotViolationReproduction(SSotBaseTestCase):
     """Reproduce SSOT violations to prove they exist (tests will FAIL by design)."""
 

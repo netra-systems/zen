@@ -21,6 +21,7 @@ from tests.e2e.staging_test_config import get_staging_config
 # Mark all tests in this file as low priority and real
 pytestmark = [pytest.mark.staging, pytest.mark.low, pytest.mark.real]
 
+@pytest.mark.e2e
 class TestLowMonitoring:
     """Tests 86-90: Core Monitoring - REAL TESTS"""
     
@@ -281,6 +282,7 @@ class TestLowMonitoring:
         assert error_report["occurrences"] > 0
         assert len(error_report["tags"]) > 0
 
+@pytest.mark.e2e
 class TestLowPerformanceMonitoring:
     """Tests 91-95: Performance Monitoring - REAL TESTS"""
     
@@ -419,6 +421,7 @@ class TestLowPerformanceMonitoring:
         assert version_info["environment"] == "staging"
         assert len(version_info["git_commit"]) > 0
 
+@pytest.mark.e2e
 class TestLowOperational:
     """Tests 96-100: Operational Features - REAL TESTS"""
     

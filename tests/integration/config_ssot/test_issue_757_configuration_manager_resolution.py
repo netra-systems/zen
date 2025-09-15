@@ -24,6 +24,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.integration
 class TestIssue757ConfigurationManagerResolution(SSotBaseTestCase):
     """Test suite validating Issue #757 Configuration Manager duplication crisis resolution."""
 

@@ -1,5 +1,6 @@
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
+@pytest.mark.websocket
 class TestWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
 

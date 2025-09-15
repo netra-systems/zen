@@ -49,6 +49,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.integration
 class TestWebSocketEventEmissionValidation(SSotAsyncTestCase):
     """
     Integration tests for WebSocket event emission with validation.
@@ -612,6 +613,7 @@ class TestWebSocketEventEmissionValidation(SSotAsyncTestCase):
 
 # === SPECIALIZED TEST SCENARIOS ===
 
+@pytest.mark.integration
 class TestWebSocketEventEmissionErrorScenarios(SSotAsyncTestCase):
     """
     Specialized tests for error scenarios and edge cases in event emission.
@@ -725,6 +727,7 @@ class TestWebSocketEventEmissionErrorScenarios(SSotAsyncTestCase):
 
 # === TEST COLLECTION AND EXECUTION ===
 
+@pytest.mark.integration
 def test_suite():
     """Return test suite for this module."""
     import unittest

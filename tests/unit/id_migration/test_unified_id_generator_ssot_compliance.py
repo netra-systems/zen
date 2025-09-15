@@ -20,6 +20,7 @@ Test Strategy:
 Expected Results: ALL TESTS SHOULD FAIL until migration complete
 """
 
+import pytest
 import ast
 import os
 import uuid
@@ -31,6 +32,7 @@ from typing import List, Dict, Set, Tuple
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator, generate_uuid_replacement
 
 
+@pytest.mark.unit
 class TestUnifiedIdGeneratorSSotCompliance(unittest.TestCase):
     """Test SSOT compliance for ID generation across the system."""
     
@@ -257,6 +259,7 @@ class TestUnifiedIdGeneratorSSotCompliance(unittest.TestCase):
                        "SSOT session ID should be valid")
 
 
+@pytest.mark.unit
 class TestProductionFileViolationDetection(unittest.TestCase):
     """Test suite to detect and catalog uuid.uuid4() violations in production code."""
     

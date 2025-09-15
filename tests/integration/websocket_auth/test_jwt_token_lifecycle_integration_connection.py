@@ -69,6 +69,7 @@ class ConnectionMetricsSnapshot:
     refresh_success_rate: float
 
 
+@pytest.mark.integration
 class TestJWTTokenLifecycleConnectionIntegration(SSotAsyncTestCase):
     """
     Integration tests for JWT Token Lifecycle Manager connection lifecycle.

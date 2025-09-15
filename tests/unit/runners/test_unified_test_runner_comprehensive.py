@@ -26,6 +26,7 @@ from typing import Dict, List, Any
 from unittest.mock import Mock, patch, MagicMock
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerCore:
     """Core test runner functionality tests"""
     
@@ -94,6 +95,7 @@ class TestUnifiedTestRunnerCore:
             assert runner.python_command == 'python3'
 
 
+@pytest.mark.unit
 class TestComponentInitialization:
     """Test component initialization and configuration"""
     
@@ -162,6 +164,7 @@ class TestComponentInitialization:
                 mock_strategy.assert_called_once()
 
 
+@pytest.mark.unit
 class TestEnvironmentConfiguration:
     """Test environment configuration and validation"""
     
@@ -223,6 +226,7 @@ class TestEnvironmentConfiguration:
             assert 'integration' in categories
 
 
+@pytest.mark.unit
 class TestDockerManagement:
     """Test Docker management and service orchestration - CRITICAL for CI/CD"""
     
@@ -263,6 +267,7 @@ class TestDockerManagement:
                 assert hasattr(runner, 'port_discovery')
 
 
+@pytest.mark.unit
 class TestServiceOrchestration:
     """Test service orchestration functionality - supports development velocity"""
     
@@ -324,6 +329,7 @@ class TestServiceOrchestration:
                 assert True  # Placeholder for complex orchestration logic
 
 
+@pytest.mark.unit
 class TestTestExecution:
     """Test test execution functionality and orchestration"""
     
@@ -378,6 +384,7 @@ class TestTestExecution:
             assert 'npm test' in frontend_config['command']
 
 
+@pytest.mark.unit
 class TestCypressIntegration:
     """Test Cypress test runner integration"""
     
@@ -403,6 +410,7 @@ class TestCypressIntegration:
             pass
 
 
+@pytest.mark.unit
 class TestProgressTracking:
     """Test progress tracking and reporting functionality"""
     
@@ -440,6 +448,7 @@ class TestProgressTracking:
             pass
 
 
+@pytest.mark.unit
 class TestFailFastStrategies:
     """Test fail-fast strategies for efficient feedback"""
     
@@ -471,6 +480,7 @@ class TestFailFastStrategies:
             pass
 
 
+@pytest.mark.unit
 class TestCategorySystem:
     """Test category-based test execution system"""
     
@@ -504,6 +514,7 @@ class TestCategorySystem:
             assert hasattr(runner, 'execution_plan')
 
 
+@pytest.mark.unit
 class TestOrchestrationIntegration:
     """Test orchestration system integration - advanced test management"""
     
@@ -551,6 +562,7 @@ class TestOrchestrationIntegration:
             pass
 
 
+@pytest.mark.unit
 class TestEnvironmentSpecificBehavior:
     """Test environment-specific behavior and configuration"""
     
@@ -602,6 +614,7 @@ class TestEnvironmentSpecificBehavior:
             pass
 
 
+@pytest.mark.unit
 class TestErrorHandlingAndRecovery:
     """Test error handling and recovery mechanisms"""
     
@@ -659,6 +672,7 @@ class TestErrorHandlingAndRecovery:
                 assert runner is not None
 
 
+@pytest.mark.unit
 class TestPerformanceOptimizations:
     """Test performance optimizations and resource management"""
     
@@ -708,6 +722,7 @@ class TestPerformanceOptimizations:
                     mock_splitter.assert_called_once_with(project_root=runner.project_root)
 
 
+@pytest.mark.unit
 class TestBusinessScenarios:
     """Test complete business scenarios - protects $500K+ ARR"""
     

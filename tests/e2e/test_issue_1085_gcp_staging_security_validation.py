@@ -23,6 +23,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.modern_execution_helpers import ModernExecutionHelpers
 
+@pytest.mark.e2e
 class TestGCPStagingSecurityValidation:
     """E2E tests validating security vulnerabilities in GCP staging environment."""
 

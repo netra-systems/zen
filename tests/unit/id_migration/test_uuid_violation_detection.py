@@ -13,6 +13,7 @@ Business Value Justification:
 
 Test Strategy: Create FAILING tests that demonstrate current violations
 """
+import pytest
 import os
 import re
 import uuid
@@ -23,6 +24,7 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
+@pytest.mark.unit
 class TestUuidViolationDetection(SSotBaseTestCase):
     """
     Test suite to detect uuid.uuid4() violations across production code.

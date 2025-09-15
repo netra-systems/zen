@@ -43,6 +43,7 @@ from shared.types import (
 import unittest
 
 
+@pytest.mark.unit
 class TestWebSocketEventTypeSerialization(SSotBaseTestCase):
     """Test JSON serialization of WebSocketEventType enums."""
     
@@ -120,6 +121,7 @@ class TestWebSocketEventTypeSerialization(SSotBaseTestCase):
                 self.assertEqual(WebSocketEventType(deserialized), event_type)
 
 
+@pytest.mark.unit
 class TestWebSocketMessageSerialization(SSotBaseTestCase):
     """Test Pydantic WebSocketMessage model serialization."""
     
@@ -313,6 +315,7 @@ class TestWebSocketMessageSerialization(SSotBaseTestCase):
         self.assertEqual(str(empty_message.user_id), "")
 
 
+@pytest.mark.unit
 class TestWebSocketEventMetadataValidation(SSotBaseTestCase):
     """Test event metadata and typing validation."""
     

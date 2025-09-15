@@ -25,6 +25,7 @@ from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import get_env
 from test_framework.ssot.database_skip_conditions import skip_if_postgresql_unavailable
 
+@pytest.mark.integration
 class TestDatabaseInitializationBasic:
     """Test basic database initialization and setup."""
 

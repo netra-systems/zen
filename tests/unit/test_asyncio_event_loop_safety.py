@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from tests.utils.asyncio_test_utils import AsyncioTestUtils, EventLoopTestError, AsyncioRegressionTester, EventLoopValidator, create_mock_async_function_with_nested_run, create_mock_async_function_proper, run_in_thread_with_loop
 from unittest.mock import patch
 
+@pytest.mark.unit
 class TestAsyncioSafetyChecks:
     """Test suite for asyncio safety checks"""
 
@@ -91,6 +92,7 @@ class TestAsyncioSafetyChecks:
         assert results['error'] is None
         assert results['is_coroutine_function'] is True
 
+@pytest.mark.unit
 class TestAsyncioRegressionTester:
     """Test the regression tester functionality"""
 
@@ -121,6 +123,7 @@ class TestAsyncioRegressionTester:
         assert 'Passed: 1' in report
         assert 'Failed: 0' in report
 
+@pytest.mark.unit
 class TestEventLoopValidator:
     """Test the module validation functionality"""
 
@@ -136,6 +139,7 @@ class TestEventLoopValidator:
         assert results['issues'][0]['type'] == 'nested_asyncio_run'
         assert results['issues'][0]['function'] == 'bad_async_function'
 
+@pytest.mark.unit
 class TestNestedEventLoopPatterns:
     """Test specific patterns that caused issues in production"""
 
@@ -196,6 +200,7 @@ class TestNestedEventLoopPatterns:
             assert 'cannot be called from a running event loop' in str(exc_info.value)
         asyncio.run(test_from_async())
 
+@pytest.mark.unit
 class TestThreadSafeExecution:
     """Test thread-safe execution patterns"""
 
@@ -225,6 +230,7 @@ class TestThreadSafeExecution:
             run_in_thread_with_loop(error_func)
         assert 'Test error' in str(exc_info.value)
 
+@pytest.mark.unit
 class TestEventLoopIsolation:
     """Test event loop isolation patterns"""
 

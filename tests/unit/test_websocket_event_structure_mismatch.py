@@ -17,6 +17,7 @@ from netra_backend.app.websocket_core.event_validator import (
 )
 
 
+@pytest.mark.unit
 class TestWebSocketEventStructureMismatch:
     """Test cases that demonstrate the event structure mismatch issue."""
 
@@ -217,6 +218,7 @@ class TestWebSocketEventStructureMismatch:
             "Error should reference business impact on tool transparency"
 
 
+@pytest.mark.unit
 class TestWebSocketEventDeliveryFormat:
     """Test the format of events as they would be delivered via WebSocket."""
 
@@ -295,6 +297,7 @@ class TestWebSocketEventDeliveryFormat:
         # Note: This test may need to be adjusted based on actual implementation
 
 
+@pytest.mark.unit
 class TestEventValidatorSchemaEnforcement:
     """Test that the event validator properly enforces schema requirements."""
 

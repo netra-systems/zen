@@ -180,6 +180,7 @@ root_dir = Path(__file__).parent.parent.parent.parent
 analyzer = ExecutionEngineAnalyzer(root_dir)
 
 
+@pytest.mark.unit
 def test_only_one_execution_engine_exists():
     """
     FAIL TEST: Prove that only one execution engine implementation exists (SSOT).
@@ -239,6 +240,7 @@ def test_only_one_execution_engine_exists():
     )
 
 
+@pytest.mark.unit
 def test_execution_engine_factory_consolidation():
     """
     FAIL TEST: Prove that execution engine factory implementations are consolidated.
@@ -282,6 +284,7 @@ def test_execution_engine_factory_consolidation():
         )
 
 
+@pytest.mark.unit
 def test_execution_engine_usage_patterns():
     """
     FAIL TEST: Analyze execution engine usage patterns for SSOT violations.
@@ -338,6 +341,7 @@ def test_execution_engine_usage_patterns():
         print(f"⚠️  RELATED ISSUE: {len(broken_imports)} broken import paths found")
 
 
+@pytest.mark.unit
 def test_supervisor_agent_execution_engine_usage():
     """
     FAIL TEST: Validate that supervisor agents use SSOT execution engine only.
@@ -395,6 +399,7 @@ def test_supervisor_agent_execution_engine_usage():
     )
 
 
+@pytest.mark.unit
 def test_websocket_execution_engine_integration():
     """
     FAIL TEST: Validate WebSocket-ExecutionEngine integration uses SSOT pattern.

@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional
 from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
+@pytest.mark.integration
 class TestCrossServiceConfigCore:
     """Test class for cross_service_config_core"""
 

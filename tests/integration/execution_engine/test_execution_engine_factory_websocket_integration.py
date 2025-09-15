@@ -39,6 +39,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 
+@pytest.mark.integration
 class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
     """SSOT Integration test for ExecutionEngineFactory WebSocket functionality.
     

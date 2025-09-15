@@ -43,6 +43,7 @@ class MockWebSocket:
         """Mock send_text method."""
         self.sent_messages.append(('text', data))
 
+@pytest.mark.integration
 class TestMessageRouterConsolidatedFunctionality(SSotAsyncTestCase):
     """Integration tests for MessageRouter consolidated functionality."""
 

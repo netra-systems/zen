@@ -20,6 +20,7 @@ Test Philosophy:
 - GOLDEN PATH PROTECTION: Tests protect end-to-end chat functionality
 - REAL-TIME VALIDATION: Tests ensure WebSocket events work reliably
 """
+import pytest
 import asyncio
 import gc
 import inspect
@@ -34,6 +35,7 @@ from unittest.mock import patch, MagicMock, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.integration
 class TestExecutionEngineFactoryWebSocketIntegration884(SSotAsyncTestCase):
     """Phase 1 Integration Tests: Execution Engine Factory WebSocket Integration
 

@@ -10,12 +10,14 @@ BUSINESS IMPACT: Quality features isolated from main routing logic
 These tests SHOULD FAIL before integration and PASS after consolidation.
 """
 
+import pytest
 import unittest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.unit
 class TestQualityRouterIntegrationValidation(SSotAsyncTestCase):
     """Test QualityMessageRouter integration into main router."""
 
@@ -240,6 +242,7 @@ class TestQualityRouterIntegrationValidation(SSotAsyncTestCase):
             self.fail("Could not import main MessageRouter for quality services test")
 
 
+@pytest.mark.unit
 class TestQualityRoutingMigrationValidation(SSotAsyncTestCase):
     """Test that quality routing migration maintains functionality."""
 

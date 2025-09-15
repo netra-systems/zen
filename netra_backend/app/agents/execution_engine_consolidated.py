@@ -5,9 +5,10 @@ This file redirects to the SSOT UserExecutionEngine to maintain backwards compat
 
 # SSOT redirect for backwards compatibility - Export all key classes
 from netra_backend.app.agents.supervisor.user_execution_engine import (
-    UserExecutionEngine as ExecutionEngine,
+    UserExecutionEngine,
+    UserExecutionEngine as ExecutionEngine,  # Also available as ExecutionEngine for compatibility
     UserExecutionContext,
-    AgentExecutionContext, 
+    AgentExecutionContext,
     AgentExecutionResult,
     UserExecutionEngineExtensions as ExecutionEngineFactory
 )

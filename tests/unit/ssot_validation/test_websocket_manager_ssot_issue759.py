@@ -218,6 +218,7 @@ root_dir = Path(__file__).parent.parent.parent.parent
 analyzer = WebSocketSystemAnalyzer(root_dir)
 
 
+@pytest.mark.unit
 def test_single_websocket_manager_exists():
     """
     FAIL TEST: Prove that only one WebSocket manager implementation exists (SSOT).
@@ -266,6 +267,7 @@ def test_single_websocket_manager_exists():
     )
 
 
+@pytest.mark.unit
 def test_websocket_event_delivery_consolidation():
     """
     FAIL TEST: Prove WebSocket event delivery is consolidated through SSOT channels.
@@ -303,6 +305,7 @@ def test_websocket_event_delivery_consolidation():
     )
 
 
+@pytest.mark.unit
 def test_websocket_routing_conflict_detection():
     """
     FAIL TEST: Detect routing conflicts where multiple WebSocket systems compete.
@@ -336,6 +339,7 @@ def test_websocket_routing_conflict_detection():
     )
 
 
+@pytest.mark.unit
 def test_critical_websocket_events_coverage():
     """
     FAIL TEST: Validate that all 5 critical WebSocket events are properly covered.
@@ -371,6 +375,7 @@ def test_critical_websocket_events_coverage():
         print(f"⚠️  UNDER-IMPLEMENTED EVENTS: {under_implemented_events} (may indicate fragility)")
 
 
+@pytest.mark.unit
 def test_websocket_execution_engine_integration():
     """
     FAIL TEST: Validate WebSocket-ExecutionEngine integration follows SSOT pattern.
@@ -417,6 +422,7 @@ def test_websocket_execution_engine_integration():
     )
 
 
+@pytest.mark.unit
 def test_websocket_bridge_vs_manager_distinction():
     """
     FAIL TEST: Validate clear distinction between WebSocket bridges and managers.

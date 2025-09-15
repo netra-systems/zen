@@ -39,6 +39,7 @@ from netra_backend.app.schemas.monitoring_schemas import ErrorSeverity
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.e2e
 class TestGCPErrorReportingE2E(SSotAsyncTestCase):
     """End-to-End tests for complete GCP Error Reporting integration."""
     

@@ -12,6 +12,7 @@ Business Impact: $500K+ ARR Golden Path protection - tool execution enables AI a
 Integration Level: Tests with real tool dispatcher, real tool execution, real WebSocket events (NO DOCKER)
 """
 
+import pytest
 import asyncio
 import sys
 import os
@@ -59,6 +60,7 @@ class ToolExecutionCapture:
         })
 
 
+@pytest.mark.integration
 class TestToolDispatcherIntegration(SSotAsyncTestCase):
     """Integration Test 6: Validate tool dispatcher integration with UserExecutionEngine SSOT"""
     

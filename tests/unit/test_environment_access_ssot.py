@@ -22,6 +22,7 @@ SSOT REQUIREMENTS ENFORCED:
 PURPOSE: These tests MUST FAIL initially to detect current environment access
 violations, then pass after remediation to protect ongoing security compliance.
 """
+import pytest
 import sys
 import ast
 import re
@@ -43,6 +44,7 @@ class EnvironmentViolation:
     code_snippet: Optional[str] = None
     severity: str = 'HIGH'
 
+@pytest.mark.unit
 class TestEnvironmentAccessSSOTCompliance(SSotBaseTestCase):
     """
     MISSION CRITICAL: Test SSOT environment access compliance across all code.

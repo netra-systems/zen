@@ -22,6 +22,7 @@ After Fix: PASSING with staging environment properly accessible
 @compliance SPEC/core.xml - Integration testing with real staging services
 """
 
+import pytest
 import unittest
 import asyncio
 import aiohttp
@@ -36,6 +37,7 @@ def get_env(key, default=None):
     return os.environ.get(key, default)
 
 
+@pytest.mark.integration
 class TestIssue847StagingWebSocketConnectivity(unittest.TestCase):
     """Integration tests for staging WebSocket connectivity validation."""
 

@@ -7,6 +7,7 @@ These tests validate core event emission logic without requiring external depend
 Business Impact: Protects $500K+ ARR by ensuring chat functionality reliability
 """
 
+import pytest
 import unittest
 from unittest.mock import Mock, patch, MagicMock, call
 import time
@@ -67,6 +68,7 @@ class MockWebSocketEventEmitter:
         self.user_event_tracking.clear()
 
 
+@pytest.mark.unit
 class TestWebSocketEventDuplicationUnit567(SSotAsyncTestCase):
     """
     Unit tests for WebSocket event duplication prevention.

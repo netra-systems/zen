@@ -84,6 +84,7 @@ class MockWebSocketConnection:
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
+@pytest.mark.unit
 class TestConfigSecretLoadingRegression:
     """Test secret loading regression prevention."""
 

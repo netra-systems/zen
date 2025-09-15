@@ -12,6 +12,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 import time
 
+@pytest.mark.e2e
 class TestGoldenPathConfigurationStability:
     """Phase 3 Tests - Protect $500K+ ARR during config migration"""
 
@@ -203,6 +204,7 @@ class TestGoldenPathConfigurationStability:
         except ImportError as e:
             pytest.fail(f'Critical import failure during startup stability test: {e}')
 
+@pytest.mark.e2e
 class TestGoldenPathEndToEndStability:
     """Test complete Golden Path stability during configuration migration"""
 

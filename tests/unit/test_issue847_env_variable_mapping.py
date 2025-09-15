@@ -21,6 +21,7 @@ After Fix: PASSING with proper variable mapping resolution
 @compliance SPEC/core.xml - Environment variable resolution testing
 """
 
+import pytest
 import unittest
 import os
 from unittest.mock import patch
@@ -29,6 +30,7 @@ from shared.isolated_environment import get_env
 from test_framework.test_context import TestContext
 
 
+@pytest.mark.unit
 class TestIssue847EnvironmentVariableMapping(unittest.TestCase):
     """Test the specific environment variable mapping gap in Issue #847."""
 

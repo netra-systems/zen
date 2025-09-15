@@ -39,6 +39,7 @@ from auth_service.auth_core.models.auth_models import (
 )
 
 
+@pytest.mark.unit
 class TestUnifiedAuthInterfaceCore:
     """Core authentication interface functionality tests"""
     
@@ -95,6 +96,7 @@ class TestUnifiedAuthInterfaceCore:
         assert "timestamp" in metrics
 
 
+@pytest.mark.unit
 class TestJWTTokenOperations:
     """Test JWT token operations - CRITICAL for $500K+ ARR security"""
     
@@ -206,6 +208,7 @@ class TestJWTTokenOperations:
             auth_interface.create_service_token({"service_name": "Test Service"})
 
 
+@pytest.mark.unit
 class TestTokenValidation:
     """Test token validation - critical for security"""
     
@@ -290,6 +293,7 @@ class TestTokenValidation:
             assert "verified_at" in result
 
 
+@pytest.mark.unit
 class TestTokenBlacklisting:
     """Test token and user blacklisting functionality"""
     
@@ -342,6 +346,7 @@ class TestTokenBlacklisting:
             mock_check.assert_called_once_with("good-user")
 
 
+@pytest.mark.unit
 class TestUserAuthentication:
     """Test user authentication operations - protects user accounts"""
     
@@ -476,6 +481,7 @@ class TestUserAuthentication:
             assert result is False
 
 
+@pytest.mark.unit
 class TestLoginLogoutOperations:
     """Test login and logout operations"""
     
@@ -531,6 +537,7 @@ class TestLoginLogoutOperations:
             mock_service_logout.assert_called_once_with("test-token", "session-123")
 
 
+@pytest.mark.unit
 class TestSessionManagement:
     """Test session management functionality"""
     
@@ -598,6 +605,7 @@ class TestSessionManagement:
         await auth_interface.invalidate_user_sessions("user-123")
 
 
+@pytest.mark.unit
 class TestAPIKeyValidation:
     """Test API key validation functionality"""
     
@@ -611,6 +619,7 @@ class TestAPIKeyValidation:
         assert result is None
 
 
+@pytest.mark.unit
 class TestSecurityUtilities:
     """Test security utility functions - prevents attacks"""
     
@@ -699,6 +708,7 @@ class TestSecurityUtilities:
             assert sig1 == sig2  # Same input should produce same signature
 
 
+@pytest.mark.unit
 class TestOAuthOperations:
     """Test OAuth integration functionality"""
     
@@ -717,6 +727,7 @@ class TestOAuthOperations:
         assert result is None
 
 
+@pytest.mark.unit
 class TestErrorHandling:
     """Test error handling and edge cases"""
     
@@ -762,6 +773,7 @@ class TestErrorHandling:
             assert result is False  # Should return False on error
 
 
+@pytest.mark.unit
 class TestBusinessScenarios:
     """Test complete business scenarios - protects $500K+ ARR"""
     

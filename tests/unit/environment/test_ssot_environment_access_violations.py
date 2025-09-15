@@ -24,6 +24,7 @@ except ImportError:
     SSotAsyncTestCase = unittest.TestCase
 
 
+@pytest.mark.unit
 class TestSSotEnvironmentAccessViolations(SSotAsyncTestCase):
     """Test suite to expose remaining SSOT environment access violations."""
 

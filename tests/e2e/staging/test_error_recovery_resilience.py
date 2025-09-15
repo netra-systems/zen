@@ -50,6 +50,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 
 logger = logging.getLogger(__name__)
 
+@pytest.mark.e2e
 class TestErrorRecoveryResilience:
     """
     E2E Tests for Error Recovery and System Resilience in Staging Environment.

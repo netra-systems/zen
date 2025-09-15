@@ -14,6 +14,7 @@ from typing import Dict, List, Any, Optional
 from test_framework.fixtures.auth import create_real_jwt_token
 
 
+@pytest.mark.integration
 class TestJWTCallingPatternsComprehensive:
     """Comprehensive test of all JWT calling patterns affected by Issue #520."""
     
@@ -160,6 +161,7 @@ class TestJWTCallingPatternsComprehensive:
                 )
 
 
+@pytest.mark.integration
 class TestJWTCallingPatternsFixValidation:
     """Test how all calling patterns should work after implementing fixes."""
     

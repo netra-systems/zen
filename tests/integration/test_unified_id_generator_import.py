@@ -10,6 +10,7 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
+@pytest.mark.integration
 def test_unified_id_generator_import_in_agent_handler():
     """
     Regression test: Ensure UnifiedIdGenerator is properly imported and accessible
@@ -26,6 +27,7 @@ def test_unified_id_generator_import_in_agent_handler():
     ws_conn_id = UnifiedIdGenerator.generate_websocket_connection_id('test_user_123')
     assert ws_conn_id.startswith('ws_conn_')
 
+@pytest.mark.integration
 def test_agent_handler_handle_message_source_code():
     """
     Test that the _handle_message_v3_clean method source code is correct.
@@ -43,6 +45,7 @@ def test_agent_handler_handle_message_source_code():
     assert 'websocket: WebSocket' in source
     assert 'message: WebSocketMessage' in source
 
+@pytest.mark.integration
 def test_no_duplicate_imports_in_agent_handler():
     """
     Ensure there are no duplicate or shadowing imports of UnifiedIdGenerator.

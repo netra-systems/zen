@@ -103,6 +103,7 @@ class MockWebSocket:
         self.is_closed = True
         self.state = MockWebSocketState.CLOSED
 
+@pytest.mark.unit
 class TestUnifiedWebSocketManager(BaseIntegrationTest):
     """Comprehensive unit test suite for UnifiedWebSocketManager."""
 

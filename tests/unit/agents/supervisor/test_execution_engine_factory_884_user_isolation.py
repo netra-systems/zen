@@ -20,6 +20,7 @@ Test Philosophy:
 - CONCURRENT VALIDATION: Tests ensure isolation under concurrent user load
 - GOLDEN PATH PROTECTION: Tests protect end-to-end user value delivery
 """
+import pytest
 import asyncio
 import gc
 import inspect
@@ -37,6 +38,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.unit
 class TestExecutionEngineFactoryUserIsolation884(SSotAsyncTestCase):
     """Phase 1 Unit Tests: Execution Engine Factory User Isolation Violations
 

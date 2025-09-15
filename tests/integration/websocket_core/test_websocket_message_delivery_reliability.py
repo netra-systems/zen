@@ -19,6 +19,7 @@ from typing import Dict, Any, List, Optional, Tuple
 import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.integration
 class TestWebSocketMessageDeliveryReliability(SSotAsyncTestCase):
     """Test WebSocket message delivery reliability during SSOT changes."""
 

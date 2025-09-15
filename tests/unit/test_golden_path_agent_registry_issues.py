@@ -44,6 +44,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
+@pytest.mark.unit
 class TestAgentRegistryConfiguration(SSotAsyncTestCase):
     """Unit tests reproducing agent registry configuration failures from Golden Path tests.
     

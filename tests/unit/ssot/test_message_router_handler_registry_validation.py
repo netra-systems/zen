@@ -19,6 +19,7 @@ BUSINESS IMPACT: $500K+ ARR Golden Path failures due to:
 TEST STRATEGY: 20% of MessageRouter SSOT testing strategy focused on handler registry validation
 """
 
+import pytest
 import unittest
 import importlib
 import inspect
@@ -28,6 +29,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.unit
 class TestMessageRouterHandlerRegistryValidation(SSotAsyncTestCase):
     """Test message handler registry consistency across different router implementations."""
 

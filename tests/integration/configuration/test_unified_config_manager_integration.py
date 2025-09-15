@@ -47,6 +47,7 @@ from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig, Stagi
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.core.environment_constants import EnvironmentDetector
 
+@pytest.mark.integration
 class TestUnifiedConfigManagerIntegration(SSotBaseTestCase):
     """
     UnifiedConfigManager Integration Tests - CONFIGURATION CRITICAL SSOT

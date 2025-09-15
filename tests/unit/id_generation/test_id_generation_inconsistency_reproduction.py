@@ -23,6 +23,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestIDGenerationInconsistency(SSotBaseTestCase):
     """Test suite for reproducing and detecting ID generation inconsistencies."""
 
@@ -162,6 +163,7 @@ class TestIDGenerationInconsistency(SSotBaseTestCase):
             return False
         return not self._test_correlation_logic(extracted_thread_id, thread_id, run_id)
 
+@pytest.mark.unit
 class TestSSOTIDManagerCompliance(SSotBaseTestCase):
     """Test suite for SSOT ID Manager compliance validation."""
 

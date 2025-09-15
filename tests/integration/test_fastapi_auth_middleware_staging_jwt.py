@@ -14,6 +14,7 @@ from unittest.mock import Mock, patch, MagicMock
 from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.integration
 class TestFastAPIAuthMiddlewareJWTStaging(SSotAsyncTestCase):
     """Integration tests for FastAPI Auth Middleware JWT configuration in staging."""
 

@@ -65,6 +65,7 @@ except ImportError as e:
     pytest.skip(f"User execution context not available: {e}", allow_module_level=True)
 
 
+@pytest.mark.unit
 class TestAgentFactoryWebSocketManagerInterfaceConflicts:
     """Test agent factories expecting different WebSocket manager interfaces."""
     
@@ -175,6 +176,7 @@ class TestAgentFactoryWebSocketManagerInterfaceConflicts:
             assert "websocket" in str(e).lower() or "manager" in str(e).lower()
 
 
+@pytest.mark.unit
 class TestWebSocketBridgeFactoryIntegrationConflicts:
     """Test WebSocket bridge factory integration conflicts."""
     
@@ -261,6 +263,7 @@ class TestWebSocketBridgeFactoryIntegrationConflicts:
             assert "deprecated" in str(e).lower() or "websocket" in str(e).lower()
 
 
+@pytest.mark.unit
 class TestExecutionEngineFactoryWebSocketIntegrationConflicts:
     """Test ExecutionEngineFactory WebSocket integration conflicts."""
     
@@ -378,6 +381,7 @@ class TestExecutionEngineFactoryWebSocketIntegrationConflicts:
             assert "parameter" in str(e).lower() or "argument" in str(e).lower()
 
 
+@pytest.mark.unit
 class TestWebSocketManagerFactoryPatternConflicts:
     """Test WebSocket manager factory pattern conflicts."""
     

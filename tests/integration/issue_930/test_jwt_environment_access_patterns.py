@@ -21,6 +21,7 @@ from shared.jwt_secret_manager import get_jwt_secret_manager, get_unified_jwt_se
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
+@pytest.mark.integration
 class TestJWTEnvironmentAccessPatterns(SSotAsyncTestCase):
     """Integration tests for JWT environment access patterns causing staging failures."""
 

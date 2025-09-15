@@ -24,6 +24,7 @@ Created for Issue #1066 - SSOT-regression-deprecated-websocket-factory-imports
 Priority: P0 - Mission Critical
 """
 
+import pytest
 import os
 import re
 import ast
@@ -226,6 +227,7 @@ class SSotImportComplianceValidator:
         return report
 
 
+@pytest.mark.unit
 class TestSSotImportCompliance(SSotBaseTestCase):
     """
     Automated tests for SSOT import compliance validation.
@@ -288,6 +290,7 @@ class TestSSotImportCompliance(SSotBaseTestCase):
 from netra_backend.app.websocket_core import create_websocket_manager
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
+@pytest.mark.unit
 def test_function():
     manager = create_websocket_manager()
     return manager
@@ -328,6 +331,7 @@ def test_function():
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
 from netra_backend.app.services.user_execution_context import create_isolated_execution_context
 
+@pytest.mark.unit
 def test_function():
     manager = WebSocketManager(mode=WebSocketManagerMode.TEST)
     return manager

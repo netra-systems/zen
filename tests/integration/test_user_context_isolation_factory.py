@@ -23,6 +23,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
+@pytest.mark.integration
 class TestUserContextIsolationFactory(SSotAsyncTestCase):
     """
     Integration test suite validating user context isolation via factory patterns.

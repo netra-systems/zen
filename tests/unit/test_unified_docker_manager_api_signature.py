@@ -26,6 +26,7 @@ from unittest.mock import Mock, patch
 import asyncio
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
 
+@pytest.mark.unit
 class TestUnifiedDockerManagerAPISignature:
     """Test UnifiedDockerManager API signatures to reproduce and prevent Issue #552."""
 
@@ -89,6 +90,7 @@ class TestUnifiedDockerManagerAPISignature:
             result = asyncio.run(manager.start_services_smart(services=['postgres', 'redis', 'auth'], wait_healthy=True))
             assert result == True, 'start_services_smart should return True for successful start'
 
+@pytest.mark.unit
 class TestUnifiedDockerManagerAPIConsistency:
     """Validate API consistency across UnifiedDockerManager methods."""
 
@@ -121,6 +123,7 @@ class TestUnifiedDockerManagerAPIConsistency:
         for param in legacy_params:
             assert param not in docstring.lower(), f"Docstring should not mention legacy parameter '{param}': {docstring}"
 
+@pytest.mark.unit
 class TestAuthServiceAPIPatternReproduction:
     """Reproduce the exact API pattern that fails in auth E2E tests."""
 

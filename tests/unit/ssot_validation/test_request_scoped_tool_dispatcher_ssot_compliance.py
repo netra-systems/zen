@@ -27,6 +27,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
+@pytest.mark.unit
 class TestRequestScopedToolDispatcherSSotCompliance(SSotBaseTestCase):
     """Test SSOT compliance for RequestScopedToolDispatcher system.
     
@@ -243,6 +244,7 @@ class TestRequestScopedToolDispatcherSSotCompliance(SSotBaseTestCase):
         if instantiable_classes:
             self.assertIn('RequestScopedToolDispatcher', instantiable_classes, f'SSOT implementation RequestScopedToolDispatcher should be instantiable, but found: {instantiable_classes}')
 
+@pytest.mark.unit
 class TestRequestScopedToolDispatcherFactoryConsistency(SSotBaseTestCase):
     """Test factory consistency for RequestScopedToolDispatcher system."""
 

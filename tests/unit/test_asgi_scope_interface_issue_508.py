@@ -20,6 +20,7 @@ except ImportError as e:
     WebSocketSSOTRouter = None
     WebSocketExclusionMiddleware = None
 
+@pytest.mark.unit
 class TestASGIScopeInterface:
     """Test ASGI scope object interface handling and compatibility issues."""
 
@@ -116,6 +117,7 @@ class TestASGIScopeInterface:
         assert hasattr(starlette_url, 'query'), 'Starlette URL should have query'
         assert starlette_url.query == 'param1=value1', 'Starlette URL query incorrect'
 
+@pytest.mark.unit
 class TestASGIScopeErrorReproduction:
     """Tests specifically designed to reproduce the exact errors from Issue #508."""
 

@@ -18,6 +18,7 @@ from typing import Any, Dict, Optional
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.unit
 class TestUserExecutionContextFactoryMethods:
     """Test suite validating UserExecutionContext factory methods for Issue #674."""
     

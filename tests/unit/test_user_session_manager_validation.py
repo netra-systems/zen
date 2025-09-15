@@ -10,6 +10,7 @@ from shared.session_management import UserSessionManager, get_user_session, get_
 from shared.id_generation import UnifiedIdGenerator
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.unit
 class TestUserSessionManagerValidation:
     """Basic validation tests for UserSessionManager."""
 

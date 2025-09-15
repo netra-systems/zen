@@ -33,6 +33,7 @@ except ImportError:
     LEGACY_IMPORTS_AVAILABLE = False
 
 
+@pytest.mark.unit
 class TestExecutionStateConsolidation(SSotBaseTestCase):
     """Test ExecutionState SSOT consolidation prevents dict/enum conflicts."""
     

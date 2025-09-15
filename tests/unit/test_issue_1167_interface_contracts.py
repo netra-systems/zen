@@ -16,6 +16,7 @@ Test Coverage:
 Business Impact: $500K+ ARR Golden Path WebSocket functionality blocked by these interface issues.
 """
 
+import pytest
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
@@ -28,6 +29,7 @@ from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from shared.types.core_types import UserID, ThreadID, RunID
 
 
+@pytest.mark.unit
 class TestIssue1167InterfaceContracts(SSotBaseTestCase, unittest.TestCase):
     """
     Interface contract tests to prove the identified failures exist.

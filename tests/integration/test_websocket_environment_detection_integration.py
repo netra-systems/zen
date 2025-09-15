@@ -37,6 +37,7 @@ pytestmark = [
 ]
 
 
+@pytest.mark.integration
 class TestWebSocketEnvironmentDetectionIntegration(SSotBaseTestCase):
     """
     Integration tests for WebSocket E2E environment detection system.

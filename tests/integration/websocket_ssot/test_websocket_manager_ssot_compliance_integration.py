@@ -36,6 +36,7 @@ if project_root not in sys.path:
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
+@pytest.mark.integration
 class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
     """Integration tests for WebSocket Manager SSOT compliance with staging services."""
 

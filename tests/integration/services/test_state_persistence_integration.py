@@ -55,6 +55,7 @@ from netra_backend.app.core.configuration.database import DatabaseConfigManager
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.integration
 class TestStatePersistenceIntegrationCore(SSotAsyncTestCase):
     """Core integration tests for StatePersistence with real 3-tier architecture"""
 
@@ -115,6 +116,7 @@ class TestStatePersistenceIntegrationCore(SSotAsyncTestCase):
         self.test_thread_ids.add(thread_id)
         return (user_id, thread_id)
 
+@pytest.mark.integration
 class TestThreeTierArchitectureIntegration(TestStatePersistenceIntegrationCore):
     """Integration tests for 3-tier architecture coordination"""
 
@@ -186,6 +188,7 @@ class TestThreeTierArchitectureIntegration(TestStatePersistenceIntegrationCore):
         self.assertIn('execution_summary', tier_data[1])
         self.assertIn('audit_info', tier_data[2])
 
+@pytest.mark.integration
 class TestDataMigrationIntegration(TestStatePersistenceIntegrationCore):
     """Integration tests for data migration between tiers"""
 
@@ -242,6 +245,7 @@ class TestDataMigrationIntegration(TestStatePersistenceIntegrationCore):
         self.assertEqual(moderate_retrieved['type'], 'moderate')
         self.assertEqual(rare_retrieved['type'], 'rare')
 
+@pytest.mark.integration
 class TestPerformanceOptimizationIntegration(TestStatePersistenceIntegrationCore):
     """Integration tests for performance optimization under real load"""
 
@@ -353,6 +357,7 @@ class TestPerformanceOptimizationIntegration(TestStatePersistenceIntegrationCore
             self.assertEqual(item['category'], 'analytical')
             self.assertGreaterEqual(item['score'], 0.5)
 
+@pytest.mark.integration
 class TestDisasterRecoveryIntegration(TestStatePersistenceIntegrationCore):
     """Integration tests for disaster recovery scenarios"""
 

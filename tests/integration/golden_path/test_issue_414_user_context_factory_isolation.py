@@ -54,6 +54,7 @@ class ContextFactoryStats:
     race_conditions_detected: int = 0
     validation_bypasses: int = 0
 
+@pytest.mark.integration
 class TestUserContextFactoryIsolation(SSotAsyncTestCase):
     """Unit tests reproducing user context factory isolation issues from Issue #414."""
 

@@ -27,6 +27,7 @@ import time
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.e2e
 class TestToolRegistryE2EExceptionHandling(SSotAsyncTestCase):
     """Test tool registry exception handling through complete request lifecycle."""
 
@@ -230,6 +231,7 @@ class TestToolRegistryE2EExceptionHandling(SSotAsyncTestCase):
         """Clean up E2E test environment."""
         super().tearDownClass()
 
+@pytest.mark.e2e
 class TestToolRegistryE2EProductionReadiness(SSotAsyncTestCase):
     """Test production readiness of tool registry exception handling."""
 

@@ -38,6 +38,7 @@ from shared.types import (
 )
 
 
+@pytest.mark.unit
 class TestWebSocketEventTypeValidation(SSotBaseTestCase):
     """Test WebSocketEventType enum validation and constraints."""
     
@@ -163,6 +164,7 @@ class TestWebSocketEventTypeValidation(SSotBaseTestCase):
             WebSocketEventType("Agent_Started")
 
 
+@pytest.mark.unit
 class TestStronglyTypedWebSocketEventValidation(SSotBaseTestCase):
     """Test StronglyTypedWebSocketEvent validation and construction."""
     
@@ -286,6 +288,7 @@ class TestStronglyTypedWebSocketEventValidation(SSotBaseTestCase):
         self.assertEqual(event.timestamp.tzinfo, timezone.utc)
 
 
+@pytest.mark.unit
 class TestWebSocketEventTypeConstraints(SSotBaseTestCase):
     """Test constraints and validation rules for WebSocket event types."""
     
@@ -363,6 +366,7 @@ class TestWebSocketEventTypeConstraints(SSotBaseTestCase):
             self.assertIn(expected_type, all_event_types)
 
 
+@pytest.mark.unit
 class TestWebSocketEventValidationEdgeCases(SSotBaseTestCase):
     """Test edge cases and error conditions for WebSocket event validation."""
     

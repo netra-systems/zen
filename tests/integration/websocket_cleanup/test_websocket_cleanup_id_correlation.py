@@ -26,6 +26,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.integration
 class TestWebSocketCleanupCorrelation(SSotAsyncTestCase):
     """Integration tests for WebSocket cleanup correlation with ID patterns."""
 

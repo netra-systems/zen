@@ -42,6 +42,7 @@ class PerformanceMetrics:
     memory_usage_mb: float
     success_rate: float
 
+@pytest.mark.integration
 class TestMigrationPerformanceImpact(SSotAsyncTestCase):
     """Integration tests validating performance impact of SSOT ID migration"""
 

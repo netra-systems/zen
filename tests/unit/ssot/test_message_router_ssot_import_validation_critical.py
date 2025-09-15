@@ -13,6 +13,7 @@ VIOLATION: 4 different MessageRouter implementations:
 BUSINESS IMPACT: $500K+ ARR Golden Path failures due to inconsistent routing
 """
 
+import pytest
 import unittest
 import importlib
 import inspect
@@ -20,6 +21,7 @@ from typing import Set, List, Dict, Any
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestMessageRouterSSOTImportValidation(SSotBaseTestCase):
     """Test that MessageRouter imports resolve to single implementation."""
 
@@ -211,6 +213,7 @@ class TestMessageRouterSSOTImportValidation(SSotBaseTestCase):
         )
 
 
+@pytest.mark.unit
 class TestMessageRouterRaceConditionPrevention(SSotBaseTestCase):
     """Test that consolidated router prevents race conditions."""
 

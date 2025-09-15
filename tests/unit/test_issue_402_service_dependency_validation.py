@@ -21,6 +21,7 @@ from netra_backend.app.core.startup_validation import StartupValidator
 from netra_backend.app.core.service_dependencies.models import EnvironmentType
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.unit
 class TestIssue402ServiceDependencyValidation(SSotAsyncTestCase):
     """Test suite for Issue #402 service dependency validation failure."""
 

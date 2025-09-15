@@ -6,6 +6,7 @@ Ensures critical environment variables and secrets are properly configured.
 CRITICAL: This test prevents deployment failures due to missing environment variables.
 """
 
+import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import sys
 import os
@@ -21,6 +22,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
+@pytest.mark.integration
 class TestGCPDeploymentRegression(SSotBaseTestCase):
     """Regression tests for GCP deployment configuration."""
     

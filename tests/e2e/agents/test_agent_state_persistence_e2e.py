@@ -37,6 +37,7 @@ from netra_backend.app.services.state_persistence_optimized import OptimizedStat
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
+@pytest.mark.e2e
 class TestAgentStatePersistenceE2E(BaseE2ETest):
     """E2E tests for agent state persistence with authenticated full-stack integration."""
 

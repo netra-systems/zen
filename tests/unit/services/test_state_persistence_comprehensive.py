@@ -43,6 +43,7 @@ from netra_backend.app.schemas.agent_state import (
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
+@pytest.mark.unit
 class TestStatePersistenceServiceCore:
     """Core state persistence functionality tests"""
     
@@ -90,6 +91,7 @@ class TestStatePersistenceServiceCore:
         assert isinstance(stats['cache_entries'], list)
 
 
+@pytest.mark.unit
 class TestSSotConsolidation:
     """Test SSOT consolidation with StateCacheManager functionality"""
     
@@ -169,6 +171,7 @@ class TestSSotConsolidation:
             assert run_id not in service._cache_versions
 
 
+@pytest.mark.unit
 class TestThreeTierArchitecture:
     """Test 3-tier architecture (Redis/ClickHouse/PostgreSQL) - CRITICAL for $500K+ ARR"""
     
@@ -286,6 +289,7 @@ class TestThreeTierArchitecture:
                     assert service._use_legacy_mode is True
 
 
+@pytest.mark.unit
 class TestOptimizationFeatures:
     """Test performance optimization features - prevents system degradation"""
     
@@ -379,6 +383,7 @@ class TestOptimizationFeatures:
         assert isinstance(is_optimizable, bool)
 
 
+@pytest.mark.unit
 class TestRecoveryCapabilities:
     """Test state recovery capabilities - prevents $100K+ incident costs"""
     
@@ -485,6 +490,7 @@ class TestRecoveryCapabilities:
             mock_db_session.add.assert_called_once()
 
 
+@pytest.mark.unit
 class TestErrorHandlingAndEdgeCases:
     """Test error handling and edge cases"""
     
@@ -574,6 +580,7 @@ class TestErrorHandlingAndEdgeCases:
         assert converted["list_with_datetime"][1] == "string"  # Non-datetime preserved
 
 
+@pytest.mark.unit
 class TestCacheManagement:
     """Test cache management functionality"""
     
@@ -639,6 +646,7 @@ class TestCacheManagement:
             )
 
 
+@pytest.mark.unit
 class TestStateCacheManagerCompatibility:
     """Test SSOT consolidation compatibility with StateCacheManager"""
     
@@ -671,6 +679,7 @@ class TestStateCacheManagerCompatibility:
             mock_save.assert_called_once_with(mock_request)
 
 
+@pytest.mark.unit
 class TestPerformanceOptimizations:
     """Test performance optimizations - prevents system degradation"""
     
@@ -752,6 +761,7 @@ class TestPerformanceOptimizations:
         assert json_safe["levels"]["level1"]["level2"]["level3"][0] == "item1"
 
 
+@pytest.mark.unit
 class TestBusinessScenarioIntegration:
     """Test complete business scenarios - protects $500K+ ARR"""
     

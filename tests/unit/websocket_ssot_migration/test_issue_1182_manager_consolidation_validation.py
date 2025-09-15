@@ -26,6 +26,7 @@ Business Value Justification:
 - Revenue Impact: Protects $500K+ ARR chat functionality reliability
 """
 
+import pytest
 import unittest
 import importlib
 import inspect
@@ -38,6 +39,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestWebSocketManagerConsolidationValidation(SSotBaseTestCase):
     """
     CRITICAL: Tests for Issue #1182 WebSocket Manager SSOT consolidation.
@@ -46,12 +48,12 @@ class TestWebSocketManagerConsolidationValidation(SSotBaseTestCase):
     Success indicates proper WebSocket manager consolidation is complete.
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment for WebSocket manager consolidation validation."""
-        super().setUp()
+        super().setup_method(method)
         self.websocket_manager_import_paths = [
             'netra_backend.app.websocket_core.manager',
-            'netra_backend.app.websocket_core.websocket_manager', 
+            'netra_backend.app.websocket_core.websocket_manager',
             'netra_backend.app.websocket_core.unified_manager',
         ]
         self.expected_websocket_classes = [

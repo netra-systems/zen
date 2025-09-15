@@ -22,6 +22,7 @@ from netra_backend.app.dependencies import create_user_execution_context
 from shared.id_generation import UnifiedIdGenerator
 
 
+@pytest.mark.integration
 class TestWebSocketManagerFix:
     """Test suite for WebSocket manager factory fixes."""
     
@@ -168,6 +169,7 @@ class TestWebSocketManagerFix:
             create_websocket_manager({"user_id": "test"})
 
 
+@pytest.mark.integration
 def test_five_whys_fix_validation():
     """
     Validate that all Five Whys levels have been addressed:

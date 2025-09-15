@@ -17,6 +17,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestWebSocketJWTAuthenticationCrisis(SSotAsyncTestCase):
     """Integration tests for WebSocket JWT authentication failures in staging."""
 
@@ -154,6 +155,7 @@ class TestWebSocketJWTAuthenticationCrisis(SSotAsyncTestCase):
                 assert any((term in error_message.lower() for term in ['jwt', 'secret', 'configuration', 'staging']))
                 logger.info(f'Golden Path correctly blocked by JWT config issue: {error_message}')
 
+@pytest.mark.integration
 class TestJWTConfigurationBusinessImpactIntegration(SSotAsyncTestCase):
     """Integration tests demonstrating business impact of JWT configuration failures."""
 
@@ -209,6 +211,7 @@ class TestJWTConfigurationBusinessImpactIntegration(SSotAsyncTestCase):
             else:
                 logger.warning(f'Staging deployment validation incomplete: {validation_steps}')
 
+@pytest.mark.integration
 class TestJWTSecretDeploymentScenarios(SSotAsyncTestCase):
     """Integration tests for various JWT secret deployment scenarios."""
 

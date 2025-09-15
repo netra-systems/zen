@@ -12,6 +12,7 @@ CRITICAL: These tests follow claude.md requirements:
 - User isolation verification
 """
 
+import pytest
 import asyncio
 import unittest
 from typing import Dict, List, Set, Any, Optional
@@ -27,6 +28,7 @@ from shared.types.core_types import UserID, ThreadID, ensure_user_id
 logger = get_logger(__name__)
 
 
+@pytest.mark.integration
 class TestWebSocketFactoryConsolidation(SSotAsyncTestCase):
     """Test WebSocket factory pattern consolidation and consistency.
     

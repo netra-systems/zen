@@ -49,6 +49,7 @@ class DatabaseSessionStats:
     leaked_sessions: int = 0
     max_concurrent: int = 0
 
+@pytest.mark.integration
 class TestDatabaseSessionLifecycle(SSotAsyncTestCase):
     """Unit tests reproducing database session lifecycle issues from Issue #414."""
 

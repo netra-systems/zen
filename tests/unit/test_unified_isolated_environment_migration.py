@@ -14,6 +14,7 @@ import time
 from pathlib import Path
 from shared.isolated_environment import get_env, IsolatedEnvironment, ValidationResult, setenv, getenv, delenv
 
+@pytest.mark.unit
 class TestUnifiedIsolatedEnvironment:
     """Test the unified IsolatedEnvironment implementation."""
 
@@ -308,6 +309,7 @@ class TestUnifiedIsolatedEnvironment:
         assert 'tracked_sources' in debug_info
         assert 'DEBUG_TEST' in debug_info['tracked_sources']
 
+@pytest.mark.unit
 class TestBackwardsCompatibility:
     """Test backwards compatibility with legacy interfaces."""
 
@@ -341,6 +343,7 @@ class TestBackwardsCompatibility:
         assert hasattr(env_manager, 'get')
         assert hasattr(env_manager, 'set')
 
+@pytest.mark.unit
 class TestErrorHandling:
     """Test error handling and edge cases."""
 

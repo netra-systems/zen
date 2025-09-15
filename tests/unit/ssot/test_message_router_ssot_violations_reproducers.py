@@ -21,6 +21,7 @@ Business Value Justification:
 - Strategic Impact: Enables safe SSOT consolidation for enterprise-grade reliability
 """
 
+import pytest
 import os
 import ast
 import importlib
@@ -33,6 +34,7 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestMessageRouterSSOTViolationDetection(SSotBaseTestCase, unittest.TestCase):
     """
     CRITICAL SSOT Violation Detection Tests for MessageRouter

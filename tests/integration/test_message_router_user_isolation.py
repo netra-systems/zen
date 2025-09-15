@@ -17,6 +17,7 @@ GitHub Issue: #1077 - MessageRouter SSOT violations blocking golden path
 Related: #953 - User isolation security vulnerabilities
 """
 
+import pytest
 import unittest
 import asyncio
 import uuid
@@ -84,6 +85,7 @@ class MockMessageHandler:
         return {'status': 'handled', 'handler_id': self.handler_id}
 
 
+@pytest.mark.integration
 class TestMessageRouterUserIsolation(SSotBaseTestCase):
     """Test suite for MessageRouter user isolation validation."""
 

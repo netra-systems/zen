@@ -13,6 +13,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.integration
 class TestSystemIntegrationValidation:
     """Test system-wide integration validation."""
 

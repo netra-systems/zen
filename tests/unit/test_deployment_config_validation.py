@@ -60,6 +60,7 @@ class MockDeploymentValidator:
             return {'valid': False, 'errors': [f'Missing required services: {missing_services}']}
         return {'valid': True, 'errors': []}
 
+@pytest.mark.unit
 class TestDeploymentConfigValidation:
     """Test deployment configuration validation."""
 

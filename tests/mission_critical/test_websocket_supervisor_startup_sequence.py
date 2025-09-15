@@ -107,7 +107,7 @@ class MissionCriticalWebSocketTester:
             async with websockets.connect(
                 ws_url,
                 timeout=timeout_seconds,
-                extra_headers={"Authorization": f"Bearer {self.auth_token}"}
+                additional_headers={"Authorization": f"Bearer {self.auth_token}"}
             ) as websocket:
                 connection_result['connection_time'] = time.time() - connection_start
                 connection_result['success'] = True

@@ -105,6 +105,7 @@ class GoldenPathResult:
     warnings: List[str] = field(default_factory=list)
 
 
+@pytest.mark.integration
 class TestReportingAgentUserContextGoldenPath(SSotAsyncTestCase):
     """
     Golden Path tests ensuring ReportingSubAgent works with UserExecutionContext.

@@ -31,6 +31,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.core.backend_environment import BackendEnvironment
 
 
+@pytest.mark.integration
 class TestEnvironmentDetection:
     """Test environment detection across various deployment contexts."""
     
@@ -333,6 +334,7 @@ class TestEnvironmentDetection:
         assert "dev-auth" in backend_env.get_auth_service_url()
 
 
+@pytest.mark.integration
 class TestDockerConfigurationConsistency:
     """Test consistency between Docker Compose and application configuration."""
     
@@ -533,6 +535,7 @@ class TestDockerConfigurationConsistency:
                 # Actual connection failure would occur at runtime, not config time
 
 
+@pytest.mark.integration
 class TestEnvironmentConfigurationLoading:
     """Test environment-specific configuration file loading."""
     
@@ -636,6 +639,7 @@ JWT_SECRET_KEY=prod-jwt-secret-key-32-chars-long
         # (This prevents accidentally loading development configs in production)
 
 
+@pytest.mark.integration
 class TestConfigurationValidationIntegration:
     """Test integrated configuration validation across environments."""
     

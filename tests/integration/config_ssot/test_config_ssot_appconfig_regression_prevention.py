@@ -56,6 +56,7 @@ class SSotViolationDetector(ast.NodeVisitor):
         self.generic_visit(node)
 
 
+@pytest.mark.integration
 class TestConfigSSotAppConfigRegressionPrevention:
     """Regression prevention tests for AppConfig SSOT compliance."""
     

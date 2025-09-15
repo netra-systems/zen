@@ -40,6 +40,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.types import MessageType
 
 @requires_docker
+@pytest.mark.integration
 class TestWebSocketRedisAuthRaceConditions:
     """
     CRITICAL TEST: WebSocket + Redis + Auth service race conditions under timing stress.
@@ -154,6 +155,7 @@ class TestWebSocketRedisAuthRaceConditions:
             raise
 
 @requires_docker
+@pytest.mark.integration
 class TestMultiUserWebSocketIsolation:
     """
     CRITICAL TEST: 10+ simultaneous user WebSocket connections with proper isolation.
@@ -249,6 +251,7 @@ class TestMultiUserWebSocketIsolation:
                     pass
 
 @requires_docker
+@pytest.mark.integration
 class TestAgentEventDeliveryLifecycle:
     """
     CRITICAL TEST: All 5 required agent events delivered through complete WebSocket lifecycle.

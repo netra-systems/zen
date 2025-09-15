@@ -8,6 +8,7 @@ Priority: P0 BLOCKER
 Business Impact: $500K+ ARR protection - quality routing infrastructure
 """
 
+import pytest
 import unittest
 import importlib
 import sys
@@ -20,6 +21,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestQualityMessageRouterFragmentation(SSotBaseTestCase):
     """Test specific fragmentation issues with QualityMessageRouter vs MessageRouter."""
 

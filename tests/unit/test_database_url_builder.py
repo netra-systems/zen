@@ -13,6 +13,7 @@ from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.unit
 class TestDatabaseURLBuilder:
     """Test DatabaseURLBuilder URL construction for all environments."""
     
@@ -218,6 +219,7 @@ class TestDatabaseURLBuilder:
         assert url == "postgresql://test:test@test-host:5432/testdb"
 
 
+@pytest.mark.unit
 class TestDatabaseURLBuilderEdgeCases:
     """Test edge cases and error conditions."""
     

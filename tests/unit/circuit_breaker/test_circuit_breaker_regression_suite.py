@@ -16,6 +16,7 @@ import threading
 from typing import Dict, Any, List
 import concurrent.futures
 
+@pytest.mark.unit
 class TestCircuitBreakerRegressionSuite:
     """Comprehensive regression tests for circuit breaker functionality."""
 
@@ -128,6 +129,7 @@ class TestCircuitBreakerRegressionSuite:
         assert call_count[0] == 3, 'Failed async call should still increment counter'
         print('ASYNC DECORATOR REGRESSION: Async circuit breaker decorator working correctly')
 
+@pytest.mark.unit
 class TestCircuitBreakerCompatibilityRegression:
     """Test compatibility layer regression scenarios."""
 
@@ -186,6 +188,7 @@ class TestCircuitBreakerCompatibilityRegression:
         assert basic_breaker.can_execute() is True, 'Basic circuit breaker should be functional'
         assert not has_resilience, 'EXPECTED FAILURE: Expected resilience framework to be incomplete due to Issue #455, but _HAS_RESILIENCE_FRAMEWORK is True. Issue may be resolved.'
 
+@pytest.mark.unit
 class TestCircuitBreakerPerformanceRegression:
     """Test performance characteristics to ensure no regression."""
 
@@ -274,6 +277,7 @@ class TestCircuitBreakerPerformanceRegression:
         assert total_operations >= expected_operations * 0.9, f'Missing operations: expected ~{expected_operations}, got {total_operations}'
         print(f'CONCURRENT PERFORMANCE: 10 threads, 500 total operations in {concurrent_time:.3f}s')
 
+@pytest.mark.unit
 class TestCircuitBreakerEdgeCaseRegression:
     """Test edge cases to ensure no regression in error handling."""
 

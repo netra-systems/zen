@@ -244,6 +244,7 @@ async def test_staging_environment_urls():
     finally:
         env.disable_isolation(restore_original=True)
 
+@pytest.mark.integration
 def test_jwt_token_decoding():
     """Test that frontend can decode JWT tokens using real auth service tokens"""
     env = get_env()

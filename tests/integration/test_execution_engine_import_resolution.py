@@ -25,6 +25,7 @@ EXPECTED FAILING SCENARIOS:
 This test complements the unit test by validating runtime behavior and integration points.
 """
 
+import pytest
 import asyncio
 import uuid
 import time
@@ -35,6 +36,7 @@ from unittest.mock import AsyncMock, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestExecutionEngineImportResolution(SSotAsyncTestCase):
     """Integration tests for ExecutionEngine import resolution and initialization.
     

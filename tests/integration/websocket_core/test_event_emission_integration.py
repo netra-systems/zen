@@ -16,6 +16,7 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.integration
 class TestWebSocketEventEmissionIntegration(SSotAsyncTestCase):
     """Integration test for WebSocket event emission during agent execution"""
 

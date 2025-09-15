@@ -1,6 +1,7 @@
 """Test Issue #1186: UserExecutionEngine SSOT Consolidation - Phase 1 Reproduction Tests
 
 This test suite is designed to FAIL initially to expose the current UserExecutionEngine
+import pytest
 import fragmentation and singleton violations. These tests demonstrate the problem
 before SSOT consolidation is implemented.
 
@@ -24,6 +25,7 @@ from typing import List, Set, Dict, Tuple
 from collections import defaultdict
 
 
+@pytest.mark.unit
 class TestUserExecutionEngineImportFragmentation(unittest.TestCase):
     """Test class to expose UserExecutionEngine import fragmentation issues"""
     
@@ -293,6 +295,7 @@ class TestUserExecutionEngineImportFragmentation(unittest.TestCase):
             return []
 
 
+@pytest.mark.unit
 class TestUserExecutionEngineUserIsolationViolations(unittest.TestCase):
     """Test class to expose user isolation violations in UserExecutionEngine"""
     

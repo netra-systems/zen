@@ -16,6 +16,7 @@ from shared.session_management.user_session_manager import SessionMetrics as Sha
 from netra_backend.app.database.request_scoped_session_factory import SessionMetrics as BackendSessionMetrics
 
 
+@pytest.mark.integration
 class TestCrossServiceSessionMetricsConflicts:
     """Test how SSOT violations cause cross-service integration failures."""
 
@@ -349,6 +350,7 @@ class TestCrossServiceSessionMetricsConflicts:
         assert len(overlap) <= 1  # Maybe error fields, but no real metric fields
 
 
+@pytest.mark.integration
 class TestSSOTViolationSystemImpacts:
     """Test system-wide impacts of SessionMetrics SSOT violations."""
 

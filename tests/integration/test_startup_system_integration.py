@@ -42,6 +42,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
+@pytest.mark.integration
 class TestWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
     
@@ -67,6 +68,7 @@ class TestWebSocketConnection:
         return self.messages_sent.copy()
 
 
+@pytest.mark.integration
 class TestStartupSystemIntegration:
     """Integration Tests for startup system components."""
     

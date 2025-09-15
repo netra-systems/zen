@@ -20,6 +20,7 @@ import sys
 from pathlib import Path
 
 
+@pytest.mark.unit
 class TestIssue725RedisManagerImportResolution:
     """Test suite validating Issue #725 RedisTestManager import error resolution."""
 
@@ -195,6 +196,7 @@ class TestIssue725RedisManagerImportResolution:
                 pytest.fail(f"Business critical module {module_name} failed import: {e}")
 
 
+@pytest.mark.unit
 class TestIssue725ComplianceValidation:
     """Additional validation tests for Issue #725 architectural compliance."""
 

@@ -65,6 +65,7 @@ class PortServer:
         if self.thread:
             self.thread.join(timeout=1)
 
+@pytest.mark.integration
 class TestFrontendPortAllocationFix:
     """Test the enhanced frontend port allocation system."""
 

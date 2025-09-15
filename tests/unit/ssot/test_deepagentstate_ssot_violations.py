@@ -13,6 +13,7 @@ from typing import Type, get_origin, get_args
 import inspect
 import sys
 
+@pytest.mark.unit
 class TestDeepAgentStateSSotViolation:
     """Test suite proving DeepAgentState SSOT violation exists"""
 

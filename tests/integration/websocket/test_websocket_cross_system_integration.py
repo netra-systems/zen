@@ -129,6 +129,7 @@ class MockIntegrationService:
         return _serialize_message_safely(response)
 
 
+@pytest.mark.integration
 class TestIntegrationScenario1_AgentToWebSocketFlow:
     """Integration test: Agent execution -> WebSocket manager -> Client delivery."""
     
@@ -302,6 +303,7 @@ class TestIntegrationScenario1_AgentToWebSocketFlow:
         print(f" PASS:  Executed {len(execution_stages)} agent lifecycle stages with complex serialization")
 
 
+@pytest.mark.integration
 class TestIntegrationScenario2_MultiServiceCommunication:
     """Integration test: Multi-service communication through WebSocket bridge."""
     
@@ -586,6 +588,7 @@ class TestIntegrationScenario2_MultiServiceCommunication:
         print(f" PASS:  Executed {len(successful_operations)} concurrent operations in {execution_time:.3f}s")
 
 
+@pytest.mark.integration
 class TestIntegrationScenario3_ErrorHandlingAndRecovery:
     """Integration test: Error handling and recovery with WebSocket serialization."""
     
@@ -730,6 +733,7 @@ class TestIntegrationScenario3_ErrorHandlingAndRecovery:
         print(" PASS:  Error handling maintained serialization integrity across failure scenarios")
 
 
+@pytest.mark.integration
 class TestIntegrationScenario4_PerformanceUnderLoad:
     """Integration test: Performance testing with high message volume and complex serialization."""
     
@@ -865,6 +869,7 @@ class TestIntegrationScenario4_PerformanceUnderLoad:
         print(f" PASS:  Verified serialization integrity for {sample_checks} complex messages")
 
 
+@pytest.mark.integration
 class TestIntegrationScenario5_RealWorldComplexity:
     """Integration test: Real-world complexity scenarios with full system integration."""
     

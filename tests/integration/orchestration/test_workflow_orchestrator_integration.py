@@ -157,6 +157,7 @@ class MockReportingAgent(BaseAgent):
     async def run(self, context: Any) -> Dict[str, Any]:
         return {'executive_summary': {'total_savings': 7700, 'roi_percentage': 65.3}}
 
+@pytest.mark.integration
 class TestWorkflowOrchestratorIntegration(SSotAsyncTestCase):
     """Comprehensive integration tests for WorkflowOrchestrator."""
 
@@ -172,6 +173,7 @@ class TestWorkflowOrchestratorIntegration(SSotAsyncTestCase):
         self.execution_context.thread_id = 'test_thread_456'
         self.execution_context.state = type('MockState', (), {})()
 
+@pytest.mark.integration
 class TestAgentWorkflowCoordination(TestWorkflowOrchestratorIntegration):
     """Test multi-agent workflow orchestration and coordination."""
 
@@ -261,6 +263,7 @@ class TestAgentWorkflowCoordination(TestWorkflowOrchestratorIntegration):
             self.assertIn('triage', execution_log[:2])
         logger.info(' PASS:  Agent communication and result passing validated')
 
+@pytest.mark.integration
 class TestAdaptiveLogicTests(TestWorkflowOrchestratorIntegration):
     """Test adaptive workflow logic and dynamic decision making."""
 
@@ -318,6 +321,7 @@ class TestAdaptiveLogicTests(TestWorkflowOrchestratorIntegration):
         self.assertIsNotNone(simple_assessment)
         logger.info(' PASS:  Adaptive resource allocation validated')
 
+@pytest.mark.integration
 class TestEnterpriseDataIntegrity(TestWorkflowOrchestratorIntegration):
     """Test Enterprise data integrity and compliance features."""
 
@@ -403,6 +407,7 @@ class TestEnterpriseDataIntegrity(TestWorkflowOrchestratorIntegration):
             self.assertEqual(orchestrator.user_context.user_id, expected_user_id)
         logger.info(' PASS:  Multi-tenant workflow security validated')
 
+@pytest.mark.integration
 class TestAgentCoordinationValidation(TestWorkflowOrchestratorIntegration):
     """Test agent coordination validation and workflow monitoring."""
 
@@ -477,6 +482,7 @@ class TestAgentCoordinationValidation(TestWorkflowOrchestratorIntegration):
         self.assertGreaterEqual(total_executions, expected_minimum)
         logger.info(' PASS:  Concurrent agent coordination safety validated')
 
+@pytest.mark.integration
 class TestBusinessLogicIntegration(TestWorkflowOrchestratorIntegration):
     """Test complete business workflow execution and value delivery."""
 
@@ -570,6 +576,7 @@ class TestBusinessLogicIntegration(TestWorkflowOrchestratorIntegration):
         self.assertGreater(len(actionable_results), 0, 'Should provide actionable customer insights')
         logger.info(' PASS:  Customer value delivery workflows validated')
 
+@pytest.mark.integration
 class TestPerformanceAndScalability(TestWorkflowOrchestratorIntegration):
     """Test workflow performance and scalability characteristics."""
 

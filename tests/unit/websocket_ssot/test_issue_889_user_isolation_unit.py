@@ -18,6 +18,7 @@ Created: 2025-09-15
 Priority: P2 (escalated from P3 due to regulatory compliance risk)
 """
 
+import pytest
 import asyncio
 import unittest
 from unittest.mock import patch, Mock, MagicMock
@@ -46,6 +47,7 @@ except ImportError as e:
     print(f"WebSocket imports not available: {e}")
 
 
+@pytest.mark.unit
 class TestIssue889UserIsolationUnit(SSotAsyncTestCase):
     """
     Unit tests for Issue #889 User Context Isolation Violations

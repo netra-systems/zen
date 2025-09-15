@@ -74,6 +74,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.unit
 class TestGoldenPathTestRunnerProtection(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

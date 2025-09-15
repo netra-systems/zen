@@ -77,6 +77,7 @@ def app():
 # CROSS-SERVICE INTEGRATION TEST CLASS
 # =============================================================================
 
+@pytest.mark.integration
 class TestCrossServiceIntegrationCore1:
     """Core cross-service integration tests."""
     

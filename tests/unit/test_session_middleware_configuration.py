@@ -6,12 +6,14 @@ CRITICAL MISSION: These tests validate the complete SessionMiddleware setup chai
 to identify exactly where the 'SessionMiddleware must be installed' errors originate.
 """
 
+import pytest
 import unittest
 from unittest.mock import patch, MagicMock, AsyncMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.unit
 class TestSessionMiddlewareConfiguration(SSotBaseTestCase):
     """Test SessionMiddleware configuration and installation scenarios."""
     

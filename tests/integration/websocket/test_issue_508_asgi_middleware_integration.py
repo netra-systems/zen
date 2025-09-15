@@ -42,6 +42,7 @@ try:
 except ImportError:
     setup_enhanced_middleware_stack = None
 
+@pytest.mark.integration
 class TestIssue508WebSocketASGIMiddlewareIntegration(SSotAsyncTestCase):
     """
     Issue #508: Integration tests for WebSocket ASGI middleware processing
@@ -140,6 +141,7 @@ class TestIssue508WebSocketASGIMiddlewareIntegration(SSotAsyncTestCase):
             auth_context = auth_middleware.process_websocket_authentication(mock_websocket)
         assert "'URL' object has no attribute 'query_params'" in str(exc_info.value)
 
+@pytest.mark.integration
 class TestIssue508WebSocketSSoTHealthEndpointIntegration(SSotAsyncTestCase):
     """
     Issue #508: Integration tests for WebSocket SSOT health endpoint processing
@@ -213,6 +215,7 @@ class TestIssue508WebSocketSSoTHealthEndpointIntegration(SSotAsyncTestCase):
             stats_context = simulate_websocket_stats_context()
         assert "'URL' object has no attribute 'query_params'" in str(exc_info.value)
 
+@pytest.mark.integration
 class TestIssue508WebSocketRealConnectionScenarios(SSotAsyncTestCase):
     """
     Issue #508: Real WebSocket connection scenarios that trigger the bug

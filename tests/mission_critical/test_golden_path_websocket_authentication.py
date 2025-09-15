@@ -237,7 +237,7 @@ class TestGoldenPathWebSocketAuthentication:
             try:
                 async with websockets.connect(
                     self.auth_config.websocket_url,
-                    extra_headers=websocket_headers,
+                    additional_headers =websocket_headers,
                     timeout=self.auth_config.timeout
                 ) as websocket:
                     
@@ -448,7 +448,7 @@ class TestGoldenPathWebSocketAuthentication:
                 try:
                     async with websockets.connect(
                         self.auth_config.websocket_url,
-                        extra_headers=websocket_headers,
+                        additional_headers =websocket_headers,
                         timeout=self.auth_config.timeout
                     ) as websocket:
                         
@@ -579,7 +579,7 @@ class TestGoldenPathWebSocketAuthentication:
             try:
                 async with websockets.connect(
                     self.auth_config.websocket_url,
-                    extra_headers=websocket_headers,
+                    additional_headers =websocket_headers,
                     timeout=self.auth_config.timeout
                 ) as websocket:
                     
@@ -763,7 +763,7 @@ class TestGoldenPathWebSocketAuthentication:
                 
                 async with websockets.connect(
                     self.auth_config.websocket_url,
-                    extra_headers=websocket_headers,
+                    additional_headers =websocket_headers,
                     timeout=self.auth_config.timeout
                 ) as websocket:
                     

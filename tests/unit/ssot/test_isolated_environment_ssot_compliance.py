@@ -29,6 +29,7 @@ import pytest
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
 
+@pytest.mark.unit
 class TestIsolatedEnvironmentSSOTCompliance:
     """Test SSOT IsolatedEnvironment pattern in isolation."""
     

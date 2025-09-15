@@ -35,6 +35,7 @@ from datetime import datetime, UTC
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.e2e
 class TestConsolidatedFactoryGoldenPath884(SSotAsyncTestCase):
     """
     E2E Test: Validate complete Golden Path with consolidated factory

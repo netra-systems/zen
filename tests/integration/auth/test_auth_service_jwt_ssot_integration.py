@@ -10,6 +10,7 @@ from unittest.mock import patch, Mock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestAuthServiceJWTSSOTIntegration(SSotAsyncTestCase):
     """Integration tests validating JWT SSOT through real auth service calls"""
     

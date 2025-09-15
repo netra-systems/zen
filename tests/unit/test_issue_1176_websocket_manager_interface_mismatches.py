@@ -62,6 +62,7 @@ except ImportError:
     UserExecutionContext = None
 
 
+@pytest.mark.unit
 class TestWebSocketManagerMethodSignatureConflicts:
     """Test WebSocket manager method signature conflicts."""
     
@@ -265,6 +266,7 @@ class TestWebSocketManagerMethodSignatureConflicts:
         assert total_conflicts > 0, f"Interface conflicts: missing={missing_methods}, incompatible={incompatible_methods}"
 
 
+@pytest.mark.unit
 class TestWebSocketBridgeAdapterInterfaceConflicts:
     """Test WebSocket bridge adapter interface conflicts."""
     

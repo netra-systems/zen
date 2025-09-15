@@ -51,6 +51,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from test_framework.websocket_helpers import WebSocketTestHelpers
 
 
+@pytest.mark.integration
 class TestRealWebSocketConfirmationGaps(SSotAsyncTestCase):
     """
     Integration tests using real WebSocket services to demonstrate confirmation gaps.
@@ -485,6 +486,7 @@ class TestRealWebSocketConfirmationGaps(SSotAsyncTestCase):
         )
 
 
+@pytest.mark.integration
 class TestRealWebSocketTimeoutGaps(SSotAsyncTestCase):
     """
     Integration tests demonstrating real WebSocket timeout gaps with staging services.

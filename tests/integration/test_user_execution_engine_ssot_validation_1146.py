@@ -16,6 +16,7 @@ Docker: NO DEPENDENCIES - Integration non-docker only
 NEW TEST: Part of 20% new validation tests for Issue #1146
 """
 
+import pytest
 import asyncio
 import time
 from datetime import datetime, timezone
@@ -39,6 +40,7 @@ from netra_backend.app.services.user_execution_context import (
 )
 
 
+@pytest.mark.integration
 class TestUserExecutionEngineSSotValidation1146(SSotAsyncTestCase):
     """Validates UserExecutionEngine handles all execution scenarios after SSOT consolidation."""
 

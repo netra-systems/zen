@@ -35,6 +35,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
 
 
+@pytest.mark.unit
 class TestChatOrchestratorUserContextReproduction(SSotAsyncTestCase):
     """Reproduction tests for ChatOrchestrator user context requirement failures."""
 

@@ -5,6 +5,7 @@ execution engine factory patterns that cause race conditions, initialization fai
 and WebSocket 1011 errors, protecting $500K+ ARR functionality.
 
 EXPECTED BEHAVIOR: All tests in this file should INITIALLY FAIL to demonstrate
+import pytest
 import fragmentation violations. They will pass after SSOT consolidation.
 
 Business Value Justification (BVJ):
@@ -37,6 +38,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.unit
 class TestExecutionEngineFactoryImportFragmentation884(SSotAsyncTestCase):
     """Phase 1 Unit Tests: Execution Engine Factory Import Fragmentation
 

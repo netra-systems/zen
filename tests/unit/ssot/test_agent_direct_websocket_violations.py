@@ -44,6 +44,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.unit
 class TestAgentDirectWebSocketViolations(SSotBaseTestCase):
     """
     SSOT violation detection tests for agent direct WebSocket access patterns.

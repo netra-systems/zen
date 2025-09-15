@@ -34,6 +34,7 @@ from starlette.types import ASGIApp, Receive, Send, Scope
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
+@pytest.mark.unit
 class TestIssue508WebSocketASGIScopeErrorReproduction(SSotAsyncTestCase):
     """
     Issue #508 Bug Reproduction Test Suite
@@ -89,6 +90,7 @@ class TestIssue508WebSocketASGIScopeErrorReproduction(SSotAsyncTestCase):
         assert query_params.get('token') == 'test123'
         assert query_params.get('user_id') == '456'
 
+@pytest.mark.unit
 class TestIssue508WebSocketASGIMiddlewareReproduction(SSotAsyncTestCase):
     """
     Issue #508: ASGI Middleware WebSocket Scope Handling Tests
@@ -125,6 +127,7 @@ class TestIssue508WebSocketASGIMiddlewareReproduction(SSotAsyncTestCase):
         assert websocket_scope.get('type') == 'websocket'
         assert http_scope.get('type') == 'http'
 
+@pytest.mark.unit
 class TestIssue508WebSocketSSoTModuleReproduction(SSotAsyncTestCase):
     """
     Issue #508: Direct reproduction in websocket_ssot.py module
@@ -172,6 +175,7 @@ class TestIssue508WebSocketSSoTModuleReproduction(SSotAsyncTestCase):
         assert connection_context['path'] == '/ws/chat'
         assert connection_context['websocket_url'] == 'ws://localhost:8000/ws/chat?token=test123&user_id=456'
 
+@pytest.mark.unit
 class TestIssue508GoldenPathBusinessImpact(SSotAsyncTestCase):
     """
     Issue #508: Golden Path Business Impact Validation

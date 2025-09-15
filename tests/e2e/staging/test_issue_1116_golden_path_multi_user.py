@@ -68,6 +68,7 @@ class GoldenPathUser:
     auth_config: Optional[E2EAuthConfig] = None
 
 
+@pytest.mark.e2e
 class TestIssue1116GoldenPathMultiUser(SSotAsyncTestCase):
     """
     E2E staging test suite proving singleton creates Golden Path multi-user vulnerabilities.

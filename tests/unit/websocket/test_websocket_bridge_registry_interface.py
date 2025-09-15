@@ -71,6 +71,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.unit
 class TestWebSocketBridgeRegistryInterface(SSotAsyncTestCase):
     """
     Test suite to protect WebSocket bridge interface stability.

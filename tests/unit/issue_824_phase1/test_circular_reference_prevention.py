@@ -7,6 +7,7 @@ Ensure no dependency loops in SSOT structure.
 Business Value: Prevents import failures that block WebSocket initialization ($500K+ ARR protection).
 """
 
+import pytest
 import sys
 import importlib
 import ast
@@ -20,6 +21,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestCircularReferencePreventionValidation(SSotAsyncTestCase):
     """Test circular reference prevention for WebSocket Manager SSOT."""
 

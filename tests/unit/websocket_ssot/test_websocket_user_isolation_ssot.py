@@ -20,6 +20,7 @@ from typing import Dict, Any, List, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.unit
 class TestWebSocketUserIsolationSSot(SSotAsyncTestCase, unittest.TestCase):
     """Test WebSocket user isolation with SSOT patterns."""
 

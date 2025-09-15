@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from shared.isolated_environment import get_env
 from test_framework.unified_test_base import UnifiedTestBase
 
+@pytest.mark.e2e
 class TestJWTEnvironmentSecretRegression(UnifiedTestBase):
     """
     CRITICAL REGRESSION TEST: JWT Secret Alignment Between Services
@@ -197,6 +198,7 @@ class TestJWTEnvironmentSecretRegression(UnifiedTestBase):
         self.assertEqual(len(set(secrets)), 1, 'All concurrent requests should get same secret')
         self.assertEqual(secrets[0], 'concurrent-test-secret')
 
+@pytest.mark.e2e
 class TestJWTSecretValidation(UnifiedTestBase):
     """Additional validation tests for JWT secret configuration."""
 
@@ -242,6 +244,7 @@ class TestJWTSecretValidation(UnifiedTestBase):
         self.assertIn('production', error_msg)
         self.assertIn('JWT_SECRET_PRODUCTION', error_msg)
 
+@pytest.mark.e2e
 class TestCrossServiceJWTFlow(UnifiedTestBase):
     """Test complete cross-service JWT flow with real components."""
 

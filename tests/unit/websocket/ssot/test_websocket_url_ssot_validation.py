@@ -19,6 +19,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SsotTestMetrics
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
+@pytest.mark.unit
 class TestWebSocketURLSSOTValidation(SSotBaseTestCase):
     """Unit tests for WebSocket URL SSOT validation (Issue #507)"""
 
@@ -122,6 +123,7 @@ class TestWebSocketURLSSOTValidation(SSotBaseTestCase):
             self.metrics.custom_metrics['ssot_compliant'] = True
             self.metrics.custom_metrics['migration_status'] = 'post_migration'
 
+@pytest.mark.unit
 class TestWebSocketEnvironmentVariableValidation(SSotBaseTestCase):
     """Additional unit tests for WebSocket environment variable validation"""
 

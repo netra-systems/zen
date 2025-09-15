@@ -5,6 +5,7 @@ Focus on actual UnifiedDockerManager implementations (excluding test files).
 This test specifically validates the core SSOT violation.
 """
 
+import pytest
 import unittest
 import os
 import sys
@@ -16,6 +17,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
+@pytest.mark.unit
 class TestDockerManagerImplementationCountRefined(unittest.TestCase):
     """Refined test focusing on actual Docker Manager implementations."""
 

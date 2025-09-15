@@ -42,6 +42,7 @@ class AuthValidationLevel(Enum):
     DEMO = 'demo'
     EMERGENCY = 'emergency'
 
+@pytest.mark.unit
 class TestAuthValidationLevels(SSotBaseTestCase):
     """
     Test authentication validation levels for resolving 1011 WebSocket errors.
@@ -205,6 +206,7 @@ class TestAuthValidationLevels(SSotBaseTestCase):
         validator = EmergencyAuthValidator()
         return await validator.validate(self.mock_websocket)
 
+@pytest.mark.unit
 class TestAuthModeDetection(SSotBaseTestCase):
     """Test detection of auth mode from environment and headers."""
 

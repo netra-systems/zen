@@ -34,6 +34,7 @@ class ErrorDetector:
         pass
 
 
+@pytest.mark.integration
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 

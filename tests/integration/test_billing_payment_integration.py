@@ -47,6 +47,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 import redis.asyncio as redis
 
 
+@pytest.mark.integration
 class TestBillingPaymentIntegrationReal:
     """
     REAL Integration Test for Complete Billing System

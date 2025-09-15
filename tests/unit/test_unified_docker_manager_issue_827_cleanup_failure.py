@@ -23,6 +23,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
 
 
+@pytest.mark.unit
 class TestUnifiedDockerManagerIssue827CleanupFailure(SSotAsyncTestCase):
     """Test Issue #827 Windows Docker Desktop pipe communication failures during cleanup."""
 
@@ -280,6 +281,7 @@ class TestUnifiedDockerManagerIssue827CleanupFailure(SSotAsyncTestCase):
             assert all(isinstance(arg, str) for arg in expected_stop_cmd), "All command args should be strings"
 
 
+@pytest.mark.unit
 class TestUnifiedDockerManagerWindowsPipeErrorReproduction(SSotAsyncTestCase):
     """Specific tests to reproduce the exact Windows pipe error patterns."""
 

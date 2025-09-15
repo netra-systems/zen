@@ -20,6 +20,7 @@ from typing import Dict, List, Set, Any
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestIssue1182ManagerConsolidationValidation(SSotBaseTestCase):
     """Unit tests to detect WebSocket Manager SSOT violations"""
 

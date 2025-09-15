@@ -13,6 +13,7 @@ from unittest.mock import Mock, patch, AsyncMock
 from fastapi import WebSocket, WebSocketDisconnect
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.integration
 class TestWebSocketAuthHandshake(SSotBaseTestCase):
     """Integration tests for WebSocket authentication handshake"""
 

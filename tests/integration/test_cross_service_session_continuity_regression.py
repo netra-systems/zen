@@ -81,6 +81,7 @@ class CrossServiceMetrics:
         """Convert metrics to dictionary for logging."""
         return {'auth_validation_ms': round(self.auth_validation_time * 1000, 2), 'context_creation_ms': round(self.context_creation_time * 1000, 2), 'context_reuse_ms': round(self.context_reuse_time * 1000, 2), 'cross_service_roundtrip_ms': round(self.cross_service_roundtrip_time * 1000, 2), 'context_memory_bytes': self.context_memory_usage, 'auth_cache_hits': self.auth_cache_hits, 'auth_cache_misses': self.auth_cache_misses, 'service_boundary_crossings': self.service_boundary_crossings}
 
+@pytest.mark.integration
 class TestCrossServiceSessionContinuityRegression(SSotBaseTestCase):
     """
     Cross-Service Session Continuity Regression Prevention Test - SSOT Compliant

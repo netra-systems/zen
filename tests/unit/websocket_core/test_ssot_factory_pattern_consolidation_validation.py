@@ -14,6 +14,7 @@ Test Strategy: Static analysis and runtime factory validation (no Docker depende
 Unit test approach - creates instances to validate factory behavior.
 """
 
+import pytest
 import inspect
 import sys
 from pathlib import Path
@@ -24,6 +25,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestWebSocketManagerFactoryConsolidation(SSotBaseTestCase, unittest.TestCase):
     """Test suite to validate SSOT factory consolidation for WebSocket managers.
 

@@ -226,6 +226,7 @@ class RealServiceChatTester:
         if self.ws_client and self.ws_client._websocket:
             await self.ws_client.disconnect()
 
+@pytest.mark.e2e
 class TestRealAgentOrchestrationCritical:
 
     def create_user_context(self) -> UserExecutionContext:

@@ -11,6 +11,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
+@pytest.mark.integration
 class TestConfigurationConsistencyIntegration:
     """Integration tests exposing configuration consistency violations"""
 
@@ -91,6 +92,7 @@ class TestConfigurationConsistencyIntegration:
         except Exception as e:
             pytest.skip(f'Startup sequence analysis failed: {e}')
 
+@pytest.mark.integration
 class TestProductionRiskAssessment:
     """Assess production deployment risks from configuration duplication"""
 

@@ -178,6 +178,7 @@ class MockWebSocketConnection:
         self.is_closed = True
         logger.info(f'WebSocket connection closed: {code} - {reason}')
 
+@pytest.mark.e2e
 class TestCriticalAgentChatFlow(SSotBaseTestCase):
     """
     MISSION CRITICAL E2E Tests for Agent Chat WebSocket Flow.

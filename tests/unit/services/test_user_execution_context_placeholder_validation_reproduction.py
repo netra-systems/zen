@@ -41,6 +41,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from shared.types.core_types import UserID, ThreadID, RunID
 
 
+@pytest.mark.unit
 class TestUserExecutionContextPlaceholderValidationReproduction(SSotBaseTestCase):
     """Test suite reproducing the exact 'default_user' validation issue from GCP logs.
     

@@ -23,6 +23,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.unit
 class TestE2EHarnessInfrastructure(SSotBaseTestCase):
     """Unit tests for E2E harness infrastructure components."""
 

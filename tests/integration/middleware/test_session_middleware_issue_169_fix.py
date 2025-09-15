@@ -20,6 +20,7 @@ from netra_backend.app.core.session_utils import SessionAvailabilityDetector, Sa
 from netra_backend.app.core.unified_secret_manager import UnifiedSecretManager, SecretType, SecretSource, get_session_secret, validate_all_secrets
 from netra_backend.app.core.middleware_setup import setup_middleware, _validate_and_get_secret_key, _validate_session_middleware_installation
 
+@pytest.mark.integration
 class TestSessionMiddlewareIssue169Fix:
     """Test suite for SessionMiddleware authentication infrastructure fixes."""
 
@@ -207,6 +208,7 @@ class TestSessionMiddlewareIssue169Fix:
         assert 'session_data' in data
         self.logger.info(' PASS:  Regression test: No SessionMiddleware crash handled')
 
+@pytest.mark.integration
 class TestIssue169BusinessImpactValidation:
     """Validate business impact of Issue #169 fixes."""
 

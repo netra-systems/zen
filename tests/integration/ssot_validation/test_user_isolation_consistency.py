@@ -21,6 +21,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.integration
 class TestUserIsolationConsistency(SSotAsyncTestCase):
     """Test user isolation consistency across all execution engines."""
     
@@ -440,6 +441,7 @@ class TestUserIsolationConsistency(SSotAsyncTestCase):
         await super().async_teardown_method(method)
 
 
+@pytest.mark.integration
 class TestGoldenPathConcurrency(SSotAsyncTestCase):
     """Test Golden Path protection during concurrent user sessions."""
     

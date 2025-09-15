@@ -253,6 +253,7 @@ class MigrationValidationUtility:
         comparison['security'] = f'Mock: {mock_sec} | Context: {context_sec}'
         return comparison
 
+@pytest.mark.unit
 class TestUserExecutionContextMigrationHelpers(SSotAsyncTestCase):
     """Test suite for UserExecutionContext migration helper utilities.
     

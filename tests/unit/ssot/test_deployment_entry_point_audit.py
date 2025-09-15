@@ -35,6 +35,7 @@ from unittest.mock import Mock, patch
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestDeploymentEntryPointAudit(SSotBaseTestCase):
     """
     Unit tests for deployment entry point audit.
@@ -303,6 +304,7 @@ class TestDeploymentEntryPointAudit(SSotBaseTestCase):
         """Check privilege separation for deployment access."""
         return {'enabled': True, 'effective': True, 'issues': []}
 
+@pytest.mark.unit
 class TestDeploymentEntryPointAuditComprehensive(SSotBaseTestCase):
     """
     Comprehensive tests for deployment entry point audit system.

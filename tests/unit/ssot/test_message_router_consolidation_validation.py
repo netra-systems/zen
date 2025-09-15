@@ -11,6 +11,7 @@ Created: 2025-09-14 (Issue #1101)
 Purpose: Validate successful SSOT consolidation of MessageRouter implementations
 """
 
+import pytest
 import unittest
 import sys
 import importlib
@@ -21,6 +22,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestMessageRouterSSOTConsolidation(SSotBaseTestCase):
     """Test MessageRouter SSOT consolidation validation."""
 
@@ -411,6 +413,7 @@ class TestMessageRouterSSOTConsolidation(SSotBaseTestCase):
         )
 
 
+@pytest.mark.unit
 class TestMessageRouterConsolidationEdgeCases(SSotBaseTestCase):
     """Test edge cases for MessageRouter SSOT consolidation."""
 

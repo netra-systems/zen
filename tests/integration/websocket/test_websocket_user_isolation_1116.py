@@ -144,6 +144,7 @@ class MockWebSocketManager:
         self.run_thread_mappings[run_id] = thread_id
 
 
+@pytest.mark.integration
 class TestWebSocketUserIsolation1116(SSotAsyncTestCase):
     """
     Integration tests proving WebSocket user isolation failures.

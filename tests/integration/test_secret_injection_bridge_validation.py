@@ -18,6 +18,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 from scripts.deploy_to_gcp_actual import GCPDeployer
 
+@pytest.mark.integration
 class TestSecretInjectionBridge:
     """Integration tests for the automated secret injection bridge."""
 

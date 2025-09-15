@@ -26,6 +26,7 @@ from typing import Dict, Any
 from netra_backend.app.websocket_core.gcp_initialization_validator import GCPWebSocketInitializationValidator, gcp_websocket_readiness_guard, GCPReadinessState, GCPReadinessResult
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.performance
 class TestGCPReadinessPerformanceFix(SSotBaseTestCase):
     """Test suite for GCP readiness validation performance regression."""
 

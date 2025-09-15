@@ -5,6 +5,7 @@ Test Collection Performance Validation
 Validates that test collection meets performance targets
 """
 
+import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 import time
@@ -14,6 +15,7 @@ import sys
 PROJECT_ROOT = Path(__file__).parent.parent.absolute()
 sys.path.insert(0, str(PROJECT_ROOT))
 
+@pytest.mark.performance
 class TestCollectionPerformanceTest(SSotBaseTestCase):
     """Validates test collection performance"""
     

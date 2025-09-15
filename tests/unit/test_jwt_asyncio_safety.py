@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from tests.utils.asyncio_test_utils import AsyncioTestUtils, EventLoopTestError
 from test_framework.ssot.auth_test_helpers import SSOTAuthTestHelper
 
+@pytest.mark.unit
 class TestJWTAsyncioSafety:
     """Test JWT operations for asyncio safety"""
 
@@ -144,6 +145,7 @@ class TestJWTAsyncioSafety:
         assert 'access_token' in result
         assert result['expires_in'] == 3600
 
+@pytest.mark.unit
 class TestJWTEventLoopPatterns:
     """Test specific JWT event loop patterns"""
 
@@ -200,6 +202,7 @@ class TestJWTEventLoopPatterns:
         assert result2['valid'] is True
         assert result2 == result1
 
+@pytest.mark.unit
 class TestJWTAsyncioMigration:
     """Test patterns for migrating JWT code to proper async"""
 

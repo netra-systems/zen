@@ -14,6 +14,7 @@ import asyncio
 import time
 from typing import Dict, Any
 
+@pytest.mark.unit
 class TestUnifiedMigrationValidation:
     """Test validation of unified circuit breaker migration patterns."""
 
@@ -131,6 +132,7 @@ class TestUnifiedMigrationValidation:
         assert call_count == 3
         print('\nASYNC FUNCTIONALITY: Unified circuit breaker properly supports async operations')
 
+@pytest.mark.unit
 class TestMigrationImpactAnalysis:
     """Test the impact of migration on existing code patterns."""
 
@@ -183,6 +185,7 @@ class TestMigrationImpactAnalysis:
         assert breaker.timeout == 45.0, 'Should be able to set timeout'
         print('\nSTATE COMPATIBILITY: Backward-compatible property access maintained')
 
+@pytest.mark.unit
 class TestMigrationFailureScenarios:
     """Test scenarios where migration might fail or cause issues."""
 

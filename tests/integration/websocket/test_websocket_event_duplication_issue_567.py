@@ -28,6 +28,7 @@ try:
 except ImportError as e:
     pytest.skip(f'Core system imports not available: {e}', allow_module_level=True)
 
+@pytest.mark.integration
 class TestWebSocketEventDuplicationIssue567(SSotAsyncTestCase):
     """
     Integration test suite for WebSocket event duplication prevention (Issue #567).

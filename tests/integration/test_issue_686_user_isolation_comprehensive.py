@@ -31,6 +31,7 @@ Issue: #686 ExecutionEngine consolidation blocking Golden Path
 Priority: INTEGRATION CRITICAL - Full Golden Path validation
 """
 
+import pytest
 import asyncio
 import json
 import threading
@@ -47,6 +48,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.integration
 class TestIssue686UserIsolationComprehensive(SSotAsyncTestCase):
     """Comprehensive integration validation of user isolation for Issue #686."""
 

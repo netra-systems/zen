@@ -21,6 +21,7 @@ from tests.e2e.staging_test_config import get_staging_config
 # Mark all tests in this file as medium priority and real
 pytestmark = [pytest.mark.staging, pytest.mark.medium, pytest.mark.real]
 
+@pytest.mark.e2e
 class TestMediumPerformance:
     """Tests 56-60: Response Time Metrics - REAL TESTS"""
     
@@ -235,6 +236,7 @@ class TestMediumPerformance:
         assert success_rate >= 0.8, f"Connection success rate too low: {success_rate:.2%}"  # Allow some failures
         assert success_count > 0, "At least some concurrent connections should succeed"
 
+@pytest.mark.e2e
 class TestMediumResources:
     """Tests 61-65: Resource Management - REAL TESTS"""
     
@@ -454,6 +456,7 @@ class TestMediumResources:
         # Cold start should be under target (with margin for network)
         assert cold_start_metrics["cold_start_ms"] < cold_start_metrics["target_cold_start_ms"] * 5
 
+@pytest.mark.e2e
 class TestMediumReliability:
     """Tests 66-70: System Reliability - REAL TESTS"""
     

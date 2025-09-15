@@ -23,6 +23,7 @@ REQUIREMENTS:
 Business Value: Enterprise/Platform - Security compliance for HIPAA, SOC2, SEC regulations
 """
 
+import pytest
 import asyncio
 import json
 import threading
@@ -37,6 +38,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState, AgentMetadata
 from netra_backend.app.agents.base.execution_context import ExecutionContext, ExecutionMetadata
 
 
+@pytest.mark.integration
 class TestIssue1017MultiUserIsolationVulnerabilities(SSotAsyncTestCase):
     """
     Comprehensive multi-user isolation vulnerability tests for Issue #1017.

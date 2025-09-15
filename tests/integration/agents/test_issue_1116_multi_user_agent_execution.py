@@ -68,6 +68,7 @@ class IntegrationTestUser:
             self.contamination_events = []
 
 
+@pytest.mark.integration
 class TestIssue1116MultiUserAgentExecution(SSotAsyncTestCase):
     """
     Integration test suite proving singleton creates multi-user agent execution vulnerabilities.

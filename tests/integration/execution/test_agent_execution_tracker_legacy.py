@@ -53,6 +53,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from shared.types.core_types import UserID, ThreadID, RunID
 
 
+@pytest.mark.integration
 class TestAgentExecutionTrackerIntegration(SSotAsyncTestCase):
     """
     Integration tests for the AgentExecutionTracker SSOT class.
@@ -863,6 +864,7 @@ class TestAgentExecutionTrackerIntegration(SSotAsyncTestCase):
         assert metrics['success_rate'] + metrics['failure_rate'] <= 1.0  # Should not exceed 100%
 
 
+@pytest.mark.integration
 class TestAgentExecutionTrackerCompatibility(SSotAsyncTestCase):
     """
     Test compatibility aliases and backward compatibility functions.
@@ -908,6 +910,7 @@ class TestAgentExecutionTrackerCompatibility(SSotAsyncTestCase):
         await shutdown_tracker()
 
 
+@pytest.mark.integration
 class TestAgentExecutionTrackerErrorConditions(SSotAsyncTestCase):
     """
     Test error conditions and edge cases for AgentExecutionTracker.

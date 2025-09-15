@@ -28,6 +28,7 @@ Business Value Justification:
 - Revenue Impact: Protects Golden Path stability and reduces integration maintenance costs
 """
 
+import pytest
 import asyncio
 import unittest
 import json
@@ -55,6 +56,7 @@ class IntegrationTestResult:
     ssot_compliance: bool = False
 
 
+@pytest.mark.integration
 class TestWebSocketCrossServiceIntegration(BaseIntegrationTest):
     """
     Integration tests for Issue #1182 WebSocket Manager SSOT cross-service compatibility.

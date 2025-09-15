@@ -40,6 +40,7 @@ except ImportError:
     SSOT_FRAMEWORK_AVAILABLE = False
 
 
+@pytest.mark.unit
 class TestIssue1040ServiceAvailabilityImportReproduction(SSotBaseTestCase):
     """
     Reproduction test for Issue #1040 ServiceAvailability import failure.
@@ -162,6 +163,7 @@ class TestIssue1040ServiceAvailabilityImportReproduction(SSotBaseTestCase):
                           f"BUSINESS IMPACT: {business_impact['blocked_revenue_protection']} protection at risk")
 
 
+@pytest.mark.unit
 class TestIssue1040ServiceAvailabilityPostFix(SSotBaseTestCase):
     """
     Post-fix validation tests for Issue #1040.

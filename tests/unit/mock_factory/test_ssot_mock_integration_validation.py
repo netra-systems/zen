@@ -29,6 +29,7 @@ try:
 except ImportError:
     REAL_INTERFACES_AVAILABLE = False
 
+@pytest.mark.unit
 class TestSSotMockIntegrationValidation(SSotBaseTestCase):
     """
     Test suite validating SSOT mock integration with real components.

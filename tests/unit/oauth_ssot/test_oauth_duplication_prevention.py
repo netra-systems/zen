@@ -31,6 +31,7 @@ from shared.configuration.central_config_validator import CentralConfigurationVa
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.unit
 class TestOAuthDuplicationPrevention:
     """Test suite to prevent OAuth validation duplication - Issue #213."""
     
@@ -359,6 +360,7 @@ class TestOAuthDuplicationPrevention:
         return python_files
 
 
+@pytest.mark.unit
 def test_oauth_duplication_detection_capability():
     """
     Verify test capability to detect OAuth duplication.

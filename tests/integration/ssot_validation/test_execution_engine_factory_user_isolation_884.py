@@ -36,6 +36,7 @@ import os
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestExecutionEngineFactoryUserIsolation884(SSotAsyncTestCase):
     """
     Integration Test: Validate factory maintains proper user isolation

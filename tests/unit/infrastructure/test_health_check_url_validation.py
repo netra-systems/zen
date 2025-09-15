@@ -20,6 +20,7 @@ from netra_backend.app.monitoring.configuration_drift_monitor import Configurati
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.unit
 class TestHealthCheckURLValidation:
     """
     Tests designed to FAIL initially and prove URL validation issues.
@@ -342,6 +343,7 @@ class TestHealthCheckURLValidation:
         return health_url
 
 
+@pytest.mark.unit
 class TestInfrastructureHealthValidation:
     """
     Tests for infrastructure health validation patterns.

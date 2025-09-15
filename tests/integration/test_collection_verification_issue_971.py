@@ -30,6 +30,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.orchestration import get_orchestration_config
 
+@pytest.mark.integration
 class TestCollectionVerificationPreFix(SSotBaseTestCase):
     """
     Pre-fix validation: These tests should FAIL before the alias is added,
@@ -72,6 +73,7 @@ class TestCollectionVerificationPreFix(SSotBaseTestCase):
         if not import_failures:
             self.fail('Expected ImportError for WebSocketTestManager, but all imports succeeded. Fix might already be applied.')
 
+@pytest.mark.integration
 class TestCollectionVerificationPostFix(SSotBaseTestCase):
     """
     Post-fix validation: These tests should PASS after the alias is added,
@@ -132,6 +134,7 @@ class TestCollectionVerificationPostFix(SSotBaseTestCase):
             except ImportError as e:
                 self.fail(f'Module {module_path} should import successfully after fix: {e}')
 
+@pytest.mark.integration
 class TestSpecificFileCollectionVerification(SSotBaseTestCase):
     """
     Specific file-level collection verification to ensure individual
@@ -170,6 +173,7 @@ class TestSpecificFileCollectionVerification(SSotBaseTestCase):
         test_count_lines = [line for line in output_lines if 'collected' in line.lower()]
         self.assertTrue(len(test_count_lines) > 0, f'Expected test collection summary, got: {result.stdout}')
 
+@pytest.mark.integration
 class TestUnifiedTestRunnerIntegration(SSotBaseTestCase):
     """
     Comprehensive integration testing with the unified test runner

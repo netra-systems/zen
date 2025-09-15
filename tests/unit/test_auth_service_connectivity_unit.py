@@ -22,6 +22,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSo
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.unit
 class TestAuthServiceConnectivityUnit(SSotAsyncTestCase):
     """Unit tests for auth service connectivity timeout and error handling"""
 

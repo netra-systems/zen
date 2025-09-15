@@ -45,6 +45,7 @@ from tests.e2e.staging_config import StagingTestConfig, staging_urls
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
+@pytest.mark.e2e
 class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
     """
     CRITICAL E2E Tests for GCP Load Balancer Header Forwarding
@@ -386,6 +387,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
         self.assertEqual(len(unique_contexts), len(user_contexts), f'CRITICAL FAILURE: User context collision detected through load balancer. User contexts: {user_contexts}. This indicates session affinity or header isolation issues.')
         logger.info(' PASS:  CRITICAL TEST PASSED: Multi-user isolation preserved through GCP Load Balancer')
 
+@pytest.mark.e2e
 class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
     """
     Tests for GCP Load Balancer configuration validation.

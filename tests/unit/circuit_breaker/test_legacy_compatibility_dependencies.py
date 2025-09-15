@@ -13,6 +13,7 @@ from unittest.mock import patch, MagicMock
 import sys
 import importlib
 
+@pytest.mark.unit
 class TestLegacyCompatibilityDependencies:
     """Test compatibility layer dependencies that cause import failures."""
 
@@ -94,6 +95,7 @@ class TestLegacyCompatibilityDependencies:
         assert breaker.config.failure_threshold == 3
         print('\nUNIFIED IMPLEMENTATIONS WORKING: Core circuit breaker functionality available')
 
+@pytest.mark.unit
 class TestCompatibilityLayerBehavior:
     """Test the behavior of the compatibility layer under different conditions."""
 

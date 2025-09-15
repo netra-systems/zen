@@ -99,6 +99,7 @@ class MockUserInterface:
         """Simulate user interface disconnection"""
         self.is_connected = False
 
+@pytest.mark.e2e
 class TestToolExecutionUserVisibilityE2E(SSotAsyncTestCase):
     """E2E tests for complete tool execution user visibility flow.
     
@@ -257,6 +258,7 @@ class TestToolExecutionUserVisibilityE2E(SSotAsyncTestCase):
             assert staging_visibility['events_delivered'] is True
             assert staging_visibility['gcp_websocket_healthy'] is True
 
+@pytest.mark.e2e
 class TestToolExecutionUserExperienceE2E(SSotAsyncTestCase):
     """E2E tests focused on user experience during tool execution.
     

@@ -124,6 +124,7 @@ class WebSocketConnectionStateMachine:
         }
 
 
+@pytest.mark.unit
 class TestConnectionStateTransitions(SSotBaseTestCase):
     """Test valid connection state transitions."""
     
@@ -232,6 +233,7 @@ class TestConnectionStateTransitions(SSotBaseTestCase):
         self.assertTrue(self.state_machine.is_active())
 
 
+@pytest.mark.unit
 class TestInvalidStateTransitions(SSotBaseTestCase):
     """Test that invalid state transitions are properly rejected."""
     
@@ -312,6 +314,7 @@ class TestInvalidStateTransitions(SSotBaseTestCase):
                 self.assertFalse(state_machine.transition_to(state))
 
 
+@pytest.mark.unit
 class TestWebSocketConnectionInfo(SSotBaseTestCase):
     """Test WebSocketConnectionInfo data structure and validation."""
     
@@ -407,6 +410,7 @@ class TestWebSocketConnectionInfo(SSotBaseTestCase):
         self.assertEqual(conn_info.last_ping, ping_time)
 
 
+@pytest.mark.unit
 class TestStateTransitionHistory(SSotBaseTestCase):
     """Test state transition history tracking and analysis."""
     
@@ -478,6 +482,7 @@ class TestStateTransitionHistory(SSotBaseTestCase):
         self.assertEqual(state_machine.get_state(), ConnectionState.CONNECTED)
 
 
+@pytest.mark.unit
 class TestConnectionStateEnumProperties(SSotBaseTestCase):
     """Test properties and validation of ConnectionState enum."""
     

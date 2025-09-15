@@ -28,6 +28,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 from test_framework.database.test_database_manager import DatabaseTestManager
 
+@pytest.mark.integration
 class TestMessageRouterLegacyMappingIntegration:
     """
     Integration tests for MessageRouter legacy type mapping with real service integration.
@@ -189,6 +190,7 @@ class TestMessageRouterLegacyMappingIntegration:
         for target, sources in mapping_targets.items():
             print(f"     {target}: {len(sources)} sources -> {sources[:3]}{('...' if len(sources) > 3 else '')}")
 
+@pytest.mark.integration
 class TestMessageRouterServiceIntegration:
     """
     Integration tests for MessageRouter with external service dependencies.

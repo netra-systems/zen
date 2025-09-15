@@ -6,12 +6,14 @@ CRITICAL MISSION: These tests are designed to reproduce the specific error condi
 that cause 'SessionMiddleware must be installed to access request.session' errors.
 """
 
+import pytest
 import unittest
 from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.unit
 class TestUnifiedSecretManagerSessionKeys(SSotBaseTestCase):
     """Test UnifiedSecretManager SESSION_SECRET loading scenarios."""
     

@@ -12,6 +12,7 @@ from netra_backend.app.cache.redis_cache_manager import RedisCacheManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
+@pytest.mark.integration
 class TestIssue585RedisCacheFallbackValidation:
     """Test Redis cache fallback behavior for Issue #585 pickle errors."""
 

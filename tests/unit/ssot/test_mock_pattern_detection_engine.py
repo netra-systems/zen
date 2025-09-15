@@ -288,6 +288,7 @@ class MockPatternDetectionEngine:
         return suggestions.get(mock_type, "Review for SSOT compliance")
 
 
+@pytest.mark.unit
 class TestMockPatternDetectionEngine(SSotBaseTestCase):
     """
     Test suite for advanced mock pattern detection engine.

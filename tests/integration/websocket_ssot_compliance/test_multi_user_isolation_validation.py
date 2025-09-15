@@ -25,6 +25,7 @@ Created for Issue #1066 - SSOT-regression-deprecated-websocket-factory-imports
 Priority: P0 - Mission Critical
 """
 
+import pytest
 import asyncio
 import threading
 import time
@@ -69,6 +70,7 @@ class UserSession:
             self.received_events = []
 
 
+@pytest.mark.integration
 class TestMultiUserIsolationValidation(SSotBaseIntegrationTest):
     """
     Integration tests for multi-user isolation with factory pattern elimination.

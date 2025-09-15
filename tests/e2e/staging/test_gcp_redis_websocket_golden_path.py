@@ -65,6 +65,7 @@ import unittest
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.e2e
 class TestGCPRedisWebSocketGoldenPath(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

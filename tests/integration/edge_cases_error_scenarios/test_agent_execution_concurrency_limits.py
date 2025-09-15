@@ -29,6 +29,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.core.config import get_config
 
 
+@pytest.mark.integration
 class TestAgentExecutionConcurrencyLimits(BaseIntegrationTest):
     """
     Test concurrent agent execution boundary conditions and user isolation.

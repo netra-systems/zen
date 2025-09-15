@@ -52,6 +52,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.integration
 class TestIssue859ExecutionEngineSSotViolations(SSotAsyncTestCase):
     """Issue #859: Test suite to detect and prove SSOT violations in execution engines."""
 

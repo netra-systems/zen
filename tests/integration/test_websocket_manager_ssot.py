@@ -34,6 +34,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, CategoryType
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestWebSocketManagerSsot(SSotBaseTestCase):
     """
     WebSocket Manager SSOT Tests - Designed to FAIL initially

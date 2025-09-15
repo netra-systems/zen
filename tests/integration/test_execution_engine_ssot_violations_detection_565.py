@@ -24,6 +24,7 @@ Expected Results:
 - After Fix: PASS - zero deprecated imports, complete factory pattern compliance
 """
 
+import pytest
 import ast
 import os
 import sys
@@ -58,6 +59,7 @@ except ImportError:
     DEPRECATED_ENGINE_STILL_EXISTS = False
 
 
+@pytest.mark.integration
 class TestExecutionEngineSSotViolationsDetection565(SSotBaseTestCase):
     """
     Integration tests to detect SSOT violations in ExecutionEngine migration.

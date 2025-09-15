@@ -27,6 +27,7 @@ Business Value Justification:
 - Revenue Impact: Enables HIPAA/SOC2/SEC compliance for enterprise customers
 """
 
+import pytest
 import asyncio
 import unittest
 import threading
@@ -61,6 +62,7 @@ class RaceConditionTest:
             self.errors = []
 
 
+@pytest.mark.unit
 class TestWebSocketManagerRaceConditionDetection(SSotAsyncTestCase):
     """
     CRITICAL: Tests for Issue #1182 WebSocket Manager race condition detection.

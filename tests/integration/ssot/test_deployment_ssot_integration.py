@@ -35,6 +35,7 @@ from unittest.mock import Mock, patch, MagicMock, call
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.integration
 class TestDeploymentSsotIntegration(SSotBaseTestCase):
     """
     Integration tests for deployment SSOT compliance.
@@ -256,6 +257,7 @@ class TestDeploymentSsotIntegration(SSotBaseTestCase):
                 changed_keys += 1
         return changed_keys / len(total_keys)
 
+@pytest.mark.integration
 class TestDeploymentSsotIntegrationEdgeCases(SSotBaseTestCase):
     """
     Edge case tests for deployment SSOT integration.

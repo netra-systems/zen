@@ -36,6 +36,7 @@ from test_framework.ssot.service_availability_detector import (
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.integration
 class TestCrossServiceApiComprehensive(SSotBaseTestCase):
     """
     Comprehensive tests for cross-service API communication.

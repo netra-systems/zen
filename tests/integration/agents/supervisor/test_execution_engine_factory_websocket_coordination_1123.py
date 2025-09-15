@@ -24,6 +24,7 @@ Test Philosophy:
 - RACE CONDITION REPRODUCTION: Tests demonstrate timing-sensitive failures
 - GOLDEN PATH PROTECTION: Tests validate end-to-end service coordination
 """
+import pytest
 import asyncio
 import gc
 import inspect
@@ -37,6 +38,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.fixtures.real_services_fixtures import RealServicesFixtureMixin
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.integration
 class TestExecutionEngineFactoryWebSocketCoordination1123(SSotAsyncTestCase, RealServicesFixtureMixin):
     """Phase 2 Integration Tests: Factory WebSocket Coordination Issues
 

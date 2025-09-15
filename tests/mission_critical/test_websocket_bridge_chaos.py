@@ -158,7 +158,7 @@
                 # REMOVED_SYNTAX_ERROR: headers = {"Authorization": "formatted_string"}
                 # REMOVED_SYNTAX_ERROR: self.websocket = await websockets.connect( )
                 # REMOVED_SYNTAX_ERROR: websocket_url,
-                # REMOVED_SYNTAX_ERROR: extra_headers=headers,
+                # REMOVED_SYNTAX_ERROR: additional_headers=headers,
                 # REMOVED_SYNTAX_ERROR: subprotocols=["jwt-auth"],
                 # REMOVED_SYNTAX_ERROR: max_size=2**20,  # 1MB max message size
                 # REMOVED_SYNTAX_ERROR: timeout=10

@@ -17,6 +17,7 @@ from shared.isolated_environment import IsolatedEnvironment
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestStagingAuthenticationConfigurationParity:
     """
     Environment parity tests for staging authentication configuration.

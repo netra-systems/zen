@@ -22,6 +22,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
+@pytest.mark.unit
 class TestAgentRegistryWebSocketEventDeliveryFailures(SSotAsyncTestCase):
     """
     Test WebSocket event delivery failures in AgentRegistry implementations.

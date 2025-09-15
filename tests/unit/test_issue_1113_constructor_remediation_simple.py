@@ -36,6 +36,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 
+@pytest.mark.unit
 class TestIssue1113ConstructorFix(unittest.TestCase):
     """
     Simplified test suite for Issue #1113 UserExecutionEngine constructor fix.
@@ -116,6 +117,7 @@ class TestIssue1113ConstructorFix(unittest.TestCase):
             self.assertIn("websocket_emitter", error_msg)
 
 
+@pytest.mark.unit
 class TestIssue1113SSotComplianceValidation(unittest.TestCase):
     """
     Test that UserExecutionEngine follows SSOT factory pattern requirements.

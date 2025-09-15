@@ -75,6 +75,7 @@ class WebSocketEventTracker:
         return timing
 
 
+@pytest.mark.e2e
 class TestWebSocketEventsBusinessCriticalStaging(SSotAsyncTestCase):
     """
     Comprehensive validation of business-critical WebSocket events on staging.

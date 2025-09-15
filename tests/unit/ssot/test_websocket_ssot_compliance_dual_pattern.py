@@ -10,6 +10,7 @@ These tests should FAIL initially to prove SSOT violations exist.
 CRITICAL: These tests are designed to FAIL and demonstrate SSOT compliance degradation.
 """
 
+import pytest
 import ast
 import os
 from pathlib import Path
@@ -18,6 +19,7 @@ from typing import Any, Dict, List, Set, Tuple
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestWebSocketSSOTComplianceDualPattern(SSotBaseTestCase):
     """Test suite to detect SSOT compliance violations (SHOULD FAIL)"""
 

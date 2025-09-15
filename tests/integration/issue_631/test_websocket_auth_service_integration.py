@@ -22,6 +22,7 @@ from netra_backend.app.clients.auth_client_core import AuthClientCore
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuth
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.integration
 class TestWebSocketAuthServiceIntegration(SSotAsyncTestCase):
     """Integration tests for WebSocket authentication service communication."""
 

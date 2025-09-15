@@ -19,6 +19,7 @@ Files Being Analyzed for Removal:
 6. /netra_backend/app/services/unified_tool_registry/execution_engine.py
 """
 
+import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import ast
 import os
@@ -232,6 +233,7 @@ RISK ASSESSMENT:
         return report
 
 
+@pytest.mark.unit
 class TestDeprecatedEngineImportAnalysis(SSotBaseTestCase):
     """Test suite for deprecated execution engine import analysis"""
     

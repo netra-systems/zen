@@ -24,6 +24,7 @@ Golden Path Critical Requirements:
 - Multi-user isolation maintained
 """
 
+import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import time
@@ -56,6 +57,7 @@ class MockWebSocketConnection:
         self.is_closed = True
 
 
+@pytest.mark.integration
 class TestWebSocketManagerGoldenPathIntegration(SSotAsyncTestCase):
     """
     Integration tests to prove WebSocket manager consolidation violations break Golden Path.

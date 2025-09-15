@@ -21,6 +21,7 @@ from netra_backend.app.factories.websocket_bridge_factory import StandardWebSock
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 
 
+@pytest.mark.integration
 class TestWebSocketEventDeliveryStructure:
     """Integration tests for WebSocket event delivery structure."""
 
@@ -268,6 +269,7 @@ class TestWebSocketEventDeliveryStructure:
         assert result.is_valid, "Flat tool_completed structure should be valid"
 
 
+@pytest.mark.integration
 class TestWebSocketEventStructureMismatchDetection:
     """Test detection and handling of structure mismatches."""
 

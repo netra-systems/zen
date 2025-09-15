@@ -20,6 +20,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.integration
 class TestSupervisorSystemLevelSSotConflicts(SSotBaseTestCase):
     """Integration tests exposing supervisor SSOT conflicts at system level."""
 
@@ -427,6 +428,7 @@ class TestSupervisorSystemLevelSSotConflicts(SSotBaseTestCase):
 
 
 # After SSOT remediation validation tests (currently skipped)
+@pytest.mark.integration
 class TestSupervisorSystemLevelSSotValidation(SSotBaseTestCase):
     """Integration tests that will pass after SSOT remediation."""
     

@@ -29,6 +29,7 @@ from auth_service.auth_core.services.auth_service import AuthService
 from netra_backend.app.auth_integration.auth import BackendAuthIntegration
 
 
+@pytest.mark.integration
 class TestDemoModeAuthIntegration(SSotAsyncTestCase):
     """
     Test complete demo mode authentication integration.

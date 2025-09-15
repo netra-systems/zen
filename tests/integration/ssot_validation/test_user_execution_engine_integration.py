@@ -17,6 +17,7 @@ CRITICAL: These tests use real service integration where appropriate to validate
 actual system behavior, not just mock interactions.
 """
 
+import pytest
 import asyncio
 import json
 from typing import Dict, Any, List, Optional
@@ -33,6 +34,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
+@pytest.mark.integration
 class TestUserExecutionEngineIntegration(SSotAsyncTestCase):
     """
     Integration test suite for UserExecutionEngine with real system components.

@@ -22,6 +22,7 @@ from shared.isolated_environment import get_env
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.integration
 class TestEnvironmentLoadingSSotIntegration(SSotBaseTestCase):
     """Test suite for SSOT environment loading integration."""
 

@@ -22,6 +22,7 @@ from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
+@pytest.mark.e2e
 class TestStagingConfiguration:
     """Test staging environment configuration requirements."""
 
@@ -89,6 +90,7 @@ class TestStagingConfiguration:
                 assert '127.0.0.1' not in value
                 assert '0.0.0.0' not in value
 
+@pytest.mark.e2e
 class TestProductionConfiguration:
     """Test production environment configuration requirements."""
 
@@ -120,6 +122,7 @@ class TestProductionConfiguration:
             with pytest.raises(EnvironmentError, match='Forbidden test variables'):
                 validator.validate_environment_at_startup()
 
+@pytest.mark.e2e
 class TestDevelopmentConfiguration:
     """Test development environment configuration."""
 
@@ -141,6 +144,7 @@ class TestDevelopmentConfiguration:
             validator = EnvironmentValidator()
             validator.validate_environment_at_startup()
 
+@pytest.mark.e2e
 class TestCrossServiceConfiguration:
     """Test configuration consistency between services."""
 
@@ -161,6 +165,7 @@ class TestCrossServiceConfiguration:
             assert redis_url == staging_env['REDIS_URL']
             assert '10.107.0.3' in redis_url
 
+@pytest.mark.e2e
 class TestConfigurationValidation:
     """Test configuration validation and error handling."""
 

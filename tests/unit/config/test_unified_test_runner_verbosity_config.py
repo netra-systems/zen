@@ -33,6 +33,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestUnifiedTestRunnerVerbosityConfig(SSotBaseTestCase):
     """Unit tests for verbosity configuration in unified test runner JSON output."""
 

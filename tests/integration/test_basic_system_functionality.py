@@ -37,6 +37,7 @@ from netra_backend.app.core.network_constants import ServicePorts, HostConstants
 from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import get_env
 
+@pytest.mark.integration
 class TestBasicSystemFunctionality:
     """Test basic system functionality after fixes."""
 

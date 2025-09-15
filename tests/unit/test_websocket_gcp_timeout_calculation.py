@@ -39,6 +39,7 @@ class MockGCPEnvironment:
         required_services = ['websocket_manager', 'agent_registry', 'database']
         return all((self.service_readiness.get(service, False) for service in required_services))
 
+@pytest.mark.unit
 class TestWebSocketGCPTimeoutCalculation(SSotBaseTestCase):
     """Unit tests for WebSocket timeout calculations in GCP environments."""
 

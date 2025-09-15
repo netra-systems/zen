@@ -39,6 +39,7 @@ if project_root not in sys.path:
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
+@pytest.mark.e2e
 class TestWebSocketManagerGoldenPathFragmentationE2E(SSotAsyncTestCase):
     """E2E tests for WebSocket Manager fragmentation impact on Golden Path user flow."""
     GOLDEN_PATH_EVENTS = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']

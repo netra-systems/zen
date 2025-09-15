@@ -32,6 +32,7 @@ TEST_CONFIG = {
     "monitoring_interval": 1.0,  # 1s intervals for test efficiency
 }
 
+@pytest.mark.e2e
 class TestResourceIsolationSuite:
     """Main test suite for resource isolation testing."""
     

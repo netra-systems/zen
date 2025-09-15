@@ -13,6 +13,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
+@pytest.mark.unit
 class TestEnvironmentIsolation:
     """Test environment isolation functionality."""
     

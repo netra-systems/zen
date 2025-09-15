@@ -38,6 +38,7 @@ try:
 except ImportError:
     AGENT_REGISTRY_AVAILABLE = False
 
+@pytest.mark.integration
 class TestAgentHealthStatusConflicts(SSotAsyncTestCase):
     """
     Reproduction tests for agent health status race conditions and conflicts.

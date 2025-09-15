@@ -55,6 +55,7 @@ async def tool_dispatcher(user_context, mock_websocket_bridge):
     yield dispatcher
     await dispatcher.cleanup()
 
+@pytest.mark.integration
 class TestEventDeliveryTracker:
     """Test the EventDeliveryTracker functionality."""
 
@@ -98,6 +99,7 @@ class TestEventDeliveryTracker:
         assert event_id_3 in event_ids
         assert event_id_2 not in event_ids
 
+@pytest.mark.integration
 class TestUnifiedToolDispatcherEventTracking:
     """Test event tracking integration in UnifiedToolDispatcher."""
 
@@ -156,6 +158,7 @@ class TestUnifiedToolDispatcherEventTracking:
             metrics = event_tracker.get_metrics()
             assert metrics.events_failed > 0
 
+@pytest.mark.integration
 class TestAgentWebSocketBridgeEventConfirmation:
     """Test event confirmation in AgentWebSocketBridge."""
 
@@ -187,6 +190,7 @@ class TestAgentWebSocketBridgeEventConfirmation:
             assert success
             assert event_tracker.get_event_status(event_id) == EventDeliveryStatus.CONFIRMED
 
+@pytest.mark.integration
 class TestEventRetryLogic:
     """Test event retry logic."""
 

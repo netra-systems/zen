@@ -40,6 +40,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
+@pytest.mark.unit
 class TestWebSocketSSOTConsolidation(SSotAsyncTestCase):
     """Test suite for WebSocket SSOT consolidation critical infrastructure gaps."""
 

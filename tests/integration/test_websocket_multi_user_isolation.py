@@ -12,6 +12,7 @@ CRITICAL: These tests follow claude.md requirements:
 - Enterprise security requirements
 """
 
+import pytest
 import asyncio
 import unittest
 import uuid
@@ -40,6 +41,7 @@ class UserSession:
     operation_results: List[Dict[str, Any]] = field(default_factory=list)
 
 
+@pytest.mark.integration
 class TestWebSocketMultiUserIsolation(SSotAsyncTestCase):
     """Test WebSocket manager multi-user isolation and security.
     

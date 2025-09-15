@@ -48,6 +48,7 @@ class ImportAnalysisResult:
     violations: List[ImportViolation]
     compliance_score: float
 
+@pytest.mark.unit
 class TestWebSocketImportSSotCompliance(SSotBaseTestCase):
     """
     CRITICAL: WebSocket import SSOT compliance validation.

@@ -26,6 +26,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.agents.registry import AgentRegistry as BasicRegistry
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry as AdvancedRegistry
 
+@pytest.mark.unit
 class TestAgentRegistryInterfaceInconsistency(SSotAsyncTestCase):
     """
     CRITICAL P0 Tests: Prove interface inconsistencies block Golden Path

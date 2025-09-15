@@ -20,6 +20,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.agents.supervisor.agent_instance_factory import create_agent_instance_factory, get_agent_instance_factory, configure_agent_instance_factory, AgentInstanceFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.unit
 class TestSSOTMigrationValidation1142(SSotAsyncTestCase):
     """Validate SSOT migration from singleton to per-request factory pattern."""
 

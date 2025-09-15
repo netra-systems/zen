@@ -40,6 +40,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.database.database_fixtures import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
+@pytest.mark.websocket
 class TestWebSocketSupervisorIsolation(SSotBaseTestCase):
     """
     Comprehensive tests for WebSocket supervisor isolation using REAL services.

@@ -29,6 +29,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from shared.isolated_environment import IsolatedEnvironment, get_env
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestAPICompatibilityRegression:
     """
     API Compatibility Regression Prevention Test Suite.

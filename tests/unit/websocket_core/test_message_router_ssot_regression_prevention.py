@@ -20,6 +20,7 @@ from typing import Dict, List, Set, Tuple, Any, Optional
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestMessageRouterSSOTRegressionPrevention(SSotBaseTestCase):
     """Test MessageRouter SSOT regression prevention."""
 

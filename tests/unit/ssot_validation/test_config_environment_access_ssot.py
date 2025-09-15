@@ -32,6 +32,7 @@ import inspect
 from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestConfigEnvironmentAccessSSot(SSotBaseTestCase):
     """Test suite to detect environment access SSOT violations in config managers."""
 

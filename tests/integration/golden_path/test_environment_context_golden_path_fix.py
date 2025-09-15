@@ -40,6 +40,7 @@ from netra_backend.app.core.service_dependencies.service_health_client import Se
 from netra_backend.app.core.service_dependencies.models import ServiceType
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.integration
 class TestEnvironmentContextGoldenPathFix:
 
     def create_user_context(self) -> UserExecutionContext:

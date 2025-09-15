@@ -16,6 +16,7 @@ from typing import Dict, List
 from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import BaseTestCase
 
+@pytest.mark.integration
 class TestPortEnvironmentSimulation(BaseTestCase):
     """Test suite to simulate Cloud Run PORT environment behavior.
     

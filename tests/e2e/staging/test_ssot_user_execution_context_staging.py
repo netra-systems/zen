@@ -82,6 +82,7 @@ class StagingTestResult:
     business_impact_assessment: str
 
 
+@pytest.mark.e2e
 class TestSSotUserExecutionContextStaging(SSotAsyncTestCase):
     """SSOT Staging E2E: Validate UserExecutionContext works in real staging environment"""
     

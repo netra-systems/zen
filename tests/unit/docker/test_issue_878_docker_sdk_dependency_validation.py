@@ -26,6 +26,7 @@ import contextlib
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestIssue878DockerSDKDependencyValidation(SSotBaseTestCase):
     """Unit tests for Docker SDK dependency validation - NO EXTERNAL DOCKER REQUIRED"""
     

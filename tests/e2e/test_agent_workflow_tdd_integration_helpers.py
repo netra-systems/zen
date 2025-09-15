@@ -63,6 +63,7 @@ class FeatureFlag:
         }
 
 
+@pytest.mark.e2e
 class TestTDDWorkflower:
     """Tester for TDD workflow integration."""
 

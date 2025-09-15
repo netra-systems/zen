@@ -42,6 +42,7 @@ try:
 except ImportError:
     EVENT_MONITOR_AVAILABLE = False
 
+@pytest.mark.e2e
 class TestWebSocketAgentHealthFragmentation(SSotAsyncTestCase):
     """
     Reproduction tests for WebSocket and agent health monitoring fragmentation.

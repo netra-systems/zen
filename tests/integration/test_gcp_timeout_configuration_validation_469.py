@@ -72,6 +72,7 @@ class TimeoutConfigurationValidator:
             validation_result['environment_appropriate'] = False
         return validation_result
 
+@pytest.mark.integration
 class TestGCPTimeoutConfigurationValidation(SSotAsyncTestCase):
     """
     Integration tests for GCP timeout configuration validation (Issue #469).

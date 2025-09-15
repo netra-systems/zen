@@ -20,6 +20,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
+@pytest.mark.e2e
 class TestWebSocketStartupRaceCondition(E2ETestBase):
     """
     Critical regression tests for WebSocket startup race conditions.
@@ -180,6 +181,7 @@ class TestWebSocketStartupRaceCondition(E2ETestBase):
         ws_error_with_metadata = [e for e in self.console_errors if 'websocket_error' in e.text or 'authentication_error' in e.text]
         assert len(ws_error_with_metadata) == 0, f'WebSocket errors with metadata logged inappropriately: {[e.text for e in ws_error_with_metadata]}'
 
+@pytest.mark.e2e
 class TestWebSocketStartupPerformance(E2ETestBase):
     """
     Performance regression tests to ensure fix doesn't degrade startup time.

@@ -35,6 +35,7 @@ import threading
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestWebSocketEventsFactoryConsolidation884(SSotAsyncTestCase):
     """
     Integration Test: Validate WebSocket events work correctly with consolidated factory

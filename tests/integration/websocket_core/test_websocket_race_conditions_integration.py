@@ -36,6 +36,7 @@ from shared.types.core_types import UserID, ThreadID, ConnectionID
 from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
+@pytest.mark.integration
 class TestWebSocketRaceConditionsIntegration(SSotAsyncTestCase):
     """Integration tests for WebSocket race conditions with real managers."""
 

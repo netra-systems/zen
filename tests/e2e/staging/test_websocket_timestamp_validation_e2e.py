@@ -29,6 +29,7 @@ from test_framework.ssot.websocket import WebSocketTestHelper
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.e2e
 class TestWebSocketTimestampValidationE2E:
     """E2E tests for WebSocket timestamp validation with full authentication."""
 
@@ -169,6 +170,7 @@ class TestWebSocketTimestampValidationE2E:
         finally:
             await websocket_connection.close()
 
+@pytest.mark.e2e
 class TestWebSocketTimestampValidationPerformanceE2E:
     """E2E performance tests for timestamp validation."""
 

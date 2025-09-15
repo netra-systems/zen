@@ -44,6 +44,7 @@ class UserTestProfile:
     expected_behavior: str
 
 
+@pytest.mark.integration
 class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
     """Test user isolation and concurrency for SSOT ExecutionEngine migration."""
     
@@ -829,6 +830,7 @@ class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
         return session_stats
 
 
+@pytest.mark.integration
 class TestConcurrencyRegressionPrevention(BaseIntegrationTest):
     """Prevent regressions in concurrency and isolation."""
     

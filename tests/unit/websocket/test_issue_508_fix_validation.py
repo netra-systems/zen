@@ -22,6 +22,7 @@ from starlette.datastructures import URL, QueryParams
 from fastapi import WebSocket
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.unit
 class TestIssue508FixValidation(SSotAsyncTestCase):
     """
     Validation Test Suite for Issue #508 Fix
@@ -141,6 +142,7 @@ class TestIssue508FixValidation(SSotAsyncTestCase):
         assert query_params.get('other') == '123'
         assert dict(query_params) == {'param': 'value', 'other': '123'}
 
+@pytest.mark.unit
 class TestIssue508StabilityValidation(SSotAsyncTestCase):
     """
     System Stability Validation for Issue #508 Fix

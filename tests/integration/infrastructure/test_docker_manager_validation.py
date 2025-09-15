@@ -6,6 +6,7 @@ and provides detailed reporting on test capabilities without requiring Docker to
 
 Business Value: Validates that infrastructure testing protects $2M+ ARR development infrastructure.
 """
+import pytest
 import inspect
 import logging
 from typing import Dict, List, Set
@@ -14,6 +15,7 @@ from test_framework.unified_docker_manager import UnifiedDockerManager
 from tests.integration.infrastructure.test_unified_docker_manager_integration import TestUnifiedDockerManagerOrchestration, TestUnifiedDockerManagerResourceManagement, TestUnifiedDockerManagerCrossPlatform, TestUnifiedDockerManagerEnvironmentIsolation, TestUnifiedDockerManagerCIPipeline
 logger = logging.getLogger(__name__)
 
+@pytest.mark.integration
 class TestUnifiedDockerManagerValidation(SSotBaseTestCase):
     """
     Validation tests for UnifiedDockerManager integration test suite.

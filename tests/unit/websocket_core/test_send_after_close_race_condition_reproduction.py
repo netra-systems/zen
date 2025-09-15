@@ -31,6 +31,7 @@ from netra_backend.app.websocket_core.connection_state_machine import Applicatio
 from shared.types.core_types import UserID, ConnectionID
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.unit
 class TestSendAfterCloseRaceCondition(SSotAsyncTestCase):
     """
     Unit tests to reproduce WebSocket send-after-close race condition.
@@ -165,6 +166,7 @@ class TestSendAfterCloseRaceCondition(SSotAsyncTestCase):
             with pytest.raises((RuntimeError, ValueError)):
                 asyncio.run(self.manager.send_message(self.user_id, {'type': 'test'}))
 
+@pytest.mark.unit
 class TestWebSocketStateValidationMissing(SSotAsyncTestCase):
     """
     Tests to demonstrate missing validation patterns that cause race conditions.

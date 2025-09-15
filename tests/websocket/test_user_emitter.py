@@ -59,6 +59,7 @@ from tests.mission_critical.websocket_real_test_base import (
 )
 
 
+@pytest.mark.websocket
 class TestUserWebSocketEmitterReal(SSotBaseTestCase):
     """
     Real UserWebSocketEmitter tests using live services with authentication.

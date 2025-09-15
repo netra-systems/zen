@@ -99,6 +99,7 @@ class MockEventConfirmationTracker:
             failed = [event for event in failed if event.user_id == user_id]
         return failed
 
+@pytest.mark.unit
 class TestToolEventConfirmationUnit(SSotAsyncTestCase):
     """Unit tests for tool execution event confirmation logic.
     
@@ -234,6 +235,7 @@ class TestToolEventConfirmationUnit(SSotAsyncTestCase):
             assert 'events_failed' in metrics
             assert 'average_confirmation_time_ms' in metrics
 
+@pytest.mark.unit
 class TestEventConfirmationIntegrationPoints(SSotAsyncTestCase):
     """Test integration points for event confirmation with existing systems.
     

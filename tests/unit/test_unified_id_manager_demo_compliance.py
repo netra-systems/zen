@@ -5,6 +5,7 @@ This test validates that UnifiedIDManager provides the correct SSOT methods
 for demo use cases and consistent ID generation patterns.
 """
 
+import pytest
 import unittest
 import uuid
 from unittest.mock import patch
@@ -12,6 +13,7 @@ from unittest.mock import patch
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
+@pytest.mark.unit
 class TestUnifiedIdManagerDemoCompliance(unittest.TestCase):
     """Unit tests for UnifiedIDManager demo compliance."""
     

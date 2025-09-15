@@ -450,6 +450,7 @@ class RealAgentExecutionValidator:
         return all_events_received, missing_events
 
 
+@pytest.mark.e2e
 class TestRealAgentExecutionStaging:
     """MISSION CRITICAL: Real agent execution tests for staging environment"""
     

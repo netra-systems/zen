@@ -1,3 +1,4 @@
+@pytest.mark.e2e
 class TestWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
 
@@ -62,6 +63,7 @@ def event_loop():
     loop.close()
 
 @pytest.fixture(scope='session')
+@pytest.mark.e2e
 async def test_database():
     """Create test database session."""
     config = ConfigurationManager()
@@ -108,6 +110,7 @@ def tool_dispatcher(llm_manager):
     return ToolDispatcher(llm_manager)
 
 @pytest.fixture
+@pytest.mark.e2e
 async def test_user(db_session):
     """Create test user in database."""
     user = User(id=str(uuid.uuid4()), email='test@example.com', name='Test User', created_at=datetime.now(timezone.utc))
@@ -116,6 +119,7 @@ async def test_user(db_session):
     return user
 
 @pytest.fixture
+@pytest.mark.e2e
 async def test_thread(db_session, test_user):
     """Create test thread in database."""
     thread = Thread(id=str(uuid.uuid4()), user_id=test_user.id, title='Test Thread', created_at=datetime.now(timezone.utc))
@@ -123,6 +127,7 @@ async def test_thread(db_session, test_user):
     await db_session.commit()
     return thread
 
+@pytest.mark.e2e
 class TestSupervisorE2E:
     """End-to-end tests for Supervisor orchestration."""
 
@@ -228,6 +233,7 @@ class TestSupervisorE2E:
         run_id2 = str(uuid.uuid4())
         await supervisor.execute(state2, run_id2, stream_updates=True)
 
+@pytest.mark.e2e
 class TestWebSocketIntegrationE2E:
     """Test WebSocket integration in E2E scenarios."""
 
@@ -279,6 +285,7 @@ class TestWebSocketIntegrationE2E:
         missing_events = required_events - event_types
         assert len(missing_events) == 0, f'Missing critical events: {missing_events}'
 
+@pytest.mark.e2e
 class TestPerformanceE2E:
     """Performance tests in E2E environment."""
 
@@ -339,6 +346,7 @@ class TestPerformanceE2E:
         print(f'  Successful: {successful}')
         print(f'  Throughput: {throughput:.2f} req/s')
 
+@pytest.mark.e2e
 class TestDataIntegrityE2E:
     """Test data integrity in E2E scenarios."""
 

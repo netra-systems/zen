@@ -105,6 +105,7 @@ class ConflictingHTTPMiddleware(BaseHTTPMiddleware):
         else:
             raise RuntimeError('HTTP middleware applied to WebSocket request')
 
+@pytest.mark.unit
 class TestIssue449UvicornMiddlewareFailures(SSotBaseTestCase):
     """
     Unit tests for Issue #449 - uvicorn middleware stack failures.

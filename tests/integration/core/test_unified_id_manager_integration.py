@@ -54,6 +54,7 @@ from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.integration
 class TestUnifiedIDManagerIntegrationCore(SSotAsyncTestCase):
     """Core integration tests for UnifiedIDManager with real services"""
 
@@ -116,6 +117,7 @@ class TestUnifiedIDManagerIntegrationCore(SSotAsyncTestCase):
         finally:
             cursor.close()
 
+@pytest.mark.integration
 class TestRealDatabaseIntegration(TestUnifiedIDManagerIntegrationCore):
     """Integration tests with real database operations"""
 
@@ -256,6 +258,7 @@ class TestRealDatabaseIntegration(TestUnifiedIDManagerIntegrationCore):
         final_count_cursor.close()
         self.assertEqual(final_count, total_success * 2)
 
+@pytest.mark.integration
 class TestHighConcurrencyIntegration(TestUnifiedIDManagerIntegrationCore):
     """Integration tests for high-concurrency ID generation scenarios"""
 
@@ -417,6 +420,7 @@ class TestHighConcurrencyIntegration(TestUnifiedIDManagerIntegrationCore):
         for scenario_name, results in benchmark_results.items():
             print(f"{scenario_name}: {results['operations_per_second']:.1f} ops/sec, avg: {results['avg_operation_time'] * 1000:.1f}ms, p95: {results['p95_operation_time'] * 1000:.1f}ms")
 
+@pytest.mark.integration
 class TestDisasterRecoveryIntegration(TestUnifiedIDManagerIntegrationCore):
     """Integration tests for disaster recovery scenarios"""
 

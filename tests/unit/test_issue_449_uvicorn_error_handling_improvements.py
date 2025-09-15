@@ -96,6 +96,7 @@ class UvicornWebSocketsImplErrorSimulator:
             self.websockets_impl_errors.append({'error': 'scope_corruption_244', 'details': 'ASGI scope corrupted leading to websockets_impl.py:244', 'original_scope': original_scope, 'corrupted_scope': corrupted_scope})
         return corrupted_scope
 
+@pytest.mark.unit
 class TestIssue449UvicornErrorHandlingImprovements(SSotBaseTestCase):
     """
     Unit tests for enhanced uvicorn error handling and websockets_impl.py:244 prevention.

@@ -35,6 +35,7 @@ from shared.types.core_types import UserID
 from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
+@pytest.mark.unit
 class TestWebSocketAuthenticatorCore(SSotAsyncTestCase):
     """Test core functionality of WebSocket authentication."""
 
@@ -151,6 +152,7 @@ class TestWebSocketAuthenticatorCore(SSotAsyncTestCase):
         self.assertEqual(decoded['custom_role'], 'premium_user')
         self.assertEqual(decoded['subscription_tier'], 'enterprise')
 
+@pytest.mark.unit
 class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
     """Test WebSocket authentication integration scenarios."""
 
@@ -210,6 +212,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
                     self.assertFalse(result.success)
                     self.assertIsNone(result.user_id)
 
+@pytest.mark.unit
 class TestWebSocketAuthenticationSecurity(SSotAsyncTestCase):
     """Test WebSocket authentication security aspects."""
 

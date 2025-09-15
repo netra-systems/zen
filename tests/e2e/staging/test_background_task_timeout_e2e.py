@@ -11,6 +11,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents timeout-related background task failures in production
 """
 
+import pytest
 import unittest
 import asyncio
 import requests
@@ -23,6 +24,7 @@ import os
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.e2e
 class TestBackgroundTaskTimeoutE2E(SSotBaseTestCase):
     """E2E tests for background task timeout configuration in GCP staging.
     

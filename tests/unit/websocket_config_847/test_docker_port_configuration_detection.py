@@ -33,6 +33,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.test_context import TestContext
 
 
+@pytest.mark.unit
 class TestDockerPortConfigurationDetection(unittest.TestCase):
     """Test Docker port configuration detection for Issue #847."""
 

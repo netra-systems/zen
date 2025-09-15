@@ -16,6 +16,7 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from netra_backend.app.smd import StartupOrchestrator
 from netra_backend.app.core.environment_context import EnvironmentContextService, EnvironmentType
 
+@pytest.mark.unit
 class TestIssue403EnvironmentContextInitialization:
     """Test suite for Issue #403 - EnvironmentContext initialization fix."""
 

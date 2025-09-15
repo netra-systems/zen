@@ -24,6 +24,7 @@ from netra_backend.app.websocket_core.types import MessageType, LEGACY_MESSAGE_T
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 from test_framework.database.test_database_manager import DatabaseTestManager
 
+@pytest.mark.integration
 class TestMessageRouterBugReproducers:
     """
     Bug reproducer tests that demonstrate the exact failures and validate fixes.
@@ -158,6 +159,7 @@ class TestMessageRouterBugReproducers:
         print(f'   - Processing result: {result}')
         print(' PASS:  This is what integration tests should validate going forward')
 
+@pytest.mark.integration
 class TestChatMessageIntegrationCorrectBehavior:
     """
     Tests that validate the CORRECT current behavior of chat_message handling.

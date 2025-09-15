@@ -54,6 +54,7 @@ class FactoryValidationResult:
     violations: List[SingletonViolation]
     security_compliance_score: float
 
+@pytest.mark.unit
 class TestWebSocketFactoryPatternEnforcement(SSotBaseTestCase):
     """
     CRITICAL: WebSocket factory pattern enforcement for user isolation security.

@@ -322,6 +322,7 @@ class MockPatternExtractor(ast.NodeVisitor):
             return 'generic_mock'
 
 
+@pytest.mark.integration
 class TestMockConsistencyValidation(SSotBaseTestCase):
     """
     Test suite for mock consistency validation.

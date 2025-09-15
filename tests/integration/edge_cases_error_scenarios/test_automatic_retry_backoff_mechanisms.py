@@ -180,6 +180,7 @@ class SimulatedRetryMechanism:
         return any(indicator in error_str for indicator in permanent_indicators)
 
 
+@pytest.mark.integration
 class TestAutomaticRetryBackoffMechanisms(BaseIntegrationTest):
     """
     Test automatic retry and backoff mechanisms for transient failure recovery.

@@ -33,6 +33,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
+@pytest.mark.unit
 class TestAgentInstanceFactorySSOTViolations(SSotAsyncTestCase):
     """
     Unit test suite proving singleton pattern violations in AgentInstanceFactory.

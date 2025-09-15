@@ -15,6 +15,7 @@ import time
 from typing import Dict, List, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.e2e
 class TestGoldenPathMessageRouterSSOTValidation(SSotAsyncTestCase):
     """Test Golden Path functionality with consolidated MessageRouter."""
 

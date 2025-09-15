@@ -56,6 +56,7 @@ SSOT Violations This Module Proves:
 4. Agent execution pipeline breaks due to manager interface mismatches
 """
 
+import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import json
@@ -96,6 +97,7 @@ class MockWebSocketConnection:
         self.is_active = False
 
 
+@pytest.mark.integration
 class TestWebSocketManagerGoldenPathFailures(SSotAsyncTestCase):
     """
     Tests to prove Golden Path failures due to WebSocket manager SSOT violations.

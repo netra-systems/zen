@@ -81,6 +81,7 @@ class ContaminationTestStats:
     queue_overflow_events: int = 0
     auth_token_reuse_cases: int = 0
 
+@pytest.mark.integration
 class TestWebSocketEventContamination(SSotAsyncTestCase):
     """Integration tests reproducing WebSocket event contamination issues from Issue #414."""
 

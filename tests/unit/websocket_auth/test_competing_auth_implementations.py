@@ -25,6 +25,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSo
 from netra_backend.app.websocket_core.auth_remediation import WebSocketAuthIntegration, authenticate_websocket_with_remediation
 from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
 
+@pytest.mark.unit
 class TestCompetingAuthImplementations(SSotAsyncTestCase):
     """
     Unit tests to detect and expose competing auth implementations in WebSocket layer.

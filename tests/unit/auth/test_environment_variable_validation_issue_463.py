@@ -20,6 +20,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuthenticator, get_websocket_authenticator, _validate_critical_environment_configuration
 from netra_backend.app.services.unified_authentication_service import get_unified_auth_service
 
+@pytest.mark.unit
 class TestServiceSecretValidation:
     """Test SERVICE_SECRET environment variable validation."""
 
@@ -62,6 +63,7 @@ class TestServiceSecretValidation:
             if not result.success:
                 assert 'service_secret' not in result.error_message.lower()
 
+@pytest.mark.unit
 class TestJwtSecretKeyValidation:
     """Test JWT_SECRET_KEY environment variable validation."""
 
@@ -101,6 +103,7 @@ class TestJwtSecretKeyValidation:
             if not result.success:
                 assert any((keyword in result.error_message.lower() for keyword in ['jwt', 'secret', 'invalid', 'format']))
 
+@pytest.mark.unit
 class TestAuthServiceUrlValidation:
     """Test AUTH_SERVICE_URL environment variable validation."""
 
@@ -154,6 +157,7 @@ class TestAuthServiceUrlValidation:
             assert not result.success, 'Authentication should fail when auth service is unreachable'
             assert result.error_code in ['AUTH_SERVICE_CONNECTION_ERROR', 'CONNECTION_ERROR', 'AUTH_SERVICE_ERROR']
 
+@pytest.mark.unit
 class TestCriticalEnvironmentConfiguration:
     """Test the critical environment configuration validation function."""
 
@@ -184,6 +188,7 @@ class TestCriticalEnvironmentConfiguration:
                 for error in validation_result['errors']:
                     assert not any((var.lower() in error.lower() for var in test_env.keys()))
 
+@pytest.mark.unit
 class TestEnvironmentVariableIntegration:
     """Integration tests for environment variables with WebSocket authentication."""
 

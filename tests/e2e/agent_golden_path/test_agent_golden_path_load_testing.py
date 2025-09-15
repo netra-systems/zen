@@ -44,6 +44,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, Authenti
 from tests.e2e.staging_config import StagingTestConfig
 from shared.isolated_environment import get_env
 
+@pytest.mark.e2e
 class TestAgentGoldenPathLoadTesting(SSotAsyncTestCase):
     """
     Load testing for agent golden path functionality under concurrent user scenarios.

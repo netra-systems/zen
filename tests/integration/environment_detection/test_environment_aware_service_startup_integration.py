@@ -25,6 +25,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.websocket_core.gcp_initialization_validator import GCPWebSocketInitializationValidator, create_gcp_websocket_validator, GCPReadinessState
 
+@pytest.mark.integration
 class TestEnvironmentAwareServiceStartup(SSotBaseTestCase):
     """
     Test service startup with environment-aware timeout configuration.

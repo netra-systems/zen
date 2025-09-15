@@ -9,6 +9,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.websocket.message_handler import StartAgentHandler
 
+@pytest.mark.unit
 class TestWebSocketEventEmissionFixes:
     """Test suite for WebSocket event emission fixes."""
 

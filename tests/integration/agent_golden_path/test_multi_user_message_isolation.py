@@ -20,6 +20,7 @@ from typing import Dict, Any, List, Set, Optional, Tuple
 import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.integration
 class TestMultiUserMessageIsolation(SSotAsyncTestCase):
     """Test multi-user message isolation during SSOT changes."""
 

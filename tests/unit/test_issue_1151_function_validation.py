@@ -14,6 +14,7 @@ project_root = Path(__file__).parent.parent.parent.absolute()
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+@pytest.mark.unit
 class TestIsDockerAvailableFunction:
     """Test suite for the newly added is_docker_available function."""
 
@@ -85,6 +86,7 @@ class TestIsDockerAvailableFunction:
         else:
             assert True
 
+@pytest.mark.unit
 class TestWebSocketTestBaseIntegration:
     """Test integration of new function with existing websocket test base."""
 

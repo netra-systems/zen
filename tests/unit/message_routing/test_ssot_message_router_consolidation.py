@@ -29,6 +29,7 @@ EXPECTED BEHAVIOR AFTER CONSOLIDATION:
 - WebSocket events use single SSOT broadcast service
 """
 
+import pytest
 import asyncio
 import unittest
 from typing import Dict, Any, List, Optional, Set
@@ -69,6 +70,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestSSOTMessageRouterConsolidation(SSotAsyncTestCase):
     """Test suite for SSOT Message Router consolidation validation.
 

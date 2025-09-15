@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 
 
+@pytest.mark.unit
 def test_critical_field_access_fix():
     """CRITICAL: Test the exact field access patterns that were failing in lines 383-385."""
     
@@ -57,6 +58,7 @@ def test_critical_field_access_fix():
     print("[PASS] Critical field access patterns work - AttributeError FIXED!")
 
 
+@pytest.mark.unit
 def test_backward_compatibility_properties():
     """Test backward compatibility properties that enable existing code to work."""
     
@@ -86,6 +88,7 @@ def test_backward_compatibility_properties():
     print("[PASS] Backward compatibility properties work correctly")
 
 
+@pytest.mark.unit
 def test_error_scenarios_stability():
     """Test that error scenarios don't crash the system."""
     
@@ -121,6 +124,7 @@ def test_error_scenarios_stability():
     print("[PASS] Error scenarios remain stable")
 
 
+@pytest.mark.unit
 def test_session_closure_robustness():
     """Test session closure handles various edge cases without crashing."""
     
@@ -155,6 +159,7 @@ def test_session_closure_robustness():
     print("[PASS] Session closure is robust under all conditions")
 
 
+@pytest.mark.unit
 def test_to_dict_functionality():
     """Test the to_dict method that's used in logging (lines ~507-511)."""
     
@@ -187,6 +192,7 @@ def test_to_dict_functionality():
     print("[PASS] to_dict functionality works for logging")
 
 
+@pytest.mark.unit
 def test_stress_field_access():
     """Stress test the critical field access patterns under high load."""
     
@@ -224,6 +230,7 @@ def test_stress_field_access():
     print("[PASS] Stress test confirms field access stability")
 
 
+@pytest.mark.unit
 def test_import_isolation():
     """Test that the SSOT module can be imported without triggering circular imports."""
     
@@ -248,6 +255,7 @@ def test_import_isolation():
     print("[PASS] SSOT module imports work in isolation")
 
 
+@pytest.mark.unit
 def test_real_factory_usage_pattern():
     """Test the exact usage pattern from request_scoped_session_factory.py."""
     

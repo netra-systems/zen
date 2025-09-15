@@ -26,6 +26,7 @@ from urllib.parse import urlparse
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.unit
 class TestWebSocketConfigurationValidation(unittest.TestCase):
     """Validate WebSocket configuration without service dependencies."""
 

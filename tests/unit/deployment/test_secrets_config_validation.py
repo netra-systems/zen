@@ -23,6 +23,7 @@ Expected Failures:
 SSOT Compliance: Uses SSotBaseTestCase for consistent test infrastructure.
 """
 
+import pytest
 import unittest
 from unittest.mock import patch, MagicMock
 import sys
@@ -36,6 +37,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from deployment.secrets_config import SecretConfig, get_staging_secret, validate_gsm_access
 
 
+@pytest.mark.unit
 class TestSecretsConfigValidation(SSotBaseTestCase):
     """
     Unit tests for SecretConfig validation logic.

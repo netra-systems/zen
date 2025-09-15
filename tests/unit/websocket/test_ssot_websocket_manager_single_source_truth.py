@@ -14,6 +14,7 @@ Test Strategy: Static analysis and import inspection (no runtime dependencies).
 NO DOCKER required - pure Python module discovery and analysis.
 """
 
+import pytest
 import importlib
 import inspect
 import pkgutil
@@ -25,6 +26,7 @@ import unittest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestWebSocketManagerSSotCompliance(SSotBaseTestCase, unittest.TestCase):
     """Test suite to validate SSOT compliance for WebSocket managers.
     

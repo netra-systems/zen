@@ -25,6 +25,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from auth_service.auth_core.secret_loader import AuthSecretLoader
 
 
+@pytest.mark.unit
 class TestE2EOAuthKeyValidation(SSotBaseTestCase):
     """
     Unit tests for E2E OAuth simulation key validation.

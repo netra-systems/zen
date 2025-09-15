@@ -45,6 +45,7 @@ def mock_app_with_middleware():
         await websocket.close()
     return app
 
+@pytest.mark.integration
 class TestWebSocketReadinessMiddlewareIntegration:
     """Integration tests for WebSocket readiness middleware behavior."""
 
@@ -156,6 +157,7 @@ class TestWebSocketReadinessMiddlewareIntegration:
                             data = websocket.receive_text()
                             assert data == 'connection_established'
 
+@pytest.mark.integration
 class TestAppStateStartupIntegration:
     """Test app state and startup validation integration."""
 
@@ -178,6 +180,7 @@ class TestAppStateStartupIntegration:
                             data = websocket.receive_text()
                             assert data == 'connection_established'
 
+@pytest.mark.integration
 class TestWebSocketConnectionEstablishment:
     """Test WebSocket connection establishment works correctly."""
 
@@ -211,6 +214,7 @@ class TestWebSocketConnectionEstablishment:
                         data = websocket.receive_text()
                         assert data == 'connection_established'
 
+@pytest.mark.integration
 class TestSecurityMeasuresIntact:
     """Test that existing security measures remain intact."""
 

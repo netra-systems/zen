@@ -9,6 +9,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestWebSocketSSOTImportPathValidation(SSotBaseTestCase):
     """Test import path validation for WebSocket SSOT agent bridge integration."""
     
@@ -182,6 +183,7 @@ class TestWebSocketSSOTImportPathValidation(SSotBaseTestCase):
             pytest.fail(f"Module completeness validation failed: {e}")
 
 
+@pytest.mark.unit
 class TestWebSocketSSOTImportSuccessAnalysis(SSotBaseTestCase):
     """Analyze the business and technical success of the SSOT implementation."""
     

@@ -16,6 +16,7 @@ from netra_backend.app.agents.supervisor.execution_engine_factory import Executi
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.mcp_execution_engine import MCPEnhancedExecutionEngine, create_mcp_enhanced_engine
 
+@pytest.mark.unit
 class TestExecutionEngineMigrationValidation:
     """Validate migration from DeepAgentState to UserExecutionContext."""
 

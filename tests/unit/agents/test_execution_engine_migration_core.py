@@ -41,6 +41,7 @@ class MockAgentExecutionResult:
         self.duration = 0.1
         self.metadata = {}
 
+@pytest.mark.unit
 class TestExecutionEngineMigrationCore:
     """Core validation tests for UserExecutionContext migration."""
 

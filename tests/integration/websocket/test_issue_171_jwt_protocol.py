@@ -24,6 +24,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.integration
 class TestIssue171JWTProtocol(SSotAsyncTestCase):
     """Integration tests to reproduce Issue #171: JWT protocol validation failures."""
 

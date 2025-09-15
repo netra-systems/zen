@@ -63,6 +63,7 @@ from netra_backend.app.core.config import get_config
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.integration
 class TestDatabaseManagerMultiDatabaseConnections(SSotBaseTestCase):
     """
     Test multi-database connection management functionality.
@@ -240,6 +241,7 @@ class TestDatabaseManagerMultiDatabaseConnections(SSotBaseTestCase):
         self.record_metric("multi_engine_support_test", "PASSED")
 
 
+@pytest.mark.integration
 class TestDatabaseManagerSSLVPCConnectivity(SSotBaseTestCase):
     """
     Test SSL/VPC connectivity and security configuration.
@@ -367,6 +369,7 @@ class TestDatabaseManagerSSLVPCConnectivity(SSotBaseTestCase):
         self.record_metric("secure_connection_test", "PASSED")
 
 
+@pytest.mark.integration
 class TestDatabaseManagerConnectionPooling(SSotBaseTestCase):
     """
     Test connection pool management and behavior under load.
@@ -531,6 +534,7 @@ class TestDatabaseManagerConnectionPooling(SSotBaseTestCase):
         self.record_metric("connection_pool_load_test", "PASSED")
 
 
+@pytest.mark.integration
 class TestDatabaseManagerTransactionIsolation(SSotBaseTestCase):
     """
     Test transaction isolation and ACID compliance.
@@ -713,6 +717,7 @@ class TestDatabaseManagerTransactionIsolation(SSotBaseTestCase):
         self.record_metric("transaction_isolation_test", "PASSED")
 
 
+@pytest.mark.integration
 class TestDatabaseManagerSessionManagement(SSotBaseTestCase):
     """
     Test database session lifecycle management.
@@ -855,6 +860,7 @@ class TestDatabaseManagerSessionManagement(SSotBaseTestCase):
         self.record_metric("session_isolation_test", "PASSED")
 
 
+@pytest.mark.integration
 class TestDatabaseManagerPerformanceReliability(SSotBaseTestCase):
     """
     Test performance and reliability under various conditions.

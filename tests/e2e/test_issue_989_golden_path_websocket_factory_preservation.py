@@ -65,6 +65,7 @@ class GoldenPathTestResult:
     error_details: Optional[str] = None
     execution_time_seconds: float = 0.0
 
+@pytest.mark.e2e
 class TestIssue989GoldenPathWebSocketFactoryPreservation(SSotAsyncTestCase):
     """Mission Critical: Issue #989 Golden Path WebSocket Factory Migration Preservation
 

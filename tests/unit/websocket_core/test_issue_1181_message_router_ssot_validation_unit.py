@@ -18,6 +18,7 @@ Tests verify SSOT compliance, import path consolidation, and interface consisten
 across all MessageRouter usage patterns.
 """
 
+import pytest
 import unittest
 from unittest.mock import Mock, patch, MagicMock
 import inspect
@@ -32,6 +33,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestIssue1181MessageRouterSSOTValidation(SSotAsyncTestCase, unittest.TestCase):
     """Test suite to validate MessageRouter SSOT compliance for Issue #1181."""
     

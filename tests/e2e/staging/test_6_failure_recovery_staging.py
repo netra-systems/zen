@@ -4,6 +4,7 @@ Tests system resilience
 Business Value: System reliability
 """
 
+import pytest
 import asyncio
 import time
 from typing import Dict, List
@@ -12,6 +13,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from tests.e2e.staging_test_base import StagingTestBase, staging_test
 
 
+@pytest.mark.e2e
 class TestFailureRecoveryStaging(StagingTestBase):
     """Test failure recovery in staging environment"""
     

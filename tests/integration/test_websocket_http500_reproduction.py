@@ -23,6 +23,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from tests.helpers.auth_test_utils import TestAuthHelper
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.integration
 class TestWebSocketHTTP500Reproduction(SSotAsyncTestCase):
     """Reproduce WebSocket HTTP 500 errors in integration environment"""
 
@@ -175,6 +176,7 @@ class TestWebSocketHTTP500Reproduction(SSotAsyncTestCase):
         except Exception as e:
             raise e
 
+@pytest.mark.integration
 class TestWebSocketMiddlewareIntegration(SSotAsyncTestCase):
     """Test WebSocket middleware integration for HTTP 500 prevention"""
 

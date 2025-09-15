@@ -20,6 +20,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.unit
 class TestAuthServiceTimeoutReproduction(SSotAsyncTestCase):
     """
     Unit tests to reproduce the 0.5s timeout configuration issue.

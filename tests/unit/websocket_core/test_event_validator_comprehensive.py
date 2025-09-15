@@ -44,6 +44,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 
 
+@pytest.mark.unit
 class TestUnifiedEventValidatorUnit(SSotAsyncTestCase):
     """
     Unit tests for UnifiedEventValidator protecting $500K+ ARR.
@@ -704,6 +705,7 @@ class TestUnifiedEventValidatorUnit(SSotAsyncTestCase):
 
 # === TEST COLLECTION AND EXECUTION ===
 
+@pytest.mark.unit
 def test_suite():
     """Return test suite for this module."""
     import unittest

@@ -25,6 +25,7 @@ from netra_backend.app.services.unified_authentication_service import UnifiedAut
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from fastapi import WebSocket
 
+@pytest.mark.integration
 class TestFactorySSotValidationFixes:
     """
     Test Factory SSOT validation enhancements for GCP Cloud Run staging patterns.
@@ -80,6 +81,7 @@ class TestFactorySSotValidationFixes:
             with pytest.raises(ValueError, match='Expected UserExecutionContext'):
                 _validate_ssot_user_context_staging_safe(invalid_context)
 
+@pytest.mark.integration
 class TestE2EAuthValidationFixes:
     """
     Test E2E authentication bypass fixes for SSOT Auth chain.
@@ -171,6 +173,7 @@ class TestE2EAuthValidationFixes:
                 assert auth_result.metadata.get('e2e_bypass') is None
                 assert user_context is not None
 
+@pytest.mark.integration
 class TestIntegratedFactoryAndAuthFixes:
     """
     Test integrated Factory SSOT and E2E Auth fixes working together.

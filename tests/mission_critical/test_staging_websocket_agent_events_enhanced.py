@@ -319,7 +319,7 @@ class EnhancedStagingWebSocketEventValidator:
             # Connect to staging WebSocket
             websocket = await websockets.connect(
                 self.staging_websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 ping_interval=30,
                 ping_timeout=10,
                 close_timeout=10

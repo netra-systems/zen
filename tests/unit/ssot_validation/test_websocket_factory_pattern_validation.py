@@ -24,6 +24,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.unit
 class TestWebSocketFactoryPatternCompliance(SSotBaseTestCase):
     """Factory pattern compliance tests (PASSING tests for proper implementation)"""
 
@@ -121,6 +122,7 @@ class TestWebSocketFactoryPatternCompliance(SSotBaseTestCase):
         except ImportError as e:
             self.skipTest(f'Factory cleanup not available: {e}')
 
+@pytest.mark.unit
 class TestWebSocketFactoryAntiPatternDetection(SSotBaseTestCase):
     """Anti-pattern detection tests (FAILING tests for violation detection)"""
 
@@ -275,6 +277,7 @@ class TestWebSocketFactoryAntiPatternDetection(SSotBaseTestCase):
         else:
             self.fail('Factory bypassing properly prevented - violation test should fail')
 
+@pytest.mark.unit
 class TestWebSocketFactoryResourceManagement(SSotBaseTestCase):
     """Factory resource management tests (MIXED RESULTS)"""
 

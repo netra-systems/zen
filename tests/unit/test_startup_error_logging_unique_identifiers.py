@@ -19,6 +19,7 @@ from io import StringIO
 import asyncio
 
 
+@pytest.mark.unit
 class TestStartupErrorLoggingUniqueIdentifiers:
     """Test startup error logging produces unique identifiable error codes."""
     

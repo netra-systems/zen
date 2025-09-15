@@ -22,6 +22,7 @@ from collections import defaultdict
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.unit
 class TestProductionImportAuditOngoing(SSotBaseTestCase):
     """Ongoing audit test for production import compliance"""
 

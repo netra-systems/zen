@@ -18,6 +18,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 @pytest.fixture
+@pytest.mark.unit
 def test_context():
     """Test fixture for user execution context."""
     test_user_id = 'test-user-585'
@@ -26,6 +27,7 @@ def test_context():
     user_context = UserExecutionContext(user_id=test_user_id, thread_id=test_thread_id, run_id=test_run_id, request_id='req-585-test', agent_context={'test_scenario': 'pickle_serialization_error', 'agent_type': 'reporting_agent'})
     return {'user_id': test_user_id, 'thread_id': test_thread_id, 'run_id': test_run_id, 'user_context': user_context}
 
+@pytest.mark.unit
 class TestIssue585PickleModuleSerializationErrors:
     """Test suite to reproduce pickle module serialization errors in agent pipelines."""
 

@@ -32,6 +32,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 
 
+@pytest.mark.integration
 class TestConcurrentUserExecutionIsolationFixed:
     """Test concurrent user execution maintains isolation guarantees."""
     

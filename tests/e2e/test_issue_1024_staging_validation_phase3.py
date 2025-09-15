@@ -38,6 +38,7 @@ except ImportError:
     BaseTestCase = unittest.TestCase
 STAGING_CONFIG = {'base_url': 'https://api.staging.netrasystems.ai', 'auth_url': 'https://auth.staging.netrasystems.ai', 'websocket_url': 'wss://api.staging.netrasystems.ai/ws', 'frontend_url': 'https://app.staging.netrasystems.ai'}
 
+@pytest.mark.e2e
 class TestStagingGoldenPathEndToEnd(BaseTestCase):
     """E2E tests for Golden Path validation on GCP staging environment"""
 
@@ -178,6 +179,7 @@ class TestStagingGoldenPathEndToEnd(BaseTestCase):
         except Exception as e:
             self.skipTest(f'User context validation unavailable: {e}')
 
+@pytest.mark.e2e
 class TestStagingVsLocalReliabilityComparison(BaseTestCase):
     """Compare staging environment reliability vs local test infrastructure chaos"""
 

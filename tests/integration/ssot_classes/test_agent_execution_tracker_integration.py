@@ -38,6 +38,7 @@ from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from shared.types.core_types import UserID, ThreadID, RunID
 
+@pytest.mark.integration
 class TestAgentExecutionTrackerLifecycle(SSotAsyncTestCase):
     """
     Test execution lifecycle management (PENDING -> RUNNING -> COMPLETED/FAILED).
@@ -205,6 +206,7 @@ class TestAgentExecutionTrackerLifecycle(SSotAsyncTestCase):
         self.record_metric('completion_order_independence', True)
         self.record_metric('test_passed', 'concurrent_execution_management')
 
+@pytest.mark.integration
 class TestAgentExecutionTrackerDeathDetection(SSotAsyncTestCase):
     """
     Test death detection and heartbeat monitoring functionality.
@@ -347,6 +349,7 @@ class TestAgentExecutionTrackerDeathDetection(SSotAsyncTestCase):
         self.record_metric('selective_monitoring_accuracy', True)
         self.record_metric('test_passed', 'mixed_healthy_and_dying_executions')
 
+@pytest.mark.integration
 class TestAgentExecutionTrackerTimeouts(SSotAsyncTestCase):
     """
     Test timeout enforcement and cancellation scenarios.
@@ -489,6 +492,7 @@ class TestAgentExecutionTrackerTimeouts(SSotAsyncTestCase):
         self.record_metric('resource_cleanup_immediate', True)
         self.record_metric('test_passed', 'execution_cancellation_flow')
 
+@pytest.mark.integration
 class TestAgentExecutionTrackerPhaseTracking(SSotAsyncTestCase):
     """
     Test state transition and phase tracking through AgentExecutionPhase states.
@@ -640,6 +644,7 @@ class TestAgentExecutionTrackerPhaseTracking(SSotAsyncTestCase):
         self.record_metric('performance_optimization_enabled', True)
         self.record_metric('test_passed', 'phase_performance_tracking')
 
+@pytest.mark.integration
 class TestAgentExecutionTrackerConcurrentManagement(SSotAsyncTestCase):
     """
     Test concurrent execution management and user isolation.
@@ -802,6 +807,7 @@ class TestAgentExecutionTrackerConcurrentManagement(SSotAsyncTestCase):
         self.record_metric('execution_management_efficiency', True)
         self.record_metric('test_passed', 'execution_query_and_filtering')
 
+@pytest.mark.integration
 class TestAgentExecutionTrackerUnifiedIDIntegration(SSotAsyncTestCase):
     """
     Test UnifiedIDManager SSOT integration for ID generation.
@@ -910,6 +916,7 @@ class TestAgentExecutionTrackerUnifiedIDIntegration(SSotAsyncTestCase):
         self.record_metric('audit_preservation_maintained', True)
         self.record_metric('test_passed', 'id_lifecycle_management')
 
+@pytest.mark.integration
 class TestAgentExecutionTrackerBusinessValueScenarios(SSotAsyncTestCase):
     """
     Test business value scenarios preventing silent agent failures in chat.

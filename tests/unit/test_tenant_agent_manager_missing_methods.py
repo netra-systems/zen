@@ -29,6 +29,7 @@ from tests.e2e.resource_isolation.test_infrastructure import TenantAgent
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.unit
 class TestTenantAgentManagerMissingMethods:
     """Test class for missing TenantAgentManager methods."""
     
@@ -252,6 +253,7 @@ class TestTenantAgentManagerMissingMethods:
             pytest.fail(f"Method signature compatibility failed: {e}")
 
 
+@pytest.mark.unit
 class TestTenantAgentManagerExistingMethods:
     """Test existing methods to ensure they still work after adding missing methods."""
     
@@ -299,6 +301,7 @@ class TestTenantAgentManagerExistingMethods:
         assert len(manager.tenants) == 0
 
 
+@pytest.mark.unit
 class TestTenantAgentCompatibility:
     """Test compatibility with TenantAgent class expectations."""
     
@@ -325,6 +328,7 @@ class TestTenantAgentCompatibility:
 
 
 # Error-specific tests for debugging
+@pytest.mark.unit
 class TestMethodErrorScenarios:
     """Test specific error scenarios to aid in debugging."""
     

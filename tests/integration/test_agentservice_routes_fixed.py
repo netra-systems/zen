@@ -16,6 +16,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.routes.agents_execute import router
 
 
+@pytest.mark.integration
 class TestAgentServiceRouteFixes:
     """Test class to verify that the AgentService route parameter fixes work."""
 

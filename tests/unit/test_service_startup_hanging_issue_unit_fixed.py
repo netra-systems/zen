@@ -24,6 +24,7 @@ from unittest.mock import AsyncMock, Mock, patch
 from typing import Dict, Any
 from tests.e2e.real_services_manager import RealServicesManager, ServiceStatus, ServiceEndpoint
 
+@pytest.mark.unit
 class TestServiceStartupHangingIssueUnit:
     """Unit tests for service startup hanging behavior"""
 
@@ -120,6 +121,7 @@ class TestServiceStartupHangingIssueUnit:
             except Exception as e:
                 print(f'Cleanup error: {e}')
 
+@pytest.mark.unit
 class TestServiceStartupTimeouts:
     """Specific timeout behavior tests"""
 

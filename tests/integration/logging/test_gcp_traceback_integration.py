@@ -34,6 +34,7 @@ from netra_backend.app.core.unified_logging import get_logger
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.integration
 class TestGCPTracebackIntegration(SSotAsyncTestCase):
     """Integration tests for GCP traceback capture with real logging services."""
     

@@ -58,6 +58,7 @@ class MockWebSocket:
         """Mock close method."""
         self.is_connected = False
 
+@pytest.mark.integration
 class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
     """
     Test suite for preventing cross-user WebSocket event bleeding.
@@ -309,6 +310,7 @@ class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
         else:
             print('WARNING: Event queuing functionality not found - queue isolation cannot be tested')
 
+@pytest.mark.integration
 class TestCrossUserEventBleedingValidationGapDocumentation(SSotAsyncTestCase):
     """
     Test suite specifically designed to document cross-user event bleeding validation gaps.

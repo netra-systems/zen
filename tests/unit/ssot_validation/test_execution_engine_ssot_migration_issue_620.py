@@ -25,6 +25,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.unit
 class TestExecutionEngineSSotMigrationIssue620(BaseIntegrationTest):
     """Test SSOT compliance for ExecutionEngine migration (Issue #620)."""
     
@@ -270,6 +271,7 @@ class TestExecutionEngineSSotMigrationIssue620(BaseIntegrationTest):
         print("✅ UserExecutionEngine properly integrates with UserExecutionContext")
 
 
+@pytest.mark.unit
 class TestExecutionEngineImportPatterns(BaseIntegrationTest):
     """Test import patterns and SSOT compliance."""
     
@@ -310,6 +312,7 @@ class TestExecutionEngineImportPatterns(BaseIntegrationTest):
         print("✅ Legacy import patterns work with proper deprecation warnings")
 
 
+@pytest.mark.unit
 class TestIssue565CompatibilityBridge(BaseIntegrationTest):
     """Test the Issue #565 compatibility bridge specifically."""
     
@@ -387,6 +390,7 @@ class TestIssue565CompatibilityBridge(BaseIntegrationTest):
         print("✅ Compatibility bridge creates anonymous user context when none provided")
 
 
+@pytest.mark.unit
 class TestSSotComplianceValidation(BaseIntegrationTest):
     """Validate overall SSOT compliance for execution engine migration."""
     

@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 from test_framework.ssot.base_test_case import BaseTestCase
 
+@pytest.mark.unit
 class TestAlpinePortConfiguration(BaseTestCase):
     """Test suite to validate Alpine Dockerfile port configurations.
     

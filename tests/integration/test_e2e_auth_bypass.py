@@ -33,6 +33,7 @@ from auth_service.auth_core.routes.auth_routes import router
 from auth_service.auth_core.secret_loader import AuthSecretLoader
 
 
+@pytest.mark.integration
 class TestE2EAuthBypass(SSotAsyncTestCase):
     """
     Integration tests for E2E authentication bypass mechanism.

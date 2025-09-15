@@ -35,6 +35,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestLLMManagerUserIsolation(SSotAsyncTestCase):
     """Test 1: User Context Isolation - Different users get separate LLM instances"""
     

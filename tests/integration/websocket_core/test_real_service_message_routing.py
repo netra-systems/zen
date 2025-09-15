@@ -19,6 +19,7 @@ from typing import Dict, Any, List, Optional
 import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.integration
 class TestRealServiceMessageRouting(SSotAsyncTestCase):
     """Test real service integration with MessageRouter routing."""
 

@@ -20,6 +20,7 @@ Author: Claude Code Agent - Issue #1040 Test Strategy
 Created: 2025-09-14
 """
 
+import pytest
 import sys
 import ast
 import inspect
@@ -44,6 +45,7 @@ except ImportError:
     SSOT_FRAMEWORK_AVAILABLE = False
 
 
+@pytest.mark.unit
 class TestIssue1040RegressionPrevention(SSotBaseTestCase):
     """
     Regression prevention test for Issue #1040 ServiceAvailability SSOT consolidation.
@@ -379,6 +381,7 @@ class TestIssue1040RegressionPrevention(SSotBaseTestCase):
                               f"Enum consolidation should be high: {consolidation_percentage}%")
 
 
+@pytest.mark.unit
 class TestIssue1040PostFixRegressionValidation(SSotBaseTestCase):
     """
     Post-fix regression validation tests.

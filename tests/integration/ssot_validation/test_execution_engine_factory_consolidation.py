@@ -79,6 +79,7 @@ except ImportError as e:
     WebSocketAuth = None
 
 
+@pytest.mark.integration
 class TestExecutionEngineFactoryUserIsolation(SSotAsyncTestCase):
     """DESIGNED TO FAIL: Test user isolation with real factory patterns.
     
@@ -592,6 +593,7 @@ class TestExecutionEngineFactoryUserIsolation(SSotAsyncTestCase):
         )
 
 
+@pytest.mark.integration
 class TestExecutionEngineFactoryPerformance(SSotAsyncTestCase):
     """Test factory performance before and after consolidation.
     

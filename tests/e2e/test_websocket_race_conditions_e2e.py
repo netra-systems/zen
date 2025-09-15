@@ -75,6 +75,7 @@ class E2EWebSocketMetrics:
     total_events_received: int = 0
 
 
+@pytest.mark.e2e
 class TestWebSocketRaceConditionsE2EHandshake:
     """
     E2E tests for WebSocket handshake race conditions through full Docker stack.
@@ -315,6 +316,7 @@ class TestWebSocketRaceConditionsE2EHandshake:
             }
 
 
+@pytest.mark.e2e
 class TestWebSocketRaceConditionsE2EAgentExecution:
     """
     E2E tests for WebSocket race conditions during agent execution through full stack.
@@ -566,6 +568,7 @@ class TestWebSocketRaceConditionsE2EAgentExecution:
             }
 
 
+@pytest.mark.e2e
 class TestWebSocketRaceConditionsE2EPerformance:
     """
     E2E performance tests for WebSocket race conditions under high load through full stack.
@@ -715,6 +718,7 @@ class TestWebSocketRaceConditionsE2EPerformance:
             }
 
 
+@pytest.mark.e2e
 class TestWebSocketRaceConditionsE2EGoldenPath:
     """
     E2E Golden Path tests for mission-critical WebSocket scenarios.

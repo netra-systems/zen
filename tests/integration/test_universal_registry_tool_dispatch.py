@@ -96,6 +96,7 @@ class MockTool:
         return f"Mock result from {self.name} with params: {kwargs}"
 
 
+@pytest.mark.integration
 class TestUniversalRegistryToolDispatch:
     """CRITICAL: UniversalRegistry tool dispatch integration testing."""
 

@@ -23,6 +23,7 @@ from typing import List, Dict, Set
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.network_constants import URLConstants
 
+@pytest.mark.unit
 class TestStagingUrlConfigurationFix(SSotBaseTestCase):
     """
     Test suite for staging URL configuration centralization fix.
@@ -166,6 +167,7 @@ class TestStagingUrlConfigurationFix(SSotBaseTestCase):
                 found_legacy.extend(matches)
         assert len(found_legacy) == 0, f'E2E test should not use legacy staging constants: {found_legacy}. Use STAGING_*_URL constants instead'
 
+@pytest.mark.unit
 class TestStagingUrlFixValidation(SSotBaseTestCase):
     """
     Test suite to validate the fix for staging URL configuration.

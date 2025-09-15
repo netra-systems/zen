@@ -1,11 +1,13 @@
 """
 Test to verify SERVICE_ID does not contain timestamp suffix
 """
+import pytest
 import re
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+@pytest.mark.unit
 def test_service_id_no_timestamp():
     """Verify that SERVICE_ID in deployment script does not contain timestamp"""
     deploy_script_path = os.path.join(

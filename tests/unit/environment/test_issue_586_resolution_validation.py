@@ -19,6 +19,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.timeout_configuration import CloudNativeTimeoutManager, TimeoutEnvironment, get_environment_detection_info, get_timeout_hierarchy_info
 
+@pytest.mark.unit
 class TestIssue586ResolutionValidation(SSotBaseTestCase):
     """
     Validation tests for Issue #586 resolution using real timeout configuration.

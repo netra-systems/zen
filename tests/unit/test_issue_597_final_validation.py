@@ -14,12 +14,14 @@ PURPOSE:
 EXECUTION: python3 tests/unit/test_issue_597_final_validation.py
 """
 
+import pytest
 import sys
 import traceback
 import asyncio
 from unittest.mock import patch, MagicMock
 
 
+@pytest.mark.unit
 def test_wrong_import_fails():
     """
     TEST 1: Demonstrate that validate_auth_at_startup import fails.
@@ -44,6 +46,7 @@ def test_wrong_import_fails():
         return False
 
 
+@pytest.mark.unit
 def test_correct_import_succeeds():
     """
     TEST 2: Prove that validate_auth_startup import works.
@@ -82,6 +85,7 @@ def test_correct_import_succeeds():
         return False
 
 
+@pytest.mark.unit
 def test_module_contents():
     """
     TEST 3: Examine module contents to understand what's available.
@@ -119,6 +123,7 @@ def test_module_contents():
         return False
 
 
+@pytest.mark.unit
 async def test_function_execution():
     """
     TEST 4: Test that the correct function can be executed.
@@ -153,6 +158,7 @@ async def test_function_execution():
         return False
 
 
+@pytest.mark.unit
 def test_consumer_import_patterns():
     """
     TEST 5: Test import patterns used by actual consumer files.

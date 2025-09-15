@@ -19,6 +19,7 @@ Expected Behavior:
 - AFTER REMEDIATION: Should PASS - consistent SSOT ID patterns enable proper cleanup
 """
 
+import pytest
 import asyncio
 import time
 from typing import Dict, List, Any, Optional, Set
@@ -34,6 +35,7 @@ from shared.types.core_types import (
 )
 
 
+@pytest.mark.e2e
 class TestWebSocketResourceCleanupIdPatterns(SSotAsyncTestCase):
     """Test WebSocket resource cleanup with consistent ID patterns."""
 

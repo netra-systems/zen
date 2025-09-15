@@ -75,6 +75,7 @@ class MockRequest:
         self.headers = {}
 
 
+@pytest.mark.integration
 class TestUserExecutionContextFactorySSot(SSotAsyncTestCase):
     """SSOT Factory Pattern: Validate single canonical factory pattern for UserExecutionContext"""
     

@@ -111,6 +111,7 @@ class MockLLMManager:
         self.requests.append(('completion', messages, model))
         return {'content': 'Mock LLM response', 'usage': {'total_tokens': 100}}
 
+@pytest.mark.integration
 class TestAgentRegistryUserIsolationIntegration(SSotAsyncTestCase):
     """Integration tests for AgentRegistry user isolation and factory patterns.
     

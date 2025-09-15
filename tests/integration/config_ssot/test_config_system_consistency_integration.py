@@ -31,6 +31,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import BaseIntegrationTest
 
 
+@pytest.mark.integration
 class TestConfigSystemConsistencyIntegration(BaseIntegrationTest):
     """Integration tests for system-wide configuration consistency violations."""
 

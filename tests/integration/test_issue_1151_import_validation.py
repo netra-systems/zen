@@ -15,6 +15,7 @@ project_root = Path(__file__).parent.parent.parent.absolute()
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+@pytest.mark.integration
 class TestFirstMessageExperienceImports:
     """Test suite for import resolution in previously failing test file."""
 
@@ -96,6 +97,7 @@ class TestFirstMessageExperienceImports:
         except ImportError as e:
             pytest.fail(f'Circular import or dependency issue: {e}')
 
+@pytest.mark.integration
 class TestMissionCriticalTestCollectability:
     """Test that mission-critical tests can be collected after the fix."""
 
@@ -142,6 +144,7 @@ class TestMissionCriticalTestCollectability:
         finally:
             os.chdir(original_cwd)
 
+@pytest.mark.integration
 class TestBackwardsCompatibility:
     """Test that existing functionality is not broken by the fix."""
 

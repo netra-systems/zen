@@ -24,6 +24,7 @@ from tests.e2e.staging_test_config import StagingConfig
 from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
 
 
+@pytest.mark.integration
 class TestWebSocketJWTAuthFix:
     """Test class to reproduce and verify WebSocket JWT authentication fix."""
 

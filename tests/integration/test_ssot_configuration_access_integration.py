@@ -57,6 +57,7 @@ class CrossServiceConfigurationAnalysis:
     inconsistent_access_patterns: Dict[str, List[str]]
     integration_risks: List[str]
 
+@pytest.mark.integration
 class TestSSotConfigurationAccessIntegration(SSotAsyncTestCase):
     """Integration tests for SSOT configuration access patterns across services."""
 

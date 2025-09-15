@@ -17,6 +17,7 @@ from concurrent.futures import ThreadPoolExecutor
 from shared.configuration.central_config_validator import CentralConfigurationValidator, get_central_validator, clear_central_validator_cache
 from shared.lifecycle.service_lifecycle_manager import ServiceLifecycleManager, ServiceRegistration, ServiceDependency, ReadinessContract, InitializationPhase, ServiceState, get_lifecycle_manager
 
+@pytest.mark.unit
 class TestRaceConditionProtection:
     """Test race condition protection in central config validator."""
 
@@ -118,6 +119,7 @@ class TestRaceConditionProtection:
             except ValueError as e:
                 assert 'Validation failed' in str(e)
 
+@pytest.mark.unit
 class TestServiceLifecycleManager:
     """Test service lifecycle management and dependency resolution."""
 
@@ -226,6 +228,7 @@ class TestServiceLifecycleManager:
         assert service_status['state'] == ServiceState.UNINITIALIZED.value
         assert service_status['phase'] == InitializationPhase.BOOTSTRAP.value
 
+@pytest.mark.unit
 class TestIntegrationScenarios:
     """Integration tests for race condition scenarios."""
 

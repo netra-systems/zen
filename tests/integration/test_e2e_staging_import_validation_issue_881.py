@@ -22,6 +22,7 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
+@pytest.mark.integration
 class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
     """
     Test suite that reproduces the exact import failures blocking E2E tests in staging.

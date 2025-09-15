@@ -7,6 +7,7 @@ Ensure single source of truth for WebSocket management.
 Business Value: Protects $500K+ ARR by preventing SSOT fragmentation failures.
 """
 
+import pytest
 import sys
 import warnings
 import importlib
@@ -20,6 +21,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestWebSocketManagerCanonicalSourceValidation(SSotAsyncTestCase):
     """Test canonical source validation for WebSocket Manager SSOT."""
 

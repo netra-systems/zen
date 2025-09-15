@@ -8,6 +8,7 @@ Priority: P0 BLOCKER
 Business Impact: $500K+ ARR protection - core WebSocket messaging reliability
 """
 
+import pytest
 import unittest
 import asyncio
 import importlib
@@ -21,6 +22,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestMessageRouterFragmentationConflicts(SSotBaseTestCase):
     """Test MessageRouter implementation fragmentation causing routing conflicts."""
 
@@ -414,6 +416,7 @@ class TestMessageRouterFragmentationConflicts(SSotBaseTestCase):
                           "Expected to find routing precedence analysis data")
 
 
+@pytest.mark.unit
 class TestMessageRouterImportPathFragmentation(SSotBaseTestCase):
     """Test MessageRouter import path fragmentation causing module conflicts."""
 

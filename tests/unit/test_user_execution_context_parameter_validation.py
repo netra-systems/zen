@@ -7,12 +7,14 @@ constructor is called with a non-existent 'metadata' parameter.
 EXPECTED BEHAVIOR: These tests should FAIL until Issue #964 is fixed
 """
 
+import pytest
 import unittest
 from unittest.mock import AsyncMock
 from test_framework.ssot.base import BaseTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.unit
 class TestUserExecutionContextParameterValidation(BaseTestCase):
     """Test cases to reproduce Issue #964 UserExecutionContext metadata parameter errors."""
 

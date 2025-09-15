@@ -18,6 +18,7 @@ from unittest.mock import patch, MagicMock
 from pathlib import Path
 from netra_backend.app.schemas.config import AppConfig
 
+@pytest.mark.unit
 class TestDatabaseConfigSSotCompliance:
     """Test complete SSOT compliance in database configuration."""
 

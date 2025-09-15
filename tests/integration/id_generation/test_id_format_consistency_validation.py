@@ -21,6 +21,7 @@ from typing import Dict, Any, List, Tuple
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
+@pytest.mark.integration
 class TestIdFormatConsistencyValidation(SSotBaseTestCase):
     """Integration tests validating ID format consistency across all migrated components"""
 

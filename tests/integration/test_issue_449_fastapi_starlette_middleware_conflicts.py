@@ -82,6 +82,7 @@ class AuthMiddlewareWebSocketConflict(BaseHTTPMiddleware):
             raise HTTPException(status_code=401, detail='Unauthorized')
         return await call_next(request)
 
+@pytest.mark.integration
 class TestIssue449FastAPIStarletteMiddlewareConflicts(SSotBaseTestCase):
     """
     Integration tests for Issue #449 - FastAPI/Starlette middleware conflicts.

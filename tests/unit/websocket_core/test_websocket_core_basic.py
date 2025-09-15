@@ -28,6 +28,7 @@ from shared.types.core_types import UserID
 from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
+@pytest.mark.unit
 class TestUserExecutionContextWebSocket(SSotAsyncTestCase):
     """Test UserExecutionContext WebSocket integration."""
 
@@ -76,6 +77,7 @@ class TestUserExecutionContextWebSocket(SSotAsyncTestCase):
         self.assertIn('source', metadata)
         self.assertIn('test_scenario', metadata)
 
+@pytest.mark.unit
 class TestWebSocketCoreTypes(SSotAsyncTestCase):
     """Test WebSocket core type validation."""
 
@@ -109,6 +111,7 @@ class TestWebSocketCoreTypes(SSotAsyncTestCase):
         self.assertIsNotNone(user_context.user_id)
         self.assertIsNotNone(user_context.websocket_client_id)
 
+@pytest.mark.unit
 class TestWebSocketEventStructure(SSotAsyncTestCase):
     """Test WebSocket event structure validation."""
 
@@ -135,6 +138,7 @@ class TestWebSocketEventStructure(SSotAsyncTestCase):
         self.assertIn('type', targeted_event)
         self.assertIn('data', targeted_event)
 
+@pytest.mark.unit
 class TestWebSocketErrorHandling(SSotAsyncTestCase):
     """Test WebSocket error handling scenarios."""
 

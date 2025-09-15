@@ -25,6 +25,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
+@pytest.mark.integration
 class TestWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
 
@@ -104,6 +105,7 @@ class MockAgent:
         }
 
 
+@pytest.mark.integration
 class TestAgentInstanceFactoryIsolation(SSotAsyncTestCase):
     """Test AgentInstanceFactory creates properly isolated instances."""
 

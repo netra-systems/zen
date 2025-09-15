@@ -21,6 +21,7 @@ from shared.database_url_builder import DatabaseURLBuilder
 from netra_backend.app.core.backend_environment import BackendEnvironment
 from auth_service.auth_core.auth_environment import AuthEnvironment
 
+@pytest.mark.e2e
 class TestCloudSQLProxyURLConstruction:
     """Test Cloud SQL proxy URL construction in DatabaseURLBuilder."""
 
@@ -73,6 +74,7 @@ class TestCloudSQLProxyURLConstruction:
         assert 'user%40example.com' in url
         assert 'p%40ss%23word%26special' in url
 
+@pytest.mark.e2e
 class TestBackendEnvironmentCloudSQL:
     """Test that backend environment correctly uses DatabaseURLBuilder."""
 
@@ -96,6 +98,7 @@ class TestBackendEnvironmentCloudSQL:
         assert '@/' in db_url
         assert '?host=/cloudsql/' in db_url
 
+@pytest.mark.e2e
 class TestAuthEnvironmentCloudSQL:
     """Test that auth environment correctly uses DatabaseURLBuilder."""
 
@@ -116,6 +119,7 @@ class TestAuthEnvironmentCloudSQL:
             db_url = auth_env.get_database_url()
             assert 'sqlite+aiosqlite:///:memory:' in db_url
 
+@pytest.mark.e2e
 class TestDeploymentScriptCompliance:
     """Test that deployment scripts follow SSOT principles."""
 
@@ -138,6 +142,7 @@ class TestDeploymentScriptCompliance:
             assert var in content, f'Deployment script should handle {var}'
         assert '/cloudsql/' in content, 'Deployment script should configure Cloud SQL socket path'
 
+@pytest.mark.e2e
 class TestCloudSQLValidation:
     """Test Cloud SQL configuration validation."""
 
@@ -158,6 +163,7 @@ class TestCloudSQLValidation:
         assert not is_valid
         assert 'Invalid Cloud SQL format' in error
 
+@pytest.mark.e2e
 class TestURLMasking:
     """Test that sensitive information is properly masked in logs."""
 

@@ -41,6 +41,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
+@pytest.mark.unit
 class TestAgentInstanceFactorySSotMigration(SSotAsyncTestCase):
     """
     SSOT migration validation test suite proving per-request pattern provides user isolation.

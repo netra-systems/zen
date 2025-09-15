@@ -17,6 +17,7 @@ from unittest.mock import patch, MagicMock, AsyncMock
 from netra_backend.app.startup_module import initialize_clickhouse
 from netra_backend.app.logging_config import central_logger
 
+@pytest.mark.unit
 class TestClickHouseDockerEnvironmentDetection:
     """Test ClickHouse Docker environment detection and error handling."""
 
@@ -157,6 +158,7 @@ class TestClickHouseDockerEnvironmentDetection:
                             assert result['status'] == 'skipped'
                             mock_detector.detect_environment_context.assert_called()
 
+@pytest.mark.unit
 def test_module_imports_successfully():
     """Test that all required modules can be imported."""
     from netra_backend.app.startup_module import initialize_clickhouse

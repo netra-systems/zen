@@ -13,6 +13,7 @@ PURPOSE:
 Business Value: Validates $500K+ ARR Golden Path infrastructure compliance
 """
 
+import pytest
 import ast
 import os
 import glob
@@ -24,6 +25,7 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.unit
 class TestWebSocketSSOTComplianceValidation(SSotAsyncTestCase):
     """Comprehensive SSOT compliance validation for WebSocket imports."""
 

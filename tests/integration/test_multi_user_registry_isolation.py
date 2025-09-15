@@ -77,6 +77,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
+@pytest.mark.integration
 class TestUser:
     """Test user for multi-user isolation testing."""
     user_id: str
@@ -88,6 +89,7 @@ class TestUser:
     start_time: datetime = field(default_factory=datetime.now)
 
 
+@pytest.mark.integration
 class TestMultiUserRegistryIsolation(SSotAsyncTestCase):
     """
     Integration test suite for multi-user registry isolation.

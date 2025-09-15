@@ -27,6 +27,7 @@ class InterfaceRequirement:
     expected_signature: Optional[str] = None
     description: str = ''
 
+@pytest.mark.unit
 class TestMessageRouterInterfaceCompleteness(SSotBaseTestCase):
     """Test MessageRouter interface completeness across implementations."""
 

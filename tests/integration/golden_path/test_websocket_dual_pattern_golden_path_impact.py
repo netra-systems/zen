@@ -10,6 +10,7 @@ These tests should FAIL initially to prove dual pattern impacts on Golden Path.
 CRITICAL: These tests are designed to FAIL and demonstrate Golden Path degradation.
 """
 
+import pytest
 import asyncio
 import json
 import time
@@ -21,6 +22,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.integration
 class TestWebSocketDualPatternGoldenPathImpact(SSotBaseTestCase):
     """Test suite to validate Golden Path impact of dual pattern (SHOULD FAIL)"""
 

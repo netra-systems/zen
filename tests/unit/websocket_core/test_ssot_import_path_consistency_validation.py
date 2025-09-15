@@ -14,6 +14,7 @@ Test Strategy: Static analysis of import statements (no runtime dependencies).
 NO DOCKER required - pure Python import analysis.
 """
 
+import pytest
 import ast
 import os
 import sys
@@ -24,6 +25,7 @@ import unittest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestWebSocketManagerImportConsistency(SSotBaseTestCase, unittest.TestCase):
     """Test suite to validate SSOT import consistency for WebSocket managers.
 

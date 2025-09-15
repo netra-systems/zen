@@ -195,6 +195,7 @@ async def agent_registry():
 
 
 @pytest.fixture
+@pytest.mark.integration
 async def test_agent():
     """Create test agent."""
     return SimpleTestAgent("TestChatAgent")

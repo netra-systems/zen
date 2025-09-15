@@ -18,6 +18,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
 
+@pytest.mark.unit
 class TestInterfaceMismatchVulnerabilities:
     """Test suite to reproduce confirmed interface mismatch vulnerabilities."""
 
@@ -121,6 +122,7 @@ class TestInterfaceMismatchVulnerabilities:
                 status = '✅ SECURE' if has_method else '🚨 VULNERABLE'
                 print(f'    {method_name}: {status}')
 
+@pytest.mark.unit
 class TestSSotViolationVulnerabilities:
     """Test suite to reproduce SSOT violations causing security vulnerabilities."""
 

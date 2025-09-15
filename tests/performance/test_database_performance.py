@@ -96,6 +96,7 @@ async def mock_database():
     return MockDatabase()
 
 @pytest.fixture
+@pytest.mark.performance
 async def test_contexts():
     """Generate multiple test contexts."""
     contexts = []

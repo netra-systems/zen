@@ -154,6 +154,7 @@ async def websocket_client(auth_token):
         await client.disconnect()
 
 
+@pytest.mark.e2e
 class TestPresenceDetectionE2E:
     """End-to-end tests for presence detection."""
     
@@ -415,6 +416,7 @@ class TestPresenceDetectionE2E:
             assert len(remaining_keys) == 0 or remaining_keys == []
 
 
+@pytest.mark.e2e
 class TestPresenceDetectionEdgeCases:
     """Test edge cases in presence detection E2E."""
     

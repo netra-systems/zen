@@ -13,6 +13,7 @@ Business Value Justification:
 
 Test Strategy: Create FAILING tests that demonstrate security gaps
 """
+import pytest
 import uuid
 import time
 import asyncio
@@ -22,6 +23,7 @@ from concurrent.futures import ThreadPoolExecutor
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
+@pytest.mark.unit
 class TestIDFormatSecurity(SSotBaseTestCase):
     """
     Test suite to validate ID format consistency and security properties.

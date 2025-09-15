@@ -24,6 +24,7 @@ SSOT PROTECTION REQUIREMENTS:
 PURPOSE: These tests MUST PASS to prove SSOT infrastructure protects rather
 than breaks the core business functionality.
 """
+import pytest
 import sys
 import asyncio
 import time
@@ -46,6 +47,7 @@ class GoldenPathValidation:
     error_message: Optional[str] = None
     details: Optional[Dict[str, Any]] = None
 
+@pytest.mark.integration
 class TestGoldenPathSSOTProtection(SSotAsyncTestCase):
     """
     MISSION CRITICAL: Test that SSOT compliance protects rather than breaks Golden Path.

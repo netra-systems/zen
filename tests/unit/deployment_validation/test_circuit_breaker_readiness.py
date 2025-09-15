@@ -8,6 +8,7 @@ import pytest
 import time
 import asyncio
 
+@pytest.mark.unit
 class TestCircuitBreakerReadiness:
     
     def test_circuit_breaker_staging_configuration(self):

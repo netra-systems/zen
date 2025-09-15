@@ -16,6 +16,7 @@ from typing import Dict, Any
 from tests.e2e.integration.test_agent_response_quality_grading import AgentResponseQualityGrader
 
 
+@pytest.mark.e2e
 class TestAgentResponseQualitySimple:
     """Simple tests for agent response quality grading system."""
     

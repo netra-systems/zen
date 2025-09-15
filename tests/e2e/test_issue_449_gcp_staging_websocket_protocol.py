@@ -130,6 +130,7 @@ class GCPStagingWebSocketTester:
             result['response_time'] = time.time() - start_time
         return result
 
+@pytest.mark.e2e
 class TestIssue449GCPStagingWebSocketProtocol(SSotBaseTestCase):
     """
     E2E tests for Issue #449 - GCP staging WebSocket protocol failures.

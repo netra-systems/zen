@@ -27,6 +27,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 
+@pytest.mark.integration
 class TestExecutionEngineFactoryWebSocketIntegration:
     """Test ExecutionEngineFactory WebSocket bridge integration patterns."""
 
@@ -215,6 +216,7 @@ class TestExecutionEngineFactoryWebSocketIntegration:
             finally:
                 await factory.cleanup_engine(engine)
 
+@pytest.mark.integration
 class TestExecutionEngineFactoryWebSocketConfiguration:
     """Test ExecutionEngineFactory WebSocket configuration and setup."""
 
@@ -278,6 +280,7 @@ class TestExecutionEngineFactoryWebSocketConfiguration:
             finally:
                 await factory.cleanup_engine(engine)
 
+@pytest.mark.integration
 class TestExecutionEngineFactoryWebSocketBusinessValue:
     """Test ExecutionEngineFactory delivers WebSocket business value."""
 

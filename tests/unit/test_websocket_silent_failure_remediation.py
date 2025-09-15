@@ -18,6 +18,7 @@ from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.unit
 class TestWebSocketSilentFailureRemediation:
     """Test suite for WebSocket silent failure remediation."""
 
@@ -263,6 +264,7 @@ class TestWebSocketSilentFailureRemediation:
 
 
 # Integration test to validate end-to-end functionality
+@pytest.mark.unit
 class TestWebSocketFailureRecoveryIntegration:
     """Integration tests for WebSocket failure recovery."""
 

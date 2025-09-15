@@ -28,6 +28,7 @@ from dataclasses import dataclass
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.timeout_configuration import CloudNativeTimeoutManager, TimeoutConfig, TimeoutEnvironment, get_websocket_recv_timeout, get_agent_execution_timeout, get_timeout_config, validate_timeout_hierarchy, reset_timeout_manager
 
+@pytest.mark.unit
 class TestStreamingTimeoutConfiguration(SSotBaseTestCase):
     """Unit tests for streaming timeout configuration hierarchy."""
 
@@ -213,6 +214,7 @@ class TestStreamingTimeoutConfiguration(SSotBaseTestCase):
             assert result['timeout'] > 0, f"Invalid timeout in thread {result['thread_id']}"
             assert result['agent_timeout'] > 0, f"Invalid agent timeout in thread {result['thread_id']}"
 
+@pytest.mark.unit
 class TestStreamingTimeoutConfigurationEdgeCases(SSotBaseTestCase):
     """Edge case tests for streaming timeout configuration."""
 

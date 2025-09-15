@@ -49,6 +49,7 @@ class GoldenPathValidationResult:
     execution_time: float
     business_impact: str
 
+@pytest.mark.e2e
 class TestGoldenPathSsotIntegration(SSotAsyncTestCase):
     """
     Golden Path SSOT Integration E2E Tests - Designed to FAIL initially

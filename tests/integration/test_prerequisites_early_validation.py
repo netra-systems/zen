@@ -28,6 +28,7 @@ from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecut
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.supervisor.execution_factory import ExecutionFactory
 
+@pytest.mark.integration
 class TestPrerequisitesEarlyValidation(SSotAsyncTestCase):
     """Integration tests for early prerequisite validation in agent execution flow.
     

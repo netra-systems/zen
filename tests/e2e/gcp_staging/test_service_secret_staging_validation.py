@@ -26,6 +26,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 logger = logging.getLogger(__name__)
 
+@pytest.mark.e2e
 class TestServiceSecretStagingValidation(SSotAsyncTestCase):
     """
     E2E tests validating Issue #1037 in GCP staging environment.

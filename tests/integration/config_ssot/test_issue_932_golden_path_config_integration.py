@@ -29,6 +29,7 @@ Expected Behavior:
 This test supports the Configuration Manager SSOT remediation effort for Issue #932.
 """
 
+import pytest
 import unittest
 import asyncio
 import time
@@ -39,6 +40,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestIssue932GoldenPathConfigIntegration(SSotAsyncTestCase, unittest.TestCase):
     """Integration tests for Golden Path configuration flow for Issue #932."""
     

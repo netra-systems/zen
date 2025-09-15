@@ -37,6 +37,7 @@ except ImportError:
     DEEP_AGENT_STATE_EXISTS = False
 
 
+@pytest.mark.unit
 class TestUserContextSecurity(SSotAsyncTestCase):
     """Test user isolation security after DeepAgentState elimination."""
     

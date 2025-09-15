@@ -139,6 +139,7 @@ async def test_backend_health_api_versioning():
 
 
 
+@pytest.mark.unit
 def test_auth_service_health_versioning_imports():
     """Test that auth service health endpoint imports and structure are correct."""
     

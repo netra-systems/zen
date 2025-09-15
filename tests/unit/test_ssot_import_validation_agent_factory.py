@@ -21,6 +21,7 @@ from unittest.mock import patch
 import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.unit
 class TestSSOTImportValidationAgentFactory(SSotAsyncTestCase):
     """
     Test suite validating SSOT import patterns in agent factory modules.

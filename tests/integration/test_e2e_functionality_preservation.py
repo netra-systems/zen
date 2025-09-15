@@ -16,6 +16,7 @@ Strategic importance: Maintains E2E testing infrastructure reliability.
 Author: E2E Functionality Preservation Agent  
 Date: 2025-09-10
 """
+import pytest
 import asyncio
 import logging
 import socket
@@ -182,6 +183,7 @@ class E2EFunctionalityTester:
         self.test_processes.clear()
         self.cleanup_tasks.clear()
 
+@pytest.mark.integration
 class TestE2EFunctionalityPreservation(SSotBaseTestCase):
     """
     Integration Test Suite: E2E Functionality Preservation.
@@ -405,6 +407,7 @@ class TestE2EFunctionalityPreservation(SSotBaseTestCase):
         assert preservation_percentage >= minimum_threshold, f'Functionality preservation {preservation_percentage:.1f}% below minimum threshold {minimum_threshold}%. Migration may have broken critical E2E capabilities.'
         logger.info(f' PASS:  COMPREHENSIVE VALIDATION PASSED: {preservation_percentage:.1f}% E2E functionality preserved')
 
+@pytest.mark.integration
 class TestE2EAsyncFunctionalityPreservation(SSotAsyncTestCase):
     """
     Async variant of E2E functionality preservation tests.

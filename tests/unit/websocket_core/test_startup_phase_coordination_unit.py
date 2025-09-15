@@ -39,6 +39,7 @@ class MockStartupPhase(Enum):
     FINALIZE = "finalize"
 
 
+@pytest.mark.unit
 class TestStartupPhaseCoordination:
     """Test startup phase coordination with WebSocket validation."""
     
@@ -244,6 +245,7 @@ class TestStartupPhaseCoordination:
             assert race_condition_logged, "Race condition detection should be logged for debugging"
 
 
+@pytest.mark.unit
 class TestTimeoutConfiguration:
     """Test timeout configuration and environment-specific behavior."""
     
@@ -318,6 +320,7 @@ class TestTimeoutConfiguration:
         assert optimized_timeout >= 0.5, "Should enforce minimum Cloud Run timeout for race condition safety"
 
 
+@pytest.mark.unit
 class TestAppStateIntegration:
     """Test app_state integration and synchronization."""
     
@@ -401,6 +404,7 @@ class TestAppStateIntegration:
                 assert supervisor_ready is True, "Should be ready when both supervisor and thread_service available"
 
 
+@pytest.mark.unit
 class TestGracefulDegradation:
     """Test graceful degradation during race conditions."""
     

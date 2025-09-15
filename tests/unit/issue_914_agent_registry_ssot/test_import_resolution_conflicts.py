@@ -26,6 +26,7 @@ from unittest.mock import Mock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.unit
 class TestAgentRegistryImportResolutionConflicts(SSotAsyncTestCase):
     """
     CRITICAL P0 Tests: Prove import resolution conflicts block Golden Path

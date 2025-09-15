@@ -18,6 +18,7 @@ EXPECTED FINAL STATE: PASS (methods consolidated to centralized factory)
 Created: 2025-09-14 for Issue #884 Step 2 test validation
 """
 
+import pytest
 import importlib
 import inspect
 import sys
@@ -29,6 +30,7 @@ import re
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestFactoryMethodConsolidation884(SSotBaseTestCase):
     """
     CRITICAL SSOT Test: Detect scattered execution engine factory methods

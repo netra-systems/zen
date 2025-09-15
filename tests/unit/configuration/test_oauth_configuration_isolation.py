@@ -13,6 +13,7 @@ from unittest.mock import patch, Mock
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
+@pytest.mark.unit
 class TestOAuthConfigurationIsolation:
     """Test OAuth configuration isolation between environments to prevent credential leaks."""
 
@@ -283,6 +284,7 @@ class TestOAuthConfigurationIsolation:
                     assert retrieved_id != invalid_id, f"Invalid OAuth client ID not sanitized: {invalid_id}"
 
 
+@pytest.mark.unit
 class TestOAuthRegressionPrevention:
     """Test OAuth regression prevention mechanisms based on previous incidents."""
 

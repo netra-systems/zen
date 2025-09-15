@@ -42,6 +42,7 @@ class BaseIntegrationTest(SSotBaseTestCase):
         for key, value in self.test_environment_values.items():
             self.env.set(key, value)
 
+@pytest.mark.integration
 class TestIssue724ConfigurationManagerIntegration(BaseIntegrationTest):
     """
     Integration tests for configuration manager SSOT compliance.

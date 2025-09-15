@@ -82,6 +82,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.integration
 class TestDatabaseManagerBusinessCriticalRevenue(SSotBaseTestCase):
     """
     Test business-critical revenue-impacting database scenarios.

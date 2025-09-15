@@ -232,6 +232,7 @@ async def orchestration_setup(real_services):
         supervisor = SupervisorAgent(db_session=db_session, llm_manager=llm_manager, websocket_manager=websocket_manager, tool_dispatcher=tool_dispatcher)
         yield {'supervisor': supervisor, 'llm_manager': llm_manager, 'websocket_manager': websocket_manager, 'tool_dispatcher': tool_dispatcher, 'db_session': db_session, 'config': app_config}
 
+@pytest.mark.e2e
 class TestCompleteAgentWorkflow(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
@@ -307,6 +308,7 @@ class TestCompleteAgentWorkflow(SSotBaseTestCase):
         except Exception as e:
             pytest.fail(f'Complex workflow failed with error: {e}')
 
+@pytest.mark.e2e
 class TestAgentHandoffAndContextPreservation(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
@@ -370,6 +372,7 @@ class TestAgentHandoffAndContextPreservation(SSotBaseTestCase):
         assert is_valid, f'Context preservation validation failed: {validation_results}'
         logger.info(f'Multi-turn conversation completed with {len(state.conversation_history)} history items')
 
+@pytest.mark.e2e
 class TestErrorRecoveryDuringExecution(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
@@ -439,6 +442,7 @@ class TestErrorRecoveryDuringExecution(SSotBaseTestCase):
         assert recovery_attempts >= min_expected_recoveries, f'Insufficient recovery attempts: {recovery_attempts} < {min_expected_recoveries}'
         logger.info(f'Error recovery testing completed: {recovery_attempts}/{len(error_scenarios)} scenarios handled')
 
+@pytest.mark.e2e
 class TestPerformanceAndProductionReadiness(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

@@ -29,6 +29,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.unit
 class TestSSotLoggingBootstrap(SSotBaseTestCase):
     """
     CRITICAL BUSINESS VALUE: Validates SSOT logging bootstrap without circular dependencies.
@@ -304,6 +305,7 @@ class TestSSotLoggingBootstrap(SSotBaseTestCase):
         )
 
 
+@pytest.mark.unit
 class TestLoggingBootstrapDependencyGraph(SSotBaseTestCase):
     """
     Advanced dependency graph analysis for logging bootstrap.

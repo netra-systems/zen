@@ -22,6 +22,7 @@ Test Strategy:
 6. Validate registry method consistency
 """
 
+import pytest
 import asyncio
 import logging
 import unittest
@@ -56,6 +57,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.unit
 class TestRegistryFactoryPatternValidation(SSotAsyncTestCase):
     """
     Test suite to validate registry factory pattern consistency.

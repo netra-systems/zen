@@ -21,6 +21,7 @@ from aiohttp import ClientTimeout, ClientSession
 import os
 from netra_backend.app.core.environment_context.cloud_environment_detector import CloudEnvironmentDetector, EnvironmentContext, EnvironmentType, CloudPlatform, get_cloud_environment_detector, detect_current_environment
 
+@pytest.mark.unit
 class TestCloudEnvironmentDetector:
     """Test comprehensive cloud environment detection."""
 
@@ -163,6 +164,7 @@ class TestCloudEnvironmentDetector:
                 await detector.detect_environment_context(force_refresh=True)
                 mock_detect.assert_called()
 
+@pytest.mark.unit
 class TestEnvironmentDetectionIntegration:
     """Integration tests for environment detection."""
 
@@ -230,6 +232,7 @@ class TestEnvironmentDetectionIntegration:
                 print(f'   Service: {context.service_name}')
                 print(f'    FAIL:  NO MORE localhost:8081 in staging!')
 
+@pytest.mark.unit
 class TestEnvironmentDetectionFailureCases:
     """Test failure scenarios and error handling."""
 

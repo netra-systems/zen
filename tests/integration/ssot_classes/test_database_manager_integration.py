@@ -40,6 +40,7 @@ from netra_backend.app.db.database_manager import DatabaseManager, get_database_
 from shared.database_url_builder import DatabaseURLBuilder
 
 
+@pytest.mark.integration
 class TestDatabaseManagerInitialization(SSotAsyncTestCase):
     """Test DatabaseManager initialization and URL building functionality."""
     
@@ -189,6 +190,7 @@ class TestDatabaseManagerInitialization(SSotAsyncTestCase):
             self.record_metric("url_builder_ssot_compliance", True)
 
 
+@pytest.mark.integration
 class TestDatabaseManagerConnectionManagement(SSotAsyncTestCase):
     """Test DatabaseManager connection and engine management functionality."""
     
@@ -321,6 +323,7 @@ class TestDatabaseManagerConnectionManagement(SSotAsyncTestCase):
                 self.record_metric("application_engine_creation", True)
 
 
+@pytest.mark.integration
 class TestDatabaseManagerSessionLifecycle(SSotAsyncTestCase):
     """Test DatabaseManager session lifecycle and context management."""
     
@@ -440,6 +443,7 @@ class TestDatabaseManagerSessionLifecycle(SSotAsyncTestCase):
                 self.record_metric("class_method_compatibility", True)
 
 
+@pytest.mark.integration
 class TestDatabaseManagerMultiDatabaseSupport(SSotAsyncTestCase):
     """Test DatabaseManager support for multiple database types."""
     
@@ -535,6 +539,7 @@ class TestDatabaseManagerMultiDatabaseSupport(SSotAsyncTestCase):
                     self.record_metric("ssl_configuration", True)
 
 
+@pytest.mark.integration
 class TestDatabaseManagerErrorHandlingAndRecovery(SSotAsyncTestCase):
     """Test DatabaseManager error handling and connection recovery."""
     
@@ -697,6 +702,7 @@ class TestDatabaseManagerErrorHandlingAndRecovery(SSotAsyncTestCase):
                 self.record_metric("migration_url_failure_handling", True)
 
 
+@pytest.mark.integration
 class TestDatabaseManagerResourceCleanup(SSotAsyncTestCase):
     """Test DatabaseManager resource cleanup and connection disposal."""
     

@@ -35,6 +35,7 @@ import pytest
 import inspect
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
 
+@pytest.mark.integration
 class TestDockerAPIMigrationValidation:
     """Validate Docker API migration and identify legacy patterns."""
 
@@ -155,6 +156,7 @@ class TestDockerAPIMigrationValidation:
                 manager.acquire_environment(**legacy_params)
         print(f'✅ All {len(legacy_combinations)} legacy parameter combinations properly rejected')
 
+@pytest.mark.integration
 class TestAuthServiceAPIPatternMigration:
     """Validate auth service specific API pattern migration."""
 

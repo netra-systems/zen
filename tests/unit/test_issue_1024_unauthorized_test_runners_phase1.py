@@ -33,6 +33,7 @@ except ImportError:
     import unittest
     BaseTestCase = unittest.TestCase
 
+@pytest.mark.unit
 class TestUnauthorizedTestRunnerDetection(BaseTestCase):
     """Unit tests to detect unauthorized test runners violating SSOT patterns"""
 
@@ -144,6 +145,7 @@ class TestUnauthorizedTestRunnerDetection(BaseTestCase):
                         continue
         self.assertEqual(len(unauthorized_patterns), 0, f'CRITICAL SSOT VIOLATION: Found {len(unauthorized_patterns)} unauthorized test execution patterns bypassing unified test runner. This creates deployment chaos.')
 
+@pytest.mark.unit
 class TestGoldenPathTestReliabilityMetrics(BaseTestCase):
     """Unit tests to measure and validate Golden Path test reliability"""
 
