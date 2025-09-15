@@ -1,16 +1,16 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-14 17:31:32
+**Generated:** 2025-09-14 17:55:00
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 1
+- **Total Tests:** 3
 - **Passed:** 0 (0.0%)
-- **Failed:** 1 (100.0%)
+- **Failed:** 3 (100.0%)
 - **Skipped:** 0
-- **Duration:** 0.32 seconds
+- **Duration:** 1.29 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,25 +19,45 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_staging_event_validator_endpoint_consistency | FAIL failed | 0.000s | test_golden_path_event_validation.py |
+| test_golden_path_user_login_ai_response_flow_with_ssot_router | FAIL failed | 0.001s | test_golden_path_message_router_ssot_validation.py |
+| test_multiple_concurrent_users_with_ssot_router | FAIL failed | 0.000s | test_golden_path_message_router_ssot_validation.py |
+| test_ssot_router_error_handling_and_recovery | FAIL failed | 0.000s | test_golden_path_message_router_ssot_validation.py |
 
 ## Failed Tests Details
 
-### FAILED: test_staging_event_validator_endpoint_consistency
-- **File:** C:\GitHub\netra-apex\tests\e2e\staging\event_validator_ssot\test_golden_path_event_validation.py
+### FAILED: test_golden_path_user_login_ai_response_flow_with_ssot_router
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_message_router_ssot_validation.py
+- **Duration:** 0.001s
+- **Error:** tests\e2e\staging\test_golden_path_message_router_ssot_validation.py:67: in test_golden_path_user_login_ai_response_flow_with_ssot_router
+    self.test_users.append(test_user)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'TestGoldenPathMessageRouterSSOTValidation' object has no attribute 'test_users'...
+
+### FAILED: test_multiple_concurrent_users_with_ssot_router
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_message_router_ssot_validation.py
 - **Duration:** 0.000s
-- **Error:** tests\e2e\staging\event_validator_ssot\test_golden_path_event_validation.py:296: in test_staging_event_validator_endpoint_consistency
-    if not self.staging_base_url:
-           ^^^^^^^^^^^^^^^^^^^^^
-E   AttributeError: 'TestGoldenPathEventValidationStaging' object has no attribute 'staging_base_url'...
+- **Error:** tests\e2e\staging\test_golden_path_message_router_ssot_validation.py:183: in test_multiple_concurrent_users_with_ssot_router
+    self.test_users.append(user)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'TestGoldenPathMessageRouterSSOTValidation' object has no attribute 'test_users'...
+
+### FAILED: test_ssot_router_error_handling_and_recovery
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_message_router_ssot_validation.py
+- **Duration:** 0.000s
+- **Error:** tests\e2e\staging\test_golden_path_message_router_ssot_validation.py:282: in test_ssot_router_error_handling_and_recovery
+    self.test_users.append(test_user)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'TestGoldenPathMessageRouterSSOTValidation' object has no attribute 'test_users'...
 
 ## Pytest Output Format
 
 ```
-test_golden_path_event_validation.py::test_staging_event_validator_endpoint_consistency FAILED
+test_golden_path_message_router_ssot_validation.py::test_golden_path_user_login_ai_response_flow_with_ssot_router FAILED
+test_golden_path_message_router_ssot_validation.py::test_multiple_concurrent_users_with_ssot_router FAILED
+test_golden_path_message_router_ssot_validation.py::test_ssot_router_error_handling_and_recovery FAILED
 
 ==================================================
-0 passed, 1 failed in 0.32s
+0 passed, 3 failed in 1.29s
 ```
 
 ## Test Coverage Matrix
