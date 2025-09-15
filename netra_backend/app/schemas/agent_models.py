@@ -454,9 +454,12 @@ class DeepAgentState(BaseModel):
         for key, value in custom_fields.items():
             key_lower = key.lower()
             if any(pattern in key_lower for pattern in sensitive_patterns):
-                filtered_fields[key] = '[REDACTED]'
+                # SECURITY: Completely remove sensitive fields rather than redacting
+                # This prevents exposure of sensitive field names to potential attackers
+                continue
             elif isinstance(value, str) and self._contains_sensitive_content(value):
-                filtered_fields[key] = '[REDACTED]'
+                # SECURITY: Remove fields with sensitive content
+                continue
             elif isinstance(value, dict):
                 # Recursively filter nested dictionaries
                 filtered_fields[key] = self._apply_generic_filtering(value)
@@ -497,9 +500,11 @@ class DeepAgentState(BaseModel):
         for key, value in data.items():
             key_lower = key.lower()
             if any(pattern in key_lower for pattern in sensitive_key_patterns):
-                filtered_data[key] = '[REDACTED]'
+                # SECURITY: Completely remove sensitive fields rather than redacting
+                continue
             elif isinstance(value, str) and self._contains_sensitive_content(value):
-                filtered_data[key] = '[REDACTED]'
+                # SECURITY: Remove fields with sensitive content
+                continue
             elif isinstance(value, dict):
                 filtered_data[key] = self._apply_generic_filtering(value)
             else:
