@@ -20,14 +20,23 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 class MockWebSocketManager:
-    """Mock WebSocket manager for testing."""
-    
+    """Mock WebSocket manager for testing.
+
+    ISSUE #1182 REMEDIATION: Updated to match SSOT WebSocketManager interface
+    including factory pattern compliance.
+    """
+
     def __init__(self):
         self.active_connections: Set[str] = set()
         self.user_connections: Dict[str, Set[str]] = {}
         self.connection_data: Dict[str, Dict[str, Any]] = {}
         self.messages_sent: List[Dict[str, Any]] = []
         self.broadcasts_sent: List[Dict[str, Any]] = []
+
+    def __call__(self, *args, **kwargs):
+        """ISSUE #1182: Add __call__ method to match factory pattern interface."""
+        # For mock, just return self to simulate factory behavior
+        return self
         
     async def connect(self, connection_id: str, user_id: Optional[str] = None, **kwargs):
         """Mock connection method."""

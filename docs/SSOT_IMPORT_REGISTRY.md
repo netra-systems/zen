@@ -9,7 +9,7 @@ Mission: Provide authoritative import mappings for all Netra services
 ### 🏆 CURRENT ACHIEVEMENTS
 - **Issue #863 Agent Registry SSOT**: ✅ **PHASE 3 COMPLETE** - 100% SSOT compliance achieved, both import paths resolve to identical classes
 - **Issue #1116 Agent Factory SSOT**: ✅ **COMPLETE** - Full singleton to factory migration with enterprise user isolation
-- **Issue #1182 WebSocket Manager SSOT**: ✅ **PHASE 1 COMPLETE** - Eliminated duplicate get_websocket_manager functions, consolidated imports to canonical paths
+- **Issue #1182 WebSocket Manager SSOT**: ✅ **PHASE 1 COMPLETE** - Eliminated duplicate get_websocket_manager functions, consolidated imports to canonical paths, WebSocketManagerFactory integrated into canonical module
 - **SSOT Compliance**: 87.2% Real System (285 violations in 118 files) - Major Agent Registry violations resolved through direct re-export
 - **Configuration Manager SSOT**: ✅ **PHASE 1 COMPLETE** - Issue #667 unified imports and compatibility
 - **WebSocket Bridge SSOT**: ✅ **COMPLETE** - Comprehensive audit and migration finished with dual pattern analysis
@@ -67,9 +67,10 @@ from netra_backend.app.services.user_execution_context import create_isolated_ex
 # WebSocket Agent Bridge (CRITICAL - VERIFIED 2025-09-11)
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 
-# WebSocket Manager (CRITICAL - UPDATED 2025-09-14 - Issue #996 Cleanup)
+# WebSocket Manager (CRITICAL - UPDATED 2025-09-14 - Issue #1182 Phase 1 Complete)
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection, WebSocketManagerMode
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerFactory  # CONSOLIDATED: No longer separate module
 
 # Request Scoped Execution (VERIFIED 2025-09-11)
 from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
@@ -513,15 +514,17 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager 
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager  # Implementation
 ```
 
-#### WebSocket Manager Factory Import (GOLDEN PATH FIX):
+#### WebSocket Manager Factory Import (ISSUE #1182 PHASE 1 COMPLETE):
 ```python
 # ISSUE: ModuleNotFoundError: No module named 'netra_backend.app.websocket_core.websocket_manager_factory'
-# SOLUTION: Created websocket_manager_factory.py compatibility module for Golden Path tests
+# SOLUTION: Consolidated WebSocketManagerFactory into websocket_manager.py (Issue #1182 Phase 1)
 
-# WORKING IMPORTS:
-from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
-from netra_backend.app.websocket_core.websocket_manager_factory import IsolatedWebSocketManager
+# DEPRECATED (no longer working):
+# from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+
+# CONSOLIDATED SSOT IMPORTS (Issue #1182):
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerFactory  # Consolidated interface
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager    # Preferred factory function
 ```
 
 #### E2E Test Helper Modules (IMPORT COMPATIBILITY):

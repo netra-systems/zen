@@ -73,9 +73,8 @@ class TestWebSocketManagerSSotViolationsUnit(SSotBaseTestCase):
         
         try:
             # Try to import the factory and manager
-            from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            # ISSUE #1182: WebSocketManagerFactory is now consolidated into websocket_manager.py
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerFactory, WebSocketManager, UnifiedWebSocketManager
             
             # Check if factory exists (indicating SSOT violation)
             # Issue #712 Fix: Factory is acceptable if it creates SSOT instances
@@ -342,8 +341,8 @@ class TestWebSocketManagerSSotViolationsUnit(SSotBaseTestCase):
         # Check for context-based SSOT implementation
         try:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-            
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, UnifiedWebSocketManager
+
             # SSOT should use single manager with context
             if not hasattr(UnifiedWebSocketManager, 'with_context') and not hasattr(UnifiedWebSocketManager, 'set_context'):
                 violation_detected = True
@@ -486,7 +485,9 @@ class TestWebSocketManagerSSotViolationsIntegration(SSotBaseTestCase):
             
             # Try to get WebSocket manager and register connections
             try:
-                manager = WebSocketManager()
+                # ISSUE #1182: Use proper factory pattern instead of direct instantiation
+                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                manager = get_websocket_manager()
                 
                 # Register connections (if manager supports it)
                 if hasattr(manager, 'register_connection'):
