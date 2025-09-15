@@ -13,6 +13,8 @@ import time
 from pathlib import Path
 from typing import Tuple, Dict, Any, Optional
 from enum import Enum
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 
 from fastapi import FastAPI
 
@@ -85,6 +87,74 @@ class DeterministicStartupError(Exception):
         return base_message
 
 
+@dataclass
+class CircuitBreakerState:
+    """Circuit breaker state for database connections - Issue #1278 resilience."""
+    failure_count: int = 0
+    last_failure_time: Optional[datetime] = None
+    state: str = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
+    failure_threshold: int = 3
+    timeout_seconds: int = 60  # Time to wait before trying again
+
+
+class DatabaseCircuitBreaker:
+    """
+    Circuit breaker for database connections to handle Issue #1278 scenarios.
+    
+    Prevents cascading failures when Cloud SQL VPC connector is under capacity pressure.
+    """
+    
+    def __init__(self, failure_threshold: int = 3, timeout_seconds: int = 60):
+        self.state = CircuitBreakerState(
+            failure_threshold=failure_threshold,
+            timeout_seconds=timeout_seconds
+        )
+        self.logger = logging.getLogger(__name__)
+    
+    def record_success(self):
+        """Record successful database operation."""
+        if self.state.failure_count > 0:
+            self.logger.info(f"Circuit breaker: Database operation succeeded, resetting failure count from {self.state.failure_count}")
+        self.state.failure_count = 0
+        self.state.last_failure_time = None
+        self.state.state = "CLOSED"
+    
+    def record_failure(self):
+        """Record failed database operation."""
+        self.state.failure_count += 1
+        self.state.last_failure_time = datetime.now()
+        
+        if self.state.failure_count >= self.state.failure_threshold:
+            self.state.state = "OPEN"
+            self.logger.warning(f"Circuit breaker: Database failures reached threshold ({self.state.failure_count}), "
+                              f"opening circuit for {self.state.timeout_seconds}s")
+        else:
+            self.logger.info(f"Circuit breaker: Database failure {self.state.failure_count}/{self.state.failure_threshold}")
+    
+    def can_execute(self) -> Tuple[bool, str]:
+        """Check if database operation can be executed."""
+        if self.state.state == "CLOSED":
+            return True, "Circuit is closed, operation allowed"
+        
+        if self.state.state == "OPEN":
+            if self.state.last_failure_time is None:
+                return False, "Circuit is open with no failure time recorded"
+            
+            time_since_failure = datetime.now() - self.state.last_failure_time
+            if time_since_failure.total_seconds() >= self.state.timeout_seconds:
+                self.state.state = "HALF_OPEN"
+                self.logger.info("Circuit breaker: Transitioning from OPEN to HALF_OPEN, allowing test operation")
+                return True, "Circuit transitioned to half-open, test operation allowed"
+            else:
+                remaining_time = self.state.timeout_seconds - time_since_failure.total_seconds()
+                return False, f"Circuit is open, {remaining_time:.1f}s remaining before retry"
+        
+        if self.state.state == "HALF_OPEN":
+            return True, "Circuit is half-open, test operation allowed"
+        
+        return False, f"Unknown circuit state: {self.state.state}"
+
+
 class StartupOrchestrator:
     """
     Orchestrates deterministic startup sequence.
@@ -112,6 +182,9 @@ class StartupOrchestrator:
         self.phase_timings: Dict[StartupPhase, Dict[str, float]] = {}
         self.completed_phases: set[StartupPhase] = set()
         self.failed_phases: set[StartupPhase] = set()
+        
+        # Circuit breaker for database resilience (Issue #1278)
+        self.database_circuit_breaker = DatabaseCircuitBreaker(failure_threshold=3, timeout_seconds=60)
         
         # Initialize app state for startup tracking
         self._initialize_startup_state()
