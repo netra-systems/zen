@@ -28,6 +28,13 @@ from netra_backend.app.websocket_core.types import (
     _get_enum_key_representation
 )
 
+# ISSUE #1011 REMEDIATION: Import SSOT MessageQueue for consolidation
+from netra_backend.app.websocket_core.message_queue import (
+    get_message_queue_registry,
+    MessageQueue,
+    MessagePriority
+)
+
 # Import the protocol after it's defined to avoid circular imports
 logger = get_logger(__name__)
 
@@ -422,8 +429,11 @@ class _UnifiedWebSocketManagerImplementation:
     
     def _initialize_unified_mode(self):
         """Initialize unified mode with full feature set."""
-        # Enhanced error handling and recovery system
-        self._message_recovery_queue: Dict[str, List[Dict]] = {}  # user_id -> [messages]
+        # ISSUE #1011 REMEDIATION: Replace competing queue implementations with SSOT MessageQueue registry
+        self._message_queue_registry = get_message_queue_registry()
+        self._connection_message_queues: Dict[str, MessageQueue] = {}  # connection_id -> MessageQueue
+
+        # Maintain minimal backward compatibility for error recovery
         self._connection_error_count: Dict[str, int] = {}  # user_id -> error_count
         self._last_error_time: Dict[str, datetime] = {}  # user_id -> last_error_timestamp
         
@@ -451,15 +461,15 @@ class _UnifiedWebSocketManagerImplementation:
         """Initialize isolated mode for user-specific operation."""
         self.user_context = user_context
         self._connection_ids: Set[str] = set()
-        
+
+        # ISSUE #1011 REMEDIATION: Use SSOT MessageQueue registry for isolated mode as well
+        self._message_queue_registry = get_message_queue_registry()
+        self._connection_message_queues: Dict[str, MessageQueue] = {}  # connection_id -> MessageQueue
+
         # Private connection state for isolation
         self._private_connections: Dict[str, Any] = {}
-        self._private_message_queue: List[Dict] = []
         self._private_error_count = 0
         self._is_healthy = True
-        
-        # Initialize minimal recovery system
-        self._message_recovery_queue: Dict[str, List[Dict]] = {}
         self._connection_error_count: Dict[str, int] = {}
         self._last_error_time: Dict[str, datetime] = {}
         self._error_recovery_enabled = True
@@ -630,9 +640,19 @@ class _UnifiedWebSocketManagerImplementation:
                 })
                 self._event_isolation_tokens[connection.connection_id] = isolation_token
                 
-                # Initialize user-specific event queue if not exists
-                if connection.user_id not in self._user_event_queues:
-                    self._user_event_queues[connection.user_id] = asyncio.Queue(maxsize=1000)  # Prevent overflow
+                # ISSUE #1011 REMEDIATION: Create SSOT MessageQueue for this connection
+                message_queue = self._message_queue_registry.create_message_queue(
+                    connection_id=connection.connection_id,
+                    user_id=connection.user_id,
+                    max_size=1000
+                )
+                self._connection_message_queues[connection.connection_id] = message_queue
+
+                # Set up message processor for the queue
+                message_queue.set_message_processor(self._process_queued_message)
+
+                # Initialize user tracking for backward compatibility
+                if connection.user_id not in self._cross_user_detection:
                     self._cross_user_detection[connection.user_id] = 0
                 
                 # Validate no cross-user contamination
@@ -694,11 +714,35 @@ class _UnifiedWebSocketManagerImplementation:
                 logger.info(f" PASS:  GOLDEN PATH CONNECTION ADDED: Connection {connection.connection_id} added for user {connection.user_id[:8] if connection.user_id else 'unknown'}... in {connection_duration*1000:.2f}ms")
                 logger.info(f" SEARCH:  CONNECTION SUCCESS CONTEXT: {json.dumps(connection_success_context, indent=2)}")
                 logger.info(f"Added connection {connection.connection_id} for user {connection.user_id} (thread-safe)")
-                
-                # CRITICAL FIX: Process any queued messages for this user after connection established
-                # This prevents race condition where messages are sent before connection is ready
-                # Store the user_id for processing outside the lock to prevent deadlock
-                process_recovery = connection.user_id in self._message_recovery_queue
+
+    # ISSUE #1011 REMEDIATION: Add SSOT MessageQueue processor method
+    async def _process_queued_message(self, queued_message):
+        """Process a message from the SSOT MessageQueue"""
+        from netra_backend.app.websocket_core.message_queue import QueuedMessage
+
+        if isinstance(queued_message, QueuedMessage):
+            # Convert QueuedMessage to the format expected by send_to_user
+            await self.send_to_user(
+                user_id=queued_message.user_id,
+                message=queued_message.message_data,
+                message_type=queued_message.message_type
+            )
+        else:
+            # Handle legacy message format for backward compatibility
+            user_id = queued_message.get('user_id')
+            message_data = queued_message.get('message', queued_message)
+            message_type = queued_message.get('type', 'unknown')
+
+            await self.send_to_user(
+                user_id=user_id,
+                message=message_data,
+                message_type=message_type
+            )
+
+        # CRITICAL FIX: Process any queued messages for this user after connection established
+        # This prevents race condition where messages are sent before connection is ready
+        # Store the user_id for processing outside the lock to prevent deadlock
+        process_recovery = connection.user_id in self._message_recovery_queue
                 
         # DEADLOCK FIX: Process recovery queue OUTSIDE the lock to prevent circular dependency
         # add_connection -> _process_queued_messages -> send_to_user -> user_lock (deadlock)
@@ -804,6 +848,15 @@ class _UnifiedWebSocketManagerImplementation:
                     connection = self._connections[connection_id]
                     del self._connections[connection_id]
                     
+                    # ISSUE #1011 REMEDIATION: Clean up SSOT MessageQueue
+                    if connection_id in self._connection_message_queues:
+                        message_queue = self._connection_message_queues[connection_id]
+                        await message_queue.close()
+                        del self._connection_message_queues[connection_id]
+                        # Also remove from registry
+                        await self._message_queue_registry.remove_message_queue(connection_id)
+                        logger.debug(f"Cleaned up SSOT MessageQueue for connection {connection_id}")
+
                     # PHASE 1 SSOT REMEDIATION: Enhanced cleanup with pattern-agnostic matching
                     if connection.user_id in self._user_connections:
                         # Remove exact match first
@@ -1889,37 +1942,53 @@ class _UnifiedWebSocketManagerImplementation:
         except Exception as e:
             return {'diagnostics_error': str(e)}
     
-    async def _store_failed_message(self, user_id: str, message: Dict[str, Any], 
+    async def _store_failed_message(self, user_id: str, message: Dict[str, Any],
                                    failure_reason: str) -> None:
-        """Store failed message for potential recovery."""
+        """Store failed message for potential recovery using SSOT MessageQueue."""
         if not self._error_recovery_enabled:
             return
-        
+
         try:
-            if user_id not in self._message_recovery_queue:
-                self._message_recovery_queue[user_id] = []
-            
-            # Add failure metadata
-            failed_message = {
-                **message,
-                'failure_reason': failure_reason,
-                'failed_at': datetime.now(timezone.utc).isoformat(),
-                'recovery_attempts': 0
-            }
-            
-            self._message_recovery_queue[user_id].append(failed_message)
-            
+            # ISSUE #1011 REMEDIATION: Use SSOT MessageQueue instead of legacy recovery queue
+            # Find all message queues for this user's connections
+            user_connection_ids = self.get_user_connections(user_id)
+
+            if user_connection_ids:
+                # Enqueue the failed message to all user's connection queues
+                for connection_id in user_connection_ids:
+                    if connection_id in self._connection_message_queues:
+                        message_queue = self._connection_message_queues[connection_id]
+
+                        # Determine priority based on failure reason
+                        priority = MessagePriority.HIGH if failure_reason == "startup_pending" else MessagePriority.NORMAL
+
+                        await message_queue.enqueue_message(
+                            message_data=message,
+                            message_type=message.get('type', 'recovery'),
+                            priority=priority,
+                            message_id=f"recovery_{user_id}_{int(time.time())}"
+                        )
+
+                logger.info(f"Queued failed message to {len(user_connection_ids)} SSOT MessageQueues for user {user_id}: {failure_reason}")
+            else:
+                # Fall back to legacy storage if no connections exist
+                if user_id not in self._message_recovery_queue:
+                    self._message_recovery_queue[user_id] = []
+
+                failed_message = {
+                    **message,
+                    'failure_reason': failure_reason,
+                    'failed_at': datetime.now(timezone.utc).isoformat(),
+                    'recovery_attempts': 0
+                }
+
+                self._message_recovery_queue[user_id].append(failed_message)
+                logger.info(f"Stored failed message in legacy queue for user {user_id}: {failure_reason}")
+
             # Increment error count
             self._connection_error_count[user_id] = self._connection_error_count.get(user_id, 0) + 1
             self._last_error_time[user_id] = datetime.now(timezone.utc)
-            
-            # Limit queue size to prevent memory issues
-            max_queue_size = 50
-            if len(self._message_recovery_queue[user_id]) > max_queue_size:
-                self._message_recovery_queue[user_id] = self._message_recovery_queue[user_id][-max_queue_size:]
-            
-            logger.info(f"Stored failed message for user {user_id}: {failure_reason}")
-            
+
         except Exception as e:
             logger.error(f"Failed to store failed message for recovery: {e}")
     
