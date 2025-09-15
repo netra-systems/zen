@@ -66,7 +66,6 @@ except ImportError as e:
     BaseAgent = MagicMock
     AgentExecutionContext = MagicMock
 
-
 class TestGoldenPathPerformanceIntegration(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Golden Path Performance Validation.
@@ -175,13 +174,11 @@ class TestGoldenPathPerformanceIntegration(SSotAsyncTestCase):
 
     async def _initialize_performance_infrastructure(self):
         """Initialize performance monitoring infrastructure for comprehensive testing."""
-        if not REAL_COMPONENTS_AVAILABLE:
-            self._initialize_mock_performance_infrastructure()
-            return
+        if not REAL_COMPONENTS_AVAILABLE:return
 
         try:
             # Create real WebSocket manager with performance monitoring
-            self.websocket_manager = await get_websocket_manager()
+            self.websocket_manager = get_websocket_manager()
 
             # Create WebSocket bridge with performance tracking
             self.websocket_bridge = create_agent_websocket_bridge()
@@ -258,33 +255,10 @@ class TestGoldenPathPerformanceIntegration(SSotAsyncTestCase):
                 )
 
         except Exception as e:
-            print(f"Failed to initialize performance infrastructure, using mocks: {e}")
-            self._initialize_mock_performance_infrastructure()
 
-    def _initialize_mock_performance_infrastructure(self):
-        """Initialize mock performance infrastructure when real components unavailable."""
-        self.websocket_manager = MagicMock()
-        self.websocket_bridge = MagicMock()
-        self.tool_dispatcher = MagicMock()
-        self.llm_manager = MagicMock()
-        self.agent_factory = MagicMock()
+            # CLAUDE.md COMPLIANCE: Tests must use real services only
 
-        # Configure mock factory methods with performance tracking
-        self.agent_factory.create_user_execution_context = AsyncMock()
-        self.agent_factory.create_agent_instance = AsyncMock()
-        self.agent_factory.user_execution_scope = self._mock_user_execution_scope
-
-    @asynccontextmanager
-    async def _mock_user_execution_scope(self, user_id, thread_id, run_id, **kwargs):
-        """Mock user execution scope with performance monitoring."""
-        context = MagicMock()
-        context.user_id = user_id
-        context.thread_id = thread_id
-        context.run_id = run_id
-        context.created_at = datetime.now(timezone.utc)
-        context.performance_monitoring = True
-        yield context
-
+            raise RuntimeError(f"Failed to initialize real infrastructure: {e}") from e
     def _get_current_resource_usage(self):
         """Get current system resource usage."""
         try:

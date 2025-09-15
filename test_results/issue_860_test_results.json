@@ -1,0 +1,68 @@
+{
+  "issue": "Issue #860 WebSocket Windows Connection Failures",
+  "timestamp": "2025-09-15 04:20:55",
+  "platform": {
+    "system": "Windows",
+    "release": "11",
+    "version": "10.0.26100",
+    "python_version": "3.12.4 | packaged by Anaconda, Inc. | (main, Jun 18 2024, 15:03:56) [MSC v.1929 64 bit (AMD64)]"
+  },
+  "execution_time": 23.91088104248047,
+  "test_results": {
+    "reproduction": {
+      "suite_name": "reproduction",
+      "description": "Tests that reproduce Issue #860 WinError 1225 failures",
+      "should_fail": true,
+      "tests": [
+        {
+          "test_file": "tests/unit/websocket_windows_issues/test_issue_860_websocket_windows_connection_failures.py",
+          "status": "failed",
+          "return_code": 2,
+          "stdout": "============================= test session starts =============================\ncollecting ... collected 0 items / 1 error\n\n=== Memory Usage Report ===\nLoaded fixture modules: base, mocks\nPeak memory usage: 233.5 MB\n\n=================================== ERRORS ====================================\n_ ERROR collecting tests/unit/websocket_windows_issues/test_issue_860_websocket_windows_connection_failures.py _\n'windows' not found in `markers` configuration option\n============================== warnings summary ===============================\nnetra_backend\\app\\agents\\mixins\\websocket_bridge_adapter.py:12\nnetra_backend\\app\\agents\\mixins\\websocket_bridge_adapter.py:12\n  C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\agents\\mixins\\websocket_bridge_adapter.py:12: DeprecationWarning: ISSUE #1144: Importing from 'netra_backend.app.websocket_core' is deprecated. Use specific module imports like 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'. This import path will be removed in Phase 2 of SSOT consolidation.\n    from netra_backend.app.websocket_core.event_validator import get_websocket_validator\n\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_config.py:323\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_config.py:323\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_config.py:323\n  C:\\Users\\antho\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_config.py:323: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/\n    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)\n\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_generate_schema.py:298\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_generate_schema.py:298\n  C:\\Users\\antho\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_generate_schema.py:298: PydanticDeprecatedSince20: `json_encoders` is deprecated. See https://docs.pydantic.dev/2.11/concepts/serialization/#custom-serializers for alternatives. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/\n    warnings.warn(\n\nnetra_backend\\app\\core\\resilience\\retry_manager.py:20\n  C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\core\\resilience\\retry_manager.py:20: DeprecationWarning: netra_backend.app.logging_config is deprecated. Use 'from shared.logging.unified_logging_ssot import get_logger' instead.\n    from netra_backend.app.logging_config import central_logger as logger\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nERROR tests/unit/websocket_windows_issues/test_issue_860_websocket_windows_connection_failures.py\n!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n======================== 8 warnings, 1 error in 1.35s =========================\n",
+          "stderr": "",
+          "execution_time": 8.701960325241089,
+          "command": "C:\\Users\\antho\\miniconda3\\python.exe -m pytest tests/unit/websocket_windows_issues/test_issue_860_websocket_windows_connection_failures.py -v --tb=short --no-header --tb=line"
+        },
+        {
+          "test_file": "tests/integration/websocket_windows/test_issue_860_websocket_infrastructure_failures.py",
+          "status": "failed",
+          "return_code": 2,
+          "stdout": "============================= test session starts =============================\ncollecting ... collected 0 items / 1 error\n\n=== Memory Usage Report ===\nLoaded fixture modules: base, mocks\nPeak memory usage: 234.8 MB\n\n=================================== ERRORS ====================================\n_ ERROR collecting tests/integration/websocket_windows/test_issue_860_websocket_infrastructure_failures.py _\n'windows' not found in `markers` configuration option\n============================== warnings summary ===============================\nnetra_backend\\app\\agents\\mixins\\websocket_bridge_adapter.py:12\nnetra_backend\\app\\agents\\mixins\\websocket_bridge_adapter.py:12\n  C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\agents\\mixins\\websocket_bridge_adapter.py:12: DeprecationWarning: ISSUE #1144: Importing from 'netra_backend.app.websocket_core' is deprecated. Use specific module imports like 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'. This import path will be removed in Phase 2 of SSOT consolidation.\n    from netra_backend.app.websocket_core.event_validator import get_websocket_validator\n\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_config.py:323\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_config.py:323\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_config.py:323\n  C:\\Users\\antho\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_config.py:323: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/\n    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)\n\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_generate_schema.py:298\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_generate_schema.py:298\n  C:\\Users\\antho\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_generate_schema.py:298: PydanticDeprecatedSince20: `json_encoders` is deprecated. See https://docs.pydantic.dev/2.11/concepts/serialization/#custom-serializers for alternatives. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/\n    warnings.warn(\n\nnetra_backend\\app\\core\\resilience\\retry_manager.py:20\n  C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\core\\resilience\\retry_manager.py:20: DeprecationWarning: netra_backend.app.logging_config is deprecated. Use 'from shared.logging.unified_logging_ssot import get_logger' instead.\n    from netra_backend.app.logging_config import central_logger as logger\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nERROR tests/integration/websocket_windows/test_issue_860_websocket_infrastructure_failures.py\n!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n======================== 8 warnings, 1 error in 0.91s =========================\n",
+          "stderr": "",
+          "execution_time": 8.154626369476318,
+          "command": "C:\\Users\\antho\\miniconda3\\python.exe -m pytest tests/integration/websocket_windows/test_issue_860_websocket_infrastructure_failures.py -v --tb=short --no-header --tb=line"
+        }
+      ],
+      "summary": {
+        "total_tests": 2,
+        "passed": 0,
+        "failed": 2,
+        "skipped": 0,
+        "errors": 0
+      }
+    },
+    "staging_solution": {
+      "suite_name": "staging_solution",
+      "description": "Tests that validate staging environment solutions",
+      "should_fail": false,
+      "tests": [
+        {
+          "test_file": "tests/e2e/staging_windows/test_issue_860_staging_websocket_compatibility.py",
+          "status": "failed",
+          "return_code": 2,
+          "stdout": "============================= test session starts =============================\ncollecting ... collected 0 items / 1 error\n\n=== Memory Usage Report ===\nLoaded fixture modules: base, mocks\nPeak memory usage: 233.8 MB\n\n=================================== ERRORS ====================================\n_ ERROR collecting tests/e2e/staging_windows/test_issue_860_staging_websocket_compatibility.py _\n'windows' not found in `markers` configuration option\n============================== warnings summary ===============================\nnetra_backend\\app\\agents\\mixins\\websocket_bridge_adapter.py:12\nnetra_backend\\app\\agents\\mixins\\websocket_bridge_adapter.py:12\n  C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\agents\\mixins\\websocket_bridge_adapter.py:12: DeprecationWarning: ISSUE #1144: Importing from 'netra_backend.app.websocket_core' is deprecated. Use specific module imports like 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'. This import path will be removed in Phase 2 of SSOT consolidation.\n    from netra_backend.app.websocket_core.event_validator import get_websocket_validator\n\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_config.py:323\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_config.py:323\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_config.py:323\n  C:\\Users\\antho\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_config.py:323: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/\n    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)\n\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_generate_schema.py:298\n..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_generate_schema.py:298\n  C:\\Users\\antho\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_generate_schema.py:298: PydanticDeprecatedSince20: `json_encoders` is deprecated. See https://docs.pydantic.dev/2.11/concepts/serialization/#custom-serializers for alternatives. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/\n    warnings.warn(\n\nnetra_backend\\app\\core\\resilience\\retry_manager.py:20\n  C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\core\\resilience\\retry_manager.py:20: DeprecationWarning: netra_backend.app.logging_config is deprecated. Use 'from shared.logging.unified_logging_ssot import get_logger' instead.\n    from netra_backend.app.logging_config import central_logger as logger\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nERROR tests/e2e/staging_windows/test_issue_860_staging_websocket_compatibility.py\n!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n======================== 8 warnings, 1 error in 1.03s =========================\n",
+          "stderr": "",
+          "execution_time": 7.0542943477630615,
+          "command": "C:\\Users\\antho\\miniconda3\\python.exe -m pytest tests/e2e/staging_windows/test_issue_860_staging_websocket_compatibility.py -v --tb=short --no-header --tb=line"
+        }
+      ],
+      "summary": {
+        "total_tests": 1,
+        "passed": 0,
+        "failed": 1,
+        "skipped": 0,
+        "errors": 0
+      }
+    }
+  }
+}

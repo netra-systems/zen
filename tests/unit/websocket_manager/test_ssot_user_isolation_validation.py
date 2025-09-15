@@ -62,7 +62,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         EXPECTED: This test should FAIL initially if validation isn't enforced.
         """
         with pytest.raises(UserIsolationViolation, match='UserExecutionContext required'):
-            manager = await get_websocket_manager(user_context=None, mode=WebSocketManagerMode.UNIFIED)
+            manager = get_websocket_manager(user_context=None, mode=WebSocketManagerMode.UNIFIED)
         pytest.fail('Manager creation without user context was allowed - validation gap confirmed')
 
     async def test_manager_user_context_isolation_validation(self):
@@ -71,7 +71,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL initially if validation isn't implemented.
         """
-        manager = await get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
+        manager = get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
         with pytest.raises(UserIsolationViolation, match='User ID mismatch'):
             result = validate_user_isolation(manager_instance=manager, user_id=self.user_context_2.user_id, operation='send_message')
         pytest.fail('User ID mismatch was not detected - validation gap confirmed')
@@ -82,7 +82,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL initially if detection isn't implemented.
         """
-        manager = await get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
+        manager = get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
         mock_connection_1 = Mock()
         mock_connection_1.user_id = 'user-001'
         mock_connection_2 = Mock()
@@ -115,9 +115,9 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL if duplicate detection isn't implemented.
         """
-        manager_1 = await get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
+        manager_1 = get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
         with patch('netra_backend.app.websocket_core.ssot_validation_enhancer.logger') as mock_logger:
-            manager_2 = await get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
+            manager_2 = get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
             warning_calls = [call for call in mock_logger.warning.call_args_list if 'Multiple manager instances' in str(call)]
             self.assertTrue(len(warning_calls) > 0, 'Multiple manager instances for same user not detected - validation gap confirmed')
 
@@ -133,8 +133,8 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         enterprise_user_2.thread_id = 'enterprise-thread-002'
         enterprise_user_2.request_id = 'enterprise-request-002'
         enterprise_user_2.is_test = True
-        manager_org_alpha = await get_websocket_manager(user_context=self.enterprise_user_context, mode=WebSocketManagerMode.UNIFIED)
-        manager_org_beta = await get_websocket_manager(user_context=enterprise_user_2, mode=WebSocketManagerMode.UNIFIED)
+        manager_org_alpha = get_websocket_manager(user_context=self.enterprise_user_context, mode=WebSocketManagerMode.UNIFIED)
+        manager_org_beta = get_websocket_manager(user_context=enterprise_user_2, mode=WebSocketManagerMode.UNIFIED)
         if hasattr(manager_org_alpha, '_user_context') and hasattr(manager_org_beta, '_user_context'):
             alpha_org = getattr(manager_org_alpha._user_context, 'organization_id', None)
             beta_org = getattr(manager_org_beta._user_context, 'organization_id', None)
@@ -151,7 +151,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         EXPECTED: This test may FAIL if history tracking isn't implemented.
         """
         initial_summary = get_ssot_validation_summary()
-        manager = await get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
+        manager = get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
         validate_user_isolation(manager_instance=manager, user_id=self.user_context_1.user_id, operation='history_tracking_test')
         updated_summary = get_ssot_validation_summary()
         self.assertTrue(updated_summary['total_validations'] > initial_summary['total_validations'], 'User isolation validation not tracked in history')
@@ -167,7 +167,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         EXPECTED: This test should FAIL if strict mode enforcement isn't implemented.
         """
         enable_strict_validation(True)
-        manager = await get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
+        manager = get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
         with pytest.raises(UserIsolationViolation):
             result = validate_user_isolation(manager_instance=manager, user_id=self.user_context_2.user_id, operation='strict_mode_test')
         pytest.fail('Strict mode did not enforce user isolation - validation gap confirmed')
@@ -178,8 +178,8 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL if event isolation isn't implemented.
         """
-        manager_1 = await get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
-        manager_2 = await get_websocket_manager(user_context=self.user_context_2, mode=WebSocketManagerMode.UNIFIED)
+        manager_1 = get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
+        manager_2 = get_websocket_manager(user_context=self.user_context_2, mode=WebSocketManagerMode.UNIFIED)
         mock_websocket_1 = AsyncMock()
         mock_websocket_2 = AsyncMock()
         event_data = {'event': 'agent_started', 'data': 'sensitive_user_data'}
@@ -200,7 +200,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         EXPECTED: This test may FAIL if cleanup isn't implemented.
         """
         initial_summary = get_ssot_validation_summary()
-        manager = await get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
+        manager = get_websocket_manager(user_context=self.user_context_1, mode=WebSocketManagerMode.UNIFIED)
         updated_summary = get_ssot_validation_summary()
         self.assertTrue(updated_summary['tracked_users'] > initial_summary['tracked_users'], 'User not tracked in validation system')
         del manager

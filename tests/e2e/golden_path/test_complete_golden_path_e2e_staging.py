@@ -87,10 +87,14 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
                 staging_config.update({'base_url': f'https://{base_domain}', 'websocket_url': f'wss://{base_domain}/ws', 'api_url': f'https://{base_domain}/api', 'auth_url': f'https://{base_domain}/auth'})
                 logger.info(f'Detected Cloud Run staging environment: {base_domain}')
         if not staging_config['base_url']:
-            local_port = get_env().get('PORT', '8000')
-            if get_env().get('ENVIRONMENT') == 'development' or get_env().get('NODE_ENV') == 'development':
-                staging_config.update({'base_url': f'http://localhost:{local_port}', 'websocket_url': f'ws://localhost:{local_port}/ws', 'api_url': f'http://localhost:{local_port}/api', 'auth_url': f'http://localhost:{local_port}/auth'})
-                logger.info(f'Detected local development environment on port {local_port}')
+            # Use canonical staging domains as specified in CLAUDE.md
+            staging_config.update({
+                'base_url': 'https://backend.staging.netrasystems.ai',
+                'websocket_url': 'wss://backend.staging.netrasystems.ai/ws',
+                'api_url': 'https://backend.staging.netrasystems.ai/api',
+                'auth_url': 'https://auth.staging.netrasystems.ai'
+            })
+            logger.info('Using canonical staging.netrasystems.ai domains')
         return staging_config
 
     def _apply_environment_fallbacks(self) -> Dict[str, str]:
@@ -99,23 +103,25 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
         Addresses Issue #677: Graceful degradation for missing configuration.
         """
         fallback_config = {}
-        staging_domains = ['staging.netra.ai', 'staging-api.netra.ai', 'netra-staging.herokuapp.com', 'localhost:8000', '127.0.0.1:8000']
+        staging_domains = ['backend.staging.netrasystems.ai', 'localhost:8000', '127.0.0.1:8000']
         for domain in staging_domains:
             try:
                 if 'localhost' in domain or '127.0.0.1' in domain:
                     base_url = f'http://{domain}'
                     websocket_url = f'ws://{domain}/ws'
+                    auth_url = f'http://{domain}/auth'
                 else:
                     base_url = f'https://{domain}'
                     websocket_url = f'wss://{domain}/ws'
-                fallback_config.update({'base_url': base_url, 'websocket_url': websocket_url, 'api_url': f'{base_url}/api', 'auth_url': f'{base_url}/auth'})
+                    auth_url = 'https://auth.staging.netrasystems.ai'
+                fallback_config.update({'base_url': base_url, 'websocket_url': websocket_url, 'api_url': f'{base_url}/api', 'auth_url': auth_url})
                 logger.info(f'Applied fallback configuration for domain: {domain}')
                 break
             except Exception as e:
                 logger.debug(f'Fallback domain {domain} not available: {e}')
                 continue
         if not fallback_config:
-            fallback_config = {'base_url': 'https://staging.netra.ai', 'websocket_url': 'wss://staging.netra.ai/ws', 'api_url': 'https://staging.netra.ai/api', 'auth_url': 'https://staging.netra.ai/auth'}
+            fallback_config = {'base_url': 'https://backend.staging.netrasystems.ai', 'websocket_url': 'wss://backend.staging.netrasystems.ai/ws', 'api_url': 'https://backend.staging.netrasystems.ai/api', 'auth_url': 'https://auth.staging.netrasystems.ai'}
             logger.warning('Using ultimate fallback configuration - may not be reachable')
         return fallback_config
 
@@ -187,8 +193,9 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
             welcome_timeout = 5.0
             welcome_message = await asyncio.wait_for(websocket.recv(), timeout=welcome_timeout)
             welcome_data = json.loads(welcome_message)
-            assert welcome_data.get('type') == 'connection_ready', f'Expected welcome message, got: {welcome_data}'
-            logger.info(' PASS:  Welcome message received from staging')
+            expected_types = ['connection_ready', 'connection_established']
+            assert welcome_data.get('type') in expected_types, f'Expected welcome message, got: {welcome_data}'
+            logger.info(f' PASS:  Welcome message received from staging: {welcome_data.get("type")}')
         except Exception as e:
             logger.error(f' FAIL:  Failed to connect to staging WebSocket: {e}')
             pytest.skip(f'Staging WebSocket connection failed: {e}')

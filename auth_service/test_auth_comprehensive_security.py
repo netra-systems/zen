@@ -36,9 +36,10 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional
 import uuid
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestJWTAdvancedSecurity(unittest.TestCase):
+class TestJWTAdvancedSecurity(SSotBaseTestCase, unittest.TestCase):
     """Advanced JWT security validation tests"""
     
     def setUp(self):
@@ -180,7 +181,7 @@ class TestJWTAdvancedSecurity(unittest.TestCase):
         self.assertTrue(all(t < 0.1 for t in times))  # Should all be very fast
 
 
-class TestGoldenPathAuthFlow(unittest.TestCase):
+class TestGoldenPathAuthFlow(SSotBaseTestCase, unittest.TestCase):
     """Golden Path authentication flow validation"""
     
     def setUp(self):
@@ -301,7 +302,7 @@ class TestGoldenPathAuthFlow(unittest.TestCase):
         self.assertEqual(decoded['aud'], 'netra-backend')
 
 
-class TestSessionManagementSecurity(unittest.TestCase):
+class TestSessionManagementSecurity(SSotBaseTestCase, unittest.TestCase):
     """Session management and security validation"""
     
     def setUp(self):
@@ -408,7 +409,7 @@ class TestSessionManagementSecurity(unittest.TestCase):
             jwt.decode(token, self.secret, algorithms=[self.algorithm])
 
 
-class TestPasswordSecurity(unittest.TestCase):
+class TestPasswordSecurity(SSotBaseTestCase, unittest.TestCase):
     """Password security and policy validation"""
     
     def test_password_hashing_security(self):
@@ -488,7 +489,7 @@ class TestPasswordSecurity(unittest.TestCase):
             self.assertEqual(len(salt), 32)
 
 
-class TestAttackVectorDefense(unittest.TestCase):
+class TestAttackVectorDefense(SSotBaseTestCase, unittest.TestCase):
     """Test defense against known attack vectors"""
     
     def setUp(self):
@@ -583,7 +584,7 @@ class TestAttackVectorDefense(unittest.TestCase):
                 self.fail(f"Unexpected exception for token: {token}")
 
 
-class TestIntegrationSecurity(unittest.TestCase):
+class TestIntegrationSecurity(SSotBaseTestCase, unittest.TestCase):
     """Integration security testing without external dependencies"""
     
     def setUp(self):

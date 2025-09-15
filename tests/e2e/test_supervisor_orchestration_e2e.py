@@ -1,3 +1,4 @@
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 @pytest.mark.e2e
 class TestWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
@@ -100,7 +101,7 @@ def llm_manager():
 def websocket_manager():
     """Use real service instance."""
     'Create WebSocket manager for testing.'
-    manager = UnifiedWebSocketManager()
+    manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
     return manager
 
 @pytest.fixture

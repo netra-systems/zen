@@ -238,7 +238,7 @@ class TestWebSocketRaceConditionIssue335(SSotAsyncTestCase):
         prevent sends to closing connections.
         """
         # Create manager with mock context
-        manager = await get_websocket_manager(
+        manager = get_websocket_manager(
             user_context=self.mock_user_context,
             mode=WebSocketManagerMode.UNIFIED
         )

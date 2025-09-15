@@ -197,7 +197,7 @@ class TestWebSocketManagerConstructorInconsistency(SSotBaseTestCase):
             """Test factory function parameter consistency."""
             try:
                 # Test factory with user context
-                manager_with_context = await get_websocket_manager(
+                manager_with_context = get_websocket_manager(
                     user_context=test_context,
                     mode=WebSocketManagerMode.UNIFIED
                 )
@@ -205,7 +205,7 @@ class TestWebSocketManagerConstructorInconsistency(SSotBaseTestCase):
                 logger.info("✅ Factory function works with user context")
                 
                 # Test factory without user context (should handle gracefully)
-                manager_without_context = await get_websocket_manager()
+                manager_without_context = get_websocket_manager()
                 assert manager_without_context is not None, "Factory should handle missing user context gracefully"
                 logger.info("✅ Factory function handles missing user context")
                 

@@ -132,7 +132,7 @@ async def test_websocket_manager_basic_functionality():
         # Test 1: Verify the function is correctly awaited (no coroutine warning)
         try:
             # This should raise ValueError for None user_context, but not create coroutine warning
-            websocket_manager = await get_websocket_manager(None)
+            websocket_manager = get_websocket_manager(None)
             pytest.fail("Should have raised ValueError for None user_context")
         except ValueError as e:
             assert "UserExecutionContext" in str(e)
@@ -167,7 +167,7 @@ async def test_agent_websocket_events_mission_critical():
         # Test 2: Verify the function is correctly awaited in mission critical context
         try:
             # This should also raise ValueError for None user_context, but not create coroutine warning
-            websocket_manager = await get_websocket_manager(None)
+            websocket_manager = get_websocket_manager(None)
             pytest.fail("Should have raised ValueError for None user_context")
         except ValueError as e:
             assert "UserExecutionContext" in str(e)

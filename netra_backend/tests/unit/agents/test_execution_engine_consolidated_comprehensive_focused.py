@@ -44,7 +44,27 @@ from unittest.mock import AsyncMock, MagicMock, patch, call, Mock, PropertyMock
 from contextlib import asynccontextmanager
 from test_framework.ssot.base import BaseTestCase, AsyncBaseTestCase
 from shared.isolated_environment import get_env
-from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine, UserExecutionEngine, RequestScopedExecutionEngine, ExecutionEngineFactory, EngineConfig, AgentExecutionContext, AgentExecutionResult, ExecutionExtension, UserExecutionExtension, MCPExecutionExtension, DataExecutionExtension, WebSocketExtension, execute_agent, execution_engine_context, create_execution_engine, get_execution_engine_factory
+# SSOT consolidation Issue #1186
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+from netra_backend.app.services.user_execution_context import UserExecutionContext, AgentExecutionContext
+from netra_backend.app.schemas.agent_result_types import AgentExecutionResult
+
+# Compatibility aliases
+ExecutionEngine = UserExecutionEngine
+
+# Compatibility stubs
+class EngineConfig:
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+class ExecutionExtension: pass
+class UserExecutionExtension(ExecutionExtension): pass
+class MCPExecutionExtension(ExecutionExtension): pass
+class DataExecutionExtension(ExecutionExtension): pass
+class WebSocketExtension(ExecutionExtension): pass
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.agent_execution_tracker import ExecutionState
 

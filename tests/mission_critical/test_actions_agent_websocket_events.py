@@ -1,58 +1,14 @@
-class TestWebSocketConnection:
-    """Real WebSocket connection for testing instead of mocks."""
-    
-    def __init__(self):
-        self.messages_sent = []
-        self.is_connected = True
-        self._closed = False
-        
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
-            raise RuntimeError("WebSocket is closed")
-        self.messages_sent.append(message)
-        
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
-        """Close WebSocket connection."""
-        self._closed = True
-        self.is_connected = False
-        
-    def get_messages(self) -> list:
-        """Get all sent messages."""
-        return self.messages_sent.copy()
-
-#!/usr/bin/env python
-"""MISSION CRITICAL TEST: ActionsAgent WebSocket Events Compliance
-
-THIS TEST MUST PASS OR ACTIONS AGENT IS NOT BUSINESS-COMPLIANT.
-Business Value: Core chat functionality - users must see agent thinking/working
-
-WebSocket events are MISSION CRITICAL for chat value delivery:
-1. agent_started - User knows agent is processing their request  
-2. agent_thinking - Real-time reasoning visibility (shows AI working)
-3. tool_executing - Tool usage transparency (demonstrates problem-solving)
-4. tool_completed - Tool results display (delivers actionable insights)
-5. agent_completed - User knows when response is ready
-
-ANY FAILURE HERE MEANS USERS GET BLACK-BOX AI WITH NO TRANSPARENCY.
-"""
-
-import asyncio
 import os
 import sys
-import time
-from typing import Dict, List, Set, Any, Optional
-from unittest.mock import Mock, AsyncMock, patch
 import pytest
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from test_framework.database.test_database_manager import DatabaseTestManager
-from netra_backend.app.redis_manager import redis_manager
-from auth_service.core.auth_manager import AuthManager
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import time
+from typing import Dict, Any, List
+from unittest.mock import Mock, patch, AsyncMock
 
-# Add project root to path
+# Import SSOT WebSocket test utility
+from test_framework.ssot.websocket_connection_test_utility import TestWebSocketConnection as WebSocketTestHelper
+
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
@@ -67,6 +23,7 @@ from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
+from test_framework.ssot.websocket_connection_test_utility import TestWebSocketConnection
 
 
 class WebSocketEventCapture:
@@ -164,7 +121,7 @@ class TestActionsAgentWebSocketCompliance:
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Mock the WebSocket bridge to capture events
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        websocket = WebSocketTestHelper()  # Real WebSocket implementation
         
         # Create mock bridge
         mock_bridge = Mock()
@@ -374,7 +331,7 @@ class TestActionsAgentWebSocketCompliance:
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Test 1: WebSocket bridge integration
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        websocket = WebSocketTestHelper()  # Real WebSocket implementation
         
         # Create mock bridge
         mock_bridge = Mock()

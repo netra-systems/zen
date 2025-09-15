@@ -42,6 +42,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional, Union
 from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # SSOT imports following architecture patterns
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -78,7 +79,6 @@ except ImportError as e:
     BaseAgent = MagicMock
     DeepAgentState = MagicMock
     E2EWebSocketAuthHelper = MagicMock
-
 
 class TestWebSocketAgentCommunicationIntegration(SSotAsyncTestCase):
     """
@@ -130,10 +130,7 @@ class TestWebSocketAgentCommunicationIntegration(SSotAsyncTestCase):
         # Mark that async initialization is needed
         self._async_init_pending = True
 
-        # Initialize mock infrastructure immediately for tests that need it
-        self._initialize_mock_websocket_infrastructure()
-        
-    def teardown_method(self, method):
+        # Initialize mock infrastructure immediately for tests that need itdef teardown_method(self, method):
         """Clean up WebSocket resources - pytest entry point."""
         # Call the parent's sync teardown method
         super().teardown_method(method)
@@ -161,13 +158,11 @@ class TestWebSocketAgentCommunicationIntegration(SSotAsyncTestCase):
     
     async def _initialize_websocket_infrastructure(self):
         """Initialize real WebSocket infrastructure components."""
-        if not REAL_COMPONENTS_AVAILABLE:
-            self._initialize_mock_websocket_infrastructure()
-            return
+        if not REAL_COMPONENTS_AVAILABLE:return
             
         try:
             # Create real WebSocket manager
-            self.websocket_manager = UnifiedWebSocketManager()
+            self.websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             
             # Create real agent-websocket bridge
             self.websocket_bridge = AgentWebSocketBridge()
@@ -190,34 +185,7 @@ class TestWebSocketAgentCommunicationIntegration(SSotAsyncTestCase):
             
         except Exception as e:
             print(f"Failed to initialize real WebSocket infrastructure: {e}")
-            self._initialize_mock_websocket_infrastructure()
     
-    def _initialize_mock_websocket_infrastructure(self):
-        """Initialize mock WebSocket infrastructure for fallback testing."""
-        self.websocket_manager = MagicMock()
-        self.websocket_bridge = MagicMock()
-        self.agent_factory = MagicMock()
-        
-        # Configure mock WebSocket behavior
-        self.websocket_manager.send_event = AsyncMock()
-        self.websocket_bridge.send_agent_event = AsyncMock()
-        self.agent_factory.user_execution_scope = self._mock_user_execution_scope
-        
-        # Mock auth helper
-        self.auth_helper = MagicMock()
-        self.auth_helper.create_test_jwt_token = MagicMock()
-        self.auth_helper.get_websocket_headers = MagicMock()
-
-    @asynccontextmanager
-    async def _mock_user_execution_scope(self, user_id, thread_id, run_id, **kwargs):
-        """Mock user execution scope for fallback testing."""
-        context = MagicMock()
-        context.user_id = user_id
-        context.thread_id = thread_id
-        context.run_id = run_id
-        context.created_at = datetime.now(timezone.utc)
-        yield context
-
     def _create_mock_llm_manager(self):
         """Create mock LLM manager for integration tests."""
         mock_llm = MagicMock()

@@ -29,6 +29,13 @@ from datetime import datetime, UTC
 import time
 import uuid
 
+# Import for real UserExecutionContext creation
+try:
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
+except ImportError:
+    # Fallback for tests that can't import the real UserExecutionContext
+    UserExecutionContext = None
+
 
 class SSotMockFactory:
     """
@@ -275,7 +282,8 @@ class SSotMockFactory:
     @staticmethod
     def create_mock_agent_websocket_bridge(
         user_id: str = "test-user",
-        run_id: str = "test-run"
+        run_id: str = "test-run",
+        should_fail: bool = False
     ) -> AsyncMock:
         """
         Create a standardized agent WebSocket bridge mock for testing.
@@ -283,6 +291,7 @@ class SSotMockFactory:
         Args:
             user_id: Mock user identifier
             run_id: Mock run identifier
+            should_fail: Whether the bridge should simulate failures
             
         Returns:
             AsyncMock configured for agent WebSocket bridge testing
@@ -295,11 +304,19 @@ class SSotMockFactory:
         mock_bridge.is_connected = True
         
         # Mock agent event notifications (Golden Path requirements)
-        mock_bridge.notify_agent_started = AsyncMock()
-        mock_bridge.notify_agent_thinking = AsyncMock()
-        mock_bridge.notify_agent_completed = AsyncMock()
-        mock_bridge.notify_tool_executing = AsyncMock()
-        mock_bridge.notify_tool_completed = AsyncMock()
+        # Configure failure behavior if should_fail is True
+        if should_fail:
+            mock_bridge.notify_agent_started = AsyncMock(side_effect=Exception("WebSocket bridge failure"))
+            mock_bridge.notify_agent_thinking = AsyncMock(side_effect=Exception("WebSocket bridge failure"))
+            mock_bridge.notify_agent_completed = AsyncMock(side_effect=Exception("WebSocket bridge failure"))
+            mock_bridge.notify_tool_executing = AsyncMock(side_effect=Exception("WebSocket bridge failure"))
+            mock_bridge.notify_tool_completed = AsyncMock(side_effect=Exception("WebSocket bridge failure"))
+        else:
+            mock_bridge.notify_agent_started = AsyncMock()
+            mock_bridge.notify_agent_thinking = AsyncMock()
+            mock_bridge.notify_agent_completed = AsyncMock()
+            mock_bridge.notify_tool_executing = AsyncMock()
+            mock_bridge.notify_tool_completed = AsyncMock()
         
         # Mock connection management
         mock_bridge.connect = AsyncMock()
@@ -387,11 +404,13 @@ class SSotMockFactory:
         websocket_client_id: Optional[str] = None,
         connection_id: Optional[str] = None,
         **kwargs
-    ) -> MagicMock:
+    ):
         """
-        Create a standardized user execution context mock for testing.
+        Create a standardized user execution context for testing.
 
         ISSUE #669 REMEDIATION: Added websocket_client_id parameter for interface consistency.
+        MOCK FACTORY FIX: Now creates real UserExecutionContext objects instead of Mock instances
+        to prevent type compatibility issues in tests.
 
         Args:
             user_id: Mock user identifier
@@ -403,8 +422,33 @@ class SSotMockFactory:
             **kwargs: Additional arguments for extensibility
 
         Returns:
-            MagicMock configured for user context testing
+            UserExecutionContext or MagicMock configured for user context testing
         """
+        # Try to create real UserExecutionContext object first
+        if UserExecutionContext is not None:
+            try:
+                # ISSUE #669 REMEDIATION: Handle websocket_client_id parameter
+                final_websocket_client_id = websocket_client_id
+                if connection_id and not websocket_client_id:
+                    final_websocket_client_id = connection_id
+                elif not final_websocket_client_id:
+                    final_websocket_client_id = f"conn_{user_id}_{thread_id}"
+
+                # Create real UserExecutionContext using factory method
+                return UserExecutionContext.from_request(
+                    user_id=user_id,
+                    thread_id=thread_id,
+                    run_id=run_id,
+                    request_id=request_id,
+                    websocket_client_id=final_websocket_client_id,
+                    agent_context=kwargs.get('agent_context', {}),
+                    audit_metadata=kwargs.get('audit_metadata', {})
+                )
+            except Exception as e:
+                # Fall back to mock if real object creation fails
+                print(f"Warning: Failed to create real UserExecutionContext, using mock: {e}")
+
+        # Fallback to mock implementation
         mock_context = MagicMock()
         mock_context.user_id = user_id
         mock_context.thread_id = thread_id
@@ -429,18 +473,67 @@ class SSotMockFactory:
         return mock_context
 
     @staticmethod
+    def create_mock_websocket_emitter(
+        user_id: str = "test-user",
+        connection_id: str = "test-connection",
+        **kwargs
+    ) -> AsyncMock:
+        """
+        Create a standardized WebSocket emitter mock for testing.
+
+        MOCK FACTORY FIX: Provides complete WebSocket emitter interface including emit_event
+        method that was missing and causing integration test failures.
+
+        Args:
+            user_id: Mock user identifier
+            connection_id: Mock connection identifier
+            **kwargs: Additional arguments for extensibility
+
+        Returns:
+            AsyncMock configured for WebSocket emitter testing with complete interface
+        """
+        mock_emitter = AsyncMock()
+        mock_emitter.user_id = user_id
+        mock_emitter.connection_id = connection_id
+        
+        # Standard WebSocket emitter methods
+        mock_emitter.emit_event = AsyncMock()
+        mock_emitter.emit_agent_started = AsyncMock()
+        mock_emitter.emit_agent_thinking = AsyncMock()
+        mock_emitter.emit_agent_completed = AsyncMock()
+        mock_emitter.emit_tool_executing = AsyncMock()
+        mock_emitter.emit_tool_completed = AsyncMock()
+        
+        # Connection and lifecycle methods
+        mock_emitter.connect = AsyncMock()
+        mock_emitter.disconnect = AsyncMock()
+        mock_emitter.is_connected = True
+        
+        # Event queue and management
+        mock_emitter.add_event = AsyncMock()
+        mock_emitter.clear_events = AsyncMock()
+        mock_emitter.get_events = AsyncMock(return_value=[])
+        
+        # Configuration and validation
+        mock_emitter.validate_event = AsyncMock(return_value=True)
+        mock_emitter.configure = AsyncMock()
+        
+        return mock_emitter
+
+    @staticmethod
     def create_isolated_execution_context(
         user_id: str,
         thread_id: str,
         websocket_client_id: Optional[str] = None,
         connection_id: Optional[str] = None,
         **kwargs
-    ) -> MagicMock:
+    ):
         """
-        Create isolated execution context mock for testing.
+        Create isolated execution context for testing.
 
         ISSUE #669 REMEDIATION: Added websocket_client_id parameter support that
         was missing and causing test failures.
+        MOCK FACTORY FIX: Now creates real UserExecutionContext objects instead of Mock instances.
 
         Args:
             user_id: User identifier
@@ -450,7 +543,7 @@ class SSotMockFactory:
             **kwargs: Additional arguments for extensibility
 
         Returns:
-            MagicMock: Mock execution context with expected interface
+            UserExecutionContext or MagicMock: Execution context with expected interface
         """
         # Delegate to create_mock_user_context with the new parameter
         return SSotMockFactory.create_mock_user_context(

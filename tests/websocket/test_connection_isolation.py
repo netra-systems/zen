@@ -51,7 +51,7 @@ class WebSocketIsolationValidator:
         url = f'{base_url}/ws/isolated'
         headers = {'Authorization': f'Bearer {token}'}
         try:
-            websocket = await websockets.connect(url, extra_headers=headers, subprotocols=['jwt-auth'])
+            websocket = await websockets.connect(url, additional_headers=headers, subprotocols=['jwt-auth'])
             self.connections[connection_id] = {'user_id': user_id, 'websocket': websocket, 'connection_id': connection_id, 'created_at': datetime.now(timezone.utc)}
             self.received_events[connection_id] = []
             asyncio.create_task(self._listen_for_events(connection_id))

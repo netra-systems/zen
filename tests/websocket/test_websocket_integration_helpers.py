@@ -40,7 +40,7 @@ class WebSocketTestHelpers:
         """Create a test WebSocket connection."""
         try:
             connection = await asyncio.wait_for(
-                websockets.connect(url, extra_headers=headers or {}),
+                websockets.connect(url, additional_headers=headers or {}),
                 timeout=timeout
             )
             return connection

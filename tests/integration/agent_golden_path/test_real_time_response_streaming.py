@@ -64,7 +64,6 @@ except ImportError as e:
     AgentExecutionCore = MagicMock
     TimeoutTier = Enum('TimeoutTier', ['FREE', 'EARLY', 'MID', 'PLATFORM', 'ENTERPRISE'])
 
-
 @dataclass
 class StreamingChunk:
     """Represents a chunk of streaming content."""
@@ -74,7 +73,6 @@ class StreamingChunk:
     chunk_sequence: int
     is_final: bool
     metadata: Dict[str, Any]
-
 
 @dataclass
 class StreamingSession:
@@ -88,7 +86,6 @@ class StreamingSession:
     total_duration: float
     streaming_active: bool
     websocket_events: List[Dict]
-
 
 class TestRealTimeResponseStreaming(SSotAsyncTestCase):
     """
@@ -148,13 +145,11 @@ class TestRealTimeResponseStreaming(SSotAsyncTestCase):
 
     async def _initialize_streaming_infrastructure(self):
         """Initialize real streaming infrastructure for testing."""
-        if not REAL_STREAMING_COMPONENTS_AVAILABLE:
-            self._initialize_mock_streaming_infrastructure()
-            return
+        if not REAL_STREAMING_COMPONENTS_AVAILABLE:return
 
         try:
             # Initialize real streaming components
-            self.websocket_manager = await get_websocket_manager()
+            self.websocket_manager = get_websocket_manager()
             self.websocket_bridge = create_agent_websocket_bridge()
             self.execution_core = AgentExecutionCore(registry=MagicMock())
 
@@ -166,8 +161,10 @@ class TestRealTimeResponseStreaming(SSotAsyncTestCase):
                 )
 
         except Exception as e:
-            print(f"Failed to initialize real streaming infrastructure, using mocks: {e}")
-            self._initialize_mock_streaming_infrastructure()
+
+            # CLAUDE.md COMPLIANCE: Tests must use real services only
+
+            raise RuntimeError(f"Failed to initialize real infrastructure: {e}") from e
 
     def _initialize_mock_streaming_infrastructure(self):
         """Initialize mock streaming infrastructure for testing."""

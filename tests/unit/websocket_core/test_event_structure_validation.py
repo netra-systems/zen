@@ -43,7 +43,7 @@ class TestWebSocketEventStructureValidation:
             'is_test': True
         })()
 
-        manager = await get_websocket_manager(
+        manager = get_websocket_manager(
             user_context=test_user_context,
             mode=WebSocketManagerMode.UNIFIED
         )

@@ -33,6 +33,7 @@ from typing import Any, Dict, List, Optional, Set
 from unittest.mock import Mock, AsyncMock, patch
 from dataclasses import dataclass
 import json
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 from netra_backend.app.logging_config import central_logger
 
@@ -146,7 +147,7 @@ class TestWebSocketManagerGoldenPathIntegration(SSotAsyncTestCase):
             
             # This should also fail due to constructor issues
             try:
-                direct_manager = UnifiedWebSocketManager()
+                direct_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
                 
                 # Try to use direct manager
                 if hasattr(direct_manager, 'add_connection'):
@@ -200,7 +201,7 @@ class TestWebSocketManagerGoldenPathIntegration(SSotAsyncTestCase):
             
         try:
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-            direct_manager = UnifiedWebSocketManager()
+            direct_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             managers_to_test.append(('Direct-created', direct_manager, False))  # Direct instantiation
         except Exception as e:
             event_violations.append(f"Direct manager unavailable: {e}")
@@ -431,7 +432,7 @@ class TestWebSocketManagerGoldenPathIntegration(SSotAsyncTestCase):
             
         try:
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-            direct_manager = UnifiedWebSocketManager()
+            direct_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             managers_to_test.append(('Direct', direct_manager, False))
         except Exception as e:
             error_recovery_violations.append(f"Direct manager unavailable: {e}")

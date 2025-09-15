@@ -362,7 +362,7 @@ class TestMultiAgentWorkflowIntegration(BaseIntegrationTest):
         """Test multiple users can run workflows concurrently without interference."""
         user_contexts = []
         for i in range(3):
-            context = UserExecutionContext(user_id=f'concurrent_user_{i}', thread_id=f'concurrent_thread_{i}', run_id=f'concurrent_run_{i}', request_id=f'concurrent_req_{i}', metadata={'user_request': f'User {i} workflow request', 'user_data': f'secret_data_user_{i}'})
+            context = UserExecutionContext(user_id=f'concurrent_user_{i}', thread_id=f'concurrent_thread_{i}', run_id=f'concurrent_run_{i}', request_id=f'concurrent_req_{i}', agent_context={'user_request': f'User {i} workflow request', 'user_data': f'secret_data_user_{i}'})
             user_contexts.append(context)
         websocket_bridges = []
         for context in user_contexts:

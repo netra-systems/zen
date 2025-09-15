@@ -166,7 +166,7 @@ class TestWebSocketEventsBusinessCriticalStaging(SSotAsyncTestCase):
             
             async with websockets.connect(
                 self.STAGING_WS_URL,
-                extra_headers=headers,
+                additional_headers=headers,
                 timeout=30.0
             ) as websocket:
                 
@@ -273,7 +273,7 @@ class TestWebSocketEventsBusinessCriticalStaging(SSotAsyncTestCase):
             
             async with websockets.connect(
                 self.STAGING_WS_URL,
-                extra_headers=headers,
+                additional_headers=headers,
                 timeout=30.0
             ) as websocket:
                 
@@ -362,7 +362,7 @@ class TestWebSocketEventsBusinessCriticalStaging(SSotAsyncTestCase):
             
             async with websockets.connect(
                 self.STAGING_WS_URL,
-                extra_headers=headers,
+                additional_headers=headers,
                 timeout=30.0
             ) as websocket:
                 
@@ -462,7 +462,7 @@ class TestWebSocketEventsBusinessCriticalStaging(SSotAsyncTestCase):
                 
                 async with websockets.connect(
                     self.STAGING_WS_URL,
-                    extra_headers=headers,
+                    additional_headers=headers,
                     timeout=30.0
                 ) as websocket:
                     
@@ -560,7 +560,7 @@ class TestWebSocketEventsBusinessCriticalStaging(SSotAsyncTestCase):
             
             async with websockets.connect(
                 self.STAGING_WS_URL,
-                extra_headers=headers,
+                additional_headers=headers,
                 timeout=30.0
             ) as websocket:
                 

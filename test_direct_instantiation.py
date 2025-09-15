@@ -35,7 +35,7 @@ try:
     import asyncio
 
     async def test_factory():
-        manager = await get_websocket_manager(user_context=MockUserContext())
+        manager = get_websocket_manager(user_context=MockUserContext())
         print("✅ SUCCESS: Factory pattern works!")
 
     asyncio.run(test_factory())

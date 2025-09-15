@@ -38,12 +38,43 @@ class ConnectionInfo:
         return (datetime.now(timezone.utc) - self.last_activity).seconds < 300
 
 
-class WebSocketEventRouter:
+# === SSOT CONSOLIDATION NOTICE ===
+# WebSocketEventRouter functionality has been consolidated into CanonicalMessageRouter
+# This file provides compatibility during migration phase
+
+from netra_backend.app.websocket_core.handlers import CanonicalMessageRouter
+
+
+class WebSocketEventRouter(CanonicalMessageRouter):
+    """
+    COMPATIBILITY ADAPTER: WebSocketEventRouter consolidated into CanonicalMessageRouter.
+
+    This class provides backward compatibility for existing WebSocketEventRouter usage
+    while routing all functionality through the consolidated CanonicalMessageRouter.
+
+    Migration Status: Phase 1 - Compatibility adapter in place
+    Business Impact: Maintains $500K+ ARR event routing functionality
+    """
+
+    def __init__(self, websocket_manager: Optional['WebSocketManager']):
+        """Initialize WebSocketEventRouter compatibility adapter."""
+        super().__init__(websocket_manager=websocket_manager)
+        logger.info("WebSocketEventRouter compatibility adapter initialized - functionality consolidated")
+
+    # All event routing methods are now inherited from CanonicalMessageRouter
+    # Legacy methods maintained for backward compatibility
+
+
+# === LEGACY IMPLEMENTATION (PRESERVED FOR REFERENCE) ===
+# The original implementation is preserved below for reference during migration
+# This will be removed in Phase 3 after all imports are updated
+
+class LegacyWebSocketEventRouter:
     """Routes events to specific user connections.
-    
+
     This class manages the WebSocket connection pool and provides routing
     functionality to ensure events reach only their intended recipients.
-    
+
     Unlike the old singleton bridge, this class focuses solely on routing
     infrastructure and does not emit events itself.
     """

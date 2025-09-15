@@ -36,7 +36,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 from netra_backend.app.websocket_core.handlers import MessageRouter
-from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
@@ -50,7 +50,7 @@ from netra_backend.app.websocket_core.types import (
     normalize_message_type
 )
 from netra_backend.app.websocket_core.handlers import MessageHandler, ConnectionHandler
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
 
 # Import pipeline state and coordination components

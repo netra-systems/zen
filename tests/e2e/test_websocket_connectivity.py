@@ -27,6 +27,7 @@ from test_framework.environment_isolation import get_env
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 class InMemoryWebSocketConnection:
     """Real in-memory WebSocket connection for E2E testing without external WebSocket server."""
@@ -100,7 +101,7 @@ class TestWebSocketConnectivityAuthenticated:
             auth_helper = E2EAuthHelper()
             user1_data = await auth_helper.create_authenticated_user(email_prefix='websocket_user1', password='SecurePass123!', name='WebSocket Test User 1')
             user2_data = await auth_helper.create_authenticated_user(email_prefix='websocket_user2', password='SecurePass456!', name='WebSocket Test User 2')
-            ws_manager = UnifiedWebSocketManager()
+            ws_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             user1_conn_id = 'websocket-conn-user1'
             user2_conn_id = 'websocket-conn-user2'
             user1_ws = InMemoryWebSocketConnection()
@@ -184,7 +185,7 @@ class TestWebSocketConnectivityAuthenticated:
             logger.info('[U+1F680] Testing AUTHENTICATED WebSocket message sequences')
             auth_helper = E2EAuthHelper()
             user_data = await auth_helper.create_authenticated_user(email_prefix='message_sequence_user', password='SequencePass123!', name='Message Sequence Test User')
-            ws_manager = UnifiedWebSocketManager()
+            ws_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             conn_id = 'message-sequence-conn'
             ws_conn = InMemoryWebSocketConnection()
             await ws_manager.connect_user(user_data.user_id, ws_conn, conn_id)

@@ -103,7 +103,7 @@ class TestWebSocketFactorySSotEnforcement(SSotBaseTestCase, unittest.TestCase):
 
         async def test_manager_creation():
             try:
-                manager = await get_websocket_manager(user_context=mock_user_context)
+                manager = get_websocket_manager(user_context=mock_user_context)
                 self.assertIsNotNone(manager, 'SSOT get_websocket_manager should return a valid manager')
                 return True
             except Exception as e:

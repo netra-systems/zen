@@ -195,7 +195,7 @@ class TestWebSocketReconnectionRecovery(SSotAsyncTestCase):
         preventing frustration and session abandonment that could impact revenue.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'reconnect_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = ReconnectingWebSocketMock(self.test_user.user_id, connection_id)
@@ -237,7 +237,7 @@ class TestWebSocketReconnectionRecovery(SSotAsyncTestCase):
         issues, maintaining chat experience quality and user satisfaction.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'replay_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = ReconnectingWebSocketMock(self.test_user.user_id, connection_id)
@@ -276,7 +276,7 @@ class TestWebSocketReconnectionRecovery(SSotAsyncTestCase):
         maintaining user confidence in system reliability.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'sync_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = ReconnectingWebSocketMock(self.test_user.user_id, connection_id)
@@ -306,7 +306,7 @@ class TestWebSocketReconnectionRecovery(SSotAsyncTestCase):
         ensuring seamless chat experience and preventing session abandonment.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'heartbeat_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = ReconnectingWebSocketMock(self.test_user.user_id, connection_id)
@@ -341,7 +341,7 @@ class TestWebSocketReconnectionRecovery(SSotAsyncTestCase):
         preventing complete service failure and user abandonment.
         """
         user_context = await self.create_mock_user_context(self.test_user)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'degradation_conn_{uuid.uuid4().hex[:8]}'
         mock_ws = ReconnectingWebSocketMock(self.test_user.user_id, connection_id)

@@ -62,7 +62,6 @@ except ImportError as e:
     StatePersistenceOptimized = MagicMock
     ClickHouseClient = MagicMock
 
-
 @dataclass
 class PersistedMessage:
     """Represents a persisted agent message with metadata."""
@@ -76,7 +75,6 @@ class PersistedMessage:
     persistence_tier: str
     audit_metadata: Dict[str, Any]
 
-
 @dataclass
 class PersistenceValidationResult:
     """Results from persistence validation operations."""
@@ -86,7 +84,6 @@ class PersistenceValidationResult:
     records_affected: int
     data_integrity_verified: bool
     errors: List[str]
-
 
 class TestAgentMessagePersistenceIntegration(SSotAsyncTestCase):
     """
@@ -149,9 +146,7 @@ class TestAgentMessagePersistenceIntegration(SSotAsyncTestCase):
 
     async def _initialize_persistence_infrastructure(self):
         """Initialize real persistence infrastructure for testing."""
-        if not REAL_PERSISTENCE_COMPONENTS_AVAILABLE:
-            self._initialize_mock_persistence_infrastructure()
-            return
+        if not REAL_PERSISTENCE_COMPONENTS_AVAILABLE:return
 
         try:
             # Initialize real persistence components
@@ -171,8 +166,10 @@ class TestAgentMessagePersistenceIntegration(SSotAsyncTestCase):
                 await self.clickhouse_client.initialize()
 
         except Exception as e:
-            print(f"Failed to initialize real persistence infrastructure, using mocks: {e}")
-            self._initialize_mock_persistence_infrastructure()
+
+            # CLAUDE.md COMPLIANCE: Tests must use real services only
+
+            raise RuntimeError(f"Failed to initialize real infrastructure: {e}") from e
 
     def _initialize_mock_persistence_infrastructure(self):
         """Initialize mock persistence infrastructure for testing."""

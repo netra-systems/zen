@@ -30,7 +30,7 @@ class TestUnifiedWebSocketManagerCore:
     async def websocket_manager(self):
         """Create UnifiedWebSocketManager instance using factory pattern."""
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-        return await get_websocket_manager()
+        return get_websocket_manager()
     
     @pytest.fixture
     def mock_websocket(self):
@@ -373,7 +373,7 @@ class TestUnifiedWebSocketManagerCompatibility:
     async def websocket_manager(self):
         """Create UnifiedWebSocketManager instance using factory pattern."""
         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-        return await get_websocket_manager()
+        return get_websocket_manager()
     
     @pytest.fixture
     def mock_websocket(self):

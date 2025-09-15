@@ -25,7 +25,7 @@ from netra_backend.app.dependencies import (
     get_user_execution_context
 )
 from shared.id_generation import UnifiedIdGenerator
-from netra_backend.app.websocket_core import create_websocket_manager
+from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.message_handlers import MessageHandlerService

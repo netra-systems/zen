@@ -82,6 +82,7 @@ markers = [
     "unit: Unit tests (fast, isolated)",
     "integration: Integration tests (component interaction)",
     "e2e: End-to-end tests (full workflow)",
+    "end_to_end: Complete end-to-end user journey tests",
     "smoke: Quick validation tests",
     "critical: Essential system tests",
     "mission_critical: Business-critical functionality tests",
@@ -692,6 +693,17 @@ markers = [
     "service_dependency: Service dependency integration and resilience tests",
     "graceful_degradation: Graceful degradation tests for service availability",
     "health_monitoring: Health monitoring tests for service dependencies",
+
+    # Issue #860 Windows WebSocket Connection Failure markers (2025-09-15)
+    "windows: Windows platform-specific tests for connection failures and compatibility",
+
+    # Issue #1058 Data Integrity and Security Boundary markers
+    "issue_1058_data_integrity: Issue #1058 data integrity validation tests",
+    "issue_1058_security_boundaries: Issue #1058 security boundary enforcement tests",
+    "enterprise_compliance: Enterprise compliance and regulatory validation tests",
+
+    # Scalability and performance markers
+    "scalability: Scalability and concurrent user load testing",
 ]
 
 # Coverage settings

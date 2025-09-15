@@ -61,7 +61,6 @@ except ImportError as e:
     WebSocketManager = MagicMock
     get_websocket_manager = MagicMock
 
-
 @dataclass
 class WebSocketEvent:
     """WebSocket event data structure for testing."""
@@ -71,7 +70,6 @@ class WebSocketEvent:
     thread_id: str
     content: Dict[str, Any] = field(default_factory=dict)
     delivery_confirmed: bool = False
-
 
 @dataclass
 class EventSequenceTracker:
@@ -103,7 +101,6 @@ class EventSequenceTracker:
         if not self.received_events:
             return 0.0
         return self.received_events[-1].timestamp - self.received_events[0].timestamp
-
 
 class TestWebSocketEventSequenceIntegration(SSotAsyncTestCase):
     """
@@ -196,13 +193,11 @@ class TestWebSocketEventSequenceIntegration(SSotAsyncTestCase):
 
     async def _initialize_real_websocket_infrastructure(self):
         """Initialize real WebSocket infrastructure components."""
-        if not REAL_WEBSOCKET_COMPONENTS_AVAILABLE:
-            self._initialize_mock_websocket_infrastructure()
-            return
+        if not REAL_WEBSOCKET_COMPONENTS_AVAILABLE:return
 
         try:
             # Initialize real WebSocket manager
-            self.websocket_manager = await get_websocket_manager()
+            self.websocket_manager = get_websocket_manager()
 
             # Initialize real WebSocket bridge for agent integration
             self.websocket_bridge = create_agent_websocket_bridge()
@@ -216,8 +211,10 @@ class TestWebSocketEventSequenceIntegration(SSotAsyncTestCase):
                 )
 
         except Exception as e:
-            print(f"Failed to initialize real WebSocket infrastructure, using mocks: {e}")
-            self._initialize_mock_websocket_infrastructure()
+
+            # CLAUDE.md COMPLIANCE: Tests must use real services only
+
+            raise RuntimeError(f"Failed to initialize real infrastructure: {e}") from e
 
     def _initialize_mock_websocket_infrastructure(self):
         """Initialize mock WebSocket infrastructure for fallback testing."""

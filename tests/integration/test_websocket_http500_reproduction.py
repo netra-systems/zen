@@ -138,7 +138,9 @@ class TestWebSocketHTTP500Reproduction(SSotAsyncTestCase):
             results = await asyncio.gather(*tasks, return_exceptions=True)
             http_500_count = 0
             for i, result in enumerate(results):
-                if isinstance(result, InvalidStatus) and hasattr(result, 'status_code') and (result.status_code == 500):
+                # ISSUE #1032 FIX: Correct InvalidStatus attribute access
+                status_code = getattr(result.response, 'status', None) if hasattr(result, 'response') else getattr(result, 'status', None)
+                if isinstance(result, InvalidStatus) and status_code == 500:
                     http_500_count += 1
                     print(f'[DETECTED] Concurrent handshake {i} caused HTTP 500: {result}')
                 elif isinstance(result, Exception):
@@ -156,10 +158,12 @@ class TestWebSocketHTTP500Reproduction(SSotAsyncTestCase):
                     print('[UNEXPECTED] Malformed request succeeded')
                     return {'http_500_detected': False, 'error_details': 'No error with malformed request'}
             except InvalidStatus as e:
-                if hasattr(e, 'status_code') and e.status_code == 500:
+                # ISSUE #1032 FIX: Correct InvalidStatus attribute access
+                status_code = getattr(e.response, 'status', None) if hasattr(e, 'response') else getattr(e, 'status', None)
+                if status_code == 500:
                     return {'http_500_detected': True, 'error_details': f'Malformed request caused HTTP 500: {e}'}
                 else:
-                    return {'http_500_detected': False, 'error_details': f"Malformed request handled correctly: HTTP {getattr(e, 'status_code', 'UNKNOWN')}"}
+                    return {'http_500_detected': False, 'error_details': f"Malformed request handled correctly: HTTP {status_code or 'UNKNOWN'}"}
         except Exception as e:
             return {'http_500_detected': False, 'error_details': f'Malformed request test error: {e}'}
 

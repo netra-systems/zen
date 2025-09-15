@@ -592,6 +592,40 @@ STANDARD_LAYERS = {
 }
 
 
+# ========== SSOT Import Re-exports ==========
+
+# Import critical classes from their actual locations and re-export through SSOT
+try:
+    from netra_backend.app.websocket_core.manager import HeartbeatConfig as _HeartbeatConfig
+    HeartbeatConfig = _HeartbeatConfig
+    _heartbeat_config_available = True
+except ImportError as e:
+    # Create placeholder if import fails
+    class HeartbeatConfig:
+        """Placeholder HeartbeatConfig when actual class unavailable."""
+        def __init__(self, **kwargs):
+            pass
+
+        @classmethod
+        def for_environment(cls, env_name: str):
+            return cls()
+
+    _heartbeat_config_available = False
+
+try:
+    from netra_backend.app.services.service_mesh.retry_policy import RetryPolicy as _RetryPolicy
+    RetryPolicy = _RetryPolicy
+    _retry_policy_available = True
+except ImportError as e:
+    # Create placeholder if import fails
+    class RetryPolicy:
+        """Placeholder RetryPolicy when actual class unavailable."""
+        def __init__(self, **kwargs):
+            pass
+
+    _retry_policy_available = False
+
+
 # ========== Utility Functions ==========
 
 def get_standard_layer(layer_type: LayerType) -> LayerDefinition:
@@ -694,7 +728,7 @@ def validate_layer_definition(layer_def: LayerDefinition) -> List[str]:
 __all__ = [
     # Enums
     'BackgroundTaskStatus',
-    'E2ETestCategory', 
+    'E2ETestCategory',
     'ExecutionStrategy',
     'ProgressOutputMode',
     'ProgressEventType',
@@ -703,7 +737,7 @@ __all__ = [
     'ServiceStatus',
     'ServiceAvailability',
     'LayerType',
-    
+
     # Data Classes
     'LayerExecutionResult',
     'CategoryExecutionResult',
@@ -711,10 +745,14 @@ __all__ = [
     'BackgroundTaskResult',
     'ProgressEvent',
     'LayerDefinition',
-    
+
+    # SSOT Re-exports
+    'HeartbeatConfig',
+    'RetryPolicy',
+
     # Constants
     'STANDARD_LAYERS',
-    
+
     # Utility Functions
     'get_standard_layer',
     'get_all_standard_layers',

@@ -35,6 +35,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 import pytest
 import pytest_asyncio
@@ -467,7 +468,7 @@ class AgentPipelineInfrastructure:
         config = get_config()
         llm_manager = LLMManager(config)
         db_manager = DatabaseManager(config)
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         
         # Get real database session
         db_session = await db_manager.get_session()

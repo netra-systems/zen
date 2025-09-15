@@ -58,7 +58,7 @@ from netra_backend.app.websocket_core.state_synchronizer import ConnectionStateS
 # Import agent coordination components
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
 from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
-from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.state_persistence_optimized import StatePersistenceService
 
 

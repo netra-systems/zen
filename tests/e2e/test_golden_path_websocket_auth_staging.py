@@ -46,7 +46,7 @@ class TestWebSocketAuthGoldenPathStaging(SSotAsyncTestCase):
             user_id = f'fallback_user_{int(time.time())}'
             user_email = f'fallback_test_{int(time.time())}@netra-testing.ai'
             access_token = self.__class__.auth_client.create_test_jwt_token(user_id=user_id, email=user_email)
-            self.__class__.test_user = {'user_id': user_id, 'email': user_email, 'access_token': access_token}
+            self.__class__.test_user = {'user_id': user_id, 'email': user_email, 'access_token': access_token, 'encoded_token': access_token}
     'E2E tests for WebSocket authentication in staging - MISSION CRITICAL'
 
     async def _ensure_staging_setup(self):
@@ -58,10 +58,10 @@ class TestWebSocketAuthGoldenPathStaging(SSotAsyncTestCase):
         if not hasattr(self.__class__, 'staging_config') or self.__class__.staging_config is None:
             self.__class__.staging_config = StagingConfig()
             self.__class__.staging_helpers = StagingTestHelpers()
-            self.__class__.staging_backend_url = self.__class__.staging_config.get_backend_websocket_url()
-            self.__class__.staging_auth_url = self.__class__.staging_config.get_auth_service_url()
+            self.__class__.staging_backend_url = self.__class__.staging_config.websocket_url
+            self.__class__.staging_auth_url = self.__class__.staging_config.auth_service_url
             self.__class__.auth_client = StagingAuthClient()
-            self.__class__.websocket_client = RealWebSocketClient()
+            self.__class__.websocket_client = RealWebSocketClient(ws_url=self.__class__.staging_backend_url)
             await self._verify_staging_services()
             self.__class__.test_user = await self._create_golden_path_test_user()
             self.logger.info('Staging E2E test setup completed')

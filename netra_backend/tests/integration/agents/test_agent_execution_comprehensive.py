@@ -43,7 +43,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, E2EAuthC
 from test_framework.ssot.websocket import WebSocketTestUtility, WebSocketEventType
 from shared.isolated_environment import get_env
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine, EngineConfig, AgentExecutionResult
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine, EngineConfig, AgentExecutionResult
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent

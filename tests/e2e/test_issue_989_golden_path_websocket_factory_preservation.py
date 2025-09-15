@@ -202,7 +202,7 @@ class TestIssue989GoldenPathWebSocketFactoryPreservation(SSotAsyncTestCase):
             logger.info(f'Testing with user: {user_context.user_id}')
             try:
                 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-                websocket_manager = await get_websocket_manager(user_context=user_context)
+                websocket_manager = get_websocket_manager(user_context=user_context)
                 test_result.websocket_connection_success = True
                 logger.info('✅ SSOT direct initialization successful')
             except Exception as e:
@@ -237,7 +237,7 @@ class TestIssue989GoldenPathWebSocketFactoryPreservation(SSotAsyncTestCase):
             if test_result.websocket_connection_success:
                 try:
                     user_context_2 = self.test_users['user_2']
-                    websocket_manager_2 = await get_websocket_manager(user_context=user_context_2)
+                    websocket_manager_2 = get_websocket_manager(user_context=user_context_2)
                     if websocket_manager_2 and hasattr(websocket_manager_2, 'user_context'):
                         if websocket_manager_2.user_context.user_id != websocket_manager.user_context.user_id:
                             test_result.user_isolation_validated = True
@@ -288,11 +288,11 @@ class TestIssue989GoldenPathWebSocketFactoryPreservation(SSotAsyncTestCase):
                             pattern_used = 'deprecated_factory'
                         except:
                             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-                            manager = await get_websocket_manager(user_context=user_context)
+                            manager = get_websocket_manager(user_context=user_context)
                             pattern_used = 'ssot_direct_fallback'
                     elif user_key == 'user_2':
                         from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-                        manager = await get_websocket_manager(user_context=user_context)
+                        manager = get_websocket_manager(user_context=user_context)
                         pattern_used = 'ssot_direct'
                     else:
                         from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager

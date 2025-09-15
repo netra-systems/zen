@@ -17,9 +17,45 @@ if TYPE_CHECKING:
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class SupervisorAgentRouter:
+# === SSOT CONSOLIDATION NOTICE ===
+# SupervisorAgentRouter functionality has been consolidated into CanonicalMessageRouter
+# This file provides compatibility during migration phase
+
+from netra_backend.app.websocket_core.handlers import CanonicalMessageRouter
+
+
+class SupervisorAgentRouter(CanonicalMessageRouter):
+    """
+    COMPATIBILITY ADAPTER: SupervisorAgentRouter consolidated into CanonicalMessageRouter.
+
+    This class provides backward compatibility for existing SupervisorAgentRouter usage
+    while routing all functionality through the consolidated CanonicalMessageRouter.
+
+    Migration Status: Phase 1 - Compatibility adapter in place
+    Business Impact: Maintains $500K+ ARR agent routing functionality
+    """
+
+    def __init__(self, supervisor_agent):
+        """Initialize SupervisorAgentRouter compatibility adapter."""
+        super().__init__()
+
+        # Store supervisor agent and configure canonical router
+        self.supervisor = supervisor_agent
+        self.set_supervisor_agent(supervisor_agent)
+
+        logger.info("SupervisorAgentRouter compatibility adapter initialized - functionality consolidated")
+
+    # All agent routing methods are now inherited from CanonicalMessageRouter
+    # Legacy methods maintained for backward compatibility
+
+
+# === LEGACY IMPLEMENTATION (PRESERVED FOR REFERENCE) ===
+# The original implementation is preserved below for reference during migration
+# This will be removed in Phase 3 after all imports are updated
+
+class LegacySupervisorAgentRouter:
     """Helper class for supervisor agent routing."""
-    
+
     def __init__(self, supervisor_agent):
         self.supervisor = supervisor_agent
     

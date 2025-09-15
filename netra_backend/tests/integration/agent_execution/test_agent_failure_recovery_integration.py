@@ -299,7 +299,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
         user_contexts = []
         engines = []
         for i in range(3):
-            context = UserExecutionContext(user_id=f'concurrent_failure_user_{i}', thread_id=f'concurrent_failure_thread_{i}', run_id=f'concurrent_failure_run_{i}', request_id=f'concurrent_failure_req_{i}', metadata={'concurrent_failure_test': i})
+            context = UserExecutionContext(user_id=f'concurrent_failure_user_{i}', thread_id=f'concurrent_failure_thread_{i}', run_id=f'concurrent_failure_run_{i}', request_id=f'concurrent_failure_req_{i}', agent_context={'concurrent_failure_test': i})
             user_contexts.append(context)
             websocket_bridge = await self.websocket_manager.create_bridge(context)
             engine = ExecutionEngine._init_from_factory(registry=failure_registry, websocket_bridge=websocket_bridge, user_context=context)

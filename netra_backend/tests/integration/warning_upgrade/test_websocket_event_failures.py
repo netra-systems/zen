@@ -71,7 +71,7 @@ class TestWebSocketEventFailuresWarningUpgrade(SsotAsyncWarningUpgradeTestCase):
                 mock_notify.side_effect = ConnectionError("WebSocket connection lost during agent_started")
                 
                 # Import and instantiate execution engine with failing WebSocket bridge
-                from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngineWithWebSocketEvents
+                from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngineWithWebSocketEvents
                 from netra_backend.app.agents.base_agent import AgentExecutionContext
                 
                 # Create test execution context
@@ -120,7 +120,7 @@ class TestWebSocketEventFailuresWarningUpgrade(SsotAsyncWarningUpgradeTestCase):
             with patch('netra_backend.app.agents.execution_engine_consolidated.WebSocketBridge.notify_agent_completed') as mock_notify:
                 mock_notify.side_effect = TimeoutError("WebSocket send timeout during agent_completed")
                 
-                from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngineWithWebSocketEvents
+                from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngineWithWebSocketEvents
                 from netra_backend.app.agents.base_agent import AgentExecutionContext, AgentExecutionResult
                 
                 # Create test contexts
@@ -175,7 +175,7 @@ class TestWebSocketEventFailuresWarningUpgrade(SsotAsyncWarningUpgradeTestCase):
             with patch('netra_backend.app.agents.execution_engine_consolidated.WebSocketBridge.notify_agent_error') as mock_notify:
                 mock_notify.side_effect = RuntimeError("WebSocket bridge unavailable during error notification")
                 
-                from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngineWithWebSocketEvents
+                from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngineWithWebSocketEvents
                 from netra_backend.app.agents.base_agent import AgentExecutionContext
                 
                 # Create test context  
@@ -243,7 +243,7 @@ class TestWebSocketEventFailuresWarningUpgrade(SsotAsyncWarningUpgradeTestCase):
                 
                 mock_notify.side_effect = selective_failure
                 
-                from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngineWithWebSocketEvents
+                from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngineWithWebSocketEvents
                 from netra_backend.app.agents.base_agent import AgentExecutionContext
                 
                 # Create contexts for both users
@@ -309,7 +309,7 @@ class TestWebSocketEventFailuresWarningUpgrade(SsotAsyncWarningUpgradeTestCase):
             with patch('netra_backend.app.agents.execution_engine_consolidated.WebSocketBridge.notify_agent_started') as mock_notify:
                 mock_notify.side_effect = intermittent_failure
                 
-                from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngineWithWebSocketEvents
+                from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngineWithWebSocketEvents
                 from netra_backend.app.agents.base_agent import AgentExecutionContext
                 
                 engine = ExecutionEngineWithWebSocketEvents()
@@ -416,7 +416,7 @@ class TestWebSocketEventFailuresWarningUpgrade(SsotAsyncWarningUpgradeTestCase):
             with patch('netra_backend.app.agents.execution_engine_consolidated.WebSocketBridge.notify_agent_started') as mock_notify:
                 mock_notify.side_effect = ConnectionError(f"Concurrent WebSocket failure {task_id}")
                 
-                from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngineWithWebSocketEvents
+                from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngineWithWebSocketEvents
                 from netra_backend.app.agents.base_agent import AgentExecutionContext
                 
                 context = AgentExecutionContext(

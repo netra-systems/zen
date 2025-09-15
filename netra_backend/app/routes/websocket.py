@@ -44,9 +44,7 @@ from netra_backend.app.routes.websocket_ssot import (
     websocket_health_check,
     get_websocket_config,
     websocket_detailed_stats,
-    websocket_beacon,
-    websocket_legacy_endpoint,
-    websocket_test_endpoint
+    websocket_beacon
 )
 
 # Re-export for backward compatibility
@@ -57,9 +55,7 @@ __all__ = [
     'websocket_health_check',
     'get_websocket_config',
     'websocket_detailed_stats',
-    'websocket_beacon',
-    'websocket_legacy_endpoint', 
-    'websocket_test_endpoint'
+    'websocket_beacon'
 ]
 
 # SSOT COMPLIANCE NOTICE:

@@ -17,6 +17,7 @@ import asyncio
 import time
 from typing import Dict, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
@@ -59,7 +60,7 @@ class TestWebSocketFactoryChainViolations(BaseIntegrationTest):
             factory_creation_error = str(e)
         
         # Method 2: Direct instantiation (what most code actually does)
-        direct_manager = UnifiedWebSocketManager()
+        direct_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         await direct_manager.initialize(
             redis_client=real_services_fixture["redis"],
             environment="test"
@@ -116,7 +117,7 @@ class TestWebSocketFactoryChainViolations(BaseIntegrationTest):
         try:
             bridge_factory = WebSocketBridgeFactory()
             bridge_via_factory = await bridge_factory.create_websocket_bridge(
-                websocket_manager=UnifiedWebSocketManager(),
+                websocket_manager=get_websocket_manager(user_context=getattr(self, 'user_context', None)),
                 redis_client=real_services_fixture["redis"]
             )
         except Exception as e:
@@ -124,7 +125,7 @@ class TestWebSocketFactoryChainViolations(BaseIntegrationTest):
             bridge_via_factory = None
             
         # Layer 2: Direct AgentWebSocketBridge creation (what actually gets used)
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         await websocket_manager.initialize(
             redis_client=real_services_fixture["redis"],
             environment="test"
@@ -196,7 +197,7 @@ class TestWebSocketFactoryChainViolations(BaseIntegrationTest):
         with inconsistent initialization and configuration.
         """
         # Create base dependencies
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         await websocket_manager.initialize(
             redis_client=real_services_fixture["redis"],
             environment="test"
@@ -314,7 +315,7 @@ class TestWebSocketFactoryChainViolations(BaseIntegrationTest):
         redis_client = real_services_fixture["redis"]
         
         # Step 2: Create WebSocket manager (should be simple)
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         await websocket_manager.initialize(redis_client=redis_client, environment="test")
         
         # Step 3: Create bridge (adds layer)
@@ -359,7 +360,7 @@ class TestWebSocketFactoryChainViolations(BaseIntegrationTest):
         simple_start = time.time()
         
         # Direct simple approach (what it should be)
-        simple_manager = UnifiedWebSocketManager()
+        simple_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         await simple_manager.initialize(redis_client=redis_client, environment="test")
         
         simple_bridge = AgentWebSocketBridge(websocket_manager=simple_manager)

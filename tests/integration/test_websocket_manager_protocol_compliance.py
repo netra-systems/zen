@@ -26,6 +26,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import create_we
 from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 @pytest.mark.integration
 class TestWebSocketManagerProtocolCompliance:
@@ -68,7 +69,7 @@ class TestWebSocketManagerProtocolCompliance:
         While UnifiedWebSocketManager doesn't formally implement the protocol,
         it should have all required methods for interface compatibility.
         """
-        manager = UnifiedWebSocketManager()
+        manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         validation_result = WebSocketManagerProtocolValidator.validate_manager_protocol(manager)
         print(f"UnifiedWebSocketManager compliance: {validation_result['summary']['compliance_percentage']}%")
         print(f"Missing methods: {validation_result['missing_methods']}")

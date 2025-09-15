@@ -1,3 +1,4 @@
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 #!/usr/bin/env python
 """
 E2E Staging Tests for WebSocket Agent Chat Flows
@@ -36,7 +37,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 async def staging_websocket_utility():
     """Create WebSocket test utility for staging environment."""
     # Use staging WebSocket URL
-    staging_ws_url = "wss://staging.netra-apex.com/ws"  # Replace with actual staging URL
+    staging_ws_url = "wss://api.staging.netrasystems.ai/ws"  # Canonical staging domain
     
     async with WebSocketTestUtility(base_url=staging_ws_url) as ws_util:
         yield ws_util
@@ -51,7 +52,7 @@ def staging_auth_helper():
 @pytest.fixture
 async def staging_websocket_manager():
     """Create WebSocket manager connected to staging."""
-    manager = UnifiedWebSocketManager()
+    manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
     await manager.initialize()
     yield manager
     await manager.cleanup()

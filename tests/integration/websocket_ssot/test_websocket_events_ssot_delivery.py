@@ -68,7 +68,7 @@ class TestWebSocketEventsSSotDelivery(SSotAsyncTestCase):
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
-        manager = await get_websocket_manager(user_context=self.test_user_context)
+        manager = get_websocket_manager(user_context=self.test_user_context)
         self.assertIsNotNone(manager, 'SSOT manager should be created')
         self.websocket_managers.append(manager)
         mock_connection = self.create_mock_websocket_connection(self.test_user_context['user_id'])
@@ -113,7 +113,7 @@ class TestWebSocketEventsSSotDelivery(SSotAsyncTestCase):
         user_managers = {}
         user_connections = {}
         for user_context in test_users:
-            manager = await get_websocket_manager(user_context=user_context)
+            manager = get_websocket_manager(user_context=user_context)
             user_managers[user_context['user_id']] = manager
             self.websocket_managers.append(manager)
             connection = self.create_mock_websocket_connection(user_context['user_id'])
@@ -163,7 +163,7 @@ class TestWebSocketEventsSSotDelivery(SSotAsyncTestCase):
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
-        manager = await get_websocket_manager(user_context=self.test_user_context)
+        manager = get_websocket_manager(user_context=self.test_user_context)
         self.websocket_managers.append(manager)
         connection = self.create_mock_websocket_connection(self.test_user_context['user_id'])
         if hasattr(manager, 'add_connection'):
@@ -203,7 +203,7 @@ class TestWebSocketEventsSSotDelivery(SSotAsyncTestCase):
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
-        manager = await get_websocket_manager(user_context=self.test_user_context)
+        manager = get_websocket_manager(user_context=self.test_user_context)
         self.websocket_managers.append(manager)
         failing_connection = AsyncMock()
         failing_connection.user_id = self.test_user_context['user_id']
@@ -259,7 +259,7 @@ class TestWebSocketEventsSSotDelivery(SSotAsyncTestCase):
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
-        manager = await get_websocket_manager(user_context=self.test_user_context)
+        manager = get_websocket_manager(user_context=self.test_user_context)
         self.websocket_managers.append(manager)
         connection = self.create_mock_websocket_connection(self.test_user_context['user_id'])
         if hasattr(manager, 'add_connection'):

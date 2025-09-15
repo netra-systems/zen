@@ -120,7 +120,7 @@ class TestWebSocketConnectionLifecycle(SSotAsyncTestCase):
         """
         user_data = self.test_users[0]
         user_context = await self.create_mock_user_context(user_data)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'conn_{uuid.uuid4().hex[:8]}'
         mock_ws = MockWebSocketConnection(user_data.user_id, connection_id)
@@ -142,7 +142,7 @@ class TestWebSocketConnectionLifecycle(SSotAsyncTestCase):
         """
         user_data = self.test_users[0]
         user_context = await self.create_mock_user_context(user_data)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'conn_{uuid.uuid4().hex[:8]}'
         mock_ws = MockWebSocketConnection(user_data.user_id, connection_id)
@@ -169,7 +169,7 @@ class TestWebSocketConnectionLifecycle(SSotAsyncTestCase):
         connection_tasks = []
         for user_data in self.test_users:
             user_context = await self.create_mock_user_context(user_data)
-            manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+            manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
             managers.append(manager)
             connection_id = f'conn_{user_data.user_id}_{uuid.uuid4().hex[:8]}'
             mock_ws = MockWebSocketConnection(user_data.user_id, connection_id)
@@ -202,7 +202,7 @@ class TestWebSocketConnectionLifecycle(SSotAsyncTestCase):
         """
         user_data = self.test_users[0]
         user_context = await self.create_mock_user_context(user_data)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connections = []
         for i in range(3):
@@ -229,7 +229,7 @@ class TestWebSocketConnectionLifecycle(SSotAsyncTestCase):
         """
         user_data = self.test_users[0]
         user_context = await self.create_mock_user_context(user_data)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'conn_{uuid.uuid4().hex[:8]}'
         mock_ws = MockWebSocketConnection(user_data.user_id, connection_id)
@@ -254,7 +254,7 @@ class TestWebSocketConnectionLifecycle(SSotAsyncTestCase):
         """
         user_data = self.test_users[0]
         user_context = await self.create_mock_user_context(user_data)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         max_connections = 5
         connections = []

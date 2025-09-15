@@ -39,11 +39,11 @@ class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
         """
         logger.info('Testing WebSocket manager import path SSOT compliance - EXPECTING FAILURE')
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as Manager1
-            from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation as Manager2
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
             user_context = {'user_id': 'test_user_123', 'thread_id': 'test_thread_456'}
-            manager1 = Manager1(user_context=user_context)
-            manager2 = Manager2(user_context=user_context)
+            manager1 = get_websocket_manager(user_context=user_context)
+            manager2 = UnifiedWebSocketManager(user_context=user_context)
             self.assertIs(manager1, manager2, 'SSOT VIOLATION: Different import paths create different WebSocket manager instances. This proves fragmentation exists and threatens Golden Path reliability.')
         except ImportError as e:
             logger.error(f'Import error indicates WebSocket manager fragmentation: {e}')
@@ -65,7 +65,7 @@ class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             user_context = {'user_id': 'test_user_789', 'thread_id': 'test_thread_101'}
             factory_manager = await create_websocket_manager(user_context=user_context)
-            direct_manager = await get_websocket_manager(user_context=user_context)
+            direct_manager = get_websocket_manager(user_context=user_context)
             self.assertIs(factory_manager, direct_manager, 'SSOT VIOLATION: Factory creates separate instances instead of using SSOT. This causes WebSocket event delivery inconsistencies.')
         except ImportError as e:
             logger.error(f'Import error indicates factory fragmentation: {e}')
@@ -86,8 +86,8 @@ class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             user_context1 = {'user_id': 'test_user_shared', 'thread_id': 'thread_1'}
             user_context2 = {'user_id': 'test_user_shared', 'thread_id': 'thread_2'}
-            manager1 = await get_websocket_manager(user_context=user_context1)
-            manager2 = await get_websocket_manager(user_context=user_context2)
+            manager1 = get_websocket_manager(user_context=user_context1)
+            manager2 = get_websocket_manager(user_context=user_context2)
             self.assertEqual(id(manager1), id(manager2), 'SSOT VIOLATION: Same user gets different WebSocket manager instances. This can cause event delivery race conditions.')
         except Exception as e:
             logger.error(f'Instance sharing test failed: {e}')
@@ -105,8 +105,8 @@ class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             context1 = {'user_id': 'user_isolation_1', 'thread_id': 'thread_1'}
             context2 = {'user_id': 'user_isolation_2', 'thread_id': 'thread_2'}
-            manager1 = await get_websocket_manager(user_context=context1)
-            manager2 = await get_websocket_manager(user_context=context2)
+            manager1 = get_websocket_manager(user_context=context1)
+            manager2 = get_websocket_manager(user_context=context2)
             if hasattr(manager1, 'connections'):
                 manager1.connections['test_key'] = 'user1_data'
             if hasattr(manager2, 'connections'):

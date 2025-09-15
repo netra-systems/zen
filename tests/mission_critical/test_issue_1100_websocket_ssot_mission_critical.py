@@ -163,9 +163,10 @@ class TestWebSocketSSotMissionCritical(SSotAsyncTestCase):
                 from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
                 from netra_backend.app.services.user_execution_context import UserExecutionContext
                 from shared.types.core_types import ensure_user_id
+                import uuid
                 
-                # Create test context
-                test_user_id = ensure_user_id("ssot_mission_critical")
+                # Create test context with proper UUID format
+                test_user_id = ensure_user_id(str(uuid.uuid4()))
                 test_context = UserExecutionContext(
                     user_id=test_user_id,
                     thread_id="mission_critical_thread",
@@ -173,19 +174,20 @@ class TestWebSocketSSotMissionCritical(SSotAsyncTestCase):
                     request_id="ssot_validation_test"
                 )
                 
-                # Test direct instantiation (SSOT compliant)
-                manager = WebSocketManager(
-                    mode=WebSocketManagerMode.UNIFIED,
-                    user_context=test_context
+                # Test factory function instantiation (SSOT compliant)
+                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                manager = get_websocket_manager(
+                    user_context=test_context,
+                    mode=WebSocketManagerMode.UNIFIED
                 )
                 
-                implementation_analysis['direct_instantiation_works'] = True
-                logger.info("Direct WebSocketManager instantiation successful")
+                implementation_analysis['factory_instantiation_works'] = True
+                logger.info("Factory WebSocketManager instantiation successful")
                 
             except Exception as e:
-                implementation_analysis['direct_instantiation_works'] = False
+                implementation_analysis['factory_instantiation_works'] = False
                 ssot_violations.append({
-                    'type': 'direct_instantiation_failed',
+                    'type': 'factory_instantiation_failed',
                     'error': str(e),
                     'impact': 'deployment_blocking'
                 })

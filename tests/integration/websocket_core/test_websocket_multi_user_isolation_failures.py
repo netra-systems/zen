@@ -119,7 +119,7 @@ class TestWebSocketMultiUserIsolationFailures(SSotAsyncTestCase, unittest.TestCa
                 user_context = user['context']
 
                 # Create manager for this user
-                manager = await get_websocket_manager(user_context=user_context)
+                manager = get_websocket_manager(user_context=user_context)
                 managers_by_user[user_context.user_id] = manager
 
                 # Create mock WebSocket with state tracking
@@ -253,7 +253,7 @@ class TestWebSocketMultiUserIsolationFailures(SSotAsyncTestCase, unittest.TestCa
             # Create managers and examine their connection pools
             for user in users:
                 user_context = user['context']
-                manager = await get_websocket_manager(user_context=user_context)
+                manager = get_websocket_manager(user_context=user_context)
 
                 # Extract connection pool reference
                 connection_pool = None
@@ -331,7 +331,7 @@ class TestWebSocketMultiUserIsolationFailures(SSotAsyncTestCase, unittest.TestCa
                     request_id=f'memory_req_{i}'
                 )
 
-                manager = await get_websocket_manager(user_context=user_context)
+                manager = get_websocket_manager(user_context=user_context)
                 managers_created.append(manager)
 
                 # Simulate some activity
@@ -427,7 +427,7 @@ class TestWebSocketEnterpriseComplianceFailures(SSotAsyncTestCase, unittest.Test
                 user_context = healthcare_user['context']
                 phi_data = healthcare_user['phi_data']
 
-                manager = await get_websocket_manager(user_context=user_context)
+                manager = get_websocket_manager(user_context=user_context)
 
                 # Mock WebSocket with PHI tracking
                 mock_ws = AsyncMock()
@@ -546,7 +546,7 @@ class TestWebSocketEnterpriseComplianceFailures(SSotAsyncTestCase, unittest.Test
                 user_context = financial_user['context']
                 financial_data = financial_user['financial_data']
 
-                manager = await get_websocket_manager(user_context=user_context)
+                manager = get_websocket_manager(user_context=user_context)
 
                 # Mock WebSocket with financial data tracking
                 mock_ws = AsyncMock()

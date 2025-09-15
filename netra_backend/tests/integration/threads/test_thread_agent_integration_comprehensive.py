@@ -48,7 +48,7 @@ from netra_backend.app.db.models_agent import Thread, Message, Run
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
-from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from shared.isolated_environment import get_env
 from shared.types import UserID, ThreadID, RunID, RequestID
 

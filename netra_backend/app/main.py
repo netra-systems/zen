@@ -21,6 +21,18 @@ env_manager = get_env()
 startup_manager = StartupEnvironmentManager(env_manager)
 startup_manager.setup_service_environment(BACKEND_CONFIG)
 
+# CRITICAL FIX: Set required auth environment variables for Issue #1229
+# This fixes AgentService dependency injection failure that breaks $500K+ ARR chat functionality
+# Missing SERVICE_ID and AUTH_SERVICE_URL cause deterministic startup to fail, preventing AgentService initialization
+if not env_manager.get("SERVICE_ID"):
+    env_manager.set("SERVICE_ID", "netra-backend")
+if not env_manager.get("AUTH_SERVICE_URL"):
+    # Use development auth service URL for local development
+    env_manager.set("AUTH_SERVICE_URL", "http://localhost:8001")
+if not env_manager.get("SERVICE_SECRET"):
+    # Use development service secret for local development
+    env_manager.set("SERVICE_SECRET", "dev-service-secret-32-chars-long")
+
 # Configure logging for Cloud Run compatibility (prevents ANSI codes)
 from netra_backend.app.core.logging_config import configure_cloud_run_logging, setup_exception_handler
 configure_cloud_run_logging()

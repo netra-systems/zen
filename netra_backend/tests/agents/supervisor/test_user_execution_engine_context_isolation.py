@@ -115,9 +115,27 @@ class TestUserExecutionEngineContextIsolation(SSotAsyncTestCase):
 
     async def test_user_execution_engine_initialization_isolation(self):
         """Test UserExecutionEngine initializes with proper user isolation."""
+        # Create a test user context for engine initialization
+        test_context = UserExecutionContext(
+            user_id="test-init-user",
+            thread_id="test-init-thread",
+            run_id="test-init-run"
+        )
+
+        # Create mock agent factory
+        from unittest.mock import Mock
+        mock_agent_factory = Mock()
+        mock_agent_factory._agent_registry = self.agent_registry
+
+        # Create mock websocket emitter
+        mock_websocket_emitter = Mock()
+        mock_websocket_emitter.manager = self.websocket_bridge
+
+        # Use modern constructor signature
         engine = UserExecutionEngine(
-            agent_registry=self.agent_registry,
-            websocket_bridge=self.websocket_bridge
+            context=test_context,
+            agent_factory=mock_agent_factory,
+            websocket_emitter=mock_websocket_emitter
         )
 
         # Verify: Engine is properly initialized
@@ -140,9 +158,27 @@ class TestUserExecutionEngineContextIsolation(SSotAsyncTestCase):
 
     async def test_concurrent_user_execution_complete_isolation(self):
         """Test complete isolation between concurrent user executions."""
+        # Create a test user context for engine initialization
+        test_context = UserExecutionContext(
+            user_id="test-concurrent-user",
+            thread_id="test-concurrent-thread",
+            run_id="test-concurrent-run"
+        )
+
+        # Create mock agent factory
+        from unittest.mock import Mock
+        mock_agent_factory = Mock()
+        mock_agent_factory._agent_registry = self.agent_registry
+
+        # Create mock websocket emitter
+        mock_websocket_emitter = Mock()
+        mock_websocket_emitter.manager = self.websocket_bridge
+
+        # Use modern constructor signature
         engine = UserExecutionEngine(
-            agent_registry=self.agent_registry,
-            websocket_bridge=self.websocket_bridge
+            context=test_context,
+            agent_factory=mock_agent_factory,
+            websocket_emitter=mock_websocket_emitter
         )
 
         # Mock the execution method to simulate processing
@@ -226,9 +262,27 @@ class TestUserExecutionEngineContextIsolation(SSotAsyncTestCase):
 
     async def test_user_memory_isolation_stress_test(self):
         """Test memory isolation under heavy concurrent load."""
+        # Create a test user context for engine initialization
+        test_context = UserExecutionContext(
+            user_id="test-stress-user",
+            thread_id="test-stress-thread",
+            run_id="test-stress-run"
+        )
+
+        # Create mock agent factory
+        from unittest.mock import Mock
+        mock_agent_factory = Mock()
+        mock_agent_factory._agent_registry = self.agent_registry
+
+        # Create mock websocket emitter
+        mock_websocket_emitter = Mock()
+        mock_websocket_emitter.manager = self.websocket_bridge
+
+        # Use modern constructor signature
         engine = UserExecutionEngine(
-            agent_registry=self.agent_registry,
-            websocket_bridge=self.websocket_bridge
+            context=test_context,
+            agent_factory=mock_agent_factory,
+            websocket_emitter=mock_websocket_emitter
         )
 
         # Create more user contexts for stress testing
@@ -308,9 +362,27 @@ class TestUserExecutionEngineContextIsolation(SSotAsyncTestCase):
 
     async def test_websocket_event_user_isolation(self):
         """Test WebSocket events are properly isolated by user context."""
+        # Create a test user context for engine initialization
+        test_context = UserExecutionContext(
+            user_id="test-websocket-user",
+            thread_id="test-websocket-thread",
+            run_id="test-websocket-run"
+        )
+
+        # Create mock agent factory
+        from unittest.mock import Mock
+        mock_agent_factory = Mock()
+        mock_agent_factory._agent_registry = self.agent_registry
+
+        # Create mock websocket emitter
+        mock_websocket_emitter = Mock()
+        mock_websocket_emitter.manager = self.websocket_bridge
+
+        # Use modern constructor signature
         engine = UserExecutionEngine(
-            agent_registry=self.agent_registry,
-            websocket_bridge=self.websocket_bridge
+            context=test_context,
+            agent_factory=mock_agent_factory,
+            websocket_emitter=mock_websocket_emitter
         )
 
         # Mock execution that emits multiple WebSocket events per user
@@ -387,9 +459,27 @@ class TestUserExecutionEngineContextIsolation(SSotAsyncTestCase):
 
     async def test_user_context_cleanup_and_resource_management(self):
         """Test proper cleanup and resource management per user context."""
+        # Create a test user context for engine initialization
+        test_context = UserExecutionContext(
+            user_id="test-cleanup-user",
+            thread_id="test-cleanup-thread",
+            run_id="test-cleanup-run"
+        )
+
+        # Create mock agent factory
+        from unittest.mock import Mock
+        mock_agent_factory = Mock()
+        mock_agent_factory._agent_registry = self.agent_registry
+
+        # Create mock websocket emitter
+        mock_websocket_emitter = Mock()
+        mock_websocket_emitter.manager = self.websocket_bridge
+
+        # Use modern constructor signature
         engine = UserExecutionEngine(
-            agent_registry=self.agent_registry,
-            websocket_bridge=self.websocket_bridge
+            context=test_context,
+            agent_factory=mock_agent_factory,
+            websocket_emitter=mock_websocket_emitter
         )
 
         # Track resource allocation and cleanup
@@ -469,9 +559,27 @@ class TestUserExecutionEngineContextIsolation(SSotAsyncTestCase):
 
     async def test_error_isolation_between_users(self):
         """Test errors in one user's execution don't affect other users."""
+        # Create a test user context for engine initialization
+        test_context = UserExecutionContext(
+            user_id="test-error-user",
+            thread_id="test-error-thread",
+            run_id="test-error-run"
+        )
+
+        # Create mock agent factory
+        from unittest.mock import Mock
+        mock_agent_factory = Mock()
+        mock_agent_factory._agent_registry = self.agent_registry
+
+        # Create mock websocket emitter
+        mock_websocket_emitter = Mock()
+        mock_websocket_emitter.manager = self.websocket_bridge
+
+        # Use modern constructor signature
         engine = UserExecutionEngine(
-            agent_registry=self.agent_registry,
-            websocket_bridge=self.websocket_bridge
+            context=test_context,
+            agent_factory=mock_agent_factory,
+            websocket_emitter=mock_websocket_emitter
         )
 
         async def selective_failure_execution(context: UserExecutionContext, request: str):

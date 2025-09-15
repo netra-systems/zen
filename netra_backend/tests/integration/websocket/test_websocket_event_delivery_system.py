@@ -140,7 +140,7 @@ class TestWebSocketEventDeliverySystem(SSotAsyncTestCase):
     async def setup_websocket_with_event_capture(self, user_data: TestUserData) -> Tuple[Any, EventCapturingWebSocket]:
         """Set up WebSocket manager with event capturing."""
         user_context = await self.create_mock_user_context(user_data)
-        manager = await get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
+        manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)
         self.websocket_managers.append(manager)
         connection_id = f'event_conn_{uuid.uuid4().hex[:8]}'
         event_capturer = EventCapturingWebSocket(user_data.user_id, connection_id)

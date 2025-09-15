@@ -85,7 +85,6 @@ except ImportError as e:
     DatabaseURLBuilder = MagicMock
     AgentInstanceFactory = MagicMock
 
-
 class TestDatabaseServiceIntegration(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Database Service Integration.
@@ -163,9 +162,7 @@ class TestDatabaseServiceIntegration(SSotAsyncTestCase):
     
     async def _initialize_database_infrastructure(self):
         """Initialize real database infrastructure components."""
-        if not REAL_DB_COMPONENTS_AVAILABLE or not SQLALCHEMY_AVAILABLE:
-            self._initialize_mock_database_infrastructure()
-            return
+        if not REAL_DB_COMPONENTS_AVAILABLE or not SQLALCHEMY_AVAILABLE:return
             
         try:
             # Get configuration for database connections
@@ -199,22 +196,6 @@ class TestDatabaseServiceIntegration(SSotAsyncTestCase):
             
         except Exception as e:
             print(f"Failed to initialize real database infrastructure: {e}")
-            self._initialize_mock_database_infrastructure()
-    
-    def _initialize_mock_database_infrastructure(self):
-        """Initialize mock database infrastructure for fallback testing."""
-        self.db_url_builder = MagicMock()
-        self.database_manager = MagicMock()
-        self.db_engine = MagicMock()
-        self.clickhouse_client = MagicMock()
-        self.state_persistence = MagicMock()
-        self.transaction_coordinator = MagicMock()
-        self.agent_factory = MagicMock()
-        
-        # Configure mock database behavior
-        self.database_manager.get_session = AsyncMock()
-        self.state_persistence.store_state = AsyncMock()
-        self.clickhouse_client.execute_query = AsyncMock()
     
     def _get_test_database_url(self):
         """Get test database URL with proper configuration."""
