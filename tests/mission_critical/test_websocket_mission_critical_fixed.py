@@ -44,6 +44,7 @@ from netra_backend.app.agents.unified_tool_execution import (
     enhance_tool_dispatcher_with_notifications
 )
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
@@ -179,7 +180,7 @@ class TestMissionCriticalWebSocketEvents:
             request_id="test-request"
         )
         dispatcher = ToolDispatcher(user_context)
-        ws_manager = WebSocketManager()
+        ws_manager = get_websocket_manager(user_context)
 
         # Verify initial state
         assert hasattr(dispatcher, 'executor'), "ToolDispatcher missing executor"
@@ -217,7 +218,7 @@ class TestMissionCriticalWebSocketEvents:
         )
         tool_dispatcher = ToolDispatcher(user_context)
         registry = AgentRegistry(MockLLM(), tool_dispatcher)
-        ws_manager = WebSocketManager()
+        ws_manager = get_websocket_manager(user_context)
 
         # Set WebSocket manager
         registry.set_websocket_manager(ws_manager)
@@ -240,7 +241,7 @@ class TestMissionCriticalWebSocketEvents:
             request_id="test-request"
         )
         registry = AgentRegistry(MockLLM(), ToolDispatcher(user_context))
-        ws_manager = WebSocketManager()
+        ws_manager = get_websocket_manager(user_context)
 
         # Create execution engine with proper Issue #1116 SSOT patterns
         engine = ExecutionEngine(
@@ -257,7 +258,14 @@ class TestMissionCriticalWebSocketEvents:
     @pytest.mark.asyncio
     async def test_unified_tool_execution_sends_critical_events(self):
         """MISSION CRITICAL: Enhanced tool execution MUST send WebSocket events."""
-        ws_manager = WebSocketManager()
+        # Create user context for Issue #1116 SSOT compliance
+        user_context = UserExecutionContext(
+            user_id="test-user",
+            thread_id="test-thread",
+            run_id="mission-critical-test",
+            request_id="mission-critical-test"
+        )
+        ws_manager = get_websocket_manager(user_context)
         validator = MissionCriticalEventValidator()
 
         # Mock WebSocket calls to capture events
@@ -401,17 +409,7 @@ class TestMissionCriticalWebSocketEvents:
     @pytest.mark.asyncio
     async def test_full_agent_execution_websocket_flow(self):
         """MISSION CRITICAL: Full agent execution flow with all WebSocket events."""
-        ws_manager = WebSocketManager()
         validator = MissionCriticalEventValidator()
-
-        # Mock WebSocket manager
-        sent_events = []
-        async def capture_events(thread_id, message_data):
-            sent_events.append(message_data)
-            validator.record(message_data)
-            return True
-
-        ws_manager.send_to_thread = AsyncMock(side_effect=capture_events)
 
         # Create full agent setup
         class MockLLM:
@@ -426,6 +424,16 @@ class TestMissionCriticalWebSocketEvents:
             run_id="mission-flow-test",
             request_id="mission-flow-test"
         )
+        ws_manager = get_websocket_manager(user_context)
+
+        # Mock WebSocket manager
+        sent_events = []
+        async def capture_events(thread_id, message_data):
+            sent_events.append(message_data)
+            validator.record(message_data)
+            return True
+
+        ws_manager.send_to_thread = AsyncMock(side_effect=capture_events)
         tool_dispatcher = ToolDispatcher(user_context)
 
         # Create registry with WebSocket
