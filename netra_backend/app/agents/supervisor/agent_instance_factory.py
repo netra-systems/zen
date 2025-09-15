@@ -1162,34 +1162,38 @@ def create_agent_instance_factory(user_context: UserExecutionContext) -> AgentIn
     return factory
 
 
-# LEGACY SINGLETON PATTERN (PHASE 1: Maintain compatibility during transition)
-_factory_instance: Optional[AgentInstanceFactory] = None
-
+# ISSUE #1186 PHASE 2: SINGLETON PATTERN COMPLETELY REMOVED
+# The singleton pattern has been completely eliminated to prevent multi-user state contamination.
+# All factory creation now uses per-request factory patterns with complete user isolation.
 
 def get_agent_instance_factory() -> AgentInstanceFactory:
-    """DEPRECATED: Singleton AgentInstanceFactory - DO NOT USE.
+    """DEPRECATED AND UNSAFE: This function creates CRITICAL security vulnerabilities.
     
-    ISSUE #1142 - CRITICAL SECURITY VULNERABILITY: This function creates shared state
-    between users causing multi-user contamination and data leakage.
+    ISSUE #1186 PHASE 2 - SINGLETON ELIMINATION COMPLETE:
+    This function is now completely deprecated and will raise an error to prevent
+    multi-user state contamination. The singleton pattern has been eliminated.
     
-    REPLACEMENT: Use create_agent_instance_factory(user_context) for proper user isolation.
+    MANDATORY MIGRATION:
+    - OLD: get_agent_instance_factory() 
+    - NEW: create_agent_instance_factory(user_context)
     
-    This function will be removed in a future version. All consumers should migrate to:
-    - create_agent_instance_factory(user_context) for per-request isolation
-    - AgentInstanceFactoryDep dependency injection in FastAPI endpoints
+    Security Impact: Singleton pattern enables data leakage between users, violates
+    HIPAA/SOC2/SEC compliance requirements, and creates race conditions.
     """
-    global _factory_instance
     
     logger.error(
-        "CRITICAL SECURITY VIOLATION: get_agent_instance_factory() called! "
-        "This singleton pattern causes multi-user state contamination. "
-        "IMMEDIATELY migrate to create_agent_instance_factory(user_context) for user isolation."
+        "SINGLETON ELIMINATION: get_agent_instance_factory() completely deprecated! "
+        "Phase 2 singleton removal prevents multi-user contamination. "
+        "MANDATORY: Use create_agent_instance_factory(user_context) for user isolation."
     )
     
-    # Issue #1142 FIX: Create new instance instead of singleton to prevent contamination
-    # Even though this function should not be used, if it is called, at least return a new instance
-    logger.warning("Creating new factory instance instead of singleton to prevent user contamination")
-    return AgentInstanceFactory()
+    # ISSUE #1186 PHASE 2: Raise error instead of creating instance
+    # This prevents accidental singleton usage and forces migration to proper patterns
+    raise ValueError(
+        "SINGLETON PATTERN ELIMINATED: get_agent_instance_factory() is no longer supported. "
+        "Use create_agent_instance_factory(user_context) for proper user isolation. "
+        "This prevents multi-user state contamination and ensures regulatory compliance."
+    )
 
 
 async def configure_agent_instance_factory(agent_class_registry: Optional[AgentClassRegistry] = None,
