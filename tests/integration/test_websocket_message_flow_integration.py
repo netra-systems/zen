@@ -57,9 +57,8 @@ except ImportError:
 # Agent System Integration
 try:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     from netra_backend.app.agents.base.agent_instance_factory import create_agent_instance
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
     AGENT_SYSTEM_AVAILABLE = True
 except ImportError:
     AGENT_SYSTEM_AVAILABLE = False

@@ -17,15 +17,15 @@ from netra_backend.app.agents.execution_engine_consolidated import (
     AgentExecutionContext,
     AgentExecutionResult
 )
-from netra_backend.app.agents.supervisor.execution_engine import (
-    ExecutionEngine as SupervisorExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import (
+    UserExecutionEngine as SupervisorExecutionEngine
 )
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult as SupervisorAgentExecutionResult
 )
-from netra_backend.app.agents.supervisor.execution_factory import (
+from netra_backend.app.agents.supervisor.execution_engine_factory import (
     ExecutionEngineFactory as SupervisorExecutionEngineFactory,
-    IsolatedExecutionEngine
+    get_execution_engine_factory
 )
 # SSOT: Import UserExecutionContext from services (canonical implementation)
 from netra_backend.app.services.user_execution_context import UserExecutionContext
