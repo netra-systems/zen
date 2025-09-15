@@ -42,15 +42,13 @@ class TestIssue1146Phase2Validation(unittest.TestCase):
         )
         
         # Create mock dependencies
-        self.mock_agent_registry = Mock()
-        self.mock_websocket_bridge = AsyncMock()
+        self.mock_agent_factory = Mock()
         self.mock_websocket_emitter = AsyncMock()
         
-        # Create UserExecutionEngine instance
+        # Create UserExecutionEngine instance with modern signature
         self.execution_engine = UserExecutionEngine(
             context=self.user_context,
-            agent_registry=self.mock_agent_registry,
-            websocket_bridge=self.mock_websocket_bridge,
+            agent_factory=self.mock_agent_factory,
             websocket_emitter=self.mock_websocket_emitter
         )
     
@@ -173,8 +171,7 @@ class TestIssue1146Phase2Validation(unittest.TestCase):
         
         another_engine = UserExecutionEngine(
             context=another_context,
-            agent_registry=self.mock_agent_registry,
-            websocket_bridge=self.mock_websocket_bridge,
+            agent_factory=self.mock_agent_factory,
             websocket_emitter=Mock()  # Different emitter
         )
         
