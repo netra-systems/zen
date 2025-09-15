@@ -25,6 +25,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
+@pytest.mark.database
 class TestRequestScopedSessionFactory:
     """Test the RequestScopedSessionFactory class."""
 
@@ -148,6 +149,7 @@ class TestRequestScopedSessionFactory:
         await factory.close()
         assert factory._cleanup_task.cancelled()
 
+@pytest.mark.database
 class TestGlobalSessionFactory:
     """Test global session factory functions."""
 
@@ -189,6 +191,7 @@ class TestGlobalSessionFactory:
         assert factory is not None
         await shutdown_session_factory()
 
+@pytest.mark.database
 class TestConcurrentLoadTesting:
     """Test high-concurrency scenarios."""
 

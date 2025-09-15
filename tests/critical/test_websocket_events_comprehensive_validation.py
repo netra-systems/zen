@@ -247,7 +247,7 @@ class RealWebSocketConnectionManager:
             if token:
                 headers['Authorization'] = f'Bearer {token}'
             start_time = time.time()
-            websocket = await websockets.connect(ws_url, extra_headers=headers, ping_interval=self.config.ping_interval, close_timeout=10, max_size=2 ** 20, max_queue=100)
+            websocket = await websockets.connect(ws_url, additional_headers=headers, ping_interval=self.config.ping_interval, close_timeout=10, max_size=2 ** 20, max_queue=100)
             connection_time = (time.time() - start_time) * 1000
             self.event_capture.connection_times.append(connection_time)
             connection_id = str(uuid.uuid4())
