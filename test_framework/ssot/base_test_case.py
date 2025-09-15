@@ -155,9 +155,89 @@ class SSotBaseTestCase:
     6. Error handling and context management
     7. Mock factories integration
     8. Test categorization and tagging
+    9. Class-level pytest fixtures (setup_class/teardown_class)
     
     CRITICAL: This replaces ALL existing BaseTestCase implementations.
     """
+    
+    # === CLASS-LEVEL PYTEST COMPATIBILITY ===
+    # These methods provide compatibility with pytest class-level fixtures
+    
+    @classmethod
+    def setup_class(cls):
+        """
+        Class-level setup method run once before all test methods in the class.
+        
+        This provides pytest compatibility for tests that use @classmethod setup_class
+        pattern for class-wide resource initialization (Issue #1050 fix).
+        
+        IMPORTANT: This is run once per test class, not per test method.
+        Use setup_method() for per-test initialization.
+        
+        Default implementation provides basic class-level logging and environment setup.
+        Tests should override this method and call super().setup_class() first.
+        
+        Business Value: Enables $500K+ ARR mission-critical tests to execute properly.
+        """
+        # Set up class-level logger if not already set
+        if not hasattr(cls, 'logger'):
+            cls.logger = logging.getLogger(cls.__name__)
+        
+        # Initialize class-level environment if needed
+        if not hasattr(cls, '_class_env'):
+            cls._class_env = get_env()
+        
+        # Initialize class-level cleanup registry
+        if not hasattr(cls, '_class_cleanup_callbacks'):
+            cls._class_cleanup_callbacks = []
+        
+        # Log class setup
+        logger.info(f"Setting up SSOT test class: {cls.__name__}")
+    
+    @classmethod
+    def teardown_class(cls):
+        """
+        Class-level teardown method run once after all test methods in the class.
+        
+        This provides pytest compatibility for tests that use @classmethod teardown_class
+        pattern for class-wide resource cleanup (Issue #1050 fix).
+        
+        IMPORTANT: This is run once per test class, not per test method.
+        Use teardown_method() for per-test cleanup.
+        
+        Default implementation provides basic class-level cleanup.
+        Tests should call super().teardown_class() in their teardown.
+        """
+        # Execute class-level cleanup callbacks
+        if hasattr(cls, '_class_cleanup_callbacks'):
+            for callback in reversed(cls._class_cleanup_callbacks):
+                try:
+                    callback()
+                except Exception as e:
+                    logger.warning(f"Class-level cleanup callback failed in {cls.__name__}: {e}")
+            cls._class_cleanup_callbacks.clear()
+        
+        # Clean up class-level attributes
+        for attr in ['_class_env', '_class_cleanup_callbacks']:
+            if hasattr(cls, attr):
+                delattr(cls, attr)
+        
+        # Log class teardown
+        logger.info(f"Tearing down SSOT test class: {cls.__name__}")
+    
+    @classmethod  
+    def add_class_cleanup(cls, callback):
+        """
+        Add a class-level cleanup callback to be executed during teardown_class.
+        
+        Args:
+            callback: Function to call during class cleanup
+        """
+        if not hasattr(cls, '_class_cleanup_callbacks'):
+            cls._class_cleanup_callbacks = []
+        cls._class_cleanup_callbacks.append(callback)
+    
+    # === INSTANCE-LEVEL PYTEST COMPATIBILITY ===
     
     def setup_method(self, method=None):
         """

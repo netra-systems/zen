@@ -634,7 +634,7 @@ class UserExecutionEngine(IExecutionEngine, ToolExecutionEngineInterface):
             try:
                 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
                 logger.debug("Attempting to create AgentWebSocketBridge")
-                bridge = create_agent_websocket_bridge(manager, self.context)
+                bridge = create_agent_websocket_bridge(self.context, manager)
                 logger.debug(f"Created bridge: {type(bridge)}")
                 return bridge
             except Exception as e:
