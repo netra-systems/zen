@@ -37,7 +37,7 @@ class SupervisorExecutionHelpers:
         # Return updated context (maintaining immutability)
         return context.create_child_context(
             operation_name="supervisor_workflow",
-            additional_context={"workflow_result": result.to_dict() if hasattr(result, 'to_dict') else str(result)}
+            additional_agent_context={"workflow_result": result.to_dict() if hasattr(result, 'to_dict') else str(result)}
         )
     
     async def handle_execution_failure(self, result: ExecutionResult, context: UserExecutionContext) -> None:
@@ -85,7 +85,7 @@ class SupervisorExecutionHelpers:
         # Create child context with execution results
         updated_context = context.create_child_context(
             operation_name="finalized_execution",
-            additional_context=updated_result
+            additional_agent_context=updated_result
         )
         self.supervisor.flow_logger.complete_flow(flow_id)
         return updated_context

@@ -215,9 +215,9 @@ class TestWebSocketManagerCanonicalImports(SSotBaseTestCase):
             },
             # Legacy factory patterns
             {
-                'module': 'netra_backend.app.websocket_core.factory',
+                'module': 'netra_backend.app.websocket_core.canonical_imports',
                 'class': 'ManagerFactory',
-                'replacement': 'netra_backend.app.websocket_core.websocket_manager.get_websocket_manager'
+                'replacement': 'netra_backend.app.services.user_execution_context.create_defensive_user_execution_context'
             }
         ]
         

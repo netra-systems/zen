@@ -60,7 +60,7 @@ from netra_backend.app.services.user_execution_context import (
 from netra_backend.app.websocket_core.unified_manager import (
     UnifiedWebSocketManager, WebSocketManagerMode
 )
-from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
 from shared.isolated_environment import IsolatedEnvironment
 from shared.types.core_types import UserID, ThreadID, RunID
 

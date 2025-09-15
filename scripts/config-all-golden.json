@@ -1,6 +1,36 @@
 {
   "instances": [
     {
+      "command": "/gitcommitgardener",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 1137",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 1138",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+      {
+      "command": "/gitissueprogressorv3 1139",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 1140",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 1141",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
       "command": "/gitissueprogressorv3 p0",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"

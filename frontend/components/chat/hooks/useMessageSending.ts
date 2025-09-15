@@ -116,13 +116,30 @@ export const useMessageSending = () => {
     return newThread.id;
   };
 
+  const extractThreadIdFromUrl = (): string | null => {
+    if (typeof window === 'undefined') return null;
+    const path = window.location.pathname;
+    const match = path.match(/\/chat\/(.+)$/);
+    return match ? match[1] : null;
+  };
+
   const getOrCreateThreadId = async (
     activeThreadId: string | null,
     currentThreadId: string | null,
     message: string
   ): Promise<string> => {
-    const threadId = activeThreadId || currentThreadId;
-    return threadId || await createNewThread(message);
+    // Priority 1: activeThreadId (from UnifiedChatStore)
+    if (activeThreadId) return activeThreadId;
+    
+    // Priority 2: currentThreadId (from ThreadStore)
+    if (currentThreadId) return currentThreadId;
+    
+    // Priority 3: URL extraction (defensive fallback)
+    const urlThreadId = extractThreadIdFromUrl();
+    if (urlThreadId) return urlThreadId;
+    
+    // Priority 4: Create new thread
+    return await createNewThread(message);
   };
 
   const createUserMessage = (message: string): ChatMessage => {

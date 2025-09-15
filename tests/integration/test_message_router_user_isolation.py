@@ -84,7 +84,7 @@ class MockMessageHandler:
         return {'status': 'handled', 'handler_id': self.handler_id}
 
 
-class TestMessageRouterUserIsolation(SSotBaseTestCase, unittest.TestCase):
+class TestMessageRouterUserIsolation(SSotBaseTestCase):
     """Test suite for MessageRouter user isolation validation."""
 
     def setUp(self):

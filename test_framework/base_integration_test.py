@@ -103,14 +103,22 @@ class BaseIntegrationTest(ABC):
             }
         
         # Insert real user into database
-        user_id = await real_services.postgres.fetchval("""
-            INSERT INTO auth.users (email, name, is_active)
-            VALUES ($1, $2, $3)
-            ON CONFLICT (email) DO UPDATE SET 
-                name = EXCLUDED.name,
-                is_active = EXCLUDED.is_active
-            RETURNING id
-        """, user_data['email'], user_data['name'], user_data['is_active'])
+        from sqlalchemy import text
+        async with real_services.postgres.get_session() as session:
+            result = await session.execute(text("""
+                INSERT INTO auth.users (email, name, is_active)
+                VALUES (:email, :name, :is_active)
+                ON CONFLICT (email) DO UPDATE SET 
+                    name = EXCLUDED.name,
+                    is_active = EXCLUDED.is_active
+                RETURNING id
+            """), {
+                'email': user_data['email'], 
+                'name': user_data['name'], 
+                'is_active': user_data['is_active']
+            })
+            user_id = result.scalar()
+            await session.commit()
         
         user_data['id'] = str(user_id)
         
@@ -127,21 +135,30 @@ class BaseIntegrationTest(ABC):
             }
         
         # Insert real organization
-        org_id = await real_services.postgres.fetchval("""
-            INSERT INTO backend.organizations (name, slug, plan)
-            VALUES ($1, $2, $3)
-            ON CONFLICT (slug) DO UPDATE SET
-                name = EXCLUDED.name,
-                plan = EXCLUDED.plan
-            RETURNING id
-        """, org_data['name'], org_data['slug'], org_data['plan'])
+        async with real_services.postgres.get_session() as session:
+            result = await session.execute(text("""
+                INSERT INTO backend.organizations (name, slug, plan)
+                VALUES (:name, :slug, :plan)
+                ON CONFLICT (slug) DO UPDATE SET
+                    name = EXCLUDED.name,
+                    plan = EXCLUDED.plan
+                RETURNING id
+            """), {
+                'name': org_data['name'],
+                'slug': org_data['slug'], 
+                'plan': org_data['plan']
+            })
+            org_id = result.scalar()
+            await session.commit()
         
         # Create membership
-        await real_services.postgres.execute("""
-            INSERT INTO backend.organization_memberships (user_id, organization_id, role)
-            VALUES ($1, $2, 'admin')
-            ON CONFLICT (user_id, organization_id) DO NOTHING
-        """, user_id, org_id)
+        async with real_services.postgres.get_session() as session:
+            await session.execute(text("""
+                INSERT INTO backend.organization_memberships (user_id, organization_id, role)
+                VALUES (:user_id, :organization_id, 'admin')
+                ON CONFLICT (user_id, organization_id) DO NOTHING
+            """), {'user_id': user_id, 'organization_id': org_id})
+            await session.commit()
         
         org_data['id'] = str(org_id)
         return org_data
@@ -273,7 +290,9 @@ class ServiceOrchestrationIntegrationTest(BaseIntegrationTest):
         
         # PostgreSQL health
         try:
-            await real_services.postgres.fetchval("SELECT 1")
+            async with real_services.postgres.get_session() as session:
+                result = await session.execute(text("SELECT 1"))
+                result.scalar()
             health_checks['postgres'] = True
         except Exception as e:
             health_checks['postgres'] = False

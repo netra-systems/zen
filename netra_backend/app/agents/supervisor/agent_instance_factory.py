@@ -1166,27 +1166,29 @@ _factory_instance: Optional[AgentInstanceFactory] = None
 
 
 def get_agent_instance_factory() -> AgentInstanceFactory:
-    """Get singleton AgentInstanceFactory instance.
+    """DEPRECATED: Singleton AgentInstanceFactory - DO NOT USE.
     
-    DEPRECATION WARNING: This singleton pattern will be phased out in favor of
-    create_agent_instance_factory() for proper user isolation.
+    ISSUE #1142 - CRITICAL SECURITY VULNERABILITY: This function creates shared state
+    between users causing multi-user contamination and data leakage.
     
-    Current consumers should migrate to per-request pattern:
-    - SupervisorAgent: Use create_agent_instance_factory(user_context)
-    - Test suites: Use create_agent_instance_factory(test_context)
-    - Direct consumers: Get user context first, then create factory
+    REPLACEMENT: Use create_agent_instance_factory(user_context) for proper user isolation.
+    
+    This function will be removed in a future version. All consumers should migrate to:
+    - create_agent_instance_factory(user_context) for per-request isolation
+    - AgentInstanceFactoryDep dependency injection in FastAPI endpoints
     """
     global _factory_instance
     
-    logger.warning(
-        "SINGLETON PATTERN USAGE DETECTED: get_agent_instance_factory() called. "
-        "Consider migrating to create_agent_instance_factory(user_context) for proper user isolation."
+    logger.error(
+        "CRITICAL SECURITY VIOLATION: get_agent_instance_factory() called! "
+        "This singleton pattern causes multi-user state contamination. "
+        "IMMEDIATELY migrate to create_agent_instance_factory(user_context) for user isolation."
     )
     
-    if _factory_instance is None:
-        _factory_instance = AgentInstanceFactory()
-    
-    return _factory_instance
+    # Issue #1142 FIX: Create new instance instead of singleton to prevent contamination
+    # Even though this function should not be used, if it is called, at least return a new instance
+    logger.warning("Creating new factory instance instead of singleton to prevent user contamination")
+    return AgentInstanceFactory()
 
 
 async def configure_agent_instance_factory(agent_class_registry: Optional[AgentClassRegistry] = None,
@@ -1197,7 +1199,12 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
                                           llm_manager: Optional[Any] = None,
                                           tool_dispatcher: Optional[Any] = None) -> AgentInstanceFactory:
     """
-    Configure the singleton AgentInstanceFactory with infrastructure components.
+    DEPRECATED: This function was used for singleton configuration and is being phased out.
+    
+    ISSUE #1142 FIX: This function has been deprecated in favor of per-request pattern.
+    Use create_agent_instance_factory(user_context) instead for proper user isolation.
+    
+    This function is maintained for backward compatibility during transition but will be removed.
     
     Args:
         agent_class_registry: Registry containing agent classes (preferred)
@@ -1208,9 +1215,16 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
         tool_dispatcher: Tool dispatcher for agent tools
         
     Returns:
-        AgentInstanceFactory: Configured factory instance
+        AgentInstanceFactory: Factory instance (NOT singleton)
     """
-    factory = get_agent_instance_factory()
+    logger.warning(
+        "DEPRECATED: configure_agent_instance_factory() called. "
+        "This function creates a factory without user context isolation. "
+        "Migrate to create_agent_instance_factory(user_context) for proper multi-user support."
+    )
+    
+    # ISSUE #1142 FIX: Create new factory instance instead of using singleton
+    factory = AgentInstanceFactory()
     factory.configure(
         agent_class_registry=agent_class_registry,
         agent_registry=agent_registry,
@@ -1220,5 +1234,5 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
         tool_dispatcher=tool_dispatcher
     )
     
-    logger.info(" PASS:  AgentInstanceFactory configured and ready for per-request agent instantiation")
+    logger.info(" PASS:  AgentInstanceFactory configured (non-singleton for backward compatibility)")
     return factory

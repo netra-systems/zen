@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-09-14T14:29:46.621798",
+    "generated_at": "2025-09-14T16:01:13.588284",
     "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 1821
   },
@@ -762,7 +762,7 @@
       "value": "/7",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1785"
+        "netra_backend/app/smd.py:1781"
       ]
     },
     "/8 tests": {
@@ -1242,7 +1242,7 @@
       "value": "/api/agents/run_agent_v2",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1720"
+        "netra_backend/app/smd.py:1716"
       ]
     },
     "/api/agents/start": {
@@ -1272,21 +1272,21 @@
       "value": "/api/agents/v2/thread/{thread_id}/runs",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1723"
+        "netra_backend/app/smd.py:1719"
       ]
     },
     "/api/agents/v2/{run_id}/state": {
       "value": "/api/agents/v2/{run_id}/state",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1722"
+        "netra_backend/app/smd.py:1718"
       ]
     },
     "/api/agents/v2/{run_id}/status": {
       "value": "/api/agents/v2/{run_id}/status",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1721"
+        "netra_backend/app/smd.py:1717"
       ]
     },
     "/api/auth": {
@@ -8628,7 +8628,7 @@
         "scripts/compliance/ssot_checker.py:224",
         "scripts/compliance/ssot_checker.py:320",
         "scripts/fix_modern_websockets_deprecation.py:179",
-        "scripts/fix_websockets_deprecation.py:67",
+        "scripts/fix_websockets_deprecation.py:74",
         "scripts/fix_websockets_legacy_to_modern.py:104"
       ]
     },
@@ -11015,7 +11015,7 @@
       "value": "scripts/*.py",
       "category": "paths",
       "locations": [
-        "scripts/fix_websockets_deprecation.py:68",
+        "scripts/fix_websockets_deprecation.py:75",
         "scripts/fix_websockets_legacy_to_modern.py:106"
       ]
     },
@@ -11341,7 +11341,7 @@
         "scripts/compliance/analyze_mocks.py:66",
         "scripts/compliance/mock_justification_checker.py:66",
         "scripts/fix_modern_websockets_deprecation.py:178",
-        "scripts/fix_websockets_deprecation.py:66",
+        "scripts/fix_websockets_deprecation.py:73",
         "scripts/fix_websockets_legacy_to_modern.py:103"
       ]
     },
@@ -11467,7 +11467,7 @@
         "scripts/compliance/mock_justification_checker.py:65",
         "scripts/create_enforcement_tools.py:99",
         "scripts/fix_modern_websockets_deprecation.py:177",
-        "scripts/fix_websockets_deprecation.py:65",
+        "scripts/fix_websockets_deprecation.py:72",
         "scripts/fix_websockets_legacy_to_modern.py:102",
         "scripts/test/identify_syntax_errors.py:28"
       ]

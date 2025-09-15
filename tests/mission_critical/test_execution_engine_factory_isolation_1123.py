@@ -33,7 +33,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.user_execution_context import (
-    UserExecutionContext, create_user_execution_context
+    UserExecutionContext, create_defensive_user_execution_context
 )
 
 logger = central_logger.get_logger(__name__)
@@ -53,9 +53,8 @@ class TestExecutionEngineFactoryIsolation1123(SSotAsyncTestCase):
         # Test user contexts
         self.user_contexts = []
         for i in range(5):  # Create 5 test users
-            context = create_user_execution_context(
-                user_id=f"test_user_{i}_{uuid.uuid4().hex[:8]}",
-                run_id=f"run_{i}_{uuid.uuid4().hex[:8]}"
+            context = create_defensive_user_execution_context(
+                user_id=f"test_user_{i}_{uuid.uuid4().hex[:8]}"
             )
             self.user_contexts.append(context)
         

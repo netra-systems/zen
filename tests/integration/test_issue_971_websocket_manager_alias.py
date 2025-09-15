@@ -38,7 +38,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
 from test_framework.ssot.orchestration import get_orchestration_config
 
 
-class TestPreFixValidation(SSotBaseTestCase, unittest.TestCase):
+class TestPreFixValidation(SSotBaseTestCase):
     """
     Phase 1: Pre-Fix Validation Tests
 
@@ -95,7 +95,7 @@ class TestPreFixValidation(SSotBaseTestCase, unittest.TestCase):
         self.assertIn('WebSocketTestUtility', module_all)
 
 
-class TestIntegrationTestCollectionFailures(SSotBaseTestCase, unittest.TestCase):
+class TestIntegrationTestCollectionFailures(SSotBaseTestCase):
     """
     Phase 2: Integration Test Collection Failure Verification
 
@@ -160,7 +160,7 @@ class TestIntegrationTestCollectionFailures(SSotBaseTestCase, unittest.TestCase)
                         f"Expected exactly 2 integration test import failures, got {import_failures}")
 
 
-class TestPostFixValidation(SSotBaseTestCase, unittest.TestCase):
+class TestPostFixValidation(SSotBaseTestCase):
     """
     Phase 3: Post-Fix Validation Tests
 
@@ -255,7 +255,7 @@ class TestPostFixValidation(SSotBaseTestCase, unittest.TestCase):
                        "WebSocketTestManager should inherit from WebSocketBridgeTestHelper")
 
 
-class TestIntegrationTestCollectionRecovery(SSotBaseTestCase, unittest.TestCase):
+class TestIntegrationTestCollectionRecovery(SSotBaseTestCase):
     """
     Phase 4: Integration Test Collection Recovery Verification
 
@@ -311,7 +311,7 @@ class TestIntegrationTestCollectionRecovery(SSotBaseTestCase, unittest.TestCase)
         self.assertTrue(callable(getattr(manager, 'get_staging_websocket_url', None)))
 
 
-class TestSSOTComplianceValidation(SSotBaseTestCase, unittest.TestCase):
+class TestSSOTComplianceValidation(SSotBaseTestCase):
     """
     Phase 5: SSOT Compliance and Regression Prevention
 
@@ -376,7 +376,7 @@ class TestSSOTComplianceValidation(SSotBaseTestCase, unittest.TestCase):
                            f"WebSocketTestUtility should still have {method_name} method")
 
 
-class TestE2ETestPathIntegrity(SSotBaseTestCase, unittest.TestCase):
+class TestE2ETestPathIntegrity(SSotBaseTestCase):
     """
     Phase 6: E2E Test Path Integrity Verification
 

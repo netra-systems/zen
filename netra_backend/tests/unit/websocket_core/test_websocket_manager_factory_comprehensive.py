@@ -43,18 +43,26 @@ import gc
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 # SSOT import after Issue #824 remediation
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager_factory import (
-    # WebSocketManager,  # REMOVED: Use WebSocketManager directly after Issue #824
-    # WebSocketManager,  # REMOVED: Use WebSocketManager directly after Issue #824
+from netra_backend.app.websocket_core.canonical_imports import (
+    # SSOT replacement imports for removed websocket_manager_factory module
     ConnectionLifecycleManager,
-    FactoryMetrics,
-    ManagerMetrics,
     FactoryInitializationError,
     get_websocket_manager_factory,
     create_websocket_manager,
-    create_defensive_user_execution_context,
     _validate_ssot_user_context,
-    _validate_ssot_user_context_staging_safe
+    _validate_ssot_user_context_staging_safe,
+    # Compatibility aliases for test migration period
+    WebSocketManagerFactory,
+    IsolatedWebSocketManager,
+    _factory_instance,
+    _factory_lock
+)
+from netra_backend.app.services.user_execution_context import (
+    create_defensive_user_execution_context
+)
+from netra_backend.app.monitoring.websocket_metrics import (
+    FactoryMetrics,
+    ManagerMetrics
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection

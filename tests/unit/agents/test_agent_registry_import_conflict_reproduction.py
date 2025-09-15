@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Test both registries - THIS IS THE SSOT VIOLATION WE'RE TESTING
 try:
-    # Basic registry
+    # Basic registry (DEPRECATED - will be removed)
     from netra_backend.app.agents.registry import AgentRegistry as BasicAgentRegistry
     basic_registry_available = True
 except ImportError:
@@ -45,7 +45,7 @@ except ImportError:
     basic_registry_available = False
 
 try:
-    # Advanced registry (should be the SSOT)
+    # SSOT registry - canonical location after migration
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry as AdvancedAgentRegistry
     advanced_registry_available = True
 except ImportError:

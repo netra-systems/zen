@@ -15,13 +15,15 @@ File focus areas (output this to console) is: ${1 : all}
 PROCESS INSTRUCTIONS START:
 
 0: NEW SUBAGENT TASK: 
+
+0.0: From git issues: Remove "actively-being-worked-on" tags if the last comment (or comment update time) was more than 20 minutes ago.
+ 
 0.1: Git commit open ${1 : all} work in conceptual units as per SPEC\git_commit_atomic_units.xml
 0.2: Pull and push.
 0.3: SAFELY AND CAREFUL handle merge commits.
 LOG AND OUTPUT AND SAVE EVERY MERGE CHOICE AND JUSTIFICATION TO A NEW FRESH FILE NAMED: MERGEISSUE-{COMMIT DATE}.MD
 saved in merges/ folder (create if doesn't exist)
 0.4: Push and pull.
-0.6: From git issues: Remove "actively-being-worked-on" tags if the last comment (or comment update time) was more than 20 minutes ago.
 
 END PROCESS INSTRUCTIONS
 

@@ -41,20 +41,9 @@ from netra_backend.app.dependencies import get_request_scoped_db_session as get_
 
 # Note: Password hashing is handled by the auth service, not directly here
 
-# ISSUE #414 FIX: Authentication token reuse prevention
+# PHASE 4 REMEDIATION: Removed local token tracking - pure delegation to auth service
 import hashlib
-from collections import defaultdict
 import asyncio
-
-# Track active tokens to prevent reuse
-_active_token_sessions: Dict[str, Dict[str, Any]] = {}
-_token_usage_stats = {
-    'total_validations': 0,
-    'reuse_attempts_blocked': 0,
-    'concurrent_usage_detected': 0,
-    'tokens_expired_cleanup': 0
-}
-_token_cleanup_lock = asyncio.Lock()
 
 logger = logging.getLogger('auth_integration.auth')
 
@@ -80,33 +69,12 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
     """Validate token with auth service and prevent token reuse (Issue #414 fix)."""
     start_time = time.time()
     
-    # ISSUE #414 FIX: Token reuse prevention
+    # PHASE 4 REMEDIATION: Pure delegation to auth service - removed bypass logic
+    # Token reuse detection is now handled by the auth service itself
     token_hash = hashlib.sha256(token.encode()).hexdigest()[:16]
     current_time = time.time()
     
-    # DISABLED: Token reuse detection feature temporarily disabled
-    # Check for token reuse - DISABLED
-    if False and token_hash in _active_token_sessions:
-        session_info = _active_token_sessions[token_hash]
-        last_used = session_info.get('last_used', 0)
-        concurrent_threshold = 0.25  # Issue #465 Fix: Reduced threshold to prevent false positives (was 1.0s causing 75% false positive rate)
-        
-        if current_time - last_used < concurrent_threshold:
-            logger.error(
-                f" ALERT:  AUTHENTICATION TOKEN REUSE DETECTED: Token hash {token_hash} "
-                f"used {current_time - last_used:.3f}s ago (threshold: {concurrent_threshold}s). "
-                f"User: {session_info.get('user_id', 'unknown')[:8]}..., "
-                f"Previous session: {session_info.get('session_id', 'unknown')}"
-            )
-            _token_usage_stats['reuse_attempts_blocked'] += 1
-            
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token reuse detected - authentication failed",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-    
-    _token_usage_stats['total_validations'] += 1
+    # PHASE 4 REMEDIATION: Token usage tracking moved to auth service
     
     logger.info(f"🔑 AUTH SERVICE DEPENDENCY: Starting token validation "
                 f"(token_hash: {token_hash}, token_length: {len(token) if token else 0}, "
@@ -155,24 +123,7 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
             f"and permissions: {validation_result.get('permissions', [])}"
         )
         
-        # ISSUE #414 FIX: Track token session to prevent reuse
-        # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for session ID generation
-        from shared.id_generation import UnifiedIdGenerator
-        session_id = UnifiedIdGenerator.generate_session_id(user_id, "auth_validation")
-        _active_token_sessions[token_hash] = {
-            'user_id': user_id,
-            'session_id': session_id,
-            'first_used': current_time,
-            'last_used': current_time,
-            'validation_count': 1,
-            'role': validation_result.get('role', 'none')
-        }
-        
-        # Schedule cleanup of expired tokens
-        if len(_active_token_sessions) > 1000:  # Prevent memory leak
-            asyncio.create_task(_cleanup_expired_tokens())
-        
-        logger.debug(f" PASS:  ISSUE #414 FIX: Token session {session_id[:8]}... tracked for user {user_id[:8]}...")
+        # PHASE 4 REMEDIATION: Pure delegation pattern - auth service handles session tracking
         
         return validation_result
         

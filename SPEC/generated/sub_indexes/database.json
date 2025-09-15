@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "database",
-    "generated_at": "2025-09-14T14:29:46.294274",
+    "generated_at": "2025-09-14T16:01:13.246302",
     "root_directory": "/Users/anthony/Desktop/netra-apex",
-    "total_literals": 395
+    "total_literals": 394
   },
   "literals": {
     "\"GCP_PROJECT_ID\": self.project_id": {
@@ -236,13 +236,6 @@
       "category": "database",
       "locations": [
         "netra_backend/app/agents/agent_communication.py:225"
-      ]
-    },
-    "WebSocket manager sync factory called without user context or user_id": {
-      "value": "WebSocket manager sync factory called without user context or user_id",
-      "category": "database",
-      "locations": [
-        "netra_backend/app/websocket_core/websocket_manager_factory.py:313"
       ]
     },
     "_created_at": {
@@ -667,7 +660,7 @@
       "value": "child_created_at",
       "category": "database",
       "locations": [
-        "netra_backend/app/services/user_execution_context.py:816"
+        "netra_backend/app/services/user_execution_context.py:891"
       ]
     },
     "child_trace_id": {
@@ -843,7 +836,7 @@
       "value": "context_set_at",
       "category": "database",
       "locations": [
-        "netra_backend/app/services/user_execution_context.py:2206"
+        "netra_backend/app/services/user_execution_context.py:2281"
       ]
     },
     "context_user_id": {
@@ -1188,7 +1181,7 @@
       "value": "engine_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/agents/supervisor/execution_engine_factory.py:484",
+        "netra_backend/app/agents/supervisor/execution_engine_factory.py:550",
         "netra_backend/app/agents/supervisor/user_execution_engine.py:838",
         "netra_backend/app/agents/supervisor/user_execution_engine.py:1385",
         "netra_backend/app/agents/supervisor/user_execution_engine.py:1430",
@@ -1365,7 +1358,7 @@
       "category": "database",
       "locations": [
         "netra_backend/app/alembic/migrations_helpers/agent_tables.py:140",
-        "netra_backend/app/services/user_execution_context.py:2635"
+        "netra_backend/app/services/user_execution_context.py:2710"
       ]
     },
     "expires_at": {
@@ -2072,7 +2065,8 @@
       "value": "manager_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/services/user_execution_context.py:2762"
+        "netra_backend/app/services/user_execution_context.py:2837",
+        "netra_backend/app/websocket_core/canonical_imports.py:233"
       ]
     },
     "manager_user_id": {
@@ -2390,15 +2384,15 @@
       "category": "database",
       "locations": [
         "netra_backend/app/services/user_execution_context.py:501",
-        "netra_backend/app/services/user_execution_context.py:813",
-        "netra_backend/app/services/user_execution_context.py:1017",
-        "netra_backend/app/services/user_execution_context.py:1075",
-        "netra_backend/app/services/user_execution_context.py:1162",
-        "netra_backend/app/services/user_execution_context.py:1189",
-        "netra_backend/app/services/user_execution_context.py:1190",
-        "netra_backend/app/services/user_execution_context.py:1194",
-        "netra_backend/app/services/user_execution_context.py:1198",
-        "netra_backend/app/services/user_execution_context.py:1248"
+        "netra_backend/app/services/user_execution_context.py:888",
+        "netra_backend/app/services/user_execution_context.py:1092",
+        "netra_backend/app/services/user_execution_context.py:1150",
+        "netra_backend/app/services/user_execution_context.py:1237",
+        "netra_backend/app/services/user_execution_context.py:1264",
+        "netra_backend/app/services/user_execution_context.py:1265",
+        "netra_backend/app/services/user_execution_context.py:1269",
+        "netra_backend/app/services/user_execution_context.py:1273",
+        "netra_backend/app/services/user_execution_context.py:1323"
       ]
     },
     "parent_snapshot_id": {
@@ -2643,9 +2637,7 @@
         "netra_backend/app/services/service_mesh/discovery_service.py:31",
         "netra_backend/app/services/service_mesh/discovery_service.py:235",
         "netra_backend/app/services/service_mesh/load_balancer.py:36",
-        "netra_backend/app/websocket_core/state_coordinator.py:246",
-        "netra_backend/app/websocket_core/websocket_manager_factory.py:496",
-        "netra_backend/app/websocket_core/websocket_manager_factory.py:519"
+        "netra_backend/app/websocket_core/state_coordinator.py:246"
       ]
     },
     "registry_created_at": {
@@ -3454,7 +3446,7 @@
       "value": "user_execution_context_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/services/user_execution_context.py:1442"
+        "netra_backend/app/services/user_execution_context.py:1517"
       ]
     },
     "user_id": {
@@ -3555,9 +3547,9 @@
         "netra_backend/app/routes/websocket_ssot.py:896",
         "netra_backend/app/routes/websocket_ssot.py:896",
         "netra_backend/app/services/user_execution_context.py:386",
-        "netra_backend/app/services/user_execution_context.py:1021",
-        "netra_backend/app/services/user_execution_context.py:1444",
-        "netra_backend/app/websocket_core/event_validator.py:317"
+        "netra_backend/app/services/user_execution_context.py:1096",
+        "netra_backend/app/services/user_execution_context.py:1519",
+        "netra_backend/app/websocket_core/canonical_imports.py:124"
       ]
     },
     "websocket_connection_id": {
@@ -3570,10 +3562,10 @@
         "netra_backend/app/routes/websocket_ssot.py:1504",
         "netra_backend/app/routes/websocket_ssot.py:1549",
         "netra_backend/app/routes/websocket_ssot.py:1662",
-        "netra_backend/app/services/user_execution_context.py:1026",
+        "netra_backend/app/services/user_execution_context.py:1101",
+        "netra_backend/app/websocket_core/canonical_imports.py:219",
         "scripts/standardize_factory_patterns.py:100",
-        "scripts/standardize_factory_patterns.py:203",
-        "scripts/standardize_factory_patterns.py:386"
+        "scripts/standardize_factory_patterns.py:203"
       ]
     },
     "websocket_connection_id parameter found - should be websocket_client_id": {

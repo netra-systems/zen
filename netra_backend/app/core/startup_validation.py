@@ -581,7 +581,7 @@ class StartupValidator:
                 # In factory pattern, WebSocket managers are created per-user
                 # For startup validation, we check if the factory is available
                 try:
-                    from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+                    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
                     # Test factory availability - don't create actual manager without context
                     ws_manager = "factory_available"  # Placeholder to indicate factory pattern is working
                     self.logger.debug("WebSocket factory pattern available for startup validation")

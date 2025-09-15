@@ -11,12 +11,12 @@ The test validates that import statements work correctly and test collection suc
 
 import sys
 import importlib
-import unittest
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 from pathlib import Path
 from typing import List, Dict, Any
 
 
-class TestImportStatementIntegrity(unittest.TestCase):
+class TestImportStatementIntegrity(SSotBaseTestCase):
     """Test import statement integrity for mission critical test collection."""
     
     def test_ssot_base_test_case_import_availability(self):
@@ -83,8 +83,9 @@ class TestImportStatementIntegrity(unittest.TestCase):
                 for attr_name in dir(module):
                     attr = getattr(module, attr_name)
                     if (isinstance(attr, type) and 
-                        issubclass(attr, unittest.TestCase) and 
-                        attr != unittest.TestCase):
+                        hasattr(attr, '__mro__') and
+                        any('TestCase' in cls.__name__ for cls in attr.__mro__) and 
+                        attr.__name__ not in ['TestCase', 'SSotBaseTestCase']):
                         test_classes.append(attr_name)
                 
                 collection_results[module_name]['test_classes'] = test_classes
@@ -172,4 +173,5 @@ class TestImportStatementIntegrity(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main(verbosity=2)
+    import pytest
+    pytest.main([__file__, '-v'])

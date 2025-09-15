@@ -99,21 +99,19 @@ class TestWebSocketSSOTFactoryPatterns(SSotAsyncTestCase):
         """
         try:
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext, create_defensive_user_execution_context
         except ImportError as e:
             pytest.skip(f"Required modules not available: {e}")
 
-        # Create isolated user contexts
-        user_context_1 = UserExecutionContext(
+        # Create isolated user contexts using SSOT defensive pattern
+        user_context_1 = create_defensive_user_execution_context(
             user_id=self.test_user_id_1,
-            thread_id=self.test_thread_id_1,
-            run_id=f"run_{uuid.uuid4()}"
+            websocket_client_id=self.test_thread_id_1
         )
 
-        user_context_2 = UserExecutionContext(
+        user_context_2 = create_defensive_user_execution_context(
             user_id=self.test_user_id_2,
-            thread_id=self.test_thread_id_2,
-            run_id=f"run_{uuid.uuid4()}"
+            websocket_client_id=self.test_thread_id_2
         )
 
         # Test isolated WebSocket manager instances
@@ -207,15 +205,14 @@ class TestWebSocketSSOTFactoryPatterns(SSotAsyncTestCase):
         """
         try:
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            from netra_backend.app.services.user_execution_context import UserExecutionContext, create_defensive_user_execution_context
         except ImportError as e:
             pytest.skip(f"Required modules not available: {e}")
 
         # Test dependency injection
-        user_context = UserExecutionContext(
+        user_context = create_defensive_user_execution_context(
             user_id=self.test_user_id_1,
-            thread_id=self.test_thread_id_1,
-            run_id=f"run_{uuid.uuid4()}"
+            websocket_client_id=self.test_thread_id_1
         )
 
         try:
@@ -300,7 +297,7 @@ class TestWebSocketSSOTFactoryPatterns(SSotAsyncTestCase):
         legacy_patterns = [
             ("unified_manager", "from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager"),
             ("direct_core", "from netra_backend.app.websocket_core import WebSocketManager"),
-            ("factory_core", "from netra_backend.app.websocket_core.factory import WebSocketFactory"),
+            ("factory_core", "from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager"),
         ]
 
         for pattern_name, import_statement in legacy_patterns:

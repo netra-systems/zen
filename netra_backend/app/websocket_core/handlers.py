@@ -1814,7 +1814,7 @@ class MessageRouter:
         try:
             from netra_backend.app.dependencies import get_user_execution_context
             from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as create_websocket_manager
-            
+
             error_message = f"Unknown quality message type: {message_type}"
             user_context = get_user_execution_context(
                 user_id=user_id,
@@ -1831,7 +1831,7 @@ class MessageRouter:
         try:
             from netra_backend.app.dependencies import get_user_execution_context
             from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as create_websocket_manager
-            
+
             error_message = f"Quality handler error for {message_type}: {str(error)}"
             user_context = get_user_execution_context(
                 user_id=user_id,
@@ -1861,7 +1861,7 @@ class MessageRouter:
             from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
             from netra_backend.app.dependencies import get_user_execution_context
             from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as create_websocket_manager
-            
+
             # Create monitoring service to get subscribers
             monitoring_service = QualityMonitoringService()
             subscribers = getattr(monitoring_service, 'subscribers', [])
@@ -1880,7 +1880,7 @@ class MessageRouter:
         try:
             from netra_backend.app.dependencies import get_user_execution_context
             from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as create_websocket_manager
-            
+
             message = {
                 "type": "quality_update",
                 "payload": update
@@ -1936,7 +1936,7 @@ class MessageRouter:
         try:
             from netra_backend.app.dependencies import get_user_execution_context
             from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context as create_websocket_manager
-            
+
             alert_message = {
                 "type": "quality_alert",
                 "payload": {
