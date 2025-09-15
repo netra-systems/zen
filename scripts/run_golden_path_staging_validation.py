@@ -91,10 +91,10 @@ class GoldenPathValidationRunner:
         
         # Run specific health tests
         health_methods = [
-            "test_staging_auth_service_health_comprehensive",
-            "test_staging_backend_api_service_health", 
-            "test_staging_websocket_service_basic_connectivity",
-            "test_staging_environment_readiness_summary"
+            "TestStagingAuthenticationServiceHealth::test_staging_auth_service_health_comprehensive",
+            "TestStagingAuthenticationServiceHealth::test_staging_backend_api_service_health", 
+            "TestStagingAuthenticationServiceHealth::test_staging_websocket_service_basic_connectivity",
+            "TestStagingAuthenticationServiceHealth::test_staging_environment_readiness_summary"
         ]
         
         health_results = {}
