@@ -38,17 +38,20 @@ class TestMessageRouterImportConsolidation(SSotBaseTestCase):
         self.test_message = {'type': 'test_message', 'payload': {'content': 'test content'}, 'timestamp': time.time()}
 
     def test_proxy_router_forwards_to_canonical(self):
-        """Test that proxy MessageRouter forwards all calls to canonical implementation."""
+        """Test that all imports now point to the same canonical implementation."""
+        # FIXED: After SSOT consolidation, all imports are now canonical
         proxy_router = ProxyMessageRouter()
-        self.assertIsNotNone(proxy_router._canonical_router)
-        self.assertIsInstance(proxy_router._canonical_router, CanonicalMessageRouter)
-        with patch.object(proxy_router._canonical_router, 'get_statistics') as mock_get_stats:
-            mock_get_stats.return_value = {'test': 'data'}
-            result = proxy_router.get_statistics()
-            mock_get_stats.assert_called_once()
-            self.assertIn('proxy_info', result)
-            self.assertTrue(result['proxy_info']['is_proxy'])
-            self.assertEqual(result['proxy_info']['canonical_source'], 'netra_backend.app.websocket_core.handlers.MessageRouter')
+        canonical_router = CanonicalMessageRouter()
+        
+        # All imports should now point to the same class
+        self.assertIs(type(proxy_router), type(canonical_router))
+        self.assertEqual(id(type(proxy_router)), id(type(canonical_router)))
+        
+        # Both should have the same methods and functionality
+        self.assertTrue(hasattr(proxy_router, 'get_stats'))
+        self.assertTrue(hasattr(canonical_router, 'get_stats'))
+        self.assertTrue(hasattr(proxy_router, 'route_message'))
+        self.assertTrue(hasattr(canonical_router, 'route_message'))
 
     def test_services_router_is_canonical_reference(self):
         """Test that services module MessageRouter is canonical reference."""
