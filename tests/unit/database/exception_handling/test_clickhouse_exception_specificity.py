@@ -12,8 +12,12 @@ import asyncio
 from unittest.mock import patch, AsyncMock, MagicMock
 # ClickHouse imports - handle import errors gracefully
 try:
-    from clickhouse_driver import Client as ClickHouseClient
-    from clickhouse_driver.errors import NetworkError, ServerException, Error as ClickHouseError
+    from clickhouse_connect import get_client as get_clickhouse_client
+    from clickhouse_connect.driver.exceptions import OperationalError as NetworkError, DatabaseError as ServerException, Error as ClickHouseError
+    # Create a client class for compatibility
+    class ClickHouseClient:
+        def __init__(self, *args, **kwargs):
+            self.client = get_clickhouse_client(*args, **kwargs)
 except ImportError:
     # Mock ClickHouse classes if not available
     class ClickHouseClient:

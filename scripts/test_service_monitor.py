@@ -16,7 +16,7 @@ from typing import Dict, List
 import asyncpg
 import redis.asyncio as redis
 from aiohttp import web
-from clickhouse_driver import Client as ClickHouseClient
+from clickhouse_connect import get_client as get_clickhouse_client
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

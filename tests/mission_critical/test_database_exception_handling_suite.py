@@ -21,7 +21,7 @@ import pytest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock
 from sqlalchemy.exc import OperationalError, DisconnectionError, TimeoutError as SQLTimeoutError
-from clickhouse_driver import errors as clickhouse_errors
+from clickhouse_connect.driver import exceptions as clickhouse_errors
 
 # Import modules under test
 from netra_backend.app.db import database_manager, clickhouse, database_initializer, clickhouse_schema

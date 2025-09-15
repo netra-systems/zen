@@ -30,6 +30,13 @@ from netra_backend.app.db.transaction_errors import (
 from sqlalchemy.exc import SQLAlchemyError, OperationalError, IntegrityError
 # test_decorator removed - production code must not depend on test_framework
 
+# Check if ClickHouse is available
+try:
+    import clickhouse_connect
+    CLICKHOUSE_AVAILABLE = True
+except ImportError:
+    CLICKHOUSE_AVAILABLE = False
+
 
 class ClickHouseCache:
     """Simple cache for ClickHouse query results with TTL support."""

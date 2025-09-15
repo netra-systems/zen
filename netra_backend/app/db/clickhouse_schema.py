@@ -18,7 +18,11 @@ from netra_backend.app.db.transaction_errors import (
 # SSOT ClickHouse import and availability check
 from netra_backend.app.db.clickhouse import get_clickhouse_client, ClickHouseClient, CLICKHOUSE_AVAILABLE
 try:
-    from clickhouse_driver.errors import ServerException, ErrorCodes
+    from clickhouse_connect.driver.exceptions import DatabaseError as ServerException
+    # clickhouse-connect doesn't have ErrorCodes, create a simple version
+    class ErrorCodes:
+        TABLE_ALREADY_EXISTS = 57
+        DATABASE_ALREADY_EXISTS = 82
 except (ImportError, ModuleNotFoundError):
     # Create dummy exception classes for when ClickHouse is not available
     class ServerException(Exception):

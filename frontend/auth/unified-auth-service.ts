@@ -383,6 +383,83 @@ export class UnifiedAuthService {
   }
 
   /**
+   * Validate token and get user data in single operation
+   * This is the missing method that the Golden Path authentication requires.
+   *
+   * Business Value Justification:
+   * - Segment: All (Platform/Security)
+   * - Business Goal: Restore $500K+ ARR Golden Path authentication functionality
+   * - Value Impact: Single API call combines token validation with user lookup for efficient auth
+   * - Strategic Impact: Eliminates authentication system blocking and enables complete user flow
+   */
+  async validateTokenAndGetUser(token: string): Promise<{valid: boolean, user?: any, error?: string}> {
+    logger.debug('Validating token and getting user data', {
+      environment: this.environment,
+      hasToken: !!token
+    });
+
+    try {
+      const response = await fetch(unifiedApiConfig.endpoints.authValidateTokenAndGetUser, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          token: token
+        }),
+      });
+
+      if (!response.ok) {
+        logger.error('validateTokenAndGetUser API call failed', {
+          status: response.status,
+          statusText: response.statusText,
+          environment: this.environment
+        });
+        return {
+          valid: false,
+          error: `API call failed: ${response.status} ${response.statusText}`
+        };
+      }
+
+      const result = await response.json();
+
+      if (result.valid) {
+        logger.info('Token validation and user lookup successful', {
+          userId: result.user_id,
+          environment: this.environment
+        });
+        return {
+          valid: true,
+          user: result.user || {
+            id: result.user_id,
+            email: result.token_data?.email,
+            ...result.token_data
+          }
+        };
+      } else {
+        logger.warn('Token validation failed', {
+          error: result.error,
+          environment: this.environment
+        });
+        return {
+          valid: false,
+          error: result.error || 'Token validation failed'
+        };
+      }
+
+    } catch (error) {
+      logger.error('validateTokenAndGetUser request failed', error as Error, {
+        environment: this.environment
+      });
+      return {
+        valid: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
    * Get current environment
    */
   getEnvironment(): string {
