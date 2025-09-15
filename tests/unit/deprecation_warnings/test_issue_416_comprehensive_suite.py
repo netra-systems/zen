@@ -22,10 +22,10 @@ from typing import Dict, List
 import warnings
 
 # Import all test modules
-from test_issue_416_deprecation_detection import TestDeprecationWarningDetection
-from test_issue_416_migration_validation import TestDeprecationMigrationValidation  
-from test_issue_416_regression_prevention import TestDeprecationRegressionPrevention
-from test_issue_416_category_coverage import TestDeprecationCategoryCoverage
+from .test_issue_416_deprecation_detection import DeprecationWarningDetectionTests
+from .test_issue_416_migration_validation import DeprecationMigrationValidationTests
+from .test_issue_416_regression_prevention import DeprecationRegressionPreventionTests
+from .test_issue_416_category_coverage import DeprecationCategoryCoverageTests
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 

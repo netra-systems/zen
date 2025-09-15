@@ -1,26 +1,43 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-15 14:36:02
+**Generated:** 2025-09-15 15:13:05
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 0
+- **Total Tests:** 1
 - **Passed:** 0 (0.0%)
-- **Failed:** 0 (0.0%)
+- **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 0.18 seconds
+- **Duration:** 10.80 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
+### CRITICAL Priority Tests
+
+| Test Name | Status | Duration | File |
+|-----------|--------|----------|------|
+| test_001_http_connectivity | FAIL failed | 10.311s | test_staging_connectivity_validation.py |
+
+## Failed Tests Details
+
+### FAILED: test_001_http_connectivity
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_staging_connectivity_validation.py
+- **Duration:** 10.311s
+- **Error:** tests\e2e\staging\test_staging_connectivity_validation.py:316: in test_001_http_connectivity
+    assert result["success"], f"HTTP connectivity failed: {result.get('error', 'Unknown error')}"
+E   AssertionError: HTTP connectivity failed: 
+E   assert False...
+
 ## Pytest Output Format
 
 ```
+test_staging_connectivity_validation.py::test_001_http_connectivity FAILED
 
 ==================================================
-0 passed, 0 failed in 0.18s
+0 passed, 1 failed in 10.80s
 ```
 
 ## Test Coverage Matrix

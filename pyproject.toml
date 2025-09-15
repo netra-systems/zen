@@ -732,6 +732,10 @@ markers = [
 
     # Issue #1174 specific marker
     "issue_1174: Issue #1174 auth token validation unit tests",
+
+    # Issue #1278 specific marker
+    "issue_1278: Issue #1278 database connectivity and FastAPI lifespan validation tests",
+    "database_connectivity: Database connectivity and timeout validation tests",
 ]
 
 # Coverage settings

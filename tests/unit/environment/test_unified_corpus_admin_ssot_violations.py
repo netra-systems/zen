@@ -21,7 +21,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from netra_backend.app.admin.corpus.unified_corpus_admin import (
-    create_user_corpus_context,
+    initialize_corpus_context,
     UnifiedCorpusAdmin,
     IsolationStrategy
 )
@@ -53,7 +53,7 @@ class UnifiedCorpusAdminSSOTViolationsTests(BaseUnitTest):
         TEST EXPECTATION: FAIL - Proves direct os.getenv() usage in corpus context creation
         
         This test demonstrates the SSOT violation in unified_corpus_admin.py line 155
-        where create_user_corpus_context() uses direct os.getenv() instead of 
+        where initialize_corpus_context() uses direct os.getenv() instead of
         IsolatedEnvironment SSOT pattern.
         
         VIOLATION LOCATION: netra_backend/app/admin/corpus/unified_corpus_admin.py:155
@@ -81,7 +81,7 @@ class UnifiedCorpusAdminSSOTViolationsTests(BaseUnitTest):
                 )
                 
                 # This function uses direct os.getenv() - SSOT violation
-                enhanced_context = create_user_corpus_context(
+                enhanced_context = initialize_corpus_context(
                     context=user_context,
                     corpus_base_path=None  # Force fallback to os.getenv
                 )
@@ -92,7 +92,7 @@ class UnifiedCorpusAdminSSOTViolationsTests(BaseUnitTest):
                 
                 # THIS ASSERTION SHOULD FAIL - proving SSOT violation exists
                 assert found_corpus_path != corpus_path, (
-                    f"🚨 SSOT VIOLATION DETECTED: create_user_corpus_context() found "
+                    f"🚨 SSOT VIOLATION DETECTED: initialize_corpus_context() found "
                     f"CORPUS_BASE_PATH = '{found_corpus_path}' via direct os.getenv() "
                     f"instead of IsolatedEnvironment SSOT pattern. "
                     f"VIOLATION LOCATION: unified_corpus_admin.py line 155. "
@@ -205,7 +205,7 @@ class UnifiedCorpusAdminSSOTViolationsTests(BaseUnitTest):
                 )
                 
                 # Test corpus context creation (should use isolated env if SSOT compliant)
-                enhanced_context = create_user_corpus_context(
+                enhanced_context = initialize_corpus_context(
                     context=user_context,
                     corpus_base_path=None  # Force environment variable lookup
                 )
@@ -229,7 +229,7 @@ class UnifiedCorpusAdminSSOTViolationsTests(BaseUnitTest):
                 if context_uses_os_environ or admin_uses_os_environ:
                     pytest.fail(
                         f"🚨 SSOT VIOLATION CONFIRMED: Corpus path resolution "
-                        f"inconsistency detected. create_user_corpus_context() "
+                        f"inconsistency detected. initialize_corpus_context() "
                         f"resolved to '{context_corpus_path}' (uses os.environ: {context_uses_os_environ}), "
                         f"UnifiedCorpusAdmin resolved to '{admin_corpus_path}' "
                         f"(uses os.environ: {admin_uses_os_environ}). "
@@ -240,7 +240,7 @@ class UnifiedCorpusAdminSSOTViolationsTests(BaseUnitTest):
                 
                 # Document the violation even if behavior appears consistent
                 assert False, (
-                    f"🚨 SSOT VIOLATION EXISTS: Both create_user_corpus_context() "
+                    f"🚨 SSOT VIOLATION EXISTS: Both initialize_corpus_context() "
                     f"and UnifiedCorpusAdmin use direct os.getenv() access "
                     f"(lines 155 and 281) creating potential for inconsistencies. "
                     f"Current results: context='{context_corpus_path}', "

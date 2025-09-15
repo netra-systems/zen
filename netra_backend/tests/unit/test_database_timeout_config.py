@@ -32,8 +32,8 @@ class DatabaseTimeoutConfigTests:
         config = get_database_timeout_config("staging")
 
         # Staging should have Cloud SQL optimized timeouts
-        # CRITICAL: Balanced Cloud SQL connectivity with WebSocket performance (Issue #1229)
-        assert config["initialization_timeout"] == 20.0
+        # CRITICAL: Issue #1263 fix - Database Connection Timeout (increased from 20.0s to 35.0s)
+        assert config["initialization_timeout"] == 35.0
         assert config["table_setup_timeout"] == 10.0
         assert config["connection_timeout"] == 15.0
         assert config["pool_timeout"] == 15.0
@@ -204,7 +204,7 @@ class TimeoutConfigurationLoggingTests:
 @pytest.mark.parametrize("environment,expected_init_timeout", [
     ("development", 30.0),
     ("test", 25.0),
-    ("staging", 20.0),  # CRITICAL: Issue #1229 fix - balanced Cloud SQL + WebSocket performance
+    ("staging", 35.0),  # CRITICAL: Issue #1263 fix - Database Connection Timeout (increased from 20.0s)
     ("production", 90.0),
     ("unknown", 30.0),  # Should default to development
 ])

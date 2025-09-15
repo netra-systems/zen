@@ -1366,6 +1366,7 @@ class SSotAsyncTestCase(SSotBaseTestCase):
 BaseTestCase = SSotBaseTestCase
 AsyncTestCase = SSotAsyncTestCase
 BaseIntegrationTest = SSotBaseTestCase  # Legacy alias for integration tests
+BaseE2ETest = SSotAsyncTestCase  # Legacy alias for E2E tests
 
 # Legacy compatibility classes removed - use SSotBaseTestCase directly
 
@@ -1378,19 +1379,20 @@ SSotAsyncBaseTestCase = SSotAsyncTestCase  # Alias for integration test compatib
 __all__ = [
     # SSOT Classes
     "SSotBaseTestCase",
-    "SSotAsyncTestCase", 
+    "SSotAsyncTestCase",
     "SsotTestMetrics",
     "SsotTestContext",
-    
+
     # SSOT Aliases
     "BaseTestCase",
     "AsyncTestCase",
     "BaseIntegrationTest",  # Legacy alias for integration tests
-    
+    "BaseE2ETest",  # Legacy alias for E2E tests
+
     # Legacy compatibility classes removed
-    
+
     # Legacy Aliases (deprecated)
-    "TestMetrics", 
+    "TestMetrics",
     "TestContext",
 ]
 
