@@ -523,7 +523,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.golden_path
     @pytest.mark.e2e
     @pytest.mark.priority_p0
-    async def test_complete_golden_path_success_flow(self, setup_golden_path_environment, mock_authenticated_user):
+    async def test_complete_golden_path_success_flow(self, setup_golden_path_environment, auth_headers):
         """
         Test 1: Complete Golden Path Success Flow - Full Happy Path with Real Business Scenario
         
@@ -571,7 +571,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.concurrent
     @pytest.mark.priority_p0
-    async def test_multiple_user_concurrent_golden_path(self, setup_golden_path_environment, mock_authenticated_user):
+    async def test_multiple_user_concurrent_golden_path(self, setup_golden_path_environment, auth_headers):
         """
         Test 2: Multiple User Concurrent Golden Path - 5+ Users Simultaneously Completing Full Journey
         
@@ -666,7 +666,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.resilience
     @pytest.mark.priority_p1
-    async def test_golden_path_with_service_interruptions(self, setup_golden_path_environment, mock_authenticated_user):
+    async def test_golden_path_with_service_interruptions(self, setup_golden_path_environment, auth_headers):
         """
         Test 3: Golden Path with Service Interruptions - Full Flow with Service Failures and Recovery
         
@@ -755,7 +755,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.performance
     @pytest.mark.priority_p1
-    async def test_golden_path_performance_validation(self, setup_golden_path_environment, mock_authenticated_user):
+    async def test_golden_path_performance_validation(self, setup_golden_path_environment, auth_headers):
         """
         Test 4: Golden Path Performance Validation - End-to-End Timing Requirements Met
         
@@ -852,7 +852,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.business_value
     @pytest.mark.priority_p0
-    async def test_golden_path_business_value_validation(self, setup_golden_path_environment, mock_authenticated_user):
+    async def test_golden_path_business_value_validation(self, setup_golden_path_environment, auth_headers):
         """
         Test 5: Golden Path Business Value Validation - Real Cost Optimization Scenario with Measurable ROI
         
@@ -1015,7 +1015,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.cross_platform
     @pytest.mark.priority_p1
-    async def test_golden_path_cross_platform_validation(self, setup_golden_path_environment, mock_authenticated_user):
+    async def test_golden_path_cross_platform_validation(self, setup_golden_path_environment, auth_headers):
         """
         Test 6: Golden Path Cross-Platform Validation - Windows/Linux Compatibility for Full Flow
         
@@ -1131,7 +1131,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.load_test
     @pytest.mark.priority_p1
-    async def test_golden_path_load_test_simulation(self, setup_golden_path_environment, mock_authenticated_user):
+    async def test_golden_path_load_test_simulation(self, setup_golden_path_environment, auth_headers):
         """
         Test 7: Golden Path Load Test Simulation - Enterprise-Scale Concurrent Usage
         
@@ -1259,7 +1259,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.audit_trail
     @pytest.mark.priority_p1
-    async def test_golden_path_data_audit_trail(self, setup_golden_path_environment, mock_authenticated_user):
+    async def test_golden_path_data_audit_trail(self, setup_golden_path_environment, auth_headers):
         """
         Test 8: Golden Path Data Audit Trail - Complete Audit Logging and Compliance Validation
         
