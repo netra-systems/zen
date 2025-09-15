@@ -17,7 +17,6 @@ This test validates that:
 CRITICAL: This is a mission critical test protecting enterprise compliance.
 """
 
-import unittest
 import asyncio
 import threading
 import time
@@ -27,6 +26,8 @@ from unittest.mock import MagicMock, patch
 import concurrent.futures
 from dataclasses import dataclass
 from pathlib import Path
+
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @dataclass
@@ -47,7 +48,7 @@ class WebSocketTestConnection:
     state_data: Dict[str, Any]
 
 
-class WebSocketFactoryUserIsolationSSotComplianceTest(unittest.TestCase):
+class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
     """
     Mission Critical Test: WebSocket Factory User Isolation SSOT Compliance.
     
@@ -57,14 +58,20 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(unittest.TestCase):
     Enterprise Impact: HIPAA, SOC2, SEC compliance requirements.
     """
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment for user isolation validation."""
+        super().setup_method(method)
+        
         self.isolation_violations = {
             'shared_state_contamination': [],
             'cross_user_data_leakage': [],
             'factory_instance_sharing': [],
             'session_state_pollution': []
         }
+        
+        # Record test context metrics
+        self.record_metric('test_type', 'user_isolation_compliance')
+        self.record_metric('test_category', 'mission_critical')
         
         # Create test user contexts for isolation testing
         self.test_users = [

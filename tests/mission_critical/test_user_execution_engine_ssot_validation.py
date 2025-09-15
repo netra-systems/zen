@@ -27,7 +27,6 @@ import asyncio
 import pytest
 import time
 import gc
-import unittest
 from typing import Dict, List, Any, Optional
 from unittest.mock import MagicMock, AsyncMock, patch
 
@@ -35,7 +34,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 
-class TestUserExecutionEngineSSotValidation(SSotAsyncTestCase, unittest.TestCase):
+class TestUserExecutionEngineSSotValidation(SSotAsyncTestCase):
     """
     Tests that SHOULD PASS to validate UserExecutionEngine SSOT compliance.
     

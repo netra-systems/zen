@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 """Issue #874: UserExecutionEngine multi-user isolation test.
 
 This test validates that UserExecutionEngine properly isolates execution 
@@ -22,7 +23,6 @@ This test should PASS if UserExecutionEngine properly implements user isolation.
 If it FAILS, it indicates security vulnerabilities requiring immediate fix.
 """
 
-import unittest
 import asyncio
 import concurrent.futures
 from unittest.mock import Mock, AsyncMock, patch
@@ -36,11 +36,13 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestUserExecutionEngineIsolation(unittest.TestCase):
+class TestUserExecutionEngineIsolation(SSotBaseTestCase):
     """Test UserExecutionEngine multi-user isolation functionality."""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment for isolation testing."""
+        super().setup_method(method)
+
         self.isolation_violations = []
         self.concurrency_issues = []
         self.resource_leaks = []
