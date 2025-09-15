@@ -2,7 +2,7 @@
 import logging
 from typing import Any, Dict, Optional, Tuple
 
-from clickhouse_driver import Client
+from netra_backend.app.db.clickhouse import get_clickhouse_client
 
 from netra_backend.app.config import get_config
 settings = get_config()

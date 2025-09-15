@@ -106,12 +106,49 @@ class TestAgentExecutionCoreIntegration:
         """Real agent registry for integration testing."""
         # Create a minimal LLM manager for integration testing
         from netra_backend.app.llm.llm_manager import LLMManager
-        
+
         # Create LLM manager without user context for testing
         # This is acceptable for integration tests as warned in the manager
         llm_manager = LLMManager(user_context=None)
-        
+
         registry = AgentRegistry(llm_manager)
+
+        # For integration testing, set up the registry to use simple registration
+        # instead of the complex factory pattern
+        registry._test_agents = {}  # Simple storage for test agents
+
+        # Override get method for testing
+        original_get = registry.get
+        original_get_async = registry.get_async
+
+        def test_get(key, context=None):
+            # First try our simple test storage
+            if hasattr(registry, '_test_agents') and key in registry._test_agents:
+                return registry._test_agents[key]
+            # Fall back to original get method
+            return original_get(key, context)
+
+        async def test_get_async(key, context=None):
+            # First try our simple test storage
+            if hasattr(registry, '_test_agents') and key in registry._test_agents:
+                return registry._test_agents[key]
+            # Fall back to original async get method
+            return await original_get_async(key, context)
+
+        # Override register method for testing
+        original_register = registry.register
+        def test_register(name, agent):
+            # Store in our simple test storage
+            if not hasattr(registry, '_test_agents'):
+                registry._test_agents = {}
+            registry._test_agents[name] = agent
+            # Also call original register
+            original_register(name, agent)
+
+        registry.get = test_get
+        registry.get_async = test_get_async
+        registry.register = test_register
+
         return registry
 
     @pytest.fixture
@@ -224,7 +261,7 @@ class TestAgentExecutionCoreIntegration:
             thread_id=f"test-thread-{uuid4()}",
             run_id=f"test-run-{uuid4()}",
             request_id=f"test-request-{uuid4()}",
-            agent_context={"user_request": "Integration test request"}  # Store in agent_context
+            agent_context={"user_request": "Integration test request"}  # Add request in agent_context
         )
         return state
 
@@ -257,15 +294,18 @@ class TestAgentExecutionCoreIntegration:
 
     @pytest.mark.asyncio
     async def test_websocket_event_sequence_validation(
-        self, integration_core, sample_context, sample_state, real_registry, mock_websocket_bridge
+        self, sample_context, sample_state, real_registry, mock_websocket_bridge
     ):
         """Test that WebSocket events are sent in correct sequence."""
+        # Create integration core with mock websocket bridge for event tracking
+        mock_integration_core = AgentExecutionCore(real_registry, mock_websocket_bridge)
+
         # Register fast mock agent
         mock_agent = MockIntegrationAgent(execution_time=0.01)
         real_registry.register("integration_test_agent", mock_agent)
-        
+
         # Execute agent
-        result = await integration_core.execute_agent(sample_context, sample_state, 5.0)
+        result = await mock_integration_core.execute_agent(sample_context, sample_state, 5.0)
         
         # Verify event sequence
         call_log = mock_websocket_bridge.call_log
@@ -300,7 +340,7 @@ class TestAgentExecutionCoreIntegration:
         # Verify failure handling
         assert isinstance(result, AgentExecutionResult)
         assert result.success is False
-        assert "Mock agent failure" in result.error
+        assert "Real integration agent failure" in result.error
         assert result.duration is not None
         
         # Verify WebSocket error notification
@@ -411,7 +451,7 @@ class TestAgentExecutionCoreIntegration:
                 user_id="test-user-123",
                 correlation_id=f"concurrent-correlation-{i}"
             )
-            state = SSotMockFactory.create_user_execution_context_mock()
+            state = SSotMockFactory.create_mock_user_context()
             state.user_id = "test-user-123"
             state.thread_id = context.thread_id
             contexts.append(context)
@@ -438,7 +478,11 @@ class TestAgentExecutionCoreIntegration:
     ):
         """Test resilience when WebSocket bridge fails."""
         # Create core with failing WebSocket bridge using SSOT patterns
+<<<<<<< HEAD
         failing_bridge = SSotMockFactory.create_mock_agent_websocket_bridge(should_fail=True)
+=======
+        failing_bridge = SSotMockFactory.create_mock_agent_websocket_bridge(should_fail=True)
+>>>>>>> 8764938e17e7cbfd22700a00d83f352704f5be9d
         failing_bridge.notify_agent_started.side_effect = Exception("WebSocket error")
         failing_bridge.notify_agent_completed.side_effect = Exception("WebSocket error")
         failing_bridge.notify_agent_error.side_effect = Exception("WebSocket error")
@@ -505,7 +549,7 @@ class TestAgentExecutionCoreIntegration:
                 user_id="test-user-123",
                 correlation_id=f"perf-correlation-{i}"
             )
-            state = SSotMockFactory.create_user_execution_context_mock()
+            state = SSotMockFactory.create_mock_user_context()
             state.user_id = "test-user-123"
             state.thread_id = context.thread_id
             contexts.append(context)

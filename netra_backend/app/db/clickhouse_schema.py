@@ -15,27 +15,17 @@ from netra_backend.app.db.transaction_errors import (
     classify_error
 )
 
-# Try to import ClickHouse driver, use no-op if not available
+# SSOT ClickHouse import and availability check
+from netra_backend.app.db.clickhouse import get_clickhouse_client, ClickHouseClient, CLICKHOUSE_AVAILABLE
 try:
-    from clickhouse_driver import Client
     from clickhouse_driver.errors import ServerException, ErrorCodes
-    CLICKHOUSE_AVAILABLE = True
 except (ImportError, ModuleNotFoundError):
-    CLICKHOUSE_AVAILABLE = False
-    # Create dummy classes for when ClickHouse is not available
-    class Client:
-        def __init__(self, *args, **kwargs):
-            pass
-        def execute(self, *args, **kwargs):
-            raise RuntimeError("ClickHouse driver not available")
-        def disconnect(self):
-            pass
-    
+    # Create dummy exception classes for when ClickHouse is not available
     class ServerException(Exception):
         def __init__(self, *args, **kwargs):
             super().__init__("ClickHouse driver not available")
             self.code = None
-    
+
     class ErrorCodes:
         TABLE_ALREADY_EXISTS = 57
         DATABASE_ALREADY_EXISTS = 81
@@ -83,19 +73,13 @@ class ClickHouseTraceSchema:
         self.password = password
         self.client_kwargs = kwargs
         
-        self._client: Optional[Client] = None
+        self._client: Optional[ClickHouseClient] = None
         self.migration_path = Path(__file__).parent.parent.parent / 'migrations' / 'clickhouse'
         
-    def _get_client(self) -> Client:
+    def _get_client(self) -> ClickHouseClient:
         """Get or create ClickHouse client."""
         if self._client is None:
-            self._client = Client(
-                host=self.host,
-                port=self.port,
-                user=self.user,
-                password=self.password,
-                **self.client_kwargs
-            )
+            self._client = get_clickhouse_client()
         return self._client
     
     async def create_tables(self) -> bool:
@@ -385,7 +369,7 @@ class ClickHouseTraceSchema:
         # Filter out empty statements
         return [s.strip() for s in statements if s.strip()]
     
-    async def _database_exists(self, client: Client) -> bool:
+    async def _database_exists(self, client: ClickHouseClient) -> bool:
         """Check if database exists."""
         try:
             result = await asyncio.get_event_loop().run_in_executor(
@@ -397,7 +381,7 @@ class ClickHouseTraceSchema:
         except Exception:
             return False
     
-    async def _table_exists(self, client: Client, table_name: str) -> bool:
+    async def _table_exists(self, client: ClickHouseClient, table_name: str) -> bool:
         """Check if table exists."""
         try:
             result = await asyncio.get_event_loop().run_in_executor(
@@ -412,7 +396,7 @@ class ClickHouseTraceSchema:
         except Exception:
             return False
     
-    async def _verify_table_structure(self, client: Client, table_name: str) -> bool:
+    async def _verify_table_structure(self, client: ClickHouseClient, table_name: str) -> bool:
         """Verify table has expected structure."""
         try:
             # Get column count

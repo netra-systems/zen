@@ -6,7 +6,7 @@ Based on Five Whys root cause analysis - tables are MANDATORY for core business 
 
 import logging
 from typing import Dict, List, Any
-from clickhouse_driver import Client
+from netra_backend.app.db.clickhouse import get_clickhouse_client, ClickHouseClient
 from clickhouse_driver.errors import ServerException, ErrorCodes
 
 logger = logging.getLogger(__name__)
@@ -95,15 +95,10 @@ class ClickHouseTableInitializer:
         self.password = password
         self.client = None
         
-    def connect(self) -> Client:
+    def connect(self) -> ClickHouseClient:
         """Establish connection to ClickHouse."""
         if not self.client:
-            self.client = Client(
-                host=self.host,
-                port=self.port,
-                user=self.user,
-                password=self.password
-            )
+            self.client = get_clickhouse_client()
         return self.client
         
     def initialize_tables(self) -> Dict[str, Any]:

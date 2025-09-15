@@ -1568,9 +1568,9 @@ async def get_request_scoped_message_handler(
             run_id=context.run_id
         )
         
-        # SSOT COMPLIANCE: Proper per-request WebSocket manager creation with error handling
+        # SSOT COMPLIANCE: Proper per-request WebSocket manager creation with error handling using factory function
         try:
-            websocket_manager = WebSocketManager(user_context=user_context)
+            websocket_manager = await get_websocket_manager(user_context=user_context)
             if not websocket_manager:
                 logger.warning(f"WebSocket manager creation returned None for user {context.user_id}")
                 websocket_manager = None

@@ -13,7 +13,7 @@ import logging
 from collections import defaultdict
 import time
 
-from clickhouse_driver import Client
+from netra_backend.app.db.clickhouse import get_clickhouse_client, ClickHouseClient
 from clickhouse_driver.errors import ServerException
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
@@ -102,7 +102,7 @@ class ClickHouseTraceWriter:
         self._buffer_lock = asyncio.Lock()
         
         # Client connection
-        self._client: Optional[Client] = None
+        self._client: Optional[ClickHouseClient] = None
         
         # Background flush task
         self._flush_task: Optional[asyncio.Task] = None
@@ -145,17 +145,10 @@ class ClickHouseTraceWriter:
         
         logger.info(f"ClickHouse trace writer stopped. Stats: {self._stats}")
     
-    def _get_client(self) -> Client:
+    def _get_client(self) -> ClickHouseClient:
         """Get or create ClickHouse client."""
         if self._client is None:
-            self._client = Client(
-                host=self.host,
-                port=self.port,
-                user=self.user,
-                password=self.password,
-                database=self.database,
-                **self.client_kwargs
-            )
+            self._client = get_clickhouse_client()
         return self._client
     
     # Core write methods for each table

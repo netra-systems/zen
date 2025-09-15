@@ -44,7 +44,7 @@ if TYPE_CHECKING:
     from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

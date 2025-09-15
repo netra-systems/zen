@@ -133,6 +133,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
             ),
             PipelineStepConfig(
                 agent_name="data_helper_agent", 
+
                 metadata={"step_number": 2, "description": "Data collection"}
             ),
             PipelineStepConfig(
@@ -730,11 +731,12 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
             context={"user_id": "concurrent_user_001", "thread_id": "concurrent_thread_001"},
             db_session=self.mock_db_session
         )
-        
+
         task_2 = pipeline_executor_2.execute_pipeline(
             pipeline=self.test_pipeline_steps,
             user_context=user_context_2,
             run_id="concurrent_run_002", 
+
             context={"user_id": "concurrent_user_002", "thread_id": "concurrent_thread_002"},
             db_session=self.mock_db_session
         )
