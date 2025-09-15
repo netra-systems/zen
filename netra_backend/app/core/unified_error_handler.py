@@ -239,7 +239,7 @@ class UnifiedErrorHandler:
             # String mappings for backward compatibility
             'VALIDATION_ERROR': 422,
             'AUTH_FAILED': 401,
-            'AUTH_UNAUTHORIZED': 403,
+            'AUTH_UNAUTHORIZED': 401,  # FIXED: Authentication failures should return 401, not 403
             'DB_RECORD_NOT_FOUND': 404,
             'DB_CONSTRAINT_VIOLATION': 409,
             'INTERNAL_ERROR': 500,
