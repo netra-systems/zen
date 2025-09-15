@@ -75,8 +75,114 @@ async def get_current_user(
     
     return user
 
+async def _discover_auth_service_endpoint() -> Optional[str]:
+    """Discover auth service endpoint with fallback chain for staging environment.
+    
+    Implements service discovery with graceful degradation:
+    1. Try configured AUTH_SERVICE_URL
+    2. Try staging canonical URL
+    3. Try localhost development URLs
+    4. Return None if all fail
+    
+    Returns:
+        Optional[str]: Working auth service endpoint or None if unavailable
+    """
+    from shared.isolated_environment import get_env
+    import httpx
+    
+    env = get_env()
+    
+    # Fallback chain for auth service discovery
+    candidate_endpoints = [
+        env.get('AUTH_SERVICE_URL'),  # Primary configured endpoint
+        'https://api.staging.netrasystems.ai',  # Staging canonical
+        'http://localhost:8081',  # Development default
+        'http://localhost:8001',  # Alternative development port
+        'http://auth-service:8081',  # Docker compose
+    ]
+    
+    # Filter out None values
+    candidate_endpoints = [ep for ep in candidate_endpoints if ep]
+    
+    for endpoint in candidate_endpoints:
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                # Try health check endpoint
+                response = await client.get(f"{endpoint}/health")
+                if response.status_code == 200:
+                    logger.info(f" PASS:  AUTH SERVICE DISCOVERY: Found working endpoint at {endpoint}")
+                    return endpoint
+        except Exception as e:
+            logger.debug(f"Auth service endpoint {endpoint} not available: {e}")
+            continue
+    
+    logger.warning("AUTH SERVICE DISCOVERY: No working endpoints found in fallback chain")
+    return None
+
+async def check_auth_service_health() -> Dict[str, Any]:
+    """Check auth service health with comprehensive status reporting.
+    
+    Returns:
+        Dict containing health status, endpoint info, and diagnostic data
+    """
+    from shared.isolated_environment import get_env
+    import httpx
+    
+    start_time = time.time()
+    env = get_env()
+    
+    health_status = {
+        "status": "unknown",
+        "endpoint": auth_client.settings.base_url,
+        "response_time_ms": 0,
+        "discovered_endpoint": None,
+        "fallback_available": False,
+        "error": None
+    }
+    
+    try:
+        # Try current endpoint first
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(f"{auth_client.settings.base_url}/health")
+            response_time = (time.time() - start_time) * 1000
+            
+            if response.status_code == 200:
+                health_status.update({
+                    "status": "healthy",
+                    "response_time_ms": response_time,
+                    "endpoint": auth_client.settings.base_url
+                })
+                logger.info(f" PASS:  AUTH SERVICE HEALTH: Service healthy at {auth_client.settings.base_url} ({response_time:.1f}ms)")
+                return health_status
+    except Exception as e:
+        logger.warning(f"AUTH SERVICE HEALTH: Primary endpoint {auth_client.settings.base_url} unhealthy: {e}")
+        health_status["error"] = str(e)
+    
+    # Try service discovery for fallback
+    discovered_endpoint = await _discover_auth_service_endpoint()
+    if discovered_endpoint:
+        health_status.update({
+            "status": "degraded",
+            "discovered_endpoint": discovered_endpoint,
+            "fallback_available": True,
+            "response_time_ms": (time.time() - start_time) * 1000
+        })
+        logger.info(f" PASS:  AUTH SERVICE HEALTH: Fallback available at {discovered_endpoint}")
+    else:
+        health_status.update({
+            "status": "unhealthy",
+            "fallback_available": False,
+            "response_time_ms": (time.time() - start_time) * 1000
+        })
+        logger.error("AUTH SERVICE HEALTH: No healthy endpoints available")
+    
+    return health_status
+
 async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
-    """Validate token with auth service and prevent token reuse (Issue #414 fix)."""
+    """Validate token with auth service and prevent token reuse (Issue #414 fix).
+    
+    Enhanced with service discovery and graceful degradation for staging environment.
+    """
     start_time = time.time()
     
     # PHASE 4 REMEDIATION: Pure delegation to auth service - removed bypass logic
@@ -86,10 +192,17 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
     
     # PHASE 4 REMEDIATION: Token usage tracking moved to auth service
     
+    # SERVICE DISCOVERY: Try to find working auth service endpoint
+    discovered_endpoint = await _discover_auth_service_endpoint()
+    if discovered_endpoint and discovered_endpoint != auth_client.settings.base_url:
+        logger.info(f"🔄 AUTH SERVICE DISCOVERY: Updating endpoint from {auth_client.settings.base_url} to {discovered_endpoint}")
+        auth_client.settings.base_url = discovered_endpoint
+    
     logger.info(f"🔑 AUTH SERVICE DEPENDENCY: Starting token validation "
                 f"(token_hash: {token_hash}, token_length: {len(token) if token else 0}, "
                 f"auth_service_endpoint: {auth_client.settings.base_url}, "
-                f"service_timeout: 30s, reuse_check: disabled)")
+                f"service_timeout: 30s, reuse_check: disabled, "
+                f"discovery_enabled: True)")
     
     try:
         validation_result = await auth_client.validate_token_jwt(token)
@@ -142,11 +255,40 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
         raise
     except Exception as e:
         response_time = (time.time() - start_time) * 1000
+        
+        # ENHANCED STAGING SUPPORT: Check if this is a staging environment for graceful degradation
+        from shared.isolated_environment import get_env
+        env = get_env()
+        is_staging = any([
+            env.get('ENVIRONMENT', '').lower() == 'staging',
+            env.get('NETRA_ENVIRONMENT', '').lower() == 'staging',
+            'staging' in env.get('GCP_PROJECT_ID', '').lower(),
+        ])
+        
+        if is_staging:
+            # In staging, try service discovery before failing
+            logger.warning(f"AUTH SERVICE STAGING RECOVERY: Attempting service discovery after failure: {e}")
+            discovered_endpoint = await _discover_auth_service_endpoint()
+            
+            if discovered_endpoint and discovered_endpoint != auth_client.settings.base_url:
+                logger.info(f"AUTH SERVICE STAGING RECOVERY: Found alternative endpoint {discovered_endpoint}, retrying validation")
+                auth_client.settings.base_url = discovered_endpoint
+                
+                # Retry validation with discovered endpoint
+                try:
+                    validation_result = await auth_client.validate_token_jwt(token)
+                    if validation_result and validation_result.get("valid"):
+                        logger.info(f" PASS:  AUTH SERVICE STAGING RECOVERY: Token validation succeeded with fallback endpoint")
+                        return validation_result
+                except Exception as retry_e:
+                    logger.error(f"AUTH SERVICE STAGING RECOVERY: Retry failed with {discovered_endpoint}: {retry_e}")
+        
         logger.critical(f" ALERT:  AUTH SERVICE EXCEPTION: Auth service communication failed "
                        f"(exception_type: {type(e).__name__}, "
                        f"exception_message: {str(e)}, "
                        f"response_time: {response_time:.2f}ms, "
                        f"service_status: auth_service_unreachable, "
+                       f"staging_environment: {is_staging}, "
                        f"golden_path_impact: CRITICAL - All authentication blocked, "
                        f"dependent_services: ['websocket_service', 'supervisor_service', 'thread_service'], "
                        f"recovery_action: Check auth service health and connectivity)")
@@ -1040,7 +1182,8 @@ __all__ = [
     "TokenRefreshResult",
     "auth_manager",  # Issue #485 fix: Missing import
     "unified_auth_client",  # Issue #762 Phase 2: Backward compatibility alias
-    "AuthIntegrationService"  # Backward compatibility for tests
+    "AuthIntegrationService",  # Backward compatibility for tests
+    "check_auth_service_health"  # P0 Action 4: Auth service health check
 ]
 
 # Issue #762 Phase 2 Remediation: Add backward compatibility alias
