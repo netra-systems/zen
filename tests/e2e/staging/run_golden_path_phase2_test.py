@@ -62,10 +62,10 @@ def validate_environment():
 def run_test_command(test_pattern: str, description: str):
     """Run pytest command with proper configuration."""
     import subprocess
-    
+
     print(f"\n🚀 {description}")
     print("=" * 80)
-    
+
     cmd = [
         "python", "-m", "pytest",
         f"tests/e2e/staging/test_golden_path_phase2_regression_prevention.py::{test_pattern}",
@@ -74,16 +74,29 @@ def run_test_command(test_pattern: str, description: str):
         "--capture=no",
         "--color=yes"
     ]
-    
+
     start_time = time.time()
-    result = subprocess.run(cmd, cwd=project_root)
+    # Fix Unicode/encoding issues for Windows compatibility
+    result = subprocess.run(
+        cmd,
+        cwd=project_root,
+        encoding='utf-8',
+        errors='replace',
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True
+    )
     duration = time.time() - start_time
-    
+
+    # Print the output with proper encoding handling
+    if result.stdout:
+        print(result.stdout)
+
     if result.returncode == 0:
         print(f"✅ {description} PASSED ({duration:.1f}s)")
     else:
         print(f"❌ {description} FAILED ({duration:.1f}s)")
-    
+
     return result.returncode == 0
 
 
