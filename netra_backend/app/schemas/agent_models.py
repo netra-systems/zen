@@ -191,7 +191,7 @@ class DeepAgentState(BaseModel):
     @field_validator('agent_input', mode='before')
     @classmethod
     def validate_agent_input_security(cls, v: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
-        """SECURITY FIX: Validate agent_input to prevent injection attacks.
+        """SECURITY FIX: Sanitize agent_input to prevent injection attacks.
 
         Issue #1017 Resolution: This validator prevents malicious data injection by:
         1. Detecting and sanitizing dangerous system commands
@@ -302,9 +302,9 @@ class DeepAgentState(BaseModel):
             (r"'\s*OR\s*'[^']*'\s*=\s*'[^']*'", "'[SQL_OR_REMOVED]'"),
 
             # Command injection patterns - literal matches for test compatibility
-            (r'; ', '; [CMD_SEMICOLON_REMOVED]'),
-            (r'\| ', '| [CMD_PIPE_REMOVED]'),
-            (r'&& ', '&& [CMD_AND_REMOVED]'),
+            (r'; ', '[CMD_SEMICOLON_REMOVED] '),
+            (r'\| ', '[CMD_PIPE_REMOVED] '),
+            (r'&& ', '[CMD_AND_REMOVED] '),
             (r'`', '[CMD_BACKTICK_REMOVED]'),
             (r'rm -rf', '[CMD_RM_RF_REMOVED]'),
             (r'wget', '[CMD_WGET_REMOVED]'),
