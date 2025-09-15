@@ -6,27 +6,27 @@
       "output_format": "stream-json"
     },
     {
-      "command": "/gitissueprogressorv3 1137",
+      "command": "/prmergergit",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
     {
-      "command": "/gitissueprogressorv3 1138",
+      "command": "/gitissueprogressorv3 no labels",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 p0",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
       {
-      "command": "/gitissueprogressorv3 1139",
+      "command": "/gitissueprogressorv3 most important",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
     {
-      "command": "/gitissueprogressorv3 1140",
-      "permission_mode": "acceptEdits",
-      "output_format": "stream-json"
-    },
-    {
-      "command": "/gitissueprogressorv3 1141",
+      "command": "/gitissueprogressorv3 critical",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
@@ -57,6 +57,16 @@
     },
     {
       "command": "/gitissueprogressorv3 long standing issues",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+      {
+      "command": "/ultimate-test-deploy-loop",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+        {
+      "command": "/gcploggardener",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
