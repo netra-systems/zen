@@ -40,6 +40,17 @@ class TestWebSocketManagerSSOTViolations(SSotBaseTestCase):
         self.import_paths = []
         self.detected_violations = []
         
+    @property
+    def detected_violations(self):
+        """Ensure detected_violations is always available."""
+        if not hasattr(self, '_detected_violations'):
+            self._detected_violations = []
+        return self._detected_violations
+        
+    @detected_violations.setter
+    def detected_violations(self, value):
+        self._detected_violations = value
+        
     def test_multiple_websocket_manager_implementations_detected(self):
         """
         CRITICAL TEST: Detect multiple WebSocket manager class implementations

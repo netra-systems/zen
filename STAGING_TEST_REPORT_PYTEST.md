@@ -1,43 +1,26 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-14 20:52:26
+**Generated:** 2025-09-14 21:10:46
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 1
+- **Total Tests:** 0
 - **Passed:** 0 (0.0%)
-- **Failed:** 1 (100.0%)
+- **Failed:** 0 (0.0%)
 - **Skipped:** 0
-- **Duration:** 9.74 seconds
+- **Duration:** 0.22 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
-### NORMAL Priority Tests
-
-| Test Name | Status | Duration | File |
-|-----------|--------|----------|------|
-| test_staging_event_validator_endpoint_consistency | FAIL failed | 0.000s | test_golden_path_event_validation.py |
-
-## Failed Tests Details
-
-### FAILED: test_staging_event_validator_endpoint_consistency
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/event_validator_ssot/test_golden_path_event_validation.py
-- **Duration:** 0.000s
-- **Error:** tests/e2e/staging/event_validator_ssot/test_golden_path_event_validation.py:132: in test_staging_event_validator_endpoint_consistency
-    if not self.staging_base_url:
-           ^^^^^^^^^^^^^^^^^^^^^
-E   AttributeError: 'TestGoldenPathEventValidationStaging' object has no attribute 'staging_base_url'...
-
 ## Pytest Output Format
 
 ```
-test_golden_path_event_validation.py::test_staging_event_validator_endpoint_consistency FAILED
 
 ==================================================
-0 passed, 1 failed in 9.74s
+0 passed, 0 failed in 0.22s
 ```
 
 ## Test Coverage Matrix

@@ -54,7 +54,9 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
         self.test_user_id = str(uuid.uuid4())
         self.test_thread_id = str(uuid.uuid4())
         self.test_run_id = str(uuid.uuid4())
-        self.user_context = UserExecutionContext.from_request_supervisor(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
+        self.user_context = UserExecutionContext.from_request(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
+        # Add mock database session for SupervisorAgent execution  
+        self.user_context.db_session = MagicMock()
         self.mock_llm_manager = MagicMock()
         self.mock_llm_manager.get_default_client.return_value = self.mock_factory.create_llm_client_mock()
 
@@ -100,7 +102,7 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
         """
         try:
             from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-            supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager)
+            supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
             self.assertIsNotNone(supervisor)
             self.assertEqual(supervisor.llm_manager, self.mock_llm_manager)
             logger.info(' PASS:  SupervisorAgent constructor with llm_manager succeeded')
@@ -121,14 +123,14 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
         """
         try:
             from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-            supervisor = SupervisorAgent()
+            supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
             supervisor.llm_manager = self.mock_llm_manager
             self.assertIsNotNone(supervisor)
             self.assertEqual(supervisor.llm_manager, self.mock_llm_manager)
             logger.info(' PASS:  SupervisorAgent fallback constructor pattern succeeded')
         except Exception as e:
             logger.error(f'SupervisorAgent fallback constructor failed: {e}')
-            alternative_patterns = [lambda: SupervisorAgent(name='supervisor'), lambda: SupervisorAgent(description='Supervisor agent'), lambda: SupervisorAgent(agent_id='supervisor_001')]
+            alternative_patterns = [lambda: SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context, name='supervisor'), lambda: SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context, description='Supervisor agent'), lambda: SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context, agent_id='supervisor_001')]
             for i, pattern in enumerate(alternative_patterns):
                 try:
                     supervisor = pattern()
@@ -149,10 +151,10 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
             try:
-                supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager)
+                supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
                 logger.info('Using primary constructor pattern')
             except TypeError:
-                supervisor = SupervisorAgent()
+                supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
                 supervisor.llm_manager = self.mock_llm_manager
                 logger.info('Using fallback constructor pattern')
             self.assertTrue(hasattr(supervisor, 'execute'), 'SupervisorAgent should have execute method')
@@ -179,17 +181,17 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
             try:
-                supervisor1 = SupervisorAgent(llm_manager=self.mock_llm_manager)
+                supervisor1 = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
                 self.assertEqual(supervisor1.llm_manager, self.mock_llm_manager)
                 logger.info(' PASS:  Constructor injection pattern works')
             except TypeError:
                 logger.info('Constructor injection pattern not supported')
                 supervisor1 = None
-            supervisor2 = SupervisorAgent()
+            supervisor2 = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
             supervisor2.llm_manager = self.mock_llm_manager
             self.assertEqual(supervisor2.llm_manager, self.mock_llm_manager)
             logger.info(' PASS:  Property injection pattern works')
-            supervisor3 = SupervisorAgent()
+            supervisor3 = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
             if hasattr(supervisor3, 'set_llm_manager'):
                 supervisor3.set_llm_manager(self.mock_llm_manager)
                 self.assertEqual(supervisor3.llm_manager, self.mock_llm_manager)
@@ -214,7 +216,11 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
             results = {}
             for pattern in test_patterns:
                 try:
-                    supervisor = SupervisorAgent(*pattern['args'], **pattern['kwargs'])
+                    # Add user_context to all test patterns for Issue #1116 compliance
+                    test_kwargs = pattern['kwargs'].copy()
+                    if 'user_context' not in test_kwargs:
+                        test_kwargs['user_context'] = self.user_context
+                    supervisor = SupervisorAgent(*pattern['args'], **test_kwargs)
                     results[pattern['name']] = {'success': True, 'supervisor': supervisor, 'error': None}
                     logger.info(f" PASS:  Constructor pattern '{pattern['name']}' succeeded")
                 except Exception as e:
