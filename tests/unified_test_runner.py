@@ -3135,7 +3135,37 @@ class UnifiedTestRunner:
                 "errors": error_msg,
                 "category": "cypress"
             }
-    
+
+    def _should_apply_pattern_filtering(self, category_name: str) -> bool:
+        """
+        Determine if pattern filtering should be applied for a given test category.
+
+        Args:
+            category_name: The test category to check
+
+        Returns:
+            bool: True if pattern filtering should be applied, False otherwise
+
+        Rules:
+        - Database category should NEVER apply -k pattern filtering
+        - E2E-related categories (websocket, security, e2e, e2e_critical, agent, performance) SHOULD apply pattern filtering
+        - Other categories follow default behavior (apply pattern filtering)
+        """
+        # Database category should never use pattern filtering
+        if category_name == "database":
+            return False
+
+        # E2E-related categories should use pattern filtering
+        e2e_related_categories = {
+            "websocket", "security", "e2e", "e2e_critical",
+            "agent", "performance", "e2e_full"
+        }
+        if category_name in e2e_related_categories:
+            return True
+
+        # Default behavior for other categories (apply pattern filtering)
+        return True
+
     def _build_pytest_command(self, service: str, category_name: str, args: argparse.Namespace) -> str:
         """Build pytest command for backend/auth services."""
         config = self.test_configs[service]
@@ -3241,12 +3271,15 @@ class UnifiedTestRunner:
         else:
             cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])   # 5min for other test categories
         
-        # Add specific test pattern
-        if args.pattern:
+        # Add specific test pattern - with category-aware filtering
+        if args.pattern and self._should_apply_pattern_filtering(category_name):
             # Clean up pattern - remove asterisks that are invalid for pytest -k expressions
             # pytest -k expects Python-like expressions, not glob patterns
             clean_pattern = args.pattern.strip('*')
             cmd_parts.extend(["-k", f'"{clean_pattern}"'])
+        elif args.pattern and not self._should_apply_pattern_filtering(category_name):
+            # Pattern provided but filtering disabled for this category (e.g., database)
+            print(f"[INFO] Pattern filtering disabled for category '{category_name}' - pattern '{args.pattern}' ignored")
         
         return " ".join(cmd_parts)
     
