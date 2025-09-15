@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Prevents $500K+ ARR chat functionality from being unavailable
 
 Test Strategy - Phase 1 Focus:
-1. Validate 25.0s timeout configuration prevents regression (was 8.0s)
+1. Validate 35.0s timeout configuration prevents regression (was 25.0s)
 2. Test timeout behavior under various load conditions
 3. Verify monitoring can detect timeout issues before they impact WebSocket
 4. Ensure graceful degradation works during database connectivity issues
@@ -35,7 +35,7 @@ def test_issue_1263_cloud_sql_timeout_configuration_validation():
     PHASE 1 CRITICAL: Validate Cloud SQL compatible timeout configuration.
 
     This test confirms that Issue #1263 fix is properly implemented:
-    - Staging initialization_timeout: 25.0s (increased from 8.0s)
+    - Staging initialization_timeout: 35.0s (increased from 25.0s)
     - Cloud SQL connection_timeout: 15.0s (sufficient for VPC connector)
     - Table setup timeout: 10.0s (increased for Cloud SQL latency)
     """
@@ -49,8 +49,8 @@ def test_issue_1263_cloud_sql_timeout_configuration_validation():
     staging_config = get_database_timeout_config("staging")
 
     # Validate Issue #1263 fix - increased timeouts for Cloud SQL compatibility
-    assert staging_config["initialization_timeout"] == 25.0, (
-        f"Expected staging initialization_timeout to be 25.0s for Cloud SQL compatibility, "
+    assert staging_config["initialization_timeout"] == 35.0, (
+        f"Expected staging initialization_timeout to be 35.0s for Cloud SQL compatibility, "
         f"but got {staging_config['initialization_timeout']}s"
     )
 
@@ -95,8 +95,8 @@ def test_issue_1263_timeout_regression_prevention():
     )
 
     # Ensure timeout provides adequate buffer for Cloud SQL
-    assert staging_config["initialization_timeout"] >= 25.0, (
-        f"Staging timeout should be >= 25.0s for Cloud SQL reliability, "
+    assert staging_config["initialization_timeout"] >= 35.0, (
+        f"Staging timeout should be >= 35.0s for Cloud SQL reliability, "
         f"but got {staging_config['initialization_timeout']}s"
     )
 
@@ -117,8 +117,8 @@ def test_issue_1263_environment_timeout_hierarchy():
     prod_config = get_database_timeout_config("production")
 
     # Staging should have reasonable timeouts for Cloud SQL
-    assert staging_config["initialization_timeout"] >= 25.0, (
-        "Staging should have >= 25.0s for Cloud SQL compatibility"
+    assert staging_config["initialization_timeout"] >= 35.0, (
+        "Staging should have >= 35.0s for Cloud SQL compatibility"
     )
 
     # Production should have the highest timeouts for maximum reliability
