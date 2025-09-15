@@ -50,7 +50,8 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.schemas.agent_models import DeepAgentState, AgentType, WorkflowStage
+from netra_backend.app.schemas.agent_models import DeepAgentState, WorkflowStage
+from netra_backend.app.agents.registry import AgentType
 from netra_backend.app.schemas.message_models import MessageRequest, MessageType
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.core.configuration.services import get_service_config
@@ -84,7 +85,7 @@ class MultiAgentWorkflowTracker:
 
     def validate_workflow_completion(self) -> Dict[str, Any]:
         """Validate complete multi-agent workflow execution."""
-        expected_agents = [AgentType.SUPERVISOR.value, AgentType.TRIAGE.value, AgentType.DATA_HELPER.value, AgentType.APEX_OPTIMIZER.value]
+        expected_agents = [AgentType.SUPERVISOR.value, AgentType.TRIAGE.value, AgentType.DATA_HELPER.value, AgentType.OPTIMIZER.value]
         executed_agents = set((exec_data['agent_type'] for exec_data in self.workflow_events))
         expected_handoffs = len(expected_agents) - 1
         return {'all_agents_executed': all((agent in executed_agents for agent in expected_agents)), 'executed_agents': list(executed_agents), 'handoff_count': len(self.agent_handoffs), 'expected_handoffs': expected_handoffs, 'proper_handoff_sequence': len(self.agent_handoffs) >= expected_handoffs - 1, 'total_workflow_duration_ms': max((event['relative_time_ms'] for event in self.workflow_events), default=0), 'workflow_events_count': len(self.workflow_events)}
@@ -111,7 +112,7 @@ class TestMultiAgentGoldenPathWorkflowsIntegration(SSotAsyncTestCase):
         async def track_workflow_events(event_type: str, data: Dict[str, Any]):
             agent_name = data.get('agent_name', 'unknown')
             if agent_name in ['supervisor', 'triage', 'data_helper', 'apex_optimizer']:
-                agent_type = AgentType.SUPERVISOR if agent_name == 'supervisor' else AgentType.TRIAGE if agent_name == 'triage' else AgentType.DATA_HELPER if agent_name == 'data_helper' else AgentType.APEX_OPTIMIZER
+                agent_type = AgentType.SUPERVISOR if agent_name == 'supervisor' else AgentType.TRIAGE if agent_name == 'triage' else AgentType.DATA_HELPER if agent_name == 'data_helper' else AgentType.OPTIMIZER
                 await self.workflow_tracker.track_agent_execution(agent_type, event_type, data)
         with patch.object(UnifiedWebSocketEmitter, 'emit_agent_event') as mock_emit:
             mock_emit.side_effect = track_workflow_events
@@ -150,9 +151,9 @@ class TestMultiAgentGoldenPathWorkflowsIntegration(SSotAsyncTestCase):
         await self.workflow_tracker.track_agent_execution(AgentType.TRIAGE, 'analyzing', {'task': 'Categorizing request complexity'})
         await self.workflow_tracker.track_agent_handoff(AgentType.TRIAGE, AgentType.DATA_HELPER, {'category': 'performance_analysis'})
         await self.workflow_tracker.track_agent_execution(AgentType.DATA_HELPER, 'collecting', {'data_sources': ['metrics', 'logs', 'performance']})
-        await self.workflow_tracker.track_agent_handoff(AgentType.DATA_HELPER, AgentType.APEX_OPTIMIZER, {'data': 'collected_performance_data'})
-        await self.workflow_tracker.track_agent_execution(AgentType.APEX_OPTIMIZER, 'optimizing', {'recommendations': 'Generated optimization plan'})
-        await self.workflow_tracker.track_agent_handoff(AgentType.APEX_OPTIMIZER, AgentType.SUPERVISOR, {'result': 'optimization_complete'})
+        await self.workflow_tracker.track_agent_handoff(AgentType.DATA_HELPER, AgentType.OPTIMIZER, {'data': 'collected_performance_data'})
+        await self.workflow_tracker.track_agent_execution(AgentType.OPTIMIZER, 'optimizing', {'recommendations': 'Generated optimization plan'})
+        await self.workflow_tracker.track_agent_handoff(AgentType.OPTIMIZER, AgentType.SUPERVISOR, {'result': 'optimization_complete'})
         await self.workflow_tracker.track_agent_execution(AgentType.SUPERVISOR, 'completed', {'final_result': 'Multi-agent workflow successful'})
         return {'status': 'completed', 'result': 'Multi-agent optimization complete'}
 
@@ -212,7 +213,7 @@ class TestMultiAgentGoldenPathWorkflowsIntegration(SSotAsyncTestCase):
             raise Exception('Data Helper agent failure')
         except Exception:
             await self.workflow_tracker.track_agent_execution(AgentType.SUPERVISOR, 'recovery', {'action': 'Attempting fallback workflow'})
-        await self.workflow_tracker.track_agent_execution(AgentType.APEX_OPTIMIZER, 'fallback', {'mode': 'simplified_processing'})
+        await self.workflow_tracker.track_agent_execution(AgentType.OPTIMIZER, 'fallback', {'mode': 'simplified_processing'})
 
     @pytest.mark.asyncio
     async def test_concurrent_multi_agent_workflows_isolation(self):

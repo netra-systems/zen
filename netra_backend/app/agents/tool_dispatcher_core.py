@@ -92,7 +92,27 @@ class ToolDispatcher:
     def _register_initial_tools(self, tools: List[BaseTool]) -> None:
         """Register initial tools if provided"""
         if tools:
-            self.registry.register_tools(tools)
+            for i, tool in enumerate(tools):
+                # Generate safe tool name avoiding metaclass issues
+                tool_name = self._generate_safe_tool_name(tool, i)
+                self.registry.register_tool(tool_name, tool)
+                logger.debug(f"Registered tool {tool_name}")
+
+    def _generate_safe_tool_name(self, tool: Any, index: int) -> str:
+        """Generate safe tool name avoiding metaclass fallbacks."""
+        # First try to get name attribute
+        if hasattr(tool, 'name') and getattr(tool, 'name', None):
+            return str(tool.name).lower()
+
+        # Use class name but ensure it's not a metaclass
+        class_name = getattr(tool, '__class__', type(tool)).__name__
+
+        # Prevent dangerous metaclass names
+        if class_name.lower() in ['modelmetaclass', 'type', 'abc', 'object']:
+            # Use a more descriptive fallback with index
+            return f"tool_legacy_{index}"
+
+        return f"{class_name.lower()}_{index}"
     
     def has_tool(self, tool_name: str) -> bool:
         """Check if a tool exists"""

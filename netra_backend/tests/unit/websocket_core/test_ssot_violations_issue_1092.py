@@ -205,12 +205,23 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
         """
         logger.info("Testing for duplicate emit_event_batch methods - EXPECTING FAILURE")
 
-        modules_to_check = [
+        modules_to_check = []
+        for name, module in [
             ('unified_manager', unified_manager_module),
             ('unified_emitter', unified_emitter_module),
             ('websocket_manager', websocket_manager_module),
             ('handlers', handlers_module)
-        ]
+        ]:
+            if module is not None:
+                modules_to_check.append((name, module))
+            else:
+                logger.error(f"SSOT VIOLATION: Module {name} could not be imported for emit_event_batch check")
+                self.discovered_violations['emit_event_batch_methods'].append({
+                    'module': name,
+                    'method_name': 'MODULE_IMPORT_FAILED',
+                    'full_path': f"netra_backend.app.websocket_core.{name}.emit_event_batch",
+                    'reason': 'Import failed due to SSOT violations'
+                })
 
         emit_batch_implementations = []
 
@@ -260,49 +271,74 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
 
         deprecated_patterns = []
 
-        # Check unified_init module for deprecated patterns
-        deprecated_functions = [
-            'get_manager',
-            'get_emitter_pool',
-            'create_websocket_emitter',
-            'create_isolated_emitter'
-        ]
+        # Check unified_init module for deprecated patterns (if it could be imported)
+        if unified_init_module is not None:
+            deprecated_functions = [
+                'get_manager',
+                'get_emitter_pool',
+                'create_websocket_emitter',
+                'create_isolated_emitter'
+            ]
 
-        for func_name in deprecated_functions:
-            if hasattr(unified_init_module, func_name):
-                func = getattr(unified_init_module, func_name)
-                deprecated_patterns.append({
-                    'type': 'deprecated_function',
-                    'name': func_name,
-                    'module': 'unified_init',
-                    'full_path': f"netra_backend.app.websocket_core.unified_init.{func_name}",
-                    'reason': 'Security vulnerability - direct instantiation patterns'
-                })
+            for func_name in deprecated_functions:
+                if hasattr(unified_init_module, func_name):
+                    func = getattr(unified_init_module, func_name)
+                    deprecated_patterns.append({
+                        'type': 'deprecated_function',
+                        'name': func_name,
+                        'module': 'unified_init',
+                        'full_path': f"netra_backend.app.websocket_core.unified_init.{func_name}",
+                        'reason': 'Security vulnerability - direct instantiation patterns'
+                    })
+        else:
+            deprecated_patterns.append({
+                'type': 'module_import_failed',
+                'name': 'unified_init',
+                'module': 'unified_init',
+                'full_path': 'netra_backend.app.websocket_core.unified_init',
+                'reason': 'Module failed to import due to SSOT violations - circular dependencies'
+            })
 
         # Check for WebSocketManagerFactory usage patterns
         factory_references = []
 
-        # Check in unified_emitter for factory references
-        unified_emitter_source = inspect.getsource(unified_emitter_module)
-        if 'WebSocketEmitterFactory' in unified_emitter_source:
+        # Check in unified_emitter for factory references (if it could be imported)
+        if unified_emitter_module is not None:
+            unified_emitter_source = inspect.getsource(unified_emitter_module)
+            if 'WebSocketEmitterFactory' in unified_emitter_source:
+                factory_references.append({
+                    'type': 'factory_class_reference',
+                    'name': 'WebSocketEmitterFactory',
+                    'module': 'unified_emitter',
+                    'reason': 'Multiple factory classes violate SSOT'
+                })
+        else:
             factory_references.append({
-                'type': 'factory_class_reference',
-                'name': 'WebSocketEmitterFactory',
+                'type': 'module_import_failed',
+                'name': 'unified_emitter',
                 'module': 'unified_emitter',
-                'reason': 'Multiple factory classes violate SSOT'
+                'reason': 'Module failed to import - cannot check for factory references'
             })
 
         # Check for direct instantiation bypasses
         bypass_patterns = []
 
-        # Check migration_adapter for bypass warnings
-        migration_source = inspect.getsource(migration_adapter_module)
-        if 'WebSocketManagerFactory.create_isolated_manager' in migration_source:
+        # Check migration_adapter for bypass warnings (if it could be imported)
+        if migration_adapter_module is not None:
+            migration_source = inspect.getsource(migration_adapter_module)
+            if 'WebSocketManagerFactory.create_isolated_manager' in migration_source:
+                bypass_patterns.append({
+                    'type': 'deprecated_factory_call',
+                    'pattern': 'WebSocketManagerFactory.create_isolated_manager',
+                    'module': 'migration_adapter',
+                    'reason': 'Deprecated factory pattern still in use'
+                })
+        else:
             bypass_patterns.append({
-                'type': 'deprecated_factory_call',
-                'pattern': 'WebSocketManagerFactory.create_isolated_manager',
+                'type': 'module_import_failed',
+                'pattern': 'migration_adapter',
                 'module': 'migration_adapter',
-                'reason': 'Deprecated factory pattern still in use'
+                'reason': 'Module failed to import - cannot check for bypass patterns'
             })
 
         all_violations = deprecated_patterns + factory_references + bypass_patterns
@@ -398,8 +434,8 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
 
         mode_violations = []
 
-        # Check if WebSocketManagerMode enum exists in unified_manager
-        if hasattr(unified_manager_module, 'WebSocketManagerMode'):
+        # Check if WebSocketManagerMode enum exists in unified_manager (if it could be imported)
+        if unified_manager_module is not None and hasattr(unified_manager_module, 'WebSocketManagerMode'):
             mode_enum = unified_manager_module.WebSocketManagerMode
             enum_values = list(mode_enum)
 
@@ -425,6 +461,12 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
                     'deprecated_modes': deprecated_modes,
                     'reason': f'Modes {deprecated_modes} redirect to UNIFIED but still exist - SSOT violation'
                 })
+        else:
+            mode_violations.append({
+                'type': 'module_import_failed',
+                'enum_name': 'WebSocketManagerMode',
+                'reason': 'unified_manager module failed to import - cannot check for enum violations'
+            })
 
         logger.error(f"SSOT VIOLATION DISCOVERED: Found {len(mode_violations)} WebSocketManagerMode violations")
         for violation in mode_violations:
@@ -447,8 +489,8 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
 
         factory_class_violations = []
 
-        # Check unified_emitter for WebSocketEmitterFactory
-        if hasattr(unified_emitter_module, 'WebSocketEmitterFactory'):
+        # Check unified_emitter for WebSocketEmitterFactory (if it could be imported)
+        if unified_emitter_module is not None and hasattr(unified_emitter_module, 'WebSocketEmitterFactory'):
             factory_class = unified_emitter_module.WebSocketEmitterFactory
             factory_class_violations.append({
                 'type': 'emitter_factory_class',
@@ -459,7 +501,7 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
             })
 
         # Check for WebSocketEmitterPool class
-        if hasattr(unified_emitter_module, 'WebSocketEmitterPool'):
+        if unified_emitter_module is not None and hasattr(unified_emitter_module, 'WebSocketEmitterPool'):
             pool_class = unified_emitter_module.WebSocketEmitterPool
             factory_class_violations.append({
                 'type': 'emitter_pool_class',
