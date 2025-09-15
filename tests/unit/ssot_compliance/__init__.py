@@ -16,10 +16,10 @@ GitHub Issue: #299 - UnifiedTestRunner SSOT violation
 """
 
 # Export main test classes for easier importing
-from .test_ssot_test_runner_compliance_suite import TestSSOTTestRunnerCompliance
-from .test_golden_path_test_runner_protection import TestGoldenPathTestRunnerProtection
+from .test_ssot_test_runner_compliance_suite import SSOTTestRunnerComplianceTests
+from .test_golden_path_test_runner_protection import GoldenPathTestRunnerProtectionTests
 
 __all__ = [
-    "TestSSOTTestRunnerCompliance",
-    "TestGoldenPathTestRunnerProtection"
+    "SSOTTestRunnerComplianceTests",
+    "GoldenPathTestRunnerProtectionTests"
 ]
