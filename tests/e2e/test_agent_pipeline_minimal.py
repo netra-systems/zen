@@ -1,6 +1,45 @@
-@pytest.mark.e2e
+"""
+Minimal Agent Pipeline Test - Debug Version
+Tests just the supervisor agent creation without complex dependencies.
+
+This test validates basic supervisor agent functionality for e2e testing
+with proper SSOT compliance and staging environment compatibility.
+"""
+
+import sys
+import asyncio
+import pytest
+from pathlib import Path
+from typing import Dict, Any, List
+from unittest.mock import AsyncMock, MagicMock
+
+# Add the project root to Python path
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+# SSOT Test Framework imports
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from test_framework.ssot.mock_factory import SSotMockFactory
+
+# SSOT compliant imports based on SSOT Import Registry
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.config import get_config
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.db.database_manager import DatabaseManager
+from shared.isolated_environment import IsolatedEnvironment, get_env
+
+# User execution context for proper isolation
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+
+# Core types
+from shared.types.core_types import UserID, ThreadID, RunID
+
+
 class TestWebSocketConnection:
-    """Real WebSocket connection for testing instead of mocks."""
+    """Mock WebSocket connection for testing."""
     
     def __init__(self):
         self.messages_sent = []
@@ -22,73 +61,95 @@ class TestWebSocketConnection:
         """Get all sent messages."""
         return self.messages_sent.copy()
 
-"""
-Minimal Agent Pipeline Test - Debug Version
-Tests just the supervisor agent creation without complex dependencies.
-"""
 
-import sys
-from pathlib import Path
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from test_framework.database.test_database_manager import DatabaseTestManager
-from auth_service.core.auth_manager import AuthManager
-from netra_backend.app.core.registry.universal_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-from shared.isolated_environment import IsolatedEnvironment
-# Add the project root to Python path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
-
-import asyncio
-import pytest
-
-from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.config import get_config
-from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from shared.isolated_environment import get_env
+class TestAgentPipelineMinimal(SSotAsyncTestCase):
+    """Minimal agent pipeline test using SSOT test framework."""
+    
+    def setup_method(self, method):
+        """Set up test method with SSOT compliance."""
+        super().setup_method(method)
+        self.mock_factory = SSotMockFactory()
+        
+    @pytest.mark.asyncio
+    @pytest.mark.e2e
+    async def test_supervisor_agent_creation_minimal(self):
+        """Test that supervisor agent can be created successfully."""
+        # Create required dependencies using SSOT patterns
+        try:
+            # Use test WebSocket connection
+            test_websocket = TestWebSocketConnection()
+            
+            # Get configuration
+            config = get_config()
+            
+            # Create mocked dependencies using SSOT mock factory methods
+            mock_db_session = self.mock_factory.create_database_session_mock()
+            
+            mock_llm_manager = self.mock_factory.create_mock_llm_manager(
+                model="gpt-4",
+                config={"temperature": 0.7}
+            )
+            
+            mock_websocket_manager = self.mock_factory.create_websocket_manager_mock(
+                manager_type="unified",
+                user_isolation=True
+            )
+            mock_websocket_manager.get_connection.return_value = test_websocket
+            
+            # Create tool dispatcher mock using generic tool mock
+            mock_tool_dispatcher = self.mock_factory.create_tool_mock(
+                tool_name="dispatcher",
+                execution_result={"status": "success", "result": "dispatched"}
+            )
+            
+            # Create user execution context for proper isolation
+            user_context = UserExecutionContext(
+                user_id=UserID("test_user_123"),
+                thread_id=ThreadID("test_thread_456"),
+                run_id=RunID("test_run_789")
+            )
+            
+            # Create supervisor agent with proper SSOT pattern
+            supervisor = SupervisorAgent(
+                llm_manager=mock_llm_manager,
+                websocket_bridge=None,  # Using None for minimal test
+                db_session_factory=mock_db_session,
+                user_context=user_context,
+                tool_dispatcher=mock_tool_dispatcher
+            )
+            
+            # Basic validation
+            assert supervisor is not None, "Supervisor agent should be created successfully"
+            assert hasattr(supervisor, '_llm_manager'), "Supervisor should have _llm_manager attribute"
+            assert hasattr(supervisor, 'websocket_bridge'), "Supervisor should have websocket_bridge attribute"
+            assert hasattr(supervisor, 'agent_factory'), "Supervisor should have agent_factory attribute"
+            
+            # Verify proper initialization
+            print(f"✅ Supervisor agent created successfully")
+            print(f"📊 Supervisor type: {type(supervisor).__name__}")
+            
+            # Test basic agent properties
+            assert supervisor._llm_manager is not None, "LLM manager should be set"
+            assert supervisor.agent_factory is not None, "Agent factory should be set"
+            assert supervisor._initialization_user_context is not None, "User context should be set"
+            
+            print(f"✅ All supervisor agent attributes validated successfully")
+            
+        except Exception as e:
+            print(f"❌ Test failed with error: {e}")
+            print(f"📝 Error type: {type(e).__name__}")
+            raise
 
 
 @pytest.mark.asyncio
-async def test_supervisor_agent_creation_minimal():
-    """Test that supervisor agent can be created successfully."""
-    # Create required dependencies
-    websocket = TestWebSocketConnection()
-    config = get_config()
-    llm_manager = LLMManager(config)
-    websocket = TestWebSocketConnection()
-    tool_dispatcher = AsyncMock(spec=ToolDispatcher)
-    
-    # Create supervisor agent
-    supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
-    
-    # Basic validation
-    assert supervisor is not None
-    assert supervisor.llm_manager is not None
-    
-    # Test that the supervisor has been properly initialized
-    print(f"Supervisor attributes: {dir(supervisor)}")
-    assert hasattr(supervisor, 'agents')
-    # Check what router-related attributes exist
-    router_attrs = [attr for attr in dir(supervisor) if 'router' in attr.lower()]
-    print(f"Router-related attributes: {router_attrs}")
-    
-    # The attribute might be named differently, let's check for common alternatives
-    routing_attrs = [attr for attr in dir(supervisor) if any(term in attr.lower() for term in ['router', 'route', 'dispatch'])]
-    print(f"Routing-related attributes: {routing_attrs}")
-    
-    # Just verify the supervisor is properly initialized
-    assert supervisor is not None
-    assert hasattr(supervisor, 'agents')
+@pytest.mark.e2e
+async def test_supervisor_agent_creation_standalone():
+    """Standalone test function for direct execution."""
+    test_instance = TestAgentPipelineMinimal()
+    test_instance.setup_method(test_supervisor_agent_creation_standalone)
+    await test_instance.test_supervisor_agent_creation_minimal()
 
 
 if __name__ == "__main__":
-    import sys
-    from pathlib import Path
-    # Add the project root to Python path
-    project_root = Path(__file__).parent.parent.parent
-    sys.path.insert(0, str(project_root))
-    asyncio.run(test_supervisor_agent_creation_minimal())
+    # Direct execution support for debugging
+    asyncio.run(test_supervisor_agent_creation_standalone())

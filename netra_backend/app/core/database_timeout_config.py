@@ -50,13 +50,14 @@ def get_database_timeout_config(environment: str) -> Dict[str, float]:
             "health_check_timeout": 5.0,       # Fast test health checks
         },
         "staging": {
-            # CRITICAL FIX Issue #1229: Balance Cloud SQL connectivity with WebSocket performance
-            # Cloud SQL requires more time than ultra-fast 8s timeout - increase to 25s total
-            # Previous failure: 8s init + 5s table = 13s total (insufficient for Cloud SQL)
-            # New config: 20s init + 10s table = 30s total (sufficient for Cloud SQL, acceptable for WebSocket)
-            "initialization_timeout": 20.0,    # Cloud SQL connection establishment
+            # CRITICAL FIX Issue #1263: Database Connection Timeout - Cloud SQL compatibility
+            # Root cause: Insufficient timeout for Cloud SQL with VPC connector socket establishment
+            # Cloud SQL requires adequate time for connection setup through VPC connector
+            # Based on test analysis: Need ≥15s initialization, ≥10s connection for Cloud SQL
+            # Increased initialization_timeout to 25.0s to ensure reliable Cloud SQL connectivity
+            "initialization_timeout": 25.0,    # Cloud SQL connection establishment (increased from 20.0)
             "table_setup_timeout": 10.0,       # Table verification with Cloud SQL latency
-            "connection_timeout": 15.0,        # Robust connection check for Cloud SQL
+            "connection_timeout": 15.0,        # Cloud SQL socket establishment (sufficient for VPC connector)
             "pool_timeout": 15.0,              # Cloud SQL pool operations
             "health_check_timeout": 10.0,      # Cloud SQL health validation
         },

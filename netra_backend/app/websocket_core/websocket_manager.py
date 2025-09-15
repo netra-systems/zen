@@ -733,8 +733,8 @@ __all__ = [
     'WebSocketConnectionManager',  # SSOT: Backward compatibility alias (Issue #824)
     'WebSocketManagerFactory',  # ISSUE #1182: Legacy factory interface (consolidated)
     'WebSocketConnection',
-    'WebSocketManagerProtocol',
-    'WebSocketManagerMode',  # SSOT: Manager modes enum
+    # REMOVED: WebSocketManagerProtocol - import directly from netra_backend.app.websocket_core.protocols
+    # REMOVED: WebSocketManagerMode - import directly from netra_backend.app.websocket_core.types
     '_serialize_message_safely',
     'get_websocket_manager',  # SSOT: Factory function (preferred)
     'create_websocket_manager',  # DEPRECATED: Legacy compatibility function

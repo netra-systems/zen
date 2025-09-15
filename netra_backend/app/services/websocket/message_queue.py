@@ -572,7 +572,7 @@ class MessageQueue:
         """Send failure message to user."""
         try:
             from netra_backend.app.dependencies import get_user_execution_context
-            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+            from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
             
             # Use session-based context to maintain conversation continuity
             user_context = get_user_execution_context(user_id=message.user_id)

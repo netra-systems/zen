@@ -50,8 +50,6 @@ from netra_backend.app.routes.websocket import (
     get_websocket_config,
     websocket_detailed_stats,
     websocket_beacon,
-    websocket_legacy_endpoint,
-    websocket_test_endpoint,
     WebSocketComponentError
 )
 
@@ -88,9 +86,7 @@ class TestWebSocketRoutesCompatibilityLayer(SSotBaseTestCase):
             'websocket_health_check',
             'get_websocket_config',
             'websocket_detailed_stats',
-            'websocket_beacon',
-            'websocket_legacy_endpoint',
-            'websocket_test_endpoint'
+            'websocket_beacon'
         ]
         
         # Verify all expected imports are accessible
@@ -127,9 +123,7 @@ class TestWebSocketRoutesCompatibilityLayer(SSotBaseTestCase):
             'websocket_health_check',
             'get_websocket_config',
             'websocket_detailed_stats',
-            'websocket_beacon',
-            'websocket_legacy_endpoint',
-            'websocket_test_endpoint'
+            'websocket_beacon'
         ]
         
         # Verify __all__ contains expected exports
@@ -178,9 +172,7 @@ class TestWebSocketRoutesCompatibilityLayer(SSotBaseTestCase):
         utility_functions = [
             get_websocket_config,
             websocket_detailed_stats,
-            websocket_beacon,
-            websocket_legacy_endpoint,
-            websocket_test_endpoint
+            websocket_beacon
         ]
         
         for func in utility_functions:
@@ -368,9 +360,7 @@ class TestWebSocketRoutesSSOTFunctionality(SSotBaseTestCase):
             ('websocket_health_check', websocket_health_check), 
             ('get_websocket_config', get_websocket_config),
             ('websocket_detailed_stats', websocket_detailed_stats),
-            ('websocket_beacon', websocket_beacon),
-            ('websocket_legacy_endpoint', websocket_legacy_endpoint),
-            ('websocket_test_endpoint', websocket_test_endpoint)
+            ('websocket_beacon', websocket_beacon)
         ]
         
         for func_name, func in functions_to_check:

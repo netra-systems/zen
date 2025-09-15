@@ -922,10 +922,8 @@ class UnifiedTestRunner:
         self.docker_environment = None
         self.docker_ports = None
         
-        # Initialize Docker port discovery with test services by default (for backward compatibility)
-        self.port_discovery = DockerPortDiscovery(use_test_services=True)
-        
         # Test execution timeout fix for iterations 41-60
+        from shared.isolated_environment import get_env
         env = get_env()
         self.max_collection_size = int(env.get("MAX_TEST_COLLECTION_SIZE", "1000"))
         
@@ -951,6 +949,63 @@ class UnifiedTestRunner:
                 "command": "npm test"
             }
         }
+
+    def _detect_staging_environment(self, args) -> bool:
+        """Enhanced staging environment detection for GCP staging context.
+        
+        Properly identifies GCP staging environment using multiple environment variables
+        to ensure accurate staging detection and prevent false negatives.
+        
+        Args:
+            args: Command line arguments containing env parameter
+            
+        Returns:
+            bool: True if running in staging environment, False otherwise
+        """
+        from shared.isolated_environment import get_env
+        
+        env = get_env()
+        
+        # Primary check: explicit env argument
+        if hasattr(args, 'env') and args.env == 'staging':
+            return True
+            
+        # Enhanced GCP staging detection
+        environment_vars = [
+            env.get('ENVIRONMENT'),
+            env.get('NETRA_ENVIRONMENT'),
+            env.get('TEST_ENV')
+        ]
+        
+        # Check if any environment variable indicates staging
+        for env_var in environment_vars:
+            if env_var and env_var.lower() == 'staging':
+                return True
+                
+        # GCP project detection
+        gcp_project_vars = [
+            env.get('GCP_PROJECT_ID'),
+            env.get('GOOGLE_CLOUD_PROJECT'),
+            env.get('GCLOUD_PROJECT')
+        ]
+        
+        # Check if any GCP project variable indicates staging
+        for project_var in gcp_project_vars:
+            if project_var and 'staging' in project_var.lower():
+                return True
+                
+        # Additional GCP staging indicators
+        staging_indicators = [
+            env.get('STAGING_ENVIRONMENT'),
+            env.get('CLOUD_RUN_SERVICE') and 'staging' in env.get('CLOUD_RUN_SERVICE', '').lower(),
+            env.get('K_SERVICE') and 'staging' in env.get('K_SERVICE', '').lower()
+        ]
+        
+        for indicator in staging_indicators:
+            if indicator:
+                return True
+                
+        return False
     
     def _detect_python_command(self) -> str:
         """Detect the correct Python command for the current platform."""
@@ -1281,7 +1336,7 @@ class UnifiedTestRunner:
     def _initialize_docker_environment(self, args, running_e2e: bool):
         """Initialize Docker environment - automatically starts services if needed."""
         # Skip Docker for staging (uses remote services)
-        if args.env == "staging":
+        if self._detect_staging_environment(args):
             return
         
         # Skip Docker if explicitly disabled
@@ -1795,7 +1850,7 @@ class UnifiedTestRunner:
         running_e2e = bool(set(categories_to_run) & e2e_categories)
         
         # Auto-configure E2E bypass key for staging environment
-        if args.env == 'staging' and running_e2e:
+        if self._detect_staging_environment(args) and running_e2e:
             self._configure_staging_e2e_auth()
         
         # Real LLM should be enabled if:
@@ -1855,7 +1910,7 @@ class UnifiedTestRunner:
         self._initialize_docker_environment(args, running_e2e)
         
         # Configure services
-        if args.env == "staging":
+        if self._detect_staging_environment(args):
             # For staging, don't use Docker port discovery - use remote staging services
             # Configure test environment with discovered ports
             env = get_env()
@@ -1865,6 +1920,14 @@ class UnifiedTestRunner:
             env.set('ENVIRONMENT', 'staging', 'staging_config')
             env.set('NETRA_ENVIRONMENT', 'staging', 'staging_config')
             env.set('TEST_ENV', 'staging', 'staging_config')  # Required by environment_markers.py
+            
+            # CRITICAL FIX Issue #1270: Add staging-specific database environment guards
+            # Prevent ClickHouse cloud connection attempts during staging tests
+            env.set('CLICKHOUSE_MODE', 'mock', 'staging_database_guard')
+            env.set('CLICKHOUSE_REQUIRED', 'false', 'staging_database_guard')
+            env.set('DATABASE_CATEGORY_TEST_MODE', 'staging', 'staging_database_guard')
+            
+            print("[INFO] Issue #1270 Fix: Set staging database environment guards to prevent cloud connections")
             if self.docker_ports:
                 # Set discovered PostgreSQL URL
                 postgres_port = self.docker_ports.get('postgres', 5434)
@@ -2164,7 +2227,7 @@ class UnifiedTestRunner:
             # Add clickhouse if available in docker ports
             if hasattr(self, 'docker_ports') and self.docker_ports and 'clickhouse' in self.docker_ports:
                 required_services.append('clickhouse')
-        elif args.env == 'staging':
+        elif self._detect_staging_environment(args):
             print("[INFO] Staging environment: using remote staging services, skipping local service checks")
             
         # Per CLAUDE.md - real LLM is required for E2E and dev/staging
@@ -2185,7 +2248,7 @@ class UnifiedTestRunner:
                     required_services.append('docker')
             except (subprocess.SubprocessError, FileNotFoundError):
                 print("[WARNING] Docker not available - tests may fail if they require containerized services")
-        elif args.env == 'staging':
+        elif self._detect_staging_environment(args):
             print("[INFO] Staging environment: using remote staging services, Docker check skipped")
         
         if not required_services:
@@ -2196,7 +2259,7 @@ class UnifiedTestRunner:
         
         try:
             # Check services with appropriate timeout
-            timeout = 10.0 if args.env == 'staging' else 5.0
+            timeout = 10.0 if self._detect_staging_environment(args) else 5.0
             require_real_services(
                 services=required_services,
                 timeout=timeout
@@ -2227,11 +2290,11 @@ class UnifiedTestRunner:
         if hasattr(args, 'no_docker') and args.no_docker:
             print("[INFO] Docker explicitly disabled via --no-docker flag")
             # Special handling for staging environment with --prefer-staging
-            if args.env == 'staging' and hasattr(args, 'prefer_staging') and args.prefer_staging:
+            if self._detect_staging_environment(args) and hasattr(args, 'prefer_staging') and args.prefer_staging:
                 print("[INFO] Staging environment with --prefer-staging: using remote services instead of Docker")
                 return False
             # Special handling for staging environment  
-            elif args.env == 'staging':
+            elif self._detect_staging_environment(args):
                 print("[INFO] Staging environment: using remote staging services instead of Docker")
                 return False
             # For other environments with --no-docker, truly disable Docker
@@ -2243,7 +2306,7 @@ class UnifiedTestRunner:
         
         # E2E tests need Docker UNLESS running in staging with remote services
         if running_e2e:
-            if args.env == 'staging':
+            if self._detect_staging_environment(args):
                 print("[INFO] E2E tests in staging environment: using remote staging services")
                 return False
             return True
@@ -2251,7 +2314,7 @@ class UnifiedTestRunner:
         # Dev environments need Docker, staging can use remote services per Issue #548 fix
         if args.env == 'dev':
             return True
-        elif args.env == 'staging':
+        elif self._detect_staging_environment(args):
             print("[INFO] Staging environment: using remote staging services, Docker not required")
             return False
         
@@ -3161,7 +3224,7 @@ class UnifiedTestRunner:
         
         # Environment-aware timeout configuration - replaces global pyproject.toml timeout
         # This provides sophisticated timeout handling for different environments and test types
-        if args.env == 'staging':
+        if self._detect_staging_environment(args):
             # Staging environment needs longer timeouts due to network latency and GCP constraints
             if category_name == "unit":
                 cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])  # 5min for staging unit tests

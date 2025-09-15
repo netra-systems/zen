@@ -67,23 +67,23 @@ class TestDatabaseConnectionTimeoutIssue1263(SSotAsyncTestCase):
             pass  # Cache doesn't exist or is not accessible
 
     @pytest.mark.asyncio
-    async def test_staging_database_timeout_8_seconds(self):
+    async def test_staging_database_timeout_cloud_sql_compatible(self):
         """
-        Test that staging environment uses 8-second timeout as configured.
+        Test that staging environment uses Cloud SQL compatible timeouts (Issue #1263 fix).
 
-        This test validates that the database timeout configuration properly
-        returns the expected 8-second timeout for staging environment.
+        This test validates that the database timeout configuration has been fixed
+        to use appropriate timeouts for Cloud SQL with VPC connector connectivity.
 
-        CRITICAL: This timeout value is the root cause of WebSocket blocking.
+        FIXED: Previous 8.0s timeout was too aggressive for Cloud SQL, now uses 25.0s.
         """
         from netra_backend.app.core.database_timeout_config import get_database_timeout_config
 
         # Test staging timeout configuration
         timeout_config = get_database_timeout_config("staging")
 
-        # Verify staging uses ultra-fast timeouts to prevent WebSocket blocking
-        expected_init_timeout = 8.0
-        expected_table_timeout = 5.0
+        # Verify staging uses Cloud SQL compatible timeouts (Issue #1263 fix)
+        expected_init_timeout = 25.0   # Fixed: increased from 8.0s to handle Cloud SQL
+        expected_table_timeout = 10.0   # Fixed: increased from 5.0s for table operations
 
         assert timeout_config["initialization_timeout"] == expected_init_timeout, (
             f"Expected staging initialization_timeout to be {expected_init_timeout}s "

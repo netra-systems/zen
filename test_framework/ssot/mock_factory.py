@@ -384,10 +384,36 @@ class SSotMockFactory:
         mock_manager.get_connection_health = MagicMock(return_value={'has_active_connections': True})
         mock_manager.get_connection = MagicMock(return_value=None)
         
+        # PHASE 3.4 FIX: Add missing WebSocket manager attributes that tests expect
+        mock_manager.websocket_instances = {}
+        mock_manager.agent_websocket_bridge = AsyncMock()
+        mock_manager.event_emitter = AsyncMock()
+        mock_manager.message_queue = AsyncMock()
+        mock_manager.connection_pool = {}
+        mock_manager.user_sessions = {}
+        mock_manager.active_user_count = 0
+        
+        # WebSocket factory methods for integration tests
+        mock_manager.create_websocket_connection = AsyncMock()
+        mock_manager.get_or_create_user_session = AsyncMock()
+        mock_manager.cleanup_user_session = AsyncMock()
+        
+        # Enterprise features for business value protection
+        mock_manager.enable_user_isolation = AsyncMock()
+        mock_manager.validate_user_permissions = AsyncMock(return_value=True)
+        mock_manager.audit_connection_access = AsyncMock()
+        
+        # Error handling and recovery
+        mock_manager.handle_connection_error = AsyncMock()
+        mock_manager.recover_from_failure = AsyncMock()
+        mock_manager.log_connection_metrics = AsyncMock()
+        
         # User isolation support
         if user_isolation:
             mock_manager.get_connections_for_user = AsyncMock(return_value=[])
             mock_manager._user_context = MagicMock()
+            mock_manager.isolate_user_session = AsyncMock()
+            mock_manager.validate_user_isolation = AsyncMock(return_value=True)
         
         # Connection management
         mock_manager._active_connections = {}
@@ -518,6 +544,25 @@ class SSotMockFactory:
         mock_emitter.validate_event = AsyncMock(return_value=True)
         mock_emitter.configure = AsyncMock()
         
+        # PHASE 3.4 FIX: Add missing WebSocket emitter attributes for integration tests
+        mock_emitter.event_queue = AsyncMock()
+        mock_emitter.connection_state = "CONNECTED"
+        mock_emitter.websocket_manager = AsyncMock()
+        mock_emitter.message_handlers = {}
+        mock_emitter.error_handlers = {}
+        mock_emitter.reconnect_attempts = 0
+        mock_emitter.last_ping_time = time.time()
+        
+        # Enterprise features
+        mock_emitter.enable_encryption = AsyncMock()
+        mock_emitter.validate_message_integrity = AsyncMock(return_value=True)
+        mock_emitter.audit_event_emission = AsyncMock()
+        
+        # Error handling and recovery
+        mock_emitter.handle_emission_error = AsyncMock()
+        mock_emitter.retry_failed_emission = AsyncMock()
+        mock_emitter.log_emission_metrics = AsyncMock()
+        
         return mock_emitter
 
     @staticmethod
@@ -627,6 +672,67 @@ class SSotMockFactory:
             mock_emitter.emit_critical_event = AsyncMock()
             mock_emitter.send_message = AsyncMock()
             return mock_emitter
+        elif mock_type == "SupervisorAgent":
+            # PHASE 3.4 FIX: Enhanced SupervisorAgent mock for dependency injection validation
+            mock_supervisor = AsyncMock()
+            mock_supervisor.name = "Supervisor"
+            mock_supervisor.agent_type = "supervisor"
+            mock_supervisor.description = "Mock Supervisor Agent for testing"
+            
+            # Core SupervisorAgent interface
+            mock_supervisor.execute = AsyncMock()
+            mock_supervisor.process_request = AsyncMock()
+            mock_supervisor.orchestrate_workflow = AsyncMock()
+            mock_supervisor.delegate_to_agents = AsyncMock()
+            
+            # User context and isolation support
+            mock_supervisor.user_context = kwargs.get('user_context', cls.create_mock_user_context())
+            mock_supervisor.validate_user_isolation = AsyncMock(return_value=True)
+            mock_supervisor.get_user_execution_engine = AsyncMock()
+            
+            # Agent factory integration
+            mock_supervisor.agent_factory = AsyncMock()
+            mock_supervisor.create_sub_agent = AsyncMock()
+            mock_supervisor.cleanup_agent_instances = AsyncMock()
+            
+            # WebSocket bridge integration
+            mock_supervisor.websocket_bridge = kwargs.get('websocket_bridge', cls.create_mock_agent_websocket_bridge())
+            mock_supervisor.notify_agent_started = AsyncMock()
+            mock_supervisor.notify_agent_completed = AsyncMock()
+            
+            # LLM manager integration
+            mock_supervisor.llm_manager = kwargs.get('llm_manager', cls.create_mock_llm_manager())
+            mock_supervisor.generate_response = AsyncMock()
+            mock_supervisor.process_llm_request = AsyncMock()
+            
+            # Database session support
+            mock_supervisor.db_session_factory = AsyncMock()
+            mock_supervisor.get_database_session = AsyncMock()
+            mock_supervisor.validate_session_isolation = AsyncMock(return_value=True)
+            
+            # Tool dispatcher integration  
+            mock_supervisor.tool_dispatcher = AsyncMock()
+            mock_supervisor.execute_tool = AsyncMock()
+            mock_supervisor.validate_tool_execution = AsyncMock(return_value=True)
+            
+            # Execution engine support
+            mock_supervisor.execution_engine = AsyncMock()
+            mock_supervisor.start_execution = AsyncMock()
+            mock_supervisor.stop_execution = AsyncMock()
+            mock_supervisor.get_execution_status = AsyncMock(return_value="idle")
+            
+            # Enterprise features
+            mock_supervisor.enable_audit_logging = AsyncMock()
+            mock_supervisor.validate_security_policies = AsyncMock(return_value=True)
+            mock_supervisor.enforce_rate_limits = AsyncMock()
+            
+            # Configuration and lifecycle
+            mock_supervisor.configure = AsyncMock()
+            mock_supervisor.initialize = AsyncMock()
+            mock_supervisor.cleanup = AsyncMock()
+            mock_supervisor.health_check = AsyncMock(return_value={"status": "healthy"})
+            
+            return mock_supervisor
         else:
             # Generic mock for unknown types
             return AsyncMock(**kwargs)

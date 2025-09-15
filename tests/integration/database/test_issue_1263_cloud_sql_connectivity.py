@@ -26,12 +26,12 @@ from contextlib import asynccontextmanager
 import os
 import socket
 from urllib.parse import urlparse
+from unittest.mock import patch
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.configuration.base import get_config
 from netra_backend.app.db.database_manager import DatabaseManager
 from shared.isolated_environment import IsolatedEnvironment
-from test_framework.ssot.database_test_utility import DatabaseTestUtility
 import sqlalchemy
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError, TimeoutError as SQLTimeoutError
@@ -48,15 +48,17 @@ class TestIssue1263CloudSQLConnectivityIntegration(SSotAsyncTestCase):
         await super().asyncSetUp()
         self.env = IsolatedEnvironment()
         self.config = get_config()
-        self.db_utility = DatabaseTestUtility()
 
-        # Real staging configuration
-        self.staging_config = {
+    @property
+    def staging_config(self):
+        """Real staging configuration for Issue #1263 reproduction"""
+        env = IsolatedEnvironment()
+        return {
             'POSTGRES_HOST': 'postgres.staging.netrasystems.ai',
             'POSTGRES_PORT': '5432',
             'POSTGRES_DB': 'netra_staging',
-            'POSTGRES_USER': self.env.get_env('POSTGRES_USER'),
-            'POSTGRES_PASSWORD': self.env.get_env('POSTGRES_PASSWORD'),
+            'POSTGRES_USER': env.get('POSTGRES_USER', 'netra_user'),
+            'POSTGRES_PASSWORD': env.get('POSTGRES_PASSWORD', 'test_password'),
             'VPC_CONNECTOR': 'projects/netra-staging/locations/us-central1/connectors/netra-staging-vpc-connector',
             'VPC_EGRESS': 'all-traffic'  # The fix from commit 2acf46c8a
         }
@@ -124,8 +126,9 @@ class TestIssue1263CloudSQLConnectivityIntegration(SSotAsyncTestCase):
         traffic to Cloud SQL through the private network.
         """
         with patch.dict(os.environ, self.staging_config, clear=False):
-            vpc_connector = self.env.get_env('VPC_CONNECTOR')
-            vpc_egress = self.env.get_env('VPC_EGRESS')
+            env = IsolatedEnvironment()
+            vpc_connector = env.get('VPC_CONNECTOR')
+            vpc_egress = env.get('VPC_EGRESS')
 
             # Validate VPC configuration
             assert vpc_connector is not None, "VPC_CONNECTOR must be configured"
@@ -134,8 +137,8 @@ class TestIssue1263CloudSQLConnectivityIntegration(SSotAsyncTestCase):
             assert vpc_egress == 'all-traffic', "VPC_EGRESS must be 'all-traffic' for Issue #1263 fix"
 
             # Test network routing to Cloud SQL
-            postgres_host = self.env.get_env('POSTGRES_HOST')
-            postgres_port = int(self.env.get_env('POSTGRES_PORT'))
+            postgres_host = env.get('POSTGRES_HOST')
+            postgres_port = int(env.get('POSTGRES_PORT'))
 
             # Test DNS resolution
             try:
@@ -334,8 +337,9 @@ class TestIssue1263CloudSQLConnectivityIntegration(SSotAsyncTestCase):
         # This test validates that credentials work with the VPC configuration
         with patch.dict(os.environ, self.staging_config, clear=False):
             # Get credentials from environment (as they would come from Secret Manager)
-            db_user = self.env.get_env('POSTGRES_USER')
-            db_password = self.env.get_env('POSTGRES_PASSWORD')
+            env = IsolatedEnvironment()
+            db_user = env.get('POSTGRES_USER')
+            db_password = env.get('POSTGRES_PASSWORD')
 
             assert db_user is not None, "Database user credentials missing"
             assert db_password is not None, "Database password credentials missing"
@@ -372,11 +376,12 @@ class TestIssue1263CloudSQLConnectivityIntegration(SSotAsyncTestCase):
 
     def _build_connection_url(self) -> str:
         """Build database connection URL from environment configuration."""
-        host = self.env.get_env('POSTGRES_HOST')
-        port = self.env.get_env('POSTGRES_PORT')
-        database = self.env.get_env('POSTGRES_DB')
-        user = self.env.get_env('POSTGRES_USER')
-        password = self.env.get_env('POSTGRES_PASSWORD')
+        env = IsolatedEnvironment()
+        host = env.get('POSTGRES_HOST')
+        port = env.get('POSTGRES_PORT')
+        database = env.get('POSTGRES_DB')
+        user = env.get('POSTGRES_USER')
+        password = env.get('POSTGRES_PASSWORD')
 
         return f"postgresql://{user}:{password}@{host}:{port}/{database}"
 

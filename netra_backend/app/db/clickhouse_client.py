@@ -62,7 +62,11 @@ class ClickHouseDriverCompatAdapter:
             self._initialized = True
     
     def execute(self, query, params=None):
-        """Execute query synchronously (for backward compatibility)."""
+        """Execute query synchronously (for backward compatibility).
+        
+        WARNING: This method attempts to handle both sync and async contexts but may
+        not work properly in all scenarios. Consider using async execute_async() instead.
+        """
         import asyncio
         
         # Handle both sync and async contexts
@@ -70,10 +74,12 @@ class ClickHouseDriverCompatAdapter:
             loop = asyncio.get_event_loop()
             if loop.is_running():
                 # We're in an async context, but this is a sync call
-                # Create a new task
-                return asyncio.create_task(self._async_execute(query, params))
+                # Return a Task that the caller must handle properly
+                logger.warning("Sync execute() called from async context - returning Task")
+                task = asyncio.create_task(self._async_execute(query, params))
+                return task
             else:
-                # We're not in an async context
+                # We're not in an async context - safe to run until complete
                 return loop.run_until_complete(self._async_execute(query, params))
         except RuntimeError:
             # No event loop, create one
@@ -84,16 +90,36 @@ class ClickHouseDriverCompatAdapter:
         await self._ensure_initialized()
         return await self.service.execute(query, params)
     
+    async def execute_async(self, query, params=None):
+        """Execute query asynchronously (recommended method for async contexts)."""
+        return await self._async_execute(query, params)
+    
+    async def disconnect_async(self):
+        """Disconnect asynchronously (recommended method for async contexts)."""
+        if self._initialized and self.service:
+            await self.service.close()
+        self._initialized = False
+    
     def disconnect(self):
-        """Disconnect (for compatibility)."""
+        """Disconnect (for compatibility).
+        
+        WARNING: This method attempts to handle both sync and async contexts but may
+        not work properly in all scenarios. Consider using async disconnect_async() instead.
+        """
         import asyncio
         try:
             loop = asyncio.get_event_loop()
             if loop.is_running():
-                return asyncio.create_task(self.service.close())
+                # We're in an async context, but this is a sync call
+                # Return a Task that the caller must handle properly
+                logger.warning("Sync disconnect() called from async context - returning Task")
+                task = asyncio.create_task(self.service.close())
+                return task
             else:
+                # We're not in an async context - safe to run until complete
                 return loop.run_until_complete(self.service.close())
         except RuntimeError:
+            # No event loop, create one
             return asyncio.run(self.service.close())
 
 
