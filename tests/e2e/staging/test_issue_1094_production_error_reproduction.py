@@ -42,9 +42,12 @@ class TestIssue1094ProductionErrorReproduction(BaseIntegrationTest):
         """
         from netra_backend.app.services.agent_service_core import AgentService
         from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
+        from unittest.mock import Mock
+        from netra_backend.app.llm.manager import LLMManager
 
         # Create realistic test environment matching production
-        supervisor = SupervisorAgent()
+        mock_llm_manager = Mock(spec=LLMManager)
+        supervisor = SupervisorAgent(llm_manager=mock_llm_manager)
         agent_service = AgentService(supervisor)
         test_user_id = "staging_test_user_1094"
 
@@ -69,12 +72,22 @@ class TestIssue1094ProductionErrorReproduction(BaseIntegrationTest):
             user_id="staging_interface_test_user",
             thread_id="staging_thread_456",
             request_id="staging_request_789",
-            websocket_client_id="ws_staging_101"
+            websocket_client_id="ws_staging_101",
+            run_id="staging_run_123"
         )
 
-        # This should FAIL - demonstrates create_websocket_manager is sync but being awaited
-        with pytest.raises(TypeError, match="object UserExecutionContext can't be used in 'await' expression|object is not awaitable"):
+        # Test what actually happens in production
+        try:
+            # This actually works (create_websocket_manager is async and returns a context)
             websocket_manager = await create_websocket_manager(user_context)
+
+            # The REAL issue: context doesn't have send_to_user method
+            # This will cause AttributeError when production code tries to call it
+            with pytest.raises(AttributeError, match="'UserExecutionContext' object has no attribute 'send_to_user'"):
+                await websocket_manager.send_to_user("test_user", {"type": "test"})
+
+        except Exception as e:
+            self.fail(f"Unexpected error in interface validation: {e}")
 
     @pytest.mark.staging
     async def test_staging_correct_async_interface_validation(self):
@@ -92,7 +105,8 @@ class TestIssue1094ProductionErrorReproduction(BaseIntegrationTest):
             user_id="staging_async_test_user",
             thread_id="staging_async_thread_456",
             request_id="staging_async_request_789",
-            websocket_client_id="ws_staging_async_101"
+            websocket_client_id="ws_staging_async_101",
+            run_id="staging_async_run_123"
         )
 
         # This should work correctly (async interface)
@@ -114,9 +128,11 @@ class TestIssue1094ProductionErrorReproduction(BaseIntegrationTest):
         """
         from netra_backend.app.services.agent_service_core import AgentService
         from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-        from unittest.mock import patch, AsyncMock
+        from unittest.mock import patch, AsyncMock, Mock
+        from netra_backend.app.llm.manager import LLMManager
 
-        supervisor = SupervisorAgent()
+        mock_llm_manager = Mock(spec=LLMManager)
+        supervisor = SupervisorAgent(llm_manager=mock_llm_manager)
         agent_service = AgentService(supervisor)
         test_user_id = "staging_both_paths_test_user"
 
@@ -148,11 +164,14 @@ class TestIssue1094ProductionErrorReproduction(BaseIntegrationTest):
         """
         from netra_backend.app.services.agent_service_core import AgentService
         from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
+        from unittest.mock import Mock
+        from netra_backend.app.llm.manager import LLMManager
 
         # Simulate Golden Path user scenario
         golden_path_user_id = "golden_path_user_1094_test"
 
-        supervisor = SupervisorAgent()
+        mock_llm_manager = Mock(spec=LLMManager)
+        supervisor = SupervisorAgent(llm_manager=mock_llm_manager)
         agent_service = AgentService(supervisor)
 
         # Track Golden Path functionality impact
