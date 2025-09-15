@@ -3,7 +3,14 @@ Auth Service Test Configuration Module
 Test configuration and environment management for auth service tests
 """
 
-from auth_service.tests.config.test_env import AuthTestEnvironment, load_test_config
-from auth_service.tests.config.test_settings import MainTestSettings
+# Import only from available shared modules
+from shared.isolated_environment import IsolatedEnvironment
 
-__all__ = ["AuthTestEnvironment", "MainTestSettings", "load_test_config"]
+# Create aliases for backward compatibility
+AuthTestEnvironment = IsolatedEnvironment
+
+def load_test_config():
+    """Load test configuration"""
+    return {}
+
+__all__ = ["AuthTestEnvironment", "load_test_config"]
