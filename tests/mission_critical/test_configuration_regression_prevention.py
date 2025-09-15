@@ -14,6 +14,7 @@ import sys
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 import asyncio
 import pytest
+import unittest
 from pathlib import Path
 from typing import Dict, List, Set, Optional, Tuple
 from unittest.mock import patch, MagicMock
@@ -26,7 +27,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.isolated_test_helper import IsolatedTestCase
 
 
-class TestConfigurationRegression(SSotBaseTestCase):
+class TestConfigurationRegression(SSotBaseTestCase, unittest.TestCase):
     """
     Critical tests to prevent configuration regressions that cause cascade failures.
     """
@@ -56,7 +57,7 @@ class TestConfigurationRegression(SSotBaseTestCase):
         for env_name in environments:
             with self.subTest(environment=env_name):
                 # Set up environment
-                self.set_env('ENVIRONMENT', env_name)
+                self.set_env_var('ENVIRONMENT', env_name)
                 
                 # Check if SERVICE_SECRET would be available
                 if env_name in ['staging', 'production']:
@@ -93,7 +94,7 @@ class TestConfigurationRegression(SSotBaseTestCase):
         
         for env_name in environments:
             with self.subTest(environment=env_name):
-                self.set_env('ENVIRONMENT', env_name)
+                self.set_env_var('ENVIRONMENT', env_name)
                 
                 # Get JWT secret through SSOT
                 jwt_manager = get_jwt_secret_manager()
@@ -347,7 +348,7 @@ class TestConfigurationRegression(SSotBaseTestCase):
         ]
         
         # Test staging environment
-        self.set_env('ENVIRONMENT', 'staging')
+        self.set_env_var('ENVIRONMENT', 'staging')
         
         # In staging, production vars should not be used
         for prod_var in production_only:
@@ -389,11 +390,11 @@ class TestConfigurationRegression(SSotBaseTestCase):
             with self.subTest(config_key=key):
                 # Set initial value
                 initial_value = f'initial_{key}_value'
-                self.set_env(key, initial_value)
+                self.set_env_var(key, initial_value)
                 
                 # Change value
                 new_value = f'changed_{key}_value'
-                self.set_env(key, new_value)
+                self.set_env_var(key, new_value)
                 
                 # Verify change is detectable
                 current = self.env.get(key)
@@ -401,7 +402,7 @@ class TestConfigurationRegression(SSotBaseTestCase):
                               f"Configuration change for {key} not detected")
 
 
-class TestConfigurationRegressionIntegration(SSotBaseTestCase):
+class TestConfigurationRegressionIntegration(SSotBaseTestCase, unittest.TestCase):
     """
     Integration tests for configuration regression prevention.
     """

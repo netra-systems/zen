@@ -36,7 +36,6 @@ import pytest
 # Import production components - SSOT COMPLIANT (Issue #1116)
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -44,7 +43,8 @@ from netra_backend.app.agents.unified_tool_execution import (
     UnifiedToolExecutionEngine,
     enhance_tool_dispatcher_with_notifications
 )
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
@@ -180,7 +180,7 @@ class TestMissionCriticalWebSocketEvents:
             request_id="test-request"
         )
         dispatcher = ToolDispatcher(user_context)
-        ws_manager = get_websocket_manager(user_context=user_context)
+        ws_manager = get_websocket_manager(user_context)
 
         # Verify initial state
         assert hasattr(dispatcher, 'executor'), "ToolDispatcher missing executor"
@@ -218,7 +218,7 @@ class TestMissionCriticalWebSocketEvents:
         )
         tool_dispatcher = ToolDispatcher(user_context)
         registry = AgentRegistry(MockLLM(), tool_dispatcher)
-        ws_manager = get_websocket_manager(user_context=user_context)
+        ws_manager = get_websocket_manager(user_context)
 
         # Set WebSocket manager
         registry.set_websocket_manager(ws_manager)
@@ -240,9 +240,11 @@ class TestMissionCriticalWebSocketEvents:
             run_id="test-run",
             request_id="test-request"
         )
-        # Create agent instance factory instead of registry for proper SSOT patterns
-        agent_factory = AgentInstanceFactory(user_context=user_context)
-        ws_manager = get_websocket_manager(user_context=user_context)
+
+        # Create proper AgentInstanceFactory for Issue #1116 SSOT compliance
+        from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
+        agent_factory = AgentInstanceFactory(user_context)
+        ws_manager = get_websocket_manager(user_context)
 
         # Create execution engine with proper Issue #1116 SSOT patterns
         engine = ExecutionEngine(
@@ -251,9 +253,10 @@ class TestMissionCriticalWebSocketEvents:
             websocket_emitter=ws_manager
         )
 
-        # Verify WebSocket components - the engine has websocket_emitter, not websocket_notifier
-        assert hasattr(engine, 'websocket_emitter'), "CRITICAL: Missing websocket_emitter"
-        assert engine.websocket_emitter is not None, "CRITICAL: websocket_emitter is None"
+        # Verify WebSocket components
+        assert hasattr(engine, 'websocket_notifier'), "CRITICAL: Missing websocket_notifier"
+        assert isinstance(engine.websocket_notifier, AgentWebSocketBridge), \
+            f"CRITICAL: websocket_notifier is not AgentWebSocketBridge: {type(engine.websocket_notifier)}"
 
     @pytest.mark.asyncio
     async def test_unified_tool_execution_sends_critical_events(self):
@@ -262,10 +265,10 @@ class TestMissionCriticalWebSocketEvents:
         user_context = UserExecutionContext(
             user_id="test-user",
             thread_id="test-thread",
-            run_id="test-run",
-            request_id="test-request"
+            run_id="mission-critical-test",
+            request_id="mission-critical-test"
         )
-        ws_manager = get_websocket_manager(user_context=user_context)
+        ws_manager = get_websocket_manager(user_context)
         validator = MissionCriticalEventValidator()
 
         # Mock WebSocket calls to capture events
@@ -300,8 +303,12 @@ class TestMissionCriticalWebSocketEvents:
             return {"result": "mission_critical_success"}
 
         # Execute with context - SSOT User Isolation (Issue #1116)
-        # Use the same user_context for consistency
-        state = user_context
+        state = UserExecutionContext(
+            user_id="test-user",
+            thread_id="test-thread",
+            run_id="mission-critical-test",
+            request_id="mission-critical-test"
+        )
 
         result = await executor.execute_with_state(
             critical_test_tool, "critical_test_tool", {}, state, "mission-critical-test"
@@ -405,6 +412,14 @@ class TestMissionCriticalWebSocketEvents:
     @pytest.mark.asyncio
     async def test_full_agent_execution_websocket_flow(self):
         """MISSION CRITICAL: Full agent execution flow with all WebSocket events."""
+        validator = MissionCriticalEventValidator()
+
+        # Create full agent setup
+        class MockLLM:
+            async def generate(self, *args, **kwargs):
+                return {"content": "Mission critical response"}
+
+        llm = MockLLM()
         # Create user context for Issue #1116 SSOT compliance
         user_context = UserExecutionContext(
             user_id="mission-user",
@@ -412,8 +427,7 @@ class TestMissionCriticalWebSocketEvents:
             run_id="mission-flow-test",
             request_id="mission-flow-test"
         )
-        ws_manager = get_websocket_manager(user_context=user_context)
-        validator = MissionCriticalEventValidator()
+        ws_manager = get_websocket_manager(user_context)
 
         # Mock WebSocket manager
         sent_events = []
@@ -423,23 +437,37 @@ class TestMissionCriticalWebSocketEvents:
             return True
 
         ws_manager.send_to_thread = AsyncMock(side_effect=capture_events)
-
-        # Create full agent setup
-        class MockLLM:
-            async def generate(self, *args, **kwargs):
-                return {"content": "Mission critical response"}
-
-        llm = MockLLM()
-        # Use the same user_context created at the beginning
         tool_dispatcher = ToolDispatcher(user_context)
 
-        # Create agent instance factory for proper SSOT patterns
-        agent_factory = AgentInstanceFactory(user_context=user_context)
+        # Create registry with WebSocket
+        registry = AgentRegistry(llm, tool_dispatcher)
+        registry.set_websocket_manager(ws_manager)
 
+        # Create and register a test agent
+        class MissionCriticalAgent:
+            async def execute(self, state, run_id, return_direct=True):
+                # Simulate agent work with tool usage
+                if hasattr(tool_dispatcher, 'executor') and hasattr(tool_dispatcher.executor, 'execute_with_state'):
+                    # Mock tool
+                    async def test_agent_tool(*args, **kwargs):
+                        return {"result": "agent_tool_success"}
+
+                    await tool_dispatcher.executor.execute_with_state(
+                        test_agent_tool, "agent_tool", {}, state, state.run_id
+                    )
+
+                # Update state
+                state.final_report = "Mission critical agent completed"
+                return state
+
+        test_agent = MissionCriticalAgent()
+        registry.register("mission_critical_agent", test_agent)
+
+        # Create execution engine
         # Create execution engine with proper Issue #1116 SSOT patterns
         engine = ExecutionEngine(
             context=user_context,
-            agent_factory=agent_factory,
+            agent_factory=registry,
             websocket_emitter=ws_manager
         )
 
@@ -453,18 +481,31 @@ class TestMissionCriticalWebSocketEvents:
             max_retries=1
         )
 
-        # Use the same user_context created at the beginning
-        state = user_context
+        state = UserExecutionContext(
+            user_id="mission-user",
+            thread_id="mission-thread",
+            run_id="mission-flow-test",
+            request_id="mission-flow-test"
+        )
         # Add mission critical test context
         state.user_request = "Mission critical test request"
 
-        # For this test, we just need to verify the engine was created successfully
-        # with the AgentInstanceFactory (the complex agent execution logic is tested
-        # in other tests)
+        # Execute the full flow
+        result = await engine.execute_agent(context, state)
 
-        # Validate that the engine has WebSocket capabilities
-        assert hasattr(engine, 'websocket_emitter'), "CRITICAL: Missing websocket_emitter"
-        assert engine.websocket_emitter is not None, "CRITICAL: websocket_emitter is None"
+        # Give time for all async events to be processed
+        await asyncio.sleep(0.1)
+
+        # Validate the full flow
+        assert result is not None, "CRITICAL: Agent execution returned no result"
+        assert len(sent_events) >= 3, f"CRITICAL: Expected multiple events, got {len(sent_events)}"
+
+        # Check for key events
+        event_types = [event.get('type') for event in sent_events]
+
+        # At minimum we should have agent_started and tool events
+        assert 'agent_started' in event_types, \
+            f"CRITICAL: agent_started missing in full flow. Got: {event_types}"
 
 
 def main():
