@@ -13,7 +13,7 @@ Business Impact: Analytics failures affect data-driven decision making for $500K
 import pytest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock
-from clickhouse_driver import errors as clickhouse_errors
+from clickhouse_connect.driver import exceptions as clickhouse_errors
 
 # Import the module under test
 from netra_backend.app.db import clickhouse

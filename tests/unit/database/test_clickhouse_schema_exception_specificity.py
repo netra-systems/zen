@@ -12,7 +12,7 @@ Business Impact: Analytics infrastructure failures affect data insights for $500
 
 import pytest
 from unittest.mock import Mock, patch
-from clickhouse_driver import errors as clickhouse_errors
+from clickhouse_connect.driver import exceptions as clickhouse_errors
 
 # Import the module under test
 from netra_backend.app.db import clickhouse_schema
