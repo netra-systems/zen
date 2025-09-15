@@ -30,7 +30,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 from netra_backend.app.websocket_core.message_queue import MessageQueue, MessagePriority
 from netra_backend.app.websocket_core.message_buffer import WebSocketMessageBuffer, BufferPriority
 from netra_backend.app.websocket_core.utils import WebSocketMessageQueue
-from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
 from shared.types.core_types import UserID, ConnectionID
 
@@ -70,7 +70,7 @@ class TestWebSocketMessageLossScenarios(SSotAsyncTestCase):
         message_queue = MessageQueue(self.test_connection_id, self.test_user_id, max_size=100)
         message_buffer = WebSocketMessageBuffer()
         utils_queue = WebSocketMessageQueue(max_size=100)
-        unified_manager = _UnifiedWebSocketManagerImplementation()
+        unified_manager = UnifiedWebSocketManager()
 
         # Track messages delivered to user
         delivered_messages = []

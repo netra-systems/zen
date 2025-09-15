@@ -392,12 +392,12 @@ class TestPhase1SystemIntegrity(SSotAsyncTestCase):
 
     def test_no_breaking_changes_to_existing_code(self):
         """Test that Phase 1 doesn't break existing functionality."""
-        # Test that we can still import the original unified manager
+        # Test that we can still import the unified manager
         try:
-            from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
-            self.assertTrue(True, "Original unified manager should still be importable")
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            self.assertTrue(True, "Unified manager should still be importable")
         except ImportError as e:
-            self.fail(f"Original unified manager import should not fail: {e}")
+            self.fail(f"Unified manager import should not fail: {e}")
 
     def test_user_isolation_preserved(self):
         """Test that user isolation mechanisms are preserved."""
