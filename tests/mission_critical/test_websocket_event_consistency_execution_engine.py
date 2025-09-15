@@ -36,7 +36,6 @@ import asyncio
 import pytest
 import time
 import uuid
-import unittest
 from typing import Dict, List, Any, Optional, Tuple
 from unittest.mock import MagicMock, AsyncMock, patch
 from dataclasses import dataclass
@@ -94,7 +93,7 @@ class WebSocketEventCapture:
         return len(missing_critical) == 0, missing_critical
 
 
-class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase, unittest.TestCase):
+class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase):
     """
     Mission critical tests for WebSocket event consistency in ExecutionEngine.
     
