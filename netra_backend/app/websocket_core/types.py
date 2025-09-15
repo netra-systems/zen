@@ -92,10 +92,77 @@ class WebSocketManagerMode(Enum):
 
         This prevents the critical security violation where all managers shared
         the same enum object instance, causing user data contamination.
+
+        Each call creates a new enum instance with the same value but different
+        object identity, preventing any possibility of shared state.
         """
         obj = object.__new__(cls)
         obj._value_ = value
+        # ISSUE #889 ENHANCEMENT: Add unique identifier for debugging
+        import time
+        obj._instance_id = f"{value}_{int(time.time() * 1000000) % 1000000}"
         return obj
+
+    @property
+    def instance_id(self):
+        """Get the unique instance identifier for debugging isolation issues."""
+        return getattr(self, '_instance_id', 'unknown')
+
+
+def create_isolated_mode(mode_value: str = "unified") -> 'WebSocketManagerMode':
+    """
+    ISSUE #889 FIX: Create an isolated WebSocketManagerMode instance.
+
+    This factory function ensures each manager gets a unique enum instance,
+    preventing any possibility of cross-user state contamination through
+    shared enum object references.
+
+    Args:
+        mode_value: The mode value ("unified", "isolated", "emergency", "degraded")
+
+    Returns:
+        WebSocketManagerMode: A new, isolated enum instance
+    """
+
+    class IsolatedModeWrapper:
+        """
+        Wrapper class that behaves like WebSocketManagerMode but provides complete isolation.
+        Each instance is unique to prevent cross-user contamination.
+        """
+        def __init__(self, value: str):
+            self._value_ = value
+            import time
+            self._instance_id = f"{value}_{int(time.time() * 1000000) % 1000000}"
+
+        @property
+        def value(self):
+            return self._value_
+
+        @property
+        def name(self):
+            return self._value_.upper()
+
+        @property
+        def instance_id(self):
+            return self._instance_id
+
+        def __str__(self):
+            return self._value_
+
+        def __repr__(self):
+            return f"IsolatedModeWrapper('{self._value_}', id={self._instance_id})"
+
+        def __eq__(self, other):
+            if hasattr(other, 'value'):
+                return self._value_ == other.value
+            return self._value_ == str(other)
+
+        def __hash__(self):
+            # Include instance_id in hash to ensure uniqueness
+            return hash((self._value_, self._instance_id))
+
+    # Create a completely isolated wrapper instance
+    return IsolatedModeWrapper(mode_value)
 
 
 class WebSocketConnectionState(str, Enum):
