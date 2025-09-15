@@ -150,8 +150,9 @@ class _WebSocketManagerFactory:
 WebSocketManager = _WebSocketManagerFactory
 
 # ISSUE #824 REMEDIATION: Create public alias for backward compatibility
-# This also uses the factory wrapper to prevent direct instantiation
-UnifiedWebSocketManager = _WebSocketManagerFactory
+# For tests and type checking, provide access to the actual implementation class
+# For runtime usage, use get_websocket_manager() factory function
+UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
 
 # User-scoped singleton registry for WebSocket managers
 # CRITICAL: This prevents multiple manager instances per user
@@ -440,8 +441,8 @@ from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmi
 # Backward compatibility aliases
 WebSocketEventEmitter = UnifiedWebSocketEmitter
 # ISSUE #824 FIX: Add WebSocketConnectionManager alias for SSOT test compliance
-# This also uses the factory wrapper to prevent direct instantiation
-WebSocketConnectionManager = _WebSocketManagerFactory
+# For tests and type checking, provide access to the actual implementation class
+WebSocketConnectionManager = _UnifiedWebSocketManagerImplementation
 
 # Export the protocol for type checking and SSOT compliance
 __all__ = [
