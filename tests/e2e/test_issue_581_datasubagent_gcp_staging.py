@@ -472,7 +472,7 @@ class TestIssue581DataSubAgentGCPStaging(SSotAsyncTestCase):
         try:
             async with websockets.connect(
                 self.staging_ws_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 ping_interval=20,
                 ping_timeout=10
             ) as websocket:
