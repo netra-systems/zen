@@ -132,34 +132,38 @@ class AgentRegistryAdapter:
             logger.error(f"Failed to create agent instance for {agent_name}: {e}")
             return None
     
-    async def get_async(self, agent_name: str):
+    async def get_async(self, agent_name: str, context: Optional[UserExecutionContext] = None):
         """Async version of get() method for explicit async usage.
-        
+
         Args:
             agent_name: Name of the agent to get
-            
+            context: Optional user execution context (defaults to adapter's context for backward compatibility)
+
         Returns:
             Agent instance or None if not found
         """
         try:
+            # Use provided context or default to adapter's context for backward compatibility
+            effective_context = context if context is not None else self.user_context
+
             # ISSUE #1186 PHASE 2: No cache checking - always create fresh instance
-            logger.debug(f"Creating fresh agent instance (async): {agent_name} for user {self.user_context.user_id}")
-            
+            logger.debug(f"Creating fresh agent instance (async): {agent_name} for user {effective_context.user_id}")
+
             # Get agent class from registry
             agent_class = self.agent_class_registry.get(agent_name)
             if not agent_class:
                 logger.debug(f"Agent class not found in registry: {agent_name}")
                 return None
-            
+
             # Use factory to create fresh instance (no caching)
             agent_instance = await self.agent_factory.create_instance(
                 agent_name,
-                self.user_context,
+                effective_context,
                 agent_class=agent_class
             )
-            
+
             # ISSUE #1186 PHASE 2: No caching - return fresh instance
-            logger.info(f"Created fresh agent instance (async): {agent_name} for user {self.user_context.user_id}")
+            logger.info(f"Created fresh agent instance (async): {agent_name} for user {effective_context.user_id}")
             return agent_instance
             
         except Exception as e:
