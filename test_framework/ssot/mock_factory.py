@@ -473,6 +473,54 @@ class SSotMockFactory:
         return mock_context
 
     @staticmethod
+    def create_mock_websocket_emitter(
+        user_id: str = "test-user",
+        connection_id: str = "test-connection",
+        **kwargs
+    ) -> AsyncMock:
+        """
+        Create a standardized WebSocket emitter mock for testing.
+
+        MOCK FACTORY FIX: Provides complete WebSocket emitter interface including emit_event
+        method that was missing and causing integration test failures.
+
+        Args:
+            user_id: Mock user identifier
+            connection_id: Mock connection identifier
+            **kwargs: Additional arguments for extensibility
+
+        Returns:
+            AsyncMock configured for WebSocket emitter testing with complete interface
+        """
+        mock_emitter = AsyncMock()
+        mock_emitter.user_id = user_id
+        mock_emitter.connection_id = connection_id
+        
+        # Standard WebSocket emitter methods
+        mock_emitter.emit_event = AsyncMock()
+        mock_emitter.emit_agent_started = AsyncMock()
+        mock_emitter.emit_agent_thinking = AsyncMock()
+        mock_emitter.emit_agent_completed = AsyncMock()
+        mock_emitter.emit_tool_executing = AsyncMock()
+        mock_emitter.emit_tool_completed = AsyncMock()
+        
+        # Connection and lifecycle methods
+        mock_emitter.connect = AsyncMock()
+        mock_emitter.disconnect = AsyncMock()
+        mock_emitter.is_connected = True
+        
+        # Event queue and management
+        mock_emitter.add_event = AsyncMock()
+        mock_emitter.clear_events = AsyncMock()
+        mock_emitter.get_events = AsyncMock(return_value=[])
+        
+        # Configuration and validation
+        mock_emitter.validate_event = AsyncMock(return_value=True)
+        mock_emitter.configure = AsyncMock()
+        
+        return mock_emitter
+
+    @staticmethod
     def create_isolated_execution_context(
         user_id: str,
         thread_id: str,
