@@ -253,9 +253,34 @@ class _UnifiedWebSocketManagerImplementation:
                 user_context = TestUserContext()
 
         # ISSUE #889 FIX: Store mode parameter to prevent state sharing between users
-        # Create isolated copy of mode to prevent shared references
-        # For enums, we need to create a new instance with the same value
-        self.mode = WebSocketManagerMode(mode.value)
+        # Create isolated wrapper to prevent shared references
+        # Python enums share object instances, so we wrap them to create unique objects
+        class IsolatedModeWrapper:
+            """Wrapper to prevent enum object sharing between manager instances."""
+            def __init__(self, enum_value):
+                self._value = enum_value.value if hasattr(enum_value, 'value') else enum_value
+                self._name = enum_value.name if hasattr(enum_value, 'name') else str(enum_value)
+
+            @property
+            def value(self):
+                return self._value
+
+            @property
+            def name(self):
+                return self._name
+
+            def __str__(self):
+                return f"WebSocketManagerMode.{self._name}"
+
+            def __repr__(self):
+                return f"<WebSocketManagerMode.{self._name}: '{self._value}'>"
+
+            def __eq__(self, other):
+                if hasattr(other, 'value'):
+                    return self._value == other.value
+                return self._value == other
+
+        self.mode = IsolatedModeWrapper(mode)
         self.user_context = user_context
         self.config = config or {}
 
