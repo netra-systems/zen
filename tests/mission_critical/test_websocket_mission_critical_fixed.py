@@ -240,13 +240,16 @@ class TestMissionCriticalWebSocketEvents:
             run_id="test-run",
             request_id="test-request"
         )
-        registry = AgentRegistry(MockLLM(), ToolDispatcher(user_context))
+
+        # Create proper AgentInstanceFactory for Issue #1116 SSOT compliance
+        from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
+        agent_factory = AgentInstanceFactory(user_context)
         ws_manager = get_websocket_manager(user_context)
 
         # Create execution engine with proper Issue #1116 SSOT patterns
         engine = ExecutionEngine(
             context=user_context,
-            agent_factory=registry,
+            agent_factory=agent_factory,
             websocket_emitter=ws_manager
         )
 
