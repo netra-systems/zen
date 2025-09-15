@@ -531,12 +531,146 @@ except Exception as e:
     logger.error(f"WebSocket Manager SSOT validation failed: {e}")
 
 
+async def get_websocket_manager_async(user_context: Optional[Any] = None, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED) -> _UnifiedWebSocketManagerImplementation:
+    """
+    Get a WebSocket manager instance asynchronously following SSOT patterns.
+
+    ISSUE #1184 REMEDIATION: This async wrapper properly handles service availability checking
+    and provides the correct interface for async contexts that need to await WebSocket manager creation.
+
+    Business Value Justification:
+    - Segment: ALL (Free -> Enterprise)
+    - Business Goal: Enable secure WebSocket communication for Golden Path
+    - Value Impact: Critical infrastructure for AI chat interactions (90% of platform value)
+    - Revenue Impact: Foundation for $500K+ ARR user interactions with proper security
+
+    Args:
+        user_context: UserExecutionContext for user isolation (optional for testing)
+        mode: WebSocket manager operational mode (DEPRECATED: all modes use UNIFIED)
+
+    Returns:
+        UnifiedWebSocketManager instance - single instance per user context
+
+    Raises:
+        ValueError: If user_context is required but not provided in production modes
+    """
+    # Extract user key for registry lookup
+    user_key = _get_user_key(user_context)
+
+    # Thread-safe registry access
+    with _REGISTRY_LOCK:
+        # Check if manager already exists for this user
+        if user_key in _USER_MANAGER_REGISTRY:
+            existing_manager = _USER_MANAGER_REGISTRY[user_key]
+            logger.debug(f"Returning existing WebSocket manager for user {user_key}")
+            return existing_manager
+
+        # No existing manager - create new one following original logic
+        try:
+            # ISSUE #1184 FIX: Proper async service availability check
+            service_available = await check_websocket_service_available()
+
+            if not service_available:
+                logger.warning("WebSocket service not available, creating test-only manager")
+                # Force unified mode for test scenarios when service is unavailable
+                mode = WebSocketManagerMode.UNIFIED
+
+            logger.info(f"Creating NEW WebSocket manager for user {user_key} with mode={mode.value}, service_available={service_available}")
+
+            # ISSUE #889 FIX: Create isolated mode instance to prevent enum sharing
+            isolated_mode = create_isolated_mode(mode.value)
+            logger.debug(f"Created isolated mode instance {isolated_mode.instance_id} for user {user_key}")
+
+            # Generate stronger authorization token
+            auth_token = secrets.token_urlsafe(32)  # Increase token length to meet new requirements
+
+            # For testing environments, create isolated test instance if no user context
+            if user_context is None:
+                # ISSUE #89 FIX: Use UnifiedIDManager for test ID generation to maintain consistency
+                id_manager = UnifiedIDManager()
+                test_user_id = id_manager.generate_id(IDType.USER, prefix="test")
+                logger.warning(f"No user_context provided, creating test instance with user_id={test_user_id}")
+
+                # Create mock user context for testing with consistent ID patterns
+                test_context = type('MockUserContext', (), {
+                    'user_id': test_user_id,
+                    'thread_id': id_manager.generate_id(IDType.THREAD, prefix="test"),
+                    'request_id': id_manager.generate_id(IDType.REQUEST, prefix="test"),
+                    'is_test': True
+                })()
+
+                manager = _UnifiedWebSocketManagerImplementation(
+                    mode=create_isolated_mode("isolated" if service_available else "unified"),
+                    user_context=test_context,
+                    _ssot_authorization_token=auth_token
+                )
+            else:
+                # Production mode with proper user context - use isolated mode instance
+                manager = _UnifiedWebSocketManagerImplementation(
+                    mode=isolated_mode,
+                    user_context=user_context,
+                    _ssot_authorization_token=auth_token
+                )
+
+            # Issue #712 Fix: Validate SSOT compliance
+            try:
+                from netra_backend.app.websocket_core.ssot_validation_enhancer import validate_websocket_manager_creation
+                validate_websocket_manager_creation(
+                    manager_instance=manager,
+                    user_context=user_context or test_context,
+                    creation_method="get_websocket_manager_async"
+                )
+            except ImportError:
+                # Validation enhancer not available - continue without validation
+                logger.debug("SSOT validation enhancer not available")
+
+            # ISSUE #889 FIX: Validate user isolation before registration
+            if not _validate_user_isolation(user_key, manager):
+                raise ValueError(f"CRITICAL USER ISOLATION VIOLATION: Manager for user {user_key} failed isolation validation")
+
+            # CRITICAL: Register manager in user-scoped registry
+            _USER_MANAGER_REGISTRY[user_key] = manager
+
+            logger.info(f"WebSocket manager created and registered for user {user_key}, total registered: {len(_USER_MANAGER_REGISTRY)}")
+            return manager
+
+        except Exception as e:
+            logger.error(f"Failed to create WebSocket manager for user {user_key}: {e}")
+            # PHASE 1 FIX: Return test-compatible fallback using improved helper functions
+            # This ensures tests can run while still following security patterns
+            try:
+                fallback_context = test_context if 'test_context' in locals() else (user_context or create_test_user_context())
+                fallback_manager = create_test_fallback_manager(fallback_context)
+
+                # Register fallback manager to prevent future creation attempts
+                _USER_MANAGER_REGISTRY[user_key] = fallback_manager
+
+                logger.warning(f"Created emergency fallback WebSocket manager for user {user_key}")
+                return fallback_manager
+            except Exception as fallback_error:
+                logger.error(f"Failed to create fallback manager for user {user_key}: {fallback_error}")
+                # Final fallback with minimal requirements - ISSUE #889 FIX: Use isolated mode
+                final_fallback = _UnifiedWebSocketManagerImplementation(
+                    mode=create_isolated_mode("emergency"),  # ISSUE #889 FIX: Use isolated mode
+                    user_context=create_test_user_context(),
+                    _ssot_authorization_token=secrets.token_urlsafe(32)
+                )
+
+                # Register final fallback to prevent repeated failures
+                _USER_MANAGER_REGISTRY[user_key] = final_fallback
+
+                return final_fallback
+
+
 def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED) -> _UnifiedWebSocketManagerImplementation:
     """
     Get a WebSocket manager instance following SSOT patterns and UserExecutionContext requirements.
 
     CRITICAL: This function implements user-scoped singleton pattern to prevent multiple
     manager instances per user, eliminating SSOT violations and ensuring proper user isolation.
+
+    ISSUE #1184 REMEDIATION: Fixed synchronous function to not use async operations.
+    For async contexts that need service availability checking, use get_websocket_manager_async().
 
     ISSUE #889 REMEDIATION: Implements user-scoped manager registry to ensure single
     manager instance per user context, preventing duplication warnings and state contamination.
@@ -559,7 +693,7 @@ def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketMan
     """
     # Extract user key for registry lookup
     user_key = _get_user_key(user_context)
-    
+
     # Thread-safe registry access
     with _REGISTRY_LOCK:
         # Check if manager already exists for this user
@@ -567,25 +701,14 @@ def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketMan
             existing_manager = _USER_MANAGER_REGISTRY[user_key]
             logger.debug(f"Returning existing WebSocket manager for user {user_key}")
             return existing_manager
-        
+
         # No existing manager - create new one following original logic
         try:
-            # PHASE 1 FIX: Check service availability before creation  
-            try:
-                import asyncio
-                try:
-                    # Try to get the current event loop
-                    loop = asyncio.get_running_loop()
-                    # If there's a running loop, create a task instead of using asyncio.run()
-                    task = loop.create_task(check_websocket_service_available())
-                    # For now, assume service is not available in sync context
-                    service_available = False
-                    logger.debug("Event loop is running, deferring service availability check")
-                except RuntimeError:
-                    # No event loop running, safe to use asyncio.run()
-                    service_available = asyncio.run(check_websocket_service_available())
-            except Exception:
-                service_available = False
+            # ISSUE #1184 FIX: Remove async operations from synchronous function
+            # Assume service is not available in sync context to maintain compatibility
+            service_available = False
+            logger.debug("Synchronous context: assuming WebSocket service not available for safety")
+
             if not service_available:
                 logger.warning("WebSocket service not available, creating test-only manager")
                 # Force unified mode for test scenarios when service is unavailable
@@ -738,7 +861,8 @@ __all__ = [
     # REMOVED: WebSocketManagerProtocol - import directly from netra_backend.app.websocket_core.protocols
     # REMOVED: WebSocketManagerMode - import directly from netra_backend.app.websocket_core.types
     '_serialize_message_safely',
-    'get_websocket_manager',  # SSOT: Factory function (preferred)
+    'get_websocket_manager',  # SSOT: Synchronous factory function
+    'get_websocket_manager_async',  # ISSUE #1184: Async factory function for proper await usage
     'create_websocket_manager',  # DEPRECATED: Legacy compatibility function
     'create_websocket_manager_sync',  # DEPRECATED: Legacy sync function
     'check_websocket_service_available',  # Service availability check
