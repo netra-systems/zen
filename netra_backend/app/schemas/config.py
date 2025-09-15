@@ -1320,6 +1320,8 @@ class StagingConfig(AppConfig):
         self._load_secrets_from_environment(data)
         # Load API keys from environment for staging
         self._load_api_keys_from_environment(env, data)
+        # Load Sentry configuration from environment for staging
+        self._load_sentry_config_from_environment(env, data)
         # Load database URL after secrets are available
         self._load_database_url_from_unified_config_staging(data)
         super().__init__(**data)
