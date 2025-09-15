@@ -28,7 +28,8 @@ from netra_backend.app.websocket_core.types import (
     _serialize_message_safely
 )
 from netra_backend.app.websocket_core.unified_manager import (
-    _UnifiedWebSocketManagerImplementation
+    _UnifiedWebSocketManagerImplementation,
+    MAX_CONNECTIONS_PER_USER
 )
 # SSOT Protocol import consolidated from protocols module
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
@@ -731,6 +732,7 @@ __all__ = [
     'check_websocket_service_available',  # Service availability check
     'create_test_user_context',  # Test context helper
     'create_test_fallback_manager',  # Test fallback helper
+    'MAX_CONNECTIONS_PER_USER',  # Connection limit constant
     'WebSocketEventEmitter',  # Compatibility alias
     'UnifiedWebSocketEmitter',  # Original emitter
     # ISSUE #889 REMEDIATION: User-scoped manager registry functions

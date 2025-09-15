@@ -55,8 +55,8 @@ from shared.isolated_environment import get_env
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
-from netra_backend.app.services.user_execution_context import UserExecutionContext, AgentExecutionContext
-from netra_backend.app.schemas.agent_execution_result import AgentExecutionResult
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, AgentExecutionResult
 
 # Compatibility stubs for test migration
 class EngineConfig:
@@ -71,6 +71,27 @@ class DataExecutionExtension(ExecutionExtension): pass
 class WebSocketExtension(ExecutionExtension): pass
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.agent_execution_tracker import ExecutionState
+
+# Helper function to create valid AgentExecutionContext objects
+def create_test_agent_context(agent_name: str, user_id: str = "test_user", task_info: Optional[str] = None, **kwargs):
+    """
+    Helper to create AgentExecutionContext with proper required fields.
+
+    The 'task' concept is stored in metadata since the actual class doesn't have a task field.
+    """
+    import uuid
+    metadata = kwargs.pop('metadata', {})
+    if task_info:
+        metadata['task'] = task_info
+
+    return AgentExecutionContext(
+        run_id=kwargs.pop('run_id', f"run_{uuid.uuid4().hex[:8]}"),
+        thread_id=kwargs.pop('thread_id', f"thread_{uuid.uuid4().hex[:8]}"),
+        user_id=user_id,
+        agent_name=agent_name,
+        metadata=metadata,
+        **kwargs
+    )
 
 class MockAgent:
     """Mock agent for testing execution engine without full agent dependencies."""
@@ -218,10 +239,16 @@ class TestAgentExecutionContext(BaseTestCase):
         BVJ: Platform/Internal - Context Management
         Test AgentExecutionContext creation with required fields.
         """
-        context = AgentExecutionContext(agent_name='test_agent', task='test_task')
+        context = AgentExecutionContext(
+            run_id='test_run_123',
+            thread_id='test_thread_456',
+            user_id='test_user_789',
+            agent_name='test_agent'
+        )
         self.assertEqual(context.agent_name, 'test_agent')
-        self.assertEqual(context.task, 'test_task')
-        self.assertIsNone(context.user_id)
+        self.assertEqual(context.run_id, 'test_run_123')
+        self.assertEqual(context.thread_id, 'test_thread_456')
+        self.assertEqual(context.user_id, 'test_user_789')
         self.assertIsNone(context.request_id)
         self.assertEqual(context.metadata, {})
 
@@ -230,16 +257,26 @@ class TestAgentExecutionContext(BaseTestCase):
         BVJ: Platform/Internal - Multi-User Isolation
         Test AgentExecutionContext with all fields for complete user isolation.
         """
-        state = DeepAgentState()
-        context = AgentExecutionContext(agent_name='data_agent', task='analyze_data', user_id='user123', request_id='req456', thread_id='thread789', session_id='session101', state=state, metadata={'priority': 'high'})
+        context = AgentExecutionContext(
+            run_id='run123',
+            agent_name='data_agent',
+            user_id='user123',
+            request_id='req456',
+            thread_id='thread789',
+            metadata={'priority': 'high'},
+            retry_count=2,
+            max_retries=5,
+            timeout=30
+        )
         self.assertEqual(context.agent_name, 'data_agent')
-        self.assertEqual(context.task, 'analyze_data')
+        self.assertEqual(context.run_id, 'run123')
         self.assertEqual(context.user_id, 'user123')
         self.assertEqual(context.request_id, 'req456')
         self.assertEqual(context.thread_id, 'thread789')
-        self.assertEqual(context.session_id, 'session101')
-        self.assertEqual(context.state, state)
         self.assertEqual(context.metadata, {'priority': 'high'})
+        self.assertEqual(context.retry_count, 2)
+        self.assertEqual(context.max_retries, 5)
+        self.assertEqual(context.timeout, 30)
 
 class TestAgentExecutionResult(BaseTestCase):
     """Test AgentExecutionResult model."""
@@ -330,7 +367,7 @@ class TestUserExecutionExtension(AsyncBaseTestCase):
         Test UserExecutionExtension creates per-user semaphores.
         """
         extension = UserExecutionExtension()
-        context = AgentExecutionContext(agent_name='test_agent', task='test_task', user_id='user123')
+        context = create_test_agent_context(agent_name='test_agent', user_id='user123', task_info='test_task')
         await extension.pre_execute(context)
         self.assertIn('user123', extension.user_semaphores)
         self.assertEqual(extension.user_semaphores['user123']._value, 1)
@@ -342,9 +379,9 @@ class TestUserExecutionExtension(AsyncBaseTestCase):
         Test UserExecutionExtension enforces per-user concurrency limits.
         """
         extension = UserExecutionExtension()
-        context1 = AgentExecutionContext(agent_name='agent1', task='task1', user_id='user123')
-        context2 = AgentExecutionContext(agent_name='agent2', task='task2', user_id='user123')
-        context3 = AgentExecutionContext(agent_name='agent3', task='task3', user_id='user123')
+        context1 = create_test_agent_context(agent_name='agent1', user_id='user123', task_info='task1')
+        context2 = create_test_agent_context(agent_name='agent2', user_id='user123', task_info='task2')
+        context3 = create_test_agent_context(agent_name='agent3', user_id='user123', task_info='task3')
         await extension.pre_execute(context1)
         await extension.pre_execute(context2)
         semaphore = extension.user_semaphores['user123']
@@ -359,7 +396,7 @@ class TestUserExecutionExtension(AsyncBaseTestCase):
         Test UserExecutionExtension adds user metadata to results.
         """
         extension = UserExecutionExtension()
-        context = AgentExecutionContext(agent_name='test_agent', task='test_task', user_id='user456')
+        context = create_test_agent_context(agent_name='test_agent', user_id='user456', task_info='test_task')
         await extension.pre_execute(context)
         result = AgentExecutionResult(success=True, result='test_output')
         updated_result = await extension.post_execute(result, context)
@@ -385,7 +422,7 @@ class TestMCPExecutionExtension(AsyncBaseTestCase):
         Test MCPExecutionExtension pre-execute MCP enablement.
         """
         extension = MCPExecutionExtension()
-        context = AgentExecutionContext(agent_name='mcp_agent', task='mcp_task', metadata={'enable_mcp': True})
+        context = create_test_agent_context(agent_name='mcp_agent', task_info='mcp_task', metadata={'enable_mcp': True})
         await extension.pre_execute(context)
         self.assertTrue(context.metadata['mcp_enabled'])
 
@@ -397,7 +434,7 @@ class TestMCPExecutionExtension(AsyncBaseTestCase):
         extension = MCPExecutionExtension()
         extension.mcp_tools.add('tool1')
         extension.mcp_tools.add('tool2')
-        context = AgentExecutionContext(agent_name='mcp_agent', task='mcp_task', metadata={'mcp_enabled': True})
+        context = create_test_agent_context(agent_name='mcp_agent', task_info='mcp_task', metadata={'mcp_enabled': True})
         result = AgentExecutionResult(success=True)
         updated_result = await extension.post_execute(result, context)
         self.assertEqual(updated_result.metadata['mcp_tools_used'], ['tool1', 'tool2'])
@@ -411,7 +448,7 @@ class TestDataExecutionExtension(AsyncBaseTestCase):
         Test DataExecutionExtension adds optimization metadata for data agents.
         """
         extension = DataExecutionExtension()
-        context = AgentExecutionContext(agent_name='data_processing_agent', task='process_large_dataset')
+        context = create_test_agent_context(agent_name='data_processing_agent', task_info='process_large_dataset')
         await extension.pre_execute(context)
         optimization = context.metadata['optimization']
         self.assertEqual(optimization['batch_size'], 1000)
@@ -424,7 +461,7 @@ class TestDataExecutionExtension(AsyncBaseTestCase):
         Test DataExecutionExtension caches results when cache_key provided.
         """
         extension = DataExecutionExtension()
-        context = AgentExecutionContext(agent_name='data_agent', task='analyze', metadata={'cache_key': 'dataset_123'})
+        context = create_test_agent_context(agent_name='data_agent', task_info='analyze', metadata={'cache_key': 'dataset_123'})
         result = AgentExecutionResult(success=True, result={'analysis': 'complete'})
         updated_result = await extension.post_execute(result, context)
         self.assertTrue(updated_result.metadata['cached'])
@@ -441,7 +478,7 @@ class TestWebSocketExtension(AsyncBaseTestCase):
         """
         bridge = MockWebSocketBridge()
         extension = WebSocketExtension(bridge)
-        context = AgentExecutionContext(agent_name='test_agent', task='test_task')
+        context = create_test_agent_context(agent_name='test_agent', task_info='test_task')
         await extension.pre_execute(context)
         self.assertEqual(len(bridge.events), 1)
         event = bridge.events[0]
@@ -456,7 +493,7 @@ class TestWebSocketExtension(AsyncBaseTestCase):
         """
         bridge = MockWebSocketBridge()
         extension = WebSocketExtension(bridge)
-        context = AgentExecutionContext(agent_name='test_agent', task='test_task')
+        context = create_test_agent_context(agent_name='test_agent', task_info='test_task')
         result = AgentExecutionResult(success=True, result='success_output')
         await extension.post_execute(result, context)
         self.assertEqual(len(bridge.events), 1)
@@ -472,7 +509,7 @@ class TestWebSocketExtension(AsyncBaseTestCase):
         """
         bridge = MockWebSocketBridge()
         extension = WebSocketExtension(bridge)
-        context = AgentExecutionContext(agent_name='failing_agent', task='fail_task')
+        context = create_test_agent_context(agent_name='failing_agent', task_info='fail_task')
         error = RuntimeError('Test error')
         await extension.on_error(error, context)
         self.assertEqual(len(bridge.events), 1)
@@ -488,7 +525,7 @@ class TestWebSocketExtension(AsyncBaseTestCase):
         """
         bridge = MockWebSocketBridge(should_fail=True)
         extension = WebSocketExtension(bridge)
-        context = AgentExecutionContext(agent_name='test_agent', task='test_task')
+        context = create_test_agent_context(agent_name='test_agent', task_info='test_task')
         await extension.pre_execute(context)
         self.assertEqual(bridge.metrics['errors'], 1)
         self.assertEqual(len(bridge.events), 0)

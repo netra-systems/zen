@@ -60,7 +60,7 @@ class TestIssue860StagingWebSocketCompatibility(BaseE2ETest):
             async with asyncio.timeout(10.0):  # Longer timeout for staging
                 async with websockets.connect(
                     websocket_url,
-                    extra_headers={
+                    additional_headers={
                         "User-Agent": "Issue860-Windows-Test",
                         "Origin": self.staging_config["frontend_url"]
                     }
@@ -160,7 +160,7 @@ class TestIssue860StagingWebSocketCompatibility(BaseE2ETest):
             async with asyncio.timeout(10.0):  # Longer timeout for staging
                 async with websockets.connect(
                     self.staging_config["websocket_url"],
-                    extra_headers={
+                    additional_headers={
                         "Origin": self.staging_config["frontend_url"]
                     }
                 ) as websocket:
@@ -320,7 +320,7 @@ class TestIssue860StagingWebSocketCompatibility(BaseE2ETest):
             async with asyncio.timeout(10.0):
                 async with websockets.connect(
                     self.staging_config["websocket_url"],
-                    extra_headers={
+                    additional_headers={
                         "Origin": self.staging_config["frontend_url"],
                         "User-Agent": "Issue860-Auth-Test"
                     }
