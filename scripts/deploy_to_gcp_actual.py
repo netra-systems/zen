@@ -1076,13 +1076,13 @@ CMD ["npm", "start"]
             vpc_connector_name = f"projects/{self.project_id}/locations/{self.region}/connectors/staging-connector"
             cmd.extend([
                 "--vpc-connector", "staging-connector",
-                "--vpc-egress", "private-ranges-only"  # Route only private traffic through VPC
+                "--vpc-egress", "all-traffic"  # Route all traffic through VPC to fix ClickHouse connectivity
             ])
             
             # CRITICAL: Service annotations for enhanced VPC connectivity
             vpc_annotations = [
                 f"run.googleapis.com/vpc-access-connector={vpc_connector_name}",
-                "run.googleapis.com/vpc-access-egress=private-ranges-only",
+                "run.googleapis.com/vpc-access-egress=all-traffic",
                 "run.googleapis.com/network-interfaces=[{\"network\":\"default\",\"subnetwork\":\"default\"}]"
             ]
             
