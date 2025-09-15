@@ -1,0 +1,62 @@
+{
+  "issue": "#1082 Mission Critical Docker Bypass Issues",
+  "test_timestamp": "2025-09-15T14:57:00Z",
+  "issues_found": [
+    "Staging backend connectivity failed: Connection timeout to staging backend (URL: https://backend.staging.netrasystems.ai/health). Cannot use as Docker fallback.",
+    "Staging auth connectivity failed: SSL certificate verification failed (URL: https://auth.staging.netrasystems.ai/health). Cannot use as Docker fallback.",
+    "WebSocket connection failed - staging environment not configured for bypass",
+    "Event agent_started structure validation failed in staging fallback - event delivery mechanism not properly configured for Docker bypass",
+    "Event agent_thinking structure validation failed in staging fallback - event delivery mechanism not properly configured for Docker bypass",
+    "Event tool_executing structure validation failed in staging fallback - event delivery mechanism not properly configured for Docker bypass",
+    "Event tool_completed structure validation failed in staging fallback - event delivery mechanism not properly configured for Docker bypass",
+    "Event agent_completed structure validation failed in staging fallback - event delivery mechanism not properly configured for Docker bypass",
+    "Mission-critical test 'websocket_agent_events' failed without Docker: Docker build timeout - failed to compute cache key. Path: tests/mission_critical/test_websocket_agent_events_suite.py",
+    "Mission-critical test 'auth_integration' failed without Docker: Auth staging environment not configured for Docker bypass. Path: tests/mission_critical/test_auth_integration_mission_critical.py",
+    "Mission-critical test 'golden_path_validation' failed without Docker: Golden path validation requires staging environment configuration. Path: tests/mission_critical/test_golden_path_user_flow.py",
+    "Unified test runner has no Docker bypass: Docker Alpine build failed - no bypass mechanism implemented",
+    "Staging environment missing REDIS_URL - Redis caching not configured for Docker bypass",
+    "Staging environment missing OAUTH_CLIENT_SECRET - OAuth authentication will fail during Docker bypass",
+    "Staging WebSocket endpoint /api/v1/websocket not configured for bypass - WebSocket tests cannot validate without Docker",
+    "Staging CORS not configured for WebSocket origin wss://backend.staging.netrasystems.ai - WebSocket connections will be blocked during Docker bypass",
+    "Staging database connectivity failed: Staging database not configured for Docker bypass - connection string missing or invalid",
+    "Missing docker_troubleshooting_guide documentation: docs/DOCKER_TROUBLESHOOTING_GUIDE.md. Team cannot execute Docker bypass procedures without documentation.",
+    "Missing staging_fallback_procedures documentation: docs/STAGING_FALLBACK_PROCEDURES.md. Team cannot execute Docker bypass procedures without documentation.",
+    "Missing mission_critical_bypass documentation: docs/MISSION_CRITICAL_TEST_BYPASS.md. Team cannot execute Docker bypass procedures without documentation.",
+    "Missing alpine_build_recovery documentation: docs/ALPINE_BUILD_RECOVERY_GUIDE.md. Team cannot execute Docker bypass procedures without documentation.",
+    "Docker bypass procedures not mentioned in main project documentation (README.md, CONTRIBUTING.md, etc.)"
+  ],
+  "test_results": {
+    "staging_accessibility_issues": [
+      "Staging backend connectivity failed: Connection timeout to staging backend (URL: https://backend.staging.netrasystems.ai/health). Cannot use as Docker fallback.",
+      "Staging auth connectivity failed: SSL certificate verification failed (URL: https://auth.staging.netrasystems.ai/health). Cannot use as Docker fallback."
+    ],
+    "websocket_fallback_issues": [
+      "WebSocket connection failed - staging environment not configured for bypass",
+      "Event agent_started structure validation failed in staging fallback - event delivery mechanism not properly configured for Docker bypass",
+      "Event agent_thinking structure validation failed in staging fallback - event delivery mechanism not properly configured for Docker bypass",
+      "Event tool_executing structure validation failed in staging fallback - event delivery mechanism not properly configured for Docker bypass",
+      "Event tool_completed structure validation failed in staging fallback - event delivery mechanism not properly configured for Docker bypass",
+      "Event agent_completed structure validation failed in staging fallback - event delivery mechanism not properly configured for Docker bypass"
+    ],
+    "mission_critical_bypass_issues": [
+      "Mission-critical test 'websocket_agent_events' failed without Docker: Docker build timeout - failed to compute cache key. Path: tests/mission_critical/test_websocket_agent_events_suite.py",
+      "Mission-critical test 'auth_integration' failed without Docker: Auth staging environment not configured for Docker bypass. Path: tests/mission_critical/test_auth_integration_mission_critical.py",
+      "Mission-critical test 'golden_path_validation' failed without Docker: Golden path validation requires staging environment configuration. Path: tests/mission_critical/test_golden_path_user_flow.py",
+      "Unified test runner has no Docker bypass: Docker Alpine build failed - no bypass mechanism implemented"
+    ],
+    "staging_config_issues": [
+      "Staging environment missing REDIS_URL - Redis caching not configured for Docker bypass",
+      "Staging environment missing OAUTH_CLIENT_SECRET - OAuth authentication will fail during Docker bypass",
+      "Staging WebSocket endpoint /api/v1/websocket not configured for bypass - WebSocket tests cannot validate without Docker",
+      "Staging CORS not configured for WebSocket origin wss://backend.staging.netrasystems.ai - WebSocket connections will be blocked during Docker bypass",
+      "Staging database connectivity failed: Staging database not configured for Docker bypass - connection string missing or invalid"
+    ],
+    "documentation_issues": [
+      "Missing docker_troubleshooting_guide documentation: docs/DOCKER_TROUBLESHOOTING_GUIDE.md. Team cannot execute Docker bypass procedures without documentation.",
+      "Missing staging_fallback_procedures documentation: docs/STAGING_FALLBACK_PROCEDURES.md. Team cannot execute Docker bypass procedures without documentation.",
+      "Missing mission_critical_bypass documentation: docs/MISSION_CRITICAL_TEST_BYPASS.md. Team cannot execute Docker bypass procedures without documentation.",
+      "Missing alpine_build_recovery documentation: docs/ALPINE_BUILD_RECOVERY_GUIDE.md. Team cannot execute Docker bypass procedures without documentation.",
+      "Docker bypass procedures not mentioned in main project documentation (README.md, CONTRIBUTING.md, etc.)"
+    ]
+  }
+}

@@ -3322,6 +3322,9 @@ class UnifiedTestRunner:
             # pytest -k expects Python-like expressions, not glob patterns
             clean_pattern = args.pattern.strip('*')
             cmd_parts.extend(["-k", f'"{clean_pattern}"'])
+        elif args.pattern and not self._should_category_use_pattern_filtering(category_name):
+            # Pattern provided but filtering disabled for this category (e.g., database)
+            print(f"[INFO] Pattern filtering disabled for category '{category_name}' - pattern '{args.pattern}' ignored")
         
         return " ".join(cmd_parts)
     

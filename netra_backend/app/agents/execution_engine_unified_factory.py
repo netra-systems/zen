@@ -58,13 +58,15 @@ class ExecutionEngineFactory:
     @staticmethod
     def create_engine(*args, **kwargs):
         """Create execution engine with compatibility."""
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+        # SSOT REMEDIATION Issue #1186: Use canonical imports
+        from netra_backend.app.agents.canonical_imports import UserExecutionEngine
         return UserExecutionEngine(**kwargs)
 
     @staticmethod
     def create_user_scoped_engine(user_context, *args, **kwargs):
         """Create user-scoped execution engine."""
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+        # SSOT REMEDIATION Issue #1186: Use canonical imports
+        from netra_backend.app.agents.canonical_imports import UserExecutionEngine
         return UserExecutionEngine(user_context=user_context, **kwargs)
 
 # Export for compatibility

@@ -22,11 +22,11 @@ from shared.constants.service_identifiers import SERVICE_ID
 # Import lazy initialization for AuthService to prevent race conditions
 from auth_service.auth_core.core.lazy_auth_service import get_auth_service
 
-# Initialize logger first
-logger = logging.getLogger(__name__)
-
 # Get environment manager
 env = get_env()
+
+# Initialize logger
+logger = logging.getLogger(__name__)
 
 # Import MockAuthService for testing only in appropriate environments
 # SECURITY FIX: Only import MockAuthService in development/test environments

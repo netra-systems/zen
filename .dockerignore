@@ -1,0 +1,191 @@
+# ====================================================
+# NETRA APEX - DOCKER BUILD CONTEXT OPTIMIZATION
+# Issue #1082 - Phase 1 Critical Infrastructure Fix
+# ====================================================
+
+# Python Cache Files (CRITICAL - 10,861+ files causing build failures)
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.Python
+**/.pytest_cache/
+**/.coverage
+**/.tox/
+**/.cache/
+**/.mypy_cache/
+**/.ruff_cache/
+
+# Node.js Cache Files
+**/node_modules/
+**/.npm/
+**/.yarn/
+**/.next/cache/
+**/.next/trace/
+**/dist/
+**/build/
+
+# Test and Development Files
+**/tests/
+**/test/
+**/*_test.py
+**/*_test.js
+**/*_test.ts
+**/cypress/
+**/jest.config.*
+**/pytest.ini*
+**/test_*.py
+**/test-*.js
+**/*.test.*
+**/*.spec.*
+
+# Documentation and Markdown
+**/*.md
+**/docs/
+**/documentation/
+**/SPEC/
+**/README*
+**/CHANGELOG*
+
+# IDE and Editor Files
+**/.vscode/
+**/.idea/
+**/.vs/
+**/*.swp
+**/*.swo
+**/*.tmp
+**/.DS_Store
+**/Thumbs.db
+
+# Git and Version Control
+**/.git/
+**/.github/
+**/.githooks/
+**/.gitignore
+**/.gitattributes
+
+# Log Files
+**/logs/
+**/*.log
+**/log/
+**/misc_logs/
+
+# Environment and Configuration
+**/.env*
+**/config.local.*
+**/.secrets/
+**/secrets/
+
+# Backup and Archive Files
+**/backup/
+**/backups/
+**/backup_*/
+**/archive/
+**/archives/
+**/*.backup
+**/*.bak
+**/*.tar
+**/*.tar.gz
+**/*.zip
+
+# Report and Analysis Files
+**/reports/
+**/coverage/
+**/benchmark_results/
+**/*_results.json
+**/*_report.json
+**/*_analysis.json
+
+# Development Tools
+**/scripts/
+**/dev-tools/
+**/dev_launcher/
+**/monitoring/
+**/prometheus/
+
+# Claude Code and AI Tools
+**/.claude/
+**/claude_prompts/
+**/.serena/
+**/...prompts/
+
+# Temporary Files
+**/tmp/
+**/temp/
+**/temporary/
+**/.tmp/
+**/C:Users*
+**/Mocks**
+**/Real
+
+# Windows Specific
+**/desktop.ini
+**/ehthumbs.db
+**/$RECYCLE.BIN/
+
+# Redis and Database
+**/redis-windows.zip
+**/database_scripts/
+
+# Build Artifacts
+**/target/
+**/build-test/
+**/cypress-results*
+**/migration_log.txt
+
+# Infrastructure Files Not Needed in Containers
+**/infrastructure/
+**/deployment/
+**/gcp/
+**/cloud*
+**/k8s/
+**/kubernetes/
+
+# Issue Tracking and Comments
+**/issue_*.md
+**/github_*.md
+**/ISSUE_*.md
+**/GITHUB_*.md
+**/EMERGENCY_*.md
+**/CRITICAL_*.md
+
+# Checklists and Planning
+**/checklists/
+**/business-context/
+**/contracts/
+
+# Pre-commit and Git Hooks
+**/.pre-commit*
+**/pre-commit*
+
+# Keep Essential Files for Docker Build
+!requirements.txt
+!package.json
+!package-lock.json
+!netra_backend/
+!frontend/
+!shared/
+!auth_service/
+!analytics_service/
+!dockerfiles/
+!alembic/
+!app/
+
+# Specific Large Files to Exclude
+**/redis-windows.zip
+**/coverage_agents.json
+**/cypress-results-summary.json
+**/migration_log.txt
+
+# E2E and Integration Test Artifacts
+**/e2e_test_*/
+**/cypress/videos/
+**/cypress/screenshots/
+**/playwright-report/
+**/test-results/
+
+# Exclude any remaining problematic patterns
+**/*_1082_test_results.json
+**/*COMPREHENSIVE_TEST*.md
+**/*FIVE_WHYS*.md
+**/*REMEDIATION*.md

@@ -41,7 +41,7 @@ central_logger = CentralLoggerCompat()
 
 if TYPE_CHECKING:
     # ISSUE #824 REMEDIATION: Use canonical SSOT import path
-    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = get_logger(__name__)
@@ -101,18 +101,18 @@ class UnifiedWebSocketEmitter:
     
     def __init__(
         self,
-        manager: 'UnifiedWebSocketManager' = None,
+        manager: 'WebSocketManager' = None,
         user_id: str = None,
         context: Optional['UserExecutionContext'] = None,
         performance_mode: bool = True,  # Enable by default for <50ms delivery
         # PHASE 1 BACKWARD COMPATIBILITY: Support legacy constructor parameters
-        websocket_manager: 'UnifiedWebSocketManager' = None
+        websocket_manager: 'WebSocketManager' = None
     ):
         """
         Initialize emitter for specific user.
         
         Args:
-            manager: UnifiedWebSocketManager instance
+            manager: WebSocketManager instance
             user_id: User ID this emitter serves
             context: Optional execution context for additional metadata
             performance_mode: Enable high-throughput mode with minimal retries
@@ -1059,13 +1059,13 @@ class UnifiedWebSocketEmitter:
     @classmethod
     def create_user_emitter(
         cls,
-        manager: 'UnifiedWebSocketManager',
+        manager: 'WebSocketManager',
         user_context: 'UserExecutionContext'
     ) -> 'UnifiedWebSocketEmitter':
         """Factory method for user-specific emitter creation.
 
         Args:
-            manager: UnifiedWebSocketManager instance
+            manager: WebSocketManager instance
             user_context: User execution context for isolation
 
         Returns:
@@ -1090,7 +1090,7 @@ class UnifiedWebSocketEmitter:
     @classmethod
     def create_auth_emitter(
         cls,
-        manager: 'UnifiedWebSocketManager',
+        manager: 'WebSocketManager',
         user_context: Optional['UserExecutionContext'] = None,
         user_id: Optional[str] = None,
         thread_id: Optional[str] = None,
@@ -1101,7 +1101,7 @@ class UnifiedWebSocketEmitter:
         ISSUE #669 REMEDIATION: Support both new and legacy parameter patterns.
 
         Args:
-            manager: UnifiedWebSocketManager instance
+            manager: WebSocketManager instance
             user_context: User execution context for auth events (NEW pattern)
             user_id: User ID (LEGACY pattern)
             thread_id: Thread ID (LEGACY pattern)
@@ -1160,7 +1160,7 @@ class AuthenticationWebSocketEmitter(UnifiedWebSocketEmitter):
         'auth_failed'
     ]
     
-    def __init__(self, manager: 'UnifiedWebSocketManager', user_id: str, 
+    def __init__(self, manager: 'WebSocketManager', user_id: str, 
                  context: Optional['UserExecutionContext'] = None):
         """Initialize authentication-specific emitter."""
         super().__init__(manager, user_id, context)
@@ -1318,7 +1318,7 @@ class AuthenticationConnectionMonitor:
     - Security compliance monitoring
     """
     
-    def __init__(self, manager: 'UnifiedWebSocketManager'):
+    def __init__(self, manager: 'WebSocketManager'):
         """
         Initialize authentication connection monitor.
         
@@ -1498,7 +1498,7 @@ class WebSocketEmitterFactory:
     
     @staticmethod
     def create_emitter(
-        manager: 'UnifiedWebSocketManager',
+        manager: 'WebSocketManager',
         user_id: str,
         context: Optional['UserExecutionContext'] = None,
         performance_mode: bool = False
@@ -1524,7 +1524,7 @@ class WebSocketEmitterFactory:
     
     @staticmethod
     def create_scoped_emitter(
-        manager: 'UnifiedWebSocketManager',
+        manager: 'WebSocketManager',
         context: 'UserExecutionContext'
     ) -> UnifiedWebSocketEmitter:
         """
@@ -1548,7 +1548,7 @@ class WebSocketEmitterFactory:
     
     @staticmethod
     def create_performance_emitter(
-        manager: 'UnifiedWebSocketManager',
+        manager: 'WebSocketManager',
         user_id: str,
         context: Optional['UserExecutionContext'] = None
     ) -> UnifiedWebSocketEmitter:
@@ -1572,7 +1572,7 @@ class WebSocketEmitterFactory:
     
     @staticmethod
     def create_auth_emitter(
-        manager: 'UnifiedWebSocketManager',
+        manager: 'WebSocketManager',
         user_id: str,
         context: Optional['UserExecutionContext'] = None
     ) -> AuthenticationWebSocketEmitter:
@@ -2100,7 +2100,7 @@ class WebSocketEmitterPool:
     Integrates EmitterPool patterns for efficient resource usage.
     """
     
-    def __init__(self, manager: 'UnifiedWebSocketManager', max_size: int = 100):
+    def __init__(self, manager: 'WebSocketManager', max_size: int = 100):
         """
         Initialize emitter pool.
         
@@ -2238,7 +2238,7 @@ def _add_factory_methods_to_unified_emitter():
     @classmethod
     def create_for_user(
         cls,
-        manager: 'UnifiedWebSocketManager',
+        manager: 'WebSocketManager',
         user_context: 'UserExecutionContext'
     ) -> 'UnifiedWebSocketEmitter':
         """
@@ -2248,7 +2248,7 @@ def _add_factory_methods_to_unified_emitter():
         WebSocket bridge components and other factory consumers.
         
         Args:
-            manager: UnifiedWebSocketManager instance
+            manager: WebSocketManager instance
             user_context: User execution context with user_id
             
         Returns:
@@ -2273,7 +2273,7 @@ def _add_factory_methods_to_unified_emitter():
     @classmethod
     def for_user(
         cls,
-        manager: 'UnifiedWebSocketManager',
+        manager: 'WebSocketManager',
         user_id: str,
         context: Optional['UserExecutionContext'] = None
     ) -> 'UnifiedWebSocketEmitter':
@@ -2283,7 +2283,7 @@ def _add_factory_methods_to_unified_emitter():
         This method provides a simplified factory interface when only user_id is available.
         
         Args:
-            manager: UnifiedWebSocketManager instance
+            manager: WebSocketManager instance
             user_id: Target user ID
             context: Optional execution context
             

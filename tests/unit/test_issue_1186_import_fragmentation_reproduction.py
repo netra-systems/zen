@@ -16,6 +16,7 @@ and violates SSOT principles, blocking $500K+ ARR chat functionality scalability
 
 import ast
 import os
+import pytest
 import re
 import sys
 import unittest

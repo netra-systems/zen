@@ -462,25 +462,23 @@ class EventValidatorFactory:
             return None
 
 
-# Global factory instance for creating user-scoped validators
-_factory_instance: Optional[EventValidatorFactory] = None
-_factory_lock = threading.RLock()
-
+# SINGLETON ELIMINATION (Issue #1186 Phase 3): Removed global factory instance
+# Factory instances are now created per-request to prevent user isolation violations
 
 def get_event_validator_factory() -> EventValidatorFactory:
     """
-    Get the global EventValidatorFactory instance.
-    
+    Create a new EventValidatorFactory instance per request.
+
+    SINGLETON ELIMINATION: This function now creates a fresh factory instance
+    for each call, ensuring proper user isolation and preventing cross-user
+    contamination of event validation state.
+
     Returns:
-        EventValidatorFactory instance
+        EventValidatorFactory: Fresh factory instance
     """
-    global _factory_instance
-    
-    with _factory_lock:
-        if _factory_instance is None:
-            _factory_instance = EventValidatorFactory()
-        
-        return _factory_instance
+    # Issue #1186 Phase 3: Create new factory instance per request
+    # This eliminates the singleton pattern that violated user isolation
+    return EventValidatorFactory()
 
 
 def create_user_event_validator(user_context: UserExecutionContext,
