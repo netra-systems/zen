@@ -119,8 +119,13 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         mock_websocket_bridge = AsyncMock()
         mock_agent = AsyncMock()
         
-        # Mock the agent's run method to return an awaitable result
-        mock_agent.run = AsyncMock()
+        # Mock the agent's execute method (not run) to return an awaitable result
+        mock_agent.execute = AsyncMock(return_value=expected_result)
+        # Fix RuntimeWarning: Mock async methods that are called but not awaited
+        mock_agent.set_trace_context = MagicMock()  # Not async
+        mock_agent.set_websocket_bridge = MagicMock()  # Not async
+        mock_agent.execution_engine = MagicMock()
+        mock_agent.execution_engine.set_websocket_bridge = MagicMock()  # Not async
         
         # Create system under test
         execution_core = AgentExecutionCore(
@@ -154,7 +159,6 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
             }
         )
         
-        mock_agent.run.return_value = expected_result
         mock_registry.get_agent.return_value = mock_agent
         # Fix: Mock the async get_async method that AgentExecutionCore actually calls
         mock_registry.get_async = AsyncMock(return_value=mock_agent)
@@ -192,7 +196,7 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         mock_websocket_bridge.notify_agent_started.assert_called_once()
         
         # Verify agent was executed with proper context
-        mock_agent.run.assert_called_once()
+        mock_agent.execute.assert_called_once()
         
         # Verify execution tracking captured business metrics
         execution_core.execution_tracker.register_execution.assert_called_once()
