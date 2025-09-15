@@ -195,7 +195,9 @@ class TestDatabaseServiceIntegration(SSotAsyncTestCase):
             self.agent_factory = AgentInstanceFactory()
             
         except Exception as e:
-            print(f"Failed to initialize real database infrastructure: {e}")def _get_test_database_url(self):
+            print(f"Failed to initialize real database infrastructure: {e}")
+    
+    def _get_test_database_url(self):
         """Get test database URL with proper configuration."""
         # Use in-memory SQLite for testing if PostgreSQL not available
         return "sqlite+aiosqlite:///:memory:"
