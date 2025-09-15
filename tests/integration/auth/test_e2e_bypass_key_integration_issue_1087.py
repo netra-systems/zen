@@ -17,9 +17,9 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 class TestE2EBypassKeyIntegrationIssue1087(SSotAsyncTestCase):
     """Integration tests for E2E bypass key authentication."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up integration test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.test_bypass_key = "staging_e2e_integration_key_12345"
         self.auth_endpoint = "/auth/e2e-test-auth"
         self.test_user_email = "e2e_test_user_issue_1087@example.com"

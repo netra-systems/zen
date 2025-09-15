@@ -19,9 +19,9 @@ from shared.isolated_environment import get_env
 class TestE2EBypassKeyGoldenPathIssue1087(SSotAsyncTestCase):
     """E2E tests for Golden Path authentication with bypass key in staging."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up E2E staging test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.env = get_env()
 
         # Staging URLs - must use canonical staging URLs per CLAUDE.md
