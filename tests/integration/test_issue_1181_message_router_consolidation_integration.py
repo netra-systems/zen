@@ -1,529 +1,538 @@
 """
-Test Issue #1181 MessageRouter Consolidation Integration
+Integration Tests for Issue #1181 MessageRouter Consolidation
+=============================================================
 
-Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: System Reliability and WebSocket Infrastructure Stability
-- Value Impact: Ensure message routing consolidation doesn't break real-time chat functionality
-- Strategic Impact: $500K+ ARR protection - consolidated routing must maintain chat reliability
+Business Value Justification:
+- Segment: Platform/Critical Infrastructure
+- Business Goal: SSOT Consolidation & Golden Path Protection
+- Value Impact: Ensures $500K+ ARR chat functionality works during consolidation
+- Strategic Impact: Validates that MessageRouter consolidation preserves all functionality
 
-This integration test validates MessageRouter consolidation with real WebSocket components
-to ensure the SSOT approach maintains business-critical messaging capabilities.
+CRITICAL INTEGRATION VALIDATION:
+Issue #1181 requires MessageRouter consolidation to eliminate fragmentation while
+maintaining full functionality. These integration tests validate that the consolidated
+MessageRouter works correctly with real services and maintains all existing capabilities.
+
+Tests verify end-to-end message routing, handler integration, quality message support,
+and compatibility with existing WebSocket infrastructure.
 """
 
-import pytest
+import unittest
 import asyncio
+import json
+import time
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from typing import Dict, Any, List
-from unittest.mock import AsyncMock, MagicMock
 
-from test_framework.ssot.base_test_case import SSotAsyncTestCase as BaseIntegrationTest
-from test_framework.websocket_helpers import WebSocketTestClient
-from shared.isolated_environment import get_env
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from netra_backend.app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
 
 
-class TestIssue1181MessageRouterConsolidationIntegration(BaseIntegrationTest):
-    """Test MessageRouter consolidation with real WebSocket infrastructure."""
-
-    @pytest.mark.integration
-    async def test_message_router_functionality_with_real_websocket(self):
-        """
-        Test MessageRouter functionality with real WebSocket components.
+class TestIssue1181MessageRouterConsolidationIntegration(SSotAsyncTestCase, unittest.TestCase):
+    """Integration test suite for MessageRouter consolidation validation."""
+    
+    def setUp(self):
+        """Set up integration test environment."""
+        super().setUp()
+        self.test_user_id = "integration_test_user_456"
+        self.test_thread_id = "integration_thread_789"
+        self.test_run_id = "integration_run_012"
         
-        This validates that the current working MessageRouter integrates properly
-        with the WebSocket infrastructure before consolidation.
-        """
+        # Mock WebSocket for integration testing
+        self.mock_websocket = Mock()
+        self.mock_websocket.send_json = AsyncMock()
+        self.mock_websocket.send_text = AsyncMock()
+        self.mock_websocket.client_state = "CONNECTED"
+        self.mock_websocket.application_state = Mock()
+        self.mock_websocket.application_state._mock_name = "test_websocket"
         
-        # Import the working MessageRouter
+        # Track sent messages for validation
+        self.sent_messages = []
+        
+        async def capture_send_json(data):
+            self.sent_messages.append({"method": "send_json", "data": data})
+            return True
+            
+        async def capture_send_text(data):
+            self.sent_messages.append({"method": "send_text", "data": data})
+            return True
+        
+        self.mock_websocket.send_json.side_effect = capture_send_json
+        self.mock_websocket.send_text.side_effect = capture_send_text
+    
+    async def test_message_router_core_functionality_integration(self):
+        """
+        INTEGRATION TEST: Verify core MessageRouter functionality works end-to-end.
+        
+        Tests the complete message routing pipeline with real MessageRouter
+        and mock WebSocket to ensure consolidation doesn't break core functionality.
+        """
+        logger.info(" TESTING:  MessageRouter core functionality integration")
+        
+        # Import and create MessageRouter
         from netra_backend.app.websocket_core.handlers import MessageRouter
         
-        # Create a test WebSocket manager (using factory pattern for user isolation)
-        from netra_backend.app.dependencies import get_user_execution_context
-        from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context
+        router = MessageRouter()
         
-        # Create isolated user context for testing
-        user_context = get_user_execution_context(
-            user_id="test_user_123",
-            thread_id="test_thread_456",
-            run_id="test_run_789"
-        )
-        
-        # Create WebSocket manager with user isolation
-        websocket_manager = await create_defensive_user_execution_context(user_context)
-        
-        # Create MessageRouter with proper dependencies
-        message_router = MessageRouter()
-        
-        # Test message routing functionality
-        test_message = {
-            "type": "test_message",
-            "content": "Testing message routing consolidation",
-            "user_id": "test_user_123"
-        }
-        
-        # Verify MessageRouter can handle the message without errors
-        try:
-            # This tests the interface without requiring full WebSocket infrastructure
-            assert hasattr(message_router, 'route_message') or hasattr(message_router, 'handle_message')
-            
-            # Document successful integration
-            self._document_successful_integration("MessageRouter", "WebSocket Manager")
-            
-        except Exception as e:
-            pytest.fail(f"MessageRouter integration with WebSocket components failed: {e}")
-
-    @pytest.mark.integration
-    async def test_quality_router_integration_after_dependency_fix(self):
-        """
-        Test QualityMessageRouter integration after fixing dependency issues.
-        
-        This test will initially fail (reproducing the import issue) but provides
-        the framework for validating the fix when dependencies are resolved.
-        """
-        
-        # Document the current broken state
-        try:
-            from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
-            quality_router_accessible = True
-        except ImportError as e:
-            quality_router_accessible = False
-            import_error = str(e)
-        
-        if not quality_router_accessible:
-            # Document the specific failure for tracking
-            self._document_quality_router_import_failure(import_error)
-            
-            # Skip the rest of the test until dependency is fixed
-            pytest.skip(f"QualityMessageRouter import blocked by dependency issue: {import_error}")
-        
-        # If import works (after fix), test integration
-        quality_router = QualityMessageRouter(
-            supervisor=MagicMock(),
-            db_session_factory=MagicMock(),
-            quality_gate_service=MagicMock(),
-            monitoring_service=MagicMock()
-        )
-        
-        # Test quality router message handling
-        test_message = {
-            "type": "get_quality_metrics",
-            "payload": {"metric_type": "response_quality"}
-        }
-        
-        # Verify quality router can handle quality-specific messages
-        user_id = "test_user_quality"
-        
-        try:
-            await quality_router.handle_message(user_id, test_message)
-            self._document_successful_integration("QualityMessageRouter", "WebSocket Infrastructure")
-        except Exception as e:
-            pytest.fail(f"QualityMessageRouter integration failed: {e}")
-
-    @pytest.mark.integration
-    async def test_message_routing_consistency_across_implementations(self):
-        """
-        Test message routing consistency between different router implementations.
-        
-        This ensures that consolidation maintains consistent routing behavior
-        across all message types and user scenarios.
-        """
-        
-        # Test the working MessageRouter
-        from netra_backend.app.websocket_core.handlers import MessageRouter
-        
-        message_router = MessageRouter()
-        
-        # Test different message types that should be handled consistently
-        test_messages = [
+        # Test Case 1: Basic message routing for core message types
+        core_messages = [
             {
-                "type": "chat_message",
-                "content": "User chat message",
-                "user_id": "user_001"
+                "type": "connect",
+                "payload": {"client_info": "test_client"},
+                "user_id": self.test_user_id,
+                "timestamp": time.time()
             },
             {
-                "type": "agent_request",
-                "agent": "triage_agent",
-                "message": "Help with optimization",
-                "user_id": "user_002"
+                "type": "ping", 
+                "payload": {"timestamp": time.time()},
+                "user_id": self.test_user_id,
+                "timestamp": time.time()
             },
             {
-                "type": "tool_execution",
-                "tool": "cost_analyzer",
-                "parameters": {"timeframe": "monthly"},
-                "user_id": "user_003"
+                "type": "user_message",
+                "payload": {"content": "Hello, test message"},
+                "user_id": self.test_user_id,
+                "thread_id": self.test_thread_id,
+                "timestamp": time.time()
             }
         ]
         
+        successful_routes = 0
+        
+        for message in core_messages:
+            try:
+                # Route the message through the consolidated router
+                result = await router.route_message(
+                    user_id=self.test_user_id,
+                    websocket=self.mock_websocket,
+                    raw_message=message
+                )
+                
+                if result:
+                    successful_routes += 1
+                    logger.info(f" PASS:  Message type '{message['type']}' routed successfully")
+                else:
+                    logger.warning(f" WARN:  Message type '{message['type']}' routing returned False")
+                    
+            except Exception as e:
+                logger.error(f" FAIL:  Message type '{message['type']}' routing failed: {e}")
+        
+        # Validate that most messages were routed successfully
+        success_rate = successful_routes / len(core_messages)
+        self.assertGreaterEqual(
+            success_rate, 0.67,  # At least 2/3 should succeed
+            f"Core message routing success rate too low: {success_rate:.2%} ({successful_routes}/{len(core_messages)})"
+        )
+        
+        # Validate that responses were sent
+        self.assertGreater(
+            len(self.sent_messages), 0,
+            "Should have sent responses for successful message routing"
+        )
+        
+        logger.info(f" PASS:  Core functionality integration validated: {success_rate:.2%} success rate")
+    
+    async def test_message_router_handler_registration_integration(self):
+        """
+        INTEGRATION TEST: Verify that custom handlers can be registered and work properly.
+        
+        Tests the handler registration system to ensure consolidation preserves
+        the ability to add custom message handlers.
+        """
+        logger.info(" TESTING:  MessageRouter handler registration integration")
+        
+        from netra_backend.app.websocket_core.handlers import MessageRouter, BaseMessageHandler
+        from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
+        
+        router = MessageRouter()
+        initial_handler_count = len(router.handlers)
+        
+        # Create a custom handler for testing
+        class TestIntegrationHandler(BaseMessageHandler):
+            def __init__(self):
+                super().__init__([MessageType.USER_MESSAGE])
+                self.handled_messages = []
+            
+            async def handle_message(self, user_id: str, websocket, message: WebSocketMessage) -> bool:
+                self.handled_messages.append({
+                    "user_id": user_id,
+                    "message_type": str(message.type),
+                    "payload": message.payload
+                })
+                
+                # Send a test response
+                response = {
+                    "type": "test_handler_response",
+                    "handled_by": "TestIntegrationHandler",
+                    "original_message": str(message.type),
+                    "user_id": user_id
+                }
+                await websocket.send_json(response)
+                return True
+        
+        # Register the custom handler
+        test_handler = TestIntegrationHandler()
+        router.add_handler(test_handler)
+        
+        # Verify handler was registered
+        self.assertEqual(
+            len(router.handlers), initial_handler_count + 1,
+            "Handler count should increase after registration"
+        )
+        self.assertIn(test_handler, router.handlers, "Custom handler should be in handlers list")
+        
+        # Test that the custom handler gets used (custom handlers have precedence)
+        test_message = {
+            "type": "user_message",
+            "payload": {"content": "Test message for custom handler"},
+            "user_id": self.test_user_id,
+            "thread_id": self.test_thread_id,
+            "timestamp": time.time()
+        }
+        
+        result = await router.route_message(
+            user_id=self.test_user_id,
+            websocket=self.mock_websocket,
+            raw_message=test_message
+        )
+        
+        # Verify the message was handled successfully
+        self.assertTrue(result, "Custom handler should handle the message successfully")
+        
+        # Verify the custom handler was actually called
+        self.assertEqual(
+            len(test_handler.handled_messages), 1,
+            "Custom handler should have handled exactly one message"
+        )
+        
+        handled_message = test_handler.handled_messages[0]
+        self.assertEqual(handled_message["user_id"], self.test_user_id)
+        self.assertEqual(handled_message["message_type"], "MessageType.USER_MESSAGE")
+        
+        # Verify response was sent
+        handler_responses = [msg for msg in self.sent_messages if "test_handler_response" in str(msg)]
+        self.assertGreater(
+            len(handler_responses), 0,
+            "Custom handler should have sent a response"
+        )
+        
+        logger.info(" PASS:  Handler registration integration validated")
+    
+    async def test_message_router_quality_message_detection_integration(self):
+        """
+        INTEGRATION TEST: Verify that quality messages are properly detected and handled.
+        
+        Tests the quality message detection system to ensure consolidation preserves
+        quality message routing capabilities even when full integration fails.
+        """
+        logger.info(" TESTING:  MessageRouter quality message detection integration")
+        
+        from netra_backend.app.websocket_core.handlers import MessageRouter
+        
+        router = MessageRouter()
+        
+        # Test quality message detection
+        quality_messages = [
+            {
+                "type": "get_quality_metrics",
+                "payload": {"metric_type": "response_time"},
+                "user_id": self.test_user_id,
+                "thread_id": self.test_thread_id
+            },
+            {
+                "type": "subscribe_quality_alerts",
+                "payload": {"alert_types": ["error", "performance"]},
+                "user_id": self.test_user_id,
+                "thread_id": self.test_thread_id
+            },
+            {
+                "type": "validate_content",
+                "payload": {"content": "Test content for validation"},
+                "user_id": self.test_user_id,
+                "thread_id": self.test_thread_id
+            }
+        ]
+        
+        detection_results = []
         routing_results = []
         
+        for message in quality_messages:
+            # Test quality message detection
+            is_quality = router._is_quality_message_type(message["type"])
+            detection_results.append(is_quality)
+            
+            if is_quality:
+                logger.info(f" PASS:  Quality message '{message['type']}' correctly detected")
+            else:
+                logger.error(f" FAIL:  Quality message '{message['type']}' not detected")
+            
+            # Test routing (may fail gracefully due to missing dependencies)
+            try:
+                result = await router.route_message(
+                    user_id=self.test_user_id,
+                    websocket=self.mock_websocket,
+                    raw_message=message
+                )
+                routing_results.append(result)
+                
+                if result:
+                    logger.info(f" PASS:  Quality message '{message['type']}' routed successfully")
+                else:
+                    logger.info(f" INFO:  Quality message '{message['type']}' routing failed gracefully")
+                    
+            except Exception as e:
+                routing_results.append(False)
+                logger.info(f" INFO:  Quality message '{message['type']}' routing failed with exception: {e}")
+        
+        # Validate detection results - all quality messages should be detected
+        detected_count = sum(detection_results)
+        self.assertEqual(
+            detected_count, len(quality_messages),
+            f"All quality messages should be detected: {detected_count}/{len(quality_messages)}"
+        )
+        
+        # Routing may fail due to missing dependencies, but detection should work
+        logger.info(f" SUMMARY:  Quality message integration:")
+        logger.info(f"   - Detection: {detected_count}/{len(quality_messages)} messages detected")
+        logger.info(f"   - Routing: {sum(routing_results)}/{len(quality_messages)} messages routed")
+        
+        logger.info(" PASS:  Quality message detection integration validated")
+    
+    async def test_message_router_error_handling_integration(self):
+        """
+        INTEGRATION TEST: Verify that error handling works properly during consolidation.
+        
+        Tests error handling and graceful degradation to ensure consolidation
+        doesn't introduce silent failures or crashes.
+        """
+        logger.info(" TESTING:  MessageRouter error handling integration")
+        
+        from netra_backend.app.websocket_core.handlers import MessageRouter
+        
+        router = MessageRouter()
+        
+        # Test Case 1: Invalid message format should be handled gracefully
+        invalid_messages = [
+            {},  # Empty message
+            {"type": None},  # Null type
+            {"type": "unknown_message_type", "payload": {}},  # Unknown type
+            {"malformed": "message"},  # Missing type
+            {"type": "user_message"},  # Missing payload
+        ]
+        
+        error_handling_results = []
+        
+        for i, message in enumerate(invalid_messages):
+            try:
+                result = await router.route_message(
+                    user_id=self.test_user_id,
+                    websocket=self.mock_websocket,
+                    raw_message=message
+                )
+                
+                # Should handle gracefully (return False or True, but not crash)
+                error_handling_results.append(True)
+                logger.info(f" PASS:  Invalid message {i+1} handled gracefully: {result}")
+                
+            except Exception as e:
+                error_handling_results.append(False)
+                logger.error(f" FAIL:  Invalid message {i+1} caused exception: {e}")
+        
+        # All invalid messages should be handled gracefully (no exceptions)
+        graceful_handling_rate = sum(error_handling_results) / len(invalid_messages)
+        self.assertEqual(
+            graceful_handling_rate, 1.0,
+            f"All invalid messages should be handled gracefully: {graceful_handling_rate:.2%}"
+        )
+        
+        # Test Case 2: WebSocket connection issues should be handled
+        disconnected_websocket = Mock()
+        disconnected_websocket.client_state = "DISCONNECTED"
+        disconnected_websocket.send_json = AsyncMock(side_effect=ConnectionError("WebSocket disconnected"))
+        
+        test_message = {
+            "type": "ping",
+            "payload": {"test": "disconnected_websocket"},
+            "user_id": self.test_user_id
+        }
+        
+        try:
+            result = await router.route_message(
+                user_id=self.test_user_id,
+                websocket=disconnected_websocket,
+                raw_message=test_message
+            )
+            
+            # Should handle disconnected WebSocket gracefully
+            logger.info(f" PASS:  Disconnected WebSocket handled gracefully: {result}")
+            
+        except Exception as e:
+            self.fail(f"Disconnected WebSocket should be handled gracefully, but got exception: {e}")
+        
+        logger.info(" PASS:  Error handling integration validated")
+    
+    async def test_message_router_statistics_integration(self):
+        """
+        INTEGRATION TEST: Verify that statistics tracking works during message routing.
+        
+        Tests the statistics system to ensure consolidation preserves metrics
+        and monitoring capabilities.
+        """
+        logger.info(" TESTING:  MessageRouter statistics integration")
+        
+        from netra_backend.app.websocket_core.handlers import MessageRouter
+        
+        router = MessageRouter()
+        
+        # Get initial statistics
+        initial_stats = router.get_stats()
+        initial_messages_routed = initial_stats["messages_routed"]
+        initial_message_types = dict(initial_stats["message_types"])
+        
+        # Route several messages and track statistics
+        test_messages = [
+            {"type": "connect", "payload": {}, "user_id": self.test_user_id},
+            {"type": "ping", "payload": {}, "user_id": self.test_user_id},
+            {"type": "ping", "payload": {}, "user_id": self.test_user_id},  # Duplicate type
+            {"type": "user_message", "payload": {"content": "test"}, "user_id": self.test_user_id},
+        ]
+        
+        routed_count = 0
         for message in test_messages:
             try:
-                # Test that MessageRouter can identify and route the message type
-                # This validates the routing logic is consistent
-                result = self._test_message_routing_capability(message_router, message)
-                routing_results.append({
-                    "message_type": message["type"],
-                    "routing_success": True,
-                    "result": result
-                })
+                result = await router.route_message(
+                    user_id=self.test_user_id,
+                    websocket=self.mock_websocket,
+                    raw_message=message
+                )
+                if result:
+                    routed_count += 1
             except Exception as e:
-                routing_results.append({
-                    "message_type": message["type"],
-                    "routing_success": False,
-                    "error": str(e)
-                })
+                logger.warning(f"Message routing failed: {e}")
         
-        # Analyze routing consistency
-        self._analyze_routing_consistency(routing_results)
+        # Get updated statistics
+        updated_stats = router.get_stats()
+        updated_messages_routed = updated_stats["messages_routed"]
+        updated_message_types = updated_stats["message_types"]
         
-        # Verify basic routing capabilities work
-        successful_routes = [r for r in routing_results if r["routing_success"]]
-        assert len(successful_routes) > 0, "MessageRouter should handle at least some message types"
-
-    @pytest.mark.integration
-    async def test_deprecated_import_migration_integration(self):
-        """
-        Test migration from deprecated import paths during live integration.
-        
-        This validates that migrating consumers from deprecated to canonical
-        imports works without breaking existing functionality.
-        """
-        
-        # Test both import paths work currently
-        from netra_backend.app.websocket_core.handlers import MessageRouter as CanonicalRouter
-        from netra_backend.app.websocket_core import MessageRouter as DeprecatedRouter
-        
-        # Create instances from both import paths
-        canonical_instance = CanonicalRouter()
-        deprecated_instance = DeprecatedRouter()
-        
-        # Test that both instances have identical behavior
-        test_message = {
-            "type": "test_routing",
-            "content": "Testing router equivalence"
-        }
-        
-        # Test routing capability equivalence
-        canonical_result = self._test_message_routing_capability(canonical_instance, test_message)
-        deprecated_result = self._test_message_routing_capability(deprecated_instance, test_message)
-        
-        # Verify identical behavior (critical for safe migration)
-        assert canonical_result == deprecated_result, (
-            "Canonical and deprecated routers must have identical behavior for safe migration"
+        # Validate statistics were updated
+        messages_routed_increase = updated_messages_routed - initial_messages_routed
+        self.assertGreaterEqual(
+            messages_routed_increase, routed_count,
+            f"Messages routed count should increase by at least {routed_count}, got {messages_routed_increase}"
         )
         
-        # Document migration safety
-        self._document_migration_safety_validation(canonical_result, deprecated_result)
-
-    @pytest.mark.integration
-    async def test_websocket_event_delivery_with_consolidated_routing(self):
-        """
-        Test WebSocket event delivery with consolidated message routing.
-        
-        This ensures that message routing consolidation maintains the critical
-        WebSocket events that enable chat functionality business value.
-        """
-        
-        # Import working components
-        from netra_backend.app.websocket_core.handlers import MessageRouter
-        from netra_backend.app.dependencies import get_user_execution_context
-        
-        # Create user context with proper isolation
-        user_context = get_user_execution_context(
-            user_id="event_test_user",
-            thread_id="event_test_thread",
-            run_id="event_test_run"
-        )
-        
-        # Test critical WebSocket events are supported
-        critical_events = [
-            "agent_started",
-            "agent_thinking", 
-            "tool_executing",
-            "tool_completed",
-            "agent_completed"
-        ]
-        
-        message_router = MessageRouter()
-        event_support_results = {}
-        
-        for event_type in critical_events:
-            # Test that the router can handle event-related messages
-            event_message = {
-                "type": f"handle_{event_type}",
-                "event_data": {"event": event_type, "timestamp": "2025-09-15T20:48:00Z"},
-                "user_id": user_context.user_id
-            }
+        # Validate message type tracking
+        for message in test_messages:
+            message_type_key = f"MessageType.{message['type'].upper()}"
             
-            try:
-                # Test event handling capability
-                result = self._test_event_handling_capability(message_router, event_message)
-                event_support_results[event_type] = {
-                    "supported": True,
-                    "result": result
-                }
-            except Exception as e:
-                event_support_results[event_type] = {
-                    "supported": False,
-                    "error": str(e)
-                }
+            # Check if this message type was tracked (may have different key format)
+            type_tracked = any(
+                message['type'].lower() in key.lower() 
+                for key in updated_message_types.keys()
+            )
+            
+            if type_tracked:
+                logger.info(f" PASS:  Message type '{message['type']}' tracked in statistics")
+            else:
+                logger.info(f" INFO:  Message type '{message['type']}' tracking format may differ")
         
-        # Analyze event support
-        self._analyze_event_support(event_support_results)
+        # Validate handler statistics
+        handler_stats = updated_stats.get("handler_stats", {})
+        self.assertIsInstance(handler_stats, dict, "Handler stats should be a dictionary")
         
-        # Verify critical events are supported (essential for business value)
-        supported_events = [event for event, result in event_support_results.items() if result["supported"]]
-        assert len(supported_events) >= len(critical_events) * 0.6, (
-            f"Insufficient critical event support. Supported: {supported_events}"
+        # Validate handler status
+        handler_status = updated_stats.get("handler_status", {})
+        self.assertIn("status", handler_status, "Handler status should have 'status' key")
+        self.assertIn("handler_count", handler_status, "Handler status should have 'handler_count' key")
+        
+        logger.info(f" SUMMARY:  Statistics integration:")
+        logger.info(f"   - Messages routed: +{messages_routed_increase} (expected: +{routed_count})")
+        logger.info(f"   - Message types tracked: {len(updated_message_types)}")
+        logger.info(f"   - Handler count: {handler_status.get('handler_count', 'unknown')}")
+        logger.info(f"   - Handler status: {handler_status.get('status', 'unknown')}")
+        
+        logger.info(" PASS:  Statistics integration validated")
+    
+    async def test_message_router_compatibility_interface_integration(self):
+        """
+        INTEGRATION TEST: Verify that compatibility interfaces work for existing code.
+        
+        Tests compatibility methods to ensure existing code that depends on
+        MessageRouter continues to work after consolidation.
+        """
+        logger.info(" TESTING:  MessageRouter compatibility interface integration")
+        
+        from netra_backend.app.websocket_core.handlers import MessageRouter
+        
+        router = MessageRouter()
+        
+        # Test compatibility methods that may be used by existing code
+        compatibility_tests = []
+        
+        # Test Case 1: add_route method (for test compatibility)
+        try:
+            test_handler = lambda msg: True
+            router.add_route("test_pattern", test_handler)
+            compatibility_tests.append("add_route")
+            logger.info(" PASS:  add_route compatibility method works")
+        except Exception as e:
+            logger.warning(f" WARN:  add_route compatibility method failed: {e}")
+        
+        # Test Case 2: add_middleware method
+        try:
+            test_middleware = lambda req, res, next: next()
+            router.add_middleware(test_middleware)
+            compatibility_tests.append("add_middleware")
+            logger.info(" PASS:  add_middleware compatibility method works")
+        except Exception as e:
+            logger.warning(f" WARN:  add_middleware compatibility method failed: {e}")
+        
+        # Test Case 3: start/stop methods
+        try:
+            router.start()
+            router.stop()
+            compatibility_tests.append("start_stop")
+            logger.info(" PASS:  start/stop compatibility methods work")
+        except Exception as e:
+            logger.warning(f" WARN:  start/stop compatibility methods failed: {e}")
+        
+        # Test Case 4: get_statistics method (vs get_stats)
+        try:
+            stats = router.get_statistics()
+            self.assertIsInstance(stats, dict, "get_statistics should return a dictionary")
+            compatibility_tests.append("get_statistics")
+            logger.info(" PASS:  get_statistics compatibility method works")
+        except Exception as e:
+            logger.warning(f" WARN:  get_statistics compatibility method failed: {e}")
+        
+        # Test Case 5: Quality message handler interface
+        try:
+            test_message = {"type": "get_quality_metrics", "payload": {}}
+            # This may fail, but should not crash
+            await router.handle_message(self.test_user_id, test_message)
+            compatibility_tests.append("handle_message")
+            logger.info(" PASS:  handle_message compatibility method works")
+        except Exception as e:
+            logger.info(f" INFO:  handle_message compatibility method failed gracefully: {e}")
+        
+        # Validate that most compatibility interfaces work
+        success_rate = len(compatibility_tests) / 5  # 5 total compatibility tests
+        
+        logger.info(f" SUMMARY:  Compatibility interface integration:")
+        logger.info(f"   - Working interfaces: {compatibility_tests}")
+        logger.info(f"   - Success rate: {success_rate:.2%} ({len(compatibility_tests)}/5)")
+        
+        # At least 60% of compatibility interfaces should work
+        self.assertGreaterEqual(
+            success_rate, 0.6,
+            f"Compatibility interface success rate too low: {success_rate:.2%}"
         )
-
-    def _test_message_routing_capability(self, router, message: Dict[str, Any]) -> Dict[str, Any]:
-        """Test message routing capability without full infrastructure."""
-        # This tests the router interface and basic functionality
-        result = {
-            "can_route": hasattr(router, 'route_message') or hasattr(router, 'handle_message'),
-            "message_type": message.get("type"),
-            "router_type": type(router).__name__
-        }
         
-        # Test basic router interface
-        if hasattr(router, '__dict__'):
-            result["router_attributes"] = list(router.__dict__.keys())
-        
-        return result
-
-    def _test_event_handling_capability(self, router, event_message: Dict[str, Any]) -> Dict[str, Any]:
-        """Test event handling capability for critical WebSocket events."""
-        return {
-            "event_type": event_message.get("type"),
-            "router_supports_events": hasattr(router, 'handle_event') or hasattr(router, 'route_message'),
-            "message_structure_valid": all(key in event_message for key in ["type", "event_data", "user_id"])
-        }
-
-    def _document_successful_integration(self, component1: str, component2: str) -> None:
-        """Document successful integration between components."""
-        print(f"\n--- Successful Integration Documented ---")
-        print(f"✅ {component1} <-> {component2}")
-        print(f"Integration Status: WORKING")
-        print(f"Business Impact: Chat functionality infrastructure validated")
-
-    def _document_quality_router_import_failure(self, error: str) -> None:
-        """Document QualityMessageRouter import failure for tracking."""
-        print(f"\n--- QualityMessageRouter Import Failure ---")
-        print(f"❌ Import Status: FAILED")
-        print(f"Error: {error}")
-        print(f"Business Impact: Quality routing features unavailable")
-        print(f"Required Action: Fix dependency chain for quality router access")
-
-    def _analyze_routing_consistency(self, results: List[Dict[str, Any]]) -> None:
-        """Analyze message routing consistency across different message types."""
-        print(f"\n--- Message Routing Consistency Analysis ---")
-        
-        total_tests = len(results)
-        successful_routes = len([r for r in results if r["routing_success"]])
-        
-        print(f"Total message types tested: {total_tests}")
-        print(f"Successfully routed: {successful_routes}")
-        print(f"Success rate: {(successful_routes/total_tests)*100:.1f}%")
-        
-        # Show details for each message type
-        for result in results:
-            status = "✅" if result["routing_success"] else "❌"
-            print(f"  {status} {result['message_type']}")
-            if not result["routing_success"]:
-                print(f"    Error: {result.get('error', 'Unknown')}")
-
-    def _document_migration_safety_validation(self, canonical_result: Dict, deprecated_result: Dict) -> None:
-        """Document migration safety validation results."""
-        print(f"\n--- Migration Safety Validation ---")
-        print(f"Canonical router result: {canonical_result}")
-        print(f"Deprecated router result: {deprecated_result}")
-        print(f"Results identical: {canonical_result == deprecated_result}")
-        
-        if canonical_result == deprecated_result:
-            print(f"✅ Migration Safety: VALIDATED - Safe to migrate consumers")
-        else:
-            print(f"❌ Migration Safety: RISK DETECTED - Review differences before migration")
-
-    def _analyze_event_support(self, results: Dict[str, Dict[str, Any]]) -> None:
-        """Analyze WebSocket event support for business value protection."""
-        print(f"\n--- WebSocket Event Support Analysis ---")
-        
-        total_events = len(results)
-        supported_events = len([r for r in results.values() if r["supported"]])
-        
-        print(f"Critical events tested: {total_events}")
-        print(f"Supported events: {supported_events}")
-        print(f"Support rate: {(supported_events/total_events)*100:.1f}%")
-        
-        print(f"\nEvent Support Details:")
-        for event, result in results.items():
-            status = "✅" if result["supported"] else "❌"
-            print(f"  {status} {event}")
-            if not result["supported"]:
-                print(f"    Error: {result.get('error', 'Unknown')}")
+        logger.info(" PASS:  Compatibility interface integration validated")
 
 
-class TestIssue1181MessageRouterRealServiceIntegration(BaseIntegrationTest):
-    """Test MessageRouter with real service dependencies."""
-
-    @pytest.mark.integration
-    @pytest.mark.real_services
-    async def test_message_router_with_real_database_session(self):
-        """
-        Test MessageRouter with real database session for persistent routing.
-        
-        This validates that consolidated routing works with real database
-        operations that support chat persistence and user context.
-        """
-        
-        # Skip if no real database available
-        env = get_env()
-        if not env.get("TEST_WITH_REAL_DB", "false").lower() == "true":
-            pytest.skip("Real database not available for testing")
-        
-        # Import working MessageRouter
-        from netra_backend.app.websocket_core.handlers import MessageRouter
-        
-        # Create router instance
-        message_router = MessageRouter()
-        
-        # Test that router can work with database-dependent operations
-        test_routing_scenarios = [
-            {
-                "scenario": "user_thread_creation",
-                "message": {
-                    "type": "create_thread",
-                    "user_id": "db_test_user",
-                    "title": "Database routing test"
-                }
-            },
-            {
-                "scenario": "message_persistence",
-                "message": {
-                    "type": "persist_message",
-                    "user_id": "db_test_user",
-                    "content": "Test message for database routing"
-                }
-            }
-        ]
-        
-        routing_results = []
-        
-        for scenario in test_routing_scenarios:
-            try:
-                # Test routing capability with database-related messages
-                result = self._test_database_routing_capability(message_router, scenario)
-                routing_results.append({
-                    "scenario": scenario["scenario"],
-                    "success": True,
-                    "result": result
-                })
-            except Exception as e:
-                routing_results.append({
-                    "scenario": scenario["scenario"],
-                    "success": False,
-                    "error": str(e)
-                })
-        
-        # Document database integration results
-        self._document_database_integration_results(routing_results)
-
-    @pytest.mark.integration
-    @pytest.mark.real_services
-    async def test_message_router_with_real_redis_session(self):
-        """
-        Test MessageRouter with real Redis session for caching and state.
-        
-        This validates that consolidated routing works with real Redis
-        operations that support real-time chat state and caching.
-        """
-        
-        # Skip if no real Redis available
-        env = get_env()
-        if not env.get("TEST_WITH_REAL_REDIS", "false").lower() == "true":
-            pytest.skip("Real Redis not available for testing")
-        
-        # Import working MessageRouter
-        from netra_backend.app.websocket_core.handlers import MessageRouter
-        
-        # Create router instance
-        message_router = MessageRouter()
-        
-        # Test Redis-dependent routing scenarios
-        redis_routing_scenarios = [
-            {
-                "scenario": "session_state_routing",
-                "message": {
-                    "type": "update_session_state",
-                    "user_id": "redis_test_user",
-                    "state": {"active": True, "last_message": "test"}
-                }
-            },
-            {
-                "scenario": "cache_invalidation_routing",
-                "message": {
-                    "type": "invalidate_cache",
-                    "user_id": "redis_test_user",
-                    "cache_keys": ["user_preferences", "chat_history"]
-                }
-            }
-        ]
-        
-        redis_results = []
-        
-        for scenario in redis_routing_scenarios:
-            try:
-                # Test routing with Redis-dependent operations
-                result = self._test_redis_routing_capability(message_router, scenario)
-                redis_results.append({
-                    "scenario": scenario["scenario"],
-                    "success": True,
-                    "result": result
-                })
-            except Exception as e:
-                redis_results.append({
-                    "scenario": scenario["scenario"],
-                    "success": False,
-                    "error": str(e)
-                })
-        
-        # Document Redis integration results
-        self._document_redis_integration_results(redis_results)
-
-    def _test_database_routing_capability(self, router, scenario: Dict[str, Any]) -> Dict[str, Any]:
-        """Test database routing capability."""
-        return {
-            "router_type": type(router).__name__,
-            "scenario": scenario["scenario"],
-            "message_type": scenario["message"].get("type"),
-            "supports_database_routing": hasattr(router, 'handle_message') or hasattr(router, 'route_message')
-        }
-
-    def _test_redis_routing_capability(self, router, scenario: Dict[str, Any]) -> Dict[str, Any]:
-        """Test Redis routing capability."""
-        return {
-            "router_type": type(router).__name__,
-            "scenario": scenario["scenario"],
-            "message_type": scenario["message"].get("type"),
-            "supports_redis_routing": hasattr(router, 'handle_message') or hasattr(router, 'route_message')
-        }
-
-    def _document_database_integration_results(self, results: List[Dict[str, Any]]) -> None:
-        """Document database integration test results."""
-        print(f"\n--- Database Integration Results ---")
-        
-        for result in results:
-            status = "✅" if result["success"] else "❌"
-            print(f"{status} {result['scenario']}")
-            if not result["success"]:
-                print(f"    Error: {result.get('error', 'Unknown')}")
-
-    def _document_redis_integration_results(self, results: List[Dict[str, Any]]) -> None:
-        """Document Redis integration test results."""
-        print(f"\n--- Redis Integration Results ---")
-        
-        for result in results:
-            status = "✅" if result["success"] else "❌"
-            print(f"{status} {result['scenario']}")
-            if not result["success"]:
-                print(f"    Error: {result.get('error', 'Unknown')}")
+if __name__ == '__main__':
+    unittest.main()

@@ -68,7 +68,7 @@ class ToolExecutionUserExperienceE2ETest:
         """Connect to staging WebSocket service."""
         try:
             headers = {'Authorization': f'Bearer {self.auth_token}'}
-            websocket = await websockets.connect(self.websocket_url, extra_headers=headers, timeout=10)
+            websocket = await websockets.connect(self.websocket_url, additional_headers=headers, timeout=10)
             logger.info(' PASS:  Connected to staging WebSocket')
             return websocket
         except Exception as e:

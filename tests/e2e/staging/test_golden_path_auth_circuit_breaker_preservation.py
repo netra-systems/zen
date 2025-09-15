@@ -96,8 +96,8 @@ class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
         env = get_env()
         
         # Get staging environment configuration
-        staging_backend_url = env.get("STAGING_BACKEND_URL", "https://netra-staging-backend.example.com")
-        staging_frontend_url = env.get("STAGING_FRONTEND_URL", "https://netra-staging.example.com")
+        staging_backend_url = env.get("STAGING_BACKEND_URL", "https://api.staging.netrasystems.ai")
+        staging_frontend_url = env.get("STAGING_FRONTEND_URL", "https://app.staging.netrasystems.ai")
         
         # Create test user credentials (use staging test account)
         test_user_email = env.get("E2E_TEST_USER_EMAIL", "e2e.test.user@netra.ai")

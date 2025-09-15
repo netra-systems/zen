@@ -86,7 +86,7 @@ class TestGCPRedisWebSocketGoldenPath(SSotAsyncTestCase):
     def setUp(self):
         """Set up test fixtures."""
         super().setUp()
-        self.staging_base_url = "https://netra-staging.example.com"  # Replace with actual staging URL
+        self.staging_base_url = "https://api.staging.netrasystems.ai"
         self.test_websocket_connections = []
         self.test_redis_keys = set()
     

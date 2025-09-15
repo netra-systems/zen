@@ -98,6 +98,135 @@ class TestWebSocketSSotMultipleManagersViolationDetection(SSotBaseTestCase):
             f"Expected only '{expected_single_manager}', but found: {violation_files}. "
             f"This violates SSOT principle - only ONE WebSocket manager should exist."
         )
+
+    def test_issue_1182_websocket_manager_ssot_consolidation(self):
+        """MISSION CRITICAL: Issue #1182 WebSocket Manager SSOT consolidation validation.
+        
+        This test validates the specific SSOT violations identified in Issue #1182:
+        - 3 competing WebSocket manager implementations
+        - Race conditions in initialization 
+        - User isolation failures
+        - DemoWebSocketBridge interface compatibility (Issue #1209)
+        
+        Expected to FAIL initially to demonstrate violations, PASS after consolidation.
+        
+        Business Impact: $500K+ ARR Golden Path functionality protection
+        """
+        logger.info("🚨 Testing Issue #1182 WebSocket Manager SSOT consolidation...")
+        
+        # Track Issue #1182 specific violations
+        issue_1182_violations = []
+        
+        # Violation 1: Check for 3 competing implementations
+        competing_implementations = []
+        websocket_core_files = [
+            "manager.py",           # Compatibility layer
+            "websocket_manager.py", # Primary interface
+            "unified_manager.py"    # Implementation layer
+        ]
+        
+        for file_name in websocket_core_files:
+            file_path = self.websocket_core_path / file_name
+            if file_path.exists():
+                competing_implementations.append(str(file_path))
+                logger.warning(f"🚨 Issue #1182: Found competing implementation {file_name}")
+        
+        if len(competing_implementations) > 1:
+            issue_1182_violations.append(
+                f"Multiple competing WebSocket implementations: {competing_implementations}"
+            )
+        
+        # Violation 2: Check import path fragmentation
+        try:
+            # Test different import paths that should resolve to same class
+            import_paths_to_test = [
+                ('netra_backend.app.websocket_core.manager', 'WebSocketManager'),
+                ('netra_backend.app.websocket_core.websocket_manager', 'WebSocketManager'),
+                ('netra_backend.app.websocket_core.unified_manager', '_UnifiedWebSocketManagerImplementation'),
+            ]
+            
+            resolved_classes = {}
+            for module_path, class_name in import_paths_to_test:
+                try:
+                    module = importlib.import_module(module_path)
+                    if hasattr(module, class_name):
+                        cls = getattr(module, class_name)
+                        class_id = f"{cls.__module__}.{cls.__qualname__}"
+                        resolved_classes[f"{module_path}.{class_name}"] = class_id
+                        logger.info(f"✓ Issue #1182: Import path {module_path}.{class_name} -> {class_id}")
+                except ImportError as e:
+                    logger.warning(f"⚠️ Issue #1182: Import failed {module_path}: {e}")
+            
+            # Check if all imports resolve to same implementation (SSOT requirement)
+            unique_implementations = set(resolved_classes.values())
+            if len(unique_implementations) > 1:
+                issue_1182_violations.append(
+                    f"Import path fragmentation: {len(unique_implementations)} different implementations: {unique_implementations}"
+                )
+                logger.error(f"🚨 Issue #1182: Import fragmentation detected - {unique_implementations}")
+            else:
+                logger.info(f"✓ Issue #1182: All imports resolve to single implementation")
+                
+        except Exception as e:
+            issue_1182_violations.append(f"Import analysis failed: {e}")
+            logger.error(f"❌ Issue #1182: Import analysis failed: {e}")
+        
+        # Violation 3: Check for DemoWebSocketBridge compatibility (Issue #1209)
+        demo_bridge_violations = []
+        try:
+            from netra_backend.app.routes.demo_websocket import execute_real_agent_workflow
+            logger.info("✓ Issue #1209: DemoWebSocketBridge imports successfully")
+            
+            # Test interface compatibility with consolidated manager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            
+            # Check if WebSocketManager has required interface for demo bridge
+            required_methods = ['emit_agent_event', 'get_active_connections', 'send_message']
+            missing_methods = []
+            
+            for method in required_methods:
+                if not hasattr(WebSocketManager, method):
+                    missing_methods.append(method)
+                    demo_bridge_violations.append(f"Missing method: {method}")
+            
+            if missing_methods:
+                issue_1182_violations.append(
+                    f"Issue #1209: DemoWebSocketBridge interface mismatch - missing methods: {missing_methods}"
+                )
+                logger.error(f"🚨 Issue #1209: Missing methods for demo bridge: {missing_methods}")
+            else:
+                logger.info("✓ Issue #1209: DemoWebSocketBridge interface compatible")
+                
+        except ImportError as e:
+            demo_bridge_violations.append(f"Demo bridge import failed: {e}")
+            issue_1182_violations.append(f"Issue #1209: Demo bridge import failed: {e}")
+            logger.error(f"❌ Issue #1209: Demo bridge import failed: {e}")
+        
+        # Store all Issue #1182 violations for analysis
+        self.violation_details['issue_1182_violations'] = issue_1182_violations
+        
+        # Log comprehensive Issue #1182 analysis
+        logger.info(f"📊 Issue #1182 SSOT Consolidation Analysis:")
+        logger.info(f"   Competing implementations: {len(competing_implementations)}")
+        logger.info(f"   Import paths tested: {len(import_paths_to_test)}")
+        logger.info(f"   Total violations detected: {len(issue_1182_violations)}")
+        
+        if issue_1182_violations:
+            logger.error(f"🚨 Issue #1182 VIOLATIONS:")
+            for i, violation in enumerate(issue_1182_violations, 1):
+                logger.error(f"   {i}. {violation}")
+        else:
+            logger.info("✅ Issue #1182: No SSOT violations detected - consolidation complete!")
+        
+        # CRITICAL: This assertion should FAIL initially (violations exist)
+        # After Issue #1182 remediation, this should PASS (violations resolved)
+        assert len(issue_1182_violations) == 0, (
+            f"Issue #1182 WebSocket Manager SSOT violations detected: {len(issue_1182_violations)} violations. "
+            f"Critical business impact: $500K+ ARR Golden Path at risk. "
+            f"Violations: {issue_1182_violations}. "
+            f"Related Issue #1209 DemoWebSocketBridge compatibility: {demo_bridge_violations}. "
+            f"SSOT consolidation required to resolve competing implementations and ensure user isolation."
+        )
     
     def test_detect_websocket_manager_import_duplication_violation(self):
         """CRITICAL: Detect import patterns showing dual manager access (SHOULD FAIL initially)

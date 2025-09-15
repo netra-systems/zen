@@ -101,7 +101,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                 test_token = self.auth_helper.create_test_token(f'golden_path_user_{attempt}_{int(time.time())}', f'golden_path_{attempt}@staging.netra.ai')
                 headers = {'Authorization': f'Bearer {test_token}', 'X-Test-Type': 'e2e', 'X-Test-Environment': 'staging', 'X-Golden-Path-Test': 'true', 'X-Scope-Bug-Test': 'issue_165'}
                 logger.info(f'[U+1F4E1] Connecting to WebSocket: {self.websocket_url}')
-                async with websockets.connect(self.websocket_url, extra_headers=headers, timeout=10) as websocket:
+                async with websockets.connect(self.websocket_url, additional_headers=headers, timeout=10) as websocket:
                     golden_path_metrics['successful_handshakes'] += 1
                     logger.info(f' PASS:  Attempt {attempt + 1}: WebSocket handshake successful')
                     golden_path_message = {'type': 'agent_request', 'agent': 'triage_agent', 'message': f'Golden Path business value test - attempt {attempt + 1}. Please analyze cost optimization opportunities.', 'golden_path_test': True, 'business_context': {'user_tier': 'enterprise', 'monthly_spend': 50000, 'optimization_goal': 'reduce_costs'}}
@@ -206,7 +206,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
             try:
                 test_token = self.auth_helper.create_test_token(f"chat_user_{scenario['name'].lower()}_{int(time.time())}", f"chat_{scenario['name'].lower()}@staging.netra.ai")
                 headers = {'Authorization': f'Bearer {test_token}', 'X-Test-Type': 'e2e', 'X-Chat-Scenario': scenario['name'], 'X-Expected-Value': scenario['expected_value']}
-                async with websockets.connect(self.websocket_url, extra_headers=headers, timeout=15) as websocket:
+                async with websockets.connect(self.websocket_url, additional_headers=headers, timeout=15) as websocket:
                     chat_metrics['successful_connections'] += 1
                     chat_metrics['successful_authentications'] += 1
                     chat_message = {'type': 'agent_request', 'agent': 'triage_agent', 'message': scenario['message'], 'chat_test': True, 'expected_business_value': scenario['expected_value'], 'user_context': {'tier': 'enterprise', 'industry': 'technology', 'team_size': 50}}
@@ -290,7 +290,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
             try:
                 test_token = self.auth_helper.create_test_token(f'event_test_user_{attempt}_{int(time.time())}', f'events_{attempt}@staging.netra.ai')
                 headers = {'Authorization': f'Bearer {test_token}', 'X-Test-Type': 'e2e', 'X-Test-Focus': 'websocket_events', 'X-Event-Test': f'attempt_{attempt + 1}'}
-                async with websockets.connect(self.websocket_url, extra_headers=headers, timeout=15) as websocket:
+                async with websockets.connect(self.websocket_url, additional_headers=headers, timeout=15) as websocket:
                     event_metrics['successful_connections'] += 1
                     event_test_message = {'type': 'agent_request', 'agent': 'triage_agent', 'message': f'Event test {attempt + 1}: Perform comprehensive analysis requiring all agent lifecycle events', 'event_test': True, 'require_all_events': True, 'business_context': {'complexity': 'high', 'expected_tools': ['analysis', 'research'], 'expected_duration': 30}}
                     await websocket.send(json.dumps(event_test_message))

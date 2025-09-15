@@ -33,21 +33,23 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 class TestExecutionEngineConsolidationIntegration(SSotAsyncTestCase):
     """Integration tests for execution engine SSOT consolidation."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test fixtures for integration testing."""
-        super().setUp()
+        super().setup_method(method)
 
         # Test user contexts for isolation validation
         self.test_user_context_1 = UserExecutionContext(
-            user_id="test_user_1",
-            session_id="test_session_1",
-            request_id=f"test_req_{uuid.uuid4()}"
+            user_id=f"user_{uuid.uuid4()}",
+            thread_id=f"thread_{uuid.uuid4()}",
+            run_id=f"run_{uuid.uuid4()}",
+            request_id=f"req_{uuid.uuid4()}"
         )
 
         self.test_user_context_2 = UserExecutionContext(
-            user_id="test_user_2",
-            session_id="test_session_2",
-            request_id=f"test_req_{uuid.uuid4()}"
+            user_id=f"user_{uuid.uuid4()}",
+            thread_id=f"thread_{uuid.uuid4()}", 
+            run_id=f"run_{uuid.uuid4()}",
+            request_id=f"req_{uuid.uuid4()}"
         )
 
         # Track WebSocket events for validation

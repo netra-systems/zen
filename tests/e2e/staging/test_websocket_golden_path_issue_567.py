@@ -31,8 +31,8 @@ class TestGoldenPathWebSocketIssue567(SSotAsyncTestCase):
         """Set up for staging environment testing."""
         super().setUpClass()
         cls._validate_staging_environment()
-        cls.staging_base_url = os.getenv('STAGING_BASE_URL', 'https://netra-staging.example.com')
-        cls.staging_websocket_url = os.getenv('STAGING_WEBSOCKET_URL', 'wss://netra-staging.example.com/ws')
+        cls.staging_base_url = os.getenv('STAGING_BASE_URL', 'https://api.staging.netrasystems.ai')
+        cls.staging_websocket_url = os.getenv('STAGING_WEBSOCKET_URL', 'wss://api.staging.netrasystems.ai/ws')
         cls.test_timeout = 30
 
     @classmethod

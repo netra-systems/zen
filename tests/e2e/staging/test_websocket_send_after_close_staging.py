@@ -242,7 +242,7 @@ class TestWebSocketSendAfterCloseStagingE2E(SSotAsyncTestCase):
                 logger.error(f'No auth token for {user_id}')
                 return None
             websocket_url = f"{self.staging_config['websocket_url']}?token={auth_token}"
-            websocket = await websockets.connect(websocket_url, timeout=10, ping_interval=20, ping_timeout=10, extra_headers={'User-Agent': f'NetraApex-E2E-Test/{user_id}'})
+            websocket = await websockets.connect(websocket_url, timeout=10, ping_interval=20, ping_timeout=10, additional_headers={'User-Agent': f'NetraApex-E2E-Test/{user_id}'})
             logger.info(f'✅ Established staging connection for {user_id}')
             return websocket
         except Exception as e:
