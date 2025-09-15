@@ -30,7 +30,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union, Callable
 from dataclasses import dataclass, field
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.websocket_core.connection_state_machine import (
     ApplicationConnectionState, ConnectionStateMachine, StateTransitionInfo
 )
@@ -54,7 +54,7 @@ try:
 except ImportError:
     CIRCUIT_BREAKER_AVAILABLE = False
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class MessagePriority(str, Enum):

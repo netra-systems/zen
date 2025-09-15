@@ -17,7 +17,9 @@ from typing import Callable, Optional, Any
 
 from pydantic import BaseModel
 
-from netra_backend.app.logging_config import central_logger as logger
+from shared.logging.unified_logging_ssot import get_logger
+
+logger = get_logger(__name__)
 
 
 class BackoffStrategy(str, Enum):

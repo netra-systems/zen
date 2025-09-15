@@ -568,10 +568,20 @@ def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketMan
         
         # No existing manager - create new one following original logic
         try:
-            # PHASE 1 FIX: Check service availability before creation
+            # PHASE 1 FIX: Check service availability before creation  
             try:
                 import asyncio
-                service_available = asyncio.run(check_websocket_service_available())
+                try:
+                    # Try to get the current event loop
+                    loop = asyncio.get_running_loop()
+                    # If there's a running loop, create a task instead of using asyncio.run()
+                    task = loop.create_task(check_websocket_service_available())
+                    # For now, assume service is not available in sync context
+                    service_available = False
+                    logger.debug("Event loop is running, deferring service availability check")
+                except RuntimeError:
+                    # No event loop running, safe to use asyncio.run()
+                    service_available = asyncio.run(check_websocket_service_available())
             except Exception:
                 service_available = False
             if not service_available:
