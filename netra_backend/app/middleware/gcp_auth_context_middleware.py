@@ -202,7 +202,7 @@ class GCPAuthContextMiddleware(BaseHTTPMiddleware):
                 logger.debug("No session data available via any method")
                 
         except Exception as e:
-            logger.error(f"Unexpected error in session data extraction: {e}", exc_info=e)
+            logger.error(f"Unexpected error in session data extraction: {e}", exc_info=True)
         
         return session_data
     
