@@ -721,6 +721,222 @@ class ConfigurationDriftAlerting:
         
         return actions
 
+    def _register_database_timeout_alerts(self) -> None:
+        """Register callback for database timeout performance alerts."""
+        try:
+            register_connection_alert_handler(self._handle_database_timeout_alert)
+            logger.info("Database timeout alert handler registered successfully")
+        except Exception as e:
+            logger.error(f"Failed to register database timeout alert handler: {e}", exc_info=True)
+
+    async def _handle_database_timeout_alert(self, environment: str, alert_data: Dict[str, Any]) -> None:
+        """Handle database connection performance alerts from the connection monitor."""
+        try:
+            alert_level = alert_data.get('level', 'unknown')
+            alert_type = alert_data.get('type', 'unknown')
+            message = alert_data.get('message', 'Unknown database performance issue')
+            value = alert_data.get('value', 0)
+            threshold = alert_data.get('threshold', 0)
+
+            # Convert database alert to configuration drift format for processing
+            drift_data = {
+                "config_key": f"DATABASE_TIMEOUT_{alert_type.upper()}_{environment.upper()}",
+                "environment": environment,
+                "severity": self._map_database_alert_level_to_severity(alert_level),
+                "business_impact_mrr": self._calculate_database_timeout_business_impact(alert_level, environment),
+                "current_value": str(value),
+                "expected_value": f"<{threshold}",
+                "cascade_risk": self._get_database_timeout_cascade_risks(alert_type, environment),
+                "remediation_priority": "immediate" if alert_level == "critical" else "high",
+                "detection_source": "database_connection_monitor",
+                "alert_details": {
+                    "alert_type": alert_type,
+                    "performance_value": value,
+                    "threshold_value": threshold,
+                    "original_message": message
+                }
+            }
+
+            logger.warning(f"Database timeout alert received: {environment} - {alert_type} - {alert_level} - {message}")
+
+            # Process through standard drift alerting pipeline
+            drift_result = {
+                "drift_detection_summary": {
+                    "total_drift_detected": True,
+                    "total_business_impact_mrr": drift_data["business_impact_mrr"]
+                },
+                "detected_drifts": [drift_data],
+                "critical_drifts": [drift_data] if alert_level == "critical" else []
+            }
+
+            await self.process_drift_detection(drift_result)
+
+        except Exception as e:
+            logger.error(f"Failed to handle database timeout alert: {e}", exc_info=True)
+
+    def _map_database_alert_level_to_severity(self, alert_level: str) -> str:
+        """Map database alert level to configuration drift severity."""
+        mapping = {
+            "critical": "critical",
+            "warning": "high",
+            "info": "moderate"
+        }
+        return mapping.get(alert_level.lower(), "moderate")
+
+    def _calculate_database_timeout_business_impact(self, alert_level: str, environment: str) -> float:
+        """Calculate business impact for database timeout issues."""
+        # Database issues affect all users, so impact is high
+        base_impact = {
+            "critical": 80000.0,  # $80K MRR - Critical database issues affect all functionality
+            "warning": 40000.0,   # $40K MRR - Warning level issues cause degraded performance
+            "info": 15000.0       # $15K MRR - Info level issues are potential future problems
+        }
+
+        # Environment multipliers
+        env_multipliers = {
+            "production": 1.5,   # Production issues have higher business impact
+            "staging": 1.0,      # Staging issues affect CI/CD and deployment confidence
+            "development": 0.3,  # Development issues affect team productivity
+            "test": 0.2          # Test environment issues have minimal business impact
+        }
+
+        base = base_impact.get(alert_level.lower(), 15000.0)
+        multiplier = env_multipliers.get(environment.lower(), 1.0)
+
+        return base * multiplier
+
+    def _get_database_timeout_cascade_risks(self, alert_type: str, environment: str) -> List[str]:
+        """Get cascade risks for database timeout issues."""
+        risks = []
+
+        if alert_type == "connection_time":
+            risks.extend([
+                "Application startup failures",
+                "User authentication delays",
+                "API response time degradation",
+                "WebSocket connection establishment failures"
+            ])
+        elif alert_type == "success_rate":
+            risks.extend([
+                "Complete service unavailability",
+                "User data access failures",
+                "Transaction processing errors",
+                "Critical business operation failures"
+            ])
+        elif alert_type == "timeout_violations":
+            risks.extend([
+                "Gradual service degradation",
+                "Increased error rates",
+                "User experience degradation",
+                "Potential cascade to other services"
+            ])
+
+        # Environment-specific risks
+        if environment.lower() == "production":
+            risks.extend([
+                "Customer-facing service disruption",
+                "Revenue impact from user inability to access platform",
+                "SLA violations and potential customer churn"
+            ])
+        elif environment.lower() == "staging":
+            risks.extend([
+                "Deployment pipeline failures",
+                "CI/CD process disruption",
+                "Release confidence degradation"
+            ])
+
+        return risks
+
+    async def check_database_timeout_health(self, environment: str) -> Dict[str, Any]:
+        """Check database timeout health and trigger alerts if needed."""
+        try:
+            # Get performance summary
+            performance_summary = get_connection_performance_summary(environment)
+            vpc_performance = check_vpc_connector_performance(environment)
+
+            health_status = {
+                "environment": environment,
+                "timestamp": time.time(),
+                "database_performance": performance_summary,
+                "vpc_connector_performance": vpc_performance,
+                "overall_status": "healthy"
+            }
+
+            alerts_triggered = []
+
+            # Check for critical database performance issues
+            if performance_summary.get('status') == 'degraded':
+                success_rate = performance_summary.get('success_rate', 100)
+                timeout_violation_rate = performance_summary.get('timeout_violation_rate', 0)
+
+                if success_rate < 80 or timeout_violation_rate > 40:
+                    # Critical database performance issue
+                    alert_data = {
+                        'level': 'critical',
+                        'type': 'database_performance',
+                        'message': f'Critical database performance degradation: {success_rate:.1f}% success rate, {timeout_violation_rate:.1f}% timeout violations',
+                        'value': success_rate,
+                        'threshold': 80.0
+                    }
+                    await self._handle_database_timeout_alert(environment, alert_data)
+                    alerts_triggered.append(alert_data)
+                    health_status["overall_status"] = "critical"
+
+                elif success_rate < 90 or timeout_violation_rate > 20:
+                    # Warning level database performance issue
+                    alert_data = {
+                        'level': 'warning',
+                        'type': 'database_performance',
+                        'message': f'Database performance degradation: {success_rate:.1f}% success rate, {timeout_violation_rate:.1f}% timeout violations',
+                        'value': success_rate,
+                        'threshold': 90.0
+                    }
+                    await self._handle_database_timeout_alert(environment, alert_data)
+                    alerts_triggered.append(alert_data)
+                    health_status["overall_status"] = "warning"
+
+            # Check VPC connector performance for Cloud SQL environments
+            if vpc_performance.get('vpc_connector_required') and vpc_performance.get('status') != 'healthy':
+                vpc_status = vpc_performance.get('status')
+                if vpc_status in ['critical', 'degrading']:
+                    alert_level = 'critical' if vpc_status == 'critical' else 'warning'
+                    alert_data = {
+                        'level': alert_level,
+                        'type': 'vpc_connector_performance',
+                        'message': f'VPC connector performance issue: {vpc_status} - {"; ".join(vpc_performance.get("performance_issues", []))}',
+                        'value': vpc_performance.get('average_connection_time', 0),
+                        'threshold': vpc_performance.get('warning_threshold', 0)
+                    }
+                    await self._handle_database_timeout_alert(environment, alert_data)
+                    alerts_triggered.append(alert_data)
+                    if health_status["overall_status"] == "healthy":
+                        health_status["overall_status"] = alert_level
+
+            health_status["alerts_triggered"] = alerts_triggered
+            health_status["alert_count"] = len(alerts_triggered)
+
+            logger.info(f"Database timeout health check for {environment}: {health_status['overall_status']} - {len(alerts_triggered)} alerts triggered")
+
+            return health_status
+
+        except Exception as e:
+            logger.error(f"Database timeout health check failed for {environment}: {e}", exc_info=True)
+            return {
+                "environment": environment,
+                "timestamp": time.time(),
+                "overall_status": "error",
+                "error": str(e),
+                "alerts_triggered": [],
+                "alert_count": 0
+            }
+
+    def get_database_timeout_alert_rules(self) -> List[AlertRule]:
+        """Get database timeout-specific alert rules."""
+        return [
+            rule for rule in self.alert_rules
+            if "database" in rule.name.lower() or "vpc" in rule.name.lower()
+        ]
+
 
 # Global alerting system instance
 _configuration_drift_alerting: Optional[ConfigurationDriftAlerting] = None
@@ -733,3 +949,37 @@ def get_configuration_drift_alerting() -> ConfigurationDriftAlerting:
         _configuration_drift_alerting = ConfigurationDriftAlerting()
         logger.info("ConfigurationDriftAlerting instance created")
     return _configuration_drift_alerting
+
+
+async def check_all_environments_database_health() -> Dict[str, Any]:
+    """Check database timeout health across all environments."""
+    alerting_system = get_configuration_drift_alerting()
+    environments = ["development", "test", "staging", "production"]
+
+    results = {}
+    total_alerts = 0
+
+    for env in environments:
+        try:
+            health_result = await alerting_system.check_database_timeout_health(env)
+            results[env] = health_result
+            total_alerts += health_result.get("alert_count", 0)
+        except Exception as e:
+            logger.error(f"Failed to check database health for {env}: {e}")
+            results[env] = {
+                "environment": env,
+                "overall_status": "error",
+                "error": str(e)
+            }
+
+    summary = {
+        "timestamp": time.time(),
+        "environments_checked": len(environments),
+        "total_alerts_triggered": total_alerts,
+        "environment_results": results,
+        "overall_system_status": "healthy" if total_alerts == 0 else "degraded"
+    }
+
+    logger.info(f"Database health check summary: {summary['environments_checked']} environments, {total_alerts} alerts, {summary['overall_system_status']} status")
+
+    return summary
