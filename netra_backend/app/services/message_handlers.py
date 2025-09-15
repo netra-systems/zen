@@ -15,7 +15,7 @@ from netra_backend.app.services.service_interfaces import IMessageHandlerService
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-    from netra_backend.app.websocket_core import WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 import json
 
 from netra_backend.app.schemas.registry import (

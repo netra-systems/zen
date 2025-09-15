@@ -4,7 +4,7 @@ import time
 import asyncio
 from datetime import datetime
 from typing import Any, Dict, Optional
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -32,7 +32,7 @@ def real_tool_dispatcher():
 def real_websocket_manager():
     """Use real service instance."""
     'Create mock WebSocket manager for testing.'
-    mock_ws = UnifiedWebSocketManager()
+    mock_ws = WebSocketManager()
     mock_ws.send_json = AsyncMock()
     return mock_ws
 

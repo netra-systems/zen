@@ -83,7 +83,7 @@ class TestSSOTBroadcastStagingValidation(SSotAsyncTestCase):
         golden_path_results = []
         validation_start_time = time.time()
         try:
-            async with websockets.connect(websocket_url, extra_headers=staging_auth_headers, timeout=30, ping_interval=20, ping_timeout=10) as websocket:
+            async with websockets.connect(websocket_url, additional_headers=staging_auth_headers, timeout=30, ping_interval=20, ping_timeout=10) as websocket:
                 connect_message = {'type': 'connect', 'user_id': staging_user, 'environment': 'staging', 'test_type': 'ssot_golden_path_validation', 'validation_metadata': {'issue': '1058', 'consolidation': 'ssot_broadcast_service', 'timestamp': datetime.now(timezone.utc).isoformat()}}
                 await websocket.send(json.dumps(connect_message))
                 connection_response = json.loads(await websocket.recv())
@@ -141,7 +141,7 @@ class TestSSOTBroadcastStagingValidation(SSotAsyncTestCase):
         logger.info(f'Starting real auth integration test: {auth_test_user}')
         auth_validation_results = []
         try:
-            async with websockets.connect(websocket_url, extra_headers=staging_auth_headers, timeout=20) as websocket:
+            async with websockets.connect(websocket_url, additional_headers=staging_auth_headers, timeout=20) as websocket:
                 auth_connect = {'type': 'connect', 'user_id': auth_test_user, 'auth_test': True, 'ssot_validation': 'real_auth_integration'}
                 await websocket.send(json.dumps(auth_connect))
                 auth_response = json.loads(await websocket.recv())
@@ -167,7 +167,7 @@ class TestSSOTBroadcastStagingValidation(SSotAsyncTestCase):
             auth_validation_results.append(('valid_auth', False, str(e)))
         invalid_headers = {'Authorization': 'Bearer invalid_staging_token', 'User-Agent': 'SSOT-Invalid-Auth-Test/1.0'}
         try:
-            async with websockets.connect(websocket_url, extra_headers=invalid_headers, timeout=10) as websocket:
+            async with websockets.connect(websocket_url, additional_headers=invalid_headers, timeout=10) as websocket:
                 invalid_auth_connect = {'type': 'connect', 'user_id': 'invalid_auth_user', 'auth_test': True}
                 await websocket.send(json.dumps(invalid_auth_connect))
                 try:
@@ -211,7 +211,7 @@ class TestSSOTBroadcastStagingValidation(SSotAsyncTestCase):
             user_results = {'user_id': user_id, 'user_index': user_index, 'successful_events': 0, 'failed_events': 0, 'total_latency_ms': 0, 'connection_time_ms': 0, 'errors': []}
             connection_start = time.time()
             try:
-                async with websockets.connect(websocket_url, extra_headers=staging_auth_headers, timeout=15) as websocket:
+                async with websockets.connect(websocket_url, additional_headers=staging_auth_headers, timeout=15) as websocket:
                     connection_end = time.time()
                     user_results['connection_time_ms'] = (connection_end - connection_start) * 1000
                     connect_message = {'type': 'connect', 'user_id': user_id, 'performance_test': True, 'ssot_performance_validation': True}

@@ -601,7 +601,7 @@ class TestWebSocketIdChatFlowE2E(BaseE2ETest):
         headers = {"Authorization": f"Bearer {auth_token}"}
         
         try:
-            websocket = await websockets.connect(websocket_url, extra_headers=headers)
+            websocket = await websockets.connect(websocket_url, additional_headers=headers)
             client = UnifiedWebSocketTestClient(websocket)
             yield client
         finally:
