@@ -47,10 +47,11 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.schemas.agent_models import DeepAgentState, AgentType
-from netra_backend.app.schemas.message_models import MessageRequest, MessageType
+from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.agents.supervisor.agent_registry import AgentType
+from netra_backend.app.routes.agent_route import MessageRequest
+from netra_backend.app.schemas.core_enums import MessageType
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
-from netra_backend.app.core.configuration.services import get_service_config
 
 class WebSocketEventSequenceCapture:
     """Captures and validates WebSocket event sequences in real-time."""
