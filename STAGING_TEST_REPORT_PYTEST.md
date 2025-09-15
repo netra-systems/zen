@@ -1,44 +1,26 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-12 16:27:55
+**Generated:** 2025-09-14 17:32:09
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 1
+- **Total Tests:** 0
 - **Passed:** 0 (0.0%)
-- **Failed:** 1 (100.0%)
+- **Failed:** 0 (0.0%)
 - **Skipped:** 0
-- **Duration:** 3.75 seconds
+- **Duration:** 0.02 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
-### NORMAL Priority Tests
-
-| Test Name | Status | Duration | File |
-|-----------|--------|----------|------|
-| test_golden_path_user_login_to_ai_response | FAIL failed | 2.531s | test_golden_path_user_flow_issue_620.py |
-
-## Failed Tests Details
-
-### FAILED: test_golden_path_user_login_to_ai_response
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_user_flow_issue_620.py
-- **Duration:** 2.531s
-- **Error:** tests\e2e\staging\test_golden_path_user_flow_issue_620.py:78: in test_golden_path_user_login_to_ai_response
-    assert response_time <= self.MAX_RESPONSE_TIME_SECONDS, f"Response time should be ≤{self.MAX_RESPONSE_TIME_SECONDS}s, got {response_time:.2f}s"
-E   AssertionError: Response time should be ≤2.0s, got 2.52s
-E   assert 2.5200624465742383 <= 2.0
-E    +  where 2.0 = <tests.e2e.staging.test_golden_path_user_flow_issue_620.TestGoldenPathUserFlowIssue620 object at 0x000001D3CDA52F90>.MAX_RESPO...
-
 ## Pytest Output Format
 
 ```
-test_golden_path_user_flow_issue_620.py::test_golden_path_user_login_to_ai_response FAILED
 
 ==================================================
-0 passed, 1 failed in 3.75s
+0 passed, 0 failed in 0.02s
 ```
 
 ## Test Coverage Matrix
