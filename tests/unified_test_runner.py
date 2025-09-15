@@ -1100,7 +1100,6 @@ class UnifiedTestRunner:
             self._configure_environment(args)
             
             # PERFORMANCE: Skip service orchestration for fast collection
-            print(f"[DEBUG] fast_collection = {getattr(args, 'fast_collection', None)}")
             if hasattr(args, 'fast_collection') and args.fast_collection:
                 print("[INFO] Fast collection mode - skipping service orchestration")
                 # Skip Docker and service setup
@@ -4522,6 +4521,11 @@ def main():
         pattern = getattr(args, 'pattern', '*')
         if not pattern:
             pattern = '*'
+
+        # Only apply pattern filtering for E2E categories, ignore for others
+        category = getattr(args, 'category', None)
+        if pattern != '*' and category not in {'e2e', 'e2e_critical', 'cypress', 'e2e_full'}:
+            pattern = '*'  # Override pattern for non-E2E categories
 
         # Create proper glob pattern - avoid creating invalid patterns like "**.py"
         if pattern == '*':

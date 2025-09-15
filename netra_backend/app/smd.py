@@ -452,22 +452,24 @@ class StartupOrchestrator:
             self.logger.info("  [U+2713] Step 8: Database schema validated")
             
         except Exception as e:
-            # Apply graceful degradation for Issue #1278
+            # CRITICAL FIX Issue #1278: NO GRACEFUL DEGRADATION in deterministic startup
+            # Database is essential for chat functionality - if database fails, startup MUST fail
             self.logger.error(f"Database setup failed: {e}")
             
-            # Check if this is a timeout-related failure (Issue #1278 pattern)
+            # Track the phase failure properly
+            if hasattr(self, 'current_phase') and self.current_phase == StartupPhase.DATABASE:
+                self._fail_phase(StartupPhase.DATABASE, e)
+                self.logger.error(f"Phase {StartupPhase.DATABASE.value} marked as failed due to database setup failure")
+            
+            # Check if this is a timeout-related failure (Issue #1278 pattern)  
             timeout_occurred = "timeout" in str(e).lower()
+            enhanced_error_msg = f"Phase 3 database setup failed - deterministic startup requires functional database: {e}"
             
-            # Apply graceful degradation
-            from netra_backend.app.infrastructure.smd_graceful_degradation import handle_startup_phase_failure
-            phase_result = await handle_startup_phase_failure(self.app.state, "database", e, timeout_occurred)
+            if timeout_occurred:
+                enhanced_error_msg = f"Phase 3 database timeout failure - Issue #1278 pattern detected: {e}"
             
-            if phase_result.status.value == "completed" and phase_result.fallback_applied:
-                self.logger.warning("  [U+26A0] Step 7: Database operating in degraded mode")
-                return  # Continue with degraded database functionality
-            else:
-                # Fallback failed - this is still a critical failure
-                raise DeterministicStartupError(f"Database setup failed and fallback unsuccessful: {e}") from e
+            # NO GRACEFUL DEGRADATION - Database is critical for chat
+            raise DeterministicStartupError(enhanced_error_msg, original_error=e, phase=StartupPhase.DATABASE) from e
     
     async def _phase4_cache_setup(self) -> None:
         """Phase 4: CACHE - Redis and caching systems."""

@@ -60,18 +60,17 @@ class ParameterConverter:
                 logger.warning(f"Unknown message type: {message_type_str}, defaulting to USER_MESSAGE")
                 message_type = MessageType.USER_MESSAGE
             
-            # Extract thread and run IDs if present
+            # Extract thread ID if present
             thread_id = payload.get("thread_id")
-            run_id = payload.get("run_id")
             
-            # Create payload copy without type field
-            clean_payload = {k: v for k, v in payload.items() if k != "type"}
+            # Create payload copy without type field and without thread_id
+            # Note: run_id stays in payload since WebSocketMessage doesn't have run_id field
+            clean_payload = {k: v for k, v in payload.items() if k not in ["type", "thread_id"]}
             
             return create_standard_message(
                 message_type=message_type,
                 payload=clean_payload,
-                thread_id=thread_id,
-                run_id=run_id
+                thread_id=thread_id
             )
         except Exception as e:
             logger.error(f"Failed to convert payload to WebSocketMessage: {e}")
@@ -238,11 +237,14 @@ class LegacyToSSOTAdapter:
         # Add message type to payload (legacy handlers expect this)
         payload["type"] = message.type.value
         
-        # Add thread and run IDs if present
+        # Add thread ID if present
         if message.thread_id:
             payload["thread_id"] = message.thread_id
-        if message.run_id:
-            payload["run_id"] = message.run_id
+        
+        # Add run_id if it's in the message payload (since WebSocketMessage doesn't have run_id field)
+        if "run_id" in payload:
+            # run_id is already in payload, keep it there
+            pass
         
         return payload
     
