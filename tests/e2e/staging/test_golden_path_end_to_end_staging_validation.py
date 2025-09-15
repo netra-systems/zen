@@ -230,7 +230,7 @@ class TestGoldenPathEndToEndStagingValidation(SSotAsyncTestCase):
             
             async with websockets.connect(
                 self.STAGING_WS_URL,
-                extra_headers=headers,
+                additional_headers=headers,
                 timeout=self.CONNECTION_TIMEOUT
             ) as websocket:
                 
@@ -293,7 +293,7 @@ class TestGoldenPathEndToEndStagingValidation(SSotAsyncTestCase):
             
             async with websockets.connect(
                 self.STAGING_WS_URL,
-                extra_headers=headers,
+                additional_headers=headers,
                 timeout=self.CONNECTION_TIMEOUT
             ) as websocket:
                 
@@ -420,7 +420,7 @@ class TestGoldenPathEndToEndStagingValidation(SSotAsyncTestCase):
                 
                 async with websockets.connect(
                     self.STAGING_WS_URL,
-                    extra_headers=headers,
+                    additional_headers=headers,
                     timeout=self.CONNECTION_TIMEOUT
                 ) as websocket:
                     
@@ -521,7 +521,7 @@ class TestGoldenPathEndToEndStagingValidation(SSotAsyncTestCase):
             
             async with websockets.connect(
                 self.STAGING_WS_URL,
-                extra_headers=headers,
+                additional_headers=headers,
                 timeout=self.CONNECTION_TIMEOUT
             ) as websocket:
                 
@@ -651,7 +651,7 @@ class TestGoldenPathEndToEndStagingValidation(SSotAsyncTestCase):
                 
                 async with websockets.connect(
                     self.STAGING_WS_URL,
-                    extra_headers=headers,
+                    additional_headers=headers,
                     timeout=self.CONNECTION_TIMEOUT
                 ) as websocket:
                     

@@ -181,6 +181,7 @@ ExecutionEngineWithWebSocketEvents = ExecutionEngine  # Alias for tests
 # Re-export core classes for backwards compatibility - Phase 3 cleanup
 __all__ = [
     'ExecutionEngine',
+    'UserExecutionEngine',  # Added for test compatibility
     'UserExecutionContext',
     'AgentExecutionContext',
     'AgentExecutionResult',
