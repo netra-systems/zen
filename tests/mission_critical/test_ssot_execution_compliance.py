@@ -217,15 +217,13 @@ class TestSSOTExecutionCompliance(SSotBaseTestCase):
                 
                 for line_num, line in enumerate(lines, 1):
                     if 'pytest.main(' in line:
-                        pass  # REMOVED_SYNTAX_ERROR: violations.append block
-                        # REMOVED_SYNTAX_ERROR: "file": str(file_path.relative_to(self.project_root)),
-                            "line": line_num,
-                            "violation_type": "DIRECT_PYTEST_EXECUTION",
-                            "description": "Direct pytest.main execution bypasses unified test runner",
-                            "line_number": line_num,
-                            "severity": "CRITICAL"
-                        ))
-                        
+                        violations.append(SSOTViolation(
+                            file_path=str(test_file.relative_to(PROJECT_ROOT)),
+                            violation_type="DIRECT_PYTEST_EXECUTION",
+                            description="Direct pytest.main execution bypasses unified test runner",
+                            line_number=line_num,
+                            severity="CRITICAL"
+                        )) 
             except Exception as e:
                 # Log but don't fail on file reading errors
                 print(f"Warning: Could not analyze {test_file}: {e}")
@@ -343,15 +341,17 @@ class TestSSOTExecutionCompliance(SSotBaseTestCase):
                 
                 # Check for test runner patterns
                 runner_patterns = [
-                    '# MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution:
-                    # Check if this is actually a test runner (not just a test file)
-                    if ('test_runner' in py_file.name.lower() or 
-                        'run_test' in py_file.name.lower() or
-                        (__name__ == "__main__" in content and len(content.split('\n')) > 50)):
-                        
-                        violations.append(SSOTViolation(
+                    'pytest.main', 'unittest.main', 'subprocess.*pytest'
+                ]
+
+                for pattern in runner_patterns:
+                    if pattern in content:
+                        # Check if this is actually a test runner (not just a test file)
+                        if ('test_runner' in py_file.name.lower() or
+                            'run_test' in py_file.name.lower() or
+                            ('__name__ == "__main__"' in content and len(content.split('\n')) > 50)):
+
+                            violations.append(SSOTViolation(
                             file_path=str(py_file.relative_to(PROJECT_ROOT)),
                             violation_type="ALTERNATIVE_TEST_RUNNER",
                             description=f"Alternative test runner found: {py_file.name}",

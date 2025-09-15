@@ -403,9 +403,8 @@ class TestSSOTTestRunnerEnforcement(SSotBaseTestCase):
             
             # Must not contain substantial test logic
             has_substantial_logic = any(pattern in content.lower() for pattern in [
-                '# MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution
+                'class test', 'def test_', 'assert ', 'self.assert'
+            ])
             
             return has_deprecation and has_redirect and not has_substantial_logic
             
@@ -424,9 +423,7 @@ class TestSSOTTestRunnerEnforcement(SSotBaseTestCase):
             if 'unified_test_runner.py' not in content:
                 issues.append("No redirect to SSOT")
             
-            if any(pattern in content.lower() for pattern in ['# MIGRATED: Use SSOT unified test runner
-    # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution:
+            if any(pattern in content.lower() for pattern in ['class test', 'def test_', 'assert ']):
                 issues.append("Contains substantial test logic")
             
             return "; ".join(issues) if issues else "General validation failure"
