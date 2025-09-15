@@ -1063,4 +1063,3 @@
                                                                                                                                                 # REMOVED_SYNTAX_ERROR: '''
 
                                                                                                                                                 # REMOVED_SYNTAX_ERROR: print(dashboard)
-                                                                                                                                                # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v", "--tb=short", "-x", "-m", "critical"])

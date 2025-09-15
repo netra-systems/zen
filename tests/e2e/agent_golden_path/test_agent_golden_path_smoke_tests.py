@@ -29,23 +29,20 @@ SCOPE:
 AGENT_SESSION_ID: agent-session-2025-09-14-1730
 Issue #1081: E2E Agent Golden Path Message Tests Phase 1 Implementation
 """
-
 import asyncio
 import json
 import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-
 import pytest
 import websockets
-
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, AuthenticatedUser
 from tests.e2e.staging_config import StagingTestConfig
 from shared.isolated_environment import get_env
 
-
+@pytest.mark.e2e
 class TestAgentGoldenPathSmoke(SSotAsyncTestCase):
     """
     Fast smoke tests for agent golden path functionality.
@@ -53,31 +50,26 @@ class TestAgentGoldenPathSmoke(SSotAsyncTestCase):
     These tests prioritize speed (<30s each) while validating critical
     business functionality: users send messages -> receive AI responses.
     """
-    
+
     def setup_method(self, method=None):
         """Set up smoke test environment with staging/local detection."""
         super().setup_method(method)
         self.env = get_env()
-        
-        # Auto-detect environment (prefer staging for reliability)
-        test_env = self.env.get("TEST_ENV", "test")
-        if test_env == "staging" or self.env.get("ENVIRONMENT") == "staging":
-            self.test_env = "staging"
+        test_env = self.env.get('TEST_ENV', 'test')
+        if test_env == 'staging' or self.env.get('ENVIRONMENT') == 'staging':
+            self.test_env = 'staging'
             self.staging_config = StagingTestConfig()
             self.websocket_url = self.staging_config.urls.websocket_url
-            self.timeout = 25.0  # Staging timeout with buffer for <30s tests
+            self.timeout = 25.0
         else:
-            self.test_env = "test"
-            self.websocket_url = self.env.get("TEST_WEBSOCKET_URL", "ws://localhost:8002/ws")
-            self.timeout = 20.0  # Local timeout
-            
+            self.test_env = 'test'
+            self.websocket_url = self.env.get('TEST_WEBSOCKET_URL', 'ws://localhost:8002/ws')
+            self.timeout = 20.0
         self.e2e_helper = E2EWebSocketAuthHelper(environment=self.test_env)
-        
-        # Smoke test configuration - optimized for speed
-        self.smoke_timeout = 25.0  # Must complete within 25s for <30s target
-        self.connection_timeout = 10.0  # Quick connection establishment
-        self.message_timeout = 15.0  # Fast message processing
-        
+        self.smoke_timeout = 25.0
+        self.connection_timeout = 10.0
+        self.message_timeout = 15.0
+
     async def test_basic_message_pipeline_smoke(self):
         """
         SMOKE TEST: Basic message pipeline validation (<30s).
@@ -86,113 +78,50 @@ class TestAgentGoldenPathSmoke(SSotAsyncTestCase):
         This is the fundamental business value - users get AI assistance.
         """
         test_start_time = time.time()
-        print(f"[SMOKE] Starting basic message pipeline test (target: <30s)")
-        print(f"[SMOKE] Environment: {self.test_env}")
-        print(f"[SMOKE] WebSocket URL: {self.websocket_url}")
-        
-        # Create test user with minimal setup for speed
-        smoke_user = await self.e2e_helper.create_authenticated_user(
-            email=f"smoke_pipeline_{int(time.time())}@test.com",
-            permissions=["read", "write", "basic_chat"]
-        )
-        
+        print(f'[SMOKE] Starting basic message pipeline test (target: <30s)')
+        print(f'[SMOKE] Environment: {self.test_env}')
+        print(f'[SMOKE] WebSocket URL: {self.websocket_url}')
+        smoke_user = await self.e2e_helper.create_authenticated_user(email=f'smoke_pipeline_{int(time.time())}@test.com', permissions=['read', 'write', 'basic_chat'])
         websocket_headers = self.e2e_helper.get_websocket_headers(smoke_user.jwt_token)
-        
         pipeline_successful = False
         response_received = False
-        
         try:
-            # Quick WebSocket connection with staging optimizations
-            async with websockets.connect(
-                self.websocket_url,
-                additional_headers=websocket_headers,
-                open_timeout=self.connection_timeout,
-                ping_interval=None,  # Disable ping for speed
-                max_size=2**16  # Smaller max size for faster processing
-            ) as websocket:
-                
+            async with websockets.connect(self.websocket_url, additional_headers=websocket_headers, open_timeout=self.connection_timeout, ping_interval=None, max_size=2 ** 16) as websocket:
                 connection_time = time.time() - test_start_time
-                print(f"[SMOKE] WebSocket connected in {connection_time:.2f}s")
-                
-                # Send streamlined message for fast processing
-                smoke_message = {
-                    "type": "smoke_test_message",
-                    "action": "quick_response",
-                    "message": "Quick test - please respond",
-                    "user_id": smoke_user.user_id,
-                    "session_id": f"smoke_{int(time.time())}",
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "priority": "high",  # Hint for fast processing
-                    "smoke_test": True
-                }
-                
+                print(f'[SMOKE] WebSocket connected in {connection_time:.2f}s')
+                smoke_message = {'type': 'smoke_test_message', 'action': 'quick_response', 'message': 'Quick test - please respond', 'user_id': smoke_user.user_id, 'session_id': f'smoke_{int(time.time())}', 'timestamp': datetime.now(timezone.utc).isoformat(), 'priority': 'high', 'smoke_test': True}
                 await websocket.send(json.dumps(smoke_message))
                 pipeline_successful = True
-                
                 message_sent_time = time.time() - test_start_time
-                print(f"[SMOKE] Message sent at {message_sent_time:.2f}s")
-                
-                # Wait for any response indicating the pipeline works
+                print(f'[SMOKE] Message sent at {message_sent_time:.2f}s')
                 try:
-                    response = await asyncio.wait_for(
-                        websocket.recv(), 
-                        timeout=self.message_timeout
-                    )
-                    
+                    response = await asyncio.wait_for(websocket.recv(), timeout=self.message_timeout)
                     response_time = time.time() - test_start_time
-                    print(f"[SMOKE] Response received at {response_time:.2f}s")
-                    
-                    # Validate response is meaningful
+                    print(f'[SMOKE] Response received at {response_time:.2f}s')
                     try:
                         response_data = json.loads(response)
-                        if response_data.get("type") in [
-                            "agent_response", "message_response", "response", 
-                            "agent_started", "agent_completed", "pong"
-                        ]:
+                        if response_data.get('type') in ['agent_response', 'message_response', 'response', 'agent_started', 'agent_completed', 'pong']:
                             response_received = True
                             print(f"[SMOKE] Valid response type: {response_data.get('type')}")
                     except json.JSONDecodeError:
-                        # Even non-JSON response indicates pipeline activity
                         response_received = True
-                        print(f"[SMOKE] Non-JSON response received (still valid): {response[:50]}...")
-                        
+                        print(f'[SMOKE] Non-JSON response received (still valid): {response[:50]}...')
                 except asyncio.TimeoutError:
-                    # Check if we got any WebSocket activity at all
                     elapsed = time.time() - test_start_time
-                    print(f"[SMOKE] No response within {self.message_timeout}s (elapsed: {elapsed:.2f}s)")
-                    
+                    print(f'[SMOKE] No response within {self.message_timeout}s (elapsed: {elapsed:.2f}s)')
         except Exception as e:
             elapsed = time.time() - test_start_time
-            print(f"[SMOKE] Pipeline test failed at {elapsed:.2f}s: {e}")
-            
-            # Skip if service unavailable (not a test failure)
+            print(f'[SMOKE] Pipeline test failed at {elapsed:.2f}s: {e}')
             if self._is_service_unavailable_error(e):
-                pytest.skip(f"WebSocket service unavailable in {self.test_env}: {e}")
-        
-        # Final timing check
+                pytest.skip(f'WebSocket service unavailable in {self.test_env}: {e}')
         total_time = time.time() - test_start_time
-        print(f"[SMOKE] Test completed in {total_time:.2f}s")
-        
-        # Critical assertions for smoke test
-        self.assertTrue(
-            pipeline_successful,
-            f"SMOKE FAILURE: Message pipeline broken - cannot send messages. "
-            f"Core business functionality is down. Time: {total_time:.2f}s"
-        )
-        
-        # Response is preferred but not required for smoke test
+        print(f'[SMOKE] Test completed in {total_time:.2f}s')
+        self.assertTrue(pipeline_successful, f'SMOKE FAILURE: Message pipeline broken - cannot send messages. Core business functionality is down. Time: {total_time:.2f}s')
         if not response_received:
-            print(f"[SMOKE] WARNING: No response received, but pipeline accepts messages")
-        
-        # Ensure we meet the speed requirement
-        self.assertLess(
-            total_time,
-            30.0,
-            f"SMOKE FAILURE: Test took {total_time:.2f}s, exceeds 30s limit"
-        )
-        
-        print(f"[SMOKE] ✓ Basic message pipeline validated in {total_time:.2f}s")
-    
+            print(f'[SMOKE] WARNING: No response received, but pipeline accepts messages')
+        self.assertLess(total_time, 30.0, f'SMOKE FAILURE: Test took {total_time:.2f}s, exceeds 30s limit')
+        print(f'[SMOKE] ✓ Basic message pipeline validated in {total_time:.2f}s')
+
     async def test_critical_websocket_events_delivery_smoke(self):
         """
         SMOKE TEST: Critical WebSocket events delivery validation (<30s).
@@ -201,112 +130,51 @@ class TestAgentGoldenPathSmoke(SSotAsyncTestCase):
         This ensures real-time feedback and user engagement features work.
         """
         test_start_time = time.time()
-        print(f"[SMOKE] Starting WebSocket events delivery test (target: <30s)")
-        
-        # Create test user for event testing
-        events_user = await self.e2e_helper.create_authenticated_user(
-            email=f"smoke_events_{int(time.time())}@test.com",
-            permissions=["read", "write", "real_time_updates"]
-        )
-        
+        print(f'[SMOKE] Starting WebSocket events delivery test (target: <30s)')
+        events_user = await self.e2e_helper.create_authenticated_user(email=f'smoke_events_{int(time.time())}@test.com', permissions=['read', 'write', 'real_time_updates'])
         websocket_headers = self.e2e_helper.get_websocket_headers(events_user.jwt_token)
-        
         events_received = []
         event_delivery_working = False
-        
         try:
-            async with websockets.connect(
-                self.websocket_url,
-                additional_headers=websocket_headers,
-                open_timeout=self.connection_timeout,
-                ping_interval=None,
-                max_size=2**16
-            ) as websocket:
-                
-                # Send message that should trigger events
-                events_message = {
-                    "type": "smoke_events_test",
-                    "action": "trigger_agent_events",
-                    "message": "Test agent events delivery",
-                    "user_id": events_user.user_id,
-                    "expects_events": True,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "smoke_test": True
-                }
-                
+            async with websockets.connect(self.websocket_url, additional_headers=websocket_headers, open_timeout=self.connection_timeout, ping_interval=None, max_size=2 ** 16) as websocket:
+                events_message = {'type': 'smoke_events_test', 'action': 'trigger_agent_events', 'message': 'Test agent events delivery', 'user_id': events_user.user_id, 'expects_events': True, 'timestamp': datetime.now(timezone.utc).isoformat(), 'smoke_test': True}
                 await websocket.send(json.dumps(events_message))
-                
-                # Monitor for any WebSocket events (focus on detection, not completeness)
-                target_events = [
-                    "agent_started", "agent_thinking", "agent_response",
-                    "tool_executing", "tool_completed", "agent_completed",
-                    "message_response", "response", "status_update"
-                ]
-                
-                # Quick event monitoring - stop after first meaningful event
+                target_events = ['agent_started', 'agent_thinking', 'agent_response', 'tool_executing', 'tool_completed', 'agent_completed', 'message_response', 'response', 'status_update']
                 end_time = time.time() + self.message_timeout
                 while time.time() < end_time:
                     try:
-                        message = await asyncio.wait_for(
-                            websocket.recv(), 
-                            timeout=2.0  # Short timeout for rapid checks
-                        )
-                        
+                        message = await asyncio.wait_for(websocket.recv(), timeout=2.0)
                         try:
                             event_data = json.loads(message)
-                            event_type = event_data.get("type", "unknown")
-                            
-                            # Check for any meaningful event
-                            if any(target in event_type for target in target_events):
+                            event_type = event_data.get('type', 'unknown')
+                            if any((target in event_type for target in target_events)):
                                 events_received.append(event_type)
                                 event_delivery_working = True
-                                print(f"[SMOKE] Event detected: {event_type}")
-                                break  # Found event, test successful
-                                
-                            # Also check for any response with meaningful content
-                            if event_data.get("message") or event_data.get("response") or event_data.get("data"):
-                                events_received.append(f"content_{event_type}")
-                                event_delivery_working = True
-                                print(f"[SMOKE] Content response detected: {event_type}")
+                                print(f'[SMOKE] Event detected: {event_type}')
                                 break
-                                
+                            if event_data.get('message') or event_data.get('response') or event_data.get('data'):
+                                events_received.append(f'content_{event_type}')
+                                event_delivery_working = True
+                                print(f'[SMOKE] Content response detected: {event_type}')
+                                break
                         except json.JSONDecodeError:
-                            # Any message indicates WebSocket activity
-                            events_received.append("websocket_activity")
+                            events_received.append('websocket_activity')
                             event_delivery_working = True
-                            print(f"[SMOKE] WebSocket activity detected")
+                            print(f'[SMOKE] WebSocket activity detected')
                             break
-                            
                     except asyncio.TimeoutError:
-                        continue  # Keep monitoring until overall timeout
-                        
+                        continue
         except Exception as e:
             elapsed = time.time() - test_start_time
-            print(f"[SMOKE] Events test failed at {elapsed:.2f}s: {e}")
-            
+            print(f'[SMOKE] Events test failed at {elapsed:.2f}s: {e}')
             if self._is_service_unavailable_error(e):
-                pytest.skip(f"WebSocket service unavailable in {self.test_env}: {e}")
-        
+                pytest.skip(f'WebSocket service unavailable in {self.test_env}: {e}')
         total_time = time.time() - test_start_time
-        print(f"[SMOKE] Events test completed in {total_time:.2f}s")
-        
-        # Smoke test assertion - focused on event delivery capability
-        self.assertTrue(
-            event_delivery_working,
-            f"SMOKE FAILURE: WebSocket event delivery not working. "
-            f"Users cannot see real-time agent progress. "
-            f"Events received: {events_received}. Time: {total_time:.2f}s"
-        )
-        
-        # Speed requirement
-        self.assertLess(
-            total_time,
-            30.0,
-            f"SMOKE FAILURE: Events test took {total_time:.2f}s, exceeds 30s limit"
-        )
-        
-        print(f"[SMOKE] ✓ WebSocket events delivery validated in {total_time:.2f}s")
-    
+        print(f'[SMOKE] Events test completed in {total_time:.2f}s')
+        self.assertTrue(event_delivery_working, f'SMOKE FAILURE: WebSocket event delivery not working. Users cannot see real-time agent progress. Events received: {events_received}. Time: {total_time:.2f}s')
+        self.assertLess(total_time, 30.0, f'SMOKE FAILURE: Events test took {total_time:.2f}s, exceeds 30s limit')
+        print(f'[SMOKE] ✓ WebSocket events delivery validated in {total_time:.2f}s')
+
     async def test_user_isolation_smoke(self):
         """
         SMOKE TEST: User isolation validation (<30s).
@@ -315,143 +183,55 @@ class TestAgentGoldenPathSmoke(SSotAsyncTestCase):
         cross-contamination. Critical for multi-tenant security.
         """
         test_start_time = time.time()
-        print(f"[SMOKE] Starting user isolation test (target: <30s)")
-        
-        # Create two separate users for isolation testing
-        user1 = await self.e2e_helper.create_authenticated_user(
-            email=f"smoke_user1_{int(time.time())}@test.com",
-            permissions=["read", "write"]
-        )
-        
-        user2 = await self.e2e_helper.create_authenticated_user(
-            email=f"smoke_user2_{int(time.time())}@test.com", 
-            permissions=["read", "write"]
-        )
-        
+        print(f'[SMOKE] Starting user isolation test (target: <30s)')
+        user1 = await self.e2e_helper.create_authenticated_user(email=f'smoke_user1_{int(time.time())}@test.com', permissions=['read', 'write'])
+        user2 = await self.e2e_helper.create_authenticated_user(email=f'smoke_user2_{int(time.time())}@test.com', permissions=['read', 'write'])
         headers1 = self.e2e_helper.get_websocket_headers(user1.jwt_token)
         headers2 = self.e2e_helper.get_websocket_headers(user2.jwt_token)
-        
         isolation_successful = False
         concurrent_connections_working = False
-        
         try:
-            # Test concurrent WebSocket connections
+
             async def user_session(user: AuthenticatedUser, headers: dict, user_num: int):
                 """Individual user session for isolation testing."""
-                session_id = f"smoke_isolation_user{user_num}_{int(time.time())}"
-                
+                session_id = f'smoke_isolation_user{user_num}_{int(time.time())}'
                 try:
-                    async with websockets.connect(
-                        self.websocket_url,
-                        additional_headers=headers,
-                        open_timeout=self.connection_timeout,
-                        ping_interval=None,
-                        max_size=2**16
-                    ) as websocket:
-                        
-                        # Send user-specific message
-                        isolation_message = {
-                            "type": "smoke_isolation_test",
-                            "action": f"user{user_num}_message",
-                            "message": f"User {user_num} isolation test message",
-                            "user_id": user.user_id,
-                            "session_id": session_id,
-                            "user_identifier": f"USER_{user_num}",
-                            "timestamp": datetime.now(timezone.utc).isoformat(),
-                            "smoke_test": True
-                        }
-                        
+                    async with websockets.connect(self.websocket_url, additional_headers=headers, open_timeout=self.connection_timeout, ping_interval=None, max_size=2 ** 16) as websocket:
+                        isolation_message = {'type': 'smoke_isolation_test', 'action': f'user{user_num}_message', 'message': f'User {user_num} isolation test message', 'user_id': user.user_id, 'session_id': session_id, 'user_identifier': f'USER_{user_num}', 'timestamp': datetime.now(timezone.utc).isoformat(), 'smoke_test': True}
                         await websocket.send(json.dumps(isolation_message))
-                        
-                        # Brief wait for any response (not required for smoke test)
                         try:
                             response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                            return {
-                                "user": user_num,
-                                "session_id": session_id,
-                                "message_sent": True,
-                                "response_received": bool(response),
-                                "connection_successful": True
-                            }
+                            return {'user': user_num, 'session_id': session_id, 'message_sent': True, 'response_received': bool(response), 'connection_successful': True}
                         except asyncio.TimeoutError:
-                            return {
-                                "user": user_num,
-                                "session_id": session_id,
-                                "message_sent": True,
-                                "response_received": False,
-                                "connection_successful": True
-                            }
-                        
+                            return {'user': user_num, 'session_id': session_id, 'message_sent': True, 'response_received': False, 'connection_successful': True}
                 except Exception as e:
-                    return {
-                        "user": user_num,
-                        "session_id": session_id,
-                        "error": str(e),
-                        "connection_successful": False
-                    }
-            
-            # Run concurrent user sessions
+                    return {'user': user_num, 'session_id': session_id, 'error': str(e), 'connection_successful': False}
             user1_task = asyncio.create_task(user_session(user1, headers1, 1))
             user2_task = asyncio.create_task(user_session(user2, headers2, 2))
-            
-            # Wait for both sessions with overall timeout
-            results = await asyncio.wait_for(
-                asyncio.gather(user1_task, user2_task, return_exceptions=True),
-                timeout=self.message_timeout
-            )
-            
+            results = await asyncio.wait_for(asyncio.gather(user1_task, user2_task, return_exceptions=True), timeout=self.message_timeout)
             user1_result, user2_result = results
-            
-            # Validate isolation
-            if (isinstance(user1_result, dict) and isinstance(user2_result, dict) and 
-                user1_result.get("connection_successful") and user2_result.get("connection_successful")):
-                
+            if isinstance(user1_result, dict) and isinstance(user2_result, dict) and user1_result.get('connection_successful') and user2_result.get('connection_successful'):
                 concurrent_connections_working = True
-                
-                # Check session isolation
-                if (user1_result.get("session_id") != user2_result.get("session_id") and
-                    user1_result.get("user") != user2_result.get("user")):
+                if user1_result.get('session_id') != user2_result.get('session_id') and user1_result.get('user') != user2_result.get('user'):
                     isolation_successful = True
-                    print(f"[SMOKE] User isolation validated: separate sessions created")
+                    print(f'[SMOKE] User isolation validated: separate sessions created')
                 else:
-                    print(f"[SMOKE] WARNING: Session isolation unclear, but connections work")
-                    isolation_successful = True  # For smoke test, connection isolation is sufficient
-                    
+                    print(f'[SMOKE] WARNING: Session isolation unclear, but connections work')
+                    isolation_successful = True
             else:
-                print(f"[SMOKE] User isolation test results: {user1_result}, {user2_result}")
-                
+                print(f'[SMOKE] User isolation test results: {user1_result}, {user2_result}')
         except Exception as e:
             elapsed = time.time() - test_start_time
-            print(f"[SMOKE] Isolation test failed at {elapsed:.2f}s: {e}")
-            
+            print(f'[SMOKE] Isolation test failed at {elapsed:.2f}s: {e}')
             if self._is_service_unavailable_error(e):
-                pytest.skip(f"WebSocket service unavailable in {self.test_env}: {e}")
-        
+                pytest.skip(f'WebSocket service unavailable in {self.test_env}: {e}')
         total_time = time.time() - test_start_time
-        print(f"[SMOKE] Isolation test completed in {total_time:.2f}s")
-        
-        # Smoke test assertions
-        self.assertTrue(
-            concurrent_connections_working,
-            f"SMOKE FAILURE: Concurrent user connections not working. "
-            f"Multi-user capability is broken. Time: {total_time:.2f}s"
-        )
-        
-        self.assertTrue(
-            isolation_successful,
-            f"SMOKE FAILURE: User isolation not validated. "
-            f"Multi-tenant security may be compromised. Time: {total_time:.2f}s"
-        )
-        
-        # Speed requirement
-        self.assertLess(
-            total_time,
-            30.0,
-            f"SMOKE FAILURE: Isolation test took {total_time:.2f}s, exceeds 30s limit"
-        )
-        
-        print(f"[SMOKE] ✓ User isolation validated in {total_time:.2f}s")
-    
+        print(f'[SMOKE] Isolation test completed in {total_time:.2f}s')
+        self.assertTrue(concurrent_connections_working, f'SMOKE FAILURE: Concurrent user connections not working. Multi-user capability is broken. Time: {total_time:.2f}s')
+        self.assertTrue(isolation_successful, f'SMOKE FAILURE: User isolation not validated. Multi-tenant security may be compromised. Time: {total_time:.2f}s')
+        self.assertLess(total_time, 30.0, f'SMOKE FAILURE: Isolation test took {total_time:.2f}s, exceeds 30s limit')
+        print(f'[SMOKE] ✓ User isolation validated in {total_time:.2f}s')
+
     async def test_infrastructure_reliability_smoke(self):
         """
         SMOKE TEST: Infrastructure reliability validation (<30s).
@@ -460,127 +240,61 @@ class TestAgentGoldenPathSmoke(SSotAsyncTestCase):
         Ensures system reliability under various conditions.
         """
         test_start_time = time.time()
-        print(f"[SMOKE] Starting infrastructure reliability test (target: <30s)")
-        
-        reliability_user = await self.e2e_helper.create_authenticated_user(
-            email=f"smoke_reliability_{int(time.time())}@test.com",
-            permissions=["read", "write"]
-        )
-        
+        print(f'[SMOKE] Starting infrastructure reliability test (target: <30s)')
+        reliability_user = await self.e2e_helper.create_authenticated_user(email=f'smoke_reliability_{int(time.time())}@test.com', permissions=['read', 'write'])
         websocket_headers = self.e2e_helper.get_websocket_headers(reliability_user.jwt_token)
-        
         timeout_control_working = False
         graceful_failure_working = False
         connection_recovery_working = False
-        
         try:
-            # Test 1: Timeout control - quick connection validation
             try:
-                async with websockets.connect(
-                    self.websocket_url,
-                    additional_headers=websocket_headers,
-                    open_timeout=5.0  # Short timeout for testing
-                ) as websocket:
+                async with websockets.connect(self.websocket_url, additional_headers=websocket_headers, open_timeout=5.0) as websocket:
                     timeout_control_working = True
-                    print(f"[SMOKE] Timeout control validated - connection established quickly")
-                    
-                    # Test graceful message handling
+                    print(f'[SMOKE] Timeout control validated - connection established quickly')
                     try:
-                        test_message = {
-                            "type": "reliability_test",
-                            "action": "timeout_test",
-                            "message": "Testing reliable message handling",
-                            "user_id": reliability_user.user_id,
-                            "timestamp": datetime.now(timezone.utc).isoformat()
-                        }
-                        
+                        test_message = {'type': 'reliability_test', 'action': 'timeout_test', 'message': 'Testing reliable message handling', 'user_id': reliability_user.user_id, 'timestamp': datetime.now(timezone.utc).isoformat()}
                         await websocket.send(json.dumps(test_message))
-                        
-                        # Brief wait for any response (validates message processing)
                         try:
                             response = await asyncio.wait_for(websocket.recv(), timeout=3.0)
                             graceful_failure_working = True
-                            print(f"[SMOKE] Message processing validated")
+                            print(f'[SMOKE] Message processing validated')
                         except asyncio.TimeoutError:
-                            graceful_failure_working = True  # No response is acceptable for smoke test
-                            print(f"[SMOKE] Message sent successfully (no response required)")
-                            
+                            graceful_failure_working = True
+                            print(f'[SMOKE] Message sent successfully (no response required)')
                     except Exception as msg_error:
-                        print(f"[SMOKE] Message handling test: {msg_error}")
-                        # Connection working is sufficient for smoke test
+                        print(f'[SMOKE] Message handling test: {msg_error}')
                         graceful_failure_working = True
-                        
             except Exception as conn_error:
-                print(f"[SMOKE] Initial connection failed: {conn_error}")
-                
-                # Test connection recovery - attempt second connection
+                print(f'[SMOKE] Initial connection failed: {conn_error}')
                 try:
-                    async with websockets.connect(
-                        self.websocket_url,
-                        additional_headers=websocket_headers,
-                        open_timeout=8.0  # Longer timeout for recovery
-                    ) as retry_websocket:
+                    async with websockets.connect(self.websocket_url, additional_headers=websocket_headers, open_timeout=8.0) as retry_websocket:
                         connection_recovery_working = True
-                        timeout_control_working = True  # Recovery validates timeout handling
-                        graceful_failure_working = True  # Recovery validates failure handling
-                        print(f"[SMOKE] Connection recovery validated")
+                        timeout_control_working = True
+                        graceful_failure_working = True
+                        print(f'[SMOKE] Connection recovery validated')
                 except Exception as recovery_error:
-                    print(f"[SMOKE] Connection recovery failed: {recovery_error}")
-                    
-                    # Check if this is a service availability issue
+                    print(f'[SMOKE] Connection recovery failed: {recovery_error}')
                     if self._is_service_unavailable_error(recovery_error):
-                        pytest.skip(f"WebSocket service unavailable in {self.test_env}: {recovery_error}")
-        
+                        pytest.skip(f'WebSocket service unavailable in {self.test_env}: {recovery_error}')
         except Exception as e:
             elapsed = time.time() - test_start_time
-            print(f"[SMOKE] Reliability test failed at {elapsed:.2f}s: {e}")
-            
+            print(f'[SMOKE] Reliability test failed at {elapsed:.2f}s: {e}')
             if self._is_service_unavailable_error(e):
-                pytest.skip(f"WebSocket service unavailable in {self.test_env}: {e}")
-        
+                pytest.skip(f'WebSocket service unavailable in {self.test_env}: {e}')
         total_time = time.time() - test_start_time
-        print(f"[SMOKE] Reliability test completed in {total_time:.2f}s")
-        
-        # Smoke test assertions - at least one reliability aspect must work
-        reliability_score = sum([
-            timeout_control_working,
-            graceful_failure_working, 
-            connection_recovery_working
-        ])
-        
-        self.assertGreater(
-            reliability_score,
-            0,
-            f"SMOKE FAILURE: No reliability mechanisms working. "
-            f"Infrastructure is unstable. "
-            f"Timeout: {timeout_control_working}, "
-            f"Graceful: {graceful_failure_working}, "
-            f"Recovery: {connection_recovery_working}. "
-            f"Time: {total_time:.2f}s"
-        )
-        
-        # Speed requirement
-        self.assertLess(
-            total_time,
-            30.0,
-            f"SMOKE FAILURE: Reliability test took {total_time:.2f}s, exceeds 30s limit"
-        )
-        
-        print(f"[SMOKE] ✓ Infrastructure reliability validated in {total_time:.2f}s (score: {reliability_score}/3)")
-    
-    # Helper methods
-    
+        print(f'[SMOKE] Reliability test completed in {total_time:.2f}s')
+        reliability_score = sum([timeout_control_working, graceful_failure_working, connection_recovery_working])
+        self.assertGreater(reliability_score, 0, f'SMOKE FAILURE: No reliability mechanisms working. Infrastructure is unstable. Timeout: {timeout_control_working}, Graceful: {graceful_failure_working}, Recovery: {connection_recovery_working}. Time: {total_time:.2f}s')
+        self.assertLess(total_time, 30.0, f'SMOKE FAILURE: Reliability test took {total_time:.2f}s, exceeds 30s limit')
+        print(f'[SMOKE] ✓ Infrastructure reliability validated in {total_time:.2f}s (score: {reliability_score}/3)')
+
     def _is_service_unavailable_error(self, error: Exception) -> bool:
         """Check if error indicates service unavailability rather than test failure."""
         error_msg = str(error).lower()
-        unavailable_indicators = [
-            "connection refused", "connection failed", "connection reset",
-            "no route to host", "network unreachable", "timeout", "refused",
-            "name or service not known", "nodename nor servname provided"
-        ]
-        return any(indicator in error_msg for indicator in unavailable_indicators)
+        unavailable_indicators = ['connection refused', 'connection failed', 'connection reset', 'no route to host', 'network unreachable', 'timeout', 'refused', 'name or service not known', 'nodename nor servname provided']
+        return any((indicator in error_msg for indicator in unavailable_indicators))
 
-
+@pytest.mark.e2e
 class TestAgentGoldenPathSmokeStaging(SSotAsyncTestCase):
     """
     Staging-specific smoke tests with optimizations for GCP Cloud Run.
@@ -588,24 +302,19 @@ class TestAgentGoldenPathSmokeStaging(SSotAsyncTestCase):
     These tests are specifically tuned for the staging environment
     and GCP infrastructure limitations.
     """
-    
+
     def setup_method(self, method=None):
         """Set up staging-optimized smoke tests."""
         super().setup_method(method)
         self.env = get_env()
-        
-        # Force staging environment for this test class
-        self.test_env = "staging"
+        self.test_env = 'staging'
         self.staging_config = StagingTestConfig()
         self.websocket_url = self.staging_config.urls.websocket_url
-        
-        self.e2e_helper = E2EWebSocketAuthHelper(environment="staging")
-        
-        # Staging-optimized timing
-        self.staging_timeout = 20.0  # Conservative for GCP Cloud Run
-        self.connection_timeout = 8.0  # Allow for GCP startup time
-        self.message_timeout = 12.0  # Account for processing delays
-        
+        self.e2e_helper = E2EWebSocketAuthHelper(environment='staging')
+        self.staging_timeout = 20.0
+        self.connection_timeout = 8.0
+        self.message_timeout = 12.0
+
     async def test_staging_websocket_connection_smoke(self):
         """
         STAGING SMOKE TEST: WebSocket connection validation (<30s).
@@ -614,89 +323,40 @@ class TestAgentGoldenPathSmokeStaging(SSotAsyncTestCase):
         with GCP Cloud Run and E2E detection headers.
         """
         test_start_time = time.time()
-        print(f"[STAGING-SMOKE] Testing staging WebSocket connection (target: <30s)")
-        print(f"[STAGING-SMOKE] URL: {self.websocket_url}")
-        
-        staging_user = await self.e2e_helper.create_authenticated_user(
-            email=f"staging_smoke_{int(time.time())}@test.com",
-            permissions=["read", "write", "e2e_test"]
-        )
-        
-        # Get staging-optimized headers with E2E detection
+        print(f'[STAGING-SMOKE] Testing staging WebSocket connection (target: <30s)')
+        print(f'[STAGING-SMOKE] URL: {self.websocket_url}')
+        staging_user = await self.e2e_helper.create_authenticated_user(email=f'staging_smoke_{int(time.time())}@test.com', permissions=['read', 'write', 'e2e_test'])
         websocket_headers = self.e2e_helper.get_websocket_headers(staging_user.jwt_token)
-        
         staging_connection_working = False
         e2e_headers_working = False
-        
         try:
-            # Staging-specific connection parameters
-            async with websockets.connect(
-                self.websocket_url,
-                additional_headers=websocket_headers,
-                open_timeout=self.connection_timeout,
-                ping_interval=None,  # Disable during handshake for speed
-                ping_timeout=None,
-                max_size=2**16,  # Smaller for faster handshake
-                close_timeout=3.0
-            ) as websocket:
-                
+            async with websockets.connect(self.websocket_url, additional_headers=websocket_headers, open_timeout=self.connection_timeout, ping_interval=None, ping_timeout=None, max_size=2 ** 16, close_timeout=3.0) as websocket:
                 connection_time = time.time() - test_start_time
                 staging_connection_working = True
-                
-                # Check if E2E headers enabled fast connection
                 if connection_time < 10.0:
                     e2e_headers_working = True
-                    print(f"[STAGING-SMOKE] Fast connection achieved in {connection_time:.2f}s (E2E headers working)")
+                    print(f'[STAGING-SMOKE] Fast connection achieved in {connection_time:.2f}s (E2E headers working)')
                 else:
-                    print(f"[STAGING-SMOKE] Connection took {connection_time:.2f}s (may need E2E optimization)")
-                
-                # Quick message test
-                staging_message = {
-                    "type": "staging_smoke_test",
-                    "action": "connection_validation",
-                    "message": "Staging connection test",
-                    "user_id": staging_user.user_id,
-                    "staging_test": True,
-                    "timestamp": datetime.now(timezone.utc).isoformat()
-                }
-                
+                    print(f'[STAGING-SMOKE] Connection took {connection_time:.2f}s (may need E2E optimization)')
+                staging_message = {'type': 'staging_smoke_test', 'action': 'connection_validation', 'message': 'Staging connection test', 'user_id': staging_user.user_id, 'staging_test': True, 'timestamp': datetime.now(timezone.utc).isoformat()}
                 await websocket.send(json.dumps(staging_message))
-                print(f"[STAGING-SMOKE] Message sent successfully to staging")
-                
+                print(f'[STAGING-SMOKE] Message sent successfully to staging')
         except Exception as e:
             elapsed = time.time() - test_start_time
-            print(f"[STAGING-SMOKE] Staging connection test failed at {elapsed:.2f}s: {e}")
-            
-            # For staging, connection issues might be environment-specific
-            if "timeout" in str(e).lower() or "refused" in str(e).lower():
-                pytest.skip(f"Staging WebSocket service timeout/unavailable: {e}")
+            print(f'[STAGING-SMOKE] Staging connection test failed at {elapsed:.2f}s: {e}')
+            if 'timeout' in str(e).lower() or 'refused' in str(e).lower():
+                pytest.skip(f'Staging WebSocket service timeout/unavailable: {e}')
             else:
-                # Re-raise non-infrastructure errors
                 raise
-        
         total_time = time.time() - test_start_time
-        print(f"[STAGING-SMOKE] Staging test completed in {total_time:.2f}s")
-        
-        # Staging-specific assertions
-        self.assertTrue(
-            staging_connection_working,
-            f"STAGING FAILURE: Cannot connect to staging WebSocket. "
-            f"Staging environment is down or misconfigured. "
-            f"Time: {total_time:.2f}s"
-        )
-        
-        # Speed requirement
-        self.assertLess(
-            total_time,
-            30.0,
-            f"STAGING FAILURE: Test took {total_time:.2f}s, exceeds 30s limit"
-        )
-        
+        print(f'[STAGING-SMOKE] Staging test completed in {total_time:.2f}s')
+        self.assertTrue(staging_connection_working, f'STAGING FAILURE: Cannot connect to staging WebSocket. Staging environment is down or misconfigured. Time: {total_time:.2f}s')
+        self.assertLess(total_time, 30.0, f'STAGING FAILURE: Test took {total_time:.2f}s, exceeds 30s limit')
         if e2e_headers_working:
-            print(f"[STAGING-SMOKE] ✓ Staging connection with E2E optimization validated in {total_time:.2f}s")
+            print(f'[STAGING-SMOKE] ✓ Staging connection with E2E optimization validated in {total_time:.2f}s')
         else:
-            print(f"[STAGING-SMOKE] ✓ Staging connection validated in {total_time:.2f}s (E2E optimization may need review)")
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--tb=short", "-x"])
+            print(f'[STAGING-SMOKE] ✓ Staging connection validated in {total_time:.2f}s (E2E optimization may need review)')
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

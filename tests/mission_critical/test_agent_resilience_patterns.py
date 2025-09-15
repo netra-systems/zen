@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -69,7 +69,7 @@ from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionR
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.core.resilience.unified_retry_handler import UnifiedRetryHandler, RetryConfig
-from netra_backend.app.services.circuit_breaker import CircuitBreakerState
+from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreakerState as CircuitBreakerState
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
@@ -897,9 +897,9 @@ class TestAgentResiliencePatterns:
         agent = ActionsToMeetGoalsSubAgent()
         
         # Test with failing WebSocket
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        websocket = WebSocketTestHelper()  # Real WebSocket implementation
         failing_ws.emit_thinking = AsyncMock(side_effect=RuntimeError("WebSocket error"))
-        failing_ws.websocket = TestWebSocketConnection()
+        failing_ws.websocket = WebSocketTestHelper()
         
         state = DeepAgentState(user_request="Test WebSocket resilience", thread_id="ws_test")
         context = ExecutionContext(
@@ -1095,7 +1095,7 @@ class TestAgentResiliencePatterns:
         )
         
         # Simulate failure and recovery
-        agent.websocket = TestWebSocketConnection()
+        agent.websocket = WebSocketTestHelper()
         
         start_time = time.time()
         try:
@@ -1121,6 +1121,12 @@ class TestAgentResiliencePatterns:
 
 
 if __name__ == "__main__":
-    # Run resilience pattern tests
-    import pytest
-    pytest.main([__file__, "-v", "--tb=short", "-x"])
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

@@ -184,6 +184,7 @@ async def e2e_websocket_fixture(e2e_authenticated_user_fixture):
             pass  # Best effort cleanup
 
 
+@pytest.mark.e2e
 class TestSSOTMigrationEndToEnd(SSotBaseTestCase):
     """
     SSOT End-to-End Migration Tests - Production-Like Environment Testing.

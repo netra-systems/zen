@@ -31,6 +31,7 @@ from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
+@pytest.mark.unit
 class TestWebSocketAuthAsyncSyntaxValidation(SSotAsyncTestCase):
     """
     Unit test suite to reproduce and validate WebSocket authentication async/await syntax errors.

@@ -45,6 +45,7 @@ from netra_backend.app.core.unified_id_manager import (
 )
 
 
+@pytest.mark.unit
 class TestIDTypeRunGeneration(SSotBaseTestCase):
     """
     Unit tests for IDType.RUN ID generation functionality.

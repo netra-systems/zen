@@ -251,7 +251,7 @@ import pytest
 import asyncpg
 from redis import Redis
 import aiohttp
-from clickhouse_driver import Client as ClickHouseClient
+from clickhouse_connect import get_client as get_clickhouse_client
 from unittest.mock import patch, AsyncMock, MagicMock
 
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"

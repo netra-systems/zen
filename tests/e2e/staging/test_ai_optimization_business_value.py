@@ -44,6 +44,7 @@ pytestmark = [
 ]
 
 
+@pytest.mark.e2e
 class TestAIOptimizationBusinessValue:
     """
     Complete E2E test suite for AI optimization chat delivering real business value.

@@ -460,38 +460,12 @@
 
 
     # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-        # Run validation and print report
-        # REMOVED_SYNTAX_ERROR: validator = ErrorHandlingSSOTValidator()
-        # REMOVED_SYNTAX_ERROR: all_valid, errors, warnings = validator.run_full_validation()
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+        # REMOVED_SYNTAX_ERROR: print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+        # REMOVED_SYNTAX_ERROR: print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+        # REMOVED_SYNTAX_ERROR: print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
-        # REMOVED_SYNTAX_ERROR: print("=" * 80)
-        # REMOVED_SYNTAX_ERROR: print("ERROR HANDLING SSOT VALIDATION REPORT")
-        # REMOVED_SYNTAX_ERROR: print("=" * 80)
-
-        # REMOVED_SYNTAX_ERROR: if all_valid:
-            # REMOVED_SYNTAX_ERROR: print("[PASS] ALL VALIDATIONS PASSED")
-            # REMOVED_SYNTAX_ERROR: else:
-                # REMOVED_SYNTAX_ERROR: print("formatted_string")
-
-                # REMOVED_SYNTAX_ERROR: if errors:
-                    # REMOVED_SYNTAX_ERROR: print(" )
-                    # REMOVED_SYNTAX_ERROR: === ERRORS ===")
-                    # REMOVED_SYNTAX_ERROR: for i, error in enumerate(errors, 1):
-                        # REMOVED_SYNTAX_ERROR: print("formatted_string")
-
-                        # REMOVED_SYNTAX_ERROR: if warnings:
-                            # REMOVED_SYNTAX_ERROR: print(" )
-                            # REMOVED_SYNTAX_ERROR: === WARNINGS ===")
-                            # REMOVED_SYNTAX_ERROR: for i, warning in enumerate(warnings, 1):
-                                # REMOVED_SYNTAX_ERROR: print("formatted_string")
-
-                                # REMOVED_SYNTAX_ERROR: print(" )
-                                # REMOVED_SYNTAX_ERROR: " + "=" * 80)
-
-                                # Run pytest if available
-                                # REMOVED_SYNTAX_ERROR: try:
-                                    # REMOVED_SYNTAX_ERROR: import pytest
-                                    # REMOVED_SYNTAX_ERROR: sys.exit(pytest.main([__file__, "-v", "--tb=short"]))
-                                    # REMOVED_SYNTAX_ERROR: except ImportError:
-                                        # REMOVED_SYNTAX_ERROR: print("pytest not available, skipping test execution")
-                                        # REMOVED_SYNTAX_ERROR: sys.exit(0 if all_valid else 1)
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

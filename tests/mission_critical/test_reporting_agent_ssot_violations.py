@@ -557,4 +557,3 @@
 
             # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
                 # Run tests with verbose output
-                # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v", "-s", "--tb=short"])

@@ -50,6 +50,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 
 logger = logging.getLogger(__name__)
 
+@pytest.mark.e2e
 class TestDataPersistenceRecovery:
     """
     E2E Tests for Data Persistence and Recovery in Staging Environment.
@@ -166,7 +167,7 @@ class TestDataPersistenceRecovery:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=15.0
             ) as websocket:
                 
@@ -258,7 +259,7 @@ class TestDataPersistenceRecovery:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=15.0
             ) as websocket:
                 
@@ -432,7 +433,7 @@ class TestDataPersistenceRecovery:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=15.0
             ) as websocket:
                 
@@ -508,7 +509,7 @@ class TestDataPersistenceRecovery:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=15.0
             ) as websocket:
                 
@@ -688,7 +689,7 @@ class TestDataPersistenceRecovery:
                 
                 async with websockets.connect(
                     self.staging_config.urls.websocket_url,
-                    extra_headers=headers,
+                    additional_headers=headers,
                     open_timeout=20.0
                 ) as websocket:
                     

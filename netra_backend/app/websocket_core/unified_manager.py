@@ -20,233 +20,34 @@ from shared.types.core_types import (
 # Import UnifiedIDManager for SSOT ID generation
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
+# ISSUE #965 REMEDIATION: Import shared types and functions from types.py to resolve circular dependency
+from netra_backend.app.websocket_core.types import (
+    WebSocketConnection,
+    WebSocketManagerMode,
+    serialize_message_safely as _serialize_message_safely,
+    _get_enum_key_representation
+)
+
+# ISSUE #1011 REMEDIATION: Import SSOT MessageQueue for consolidation
+from netra_backend.app.websocket_core.message_queue import (
+    get_message_queue_registry,
+    MessageQueue,
+    MessagePriority
+)
+
 # Import the protocol after it's defined to avoid circular imports
 logger = get_logger(__name__)
 
-
-class WebSocketManagerMode(Enum):
-    """DEPRECATED: WebSocket manager modes - CONSOLIDATING TO UNIFIED SSOT.
-    
-    ALL MODES NOW REDIRECT TO UNIFIED MODE FOR SSOT COMPLIANCE.
-    User isolation is handled through UserExecutionContext, not manager modes.
-    
-    MIGRATION NOTICE: This enum will be removed in v2.0. 
-    Use WebSocketManager directly without specifying mode.
-    """
-    UNIFIED = "unified"        # SSOT: Single unified mode with UserExecutionContext isolation
-    ISOLATED = "unified"       # DEPRECATED: Redirects to UNIFIED (isolation via UserExecutionContext)
-    EMERGENCY = "unified"      # DEPRECATED: Redirects to UNIFIED (graceful degradation built-in)
-    DEGRADED = "unified"       # DEPRECATED: Redirects to UNIFIED (auto-recovery built-in)
+# WEBSOCKET MANAGER SSOT CONSOLIDATION: Connection limits enforcement
+MAX_CONNECTIONS_PER_USER = 10  # Maximum WebSocket connections per user to prevent resource exhaustion
 
 
-def _get_enum_key_representation(enum_key: Enum) -> str:
-    """
-    Get string representation for enum keys in dictionaries.
-    
-    For enum keys, we use different strategies based on enum type:
-    - WebSocketState enums: Use lowercase names for consistency ("open" vs "1")
-    - Integer enums (IntEnum): Use string value for readability ("1" vs "first")  
-    - String/text enums: Use lowercase names for readability ("option_a" vs "OPTION_A")
-    
-    Args:
-        enum_key: Enum object to convert to string key
-        
-    Returns:
-        String representation suitable for JSON dict keys
-    """
-    if hasattr(enum_key, 'name') and hasattr(enum_key, 'value'):
-        # WEBSOCKET STATE HANDLING: Check if this is a WebSocket state enum
-        enum_name = str(enum_key.name).upper()
-        websocket_state_names = {'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'CONNECTED', 'DISCONNECTED'}
-        
-        # Check if it's from a WebSocket framework module or has WebSocket-like class name
-        module_name = getattr(enum_key.__class__, '__module__', '')
-        framework_modules = ['starlette.websockets', 'fastapi.websockets', 'websockets']
-        is_framework_websocket = any(framework_mod in module_name for framework_mod in framework_modules)
-        
-        class_name = enum_key.__class__.__name__
-        is_websocket_class = 'websocket' in class_name.lower() and 'state' in class_name.lower()
-        
-        # For WebSocket state enums, always use lowercase name for keys
-        if (is_framework_websocket or 
-            (is_websocket_class and enum_name in websocket_state_names)):
-            return str(enum_key.name).lower()
-        
-        # For integer-valued non-WebSocket enums, use the string representation of the value
-        # This makes {"1": "initialized"} instead of {"first": "initialized"}
-        elif isinstance(enum_key.value, int):
-            return str(enum_key.value)
-        else:
-            # For string/other enums, use lowercase names for better JSON readability
-            # This makes {"option_a": "selected"} instead of {"OPTION_A": "selected"}
-            return str(enum_key.name).lower()
-    else:
-        # Fallback to string representation
-        return str(enum_key)
+# ISSUE #965 REMEDIATION: WebSocketManagerMode enum moved to types.py to break circular dependency
+# ISSUE #965 REMEDIATION: _get_enum_key_representation function moved to types.py to break circular dependency
 
 
-def _serialize_message_safely(message: Any) -> Dict[str, Any]:
-    """
-    Safely serialize message data for WebSocket transmission with comprehensive fallback strategies.
-    
-    CRITICAL FIX: Handles all serialization edge cases including:
-    - Enum objects (WebSocketState, etc.)  ->  converted to string values
-    - Pydantic models  ->  model_dump(mode='json') for datetime handling  
-    - Complex objects with to_dict() method
-    - Datetime objects  ->  ISO string format
-    - Dataclasses  ->  converted to dict
-    - Fallback to string representation for unhandled types
-    
-    Args:
-        message: Any message object that needs JSON serialization
-        
-    Returns:
-        JSON-serializable dictionary
-        
-    Raises:
-        TypeError: Only if all fallback strategies fail (should be extremely rare)
-    """
-    # Quick path for already serializable dicts
-    if isinstance(message, dict):
-        try:
-            # Test if it's already JSON serializable
-            json.dumps(message)
-            return message
-        except (TypeError, ValueError):
-            # Dict contains non-serializable objects, need to process recursively
-            # Process both keys AND values for enum objects
-            result = {}
-            for key, value in message.items():
-                # Convert enum keys consistently with enum value handling
-                if isinstance(key, Enum):
-                    # For WebSocketState enums, use name.lower() to match value handling
-                    try:
-                        from starlette.websockets import WebSocketState as StarletteWebSocketState
-                        if isinstance(key, StarletteWebSocketState):
-                            safe_key = key.name.lower()
-                        else:
-                            safe_key = _get_enum_key_representation(key)
-                    except (ImportError, AttributeError):
-                        try:
-                            from fastapi.websockets import WebSocketState as FastAPIWebSocketState  
-                            if isinstance(key, FastAPIWebSocketState):
-                                safe_key = key.name.lower()
-                            else:
-                                safe_key = _get_enum_key_representation(key)
-                        except (ImportError, AttributeError):
-                            safe_key = _get_enum_key_representation(key)
-                else:
-                    safe_key = key
-                # Recursively serialize values
-                result[safe_key] = _serialize_message_safely(value)
-            return result
-    
-    # CRITICAL FIX: Handle WebSocketState enum specifically (from FastAPI/Starlette)
-    # CLOUD RUN FIX: More resilient import handling to prevent startup failures
-    try:
-        from starlette.websockets import WebSocketState as StarletteWebSocketState
-        if isinstance(message, StarletteWebSocketState):
-            return message.name.lower()  # CONNECTED  ->  "connected"
-    except (ImportError, AttributeError) as e:
-        logger.debug(f"Starlette WebSocketState import failed (non-critical): {e}")
-    
-    try:
-        from fastapi.websockets import WebSocketState as FastAPIWebSocketState  
-        if isinstance(message, FastAPIWebSocketState):
-            return message.name.lower()  # CONNECTED  ->  "connected"
-    except (ImportError, AttributeError) as e:
-        logger.debug(f"FastAPI WebSocketState import failed (non-critical): {e}")
-    
-    # Handle enum objects - CONSISTENT LOGIC: Return .value for generic enums  
-    if isinstance(message, Enum):
-        # WEBSOCKET STATE HANDLING: Check if this enum represents WebSocket state
-        # This includes both framework enums and test enums with WebSocket-like names
-        if hasattr(message, 'name') and hasattr(message, 'value'):
-            # Check for WebSocket state behavior by enum name pattern
-            enum_name = str(message.name).upper()
-            websocket_state_names = {'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'CONNECTED', 'DISCONNECTED'}
-            
-            # Also check if it's from a WebSocket framework module
-            module_name = getattr(message.__class__, '__module__', '')
-            framework_modules = ['starlette.websockets', 'fastapi.websockets', 'websockets']
-            is_framework_websocket = any(framework_mod in module_name for framework_mod in framework_modules)
-            
-            # Also check if the class name suggests it's a WebSocket state enum
-            class_name = message.__class__.__name__
-            is_websocket_class = 'websocket' in class_name.lower() and 'state' in class_name.lower()
-            
-            # Treat as WebSocket state if: 
-            # 1. From framework module, OR
-            # 2. Has WebSocket-like class name AND websocket state name
-            if (is_framework_websocket or 
-                (is_websocket_class and enum_name in websocket_state_names)):
-                return str(message.name).lower()
-        
-        # For all other enums, return the value
-        return message.value if hasattr(message, 'value') else str(message)
-    
-    # Handle Pydantic models with proper datetime serialization
-    if hasattr(message, 'model_dump'):
-        try:
-            return message.model_dump(mode='json')
-        except Exception as e:
-            logger.warning(f"Pydantic model_dump(mode='json') failed: {e}, trying without mode")
-            try:
-                return message.model_dump()
-            except Exception as e2:
-                logger.warning(f"Pydantic model_dump failed completely: {e2}, using string fallback")
-                # Fall through to the string fallback at the end of the function
-    
-    # Handle objects with to_dict method (UserExecutionContext, etc.)
-    if hasattr(message, 'to_dict'):
-        return message.to_dict()
-    
-    # Handle dataclasses
-    if hasattr(message, '__dataclass_fields__'):
-        from dataclasses import asdict
-        # Convert dataclass to dict, then recursively serialize the result
-        dict_data = asdict(message)
-        return _serialize_message_safely(dict_data)
-    
-    # Handle datetime objects
-    if hasattr(message, 'isoformat'):
-        return message.isoformat()
-    
-    # Handle lists and tuples recursively
-    if isinstance(message, (list, tuple)):
-        return [_serialize_message_safely(item) for item in message]
-    
-    # Handle sets (convert to list)
-    if isinstance(message, set):
-        return [_serialize_message_safely(item) for item in message]
-    
-    # Test direct JSON serialization for basic types
-    try:
-        json.dumps(message)
-        return message
-    except (TypeError, ValueError):
-        pass
-    
-    # Final fallback - convert to string (prevents total failure)
-    logger.warning(f"Using string fallback for object of type {type(message)}: {message}")
-    return str(message)
-
-
-@dataclass
-class WebSocketConnection:
-    """Represents a WebSocket connection with type safety."""
-    connection_id: str
-    user_id: str
-    websocket: Any
-    connected_at: datetime
-    metadata: Dict[str, Any] = None
-    thread_id: Optional[str] = None
-    
-    def __post_init__(self):
-        """Validate connection data after initialization."""
-        # Validate user_id is properly formatted
-        if self.user_id:
-            self.user_id = ensure_user_id(self.user_id)
+# ISSUE #965 REMEDIATION: _serialize_message_safely function moved to types.py to break circular dependency
+# ISSUE #965 REMEDIATION: WebSocketConnection dataclass moved to types.py to break circular dependency
 
 
 class RegistryCompat:
@@ -358,17 +159,54 @@ class _UnifiedWebSocketManagerImplementation:
 
         return False
 
+    def __new__(cls, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, user_context: Optional[Any] = None, config: Optional[Dict[str, Any]] = None, _ssot_authorization_token: Optional[str] = None):
+        """
+        ISSUE #889 REMEDIATION: User-scoped singleton implementation.
+        
+        This ensures that multiple instantiations with the same user context
+        return the same instance, preventing SSOT violations and user isolation failures.
+        """
+        # Import registry functions (avoid circular imports)
+        try:
+            from netra_backend.app.websocket_core.websocket_manager import (
+                _get_user_key, _USER_MANAGER_REGISTRY, _REGISTRY_LOCK
+            )
+            
+            # Extract user key for registry lookup
+            user_key = _get_user_key(user_context)
+            
+            # Check if instance already exists for this user
+            if user_key in _USER_MANAGER_REGISTRY:
+                existing_instance = _USER_MANAGER_REGISTRY[user_key]
+                logger.debug(f"Returning existing manager instance for user {user_key} from __new__")
+                return existing_instance
+                
+        except ImportError:
+            # Registry not available - continue with normal instantiation
+            logger.debug("Registry not available in __new__, continuing with normal instantiation")
+            pass
+        
+        # Create new instance using normal object creation
+        return super().__new__(cls)
+
     def __init__(self, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, user_context: Optional[Any] = None, config: Optional[Dict[str, Any]] = None, _ssot_authorization_token: Optional[str] = None):
         """Initialize UnifiedWebSocketManager - ALL MODES CONSOLIDATED TO UNIFIED.
         
         SSOT MIGRATION NOTICE: All WebSocket modes now use unified initialization.
         User isolation is achieved through UserExecutionContext, not separate modes.
         
+        ISSUE #889 REMEDIATION: If this instance was returned from registry in __new__,
+        skip initialization to prevent reinitializing an existing instance.
+        
         Args:
             mode: DEPRECATED - All modes redirect to UNIFIED (kept for backward compatibility)
             user_context: User execution context for proper user isolation
             config: Configuration dictionary (optional)
         """
+        # Check if this instance is already initialized (returned from registry)
+        if hasattr(self, '_initialized'):
+            logger.debug(f"Instance already initialized for user {getattr(user_context, 'user_id', 'unknown')}, skipping __init__")
+            return
         # ISSUE #712 FIX: SSOT Validation Integration
         from netra_backend.app.websocket_core.ssot_validation_enhancer import (
             validate_websocket_manager_creation,
@@ -424,8 +262,35 @@ class _UnifiedWebSocketManagerImplementation:
                         self.request_id = "test_request_824"
                 user_context = TestUserContext()
 
-        # DEPRECATED: Mode is ignored - all instances use unified behavior
-        self.mode = WebSocketManagerMode.UNIFIED  # Force unified mode
+        # ISSUE #889 FIX: Store mode parameter to prevent state sharing between users
+        # Create isolated wrapper to prevent shared references
+        # Python enums share object instances, so we wrap them to create unique objects
+        class IsolatedModeWrapper:
+            """Wrapper to prevent enum object sharing between manager instances."""
+            def __init__(self, enum_value):
+                self._value = enum_value.value if hasattr(enum_value, 'value') else enum_value
+                self._name = enum_value.name if hasattr(enum_value, 'name') else str(enum_value)
+
+            @property
+            def value(self):
+                return self._value
+
+            @property
+            def name(self):
+                return self._name
+
+            def __str__(self):
+                return f"WebSocketManagerMode.{self._name}"
+
+            def __repr__(self):
+                return f"<WebSocketManagerMode.{self._name}: '{self._value}'>"
+
+            def __eq__(self, other):
+                if hasattr(other, 'value'):
+                    return self._value == other.value
+                return self._value == other
+
+        self.mode = IsolatedModeWrapper(mode)
         self.user_context = user_context
         self.config = config or {}
 
@@ -485,6 +350,22 @@ class _UnifiedWebSocketManagerImplementation:
         self.on_event_emitted: Optional[callable] = None
         self._event_listeners: List[callable] = []
 
+        # ISSUE #889 REMEDIATION: Register this instance in the user-scoped registry
+        try:
+            from netra_backend.app.websocket_core.websocket_manager import (
+                _get_user_key, _USER_MANAGER_REGISTRY
+            )
+            
+            user_key = _get_user_key(user_context)
+            _USER_MANAGER_REGISTRY[user_key] = self
+            logger.debug(f"Registered new manager instance for user {user_key} in registry")
+            
+        except ImportError:
+            logger.debug("Registry not available, skipping registration")
+
+        # Mark this instance as initialized
+        self._initialized = True
+        
         logger.info("UnifiedWebSocketManager initialized with SSOT unified mode (all legacy modes consolidated)")
 
     def _validate_user_isolation(self, user_id: str, operation: str = "unknown") -> bool:
@@ -551,8 +432,11 @@ class _UnifiedWebSocketManagerImplementation:
     
     def _initialize_unified_mode(self):
         """Initialize unified mode with full feature set."""
-        # Enhanced error handling and recovery system
-        self._message_recovery_queue: Dict[str, List[Dict]] = {}  # user_id -> [messages]
+        # ISSUE #1011 REMEDIATION: Replace competing queue implementations with SSOT MessageQueue registry
+        self._message_queue_registry = get_message_queue_registry()
+        self._connection_message_queues: Dict[str, MessageQueue] = {}  # connection_id -> MessageQueue
+
+        # Maintain minimal backward compatibility for error recovery
         self._connection_error_count: Dict[str, int] = {}  # user_id -> error_count
         self._last_error_time: Dict[str, datetime] = {}  # user_id -> last_error_timestamp
         
@@ -580,15 +464,15 @@ class _UnifiedWebSocketManagerImplementation:
         """Initialize isolated mode for user-specific operation."""
         self.user_context = user_context
         self._connection_ids: Set[str] = set()
-        
+
+        # ISSUE #1011 REMEDIATION: Use SSOT MessageQueue registry for isolated mode as well
+        self._message_queue_registry = get_message_queue_registry()
+        self._connection_message_queues: Dict[str, MessageQueue] = {}  # connection_id -> MessageQueue
+
         # Private connection state for isolation
         self._private_connections: Dict[str, Any] = {}
-        self._private_message_queue: List[Dict] = []
         self._private_error_count = 0
         self._is_healthy = True
-        
-        # Initialize minimal recovery system
-        self._message_recovery_queue: Dict[str, List[Dict]] = {}
         self._connection_error_count: Dict[str, int] = {}
         self._last_error_time: Dict[str, datetime] = {}
         self._error_recovery_enabled = True
@@ -743,7 +627,26 @@ class _UnifiedWebSocketManagerImplementation:
             logger.critical(f" ALERT:  GOLDEN PATH CONNECTION VALIDATION FAILURE: Connection {connection.connection_id} validation failed for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
             logger.critical(f" SEARCH:  VALIDATION FAILURE CONTEXT: {json.dumps(validation_failure_context, indent=2)}")
             raise
-            
+
+        # WEBSOCKET MANAGER SSOT CONSOLIDATION: Enforce connection limits per user
+        current_user_connections = len(self._user_connections.get(connection.user_id, set()))
+        if current_user_connections >= MAX_CONNECTIONS_PER_USER:
+            connection_limit_context = {
+                "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
+                "current_connections": current_user_connections,
+                "max_allowed": MAX_CONNECTIONS_PER_USER,
+                "connection_id": connection.connection_id,
+                "rejection_reason": "MAX_CONNECTIONS_PER_USER exceeded",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "golden_path_impact": "CONNECTION_REJECTED - User exceeded connection limit"
+            }
+
+            logger.warning(f" LIMIT: CONNECTION REJECTED: User {connection.user_id[:8] if connection.user_id else 'unknown'} exceeded MAX_CONNECTIONS_PER_USER ({MAX_CONNECTIONS_PER_USER})")
+            logger.warning(f" SEARCH: CONNECTION LIMIT CONTEXT: {json.dumps(connection_limit_context, indent=2)}")
+
+            # Raise specific exception for connection limit exceeded
+            raise ValueError(f"User {connection.user_id} exceeded maximum connections per user limit ({MAX_CONNECTIONS_PER_USER}). Current: {current_user_connections}")
+
         # Use user-specific lock for connection operations
         user_lock = await self._get_user_connection_lock(connection.user_id)
         
@@ -759,9 +662,19 @@ class _UnifiedWebSocketManagerImplementation:
                 })
                 self._event_isolation_tokens[connection.connection_id] = isolation_token
                 
-                # Initialize user-specific event queue if not exists
-                if connection.user_id not in self._user_event_queues:
-                    self._user_event_queues[connection.user_id] = asyncio.Queue(maxsize=1000)  # Prevent overflow
+                # ISSUE #1011 REMEDIATION: Create SSOT MessageQueue for this connection
+                message_queue = self._message_queue_registry.create_message_queue(
+                    connection_id=connection.connection_id,
+                    user_id=connection.user_id,
+                    max_size=1000
+                )
+                self._connection_message_queues[connection.connection_id] = message_queue
+
+                # Set up message processor for the queue
+                message_queue.set_message_processor(self._process_queued_message)
+
+                # Initialize user tracking for backward compatibility
+                if connection.user_id not in self._cross_user_detection:
                     self._cross_user_detection[connection.user_id] = 0
                 
                 # Validate no cross-user contamination
@@ -823,11 +736,35 @@ class _UnifiedWebSocketManagerImplementation:
                 logger.info(f" PASS:  GOLDEN PATH CONNECTION ADDED: Connection {connection.connection_id} added for user {connection.user_id[:8] if connection.user_id else 'unknown'}... in {connection_duration*1000:.2f}ms")
                 logger.info(f" SEARCH:  CONNECTION SUCCESS CONTEXT: {json.dumps(connection_success_context, indent=2)}")
                 logger.info(f"Added connection {connection.connection_id} for user {connection.user_id} (thread-safe)")
-                
-                # CRITICAL FIX: Process any queued messages for this user after connection established
-                # This prevents race condition where messages are sent before connection is ready
-                # Store the user_id for processing outside the lock to prevent deadlock
-                process_recovery = connection.user_id in self._message_recovery_queue
+
+    # ISSUE #1011 REMEDIATION: Add SSOT MessageQueue processor method
+    async def _process_queued_message(self, queued_message):
+        """Process a message from the SSOT MessageQueue"""
+        from netra_backend.app.websocket_core.message_queue import QueuedMessage
+
+        if isinstance(queued_message, QueuedMessage):
+            # Convert QueuedMessage to the format expected by send_to_user
+            await self.send_to_user(
+                user_id=queued_message.user_id,
+                message=queued_message.message_data,
+                message_type=queued_message.message_type
+            )
+        else:
+            # Handle legacy message format for backward compatibility
+            user_id = queued_message.get('user_id')
+            message_data = queued_message.get('message', queued_message)
+            message_type = queued_message.get('type', 'unknown')
+
+            await self.send_to_user(
+                user_id=user_id,
+                message=message_data,
+                message_type=message_type
+            )
+
+        # CRITICAL FIX: Process any queued messages for this user after connection established
+        # This prevents race condition where messages are sent before connection is ready
+        # Store the user_id for processing outside the lock to prevent deadlock
+        process_recovery = connection.user_id in self._message_recovery_queue
                 
         # DEADLOCK FIX: Process recovery queue OUTSIDE the lock to prevent circular dependency
         # add_connection -> _process_queued_messages -> send_to_user -> user_lock (deadlock)
@@ -933,6 +870,15 @@ class _UnifiedWebSocketManagerImplementation:
                     connection = self._connections[connection_id]
                     del self._connections[connection_id]
                     
+                    # ISSUE #1011 REMEDIATION: Clean up SSOT MessageQueue
+                    if connection_id in self._connection_message_queues:
+                        message_queue = self._connection_message_queues[connection_id]
+                        await message_queue.close()
+                        del self._connection_message_queues[connection_id]
+                        # Also remove from registry
+                        await self._message_queue_registry.remove_message_queue(connection_id)
+                        logger.debug(f"Cleaned up SSOT MessageQueue for connection {connection_id}")
+
                     # PHASE 1 SSOT REMEDIATION: Enhanced cleanup with pattern-agnostic matching
                     if connection.user_id in self._user_connections:
                         # Remove exact match first
@@ -2018,37 +1964,53 @@ class _UnifiedWebSocketManagerImplementation:
         except Exception as e:
             return {'diagnostics_error': str(e)}
     
-    async def _store_failed_message(self, user_id: str, message: Dict[str, Any], 
+    async def _store_failed_message(self, user_id: str, message: Dict[str, Any],
                                    failure_reason: str) -> None:
-        """Store failed message for potential recovery."""
+        """Store failed message for potential recovery using SSOT MessageQueue."""
         if not self._error_recovery_enabled:
             return
-        
+
         try:
-            if user_id not in self._message_recovery_queue:
-                self._message_recovery_queue[user_id] = []
-            
-            # Add failure metadata
-            failed_message = {
-                **message,
-                'failure_reason': failure_reason,
-                'failed_at': datetime.now(timezone.utc).isoformat(),
-                'recovery_attempts': 0
-            }
-            
-            self._message_recovery_queue[user_id].append(failed_message)
-            
+            # ISSUE #1011 REMEDIATION: Use SSOT MessageQueue instead of legacy recovery queue
+            # Find all message queues for this user's connections
+            user_connection_ids = self.get_user_connections(user_id)
+
+            if user_connection_ids:
+                # Enqueue the failed message to all user's connection queues
+                for connection_id in user_connection_ids:
+                    if connection_id in self._connection_message_queues:
+                        message_queue = self._connection_message_queues[connection_id]
+
+                        # Determine priority based on failure reason
+                        priority = MessagePriority.HIGH if failure_reason == "startup_pending" else MessagePriority.NORMAL
+
+                        await message_queue.enqueue_message(
+                            message_data=message,
+                            message_type=message.get('type', 'recovery'),
+                            priority=priority,
+                            message_id=f"recovery_{user_id}_{int(time.time())}"
+                        )
+
+                logger.info(f"Queued failed message to {len(user_connection_ids)} SSOT MessageQueues for user {user_id}: {failure_reason}")
+            else:
+                # Fall back to legacy storage if no connections exist
+                if user_id not in self._message_recovery_queue:
+                    self._message_recovery_queue[user_id] = []
+
+                failed_message = {
+                    **message,
+                    'failure_reason': failure_reason,
+                    'failed_at': datetime.now(timezone.utc).isoformat(),
+                    'recovery_attempts': 0
+                }
+
+                self._message_recovery_queue[user_id].append(failed_message)
+                logger.info(f"Stored failed message in legacy queue for user {user_id}: {failure_reason}")
+
             # Increment error count
             self._connection_error_count[user_id] = self._connection_error_count.get(user_id, 0) + 1
             self._last_error_time[user_id] = datetime.now(timezone.utc)
-            
-            # Limit queue size to prevent memory issues
-            max_queue_size = 50
-            if len(self._message_recovery_queue[user_id]) > max_queue_size:
-                self._message_recovery_queue[user_id] = self._message_recovery_queue[user_id][-max_queue_size:]
-            
-            logger.info(f"Stored failed message for user {user_id}: {failure_reason}")
-            
+
         except Exception as e:
             logger.error(f"Failed to store failed message for recovery: {e}")
     
@@ -3858,6 +3820,145 @@ class _UnifiedWebSocketManagerImplementation:
         logger.info(f"Cleanup complete: {cleaned_count} stale connections removed")
         return cleaned_count
 
+    async def shutdown(self):
+        """
+        Shutdown the WebSocket manager and cleanup all resources.
+        
+        This method provides a complete shutdown interface for the WebSocket manager,
+        cleaning up connections, background tasks, and other resources.
+        
+        ISSUE #1199 Phase 2: Adds missing shutdown interface method for test compatibility.
+        
+        Business Value:
+        - Ensures proper resource cleanup in production and test environments
+        - Prevents resource leaks and memory issues
+        - Provides clean shutdown interface for testing frameworks
+        """
+        logger.info("Starting WebSocket manager shutdown...")
+        
+        try:
+            # 1. Shutdown background monitoring first
+            await self.shutdown_background_monitoring()
+            
+            # 2. Clean up all connections
+            connection_ids = list(self._connections.keys())
+            for connection_id in connection_ids:
+                try:
+                    await self.remove_connection(connection_id)
+                except Exception as e:
+                    logger.warning(f"Error removing connection {connection_id} during shutdown: {e}")
+            
+            # 3. Clear user mappings
+            self._user_connections.clear()
+            
+            # 4. Clear event tracking and queues
+            if hasattr(self, '_event_tracking'):
+                self._event_tracking.clear()
+            
+            if hasattr(self, '_event_queues'):
+                self._event_queues.clear()
+                
+            if hasattr(self, '_user_event_queues'):
+                self._user_event_queues.clear()
+            
+            # 5. Clear coordination and transaction data
+            if hasattr(self, '_pending_events'):
+                self._pending_events.clear()
+                
+            if hasattr(self, '_transaction_coordinator'):
+                self._transaction_coordinator = None
+            
+            # 6. Clear metrics and health tracking
+            if hasattr(self, '_metrics'):
+                self._metrics.clear()
+                
+            if hasattr(self, '_health_status'):
+                self._health_status = {'healthy': False, 'shutdown': True}
+            
+            logger.info("WebSocket manager shutdown completed successfully")
+            
+        except Exception as e:
+            logger.error(f"Error during WebSocket manager shutdown: {e}")
+            raise
+
+    # =================== GOLDEN PATH INTERFACE METHODS ===================
+    # These methods provide the interface expected by tests and Golden Path flows
+    
+    async def connect(self, user_id: str, websocket: Any, connection_id: str = None, thread_id: str = None) -> Any:
+        """
+        Connect a WebSocket for a user (Golden Path interface method).
+        
+        CRITICAL: This method provides the interface expected by Golden Path tests
+        and WebSocket validation suites. It's an alias to connect_user() to maintain
+        backward compatibility with existing test expectations.
+        
+        Business Value Justification:
+        - Segment: ALL (Free -> Enterprise)  
+        - Business Goal: Enable reliable Golden Path WebSocket connections
+        - Value Impact: Critical for $500K+ ARR chat functionality
+        - Revenue Impact: Foundation for all AI-powered user interactions
+        
+        Args:
+            user_id: User identifier for the connection
+            websocket: WebSocket instance to connect
+            connection_id: Optional connection ID to use
+            thread_id: Optional thread ID for connection
+            
+        Returns:
+            Connection information or connection ID
+        """
+        logger.debug(f"[Golden Path] Connecting user {user_id[:8]}... via connect() interface")
+        return await self.connect_user(user_id, websocket, connection_id, thread_id)
+    
+    async def disconnect(self, user_id: str, websocket: Any = None, code: int = 1000, reason: str = "Normal closure") -> None:
+        """
+        Disconnect a WebSocket for a user (Golden Path interface method).
+        
+        CRITICAL: This method provides the interface expected by Golden Path tests
+        and WebSocket validation suites. It's an alias to disconnect_user() to maintain
+        backward compatibility with existing test expectations.
+        
+        Business Value Justification:
+        - Segment: ALL (Free -> Enterprise)
+        - Business Goal: Enable clean WebSocket disconnections for Golden Path
+        - Value Impact: Critical for proper connection lifecycle management
+        - Revenue Impact: Prevents connection leaks affecting system stability
+        
+        Args:
+            user_id: User identifier for the disconnection
+            websocket: Optional WebSocket instance to disconnect
+            code: WebSocket close code (default: 1000 for normal closure)
+            reason: Reason for disconnection
+        """
+        logger.debug(f"[Golden Path] Disconnecting user {user_id[:8]}... via disconnect() interface")
+        if websocket:
+            await self.disconnect_user(user_id, websocket, code, reason)
+        else:
+            # Disconnect all connections for the user if no specific websocket provided
+            await self.handle_disconnection(user_id, websocket)
+    
+    async def emit_agent_event(self, user_id: Union[str, UserID], event_type: str, data: Dict[str, Any]) -> None:
+        """
+        Emit agent event to user connections (Golden Path interface method).
+        
+        CRITICAL: This method provides the interface expected by Golden Path tests
+        and agent execution flows. It's an alias to send_agent_event() to maintain
+        backward compatibility with existing test and agent execution expectations.
+        
+        Business Value Justification:
+        - Segment: ALL (Free -> Enterprise)
+        - Business Goal: Enable real-time agent progress updates (90% of platform value)
+        - Value Impact: Critical for chat functionality and user experience
+        - Revenue Impact: Core method for $500K+ ARR AI interaction delivery
+        
+        Args:
+            user_id: Target user ID for the event
+            event_type: Type of agent event (agent_started, agent_thinking, tool_executing, etc.)
+            data: Event payload data
+        """
+        logger.debug(f"[Golden Path] Emitting agent event '{event_type}' to user {str(user_id)[:8]}... via emit_agent_event() interface")
+        await self.send_agent_event(user_id, event_type, data)
+
 
 # SECURITY FIX: Replace singleton with factory pattern
 #  ALERT:  SECURITY FIX: Singleton pattern completely removed to prevent multi-user data leakage
@@ -3887,10 +3988,10 @@ class _UnifiedWebSocketManagerImplementation:
 # Backward compatibility exports REMOVED to achieve SSOT compliance
 # CANONICAL PATH: Use netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
-# UnifiedWebSocketManager export removed - use WebSocketManager from websocket_manager.py
-# UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation  # REMOVED
+# UnifiedWebSocketManager export - RESTORED for Issue #1236 import fix
+UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
 
-__all__ = ['WebSocketConnection', '_serialize_message_safely', 'WebSocketManagerMode']
+__all__ = ['WebSocketConnection', '_serialize_message_safely', 'WebSocketManagerMode', 'UnifiedWebSocketManager']
 
 # SSOT Consolidation: Log that direct imports are not supported
 import sys

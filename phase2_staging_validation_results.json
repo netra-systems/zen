@@ -1,0 +1,19 @@
+{
+  "service_health": {
+    "health_status": "healthy",
+    "startup_status": "healthy",
+    "startup_complete": true
+  },
+  "api_availability": {
+    "openapi_available": true,
+    "agent_endpoints_count": 29,
+    "v2_execute_available": true
+  },
+  "readiness_probe": {
+    "readiness_status": "degraded",
+    "postgresql_status": "degraded",
+    "clickhouse_status": "healthy"
+  },
+  "overall_status": "PASS",
+  "success_rate": "3/3"
+}

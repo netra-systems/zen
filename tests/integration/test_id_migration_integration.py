@@ -55,6 +55,7 @@ from test_framework.fixtures.auth_fixtures import auth_service_client
 from test_framework.database_test_utilities import DatabaseTestUtilities
 
 
+@pytest.mark.integration
 class TestCrossServiceIDConsistency(SSotAsyncTestCase, BaseIntegrationTest):
     """Integration tests for ID consistency across service boundaries."""
     

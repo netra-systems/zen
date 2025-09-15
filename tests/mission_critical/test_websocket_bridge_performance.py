@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -278,7 +278,7 @@ class TestWebSocketBridgePerformance:
         factory.configure(
             connection_pool=connection_pool,
             agent_registry=None,  # Using per-request pattern
-            websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            websocket = WebSocketTestHelper()  # Real WebSocket implementation
         )
         
         return factory
@@ -1080,7 +1080,7 @@ if __name__ == "__main__":
         factory.configure(
             connection_pool=connection_pool,
             agent_registry=None,
-            websocket = TestWebSocketConnection()  # Real WebSocket implementation
+            websocket = WebSocketTestHelper()  # Real WebSocket implementation
         )
         
         test_instance = TestWebSocketBridgePerformance()

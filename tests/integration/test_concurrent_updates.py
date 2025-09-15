@@ -24,6 +24,7 @@ def auth_token():
         return response.json()["access_token"]
 
 
+@pytest.mark.integration
 class TestConcurrentUpdates:
 
     @pytest.mark.asyncio

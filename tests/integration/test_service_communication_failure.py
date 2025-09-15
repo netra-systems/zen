@@ -144,6 +144,7 @@ def auth_token():
         pytest.skip(f"Cannot obtain auth token from real auth service: {e}")
 
 
+@pytest.mark.integration
 class TestServiceCommunicationFailure:
     """Test real service communication failures and resilience patterns."""
     

@@ -26,7 +26,6 @@ GitHub Issue: #1059 Agent Golden Path Messages E2E Test Creation - Phase 1
 ENHANCEMENT: Business value validation, multi-agent orchestration, response quality >0.7 threshold
 Target Coverage: 15% → 35% improvement
 """
-
 import asyncio
 import pytest
 import time
@@ -39,15 +38,10 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 import httpx
 from collections import defaultdict
-
-# SSOT imports
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from tests.e2e.staging_config import get_staging_config, is_staging_available
-
-# Auth and WebSocket utilities
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
-
 
 @pytest.mark.e2e
 @pytest.mark.gcp_staging
@@ -66,56 +60,28 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
     @classmethod
     def setup_class(cls):
         """Setup staging environment configuration and dependencies."""
-        # Initialize staging configuration
         cls.staging_config = get_staging_config()
         cls.logger = logging.getLogger(__name__)
-        
-        # Skip if staging not available
         if not is_staging_available():
-            pytest.skip("Staging environment not available")
-        
-        # Initialize auth helper for JWT management
-        cls.auth_helper = E2EAuthHelper(environment="staging")
-        
-        # Initialize WebSocket test utilities
+            pytest.skip('Staging environment not available')
+        cls.auth_helper = E2EAuthHelper(environment='staging')
         cls.websocket_helper = WebSocketTestHelper()
-        
-        # Test user configuration
-        cls.test_user_id = f"golden_path_user_{int(time.time())}"
-        cls.test_user_email = f"golden_path_test_{int(time.time())}@netra-testing.ai"
-        
-        # PHASE 1 ENHANCEMENT: Business value validation framework
-        cls.business_value_keywords = {
-            "cost_optimization": ["cost", "savings", "reduce", "optimization", "efficiency", "budget"],
-            "technical_accuracy": ["specific", "implement", "configure", "setup", "deploy"],
-            "actionability": ["step", "recommend", "suggest", "should", "consider", "strategy"],
-            "quantification": ["percent", "%", "dollar", "$", "reduction", "improvement", "roi"]
-        }
-        
-        # Response quality scoring thresholds (Issue #1059)
-        cls.QUALITY_THRESHOLD_HIGH = 0.7  # For enterprise/complex scenarios
-        cls.QUALITY_THRESHOLD_MEDIUM = 0.5  # For standard scenarios
-        cls.MIN_SUBSTANTIVE_LENGTH = 200  # Minimum chars for business value
-        
-        cls.logger.info(f"Agent message pipeline e2e tests initialized for staging with business value framework")
+        cls.test_user_id = f'golden_path_user_{int(time.time())}'
+        cls.test_user_email = f'golden_path_test_{int(time.time())}@netra-testing.ai'
+        cls.business_value_keywords = {'cost_optimization': ['cost', 'savings', 'reduce', 'optimization', 'efficiency', 'budget'], 'technical_accuracy': ['specific', 'implement', 'configure', 'setup', 'deploy'], 'actionability': ['step', 'recommend', 'suggest', 'should', 'consider', 'strategy'], 'quantification': ['percent', '%', 'dollar', '$', 'reduction', 'improvement', 'roi']}
+        cls.QUALITY_THRESHOLD_HIGH = 0.7
+        cls.QUALITY_THRESHOLD_MEDIUM = 0.5
+        cls.MIN_SUBSTANTIVE_LENGTH = 200
+        cls.logger.info(f'Agent message pipeline e2e tests initialized for staging with business value framework')
 
     def setup_method(self, method):
         """Setup for each test method."""
         super().setup_method(method)
-        
-        # Generate test-specific user context
-        self.thread_id = f"message_pipeline_test_{int(time.time())}"
-        self.run_id = f"run_{self.thread_id}"
-        
-        # Create JWT token for this test
-        self.access_token = self.__class__.auth_helper.create_test_jwt_token(
-            user_id=self.__class__.test_user_id,
-            email=self.__class__.test_user_email,
-            exp_minutes=60
-        )
-        
-        self.logger.info(f"Test setup complete - thread_id: {self.thread_id}")
-    
+        self.thread_id = f'message_pipeline_test_{int(time.time())}'
+        self.run_id = f'run_{self.thread_id}'
+        self.access_token = self.__class__.auth_helper.create_test_jwt_token(user_id=self.__class__.test_user_id, email=self.__class__.test_user_email, exp_minutes=60)
+        self.logger.info(f'Test setup complete - thread_id: {self.thread_id}')
+
     def _calculate_response_quality_score(self, response_text: str, scenario_context: Dict[str, Any]) -> Dict[str, Any]:
         """
         Calculate comprehensive response quality score for business value validation.
@@ -129,69 +95,26 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         Returns:
             Dict with quality metrics and overall score
         """
-        quality_metrics = {
-            "length_score": min(len(response_text) / self.__class__.MIN_SUBSTANTIVE_LENGTH, 1.0),
-            "keyword_relevance": {},
-            "actionability_score": 0.0,
-            "technical_specificity": 0.0,
-            "business_indicators": [],
-            "overall_quality_score": 0.0,
-            "meets_threshold": False
-        }
-        
+        quality_metrics = {'length_score': min(len(response_text) / self.__class__.MIN_SUBSTANTIVE_LENGTH, 1.0), 'keyword_relevance': {}, 'actionability_score': 0.0, 'technical_specificity': 0.0, 'business_indicators': [], 'overall_quality_score': 0.0, 'meets_threshold': False}
         response_lower = response_text.lower()
-        
-        # Keyword relevance scoring
         for category, keywords in self.__class__.business_value_keywords.items():
             found_keywords = [kw for kw in keywords if kw in response_lower]
             relevance_score = min(len(found_keywords) / len(keywords), 1.0)
-            quality_metrics["keyword_relevance"][category] = {
-                "found": found_keywords,
-                "score": relevance_score
-            }
-        
-        # Actionability scoring (concrete recommendations)
-        actionable_patterns = [
-            r'\d+\.\s+[A-Z]',  # Numbered lists
-            r'recommend\w*\s+\w+',  # Recommendations  
-            r'should\s+\w+',  # Should statements
-            r'step\s+\d+',  # Step references
-            r'implement\s+\w+',  # Implementation guidance
-        ]
-        actionability_matches = sum(len(re.findall(pattern, response_text, re.IGNORECASE))
-                                   for pattern in actionable_patterns)
-        quality_metrics["actionability_score"] = min(actionability_matches / 5, 1.0)
-        
-        # Technical specificity scoring
-        technical_indicators = [
-            r'\$\d+', r'\d+%', r'\d+\s*seconds?', r'\d+\s*minutes?',  # Quantifications
-            r'config\w*', r'setup', r'deploy', r'implement',  # Technical terms
-            r'API\s+\w+', r'endpoint', r'database', r'cache'  # System components
-        ]
-        technical_matches = sum(len(re.findall(pattern, response_text, re.IGNORECASE))
-                               for pattern in technical_indicators)
-        quality_metrics["technical_specificity"] = min(technical_matches / 8, 1.0)
-        
-        # Business value indicators
-        expected_indicators = scenario_context.get("expected_business_value", [])
+            quality_metrics['keyword_relevance'][category] = {'found': found_keywords, 'score': relevance_score}
+        actionable_patterns = ['\\d+\\.\\s+[A-Z]', 'recommend\\w*\\s+\\w+', 'should\\s+\\w+', 'step\\s+\\d+', 'implement\\s+\\w+']
+        actionability_matches = sum((len(re.findall(pattern, response_text, re.IGNORECASE)) for pattern in actionable_patterns))
+        quality_metrics['actionability_score'] = min(actionability_matches / 5, 1.0)
+        technical_indicators = ['\\$\\d+', '\\d+%', '\\d+\\s*seconds?', '\\d+\\s*minutes?', 'config\\w*', 'setup', 'deploy', 'implement', 'API\\s+\\w+', 'endpoint', 'database', 'cache']
+        technical_matches = sum((len(re.findall(pattern, response_text, re.IGNORECASE)) for pattern in technical_indicators))
+        quality_metrics['technical_specificity'] = min(technical_matches / 8, 1.0)
+        expected_indicators = scenario_context.get('expected_business_value', [])
         for indicator in expected_indicators:
             if indicator.lower() in response_lower:
-                quality_metrics["business_indicators"].append(indicator)
-        
-        # Calculate overall quality score (weighted components)
-        quality_components = [
-            quality_metrics["length_score"] * 0.2,
-            quality_metrics["keyword_relevance"]["cost_optimization"]["score"] * 0.25,
-            quality_metrics["keyword_relevance"]["actionability"]["score"] * 0.25,
-            quality_metrics["actionability_score"] * 0.15,
-            quality_metrics["technical_specificity"] * 0.15
-        ]
-        quality_metrics["overall_quality_score"] = sum(quality_components)
-        
-        # Determine if meets business value threshold
-        threshold = scenario_context.get("quality_threshold", self.__class__.QUALITY_THRESHOLD_MEDIUM)
-        quality_metrics["meets_threshold"] = quality_metrics["overall_quality_score"] >= threshold
-        
+                quality_metrics['business_indicators'].append(indicator)
+        quality_components = [quality_metrics['length_score'] * 0.2, quality_metrics['keyword_relevance']['cost_optimization']['score'] * 0.25, quality_metrics['keyword_relevance']['actionability']['score'] * 0.25, quality_metrics['actionability_score'] * 0.15, quality_metrics['technical_specificity'] * 0.15]
+        quality_metrics['overall_quality_score'] = sum(quality_components)
+        threshold = scenario_context.get('quality_threshold', self.__class__.QUALITY_THRESHOLD_MEDIUM)
+        quality_metrics['meets_threshold'] = quality_metrics['overall_quality_score'] >= threshold
         return quality_metrics
 
     async def test_complete_user_message_to_agent_response_flow(self):
@@ -213,269 +136,104 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         """
         pipeline_start_time = time.time()
         pipeline_events = []
-        
-        # Initialize class attributes if not already done
         if not hasattr(self.__class__, 'logger'):
             self.__class__.setUpClass()
-
-        # Initialize instance attributes if not already done
         if not hasattr(self, 'access_token'):
-            # Generate test-specific user context
-            self.thread_id = f"message_pipeline_test_{int(time.time())}"
-            self.run_id = f"run_{self.thread_id}"
-
-            # Create JWT token for this test
-            self.access_token = self.__class__.auth_helper.create_test_jwt_token(
-                user_id=self.__class__.test_user_id,
-                email=self.__class__.test_user_email,
-                exp_minutes=60
-            )
-
-        self.logger.info("🎯 Testing complete user message → agent response pipeline")
-        
+            self.thread_id = f'message_pipeline_test_{int(time.time())}'
+            self.run_id = f'run_{self.thread_id}'
+            self.access_token = self.__class__.auth_helper.create_test_jwt_token(user_id=self.__class__.test_user_id, email=self.__class__.test_user_email, exp_minutes=60)
+        self.logger.info('🎯 Testing complete user message → agent response pipeline')
         try:
-            # Step 1: Establish WebSocket connection to staging
             ssl_context = ssl.create_default_context()
-            ssl_context.check_hostname = False  # Staging environment
+            ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
-            
             connection_start = time.time()
-            websocket = await asyncio.wait_for(
-                websockets.connect(
-                    self.__class__.staging_config.urls.websocket_url,
-                    additional_headers={
-                        "Authorization": f"Bearer {self.access_token}",
-                        "X-Environment": "staging",
-                        "X-Test-Suite": "agent-pipeline-e2e"
-                    },
-                    ssl=ssl_context,
-                    ping_interval=30,
-                    ping_timeout=10
-                ),
-                timeout=20.0
-            )
-            
+            websocket = await asyncio.wait_for(websockets.connect(self.__class__.staging_config.urls.websocket_url, additional_headers={'Authorization': f'Bearer {self.access_token}', 'X-Environment': 'staging', 'X-Test-Suite': 'agent-pipeline-e2e'}, ssl=ssl_context, ping_interval=30, ping_timeout=10), timeout=20.0)
             connection_time = time.time() - connection_start
-            pipeline_events.append({
-                "event": "websocket_connected",
-                "timestamp": time.time(),
-                "duration": connection_time,
-                "success": True
-            })
-            
-            self.logger.info(f"✅ WebSocket connected to staging in {connection_time:.2f}s")
-            
-            # Step 2: Send realistic user message
-            user_message = {
-                "type": "agent_request",
-                "agent": "supervisor_agent",
-                "message": (
-                    "I need help optimizing my AI costs. My current spend is $2,000/month "
-                    "on GPT-4 calls, and I want to reduce costs by 30% without sacrificing quality. "
-                    "Can you analyze my usage patterns and suggest specific optimizations?"
-                ),
-                "thread_id": self.thread_id,
-                "run_id": self.run_id,
-                "user_id": self.__class__.test_user_id,
-                "context": {
-                    "test_scenario": "golden_path_message_pipeline",
-                    "expected_agents": ["supervisor_agent", "triage_agent", "apex_optimizer_agent"],
-                    "expected_duration": "30-60s"
-                }
-            }
-            
+            pipeline_events.append({'event': 'websocket_connected', 'timestamp': time.time(), 'duration': connection_time, 'success': True})
+            self.logger.info(f'✅ WebSocket connected to staging in {connection_time:.2f}s')
+            user_message = {'type': 'agent_request', 'agent': 'supervisor_agent', 'message': 'I need help optimizing my AI costs. My current spend is $2,000/month on GPT-4 calls, and I want to reduce costs by 30% without sacrificing quality. Can you analyze my usage patterns and suggest specific optimizations?', 'thread_id': self.thread_id, 'run_id': self.run_id, 'user_id': self.__class__.test_user_id, 'context': {'test_scenario': 'golden_path_message_pipeline', 'expected_agents': ['supervisor_agent', 'triage_agent', 'apex_optimizer_agent'], 'expected_duration': '30-60s'}}
             message_send_start = time.time()
             await websocket.send(json.dumps(user_message))
             message_send_time = time.time() - message_send_start
-            
-            pipeline_events.append({
-                "event": "user_message_sent", 
-                "timestamp": time.time(),
-                "duration": message_send_time,
-                "message_length": len(user_message["message"]),
-                "success": True
-            })
-            
+            pipeline_events.append({'event': 'user_message_sent', 'timestamp': time.time(), 'duration': message_send_time, 'message_length': len(user_message['message']), 'success': True})
             self.logger.info(f"📤 User message sent ({len(user_message['message'])} chars)")
-            
-            # Step 3: Collect all agent processing events
             agent_events = []
-            response_timeout = 90.0  # Allow time for real LLM calls
+            response_timeout = 90.0
             event_collection_start = time.time()
-            
-            # Expected event sequence for Golden Path
-            expected_events = [
-                "agent_started",
-                "agent_thinking", 
-                "tool_executing",
-                "tool_completed",
-                "agent_completed"
-            ]
+            expected_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
             received_events = set()
             final_response = None
-            
             while time.time() - event_collection_start < response_timeout:
                 try:
                     event_data = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                     event = json.loads(event_data)
                     agent_events.append(event)
-                    
-                    event_type = event.get("type", "unknown")
+                    event_type = event.get('type', 'unknown')
                     received_events.add(event_type)
-                    
-                    self.logger.info(f"📨 Received event: {event_type}")
-                    
-                    # Check for agent completion
-                    if event_type == "agent_completed":
+                    self.logger.info(f'📨 Received event: {event_type}')
+                    if event_type == 'agent_completed':
                         final_response = event
                         break
-                        
-                    # Check for error events
-                    if event_type == "error" or event_type == "agent_error":
-                        raise AssertionError(f"Agent processing error: {event}")
-                        
+                    if event_type == 'error' or event_type == 'agent_error':
+                        raise AssertionError(f'Agent processing error: {event}')
                 except asyncio.TimeoutError:
-                    # Log timeout and continue - may be normal for slower processing
                     continue
                 except json.JSONDecodeError as e:
-                    self.logger.warning(f"Failed to parse WebSocket message: {e}")
+                    self.logger.warning(f'Failed to parse WebSocket message: {e}')
                     continue
-            
             event_collection_time = time.time() - event_collection_start
-            pipeline_events.append({
-                "event": "agent_events_collected",
-                "timestamp": time.time(), 
-                "duration": event_collection_time,
-                "event_count": len(agent_events),
-                "received_event_types": list(received_events),
-                "success": len(agent_events) > 0
-            })
-            
-            # Step 4: Validate agent processing results
-            
-            # Must receive at least basic events
-            assert len(agent_events) > 0, "Should receive at least one agent event"
-            assert "agent_started" in received_events, f"Missing agent_started event. Got: {received_events}"
-            assert "agent_completed" in received_events, f"Missing agent_completed event. Got: {received_events}"
-            
-            # Validate final response content
-            assert final_response is not None, "Should receive final agent response"
-            
-            response_data = final_response.get("data", {})
-            result = response_data.get("result", {})
-            
-            # PHASE 1 ENHANCEMENT: Comprehensive business value validation
+            pipeline_events.append({'event': 'agent_events_collected', 'timestamp': time.time(), 'duration': event_collection_time, 'event_count': len(agent_events), 'received_event_types': list(received_events), 'success': len(agent_events) > 0})
+            assert len(agent_events) > 0, 'Should receive at least one agent event'
+            assert 'agent_started' in received_events, f'Missing agent_started event. Got: {received_events}'
+            assert 'agent_completed' in received_events, f'Missing agent_completed event. Got: {received_events}'
+            assert final_response is not None, 'Should receive final agent response'
+            response_data = final_response.get('data', {})
+            result = response_data.get('result', {})
             if isinstance(result, dict):
-                response_text = result.get("response", str(result))
+                response_text = result.get('response', str(result))
             else:
                 response_text = str(result)
-            
-            # Calculate response quality score
-            quality_evaluation = self._calculate_response_quality_score(
-                response_text,
-                {
-                    "expected_business_value": ["cost optimization", "specific recommendations", "implementation steps"],
-                    "quality_threshold": self.__class__.QUALITY_THRESHOLD_HIGH  # High threshold for cost optimization
-                }
-            )
-            
-            # Enhanced business value assertions
-            assert len(response_text) > self.__class__.MIN_SUBSTANTIVE_LENGTH, (
-                f"Agent response not substantive enough: {len(response_text)} chars "
-                f"(required >{self.__class__.MIN_SUBSTANTIVE_LENGTH} for business value)"
-            )
-            
-            assert quality_evaluation["meets_threshold"], (
-                f"Response fails business value quality threshold. "
-                f"Score: {quality_evaluation['overall_quality_score']:.3f} "
-                f"(required ≥{self.__class__.QUALITY_THRESHOLD_HIGH}). "
-                f"Metrics: {quality_evaluation}"
-            )
-            
-            # Validate specific business requirements
-            assert quality_evaluation["keyword_relevance"]["cost_optimization"]["score"] >= 0.4, (
-                f"Insufficient cost optimization focus in response. "
-                f"Found keywords: {quality_evaluation['keyword_relevance']['cost_optimization']['found']}"
-            )
-            
-            assert quality_evaluation["actionability_score"] >= 0.3, (
-                f"Response lacks actionable recommendations: {quality_evaluation['actionability_score']:.3f}"
-            )
-            
-            # Step 5: Test message acknowledgment flow
-            ack_message = {
-                "type": "message_acknowledgment",
-                "thread_id": self.thread_id,
-                "run_id": self.run_id,
-                "acknowledged_at": datetime.utcnow().isoformat()
-            }
-            
+            quality_evaluation = self._calculate_response_quality_score(response_text, {'expected_business_value': ['cost optimization', 'specific recommendations', 'implementation steps'], 'quality_threshold': self.__class__.QUALITY_THRESHOLD_HIGH})
+            assert len(response_text) > self.__class__.MIN_SUBSTANTIVE_LENGTH, f'Agent response not substantive enough: {len(response_text)} chars (required >{self.__class__.MIN_SUBSTANTIVE_LENGTH} for business value)'
+            assert quality_evaluation['meets_threshold'], f"Response fails business value quality threshold. Score: {quality_evaluation['overall_quality_score']:.3f} (required ≥{self.__class__.QUALITY_THRESHOLD_HIGH}). Metrics: {quality_evaluation}"
+            assert quality_evaluation['keyword_relevance']['cost_optimization']['score'] >= 0.4, f"Insufficient cost optimization focus in response. Found keywords: {quality_evaluation['keyword_relevance']['cost_optimization']['found']}"
+            assert quality_evaluation['actionability_score'] >= 0.3, f"Response lacks actionable recommendations: {quality_evaluation['actionability_score']:.3f}"
+            ack_message = {'type': 'message_acknowledgment', 'thread_id': self.thread_id, 'run_id': self.run_id, 'acknowledged_at': datetime.utcnow().isoformat()}
             await websocket.send(json.dumps(ack_message))
-            
-            # Wait for potential acknowledgment response
             try:
                 ack_response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                pipeline_events.append({
-                    "event": "acknowledgment_received",
-                    "timestamp": time.time(),
-                    "success": True
-                })
+                pipeline_events.append({'event': 'acknowledgment_received', 'timestamp': time.time(), 'success': True})
             except asyncio.TimeoutError:
-                # Acknowledgment response is optional
                 pass
-            
             await websocket.close()
-            
-            # Final validation and reporting
             total_pipeline_time = time.time() - pipeline_start_time
-            
-            pipeline_events.append({
-                "event": "pipeline_completed",
-                "timestamp": time.time(),
-                "total_duration": total_pipeline_time,
-                "success": True
-            })
-            
-            # PHASE 1 ENHANCEMENT: Comprehensive business value reporting
-            self.logger.info("🎉 GOLDEN PATH MESSAGE PIPELINE SUCCESS WITH BUSINESS VALUE VALIDATION")
-            self.logger.info(f"📊 Pipeline Metrics:")
-            self.logger.info(f"   Total Duration: {total_pipeline_time:.1f}s")
-            self.logger.info(f"   WebSocket Connection: {connection_time:.2f}s")
-            self.logger.info(f"   Agent Processing: {event_collection_time:.1f}s")
-            self.logger.info(f"   Events Received: {len(agent_events)}")
-            self.logger.info(f"   Event Types: {received_events}")
-            self.logger.info(f"   Response Length: {len(response_text)} characters")
-            self.logger.info(f"   Pipeline Events: {len(pipeline_events)}")
-            self.logger.info(f"💰 Business Value Metrics:")
+            pipeline_events.append({'event': 'pipeline_completed', 'timestamp': time.time(), 'total_duration': total_pipeline_time, 'success': True})
+            self.logger.info('🎉 GOLDEN PATH MESSAGE PIPELINE SUCCESS WITH BUSINESS VALUE VALIDATION')
+            self.logger.info(f'📊 Pipeline Metrics:')
+            self.logger.info(f'   Total Duration: {total_pipeline_time:.1f}s')
+            self.logger.info(f'   WebSocket Connection: {connection_time:.2f}s')
+            self.logger.info(f'   Agent Processing: {event_collection_time:.1f}s')
+            self.logger.info(f'   Events Received: {len(agent_events)}')
+            self.logger.info(f'   Event Types: {received_events}')
+            self.logger.info(f'   Response Length: {len(response_text)} characters')
+            self.logger.info(f'   Pipeline Events: {len(pipeline_events)}')
+            self.logger.info(f'💰 Business Value Metrics:')
             self.logger.info(f"   Quality Score: {quality_evaluation['overall_quality_score']:.3f}/1.0")
             self.logger.info(f"   Actionability: {quality_evaluation['actionability_score']:.3f}/1.0")
             self.logger.info(f"   Technical Specificity: {quality_evaluation['technical_specificity']:.3f}/1.0")
             self.logger.info(f"   Business Indicators: {quality_evaluation['business_indicators']}")
             self.logger.info(f"   Meets Threshold: {quality_evaluation['meets_threshold']}")
-            
-            # PHASE 1 ENHANCED: Business value performance assertions
-            assert total_pipeline_time < 120.0, f"Pipeline too slow: {total_pipeline_time:.1f}s (max 120s)"
-            assert quality_evaluation["overall_quality_score"] >= self.__class__.QUALITY_THRESHOLD_HIGH, (
-                f"Overall business value quality insufficient: {quality_evaluation['overall_quality_score']:.3f}"
-            )
-            assert len(quality_evaluation["business_indicators"]) >= 1, (
-                f"Response lacks expected business value indicators: {quality_evaluation['business_indicators']}"
-            )
-            
+            assert total_pipeline_time < 120.0, f'Pipeline too slow: {total_pipeline_time:.1f}s (max 120s)'
+            assert quality_evaluation['overall_quality_score'] >= self.__class__.QUALITY_THRESHOLD_HIGH, f"Overall business value quality insufficient: {quality_evaluation['overall_quality_score']:.3f}"
+            assert len(quality_evaluation['business_indicators']) >= 1, f"Response lacks expected business value indicators: {quality_evaluation['business_indicators']}"
         except Exception as e:
             total_time = time.time() - pipeline_start_time
-            
-            self.logger.error(f"❌ GOLDEN PATH MESSAGE PIPELINE FAILED")
-            self.logger.error(f"   Error: {str(e)}")
-            self.logger.error(f"   Duration: {total_time:.1f}s")
-            self.logger.error(f"   Events collected: {len(pipeline_events)}")
-            
-            # Fail with detailed context for debugging
-            raise AssertionError(
-                f"PHASE 1 ENHANCED: Golden Path message pipeline with business value validation failed after {total_time:.1f}s: {e}. "
-                f"Events: {pipeline_events}. "
-                f"This breaks core user functionality and business value delivery ($500K+ ARR impact)."
-            )
+            self.logger.error(f'❌ GOLDEN PATH MESSAGE PIPELINE FAILED')
+            self.logger.error(f'   Error: {str(e)}')
+            self.logger.error(f'   Duration: {total_time:.1f}s')
+            self.logger.error(f'   Events collected: {len(pipeline_events)}')
+            raise AssertionError(f'PHASE 1 ENHANCED: Golden Path message pipeline with business value validation failed after {total_time:.1f}s: {e}. Events: {pipeline_events}. This breaks core user functionality and business value delivery ($500K+ ARR impact).')
 
     async def test_agent_error_handling_and_recovery(self):
         """
@@ -493,120 +251,41 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Staging GCP environment
         STATUS: Should PASS - Error handling is critical for user experience
         """
-        self.logger.info("🛡️ Testing agent error handling and recovery")
-        
+        self.logger.info('🛡️ Testing agent error handling and recovery')
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False
         ssl_context.verify_mode = ssl.CERT_NONE
-        
-        # Test various error scenarios
-        error_scenarios = [
-            {
-                "name": "invalid_agent_type",
-                "message": {
-                    "type": "agent_request",
-                    "agent": "nonexistent_agent_type",
-                    "message": "This should trigger an error",
-                    "thread_id": f"error_test_{int(time.time())}"
-                },
-                "expected_error_type": "agent_error",
-                "should_recover": True
-            },
-            {
-                "name": "malformed_message_structure", 
-                "message": {
-                    "type": "agent_request",
-                    # Missing required fields
-                    "invalid_field": "This message is malformed"
-                },
-                "expected_error_type": "validation_error",
-                "should_recover": True
-            },
-            {
-                "name": "empty_message_content",
-                "message": {
-                    "type": "agent_request",
-                    "agent": "triage_agent",
-                    "message": "",  # Empty message
-                    "thread_id": f"empty_test_{int(time.time())}"
-                },
-                "expected_error_type": "validation_error",
-                "should_recover": True
-            }
-        ]
-        
-        websocket = await asyncio.wait_for(
-            websockets.connect(
-                self.__class__.staging_config.urls.websocket_url,
-                additional_headers={
-                    "Authorization": f"Bearer {self.access_token}",
-                    "X-Environment": "staging",
-                    "X-Test-Suite": "error-handling-e2e"
-                },
-                ssl=ssl_context
-            ),
-            timeout=15.0
-        )
-        
+        error_scenarios = [{'name': 'invalid_agent_type', 'message': {'type': 'agent_request', 'agent': 'nonexistent_agent_type', 'message': 'This should trigger an error', 'thread_id': f'error_test_{int(time.time())}'}, 'expected_error_type': 'agent_error', 'should_recover': True}, {'name': 'malformed_message_structure', 'message': {'type': 'agent_request', 'invalid_field': 'This message is malformed'}, 'expected_error_type': 'validation_error', 'should_recover': True}, {'name': 'empty_message_content', 'message': {'type': 'agent_request', 'agent': 'triage_agent', 'message': '', 'thread_id': f'empty_test_{int(time.time())}'}, 'expected_error_type': 'validation_error', 'should_recover': True}]
+        websocket = await asyncio.wait_for(websockets.connect(self.__class__.staging_config.urls.websocket_url, additional_headers={'Authorization': f'Bearer {self.access_token}', 'X-Environment': 'staging', 'X-Test-Suite': 'error-handling-e2e'}, ssl=ssl_context), timeout=15.0)
         try:
             for scenario in error_scenarios:
                 scenario_start = time.time()
                 self.logger.info(f"Testing error scenario: {scenario['name']}")
-                
-                # Send error-inducing message
-                await websocket.send(json.dumps(scenario["message"]))
-                
-                # Collect error response
+                await websocket.send(json.dumps(scenario['message']))
                 error_events = []
                 error_timeout = 20.0
                 received_error = False
-                
                 while time.time() - scenario_start < error_timeout:
                     try:
                         event_data = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                         event = json.loads(event_data)
                         error_events.append(event)
-                        
-                        event_type = event.get("type", "unknown")
-                        
-                        # Check if we received expected error
-                        if "error" in event_type.lower():
+                        event_type = event.get('type', 'unknown')
+                        if 'error' in event_type.lower():
                             received_error = True
-                            self.logger.info(f"✅ Received expected error: {event_type}")
+                            self.logger.info(f'✅ Received expected error: {event_type}')
                             break
-                            
                     except asyncio.TimeoutError:
                         break
-                
-                # Validate error handling
-                assert received_error, (
-                    f"Should receive error for scenario '{scenario['name']}', "
-                    f"got events: {error_events}"
-                )
-                
-                # Test recovery - send valid message after error
-                if scenario["should_recover"]:
-                    recovery_message = {
-                        "type": "agent_request",
-                        "agent": "triage_agent", 
-                        "message": f"Recovery test after {scenario['name']}",
-                        "thread_id": f"recovery_{scenario['name']}_{int(time.time())}"
-                    }
-                    
+                assert received_error, f"Should receive error for scenario '{scenario['name']}', got events: {error_events}"
+                if scenario['should_recover']:
+                    recovery_message = {'type': 'agent_request', 'agent': 'triage_agent', 'message': f"Recovery test after {scenario['name']}", 'thread_id': f"recovery_{scenario['name']}_{int(time.time())}"}
                     await websocket.send(json.dumps(recovery_message))
-                    
-                    # Should get normal response after error
                     recovery_response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                     recovery_event = json.loads(recovery_response)
-                    
-                    assert recovery_event.get("type") != "error", (
-                        f"System should recover after {scenario['name']} error"
-                    )
-                    
+                    assert recovery_event.get('type') != 'error', f"System should recover after {scenario['name']} error"
                     self.logger.info(f"✅ System recovered successfully after {scenario['name']}")
-        
-            self.logger.info("🛡️ All error handling scenarios passed")
-            
+            self.logger.info('🛡️ All error handling scenarios passed')
         finally:
             await websocket.close()
 
@@ -627,141 +306,65 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Staging GCP with real isolation
         STATUS: Should PASS - Multi-user isolation is critical for platform
         """
-        self.logger.info("👥 Testing concurrent user message processing")
-        
-        # Create multiple test users
+        self.logger.info('👥 Testing concurrent user message processing')
         concurrent_users = []
-        user_count = 3  # Reasonable load for staging
-        
+        user_count = 3
         for i in range(user_count):
-            user = {
-                "user_id": f"concurrent_user_{i}_{int(time.time())}",
-                "email": f"concurrent_test_{i}_{int(time.time())}@netra-testing.ai",
-                "thread_id": f"concurrent_thread_{i}_{int(time.time())}",
-                "message": f"Concurrent test message {i+1}: Analyze my AI optimization needs for user context {i+1}"
-            }
-            
-            # Generate JWT for each user
-            user["access_token"] = self.__class__.auth_helper.create_test_jwt_token(
-                user_id=user["user_id"],
-                email=user["email"]
-            )
-            
+            user = {'user_id': f'concurrent_user_{i}_{int(time.time())}', 'email': f'concurrent_test_{i}_{int(time.time())}@netra-testing.ai', 'thread_id': f'concurrent_thread_{i}_{int(time.time())}', 'message': f'Concurrent test message {i + 1}: Analyze my AI optimization needs for user context {i + 1}'}
+            user['access_token'] = self.__class__.auth_helper.create_test_jwt_token(user_id=user['user_id'], email=user['email'])
             concurrent_users.append(user)
-        
-        # Create concurrent connection tasks
+
         async def process_user_message(user: Dict[str, Any]) -> Dict[str, Any]:
             """Process message for a single concurrent user."""
             user_start = time.time()
-            
             try:
                 ssl_context = ssl.create_default_context()
                 ssl_context.check_hostname = False
                 ssl_context.verify_mode = ssl.CERT_NONE
-                
-                # Establish user-specific WebSocket connection
-                websocket = await asyncio.wait_for(
-                    websockets.connect(
-                        self.__class__.staging_config.urls.websocket_url,
-                        additional_headers={
-                            "Authorization": f"Bearer {user['access_token']}",
-                            "X-Environment": "staging",
-                            "X-User-Context": user["user_id"]
-                        },
-                        ssl=ssl_context
-                    ),
-                    timeout=15.0
-                )
-                
-                # Send user-specific message
-                message = {
-                    "type": "agent_request",
-                    "agent": "triage_agent",
-                    "message": user["message"],
-                    "thread_id": user["thread_id"],
-                    "user_id": user["user_id"]
-                }
-                
+                websocket = await asyncio.wait_for(websockets.connect(self.__class__.staging_config.urls.websocket_url, additional_headers={'Authorization': f"Bearer {user['access_token']}", 'X-Environment': 'staging', 'X-User-Context': user['user_id']}, ssl=ssl_context), timeout=15.0)
+                message = {'type': 'agent_request', 'agent': 'triage_agent', 'message': user['message'], 'thread_id': user['thread_id'], 'user_id': user['user_id']}
                 await websocket.send(json.dumps(message))
-                
-                # Collect responses (simplified - just wait for completion)
                 events = []
                 response_timeout = 45.0
                 completion_received = False
-                
                 collection_start = time.time()
                 while time.time() - collection_start < response_timeout:
                     try:
                         event_data = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                         event = json.loads(event_data)
                         events.append(event)
-                        
-                        if event.get("type") == "agent_completed":
+                        if event.get('type') == 'agent_completed':
                             completion_received = True
                             break
-                            
                     except asyncio.TimeoutError:
                         continue
-                
                 await websocket.close()
-                
-                return {
-                    "user_id": user["user_id"],
-                    "success": completion_received,
-                    "duration": time.time() - user_start,
-                    "events_received": len(events),
-                    "completed": completion_received
-                }
-                
+                return {'user_id': user['user_id'], 'success': completion_received, 'duration': time.time() - user_start, 'events_received': len(events), 'completed': completion_received}
             except Exception as e:
-                return {
-                    "user_id": user["user_id"],
-                    "success": False,
-                    "duration": time.time() - user_start,
-                    "error": str(e),
-                    "events_received": 0,
-                    "completed": False
-                }
-        
-        # Execute concurrent user processing
+                return {'user_id': user['user_id'], 'success': False, 'duration': time.time() - user_start, 'error': str(e), 'events_received': 0, 'completed': False}
         concurrent_start = time.time()
         tasks = [process_user_message(user) for user in concurrent_users]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         total_concurrent_time = time.time() - concurrent_start
-        
-        # Analyze concurrent processing results
-        successful_users = [r for r in results if isinstance(r, dict) and r["success"]]
-        failed_users = [r for r in results if isinstance(r, dict) and not r["success"]]
+        successful_users = [r for r in results if isinstance(r, dict) and r['success']]
+        failed_users = [r for r in results if isinstance(r, dict) and (not r['success'])]
         error_users = [r for r in results if isinstance(r, Exception)]
-        
-        self.logger.info(f"👥 Concurrent processing results:")
-        self.logger.info(f"   Total time: {total_concurrent_time:.1f}s")
-        self.logger.info(f"   Successful users: {len(successful_users)}/{user_count}")
-        self.logger.info(f"   Failed users: {len(failed_users)}")
-        self.logger.info(f"   Error users: {len(error_users)}")
-        
-        # Validate concurrent processing
+        self.logger.info(f'👥 Concurrent processing results:')
+        self.logger.info(f'   Total time: {total_concurrent_time:.1f}s')
+        self.logger.info(f'   Successful users: {len(successful_users)}/{user_count}')
+        self.logger.info(f'   Failed users: {len(failed_users)}')
+        self.logger.info(f'   Error users: {len(error_users)}')
         success_rate = len(successful_users) / user_count
-        
-        assert success_rate >= 0.66, (
-            f"Concurrent processing success rate too low: {success_rate:.1%} "
-            f"(expected ≥66%). Successful: {len(successful_users)}, Failed: {len(failed_users)}, "
-            f"Errors: {len(error_users)}"
-        )
-        
-        # Validate reasonable response times
+        assert success_rate >= 0.66, f'Concurrent processing success rate too low: {success_rate:.1%} (expected ≥66%). Successful: {len(successful_users)}, Failed: {len(failed_users)}, Errors: {len(error_users)}'
         if successful_users:
-            avg_duration = sum(r["duration"] for r in successful_users) / len(successful_users)
-            max_duration = max(r["duration"] for r in successful_users)
-            
-            assert avg_duration < 90.0, f"Average response time too slow: {avg_duration:.1f}s"
-            assert max_duration < 150.0, f"Max response time too slow: {max_duration:.1f}s"
-            
-            self.logger.info(f"📊 Performance metrics:")
-            self.logger.info(f"   Average duration: {avg_duration:.1f}s")
-            self.logger.info(f"   Max duration: {max_duration:.1f}s")
-        
-        self.logger.info("✅ Concurrent user processing validation complete")
+            avg_duration = sum((r['duration'] for r in successful_users)) / len(successful_users)
+            max_duration = max((r['duration'] for r in successful_users))
+            assert avg_duration < 90.0, f'Average response time too slow: {avg_duration:.1f}s'
+            assert max_duration < 150.0, f'Max response time too slow: {max_duration:.1f}s'
+            self.logger.info(f'📊 Performance metrics:')
+            self.logger.info(f'   Average duration: {avg_duration:.1f}s')
+            self.logger.info(f'   Max duration: {max_duration:.1f}s')
+        self.logger.info('✅ Concurrent user processing validation complete')
 
     async def test_large_message_handling(self):
         """
@@ -780,143 +383,41 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         REAL SERVICES: Yes - Staging GCP message processing
         STATUS: Should PASS - Message size flexibility is important for UX
         """
-        self.logger.info("📏 Testing large message handling capabilities")
-        
+        self.logger.info('📏 Testing large message handling capabilities')
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False
         ssl_context.verify_mode = ssl.CERT_NONE
-        
-        websocket = await asyncio.wait_for(
-            websockets.connect(
-                self.__class__.staging_config.urls.websocket_url,
-                additional_headers={
-                    "Authorization": f"Bearer {self.access_token}",
-                    "X-Environment": "staging",
-                    "X-Test-Suite": "large-message-e2e"
-                },
-                ssl=ssl_context
-            ),
-            timeout=15.0
-        )
-        
+        websocket = await asyncio.wait_for(websockets.connect(self.__class__.staging_config.urls.websocket_url, additional_headers={'Authorization': f'Bearer {self.access_token}', 'X-Environment': 'staging', 'X-Test-Suite': 'large-message-e2e'}, ssl=ssl_context), timeout=15.0)
         try:
-            message_test_cases = [
-                {
-                    "name": "short_message",
-                    "content": "Optimize my AI costs",
-                    "expected_response_time": 30.0
-                },
-                {
-                    "name": "medium_message", 
-                    "content": (
-                        "I'm running a SaaS application with 10,000 users and spending $5,000/month "
-                        "on OpenAI API calls. My current setup uses GPT-4 for all user interactions, "
-                        "but I'm seeing costs escalate quickly. I need specific recommendations for: "
-                        "1) When to use GPT-3.5 vs GPT-4, 2) How to implement intelligent caching, "
-                        "3) Prompt optimization techniques, 4) Usage monitoring and alerts. "
-                        "Can you provide a comprehensive optimization strategy?"
-                    ),
-                    "expected_response_time": 45.0
-                },
-                {
-                    "name": "large_message",
-                    "content": (
-                        "I'm the CTO of a growing AI-first company and we're facing significant challenges "
-                        "with our AI infrastructure costs and optimization. Here's our current situation: "
-                        "\n\n"
-                        "CURRENT SETUP:\n"
-                        "- 50,000 monthly active users\n"
-                        "- $25,000/month OpenAI API spend (75% GPT-4, 25% GPT-3.5)\n"
-                        "- Average 15 API calls per user session\n"
-                        "- Peak usage: 2,000 concurrent users during business hours\n"
-                        "- Geographic distribution: 60% US, 25% EU, 15% Asia\n"
-                        "\n"
-                        "PAIN POINTS:\n"
-                        "1. Cost scaling faster than revenue (40% month-over-month increase)\n"
-                        "2. Response latency issues during peak hours (>3s average)\n"
-                        "3. No intelligent model selection - everything uses GPT-4\n"
-                        "4. Limited caching strategy causing repeated expensive calls\n"
-                        "5. Difficulty predicting monthly costs for budgeting\n"
-                        "\n"
-                        "REQUIREMENTS:\n"
-                        "- Reduce costs by 30-40% without quality degradation\n"
-                        "- Maintain <2s response time during peak usage\n"
-                        "- Implement predictable cost structure\n"
-                        "- Support for 100,000 users by year-end\n"
-                        "- Geographic latency optimization\n"
-                        "\n"
-                        "Can you provide a comprehensive optimization strategy addressing each of these areas?"
-                    ),
-                    "expected_response_time": 60.0
-                }
-            ]
-            
+            message_test_cases = [{'name': 'short_message', 'content': 'Optimize my AI costs', 'expected_response_time': 30.0}, {'name': 'medium_message', 'content': "I'm running a SaaS application with 10,000 users and spending $5,000/month on OpenAI API calls. My current setup uses GPT-4 for all user interactions, but I'm seeing costs escalate quickly. I need specific recommendations for: 1) When to use GPT-3.5 vs GPT-4, 2) How to implement intelligent caching, 3) Prompt optimization techniques, 4) Usage monitoring and alerts. Can you provide a comprehensive optimization strategy?", 'expected_response_time': 45.0}, {'name': 'large_message', 'content': "I'm the CTO of a growing AI-first company and we're facing significant challenges with our AI infrastructure costs and optimization. Here's our current situation: \n\nCURRENT SETUP:\n- 50,000 monthly active users\n- $25,000/month OpenAI API spend (75% GPT-4, 25% GPT-3.5)\n- Average 15 API calls per user session\n- Peak usage: 2,000 concurrent users during business hours\n- Geographic distribution: 60% US, 25% EU, 15% Asia\n\nPAIN POINTS:\n1. Cost scaling faster than revenue (40% month-over-month increase)\n2. Response latency issues during peak hours (>3s average)\n3. No intelligent model selection - everything uses GPT-4\n4. Limited caching strategy causing repeated expensive calls\n5. Difficulty predicting monthly costs for budgeting\n\nREQUIREMENTS:\n- Reduce costs by 30-40% without quality degradation\n- Maintain <2s response time during peak usage\n- Implement predictable cost structure\n- Support for 100,000 users by year-end\n- Geographic latency optimization\n\nCan you provide a comprehensive optimization strategy addressing each of these areas?", 'expected_response_time': 60.0}]
             for test_case in message_test_cases:
                 case_start = time.time()
-                message_length = len(test_case["content"])
-                
+                message_length = len(test_case['content'])
                 self.logger.info(f"Testing {test_case['name']}: {message_length} characters")
-                
-                # Send test message
-                message = {
-                    "type": "agent_request",
-                    "agent": "apex_optimizer_agent",
-                    "message": test_case["content"],
-                    "thread_id": f"large_msg_test_{test_case['name']}_{int(time.time())}",
-                    "user_id": self.__class__.test_user_id,
-                    "context": {
-                        "test_case": test_case["name"],
-                        "message_length": message_length
-                    }
-                }
-                
+                message = {'type': 'agent_request', 'agent': 'apex_optimizer_agent', 'message': test_case['content'], 'thread_id': f"large_msg_test_{test_case['name']}_{int(time.time())}", 'user_id': self.__class__.test_user_id, 'context': {'test_case': test_case['name'], 'message_length': message_length}}
                 await websocket.send(json.dumps(message))
-                
-                # Wait for agent completion
                 completion_received = False
                 response_content = None
-                
-                timeout = test_case["expected_response_time"]
+                timeout = test_case['expected_response_time']
                 while time.time() - case_start < timeout:
                     try:
                         event_data = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                         event = json.loads(event_data)
-                        
-                        if event.get("type") == "agent_completed":
+                        if event.get('type') == 'agent_completed':
                             completion_received = True
-                            response_data = event.get("data", {})
-                            result = response_data.get("result", {})
+                            response_data = event.get('data', {})
+                            result = response_data.get('result', {})
                             response_content = str(result)
                             break
-                            
                     except asyncio.TimeoutError:
                         continue
-                
                 case_duration = time.time() - case_start
-                
-                # Validate message processing
-                assert completion_received, (
-                    f"Should complete processing for {test_case['name']} "
-                    f"({message_length} chars) within {timeout}s"
-                )
-                
-                assert response_content and len(response_content) > 50, (
-                    f"Should receive substantive response for {test_case['name']} "
-                    f"(got {len(response_content) if response_content else 0} chars)"
-                )
-                
-                # Response should be proportional to input complexity
+                assert completion_received, f"Should complete processing for {test_case['name']} ({message_length} chars) within {timeout}s"
+                assert response_content and len(response_content) > 50, f"Should receive substantive response for {test_case['name']} (got {(len(response_content) if response_content else 0)} chars)"
                 expected_min_response_length = min(200, message_length // 10)
-                assert len(response_content) >= expected_min_response_length, (
-                    f"Response too short for {test_case['name']}: "
-                    f"{len(response_content)} chars (expected ≥{expected_min_response_length})"
-                )
-                
-                self.logger.info(f"✅ {test_case['name']}: {case_duration:.1f}s, "
-                               f"response: {len(response_content)} chars")
-            
-            self.logger.info("📏 Large message handling tests completed successfully")
-        
+                assert len(response_content) >= expected_min_response_length, f"Response too short for {test_case['name']}: {len(response_content)} chars (expected ≥{expected_min_response_length})"
+                self.logger.info(f"✅ {test_case['name']}: {case_duration:.1f}s, response: {len(response_content)} chars")
+            self.logger.info('📏 Large message handling tests completed successfully')
         finally:
             await websocket.close()
 
@@ -939,254 +440,100 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         STATUS: Should PASS - Multi-agent coordination is core platform differentiator
         """
         orchestration_start_time = time.time()
-        orchestration_metrics = {
-            "agents_invoked": [],
-            "agent_transitions": [],
-            "coordination_events": [],
-            "business_value_score": 0.0
-        }
-        
-        self.logger.info("🔄 Testing multi-agent orchestration flow validation")
-        
+        orchestration_metrics = {'agents_invoked': [], 'agent_transitions': [], 'coordination_events': [], 'business_value_score': 0.0}
+        self.logger.info('🔄 Testing multi-agent orchestration flow validation')
         try:
-            # Establish WebSocket connection
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
-            
-            websocket = await asyncio.wait_for(
-                websockets.connect(
-                    self.__class__.staging_config.urls.websocket_url,
-                    additional_headers={
-                        "Authorization": f"Bearer {self.access_token}",
-                        "X-Environment": "staging",
-                        "X-Test-Suite": "multi-agent-orchestration-e2e",
-                        "X-Business-Scenario": "complex-optimization"
-                    },
-                    ssl=ssl_context,
-                    ping_interval=30,
-                    ping_timeout=10
-                ),
-                timeout=20.0
-            )
-            
-            # Send complex enterprise scenario requiring multi-agent coordination
-            complex_scenario = {
-                "type": "agent_request",
-                "agent": "supervisor_agent",  # Start with supervisor for routing
-                "message": (
-                    "I'm the CTO of a FinTech company processing 500,000 transactions daily. "
-                    "Our current AI infrastructure costs $45,000/month with the following challenges: "
-                    "1) GPT-4 usage for fraud detection (80% of costs), "
-                    "2) Real-time response requirements (<100ms), "
-                    "3) SOC2 and PCI compliance requirements, "
-                    "4) 99.99% uptime SLA commitments, "
-                    "5) Scaling to 2M transactions/day by Q4. "
-                    "I need a comprehensive multi-phase optimization strategy that addresses "
-                    "cost reduction (target: 40%), performance optimization, compliance maintenance, "
-                    "and scalability planning. Please provide specific technical recommendations, "
-                    "implementation timelines, ROI calculations, and risk assessments."
-                ),
-                "thread_id": f"orchestration_test_{int(time.time())}",
-                "run_id": f"orchestration_run_{int(time.time())}",
-                "user_id": self.__class__.test_user_id,
-                "context": {
-                    "business_scenario": "enterprise_fintech_optimization",
-                    "expected_agents": ["supervisor_agent", "triage_agent", "apex_optimizer_agent"],
-                    "complexity": "very_high",
-                    "expected_business_value": [
-                        "cost reduction", "performance optimization", "compliance", 
-                        "scalability", "roi calculations", "implementation timeline"
-                    ],
-                    "quality_threshold": self.__class__.QUALITY_THRESHOLD_HIGH
-                }
-            }
-            
+            websocket = await asyncio.wait_for(websockets.connect(self.__class__.staging_config.urls.websocket_url, additional_headers={'Authorization': f'Bearer {self.access_token}', 'X-Environment': 'staging', 'X-Test-Suite': 'multi-agent-orchestration-e2e', 'X-Business-Scenario': 'complex-optimization'}, ssl=ssl_context, ping_interval=30, ping_timeout=10), timeout=20.0)
+            complex_scenario = {'type': 'agent_request', 'agent': 'supervisor_agent', 'message': "I'm the CTO of a FinTech company processing 500,000 transactions daily. Our current AI infrastructure costs $45,000/month with the following challenges: 1) GPT-4 usage for fraud detection (80% of costs), 2) Real-time response requirements (<100ms), 3) SOC2 and PCI compliance requirements, 4) 99.99% uptime SLA commitments, 5) Scaling to 2M transactions/day by Q4. I need a comprehensive multi-phase optimization strategy that addresses cost reduction (target: 40%), performance optimization, compliance maintenance, and scalability planning. Please provide specific technical recommendations, implementation timelines, ROI calculations, and risk assessments.", 'thread_id': f'orchestration_test_{int(time.time())}', 'run_id': f'orchestration_run_{int(time.time())}', 'user_id': self.__class__.test_user_id, 'context': {'business_scenario': 'enterprise_fintech_optimization', 'expected_agents': ['supervisor_agent', 'triage_agent', 'apex_optimizer_agent'], 'complexity': 'very_high', 'expected_business_value': ['cost reduction', 'performance optimization', 'compliance', 'scalability', 'roi calculations', 'implementation timeline'], 'quality_threshold': self.__class__.QUALITY_THRESHOLD_HIGH}}
             await websocket.send(json.dumps(complex_scenario))
-            self.logger.info("📤 Complex multi-agent scenario sent")
-            
-            # Monitor multi-agent orchestration events
+            self.logger.info('📤 Complex multi-agent scenario sent')
             orchestration_events = []
             agent_activity = defaultdict(list)
-            response_timeout = 150.0  # Extended for complex multi-agent processing
+            response_timeout = 150.0
             collection_start = time.time()
-            
             final_response = None
-            
             while time.time() - collection_start < response_timeout:
                 try:
                     event_data = await asyncio.wait_for(websocket.recv(), timeout=20.0)
                     event = json.loads(event_data)
                     orchestration_events.append(event)
-                    
-                    event_type = event.get("type", "unknown")
-                    event_data_content = event.get("data", {})
-                    
-                    # Track agent activity and transitions
-                    if "agent" in event_type or "agent" in str(event_data_content).lower():
+                    event_type = event.get('type', 'unknown')
+                    event_data_content = event.get('data', {})
+                    if 'agent' in event_type or 'agent' in str(event_data_content).lower():
                         agent_info = self._extract_agent_info(event)
                         if agent_info:
-                            agent_activity[agent_info["agent_name"]].append({
-                                "event_type": event_type,
-                                "timestamp": time.time() - collection_start,
-                                "data": agent_info
-                            })
-                            orchestration_metrics["agents_invoked"].append(agent_info["agent_name"])
-                    
-                    # Track coordination events (agent handoffs, data sharing)
-                    if any(keyword in event_type.lower() for keyword in ["routing", "handoff", "coordination", "triage"]):
-                        orchestration_metrics["coordination_events"].append({
-                            "event_type": event_type,
-                            "timestamp": time.time() - collection_start
-                        })
-                    
-                    self.logger.info(f"📨 Multi-agent event: {event_type}")
-                    
-                    # Check for final completion
-                    if event_type == "agent_completed":
+                            agent_activity[agent_info['agent_name']].append({'event_type': event_type, 'timestamp': time.time() - collection_start, 'data': agent_info})
+                            orchestration_metrics['agents_invoked'].append(agent_info['agent_name'])
+                    if any((keyword in event_type.lower() for keyword in ['routing', 'handoff', 'coordination', 'triage'])):
+                        orchestration_metrics['coordination_events'].append({'event_type': event_type, 'timestamp': time.time() - collection_start})
+                    self.logger.info(f'📨 Multi-agent event: {event_type}')
+                    if event_type == 'agent_completed':
                         final_response = event
-                        self.logger.info("🏁 Multi-agent orchestration completed")
+                        self.logger.info('🏁 Multi-agent orchestration completed')
                         break
-                        
-                    # Check for orchestration errors
-                    if "error" in event_type.lower():
-                        raise AssertionError(f"Multi-agent orchestration error: {event}")
-                        
+                    if 'error' in event_type.lower():
+                        raise AssertionError(f'Multi-agent orchestration error: {event}')
                 except asyncio.TimeoutError:
-                    # Continue monitoring for orchestration completion
                     continue
-            
             orchestration_duration = time.time() - collection_start
-            
-            # Validate multi-agent orchestration results
-            assert len(orchestration_events) > 0, "Should receive orchestration events"
-            assert final_response is not None, "Should receive final orchestrated response"
-            
-            # Extract and validate orchestrated response
-            response_data = final_response.get("data", {})
-            result = response_data.get("result", {})
-            response_text = result.get("response", str(result)) if isinstance(result, dict) else str(result)
-            
-            # PHASE 1: Comprehensive business value validation for orchestrated response
-            quality_evaluation = self._calculate_response_quality_score(
-                response_text,
-                complex_scenario["context"]
-            )
-            orchestration_metrics["business_value_score"] = quality_evaluation["overall_quality_score"]
-            
-            # Multi-agent coordination validation
-            unique_agents = list(set(orchestration_metrics["agents_invoked"]))
-            assert len(unique_agents) >= 2, (
-                f"Multi-agent orchestration should involve ≥2 agents, detected: {unique_agents}"
-            )
-            
-            # Validate sophisticated response quality for complex scenario
-            assert len(response_text) > 800, (
-                f"Complex enterprise scenario should generate comprehensive response: "
-                f"{len(response_text)} chars (expected >800 for FinTech optimization)"
-            )
-            
-            assert quality_evaluation["meets_threshold"], (
-                f"Multi-agent orchestrated response fails quality threshold. "
-                f"Score: {quality_evaluation['overall_quality_score']:.3f} "
-                f"(required ≥{self.__class__.QUALITY_THRESHOLD_HIGH})"
-            )
-            
-            # Validate enterprise-specific business value indicators
-            enterprise_indicators_found = [
-                indicator for indicator in complex_scenario["context"]["expected_business_value"]
-                if indicator.lower() in response_text.lower()
-            ]
-            
-            indicator_coverage = len(enterprise_indicators_found) / len(complex_scenario["context"]["expected_business_value"])
-            assert indicator_coverage >= 0.6, (
-                f"Insufficient enterprise topic coverage in orchestrated response: "
-                f"{indicator_coverage:.1%} (found: {enterprise_indicators_found})"
-            )
-            
-            # Validate technical sophistication (should be higher for multi-agent)
-            assert quality_evaluation["technical_specificity"] >= 0.5, (
-                f"Multi-agent response should be technically sophisticated: "
-                f"{quality_evaluation['technical_specificity']:.3f} (expected ≥0.5)"
-            )
-            
+            assert len(orchestration_events) > 0, 'Should receive orchestration events'
+            assert final_response is not None, 'Should receive final orchestrated response'
+            response_data = final_response.get('data', {})
+            result = response_data.get('result', {})
+            response_text = result.get('response', str(result)) if isinstance(result, dict) else str(result)
+            quality_evaluation = self._calculate_response_quality_score(response_text, complex_scenario['context'])
+            orchestration_metrics['business_value_score'] = quality_evaluation['overall_quality_score']
+            unique_agents = list(set(orchestration_metrics['agents_invoked']))
+            assert len(unique_agents) >= 2, f'Multi-agent orchestration should involve ≥2 agents, detected: {unique_agents}'
+            assert len(response_text) > 800, f'Complex enterprise scenario should generate comprehensive response: {len(response_text)} chars (expected >800 for FinTech optimization)'
+            assert quality_evaluation['meets_threshold'], f"Multi-agent orchestrated response fails quality threshold. Score: {quality_evaluation['overall_quality_score']:.3f} (required ≥{self.__class__.QUALITY_THRESHOLD_HIGH})"
+            enterprise_indicators_found = [indicator for indicator in complex_scenario['context']['expected_business_value'] if indicator.lower() in response_text.lower()]
+            indicator_coverage = len(enterprise_indicators_found) / len(complex_scenario['context']['expected_business_value'])
+            assert indicator_coverage >= 0.6, f'Insufficient enterprise topic coverage in orchestrated response: {indicator_coverage:.1%} (found: {enterprise_indicators_found})'
+            assert quality_evaluation['technical_specificity'] >= 0.5, f"Multi-agent response should be technically sophisticated: {quality_evaluation['technical_specificity']:.3f} (expected ≥0.5)"
             await websocket.close()
-            
-            # Comprehensive orchestration reporting
             total_orchestration_time = time.time() - orchestration_start_time
-            
-            self.logger.info("🎯 MULTI-AGENT ORCHESTRATION SUCCESS")
-            self.logger.info(f"🔄 Orchestration Metrics:")
-            self.logger.info(f"   Total Orchestration Time: {total_orchestration_time:.1f}s")
-            self.logger.info(f"   Agent Processing Time: {orchestration_duration:.1f}s")
-            self.logger.info(f"   Agents Involved: {unique_agents}")
+            self.logger.info('🎯 MULTI-AGENT ORCHESTRATION SUCCESS')
+            self.logger.info(f'🔄 Orchestration Metrics:')
+            self.logger.info(f'   Total Orchestration Time: {total_orchestration_time:.1f}s')
+            self.logger.info(f'   Agent Processing Time: {orchestration_duration:.1f}s')
+            self.logger.info(f'   Agents Involved: {unique_agents}')
             self.logger.info(f"   Coordination Events: {len(orchestration_metrics['coordination_events'])}")
-            self.logger.info(f"   Total Events: {len(orchestration_events)}")
-            self.logger.info(f"💰 Business Value Metrics:")
+            self.logger.info(f'   Total Events: {len(orchestration_events)}')
+            self.logger.info(f'💰 Business Value Metrics:')
             self.logger.info(f"   Quality Score: {quality_evaluation['overall_quality_score']:.3f}/1.0")
-            self.logger.info(f"   Enterprise Coverage: {indicator_coverage:.1%}")
+            self.logger.info(f'   Enterprise Coverage: {indicator_coverage:.1%}')
             self.logger.info(f"   Technical Sophistication: {quality_evaluation['technical_specificity']:.3f}/1.0")
-            self.logger.info(f"   Response Length: {len(response_text)} characters")
-            
-            # Business success assertions for orchestration
-            assert total_orchestration_time < 180.0, (
-                f"Multi-agent orchestration too slow: {total_orchestration_time:.1f}s (max 180s)"
-            )
-            assert quality_evaluation["overall_quality_score"] >= self.__class__.QUALITY_THRESHOLD_HIGH, (
-                f"Multi-agent orchestration quality insufficient: {quality_evaluation['overall_quality_score']:.3f}"
-            )
-            
+            self.logger.info(f'   Response Length: {len(response_text)} characters')
+            assert total_orchestration_time < 180.0, f'Multi-agent orchestration too slow: {total_orchestration_time:.1f}s (max 180s)'
+            assert quality_evaluation['overall_quality_score'] >= self.__class__.QUALITY_THRESHOLD_HIGH, f"Multi-agent orchestration quality insufficient: {quality_evaluation['overall_quality_score']:.3f}"
         except Exception as e:
             total_time = time.time() - orchestration_start_time
-            
-            self.logger.error("❌ MULTI-AGENT ORCHESTRATION FAILED")
-            self.logger.error(f"   Error: {str(e)}")
-            self.logger.error(f"   Duration: {total_time:.1f}s")
+            self.logger.error('❌ MULTI-AGENT ORCHESTRATION FAILED')
+            self.logger.error(f'   Error: {str(e)}')
+            self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f"   Events collected: {len(orchestration_metrics.get('coordination_events', []))}")
             self.logger.error(f"   Agents detected: {orchestration_metrics.get('agents_invoked', [])}")
-            
-            raise AssertionError(
-                f"Multi-agent orchestration validation failed after {total_time:.1f}s: {e}. "
-                f"This breaks advanced platform capabilities and enterprise value proposition ($500K+ ARR impact). "
-                f"Orchestration metrics: {orchestration_metrics}"
-            )
-    
+            raise AssertionError(f'Multi-agent orchestration validation failed after {total_time:.1f}s: {e}. This breaks advanced platform capabilities and enterprise value proposition ($500K+ ARR impact). Orchestration metrics: {orchestration_metrics}')
+
     def _extract_agent_info(self, event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Extract agent information from WebSocket events."""
         event_str = json.dumps(event).lower()
-        event_type = event.get("type", "unknown")
-        
-        # Common agent names to detect
-        agents = ["supervisor", "triage", "apex", "optimizer", "data_helper"]
-        
+        event_type = event.get('type', 'unknown')
+        agents = ['supervisor', 'triage', 'apex', 'optimizer', 'data_helper']
         for agent in agents:
             if agent in event_str:
-                return {
-                    "agent_name": agent,
-                    "event_type": event_type,
-                    "detected_via": "content_analysis"
-                }
-        
-        # Try to extract from event data structure
-        event_data = event.get("data", {})
+                return {'agent_name': agent, 'event_type': event_type, 'detected_via': 'content_analysis'}
+        event_data = event.get('data', {})
         if isinstance(event_data, dict):
             for key, value in event_data.items():
-                if "agent" in key.lower() and isinstance(value, str):
-                    return {
-                        "agent_name": value.lower(),
-                        "event_type": event_type,
-                        "detected_via": f"data_field_{key}"
-                    }
-        
+                if 'agent' in key.lower() and isinstance(value, str):
+                    return {'agent_name': value.lower(), 'event_type': event_type, 'detected_via': f'data_field_{key}'}
         return None
-
-
-if __name__ == "__main__":
-    pytest.main([
-        __file__,
-        "-v",
-        "--tb=long", 
-        "-s",
-        "--gcp-staging",
-        "--agent-goldenpath"
-    ])
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

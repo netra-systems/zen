@@ -21,6 +21,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSo
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 
 
+@pytest.mark.integration
 class TestWebSocketStateSerializationIntegration:
     """Integration tests for WebSocket state serialization in real scenarios."""
 
@@ -141,6 +142,7 @@ class TestWebSocketStateSerializationIntegration:
         assert parsed["state"] == state.name.lower()
 
 
+@pytest.mark.integration
 class TestGCPCloudRunCompatibility:
     """Test compatibility with GCP Cloud Run structured logging patterns."""
 
@@ -219,6 +221,7 @@ class TestGCPCloudRunCompatibility:
         assert parsed["jsonPayload"]["websocket_application_state"] == "disconnected"
 
 
+@pytest.mark.integration
 class TestRegressionPrevention:
     """Ensure the original 1011 error pattern is completely fixed."""
 

@@ -503,10 +503,6 @@ class TestAuthServiceFailureRecovery(BaseIntegrationTest):
 
 if __name__ == "__main__":
     """Run mission critical auth service coordination tests."""
-    pytest.main([
-        __file__,
-        "-v", 
-        "--tb=short",
-        "-m", "mission_critical",
-        "--real-services"
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

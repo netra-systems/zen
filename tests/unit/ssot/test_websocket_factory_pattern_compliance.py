@@ -7,6 +7,7 @@ and identifies violations where direct instantiation or singleton patterns are u
 Expected to FAIL initially - demonstrating factory pattern violations.
 """
 
+import pytest
 import unittest
 import importlib
 import inspect
@@ -16,6 +17,7 @@ from typing import List, Dict, Set, Tuple, Any
 from pathlib import Path
 
 
+@pytest.mark.unit
 class TestWebSocketFactoryPatternCompliance(unittest.TestCase):
     """Test WebSocket factory pattern SSOT compliance."""
 

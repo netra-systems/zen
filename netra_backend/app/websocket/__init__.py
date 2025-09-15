@@ -12,7 +12,12 @@ warnings.warn(
     stacklevel=2
 )
 
-from netra_backend.app.websocket_core import *
+# Import specific components instead of wildcard import
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.handlers import MessageRouter, get_message_router
+from netra_backend.app.websocket_core.event_validator import get_websocket_validator
+
+__all__ = ["UnifiedWebSocketManager", "MessageRouter", "get_message_router", "get_websocket_validator"]
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.types import *
 

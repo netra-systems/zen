@@ -10,6 +10,7 @@ BUSINESS IMPACT: $500K+ ARR at risk from inconsistent message routing
 These tests SHOULD FAIL before consolidation and PASS after SSOT implementation.
 """
 
+import pytest
 import unittest
 import asyncio
 import threading
@@ -19,6 +20,7 @@ from unittest.mock import AsyncMock, Mock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestMessageRouterRaceConditionPrevention(SSotAsyncTestCase):
     """Test race condition prevention in consolidated MessageRouter."""
 
@@ -380,6 +382,7 @@ class TestMessageRouterRaceConditionPrevention(SSotAsyncTestCase):
             self.fail("Could not import MessageRouter for thread safety test")
 
 
+@pytest.mark.integration
 class TestMessageRouterSingletonBehaviorValidation(SSotAsyncTestCase):
     """Test that consolidated router behaves as singleton when needed."""
 

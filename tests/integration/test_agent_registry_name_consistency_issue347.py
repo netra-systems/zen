@@ -29,6 +29,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.integration
 class TestAgentRegistryNameConsistencyIntegration(SSotAsyncTestCase):
     """Integration tests for agent registry naming consistency with real services."""
     
@@ -246,6 +247,7 @@ class TestAgentRegistryNameConsistencyIntegration(SSotAsyncTestCase):
         print(f"   Inconsistent agents (PROBLEM): {inconsistent_agents}")
 
 
+@pytest.mark.integration
 class TestAgentRegistryRealServiceIntegration(SSotAsyncTestCase):
     """Integration tests with real agent registry patterns and services."""
     

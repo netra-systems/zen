@@ -41,6 +41,7 @@ def generate_test_user_id(suffix: str = "") -> str:
     return str(uuid.uuid4())
 
 
+@pytest.mark.e2e
 class TestWebSocket1011Prevention:
     """
     E2E validation that WebSocket 1011 errors have been prevented.

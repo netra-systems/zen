@@ -15,6 +15,7 @@ Protects the primary Golden Path user flow ensuring chat delivers 90% of platfor
 CRITICAL: These tests must fail when SSOT violations exist and pass when migration is complete.
 """
 
+import pytest
 import asyncio
 import inspect
 import warnings
@@ -31,6 +32,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.unit
 class TestIssue565MigrationCompletion(SSotAsyncTestCase):
     """
     Test suite validating Issue #565 ExecutionEngine migration completion.

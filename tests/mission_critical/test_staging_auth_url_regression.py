@@ -439,5 +439,4 @@
                                                                         # REMOVED_SYNTAX_ERROR: sys.exit(1)
 
                                                                         # Run full test suite
-                                                                        # REMOVED_SYNTAX_ERROR: pytest.main([__file__, '-v', '--tb=short', '-x'])
                                                                         # REMOVED_SYNTAX_ERROR: pass

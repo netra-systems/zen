@@ -34,6 +34,7 @@ from netra_backend.app.dependencies import get_llm_manager
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestLLMManagerSSOTViolations(SSotBaseTestCase):
     """Test 1: SSOT Violation Detection - Static analysis for violation patterns"""
     

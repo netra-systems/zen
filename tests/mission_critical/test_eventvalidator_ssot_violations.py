@@ -320,16 +320,12 @@ class TestEventValidatorSSOTViolations(SSotBaseTestCase):
 
 
 if __name__ == "__main__":
-    # Configure logging for standalone execution
-    logging.basicConfig(level=logging.INFO)
-    
-    # Run the test
-    suite = pytest.TestLoader().loadTestsFromTestCase(TestEventValidatorSSOTViolations)
-    runner = pytest.TextTestRunner(verbosity=2)
-    result = runner.run(suite)
-    
-    if result.wasSuccessful():
-        print(" FAIL:  UNEXPECTED: Test passed - SSOT violations may have been fixed already")
-    else:
-        print(" PASS:  EXPECTED: Test failed - SSOT violations detected as expected")
-        print("This confirms Issue #231 exists and requires SSOT consolidation")
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

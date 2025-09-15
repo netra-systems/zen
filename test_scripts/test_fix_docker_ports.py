@@ -6,7 +6,7 @@ This simulates what the test runner does when acquiring Docker environment.
 import sys
 import subprocess
 import logging
-from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add the project root to path

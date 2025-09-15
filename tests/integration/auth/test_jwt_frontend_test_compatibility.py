@@ -14,6 +14,7 @@ from typing import Dict, Any
 from test_framework.fixtures.auth import create_real_jwt_token
 
 
+@pytest.mark.integration
 class TestJWTFrontendTestCompatibility:
     """Test JWT token creation patterns used by frontend integration tests."""
     
@@ -112,6 +113,7 @@ class TestJWTFrontendTestCompatibility:
             )
 
 
+@pytest.mark.integration
 class TestJWTFrontendTestCompatibilityWithFix:
     """Test how frontend tests should work after the fix is applied."""
     

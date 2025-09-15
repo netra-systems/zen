@@ -4,6 +4,7 @@ Tests agent coordination
 Business Value: Multi-agent collaboration
 """
 
+import pytest
 import asyncio
 import json
 import uuid
@@ -14,6 +15,7 @@ from tests.e2e.staging_test_base import StagingTestBase, staging_test
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.e2e
 class TestAgentOrchestrationStaging(StagingTestBase):
 
     def create_user_context(self) -> UserExecutionContext:

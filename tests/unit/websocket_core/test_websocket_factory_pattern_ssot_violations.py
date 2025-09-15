@@ -18,6 +18,7 @@ PURPOSE:
 Business Value: Eliminates factory abstraction overhead threatening $500K+ ARR performance
 """
 
+import pytest
 import warnings
 import asyncio
 import inspect
@@ -27,6 +28,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.unit
 class TestWebSocketFactoryPatternSSOTViolations(SSotAsyncTestCase):
     """Test for WebSocket factory pattern SSOT violations."""
 

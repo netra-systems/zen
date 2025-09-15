@@ -1,26 +1,51 @@
 {
   "instances": [
     {
-      "command": "/gitcommitgardener",
+      "command": "/gitissueprogressorv3 golden path p0",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
     {
-      "command": "/prmergergit",
+      "command": "/gitissueprogressorv3 golden path phase 2",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
     {
-      "command": "/gitissueprogressorv3 no labels",
+      "command": "/gitissueprogressorv3 golden path p0",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
     {
-      "command": "/gitissueprogressorv3 p0",
+      "command": "/gitissueprogressorv3 golden path phase 3",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
-      {
+    {
+      "command": "/gitissueprogressorv3 golden path p0",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 golden path",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/runtests agents, e2e gcp",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/runtests goldenpath, unit",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/runtests goldenpath, e2e",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
       "command": "/gitissueprogressorv3 most important",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
@@ -60,13 +85,18 @@
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
-      {
+    {
       "command": "/ultimate-test-deploy-loop",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
-        {
+    {
       "command": "/gcploggardener",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/runtests goldenpath, integration",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },

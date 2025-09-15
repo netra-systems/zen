@@ -74,15 +74,15 @@ class TestSSotComplianceValidation(BaseIntegrationTest):
         
         try:
             # Check for any other WebSocket manager implementations
-            from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
             websocket_manager_modules.append({
-                'module': 'netra_backend.app.websocket_core.unified_manager', 
-                'class': '_UnifiedWebSocketManagerImplementation',
-                'implementation': _UnifiedWebSocketManagerImplementation,
-                'type': 'internal_implementation'
+                'module': 'netra_backend.app.websocket_core.unified_manager',
+                'class': 'UnifiedWebSocketManager',
+                'implementation': UnifiedWebSocketManager,
+                'type': 'unified_implementation'
             })
-            # Internal implementation is allowed as it's private and used by canonical
-            logger.info("Found internal _UnifiedWebSocketManagerImplementation (allowed)")
+            # Unified implementation is allowed as exported interface
+            logger.info("Found UnifiedWebSocketManager implementation (allowed)")
         except ImportError:
             pass
         

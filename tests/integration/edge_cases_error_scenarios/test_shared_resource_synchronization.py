@@ -30,6 +30,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.core.config import get_config
 
 
+@pytest.mark.integration
 class TestSharedResourceSynchronization(BaseIntegrationTest):
     """
     Test synchronization mechanisms for shared resources under concurrent access.

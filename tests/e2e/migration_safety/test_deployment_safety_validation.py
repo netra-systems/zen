@@ -17,6 +17,7 @@ CRITICAL: These tests simulate production deployment scenarios to validate
 that the migration can be deployed safely without service interruption.
 """
 
+import pytest
 import asyncio
 import time
 import json
@@ -35,6 +36,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
+@pytest.mark.e2e
 class TestDeploymentSafetyValidation(SSotAsyncTestCase):
     """
     Test suite validating deployment safety for ExecutionEngine migration.

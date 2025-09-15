@@ -33,6 +33,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.integration
 class TestWebSocketEventDeliveryFragmentationFailures(SSotAsyncTestCase):
     """Phase 1 Reproduction Test: Prove event delivery fails with fragmented managers."""
     
@@ -297,8 +298,8 @@ class TestWebSocketEventDeliveryFragmentationFailures(SSotAsyncTestCase):
         
         try:
             # Create multiple managers for the same user (potential duplication scenario)
-            manager1 = await get_websocket_manager(user_context=self.test_user_context)
-            manager2 = await get_websocket_manager(user_context=self.test_user_context)
+            manager1 = get_websocket_manager(user_context=self.test_user_context)
+            manager2 = get_websocket_manager(user_context=self.test_user_context)
             
             # Create connection and add to both managers
             mock_connection = await self._create_mock_websocket_connection()
@@ -369,8 +370,8 @@ class TestWebSocketEventDeliveryFragmentationFailures(SSotAsyncTestCase):
         
         try:
             # Create managers for ordering test
-            manager1 = await get_websocket_manager(user_context=self.test_user_context)
-            manager2 = await get_websocket_manager(user_context=self.test_user_context)
+            manager1 = get_websocket_manager(user_context=self.test_user_context)
+            manager2 = get_websocket_manager(user_context=self.test_user_context)
             
             # Create connection
             mock_connection = await self._create_mock_websocket_connection()

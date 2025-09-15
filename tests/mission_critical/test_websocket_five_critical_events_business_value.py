@@ -91,8 +91,8 @@ from shared.types.core_types import (
 )
 
 # System Under Test - SSOT imports
-from netra_backend.app.websocket_core.unified_manager import (
-    UnifiedWebSocketManager,
+from netra_backend.app.websocket_core.websocket_manager import (
+    WebSocketManager as UnifiedWebSocketManager,
     WebSocketConnection,
     WebSocketManagerMode
 )
@@ -392,8 +392,9 @@ class TestWebSocketFiveCriticalEventsBusinessValue(SSotAsyncTestCase):
         # Set up base test case
         self.setup_method()
         
-        # Initialize WebSocket testing components
-        self.manager = UnifiedWebSocketManager()
+        # Initialize WebSocket testing components using SSOT factory pattern
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        self.manager = get_websocket_manager()
         self.test_user_id = ensure_user_id("critical-events-user-123")
         self.event_tester = RealWebSocketEventTester()
         
@@ -1034,5 +1035,12 @@ class TestWebSocketFiveCriticalEventsBusinessValue(SSotAsyncTestCase):
 
 
 if __name__ == "__main__":
-    # Run with: python -m pytest tests/mission_critical/test_websocket_five_critical_events_business_value.py -v
-    pytest.main([__file__, "-v", "--tb=short"])
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

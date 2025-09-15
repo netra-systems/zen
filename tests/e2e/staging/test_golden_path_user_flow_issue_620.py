@@ -342,7 +342,7 @@ class TestGoldenPathUserFlowIssue620(BaseE2ETest):
             # Try to connect to staging WebSocket endpoint
             websocket = await websockets.connect(
                 self.STAGING_WS_URL,
-                extra_headers=headers,
+                additional_headers=headers,
                 timeout=10
             )
             

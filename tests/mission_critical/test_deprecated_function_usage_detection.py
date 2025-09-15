@@ -18,11 +18,11 @@ import os
 import re
 import unittest
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestDeprecatedFunctionUsageDetection(SSotAsyncTestCase):
+class TestDeprecatedFunctionUsageDetection(SSotAsyncTestCase, unittest.TestCase):
     """
     Mission Critical Test: Deprecated WebSocket Authentication Function Detection
     
@@ -33,7 +33,7 @@ class TestDeprecatedFunctionUsageDetection(SSotAsyncTestCase):
     def setUp(self):
         """Set up test environment for deprecated function usage detection."""
         super().setUp()
-        self.project_root = "/Users/anthony/Desktop/netra-apex"
+        self.project_root = r"C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1"
         self.deprecated_function = "authenticate_websocket_connection"
         self.ssot_function = "authenticate_websocket_ssot"
         self.scan_patterns = [
@@ -46,7 +46,14 @@ class TestDeprecatedFunctionUsageDetection(SSotAsyncTestCase):
             "**/__pycache__/**",
             "**/test_deprecated_function_usage_detection.py"  # Exclude this test file
         ]
-    
+
+    @property
+    def test_metadata(self) -> Dict[str, Any]:
+        """Access test metadata through context."""
+        if not hasattr(self, '_test_metadata'):
+            self._test_metadata = {}
+        return self._test_metadata
+
     def test_no_deprecated_websocket_auth_function_usage(self):
         """
         CRITICAL TEST: Should FAIL currently - finds deprecated function usage in codebase.

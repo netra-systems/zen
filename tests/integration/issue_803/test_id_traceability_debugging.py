@@ -20,6 +20,7 @@ EXPECTED TEST BEHAVIOR:
 - Traceability tests show the impact across system boundaries
 """
 
+import pytest
 import unittest
 import time
 import traceback
@@ -32,6 +33,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
+@pytest.mark.integration
 class TestIssue803IDTraceabilityDebugging(SSotAsyncTestCase):
     """Integration tests for ID traceability debugging and analysis."""
 

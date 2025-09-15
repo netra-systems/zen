@@ -116,10 +116,32 @@ class ExecutionTracker(_SSOT_AgentExecutionTracker):
         metrics = self.get_metrics()
         return []  # For now, return empty list - full conversion would need UUID tracking
     
-    @failed_executions.setter  
+    @failed_executions.setter
     def failed_executions(self, value: List[UUID]):
         """Setter for backward compatibility (no-op)."""
         pass
+
+    def complete_execution(self, execution_id: str, success: bool = True, error: Optional[str] = None) -> bool:
+        """
+        Mark execution as completed - Backward compatibility method.
+
+        This method provides the interface expected by test files while delegating
+        to the SSOT AgentExecutionTracker's update_execution_state method.
+
+        Args:
+            execution_id: The execution ID to complete
+            success: Whether the execution was successful (default True)
+            error: Optional error message if failed
+
+        Returns:
+            bool: True if successfully updated
+        """
+        if success:
+            state = ExecutionState.COMPLETED
+        else:
+            state = ExecutionState.FAILED
+
+        return self.update_execution_state(execution_id, state, error)
 
 
 # BACKWARD COMPATIBILITY: Redirect to SSOT functions

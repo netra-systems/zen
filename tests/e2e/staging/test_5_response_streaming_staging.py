@@ -4,6 +4,7 @@ Tests real-time response streaming
 Business Value: Real-time user experience
 """
 
+import pytest
 import asyncio
 import json
 import time
@@ -13,6 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from tests.e2e.staging_test_base import StagingTestBase, staging_test
 
 
+@pytest.mark.e2e
 class TestResponseStreamingStaging(StagingTestBase):
     """Test response streaming in staging environment"""
     

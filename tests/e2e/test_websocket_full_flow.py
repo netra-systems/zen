@@ -4,6 +4,7 @@ Comprehensive E2E WebSocket Agent Event Test
 Captures and displays ALL WebSocket events during agent execution
 """
 
+import pytest
 import asyncio
 import json
 import time
@@ -218,6 +219,7 @@ async def run_agent_and_capture_events():
     
     return capture
 
+@pytest.mark.e2e
 async def test_multiple_concurrent_users():
     """Test multiple concurrent users to verify isolation"""
     print(f"\n{Fore.CYAN}{'='*80}")

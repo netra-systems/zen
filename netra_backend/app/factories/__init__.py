@@ -22,18 +22,16 @@ Key Factories:
 
 from netra_backend.app.factories.data_access_factory import (
     DataAccessFactory,
-    ClickHouseAccessFactory, 
-    RedisAccessFactory
+    get_clickhouse_factory,
+    get_redis_factory
 )
 from netra_backend.app.factories.clickhouse_factory import (
     ClickHouseFactory,
-    UserClickHouseClient,
-    get_clickhouse_factory
+    UserClickHouseClient
 )
 from netra_backend.app.factories.redis_factory import (
     RedisFactory,
-    UserRedisClient,
-    get_redis_factory
+    UserRedisClient
 )
 from netra_backend.app.factories.tool_dispatcher_factory import (
     ToolDispatcherFactory,
@@ -58,10 +56,8 @@ from netra_backend.app.factories.websocket_bridge_factory import (
 
 __all__ = [
     "DataAccessFactory",
-    "ClickHouseAccessFactory",
-    "RedisAccessFactory",
     "ClickHouseFactory",
-    "UserClickHouseClient", 
+    "UserClickHouseClient",
     "get_clickhouse_factory",
     "RedisFactory",
     "UserRedisClient",

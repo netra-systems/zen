@@ -23,6 +23,9 @@ import json
 import time
 import uuid
 from collections import defaultdict, deque
+
+# SSOT Import for Phase 2 UUID violation remediation
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -255,7 +258,7 @@ class EventValidator:
             # Handle non-standard event types
             event_type = event_type_str
         
-        event_id = event.get('message_id') or str(uuid.uuid4())
+        event_id = event.get('message_id') or UnifiedIdGenerator.generate_base_id('event')
         thread_id = event.get('thread_id') or context.get('thread_id', 'unknown')
         run_id = event.get('payload', {}).get('run_id') or context.get('run_id')
         timestamp = event.get('timestamp', time.time())
@@ -721,7 +724,7 @@ class EventValidationFramework:
     def _create_bypass_validation(self, event: Dict[str, Any], context: Dict[str, Any]) -> ValidatedEvent:
         """Create minimal validation when circuit breaker is open."""
         return ValidatedEvent(
-            event_id=str(uuid.uuid4()),
+            event_id=UnifiedIdGenerator.generate_base_id('bypass'),
             event_type=event.get('type', 'unknown'),
             thread_id=event.get('thread_id', 'unknown'),
             run_id=event.get('payload', {}).get('run_id'),
@@ -734,7 +737,7 @@ class EventValidationFramework:
     def _create_error_validation(self, event: Dict[str, Any], context: Dict[str, Any], error: str) -> ValidatedEvent:
         """Create error validation result."""
         return ValidatedEvent(
-            event_id=str(uuid.uuid4()),
+            event_id=UnifiedIdGenerator.generate_base_id('error'),
             event_type=event.get('type', 'unknown'),
             thread_id=event.get('thread_id', 'unknown'),
             run_id=event.get('payload', {}).get('run_id'),

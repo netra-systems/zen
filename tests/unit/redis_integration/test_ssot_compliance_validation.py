@@ -12,6 +12,7 @@ Test Strategy:
 4. Validate SSOT migration compliance
 """
 
+import pytest
 import unittest
 import sys
 import os
@@ -19,6 +20,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestSsotComplianceValidation(SSotBaseTestCase):
     """
     SSOT Compliance: System-wide Redis integration validation

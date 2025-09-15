@@ -73,6 +73,7 @@ class GCPErrorObjectValidationReport:
         self.compliance_score = (self.passed_validations / self.total_validations * 100) if self.total_validations > 0 else 0
 
 
+@pytest.mark.integration
 class TestGCPErrorObjectValidation(SSotBaseTestCase):
     """Integration tests for GCP Error object validation and compliance."""
     

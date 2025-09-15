@@ -56,6 +56,7 @@ except ImportError:
         env.disable_isolation()
 
 
+@pytest.mark.integration
 class TestSSOTEnvironmentMigrationValidation:
     """Test SSOT environment migration validation."""
     

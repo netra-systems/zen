@@ -434,4 +434,3 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
 
         # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
             # Run async tests properly
-            # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v", "--tb=short"])

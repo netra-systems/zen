@@ -32,6 +32,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.unit
 class TestStagingEnvironmentConfiguration:
     """Test suite for staging environment configuration handling."""
     
@@ -242,6 +243,7 @@ class TestStagingEnvironmentConfiguration:
             )
 
 
+@pytest.mark.unit
 class TestStagingDeploymentErrorPrevention:
     """Test suite focused on preventing staging deployment errors."""
     

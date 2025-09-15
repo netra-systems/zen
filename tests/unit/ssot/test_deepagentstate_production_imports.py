@@ -17,6 +17,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.unit
 class TestDeepAgentStateProductionImports(SSotAsyncTestCase):
     """Test suite proving production files still use deprecated DeepAgentState imports"""
 

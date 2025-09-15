@@ -73,10 +73,11 @@ async def test_staging_websocket():
                     print(f"  ⏰ No response within timeout")
                     
         except InvalidStatus as e:
-            status_code = getattr(e, 'status_code', None)
+            # ISSUE #1032 FIX: Correct InvalidStatus attribute access
+            status_code = getattr(e.response, 'status', None) if hasattr(e, 'response') else getattr(e, 'status', None)
             error_message = str(e)
             print(f"  ❌ HTTP Error: {status_code} - {e}")
-            
+
             # Check for HTTP 500 in error message even if status_code is None
             if status_code == 500 or "HTTP 500" in error_message:
                 test_results["http_500_errors"] += 1

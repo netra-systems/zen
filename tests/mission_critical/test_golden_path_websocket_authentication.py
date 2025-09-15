@@ -237,7 +237,7 @@ class TestGoldenPathWebSocketAuthentication:
             try:
                 async with websockets.connect(
                     self.auth_config.websocket_url,
-                    extra_headers=websocket_headers,
+                    additional_headers =websocket_headers,
                     timeout=self.auth_config.timeout
                 ) as websocket:
                     
@@ -448,7 +448,7 @@ class TestGoldenPathWebSocketAuthentication:
                 try:
                     async with websockets.connect(
                         self.auth_config.websocket_url,
-                        extra_headers=websocket_headers,
+                        additional_headers =websocket_headers,
                         timeout=self.auth_config.timeout
                     ) as websocket:
                         
@@ -579,7 +579,7 @@ class TestGoldenPathWebSocketAuthentication:
             try:
                 async with websockets.connect(
                     self.auth_config.websocket_url,
-                    extra_headers=websocket_headers,
+                    additional_headers =websocket_headers,
                     timeout=self.auth_config.timeout
                 ) as websocket:
                     
@@ -763,7 +763,7 @@ class TestGoldenPathWebSocketAuthentication:
                 
                 async with websockets.connect(
                     self.auth_config.websocket_url,
-                    extra_headers=websocket_headers,
+                    additional_headers =websocket_headers,
                     timeout=self.auth_config.timeout
                 ) as websocket:
                     
@@ -929,5 +929,12 @@ class TestGoldenPathWebSocketAuthentication:
 
 
 if __name__ == "__main__":
-    # Run Golden Path mission critical tests with pytest
-    pytest.main([__file__, "-v", "--tb=short", "-m", "mission_critical", "-m", "golden_path"])
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

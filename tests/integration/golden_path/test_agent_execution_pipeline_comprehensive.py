@@ -365,13 +365,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         """
         if not real_services_fixture["database_available"]:
             pytest.skip("Database required for agent orchestration")
-        
-        # Create supervisor with mocked infrastructure
-        supervisor = SupervisorAgent(
-            llm_manager=self.mock_llm_manager,
-            websocket_bridge=self.mock_websocket_bridge
-        )
-        
+
         # Create user context with database session
         user_context = self.create_test_user_context(
             additional_metadata={
@@ -379,6 +373,13 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
                 'context_data': {'monthly_spend': 5000, 'models': ['gpt-4', 'claude']}
             },
             db_session=real_services_fixture["db"]
+        )
+
+        # Create supervisor with mocked infrastructure and user context (Issue #1116 compliance)
+        supervisor = SupervisorAgent(
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge,
+            user_context=user_context
         )
         
         # Mock LLM responses for different agents
@@ -445,18 +446,19 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         """
         if not real_services_fixture["database_available"]:
             pytest.skip("Database required for pipeline testing")
-        
-        supervisor = SupervisorAgent(
-            llm_manager=self.mock_llm_manager,
-            websocket_bridge=self.mock_websocket_bridge
-        )
-        
+
         user_context = self.create_test_user_context(
             additional_metadata={
                 'user_request': 'Provide comprehensive AI cost analysis and optimization plan',
                 'execution_tracking': True
             },
             db_session=real_services_fixture["db"]
+        )
+
+        supervisor = SupervisorAgent(
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge,
+            user_context=user_context
         )
         
         # Track agent execution order
@@ -525,15 +527,16 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         """
         if not real_services_fixture["database_available"]:
             pytest.skip("Database required for failure testing")
-        
-        supervisor = SupervisorAgent(
-            llm_manager=self.mock_llm_manager, 
-            websocket_bridge=self.mock_websocket_bridge
-        )
-        
+
         user_context = self.create_test_user_context(
             additional_metadata={'user_request': 'Optimize my costs even if some analysis fails'},
             db_session=real_services_fixture["db"]
+        )
+
+        supervisor = SupervisorAgent(
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge,
+            user_context=user_context
         )
         
         # Simulate agent failures
@@ -604,19 +607,8 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         """
         if not real_services_fixture["database_available"]:
             pytest.skip("Database required for multi-user testing")
-        
-        # Create multiple supervisors (simulating different user sessions)
-        supervisor1 = SupervisorAgent(
-            llm_manager=self.mock_llm_manager,
-            websocket_bridge=self.mock_websocket_bridge
-        )
-        
-        supervisor2 = SupervisorAgent(
-            llm_manager=self.mock_llm_manager,
-            websocket_bridge=self.mock_websocket_bridge
-        )
-        
-        # Create isolated user contexts (cannot modify frozen fields, create new contexts)
+
+        # Create isolated user contexts (Issue #1116 compliance - create contexts first)
         user1_context = UserExecutionContext(
             user_id="multi-user-1",
             thread_id=UnifiedIdGenerator.generate_thread_id("multi-user-1"),
@@ -629,7 +621,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
                 'user_data': {'service': 'openai', 'monthly_budget': 1000}
             }
         )
-        
+
         user2_context = UserExecutionContext(
             user_id="multi-user-2",
             thread_id=UnifiedIdGenerator.generate_thread_id("multi-user-2"),
@@ -641,6 +633,19 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
                 'user_request': 'User 2: Optimize my Anthropic usage',
                 'user_data': {'service': 'anthropic', 'monthly_budget': 2000}
             }
+        )
+
+        # Create multiple supervisors with user-specific contexts (simulating different user sessions)
+        supervisor1 = SupervisorAgent(
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge,
+            user_context=user1_context
+        )
+
+        supervisor2 = SupervisorAgent(
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge,
+            user_context=user2_context
         )
         
         # Track responses per user to validate isolation
@@ -792,13 +797,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         
         self.mock_websocket_manager.send_to_user.side_effect = capture_detailed_websocket_events
         self.mock_websocket_bridge.emit_agent_event.side_effect = capture_detailed_agent_events
-        
-        # Create supervisor with enhanced WebSocket tracking
-        supervisor = SupervisorAgent(
-            llm_manager=self.mock_llm_manager,
-            websocket_bridge=self.mock_websocket_bridge
-        )
-        
+
         user_context = self.create_test_user_context(
             additional_metadata={
                 'user_request': 'Run comprehensive analysis with full event tracking',
@@ -806,6 +805,13 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
                 'stream_all_events': True
             },
             db_session=real_services_fixture["db"]
+        )
+
+        # Create supervisor with enhanced WebSocket tracking and user context (Issue #1116 compliance)
+        supervisor = SupervisorAgent(
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge,
+            user_context=user_context
         )
         
         # Mock LLM responses that trigger tool usage
@@ -897,12 +903,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         """
         if not real_services_fixture["database_available"]:
             pytest.skip("Database required for business scenario testing")
-        
-        supervisor = SupervisorAgent(
-            llm_manager=self.mock_llm_manager,
-            websocket_bridge=self.mock_websocket_bridge
-        )
-        
+
         # Real business scenario data
         business_context = self.create_test_user_context(
             additional_metadata={
@@ -919,7 +920,13 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
             },
             db_session=real_services_fixture["db"]
         )
-        
+
+        supervisor = SupervisorAgent(
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge,
+            user_context=business_context
+        )
+
         # Mock realistic business analysis responses
         self.mock_llm_manager.generate_response.side_effect = [
             # Triage - recognizes cost optimization scenario
@@ -1079,10 +1086,16 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         """
         if not real_services_fixture["database_available"]:
             pytest.skip("Database required for performance testing")
-        
+
+        # Create default user context for supervisor instantiation (Issue #1116 compliance)
+        default_user_context = self.create_test_user_context(
+            db_session=real_services_fixture["db"]
+        )
+
         supervisor = SupervisorAgent(
             llm_manager=self.mock_llm_manager,
-            websocket_bridge=self.mock_websocket_bridge
+            websocket_bridge=self.mock_websocket_bridge,
+            user_context=default_user_context
         )
         
         # Performance test scenarios
@@ -1181,13 +1194,19 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
     async def test_invalid_user_context_handling(self, real_services_fixture):
         """
         Test handling of invalid user contexts with proper error messages.
-        
+
         Business Value: Ensures robust error handling for production deployment.
         Critical Path: System fails gracefully with clear error messages for debugging.
         """
+        # Create valid user context for SupervisorAgent instantiation (Issue #1116 compliance)
+        valid_user_context = self.create_test_user_context(
+            db_session=real_services_fixture["db"]
+        )
+
         supervisor = SupervisorAgent(
             llm_manager=self.mock_llm_manager,
-            websocket_bridge=self.mock_websocket_bridge
+            websocket_bridge=self.mock_websocket_bridge,
+            user_context=valid_user_context
         )
         
         # Test invalid contexts - check creation and execution separately
@@ -1254,15 +1273,16 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         failing_websocket_bridge = Mock(spec=AgentWebSocketBridge)
         failing_websocket_bridge.websocket_manager = None  # Simulate missing manager
         failing_websocket_bridge.emit_agent_event = AsyncMock(side_effect=RuntimeError("WebSocket connection failed"))
-        
-        supervisor = SupervisorAgent(
-            llm_manager=self.mock_llm_manager,
-            websocket_bridge=failing_websocket_bridge
-        )
-        
+
         user_context = self.create_test_user_context(
             additional_metadata={'user_request': 'Test with WebSocket failures'},
             db_session=real_services_fixture["db"]
+        )
+
+        supervisor = SupervisorAgent(
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=failing_websocket_bridge,
+            user_context=user_context
         )
         
         # Mock successful agent responses

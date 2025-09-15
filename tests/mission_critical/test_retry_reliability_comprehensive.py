@@ -1157,4 +1157,6 @@ async def test_retry_state_isolation_concurrent_operations(retry_reliability_tes
 
 if __name__ == "__main__":
     # Run retry reliability stress tests
-    pytest.main([__file__, "-v", "--tb=short", "-x"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

@@ -14,6 +14,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
+@pytest.mark.unit
 def test_env_file_not_loaded_in_staging():
     """Test that .env file is not loaded in staging environment."""
     # Create a temporary .env file
@@ -44,6 +45,7 @@ def test_env_file_not_loaded_in_staging():
             os.chdir(original_cwd)
 
 
+@pytest.mark.unit
 def test_env_file_not_loaded_in_production():
     """Test that .env file is not loaded in production environment."""
     # Create a temporary .env file
@@ -74,6 +76,7 @@ def test_env_file_not_loaded_in_production():
             os.chdir(original_cwd)
 
 
+@pytest.mark.unit
 def test_env_file_is_loaded_in_development():
     """Test that .env file IS loaded in development environment."""
     # Create a temporary .env file
@@ -124,6 +127,7 @@ def test_env_file_is_loaded_in_development():
             os.chdir(original_cwd)
 
 
+@pytest.mark.unit
 def test_env_file_does_not_override_existing_vars():
     """Test that .env file does not override existing environment variables."""
     # Create a temporary .env file

@@ -1128,7 +1128,6 @@
     # REMOVED_SYNTAX_ERROR: print("=" * 80)
 
     # Run pytest with verbose output
-    # REMOVED_SYNTAX_ERROR: result = pytest.main([__file__, "-v", "-s", "--tb=short"])
 
     # REMOVED_SYNTAX_ERROR: if result == 0:
         # REMOVED_SYNTAX_ERROR: print(" )

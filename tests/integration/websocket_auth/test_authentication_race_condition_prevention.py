@@ -14,6 +14,7 @@ Expected Test Behavior:
 - PASSES AFTER: Single authenticator eliminates race conditions
 """
 
+import pytest
 import asyncio
 import time
 import unittest
@@ -24,6 +25,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.websocket_helpers import MockWebSocketConnection
 
 
+@pytest.mark.integration
 class TestAuthenticationRaceConditionPrevention(SSotAsyncTestCase):
     """
     Integration Test: WebSocket Authentication Race Condition Detection

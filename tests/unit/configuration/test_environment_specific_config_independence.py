@@ -14,6 +14,7 @@ from pathlib import Path
 from shared.isolated_environment import IsolatedEnvironment, get_env, ValidationResult
 
 
+@pytest.mark.unit
 class TestEnvironmentSpecificConfigIndependence:
     """Test environment-specific configuration independence to prevent cascade failures."""
 
@@ -236,6 +237,7 @@ class TestEnvironmentSpecificConfigIndependence:
             assert validation_result["issues"], f"Invalid config {i} should have issues listed"
 
 
+@pytest.mark.unit
 class TestConfigurationEnvironmentDefaults:
     """Test environment-specific default configuration handling."""
 

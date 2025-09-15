@@ -12,6 +12,7 @@ EXPECTED BEHAVIOR:
 Business Value: Ensures consistent dependency injection patterns for $500K+ ARR agents
 """
 
+import pytest
 import ast
 import importlib
 import inspect
@@ -23,6 +24,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.unit
 class TestUnifiedToolDispatcherSSotCompliance(SSotBaseTestCase):
     """Test proper SSOT import patterns for UnifiedToolDispatcher."""
 

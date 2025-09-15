@@ -7,6 +7,7 @@ when GOOGLE_OAUTH_CLIENT_ID_STAGING is missing or misconfigured.
 Business Value: Prevents $500K+ ARR disruption from broken OAuth authentication
 """
 
+import pytest
 import unittest
 from unittest.mock import MagicMock, patch
 import os
@@ -20,6 +21,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.unit
 class TestOAuthConfigurationValidation(SSotBaseTestCase):
     """Test OAuth configuration validation for deployment."""
 

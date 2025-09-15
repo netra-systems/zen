@@ -56,7 +56,7 @@ from netra_backend.app.clients.auth_client_core import (
     AuthServiceNotAvailableError, CircuitBreakerError
 )
 from netra_backend.app.clients.circuit_breaker import CircuitBreakerOpen
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.models.user import User
 from netra_backend.app.models.thread import Thread

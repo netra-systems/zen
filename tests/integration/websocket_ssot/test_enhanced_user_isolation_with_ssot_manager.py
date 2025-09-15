@@ -33,6 +33,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.integration
 class TestEnhancedUserIsolationWithSsotManager(SSotAsyncTestCase):
     """Phase 2 SSOT Validation Test: Validate enhanced user isolation with consolidated SSOT manager."""
     
@@ -87,7 +88,7 @@ class TestEnhancedUserIsolationWithSsotManager(SSotAsyncTestCase):
         enterprise_managers = []
         try:
             for user_context in self.enterprise_users:
-                manager = await get_websocket_manager(user_context=user_context)
+                manager = get_websocket_manager(user_context=user_context)
                 enterprise_managers.append((user_context, manager))
                 logger.info(f"Created SSOT manager for {user_context.tenant_id}: {type(manager)}")
             
@@ -356,7 +357,7 @@ class TestEnhancedUserIsolationWithSsotManager(SSotAsyncTestCase):
         
         # Create enterprise manager with maximum security context
         max_security_context = self.enterprise_users[1]  # beta_industries with maximum security
-        enterprise_manager = await get_websocket_manager(user_context=max_security_context)
+        enterprise_manager = get_websocket_manager(user_context=max_security_context)
         
         # CRITICAL SECURITY TEST 1: Verify security metadata handling
         security_metadata = {
@@ -459,7 +460,7 @@ class TestEnhancedUserIsolationWithSsotManager(SSotAsyncTestCase):
         # Create multiple enterprise managers for load testing
         enterprise_load_managers = []
         for user_context in self.enterprise_users:
-            manager = await get_websocket_manager(user_context=user_context)
+            manager = get_websocket_manager(user_context=user_context)
             enterprise_load_managers.append((user_context, manager))
         
         # Simulate enterprise load scenario

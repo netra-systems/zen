@@ -74,6 +74,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
+@pytest.mark.integration
 class TestExecutionContext:
     """Test execution context for validation."""
     user_id: str
@@ -86,6 +87,7 @@ class TestExecutionContext:
     error: Optional[str] = None
 
 
+@pytest.mark.integration
 class TestAgentExecutionContextPreservation(SSotAsyncTestCase):
     """
     Integration test suite for agent execution context preservation.

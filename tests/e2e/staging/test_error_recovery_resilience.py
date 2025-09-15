@@ -50,6 +50,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 
 logger = logging.getLogger(__name__)
 
+@pytest.mark.e2e
 class TestErrorRecoveryResilience:
     """
     E2E Tests for Error Recovery and System Resilience in Staging Environment.
@@ -122,7 +123,7 @@ class TestErrorRecoveryResilience:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=15.0
             ) as websocket:
                 
@@ -322,7 +323,7 @@ class TestErrorRecoveryResilience:
                 
                 async with websockets.connect(
                     websocket_url,
-                    extra_headers=headers,
+                    additional_headers=headers,
                     open_timeout=10.0,
                     ping_interval=5.0,  # Enable ping/pong for connection health
                     ping_timeout=3.0
@@ -418,7 +419,7 @@ class TestErrorRecoveryResilience:
         try:
             async with websockets.connect(
                 websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=15.0
             ) as websocket:
                 resilience_metrics["successful_reconnections"] += 1
@@ -526,7 +527,7 @@ class TestErrorRecoveryResilience:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=15.0
             ) as websocket:
                 

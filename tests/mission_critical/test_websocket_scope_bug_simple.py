@@ -376,10 +376,6 @@ if __name__ == "__main__":
     logger.info("[U+1F4B0] BUSINESS IMPACT: Document $500K+ ARR blocking scope bug")
     logger.info(" TARGET:  FOCUS: Direct code analysis and scope demonstration")
     
-    pytest.main([
-        __file__,
-        "-v",
-        "--tb=short",
-        "--capture=no",
-        "-k", "scope_bug"
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

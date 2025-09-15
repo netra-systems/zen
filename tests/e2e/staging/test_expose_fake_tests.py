@@ -65,6 +65,7 @@ class NetworkCallDetector:
             Mock.__init__ = Mock.__init__.__wrapped__ if hasattr(Mock.__init__, '__wrapped__') else Mock.__init__
 
 
+@pytest.mark.e2e
 class TestNetworkCallVerification:
     """Tests that FAIL if network calls are not actually made"""
     
@@ -205,6 +206,7 @@ class TestNetworkCallVerification:
         print(f"[U+2713] REAL HTTP: Average request time {avg_time:.3f}s (timings: {timings})")
 
 
+@pytest.mark.e2e
 class TestWebSocketConnectionAuthenticity:
     """Tests that FAIL if WebSocket connections are fake"""
     
@@ -303,6 +305,7 @@ class TestWebSocketConnectionAuthenticity:
                 print(f"[U+2713] REAL WebSocket: Server rejected connection (auth required): {response.split()[1]}")
 
 
+@pytest.mark.e2e
 class TestAPIResponseAuthenticity:
     """Tests that FAIL if API responses are mocked/fake"""
     
@@ -428,6 +431,7 @@ class TestAPIResponseAuthenticity:
                 print(f"[U+2713] REAL API: {endpoint} -> {response.status_code}")
 
 
+@pytest.mark.e2e
 class TestTimingBasedAuthenticity:
     """Tests that FAIL if operations complete too quickly (indicating mocks)"""
     
@@ -526,6 +530,7 @@ class TestTimingBasedAuthenticity:
                 pytest.fail(f"Request completed in {elapsed}s with 1ms timeout - likely mocked")
 
 
+@pytest.mark.e2e
 class TestDataIntegrityAndPersistence:
     """Tests that FAIL if data operations are fake/mocked"""
     
@@ -613,6 +618,7 @@ class TestDataIntegrityAndPersistence:
         print(f"[U+2713] REAL SERVER: {len(working_endpoints)} consistent endpoints")
 
 
+@pytest.mark.e2e
 class TestResourceUsageValidation:
     """Tests that FAIL if system resources aren't used (indicating mocks)"""
     
@@ -684,6 +690,7 @@ class TestResourceUsageValidation:
         print(f"[U+2713] REAL MEMORY: Used {total_increase} additional bytes for HTTP operations")
 
 
+@pytest.mark.e2e
 class TestAsyncBehaviorValidation:
     """Tests that FAIL if async operations are fake/synchronous"""
     
@@ -775,6 +782,7 @@ class TestAsyncBehaviorValidation:
         loop.call_soon = original_call_soon
 
 
+@pytest.mark.e2e
 class TestAuthenticationValidation:
     """Tests that FAIL if authentication is bypassed or fake"""
     
@@ -839,6 +847,7 @@ class TestAuthenticationValidation:
 
 
 # Summary test that ties everything together
+@pytest.mark.e2e
 class TestComprehensiveFakeDetection:
     """Final test that combines multiple detection methods"""
     

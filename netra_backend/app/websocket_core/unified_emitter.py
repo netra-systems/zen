@@ -380,7 +380,9 @@ class UnifiedWebSocketEmitter:
             data: Event payload
         """
         # PHASE 1 ENHANCEMENT: Security validation before emission
-        if not self._validate_event_context(getattr(self.context, 'run_id', None), event_type):
+        # Check run_id from data payload first, then fallback to context
+        run_id_to_validate = data.get('run_id') or getattr(self.context, 'run_id', None)
+        if not self._validate_event_context(run_id_to_validate, event_type, data.get('agent_name')):
             logger.error(f"Security validation failed for event {event_type} - blocking emission")
             return False
         
@@ -1010,34 +1012,48 @@ class UnifiedWebSocketEmitter:
     def _is_suspicious_run_id(self, run_id: str) -> bool:
         """
         Check if a run_id contains suspicious patterns that might indicate invalid context.
-        
+
         This helps detect potentially invalid run_ids that could cause security issues
         or indicate bugs in run_id generation.
-        
+
         Args:
             run_id: The run_id to check
-            
+
         Returns:
             bool: True if the run_id contains suspicious patterns
         """
+        import re
+
+        # Basic validation first
+        if not run_id or not isinstance(run_id, str):
+            return True
+
+        # Check if it's a valid UUID format (most run_ids should be UUIDs)
+        uuid_pattern = r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+        if re.match(uuid_pattern, run_id.lower()):
+            return False  # Valid UUID format is not suspicious
+
+        # Suspicious patterns to check (removed empty string to fix the bug)
         suspicious_patterns = [
-            'undefined', 'null', 'none', '',  # Falsy values that became strings
+            'undefined', 'null', 'none',      # Falsy values that became strings (NOTE: removed empty string)
             'test_', 'mock_', 'fake_',        # Test/mock values in production
             'admin', 'system', 'root',        # System-level contexts
             '__', '{{', '}}', '${',           # Template/variable placeholders
             'localhost', '127.0.0.1',        # Local development patterns
             'debug', 'trace',                 # Debug contexts
         ]
-        
+
         run_id_lower = run_id.lower()
+
+        # Check for suspicious patterns
         for pattern in suspicious_patterns:
             if pattern in run_id_lower:
                 return True
-                
+
         # Check for unusual characters that might indicate encoding issues
         if any(ord(char) > 127 for char in run_id):  # Non-ASCII characters
             return True
-            
+
         return False
 
     @classmethod

@@ -1,3 +1,4 @@
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 # REMOVED_SYNTAX_ERROR: '''Agent Context Window Management Integration Test
 
 # REMOVED_SYNTAX_ERROR: Business Value Justification (BVJ):
@@ -53,7 +54,7 @@
     # REMOVED_SYNTAX_ERROR: config = get_config()
     # REMOVED_SYNTAX_ERROR: llm_manager = LLMManager(config)
     # Mock: WebSocket connection isolation for testing without network overhead
-    # REMOVED_SYNTAX_ERROR: websocket_manager = UnifiedWebSocketManager() instead of Mock
+    # REMOVED_SYNTAX_ERROR: websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None)) instead of Mock
 
 
     # Create required dependencies

@@ -41,6 +41,7 @@ from netra_backend.app.services.unified_authentication_service import AuthResult
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.integration
 class TestWebSocketAuthenticationSecurity(SSotAsyncTestCase):
     """
     Integration tests for WebSocket authentication security and validation.

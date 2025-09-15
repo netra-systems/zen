@@ -47,6 +47,7 @@ from netra_backend.app.schemas.request import RequestModel
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.integration
 class TestAgentRouteUserContextValidationFailure(SSotAsyncTestCase):
     """Integration test reproducing UserExecutionContext validation failure in API routes.
     

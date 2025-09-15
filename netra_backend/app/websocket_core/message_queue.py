@@ -20,21 +20,41 @@ The message queue provides:
 """
 
 import asyncio
+import json
 import threading
 import time
+import uuid
 from collections import deque
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union, Callable
 from dataclasses import dataclass, field
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.websocket_core.connection_state_machine import (
     ApplicationConnectionState, ConnectionStateMachine, StateTransitionInfo
 )
 from shared.types.core_types import UserID, ConnectionID, ensure_user_id
 
-logger = central_logger.get_logger(__name__)
+# ISSUE #1011 REMEDIATION: Import Redis and Circuit Breaker for SSOT enhancement
+try:
+    from netra_backend.app.redis_manager import redis_manager
+    REDIS_AVAILABLE = True
+except ImportError:
+    redis_manager = None
+    REDIS_AVAILABLE = False
+
+try:
+    from netra_backend.app.core.circuit_breaker import (
+        get_unified_circuit_breaker_manager,
+        UnifiedCircuitConfig,
+        CircuitBreakerOpenError
+    )
+    CIRCUIT_BREAKER_AVAILABLE = True
+except ImportError:
+    CIRCUIT_BREAKER_AVAILABLE = False
+
+logger = get_logger(__name__)
 
 
 class MessagePriority(str, Enum):
@@ -53,6 +73,10 @@ class MessageQueueState(str, Enum):
     OVERFLOW = "overflow"      # Queue full, dropping messages
     SUSPENDED = "suspended"    # Queue suspended due to errors
     CLOSED = "closed"          # Queue closed
+    # ISSUE #1011 REMEDIATION: Add states from Redis queue implementation
+    RETRYING = "retrying"      # Processing retries with exponential backoff
+    CIRCUIT_BREAKER_OPEN = "circuit_breaker_open"  # Circuit breaker protection active
+    DEAD_LETTER = "dead_letter"  # Messages moved to dead letter queue
 
 
 @dataclass
@@ -76,10 +100,24 @@ class QueuedMessage:
     attempts: int = 0
     max_attempts: int = 3
     last_attempt: Optional[datetime] = None
-    
+
     # Queue analytics
     queue_duration_ms: Optional[float] = None
     processing_started_at: Optional[datetime] = None
+
+    # ISSUE #1011 REMEDIATION: Add retry logic with exponential backoff from Redis implementation
+    retry_count: int = 0
+    max_retries: int = 5  # Increased from 3 to 5 for better resilience
+    last_retry_at: Optional[datetime] = None
+    next_retry_at: Optional[datetime] = None
+    backoff_multiplier: float = 2.0  # Exponential backoff: 1s, 2s, 4s, 8s, 16s
+    base_retry_delay: int = 1  # seconds
+    max_retry_delay: int = 60  # 1 minute max
+    permanent_failure: bool = False
+    circuit_breaker_failures: int = 0
+    last_error_type: Optional[str] = None
+    error_message: Optional[str] = None
+    retry_history: List[datetime] = field(default_factory=list)
     
     def mark_attempt(self):
         """Mark a processing attempt."""
@@ -104,6 +142,98 @@ class QueuedMessage:
     def can_retry(self) -> bool:
         """Check if message can be retried."""
         return self.attempts < self.max_attempts
+
+    # ISSUE #1011 REMEDIATION: Add retry logic methods from Redis implementation
+    def calculate_next_retry_delay(self) -> int:
+        """Calculate exponential backoff delay: 1s, 2s, 4s, 8s, 16s"""
+        import random
+        if self.retry_count == 0:
+            return self.base_retry_delay
+
+        # Exponential backoff
+        base_delay = self.base_retry_delay * (self.backoff_multiplier ** (self.retry_count - 1))
+
+        # Add jitter (0-40%) to prevent thundering herd
+        delay_with_jitter = base_delay * (1 + 0.4 * random.random())
+
+        # Apply max cap after jitter
+        final_delay = min(delay_with_jitter, self.max_retry_delay)
+
+        return max(1, int(final_delay))
+
+    def should_retry(self) -> bool:
+        """Check if message should be retried based on retry count and conditions"""
+        if self.permanent_failure:
+            return False
+        if self.retry_count >= self.max_retries:
+            return False
+        return True
+
+    def is_retry_ready(self) -> bool:
+        """Check if message is ready for retry based on next_retry_at"""
+        if not self.next_retry_at:
+            return True
+        return datetime.now(timezone.utc) >= self.next_retry_at
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for Redis persistence"""
+        return {
+            "message_data": self.message_data,
+            "message_type": self.message_type,
+            "queued_at": self.queued_at.isoformat(),
+            "priority": self.priority.value,
+            "message_id": self.message_id,
+            "user_id": self.user_id,
+            "connection_id": self.connection_id,
+            "attempts": self.attempts,
+            "max_attempts": self.max_attempts,
+            "last_attempt": self.last_attempt.isoformat() if self.last_attempt else None,
+            "queue_duration_ms": self.queue_duration_ms,
+            "processing_started_at": self.processing_started_at.isoformat() if self.processing_started_at else None,
+            "retry_count": self.retry_count,
+            "max_retries": self.max_retries,
+            "last_retry_at": self.last_retry_at.isoformat() if self.last_retry_at else None,
+            "next_retry_at": self.next_retry_at.isoformat() if self.next_retry_at else None,
+            "backoff_multiplier": self.backoff_multiplier,
+            "base_retry_delay": self.base_retry_delay,
+            "max_retry_delay": self.max_retry_delay,
+            "permanent_failure": self.permanent_failure,
+            "circuit_breaker_failures": self.circuit_breaker_failures,
+            "last_error_type": self.last_error_type,
+            "error_message": self.error_message,
+            "retry_history": [dt.isoformat() for dt in self.retry_history]
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'QueuedMessage':
+        """Create from dictionary for Redis persistence"""
+        msg = cls(
+            message_data=data.get("message_data", {}),
+            message_type=data.get("message_type", ""),
+            queued_at=datetime.fromisoformat(data.get("queued_at", datetime.now(timezone.utc).isoformat())),
+            priority=MessagePriority(data.get("priority", "normal")),
+            message_id=data.get("message_id"),
+            user_id=data.get("user_id"),
+            connection_id=data.get("connection_id"),
+            attempts=data.get("attempts", 0),
+            max_attempts=data.get("max_attempts", 3),
+            last_attempt=datetime.fromisoformat(data["last_attempt"]) if data.get("last_attempt") else None,
+            queue_duration_ms=data.get("queue_duration_ms"),
+            processing_started_at=datetime.fromisoformat(data["processing_started_at"]) if data.get("processing_started_at") else None,
+            retry_count=data.get("retry_count", 0),
+            max_retries=data.get("max_retries", 5),
+            last_retry_at=datetime.fromisoformat(data["last_retry_at"]) if data.get("last_retry_at") else None,
+            next_retry_at=datetime.fromisoformat(data["next_retry_at"]) if data.get("next_retry_at") else None,
+            backoff_multiplier=data.get("backoff_multiplier", 2.0),
+            base_retry_delay=data.get("base_retry_delay", 1),
+            max_retry_delay=data.get("max_retry_delay", 60),
+            permanent_failure=data.get("permanent_failure", False),
+            circuit_breaker_failures=data.get("circuit_breaker_failures", 0),
+            last_error_type=data.get("last_error_type"),
+            error_message=data.get("error_message"),
+            retry_history=[datetime.fromisoformat(dt) for dt in data.get("retry_history", [])]
+        )
+        return msg
 
 
 class MessageQueue:
@@ -175,12 +305,70 @@ class MessageQueue:
         # Message processing callbacks
         self._message_processor: Optional[Callable[[QueuedMessage], Any]] = None
         self._flush_complete_callbacks: List[Callable[[], None]] = []
-        
+
+        # ISSUE #1011 REMEDIATION: Add Redis persistence and circuit breaker support
+        self.redis = redis_manager if REDIS_AVAILABLE else None
+        self._redis_enabled = REDIS_AVAILABLE and redis_manager is not None
+        self._circuit_breaker_enabled = CIRCUIT_BREAKER_AVAILABLE
+
+        # Circuit breaker setup
+        self.circuit_manager = None
+        self.message_circuit = None
+        self.redis_circuit = None
+
+        if self._circuit_breaker_enabled:
+            try:
+                self.circuit_manager = get_unified_circuit_breaker_manager()
+                self.message_circuit = self._setup_message_circuit_breaker()
+                self.redis_circuit = self._setup_redis_circuit_breaker()
+            except Exception as e:
+                logger.warning(f"Failed to initialize circuit breakers for {self.connection_id}: {e}")
+                self._circuit_breaker_enabled = False
+
+        # Retry processing task
+        self._retry_task: Optional[asyncio.Task] = None
+        self._running = False
+
         # State change callback registration
         if self.state_machine:
             self.state_machine.add_state_change_callback(self._on_connection_state_change)
-        
-        logger.info(f"MessageQueue initialized for connection {self.connection_id}, user: {self.user_id}")
+
+        logger.info(f"MessageQueue initialized for connection {self.connection_id}, user: {self.user_id} "
+                   f"(Redis: {self._redis_enabled}, CircuitBreaker: {self._circuit_breaker_enabled})")
+
+    def _setup_message_circuit_breaker(self):
+        """Setup circuit breaker for message processing"""
+        if not self._circuit_breaker_enabled:
+            return None
+        try:
+            config = UnifiedCircuitConfig(
+                name=f"websocket_message_processing_{self.connection_id}",
+                failure_threshold=3,
+                success_threshold=2,
+                recovery_timeout=30,
+                timeout_seconds=30.0
+            )
+            return self.circuit_manager.create_circuit_breaker(f"message_processing_{self.connection_id}", config)
+        except Exception as e:
+            logger.warning(f"Failed to create message circuit breaker: {e}")
+            return None
+
+    def _setup_redis_circuit_breaker(self):
+        """Setup circuit breaker for Redis operations"""
+        if not self._circuit_breaker_enabled:
+            return None
+        try:
+            config = UnifiedCircuitConfig(
+                name=f"websocket_redis_operations_{self.connection_id}",
+                failure_threshold=5,
+                success_threshold=3,
+                recovery_timeout=60,
+                timeout_seconds=10.0
+            )
+            return self.circuit_manager.create_circuit_breaker(f"redis_operations_{self.connection_id}", config)
+        except Exception as e:
+            logger.warning(f"Failed to create Redis circuit breaker: {e}")
+            return None
     
     @property
     def current_state(self) -> MessageQueueState:
@@ -266,21 +454,35 @@ class MessageQueue:
                 message_data=message_data,
                 message_type=message_type,
                 priority=priority,
-                message_id=message_id,
+                message_id=message_id or str(uuid.uuid4()),
                 user_id=self.user_id,
                 connection_id=self.connection_id
             )
-            
-            # Add to appropriate priority queue
+
+            # ISSUE #1011 REMEDIATION: Add Redis persistence with circuit breaker protection
+            redis_persisted = False
+            if self._redis_enabled:
+                try:
+                    if self.redis_circuit and self.redis_circuit.can_execute():
+                        redis_persisted = await self._persist_to_redis(queued_msg)
+                    elif self.redis_circuit:
+                        logger.debug(f"Redis circuit breaker open for {self.connection_id}")
+                except CircuitBreakerOpenError:
+                    logger.debug(f"Circuit breaker prevented Redis persistence for {self.connection_id}")
+                except Exception as e:
+                    logger.warning(f"Redis persistence failed for {self.connection_id}: {e}")
+
+            # Add to appropriate priority queue (in-memory buffer)
             self._queues[priority].append(queued_msg)
             self._metrics["messages_queued"] += 1
-            
+
             # Update peak size metric
             new_size = self._get_total_queue_size()
             if new_size > self._metrics["peak_queue_size"]:
                 self._metrics["peak_queue_size"] = new_size
-            
-            logger.debug(f"Queued {priority.value} message for {self.connection_id} (queue size: {new_size})")
+
+            logger.debug(f"Queued {priority.value} message for {self.connection_id} "
+                        f"(queue size: {new_size}, Redis: {'✓' if redis_persisted else '✗'})")
             return True
     
     async def _handle_queue_overflow(self, incoming_priority: MessagePriority) -> bool:
@@ -384,13 +586,21 @@ class MessageQueue:
                                 except Exception as e:
                                     logger.error(f"Message processing failed during flush for {self.connection_id}: {e}")
                                     total_failed += 1
-                                    
-                                    # Retry logic for non-critical messages
-                                    if queued_msg.can_retry() and priority != MessagePriority.CRITICAL:
-                                        # Put back at front of queue for retry
-                                        queue.appendleft(queued_msg)
-                                        logger.debug(f"Retrying message for {self.connection_id} (attempt {queued_msg.attempts})")
-                                        break  # Break inner loop to retry this message
+
+                                    # ISSUE #1011 REMEDIATION: Enhanced retry logic with exponential backoff and DLQ
+                                    if queued_msg.should_retry():
+                                        # Schedule for retry with exponential backoff
+                                        await self._schedule_retry(queued_msg, str(e))
+                                        logger.debug(f"Scheduled retry for message {queued_msg.message_id} "
+                                                   f"(attempt {queued_msg.retry_count}/{queued_msg.max_retries})")
+                                    else:
+                                        # Move to dead letter queue
+                                        await self._move_to_dead_letter_queue(queued_msg, str(e))
+                                        logger.error(f"Message {queued_msg.message_id} moved to DLQ after exhausting retries")
+
+                                    # Record failure in circuit breaker if available
+                                    if self.message_circuit:
+                                        self.message_circuit.record_failure(type(e).__name__)
                             else:
                                 # No processor - just count as flushed
                                 total_flushed += 1
@@ -411,6 +621,8 @@ class MessageQueue:
                 # Transition to pass-through mode if successful
                 if total_failed == 0:
                     self._state = MessageQueueState.PASS_THROUGH
+                    # ISSUE #1011 REMEDIATION: Start retry processor when entering operational mode
+                    await self.start_retry_processor()
                     logger.info(f"MessageQueue transitioned to PASS_THROUGH for {self.connection_id}")
                 else:
                     # Some failures - stay in buffering mode temporarily
@@ -494,7 +706,7 @@ class MessageQueue:
             priority.value: len(queue) for priority, queue in self._queues.items()
         }
         
-        return {
+        stats = {
             "connection_id": self.connection_id,
             "user_id": self.user_id,
             "state": self._state.value,
@@ -504,14 +716,177 @@ class MessageQueue:
             "metrics": self._metrics.copy(),
             "max_size": self.max_size,
             "max_message_age_seconds": self.max_message_age_seconds,
-            "uptime_seconds": time.time() - self._metrics["created_at"]
+            "uptime_seconds": time.time() - self._metrics["created_at"],
+            "redis_enabled": self._redis_enabled,
+            "circuit_breaker_enabled": self._circuit_breaker_enabled
         }
-    
+        return stats
+
+    # ISSUE #1011 REMEDIATION: Add Redis persistence and retry handling methods
+    def _get_redis_queue_key(self, priority: MessagePriority) -> str:
+        """Get Redis key for a priority queue"""
+        return f"message_queue:{self.connection_id}:{priority.value}"
+
+    def _get_redis_retry_key(self, message_id: str) -> str:
+        """Get Redis key for retry queue"""
+        return f"retry:{self.connection_id}:{message_id}"
+
+    def _get_redis_dlq_key(self, message_id: str) -> str:
+        """Get Redis key for dead letter queue"""
+        return f"dlq:{self.connection_id}:{message_id}"
+
+    async def _persist_to_redis(self, message: QueuedMessage) -> bool:
+        """Persist message to Redis if available"""
+        if not self._redis_enabled or not self.redis:
+            return False
+
+        try:
+            if self.redis_circuit and not self.redis_circuit.can_execute():
+                logger.debug(f"Redis circuit breaker open for {self.connection_id}")
+                return False
+
+            redis_key = self._get_redis_queue_key(message.priority)
+            message_data = json.dumps(message.to_dict())
+            await self.redis.lpush(redis_key, message_data)
+
+            if self.redis_circuit:
+                self.redis_circuit.record_success()
+
+            return True
+        except Exception as e:
+            logger.warning(f"Failed to persist message to Redis for {self.connection_id}: {e}")
+            if self.redis_circuit:
+                self.redis_circuit.record_failure(type(e).__name__)
+            return False
+
+    async def _schedule_retry(self, message: QueuedMessage, error: str) -> None:
+        """Schedule message for retry with exponential backoff"""
+        message.retry_count += 1
+        message.error_message = error
+        message.last_error_type = type(Exception(error)).__name__
+        message.last_retry_at = datetime.now(timezone.utc)
+        message.retry_history.append(message.last_retry_at)
+
+        # Calculate next retry delay
+        retry_delay = message.calculate_next_retry_delay()
+        message.next_retry_at = datetime.now(timezone.utc) + timedelta(seconds=retry_delay)
+
+        if self._redis_enabled and self.redis:
+            try:
+                retry_key = self._get_redis_retry_key(message.message_id or str(uuid.uuid4()))
+                await self.redis.set(
+                    retry_key,
+                    json.dumps(message.to_dict()),
+                    ex=retry_delay + 60  # Add buffer
+                )
+                logger.info(f"Scheduled retry for message in {retry_delay}s for {self.connection_id}")
+            except Exception as e:
+                logger.warning(f"Failed to schedule retry in Redis: {e}")
+
+    async def _move_to_dead_letter_queue(self, message: QueuedMessage, final_error: str) -> None:
+        """Move permanently failed message to Dead Letter Queue"""
+        message.permanent_failure = True
+        message.error_message = final_error
+
+        if self._redis_enabled and self.redis:
+            try:
+                dlq_key = self._get_redis_dlq_key(message.message_id or str(uuid.uuid4()))
+                dlq_data = {
+                    **message.to_dict(),
+                    "moved_to_dlq_at": datetime.now(timezone.utc).isoformat(),
+                    "final_error": final_error,
+                    "total_processing_time": (
+                        datetime.now(timezone.utc) - message.queued_at
+                    ).total_seconds()
+                }
+
+                # Store in DLQ with 7 day retention
+                await self.redis.set(
+                    dlq_key,
+                    json.dumps(dlq_data),
+                    ex=7 * 24 * 3600
+                )
+
+                # Add to DLQ index for easier querying
+                dlq_index_key = f"dlq_index:{self.connection_id}"
+                await self.redis.zadd(
+                    dlq_index_key,
+                    {message.message_id: datetime.now(timezone.utc).timestamp()}
+                )
+
+                logger.error(f"Message moved to Dead Letter Queue for {self.connection_id}: {final_error}")
+            except Exception as e:
+                logger.error(f"Failed to move message to DLQ: {e}")
+
+    async def start_retry_processor(self) -> None:
+        """Start background retry processor if not already running"""
+        if self._running or not self._redis_enabled:
+            return
+
+        self._running = True
+        if not self._retry_task or self._retry_task.done():
+            self._retry_task = asyncio.create_task(self._retry_processor_loop())
+            logger.info(f"Started retry processor for {self.connection_id}")
+
+    async def stop_retry_processor(self) -> None:
+        """Stop background retry processor"""
+        self._running = False
+        if self._retry_task and not self._retry_task.done():
+            self._retry_task.cancel()
+            try:
+                await self._retry_task
+            except asyncio.CancelledError:
+                pass
+            logger.info(f"Stopped retry processor for {self.connection_id}")
+
+    async def _retry_processor_loop(self) -> None:
+        """Background loop to process retries"""
+        while self._running:
+            try:
+                await self._process_retry_messages()
+                await asyncio.sleep(30)  # Check every 30 seconds
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Error in retry processor for {self.connection_id}: {e}")
+                await asyncio.sleep(5)
+
+    async def _process_retry_messages(self) -> None:
+        """Process messages ready for retry"""
+        if not self._redis_enabled or not self.redis:
+            return
+
+        try:
+            pattern = f"retry:{self.connection_id}:*"
+            keys = await self.redis.keys(pattern)
+
+            for key in keys:
+                try:
+                    message_data = await self.redis.get(key)
+                    if message_data:
+                        message = QueuedMessage.from_dict(json.loads(message_data))
+                        if message.is_retry_ready():
+                            await self.redis.delete(key)
+                            # Re-enqueue for processing
+                            await self.enqueue_message(
+                                message.message_data,
+                                message.message_type,
+                                message.priority,
+                                message.message_id
+                            )
+                except Exception as e:
+                    logger.warning(f"Error processing retry key {key}: {e}")
+        except Exception as e:
+            logger.error(f"Error processing retry messages: {e}")
+
     async def close(self):
         """Close the message queue and clean up resources."""
         async with self._lock:
             self._state = MessageQueueState.CLOSED
-            
+
+            # Stop retry processor
+            await self.stop_retry_processor()
+
             # Cancel any ongoing flush
             if self._flush_task and not self._flush_task.done():
                 self._flush_task.cancel()
@@ -519,14 +894,14 @@ class MessageQueue:
                     await self._flush_task
                 except asyncio.CancelledError:
                     pass
-            
+
             # Clear all queues
             cleared_count = await self.clear_queue()
-            
+
             # Remove state change callback
             if self.state_machine:
                 self.state_machine.remove_state_change_callback(self._on_connection_state_change)
-            
+
             logger.info(f"MessageQueue closed for {self.connection_id}, cleared {cleared_count} messages")
     
     def __repr__(self) -> str:

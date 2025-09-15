@@ -34,6 +34,7 @@ from netra_backend.app.routes.utils.thread_handlers import (
 )
 
 
+@pytest.mark.e2e
 class TestSessionLeakDetectionE2E(SessionLeakTestBase):
     """
     E2E session leak detection tests with full authentication.

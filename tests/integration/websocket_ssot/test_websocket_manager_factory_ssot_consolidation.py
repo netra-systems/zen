@@ -32,6 +32,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.integration
 class TestWebSocketManagerFactorySsotConsolidation(SSotAsyncTestCase):
     """Phase 2 SSOT Validation Test: Validate factory patterns are consolidated to SSOT."""
     
@@ -264,7 +265,7 @@ class TestWebSocketManagerFactorySsotConsolidation(SSotAsyncTestCase):
             params = test_case['params']
             
             try:
-                manager_instance = await get_websocket_manager(**params)
+                manager_instance = get_websocket_manager(**params)
                 factory_results[case_name] = {
                     'success': True,
                     'instance_type': type(manager_instance),
@@ -321,7 +322,7 @@ class TestWebSocketManagerFactorySsotConsolidation(SSotAsyncTestCase):
             # Add some variability to test race conditions
             await asyncio.sleep(0.01 * user_index)
             
-            manager = await get_websocket_manager(user_context=user_context)
+            manager = get_websocket_manager(user_context=user_context)
             
             return {
                 'user_index': user_index,
@@ -418,7 +419,7 @@ class TestWebSocketManagerFactorySsotConsolidation(SSotAsyncTestCase):
             should_fail = test_case['should_fail']
             
             try:
-                manager = await get_websocket_manager(**params)
+                manager = get_websocket_manager(**params)
                 validation_results[case_name] = {
                     'failed': False,
                     'instance_created': True,

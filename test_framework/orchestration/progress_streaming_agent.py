@@ -52,7 +52,7 @@ from test_framework.progress_tracker import (
 
 # Integration imports for WebSocket support
 try:
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager
     from netra_backend.app.schemas.websocket_models import WebSocketMessage
     from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext

@@ -24,6 +24,7 @@ import json
 import time
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 from test_framework.ssot.e2e_auth_helper import (
     E2EAuthHelper, 
@@ -152,7 +153,7 @@ class TestCompleteAgentExecutionWithEvents(BaseE2ETest):
                 self.logger.error(f"Error collecting WebSocket events: {e}")
         
         # Set up WebSocket bridge for event delivery
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         websocket_bridge = AgentWebSocketBridge(websocket_manager)
         
         # Create agent execution core with real WebSocket bridge
@@ -316,7 +317,7 @@ class TestCompleteAgentExecutionWithEvents(BaseE2ETest):
                 pass
         
         # Set up execution infrastructure
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         websocket_bridge = AgentWebSocketBridge(websocket_manager)
         execution_core = AgentExecutionCore(real_agent_registry, websocket_bridge)
         
@@ -437,7 +438,7 @@ class TestCompleteAgentExecutionWithEvents(BaseE2ETest):
                 pass
         
         # Set up execution with error conditions
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         websocket_bridge = AgentWebSocketBridge(websocket_manager)
         execution_core = AgentExecutionCore(real_agent_registry, websocket_bridge)
         

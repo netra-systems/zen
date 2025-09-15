@@ -37,7 +37,9 @@ def _get_api_route_configs(modules: dict) -> dict:
         "messages": (modules["messages_router"], "/api/chat", ["messages"]),
         "messages_root": (modules["messages_root_router"], "/api/messages", ["messages-root"]),
         "llm_cache": (modules["llm_cache_router"], "/api/llm-cache", ["llm-cache"]),
-        "events_stream": (modules["events_stream_router"], "/api/events", ["events"])
+        "events_stream": (modules["events_stream_router"], "/api/events", ["events"]),
+        "conversations": (modules["conversations_router"], "", ["conversations"]),
+        "history": (modules["history_router"], "", ["history"])
     }
     
     # Only include MCP router if it's available

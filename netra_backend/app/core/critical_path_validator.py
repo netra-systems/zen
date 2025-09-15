@@ -379,7 +379,7 @@ class CriticalPathValidator:
             # Check if MessageRouter exists and is functional
             message_router = None
             try:
-                from netra_backend.app.websocket_core import get_message_router
+                from netra_backend.app.websocket_core.handlers import get_message_router
                 message_router = get_message_router()
             except ImportError as e:
                 self._add_critical_failure(

@@ -346,18 +346,18 @@ class TestFirstMessageExperience:
                     ssl_context.verify_mode = ssl.CERT_NONE
                     
                     # Create connection with proper headers for staging authentication
-                    extra_headers = {
+                    additional_headers = {
                         "Authorization": f"Bearer {jwt_token}",
                         "User-Agent": "Netra-Test-Client/1.0",
                         "X-Test-Environment": "staging"
                     }
-                    
+
                     # Use asyncio.timeout for Python 3.12 compatibility
                     async with asyncio.timeout(15):  # 15 second timeout for connection
                         ws = await websockets.connect(
                             self.ws_url,
                             ssl=ssl_context,
-                            extra_headers=extra_headers,
+                            additional_headers=additional_headers,
                             ping_interval=30,
                             ping_timeout=10,
                             close_timeout=10
@@ -1150,10 +1150,6 @@ Load Test Results:
 
 if __name__ == "__main__":
     # Run with real services
-    pytest.main([
-        __file__,
-        "-v",
-        "--tb=short",
-        "--no-header",
-        "-q"
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

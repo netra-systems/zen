@@ -41,7 +41,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
 from netra_backend.app.websocket_core.auth import WebSocketAuth
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuth
-from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType, generate_id
 
 # Import message security components
 from netra_backend.app.websocket_core.types import (
@@ -51,13 +51,13 @@ from netra_backend.app.websocket_core.types import (
 )
 from netra_backend.app.websocket_core.validation import MessageValidator
 from netra_backend.app.websocket_core.protocols import WebSocketProtocol
-from netra_backend.app.websocket_core.event_validator import EventValidator
+from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator as EventValidator
 
 # Import security validation components
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.state_manager import StateManager
-from netra_backend.app.agents.validator import AgentValidator
+from netra_backend.app.agents.validator import ValidatorAgent
 from netra_backend.app.agents.input_validation import InputValidator
 
 
@@ -87,7 +87,7 @@ class TestUserContextMessageSecurity(SSotAsyncTestCase):
         security_levels = ["basic", "enhanced", "enterprise"]
         for i, security_level in enumerate(security_levels):
             user_id = f"secure_user_{i}_{uuid.uuid4()}"
-            execution_id = UnifiedIDManager.generate_id(IDType.EXECUTION)
+            execution_id = generate_id(IDType.EXECUTION)
             connection_id = f"secure_conn_{i}_{uuid.uuid4()}"
             
             # Generate security credentials
@@ -96,14 +96,15 @@ class TestUserContextMessageSecurity(SSotAsyncTestCase):
             
             user_context = UserExecutionContext(
                 user_id=user_id,
-                execution_id=execution_id,
-                connection_id=connection_id,
-                jwt_token=f"jwt_secure_token_{i}",
-                metadata={
+                thread_id=f"secure_thread_{i}_{uuid.uuid4()}",
+                run_id=execution_id,
+                websocket_client_id=connection_id,
+                agent_context={
                     "test_case": method.__name__,
                     "security_level": security_level,
                     "api_key": api_key,
                     "encryption_key": base64.b64encode(encryption_key).decode(),
+                    "jwt_token": f"jwt_secure_token_{i}",
                     "sensitive_data": {
                         "pii": f"user_{i}_personal_info",
                         "phi": f"user_{i}_health_info",

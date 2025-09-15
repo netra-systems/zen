@@ -277,4 +277,3 @@ from shared.isolated_environment import IsolatedEnvironment
 
                             # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
                                 # Run the tests
-                                # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-xvs", "--tb=short"])

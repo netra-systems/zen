@@ -21,6 +21,7 @@ Prerequisites:
 GitHub Issue: https://github.com/netra-systems/netra-apex/issues/982
 """
 
+import pytest
 import asyncio
 import json
 import time
@@ -191,6 +192,7 @@ class StagingWebSocketClient:
         self.websocket = None
 
 
+@pytest.mark.e2e
 class TestGoldenPathBroadcastStaging(SSotAsyncTestCase):
     """E2E staging tests for Golden Path agent event delivery."""
 

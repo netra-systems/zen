@@ -207,6 +207,7 @@ class UserContextFactory:
             raise ContextValidationError(f"Forbidden test user ID: {user_id}")
 
 
+@pytest.mark.unit
 class TestUserContextFactoryIsolation(SSotBaseTestCase):
     """Test user context factory isolation patterns."""
     
@@ -375,6 +376,7 @@ class TestUserContextFactoryIsolation(SSotBaseTestCase):
         self.assertEqual(len(violations), 0)
 
 
+@pytest.mark.unit
 class TestUserContextMemoryCleanup(SSotBaseTestCase):
     """Test memory cleanup and resource management for user contexts."""
     
@@ -468,6 +470,7 @@ class TestUserContextMemoryCleanup(SSotBaseTestCase):
         self.assertEqual(len(violations), 0)
 
 
+@pytest.mark.unit
 class TestUserContextInheritancePatterns(SSotBaseTestCase):
     """Test context inheritance patterns and validation."""
     
@@ -550,6 +553,7 @@ class TestUserContextInheritancePatterns(SSotBaseTestCase):
             self.factory.create_child_context(parent, parent.request_id)
 
 
+@pytest.mark.unit
 class TestUserContextValidationErrors(SSotBaseTestCase):
     """Test validation error handling in user context factory."""
     

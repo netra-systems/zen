@@ -60,5 +60,45 @@ def enhance_tool_dispatcher_with_notifications(tool_dispatcher: Any, websocket_m
     logger.info(" PASS:  Tool dispatcher enhanced with UnifiedToolExecutionEngine and WebSocket notifications")
 
 
+class WebSocketToolEnhancer:
+    """
+    SSOT-compliant WebSocket Tool Enhancement class
+
+    Provides class-based interface for WebSocket tool dispatcher enhancement
+    while maintaining backward compatibility with existing function-based approach.
+    """
+
+    def __init__(self, websocket_manager=None):
+        """Initialize WebSocket tool enhancer with optional WebSocket manager."""
+        self.websocket_manager = websocket_manager
+        self.logger = logging.getLogger(__name__)
+
+    def enhance_dispatcher(self, tool_dispatcher, websocket_manager=None):
+        """
+        Enhance a tool dispatcher with WebSocket notification capabilities.
+
+        Args:
+            tool_dispatcher: The tool dispatcher to enhance
+            websocket_manager: Optional WebSocket manager (uses instance manager if not provided)
+        """
+        manager = websocket_manager or self.websocket_manager
+        if not manager:
+            self.logger.warning("No WebSocket manager available for enhancement")
+            return
+
+        # Use the existing function implementation
+        enhance_tool_dispatcher_with_notifications(tool_dispatcher, manager)
+        self.logger.info("Tool dispatcher enhanced successfully via WebSocketToolEnhancer")
+
+    @classmethod
+    def create_with_manager(cls, websocket_manager):
+        """Factory method to create enhancer with WebSocket manager."""
+        return cls(websocket_manager=websocket_manager)
+
+    def is_enhanced(self, tool_dispatcher):
+        """Check if tool dispatcher is already enhanced."""
+        return hasattr(tool_dispatcher, '_websocket_enhanced') and tool_dispatcher._websocket_enhanced
+
+
 # For backward compatibility, also export from unified_tool_execution
-__all__ = ['enhance_tool_dispatcher_with_notifications']
+__all__ = ['enhance_tool_dispatcher_with_notifications', 'WebSocketToolEnhancer']

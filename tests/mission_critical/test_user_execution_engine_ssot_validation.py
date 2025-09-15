@@ -508,4 +508,6 @@ if __name__ == "__main__":
     Expected Result: ALL TESTS SHOULD PASS
     This proves that UserExecutionEngine correctly implements SSOT principles.
     """
-    pytest.main([__file__, "-v", "--tb=short"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

@@ -193,6 +193,7 @@ class SimulatedCircuitBreaker:
         })
 
 
+@pytest.mark.integration
 class TestCircuitBreakerFailureRecovery(BaseIntegrationTest):
     """
     Test circuit breaker pattern for failure detection and automatic recovery.

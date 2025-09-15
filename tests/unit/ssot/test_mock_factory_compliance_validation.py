@@ -28,6 +28,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
+@pytest.mark.unit
 class TestSSOTMockFactoryCompliance(SSotBaseTestCase):
     """
     Validates compliance with SSOT mock factory patterns.

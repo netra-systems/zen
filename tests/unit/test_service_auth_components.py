@@ -29,6 +29,7 @@ from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
+@pytest.mark.unit
 class TestServiceAuthComponents(SSotBaseTestCase):
     """
     Unit Tests: Service authentication component logic for Issue #115.

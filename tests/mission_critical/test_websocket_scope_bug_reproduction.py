@@ -400,10 +400,6 @@ if __name__ == "__main__":
     logger.info("[U+1F4B0] BUSINESS IMPACT: $500K+ ARR - 100% WebSocket connection failure")
     logger.info("[U+1F527] PURPOSE: Reproduce exact NameError from variable scope isolation")
     
-    pytest.main([
-        __file__,
-        "-v",
-        "--tb=short", 
-        "--capture=no",
-        "-k", "test_websocket_scope_bug"
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

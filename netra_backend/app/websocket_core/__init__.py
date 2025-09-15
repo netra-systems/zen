@@ -11,13 +11,19 @@ Business Value:
 """
 
 # Unified implementations (SSOT)
-# CANONICAL IMPORT: Prefer the canonical import path for better SSOT compliance
+# ISSUE #1144 SSOT CONSOLIDATION: Phase 1 - Deprecate __init__.py imports
 # DEPRECATED: from netra_backend.app.websocket_core import WebSocketManager
 # CANONICAL: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+#
+# MIGRATION PLAN:
+# - Phase 1: Update key consumers to use canonical imports (IN PROGRESS)
+# - Phase 2: Remove __init__.py exports entirely
+# - Phase 3: Consolidate implementation layers
 import warnings
 warnings.warn(
-    "Importing WebSocketManager from 'netra_backend.app.websocket_core' is deprecated. "
-    "Use canonical path 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager' instead.",
+    "ISSUE #1144: Importing from 'netra_backend.app.websocket_core' is deprecated. "
+    "Use specific module imports like 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'. "
+    "This import path will be removed in Phase 2 of SSOT consolidation.",
     DeprecationWarning,
     stacklevel=2
 )
@@ -97,7 +103,7 @@ def create_websocket_manager(user_context=None):
             # This is a legacy compatibility issue - recommend using async version
             raise RuntimeError(
                 "create_websocket_manager cannot be called from async context. "
-                "Use 'await get_websocket_manager(user_context)' instead."
+                "Use 'get_websocket_manager(user_context)' instead."
             )
         else:
             return WebSocketManager(
@@ -111,45 +117,9 @@ def create_websocket_manager(user_context=None):
             _ssot_authorization_token=secrets.token_urlsafe(32)
         )
 
-# Backward compatibility function using factory pattern
-async def get_websocket_manager(user_context=None):
-    """
-    SECURITY MIGRATION: Compatibility wrapper for get_websocket_manager.
-
-    IMPORTANT: This function now uses the secure factory pattern instead
-    of a singleton to prevent multi-user data leakage.
-
-    ARCHITECTURE COMPLIANCE: Import-time initialization is prohibited.
-    WebSocket managers must be created per-request with valid UserExecutionContext.
-
-    Args:
-        user_context: Required UserExecutionContext for proper isolation
-
-    Returns:
-        WebSocketManager instance
-
-    Raises:
-        ValueError: If user_context is None (import-time initialization not allowed)
-
-    Note: For new code, use WebSocketManager(user_context=user_context) directly.
-    """
-    if user_context is None:
-        # CRITICAL: Import-time initialization violates User Context Architecture
-        raise ValueError(
-            "WebSocket manager creation requires valid UserExecutionContext. "
-            "Import-time initialization is prohibited. Use request-scoped factory pattern instead. "
-            "See User Context Architecture documentation for proper implementation."
-        )
-
-    # PHASE 1 FIX: Use WebSocketManager directly with proper token generation
-    # This ensures the SSOT authorization token is properly provided
-    import secrets
-    # Use canonical import from websocket_manager.py (not unified_manager.py which has __all__ = [])
-    
-    return WebSocketManager(
-        user_context=user_context,
-        _ssot_authorization_token=secrets.token_urlsafe(32)
-    )
+# SSOT COMPLIANCE: Remove duplicate get_websocket_manager function
+# Use the canonical implementation from websocket_manager.py instead
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 from netra_backend.app.websocket_core.migration_adapter import (
     get_legacy_websocket_manager,

@@ -24,6 +24,7 @@ from shared.isolated_environment import get_env
 pytestmark = [pytest.mark.staging, pytest.mark.critical, pytest.mark.real]
 
 
+@pytest.mark.e2e
 class TestWebSocketAuthenticationFix:
     """Test WebSocket authentication fix by reproducing and then fixing the 403 error."""
     

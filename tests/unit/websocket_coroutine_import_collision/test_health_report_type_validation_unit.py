@@ -25,6 +25,7 @@ EXPECTED FAILURE MODE (before fix):
 - Test PASSING indicates the coroutine error is resolved
 """
 
+import pytest
 import asyncio
 import logging
 import unittest
@@ -39,6 +40,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.websocket_core.websocket_manager_factory import validate_websocket_component_health
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
+@pytest.mark.unit
 class TestHealthReportTypeValidationUnit(SSotBaseTestCase):
     """
     UNIT TEST: Reproduce and validate WebSocket coroutine error fix.

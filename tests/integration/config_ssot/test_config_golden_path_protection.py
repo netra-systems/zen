@@ -30,6 +30,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import BaseIntegrationTest
 
 
+@pytest.mark.integration
 class TestConfigGoldenPathProtection(BaseIntegrationTest):
     """Integration tests for Golden Path configuration protection."""
 

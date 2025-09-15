@@ -27,6 +27,7 @@ from netra_backend.app.websocket_core.websocket_manager import (
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
+@pytest.mark.unit
 class TestWebSocketEventStructureValidation:
     """Test suite that reproduces Issue #1021 WebSocket event structure problems."""
 
@@ -42,7 +43,7 @@ class TestWebSocketEventStructureValidation:
             'is_test': True
         })()
 
-        manager = await get_websocket_manager(
+        manager = get_websocket_manager(
             user_context=test_user_context,
             mode=WebSocketManagerMode.UNIFIED
         )

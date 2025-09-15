@@ -53,6 +53,7 @@ import pytest
 from loguru import logger
 
 
+@pytest.mark.unit
 class TestWebSocketFactoryDeprecationReproduction(SSotAsyncTestCase):
     """
     Strategic SSOT Tests: Factory Deprecation Detection

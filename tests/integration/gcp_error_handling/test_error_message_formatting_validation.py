@@ -709,6 +709,7 @@ class ErrorMessageValidator:
             self.validation_metrics[metric_key] = self.validation_metrics[metric_key][-1000:]
 
 
+@pytest.mark.integration
 class TestErrorMessageFormattingValidation(SSotAsyncTestCase):
     """Integration tests for error message formatting and validation."""
     

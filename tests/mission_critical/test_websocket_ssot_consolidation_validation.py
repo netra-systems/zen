@@ -32,7 +32,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 # Import components for future SSOT validation
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ensure_user_id
 
@@ -112,7 +112,7 @@ class TestWebSocketSsotConsolidationValidation(SSotAsyncTestCase):
         # TARGET STATE: Get SSOT singleton instance
         try:
             # Future SSOT pattern: Singleton access method
-            from netra_backend.app.websocket_core.unified_manager import get_websocket_manager_singleton
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager_singleton
             
             ssot_manager = get_websocket_manager_singleton()
             self.assertIsNotNone(ssot_manager, "SSOT singleton should be available")
@@ -427,5 +427,12 @@ class TestSsotConsolidationIntegration(SSotBaseTestCase):
 
 
 if __name__ == "__main__":
-    # Run with pytest to validate SSOT consolidation targets
-    pytest.main([__file__, "-v", "--tb=short"])
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

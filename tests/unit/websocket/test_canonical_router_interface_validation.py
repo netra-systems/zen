@@ -16,6 +16,7 @@ EXPECTED BEHAVIOR:
 GitHub Issue: #1077 - MessageRouter SSOT violations blocking golden path
 """
 
+import pytest
 import unittest
 import inspect
 from typing import Dict, List, Set, Optional, Any, Callable
@@ -24,6 +25,7 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestCanonicalRouterInterfaceValidation(SSotBaseTestCase, unittest.TestCase):
     """Test that validates canonical MessageRouter interface compliance."""
 

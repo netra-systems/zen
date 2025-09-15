@@ -28,7 +28,7 @@ import gc
 import sys
 import weakref
 from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, Optional, List, Set, WeakSet
+from typing import Dict, Any, Optional, List, Set
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from dataclasses import dataclass
 import threading
@@ -42,7 +42,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
-from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.state_manager import StateManager
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
@@ -60,7 +60,7 @@ from netra_backend.app.websocket_core.user_session_manager import UserSessionMan
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
 # Import factory isolation components
-from netra_backend.app.agents.execution_engine_unified_factory import ExecutionEngineFactory
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 from netra_backend.app.agents.user_context_tool_factory import UserContextToolFactory
 
 

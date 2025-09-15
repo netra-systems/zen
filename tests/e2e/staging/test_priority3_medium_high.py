@@ -22,6 +22,7 @@ from tests.e2e.staging_test_config import get_staging_config
 # Mark all tests in this file as staging and real
 pytestmark = [pytest.mark.staging, pytest.mark.real]
 
+@pytest.mark.e2e
 class TestMediumHighOrchestration:
     """Tests 41-45: Multi-Agent Workflows - REAL TESTS"""
     
@@ -462,6 +463,7 @@ class TestMediumHighOrchestration:
         assert duration > 0.3, f"Test too fast ({duration:.3f}s) for dependency testing!"
         assert len(dependency_results) > 4, "Should test multiple dependency endpoints"
 
+@pytest.mark.e2e
 class TestMediumHighCommunication:
     """Tests 46-50: Agent Communication - REAL TESTS"""
     
@@ -570,6 +572,7 @@ class TestMediumHighCommunication:
             assert attempt["status"] == "failed"
             assert attempt["error"] in retry_state["retry_policy"]["retry_on"]
 
+@pytest.mark.e2e
 class TestMediumHighResilience:
     """Tests 51-55: System Resilience - REAL TESTS"""
     

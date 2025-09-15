@@ -27,6 +27,7 @@ from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from shared.id_generation import UnifiedIdGenerator
 
 
+@pytest.mark.integration
 class TestWebSocketManagerMethodCompatibility:
     """Test suite to ensure WebSocket manager has all required methods."""
     

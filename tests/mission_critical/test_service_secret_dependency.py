@@ -436,5 +436,4 @@
 
                 # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
                     # Allow running tests directly
-                    # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v", "--tb=short"])
                     # REMOVED_SYNTAX_ERROR: pass

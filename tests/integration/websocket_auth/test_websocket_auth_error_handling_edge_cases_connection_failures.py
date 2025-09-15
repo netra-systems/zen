@@ -47,6 +47,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.integration
 class TestWebSocketConnectionFailureEdgeCases(SSotAsyncTestCase):
     """
     Integration tests for WebSocket connection failure edge cases during authentication.

@@ -14,7 +14,6 @@ Issue: #1107 - SSOT Mock Factory Duplication
 Phase: 2 - Test Creation
 Priority: Critical
 """
-
 import pytest
 import asyncio
 import threading
@@ -22,11 +21,10 @@ import time
 import concurrent.futures
 from typing import Dict, List, Any, Set
 from unittest.mock import patch
-
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
-
+@pytest.mark.unit
 class TestSSotMockUserIsolation(SSotBaseTestCase):
     """
     Test suite validating user isolation in SSOT mock factory operations.
@@ -38,7 +36,7 @@ class TestSSotMockUserIsolation(SSotBaseTestCase):
         """Set up isolation testing environment."""
         super().setUp()
         self.isolation_results = []
-        
+
     def tearDown(self):
         """Clean up isolation testing environment."""
         super().tearDown()
@@ -49,38 +47,25 @@ class TestSSotMockUserIsolation(SSotBaseTestCase):
         
         CRITICAL: User context isolation is fundamental to multi-tenant security.
         """
-        # Create multiple user contexts with different user IDs
         user_contexts = []
-        user_ids = ["user_001", "user_002", "user_003", "user_004", "user_005"]
-        
+        user_ids = ['user_001', 'user_002', 'user_003', 'user_004', 'user_005']
         for user_id in user_ids:
-            context = SSotMockFactory.create_mock_user_context(
-                user_id=user_id,
-                thread_id=f"thread_{user_id}",
-                run_id=f"run_{user_id}",
-                websocket_client_id=f"ws_{user_id}"
-            )
+            context = SSotMockFactory.create_mock_user_context(user_id=user_id, thread_id=f'thread_{user_id}', run_id=f'run_{user_id}', websocket_client_id=f'ws_{user_id}')
             user_contexts.append(context)
-        
-        # Validate each context has unique isolation
         context_user_ids = [ctx.user_id for ctx in user_contexts]
         context_thread_ids = [ctx.thread_id for ctx in user_contexts]
         context_run_ids = [ctx.run_id for ctx in user_contexts]
         context_ws_ids = [ctx.websocket_client_id for ctx in user_contexts]
-        
-        # Ensure all identifiers are unique (no cross-contamination)
         self.assertEqual(len(set(context_user_ids)), len(user_ids))
         self.assertEqual(len(set(context_thread_ids)), len(user_ids))
         self.assertEqual(len(set(context_run_ids)), len(user_ids))
         self.assertEqual(len(set(context_ws_ids)), len(user_ids))
-        
-        # Validate each context contains only its own user data
         for i, context in enumerate(user_contexts):
             expected_user_id = user_ids[i]
             self.assertEqual(context.user_id, expected_user_id)
-            self.assertEqual(context.thread_id, f"thread_{expected_user_id}")
-            self.assertEqual(context.run_id, f"run_{expected_user_id}")
-            self.assertEqual(context.websocket_client_id, f"ws_{expected_user_id}")
+            self.assertEqual(context.thread_id, f'thread_{expected_user_id}')
+            self.assertEqual(context.run_id, f'run_{expected_user_id}')
+            self.assertEqual(context.websocket_client_id, f'ws_{expected_user_id}')
 
     def test_websocket_mock_user_isolation(self):
         """
@@ -88,32 +73,17 @@ class TestSSotMockUserIsolation(SSotBaseTestCase):
         
         CRITICAL: WebSocket isolation prevents user message cross-contamination.
         """
-        # Create WebSocket mocks for different users
         websocket_mocks = []
-        user_data = [
-            ("user_alpha", "conn_alpha"),
-            ("user_beta", "conn_beta"),
-            ("user_gamma", "conn_gamma"),
-            ("user_delta", "conn_delta")
-        ]
-        
+        user_data = [('user_alpha', 'conn_alpha'), ('user_beta', 'conn_beta'), ('user_gamma', 'conn_gamma'), ('user_delta', 'conn_delta')]
         for user_id, connection_id in user_data:
-            websocket = SSotMockFactory.create_websocket_mock(
-                connection_id=connection_id,
-                user_id=user_id
-            )
+            websocket = SSotMockFactory.create_websocket_mock(connection_id=connection_id, user_id=user_id)
             websocket_mocks.append(websocket)
-        
-        # Validate user isolation
         for i, websocket in enumerate(websocket_mocks):
             expected_user_id, expected_connection_id = user_data[i]
             self.assertEqual(websocket.user_id, expected_user_id)
             self.assertEqual(websocket.connection_id, expected_connection_id)
-        
-        # Validate no cross-user contamination in mock state
         user_ids = [ws.user_id for ws in websocket_mocks]
         connection_ids = [ws.connection_id for ws in websocket_mocks]
-        
         self.assertEqual(len(set(user_ids)), len(user_data))
         self.assertEqual(len(set(connection_ids)), len(user_data))
 
@@ -124,75 +94,33 @@ class TestSSotMockUserIsolation(SSotBaseTestCase):
         
         CRITICAL: Agent execution isolation prevents user data leakage in AI responses.
         """
-        # Create agent mocks with user-specific execution contexts
         agent_mocks = []
-        user_scenarios = [
-            {
-                "user_id": "enterprise_user_001",
-                "agent_type": "supervisor",
-                "execution_result": {
-                    "status": "completed",
-                    "user_data": {"confidential": "enterprise_data_001"},
-                    "result": "Enterprise analysis complete"
-                }
-            },
-            {
-                "user_id": "healthcare_user_002", 
-                "agent_type": "data_helper",
-                "execution_result": {
-                    "status": "completed",
-                    "user_data": {"patient_id": "healthcare_data_002"},
-                    "result": "Healthcare analysis complete"
-                }
-            },
-            {
-                "user_id": "financial_user_003",
-                "agent_type": "triage", 
-                "execution_result": {
-                    "status": "completed",
-                    "user_data": {"account": "financial_data_003"},
-                    "result": "Financial analysis complete"
-                }
-            }
-        ]
-        
+        user_scenarios = [{'user_id': 'enterprise_user_001', 'agent_type': 'supervisor', 'execution_result': {'status': 'completed', 'user_data': {'confidential': 'enterprise_data_001'}, 'result': 'Enterprise analysis complete'}}, {'user_id': 'healthcare_user_002', 'agent_type': 'data_helper', 'execution_result': {'status': 'completed', 'user_data': {'patient_id': 'healthcare_data_002'}, 'result': 'Healthcare analysis complete'}}, {'user_id': 'financial_user_003', 'agent_type': 'triage', 'execution_result': {'status': 'completed', 'user_data': {'account': 'financial_data_003'}, 'result': 'Financial analysis complete'}}]
         for scenario in user_scenarios:
-            agent = SSotMockFactory.create_agent_mock(
-                agent_type=scenario["agent_type"],
-                execution_result=scenario["execution_result"]
-            )
-            # Associate user context with agent
-            agent._user_context = scenario["user_id"]
+            agent = SSotMockFactory.create_agent_mock(agent_type=scenario['agent_type'], execution_result=scenario['execution_result'])
+            agent._user_context = scenario['user_id']
             agent_mocks.append((agent, scenario))
-        
-        # Execute all agents and validate isolation
         execution_results = []
         for agent, scenario in agent_mocks:
             result = await agent.execute()
-            execution_results.append((result, scenario["user_id"]))
-        
-        # Validate each execution contains only its own user data
+            execution_results.append((result, scenario['user_id']))
         for result, expected_user_id in execution_results:
-            # Verify result contains expected user-specific data
-            user_data = result.get("user_data", {})
-            
-            if expected_user_id == "enterprise_user_001":
-                self.assertIn("confidential", user_data)
-                self.assertEqual(user_data["confidential"], "enterprise_data_001")
-                self.assertNotIn("patient_id", user_data)
-                self.assertNotIn("account", user_data)
-                
-            elif expected_user_id == "healthcare_user_002":
-                self.assertIn("patient_id", user_data)
-                self.assertEqual(user_data["patient_id"], "healthcare_data_002")
-                self.assertNotIn("confidential", user_data)
-                self.assertNotIn("account", user_data)
-                
-            elif expected_user_id == "financial_user_003":
-                self.assertIn("account", user_data)
-                self.assertEqual(user_data["account"], "financial_data_003")
-                self.assertNotIn("confidential", user_data)
-                self.assertNotIn("patient_id", user_data)
+            user_data = result.get('user_data', {})
+            if expected_user_id == 'enterprise_user_001':
+                self.assertIn('confidential', user_data)
+                self.assertEqual(user_data['confidential'], 'enterprise_data_001')
+                self.assertNotIn('patient_id', user_data)
+                self.assertNotIn('account', user_data)
+            elif expected_user_id == 'healthcare_user_002':
+                self.assertIn('patient_id', user_data)
+                self.assertEqual(user_data['patient_id'], 'healthcare_data_002')
+                self.assertNotIn('confidential', user_data)
+                self.assertNotIn('account', user_data)
+            elif expected_user_id == 'financial_user_003':
+                self.assertIn('account', user_data)
+                self.assertEqual(user_data['account'], 'financial_data_003')
+                self.assertNotIn('confidential', user_data)
+                self.assertNotIn('patient_id', user_data)
 
     def test_concurrent_user_mock_isolation(self):
         """
@@ -202,70 +130,25 @@ class TestSSotMockUserIsolation(SSotBaseTestCase):
         """
         isolation_results = []
         num_concurrent_users = 10
-        
+
         def create_user_mock_scenario(user_index: int):
             """Create and validate isolated user mock scenario."""
-            user_id = f"concurrent_user_{user_index:03d}"
-            
-            # Create user-specific mocks
-            user_context = SSotMockFactory.create_mock_user_context(
-                user_id=user_id,
-                thread_id=f"thread_{user_index}",
-                run_id=f"run_{user_index}"
-            )
-            
-            websocket = SSotMockFactory.create_websocket_mock(
-                connection_id=f"conn_{user_index}",
-                user_id=user_id
-            )
-            
-            agent = SSotMockFactory.create_agent_mock(
-                agent_type="supervisor",
-                execution_result={
-                    "user_specific_data": f"data_for_user_{user_index}",
-                    "user_id": user_id
-                }
-            )
-            
-            # Validate isolation immediately
-            isolation_check = {
-                "user_index": user_index,
-                "user_context_user_id": user_context.user_id,
-                "websocket_user_id": websocket.user_id,
-                "websocket_connection_id": websocket.connection_id,
-                "agent_execution_result": agent.execute.return_value,
-                "isolation_valid": (
-                    user_context.user_id == user_id and
-                    websocket.user_id == user_id and
-                    websocket.connection_id == f"conn_{user_index}"
-                )
-            }
-            
+            user_id = f'concurrent_user_{user_index:03d}'
+            user_context = SSotMockFactory.create_mock_user_context(user_id=user_id, thread_id=f'thread_{user_index}', run_id=f'run_{user_index}')
+            websocket = SSotMockFactory.create_websocket_mock(connection_id=f'conn_{user_index}', user_id=user_id)
+            agent = SSotMockFactory.create_agent_mock(agent_type='supervisor', execution_result={'user_specific_data': f'data_for_user_{user_index}', 'user_id': user_id})
+            isolation_check = {'user_index': user_index, 'user_context_user_id': user_context.user_id, 'websocket_user_id': websocket.user_id, 'websocket_connection_id': websocket.connection_id, 'agent_execution_result': agent.execute.return_value, 'isolation_valid': user_context.user_id == user_id and websocket.user_id == user_id and (websocket.connection_id == f'conn_{user_index}')}
             return isolation_check
-        
-        # Run concurrent mock creation
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_concurrent_users) as executor:
-            futures = [
-                executor.submit(create_user_mock_scenario, i)
-                for i in range(num_concurrent_users)
-            ]
-            
+            futures = [executor.submit(create_user_mock_scenario, i) for i in range(num_concurrent_users)]
             for future in concurrent.futures.as_completed(futures):
                 result = future.result()
                 isolation_results.append(result)
-        
-        # Validate all concurrent operations maintained isolation
         self.assertEqual(len(isolation_results), num_concurrent_users)
-        
-        # Check that all isolation checks passed
-        failed_isolations = [r for r in isolation_results if not r["isolation_valid"]]
-        self.assertEqual(len(failed_isolations), 0, 
-                        f"Isolation failures: {failed_isolations}")
-        
-        # Validate unique identifiers across all concurrent users
-        user_ids = [r["user_context_user_id"] for r in isolation_results]
-        connection_ids = [r["websocket_connection_id"] for r in isolation_results]
-        
+        failed_isolations = [r for r in isolation_results if not r['isolation_valid']]
+        self.assertEqual(len(failed_isolations), 0, f'Isolation failures: {failed_isolations}')
+        user_ids = [r['user_context_user_id'] for r in isolation_results]
+        connection_ids = [r['websocket_connection_id'] for r in isolation_results]
         self.assertEqual(len(set(user_ids)), num_concurrent_users)
         self.assertEqual(len(set(connection_ids)), num_concurrent_users)
 
@@ -276,37 +159,20 @@ class TestSSotMockUserIsolation(SSotBaseTestCase):
         
         CRITICAL: Bridge isolation ensures Golden Path events go to correct users.
         """
-        # Create bridge mocks for different users
-        bridge_scenarios = [
-            {"user_id": "bridge_user_001", "run_id": "run_001", "session_data": {"type": "premium"}},
-            {"user_id": "bridge_user_002", "run_id": "run_002", "session_data": {"type": "enterprise"}},
-            {"user_id": "bridge_user_003", "run_id": "run_003", "session_data": {"type": "free"}}
-        ]
-        
+        bridge_scenarios = [{'user_id': 'bridge_user_001', 'run_id': 'run_001', 'session_data': {'type': 'premium'}}, {'user_id': 'bridge_user_002', 'run_id': 'run_002', 'session_data': {'type': 'enterprise'}}, {'user_id': 'bridge_user_003', 'run_id': 'run_003', 'session_data': {'type': 'free'}}]
         bridges = []
         for scenario in bridge_scenarios:
-            bridge = SSotMockFactory.create_mock_agent_websocket_bridge(
-                user_id=scenario["user_id"],
-                run_id=scenario["run_id"]
-            )
-            # Add session-specific data
-            bridge._session_data = scenario["session_data"]
+            bridge = SSotMockFactory.create_mock_agent_websocket_bridge(user_id=scenario['user_id'], run_id=scenario['run_id'])
+            bridge._session_data = scenario['session_data']
             bridges.append((bridge, scenario))
-        
-        # Test Golden Path event isolation
         for bridge, scenario in bridges:
-            # Send user-specific events
-            await bridge.notify_agent_started("supervisor", f"Processing for {scenario['user_id']}")
+            await bridge.notify_agent_started('supervisor', f"Processing for {scenario['user_id']}")
             await bridge.notify_agent_thinking(f"Analyzing {scenario['user_id']} request")
             await bridge.notify_agent_completed(f"Response ready for {scenario['user_id']}")
-            
-            # Validate bridge maintains user context
-            self.assertEqual(bridge.user_id, scenario["user_id"])
-            self.assertEqual(bridge.run_id, scenario["run_id"])
-            self.assertEqual(bridge._session_data, scenario["session_data"])
-            
-            # Validate events were called with user-specific data
-            bridge.notify_agent_started.assert_called_with("supervisor", f"Processing for {scenario['user_id']}")
+            self.assertEqual(bridge.user_id, scenario['user_id'])
+            self.assertEqual(bridge.run_id, scenario['run_id'])
+            self.assertEqual(bridge._session_data, scenario['session_data'])
+            bridge.notify_agent_started.assert_called_with('supervisor', f"Processing for {scenario['user_id']}")
             bridge.notify_agent_thinking.assert_called_with(f"Analyzing {scenario['user_id']} request")
             bridge.notify_agent_completed.assert_called_with(f"Response ready for {scenario['user_id']}")
 
@@ -316,39 +182,22 @@ class TestSSotMockUserIsolation(SSotBaseTestCase):
         
         IMPORTANT: Database transaction isolation prevents user data contamination.
         """
-        # Create database session mocks for different users
         user_sessions = []
-        user_transaction_data = [
-            {"user_id": "db_user_001", "transaction_id": "txn_001", "data": {"balance": 1000}},
-            {"user_id": "db_user_002", "transaction_id": "txn_002", "data": {"balance": 2000}},
-            {"user_id": "db_user_003", "transaction_id": "txn_003", "data": {"balance": 3000}}
-        ]
-        
+        user_transaction_data = [{'user_id': 'db_user_001', 'transaction_id': 'txn_001', 'data': {'balance': 1000}}, {'user_id': 'db_user_002', 'transaction_id': 'txn_002', 'data': {'balance': 2000}}, {'user_id': 'db_user_003', 'transaction_id': 'txn_003', 'data': {'balance': 3000}}]
         for user_data in user_transaction_data:
             session = SSotMockFactory.create_database_session_mock()
-            
-            # Configure session with user-specific transaction data
-            session._user_id = user_data["user_id"]
-            session._transaction_id = user_data["transaction_id"]
-            session.scalar.return_value = user_data["data"]["balance"]
-            
+            session._user_id = user_data['user_id']
+            session._transaction_id = user_data['transaction_id']
+            session.scalar.return_value = user_data['data']['balance']
             user_sessions.append((session, user_data))
-        
-        # Test transaction isolation
         for session, user_data in user_sessions:
-            # Execute user-specific queries
             balance = session.scalar.return_value
-            
-            # Validate session isolation
-            self.assertEqual(session._user_id, user_data["user_id"])
-            self.assertEqual(session._transaction_id, user_data["transaction_id"])
-            self.assertEqual(balance, user_data["data"]["balance"])
-        
-        # Validate no cross-session contamination
+            self.assertEqual(session._user_id, user_data['user_id'])
+            self.assertEqual(session._transaction_id, user_data['transaction_id'])
+            self.assertEqual(balance, user_data['data']['balance'])
         user_ids = [s._user_id for s, _ in user_sessions]
         transaction_ids = [s._transaction_id for s, _ in user_sessions]
         balances = [s.scalar.return_value for s, _ in user_sessions]
-        
         self.assertEqual(len(set(user_ids)), len(user_transaction_data))
         self.assertEqual(len(set(transaction_ids)), len(user_transaction_data))
         self.assertEqual(len(set(balances)), len(user_transaction_data))
@@ -359,42 +208,24 @@ class TestSSotMockUserIsolation(SSotBaseTestCase):
         
         IMPORTANT: Comprehensive isolation testing across all mock types.
         """
-        # Create mock suites for different users
-        user_scenarios = [
-            {"user_id": "suite_user_001", "scenario": "healthcare"},
-            {"user_id": "suite_user_002", "scenario": "finance"}, 
-            {"user_id": "suite_user_003", "scenario": "enterprise"}
-        ]
-        
-        mock_types = ["agent", "websocket", "database_session", "execution_context", "llm_client"]
+        user_scenarios = [{'user_id': 'suite_user_001', 'scenario': 'healthcare'}, {'user_id': 'suite_user_002', 'scenario': 'finance'}, {'user_id': 'suite_user_003', 'scenario': 'enterprise'}]
+        mock_types = ['agent', 'websocket', 'database_session', 'execution_context', 'llm_client']
         user_mock_suites = []
-        
         for scenario in user_scenarios:
-            # Create mock suite
             mock_suite = SSotMockFactory.create_mock_suite(mock_types)
-            
-            # Configure each mock with user-specific data
-            mock_suite["agent"]._user_context = scenario["user_id"]
-            mock_suite["websocket"].user_id = scenario["user_id"]
-            mock_suite["execution_context"].user_id = scenario["user_id"]
-            
+            mock_suite['agent']._user_context = scenario['user_id']
+            mock_suite['websocket'].user_id = scenario['user_id']
+            mock_suite['execution_context'].user_id = scenario['user_id']
             user_mock_suites.append((mock_suite, scenario))
-        
-        # Validate isolation across all mock types in each suite
         for mock_suite, scenario in user_mock_suites:
-            expected_user_id = scenario["user_id"]
-            
-            # Check user isolation in each mock type
-            self.assertEqual(mock_suite["agent"]._user_context, expected_user_id)
-            self.assertEqual(mock_suite["websocket"].user_id, expected_user_id)
-            self.assertEqual(mock_suite["execution_context"].user_id, expected_user_id)
-        
-        # Validate no cross-suite contamination
-        agent_users = [suite["agent"]._user_context for suite, _ in user_mock_suites]
-        websocket_users = [suite["websocket"].user_id for suite, _ in user_mock_suites]
-        context_users = [suite["execution_context"].user_id for suite, _ in user_mock_suites]
-        
-        expected_users = [s["user_id"] for s in user_scenarios]
+            expected_user_id = scenario['user_id']
+            self.assertEqual(mock_suite['agent']._user_context, expected_user_id)
+            self.assertEqual(mock_suite['websocket'].user_id, expected_user_id)
+            self.assertEqual(mock_suite['execution_context'].user_id, expected_user_id)
+        agent_users = [suite['agent']._user_context for suite, _ in user_mock_suites]
+        websocket_users = [suite['websocket'].user_id for suite, _ in user_mock_suites]
+        context_users = [suite['execution_context'].user_id for suite, _ in user_mock_suites]
+        expected_users = [s['user_id'] for s in user_scenarios]
         self.assertEqual(set(agent_users), set(expected_users))
         self.assertEqual(set(websocket_users), set(expected_users))
         self.assertEqual(set(context_users), set(expected_users))
@@ -405,64 +236,38 @@ class TestSSotMockUserIsolation(SSotBaseTestCase):
         
         CRITICAL: State isolation prevents user data leakage in testing scenarios.
         """
-        # Create mocks with stateful operations
         user_states = []
-        
         for i in range(5):
-            user_id = f"state_user_{i:03d}"
-            
-            # Create user context with state
+            user_id = f'state_user_{i:03d}'
             context = SSotMockFactory.create_mock_user_context(user_id=user_id)
-            context.get_state.return_value = {f"user_{i}_key": f"user_{i}_value"}
-            
-            # Create agent with user-specific state
+            context.get_state.return_value = {f'user_{i}_key': f'user_{i}_value'}
             agent = SSotMockFactory.create_agent_mock()
-            agent._internal_state = {f"agent_state_{i}": f"agent_value_{i}"}
-            
-            # Create WebSocket with connection state
+            agent._internal_state = {f'agent_state_{i}': f'agent_value_{i}'}
             websocket = SSotMockFactory.create_websocket_mock(user_id=user_id)
-            websocket._connection_state = {f"ws_state_{i}": f"ws_value_{i}"}
-            
-            user_states.append({
-                "user_id": user_id,
-                "context": context,
-                "agent": agent,
-                "websocket": websocket
-            })
-        
-        # Validate state isolation
+            websocket._connection_state = {f'ws_state_{i}': f'ws_value_{i}'}
+            user_states.append({'user_id': user_id, 'context': context, 'agent': agent, 'websocket': websocket})
         for i, user_state in enumerate(user_states):
-            # Check context state isolation
-            context_state = user_state["context"].get_state()
-            expected_context_key = f"user_{i}_key"
+            context_state = user_state['context'].get_state()
+            expected_context_key = f'user_{i}_key'
             self.assertIn(expected_context_key, context_state)
-            self.assertEqual(context_state[expected_context_key], f"user_{i}_value")
-            
-            # Check agent state isolation
-            agent_state = user_state["agent"]._internal_state
-            expected_agent_key = f"agent_state_{i}"
+            self.assertEqual(context_state[expected_context_key], f'user_{i}_value')
+            agent_state = user_state['agent']._internal_state
+            expected_agent_key = f'agent_state_{i}'
             self.assertIn(expected_agent_key, agent_state)
-            self.assertEqual(agent_state[expected_agent_key], f"agent_value_{i}")
-            
-            # Check WebSocket state isolation
-            ws_state = user_state["websocket"]._connection_state
-            expected_ws_key = f"ws_state_{i}"
+            self.assertEqual(agent_state[expected_agent_key], f'agent_value_{i}')
+            ws_state = user_state['websocket']._connection_state
+            expected_ws_key = f'ws_state_{i}'
             self.assertIn(expected_ws_key, ws_state)
-            self.assertEqual(ws_state[expected_ws_key], f"ws_value_{i}")
-        
-        # Validate no cross-user state contamination
+            self.assertEqual(ws_state[expected_ws_key], f'ws_value_{i}')
         for i, user_state_i in enumerate(user_states):
             for j, user_state_j in enumerate(user_states):
                 if i != j:
-                    # Ensure user i's state doesn't appear in user j's mocks
-                    context_state_j = user_state_j["context"].get_state()
-                    agent_state_j = user_state_j["agent"]._internal_state
-                    ws_state_j = user_state_j["websocket"]._connection_state
-                    
-                    # Check for contamination
-                    self.assertNotIn(f"user_{i}_key", context_state_j)
-                    self.assertNotIn(f"agent_state_{i}", agent_state_j)
-                    self.assertNotIn(f"ws_state_{i}", ws_state_j)
+                    context_state_j = user_state_j['context'].get_state()
+                    agent_state_j = user_state_j['agent']._internal_state
+                    ws_state_j = user_state_j['websocket']._connection_state
+                    self.assertNotIn(f'user_{i}_key', context_state_j)
+                    self.assertNotIn(f'agent_state_{i}', agent_state_j)
+                    self.assertNotIn(f'ws_state_{i}', ws_state_j)
 
     def test_regulatory_compliance_isolation_scenarios(self):
         """
@@ -470,73 +275,31 @@ class TestSSotMockUserIsolation(SSotBaseTestCase):
         
         CRITICAL: Regulatory compliance requires absolute user data isolation.
         """
-        # Define regulatory compliance scenarios
-        compliance_scenarios = [
-            {
-                "regulation": "HIPAA",
-                "user_id": "hipaa_patient_001",
-                "sensitive_data": {"patient_id": "P001", "diagnosis": "confidential_medical_data"},
-                "data_classification": "PHI"
-            },
-            {
-                "regulation": "SOC2",
-                "user_id": "soc2_enterprise_001", 
-                "sensitive_data": {"customer_id": "C001", "financial_records": "confidential_financial_data"},
-                "data_classification": "Confidential"
-            },
-            {
-                "regulation": "SEC",
-                "user_id": "sec_financial_001",
-                "sensitive_data": {"trading_data": "insider_information", "compliance_status": "confidential"},
-                "data_classification": "Material Non-Public"
-            }
-        ]
-        
-        # Create isolated mock environments for each compliance scenario
+        compliance_scenarios = [{'regulation': 'HIPAA', 'user_id': 'hipaa_patient_001', 'sensitive_data': {'patient_id': 'P001', 'diagnosis': 'confidential_medical_data'}, 'data_classification': 'PHI'}, {'regulation': 'SOC2', 'user_id': 'soc2_enterprise_001', 'sensitive_data': {'customer_id': 'C001', 'financial_records': 'confidential_financial_data'}, 'data_classification': 'Confidential'}, {'regulation': 'SEC', 'user_id': 'sec_financial_001', 'sensitive_data': {'trading_data': 'insider_information', 'compliance_status': 'confidential'}, 'data_classification': 'Material Non-Public'}]
         compliance_mocks = []
         for scenario in compliance_scenarios:
-            # Create completely isolated mock suite for regulatory scenario
-            mock_suite = SSotMockFactory.create_mock_suite([
-                "agent", "websocket", "database_session", "execution_context"
-            ])
-            
-            # Configure with compliance-specific data
-            user_context = SSotMockFactory.create_mock_user_context(user_id=scenario["user_id"])
-            user_context.get_state.return_value = scenario["sensitive_data"]
-            user_context.data_classification = scenario["data_classification"]
-            user_context.regulation = scenario["regulation"]
-            
-            compliance_mocks.append({
-                "scenario": scenario,
-                "user_context": user_context,
-                "mock_suite": mock_suite
-            })
-        
-        # Validate complete isolation between regulatory scenarios
+            mock_suite = SSotMockFactory.create_mock_suite(['agent', 'websocket', 'database_session', 'execution_context'])
+            user_context = SSotMockFactory.create_mock_user_context(user_id=scenario['user_id'])
+            user_context.get_state.return_value = scenario['sensitive_data']
+            user_context.data_classification = scenario['data_classification']
+            user_context.regulation = scenario['regulation']
+            compliance_mocks.append({'scenario': scenario, 'user_context': user_context, 'mock_suite': mock_suite})
         for i, compliance_mock_i in enumerate(compliance_mocks):
-            scenario_i = compliance_mock_i["scenario"]
-            context_i = compliance_mock_i["user_context"]
-            
-            # Validate scenario has its own data
+            scenario_i = compliance_mock_i['scenario']
+            context_i = compliance_mock_i['user_context']
             state_i = context_i.get_state()
-            self.assertEqual(context_i.regulation, scenario_i["regulation"])
-            self.assertEqual(context_i.data_classification, scenario_i["data_classification"])
-            
-            for key, value in scenario_i["sensitive_data"].items():
+            self.assertEqual(context_i.regulation, scenario_i['regulation'])
+            self.assertEqual(context_i.data_classification, scenario_i['data_classification'])
+            for key, value in scenario_i['sensitive_data'].items():
                 self.assertIn(key, state_i)
                 self.assertEqual(state_i[key], value)
-            
-            # Validate no contamination from other regulatory scenarios
             for j, compliance_mock_j in enumerate(compliance_mocks):
                 if i != j:
-                    scenario_j = compliance_mock_j["scenario"]
-                    
-                    # Ensure scenario i data doesn't appear in scenario j
-                    for key in scenario_j["sensitive_data"].keys():
-                        if key not in scenario_i["sensitive_data"]:
-                            self.assertNotIn(key, state_i, 
-                                           f"Data contamination: {scenario_j['regulation']} data found in {scenario_i['regulation']} context")
-
-if __name__ == "__main__":
-    # Run as standalone test for development
-    pytest.main([__file__, "-v"])
+                    scenario_j = compliance_mock_j['scenario']
+                    for key in scenario_j['sensitive_data'].keys():
+                        if key not in scenario_i['sensitive_data']:
+                            self.assertNotIn(key, state_i, f"Data contamination: {scenario_j['regulation']} data found in {scenario_i['regulation']} context")
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

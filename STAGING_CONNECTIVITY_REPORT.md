@@ -1,5 +1,5 @@
 # Staging Environment Connectivity Report
-Generated: 2025-09-14 11:19:04
+Generated: 2025-09-15 02:04:45
 Environment: https://api.staging.netrasystems.ai
 
 ## Executive Summary
@@ -10,7 +10,7 @@ Environment: https://api.staging.netrasystems.ai
 ## Test Results
 ### http_connectivity
 - **Status**:  PASS:  PASS
-- **Duration**: 0.338s
+- **Duration**: 0.383s
 - **Health Status**: 200
 - **Service Status**: healthy
 - **Version**: 1.0.0
@@ -18,12 +18,12 @@ Environment: https://api.staging.netrasystems.ai
 ### websocket_connectivity
 - **Status**:  PASS:  PASS
 - **Duration**: 0.000s
-- **Connection Time**: 0.704s
+- **Connection Time**: 0.716s
 - **Ping Time**: 0.000s
 
 ### agent_request_pipeline
 - **Status**:  PASS:  PASS
-- **Duration**: 0.788s
+- **Duration**: 0.803s
 - **Pipeline Working**: True
 - **Response Type**: connection_established
 

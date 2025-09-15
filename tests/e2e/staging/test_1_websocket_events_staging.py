@@ -29,6 +29,7 @@ MISSION_CRITICAL_EVENTS = {
 }
 
 
+@pytest.mark.e2e
 class TestWebSocketEventsStaging(StagingTestBase):
     """Test WebSocket events in staging environment"""
     

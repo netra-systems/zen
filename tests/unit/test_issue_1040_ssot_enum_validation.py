@@ -42,6 +42,7 @@ except ImportError:
     SSOT_FRAMEWORK_AVAILABLE = False
 
 
+@pytest.mark.unit
 class TestIssue1040SSOTEnumValidation(SSotBaseTestCase):
     """
     SSOT Enum availability validation for Issue #1040.
@@ -226,6 +227,7 @@ class TestIssue1040SSOTEnumValidation(SSotBaseTestCase):
         self.assertTrue(True, "Both locations available during migration - legacy location should be deprecated")
 
 
+@pytest.mark.unit
 class TestIssue1040SSOTArchitectureCompliance(SSotBaseTestCase):
     """
     SSOT Architecture compliance validation for Issue #1040.

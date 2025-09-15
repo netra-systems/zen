@@ -32,6 +32,7 @@ flow and impact $500K+ ARR.
 This test supports the Authentication Flow consistency validation for Issue #962.
 """
 
+import pytest
 import asyncio
 import unittest
 from typing import Dict, List, Optional, Any, Set
@@ -42,6 +43,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.integration
 class TestIssue962AuthenticationFlowValidation(SSotAsyncTestCase):
     """
     Integration tests to validate authentication flow consistency with SSOT configuration.

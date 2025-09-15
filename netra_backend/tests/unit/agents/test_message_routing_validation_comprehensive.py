@@ -55,9 +55,9 @@ from netra_backend.app.websocket_core.validation import MessageValidator
 from netra_backend.app.websocket_core.protocols import WebSocketProtocol
 
 # Import routing validation components
-from netra_backend.app.agents.validator import AgentValidator
+from netra_backend.app.agents.validator import ValidatorAgent
 from netra_backend.app.agents.input_validation import InputValidator
-from netra_backend.app.agents.quality_checks import QualityCheckValidator
+from netra_backend.app.agents.quality_checks import QualityValidator as QualityCheckValidator
 
 
 @dataclass

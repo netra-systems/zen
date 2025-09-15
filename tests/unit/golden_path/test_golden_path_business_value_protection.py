@@ -55,6 +55,7 @@ TEST STRATEGY:
 - Prove business impact when logging is unified vs disconnected
 """
 
+import pytest
 import asyncio
 import time
 import unittest
@@ -70,6 +71,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
+@pytest.mark.unit
 class TestGoldenPathBusinessValueProtection(SSotAsyncTestCase, unittest.TestCase):
     """
     Validates unified logging protects $500K+ ARR debugging capabilities.

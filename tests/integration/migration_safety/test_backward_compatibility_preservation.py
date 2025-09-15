@@ -17,6 +17,7 @@ CRITICAL: These tests validate that the migration maintains system stability
 during transition while encouraging adoption of modern patterns.
 """
 
+import pytest
 import asyncio
 import warnings
 import inspect
@@ -34,6 +35,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
+@pytest.mark.integration
 class TestBackwardCompatibilityPreservation(SSotAsyncTestCase):
     """
     Test suite validating backward compatibility during ExecutionEngine migration.

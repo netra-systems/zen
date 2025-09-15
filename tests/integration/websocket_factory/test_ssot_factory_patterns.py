@@ -18,6 +18,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.integration
 class TestWebSocketSSOTFactoryPatterns(SSotAsyncTestCase):
     """
     Integration test suite for WebSocket SSOT factory patterns.
@@ -82,7 +83,7 @@ class TestWebSocketSSOTFactoryPatterns(SSotAsyncTestCase):
 
         # Test factory method initialization
         try:
-            websocket_manager = await get_websocket_manager()
+            websocket_manager = get_websocket_manager()
             assert websocket_manager is not None, "WebSocket manager should be initialized via factory"
             assert isinstance(websocket_manager, WebSocketManager), "Should return WebSocketManager instance"
         except Exception as e:
@@ -115,8 +116,8 @@ class TestWebSocketSSOTFactoryPatterns(SSotAsyncTestCase):
         )
 
         # Test isolated WebSocket manager instances
-        websocket_manager_1 = await get_websocket_manager()
-        websocket_manager_2 = await get_websocket_manager()
+        websocket_manager_1 = get_websocket_manager()
+        websocket_manager_2 = get_websocket_manager()
 
         # Verify they can handle different users without state contamination
         try:
@@ -164,7 +165,7 @@ class TestWebSocketSSOTFactoryPatterns(SSotAsyncTestCase):
         except ImportError as e:
             pytest.skip(f"WebSocket manager not available: {e}")
 
-        websocket_manager = await get_websocket_manager()
+        websocket_manager = get_websocket_manager()
 
         # Test event emission capability (with mock connection)
         mock_connection = AsyncMock()
@@ -217,13 +218,13 @@ class TestWebSocketSSOTFactoryPatterns(SSotAsyncTestCase):
 
         try:
             # Test factory with context injection
-            websocket_manager = await get_websocket_manager()
+            websocket_manager = get_websocket_manager()
 
             # Verify manager has necessary dependencies
             assert websocket_manager is not None, "Manager should be created with dependencies"
 
             # Test that we can create multiple instances without singleton issues
-            websocket_manager_2 = await get_websocket_manager()
+            websocket_manager_2 = get_websocket_manager()
 
             # In SSOT factory pattern, these could be the same instance (singleton)
             # or different instances (factory) - both are valid SSOT patterns
@@ -250,7 +251,7 @@ class TestWebSocketSSOTFactoryPatterns(SSotAsyncTestCase):
         if not redis_client:
             pytest.skip("Redis not available for integration testing")
 
-        websocket_manager = await get_websocket_manager()
+        websocket_manager = get_websocket_manager()
 
         # Test Redis integration
         test_key = f"websocket:test:{uuid.uuid4()}"
@@ -295,7 +296,7 @@ class TestWebSocketSSOTFactoryPatterns(SSotAsyncTestCase):
         legacy_import_results = {}
 
         legacy_patterns = [
-            ("unified_manager", "from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager"),
+            ("unified_manager", "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager"),
             ("direct_core", "from netra_backend.app.websocket_core import WebSocketManager"),
             ("factory_core", "from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager"),
         ]

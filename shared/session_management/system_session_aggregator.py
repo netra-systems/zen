@@ -397,7 +397,11 @@ class SystemSessionAggregator:
                 summary['sessions_by_state'][record.state.value] += 1
                 
                 # Count by user type (anonymized)
-                user_type = "system" if record.user_id.startswith("system") else "user"
+                # CRITICAL FIX: Detect service users in "service:netra-backend" format
+                if record.user_id.startswith("service:") or record.user_id == "system":
+                    user_type = "system"
+                else:
+                    user_type = "user"
                 summary['sessions_by_user_type'][user_type] += 1
                 
                 # Count errors

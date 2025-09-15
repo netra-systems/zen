@@ -1537,6 +1537,77 @@ async def get_current_user(request: Request) -> Dict[str, Any]:
             detail="Internal server error"
         )
 
+@router.post("/auth/validate-token-and-get-user")
+async def validate_token_and_get_user_endpoint(request: Request) -> Dict[str, Any]:
+    """
+    Validate JWT token and return user data in single operation.
+    This is the missing method that the Golden Path authentication requires.
+
+    Business Value Justification:
+    - Segment: All (Platform/Security)
+    - Business Goal: Restore $500K+ ARR Golden Path authentication functionality
+    - Value Impact: Single API call combines token validation with user lookup for efficient auth
+    - Strategic Impact: Eliminates authentication system blocking and enables complete user flow
+
+    Accepts token from Authorization header (Bearer token) or request body.
+    Returns combined validation and user data if valid, error if invalid.
+    """
+    try:
+        token = None
+
+        # Try to get token from Authorization header first
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+
+        # If no Authorization header, try to get token from request body
+        if not token:
+            try:
+                body = await request.json()
+                token = body.get("token") or body.get("access_token")
+            except Exception:
+                # Ignore JSON parsing errors and continue with no token
+                pass
+
+        if not token:
+            logger.warning("validateTokenAndGetUser requested with no token provided")
+            return {
+                "valid": False,
+                "error": "No token provided in Authorization header or request body"
+            }
+
+        # Use the unified auth interface's new method
+        from auth_service.auth_core.unified_auth_interface import get_unified_auth
+        auth_interface = get_unified_auth()
+
+        # Call the new validateTokenAndGetUser method
+        try:
+            result = await auth_interface.validateTokenAndGetUser(token)
+        except Exception as e:
+            logger.error(f"validateTokenAndGetUser method failed: {e}")
+            return {
+                "valid": False,
+                "error": "Token validation and user lookup failed"
+            }
+
+        if not result:
+            logger.debug("validateTokenAndGetUser returned None - invalid token or user")
+            return {
+                "valid": False,
+                "error": "Invalid token or user not found"
+            }
+
+        # Return the combined result from UnifiedAuthInterface
+        logger.debug(f"validateTokenAndGetUser successful for user: {result.get('user_id')}")
+        return result
+
+    except Exception as e:
+        logger.error(f"Unexpected error in validateTokenAndGetUser endpoint: {e}")
+        return {
+            "valid": False,
+            "error": "Internal server error during token validation and user lookup"
+        }
+
 @router.post("/auth/verify")
 @router.get("/auth/verify")
 async def verify_token_endpoint(request: Request) -> Dict[str, Any]:

@@ -35,7 +35,7 @@
         # REMOVED_SYNTAX_ERROR: from datetime import datetime, timezone
         # REMOVED_SYNTAX_ERROR: from pathlib import Path
         # REMOVED_SYNTAX_ERROR: from typing import Dict, List, Optional, Tuple, Any
-        # REMOVED_SYNTAX_ERROR: from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+        # REMOVED_SYNTAX_ERROR: 
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
         # Add project root to path for absolute imports (CLAUDE.md compliance)

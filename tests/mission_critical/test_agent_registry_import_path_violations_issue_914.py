@@ -405,15 +405,14 @@ class TestAgentRegistryImportPathViolations(SSotBaseTestCase):
         return statements
 
 
-if __name__ == '__main__':
-    print("="*80)
-    print("ISSUE #914 AGENT REGISTRY IMPORT PATH VIOLATIONS TEST SUITE")
-    print("="*80)
-    print("PURPOSE: Demonstrate import path SSOT violations")
-    print("EXPECTED: Tests should FAIL initially, proving import ambiguity")
-    print("AFTER FIX: Tests should pass with single canonical import path")
-    print("="*80)
-    
-    # Run the tests
-    import pytest
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)
+    pass  # TODO: Replace with appropriate SSOT test execution

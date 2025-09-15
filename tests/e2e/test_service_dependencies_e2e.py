@@ -78,6 +78,7 @@ class E2EServiceDependencyMetrics:
     recovery_operations: int = 0
 
 
+@pytest.mark.e2e
 class TestCompleteUserJourneyServiceDependencies:
     """
     E2E tests for complete user journeys through all service dependencies.

@@ -25,6 +25,7 @@ import time
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional, Tuple
 from concurrent.futures import ThreadPoolExecutor
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 from test_framework.ssot.e2e_auth_helper import (
     E2EAuthHelper,
@@ -155,7 +156,7 @@ class TestMultiUserConcurrentAgentExecution(BaseE2ETest):
             user_event_collectors.append(create_event_collector(i, ws_connection))
         
         # Set up agent execution infrastructure
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         websocket_bridge = AgentWebSocketBridge(websocket_manager)
         execution_core = AgentExecutionCore(real_agent_registry, websocket_bridge)
         
@@ -324,7 +325,7 @@ class TestMultiUserConcurrentAgentExecution(BaseE2ETest):
                 event_task = asyncio.create_task(collect_events())
                 
                 # Execute agent
-                websocket_manager = UnifiedWebSocketManager()
+                websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
                 websocket_bridge = AgentWebSocketBridge(websocket_manager)
                 execution_core = AgentExecutionCore(real_agent_registry, websocket_bridge)
                 
@@ -474,7 +475,7 @@ class TestMultiUserConcurrentAgentExecution(BaseE2ETest):
             event_task = asyncio.create_task(collect_events())
             
             # Execute agent
-            websocket_manager = UnifiedWebSocketManager()
+            websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
             websocket_bridge = AgentWebSocketBridge(websocket_manager)
             execution_core = AgentExecutionCore(real_agent_registry, websocket_bridge)
             

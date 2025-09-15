@@ -21,6 +21,7 @@ from typing import Dict, Any, List, Optional, Union
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from concurrent.futures import ThreadPoolExecutor
 import time
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # Import all the WebSocket-related systems for integration testing
 from netra_backend.app.websocket_core.unified_manager import (
@@ -129,6 +130,7 @@ class MockIntegrationService:
         return _serialize_message_safely(response)
 
 
+@pytest.mark.integration
 class TestIntegrationScenario1_AgentToWebSocketFlow:
     """Integration test: Agent execution -> WebSocket manager -> Client delivery."""
     
@@ -136,7 +138,7 @@ class TestIntegrationScenario1_AgentToWebSocketFlow:
     async def integration_setup(self):
         """Set up integration test environment."""
         # Create WebSocket manager
-        manager = UnifiedWebSocketManager()
+        manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         
         # Create mock WebSocket connection
         mock_websocket = Mock()
@@ -302,6 +304,7 @@ class TestIntegrationScenario1_AgentToWebSocketFlow:
         print(f" PASS:  Executed {len(execution_stages)} agent lifecycle stages with complex serialization")
 
 
+@pytest.mark.integration
 class TestIntegrationScenario2_MultiServiceCommunication:
     """Integration test: Multi-service communication through WebSocket bridge."""
     
@@ -586,13 +589,14 @@ class TestIntegrationScenario2_MultiServiceCommunication:
         print(f" PASS:  Executed {len(successful_operations)} concurrent operations in {execution_time:.3f}s")
 
 
+@pytest.mark.integration
 class TestIntegrationScenario3_ErrorHandlingAndRecovery:
     """Integration test: Error handling and recovery with WebSocket serialization."""
     
     @pytest.fixture
     async def error_recovery_setup(self):
         """Set up error recovery integration test environment."""
-        manager = UnifiedWebSocketManager()
+        manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         
         # Create connections with different states for testing
         connections = {}
@@ -730,13 +734,14 @@ class TestIntegrationScenario3_ErrorHandlingAndRecovery:
         print(" PASS:  Error handling maintained serialization integrity across failure scenarios")
 
 
+@pytest.mark.integration
 class TestIntegrationScenario4_PerformanceUnderLoad:
     """Integration test: Performance testing with high message volume and complex serialization."""
     
     async def test_high_volume_serialization_performance(self):
         """Test WebSocket serialization performance under high message volume."""
         # Create WebSocket manager
-        manager = UnifiedWebSocketManager()
+        manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         
         # Create multiple connections
         connections = []
@@ -865,6 +870,7 @@ class TestIntegrationScenario4_PerformanceUnderLoad:
         print(f" PASS:  Verified serialization integrity for {sample_checks} complex messages")
 
 
+@pytest.mark.integration
 class TestIntegrationScenario5_RealWorldComplexity:
     """Integration test: Real-world complexity scenarios with full system integration."""
     

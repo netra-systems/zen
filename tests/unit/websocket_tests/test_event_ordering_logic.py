@@ -114,6 +114,7 @@ class WebSocketEventSequenceValidator:
         )
 
 
+@pytest.mark.unit
 class TestWebSocketEventSequenceValidation(SSotBaseTestCase):
     """Test the business logic for WebSocket event sequence validation."""
     
@@ -286,6 +287,7 @@ class TestWebSocketEventSequenceValidation(SSotBaseTestCase):
         self.assertTrue(self.validator.is_valid_complete_sequence())
 
 
+@pytest.mark.unit
 class TestEventSequenceStateManagement(SSotBaseTestCase):
     """Test state machine transitions for event sequence validation."""
     
@@ -356,6 +358,7 @@ class TestEventSequenceStateManagement(SSotBaseTestCase):
         self.assertFalse(self.validator.is_valid_complete_sequence())
 
 
+@pytest.mark.unit
 class TestEventSequenceErrorPrevention(SSotBaseTestCase):
     """Test error prevention in event sequence validation."""
     

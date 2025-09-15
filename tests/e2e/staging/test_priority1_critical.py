@@ -22,6 +22,7 @@ from tests.e2e.staging_test_config import get_staging_config
 # Mark all tests in this file as critical and real
 pytestmark = [pytest.mark.staging, pytest.mark.critical, pytest.mark.real]
 
+@pytest.mark.e2e
 class TestCriticalWebSocket:
     """Tests 1-4: REAL WebSocket Core Functionality"""
     
@@ -85,8 +86,10 @@ class TestCriticalWebSocket:
                     
                     for attempt in range(2):  # Retry logic for Windows asyncio issues
                         try:
-                            # Increased timeout for Windows asyncio + network latency
-                            welcome_response = await asyncio.wait_for(ws.recv(), timeout=30)
+                            # SSOT COMPLIANCE: Use cloud-native timeout from staging config
+                            cloud_timeout = config.get_cloud_native_timeout()
+                            print(f"[SSOT TIMEOUT] Using cloud-native timeout: {cloud_timeout}s")
+                            welcome_response = await asyncio.wait_for(ws.recv(), timeout=cloud_timeout)
                             print(f"WebSocket welcome message: {welcome_response}")
                             welcome_received = True
                             
@@ -420,7 +423,7 @@ class TestCriticalWebSocket:
                 else:
                     print("SUCCESS: WebSocket properly enforces authentication")
                     message_sent = True
-            elif "unexpected keyword" in error_str or "extra_headers" in error_str or "additional_headers" in error_str:
+            elif "unexpected keyword" in error_str or "additional_headers" in error_str or "additional_headers" in error_str:
                 print("WARNING: WebSocket library parameter error - falling back to unauthenticated test")
                 # Fall back to testing without headers
                 try:
@@ -524,6 +527,7 @@ class TestCriticalWebSocket:
         successful_results = [r for r in results if isinstance(r, dict)]
         assert len(successful_results) == 5, "Should get results for all connections"
 
+@pytest.mark.e2e
 class TestCriticalAgent:
     """Tests 5-11: REAL Agent Core Functionality"""
     
@@ -923,6 +927,7 @@ class TestCriticalAgent:
             assert avg_response > 10, f"Average response time too low ({avg_response:.1f}ms) - might be local!"
             assert max_response > min_response, "Response times should vary"
 
+@pytest.mark.e2e
 class TestCriticalMessaging:
     """Tests 12-16: REAL Message and Thread Management"""
     
@@ -1315,6 +1320,7 @@ class TestCriticalMessaging:
         assert duration > 0.3, f"Test too fast ({duration:.3f}s) for isolation testing!"
         assert len(isolation_results) > 1, "Should test user isolation endpoints"
 
+@pytest.mark.e2e
 class TestCriticalScalability:
     """Tests 17-21: REAL Scalability and Reliability"""
     
@@ -1763,6 +1769,7 @@ class TestCriticalScalability:
         assert duration > 0.4, f"Test too fast ({duration:.3f}s) for session testing!"
         assert len(session_results["session_endpoints"]) > 0, "Should test session endpoints"
 
+@pytest.mark.e2e
 class TestCriticalUserExperience:
     """Tests 22-25: REAL User Experience Critical Features"""
     

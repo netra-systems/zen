@@ -11,6 +11,7 @@ EXPECTED BEHAVIOR:
 Business Value: Ensures $500K+ ARR Golden Path can create DataHelper agents reliably
 """
 
+import pytest
 import asyncio
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -19,6 +20,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
+@pytest.mark.unit
 class TestAgentFactoryDataHelperSSot(SSotAsyncTestCase):
     """Test AgentInstanceFactory ability to create DataHelper agent with SSOT compliance."""
 

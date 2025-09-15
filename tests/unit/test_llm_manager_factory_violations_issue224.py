@@ -35,6 +35,7 @@ from loguru import logger
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestLLMManagerFactoryViolationsIssue224(SSotBaseTestCase):
     """Unit tests to detect the 51 LLMManager factory pattern violations for issue #224"""
     

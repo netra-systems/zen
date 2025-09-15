@@ -30,6 +30,7 @@ and ensures reliable user authentication across all services.
 This test supports the Configuration Import Fragmentation remediation for Issue #962.
 """
 
+import pytest
 import ast
 import os
 import unittest
@@ -40,6 +41,7 @@ import importlib.util
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestIssue962ImportPatternEnforcement(SSotBaseTestCase, unittest.TestCase):
     """
     Unit tests to enforce SSOT configuration import patterns for Issue #962.

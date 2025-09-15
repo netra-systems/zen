@@ -17,6 +17,7 @@ SSOT Violations This Module Proves:
 4. Inconsistent error handling across manager interfaces
 """
 
+import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import inspect
@@ -40,6 +41,7 @@ class MethodSignature:
     is_property: bool
 
 
+@pytest.mark.unit
 class TestWebSocketManagerInterfaceConsistency(SSotBaseTestCase):
     """
     Tests to prove WebSocket manager interface consistency violations exist.

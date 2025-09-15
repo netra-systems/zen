@@ -40,6 +40,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
+@pytest.mark.unit
 class TestAgentInstanceFactoryUserIsolation(SSotAsyncTestCase):
     """
     Critical security test suite proving singleton pattern creates user isolation vulnerabilities.

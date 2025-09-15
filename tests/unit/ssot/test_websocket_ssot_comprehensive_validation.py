@@ -7,6 +7,7 @@ identifying violations across multiple dimensions of the architecture.
 Expected to FAIL initially - demonstrating comprehensive SSOT violations.
 """
 
+import pytest
 import unittest
 import importlib
 import inspect
@@ -18,6 +19,7 @@ from pathlib import Path
 from collections import defaultdict
 
 
+@pytest.mark.unit
 class TestWebSocketSSOTComprehensiveValidation(unittest.TestCase):
     """Comprehensive WebSocket SSOT compliance validation."""
 

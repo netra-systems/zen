@@ -21,6 +21,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.unit
 class TestDeprecatedEnginePrevention(SSotBaseTestCase):
     """Test prevention of deprecated execution engine instantiation."""
     
@@ -504,6 +505,7 @@ class TestDeprecatedEnginePrevention(SSotBaseTestCase):
         super().teardown_method(method)
 
 
+@pytest.mark.unit
 class TestSSotConsolidationReadiness(SSotBaseTestCase):
     """Test overall SSOT consolidation readiness for execution engines."""
     

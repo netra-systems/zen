@@ -40,6 +40,7 @@ from tests.e2e.integration.websocket_dev_utilities import (
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 
+@pytest.mark.e2e
 class TestWebSocketUserJourneyer:
     """Test manager for WebSocket user journey testing."""
 

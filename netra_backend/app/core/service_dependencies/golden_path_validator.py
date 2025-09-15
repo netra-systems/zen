@@ -391,7 +391,7 @@ class GoldenPathValidator:
             
             # Check message router
             try:
-                from netra_backend.app.websocket_core import get_message_router
+                from netra_backend.app.websocket_core.handlers import get_message_router
                 message_router = get_message_router()
                 if message_router:
                     event_chain["message_router"] = True

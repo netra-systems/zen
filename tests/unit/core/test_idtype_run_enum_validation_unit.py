@@ -38,6 +38,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.core.unified_id_manager import IDType, UnifiedIDManager, generate_id
 
 
+@pytest.mark.unit
 class TestIDTypeRunEnumValidation(SSotBaseTestCase):
     """
     Unit tests for IDType.RUN enum validation and completeness.

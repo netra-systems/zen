@@ -80,6 +80,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.e2e
 class TestGoldenPathRegistryConsolidationStaging(SSotAsyncTestCase):
     """
     E2E test suite for Golden Path validation in GCP staging environment.

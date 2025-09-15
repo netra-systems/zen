@@ -22,6 +22,7 @@ from netra_backend.app.clients.circuit_breaker import CircuitBreakerOpen, Circui
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestAuthCircuitBreakerTimeout(SSotAsyncTestCase):
     """
     Integration tests to reproduce circuit breaker and timeout configuration issues.

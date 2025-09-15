@@ -9,6 +9,8 @@ Mission: Provide authoritative import mappings for all Netra services
 ### 🏆 CURRENT ACHIEVEMENTS
 - **Issue #863 Agent Registry SSOT**: ✅ **PHASE 3 COMPLETE** - 100% SSOT compliance achieved, both import paths resolve to identical classes
 - **Issue #1116 Agent Factory SSOT**: ✅ **COMPLETE** - Full singleton to factory migration with enterprise user isolation
+- **Issue #1186 UserExecutionEngine SSOT**: ✅ **CONSOLIDATION COMPLETE** - Fixed 17 files with fragmented import patterns, eliminated execution_engine_consolidated dependencies
+- **Issue #1182 WebSocket Manager SSOT**: ✅ **PHASE 1 COMPLETE** - Eliminated duplicate get_websocket_manager functions, consolidated imports to canonical paths, WebSocketManagerFactory integrated into canonical module
 - **SSOT Compliance**: 87.2% Real System (285 violations in 118 files) - Major Agent Registry violations resolved through direct re-export
 - **Configuration Manager SSOT**: ✅ **PHASE 1 COMPLETE** - Issue #667 unified imports and compatibility
 - **WebSocket Bridge SSOT**: ✅ **COMPLETE** - Comprehensive audit and migration finished with dual pattern analysis
@@ -25,10 +27,11 @@ Mission: Provide authoritative import mappings for all Netra services
 ### 🎯 COMPLETED MIGRATIONS
 1. **Issue #863 Agent Registry SSOT Phase 3** - Complete SSOT consolidation with direct re-export, 100% compliance achieved
 2. **Issue #1116 Agent Factory SSOT** - Complete singleton to factory migration with enterprise user isolation
-3. **Configuration SSOT Phase 1** - Unified configuration imports with compatibility layer
-4. **WebSocket Bridge SSOT** - Complete agent WebSocket bridge migration and audit
-5. **Orchestration SSOT** - Centralized availability checking with thread-safe caching
-6. **Test Infrastructure SSOT** - Unified test runner and base test case consolidation
+3. **Issue #1182 WebSocket Manager SSOT Phase 1** - Eliminated duplicate get_websocket_manager functions and consolidated import paths
+4. **Configuration SSOT Phase 1** - Unified configuration imports with compatibility layer
+5. **WebSocket Bridge SSOT** - Complete agent WebSocket bridge migration and audit
+6. **Orchestration SSOT** - Centralized availability checking with thread-safe caching
+7. **Test Infrastructure SSOT** - Unified test runner and base test case consolidation
 
 ## SERVICE IMPORT PATTERNS
 
@@ -62,12 +65,17 @@ from netra_backend.app.services.user_execution_context import InvalidContextErro
 from netra_backend.app.services.user_execution_context import managed_user_context, validate_user_context
 from netra_backend.app.services.user_execution_context import create_isolated_execution_context
 
+# Agent Execution Context SSOT (FIXED 2025-09-15 - IMPORT ERROR RESOLVED)
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext  # CANONICAL: Primary implementation (331+ files)
+from netra_backend.app.services.user_execution_context import AgentExecutionContext  # COMPATIBILITY: Lazy import alias for test compatibility
+
 # WebSocket Agent Bridge (CRITICAL - VERIFIED 2025-09-11)
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 
-# WebSocket Manager (CRITICAL - UPDATED 2025-09-14 - Issue #996 Cleanup)
+# WebSocket Manager (CRITICAL - UPDATED 2025-09-14 - Issue #1182 Phase 1 Complete)
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection, WebSocketManagerMode
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerFactory  # CONSOLIDATED: No longer separate module
 
 # Request Scoped Execution (VERIFIED 2025-09-11)
 from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
@@ -76,13 +84,16 @@ from netra_backend.app.agents.supervisor.request_scoped_execution_engine import 
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory, get_execution_engine_factory, configure_execution_engine_factory
 from netra_backend.app.core.managers.execution_engine_factory import ExecutionEngineFactory  # COMPATIBILITY ALIAS - Use supervisor version for new code
 
-# ExecutionEngine - SSOT Pattern (FIXED 2025-09-12)
-from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine  # RECOMMENDED: Use alias for backward compatibility
-from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine  # FACTORY METHOD: Use for proper instantiation
+# UserExecutionEngine - SSOT Pattern (Issue #1186 CONSOLIDATION COMPLETE - 2025-09-15)
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine  # ✅ CANONICAL: Single Source of Truth
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory  # ✅ CANONICAL: Factory pattern
+from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine  # ✅ CANONICAL: Scoped execution
 
-# ExecutionEngine - SSOT Pattern (FIXED 2025-09-12)
-from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine  # RECOMMENDED: Use alias for backward compatibility
-from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine  # FACTORY METHOD: Use for proper instantiation
+# CONSOLIDATED IMPORTS - Issue #1186 Fixed fragmented patterns:
+# ❌ DEPRECATED: from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+# ❌ DEPRECATED: from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory
+# ✅ USE INSTEAD: UserExecutionEngine (canonical SSOT class)
+# ✅ USE INSTEAD: ExecutionEngineFactory (canonical factory)
 
 # Tools (Performance and Optimization)
 from netra_backend.app.tools.performance_optimizer import ToolPerformanceOptimizer
@@ -152,10 +163,10 @@ from netra_backend.app.core.isolated_environment import IsolatedEnvironment  # �
 
 # CRITICAL: Fixed 2025-09-11 - agent_schemas module does not exist
 
-# CRITICAL: Fixed 2025-01-14 - ExecutionEngineFactory import path issue (Issue #1004)
-from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory  # ❌ BROKEN PATH - Module does not exist
-from netra_backend.app.services.user_execution_context import ExecutionEngineFactory  # ❌ BROKEN IMPORT - Not available in user_execution_context
-# USE INSTEAD: from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+# CRITICAL: Fixed 2025-09-14 Issue #1069 Phase 2 - ExecutionEngineFactory import path issue (Issue #1004)
+from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory  # ❌ BROKEN PATH - Module does not exist [FIXED]
+from netra_backend.app.services.user_execution_context import ExecutionEngineFactory  # ❌ BROKEN IMPORT - Not available in user_execution_context [FIXED]
+# ✅ CORRECTED: from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 
 # ISSUE #996 FIX: WebSocket Import Deprecations (2025-09-14)
 from netra_backend.app.websocket_core import WebSocketManager  # ⚠️ DEPRECATED (generates warnings)
@@ -167,11 +178,11 @@ from netra_backend.app.schemas.agent_schemas import RequestModel  # ❌ BROKEN P
 from netra_backend.app.schemas.agent_schemas import AgentExecutionResult  # ❌ BROKEN PATH
 # USE INSTEAD: from shared.types.agent_types import AgentExecutionResult
 
-# CRITICAL: Fixed 2025-09-12 - ExecutionEngine direct instantiation deprecated
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine  # ❌ DEPRECATED: Direct import no longer supported
-# ExecutionEngine() instantiation without parameters  # ❌ BROKEN: Requires specific factory parameters
-# USE INSTEAD: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-# AND: Use create_request_scoped_engine() factory method instead of direct ExecutionEngine() instantiation
+# CRITICAL: Fixed 2025-09-14 Issue #1069 Phase 2 - ExecutionEngine direct instantiation deprecated
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine  # ❌ DEPRECATED: Direct import no longer supported [FIXED]
+# ExecutionEngine() instantiation without parameters  # ❌ BROKEN: Requires specific factory parameters [FIXED]
+# ✅ CORRECTED: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
+# ✅ CORRECTED: Use create_request_scoped_engine() factory method instead of direct ExecutionEngine() instantiation
 
 # CRITICAL: Fixed 2025-09-12 - Missing tool modules for test collection
 from netra_backend.app.tools.search_tool import SearchTool  # ❌ DID NOT EXIST: Placeholder created for test compatibility
@@ -511,15 +522,17 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager 
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager  # Implementation
 ```
 
-#### WebSocket Manager Factory Import (GOLDEN PATH FIX):
+#### WebSocket Manager Factory Import (ISSUE #1182 PHASE 1 COMPLETE):
 ```python
 # ISSUE: ModuleNotFoundError: No module named 'netra_backend.app.websocket_core.websocket_manager_factory'
-# SOLUTION: Created websocket_manager_factory.py compatibility module for Golden Path tests
+# SOLUTION: Consolidated WebSocketManagerFactory into websocket_manager.py (Issue #1182 Phase 1)
 
-# WORKING IMPORTS:
-from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
-from netra_backend.app.websocket_core.websocket_manager_factory import IsolatedWebSocketManager
+# DEPRECATED (no longer working):
+# from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+
+# CONSOLIDATED SSOT IMPORTS (Issue #1182):
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerFactory  # Consolidated interface
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager    # Preferred factory function
 ```
 
 #### E2E Test Helper Modules (IMPORT COMPATIBILITY):

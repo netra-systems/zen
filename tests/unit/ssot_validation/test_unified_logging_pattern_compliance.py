@@ -13,6 +13,7 @@ EXPECTED BEHAVIOR:
 - PASSES after SSOT remediation when both files use central_logger.get_logger()
 """
 
+import pytest
 import ast
 import inspect
 import os
@@ -22,6 +23,7 @@ from unittest import mock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestUnifiedLoggingPatternCompliance(SSotBaseTestCase):
     """
     Validates both files use same SSOT logging pattern post-fix.

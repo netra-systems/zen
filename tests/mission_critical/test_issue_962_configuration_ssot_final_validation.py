@@ -507,12 +507,13 @@ class TestIssue962ConfigurationSSOTFinalValidation(SSotAsyncTestCase):
 
 
 if __name__ == "__main__":
-    # Execute mission critical tests with maximum verbosity
-    print("=" * 80)
-    print("MISSION CRITICAL: Issue #962 Configuration SSOT Final Validation")
-    print("DEPLOYMENT GATE: These tests MUST PASS before production deployment")
-    print("BUSINESS IMPACT: $500K+ ARR Golden Path protection")
-    print("=" * 80)
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
-    import pytest
-    pytest.main([__file__, '-v'])
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)
+    pass  # TODO: Replace with appropriate SSOT test execution

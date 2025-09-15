@@ -10,6 +10,7 @@ BUSINESS IMPACT: Protect $500K+ ARR Golden Path from message routing race condit
 These tests provide the definitive validation framework for Issue #1101 completion.
 """
 
+import pytest
 import unittest
 import importlib
 import inspect
@@ -19,6 +20,7 @@ from typing import Set, List, Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestMessageRouterSSOTComprehensiveValidation(SSotBaseTestCase):
     """Comprehensive validation of MessageRouter SSOT consolidation."""
 
@@ -419,6 +421,7 @@ class TestMessageRouterSSOTComprehensiveValidation(SSotBaseTestCase):
         )
 
 
+@pytest.mark.unit
 class TestMessageRouterSSOTRegressionPrevention(SSotBaseTestCase):
     """Prevent regression after SSOT consolidation."""
 

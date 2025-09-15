@@ -20,6 +20,7 @@ from tests.helpers.auth_test_utils import TestAuthHelper
 from netra_backend.app.core.timeout_configuration import get_websocket_recv_timeout, get_timeout_config
 
 
+@pytest.mark.e2e
 class TestAgentPipelineStaging(StagingTestBase):
     """Test agent pipeline in staging environment"""
     

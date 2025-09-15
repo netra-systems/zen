@@ -27,6 +27,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.unit
 class TestAgentNameMismatchUnit(SSotAsyncTestCase):
     """Unit tests demonstrating agent name mismatch issue (Issue #347)."""
     
@@ -144,6 +145,7 @@ class TestAgentNameMismatchUnit(SSotAsyncTestCase):
         print(f"   Registry actual names: {[name for name in registry_actual_names if name in registered_names]}")
 
 
+@pytest.mark.unit
 class TestAgentNamingConsistencyUnit(SSotBaseTestCase):
     """Additional unit tests for agent naming consistency patterns."""
     

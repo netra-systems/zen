@@ -6,15 +6,17 @@ argument-hint: "[time period] [service]"
 Your goals are to:
 1. Collect GCP log issues and errors not yet in github issues 
 
+FOCUS_AREA = ${1 : last 1 hour}
+
 Context:
 1. You must keep going until all work is fully completed.
 2. Have sub agents use built in github tools or direct `git` or `gh` if needed. ALWAYS think about overall repo safety and STOP if anything might damage overall health of repo.
-3. -
+3. TIME = Timezone awareness! First get the absolute most recent log available to understand the timezone and log timing at play. Most likely defaults to PDT. Be sure you are getting and comparing right fields as logs may have multiple times stamps, timezones, and you may be in a different timezone yourself.
 4. SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
 5. ALL Github output (issues, comments, prs etc.) MUST follow @GITHUB_STYLE_GUIDE.md
 Use label: "claude-code-generated-issue"
 6. FIRST DO NO HARM.
-7. GCP-LOG-GARDENER-WORKLOG = GCP-LOG-GARDENER-WORKLOG-${1 : latest}-{date-time}.md
+7. GCP-LOG-GARDENER-WORKLOG = GCP-LOG-GARDENER-WORKLOG-{FOCUS_AREA}-{date-time}.md
 8. GCP-LOG-GARDENER-WORKLOG-UPDATE = Update GCP-LOG-GARDENER-WORKLOG.
 9. GCP-LOG-GARDENER-WORKLOG-UPDATE-PUSH = 1:GCP-LOG-GARDENER-WORKLOG-UPDATE 2: Git commit and pull / push safely (skip if not safe)
 10. UPDATE-COMMENT = UPDATE a comment on one of (Issue, PR) with the human readable noise-free updates.
@@ -36,8 +38,10 @@ Example_JSON_payload to get (check other fields etc for json or take what you ca
     timestamp: "2025-09-12T23:21:43.625002+00:00"
 
 START:
-1. Get all the ${1 : latest} log notices, warnings and errors for ${2 : backend}.
+1. Get all the FOCUS_AREA log notices, warnings and errors for ${2 : backend}.
 Be sure to get logs, and if possible the actual JSON payloads, such as the context, labels, traceback, line etc. one of many possible formats is exampled in Example_JSON_payload
+
+Remember to carefully check the TIME.
 
 2. Save the discovered issues to a fresh GCP-LOG-GARDENER-WORKLOG in gcp/log-gardener/ folder (or create it)
 

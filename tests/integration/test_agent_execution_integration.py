@@ -49,8 +49,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 # Core Agent Execution Infrastructure
 try:
-    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     AGENT_EXECUTION_AVAILABLE = True

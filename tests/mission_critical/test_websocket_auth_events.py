@@ -633,10 +633,6 @@ class TestWebSocketAuthPerformance(SSotAsyncTestCase):
 
 if __name__ == "__main__":
     """Run mission critical WebSocket auth event tests."""
-    pytest.main([
-        __file__,
-        "-v",
-        "--tb=short",
-        "-m", "mission_critical",
-        "--real-services"
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

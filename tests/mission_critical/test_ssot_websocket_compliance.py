@@ -159,7 +159,7 @@ class TestSSoTWebSocketCompliance(SSotAsyncTestCase):
             )
             
             # Get WebSocket manager using SSOT pattern (NOT factory pattern)
-            websocket_manager = await get_websocket_manager(user_context=user_context)
+            websocket_manager = get_websocket_manager(user_context=user_context)
             self.assertIsNotNone(websocket_manager, "WebSocket manager must be available for Golden Path")
             
             # Validate WebSocketManager is SSOT implementation
@@ -306,7 +306,7 @@ class TestSSoTWebSocketCompliance(SSotAsyncTestCase):
             )
             
             # Get WebSocket manager - must be SSOT implementation
-            websocket_manager = await get_websocket_manager(user_context=user_context)
+            websocket_manager = get_websocket_manager(user_context=user_context)
             
             # Validate this is the canonical SSOT WebSocketManager
             self.assertEqual(
@@ -447,7 +447,7 @@ class TestSSoTWebSocketCompliance(SSotAsyncTestCase):
                 session_id=f"session_{uuid.uuid4().hex[:8]}"
             )
             
-            websocket_manager = await get_websocket_manager(user_context=user_context)
+            websocket_manager = get_websocket_manager(user_context=user_context)
             websocket_bridge = create_agent_websocket_bridge(
                 websocket_manager=websocket_manager,
                 user_context=user_context
@@ -577,8 +577,8 @@ class TestSSoTWebSocketCompliance(SSotAsyncTestCase):
             )
             
             # Create separate WebSocket managers for each user
-            websocket_manager_a = await get_websocket_manager(user_context=user_a_context)
-            websocket_manager_b = await get_websocket_manager(user_context=user_b_context)
+            websocket_manager_a = get_websocket_manager(user_context=user_a_context)
+            websocket_manager_b = get_websocket_manager(user_context=user_b_context)
             
             # Create WebSocket bridges for each user
             bridge_a = create_agent_websocket_bridge(
@@ -729,7 +729,7 @@ class TestSSoTWebSocketCompliance(SSotAsyncTestCase):
             )
             
             connection_start = time.time()
-            websocket_manager = await get_websocket_manager(user_context=user_context)
+            websocket_manager = get_websocket_manager(user_context=user_context)
             connection_time = time.time() - connection_start
             
             # Connection must be established quickly

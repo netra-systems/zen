@@ -13,6 +13,7 @@ from netra_backend.app.main import app
 client = TestClient(app)
 
 
+@pytest.mark.unit
 class TestRoutingValidation:
     """Test suite for route validation and consistency."""
 

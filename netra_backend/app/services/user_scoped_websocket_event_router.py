@@ -90,14 +90,54 @@ class UserEventRoutingRegistry:
         object.__setattr__(self, 'last_access', datetime.now(timezone.utc))
 
 
-class UserScopedWebSocketEventRouter:
+# === SSOT CONSOLIDATION NOTICE ===
+# UserScopedWebSocketEventRouter functionality has been consolidated into CanonicalMessageRouter
+# This file provides compatibility during migration phase
+
+from netra_backend.app.websocket_core.handlers import CanonicalMessageRouter
+
+
+class UserScopedWebSocketEventRouter(CanonicalMessageRouter):
+    """
+    COMPATIBILITY ADAPTER: UserScopedWebSocketEventRouter consolidated into CanonicalMessageRouter.
+
+    This class provides backward compatibility for existing UserScopedWebSocketEventRouter usage
+    while routing all functionality through the consolidated CanonicalMessageRouter with user isolation.
+
+    Migration Status: Phase 1 - Compatibility adapter in place
+    Business Impact: Maintains $500K+ ARR user isolation functionality
+    """
+
+    def __init__(self, user_context: UserExecutionContext, websocket_manager: Optional['UnifiedWebSocketManager'] = None):
+        """Initialize UserScopedWebSocketEventRouter compatibility adapter."""
+        super().__init__(websocket_manager=websocket_manager)
+
+        # Store user context for isolation
+        self.user_context = user_context
+
+        # Create isolated registry for this user
+        self.registry = self.create_user_isolated_registry(user_context)
+
+        logger.info(
+            f"UserScopedWebSocketEventRouter compatibility adapter initialized for user {user_context.user_id[:8]}..."
+        )
+
+    # All user isolation methods are now inherited from CanonicalMessageRouter
+    # Legacy methods maintained for backward compatibility
+
+
+# === LEGACY IMPLEMENTATION (PRESERVED FOR REFERENCE) ===
+# The original implementation is preserved below for reference during migration
+# This will be removed in Phase 3 after all imports are updated
+
+class LegacyUserScopedWebSocketEventRouter:
     """
     User-scoped WebSocket event router providing complete isolation between user executions.
-    
+
     This class replaces the singleton WebSocketEventRouter pattern with per-user instances,
     ensuring that each user's event routing and connections are completely isolated from other
     users, preventing cross-user event leakage and ensuring secure event delivery.
-    
+
     Key Features:
     - Complete user isolation through UserExecutionContext
     - Per-user connection pools with independent lifecycles
@@ -626,10 +666,10 @@ async def broadcast_user_event(event: Dict[str, Any],
         # Get WebSocket manager from application context
         try:
             # Try to get manager from existing patterns
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
             # Create manager with user context for proper isolation
-            websocket_manager = WebSocketManager(user_context=user_context)
+            websocket_manager = get_websocket_manager(user_context=user_context)
 
         except Exception as manager_error:
             logger.error(
@@ -735,10 +775,11 @@ async def broadcast_to_user(user_id: str, event: Dict[str, Any]) -> int:
     try:
         # Import here to avoid circular dependency
         from netra_backend.app.services.websocket_broadcast_service import create_broadcast_service
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
-        # Get WebSocket manager instance
-        websocket_manager = UnifiedWebSocketManager()
+        # Get WebSocket manager instance via SSOT factory
+        # NOTE: Module-level function lacks user context - consider upgrading callers
+        websocket_manager = get_websocket_manager(user_context=None)
 
         # Create SSOT broadcast service
         broadcast_service = create_broadcast_service(websocket_manager)

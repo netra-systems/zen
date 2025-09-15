@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -70,13 +70,13 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Import circuit breaker components
-from netra_backend.app.services.circuit_breaker import (
+from netra_backend.app.core.circuit_breaker import (
     CircuitBreaker,
-    CircuitBreakerConfig,
-    CircuitBreakerManager,
-    CircuitOpenException,
+    CircuitConfig as CircuitBreakerConfig,
+    get_circuit_breaker as CircuitBreakerManager,
+    CircuitBreakerOpenError as CircuitOpenException,
     CircuitState,
-    ServiceCircuitBreakers
+    UnifiedServiceCircuitBreakers as ServiceCircuitBreakers
 )
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
     UnifiedCircuitBreaker,
@@ -828,7 +828,7 @@ async def test_circuit_breaker_websocket_notifications():
     
     # Mock WebSocket manager
     websocket_manager = AsyncMock(spec=WebSocketManager)
-    websocket_manager.websocket = TestWebSocketConnection()
+    websocket_manager.websocket = WebSocketTestHelper()
     websocket_notifier = WebSocketNotifier.create_for_user(websocket_manager)
     
     # Create circuit breaker with WebSocket integration
@@ -1845,4 +1845,6 @@ async def test_execute_core_circuit_breaker_error_propagation():
 
 if __name__ == "__main__":
     # Run circuit breaker stress tests
-    pytest.main([__file__, "-v", "--tb=short", "-x"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

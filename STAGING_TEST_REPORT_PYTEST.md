@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-14 17:31:32
+**Generated:** 2025-09-15 09:15:36
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 1
-- **Passed:** 0 (0.0%)
-- **Failed:** 1 (100.0%)
+- **Total Tests:** 6
+- **Passed:** 2 (33.3%)
+- **Failed:** 4 (66.7%)
 - **Skipped:** 0
-- **Duration:** 0.32 seconds
-- **Pass Rate:** 0.0%
+- **Duration:** 88.03 seconds
+- **Pass Rate:** 33.3%
 
 ## Test Results by Priority
 
@@ -19,31 +19,80 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_staging_event_validator_endpoint_consistency | FAIL failed | 0.000s | test_golden_path_event_validation.py |
+| test_staging_health_endpoint_redis_status_failure | FAIL failed | 30.646s | test_redis_golden_path_validation.py |
+| test_staging_websocket_connection_redis_dependency_failure | PASS passed | 4.307s | test_redis_golden_path_validation.py |
+| test_staging_session_management_redis_failure | PASS passed | 0.169s | test_redis_golden_path_validation.py |
+| test_staging_full_golden_path_redis_impact | FAIL failed | 15.336s | test_redis_golden_path_validation.py |
+| test_staging_redis_configuration_diagnosis | FAIL failed | 20.943s | test_redis_golden_path_validation.py |
+| test_staging_service_dependencies_redis_cascade_failure | FAIL failed | 16.020s | test_redis_golden_path_validation.py |
 
 ## Failed Tests Details
 
-### FAILED: test_staging_event_validator_endpoint_consistency
-- **File:** C:\GitHub\netra-apex\tests\e2e\staging\event_validator_ssot\test_golden_path_event_validation.py
-- **Duration:** 0.000s
-- **Error:** tests\e2e\staging\event_validator_ssot\test_golden_path_event_validation.py:296: in test_staging_event_validator_endpoint_consistency
-    if not self.staging_base_url:
-           ^^^^^^^^^^^^^^^^^^^^^
-E   AttributeError: 'TestGoldenPathEventValidationStaging' object has no attribute 'staging_base_url'...
+### FAILED: test_staging_health_endpoint_redis_status_failure
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_redis_golden_path_validation.py
+- **Duration:** 30.646s
+- **Error:** C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\aiohttp\client_reqrep.py:532: in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\aiohttp\streams.py:672: in read
+    await self._waiter
+E   asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+tests\e2e\staging\test_redis_golden_path_validation.py:56:...
+
+### FAILED: test_staging_full_golden_path_redis_impact
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_redis_golden_path_validation.py
+- **Duration:** 15.336s
+- **Error:** C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\aiohttp\client_reqrep.py:532: in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\aiohttp\streams.py:672: in read
+    await self._waiter
+E   asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+tests\e2e\staging\test_redis_golden_path_validation.py:177...
+
+### FAILED: test_staging_redis_configuration_diagnosis
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_redis_golden_path_validation.py
+- **Duration:** 20.943s
+- **Error:** C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\aiohttp\client_reqrep.py:532: in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\aiohttp\streams.py:672: in read
+    await self._waiter
+E   asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+tests\e2e\staging\test_redis_golden_path_validation.py:211...
+
+### FAILED: test_staging_service_dependencies_redis_cascade_failure
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_redis_golden_path_validation.py
+- **Duration:** 16.020s
+- **Error:** tests\e2e\staging\test_redis_golden_path_validation.py:314: in test_staging_service_dependencies_redis_cascade_failure
+    pytest.fail(f"EXPECTED CASCADE FAILURE - Redis config issue affecting multiple services (Issue #1177): {cascade_analysis}")
+E   Failed: EXPECTED CASCADE FAILURE - Redis config issue affecting multiple services (Issue #1177): {'failed_services': ['backend'], 'services_with_redis_issues': ['backend'], 'full_status': {'backend': {'accessible': False, 'error': ''}, 'auth': {'acc...
 
 ## Pytest Output Format
 
 ```
-test_golden_path_event_validation.py::test_staging_event_validator_endpoint_consistency FAILED
+test_redis_golden_path_validation.py::test_staging_health_endpoint_redis_status_failure FAILED
+test_redis_golden_path_validation.py::test_staging_websocket_connection_redis_dependency_failure PASSED
+test_redis_golden_path_validation.py::test_staging_session_management_redis_failure PASSED
+test_redis_golden_path_validation.py::test_staging_full_golden_path_redis_impact FAILED
+test_redis_golden_path_validation.py::test_staging_redis_configuration_diagnosis FAILED
+test_redis_golden_path_validation.py::test_staging_service_dependencies_redis_cascade_failure FAILED
 
 ==================================================
-0 passed, 1 failed in 0.32s
+2 passed, 4 failed in 88.03s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
+| WebSocket | 1 | 1 | 0 | 100.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*

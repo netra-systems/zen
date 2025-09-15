@@ -724,10 +724,6 @@ class TestCloudRunEnvironmentCompatibility(BaseTestCase):
 
 if __name__ == "__main__":
     # Run mission-critical tests with strict failure requirements
-    pytest.main([
-        __file__, 
-        "-v", 
-        "--tb=long",
-        "--strict-markers",
-        "--maxfail=1"  # Stop on first failure for mission-critical tests
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

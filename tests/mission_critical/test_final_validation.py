@@ -233,8 +233,12 @@
 
 
     # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-        # Quick validation
-        # REMOVED_SYNTAX_ERROR: run_final_validation()
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+        # REMOVED_SYNTAX_ERROR: print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+        # REMOVED_SYNTAX_ERROR: print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+        # REMOVED_SYNTAX_ERROR: print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
-        # Or run with pytest
-        # pytest.main([__file__, "-v", "--tb=short"])
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

@@ -1536,4 +1536,3 @@
                                     # REMOVED_SYNTAX_ERROR: print("="*80 + " )
                                     # REMOVED_SYNTAX_ERROR: ")
 
-                                    # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v", "-s", "--tb=short"])

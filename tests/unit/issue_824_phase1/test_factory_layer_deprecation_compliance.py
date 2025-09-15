@@ -7,6 +7,7 @@ Test controlled deprecation path.
 Business Value: Ensures smooth migration without breaking existing code during SSOT consolidation.
 """
 
+import pytest
 import warnings
 import sys
 import importlib
@@ -20,6 +21,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestFactoryLayerDeprecationCompliance(SSotAsyncTestCase):
     """Test factory layer deprecation compliance for WebSocket Manager SSOT."""
 

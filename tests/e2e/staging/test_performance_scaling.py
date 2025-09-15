@@ -51,6 +51,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 
 logger = logging.getLogger(__name__)
 
+@pytest.mark.e2e
 class TestPerformanceScaling:
     """
     E2E Tests for Performance and Scaling in Staging Environment.
@@ -125,7 +126,7 @@ class TestPerformanceScaling:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=20.0  # Longer timeout for concurrent load
             ) as websocket:
                 
@@ -394,7 +395,7 @@ class TestPerformanceScaling:
             
             async with websockets.connect(
                 self.staging_config.urls.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 open_timeout=20.0
             ) as websocket:
                 

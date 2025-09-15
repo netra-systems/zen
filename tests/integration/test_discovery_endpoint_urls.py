@@ -1,3 +1,4 @@
+@pytest.mark.integration
 class TestWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
 

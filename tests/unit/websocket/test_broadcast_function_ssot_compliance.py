@@ -16,6 +16,7 @@ Expected Behavior: All tests should FAIL initially, then PASS after SSOT remedia
 GitHub Issue: https://github.com/netra-systems/netra-apex/issues/982
 """
 
+import pytest
 import ast
 import inspect
 import importlib
@@ -223,6 +224,7 @@ class BroadcastFunctionDiscovery:
         )
 
 
+@pytest.mark.unit
 class TestBroadcastFunctionSSotCompliance(SSotBaseTestCase):
     """Test suite for broadcast function SSOT compliance detection."""
 
@@ -456,6 +458,7 @@ class TestBroadcastFunctionSSotCompliance(SSotBaseTestCase):
         return f"({', '.join(normalized)})"
 
 
+@pytest.mark.unit
 class TestBroadcastFunctionDiscovery(SSotBaseTestCase):
     """Test suite for broadcast function discovery and analysis."""
 

@@ -38,6 +38,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.integration
 class TestOAuthSecurityComprehensive:
     """Test suite for OAuth security validation using SSOT - Issue #213."""
     
@@ -397,6 +398,7 @@ class TestOAuthSecurityComprehensive:
         return False
 
 
+@pytest.mark.integration
 def test_oauth_security_validation_capability():
     """
     Verify OAuth security validation test capability.

@@ -26,6 +26,7 @@ Expected Behavior:
 This test supports the Configuration Manager SSOT remediation effort for Issue #932.
 """
 
+import pytest
 import unittest
 import asyncio
 import threading
@@ -37,6 +38,7 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestIssue932FactoryPatternValidation(SSotBaseTestCase, unittest.TestCase):
     """Unit tests to validate configuration factory patterns for Issue #932."""
     

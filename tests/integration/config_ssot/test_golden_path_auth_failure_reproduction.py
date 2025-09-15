@@ -30,6 +30,7 @@ occurs when configuration manager duplication causes JWT configuration inconsist
 - System reliability: Inconsistent auth behavior affects platform credibility
 """
 
+import pytest
 import asyncio
 import time
 import warnings
@@ -42,6 +43,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestGoldenPathAuthFailureReproduction(SSotAsyncTestCase):
     """
     Golden Path Auth Failure Reproduction Tests

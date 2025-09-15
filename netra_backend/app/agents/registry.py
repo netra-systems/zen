@@ -21,6 +21,8 @@ SSOT ACHIEVEMENT: Both import paths now resolve to identical class objects.
 
 import logging
 import warnings
+import threading
+from typing import Dict, Optional
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -137,16 +139,68 @@ warnings.warn(
     stacklevel=2
 )
 
-# Backward compatibility - create a module-level agent_registry using lazy initialization
-_agent_registry_instance = None
+# ISSUE #1116 REMEDIATION: Phase 1 Singleton to User-Scoped Factory Migration
+# Replace global singleton with user-scoped factory for multi-user safety
+
+class AgentRegistryFactory:
+    """User-scoped AgentRegistry factory for multi-user isolation.
+
+    CRITICAL SECURITY: Prevents cross-user data contamination by ensuring
+    each user gets their own isolated AgentRegistry instance.
+
+    Business Value: Enables $500K+ ARR multi-user chat functionality
+    with enterprise-grade user isolation.
+    """
+
+    def __init__(self):
+        """Initialize factory with per-user registry storage."""
+        self._user_registries: Dict[str, AgentRegistry] = {}
+        self._lock = threading.Lock()
+
+    def get_registry(self, user_context: Optional[str] = None) -> AgentRegistry:
+        """Get user-scoped AgentRegistry instance.
+
+        Args:
+            user_context: User identifier for isolation (optional for backward compatibility)
+
+        Returns:
+            AgentRegistry: Isolated registry for the user
+        """
+        # Default context for backward compatibility
+        if user_context is None:
+            user_context = "default_global"
+
+        with self._lock:
+            if user_context not in self._user_registries:
+                self._user_registries[user_context] = AgentRegistry()
+            return self._user_registries[user_context]
+
+    def clear_user_registry(self, user_context: str) -> None:
+        """Clear registry for specific user (cleanup after session ends)."""
+        with self._lock:
+            self._user_registries.pop(user_context, None)
+
+# Factory instance for creating user-scoped registries
+_agent_registry_factory = AgentRegistryFactory()
 
 def _get_global_agent_registry():
-    """Get the global agent registry instance with lazy initialization."""
-    global _agent_registry_instance
-    if _agent_registry_instance is None:
-        # Create an instance for backward compatibility
-        _agent_registry_instance = AgentRegistry()
-    return _agent_registry_instance
+    """DEPRECATED: Get the global agent registry instance.
+
+    MIGRATION PATH: This maintains backward compatibility.
+    New code should use get_user_agent_registry(user_context) instead.
+    """
+    return _agent_registry_factory.get_registry(user_context=None)
+
+def get_user_agent_registry(user_context: Optional[str] = None) -> AgentRegistry:
+    """Get user-scoped agent registry for multi-user safety.
+
+    Args:
+        user_context: User identifier for isolation
+
+    Returns:
+        AgentRegistry: Isolated registry for the user
+    """
+    return _agent_registry_factory.get_registry(user_context)
 
 # Module-level agent_registry for backward compatibility
 agent_registry = _get_global_agent_registry()

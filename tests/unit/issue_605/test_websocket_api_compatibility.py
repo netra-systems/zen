@@ -34,6 +34,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.unit
 class TestWebSocketAPICompatibility(SSotBaseTestCase):
     """
     Unit tests for WebSocket API compatibility issues in Issue #605.

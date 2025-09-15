@@ -91,6 +91,7 @@ class DatabaseURLViolationDetector:
             pass
 
 
+@pytest.mark.unit
 class TestActualDatabaseURLSSOTViolations:
     """Test for real SSOT violations in the codebase."""
     

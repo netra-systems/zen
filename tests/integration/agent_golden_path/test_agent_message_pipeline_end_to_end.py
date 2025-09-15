@@ -65,7 +65,6 @@ except ImportError as e:
     AgentExecutionResult = MagicMock
     PipelineExecutor = MagicMock
 
-
 class TestAgentMessagePipelineEndToEnd(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Complete Agent Message Pipeline.
@@ -122,9 +121,7 @@ class TestAgentMessagePipelineEndToEnd(SSotAsyncTestCase):
 
     async def _initialize_agent_pipeline_infrastructure(self):
         """Initialize real agent pipeline infrastructure components for testing."""
-        if not REAL_COMPONENTS_AVAILABLE:
-            self._initialize_mock_pipeline_infrastructure()
-            return
+        if not REAL_COMPONENTS_AVAILABLE:return
 
         try:
             # Initialize real agent factory for message processing
@@ -148,8 +145,10 @@ class TestAgentMessagePipelineEndToEnd(SSotAsyncTestCase):
                 )
 
         except Exception as e:
-            print(f"Failed to initialize real pipeline infrastructure, using mocks: {e}")
-            self._initialize_mock_pipeline_infrastructure()
+
+            # CLAUDE.md COMPLIANCE: Tests must use real services only
+
+            raise RuntimeError(f"Failed to initialize real infrastructure: {e}") from e
 
     def _initialize_mock_pipeline_infrastructure(self):
         """Initialize mock pipeline infrastructure for testing when real components unavailable."""

@@ -56,7 +56,6 @@ try:
 except ImportError:
     websockets = None
     logger.warning("websockets not available, WebSocket tests will be skipped")
-import jwt
 from loguru import logger
 
 # Set up logging
@@ -320,7 +319,7 @@ class EnhancedStagingWebSocketEventValidator:
             # Connect to staging WebSocket
             websocket = await websockets.connect(
                 self.staging_websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 ping_interval=30,
                 ping_timeout=10,
                 close_timeout=10
@@ -660,4 +659,6 @@ class TestStagingWebSocketAuthentication:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--tb=short"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

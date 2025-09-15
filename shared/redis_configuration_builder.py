@@ -7,7 +7,7 @@ from typing import Optional, Dict, Any
 import logging
 import re
 import os
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +31,9 @@ class RedisConfigurationBuilder:
         self.env = env_vars
         self.environment = env_vars.get("ENVIRONMENT", "development").lower()
 
-        # ALWAYS build from component parts never directly take REDIS_URL from env
-        # This follows DatabaseURLBuilder SSOT pattern
+        # CRITICAL FIX: Issue #1177 - Parse URL to extract components when needed
+        # This enables seamless handling of both component-based and URL-based configs
+        self._parsed_url_components = self._parse_redis_url_if_needed()
 
         # Initialize sub-builders
         self.connection = self.ConnectionBuilder(self)
@@ -78,28 +79,104 @@ class RedisConfigurationBuilder:
             pass
         
         return False
-    
+
+    def _parse_redis_url_if_needed(self) -> Optional[Dict[str, str]]:
+        """
+        Parse Redis URL to extract components when component-based config is missing.
+
+        CRITICAL FIX: Issue #1177 - This enables seamless fallback from URL to components
+        when deployment provides REDIS_URL but runtime expects component-based config.
+
+        Returns:
+            Dict with parsed components or None if parsing not needed/possible
+        """
+        redis_url = self.env.get("REDIS_URL")
+
+        # Only parse URL if we don't have component config
+        if not redis_url or self.env.get("REDIS_HOST"):
+            return None
+
+        try:
+            parsed = urlparse(redis_url)
+
+            if parsed.scheme not in ('redis', 'rediss'):
+                logger.warning(f"Invalid Redis URL scheme: {parsed.scheme}")
+                return None
+
+            components = {
+                'host': parsed.hostname or 'localhost',
+                'port': str(parsed.port or 6379),
+                'db': parsed.path.lstrip('/') or '0'
+            }
+
+            # Extract password if present
+            if parsed.password:
+                components['password'] = parsed.password
+
+            logger.info(f"Parsed Redis URL components: host={components['host']}, port={components['port']}, db={components['db']}")
+            return components
+
+        except Exception as e:
+            logger.error(f"Failed to parse Redis URL: {e}")
+            return None
+
     # ===== REDIS ENVIRONMENT VARIABLE PROPERTIES =====
     
     @property
     def redis_host(self) -> Optional[str]:
-        """Get Redis host from environment variables."""
-        return self.env.get("REDIS_HOST")
+        """Get Redis host from environment variables or parsed URL."""
+        # Prefer component config over parsed URL
+        component_host = self.env.get("REDIS_HOST")
+        if component_host:
+            return component_host
+
+        # Fallback to parsed URL components
+        if self._parsed_url_components:
+            return self._parsed_url_components.get('host')
+
+        return None
     
-    @property 
+    @property
     def redis_port(self) -> Optional[str]:
-        """Get Redis port from environment variables."""
-        return self.env.get("REDIS_PORT") or "6379"
+        """Get Redis port from environment variables or parsed URL."""
+        # Prefer component config over parsed URL
+        component_port = self.env.get("REDIS_PORT")
+        if component_port:
+            return component_port
+
+        # Fallback to parsed URL components
+        if self._parsed_url_components:
+            return self._parsed_url_components.get('port', '6379')
+
+        return "6379"
     
     @property
     def redis_password(self) -> Optional[str]:
-        """Get Redis password from environment variables."""
-        return self.env.get("REDIS_PASSWORD")
+        """Get Redis password from environment variables or parsed URL."""
+        # Prefer component config over parsed URL
+        component_password = self.env.get("REDIS_PASSWORD")
+        if component_password:
+            return component_password
+
+        # Fallback to parsed URL components
+        if self._parsed_url_components:
+            return self._parsed_url_components.get('password')
+
+        return None
     
     @property
     def redis_db(self) -> Optional[str]:
-        """Get Redis database number from environment variables."""
-        return self.env.get("REDIS_DB") or "0"
+        """Get Redis database number from environment variables or parsed URL."""
+        # Prefer component config over parsed URL
+        component_db = self.env.get("REDIS_DB")
+        if component_db:
+            return component_db
+
+        # Fallback to parsed URL components
+        if self._parsed_url_components:
+            return self._parsed_url_components.get('db', '0')
+
+        return "0"
     
     @property
     def redis_url(self) -> Optional[str]:
@@ -142,8 +219,21 @@ class RedisConfigurationBuilder:
         
         @property
         def has_config(self) -> bool:
-            """Check if Redis configuration is available."""
-            return bool(self.parent.redis_host)
+            """Check if Redis configuration is available from either components or URL.
+
+            CRITICAL FIX: Issue #1177 - Enhanced to check both component-based and URL-based patterns.
+            This resolves deployment/runtime configuration mismatches.
+            """
+            # Check component-based config (preferred)
+            if self.parent.redis_host:
+                return True
+
+            # Check URL-based config (fallback)
+            redis_url = self.parent.env.get("REDIS_URL")
+            if redis_url and redis_url.strip():
+                return True
+
+            return False
         
         @property
         def async_url(self) -> Optional[str]:

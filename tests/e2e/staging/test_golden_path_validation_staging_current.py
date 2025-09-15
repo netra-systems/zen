@@ -76,6 +76,7 @@ from netra_backend.app.core.service_dependencies.models import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.e2e
 class TestGoldenPathValidationStagingIssues:
 
     def create_user_context(self) -> UserExecutionContext:
@@ -395,6 +396,7 @@ class TestGoldenPathValidationStagingIssues:
         )
 
 
+@pytest.mark.e2e
 class TestStagingEnvironmentRealityCheck:
 
     def create_user_context(self) -> UserExecutionContext:

@@ -259,6 +259,7 @@ class EnvironmentAccessViolationDetector:
         return "\n".join(report_lines)
 
 
+@pytest.mark.unit
 class TestEnvironmentAccessViolationDetection:
     """Test environment access violation detection."""
     

@@ -33,6 +33,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestWebSocketManagerSSOTConsolidationValidation(SSotBaseTestCase):
     """Validate SSOT consolidation of WebSocket Manager implementations."""
 

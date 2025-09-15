@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Issue #971 Test Suite: Missing WebSocketTestManager Class Alias Verification
 
@@ -24,7 +23,6 @@ CRITICAL REQUIREMENTS per CLAUDE.md:
 - No test cheating - tests must fail/pass meaningfully
 - Real import testing - no mocked import mechanisms
 """
-
 import sys
 import importlib
 import traceback
@@ -32,12 +30,10 @@ import unittest
 from typing import Any, Dict, List, Optional
 from unittest.mock import patch
 import pytest
-
-# SSOT Test Framework Imports (Required)
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 from test_framework.ssot.orchestration import get_orchestration_config
 
-
+@pytest.mark.integration
 class TestPreFixValidation(SSotBaseTestCase):
     """
     Phase 1: Pre-Fix Validation Tests
@@ -55,11 +51,9 @@ class TestPreFixValidation(SSotBaseTestCase):
         """
         with self.assertRaises(ImportError) as context:
             from test_framework.ssot.websocket_test_utility import WebSocketTestManager
-
-        # Verify specific error message
         error_msg = str(context.exception)
-        self.assertIn("WebSocketTestManager", error_msg)
-        self.assertIn("cannot import name", error_msg)
+        self.assertIn('WebSocketTestManager', error_msg)
+        self.assertIn('cannot import name', error_msg)
 
     def test_websocket_test_manager_not_in_module_attributes_before_fix(self):
         """
@@ -69,11 +63,7 @@ class TestPreFixValidation(SSotBaseTestCase):
         before the alias is added.
         """
         import test_framework.ssot.websocket_test_utility as websocket_module
-
-        # Verify WebSocketTestManager is not available
         self.assertFalse(hasattr(websocket_module, 'WebSocketTestManager'))
-
-        # Verify WebSocketTestUtility IS available (sanity check)
         self.assertTrue(hasattr(websocket_module, 'WebSocketTestUtility'))
 
     def test_websocket_test_manager_not_in_exports_before_fix(self):
@@ -84,17 +74,11 @@ class TestPreFixValidation(SSotBaseTestCase):
         the alias is added to the module.
         """
         import test_framework.ssot.websocket_test_utility as websocket_module
-
-        # Get module's __all__ if it exists
         module_all = getattr(websocket_module, '__all__', [])
-
-        # Verify WebSocketTestManager is not in exports
         self.assertNotIn('WebSocketTestManager', module_all)
-
-        # Verify WebSocketTestUtility IS in exports (sanity check)
         self.assertIn('WebSocketTestUtility', module_all)
 
-
+@pytest.mark.integration
 class TestIntegrationTestCollectionFailures(SSotBaseTestCase):
     """
     Phase 2: Integration Test Collection Failure Verification
@@ -110,14 +94,11 @@ class TestIntegrationTestCollectionFailures(SSotBaseTestCase):
         This test reproduces the exact ImportError preventing test collection
         for the multi-agent golden path workflow integration test.
         """
-        test_file_path = "tests.integration.test_multi_agent_golden_path_workflows_integration"
-
+        test_file_path = 'tests.integration.test_multi_agent_golden_path_workflows_integration'
         with self.assertRaises(ImportError) as context:
             importlib.import_module(test_file_path)
-
-        # Verify this is specifically the WebSocketTestManager import error
         error_msg = str(context.exception)
-        self.assertIn("WebSocketTestManager", error_msg)
+        self.assertIn('WebSocketTestManager', error_msg)
 
     def test_agent_websocket_event_sequence_collection_fails_before_fix(self):
         """
@@ -126,14 +107,11 @@ class TestIntegrationTestCollectionFailures(SSotBaseTestCase):
         This test reproduces the exact ImportError preventing test collection
         for the agent WebSocket event sequence integration test.
         """
-        test_file_path = "tests.integration.test_agent_websocket_event_sequence_integration"
-
+        test_file_path = 'tests.integration.test_agent_websocket_event_sequence_integration'
         with self.assertRaises(ImportError) as context:
             importlib.import_module(test_file_path)
-
-        # Verify this is specifically the WebSocketTestManager import error
         error_msg = str(context.exception)
-        self.assertIn("WebSocketTestManager", error_msg)
+        self.assertIn('WebSocketTestManager', error_msg)
 
     def test_affected_test_count_verification_before_fix(self):
         """
@@ -142,24 +120,17 @@ class TestIntegrationTestCollectionFailures(SSotBaseTestCase):
         This test documents how many integration tests are blocked by
         the missing WebSocketTestManager alias.
         """
-        affected_test_modules = [
-            "tests.integration.test_multi_agent_golden_path_workflows_integration",
-            "tests.integration.test_agent_websocket_event_sequence_integration"
-        ]
-
+        affected_test_modules = ['tests.integration.test_multi_agent_golden_path_workflows_integration', 'tests.integration.test_agent_websocket_event_sequence_integration']
         import_failures = 0
         for module_path in affected_test_modules:
             try:
                 importlib.import_module(module_path)
             except ImportError as e:
-                if "WebSocketTestManager" in str(e):
+                if 'WebSocketTestManager' in str(e):
                     import_failures += 1
+        self.assertEqual(import_failures, 2, f'Expected exactly 2 integration test import failures, got {import_failures}')
 
-        # Verify exactly 2 integration tests are affected
-        self.assertEqual(import_failures, 2,
-                        f"Expected exactly 2 integration test import failures, got {import_failures}")
-
-
+@pytest.mark.integration
 class TestPostFixValidation(SSotBaseTestCase):
     """
     Phase 3: Post-Fix Validation Tests
@@ -179,10 +150,9 @@ class TestPostFixValidation(SSotBaseTestCase):
         """
         try:
             from test_framework.ssot.websocket_test_utility import WebSocketTestManager
-            # If we get here, import succeeded
-            self.assertTrue(True, "WebSocketTestManager import succeeded")
+            self.assertTrue(True, 'WebSocketTestManager import succeeded')
         except ImportError as e:
-            self.fail(f"WebSocketTestManager import still failing after fix: {e}")
+            self.fail(f'WebSocketTestManager import still failing after fix: {e}')
 
     def test_websocket_test_manager_class_equivalence_after_fix(self):
         """
@@ -191,14 +161,8 @@ class TestPostFixValidation(SSotBaseTestCase):
         This test verifies that the alias creates a proper class reference,
         not just a name binding.
         """
-        from test_framework.ssot.websocket_test_utility import (
-            WebSocketTestManager,
-            WebSocketTestUtility
-        )
-
-        # Verify they are the exact same class object
-        self.assertIs(WebSocketTestManager, WebSocketTestUtility,
-                     "WebSocketTestManager should be an alias to WebSocketTestUtility")
+        from test_framework.ssot.websocket_test_utility import WebSocketTestManager, WebSocketTestUtility
+        self.assertIs(WebSocketTestManager, WebSocketTestUtility, 'WebSocketTestManager should be an alias to WebSocketTestUtility')
 
     def test_websocket_test_manager_instantiation_after_fix(self):
         """
@@ -208,11 +172,7 @@ class TestPostFixValidation(SSotBaseTestCase):
         with the same functionality as WebSocketTestUtility.
         """
         from test_framework.ssot.websocket_test_utility import WebSocketTestManager
-
-        # Create instance through alias
         manager_instance = WebSocketTestManager()
-
-        # Verify instance is created and has expected attributes
         self.assertIsNotNone(manager_instance)
         self.assertTrue(hasattr(manager_instance, 'setup_auth_for_testing'))
         self.assertTrue(hasattr(manager_instance, 'create_authenticated_connection'))
@@ -225,20 +185,10 @@ class TestPostFixValidation(SSotBaseTestCase):
         This test verifies that the alias provides complete functionality
         compatibility without any method access issues.
         """
-        from test_framework.ssot.websocket_test_utility import (
-            WebSocketTestManager,
-            WebSocketTestUtility
-        )
-
-        # Get methods from both classes
-        utility_methods = [method for method in dir(WebSocketTestUtility)
-                          if not method.startswith('_')]
-        manager_methods = [method for method in dir(WebSocketTestManager)
-                          if not method.startswith('_')]
-
-        # Verify method lists are identical
-        self.assertEqual(set(utility_methods), set(manager_methods),
-                        "WebSocketTestManager should have same methods as WebSocketTestUtility")
+        from test_framework.ssot.websocket_test_utility import WebSocketTestManager, WebSocketTestUtility
+        utility_methods = [method for method in dir(WebSocketTestUtility) if not method.startswith('_')]
+        manager_methods = [method for method in dir(WebSocketTestManager) if not method.startswith('_')]
+        self.assertEqual(set(utility_methods), set(manager_methods), 'WebSocketTestManager should have same methods as WebSocketTestUtility')
 
     def test_websocket_test_manager_inheritance_chain_after_fix(self):
         """
@@ -249,12 +199,9 @@ class TestPostFixValidation(SSotBaseTestCase):
         """
         from test_framework.ssot.websocket_test_utility import WebSocketTestManager
         from test_framework.ssot.websocket_bridge_test_helper import WebSocketBridgeTestHelper
+        self.assertTrue(issubclass(WebSocketTestManager, WebSocketBridgeTestHelper), 'WebSocketTestManager should inherit from WebSocketBridgeTestHelper')
 
-        # Verify inheritance chain is preserved
-        self.assertTrue(issubclass(WebSocketTestManager, WebSocketBridgeTestHelper),
-                       "WebSocketTestManager should inherit from WebSocketBridgeTestHelper")
-
-
+@pytest.mark.integration
 class TestIntegrationTestCollectionRecovery(SSotBaseTestCase):
     """
     Phase 4: Integration Test Collection Recovery Verification
@@ -270,13 +217,12 @@ class TestIntegrationTestCollectionRecovery(SSotBaseTestCase):
         This test verifies that the integration test that was previously
         failing to collect can now be imported successfully.
         """
-        test_file_path = "tests.integration.test_multi_agent_golden_path_workflows_integration"
-
+        test_file_path = 'tests.integration.test_multi_agent_golden_path_workflows_integration'
         try:
             module = importlib.import_module(test_file_path)
-            self.assertIsNotNone(module, "Module should be importable after fix")
+            self.assertIsNotNone(module, 'Module should be importable after fix')
         except ImportError as e:
-            self.fail(f"Integration test still failing to import after fix: {e}")
+            self.fail(f'Integration test still failing to import after fix: {e}')
 
     def test_agent_websocket_event_sequence_collection_succeeds_after_fix(self):
         """
@@ -285,13 +231,12 @@ class TestIntegrationTestCollectionRecovery(SSotBaseTestCase):
         This test verifies that the integration test that was previously
         failing to collect can now be imported successfully.
         """
-        test_file_path = "tests.integration.test_agent_websocket_event_sequence_integration"
-
+        test_file_path = 'tests.integration.test_agent_websocket_event_sequence_integration'
         try:
             module = importlib.import_module(test_file_path)
-            self.assertIsNotNone(module, "Module should be importable after fix")
+            self.assertIsNotNone(module, 'Module should be importable after fix')
         except ImportError as e:
-            self.fail(f"Integration test still failing to import after fix: {e}")
+            self.fail(f'Integration test still failing to import after fix: {e}')
 
     def test_websocket_test_manager_usage_in_integration_tests_after_fix(self):
         """
@@ -301,16 +246,12 @@ class TestIntegrationTestCollectionRecovery(SSotBaseTestCase):
         WebSocketTestManager but also use it in their test context.
         """
         from test_framework.ssot.websocket_test_utility import WebSocketTestManager
-
-        # Simulate integration test usage pattern
         manager = WebSocketTestManager()
-
-        # Verify methods that integration tests expect to use
         self.assertTrue(callable(getattr(manager, 'setup_auth_for_testing', None)))
         self.assertTrue(callable(getattr(manager, 'create_authenticated_connection', None)))
         self.assertTrue(callable(getattr(manager, 'get_staging_websocket_url', None)))
 
-
+@pytest.mark.integration
 class TestSSOTComplianceValidation(SSotBaseTestCase):
     """
     Phase 5: SSOT Compliance and Regression Prevention
@@ -327,17 +268,9 @@ class TestSSOTComplianceValidation(SSotBaseTestCase):
         so it can be imported by external code.
         """
         import test_framework.ssot.websocket_test_utility as websocket_module
-
-        # Get module's __all__ exports
         module_all = getattr(websocket_module, '__all__', [])
-
-        # Verify WebSocketTestManager is now in exports
-        self.assertIn('WebSocketTestManager', module_all,
-                     "WebSocketTestManager should be in __all__ exports after fix")
-
-        # Verify WebSocketTestUtility is still in exports (no regression)
-        self.assertIn('WebSocketTestUtility', module_all,
-                     "WebSocketTestUtility should still be in __all__ exports")
+        self.assertIn('WebSocketTestManager', module_all, 'WebSocketTestManager should be in __all__ exports after fix')
+        self.assertIn('WebSocketTestUtility', module_all, 'WebSocketTestUtility should still be in __all__ exports')
 
     def test_no_duplicate_websocket_manager_implementations_after_fix(self):
         """
@@ -347,14 +280,8 @@ class TestSSOTComplianceValidation(SSotBaseTestCase):
         exists in the SSOT utility module (the alias we added).
         """
         import test_framework.ssot.websocket_test_utility as websocket_module
-
-        # Count how many WebSocketTestManager-related attributes exist
-        websocket_manager_attrs = [attr for attr in dir(websocket_module)
-                                  if 'WebSocketTestManager' in attr]
-
-        # Should be exactly one: the alias we added
-        self.assertEqual(len(websocket_manager_attrs), 1,
-                        f"Expected exactly 1 WebSocketTestManager attribute, got {websocket_manager_attrs}")
+        websocket_manager_attrs = [attr for attr in dir(websocket_module) if 'WebSocketTestManager' in attr]
+        self.assertEqual(len(websocket_manager_attrs), 1, f'Expected exactly 1 WebSocketTestManager attribute, got {websocket_manager_attrs}')
 
     def test_existing_websocket_test_utility_functionality_preserved_after_fix(self):
         """
@@ -364,18 +291,13 @@ class TestSSOTComplianceValidation(SSotBaseTestCase):
         WebSocketTestUtility usage or functionality.
         """
         from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
-
-        # Verify WebSocketTestUtility can still be imported and used
         utility_instance = WebSocketTestUtility()
         self.assertIsNotNone(utility_instance)
-
-        # Verify key methods are still available
         expected_methods = ['setup_auth_for_testing', 'create_authenticated_connection', 'get_staging_websocket_url']
         for method_name in expected_methods:
-            self.assertTrue(hasattr(utility_instance, method_name),
-                           f"WebSocketTestUtility should still have {method_name} method")
+            self.assertTrue(hasattr(utility_instance, method_name), f'WebSocketTestUtility should still have {method_name} method')
 
-
+@pytest.mark.integration
 class TestE2ETestPathIntegrity(SSotBaseTestCase):
     """
     Phase 6: E2E Test Path Integrity Verification
@@ -395,7 +317,7 @@ class TestE2ETestPathIntegrity(SSotBaseTestCase):
             from tests.e2e.integration.helpers.websocket_test_helpers import WebSocketTestManager
             self.assertIsNotNone(WebSocketTestManager)
         except ImportError as e:
-            self.fail(f"E2E WebSocketTestManager import should still work: {e}")
+            self.fail(f'E2E WebSocketTestManager import should still work: {e}')
 
     def test_ssot_and_e2e_websocket_managers_are_different_classes(self):
         """
@@ -406,10 +328,7 @@ class TestE2ETestPathIntegrity(SSotBaseTestCase):
         """
         from test_framework.ssot.websocket_test_utility import WebSocketTestManager as SSOTManager
         from tests.e2e.integration.helpers.websocket_test_helpers import WebSocketTestManager as E2EManager
-
-        # Verify they are different class objects
-        self.assertIsNot(SSOTManager, E2EManager,
-                        "SSOT and E2E WebSocketTestManager should be different classes")
+        self.assertIsNot(SSOTManager, E2EManager, 'SSOT and E2E WebSocketTestManager should be different classes')
 
     def test_both_websocket_managers_coexist_without_conflicts(self):
         """
@@ -418,49 +337,14 @@ class TestE2ETestPathIntegrity(SSotBaseTestCase):
         This test verifies that having WebSocketTestManager available from
         both paths doesn't create import conflicts or namespace issues.
         """
-        # Import both implementations
         from test_framework.ssot.websocket_test_utility import WebSocketTestManager as SSOTManager
         from tests.e2e.integration.helpers.websocket_test_helpers import WebSocketTestManager as E2EManager
-
-        # Verify both can be instantiated without conflicts
         ssot_instance = SSOTManager()
         e2e_instance = E2EManager()
-
         self.assertIsNotNone(ssot_instance)
         self.assertIsNotNone(e2e_instance)
         self.assertNotEqual(type(ssot_instance), type(e2e_instance))
-
-
-if __name__ == "__main__":
-    """
-    Test Execution Guide for Issue #971 Validation:
-
-    PRE-FIX EXECUTION (Should show failures):
-    1. Run pre-fix tests: python -m pytest tests/integration/test_issue_971_websocket_manager_alias.py::TestPreFixValidation -v
-    2. Run collection tests: python -m pytest tests/integration/test_issue_971_websocket_manager_alias.py::TestIntegrationTestCollectionFailures -v
-
-    IMPLEMENT FIX:
-    Add to test_framework/ssot/websocket_test_utility.py:
-    ```python
-    # Create alias for integration tests expecting WebSocketTestManager
-    WebSocketTestManager = WebSocketTestUtility
-
-    __all__ = [
-        "WebSocketTestUtility",
-        "WebSocketTestManager",  # Alias for integration tests
-        "WebSocketTestHelper",   # Existing compatibility alias
-        "WebSocketBridgeTestHelper",
-        "WebSocketAuthHelper",
-    ]
-    ```
-
-    POST-FIX EXECUTION (Should show success):
-    3. Run post-fix tests: python -m pytest tests/integration/test_issue_971_websocket_manager_alias.py::TestPostFixValidation -v
-    4. Run recovery tests: python -m pytest tests/integration/test_issue_971_websocket_manager_alias.py::TestIntegrationTestCollectionRecovery -v
-    5. Run compliance tests: python -m pytest tests/integration/test_issue_971_websocket_manager_alias.py::TestSSOTComplianceValidation -v
-    6. Run integrity tests: python -m pytest tests/integration/test_issue_971_websocket_manager_alias.py::TestE2ETestPathIntegrity -v
-
-    FINAL VALIDATION:
-    7. Test affected integration tests: python tests/unified_test_runner.py --collect-only --category integration
-    """
-    pytest.main([__file__, "-v"])
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

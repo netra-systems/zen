@@ -39,7 +39,8 @@ from netra_backend.app.agents.supervisor.factory_performance_config import (
     get_factory_performance_config
 )
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core import (
+# ISSUE #1144 FIX: Use canonical SSOT import path instead of deprecated module import
+from netra_backend.app.websocket_core.unified_emitter import (
     WebSocketEmitterPool,
 )
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
@@ -1006,16 +1007,52 @@ class AgentInstanceFactory:
             'summary_timestamp': datetime.now(timezone.utc).isoformat()
         }
     
+    async def create_instance(self, 
+                             agent_name: str,
+                             user_context: UserExecutionContext,
+                             **kwargs) -> BaseAgent:
+        """
+        ISSUE #1186 PHASE 2: Primary factory method for agent instance creation.
+        
+        This is the canonical method for creating agent instances with proper user isolation.
+        It implements the factory pattern that eliminates singleton vulnerabilities.
+        
+        Args:
+            agent_name: Name of the agent to create
+            user_context: User execution context for complete isolation
+            **kwargs: Additional parameters (agent_class, etc.)
+            
+        Returns:
+            BaseAgent: Fresh agent instance with proper user context binding
+            
+        Raises:
+            ValueError: If agent not found or invalid parameters
+            RuntimeError: If agent creation fails
+            
+        Business Impact: Enables enterprise-grade multi-user deployment with
+        guaranteed user isolation and regulatory compliance.
+        """
+        logger.info(f"Factory.create_instance() called for {agent_name} (user: {user_context.user_id})")
+        
+        # Extract agent_class from kwargs if provided
+        agent_class = kwargs.get('agent_class', None)
+        
+        # Use the standard create_agent_instance method
+        return await self.create_agent_instance(
+            agent_name=agent_name,
+            user_context=user_context,
+            agent_class=agent_class
+        )
+
     async def create_agent(self, 
                           agent_name: str,
                           user_context: UserExecutionContext,
                           agent_class: Optional[Type[BaseAgent]] = None) -> BaseAgent:
         """
-        COMPATIBILITY METHOD: create_agent() wrapper for create_agent_instance().
+        COMPATIBILITY METHOD: create_agent() wrapper for create_instance().
         
         This method provides backward compatibility for tests and code that expect
-        a create_agent() method on the AgentInstanceFactory. It wraps the standard
-        create_agent_instance() method with appropriate logging and deprecation warning.
+        a create_agent() method. It redirects to the canonical create_instance() method.
         
         Args:
             agent_name: Name of the agent to create
@@ -1029,13 +1066,12 @@ class AgentInstanceFactory:
             ValueError: If agent not found or invalid parameters
             RuntimeError: If agent creation fails
         """
-        logger.warning(
-            f" CYCLE:  COMPATIBILITY: create_agent() method called - redirecting to create_agent_instance(). "
-            f"Consider updating calling code to use create_agent_instance() directly for {agent_name}"
+        logger.debug(
+            f"COMPATIBILITY: create_agent() redirecting to create_instance() for {agent_name}"
         )
         
-        # Use the standard create_agent_instance method
-        return await self.create_agent_instance(
+        # Use the canonical create_instance method
+        return await self.create_instance(
             agent_name=agent_name,
             user_context=user_context,
             agent_class=agent_class
@@ -1161,34 +1197,38 @@ def create_agent_instance_factory(user_context: UserExecutionContext) -> AgentIn
     return factory
 
 
-# LEGACY SINGLETON PATTERN (PHASE 1: Maintain compatibility during transition)
-_factory_instance: Optional[AgentInstanceFactory] = None
-
+# ISSUE #1186 PHASE 2: SINGLETON PATTERN COMPLETELY REMOVED
+# The singleton pattern has been completely eliminated to prevent multi-user state contamination.
+# All factory creation now uses per-request factory patterns with complete user isolation.
 
 def get_agent_instance_factory() -> AgentInstanceFactory:
-    """DEPRECATED: Singleton AgentInstanceFactory - DO NOT USE.
+    """DEPRECATED AND UNSAFE: This function creates CRITICAL security vulnerabilities.
     
-    ISSUE #1142 - CRITICAL SECURITY VULNERABILITY: This function creates shared state
-    between users causing multi-user contamination and data leakage.
+    ISSUE #1186 PHASE 2 - SINGLETON ELIMINATION COMPLETE:
+    This function is now completely deprecated and will raise an error to prevent
+    multi-user state contamination. The singleton pattern has been eliminated.
     
-    REPLACEMENT: Use create_agent_instance_factory(user_context) for proper user isolation.
+    MANDATORY MIGRATION:
+    - OLD: get_agent_instance_factory() 
+    - NEW: create_agent_instance_factory(user_context)
     
-    This function will be removed in a future version. All consumers should migrate to:
-    - create_agent_instance_factory(user_context) for per-request isolation
-    - AgentInstanceFactoryDep dependency injection in FastAPI endpoints
+    Security Impact: Singleton pattern enables data leakage between users, violates
+    HIPAA/SOC2/SEC compliance requirements, and creates race conditions.
     """
-    global _factory_instance
     
     logger.error(
-        "CRITICAL SECURITY VIOLATION: get_agent_instance_factory() called! "
-        "This singleton pattern causes multi-user state contamination. "
-        "IMMEDIATELY migrate to create_agent_instance_factory(user_context) for user isolation."
+        "SINGLETON ELIMINATION: get_agent_instance_factory() completely deprecated! "
+        "Phase 2 singleton removal prevents multi-user contamination. "
+        "MANDATORY: Use create_agent_instance_factory(user_context) for user isolation."
     )
     
-    # Issue #1142 FIX: Create new instance instead of singleton to prevent contamination
-    # Even though this function should not be used, if it is called, at least return a new instance
-    logger.warning("Creating new factory instance instead of singleton to prevent user contamination")
-    return AgentInstanceFactory()
+    # ISSUE #1186 PHASE 2: Raise error instead of creating instance
+    # This prevents accidental singleton usage and forces migration to proper patterns
+    raise ValueError(
+        "SINGLETON PATTERN ELIMINATED: get_agent_instance_factory() is no longer supported. "
+        "Use create_agent_instance_factory(user_context) for proper user isolation. "
+        "This prevents multi-user state contamination and ensures regulatory compliance."
+    )
 
 
 async def configure_agent_instance_factory(agent_class_registry: Optional[AgentClassRegistry] = None,
@@ -1199,31 +1239,44 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
                                           llm_manager: Optional[Any] = None,
                                           tool_dispatcher: Optional[Any] = None) -> AgentInstanceFactory:
     """
-    DEPRECATED: This function was used for singleton configuration and is being phased out.
+    ISSUE #1186 PHASE 2 - SINGLETON ELIMINATION: Function completely deprecated.
     
-    ISSUE #1142 FIX: This function has been deprecated in favor of per-request pattern.
-    Use create_agent_instance_factory(user_context) instead for proper user isolation.
+    This function was used for singleton configuration and creates security vulnerabilities
+    by sharing state between users. The singleton pattern has been eliminated in Phase 2.
     
-    This function is maintained for backward compatibility during transition but will be removed.
+    MANDATORY MIGRATION:
+    - OLD: configure_agent_instance_factory(components...) 
+    - NEW: create_agent_instance_factory(user_context) + factory.configure(components...)
+    
+    Security Impact: Global factory configuration enables multi-user contamination.
+    Per-request factories with user context binding are now mandatory.
     
     Args:
-        agent_class_registry: Registry containing agent classes (preferred)
-        agent_registry: Legacy agent registry (for backward compatibility)
-        websocket_bridge: WebSocket bridge for notifications (SSOT)
-        websocket_manager: DEPRECATED - Ignored for backward compatibility
-        llm_manager: LLM manager for agent communication
-        tool_dispatcher: Tool dispatcher for agent tools
+        [All parameters ignored - function deprecated]
         
     Returns:
-        AgentInstanceFactory: Factory instance (NOT singleton)
+        AgentInstanceFactory: Per-request factory (no singleton behavior)
+        
+    Raises:
+        DeprecationWarning: To encourage migration to proper patterns
     """
-    logger.warning(
-        "DEPRECATED: configure_agent_instance_factory() called. "
-        "This function creates a factory without user context isolation. "
-        "Migrate to create_agent_instance_factory(user_context) for proper multi-user support."
+    logger.error(
+        "SINGLETON ELIMINATION: configure_agent_instance_factory() deprecated in Phase 2! "
+        "This creates security vulnerabilities through shared factory state. "
+        "Use create_agent_instance_factory(user_context) for proper isolation."
     )
     
-    # ISSUE #1142 FIX: Create new factory instance instead of using singleton
+    # ISSUE #1186 PHASE 2: Still create factory but warn about security implications
+    # This maintains some backward compatibility while encouraging migration
+    import warnings
+    warnings.warn(
+        "configure_agent_instance_factory() is deprecated and creates security vulnerabilities. "
+        "Use create_agent_instance_factory(user_context) for proper user isolation.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    # Create factory without singleton behavior
     factory = AgentInstanceFactory()
     factory.configure(
         agent_class_registry=agent_class_registry,
@@ -1234,5 +1287,5 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
         tool_dispatcher=tool_dispatcher
     )
     
-    logger.info(" PASS:  AgentInstanceFactory configured (non-singleton for backward compatibility)")
+    logger.warning(" WARNING:  Created AgentInstanceFactory without user context - security risk!")
     return factory

@@ -21,7 +21,7 @@ import pytest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock
 from sqlalchemy.exc import OperationalError, DisconnectionError, TimeoutError as SQLTimeoutError
-from clickhouse_driver import errors as clickhouse_errors
+from clickhouse_connect.driver import exceptions as clickhouse_errors
 
 # Import modules under test
 from netra_backend.app.db import database_manager, clickhouse, database_initializer, clickhouse_schema
@@ -360,4 +360,6 @@ if __name__ == '__main__':
     
     Command: python tests/mission_critical/test_database_exception_handling_suite.py
     """
-    pytest.main([__file__, '-v', '--tb=short'])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

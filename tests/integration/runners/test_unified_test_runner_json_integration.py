@@ -35,6 +35,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.integration
 class TestUnifiedTestRunnerJsonIntegration(SSotBaseTestCase):
     """Integration tests for JSON output with real test runner execution."""
 
@@ -468,6 +469,7 @@ class TestUnifiedTestRunnerJsonIntegration(SSotBaseTestCase):
         self.logger.info(f"Simulating permission errors for {file_path}")
 
 
+@pytest.mark.integration
 class TestJsonOutputRealServiceIntegration(SSotBaseTestCase):
     """Integration tests for JSON output with real service dependencies."""
 

@@ -48,7 +48,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 
 # WebSocket core components
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.websocket_core.types import (
     WebSocketConnectionState, MessageType, ConnectionInfo, WebSocketMessage,
     ServerMessage, ErrorMessage, WebSocketConfig, ReconnectionConfig

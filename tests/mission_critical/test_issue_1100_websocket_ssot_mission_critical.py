@@ -16,13 +16,13 @@ import asyncio
 import time
 from typing import Dict, List, Any
 from datetime import datetime, timezone
-from tests.mission_critical.base import MissionCriticalTest
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.logging.unified_logging_ssot import get_logger
 
 logger = get_logger(__name__)
 
 
-class TestWebSocketSSotMissionCritical(MissionCriticalTest):
+class TestWebSocketSSotMissionCritical(SSotAsyncTestCase):
     """Mission critical WebSocket SSOT validation tests."""
     
     @pytest.mark.mission_critical

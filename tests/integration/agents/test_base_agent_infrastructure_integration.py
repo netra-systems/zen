@@ -61,6 +61,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.integration
 class TestBaseAgentInfrastructureIntegration(SSotAsyncTestCase):
     """
     Base Agent Infrastructure Integration Tests - Issue #870 Phase 1 Foundation

@@ -42,7 +42,7 @@ from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # Import for WebSocket event validation
-from tests.mission_critical.test_websocket_agent_events_suite import MissionCriticalEventValidator
+from tests.mission_critical.test_websocket_mission_critical_fixed import MissionCriticalEventValidator
 
 
 class TestActionsToMeetGoalsWebSocketFailures(SSotAsyncTestCase):
@@ -423,4 +423,6 @@ class TestActionsToMeetGoalsWebSocketFailures(SSotAsyncTestCase):
 
 if __name__ == "__main__":
     # Run mission critical WebSocket tests
-    pytest.main([__file__, "-v", "--tb=short", "-s"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

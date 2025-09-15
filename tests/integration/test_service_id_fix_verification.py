@@ -19,6 +19,7 @@ from tests.e2e.staging_test_config import get_staging_config
 from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
 
 
+@pytest.mark.integration
 class TestWebSocketAuthFix:
     """Test suite to verify WebSocket authentication fix"""
     
@@ -128,6 +129,7 @@ class TestWebSocketAuthFix:
         print(f"   Token contains required claims: {list(unverified_payload.keys())}")
 
 
+@pytest.mark.integration
 class TestWebSocketAuthFixIntegration:
     """Integration tests for WebSocket authentication fix"""
     

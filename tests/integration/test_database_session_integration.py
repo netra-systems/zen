@@ -61,6 +61,7 @@ def db_session_manager():
     return DatabaseSessionManager()
 
 
+@pytest.mark.integration
 async def test_save_and_load_agent_state(state_persistence_service, db_session):
     request = StatePersistenceRequest(
         run_id="test_run",
@@ -84,6 +85,7 @@ async def test_save_and_load_agent_state(state_persistence_service, db_session):
     # This test verifies the load operation works without checking specific field access
 
 
+@pytest.mark.integration
 async def test_create_and_get_session(redis_session_manager):
     session_id = await redis_session_manager.create_session("test_user", {"foo": "bar"})
     assert session_id is not None
@@ -93,6 +95,7 @@ async def test_create_and_get_session(redis_session_manager):
     assert session_data["data"]["foo"] == "bar"
 
 
+@pytest.mark.integration
 async def test_get_db_session(db_session_manager):
     async with db_session_manager.get_session() as session:
         assert session is not None

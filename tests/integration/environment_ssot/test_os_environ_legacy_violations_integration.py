@@ -36,6 +36,7 @@ from netra_backend.app.admin.corpus.unified_corpus_admin import (
 from netra_backend.app.core.auth_startup_validator import AuthStartupValidator
 
 
+@pytest.mark.integration
 class TestLegacyOsEnvironViolationsIntegration(SSotBaseTestCase):
     """Integration test suite for all legacy os.environ SSOT violations."""
 

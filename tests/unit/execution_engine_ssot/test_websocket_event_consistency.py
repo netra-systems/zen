@@ -13,6 +13,7 @@ Expected to PASS after SSOT consolidation (proves UserExecutionEngine emits all 
 Business Impact: $500K+ ARR Golden Path protection - consistent events enable 90% of chat value
 """
 
+import pytest
 import asyncio
 import sys
 import os
@@ -96,6 +97,7 @@ class WebSocketEventCapture:
         return violations
 
 
+@pytest.mark.unit
 class TestWebSocketEventConsistency(SSotAsyncTestCase):
     """Unit Test 3: Validate WebSocket event consistency in UserExecutionEngine"""
     

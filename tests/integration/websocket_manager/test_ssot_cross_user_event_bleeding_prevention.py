@@ -15,32 +15,17 @@ The failures prove that cross-user event bleeding prevention is not yet fully en
 
 NOTE: These are integration tests that test actual WebSocket behavior with real connections.
 """
-
 import pytest
 import asyncio
 import json
 import weakref
 from typing import Any, Dict, List, Optional, Set
 from unittest.mock import Mock, patch, MagicMock, AsyncMock
-
-# SSOT imports following test framework patterns
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.types.core_types import UserID, ThreadID, ConnectionID, ensure_user_id
-
-# Import the actual classes we're testing
-from netra_backend.app.websocket_core.unified_manager import (
-    UnifiedWebSocketManager,
-    WebSocketManagerMode,
-    WebSocketConnection
-)
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketManagerMode, WebSocketConnection
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-from netra_backend.app.websocket_core.ssot_validation_enhancer import (
-    SSotValidationError,
-    UserIsolationViolation,
-    enable_strict_validation,
-    validate_user_isolation
-)
-
+from netra_backend.app.websocket_core.ssot_validation_enhancer import SSotValidationError, UserIsolationViolation, enable_strict_validation, validate_user_isolation
 
 class MockWebSocket:
     """Mock WebSocket for testing event isolation."""
@@ -49,7 +34,7 @@ class MockWebSocket:
         self.user_id = user_id
         self.received_messages: List[Dict] = []
         self.is_connected = True
-        self.connection_id = f"conn-{user_id}"
+        self.connection_id = f'conn-{user_id}'
 
     async def send_text(self, data: str):
         """Mock send_text method."""
@@ -73,7 +58,7 @@ class MockWebSocket:
         """Mock close method."""
         self.is_connected = False
 
-
+@pytest.mark.integration
 class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
     """
     Test suite for preventing cross-user WebSocket event bleeding.
@@ -85,33 +70,25 @@ class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
     def setup_method(self, method):
         """Setup for each test method."""
         super().setup_method(method)
-
-        # Reset validation state
-        enable_strict_validation(False)  # Start in permissive mode
-
-        # Create distinct user contexts for testing
+        enable_strict_validation(False)
         self.user_context_a = Mock()
-        self.user_context_a.user_id = "user-alpha"
-        self.user_context_a.thread_id = "thread-alpha"
-        self.user_context_a.request_id = "request-alpha"
+        self.user_context_a.user_id = 'user-alpha'
+        self.user_context_a.thread_id = 'thread-alpha'
+        self.user_context_a.request_id = 'request-alpha'
         self.user_context_a.is_test = True
-
         self.user_context_b = Mock()
-        self.user_context_b.user_id = "user-beta"
-        self.user_context_b.thread_id = "thread-beta"
-        self.user_context_b.request_id = "request-beta"
+        self.user_context_b.user_id = 'user-beta'
+        self.user_context_b.thread_id = 'thread-beta'
+        self.user_context_b.request_id = 'request-beta'
         self.user_context_b.is_test = True
-
         self.user_context_c = Mock()
-        self.user_context_c.user_id = "user-gamma"
-        self.user_context_c.thread_id = "thread-gamma"
-        self.user_context_c.request_id = "request-gamma"
+        self.user_context_c.user_id = 'user-gamma'
+        self.user_context_c.thread_id = 'thread-gamma'
+        self.user_context_c.request_id = 'request-gamma'
         self.user_context_c.is_test = True
-
-        # Create mock WebSockets for each user
-        self.websocket_a = MockWebSocket("user-alpha")
-        self.websocket_b = MockWebSocket("user-beta")
-        self.websocket_c = MockWebSocket("user-gamma")
+        self.websocket_a = MockWebSocket('user-alpha')
+        self.websocket_b = MockWebSocket('user-beta')
+        self.websocket_c = MockWebSocket('user-gamma')
 
     async def test_agent_events_do_not_bleed_between_users(self):
         """
@@ -119,69 +96,31 @@ class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL initially if event isolation isn't enforced.
         """
-        # Create managers for each user
-        manager_a = await get_websocket_manager(
-            user_context=self.user_context_a,
-            mode=WebSocketManagerMode.UNIFIED
-        )
-
-        manager_b = await get_websocket_manager(
-            user_context=self.user_context_b,
-            mode=WebSocketManagerMode.UNIFIED
-        )
-
-        # Clear any initial messages
+        manager_a = get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
+        manager_b = get_websocket_manager(user_context=self.user_context_b, mode=WebSocketManagerMode.UNIFIED)
         self.websocket_a.clear_messages()
         self.websocket_b.clear_messages()
-
-        # Simulate connecting WebSockets to managers
         if hasattr(manager_a, 'add_connection'):
             await manager_a.add_connection(self.websocket_a)
-
         if hasattr(manager_b, 'add_connection'):
             await manager_b.add_connection(self.websocket_b)
-
-        # Send agent event through manager A
-        agent_event = {
-            "event": "agent_started",
-            "user_id": "user-alpha",
-            "agent_id": "test-agent-123",
-            "sensitive_data": "user_alpha_private_information"
-        }
-
-        # Send event through manager A
+        agent_event = {'event': 'agent_started', 'user_id': 'user-alpha', 'agent_id': 'test-agent-123', 'sensitive_data': 'user_alpha_private_information'}
         if hasattr(manager_a, 'send_to_websocket'):
             await manager_a.send_to_websocket(agent_event, websocket=self.websocket_a)
         elif hasattr(manager_a, 'broadcast_to_user'):
             await manager_a.broadcast_to_user(self.user_context_a.user_id, agent_event)
         else:
-            # Fallback to direct WebSocket send for testing
             await self.websocket_a.send_json(agent_event)
-
-        # Wait for event processing
         await asyncio.sleep(0.1)
-
-        # Verify User A received the event
         messages_a = self.websocket_a.get_received_messages()
-        self.assertTrue(len(messages_a) > 0, "User A should have received the agent event")
-
-        # CRITICAL: Verify User B did NOT receive the event
+        self.assertTrue(len(messages_a) > 0, 'User A should have received the agent event')
         messages_b = self.websocket_b.get_received_messages()
-
-        # Check for event bleeding
         for message in messages_b:
-            if (message.get('event') == 'agent_started' and
-                message.get('sensitive_data') == 'user_alpha_private_information'):
-                pytest.fail("CRITICAL: Agent event bled from User A to User B - security violation!")
-
-        # Additional check: User B should have 0 messages or only their own
-        user_b_foreign_events = [
-            msg for msg in messages_b
-            if msg.get('user_id') and msg.get('user_id') != 'user-beta'
-        ]
-
+            if message.get('event') == 'agent_started' and message.get('sensitive_data') == 'user_alpha_private_information':
+                pytest.fail('CRITICAL: Agent event bled from User A to User B - security violation!')
+        user_b_foreign_events = [msg for msg in messages_b if msg.get('user_id') and msg.get('user_id') != 'user-beta']
         if len(user_b_foreign_events) > 0:
-            pytest.fail(f"Event bleeding detected: User B received {len(user_b_foreign_events)} events from other users")
+            pytest.fail(f'Event bleeding detected: User B received {len(user_b_foreign_events)} events from other users')
 
     async def test_concurrent_agent_events_remain_isolated(self):
         """
@@ -189,94 +128,35 @@ class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL if concurrent event isolation isn't enforced.
         """
-        # Create managers for all users
-        manager_a = await get_websocket_manager(
-            user_context=self.user_context_a,
-            mode=WebSocketManagerMode.UNIFIED
-        )
-
-        manager_b = await get_websocket_manager(
-            user_context=self.user_context_b,
-            mode=WebSocketManagerMode.UNIFIED
-        )
-
-        manager_c = await get_websocket_manager(
-            user_context=self.user_context_c,
-            mode=WebSocketManagerMode.UNIFIED
-        )
-
-        # Clear all messages
+        manager_a = get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
+        manager_b = get_websocket_manager(user_context=self.user_context_b, mode=WebSocketManagerMode.UNIFIED)
+        manager_c = get_websocket_manager(user_context=self.user_context_c, mode=WebSocketManagerMode.UNIFIED)
         for ws in [self.websocket_a, self.websocket_b, self.websocket_c]:
             ws.clear_messages()
-
-        # Connect WebSockets
-        managers_and_websockets = [
-            (manager_a, self.websocket_a),
-            (manager_b, self.websocket_b),
-            (manager_c, self.websocket_c)
-        ]
-
+        managers_and_websockets = [(manager_a, self.websocket_a), (manager_b, self.websocket_b), (manager_c, self.websocket_c)]
         for manager, websocket in managers_and_websockets:
             if hasattr(manager, 'add_connection'):
                 await manager.add_connection(websocket)
-
-        # Create distinct events for each user
-        events = [
-            {
-                "event": "agent_thinking",
-                "user_id": "user-alpha",
-                "data": "alpha_secret_thought_process",
-                "timestamp": "2024-01-01T10:00:00Z"
-            },
-            {
-                "event": "tool_executing",
-                "user_id": "user-beta",
-                "data": "beta_confidential_tool_execution",
-                "timestamp": "2024-01-01T10:00:01Z"
-            },
-            {
-                "event": "agent_completed",
-                "user_id": "user-gamma",
-                "data": "gamma_private_agent_results",
-                "timestamp": "2024-01-01T10:00:02Z"
-            }
-        ]
-
-        # Send events concurrently
+        events = [{'event': 'agent_thinking', 'user_id': 'user-alpha', 'data': 'alpha_secret_thought_process', 'timestamp': '2024-01-01T10:00:00Z'}, {'event': 'tool_executing', 'user_id': 'user-beta', 'data': 'beta_confidential_tool_execution', 'timestamp': '2024-01-01T10:00:01Z'}, {'event': 'agent_completed', 'user_id': 'user-gamma', 'data': 'gamma_private_agent_results', 'timestamp': '2024-01-01T10:00:02Z'}]
         tasks = []
         for i, (manager, websocket) in enumerate(managers_and_websockets):
             event = events[i]
             if hasattr(manager, 'send_to_websocket'):
                 task = asyncio.create_task(manager.send_to_websocket(event, websocket=websocket))
             else:
-                # Fallback for testing
                 task = asyncio.create_task(websocket.send_json(event))
             tasks.append(task)
-
-        # Wait for all events to be sent
         await asyncio.gather(*tasks)
-        await asyncio.sleep(0.2)  # Allow processing time
-
-        # Verify isolation: each user should only have their own event
-        user_data_map = {
-            self.websocket_a: ("user-alpha", "alpha_secret_thought_process"),
-            self.websocket_b: ("user-beta", "beta_confidential_tool_execution"),
-            self.websocket_c: ("user-gamma", "gamma_private_agent_results")
-        }
-
+        await asyncio.sleep(0.2)
+        user_data_map = {self.websocket_a: ('user-alpha', 'alpha_secret_thought_process'), self.websocket_b: ('user-beta', 'beta_confidential_tool_execution'), self.websocket_c: ('user-gamma', 'gamma_private_agent_results')}
         for websocket, (expected_user, expected_data) in user_data_map.items():
             messages = websocket.get_received_messages()
-
-            # Verify user received their own event
             own_events = [msg for msg in messages if msg.get('user_id') == expected_user]
-            self.assertTrue(len(own_events) > 0, f"User {expected_user} should have received their event")
-
-            # CRITICAL: Verify user did NOT receive other users' events
+            self.assertTrue(len(own_events) > 0, f'User {expected_user} should have received their event')
             foreign_events = [msg for msg in messages if msg.get('user_id') != expected_user]
-
             if len(foreign_events) > 0:
                 foreign_data = [msg.get('data') for msg in foreign_events]
-                pytest.fail(f"Event bleeding detected for {expected_user}: received foreign events with data {foreign_data}")
+                pytest.fail(f'Event bleeding detected for {expected_user}: received foreign events with data {foreign_data}')
 
     async def test_websocket_broadcast_user_filtering(self):
         """
@@ -284,70 +164,40 @@ class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL if broadcast filtering isn't implemented.
         """
-        # Create manager
-        manager = await get_websocket_manager(
-            user_context=self.user_context_a,
-            mode=WebSocketManagerMode.UNIFIED
-        )
-
-        # Connect multiple WebSockets representing different users
+        manager = get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
         websockets = [self.websocket_a, self.websocket_b, self.websocket_c]
-
-        # Mock connections with user IDs
         mock_connections = {}
         for i, websocket in enumerate(websockets):
-            connection_id = f"conn-{i}"
+            connection_id = f'conn-{i}'
             mock_connection = Mock()
             mock_connection.websocket = websocket
             mock_connection.user_id = websocket.user_id
             mock_connection.connection_id = connection_id
             mock_connections[connection_id] = mock_connection
-
-        # If manager has connections attribute, set it up
         if hasattr(manager, '_active_connections'):
             manager._active_connections = mock_connections
-
-        # Clear all messages
         for ws in websockets:
             ws.clear_messages()
-
-        # Broadcast to specific user
-        broadcast_event = {
-            "event": "user_specific_notification",
-            "message": "This is for user-alpha only",
-            "sensitive_token": "alpha_secret_token_123"
-        }
-
-        # Test broadcast to specific user
+        broadcast_event = {'event': 'user_specific_notification', 'message': 'This is for user-alpha only', 'sensitive_token': 'alpha_secret_token_123'}
         if hasattr(manager, 'broadcast_to_user'):
-            await manager.broadcast_to_user("user-alpha", broadcast_event)
+            await manager.broadcast_to_user('user-alpha', broadcast_event)
         elif hasattr(manager, 'send_to_user'):
-            await manager.send_to_user("user-alpha", broadcast_event)
+            await manager.send_to_user('user-alpha', broadcast_event)
         else:
-            # Manual filtering test
             for conn_id, connection in mock_connections.items():
-                if connection.user_id == "user-alpha":
+                if connection.user_id == 'user-alpha':
                     await connection.websocket.send_json(broadcast_event)
-
-        # Wait for processing
         await asyncio.sleep(0.1)
-
-        # Verify only user-alpha received the broadcast
         messages_a = self.websocket_a.get_received_messages()
         messages_b = self.websocket_b.get_received_messages()
         messages_c = self.websocket_c.get_received_messages()
-
-        # User A should have received the message
         alpha_events = [msg for msg in messages_a if msg.get('sensitive_token') == 'alpha_secret_token_123']
-        self.assertTrue(len(alpha_events) > 0, "User alpha should have received the broadcast")
-
-        # Users B and C should NOT have received the message
-        for websocket, user_name in [(self.websocket_b, "beta"), (self.websocket_c, "gamma")]:
+        self.assertTrue(len(alpha_events) > 0, 'User alpha should have received the broadcast')
+        for websocket, user_name in [(self.websocket_b, 'beta'), (self.websocket_c, 'gamma')]:
             messages = websocket.get_received_messages()
             leaked_events = [msg for msg in messages if msg.get('sensitive_token') == 'alpha_secret_token_123']
-
             if len(leaked_events) > 0:
-                pytest.fail(f"Broadcast leaked to user {user_name}: received {len(leaked_events)} unauthorized events")
+                pytest.fail(f'Broadcast leaked to user {user_name}: received {len(leaked_events)} unauthorized events')
 
     async def test_connection_removal_prevents_event_bleeding(self):
         """
@@ -355,69 +205,36 @@ class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL if connection cleanup isn't preventing bleeding.
         """
-        # Create manager for user A
-        manager_a = await get_websocket_manager(
-            user_context=self.user_context_a,
-            mode=WebSocketManagerMode.UNIFIED
-        )
-
-        # Connect user A's WebSocket
+        manager_a = get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
         if hasattr(manager_a, 'add_connection'):
             await manager_a.add_connection(self.websocket_a)
-
-        # Clear messages
         self.websocket_a.clear_messages()
-
-        # Send initial event to verify connection works
-        initial_event = {"event": "connection_test", "data": "initial"}
+        initial_event = {'event': 'connection_test', 'data': 'initial'}
         if hasattr(manager_a, 'send_to_websocket'):
             await manager_a.send_to_websocket(initial_event, websocket=self.websocket_a)
         else:
             await self.websocket_a.send_json(initial_event)
-
         await asyncio.sleep(0.1)
-
-        # Verify initial event was received
         messages = self.websocket_a.get_received_messages()
-        self.assertTrue(len(messages) > 0, "Initial event should have been received")
-
-        # Remove connection
+        self.assertTrue(len(messages) > 0, 'Initial event should have been received')
         if hasattr(manager_a, 'remove_connection'):
             await manager_a.remove_connection(self.websocket_a)
         elif hasattr(manager_a, 'disconnect_websocket'):
             await manager_a.disconnect_websocket(self.websocket_a)
-
-        # Clear messages after disconnection
         self.websocket_a.clear_messages()
-
-        # Try to send event after disconnection
-        post_disconnect_event = {
-            "event": "post_disconnect_event",
-            "data": "this_should_not_be_received",
-            "sensitive_info": "leaked_after_disconnect"
-        }
-
-        # Attempt to send to disconnected user
+        post_disconnect_event = {'event': 'post_disconnect_event', 'data': 'this_should_not_be_received', 'sensitive_info': 'leaked_after_disconnect'}
         try:
             if hasattr(manager_a, 'send_to_websocket'):
                 await manager_a.send_to_websocket(post_disconnect_event, websocket=self.websocket_a)
             elif hasattr(manager_a, 'broadcast_to_user'):
                 await manager_a.broadcast_to_user(self.user_context_a.user_id, post_disconnect_event)
         except Exception:
-            # Expected - sending to disconnected user should fail
             pass
-
         await asyncio.sleep(0.1)
-
-        # Verify disconnected user did NOT receive the event
         post_disconnect_messages = self.websocket_a.get_received_messages()
-        leaked_events = [
-            msg for msg in post_disconnect_messages
-            if msg.get('sensitive_info') == 'leaked_after_disconnect'
-        ]
-
+        leaked_events = [msg for msg in post_disconnect_messages if msg.get('sensitive_info') == 'leaked_after_disconnect']
         if len(leaked_events) > 0:
-            pytest.fail("Event bleeding after disconnection: disconnected user received unauthorized events")
+            pytest.fail('Event bleeding after disconnection: disconnected user received unauthorized events')
 
     async def test_user_context_switching_prevents_bleeding(self):
         """
@@ -425,86 +242,40 @@ class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL if context switching isolation isn't enforced.
         """
-        # Create manager with initial user context
-        manager = await get_websocket_manager(
-            user_context=self.user_context_a,
-            mode=WebSocketManagerMode.UNIFIED
-        )
-
-        # Connect WebSocket for user A
+        manager = get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
         if hasattr(manager, 'add_connection'):
             await manager.add_connection(self.websocket_a)
-
-        # Send event as user A
-        user_a_event = {
-            "event": "user_a_private_event",
-            "data": "user_a_confidential_data",
-            "user_id": "user-alpha"
-        }
-
+        user_a_event = {'event': 'user_a_private_event', 'data': 'user_a_confidential_data', 'user_id': 'user-alpha'}
         self.websocket_a.clear_messages()
-
         if hasattr(manager, 'send_to_websocket'):
             await manager.send_to_websocket(user_a_event, websocket=self.websocket_a)
-
         await asyncio.sleep(0.1)
-
-        # Verify user A received their event
         messages_a = self.websocket_a.get_received_messages()
-        self.assertTrue(len(messages_a) > 0, "User A should have received their event")
-
-        # Now attempt to switch context to user B (should fail or create new manager)
+        self.assertTrue(len(messages_a) > 0, 'User A should have received their event')
         try:
-            # If manager supports context switching
             if hasattr(manager, 'switch_user_context'):
                 await manager.switch_user_context(self.user_context_b)
             else:
-                # Context switching should not be allowed - this simulates the attempt
-                manager._user_context = self.user_context_b  # Direct manipulation (should be prevented)
-
-            # Connect WebSocket for user B
+                manager._user_context = self.user_context_b
             if hasattr(manager, 'add_connection'):
                 await manager.add_connection(self.websocket_b)
-
-            # Send event as user B
-            user_b_event = {
-                "event": "user_b_private_event",
-                "data": "user_b_confidential_data",
-                "user_id": "user-beta"
-            }
-
+            user_b_event = {'event': 'user_b_private_event', 'data': 'user_b_confidential_data', 'user_id': 'user-beta'}
             self.websocket_b.clear_messages()
-
             if hasattr(manager, 'send_to_websocket'):
                 await manager.send_to_websocket(user_b_event, websocket=self.websocket_b)
-
             await asyncio.sleep(0.1)
-
-            # CRITICAL: Verify user A did NOT receive user B's event
             messages_a_after = self.websocket_a.get_received_messages()
-            user_b_events_leaked_to_a = [
-                msg for msg in messages_a_after
-                if msg.get('data') == 'user_b_confidential_data'
-            ]
-
+            user_b_events_leaked_to_a = [msg for msg in messages_a_after if msg.get('data') == 'user_b_confidential_data']
             if len(user_b_events_leaked_to_a) > 0:
                 pytest.fail("Context switching allowed event bleeding: User A received User B's confidential data")
-
-            # Verify user B received their event
             messages_b = self.websocket_b.get_received_messages()
-            user_b_own_events = [
-                msg for msg in messages_b
-                if msg.get('data') == 'user_b_confidential_data'
-            ]
-            self.assertTrue(len(user_b_own_events) > 0, "User B should have received their own event")
-
+            user_b_own_events = [msg for msg in messages_b if msg.get('data') == 'user_b_confidential_data']
+            self.assertTrue(len(user_b_own_events) > 0, 'User B should have received their own event')
         except Exception as e:
-            # If context switching is properly prevented, this is expected
-            if "isolation" in str(e).lower() or "context" in str(e).lower():
-                # This is good - context switching was prevented
+            if 'isolation' in str(e).lower() or 'context' in str(e).lower():
                 pass
             else:
-                pytest.fail(f"Unexpected error during context switching test: {e}")
+                pytest.fail(f'Unexpected error during context switching test: {e}')
 
     async def test_event_queue_isolation_between_users(self):
         """
@@ -512,71 +283,34 @@ class TestWebSocketManagerCrossUserEventBleedingPrevention(SSotAsyncTestCase):
 
         EXPECTED: This test should FAIL if event queue isolation isn't implemented.
         """
-        # Create managers for both users
-        manager_a = await get_websocket_manager(
-            user_context=self.user_context_a,
-            mode=WebSocketManagerMode.UNIFIED
-        )
-
-        manager_b = await get_websocket_manager(
-            user_context=self.user_context_b,
-            mode=WebSocketManagerMode.UNIFIED
-        )
-
-        # Queue events for user A
-        user_a_events = [
-            {"event": "agent_started", "data": "a_start", "queue_id": "a1"},
-            {"event": "agent_thinking", "data": "a_thinking", "queue_id": "a2"},
-            {"event": "tool_executing", "data": "a_tool", "queue_id": "a3"}
-        ]
-
-        # Queue events for user B
-        user_b_events = [
-            {"event": "agent_started", "data": "b_start", "queue_id": "b1"},
-            {"event": "agent_thinking", "data": "b_thinking", "queue_id": "b2"},
-            {"event": "tool_executing", "data": "b_tool", "queue_id": "b3"}
-        ]
-
-        # If managers have event queues, test them
+        manager_a = get_websocket_manager(user_context=self.user_context_a, mode=WebSocketManagerMode.UNIFIED)
+        manager_b = get_websocket_manager(user_context=self.user_context_b, mode=WebSocketManagerMode.UNIFIED)
+        user_a_events = [{'event': 'agent_started', 'data': 'a_start', 'queue_id': 'a1'}, {'event': 'agent_thinking', 'data': 'a_thinking', 'queue_id': 'a2'}, {'event': 'tool_executing', 'data': 'a_tool', 'queue_id': 'a3'}]
+        user_b_events = [{'event': 'agent_started', 'data': 'b_start', 'queue_id': 'b1'}, {'event': 'agent_thinking', 'data': 'b_thinking', 'queue_id': 'b2'}, {'event': 'tool_executing', 'data': 'b_tool', 'queue_id': 'b3'}]
         if hasattr(manager_a, 'queue_event') and hasattr(manager_b, 'queue_event'):
-            # Queue events for both users
             for event in user_a_events:
                 await manager_a.queue_event(event)
-
             for event in user_b_events:
                 await manager_b.queue_event(event)
-
-            # Process queues
             if hasattr(manager_a, 'process_event_queue'):
                 await manager_a.process_event_queue()
-
             if hasattr(manager_b, 'process_event_queue'):
                 await manager_b.process_event_queue()
-
-            # Verify queue isolation
             if hasattr(manager_a, 'get_queued_events'):
                 a_queue = await manager_a.get_queued_events()
                 b_queue = await manager_b.get_queued_events()
-
-                # Check for cross-contamination
                 a_queue_ids = [event.get('queue_id') for event in a_queue]
                 b_queue_ids = [event.get('queue_id') for event in b_queue]
-
-                # User A's queue should not contain User B's events
                 b_events_in_a_queue = [qid for qid in a_queue_ids if qid and qid.startswith('b')]
                 if len(b_events_in_a_queue) > 0:
                     pytest.fail(f"Event queue bleeding: User A's queue contains User B's events: {b_events_in_a_queue}")
-
-                # User B's queue should not contain User A's events
                 a_events_in_b_queue = [qid for qid in b_queue_ids if qid and qid.startswith('a')]
                 if len(a_events_in_b_queue) > 0:
                     pytest.fail(f"Event queue bleeding: User B's queue contains User A's events: {a_events_in_b_queue}")
-
         else:
-            # Event queuing not implemented - note the gap
-            print("WARNING: Event queuing functionality not found - queue isolation cannot be tested")
+            print('WARNING: Event queuing functionality not found - queue isolation cannot be tested')
 
-
+@pytest.mark.integration
 class TestCrossUserEventBleedingValidationGapDocumentation(SSotAsyncTestCase):
     """
     Test suite specifically designed to document cross-user event bleeding validation gaps.
@@ -590,32 +324,17 @@ class TestCrossUserEventBleedingValidationGapDocumentation(SSotAsyncTestCase):
 
         This test captures the current state before fixes are applied.
         """
-        event_isolation_scenarios = [
-            "agent_events_user_isolation",
-            "concurrent_events_isolation",
-            "broadcast_user_filtering",
-            "connection_removal_cleanup",
-            "user_context_switching_prevention",
-            "event_queue_isolation"
-        ]
-
+        event_isolation_scenarios = ['agent_events_user_isolation', 'concurrent_events_isolation', 'broadcast_user_filtering', 'connection_removal_cleanup', 'user_context_switching_prevention', 'event_queue_isolation']
         results = {}
-
         for scenario in event_isolation_scenarios:
             try:
-                # Each scenario would have specific validation logic
-                # For now, we document them as "TO_BE_TESTED"
-                results[scenario] = "TO_BE_TESTED"
+                results[scenario] = 'TO_BE_TESTED'
             except Exception as e:
-                results[scenario] = f"ERROR: {type(e).__name__}: {str(e)}"
-
-        # Log the current behavior for documentation
-        print(f"\nCurrent Cross-User Event Isolation Behavior:")
+                results[scenario] = f'ERROR: {type(e).__name__}: {str(e)}'
+        print(f'\nCurrent Cross-User Event Isolation Behavior:')
         for scenario, result in results.items():
-            print(f"  {scenario}: {result}")
-
-        # This test always passes - it's just for documentation
-        self.assertTrue(True, "Baseline event isolation behavior documented")
+            print(f'  {scenario}: {result}')
+        self.assertTrue(True, 'Baseline event isolation behavior documented')
 
     def test_event_bleeding_prevention_gaps_summary(self):
         """
@@ -623,27 +342,12 @@ class TestCrossUserEventBleedingValidationGapDocumentation(SSotAsyncTestCase):
 
         This serves as a checklist for Issue #712 implementation.
         """
-        event_bleeding_gaps_to_address = [
-            "Agent event user isolation enforcement",
-            "Concurrent event processing isolation",
-            "WebSocket broadcast user filtering",
-            "Connection removal event cleanup",
-            "User context switching prevention",
-            "Event queue isolation between users",
-            "Real-time event delivery validation",
-            "Event history isolation",
-            "Cross-user event monitoring and alerting",
-            "Security audit trail for event access"
-        ]
-
-        print(f"\nCross-User Event Bleeding Prevention Gaps to Address (Issue #712):")
+        event_bleeding_gaps_to_address = ['Agent event user isolation enforcement', 'Concurrent event processing isolation', 'WebSocket broadcast user filtering', 'Connection removal event cleanup', 'User context switching prevention', 'Event queue isolation between users', 'Real-time event delivery validation', 'Event history isolation', 'Cross-user event monitoring and alerting', 'Security audit trail for event access']
+        print(f'\nCross-User Event Bleeding Prevention Gaps to Address (Issue #712):')
         for i, gap in enumerate(event_bleeding_gaps_to_address, 1):
-            print(f"  {i}. {gap}")
-
-        # This test always passes - it's documentation
-        self.assertTrue(True, "Event bleeding prevention gaps documented")
-
-
+            print(f'  {i}. {gap}')
+        self.assertTrue(True, 'Event bleeding prevention gaps documented')
 if __name__ == '__main__':
-    # Run the tests to demonstrate the gaps
-    pytest.main([__file__, '-v'])
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

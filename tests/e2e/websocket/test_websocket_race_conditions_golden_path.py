@@ -106,6 +106,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDisp
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.e2e
 class TestWebSocketRaceConditionsGoldenPath(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

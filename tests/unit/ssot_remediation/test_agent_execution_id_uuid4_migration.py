@@ -19,6 +19,7 @@ Expected Behavior:
 - AFTER REMEDIATION: Should PASS - agent execution uses UnifiedIDManager SSOT
 """
 
+import pytest
 import uuid
 import inspect
 import re
@@ -31,6 +32,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from shared.types.core_types import ExecutionID, AgentID, UserID
 
 
+@pytest.mark.unit
 class TestAgentExecutionIdUuid4Migration(SSotBaseTestCase):
     """Test agent execution ID migration from uuid.uuid4() to SSOT patterns."""
 

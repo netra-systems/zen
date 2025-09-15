@@ -1,0 +1,19 @@
+{
+  "timestamp": "2025-09-14T19:05:46.681380",
+  "mode": "live_migration",
+  "statistics": {
+    "total_files_processed": 427,
+    "successful_migrations": 427,
+    "failed_migrations": 0,
+    "total_violations_eliminated": 2,
+    "rollbacks_performed": 0,
+    "syntax_errors_prevented": 0,
+    "total_execution_time_ms": 2458.4479999999994
+  },
+  "successful_files": [
+    "tests\\mission_critical\\test_issue_1069_golden_path_protection.py"
+  ],
+  "error_files": [],
+  "rollback_files": [],
+  "remaining_violations": 0
+}

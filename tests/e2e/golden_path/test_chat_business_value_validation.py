@@ -17,6 +17,7 @@ CRITICAL: These tests validate actual business value delivery, not just
 technical functionality - ensuring chat provides real AI intelligence.
 """
 
+import pytest
 import asyncio
 import json
 import time
@@ -35,6 +36,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
+@pytest.mark.e2e
 class TestChatBusinessValueValidation(SSotAsyncTestCase):
     """
     Test suite validating that chat functionality delivers core business value.

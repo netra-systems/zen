@@ -4,6 +4,7 @@ Tests complete lifecycle
 Business Value: User visibility
 """
 
+import pytest
 import asyncio
 import time
 import json
@@ -13,6 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from tests.e2e.staging_test_base import StagingTestBase, staging_test
 
 
+@pytest.mark.e2e
 class TestLifecycleEventsStaging(StagingTestBase):
     """Test lifecycle events in staging environment"""
     

@@ -23,6 +23,7 @@ These tests SHOULD FAIL initially, demonstrating existing registry fragmentation
 After SSOT consolidation, these tests should pass, confirming unified registry.
 """
 
+import pytest
 import asyncio
 import importlib
 import inspect
@@ -41,6 +42,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestRegistrySSotValidation(SSotBaseTestCase):
     """Test suite for validating Agent Registry SSOT compliance."""
     

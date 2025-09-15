@@ -8,6 +8,7 @@ import pytest
 import asyncio
 import time
 
+@pytest.mark.unit
 class TestAsyncioSelectorOptimization:
     
     def test_selector_timeout_optimization_exists(self):

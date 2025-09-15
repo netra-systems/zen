@@ -7,6 +7,7 @@ and detects deprecated/fragmented import paths that violate SSOT compliance.
 Expected to FAIL initially - demonstrating the import fragmentation issues.
 """
 
+import pytest
 import unittest
 import importlib
 import sys
@@ -15,6 +16,7 @@ import os
 from typing import List, Dict, Set, Tuple
 from pathlib import Path
 
+@pytest.mark.unit
 class TestWebSocketFactorySSOTImportValidation(unittest.TestCase):
     """Test WebSocket factory SSOT import compliance."""
 

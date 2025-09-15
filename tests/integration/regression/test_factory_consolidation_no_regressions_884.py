@@ -31,6 +31,7 @@ from unittest.mock import MagicMock, AsyncMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestFactoryConsolidationNoRegressions884(SSotAsyncTestCase):
     """
     Regression Test: Validate existing agent functionality after factory consolidation

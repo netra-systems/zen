@@ -1,6 +1,6 @@
 from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from auth_service.core.auth_manager import AuthManager
@@ -1134,11 +1134,13 @@ sys.path.insert(0, str(project_root))
                                 # REMOVED_SYNTAX_ERROR: return report
 
 
-                                # REMOVED_SYNTAX_ERROR: if __name__ == '__main__':
-                                    # Run the comprehensive validation
-                                    # REMOVED_SYNTAX_ERROR: validator = ComprehensiveComplianceValidator()
-                                    # REMOVED_SYNTAX_ERROR: metrics = validator.run_full_compliance_validation()
-                                    # REMOVED_SYNTAX_ERROR: print("formatted_string")
+                                # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+        # REMOVED_SYNTAX_ERROR: print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+        # REMOVED_SYNTAX_ERROR: print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+        # REMOVED_SYNTAX_ERROR: print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
-                                    # Run as pytest
-                                    # REMOVED_SYNTAX_ERROR: pytest.main([__file__, '-v', '--tb=short'])
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

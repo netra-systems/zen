@@ -20,6 +20,7 @@ from test_framework.ssot.base_test_case import BaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.ssot.websocket import WebSocketTestUtility, WebSocketEventType
 from netra_backend.app.websocket_core.unified_manager import (
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
     UnifiedWebSocketManager,
     WebSocketConnection,
     _serialize_message_safely
@@ -65,7 +66,7 @@ class TestUnifiedWebSocketManagerE2EMultiUser(BaseTestCase):
     @pytest.fixture
     async def websocket_manager_with_real_connections(self, multi_user_auth_setup):
         """Create UnifiedWebSocketManager with real authenticated connections."""
-        manager = UnifiedWebSocketManager()
+        manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         
         # Create realistic WebSocket connections for each authenticated user
         connections_data = []
@@ -395,7 +396,7 @@ class TestUnifiedWebSocketManagerE2EMultiUser(BaseTestCase):
         This test simulates challenging production conditions including connection drops,
         rapid reconnections, high message volumes, and concurrent user activity.
         """
-        manager = UnifiedWebSocketManager()
+        manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         
         # Create initial connections
         initial_connections = []

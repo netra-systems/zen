@@ -106,8 +106,8 @@ class StagingGCPClient:
     
     def __init__(self):
         self.env = IsolatedEnvironment()
-        self.base_url = self.env.get("STAGING_BASE_URL", "https://netra-staging.example.com")
-        self.websocket_url = self.env.get("STAGING_WEBSOCKET_URL", "wss://netra-staging.example.com/ws")
+        self.base_url = self.env.get("STAGING_BASE_URL", "https://api.staging.netrasystems.ai")
+        self.websocket_url = self.env.get("STAGING_WEBSOCKET_URL", "wss://api.staging.netrasystems.ai/ws")
         self.test_user_email = "test@netra.example.com"
         self.test_user_password = "test_password_123"
         
@@ -238,6 +238,7 @@ class WebSocketEventCollector:
         self.is_connected = False
 
 
+@pytest.mark.e2e
 class TestGoldenPathSSotTools(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

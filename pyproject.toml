@@ -82,6 +82,7 @@ markers = [
     "unit: Unit tests (fast, isolated)",
     "integration: Integration tests (component interaction)",
     "e2e: End-to-end tests (full workflow)",
+    "end_to_end: Complete end-to-end user journey tests",
     "smoke: Quick validation tests",
     "critical: Essential system tests",
     "mission_critical: Business-critical functionality tests",
@@ -127,6 +128,7 @@ markers = [
     "websocket_events: WebSocket event validation tests",
     "deployment: Deployment-related tests",
     "regression: Regression prevention tests",
+    "regression_prevention: Regression prevention validation tests",
     "architecture: Architecture compliance tests",
     "issue_1140: Issue #1140 specific tests",
     "timeout: Tests with custom timeout settings",
@@ -196,6 +198,8 @@ markers = [
     "migration: Migration tests",
     "models: Model tests",
     "ssot_validation: SSOT validation tests",
+    "ssot_orchestration: SSOT orchestration and coordination tests",
+    "ssot_violation: SSOT violation detection tests",
     "toolregistry: Tool registry tests",
     "docker_required: Tests that require Docker services",
     "no_docker: Tests that work without Docker",
@@ -214,6 +218,11 @@ markers = [
     # Final missing markers (last batch)
     "authentication: Authentication tests",
     "flow_context: Flow context tests",
+    "auth_breakdown: Authentication breakdown and failure tests",
+    "issue_1116: Issue #1116 specific tests",
+    "issue_1186_phase3: Issue #1186 UserExecutionEngine SSOT consolidation Phase 3 tests",
+    "issue_1197: Issue #1197 specific tests",
+    "sla_validation: SLA validation tests",
     "ssot_compliance: SSOT compliance tests",
     "user_engine_delegation: User engine delegation tests", 
     "websocket_coordination: WebSocket coordination tests",
@@ -237,6 +246,9 @@ markers = [
     # Missing marker for auth service secret loader tests (Issue #687)
     "secret_loader: Secret loader component tests",
     "ssot: Single Source of Truth pattern tests",
+
+    # Golden Path Phase 2 marker for critical staging tests
+    "golden_path_phase2: Golden Path Phase 2 staging validation tests",
     
     # Additional comprehensive marker definitions (Issue #553 Resolution)
     "infrastructure_validation: Infrastructure validation tests",
@@ -643,9 +655,12 @@ markers = [
     
     # Missing supervisor orchestration marker causing collection failures
     "supervisor_orchestration: Supervisor orchestration and multi-user isolation tests",
-    
+
     # Missing agent_handoff_chain marker causing collection failures
     "agent_handoff_chain: Agent handoff chain coordination tests",
+
+    # Missing golden_path_phase2 marker causing collection failures (Issue #881)
+    "golden_path_phase2: Golden Path Phase 2 regression prevention and validation tests",
 
     # Issue #861 Phase 1 Integration Test Markers
     "websocket_flow: WebSocket message flow integration tests",
@@ -672,6 +687,23 @@ markers = [
     "issue_1058_migration_safety: Issue #1058 migration safety specific tests",
     "issue_1058_broadcast_consolidation: Issue #1058 broadcast consolidation specific tests",
     "integration_demo: Integration demonstration and workflow tests",
+    "ssl_security: SSL/TLS security validation tests",
+    "real_time_value: Real-time value delivery and performance validation tests",
+    "quality_assurance: Quality assurance and feature accessibility validation tests",
+    "service_dependency: Service dependency integration and resilience tests",
+    "graceful_degradation: Graceful degradation tests for service availability",
+    "health_monitoring: Health monitoring tests for service dependencies",
+
+    # Issue #860 Windows WebSocket Connection Failure markers (2025-09-15)
+    "windows: Windows platform-specific tests for connection failures and compatibility",
+
+    # Issue #1058 Data Integrity and Security Boundary markers
+    "issue_1058_data_integrity: Issue #1058 data integrity validation tests",
+    "issue_1058_security_boundaries: Issue #1058 security boundary enforcement tests",
+    "enterprise_compliance: Enterprise compliance and regulatory validation tests",
+
+    # Scalability and performance markers
+    "scalability: Scalability and concurrent user load testing",
 ]
 
 # Coverage settings

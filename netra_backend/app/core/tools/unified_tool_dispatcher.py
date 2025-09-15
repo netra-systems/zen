@@ -176,7 +176,7 @@ class UnifiedToolDispatcher:
             PermissionError: If admin tools requested without admin permission
         """
         import warnings
-        from netra_backend.app.factories.tool_dispatcher_factory import get_tool_dispatcher_factory
+        from netra_backend.app.agents.supervisor.tool_dispatcher_factory import get_tool_dispatcher_factory
         
         # Issue deprecation warning for SSOT compliance tracking
         warnings.warn(
@@ -207,9 +207,9 @@ class UnifiedToolDispatcher:
                 logger.info(f"Created WebSocket bridge adapter for AgentWebSocketBridge (user: {user_context.user_id})")
             # Otherwise wrap it
             else:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
-                websocket_manager = UnifiedWebSocketManager()
-                logger.warning(f"Created fallback WebSocketManager - no bridge connection for user {user_context.user_id}")
+                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                websocket_manager = get_websocket_manager(user_context)
+                logger.warning(f"Created fallback WebSocketManager via factory - no bridge connection for user {user_context.user_id}")
         
         try:
             # Get global SSOT ToolDispatcherFactory instance
@@ -269,7 +269,7 @@ class UnifiedToolDispatcher:
                 # Automatic cleanup happens here
         """
         import warnings
-        from netra_backend.app.factories.tool_dispatcher_factory import get_tool_dispatcher_factory
+        from netra_backend.app.agents.supervisor.tool_dispatcher_factory import get_tool_dispatcher_factory
         
         # Issue deprecation warning for SSOT compliance tracking
         warnings.warn(

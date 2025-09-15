@@ -43,6 +43,7 @@ from netra_backend.app.core.managers.unified_state_manager import (
 )
 
 
+@pytest.mark.unit
 class TestUnifiedStateManagerCore:
     """Core state manager functionality tests"""
     
@@ -101,6 +102,7 @@ class TestUnifiedStateManagerCore:
         assert manager.exists("existing")
 
 
+@pytest.mark.unit
 class TestStateScoping:
     """Test multi-scope state isolation - CRITICAL for $500K+ ARR protection"""
     
@@ -175,6 +177,7 @@ class TestStateScoping:
         assert manager.get_websocket_state("conn3", "user_id") is None
 
 
+@pytest.mark.unit
 class TestTTLManagement:
     """Test TTL-based state expiration - critical for memory management"""
     
@@ -235,6 +238,7 @@ class TestTTLManagement:
                 pass
 
 
+@pytest.mark.unit
 class TestConcurrencyAndThreadSafety:
     """Test thread-safe operations - CRITICAL for concurrent users"""
     
@@ -334,6 +338,7 @@ class TestConcurrencyAndThreadSafety:
         assert final_value == 500
 
 
+@pytest.mark.unit
 class TestMemoryManagement:
     """Test memory management and limits - prevents system crashes"""
     
@@ -375,6 +380,7 @@ class TestMemoryManagement:
         assert manager.exists("key_4")
 
 
+@pytest.mark.unit
 class TestEventSystem:
     """Test state change event system - enables real-time WebSocket updates"""
     
@@ -433,6 +439,7 @@ class TestEventSystem:
         assert mock_create_task.called
 
 
+@pytest.mark.unit
 class TestFactoryPattern:
     """Test factory pattern for user isolation - CRITICAL for multi-tenant security"""
     
@@ -493,6 +500,7 @@ class TestFactoryPattern:
         assert stats["user_specific"] == 0
 
 
+@pytest.mark.unit
 class TestStateQuerying:
     """Test advanced state querying and filtering"""
     
@@ -551,6 +559,7 @@ class TestStateQuerying:
         assert type_stats[StateType.USER_PREFERENCES.value] >= 1
 
 
+@pytest.mark.unit
 class TestContextManagers:
     """Test context managers for scoped operations"""
     
@@ -585,6 +594,7 @@ class TestContextManagers:
             assert thread_ctx.get("context")["agent_type"] == "optimizer"
 
 
+@pytest.mark.unit
 class TestBulkOperations:
     """Test bulk state operations for performance"""
     
@@ -650,6 +660,7 @@ class TestBulkOperations:
         assert manager.get_user_state("user2", "pref1") == "value3"  # Should remain
 
 
+@pytest.mark.unit
 class TestStatusAndMonitoring:
     """Test status reporting and monitoring capabilities"""
     
@@ -688,6 +699,7 @@ class TestStatusAndMonitoring:
         assert "event_queue_size" in health
 
 
+@pytest.mark.unit
 class TestConvenienceFunctions:
     """Test module-level convenience functions"""
     
@@ -722,6 +734,7 @@ class TestConvenienceFunctions:
         assert isinstance(message_mgr, UnifiedStateManager)
 
 
+@pytest.mark.unit
 class TestErrorHandling:
     """Test error handling and edge cases"""
     
@@ -764,6 +777,7 @@ class TestErrorHandling:
 
 
 # Performance and Load Testing
+@pytest.mark.unit
 class TestPerformanceScenarios:
     """Performance tests for high-load scenarios - protects $500K+ ARR"""
     

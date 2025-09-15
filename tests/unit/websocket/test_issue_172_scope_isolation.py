@@ -20,6 +20,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.unit
 class TestIssue172ScopeIsolation(SSotAsyncTestCase):
     """Unit tests to reproduce Issue #172: Variable scope isolation problems."""
 

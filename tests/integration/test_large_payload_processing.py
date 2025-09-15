@@ -21,6 +21,7 @@ def auth_token():
         return response.json()["access_token"]
 
 
+@pytest.mark.integration
 class TestLargePayloadProcessing:
 
     def test_large_json_payload(self, auth_token):

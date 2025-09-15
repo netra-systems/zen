@@ -54,6 +54,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.integration
 class TestE2EOAuthSimulationKeyValidator:
     """Test E2E OAuth simulation key consistency validation."""
     
@@ -165,6 +166,7 @@ class TestE2EOAuthSimulationKeyValidator:
                 logger.info(" PASS:  E2E OAuth functionality failure detection test passed")
 
 
+@pytest.mark.integration
 class TestJWTSecretAlignmentValidator:
     """Test JWT secret alignment validation."""
     
@@ -253,6 +255,7 @@ class TestJWTSecretAlignmentValidator:
                 logger.info(" PASS:  JWT functionality failure detection test passed")
 
 
+@pytest.mark.integration
 class TestWebSocketConfigurationValidator:
     """Test WebSocket authentication configuration validation."""
     
@@ -325,6 +328,7 @@ class TestWebSocketConfigurationValidator:
                 logger.info(" PASS:  WebSocket auth integration failure detection test passed")
 
 
+@pytest.mark.integration
 class TestConfigurationDriftMonitor:
     """Test the comprehensive configuration drift monitor."""
     
@@ -448,6 +452,7 @@ class TestConfigurationDriftMonitor:
                     logger.info(" PASS:  No drift detection test passed")
 
 
+@pytest.mark.integration
 class TestConfigurationDriftAlerting:
     """Test configuration drift alerting system."""
     
@@ -542,6 +547,7 @@ class TestConfigurationDriftAlerting:
             logger.info(" PASS:  Alert throttling test passed")
 
 
+@pytest.mark.integration
 class TestUnifiedConfigurationMonitoring:
     """Test the unified configuration monitoring orchestration."""
     
@@ -645,6 +651,7 @@ class TestUnifiedConfigurationMonitoring:
         logger.info(" PASS:  Drift history retrieval test passed")
 
 
+@pytest.mark.integration
 class TestIntegrationScenarios:
     """Test complete integration scenarios representing real-world drift patterns."""
     

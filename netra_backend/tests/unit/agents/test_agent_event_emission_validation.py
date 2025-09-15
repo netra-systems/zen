@@ -35,16 +35,16 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 # Import core event emission components
-from netra_backend.app.websocket_core.unified_emitter import UnifiedEventEmitter
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UnifiedEventEmitter
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
-from netra_backend.app.websocket_core.event_validator import EventValidator
+from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator as EventValidator
 from netra_backend.app.websocket_core.event_delivery_tracker import EventDeliveryTracker
 from netra_backend.app.websocket_core.manager import WebSocketManager
 
 # Import agent event integration components
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
-from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus

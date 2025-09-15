@@ -20,6 +20,7 @@ HTTP 503 service outage and validate the fix prevents regression.
 CRITICAL: These tests MUST FAIL initially to demonstrate the problem exists.
 """
 
+import pytest
 import sys
 import unittest
 from pathlib import Path
@@ -32,11 +33,13 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # Simple debug test
+@pytest.mark.unit
 def test_basic():
     print("Basic test works")
     return True
 
 
+@pytest.mark.unit
 class TestRateLimiterRedisImportIssue517(unittest.TestCase):
     """
     Test suite for Issue #517 - Redis Import Error in Rate Limiter Service

@@ -11,131 +11,76 @@ to prevent regression of singleton patterns in future development.
 Created: 2025-09-14
 Issue: #1142 - SSOT Agent Factory Singleton violation blocking Golden Path
 """
-
 import pytest
 import ast
 import inspect
 from pathlib import Path
 from typing import List, Dict, Any, Set
 from unittest.mock import patch
-
-# Test framework imports
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-
-# Import modules to scan for singleton patterns
 from netra_backend.app.agents.supervisor import agent_instance_factory
 from netra_backend.app import dependencies
 
-
 class SingletonPatternScanner:
     """Utility class to scan Python modules for singleton patterns."""
-    
+
     @staticmethod
     def scan_for_global_variables(module_path: str) -> List[Dict[str, Any]]:
         """Scan a Python file for global variables that could be singletons."""
         global_vars = []
-        
         with open(module_path, 'r') as file:
             content = file.read()
             tree = ast.parse(content)
-            
             for node in ast.walk(tree):
                 if isinstance(node, ast.Assign):
                     for target in node.targets:
                         if isinstance(target, ast.Name):
-                            # Look for global variable assignments
                             if target.id.startswith('_') and 'instance' in target.id.lower():
-                                global_vars.append({
-                                    'name': target.id,
-                                    'line': node.lineno,
-                                    'module': module_path
-                                })
+                                global_vars.append({'name': target.id, 'line': node.lineno, 'module': module_path})
                             elif target.id.isupper() and 'FACTORY' in target.id:
-                                global_vars.append({
-                                    'name': target.id,
-                                    'line': node.lineno,
-                                    'module': module_path
-                                })
-        
+                                global_vars.append({'name': target.id, 'line': node.lineno, 'module': module_path})
         return global_vars
-    
+
     @staticmethod
     def scan_for_singleton_functions(module_path: str) -> List[Dict[str, Any]]:
         """Scan for functions that implement singleton patterns."""
         singleton_functions = []
-        
         with open(module_path, 'r') as file:
             content = file.read()
             tree = ast.parse(content)
-            
             for node in ast.walk(tree):
                 if isinstance(node, ast.FunctionDef):
-                    # Look for get_* functions that might be singletons
                     if node.name.startswith('get_') and 'factory' in node.name.lower():
-                        # Check if function uses global variables
                         for child in ast.walk(node):
                             if isinstance(child, ast.Global):
-                                singleton_functions.append({
-                                    'name': node.name,
-                                    'line': node.lineno,
-                                    'module': module_path,
-                                    'uses_global': True
-                                })
+                                singleton_functions.append({'name': node.name, 'line': node.lineno, 'module': module_path, 'uses_global': True})
                                 break
-        
         return singleton_functions
-    
+
     @staticmethod
     def scan_for_shared_state_patterns(module_path: str) -> List[Dict[str, Any]]:
         """Scan for patterns that indicate shared state between users."""
         shared_state_patterns = []
-        
         with open(module_path, 'r') as file:
             content = file.read()
-            
-            # Look for suspicious patterns in the code
             lines = content.split('\n')
             for i, line in enumerate(lines, 1):
                 line_lower = line.lower()
-                
-                # Check for shared cache or storage patterns
-                if any(pattern in line_lower for pattern in [
-                    'global cache', 'shared_cache', 'global_storage',
-                    'singleton', 'shared_instance'
-                ]):
-                    shared_state_patterns.append({
-                        'pattern': line.strip(),
-                        'line': i,
-                        'module': module_path,
-                        'type': 'shared_state'
-                    })
-        
+                if any((pattern in line_lower for pattern in ['global cache', 'shared_cache', 'global_storage', 'singleton', 'shared_instance'])):
+                    shared_state_patterns.append({'pattern': line.strip(), 'line': i, 'module': module_path, 'type': 'shared_state'})
         return shared_state_patterns
 
-
+@pytest.mark.unit
 class TestSingletonPatternRegression1142(SSotBaseTestCase):
     """Test suite to prevent singleton pattern regression."""
-    
+
     def setUp(self):
         """Set up test fixtures."""
         super().setUp()
-        
-        # Modules to scan for singleton patterns
         self.factory_module_path = Path(agent_instance_factory.__file__)
         self.dependencies_module_path = Path(dependencies.__file__)
-        
-        # Acceptable global variables (not singletons)
-        self.allowed_global_variables = {
-            '_factory_instance',  # Legacy compatibility (should be deprecated)
-            'logger',  # Logging is acceptable
-            'TYPE_CHECKING'  # Type checking imports
-        }
-        
-        # Acceptable singleton functions (deprecated but allowed during transition)
-        self.allowed_singleton_functions = {
-            'get_agent_instance_factory',  # Deprecated but allowed with warnings
-            'configure_agent_instance_factory'  # Deprecated but allowed with warnings
-        }
+        self.allowed_global_variables = {'_factory_instance', 'logger', 'TYPE_CHECKING'}
+        self.allowed_singleton_functions = {'get_agent_instance_factory', 'configure_agent_instance_factory'}
 
     def test_no_new_global_singleton_variables(self):
         """
@@ -147,24 +92,13 @@ class TestSingletonPatternRegression1142(SSotBaseTestCase):
         Expected: PASS - No new global singleton variables detected
         """
         scanner = SingletonPatternScanner()
-        
-        # Scan factory module for global variables
         factory_globals = scanner.scan_for_global_variables(str(self.factory_module_path))
         dependencies_globals = scanner.scan_for_global_variables(str(self.dependencies_module_path))
-        
-        # Filter out allowed globals
         problematic_globals = []
         for global_var in factory_globals + dependencies_globals:
             if global_var['name'] not in self.allowed_global_variables:
                 problematic_globals.append(global_var)
-        
-        # REGRESSION PREVENTION: No new global singletons should exist
-        assert len(problematic_globals) == 0, (
-            f"SINGLETON REGRESSION DETECTED: New global singleton variables found. "
-            f"This violates SSOT user isolation patterns. "
-            f"Problematic globals: {problematic_globals}. "
-            f"Remove these globals and use per-request factory pattern instead."
-        )
+        assert len(problematic_globals) == 0, f'SINGLETON REGRESSION DETECTED: New global singleton variables found. This violates SSOT user isolation patterns. Problematic globals: {problematic_globals}. Remove these globals and use per-request factory pattern instead.'
 
     def test_no_new_singleton_functions(self):
         """
@@ -176,24 +110,13 @@ class TestSingletonPatternRegression1142(SSotBaseTestCase):
         Expected: PASS - No new singleton functions detected
         """
         scanner = SingletonPatternScanner()
-        
-        # Scan for singleton function patterns
         factory_singletons = scanner.scan_for_singleton_functions(str(self.factory_module_path))
         dependencies_singletons = scanner.scan_for_singleton_functions(str(self.dependencies_module_path))
-        
-        # Filter out allowed singleton functions (deprecated but acceptable)
         problematic_singletons = []
         for singleton_func in factory_singletons + dependencies_singletons:
             if singleton_func['name'] not in self.allowed_singleton_functions:
                 problematic_singletons.append(singleton_func)
-        
-        # REGRESSION PREVENTION: No new singleton functions should exist
-        assert len(problematic_singletons) == 0, (
-            f"SINGLETON FUNCTION REGRESSION: New singleton functions detected. "
-            f"This violates SSOT per-request isolation patterns. "
-            f"Problematic functions: {problematic_singletons}. "
-            f"Use create_agent_instance_factory(user_context) pattern instead."
-        )
+        assert len(problematic_singletons) == 0, f'SINGLETON FUNCTION REGRESSION: New singleton functions detected. This violates SSOT per-request isolation patterns. Problematic functions: {problematic_singletons}. Use create_agent_instance_factory(user_context) pattern instead.'
 
     def test_no_shared_state_patterns(self):
         """
@@ -205,20 +128,10 @@ class TestSingletonPatternRegression1142(SSotBaseTestCase):
         Expected: PASS - No shared state patterns detected
         """
         scanner = SingletonPatternScanner()
-        
-        # Scan for shared state patterns
         factory_shared_state = scanner.scan_for_shared_state_patterns(str(self.factory_module_path))
         dependencies_shared_state = scanner.scan_for_shared_state_patterns(str(self.dependencies_module_path))
-        
         all_shared_patterns = factory_shared_state + dependencies_shared_state
-        
-        # REGRESSION PREVENTION: No shared state patterns should exist
-        assert len(all_shared_patterns) == 0, (
-            f"SHARED STATE REGRESSION: Shared state patterns detected. "
-            f"This can cause multi-user data contamination. "
-            f"Patterns found: {all_shared_patterns}. "
-            f"Use per-request isolation patterns instead."
-        )
+        assert len(all_shared_patterns) == 0, f'SHARED STATE REGRESSION: Shared state patterns detected. This can cause multi-user data contamination. Patterns found: {all_shared_patterns}. Use per-request isolation patterns instead.'
 
     def test_legacy_singleton_functions_show_deprecation_warnings(self):
         """
@@ -230,20 +143,11 @@ class TestSingletonPatternRegression1142(SSotBaseTestCase):
         Expected: PASS - Deprecation warnings are properly shown
         """
         import warnings
-        
-        # Test get_agent_instance_factory deprecation warning
         with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            
-            # Import and call the legacy function
+            warnings.simplefilter('always')
             from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
-            
             factory = get_agent_instance_factory()
-            
-            # Should not be None
-            assert factory is not None, (
-                "LEGACY FUNCTION: get_agent_instance_factory() should return a factory instance"
-            )
+            assert factory is not None, 'LEGACY FUNCTION: get_agent_instance_factory() should return a factory instance'
 
     def test_factory_module_exports_correct_functions(self):
         """
@@ -254,24 +158,12 @@ class TestSingletonPatternRegression1142(SSotBaseTestCase):
         
         Expected: PASS - Correct SSOT functions are exported
         """
-        # Check that SSOT function is available
-        assert hasattr(agent_instance_factory, 'create_agent_instance_factory'), (
-            "SSOT EXPORT: Module should export create_agent_instance_factory function"
-        )
-        
-        # Check that function is callable
+        assert hasattr(agent_instance_factory, 'create_agent_instance_factory'), 'SSOT EXPORT: Module should export create_agent_instance_factory function'
         create_function = getattr(agent_instance_factory, 'create_agent_instance_factory')
-        assert callable(create_function), (
-            "SSOT FUNCTION: create_agent_instance_factory should be callable"
-        )
-        
-        # Check function signature accepts user_context
+        assert callable(create_function), 'SSOT FUNCTION: create_agent_instance_factory should be callable'
         sig = inspect.signature(create_function)
         param_names = list(sig.parameters.keys())
-        assert 'user_context' in param_names, (
-            f"SSOT SIGNATURE: create_agent_instance_factory should accept user_context parameter. "
-            f"Current parameters: {param_names}"
-        )
+        assert 'user_context' in param_names, f'SSOT SIGNATURE: create_agent_instance_factory should accept user_context parameter. Current parameters: {param_names}'
 
     def test_dependencies_module_uses_correct_patterns(self):
         """
@@ -282,24 +174,12 @@ class TestSingletonPatternRegression1142(SSotBaseTestCase):
         
         Expected: PASS - Dependencies use SSOT per-request patterns
         """
-        # Check that dependency function exists
-        assert hasattr(dependencies, 'get_agent_instance_factory_dependency'), (
-            "DEPENDENCY EXPORT: Dependencies should export get_agent_instance_factory_dependency"
-        )
-        
-        # Check that function is async (required for proper dependency injection)
+        assert hasattr(dependencies, 'get_agent_instance_factory_dependency'), 'DEPENDENCY EXPORT: Dependencies should export get_agent_instance_factory_dependency'
         dep_function = getattr(dependencies, 'get_agent_instance_factory_dependency')
-        assert inspect.iscoroutinefunction(dep_function), (
-            "DEPENDENCY ASYNC: get_agent_instance_factory_dependency should be async function"
-        )
-        
-        # Check function signature accepts Request
+        assert inspect.iscoroutinefunction(dep_function), 'DEPENDENCY ASYNC: get_agent_instance_factory_dependency should be async function'
         sig = inspect.signature(dep_function)
         param_names = list(sig.parameters.keys())
-        assert 'request' in param_names, (
-            f"DEPENDENCY SIGNATURE: Function should accept Request parameter. "
-            f"Current parameters: {param_names}"
-        )
+        assert 'request' in param_names, f'DEPENDENCY SIGNATURE: Function should accept Request parameter. Current parameters: {param_names}'
 
     def test_no_module_level_factory_instances(self):
         """
@@ -310,33 +190,14 @@ class TestSingletonPatternRegression1142(SSotBaseTestCase):
         
         Expected: PASS - No module-level factory instances detected
         """
-        # Check agent_instance_factory module
-        factory_attributes = [attr for attr in dir(agent_instance_factory) 
-                            if not attr.startswith('__')]
-        
+        factory_attributes = [attr for attr in dir(agent_instance_factory) if not attr.startswith('__')]
         problematic_instances = []
         for attr_name in factory_attributes:
             attr_value = getattr(agent_instance_factory, attr_name)
-            
-            # Check if it's a factory instance (not a class or function)
-            if (hasattr(attr_value, '__class__') and 
-                'AgentInstanceFactory' in str(attr_value.__class__) and
-                not inspect.isclass(attr_value) and
-                not inspect.isfunction(attr_value)):
-                problematic_instances.append({
-                    'name': attr_name,
-                    'type': str(type(attr_value)),
-                    'module': 'agent_instance_factory'
-                })
-        
-        # REGRESSION PREVENTION: No module-level factory instances
-        assert len(problematic_instances) == 0, (
-            f"MODULE INSTANCE REGRESSION: Factory instances found at module level. "
-            f"This creates shared singleton state. "
-            f"Instances: {problematic_instances}. "
-            f"Move these to per-request creation patterns."
-        )
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+            if hasattr(attr_value, '__class__') and 'AgentInstanceFactory' in str(attr_value.__class__) and (not inspect.isclass(attr_value)) and (not inspect.isfunction(attr_value)):
+                problematic_instances.append({'name': attr_name, 'type': str(type(attr_value)), 'module': 'agent_instance_factory'})
+        assert len(problematic_instances) == 0, f'MODULE INSTANCE REGRESSION: Factory instances found at module level. This creates shared singleton state. Instances: {problematic_instances}. Move these to per-request creation patterns.'
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

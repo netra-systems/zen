@@ -25,7 +25,7 @@ from shared.types.core_types import WebSocketEventType, UserID, ThreadID, Reques
 from test_framework.ssot.websocket import WebSocketTestUtility, WebSocketEventType as TestEventType
 
 # Import production WebSocket components - NO MOCKS per CLAUDE.md
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 

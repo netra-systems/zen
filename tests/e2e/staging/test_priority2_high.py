@@ -23,6 +23,7 @@ from tests.e2e.staging_test_config import get_staging_config
 pytestmark = [pytest.mark.staging, pytest.mark.high, pytest.mark.real]
 
 
+@pytest.mark.e2e
 class TestHighAuthentication:
     """Tests 26-30: REAL Authentication Tests"""
     
@@ -346,6 +347,7 @@ class TestHighAuthentication:
         assert logout_results["health_after_logout"]["healthy"], "Health check should still work"
 
 
+@pytest.mark.e2e
 class TestHighSecurity:
     """Tests 31-35: REAL Security Controls Testing"""
     

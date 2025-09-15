@@ -56,6 +56,7 @@ import ast
 import inspect
 
 
+@pytest.mark.unit
 class TestUUIDViolationDetection(SSotBaseTestCase):
     """Unit tests to detect direct UUID violations requiring migration."""
     
@@ -411,6 +412,7 @@ class TestUUIDViolationDetection(SSotBaseTestCase):
         return bool(re.match(EXPECTED_UNIFIED_PATTERN, id_value))
 
 
+@pytest.mark.unit
 class TestIDMigrationImpactAnalysis(SSotBaseTestCase):
     """Tests to analyze the business impact of ID migration gaps."""
     

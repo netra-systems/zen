@@ -307,4 +307,3 @@ WebSocketConnection
 
 
                                 # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-                                    # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v"])

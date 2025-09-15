@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.base.interface import ExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.chat_orchestrator.confidence_manager import (
     ConfidenceManager,
 )
@@ -46,9 +47,10 @@ class ChatOrchestrator(SupervisorAgent):
                  websocket_manager,
                  tool_dispatcher: UnifiedToolDispatcher,
                  cache_manager=None,
-                 semantic_cache_enabled: bool = True):
+                 semantic_cache_enabled: bool = True,
+                 user_context: Optional[UserExecutionContext] = None):
         # SupervisorAgent uses UserExecutionContext pattern - only needs llm_manager and websocket_bridge
-        super().__init__(llm_manager, websocket_manager)
+        super().__init__(llm_manager, websocket_manager, user_context=user_context)
         
         # Store additional ChatOrchestrator-specific dependencies
         self.db_session = db_session

@@ -45,6 +45,7 @@ from netra_backend.app.services.unified_authentication_service import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.integration
 class TestWebSocketAuthenticationFlow(SSotAsyncTestCase):
     """
     Integration tests for core WebSocket authentication flows.

@@ -22,6 +22,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.unit
 class TestExecutionEngineWebSocketNotifications(SSotAsyncTestCase):
     """Test WebSocket notification behavior in agent execution success path."""
 

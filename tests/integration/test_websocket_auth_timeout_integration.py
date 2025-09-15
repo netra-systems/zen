@@ -25,6 +25,7 @@ from fastapi import HTTPException
 import httpx
 
 
+@pytest.mark.integration
 class TestWebSocketAuthTimeoutIntegration(SSotAsyncTestCase):
     """
     Integration tests to reproduce WebSocket authentication timeout failures.

@@ -10,6 +10,7 @@ Ensures all services use unified environment management without cross-dependenci
 CRITICAL: These tests use real services (NO DOCKER) and SSotBaseTestCase patterns.
 """
 
+import pytest
 import asyncio
 import sys
 from pathlib import Path
@@ -19,6 +20,7 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestServiceEnvironmentComplianceIntegration(SSotAsyncTestCase):
     """
     Integration tests for validating SSOT environment compliance across services.

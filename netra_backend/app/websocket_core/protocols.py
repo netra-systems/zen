@@ -22,10 +22,10 @@ preventing future AttributeError and method missing errors.
 
 import asyncio
 from typing import Dict, Optional, Set, Any, List, Protocol, runtime_checkable, Union
-from datetime import datetime
+from datetime import datetime, timezone
 from abc import abstractmethod
 
-from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+from netra_backend.app.websocket_core.types import WebSocketConnection
 from shared.logging.unified_logging_ssot import get_logger
 from shared.types.core_types import (
     UserID, ThreadID, ConnectionID, WebSocketID, RequestID,
@@ -258,7 +258,7 @@ class WebSocketProtocolValidator:
             
         Example:
             >>> from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            >>> manager = await get_websocket_manager(user_context)
+            >>> manager = get_websocket_manager(user_context)
             >>> result = WebSocketManagerProtocolValidator.validate_manager_protocol(manager)
             >>> if not result['compliant']:
             ...     raise ValueError(f"Manager not protocol compliant: {result['missing_methods']}")
@@ -271,7 +271,7 @@ class WebSocketProtocolValidator:
             'invalid_signatures': [],
             'method_check_details': {},
             'protocol_version': '1.0.0',
-            'validation_timestamp': datetime.utcnow().isoformat()
+            'validation_timestamp': datetime.now(timezone.utc).isoformat()
         }
         
         # Define required methods with their expected signatures

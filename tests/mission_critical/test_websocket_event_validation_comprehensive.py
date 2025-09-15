@@ -815,4 +815,6 @@ class TestComprehensiveWebSocketEventValidation:
 
 if __name__ == "__main__":
     # Run specific test for debugging
-    pytest.main([__file__, "-v", "--tb=short", "-k", "test_complete_event_sequence_validation"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

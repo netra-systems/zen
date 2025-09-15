@@ -250,7 +250,7 @@ class MockOrchestrator:
 @pytest.fixture
 async def real_websocket_manager():
     """Real WebSocket manager fixture - NO MOCKS."""
-    from netra_backend.app.websocket_core import get_websocket_manager
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
     manager = get_websocket_manager()
     yield manager
 
@@ -1437,11 +1437,6 @@ class TestBusinessMetrics:
 
 if __name__ == "__main__":
     # Run comprehensive critical flows test suite
-    pytest.main([
-        __file__,
-        "-v",
-        "--tb=short", 
-        "--asyncio-mode=auto",
-        "-s",  # Show print statements
-        "--maxfail=5"  # Stop after 5 failures for faster feedback
-    ])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

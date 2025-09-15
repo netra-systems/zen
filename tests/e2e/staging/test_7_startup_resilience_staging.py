@@ -4,6 +4,7 @@ Tests startup reliability
 Business Value: System availability
 """
 
+import pytest
 import asyncio
 import time
 from typing import List
@@ -12,6 +13,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from tests.e2e.staging_test_base import StagingTestBase, staging_test
 
 
+@pytest.mark.e2e
 class TestStartupResilienceStaging(StagingTestBase):
     """Test startup resilience in staging environment"""
     

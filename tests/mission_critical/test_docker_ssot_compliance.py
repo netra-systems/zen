@@ -36,7 +36,6 @@ from typing import Dict, List, Set, Any, Optional, Tuple
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
-from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from shared.isolated_environment import IsolatedEnvironment
 
 # SSOT imports - the ONLY allowed Docker management interfaces
@@ -564,4 +563,6 @@ class TestDockerSSOTInfrastructure:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--tb=short"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

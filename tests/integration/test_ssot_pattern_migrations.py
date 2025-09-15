@@ -61,6 +61,7 @@ async def ssot_migration_auth_fixture():
     }
 
 
+@pytest.mark.integration
 class TestSSOTPatternMigrations(SSotBaseTestCase):
     """
     SSOT Pattern Migration Validation Tests.

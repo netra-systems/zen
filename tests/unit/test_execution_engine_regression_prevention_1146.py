@@ -16,6 +16,7 @@ Docker: NO DEPENDENCIES - Unit tests only
 NEW TEST: Part of 20% new validation tests for Issue #1146
 """
 
+import pytest
 import ast
 import os
 import sys
@@ -29,6 +30,7 @@ from unittest.mock import Mock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestExecutionEngineRegressionPrevention1146(SSotBaseTestCase):
     """Prevents regression to multiple execution engine implementations."""
 

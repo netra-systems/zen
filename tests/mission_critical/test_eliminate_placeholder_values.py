@@ -704,7 +704,6 @@
                 # Main test runner
                 # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
                     # Run with detailed output
-                    # REMOVED_SYNTAX_ERROR: pytest.main([ ))
                     # REMOVED_SYNTAX_ERROR: __file__,
                     # REMOVED_SYNTAX_ERROR: "-v",
                     # REMOVED_SYNTAX_ERROR: "--tb=short",

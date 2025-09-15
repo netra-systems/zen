@@ -12,6 +12,7 @@ Business Impact: $500K+ ARR Golden Path protection - configuration controls all 
 Integration Level: Tests with real configuration, real environment access, real service configs (NO DOCKER)
 """
 
+import pytest
 import asyncio
 import os
 import sys
@@ -59,6 +60,7 @@ class ConfigurationAccessCapture:
         })
 
 
+@pytest.mark.integration
 class TestConfigurationIntegration(SSotAsyncTestCase):
     """Integration Test 7: Validate configuration integration with UserExecutionEngine SSOT"""
     

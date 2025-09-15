@@ -670,4 +670,6 @@ if __name__ == "__main__":
     Expected Result: ALL TESTS SHOULD PASS for proper chat functionality.
     These tests are mission critical for the Golden Path: Users login  ->  get AI responses.
     """
-    pytest.main([__file__, "-v", "--tb=short", "-x"])  # Stop on first failure
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution  # Stop on first failure

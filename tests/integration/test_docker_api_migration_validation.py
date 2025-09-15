@@ -25,7 +25,6 @@ Business Value Justification:
 @compliance CLAUDE.md - Real tests that fail properly, comprehensive validation
 @compliance SPEC/core.xml - API consistency and migration validation
 """
-
 import asyncio
 import os
 import re
@@ -34,20 +33,18 @@ from typing import List, Dict, Set, Tuple, Any
 from unittest.mock import Mock, patch, AsyncMock
 import pytest
 import inspect
-
-# CRITICAL: Import actual classes for API validation
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
 
-
+@pytest.mark.integration
 class TestDockerAPIMigrationValidation:
     """Validate Docker API migration and identify legacy patterns."""
-    
+
     def setup_method(self):
         """Set up test environment for API validation."""
         self.project_root = Path(__file__).parent.parent.parent
         self.legacy_patterns_found = []
         self.working_patterns_found = []
-    
+
     def test_scan_for_legacy_acquire_environment_calls(self):
         """FAILING TEST: Find all legacy acquire_environment() calls with parameters.
         
@@ -56,135 +53,73 @@ class TestDockerAPIMigrationValidation:
         """
         legacy_pattern_files = []
         legacy_call_details = []
-        
-        # Define file patterns to scan
-        scan_patterns = [
-            "**/*.py",
-        ]
-        
-        # Define directories to exclude
-        exclude_dirs = {
-            ".git", "__pycache__", ".pytest_cache", "node_modules", 
-            ".venv", "venv", "backup", ".mypy_cache"
-        }
-        
-        # Scan for legacy API patterns
+        scan_patterns = ['**/*.py']
+        exclude_dirs = {'.git', '__pycache__', '.pytest_cache', 'node_modules', '.venv', 'venv', 'backup', '.mypy_cache'}
         for pattern in scan_patterns:
             for file_path in self.project_root.rglob(pattern):
-                # Skip excluded directories
-                if any(exclude_dir in file_path.parts for exclude_dir in exclude_dirs):
+                if any((exclude_dir in file_path.parts for exclude_dir in exclude_dirs)):
                     continue
-                
                 try:
                     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                         content = f.read()
                         lines = content.split('\n')
-                    
-                    # Look for legacy acquire_environment patterns (including multiline)
                     for line_num, line in enumerate(lines, 1):
                         if 'acquire_environment(' in line:
-                            # Check current line and next few lines for legacy parameters
-                            search_lines = lines[line_num-1:min(line_num+5, len(lines))]
+                            search_lines = lines[line_num - 1:min(line_num + 5, len(lines))]
                             search_content = ' '.join(search_lines)
-                            
                             legacy_params = ['env_name=', 'use_alpine=', 'rebuild_images=']
-                            if any(param in search_content for param in legacy_params):
+                            if any((param in search_content for param in legacy_params)):
                                 relative_path = file_path.relative_to(self.project_root)
                                 legacy_pattern_files.append(str(relative_path))
-                                legacy_call_details.append({
-                                    'file': str(relative_path),
-                                    'line': line_num,
-                                    'content': line.strip()
-                                })
-                
+                                legacy_call_details.append({'file': str(relative_path), 'line': line_num, 'content': line.strip()})
                 except (OSError, UnicodeDecodeError):
-                    # Skip files that can't be read
                     continue
-        
-        # Remove duplicates
         legacy_pattern_files = list(set(legacy_pattern_files))
-        
-        # This assertion will initially FAIL, showing all files needing updates
         if legacy_pattern_files:
-            error_message = (
-                f"Found {len(legacy_pattern_files)} files with legacy acquire_environment() calls:\n"
-            )
+            error_message = f'Found {len(legacy_pattern_files)} files with legacy acquire_environment() calls:\n'
             for detail in legacy_call_details:
                 error_message += f"  {detail['file']}:{detail['line']} - {detail['content']}\n"
-            
-            error_message += "\nThese files need to be updated to use start_services_smart() pattern."
-        
+            error_message += '\nThese files need to be updated to use start_services_smart() pattern.'
         assert not legacy_pattern_files, error_message
-    
+
     def test_validate_start_services_smart_usage_patterns(self):
         """PASSING TEST: Validate all start_services_smart() calls use correct patterns."""
         working_pattern_files = []
         working_call_details = []
-        
-        # Scan for start_services_smart patterns
-        for file_path in self.project_root.rglob("**/*.py"):
-            # Skip excluded directories
-            exclude_dirs = {".git", "__pycache__", ".pytest_cache", "backup"}
-            if any(exclude_dir in file_path.parts for exclude_dir in exclude_dirs):
+        for file_path in self.project_root.rglob('**/*.py'):
+            exclude_dirs = {'.git', '__pycache__', '.pytest_cache', 'backup'}
+            if any((exclude_dir in file_path.parts for exclude_dir in exclude_dirs)):
                 continue
-            
             try:
                 with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                     content = f.read()
                     lines = content.split('\n')
-                
-                # Look for start_services_smart patterns
                 for line_num, line in enumerate(lines, 1):
                     if 'start_services_smart(' in line:
                         relative_path = file_path.relative_to(self.project_root)
                         working_pattern_files.append(str(relative_path))
-                        working_call_details.append({
-                            'file': str(relative_path),
-                            'line': line_num,
-                            'content': line.strip()
-                        })
-            
+                        working_call_details.append({'file': str(relative_path), 'line': line_num, 'content': line.strip()})
             except (OSError, UnicodeDecodeError):
                 continue
-        
-        # Validate we found some working patterns
-        assert working_pattern_files, (
-            "Should find at least some start_services_smart() usage patterns in codebase"
-        )
-        
-        # Log found patterns for validation
-        print(f"\n✅ Found {len(working_call_details)} start_services_smart() calls:")
-        for detail in working_call_details[:5]:  # Show first 5
+        assert working_pattern_files, 'Should find at least some start_services_smart() usage patterns in codebase'
+        print(f'\n✅ Found {len(working_call_details)} start_services_smart() calls:')
+        for detail in working_call_details[:5]:
             print(f"  {detail['file']}:{detail['line']} - {detail['content']}")
-        
         self.working_patterns_found = working_call_details
-    
+
     def test_api_signature_consistency_validation(self):
         """PASSING TEST: Validate UnifiedDockerManager API signatures are consistent."""
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
-        
-        # Test acquire_environment signature
         acquire_sig = inspect.signature(manager.acquire_environment)
         acquire_params = list(acquire_sig.parameters.keys())
-        
-        # Should only have 'self' parameter
-        assert acquire_params == ['self'], (
-            f"acquire_environment should only have 'self' parameter, got: {acquire_params}"
-        )
-        
-        # Test start_services_smart signature
+        assert acquire_params == ['self'], f"acquire_environment should only have 'self' parameter, got: {acquire_params}"
         if hasattr(manager, 'start_services_smart'):
             smart_sig = inspect.signature(manager.start_services_smart)
             smart_params = list(smart_sig.parameters.keys())
-            
-            # Should have self, services, and wait_healthy parameters
             expected_params = ['self', 'services', 'wait_healthy']
-            assert all(param in smart_params for param in expected_params), (
-                f"start_services_smart should have {expected_params}, got: {smart_params}"
-            )
-        
-        print("✅ API signatures are consistent")
-    
+            assert all((param in smart_params for param in expected_params)), f'start_services_smart should have {expected_params}, got: {smart_params}'
+        print('✅ API signatures are consistent')
+
     def test_working_docker_api_pattern_integration(self):
         """PASSING TEST: Validate the working Docker API pattern works correctly.
         
@@ -192,42 +127,22 @@ class TestDockerAPIMigrationValidation:
         legacy acquire_environment() calls.
         """
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
-        
-        # Mock the async method to test without Docker
-        async def mock_start_services_smart(services: List[str], wait_healthy: bool = True):
+
+        async def mock_start_services_smart(services: List[str], wait_healthy: bool=True):
             """Mock implementation that simulates successful service start."""
-            # Simulate validation logic
             if not services:
                 return False
-            
             if not isinstance(services, list):
                 return False
-            
-            # Simulate successful start
             return True
-        
-        # Test the working pattern with mock
         with patch.object(manager, 'start_services_smart', side_effect=mock_start_services_smart):
-            # This is the CORRECT pattern for auth services
-            result = asyncio.run(manager.start_services_smart(
-                services=["postgres", "redis", "auth"],
-                wait_healthy=True
-            ))
-            
-            assert result == True, "Working pattern should return True for successful start"
-        
-        # Test with different service combinations
+            result = asyncio.run(manager.start_services_smart(services=['postgres', 'redis', 'auth'], wait_healthy=True))
+            assert result == True, 'Working pattern should return True for successful start'
         with patch.object(manager, 'start_services_smart', side_effect=mock_start_services_smart):
-            # Backend services pattern
-            result = asyncio.run(manager.start_services_smart(
-                services=["postgres", "redis", "backend"],
-                wait_healthy=True
-            ))
-            
-            assert result == True, "Backend services pattern should work"
-        
-        print("✅ Working Docker API pattern validated")
-    
+            result = asyncio.run(manager.start_services_smart(services=['postgres', 'redis', 'backend'], wait_healthy=True))
+            assert result == True, 'Backend services pattern should work'
+        print('✅ Working Docker API pattern validated')
+
     def test_legacy_api_compatibility_removed(self):
         """PASSING TEST: Validate legacy API compatibility has been intentionally removed.
         
@@ -235,104 +150,58 @@ class TestDockerAPIMigrationValidation:
         preventing accidental usage.
         """
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
-        
-        # Test various legacy parameter combinations
-        legacy_combinations = [
-            {"env_name": "test"},
-            {"use_alpine": True},
-            {"rebuild_images": True},
-            {"env_name": "test", "use_alpine": True},
-            {"env_name": "test", "use_alpine": True, "rebuild_images": True},
-        ]
-        
+        legacy_combinations = [{'env_name': 'test'}, {'use_alpine': True}, {'rebuild_images': True}, {'env_name': 'test', 'use_alpine': True}, {'env_name': 'test', 'use_alpine': True, 'rebuild_images': True}]
         for legacy_params in legacy_combinations:
             with pytest.raises(TypeError):
                 manager.acquire_environment(**legacy_params)
-        
-        print(f"✅ All {len(legacy_combinations)} legacy parameter combinations properly rejected")
+        print(f'✅ All {len(legacy_combinations)} legacy parameter combinations properly rejected')
 
-
+@pytest.mark.integration
 class TestAuthServiceAPIPatternMigration:
     """Validate auth service specific API pattern migration."""
-    
+
     def test_auth_service_docker_setup_migration_pattern(self):
         """DEMONSTRATION: Show correct migration pattern for auth service Docker setup.
         
         This test demonstrates how the failing auth E2E test should be fixed.
         """
-        # BROKEN PATTERN (from auth_service/tests/e2e/test_auth_service_business_flows.py)
         manager = UnifiedDockerManager()
-        
         broken_pattern_fails = False
         try:
-            # This is the broken pattern that causes Issue #552
-            env_info = manager.acquire_environment(
-                env_name="test",
-                use_alpine=True,
-                rebuild_images=True
-            )
+            env_info = manager.acquire_environment(env_name='test', use_alpine=True, rebuild_images=True)
         except TypeError:
             broken_pattern_fails = True
-        
-        assert broken_pattern_fails, "Broken pattern should fail to demonstrate Issue #552"
-        
-        # CORRECT PATTERN (what should be used instead)
+        assert broken_pattern_fails, 'Broken pattern should fail to demonstrate Issue #552'
+
         async def correct_pattern():
             with patch.object(manager, 'start_services_smart') as mock_start:
                 mock_start.return_value = True
-                
-                # This is the CORRECT pattern
-                success = await manager.start_services_smart(
-                    services=["postgres", "redis", "auth"],
-                    wait_healthy=True
-                )
+                success = await manager.start_services_smart(services=['postgres', 'redis', 'auth'], wait_healthy=True)
                 return success
-        
-        # Test correct pattern works
         result = asyncio.run(correct_pattern())
-        assert result == True, "Correct pattern should work"
-        
-        print("✅ Auth service migration pattern validated")
-    
+        assert result == True, 'Correct pattern should work'
+        print('✅ Auth service migration pattern validated')
+
     def test_comprehensive_auth_service_dependencies_pattern(self):
         """PASSING TEST: Validate comprehensive auth service dependency startup pattern."""
         manager = UnifiedDockerManager()
-        
-        # Mock successful service startup
-        async def mock_successful_start(services: List[str], wait_healthy: bool = True):
-            # Simulate validation of required auth services
-            required_services = {"postgres", "redis", "auth"}
+
+        async def mock_successful_start(services: List[str], wait_healthy: bool=True):
+            required_services = {'postgres', 'redis', 'auth'}
             provided_services = set(services)
-            
-            # Check if all required services are provided
             if not required_services.issubset(provided_services):
                 missing = required_services - provided_services
-                print(f"Missing required services: {missing}")
+                print(f'Missing required services: {missing}')
                 return False
-            
             return True
-        
         with patch.object(manager, 'start_services_smart', side_effect=mock_successful_start):
-            # Test comprehensive auth service setup
-            result = asyncio.run(manager.start_services_smart(
-                services=["postgres", "redis", "auth", "backend"],
-                wait_healthy=True
-            ))
-            
-            assert result == True, "Comprehensive auth setup should succeed"
-        
-        # Test minimal auth service setup
+            result = asyncio.run(manager.start_services_smart(services=['postgres', 'redis', 'auth', 'backend'], wait_healthy=True))
+            assert result == True, 'Comprehensive auth setup should succeed'
         with patch.object(manager, 'start_services_smart', side_effect=mock_successful_start):
-            result = asyncio.run(manager.start_services_smart(
-                services=["postgres", "redis", "auth"],
-                wait_healthy=True
-            ))
-            
-            assert result == True, "Minimal auth setup should succeed"
-        
-        print("✅ Comprehensive auth service dependency patterns validated")
-
-
-if __name__ == "__main__":
-    # Allow running this test file directly for development
-    pytest.main([__file__, "-v", "-s"])
+            result = asyncio.run(manager.start_services_smart(services=['postgres', 'redis', 'auth'], wait_healthy=True))
+            assert result == True, 'Minimal auth setup should succeed'
+        print('✅ Comprehensive auth service dependency patterns validated')
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

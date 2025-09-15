@@ -11,6 +11,7 @@ import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
+@pytest.mark.unit
 class TestIssue551ProofValidation(BaseIntegrationTest):
     """
     Proof tests for Issue #551 resolution.

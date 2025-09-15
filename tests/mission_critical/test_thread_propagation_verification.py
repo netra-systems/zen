@@ -206,7 +206,7 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
                 )
 
                 # Initialize WebSocket manager with proper user context
-                self.websocket_manager = await get_websocket_manager(user_context=user_context)
+                self.websocket_manager = get_websocket_manager(user_context=user_context)
                 logger.info(f"WebSocket manager initialized with user context: {self.user_id[:8]}")
 
                 # Connect with thread context
@@ -336,7 +336,7 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
                     thread_id=self.thread_id,
                     run_id=f"test_isolation_{uuid.uuid4().hex[:8]}"
                 )
-                self.websocket_manager = await get_websocket_manager(user_context=test_user_context)
+                self.websocket_manager = get_websocket_manager(user_context=test_user_context)
 
                 # Simulate concurrent processing
                 connection_results = []
@@ -379,4 +379,6 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
 if __name__ == "__main__":
     # Run tests with verbose output to see failures
     import sys
-    sys.exit(pytest.main([__file__, "-v", "-s", "--tb=short"]))
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

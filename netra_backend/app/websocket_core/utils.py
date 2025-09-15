@@ -538,7 +538,7 @@ async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], 
                 await websocket.send_text(data)
             else:
                 # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
-                from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+                from netra_backend.app.websocket_core.types import _serialize_message_safely
                 safe_data = _serialize_message_safely(data)
                 await websocket.send_json(safe_data)
             

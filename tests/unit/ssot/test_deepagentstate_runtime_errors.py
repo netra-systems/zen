@@ -13,6 +13,7 @@ from typing import Optional
 from unittest.mock import Mock, patch
 
 
+@pytest.mark.unit
 class TestDeepAgentStateRuntimeErrorPrevention:
     """Test suite reproducing runtime errors from DeepAgentState SSOT violation"""
 

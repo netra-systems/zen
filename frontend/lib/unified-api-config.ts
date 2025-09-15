@@ -39,6 +39,7 @@ interface UnifiedApiConfig {
     authToken: string;
     authRefresh: string;
     authValidate: string;
+    authValidateTokenAndGetUser: string;
     authSession: string;
     authMe: string;
   };
@@ -56,43 +57,50 @@ interface UnifiedApiConfig {
 /**
  * Detect current environment with clear precedence
  * 1. NEXT_PUBLIC_ENVIRONMENT (explicit)
- * 2. NODE_ENV mapping
- * 3. Domain-based detection for staging
- * 4. Default to development
+ * 2. Windows staging fallback (Issue #860)
+ * 3. NODE_ENV mapping
+ * 4. Domain-based detection for staging
+ * 5. Default to development
  */
 function detectEnvironment(): Environment {
   // Explicit environment variable takes precedence
   const explicitEnv = process.env.NEXT_PUBLIC_ENVIRONMENT;
   if (explicitEnv === 'production' || explicitEnv === 'staging' || explicitEnv === 'test' || explicitEnv === 'development') {
-    console.log(`[2025-08-30T${new Date().toISOString().split('T')[1]}] INFO: Environment detected from NEXT_PUBLIC_ENVIRONMENT: ${explicitEnv}`);
+    console.log(`[2025-09-15T${new Date().toISOString().split('T')[1]}] INFO: Environment detected from NEXT_PUBLIC_ENVIRONMENT: ${explicitEnv}`);
     return explicitEnv as Environment;
   }
-  
+
+  // Issue #860: Windows staging fallback for WebSocket compatibility
+  if (shouldUseWindowsStagingFallback()) {
+    console.log('[2025-09-15T' + new Date().toISOString().split('T')[1] + '] INFO: Windows platform detected - using staging fallback for WebSocket compatibility (Issue #860)');
+    return 'staging';
+  }
+
   // Check if running in browser and detect by domain
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     if (hostname.includes('staging.netrasystems.ai')) {
-      console.log('[2025-08-30T' + new Date().toISOString().split('T')[1] + '] INFO: Environment detected from hostname as staging');
+      console.log('[2025-09-15T' + new Date().toISOString().split('T')[1] + '] INFO: Environment detected from hostname as staging');
       return 'staging';
     }
     if (hostname.includes('netrasystems.ai') && !hostname.includes('staging')) {
-      console.log('[2025-08-30T' + new Date().toISOString().split('T')[1] + '] INFO: Environment detected from hostname as production');
+      console.log('[2025-09-15T' + new Date().toISOString().split('T')[1] + '] INFO: Environment detected from hostname as production');
       return 'production';
     }
   }
-  
+
   // Fallback to NODE_ENV
   const nodeEnv = process.env.NODE_ENV;
   if (nodeEnv === 'production') {
     // Production NODE_ENV without explicit environment defaults to staging for safety
-    console.warn('[2025-08-30T' + new Date().toISOString().split('T')[1] + '] WARN: NODE_ENV=production but NEXT_PUBLIC_ENVIRONMENT not set, defaulting to staging');
+    console.warn('[2025-09-15T' + new Date().toISOString().split('T')[1] + '] WARN: NODE_ENV=production but NEXT_PUBLIC_ENVIRONMENT not set, defaulting to staging');
     return 'staging';
   }
-  
+
   if (nodeEnv === 'test') {
     return 'test';
   }
-  
+
   // Default to development
   return 'development';
 }
@@ -104,6 +112,51 @@ function detectEnvironment(): Environment {
 function isRunningInDocker(): boolean {
   // Check for Docker-specific environment variables
   return process.env.API_URL !== undefined || process.env.AUTH_URL !== undefined;
+}
+
+/**
+ * Detect if running on Windows platform
+ * Issue #860: Windows developers need automatic staging fallback due to Docker/WebSocket compatibility issues
+ */
+function isWindowsPlatform(): boolean {
+  // Server-side detection (Node.js)
+  if (typeof process !== 'undefined' && process.platform) {
+    return process.platform === 'win32';
+  }
+
+  // Client-side detection (Browser)
+  if (typeof navigator !== 'undefined' && navigator.platform) {
+    return navigator.platform.toLowerCase().includes('win');
+  }
+
+  // User agent fallback
+  if (typeof navigator !== 'undefined' && navigator.userAgent) {
+    return /windows|win32|win64|wow32|wow64/i.test(navigator.userAgent);
+  }
+
+  return false;
+}
+
+/**
+ * Check if Windows developer should use staging fallback
+ * Issue #860: Windows + localhost development = staging fallback for WebSocket compatibility
+ */
+function shouldUseWindowsStagingFallback(): boolean {
+  if (!isWindowsPlatform()) {
+    return false;
+  }
+
+  // Only apply fallback in development environment on localhost
+  const isDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+  const explicitEnv = process.env.NEXT_PUBLIC_ENVIRONMENT;
+
+  // If explicitly set to development or test, respect it
+  if (explicitEnv === 'development' || explicitEnv === 'test') {
+    return false;
+  }
+
+  // Windows + localhost + no explicit environment = staging fallback
+  return isDevelopment;
 }
 
 /**
@@ -166,6 +219,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           authToken: 'https://auth.netrasystems.ai/auth/token',
           authRefresh: 'https://auth.netrasystems.ai/auth/refresh',
           authValidate: 'https://auth.netrasystems.ai/auth/validate',
+          authValidateTokenAndGetUser: 'https://auth.netrasystems.ai/auth/validate-token-and-get-user',
           authSession: 'https://auth.netrasystems.ai/auth/session',
           authMe: 'https://auth.netrasystems.ai/auth/me',
         },
@@ -218,6 +272,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           authToken: `${stagingAuthUrl}/auth/token`,
           authRefresh: `${stagingAuthUrl}/auth/refresh`,
           authValidate: `${stagingAuthUrl}/auth/validate`,
+          authValidateTokenAndGetUser: `${stagingAuthUrl}/auth/validate-token-and-get-user`,
           authSession: `${stagingAuthUrl}/auth/session`,
           authMe: `${stagingAuthUrl}/auth/me`,
         },
@@ -263,6 +318,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           authToken: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/token`,
           authRefresh: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/refresh`,
           authValidate: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/validate`,
+          authValidateTokenAndGetUser: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/validate-token-and-get-user`,
           authSession: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/session`,
           authMe: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/me`,
         },
@@ -315,6 +371,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           authToken: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/token`,
           authRefresh: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/refresh`,
           authValidate: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/validate`,
+          authValidateTokenAndGetUser: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/validate-token-and-get-user`,
           authSession: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/session`,
           authMe: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/me`,
         },
@@ -461,6 +518,9 @@ export const unifiedApiConfig = getUnifiedApiConfig();
 
 // Export environment detection for other modules
 export { detectEnvironment };
+
+// Export Windows platform utilities for Issue #860
+export { isWindowsPlatform, shouldUseWindowsStagingFallback };
 
 // Type exports
 export type { UnifiedApiConfig };

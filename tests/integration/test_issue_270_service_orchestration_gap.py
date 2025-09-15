@@ -19,6 +19,7 @@ Expected Outcomes:
 - FAIL: Tests that expose real integration issues
 """
 
+import pytest
 import asyncio
 import sys
 import os
@@ -38,6 +39,7 @@ from tests.e2e.real_services_manager import (
 )
 
 
+@pytest.mark.integration
 class TestServiceOrchestrationGap:
     """Integration tests that expose service orchestration gaps."""
     

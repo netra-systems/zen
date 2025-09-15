@@ -13,7 +13,6 @@ Business Value:
 CRITICAL: This test validates the import chain that E2E tests depend on.
 It must fail with the exact errors found in staging to prove Issue #881.
 """
-
 import pytest
 import asyncio
 import importlib
@@ -21,10 +20,9 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from unittest.mock import patch, MagicMock
-
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-
+@pytest.mark.integration
 class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
     """
     Test suite that reproduces the exact import failures blocking E2E tests in staging.
@@ -38,15 +36,15 @@ class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
     This test MUST fail with the exact errors found in Issue #881 to prove
     the issues exist and need to be fixed.
     """
-    
+
     def setup_method(self, method):
         """Set up test environment for import validation."""
         super().setup_method(method)
         self.project_root = Path(__file__).parent.parent.parent
-        self.tests_e2e_path = self.project_root / "tests" / "e2e"
+        self.tests_e2e_path = self.project_root / 'tests' / 'e2e'
         self.import_failures = []
         self.missing_functions = []
-        
+
     async def test_websocket_helpers_wait_function_import(self):
         """
         TEST 1: Reproduce missing wait_for_websocket_event function import.
@@ -57,48 +55,35 @@ class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
         
         EXPECTED OUTCOME: This test should FAIL showing the import error.
         """
-        # Test tries to import the missing function that E2E tests expect
         try:
             from tests.e2e.test_helpers.websocket_helpers import wait_for_websocket_event
-            
-            # If import succeeds, the function should be callable
-            assert callable(wait_for_websocket_event), "wait_for_websocket_event should be a callable function"
-            
-            # Test function signature that E2E tests expect
-            # This should work if the function exists with correct signature
+            assert callable(wait_for_websocket_event), 'wait_for_websocket_event should be a callable function'
             import inspect
             sig = inspect.signature(wait_for_websocket_event)
             expected_params = ['event_type', 'timeout']
             actual_params = list(sig.parameters.keys())
-            
-            self.assertIn('event_type', actual_params, "wait_for_websocket_event missing event_type parameter")
-            self.assertIn('timeout', actual_params, "wait_for_websocket_event missing timeout parameter")
-            
-            print("SUCCESS: wait_for_websocket_event function found and has expected signature")
-            
+            self.assertIn('event_type', actual_params, 'wait_for_websocket_event missing event_type parameter')
+            self.assertIn('timeout', actual_params, 'wait_for_websocket_event missing timeout parameter')
+            print('SUCCESS: wait_for_websocket_event function found and has expected signature')
         except ImportError as e:
-            self.import_failures.append(f"wait_for_websocket_event import failed: {e}")
-            print(f"EXPECTED FAILURE: wait_for_websocket_event import error: {e}")
-            
-            # Check if the function exists but in wrong location
+            self.import_failures.append(f'wait_for_websocket_event import failed: {e}')
+            print(f'EXPECTED FAILURE: wait_for_websocket_event import error: {e}')
             try:
-                # Check if it exists in staging_test_base (where it actually is)
                 from tests.e2e.staging_test_base import StagingTestBase
                 if hasattr(StagingTestBase, 'wait_for_websocket_event'):
-                    print("ISSUE IDENTIFIED: wait_for_websocket_event exists in StagingTestBase but not exported from websocket_helpers")
-                    raise AssertionError("wait_for_websocket_event exists but not accessible from expected import path")
+                    print('ISSUE IDENTIFIED: wait_for_websocket_event exists in StagingTestBase but not exported from websocket_helpers')
+                    raise AssertionError('wait_for_websocket_event exists but not accessible from expected import path')
                 else:
-                    print("ISSUE CONFIRMED: wait_for_websocket_event missing from websocket_helpers")
-                    raise AssertionError("wait_for_websocket_event function completely missing from helpers")
+                    print('ISSUE CONFIRMED: wait_for_websocket_event missing from websocket_helpers')
+                    raise AssertionError('wait_for_websocket_event function completely missing from helpers')
             except Exception as nested_e:
-                print(f"NESTED ERROR: Cannot check alternative locations: {nested_e}")
-                raise AssertionError(f"wait_for_websocket_event import chain broken: {e}")
-        
+                print(f'NESTED ERROR: Cannot check alternative locations: {nested_e}')
+                raise AssertionError(f'wait_for_websocket_event import chain broken: {e}')
         except AttributeError as e:
-            self.import_failures.append(f"wait_for_websocket_event attribute error: {e}")
-            print(f"EXPECTED FAILURE: wait_for_websocket_event not found: {e}")
-            raise AssertionError(f"wait_for_websocket_event function missing from websocket_helpers: {e}")
-    
+            self.import_failures.append(f'wait_for_websocket_event attribute error: {e}')
+            print(f'EXPECTED FAILURE: wait_for_websocket_event not found: {e}')
+            raise AssertionError(f'wait_for_websocket_event function missing from websocket_helpers: {e}')
+
     async def test_e2e_auth_helper_missing_functions_import(self):
         """
         TEST 2: Reproduce missing E2E auth helper function imports.
@@ -109,53 +94,33 @@ class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
         
         EXPECTED OUTCOME: Identify missing or broken auth helper functions.
         """
-        # Test expected E2E auth helper functions that tests try to import
-        expected_functions = [
-            'create_test_user_with_auth',
-            'authenticate_test_user', 
-            'create_authenticated_user',
-            'get_jwt_token_for_user',
-            'validate_jwt_token',
-            'create_authenticated_test_user',
-            'get_staging_token_async'
-        ]
-        
+        expected_functions = ['create_test_user_with_auth', 'authenticate_test_user', 'create_authenticated_user', 'get_jwt_token_for_user', 'validate_jwt_token', 'create_authenticated_test_user', 'get_staging_token_async']
         try:
             from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
-            
-            # Test that E2EAuthHelper can be instantiated
             auth_helper = E2EAuthHelper()
-            assert auth_helper is not None, "E2EAuthHelper should be instantiable"
-            
-            # Check for missing methods that E2E tests expect
+            assert auth_helper is not None, 'E2EAuthHelper should be instantiable'
             missing_methods = []
             for func_name in expected_functions:
                 if not hasattr(auth_helper, func_name):
                     missing_methods.append(func_name)
-                    self.missing_functions.append(f"E2EAuthHelper missing method: {func_name}")
-            
+                    self.missing_functions.append(f'E2EAuthHelper missing method: {func_name}')
             if missing_methods:
-                print(f"EXPECTED FAILURE: E2EAuthHelper missing methods: {missing_methods}")
-                raise AssertionError(f"E2EAuthHelper missing required methods: {missing_methods}")
-            
-            # Test that critical methods are callable and async where expected
+                print(f'EXPECTED FAILURE: E2EAuthHelper missing methods: {missing_methods}')
+                raise AssertionError(f'E2EAuthHelper missing required methods: {missing_methods}')
             async_methods = ['authenticate_test_user', 'create_authenticated_user', 'get_staging_token_async']
             for method_name in async_methods:
                 method = getattr(auth_helper, method_name)
-                assert asyncio.iscoroutinefunction(method), f"{method_name} should be async"
-            
-            print("SUCCESS: All expected E2EAuthHelper methods found and properly typed")
-            
+                assert asyncio.iscoroutinefunction(method), f'{method_name} should be async'
+            print('SUCCESS: All expected E2EAuthHelper methods found and properly typed')
         except ImportError as e:
-            self.import_failures.append(f"E2EAuthHelper import failed: {e}")
-            print(f"CRITICAL FAILURE: E2EAuthHelper import error: {e}")
-            raise AssertionError(f"E2EAuthHelper import chain broken: {e}")
-        
+            self.import_failures.append(f'E2EAuthHelper import failed: {e}')
+            print(f'CRITICAL FAILURE: E2EAuthHelper import error: {e}')
+            raise AssertionError(f'E2EAuthHelper import chain broken: {e}')
         except Exception as e:
-            self.import_failures.append(f"E2EAuthHelper validation failed: {e}")
-            print(f"UNEXPECTED FAILURE: E2EAuthHelper validation error: {e}")
-            raise AssertionError(f"E2EAuthHelper interface validation failed: {e}")
-    
+            self.import_failures.append(f'E2EAuthHelper validation failed: {e}')
+            print(f'UNEXPECTED FAILURE: E2EAuthHelper validation error: {e}')
+            raise AssertionError(f'E2EAuthHelper interface validation failed: {e}')
+
     def test_pytest_marker_configuration(self):
         """
         TEST 3: Validate pytest marker configuration for staging tests.
@@ -166,32 +131,23 @@ class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
         EXPECTED OUTCOME: Identify pytest configuration issues.
         """
         try:
-            # Check if staging marker is properly registered
             import pytest
-            
-            # Try to create a test with staging marker
+
             @pytest.mark.staging
             @pytest.mark.asyncio
             def dummy_staging_test():
                 pass
-            
-            # Check if marker attributes are accessible
             markers = dummy_staging_test.pytestmark if hasattr(dummy_staging_test, 'pytestmark') else []
             marker_names = [mark.name for mark in markers if hasattr(mark, 'name')]
-            
-            assert 'staging' in marker_names, "staging marker not properly applied"
-            assert 'asyncio' in marker_names, "asyncio marker not properly applied"
-            
-            # Check if staging marker has proper configuration
+            assert 'staging' in marker_names, 'staging marker not properly applied'
+            assert 'asyncio' in marker_names, 'asyncio marker not properly applied'
             staging_marks = [mark for mark in markers if hasattr(mark, 'name') and mark.name == 'staging']
-            assert len(staging_marks) > 0, "staging marker not found in test marks"
-            
-            print("SUCCESS: pytest staging markers properly configured")
-            
+            assert len(staging_marks) > 0, 'staging marker not found in test marks'
+            print('SUCCESS: pytest staging markers properly configured')
         except Exception as e:
-            print(f"EXPECTED FAILURE: pytest marker configuration issue: {e}")
-            raise AssertionError(f"pytest marker configuration broken: {e}")
-    
+            print(f'EXPECTED FAILURE: pytest marker configuration issue: {e}')
+            raise AssertionError(f'pytest marker configuration broken: {e}')
+
     async def test_reproduce_e2e_staging_import_chain(self):
         """
         TEST 4: Reproduce the complete E2E staging import chain failures.
@@ -201,111 +157,67 @@ class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
         
         EXPECTED OUTCOME: Demonstrate the complete failure chain.
         """
-        import_chain_results = {
-            'websocket_helpers': False,
-            'e2e_auth_helper': False,
-            'staging_test_base': False,
-            'real_services_manager': False,
-            'unified_flow_helpers': False
-        }
-        
-        # Test 1: WebSocket helpers import chain
+        import_chain_results = {'websocket_helpers': False, 'e2e_auth_helper': False, 'staging_test_base': False, 'real_services_manager': False, 'unified_flow_helpers': False}
         try:
-            from tests.e2e.test_helpers.websocket_helpers import (
-                MockWebSocketServer,
-                test_websocket_test_context,
-                send_and_receive,
-                wait_for_websocket_event  # This should fail
-            )
+            from tests.e2e.test_helpers.websocket_helpers import MockWebSocketServer, test_websocket_test_context, send_and_receive, wait_for_websocket_event
             import_chain_results['websocket_helpers'] = True
-            print("UNEXPECTED SUCCESS: WebSocket helpers import chain worked")
+            print('UNEXPECTED SUCCESS: WebSocket helpers import chain worked')
         except ImportError as e:
-            print(f"EXPECTED FAILURE: WebSocket helpers import chain: {e}")
-            self.import_failures.append(f"WebSocket helpers: {e}")
-        
-        # Test 2: E2E auth helper import chain
+            print(f'EXPECTED FAILURE: WebSocket helpers import chain: {e}')
+            self.import_failures.append(f'WebSocket helpers: {e}')
         try:
-            from test_framework.ssot.e2e_auth_helper import (
-                E2EAuthHelper,
-                create_test_user_with_auth,
-                authenticate_test_user,
-                get_staging_token_async
-            )
-            
-            # Test instantiation
-            auth_helper = E2EAuthHelper(environment="staging")
+            from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_test_user_with_auth, authenticate_test_user, get_staging_token_async
+            auth_helper = E2EAuthHelper(environment='staging')
             token = await auth_helper.get_staging_token_async()
             import_chain_results['e2e_auth_helper'] = True
-            print("SUCCESS: E2E auth helper import chain worked")
-            
+            print('SUCCESS: E2E auth helper import chain worked')
         except Exception as e:
-            print(f"POTENTIAL FAILURE: E2E auth helper import chain: {e}")
-            self.import_failures.append(f"E2E auth helper: {e}")
-        
-        # Test 3: Staging test base import chain
+            print(f'POTENTIAL FAILURE: E2E auth helper import chain: {e}')
+            self.import_failures.append(f'E2E auth helper: {e}')
         try:
             from tests.e2e.staging_test_base import StagingTestBase, staging_test
             from tests.e2e.staging_config import StagingTestConfig
-            
-            # Test instantiation
             config = StagingTestConfig()
             test_base = StagingTestBase()
             import_chain_results['staging_test_base'] = True
-            print("SUCCESS: Staging test base import chain worked")
-            
+            print('SUCCESS: Staging test base import chain worked')
         except Exception as e:
-            print(f"POTENTIAL FAILURE: Staging test base import chain: {e}")
-            self.import_failures.append(f"Staging test base: {e}")
-        
-        # Test 4: Real services manager import chain (known to fail)
+            print(f'POTENTIAL FAILURE: Staging test base import chain: {e}')
+            self.import_failures.append(f'Staging test base: {e}')
         try:
             from tests.e2e.real_services_manager import RealServicesManager
             import_chain_results['real_services_manager'] = True
-            print("UNEXPECTED SUCCESS: Real services manager import worked")
+            print('UNEXPECTED SUCCESS: Real services manager import worked')
         except ImportError as e:
-            print(f"EXPECTED FAILURE: Real services manager import: {e}")
-            self.import_failures.append(f"Real services manager: {e}")
-        
-        # Test 5: Unified flow helpers import chain (known to have issues)
+            print(f'EXPECTED FAILURE: Real services manager import: {e}')
+            self.import_failures.append(f'Real services manager: {e}')
         try:
-            from tests.e2e.helpers.core.unified_flow_helpers import (
-                ControlledSignupHelper,
-                ControlledLoginHelper
-            )
+            from tests.e2e.helpers.core.unified_flow_helpers import ControlledSignupHelper, ControlledLoginHelper
             import_chain_results['unified_flow_helpers'] = True
-            print("UNEXPECTED SUCCESS: Unified flow helpers import worked")
+            print('UNEXPECTED SUCCESS: Unified flow helpers import worked')
         except ImportError as e:
-            print(f"EXPECTED FAILURE: Unified flow helpers import: {e}")
-            self.import_failures.append(f"Unified flow helpers: {e}")
-        
-        # Analyze results
+            print(f'EXPECTED FAILURE: Unified flow helpers import: {e}')
+            self.import_failures.append(f'Unified flow helpers: {e}')
         successful_imports = sum(import_chain_results.values())
         total_imports = len(import_chain_results)
-        
-        print(f"\nIMPORT CHAIN ANALYSIS:")
-        print(f"Successful imports: {successful_imports}/{total_imports}")
-        print(f"Failed imports: {total_imports - successful_imports}/{total_imports}")
-        print(f"Import success rate: {successful_imports/total_imports*100:.1f}%")
-        
+        print(f'\nIMPORT CHAIN ANALYSIS:')
+        print(f'Successful imports: {successful_imports}/{total_imports}')
+        print(f'Failed imports: {total_imports - successful_imports}/{total_imports}')
+        print(f'Import success rate: {successful_imports / total_imports * 100:.1f}%')
         for chain, success in import_chain_results.items():
-            status = "✅ SUCCESS" if success else "❌ FAILED"
-            print(f"  {chain}: {status}")
-        
-        # This test should identify the issues
+            status = '✅ SUCCESS' if success else '❌ FAILED'
+            print(f'  {chain}: {status}')
         if self.import_failures:
-            print(f"\nIDENTIFIED IMPORT FAILURES ({len(self.import_failures)}):")
+            print(f'\nIDENTIFIED IMPORT FAILURES ({len(self.import_failures)}):')
             for i, failure in enumerate(self.import_failures, 1):
-                print(f"  {i}. {failure}")
-        
+                print(f'  {i}. {failure}')
         if self.missing_functions:
-            print(f"\nIDENTIFIED MISSING FUNCTIONS ({len(self.missing_functions)}):")
+            print(f'\nIDENTIFIED MISSING FUNCTIONS ({len(self.missing_functions)}):')
             for i, missing in enumerate(self.missing_functions, 1):
-                print(f"  {i}. {missing}")
-        
-        # The test succeeds by identifying the issues
-        assert len(self.import_failures) > 0, "Test should identify import failures to validate Issue #881"
-        print(f"\nSUCCESS: Issue #881 reproduced with {len(self.import_failures)} import failures identified")
-    
+                print(f'  {i}. {missing}')
+        assert len(self.import_failures) > 0, 'Test should identify import failures to validate Issue #881'
+        print(f'\nSUCCESS: Issue #881 reproduced with {len(self.import_failures)} import failures identified')
+
     def test_staging_environment_detection(self):
         """
         TEST 5: Validate staging environment detection mechanisms.
@@ -314,43 +226,32 @@ class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
         environment to use appropriate configuration and authentication methods.
         """
         try:
-            # Test environment detection methods
             from tests.e2e.staging_config import is_staging_available, StagingTestConfig
-            
-            # Check if staging detection works
             staging_available = is_staging_available()
-            print(f"Staging available: {staging_available}")
-            
-            # Test staging config creation
+            print(f'Staging available: {staging_available}')
             config = StagingTestConfig()
-            assert hasattr(config, 'backend_url'), "StagingTestConfig missing backend_url"
-            assert hasattr(config, 'websocket_url'), "StagingTestConfig missing websocket_url"
-            assert hasattr(config, 'auth_service_url'), "StagingTestConfig missing auth_service_url"
-            
-            print("SUCCESS: Staging environment detection working")
-            
+            assert hasattr(config, 'backend_url'), 'StagingTestConfig missing backend_url'
+            assert hasattr(config, 'websocket_url'), 'StagingTestConfig missing websocket_url'
+            assert hasattr(config, 'auth_service_url'), 'StagingTestConfig missing auth_service_url'
+            print('SUCCESS: Staging environment detection working')
         except Exception as e:
-            print(f"FAILURE: Staging environment detection error: {e}")
-            raise AssertionError(f"Staging environment detection broken: {e}")
-    
+            print(f'FAILURE: Staging environment detection error: {e}')
+            raise AssertionError(f'Staging environment detection broken: {e}')
+
     def teardown_method(self, method):
         """Clean up after test execution."""
         super().teardown_method(method)
-        
-        # Log summary of findings for Issue #881
-        print(f"\n" + "="*60)
-        print(f"ISSUE #881 VALIDATION SUMMARY")
-        print(f"="*60)
-        print(f"Import failures identified: {len(self.import_failures)}")
-        print(f"Missing functions identified: {len(self.missing_functions)}")
-        
+        print(f'\n' + '=' * 60)
+        print(f'ISSUE #881 VALIDATION SUMMARY')
+        print(f'=' * 60)
+        print(f'Import failures identified: {len(self.import_failures)}')
+        print(f'Missing functions identified: {len(self.missing_functions)}')
         if self.import_failures or self.missing_functions:
-            print(f"\nISSUE #881 CONFIRMED: Import chain failures block E2E staging tests")
-            print(f"Next step: Implement fixes for identified import failures")
+            print(f'\nISSUE #881 CONFIRMED: Import chain failures block E2E staging tests')
+            print(f'Next step: Implement fixes for identified import failures')
         else:
-            print(f"\nISSUE #881 MAY BE RESOLVED: No import failures found")
-
-
-if __name__ == "__main__":
-    # Allow running this test file directly for Issue #881 validation
-    pytest.main([__file__, "-v", "-s", "--tb=short"])
+            print(f'\nISSUE #881 MAY BE RESOLVED: No import failures found')
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

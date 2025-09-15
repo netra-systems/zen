@@ -11,12 +11,14 @@ Tests Docker health monitoring integration with test infrastructure,
 focusing on graceful degradation and alternative validation paths.
 """
 
+import pytest
 import unittest
 from unittest.mock import Mock, patch, AsyncMock
 import asyncio
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.integration
 class TestDockerHealthMonitoring(SSotAsyncTestCase):
     """Test Docker health monitoring integration."""
 
@@ -105,6 +107,7 @@ class TestDockerHealthMonitoring(SSotAsyncTestCase):
                                "Should log Docker initialization failure warning")
 
 
+@pytest.mark.integration
 class TestDockerHealthMonitoringAsync(SSotAsyncTestCase):
     """Test asynchronous Docker health monitoring operations."""
 

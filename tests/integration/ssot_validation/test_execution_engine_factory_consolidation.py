@@ -1,3 +1,4 @@
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 #!/usr/bin/env python
 """Integration Tests for Execution Engine Factory Pattern Consolidation
 
@@ -79,6 +80,7 @@ except ImportError as e:
     WebSocketAuth = None
 
 
+@pytest.mark.integration
 class TestExecutionEngineFactoryUserIsolation(SSotAsyncTestCase):
     """DESIGNED TO FAIL: Test user isolation with real factory patterns.
     
@@ -528,7 +530,7 @@ class TestExecutionEngineFactoryUserIsolation(SSotAsyncTestCase):
         if UnifiedWebSocketManager:
             try:
                 # Test if factory engines integrate with real WebSocket manager
-                websocket_manager = UnifiedWebSocketManager()
+                websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
                 
                 for engine_info in created_engines:
                     engine = engine_info['engine']
@@ -592,6 +594,7 @@ class TestExecutionEngineFactoryUserIsolation(SSotAsyncTestCase):
         )
 
 
+@pytest.mark.integration
 class TestExecutionEngineFactoryPerformance(SSotAsyncTestCase):
     """Test factory performance before and after consolidation.
     

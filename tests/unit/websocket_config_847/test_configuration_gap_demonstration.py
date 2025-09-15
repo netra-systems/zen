@@ -34,6 +34,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.test_context import TestContext
 
 
+@pytest.mark.unit
 class TestConfigurationGapDemonstration(unittest.TestCase):
     """Test complete configuration gap demonstration for Issue #847."""
 

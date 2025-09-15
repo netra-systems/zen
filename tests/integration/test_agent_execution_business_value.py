@@ -35,6 +35,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
 from unittest.mock import AsyncMock, MagicMock, patch
 from contextlib import asynccontextmanager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # SSOT imports following test architecture patterns
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -120,7 +121,7 @@ class TestAgentExecutionBusinessValue(SSotAsyncTestCase):
     async def _initialize_test_infrastructure(self):
         """Initialize real agent infrastructure for testing."""
         # Create WebSocket manager for real-time notifications
-        self.websocket_manager = UnifiedWebSocketManager()
+        self.websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         
         # Create WebSocket bridge for agent notifications
         self.websocket_bridge = AgentWebSocketBridge()

@@ -18,6 +18,7 @@ from datetime import datetime, timezone, timedelta
 from test_framework.ssot.base_test_case import BaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from netra_backend.app.services.agent_websocket_bridge import (
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
     AgentWebSocketBridge,
     IntegrationState,
     IntegrationConfig,
@@ -65,7 +66,7 @@ class TestAgentWebSocketBridgeE2EIntegration(BaseTestCase):
     @pytest.fixture
     async def production_websocket_manager(self, test_users):
         """Create production-like WebSocket manager with real authenticated connections."""
-        manager = UnifiedWebSocketManager()
+        manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         
         # Create realistic WebSocket connections for authenticated users
         connections_data = []

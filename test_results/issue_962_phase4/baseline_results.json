@@ -1,0 +1,51 @@
+{
+  "import_patterns": {
+    "success": false,
+    "violations_count": 14,
+    "test_failures": [
+      "FAILED",
+      "FAILED",
+      "FAILED"
+    ],
+    "execution_time": 9.595497369766235,
+    "timestamp": "2025-09-14T19:16:08.480168"
+  },
+  "single_manager": {
+    "success": false,
+    "violations_count": 0,
+    "test_failures": [
+      "FAILED",
+      "FAILED",
+      "FAILED"
+    ],
+    "execution_time": 9.847086191177368,
+    "timestamp": "2025-09-14T19:16:08.480168"
+  },
+  "auth_flow": {
+    "success": false,
+    "violations_count": 0,
+    "test_failures": [
+      "FAILED",
+      "FAILED",
+      "FAILED"
+    ],
+    "execution_time": 10.609793424606323,
+    "timestamp": "2025-09-14T19:16:08.480168"
+  },
+  "mission_critical": {
+    "success": false,
+    "violations_count": 999,
+    "test_failures": [
+      "Test execution error: 'NoneType' object has no attribute 'split'"
+    ],
+    "execution_time": 11.497350692749023,
+    "timestamp": "2025-09-14T19:16:08.480168"
+  },
+  "staging_validation": {
+    "success": true,
+    "violations_count": 0,
+    "test_failures": [],
+    "execution_time": 10.204970598220825,
+    "timestamp": "2025-09-14T19:16:08.480168"
+  }
+}

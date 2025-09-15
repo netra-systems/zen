@@ -67,6 +67,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.e2e
 class TestGoldenPathInfrastructureValidation:
 
     def create_user_context(self) -> UserExecutionContext:

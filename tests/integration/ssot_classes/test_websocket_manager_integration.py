@@ -102,6 +102,7 @@ class MockWebSocket:
         logger.debug(f"Mock WebSocket closed with code: {code}")
 
 
+@pytest.mark.integration
 class TestWebSocketManagerIntegration(SSotAsyncTestCase):
     """
     Comprehensive integration tests for WebSocketManager SSOT class.
@@ -389,6 +390,7 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
 
 
 # Mark the test as completed
+@pytest.mark.integration
 async def test_websocket_manager_integration_suite_completion():
     """
     Integration test suite completion marker.

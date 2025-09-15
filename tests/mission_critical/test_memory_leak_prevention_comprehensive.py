@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -1136,10 +1136,10 @@ class TestAuthenticationFlowMemoryManagement:
         self.baseline = self.profiler.establish_baseline()
         
         # Mock authentication service
-        self.websocket = TestWebSocketConnection()
+        self.websocket = WebSocketTestHelper()
         
         # Mock WebSocket manager for real-time updates
-        self.websocket = TestWebSocketConnection()
+        self.websocket = WebSocketTestHelper()
         self.mock_ws_manager.send_to_thread = AsyncMock(return_value=True)
         
         yield
@@ -1612,10 +1612,10 @@ class TestUserJourneyMemoryOptimization:
         self.baseline = self.profiler.establish_baseline()
         
         # Mock services for complete user journey
-        self.websocket = TestWebSocketConnection()
+        self.websocket = WebSocketTestHelper()
         
         # Mock WebSocket manager for real-time updates
-        self.websocket = TestWebSocketConnection()
+        self.websocket = WebSocketTestHelper()
         self.mock_ws_manager.send_to_thread = AsyncMock(return_value=True)
         
         yield
@@ -2051,7 +2051,7 @@ class TestAuthenticationPerformanceUnderLoad:
         }
         
         # Mock WebSocket manager for real-time updates
-        self.websocket = TestWebSocketConnection()
+        self.websocket = WebSocketTestHelper()
         self.mock_ws_manager.send_to_thread = AsyncMock(return_value=True)
         
         yield
@@ -2299,4 +2299,6 @@ class TestAuthenticationPerformanceUnderLoad:
 
 if __name__ == "__main__":
     # Run comprehensive memory leak detection and authentication tests
-    pytest.main([__file__, "-v", "--tb=short", "-x"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

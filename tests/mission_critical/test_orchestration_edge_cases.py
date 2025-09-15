@@ -49,7 +49,6 @@
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
-    # REMOVED_SYNTAX_ERROR: from test_framework.docker.unified_docker_manager import UnifiedDockerManager
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
     # Add project root to path for imports
@@ -1162,42 +1161,12 @@
 
 
                                                         # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-                                                            # Configure pytest for chaos engineering testing
-                                                            # REMOVED_SYNTAX_ERROR: pytest_args = [ )
-                                                            # REMOVED_SYNTAX_ERROR: __file__,
-                                                            # REMOVED_SYNTAX_ERROR: "-v",
-                                                            # REMOVED_SYNTAX_ERROR: "-s",  # Show print outputs for chaos results
-                                                            # REMOVED_SYNTAX_ERROR: "--tb=short",
-                                                            # REMOVED_SYNTAX_ERROR: "-m", "mission_critical",
-                                                            # REMOVED_SYNTAX_ERROR: "--maxfail=10"  # Allow multiple failures for comprehensive chaos testing
-                                                            
+    # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
+    # Issue #1024: Unauthorized test runners blocking Golden Path
+        # REMOVED_SYNTAX_ERROR: print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+        # REMOVED_SYNTAX_ERROR: print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+        # REMOVED_SYNTAX_ERROR: print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
-                                                            # REMOVED_SYNTAX_ERROR: print("Running BRUTAL Orchestration Chaos Engineering & Edge Case Tests...")
-                                                            # REMOVED_SYNTAX_ERROR: print("=" * 90)
-                                                            # REMOVED_SYNTAX_ERROR: print("[U+1F4A5] CHAOS MODE: Testing network partitions, resource exhaustion, Byzantine faults")
-                                                            # REMOVED_SYNTAX_ERROR: print(" FIRE:  Security attacks, split-brain scenarios, cascade failure prevention")
-                                                            # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  WARNING: These tests simulate production disasters and extreme conditions")
-                                                            # REMOVED_SYNTAX_ERROR: print("[U+1F6E1][U+FE0F]  Validating 99.9% uptime SLA under the most severe failure scenarios")
-                                                            # REMOVED_SYNTAX_ERROR: print("=" * 90)
-
-                                                            # REMOVED_SYNTAX_ERROR: result = pytest.main(pytest_args)
-
-                                                            # REMOVED_SYNTAX_ERROR: if result == 0:
-                                                                # REMOVED_SYNTAX_ERROR: print(" )
-                                                                # REMOVED_SYNTAX_ERROR: " + "=" * 90)
-                                                                # REMOVED_SYNTAX_ERROR: print(" PASS:  ALL CHAOS ENGINEERING TESTS PASSED")
-                                                                # REMOVED_SYNTAX_ERROR: print("[U+1F6E1][U+FE0F]  Orchestration system is BULLETPROOF against extreme failure conditions")
-                                                                # REMOVED_SYNTAX_ERROR: print("[U+1F680] Enterprise-ready for 100+ services with 99.9% uptime SLA guaranteed")
-                                                                # REMOVED_SYNTAX_ERROR: print("[U+1F4AA] Byzantine fault tolerance, DDoS resilience, split-brain prevention VERIFIED")
-                                                                # REMOVED_SYNTAX_ERROR: print("=" * 90)
-                                                                # REMOVED_SYNTAX_ERROR: else:
-                                                                    # REMOVED_SYNTAX_ERROR: print(" )
-                                                                    # REMOVED_SYNTAX_ERROR: " + "=" * 90)
-                                                                    # REMOVED_SYNTAX_ERROR: print(" FAIL:  CHAOS ENGINEERING TESTS FAILED")
-                                                                    # REMOVED_SYNTAX_ERROR: print(" ALERT:  Orchestration system VULNERABLE to extreme failure conditions")
-                                                                    # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  NOT ready for enterprise deployment - critical resilience gaps detected")
-                                                                    # REMOVED_SYNTAX_ERROR: print("[U+1F527] Fix Byzantine fault tolerance, network partition handling, or security vulnerabilities")
-                                                                    # REMOVED_SYNTAX_ERROR: print("=" * 90)
-
-                                                                    # REMOVED_SYNTAX_ERROR: sys.exit(result)
-                                                                    # REMOVED_SYNTAX_ERROR: pass
+    # Uncomment and customize the following for SSOT execution:
+    # result = run_tests_via_ssot_runner()
+    # sys.exit(result)

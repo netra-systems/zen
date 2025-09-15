@@ -23,6 +23,7 @@ from tests.e2e.staging_test_config import get_staging_config
 from tests.helpers.auth_test_utils import TestAuthHelper
 
 
+@pytest.mark.e2e
 class TestWebSocketAuthFixVerification(StagingTestBase):
     """Verify WebSocket authentication fix using JWT secret consistency"""
     

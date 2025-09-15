@@ -7,6 +7,7 @@ that should handle missing SessionMiddleware gracefully without causing
 authentication context extraction failures.
 """
 
+import pytest
 import unittest
 import asyncio
 from unittest.mock import patch, MagicMock, AsyncMock
@@ -14,6 +15,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.unit
 class TestGCPAuthContextDefensiveAccess(SSotBaseTestCase):
     """Test defensive session access patterns in GCPAuthContextMiddleware."""
     

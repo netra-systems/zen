@@ -20,7 +20,7 @@ from netra_backend.app.services.database.unit_of_work import (
     get_unit_of_work,
 )
 from netra_backend.app.services.service_interfaces import IThreadService
-from netra_backend.app.websocket_core import create_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
@@ -47,7 +47,7 @@ class ThreadService(IThreadService):
             thread_id=thread_id,
             run_id=f"thread_creation_{uuid.uuid4()}"
         )
-        manager = await create_websocket_manager(user_context)
+        manager = get_websocket_manager(user_context)
         if manager:
             await manager.send_to_user(user_id, {"type": "thread_created", "payload": {"thread_id": thread_id, "timestamp": time.time()}})
     
@@ -143,7 +143,7 @@ class ThreadService(IThreadService):
                     thread_id=thread_id,
                     run_id=run_id
                 )
-                manager = await create_websocket_manager(user_context)
+                manager = get_websocket_manager(user_context)
                 if manager:
                     await manager.send_to_user(user_id, {"type": "agent_started", "payload": {"run_id": run_id, "agent_name": agent_name, "thread_id": thread_id, "timestamp": time.time()}})
     
@@ -214,7 +214,7 @@ class ThreadService(IThreadService):
                 thread_id=thread_id,
                 run_id=f"thread_switch_{uuid.uuid4()}"
             )
-            manager = await create_websocket_manager(user_context)
+            manager = get_websocket_manager(user_context)
             if manager:
                 await manager.send_to_user(user_id, {
                     "type": "thread_switched", 
@@ -236,7 +236,7 @@ class ThreadService(IThreadService):
                         thread_id=thread_id,
                         run_id=f"thread_delete_{uuid.uuid4()}"
                     )
-                    manager = await create_websocket_manager(user_context)
+                    manager = get_websocket_manager(user_context)
                     if manager:
                         await manager.send_to_user(user_id, {
                             "type": "thread_deleted", 

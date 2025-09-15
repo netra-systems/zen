@@ -39,6 +39,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
+@pytest.mark.unit
 class TestExecutionEngineFactoryResourceLimitsUnit(SSotBaseTestCase):
     """SSOT Unit test for ExecutionEngineFactory resource limit enforcement.
     

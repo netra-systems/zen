@@ -20,6 +20,7 @@ Expected Issues (proving real impact):
 These tests use REAL services to prove Issue #667 has actual business impact.
 """
 
+import pytest
 import unittest
 import asyncio
 import time
@@ -30,6 +31,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.integration
 class TestConfigSystemConsistencyIntegrationIssue667(SSotAsyncTestCase, unittest.TestCase):
     """Integration tests to validate configuration system consistency for Issue #667."""
     

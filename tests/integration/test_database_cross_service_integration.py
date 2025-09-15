@@ -44,6 +44,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.integration
 class TestDatabaseCrossServiceIntegration(SSotBaseTestCase):
     """Comprehensive database integration tests across all services using real PostgreSQL."""
     

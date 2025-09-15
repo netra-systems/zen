@@ -30,6 +30,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.unit
 class TestStagingTestBaseInheritance(SSotBaseTestCase):
     """
     Unit tests for staging test base inheritance issues in Issue #605.

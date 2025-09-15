@@ -30,7 +30,7 @@ from shared.types.core_types import (
 )
 
 # SSOT WebSocket and ID Management
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 # SSOT Real Services Test Management

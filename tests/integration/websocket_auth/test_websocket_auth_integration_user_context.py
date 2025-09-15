@@ -42,6 +42,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.id_generation import UnifiedIdGenerator
 
 
+@pytest.mark.integration
 class TestWebSocketUserContextIntegration(SSotAsyncTestCase):
     """
     Integration tests for WebSocket authentication user context management.

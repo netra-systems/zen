@@ -10,11 +10,13 @@ Purpose:
 - Can run without Docker or complex setup requirements
 """
 
+import pytest
 import unittest
 import sys
 import importlib
 
 
+@pytest.mark.unit
 class TestIssue597SimpleImportValidation(unittest.TestCase):
     """
     Simple tests to validate Issue #597 import problems.
@@ -120,6 +122,7 @@ class TestIssue597SimpleImportValidation(unittest.TestCase):
             self.fail(f"Alias import failed: {e}")
 
 
+@pytest.mark.unit
 class TestIssue597RealWorldScenarios(unittest.TestCase):
     """
     Test real-world scenarios that are failing in the codebase.

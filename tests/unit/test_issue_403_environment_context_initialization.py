@@ -10,15 +10,13 @@ await service.initialize(), leaving the service uninitialized.
 
 Business Impact: MEDIUM - Reduced validation capabilities in Cloud Run environment.
 """
-
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch, MagicMock
-
 from netra_backend.app.smd import StartupOrchestrator
 from netra_backend.app.core.environment_context import EnvironmentContextService, EnvironmentType
 
-
+@pytest.mark.unit
 class TestIssue403EnvironmentContextInitialization:
     """Test suite for Issue #403 - EnvironmentContext initialization fix."""
 
@@ -41,20 +39,13 @@ class TestIssue403EnvironmentContextInitialization:
 
         CRITICAL: This test ensures the root cause of Issue #403 is fixed.
         """
-        # Mock the initialize_environment_context function
         with patch('netra_backend.app.core.environment_context.initialize_environment_context') as mock_init:
             mock_service = MagicMock(spec=EnvironmentContextService)
             mock_service.is_initialized.return_value = True
             mock_service.get_environment_type.return_value = EnvironmentType.STAGING
             mock_init.return_value = mock_service
-
-            # Call the initialization method
             await startup_orchestrator._initialize_environment_context()
-
-            # Verify async initialization was called
             mock_init.assert_called_once()
-
-            # Verify service was stored in app state
             assert startup_orchestrator.app.state.environment_context_service == mock_service
 
     @pytest.mark.asyncio
@@ -64,14 +55,9 @@ class TestIssue403EnvironmentContextInitialization:
 
         BUSINESS IMPACT: Ensures system stability while logging the issue for monitoring.
         """
-        # Mock the initialize_environment_context function to raise exception
         with patch('netra_backend.app.core.environment_context.initialize_environment_context') as mock_init:
-            mock_init.side_effect = RuntimeError("Environment detection failed")
-
-            # Initialization should not raise exception (allows fallback)
+            mock_init.side_effect = RuntimeError('Environment detection failed')
             await startup_orchestrator._initialize_environment_context()
-
-            # Verify service is set to None (allows fallback ServiceDependencyChecker)
             assert startup_orchestrator.app.state.environment_context_service is None
 
     @pytest.mark.asyncio
@@ -83,20 +69,13 @@ class TestIssue403EnvironmentContextInitialization:
         """
         mock_app = MagicMock()
         mock_app.state = MagicMock()
-
         orchestrator = StartupOrchestrator(mock_app)
-
-        # Mock all dependencies for Phase 1
         with patch.object(orchestrator, '_validate_environment'):
             with patch.object(orchestrator, '_run_migrations') as mock_migrations:
                 mock_migrations.return_value = None
                 with patch.object(orchestrator, '_initialize_environment_context') as mock_env_init:
                     mock_env_init.return_value = None
-
-                    # Call Phase 1
                     await orchestrator._phase1_foundation()
-
-                    # Verify environment context initialization was called
                     mock_env_init.assert_called_once()
 
     @pytest.mark.asyncio
@@ -108,26 +87,17 @@ class TestIssue403EnvironmentContextInitialization:
         """
         from netra_backend.app.core.startup_validation import StartupValidator
         from netra_backend.app.core.environment_context import EnvironmentContextService
-
-        # Create a properly initialized environment context service
         with patch('netra_backend.app.core.startup_validation.get_environment_context_service') as mock_get_service:
             mock_service = MagicMock(spec=EnvironmentContextService)
-            mock_service.is_initialized.return_value = True  # CRITICAL: Service is initialized
+            mock_service.is_initialized.return_value = True
             mock_get_service.return_value = mock_service
-
-            # Mock ServiceDependencyChecker creation
             with patch('netra_backend.app.core.startup_validation.ServiceDependencyChecker') as mock_checker_class:
                 mock_checker = MagicMock()
                 mock_checker_class.return_value = mock_checker
-
                 validator = StartupValidator()
-
-                # Get the service dependency checker (should NOT be fallback)
                 checker = validator._get_service_dependency_checker()
-
-                # Verify we got the real ServiceDependencyChecker, not fallback
                 assert checker is not None
-                assert checker == mock_checker  # Should be the mocked real checker, not fallback
+                assert checker == mock_checker
                 mock_checker_class.assert_called_once_with(environment_context_service=mock_service)
 
     def test_issue_403_root_cause_validation(self):
@@ -139,15 +109,9 @@ class TestIssue403EnvironmentContextInitialization:
         """
         from netra_backend.app.smd import StartupOrchestrator
         import inspect
-
-        # Verify the method is now async
-        assert inspect.iscoroutinefunction(StartupOrchestrator._initialize_environment_context), \
-            "_initialize_environment_context must be async to properly initialize the service"
-
-        # Verify the method signature indicates it returns None (but is async)
+        assert inspect.iscoroutinefunction(StartupOrchestrator._initialize_environment_context), '_initialize_environment_context must be async to properly initialize the service'
         sig = inspect.signature(StartupOrchestrator._initialize_environment_context)
-        assert str(sig.return_annotation) == "None", \
-            "Method should return None but be async"
+        assert str(sig.return_annotation) == 'None', 'Method should return None but be async'
 
     def test_startup_orchestrator_imports_correct_initialization_function(self):
         """
@@ -155,20 +119,14 @@ class TestIssue403EnvironmentContextInitialization:
 
         CRITICAL: Ensures we're using initialize_environment_context() not just EnvironmentContextService()
         """
-        # This test verifies the import path is correct by attempting the import
         try:
             from netra_backend.app.core.environment_context import initialize_environment_context
-            assert callable(initialize_environment_context), \
-                "initialize_environment_context should be importable and callable"
-
-            # Verify it's an async function
+            assert callable(initialize_environment_context), 'initialize_environment_context should be importable and callable'
             import inspect
-            assert inspect.iscoroutinefunction(initialize_environment_context), \
-                "initialize_environment_context should be an async function"
+            assert inspect.iscoroutinefunction(initialize_environment_context), 'initialize_environment_context should be an async function'
         except ImportError:
-            pytest.fail("initialize_environment_context should be importable from environment_context module")
-
-
-if __name__ == "__main__":
-    # Run the tests
-    pytest.main([__file__, "-v"])
+            pytest.fail('initialize_environment_context should be importable from environment_context module')
+if __name__ == '__main__':
+    'MIGRATED: Use SSOT unified test runner'
+    print('MIGRATION NOTICE: Please use SSOT unified test runner')
+    print('Command: python tests/unified_test_runner.py --category <category>')

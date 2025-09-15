@@ -414,6 +414,7 @@ class AgentEventSequenceValidator:
 
 
 # CLAUDE.md COMPLIANT TEST CASES
+@pytest.mark.e2e
 class TestWebSocketAgentEventSequenceAuthenticated:
     """
     CLAUDE.md COMPLIANT: Agent Event Sequence Tests with MANDATORY Authentication

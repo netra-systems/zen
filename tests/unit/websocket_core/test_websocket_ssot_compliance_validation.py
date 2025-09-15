@@ -13,6 +13,7 @@ PURPOSE:
 Business Value: Validates $500K+ ARR Golden Path infrastructure compliance
 """
 
+import pytest
 import ast
 import os
 import glob
@@ -24,6 +25,7 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.unit
 class TestWebSocketSSOTComplianceValidation(SSotAsyncTestCase):
     """Comprehensive SSOT compliance validation for WebSocket imports."""
 
@@ -374,7 +376,7 @@ class TestWebSocketSSOTComplianceValidation(SSotAsyncTestCase):
             # Test canonical pattern (should work)
             try:
                 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-                canonical_manager = await get_websocket_manager(user_context=test_context)
+                canonical_manager = get_websocket_manager(user_context=test_context)
                 creation_results['canonical_pattern'] = 'SUCCESS'
             except Exception as e:
                 creation_results['canonical_pattern'] = f'FAILED: {e}'

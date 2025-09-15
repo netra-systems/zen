@@ -64,7 +64,6 @@ except ImportError as e:
     UserExecutionContext = MagicMock
     UserContextFactory = MagicMock
 
-
 @dataclass
 class UserScenario:
     """User scenario for isolation testing."""
@@ -77,7 +76,6 @@ class UserScenario:
     expected_isolation_markers: Set[str] = field(default_factory=set)
     contamination_detectors: Set[str] = field(default_factory=set)
 
-
 @dataclass
 class IsolationTestResult:
     """Result of isolation testing for a user."""
@@ -89,7 +87,6 @@ class IsolationTestResult:
     context_leak_detected: bool = False
     memory_isolation_maintained: bool = True
     execution_time: float = 0.0
-
 
 class TestMultiUserMessageIsolationIntegration(SSotAsyncTestCase):
     """
@@ -171,9 +168,7 @@ class TestMultiUserMessageIsolationIntegration(SSotAsyncTestCase):
 
     async def _initialize_real_isolation_infrastructure(self):
         """Initialize real multi-user isolation infrastructure components."""
-        if not REAL_ISOLATION_COMPONENTS_AVAILABLE:
-            self._initialize_mock_isolation_infrastructure()
-            return
+        if not REAL_ISOLATION_COMPONENTS_AVAILABLE:return
 
         try:
             # Initialize real user context factory for isolation
@@ -183,7 +178,7 @@ class TestMultiUserMessageIsolationIntegration(SSotAsyncTestCase):
             self.agent_factory = get_agent_instance_factory()
 
             # Initialize WebSocket manager for per-user event isolation
-            self.websocket_manager = await get_websocket_manager()
+            self.websocket_manager = get_websocket_manager()
 
             # Initialize WebSocket bridge with user isolation
             self.websocket_bridge = create_agent_websocket_bridge()
@@ -197,8 +192,10 @@ class TestMultiUserMessageIsolationIntegration(SSotAsyncTestCase):
                 )
 
         except Exception as e:
-            print(f"Failed to initialize real isolation infrastructure, using mocks: {e}")
-            self._initialize_mock_isolation_infrastructure()
+
+            # CLAUDE.md COMPLIANCE: Tests must use real services only
+
+            raise RuntimeError(f"Failed to initialize real infrastructure: {e}") from e
 
     def _initialize_mock_isolation_infrastructure(self):
         """Initialize mock isolation infrastructure for fallback testing."""

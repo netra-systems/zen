@@ -42,13 +42,13 @@ from netra_backend.app.websocket_core.types import (
 )
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
-from netra_backend.app.websocket_core.event_validator import EventValidator
-from netra_backend.app.websocket_core.unified_emitter import UnifiedEventEmitter
+from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UnifiedEventEmitter
 
 # Import agent WebSocket integration components
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
-from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
@@ -80,16 +80,17 @@ class TestCriticalWebSocketEventsComprehensive(SSotAsyncTestCase):
         
         # Create test IDs
         self.user_id = str(uuid.uuid4())
-        self.execution_id = UnifiedIDManager.generate_id(IDType.EXECUTION)
+        id_manager = UnifiedIDManager()
+        self.execution_id = id_manager.generate_id(IDType.EXECUTION)
         self.connection_id = str(uuid.uuid4())
         
         # Create mock user execution context
         self.user_context = UserExecutionContext(
             user_id=self.user_id,
-            execution_id=self.execution_id,
-            connection_id=self.connection_id,
-            jwt_token="mock_jwt_token",
-            metadata={"test_case": method.__name__, "websocket_events_test": True}
+            thread_id=str(uuid.uuid4()),
+            run_id=self.execution_id,
+            websocket_client_id=self.connection_id,
+            agent_context={"test_case": method.__name__, "websocket_events_test": True}
         )
         
         # Initialize WebSocket event components with mocked externals
@@ -99,7 +100,7 @@ class TestCriticalWebSocketEventsComprehensive(SSotAsyncTestCase):
         # Create real internal WebSocket components (following SSOT patterns)
         self.websocket_manager = AsyncMock()  # WebSocket manager needs to be mocked for unit tests
         self.event_monitor = ChatEventMonitor()
-        self.event_validator = EventValidator()
+        self.event_validator = UnifiedEventValidator()
         self.unified_emitter = UnifiedEventEmitter()
         
         # Track emitted events for validation

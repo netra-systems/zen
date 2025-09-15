@@ -70,17 +70,24 @@ from netra_backend.app.websocket_core.websocket_manager import (
     WebSocketManager,
     get_websocket_manager,
 )
-from netra_backend.app.websocket_core import (
+# ISSUE #1144 FIX: Use specific module imports instead of deprecated __init__.py imports
+from netra_backend.app.websocket_core.handlers import (
     MessageRouter,
     get_message_router,
+)
+from netra_backend.app.websocket_core.utils import (
     WebSocketHeartbeat,
     get_connection_monitor,
     safe_websocket_send,
     safe_websocket_close,
+)
+from netra_backend.app.websocket_core.types import (
     create_server_message,
     create_error_message,
     MessageType,
     WebSocketConfig,
+)
+from netra_backend.app.websocket_core.unified_jwt_protocol_handler import (
     negotiate_websocket_subprotocol  # PRIORITY 4 FIX: JWT subprotocol negotiation
 )
 
@@ -143,6 +150,13 @@ from netra_backend.app.core.timeout_configuration import (
 from shared.isolated_environment import get_env
 from netra_backend.app.auth_integration.auth import get_current_user
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+# Startup phase validation for Phase 2 remediation
+from netra_backend.app.core.startup_phase_validation import (
+    get_startup_validator,
+    ContractPhase,
+    StartupValidationError
+)
 
 logger = get_logger(__name__)
 
@@ -698,11 +712,26 @@ class WebSocketSSOTRouter:
             
             if app_state:
                 try:
-                    async with gcp_websocket_readiness_guard(app_state, timeout=readiness_timeout) as readiness_result:
+                    async with gcp_websocket_readiness_guard(
+                        app_state, 
+                        timeout=readiness_timeout,
+                        websocket=websocket,
+                        connection_id=connection_id
+                    ) as readiness_result:
+                        # Check if connection was queued during startup
+                        if readiness_result.details.get("connection_queued", False):
+                            logger.info(
+                                f"🔄 WebSocket connection {connection_id} queued during startup - "
+                                f"will be processed when services are ready"
+                            )
+                            # Connection is queued, wait for processing
+                            # The startup queue will handle the connection when ready
+                            return  # Exit early - queue will manage the connection
+                        
                         if not readiness_result.ready:
                             # Race condition detected - reject connection to prevent 1011 error
                             logger.error(
-                                f"[U+1F534] RACE CONDITION: WebSocket connection {connection_id} rejected - "
+                                f"🔴 RACE CONDITION: WebSocket connection {connection_id} rejected - "
                                 f"GCP services not ready. Failed: {readiness_result.failed_services}"
                             )
                             await websocket.close(
@@ -711,7 +740,7 @@ class WebSocketSSOTRouter:
                             )
                             return
                         
-                        logger.info(f" PASS:  GCP readiness validated - accepting WebSocket connection {connection_id}")
+                        logger.info(f"✅ GCP readiness validated - accepting WebSocket connection {connection_id}")
                 except Exception as readiness_error:
                     logger.warning(f"GCP readiness validation failed: {readiness_error} - proceeding with degraded mode")
             else:
@@ -1208,7 +1237,7 @@ class WebSocketSSOTRouter:
         The proper factory pattern now works correctly with SSOT authorization tokens.
         """
         # SSOT MIGRATION: Use proper factory pattern from websocket_manager.py
-        manager = await get_websocket_manager(user_context)
+        manager = get_websocket_manager(user_context)
         logger.info(f"WebSocket manager created successfully for user {getattr(user_context, 'user_id', 'unknown')}")
         return manager
     
@@ -1674,7 +1703,8 @@ class WebSocketSSOTRouter:
         """WebSocket health check endpoint."""
         try:
             # SSOT PATTERN: Direct manager access for health checks (no user context required)
-            manager = await get_websocket_manager(user_context=None)
+            manager = get_websocket_manager(user_context=None)
+            manager = get_websocket_manager(user_context=None)
             health_status = {
                 "status": "healthy",
                 "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -1704,7 +1734,7 @@ class WebSocketSSOTRouter:
         """Get WebSocket configuration."""
         try:
             # SSOT PATTERN: Direct manager access for configuration endpoint
-            manager = await get_websocket_manager(user_context=None)
+            manager = get_websocket_manager(user_context=None)
             
             return {
                 "websocket_config": {
@@ -1729,7 +1759,8 @@ class WebSocketSSOTRouter:
         """Get detailed WebSocket statistics."""
         try:
             # SSOT PATTERN: Direct manager access for statistics endpoint
-            manager = await get_websocket_manager(user_context=None)
+            manager = get_websocket_manager(user_context=None)
+            manager = get_websocket_manager(user_context=None)
             message_router = get_message_router()
             
             return {

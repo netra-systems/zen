@@ -36,8 +36,8 @@ from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
 )
-from netra_backend.app.websocket_core import (
-    WebSocketEventEmitter,
+from netra_backend.app.websocket_core.unified_emitter import (
+    UnifiedWebSocketEmitter as WebSocketEventEmitter,
 )
 # Import the correct WebSocketEmitterFactory
 from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory

@@ -295,6 +295,7 @@ class StagingConnectivityValidator:
         return "\n".join(report_lines)
 
 
+@pytest.mark.e2e
 class TestStagingConnectivityValidation:
     """Test suite for validating staging environment connectivity"""
     

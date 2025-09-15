@@ -11,6 +11,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 # Test the agent_execution_core directly since it's the suspected source
+@pytest.mark.unit
 async def test_issue_1028_websocket_completion_missing():
     """Reproduce Issue #1028: Missing WebSocket completion notifications in success path.
 

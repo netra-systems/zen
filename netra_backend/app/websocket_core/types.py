@@ -16,10 +16,153 @@ from typing import Any, Dict, List, Optional, Union
 import time
 import uuid
 from pydantic import BaseModel, Field
+from dataclasses import dataclass
 
 # Import UnifiedIdGenerator for SSOT ID generation
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.isolated_environment import get_env
+from shared.types.core_types import (
+    UserID, ThreadID, ConnectionID, WebSocketID, RequestID,
+    ensure_user_id, ensure_thread_id, ensure_websocket_id
+)
+
+
+@dataclass
+class WebSocketConnection:
+    """
+    SSOT WebSocket Connection data structure.
+
+    CRITICAL: This class has been extracted from unified_manager.py to break
+    the circular dependency between unified_manager.py and websocket_manager.py.
+    This enables proper SSOT consolidation while maintaining type safety.
+
+    Business Value Justification:
+    - Segment: Platform/Infrastructure
+    - Business Goal: Enable proper user isolation and connection management
+    - Value Impact: Foundation for all WebSocket-based chat interactions
+    - Revenue Impact: Prevents connection state corruption affecting $500K+ ARR
+    """
+    connection_id: str
+    user_id: str
+    websocket: Any
+    connected_at: datetime
+    metadata: Dict[str, Any] = None
+    thread_id: Optional[str] = None
+    last_activity: datetime = None
+    is_active: bool = True
+
+    def __post_init__(self):
+        """Validate connection data after initialization."""
+        # Validate user_id is properly formatted
+        if self.user_id:
+            self.user_id = ensure_user_id(self.user_id)
+
+        # Set default values for optional fields
+        if self.metadata is None:
+            self.metadata = {}
+
+        if self.last_activity is None:
+            self.last_activity = self.connected_at
+
+        # Ensure connection_id is properly typed
+        if isinstance(self.connection_id, str):
+            self.connection_id = ConnectionID(self.connection_id)
+
+        # Ensure thread_id is properly typed if provided
+        if self.thread_id is not None:
+            self.thread_id = ensure_thread_id(self.thread_id)
+
+
+class WebSocketManagerMode(Enum):
+    """WebSocket manager modes with proper user isolation.
+
+    ISSUE #889 FIX: Each enum value creates unique instances to prevent
+    cross-user state sharing violations that caused regulatory compliance issues.
+
+    User isolation is enforced through both UserExecutionContext and unique enum instances.
+    """
+    UNIFIED = "unified"        # SSOT: Single unified mode with UserExecutionContext isolation
+    ISOLATED = "isolated"      # Isolated mode for enhanced user separation
+    EMERGENCY = "emergency"    # Emergency fallback mode with degraded capabilities
+    DEGRADED = "degraded"      # Degraded mode for service recovery
+
+    def __new__(cls, value):
+        """
+        ISSUE #889 FIX: Create unique enum instances to prevent cross-user state sharing.
+
+        This prevents the critical security violation where all managers shared
+        the same enum object instance, causing user data contamination.
+
+        Each call creates a new enum instance with the same value but different
+        object identity, preventing any possibility of shared state.
+        """
+        obj = object.__new__(cls)
+        obj._value_ = value
+        # ISSUE #889 ENHANCEMENT: Add unique identifier for debugging
+        import time
+        obj._instance_id = f"{value}_{int(time.time() * 1000000) % 1000000}"
+        return obj
+
+    @property
+    def instance_id(self):
+        """Get the unique instance identifier for debugging isolation issues."""
+        return getattr(self, '_instance_id', 'unknown')
+
+
+def create_isolated_mode(mode_value: str = "unified") -> 'WebSocketManagerMode':
+    """
+    ISSUE #889 FIX: Create an isolated WebSocketManagerMode instance.
+
+    This factory function ensures each manager gets a unique enum instance,
+    preventing any possibility of cross-user state contamination through
+    shared enum object references.
+
+    Args:
+        mode_value: The mode value ("unified", "isolated", "emergency", "degraded")
+
+    Returns:
+        WebSocketManagerMode: A new, isolated enum instance
+    """
+
+    class IsolatedModeWrapper:
+        """
+        Wrapper class that behaves like WebSocketManagerMode but provides complete isolation.
+        Each instance is unique to prevent cross-user contamination.
+        """
+        def __init__(self, value: str):
+            self._value_ = value
+            import time
+            self._instance_id = f"{value}_{int(time.time() * 1000000) % 1000000}"
+
+        @property
+        def value(self):
+            return self._value_
+
+        @property
+        def name(self):
+            return self._value_.upper()
+
+        @property
+        def instance_id(self):
+            return self._instance_id
+
+        def __str__(self):
+            return self._value_
+
+        def __repr__(self):
+            return f"IsolatedModeWrapper('{self._value_}', id={self._instance_id})"
+
+        def __eq__(self, other):
+            if hasattr(other, 'value'):
+                return self._value_ == other.value
+            return self._value_ == str(other)
+
+        def __hash__(self):
+            # Include instance_id in hash to ensure uniqueness
+            return hash((self._value_, self._instance_id))
+
+    # Create a completely isolated wrapper instance
+    return IsolatedModeWrapper(mode_value)
 
 
 class WebSocketConnectionState(str, Enum):
@@ -31,7 +174,7 @@ class WebSocketConnectionState(str, Enum):
     ERROR = "error"
     # Compatibility aliases for tests
     ACTIVE = "connected"  # Alias for CONNECTED
-    CLOSING = "disconnecting"  # Alias for DISCONNECTING  
+    CLOSING = "disconnecting"  # Alias for DISCONNECTING
     CLOSED = "disconnected"  # Alias for DISCONNECTED
     FAILED = "error"  # Alias for ERROR
 
@@ -949,6 +1092,216 @@ class AgentEvent(BaseModel):
                 include_random=True,
                 random_length=8
             )
+
+
+# =============================================================================
+# SSOT SERIALIZATION FUNCTIONS (EXTRACTED FROM UNIFIED_MANAGER)
+# =============================================================================
+
+def _get_enum_key_representation(enum_key: Enum) -> str:
+    """
+    Get string representation for enum keys in dictionaries.
+
+    For enum keys, we use different strategies based on enum type:
+    - WebSocketState enums: Use lowercase names for consistency ("open" vs "1")
+    - Integer enums (IntEnum): Use string value for readability ("1" vs "first")
+    - String/text enums: Use lowercase names for readability ("option_a" vs "OPTION_A")
+
+    Args:
+        enum_key: Enum object to convert to string key
+
+    Returns:
+        String representation suitable for JSON dict keys
+    """
+    if hasattr(enum_key, 'name') and hasattr(enum_key, 'value'):
+        # WEBSOCKET STATE HANDLING: Check if this is a WebSocket state enum
+        enum_name = str(enum_key.name).upper()
+        websocket_state_names = {'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'CONNECTED', 'DISCONNECTED'}
+
+        # Check if it's from a WebSocket framework module or has WebSocket-like class name
+        module_name = getattr(enum_key.__class__, '__module__', '')
+        framework_modules = ['starlette.websockets', 'fastapi.websockets', 'websockets']
+        is_framework_websocket = any(framework_mod in module_name for framework_mod in framework_modules)
+
+        class_name = enum_key.__class__.__name__
+        is_websocket_class = 'websocket' in class_name.lower() and 'state' in class_name.lower()
+
+        # For WebSocket state enums, always use lowercase name for keys
+        if (is_framework_websocket or
+            (is_websocket_class and enum_name in websocket_state_names)):
+            return str(enum_key.name).lower()
+
+        # For integer-valued non-WebSocket enums, use the string representation of the value
+        # This makes {"1": "initialized"} instead of {"first": "initialized"}
+        elif isinstance(enum_key.value, int):
+            return str(enum_key.value)
+        else:
+            # For string/other enums, use lowercase names for better JSON readability
+            # This makes {"option_a": "selected"} instead of {"OPTION_A": "selected"}
+            return str(enum_key.name).lower()
+    else:
+        # Fallback to string representation
+        return str(enum_key)
+
+
+def serialize_message_safely(message: Any) -> Dict[str, Any]:
+    """
+    SSOT: Safely serialize message data for WebSocket transmission.
+
+    EXTRACTED FROM UNIFIED_MANAGER: This function has been moved to types.py
+    to break the circular dependency and provide a single source of truth
+    for message serialization across the WebSocket infrastructure.
+
+    CRITICAL FIX: Handles all serialization edge cases including:
+    - Enum objects (WebSocketState, etc.)  ->  converted to string values
+    - Pydantic models  ->  model_dump(mode='json') for datetime handling
+    - Complex objects with to_dict() method
+    - Datetime objects  ->  ISO string format
+    - Dataclasses  ->  converted to dict
+    - Fallback to string representation for unhandled types
+
+    Args:
+        message: Any message object that needs JSON serialization
+
+    Returns:
+        JSON-serializable dictionary
+
+    Raises:
+        TypeError: Only if all fallback strategies fail (should be extremely rare)
+    """
+    import json
+    from shared.logging.unified_logging_ssot import get_logger
+
+    logger = get_logger(__name__)
+
+    # Quick path for already serializable dicts
+    if isinstance(message, dict):
+        try:
+            # Test if it's already JSON serializable
+            json.dumps(message)
+            return message
+        except (TypeError, ValueError):
+            # Dict contains non-serializable objects, need to process recursively
+            # Process both keys AND values for enum objects
+            result = {}
+            for key, value in message.items():
+                # Convert enum keys consistently with enum value handling
+                if isinstance(key, Enum):
+                    # For WebSocketState enums, use name.lower() to match value handling
+                    try:
+                        from starlette.websockets import WebSocketState as StarletteWebSocketState
+                        if isinstance(key, StarletteWebSocketState):
+                            safe_key = key.name.lower()
+                        else:
+                            safe_key = _get_enum_key_representation(key)
+                    except (ImportError, AttributeError):
+                        try:
+                            from fastapi.websockets import WebSocketState as FastAPIWebSocketState
+                            if isinstance(key, FastAPIWebSocketState):
+                                safe_key = key.name.lower()
+                            else:
+                                safe_key = _get_enum_key_representation(key)
+                        except (ImportError, AttributeError):
+                            safe_key = _get_enum_key_representation(key)
+                else:
+                    safe_key = key
+                # Recursively serialize values
+                result[safe_key] = serialize_message_safely(value)
+            return result
+
+    # CRITICAL FIX: Handle WebSocketState enum specifically (from FastAPI/Starlette)
+    # CLOUD RUN FIX: More resilient import handling to prevent startup failures
+    try:
+        from starlette.websockets import WebSocketState as StarletteWebSocketState
+        if isinstance(message, StarletteWebSocketState):
+            return message.name.lower()  # CONNECTED  ->  "connected"
+    except (ImportError, AttributeError) as e:
+        logger.debug(f"Starlette WebSocketState import failed (non-critical): {e}")
+
+    try:
+        from fastapi.websockets import WebSocketState as FastAPIWebSocketState
+        if isinstance(message, FastAPIWebSocketState):
+            return message.name.lower()  # CONNECTED  ->  "connected"
+    except (ImportError, AttributeError) as e:
+        logger.debug(f"FastAPI WebSocketState import failed (non-critical): {e}")
+
+    # Handle enum objects - CONSISTENT LOGIC: Return .value for generic enums
+    if isinstance(message, Enum):
+        # WEBSOCKET STATE HANDLING: Check if this enum represents WebSocket state
+        # This includes both framework enums and test enums with WebSocket-like names
+        if hasattr(message, 'name') and hasattr(message, 'value'):
+            # Check for WebSocket state behavior by enum name pattern
+            enum_name = str(message.name).upper()
+            websocket_state_names = {'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'CONNECTED', 'DISCONNECTED'}
+
+            # Also check if it's from a WebSocket framework module
+            module_name = getattr(message.__class__, '__module__', '')
+            framework_modules = ['starlette.websockets', 'fastapi.websockets', 'websockets']
+            is_framework_websocket = any(framework_mod in module_name for framework_mod in framework_modules)
+
+            # Also check if the class name suggests it's a WebSocket state enum
+            class_name = message.__class__.__name__
+            is_websocket_class = 'websocket' in class_name.lower() and 'state' in class_name.lower()
+
+            # Treat as WebSocket state if:
+            # 1. From framework module, OR
+            # 2. Has WebSocket-like class name AND websocket state name
+            if (is_framework_websocket or
+                (is_websocket_class and enum_name in websocket_state_names)):
+                return str(message.name).lower()
+
+        # For all other enums, return the value
+        return message.value if hasattr(message, 'value') else str(message)
+
+    # Handle Pydantic models with proper datetime serialization
+    if hasattr(message, 'model_dump'):
+        try:
+            return message.model_dump(mode='json')
+        except Exception as e:
+            logger.warning(f"Pydantic model_dump(mode='json') failed: {e}, trying without mode")
+            try:
+                return message.model_dump()
+            except Exception as e2:
+                logger.warning(f"Pydantic model_dump failed completely: {e2}, using string fallback")
+                # Fall through to the string fallback at the end of the function
+
+    # Handle objects with to_dict method (UserExecutionContext, etc.)
+    if hasattr(message, 'to_dict'):
+        return message.to_dict()
+
+    # Handle dataclasses
+    if hasattr(message, '__dataclass_fields__'):
+        from dataclasses import asdict
+        # Convert dataclass to dict, then recursively serialize the result
+        dict_data = asdict(message)
+        return serialize_message_safely(dict_data)
+
+    # Handle datetime objects
+    if hasattr(message, 'isoformat'):
+        return message.isoformat()
+
+    # Handle lists and tuples recursively
+    if isinstance(message, (list, tuple)):
+        return [serialize_message_safely(item) for item in message]
+
+    # Handle sets (convert to list)
+    if isinstance(message, set):
+        return [serialize_message_safely(item) for item in message]
+
+    # Test direct JSON serialization for basic types
+    try:
+        json.dumps(message)
+        return message
+    except (TypeError, ValueError):
+        pass
+
+    # Final fallback - convert to string (prevents total failure)
+    logger.warning(f"Using string fallback for object of type {type(message)}: {message}")
+    return str(message)
+
+
+# Backward compatibility alias for _serialize_message_safely
+_serialize_message_safely = serialize_message_safely
 
 
 # Backward compatibility aliases

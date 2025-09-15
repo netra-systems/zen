@@ -37,6 +37,7 @@ class ToolAtomicityLevel(Enum):
 
 
 @dataclass
+@pytest.mark.e2e
 class TestToolResult:
     """Result of tool atomicity testing."""
     tool_name: str
@@ -53,6 +54,7 @@ class TestToolResult:
                 self.error_count == 0)
 
 
+@pytest.mark.e2e
 class TestToolAtomicityer:
     """Tester for agent tool atomicity."""
 

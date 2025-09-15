@@ -14,6 +14,7 @@ Validates that deprecated patterns are eliminated, reducing technical debt
 and eliminating confusion in factory pattern usage.
 """
 
+import pytest
 import os
 import re
 import subprocess
@@ -22,6 +23,7 @@ from typing import List, Dict, Set, Tuple, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.integration
 class TestWebSocketDeprecatedPatternElimination(SSotBaseTestCase):
     """
     SSOT validation tests for WebSocket deprecated pattern elimination.

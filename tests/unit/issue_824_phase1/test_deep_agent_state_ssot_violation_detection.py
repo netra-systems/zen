@@ -14,6 +14,7 @@ EXPECTED BEHAVIOR: All tests should FAIL initially, proving violation exists.
 After remediation: All tests should PASS, confirming SSOT consolidation.
 """
 
+import pytest
 import sys
 import importlib
 import inspect
@@ -26,6 +27,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
+@pytest.mark.unit
 class TestDeepAgentStateImportConflictValidation(SSotAsyncTestCase):
     """Test import conflict validation - MUST FAIL initially to prove violation exists."""
 
@@ -197,6 +199,7 @@ class TestDeepAgentStateImportConflictValidation(SSotAsyncTestCase):
         )
 
 
+@pytest.mark.unit
 class TestDeepAgentStateCompatibilityVerification(SSotAsyncTestCase):
     """Test state compatibility verification - MUST FAIL initially to prove differences exist."""
 
@@ -318,6 +321,7 @@ class TestDeepAgentStateCompatibilityVerification(SSotAsyncTestCase):
         )
 
 
+@pytest.mark.unit
 class TestDeepAgentStateGoldenPathIndependence(SSotAsyncTestCase):
     """Test Golden Path independence - MUST FAIL initially to prove WebSocket dependency issues."""
 

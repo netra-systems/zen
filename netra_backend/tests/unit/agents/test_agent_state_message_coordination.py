@@ -52,13 +52,13 @@ from netra_backend.app.websocket_core.types import (
 )
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
-from netra_backend.app.websocket_core.state_coordinator import StateCoordinator
-from netra_backend.app.websocket_core.state_synchronizer import StateSynchronizer
+from netra_backend.app.websocket_core.state_coordinator import WebSocketStateCoordinator
+from netra_backend.app.websocket_core.state_synchronizer import ConnectionStateSynchronizer
 
 # Import agent coordination components
-from netra_backend.app.agents.agent_lifecycle import AgentLifecycleManager
-from netra_backend.app.agents.agent_communication import AgentCommunicationManager
-from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
+from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.state_persistence_optimized import StatePersistenceService
 
 
@@ -82,17 +82,18 @@ class TestAgentStateMessageCoordination(SSotAsyncTestCase):
         
         # Create test IDs
         self.user_id = str(uuid.uuid4())
-        self.execution_id = UnifiedIDManager.generate_id(IDType.EXECUTION)
-        self.agent_id = UnifiedIDManager.generate_id(IDType.AGENT)
+        id_manager = UnifiedIDManager()
+        self.execution_id = id_manager.generate_id(IDType.EXECUTION)
+        self.agent_id = id_manager.generate_id(IDType.AGENT)
         self.connection_id = str(uuid.uuid4())
         
         # Create mock user execution context
         self.user_context = UserExecutionContext(
             user_id=self.user_id,
-            execution_id=self.execution_id,
-            connection_id=self.connection_id,
-            jwt_token="mock_jwt_token",
-            metadata={"test_case": method.__name__, "agent_id": self.agent_id}
+            thread_id=str(uuid.uuid4()),
+            run_id=self.execution_id,
+            websocket_client_id=self.connection_id,
+            agent_context={"test_case": method.__name__, "agent_id": self.agent_id}
         )
         
         # Initialize coordination components with mocked externals
@@ -102,10 +103,11 @@ class TestAgentStateMessageCoordination(SSotAsyncTestCase):
         
         # Create real internal components (following SSOT patterns)
         self.state_manager = StateManager()
-        self.lifecycle_manager = AgentLifecycleManager()
-        self.communication_manager = AgentCommunicationManager()
-        self.state_coordinator = StateCoordinator()
-        self.state_synchronizer = StateSynchronizer()
+        # Note: These are mixins, not standalone classes - will need to create test implementations
+        # self.lifecycle_manager = AgentLifecycleMixin()  # Mixin - needs concrete implementation
+        # self.communication_manager = AgentCommunicationMixin()  # Mixin - needs concrete implementation
+        self.state_coordinator = WebSocketStateCoordinator()
+        # self.state_synchronizer = ConnectionStateSynchronizer(mock_connection_manager)  # Needs connection manager
         
         # Define test coordination scenarios
         self.coordination_scenarios = [

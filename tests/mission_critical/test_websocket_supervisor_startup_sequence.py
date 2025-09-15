@@ -107,7 +107,7 @@ class MissionCriticalWebSocketTester:
             async with websockets.connect(
                 ws_url,
                 timeout=timeout_seconds,
-                extra_headers={"Authorization": f"Bearer {self.auth_token}"}
+                additional_headers={"Authorization": f"Bearer {self.auth_token}"}
             ) as websocket:
                 connection_result['connection_time'] = time.time() - connection_start
                 connection_result['success'] = True
@@ -843,4 +843,6 @@ class TestWebSocketAgentInteractionFlow(SSotAsyncTestCase):
 
 if __name__ == '__main__':
     # Run mission critical tests with detailed output
-    pytest.main([__file__, '-v', '--tb=long', '--asyncio-mode=auto'])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

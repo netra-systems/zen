@@ -53,6 +53,7 @@ def staging_auth_helper(staging_config):
     return E2EAuthHelper(environment="staging")
 
 
+@pytest.mark.e2e
 class TestWebSocketStagingEnvironmentValidation:
     """
     Test suite that validates GCP staging environment infrastructure.

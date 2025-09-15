@@ -25,6 +25,7 @@ from unittest.mock import AsyncMock, Mock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
+@pytest.mark.unit
 class TestRedisConnectionPoolConflicts(SSotAsyncTestCase):
     """Unit tests validating Redis connection pool sharing and conflicts.
     

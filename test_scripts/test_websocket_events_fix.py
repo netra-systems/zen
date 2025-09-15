@@ -14,7 +14,7 @@ import json
 import sys
 import time
 from typing import Dict, List, Set, Optional, Any
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from shared.isolated_environment import IsolatedEnvironment
 

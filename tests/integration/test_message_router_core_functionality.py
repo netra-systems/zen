@@ -27,6 +27,7 @@ GitHub Issue: #1101 - Message Router Core Functionality Integration Tests
 Related: #1077 - MessageRouter SSOT violations, #953 - User isolation security
 """
 
+import pytest
 import unittest
 import asyncio
 import time
@@ -77,6 +78,7 @@ class MockWebSocket:
         self.sent_messages.clear()
 
 
+@pytest.mark.integration
 class TestMessageHandler:
     """Test message handler for routing validation."""
 
@@ -115,6 +117,7 @@ class TestMessageHandler:
         }
 
 
+@pytest.mark.integration
 class TestMessageRouterCoreFunctionality(SSotAsyncTestCase):
     """Integration tests for message router core functionality."""
 

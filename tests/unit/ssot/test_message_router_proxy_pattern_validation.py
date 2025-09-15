@@ -18,6 +18,7 @@ VALIDATION FOCUS:
 TEST STRATEGY: Focused validation of proxy pattern behavior rather than violation detection
 """
 
+import pytest
 import unittest
 import warnings
 import importlib
@@ -26,6 +27,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestMessageRouterProxyPatternValidation(SSotBaseTestCase):
     """Validate MessageRouter proxy pattern implementation."""
 
@@ -291,6 +293,7 @@ class TestMessageRouterProxyPatternValidation(SSotBaseTestCase):
         )
 
 
+@pytest.mark.unit
 class TestMessageRouterSSotComplianceValidation(SSotBaseTestCase):
     """Validate SSOT compliance through proxy pattern."""
 

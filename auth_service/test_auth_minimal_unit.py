@@ -16,9 +16,10 @@ import logging
 import time
 from datetime import datetime, timedelta, timezone
 import jwt
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestJWTBasicOperations(unittest.TestCase):
+class TestJWTBasicOperations(SSotBaseTestCase, unittest.TestCase):
     """
     Basic JWT operations test without auth service dependencies
     Test fundamental JWT functionality that the auth service should provide
@@ -266,7 +267,7 @@ class TestJWTBasicOperations(unittest.TestCase):
         self.assertEqual(header['typ'], 'JWT')
 
 
-class TestBasicPasswordHashing(unittest.TestCase):
+class TestBasicPasswordHashing(SSotBaseTestCase, unittest.TestCase):
     """
     Test basic password hashing functionality
     This represents what an auth service should provide for password validation
@@ -308,7 +309,7 @@ class TestBasicPasswordHashing(unittest.TestCase):
         self.assertEqual(len(salt2), 32)
 
 
-class TestHealthCheckLogic(unittest.TestCase):
+class TestHealthCheckLogic(SSotBaseTestCase, unittest.TestCase):
     """
     Test basic health check logic that doesn't require network calls
     """
@@ -355,7 +356,7 @@ class TestHealthCheckLogic(unittest.TestCase):
         self.assertEqual(determine_health_status(none_healthy), 'unhealthy')
 
 
-class TestEnvironmentConfiguration(unittest.TestCase):
+class TestEnvironmentConfiguration(SSotBaseTestCase, unittest.TestCase):
     """
     Test environment configuration handling without external dependencies
     """
@@ -400,8 +401,13 @@ if __name__ == "__main__":
     # Run tests directly if called as script
     print("Running minimal auth service unit tests...")
     
-    # Set basic environment for tests
-    os.environ['ENVIRONMENT'] = 'test'
+    # Set basic environment for tests using IsolatedEnvironment
+    import sys
+    from pathlib import Path
+    sys.path.append(str(Path(__file__).parent.parent))
+    from shared.isolated_environment import get_env
+    env = get_env()
+    env.set('ENVIRONMENT', 'test')
     
     # Run with more detailed output
     unittest.main(argv=[''], exit=False, verbosity=2)

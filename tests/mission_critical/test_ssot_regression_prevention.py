@@ -2276,4 +2276,6 @@ if __name__ == '__main__':
         logger.error(f"WebSocket test execution failed: {e}")
     
     # Run the synchronous tests
-    pytest.main([__file__, '-v', '--tb=short', '--capture=no', '--maxfail=3'])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

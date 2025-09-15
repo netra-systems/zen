@@ -20,6 +20,7 @@ CRITICAL: These tests use REAL SERVICES (no Docker required) to validate
 actual integration behavior during SSOT consolidation process.
 """
 
+import pytest
 import asyncio
 import time
 import uuid
@@ -30,25 +31,17 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.integration
 class TestExecutionEngineConsolidationIntegration(SSotAsyncTestCase):
     """Integration tests for execution engine SSOT consolidation."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test fixtures for integration testing."""
-        super().setUp()
+        super().setup_method(method)
 
-        # Test user contexts for isolation validation
-        self.test_user_context_1 = UserExecutionContext(
-            user_id="test_user_1",
-            session_id="test_session_1",
-            request_id=f"test_req_{uuid.uuid4()}"
-        )
-
-        self.test_user_context_2 = UserExecutionContext(
-            user_id="test_user_2",
-            session_id="test_session_2",
-            request_id=f"test_req_{uuid.uuid4()}"
-        )
+        # Test user contexts for isolation validation using SSOT helper
+        self.test_user_context_1 = self.create_test_user_execution_context()
+        self.test_user_context_2 = self.create_test_user_execution_context()
 
         # Track WebSocket events for validation
         self.websocket_events = []

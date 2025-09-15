@@ -31,6 +31,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
+@pytest.mark.integration
 class TestMockPerformanceBaseline(SSotBaseTestCase):
     """
     Performance baseline validation for SSOT mock factory.

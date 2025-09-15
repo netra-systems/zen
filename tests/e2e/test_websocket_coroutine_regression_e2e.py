@@ -39,6 +39,7 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.e2e
 class TestWebSocketCoroutineRegressionE2E(SSotBaseTestCase):
     """
     E2E tests for WebSocket coroutine regression prevention.

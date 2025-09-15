@@ -56,6 +56,7 @@ def staging_websocket_auth_helper(staging_config):
     return E2EWebSocketAuthHelper(environment="staging")
 
 
+@pytest.mark.e2e
 class TestWebSocket1011ErrorReproduction:
     """
     Test suite that reproduces the exact WebSocket 1011 internal errors.

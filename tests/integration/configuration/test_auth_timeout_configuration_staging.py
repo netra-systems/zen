@@ -43,6 +43,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import (
 )
 
 
+@pytest.mark.integration
 class TestAuthTimeoutConfigurationStaging(SSotBaseTestCase):
     """
     Configuration tests for auth timeout in staging environments.

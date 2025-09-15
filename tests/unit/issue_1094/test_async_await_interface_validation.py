@@ -41,17 +41,21 @@ class TestAsyncAwaitInterfaceValidation(BaseIntegrationTest):
     async def test_create_websocket_manager_sync_interface_reproduction(self):
         """
         FAILING TEST: Reproduce TypeError when awaiting synchronous create_websocket_manager.
-        
+
         This test demonstrates the root cause of Issue #1094 - attempting to await
         a synchronous function that returns a context object instead of a manager.
         """
         from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
-        
-        # Create mock user context
-        user_context = Mock()
-        user_context.user_id = "test_user_123"
-        user_context.thread_id = "test_thread_456"
-        
+
+        # Create proper user context (not Mock to avoid validation errors)
+        user_context = UserExecutionContext(
+            user_id="test_user_123",
+            thread_id="test_thread_456",
+            run_id="test_run_789",
+            request_id="test_request_012",
+            websocket_client_id="ws_test_123"
+        )
+
         # This should FAIL - demonstrates the TypeError in production
         with pytest.raises(TypeError, match="object UserExecutionContext can't be used in 'await' expression|object is not awaitable"):
             websocket_manager = await create_websocket_manager(user_context)
@@ -90,13 +94,14 @@ class TestAsyncAwaitInterfaceValidation(BaseIntegrationTest):
         # Create proper user context
         user_context = UserExecutionContext(
             user_id="test_user_123",
-            thread_id="test_thread_456", 
+            thread_id="test_thread_456",
+            run_id="test_run_234",
             request_id="test_request_789",
             websocket_client_id="ws_client_123"
         )
         
         # This should work correctly (async interface)
-        websocket_manager = await get_websocket_manager(user_context=user_context)
+        websocket_manager = get_websocket_manager(user_context=user_context)
         
         # Verify we get a manager with expected interface
         assert websocket_manager is not None, "get_websocket_manager should return manager"
@@ -116,7 +121,8 @@ class TestAsyncAwaitInterfaceValidation(BaseIntegrationTest):
         user_context = UserExecutionContext(
             user_id=user_id,
             thread_id="test_thread_456",
-            request_id="test_request_789", 
+            run_id="test_run_345",
+            request_id="test_request_789",
             websocket_client_id="ws_client_123"
         )
         
@@ -128,7 +134,7 @@ class TestAsyncAwaitInterfaceValidation(BaseIntegrationTest):
             
             # Simulate corrected agent service stop operation
             try:
-                websocket_manager = await get_websocket_manager(user_context=user_context)
+                websocket_manager = get_websocket_manager(user_context=user_context)
                 await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
                 success = True
             except Exception as e:
@@ -162,12 +168,13 @@ class TestAsyncAwaitInterfaceValidation(BaseIntegrationTest):
         proper_context = UserExecutionContext(
             user_id="test_user_123",
             thread_id="test_thread_456",
+            run_id="test_run_456",
             request_id="test_request_789",
             websocket_client_id="ws_client_123"
         )
         
         # Should work asynchronously 
-        manager = await get_websocket_manager(user_context=proper_context)
+        manager = get_websocket_manager(user_context=proper_context)
         assert manager is not None, "Modern function should return manager"
 
     @pytest.mark.unit
@@ -230,6 +237,7 @@ class TestAgentServiceCoreInterfaceFix(BaseIntegrationTest):
                 user_context = UserExecutionContext(
                     user_id=user_id,
                     thread_id="production_thread_789",
+                    run_id="production_run_567",
                     request_id="production_request_101",
                     websocket_client_id="ws_production_202"
                 )
@@ -251,7 +259,7 @@ class TestAgentServiceCoreInterfaceFix(BaseIntegrationTest):
                         user_context = await get_user_session_context(user_id=user_id)
                         
                         # Use correct async interface (FIXED)
-                        websocket_manager = await get_websocket_manager(user_context)
+                        websocket_manager = get_websocket_manager(user_context)
                         await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
                         
                         success = True
@@ -288,7 +296,8 @@ class TestAgentServiceCoreInterfaceFix(BaseIntegrationTest):
                 fallback_context = UserExecutionContext(
                     user_id=user_id,
                     thread_id="fallback_thread_303",
-                    request_id="fallback_request_404", 
+                    run_id="fallback_run_678",
+                    request_id="fallback_request_404",
                     websocket_client_id="ws_fallback_505"
                 )
                 mock_get_context.return_value = fallback_context
@@ -307,7 +316,7 @@ class TestAgentServiceCoreInterfaceFix(BaseIntegrationTest):
                         
                         # Fallback to direct manager access (FIXED INTERFACE)
                         fallback_context = await get_user_session_context(user_id=user_id)
-                        websocket_manager = await get_websocket_manager(fallback_context)
+                        websocket_manager = get_websocket_manager(fallback_context)
                         await websocket_manager.send_to_user(user_id, {"type": "agent_stopped"})
                         
                         success = True
@@ -336,13 +345,14 @@ class TestWebSocketFactorySSotCompliance(BaseIntegrationTest):
         # Test SSOT compliance across factory interfaces
         user_context = UserExecutionContext(
             user_id="ssot_user_606",
-            thread_id="ssot_thread_707", 
+            thread_id="ssot_thread_707",
+            run_id="ssot_run_789",
             request_id="ssot_request_808",
             websocket_client_id="ws_ssot_909"
         )
         
         # Verify async factory works correctly
-        manager = await get_websocket_manager(user_context=user_context)
+        manager = get_websocket_manager(user_context=user_context)
         assert manager is not None, "SSOT async factory should work"
         
         # Verify sync compatibility function exists but is clearly differentiated
@@ -371,6 +381,7 @@ class TestWebSocketFactorySSotCompliance(BaseIntegrationTest):
         user_context = UserExecutionContext(
             user_id=user_id,
             thread_id="golden_thread_456",
+            run_id="golden_run_890",
             request_id="golden_request_789",
             websocket_client_id="ws_golden_101"
         )
@@ -391,7 +402,7 @@ class TestWebSocketFactorySSotCompliance(BaseIntegrationTest):
             ]
             
             try:
-                websocket_manager = await get_websocket_manager(user_context=user_context)
+                websocket_manager = get_websocket_manager(user_context=user_context)
                 
                 # Send all critical events
                 for event in critical_events:

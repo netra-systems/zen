@@ -404,8 +404,8 @@ class PipelineExecutor:
     
     def _get_current_timestamp(self) -> str:
         """Get current timestamp for messaging."""
-        from datetime import datetime
-        return datetime.utcnow().isoformat()
+        from datetime import datetime, timezone
+        return datetime.now(timezone.utc).isoformat()
     
     # DEPRECATED METHODS - Keep for backward compatibility but mark as deprecated
     async def _persist_final_state(self, state, context: Dict[str, str], db_session) -> None:

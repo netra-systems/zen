@@ -32,6 +32,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.integration
 class TestUserIsolationFailsWithFragmentedManagers(SSotAsyncTestCase):
     """Phase 1 Reproduction Test: Prove user isolation fails with fragmented managers."""
     
@@ -273,8 +274,8 @@ class TestUserIsolationFailsWithFragmentedManagers(SSotAsyncTestCase):
         
         try:
             # Create managers for concurrent testing
-            manager1 = await get_websocket_manager(user_context=self.user_context_1)
-            manager2 = await get_websocket_manager(user_context=self.user_context_2)
+            manager1 = get_websocket_manager(user_context=self.user_context_1)
+            manager2 = get_websocket_manager(user_context=self.user_context_2)
             
             # Create concurrent operations for each user
             async def user1_operations():

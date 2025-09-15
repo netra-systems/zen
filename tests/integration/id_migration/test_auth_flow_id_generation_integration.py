@@ -14,6 +14,7 @@ Integration Test Strategy:
 Expected Results: ALL TESTS SHOULD FAIL until SSOT migration complete
 """
 
+import pytest
 import asyncio
 import unittest
 import uuid
@@ -38,6 +39,7 @@ except ImportError:
     AUTH_IMPORTS_AVAILABLE = False
 
 
+@pytest.mark.integration
 class TestAuthFlowIdGenerationIntegration(SSotBaseTestCase):
     """Integration tests for auth flow ID generation patterns."""
     
@@ -263,6 +265,7 @@ class TestAuthFlowIdGenerationIntegration(SSotBaseTestCase):
                        "All SSOT IDs should be parseable (consistent format)")
 
 
+@pytest.mark.integration
 class TestMultiUserAuthIdIsolationIntegration(SSotBaseTestCase):
     """Integration tests for multi-user auth ID isolation patterns."""
     

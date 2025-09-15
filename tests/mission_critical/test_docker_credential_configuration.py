@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -62,7 +62,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 # Removed non-existent AuthManager import
@@ -1204,4 +1204,6 @@ class TestDockerCredentialSecurityInfrastructure:
 
 if __name__ == "__main__":
     # Run all tests
-    pytest.main([__file__, "-v", "--tb=short"])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

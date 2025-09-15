@@ -15,7 +15,7 @@ from netra_backend.app.services.service_interfaces import IMessageHandlerService
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-    from netra_backend.app.websocket_core import WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 import json
 
 from netra_backend.app.schemas.registry import (
@@ -66,7 +66,7 @@ from netra_backend.app.services.message_processing import (
     send_response_safely as _send_response_safely,
 )
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.websocket_core import create_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
@@ -100,7 +100,7 @@ class MessageHandlerService(IMessageHandlerService):
             return
         
         # Create isolated WebSocket manager for this user context
-        websocket_manager = await create_websocket_manager(user_context)
+        websocket_manager = get_websocket_manager(user_context)
         self.handler_base = MessageHandlerBase(websocket_manager)
         
         # CRITICAL FIX: Ensure thread association before agent processing
@@ -386,7 +386,7 @@ class MessageHandlerService(IMessageHandlerService):
         logger.info(f"Received user message from {user_id}: {text}, thread_id: {thread_id}")
         
         # Create isolated WebSocket manager for this user context
-        websocket_manager = await create_websocket_manager(user_context)
+        websocket_manager = get_websocket_manager(user_context)
         self.handler_base = MessageHandlerBase(websocket_manager)
         
         # Don't process empty messages - prevents wasted agent resources
@@ -539,12 +539,12 @@ class MessageHandlerService(IMessageHandlerService):
         db_session: Optional[AsyncSession]
     ) -> None:
         """Handle get_thread_history message type"""
-        websocket_manager = await create_websocket_manager(user_context)
+        websocket_manager = get_websocket_manager(user_context)
         await _handle_thread_history(self.thread_service, user_context.user_id, db_session, websocket_manager)
     
     async def handle_stop_agent(self, user_context: UserExecutionContext) -> None:
         """Handle stop_agent message type"""
-        websocket_manager = await create_websocket_manager(user_context)
+        websocket_manager = get_websocket_manager(user_context)
         await _handle_stop_agent(user_context.user_id, websocket_manager)
     
     async def handle_switch_thread(
@@ -556,7 +556,7 @@ class MessageHandlerService(IMessageHandlerService):
     ) -> None:
         """Handle switch_thread message type - join room AND load thread data"""
         user_id = user_context.user_id
-        websocket_manager = await create_websocket_manager(user_context)
+        websocket_manager = get_websocket_manager(user_context)
         
         thread_id = payload.get("thread_id")
         if not thread_id:
@@ -662,7 +662,7 @@ class MessageHandlerService(IMessageHandlerService):
         elif message_type == "example_message":
             await self.handle_example_message(user_context, payload, None)
         else:
-            websocket_manager = await create_websocket_manager(user_context)
+            websocket_manager = get_websocket_manager(user_context)
             await websocket_manager.send_to_user({"type": "error", "message": f"Unknown message type: {message_type}"})
 
     async def process_user_message(self, user_id: str, message: str, thread_id: str = None):
@@ -692,7 +692,7 @@ class MessageHandlerService(IMessageHandlerService):
     ) -> None:
         """Handle get_conversation_history message type."""
         user_id = user_context.user_id
-        websocket_manager = await create_websocket_manager(user_context)
+        websocket_manager = get_websocket_manager(user_context)
         
         try:
             session_token = payload.get("session_token", user_id)
@@ -721,7 +721,7 @@ class MessageHandlerService(IMessageHandlerService):
     ) -> None:
         """Handle get_agent_context message type."""
         user_id = user_context.user_id
-        websocket_manager = await create_websocket_manager(user_context)
+        websocket_manager = get_websocket_manager(user_context)
         
         try:
             session_token = payload.get("session_token", user_id)
@@ -818,7 +818,7 @@ class MessageHandlerService(IMessageHandlerService):
     ) -> None:
         """Handle example_message message type."""
         user_id = user_context.user_id
-        websocket_manager = await create_websocket_manager(user_context)
+        websocket_manager = get_websocket_manager(user_context)
         
         try:
             logger.info(f"Processing example message for user {user_id}")

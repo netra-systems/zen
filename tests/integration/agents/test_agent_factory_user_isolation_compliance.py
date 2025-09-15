@@ -34,6 +34,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
+@pytest.mark.integration
 class TestAgentFactoryUserIsolationCompliance(SSotAsyncTestCase):
     """
     Integration test suite proving user isolation compliance violations.

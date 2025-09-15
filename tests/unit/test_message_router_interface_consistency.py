@@ -15,6 +15,7 @@ EXPECTED BEHAVIOR:
 GitHub Issue: #217 - MessageRouter SSOT violations blocking golden path
 """
 
+import pytest
 import inspect
 import ast
 import unittest
@@ -26,6 +27,7 @@ import sys
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.unit
 class TestMessageRouterInterfaceConsistency(SSotBaseTestCase, unittest.TestCase):
     """Test interface consistency across MessageRouter implementations."""
 

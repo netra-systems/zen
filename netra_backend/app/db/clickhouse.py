@@ -30,6 +30,13 @@ from netra_backend.app.db.transaction_errors import (
 from sqlalchemy.exc import SQLAlchemyError, OperationalError, IntegrityError
 # test_decorator removed - production code must not depend on test_framework
 
+# Check if ClickHouse is available
+try:
+    import clickhouse_connect
+    CLICKHOUSE_AVAILABLE = True
+except ImportError:
+    CLICKHOUSE_AVAILABLE = False
+
 
 class ClickHouseCache:
     """Simple cache for ClickHouse query results with TTL support."""
@@ -1619,7 +1626,7 @@ async def insert_agent_state_history(run_id: str, state_data: dict, metadata: di
 def _prepare_state_history_record(run_id: str, state_data: dict, metadata: dict) -> dict:
     """Prepare state history record for ClickHouse insertion."""
     import json
-    from datetime import datetime
+    from datetime import datetime, timezone
     
     # Calculate state metrics
     state_json = json.dumps(state_data)
@@ -1635,7 +1642,7 @@ def _prepare_state_history_record(run_id: str, state_data: dict, metadata: dict)
     else:
         complexity = 'very_complex'
     
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     
     return {
         'run_id': run_id,

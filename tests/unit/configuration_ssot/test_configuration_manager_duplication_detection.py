@@ -19,6 +19,7 @@ Test Strategy:
 CRITICAL: Uses SSOT test infrastructure from test_framework/ssot/
 """
 
+import pytest
 import ast
 import inspect
 import os
@@ -31,6 +32,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.unit
 class TestConfigurationManagerDuplicationDetection(SSotBaseTestCase):
     """Unit tests to detect and validate configuration manager duplication."""
 
@@ -342,6 +344,7 @@ class TestConfigurationManagerDuplicationDetection(SSotBaseTestCase):
         }
 
 
+@pytest.mark.unit
 class TestConfigurationManagerCompatibilityBridge(SSotBaseTestCase):
     """Test the Issue #667 Phase 1 compatibility bridge functionality."""
 

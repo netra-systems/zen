@@ -25,6 +25,7 @@ SSOT Compliance: Uses SSotBaseTestCase for consistent test infrastructure.
 Real Services: Tests against actual staging environment where possible.
 """
 
+import pytest
 import unittest
 import subprocess
 import sys
@@ -49,6 +50,7 @@ from deployment.secrets_config import (
 from shared.isolated_environment import get_env
 
 
+@pytest.mark.e2e
 class TestStagingDeploymentValidation(SSotBaseTestCase):
     """
     E2E tests for staging deployment validation.

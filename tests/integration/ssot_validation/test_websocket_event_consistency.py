@@ -21,6 +21,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.integration
 class TestWebSocketEventConsistency(SSotAsyncTestCase):
     """Test WebSocket event consistency across execution engines."""
     
@@ -451,6 +452,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
         await super().async_teardown_method(method)
 
 
+@pytest.mark.integration
 class TestWebSocketEventBridgeConsistency(SSotAsyncTestCase):
     """Test WebSocket bridge consistency across different execution patterns."""
     

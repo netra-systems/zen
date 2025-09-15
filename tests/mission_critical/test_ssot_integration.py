@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketTestHelper:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -50,7 +50,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union, Set
-from test_framework.docker.unified_docker_manager import UnifiedDockerManager
+
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -1183,4 +1183,6 @@ if __name__ == '__main__':
     )
     
     # Run the comprehensive SSOT integration isolation tests
-    pytest.main([__file__, '-v', '--tb=short', '--capture=no', '--maxfail=1'])
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

@@ -24,12 +24,12 @@ import statistics
 import psutil
 import os
 from typing import List, Dict, Any
-from test_framework.ssot.base_test_case import SsotBaseTestCase
-from test_framework.ssot.real_websocket_test_client import WebSocketTestClient
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from test_framework.ssot.real_websocket_test_client import RealWebSocketTestClient
 from test_framework.ssot.real_services_test_fixtures import real_services_fixture
 
 
-class TestTracingPerformanceImpact(SsotBaseTestCase):
+class TestTracingPerformanceImpact(SSotAsyncTestCase):
     """Performance impact tests for distributed tracing - MUST FAIL with high overhead."""
 
     @pytest.mark.performance
@@ -44,7 +44,7 @@ class TestTracingPerformanceImpact(SsotBaseTestCase):
         for iteration in range(10):
             start_time = time.time()
             
-            async with WebSocketTestClient(token=user_token) as client:
+            async with RealWebSocketTestClient(token=user_token) as client:
                 await client.send_json({"type": "ping"})
                 response = await client.receive_json(timeout=5)
                 assert response is not None
@@ -85,7 +85,7 @@ class TestTracingPerformanceImpact(SsotBaseTestCase):
         for iteration in range(5):  # Fewer iterations due to longer execution time
             start_time = time.time()
             
-            async with WebSocketTestClient(token=user_token) as client:
+            async with RealWebSocketTestClient(token=user_token) as client:
                 await client.send_json({
                     "type": "agent_request",
                     "agent": "triage_agent", 
@@ -131,7 +131,7 @@ class TestTracingPerformanceImpact(SsotBaseTestCase):
         user_token = await self.create_test_user_token()
         
         # Simulate load that would generate many spans
-        async with WebSocketTestClient(token=user_token) as client:
+        async with RealWebSocketTestClient(token=user_token) as client:
             tasks = []
             for i in range(25):  # Simulate moderate load
                 task = client.send_json({
@@ -181,7 +181,7 @@ class TestTracingPerformanceImpact(SsotBaseTestCase):
         
         # Execute CPU-intensive operations that would generate traces
         start_time = time.time()
-        async with WebSocketTestClient(token=user_token) as client:
+        async with RealWebSocketTestClient(token=user_token) as client:
             for i in range(10):  # Reduced for CI compatibility
                 await client.send_json({
                     "type": "agent_request",
@@ -232,7 +232,7 @@ class TestTracingPerformanceImpact(SsotBaseTestCase):
         message_count = 20
         start_time = time.time()
         
-        async with WebSocketTestClient(token=user_token) as client:
+        async with RealWebSocketTestClient(token=user_token) as client:
             # Send messages rapidly
             tasks = []
             for i in range(message_count):
@@ -368,7 +368,7 @@ class TestTracingPerformanceImpact(SsotBaseTestCase):
                 f"Redis tracing overhead {simulated_traced_operation_time:.4f}s exceeds 20% threshold {max_acceptable_overhead:.4f}s"
 
 
-class TestTracingResourceConsumption(SsotBaseTestCase):
+class TestTracingResourceConsumption(SSotAsyncTestCase):
     """Test tracing resource consumption - MUST FAIL with excessive usage initially."""
 
     @pytest.mark.performance
@@ -506,7 +506,7 @@ class TestTracingResourceConsumption(SsotBaseTestCase):
             
             start_time = time.time()
             
-            async with WebSocketTestClient(token=user_token) as client:
+            async with RealWebSocketTestClient(token=user_token) as client:
                 # Send messages that would generate spans
                 for i in range(10):
                     await client.send_json({
@@ -548,7 +548,7 @@ class TestTracingResourceConsumption(SsotBaseTestCase):
                 )
 
 
-class TestPerformanceSLAValidation(SsotBaseTestCase):
+class TestPerformanceSLAValidation(SSotAsyncTestCase):
     """Test performance SLA compliance with tracing - MUST FAIL if SLAs violated."""
 
     @pytest.mark.performance
@@ -573,7 +573,7 @@ class TestPerformanceSLAValidation(SsotBaseTestCase):
             # Measure connection time
             connection_start = time.time()
             
-            async with WebSocketTestClient(token=user_token) as client:
+            async with RealWebSocketTestClient(token=user_token) as client:
                 connection_time = time.time() - connection_start
                 connection_times.append(connection_time)
                 
@@ -653,7 +653,7 @@ class TestPerformanceSLAValidation(SsotBaseTestCase):
         error_count = 0
         successful_requests = 0
         
-        async with WebSocketTestClient(token=user_token) as client:
+        async with RealWebSocketTestClient(token=user_token) as client:
             for i in range(total_requests):
                 try:
                     await client.send_json({

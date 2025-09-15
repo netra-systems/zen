@@ -34,6 +34,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.integration
 class TestWebSocketEventReliabilitySsotImprovement(SSotAsyncTestCase):
     """Phase 2 SSOT Validation Test: Validate 100% reliable event delivery with consolidated SSOT manager."""
     
@@ -79,7 +80,7 @@ class TestWebSocketEventReliabilitySsotImprovement(SSotAsyncTestCase):
         reliability_managers = []
         try:
             for user_context in self.reliability_users:
-                manager = await get_websocket_manager(user_context=user_context)
+                manager = get_websocket_manager(user_context=user_context)
                 reliability_managers.append((user_context, manager))
                 logger.info(f"Created SSOT manager for reliability testing: {user_context.user_id}")
             
@@ -430,7 +431,7 @@ class TestWebSocketEventReliabilitySsotImprovement(SSotAsyncTestCase):
         
         # Create manager for ordering test
         test_user = self.reliability_users[0]
-        manager = await get_websocket_manager(user_context=test_user)
+        manager = get_websocket_manager(user_context=test_user)
         
         # Create connection for ordering test
         ordering_connection = await self._create_event_tracking_connection(test_user)
@@ -498,7 +499,7 @@ class TestWebSocketEventReliabilitySsotImprovement(SSotAsyncTestCase):
         
         # Create manager for recovery testing
         recovery_user = self.reliability_users[1]
-        manager = await get_websocket_manager(user_context=recovery_user)
+        manager = get_websocket_manager(user_context=recovery_user)
         
         # Create connection that can simulate failures
         recovery_connection = type('RecoveryTestConnection', (), {

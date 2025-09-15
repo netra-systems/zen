@@ -49,6 +49,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
+@pytest.mark.e2e
 class TestWebSocketIDConsistencyFailures(BaseTestCase):
     """E2E tests exposing WebSocket ID generation and routing consistency failures."""
     
