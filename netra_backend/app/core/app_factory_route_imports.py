@@ -107,6 +107,8 @@ def _import_core_routers() -> dict:
     from netra_backend.app.routes.messages import router as messages_router
     from netra_backend.app.routes.messages_root import router as messages_root_router
     from netra_backend.app.routes.events_stream import router as events_stream_router
+    from netra_backend.app.routes.conversations import router as conversations_router
+    from netra_backend.app.routes.history import router as history_router
     
     # Conditionally import MCP router based on dependency availability
     mcp_router = None
@@ -125,7 +127,9 @@ def _import_core_routers() -> dict:
         "threads_router": threads_router, 
         "messages_router": messages_router, 
         "messages_root_router": messages_root_router, 
-        "events_stream_router": events_stream_router
+        "events_stream_router": events_stream_router,
+        "conversations_router": conversations_router,
+        "history_router": history_router
     }
     
     # Only add MCP router if it's available
