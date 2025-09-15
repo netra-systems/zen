@@ -127,6 +127,7 @@ markers = [
     "websocket_events: WebSocket event validation tests",
     "deployment: Deployment-related tests",
     "regression: Regression prevention tests",
+    "regression_prevention: Regression prevention validation tests",
     "architecture: Architecture compliance tests",
     "issue_1140: Issue #1140 specific tests",
     "timeout: Tests with custom timeout settings",
