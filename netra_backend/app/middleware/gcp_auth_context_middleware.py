@@ -114,7 +114,9 @@ class GCPAuthContextMiddleware(BaseHTTPMiddleware):
                             'user_id': jwt_validation_result.get('user_id'),
                             'user_email': jwt_validation_result.get('email')
                         })
-                        logger.debug(f"JWT validation successful via auth service for user {jwt_validation_result.get('user_id', 'unknown')[:8]}...")
+                        user_id = jwt_validation_result.get('user_id', 'unknown')
+                        user_id_display = str(user_id)[:8] if user_id else 'unknown'
+                        logger.debug(f"JWT validation successful via auth service for user {user_id_display}...")
                     else:
                         logger.warning("JWT validation failed via auth service - using fallback context")
                         auth_context.update({'auth_method': 'jwt_validation_failed'})
