@@ -9,6 +9,7 @@ Mission: Provide authoritative import mappings for all Netra services
 ### 🏆 CURRENT ACHIEVEMENTS
 - **Issue #863 Agent Registry SSOT**: ✅ **PHASE 3 COMPLETE** - 100% SSOT compliance achieved, both import paths resolve to identical classes
 - **Issue #1116 Agent Factory SSOT**: ✅ **COMPLETE** - Full singleton to factory migration with enterprise user isolation
+- **Issue #1186 UserExecutionEngine SSOT**: ✅ **CONSOLIDATION COMPLETE** - Fixed 17 files with fragmented import patterns, eliminated execution_engine_consolidated dependencies
 - **Issue #1182 WebSocket Manager SSOT**: ✅ **PHASE 1 COMPLETE** - Eliminated duplicate get_websocket_manager functions, consolidated imports to canonical paths, WebSocketManagerFactory integrated into canonical module
 - **SSOT Compliance**: 87.2% Real System (285 violations in 118 files) - Major Agent Registry violations resolved through direct re-export
 - **Configuration Manager SSOT**: ✅ **PHASE 1 COMPLETE** - Issue #667 unified imports and compatibility
@@ -79,13 +80,16 @@ from netra_backend.app.agents.supervisor.request_scoped_execution_engine import 
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory, get_execution_engine_factory, configure_execution_engine_factory
 from netra_backend.app.core.managers.execution_engine_factory import ExecutionEngineFactory  # COMPATIBILITY ALIAS - Use supervisor version for new code
 
-# ExecutionEngine - SSOT Pattern (FIXED 2025-09-12)
-from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine  # RECOMMENDED: Use alias for backward compatibility
-from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine  # FACTORY METHOD: Use for proper instantiation
+# UserExecutionEngine - SSOT Pattern (Issue #1186 CONSOLIDATION COMPLETE - 2025-09-15)
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine  # ✅ CANONICAL: Single Source of Truth
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory  # ✅ CANONICAL: Factory pattern
+from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine  # ✅ CANONICAL: Scoped execution
 
-# ExecutionEngine - SSOT Pattern (FIXED 2025-09-12)
-from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine  # RECOMMENDED: Use alias for backward compatibility
-from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine  # FACTORY METHOD: Use for proper instantiation
+# CONSOLIDATED IMPORTS - Issue #1186 Fixed fragmented patterns:
+# ❌ DEPRECATED: from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+# ❌ DEPRECATED: from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory
+# ✅ USE INSTEAD: UserExecutionEngine (canonical SSOT class)
+# ✅ USE INSTEAD: ExecutionEngineFactory (canonical factory)
 
 # Tools (Performance and Optimization)
 from netra_backend.app.tools.performance_optimizer import ToolPerformanceOptimizer
