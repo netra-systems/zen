@@ -1,6 +1,6 @@
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
@@ -44,7 +44,7 @@ class TestWebSocketConnection:
                 from netra_backend.app.clients.auth_client_core import AuthServiceClient
                 from shared.isolated_environment import get_env
 
-                class TestAuthRefreshDatabaseSessionRegression:
+                class AuthRefreshDatabaseSessionRegressionTests:
                     """
                     Regression test to ensure auth refresh always has database session
                     This prevents the "No database session" error seen in staging logs
@@ -83,7 +83,7 @@ class TestWebSocketConnection:
                                     refresh_token = test_auth_service.jwt_handler.create_refresh_token(test_user_id)
                                     from auth_service.auth_core.database.repository import AuthUserRepository
                                     with patch('auth_service.auth_core.services.auth_service.AuthUserRepository') as MockRepo:
-                                        websocket = TestWebSocketConnection()
+                                        websocket = WebSocketConnectionTests()
                                         MockRepo.return_value = mock_repo_instance
                                         from auth_service.auth_core.database.models import AuthUser
                                         mock_user = AuthUser(id=test_user_id, email='test@example.com', full_name='Test User', auth_provider='local', is_active=True, is_verified=True)
@@ -139,7 +139,7 @@ class TestWebSocketConnection:
                                                             assert result['access_token'] == 'new_access'
                                                             assert result['refresh_token'] == 'new_refresh'
 
-                                                            class TestAuthLoopPreventionIntegration:
+                                                            class AuthLoopPreventionIntegrationTests:
                                                                 """Integration tests for auth loop prevention"""
 
                                                                 @pytest.mark.asyncio
@@ -152,7 +152,7 @@ class TestWebSocketConnection:
                                                                     refresh_token = test_auth_service.jwt_handler.create_refresh_token(user_id)
                                                                     from auth_service.auth_core.database.repository import AuthUserRepository
                                                                     with patch('auth_service.auth_core.services.auth_service.AuthUserRepository') as MockRepo:
-                                                                        websocket = TestWebSocketConnection()
+                                                                        websocket = WebSocketConnectionTests()
                                                                         MockRepo.return_value = mock_repo
                                                                         from auth_service.auth_core.database.models import AuthUser
                                                                         mock_user = AuthUser(id=user_id, email='loop@test.com', full_name='Loop Test', auth_provider='local', is_active=True, is_verified=True)

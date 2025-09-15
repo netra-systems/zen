@@ -13,7 +13,7 @@ from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestCostCalculatorCore:
+class CostCalculatorCoreTests:
     """Test core cost calculation functionality."""
 
     @pytest.fixture
@@ -124,7 +124,7 @@ class TestCostCalculatorCore:
         assert 0 < cost < Decimal('0.01')
 
 
-class TestCostOptimalModelSelection:
+class CostOptimalModelSelectionTests:
     """Test cost-optimal model selection functionality."""
 
     @pytest.fixture
@@ -169,7 +169,7 @@ class TestCostOptimalModelSelection:
         # We don't assert a specific count since configuration may vary
 
 
-class TestBudgetTracking:
+class BudgetTrackingTests:
     """Test budget tracking and management features."""
 
     @pytest.fixture
@@ -211,7 +211,7 @@ class TestBudgetTracking:
             assert True
 
 
-class TestCostTierBusinessLogic:
+class CostTierBusinessLogicTests:
     """Test business logic around cost tiers."""
 
     def test_cost_tier_enum_values(self):
@@ -260,7 +260,7 @@ class TestCostTierBusinessLogic:
             assert cost_info.performance_score == score
 
 
-class TestEdgeCasesAndErrorHandling:
+class EdgeCasesAndErrorHandlingTests:
     """Test edge cases and error handling in cost calculations."""
 
     @pytest.fixture

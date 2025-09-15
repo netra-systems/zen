@@ -18,7 +18,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import InterfaceError
 logger = central_logger.get_logger(__name__)
 
-class TestDatabaseRaceCondition:
+class DatabaseRaceConditionTests:
     """Test cases to reproduce and validate fixes for database connection race conditions."""
 
     @pytest.mark.integration

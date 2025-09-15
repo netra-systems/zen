@@ -31,7 +31,7 @@ from netra_backend.app.database import get_db
 from netra_backend.app.models import User, Thread, Message
 
 
-class TestBackendAuthIntegration(BaseIntegrationTest):
+class BackendAuthIntegrationTests(BaseIntegrationTest):
     """Integration tests for backend authentication with real services."""
     
     @pytest.fixture(autouse=True)

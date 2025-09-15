@@ -112,7 +112,7 @@ def create_admin_user_context(user_id: str='admin_user_123', run_id: str=None) -
     metadata = {'roles': ['admin'], 'permissions': ['admin_tools', 'corpus_admin', 'user_admin']}
     return create_user_context(user_id=user_id, run_id=run_id, metadata=metadata)
 
-class TestUnifiedToolDispatcherFactoryEnforcement:
+class UnifiedToolDispatcherFactoryEnforcementTests:
     """Test factory pattern enforcement - CRITICAL security requirement."""
 
     def test_direct_instantiation_raises_runtime_error(self):
@@ -149,7 +149,7 @@ class TestUnifiedToolDispatcherFactoryEnforcement:
             assert 'user isolation' in error_msg
             assert 'shared state issues' in error_msg
 
-class TestUnifiedToolDispatcherCreation:
+class UnifiedToolDispatcherCreationTests:
     """Test proper dispatcher creation through factory methods."""
 
     @pytest.mark.asyncio
@@ -228,7 +228,7 @@ class TestUnifiedToolDispatcherCreation:
             await UnifiedToolDispatcher.create_for_user(invalid_context)
         assert 'Valid UserExecutionContext required' in str(exc_info.value)
 
-class TestUnifiedToolDispatcherScoped:
+class UnifiedToolDispatcherScopedTests:
     """Test scoped dispatcher creation with automatic cleanup."""
 
     @pytest.mark.asyncio
@@ -261,7 +261,7 @@ class TestUnifiedToolDispatcherScoped:
                 assert dispatcher._is_active is True
                 raise ValueError('Test exception')
 
-class TestUnifiedToolDispatcherFactory:
+class UnifiedToolDispatcherFactoryTests:
     """Test UnifiedToolDispatcherFactory creation methods."""
 
     def test_create_for_request_success(self):
@@ -313,7 +313,7 @@ class TestUnifiedToolDispatcherFactory:
         assert dispatcher.user_context.user_id == 'legacy_global'
         assert dispatcher.has_tool('legacy_tool') is True
 
-class TestUnifiedToolDispatcherToolManagement:
+class UnifiedToolDispatcherToolManagementTests:
     """Test tool registration and management."""
 
     @pytest.mark.asyncio
@@ -365,7 +365,7 @@ class TestUnifiedToolDispatcherToolManagement:
         assert tools_dict['property_tool'] == tool
         await dispatcher.cleanup()
 
-class TestUnifiedToolDispatcherExecution:
+class UnifiedToolDispatcherExecutionTests:
     """Test core tool execution functionality."""
 
     @pytest.mark.asyncio
@@ -484,7 +484,7 @@ class TestUnifiedToolDispatcherExecution:
         assert completed_call['result']['output'] is not None
         await dispatcher.cleanup()
 
-class TestUnifiedToolDispatcherPermissions:
+class UnifiedToolDispatcherPermissionsTests:
     """Test permission validation and security boundaries."""
 
     @pytest.mark.asyncio
@@ -557,7 +557,7 @@ class TestUnifiedToolDispatcherPermissions:
         assert dispatcher._check_admin_permission() is True
         mock_permission_service.has_admin_permission.assert_called_once_with(mock_user)
 
-class TestUnifiedToolDispatcherWebSocketEvents:
+class UnifiedToolDispatcherWebSocketEventsTests:
     """Test WebSocket event emission - CRITICAL for chat UX."""
 
     @pytest.mark.asyncio
@@ -657,7 +657,7 @@ class TestUnifiedToolDispatcherWebSocketEvents:
         assert dispatcher.websocket_manager == websocket_manager
         await dispatcher.cleanup()
 
-class TestUnifiedToolDispatcherMultiUser:
+class UnifiedToolDispatcherMultiUserTests:
     """Test multi-user isolation and dispatcher limits."""
 
     @pytest.mark.asyncio
@@ -708,7 +708,7 @@ class TestUnifiedToolDispatcherMultiUser:
             assert dispatcher._is_active is True
         await UnifiedToolDispatcher.cleanup_user_dispatchers(user_id)
 
-class TestUnifiedToolDispatcherLegacyCompatibility:
+class UnifiedToolDispatcherLegacyCompatibilityTests:
     """Test legacy compatibility methods."""
 
     @pytest.mark.asyncio
@@ -756,7 +756,7 @@ class TestUnifiedToolDispatcherLegacyCompatibility:
         """Test websocket_bridge compatibility property."""
         pass
 
-class TestUnifiedToolDispatcherMetrics:
+class UnifiedToolDispatcherMetricsTests:
     """Test metrics tracking and performance monitoring."""
 
     @pytest.mark.asyncio
@@ -857,7 +857,7 @@ class TestUnifiedToolDispatcherMetrics:
         assert metrics['permission_checks'] == 3
         await dispatcher.cleanup()
 
-class TestUnifiedToolDispatcherLifecycle:
+class UnifiedToolDispatcherLifecycleTests:
     """Test dispatcher lifecycle management."""
 
     @pytest.mark.asyncio
@@ -920,7 +920,7 @@ class TestUnifiedToolDispatcherLifecycle:
         assert len(UnifiedToolDispatcher._active_dispatchers) == initial_count
         assert dispatcher.dispatcher_id not in UnifiedToolDispatcher._active_dispatchers
 
-class TestUnifiedToolDispatcherErrorHandling:
+class UnifiedToolDispatcherErrorHandlingTests:
     """Test comprehensive error handling scenarios."""
 
     @pytest.mark.asyncio
@@ -989,7 +989,7 @@ class TestUnifiedToolDispatcherErrorHandling:
         assert metrics['successful_executions'] == 0
         await dispatcher.cleanup()
 
-class TestUnifiedToolDispatcherContextManager:
+class UnifiedToolDispatcherContextManagerTests:
     """Test context manager functionality."""
 
     @pytest.mark.asyncio
@@ -1015,7 +1015,7 @@ class TestUnifiedToolDispatcherContextManager:
                 assert dispatcher._is_active is True
                 raise ValueError('Test exception in context')
 
-class TestUnifiedToolDispatcherPerformance:
+class UnifiedToolDispatcherPerformanceTests:
     """Test performance characteristics and resource usage."""
 
     @pytest.mark.asyncio

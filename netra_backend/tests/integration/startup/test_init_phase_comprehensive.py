@@ -34,7 +34,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
-class TestInitPhaseComprehensive(BaseIntegrationTest):
+class InitPhaseComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive integration tests for system startup INIT phase.
     

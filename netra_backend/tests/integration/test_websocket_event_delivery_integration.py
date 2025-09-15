@@ -61,7 +61,7 @@ from shared.types import UserID, ThreadID, RunID, RequestID
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketEventDeliveryIntegration(WebSocketIntegrationTest):
+class WebSocketEventDeliveryIntegrationTests(WebSocketIntegrationTest):
     """
     15 Comprehensive WebSocket Event Delivery Integration Tests for Golden Path.
     

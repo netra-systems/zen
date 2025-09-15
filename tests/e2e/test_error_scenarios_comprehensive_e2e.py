@@ -31,7 +31,7 @@ import aiohttp
 import pytest
 
 
-class TestErrorScenarioer:
+class ErrorScenarioerTests:
     """Helper class for testing error scenarios and edge cases."""
     
     def __init__(self):
@@ -323,7 +323,7 @@ def error_scenario_tester():
     return ErrorScenarioTester()
 
 
-class TestErrorScenariosComprehensiveE2E:
+class ErrorScenariosComprehensiveE2ETests:
     """Comprehensive E2E tests for error scenarios and edge cases."""
     
     @pytest.mark.asyncio

@@ -28,7 +28,7 @@ from tests.e2e.fixtures.error_propagation_fixtures import (
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAuthServiceFailures:
+class AuthServiceFailuresTests:
     """Test auth service failure propagation."""
     
     @pytest.mark.resilience

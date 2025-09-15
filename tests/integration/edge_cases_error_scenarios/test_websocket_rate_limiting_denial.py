@@ -25,7 +25,7 @@ from test_framework.real_services import get_real_services
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketRateLimitingDenial(BaseIntegrationTest):
+class WebSocketRateLimitingDenialTests(BaseIntegrationTest):
     """Test WebSocket rate limiting and DoS protection mechanisms."""
     
     @pytest.mark.integration

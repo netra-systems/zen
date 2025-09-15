@@ -44,7 +44,7 @@ except ImportError:
     AsyncSession = None
 
 
-class TestSchemaEvolutionUserConstraints(BaseIntegrationTest):
+class SchemaEvolutionUserConstraintsTests(BaseIntegrationTest):
     """Test schema evolution with user constraints using real database."""
 
     def setUp(self):

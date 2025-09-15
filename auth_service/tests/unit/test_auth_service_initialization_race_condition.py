@@ -36,7 +36,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 from shared.isolated_environment import get_env
 
 
-class TestAuthServiceInitializationRaceCondition(SSotBaseTestCase):
+class AuthServiceInitializationRaceConditionTests(SSotBaseTestCase):
     """Unit tests for Auth Service initialization race condition scenarios"""
     
     def setUp(self):

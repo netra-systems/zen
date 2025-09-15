@@ -12,7 +12,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestGCPAuthContextMiddlewareSessionAccess(SSotBaseTestCase):
+class GCPAuthContextMiddlewareSessionAccessTests(SSotBaseTestCase):
     """Test GCP Auth Context middleware session access patterns from Issue #1127."""
 
     def test_gcp_auth_context_middleware_session_access_exact_scenario(self):

@@ -29,7 +29,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 @pytest.mark.e2e
-class TestMessageRouterGoldenPathValidationE2E(SSotAsyncTestCase):
+class MessageRouterGoldenPathValidationE2ETests(SSotAsyncTestCase):
     """E2E staging tests for MessageRouter Golden Path validation."""
 
     @classmethod

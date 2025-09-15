@@ -28,7 +28,7 @@ from netra_backend.app.services.unified_authentication_service import (
 )
 
 @pytest.mark.integration
-class TestWebSocketUnifiedAuthCompliance(SSotAsyncTestCase):
+class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
     """
     Test suite to validate SSOT compliance in WebSocket authentication.
     

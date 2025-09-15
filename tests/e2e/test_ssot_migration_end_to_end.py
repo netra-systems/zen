@@ -185,7 +185,7 @@ async def e2e_websocket_fixture(e2e_authenticated_user_fixture):
 
 
 @pytest.mark.e2e
-class TestSSOTMigrationEndToEnd(SSotBaseTestCase):
+class SSOTMigrationEndToEndTests(SSotBaseTestCase):
     """
     SSOT End-to-End Migration Tests - Production-Like Environment Testing.
     
@@ -726,7 +726,7 @@ class TestSSOTMigrationEndToEnd(SSotBaseTestCase):
 
 # SSOT Export Control
 __all__ = [
-    "TestSSOTMigrationEndToEnd",
+    "SSOTMigrationEndToEndTests",
     "docker_services_fixture",
     "e2e_authenticated_user_fixture", 
     "e2e_websocket_fixture"

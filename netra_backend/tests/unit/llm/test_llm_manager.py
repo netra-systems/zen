@@ -68,7 +68,7 @@ class BusinessScenarioTestModel(BaseModel):
     recommendations: list = []
 
 
-class TestLLMManager(BaseIntegrationTest):
+class LLMManagerTests(BaseIntegrationTest):
     """
     Comprehensive unit tests for LLMManager SSOT class.
     

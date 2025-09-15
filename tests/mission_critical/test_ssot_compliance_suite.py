@@ -185,7 +185,7 @@ class SSotComplianceSuite:
         return violations
 
 
-class TestSSotComplianceWithIsolation:
+class SSotComplianceWithIsolationTests:
     """CRITICAL: Comprehensive SSOT compliance and isolation testing."""
     
     @pytest.fixture(autouse=True)

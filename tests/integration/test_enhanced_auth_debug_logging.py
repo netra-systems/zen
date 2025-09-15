@@ -19,7 +19,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.integration
-class TestEnhancedAuthDebugLogging(SSotBaseTestCase):
+class EnhancedAuthDebugLoggingTests(SSotBaseTestCase):
     """Test enhanced authentication debug logging functionality."""
     
     def setup_method(self):

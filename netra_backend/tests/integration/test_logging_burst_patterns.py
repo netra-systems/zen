@@ -51,7 +51,7 @@ from shared.logging.unified_logging_ssot import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestLoggingBurstPatterns(SSotBaseTestCase):
+class LoggingBurstPatternsTests(SSotBaseTestCase):
     """
     Integration test suite for logging burst patterns causing empty CRITICAL entries.
     

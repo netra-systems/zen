@@ -64,7 +64,7 @@ from netra_backend.app.core.websocket_cors import (
 )
 
 
-class TestWebSocketCORSHandler(SSotBaseTestCase):
+class WebSocketCORSHandlerTests(SSotBaseTestCase):
     """
     Comprehensive unit tests for WebSocket CORS handler.
     
@@ -405,7 +405,7 @@ class TestWebSocketCORSHandler(SSotBaseTestCase):
             assert is_suspicious is False, f"Should NOT be suspicious in dev: {origin}"
 
 
-class TestWebSocketCORSMiddleware(SSotBaseTestCase):
+class WebSocketCORSMiddlewareTests(SSotBaseTestCase):
     """
     Unit tests for WebSocket CORS ASGI middleware.
     
@@ -546,7 +546,7 @@ class TestWebSocketCORSMiddleware(SSotBaseTestCase):
         mock_app.assert_called_once_with(scope, receive, send)
 
 
-class TestWebSocketCORSUtilityFunctions(SSotBaseTestCase):
+class WebSocketCORSUtilityFunctionsTests(SSotBaseTestCase):
     """
     Unit tests for WebSocket CORS utility functions.
     
@@ -726,7 +726,7 @@ class TestWebSocketCORSUtilityFunctions(SSotBaseTestCase):
             assert handler2.environment == "production"
 
 
-class TestWebSocketCORSPerformance(SSotBaseTestCase):
+class WebSocketCORSPerformanceTests(SSotBaseTestCase):
     """
     Performance tests for WebSocket CORS functionality.
     

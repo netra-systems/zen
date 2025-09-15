@@ -25,7 +25,7 @@ from netra_backend.app.core.exceptions_base import ValidationError
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestPipelineStepValidation(BaseIntegrationTest):
+class PipelineStepValidationTests(BaseIntegrationTest):
     """Integration tests for pipeline step validation."""
 
     @pytest.mark.integration

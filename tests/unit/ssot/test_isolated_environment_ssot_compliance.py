@@ -30,7 +30,7 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestIsolatedEnvironmentSSOTCompliance:
+class IsolatedEnvironmentSSOTComplianceTests:
     """Test SSOT IsolatedEnvironment pattern in isolation."""
     
     def test_get_env_function_returns_singleton(self):

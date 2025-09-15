@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.routes.utils.thread_handlers import handle_list_threads_request, handle_create_thread_request
 from shared.types import RunID, UserID, ThreadID
 
-class TestThreadHandlersThreeTierIntegration:
+class ThreadHandlersThreeTierIntegrationTests:
     """Test thread handlers integration with three-tier storage architecture."""
 
     @pytest.fixture
@@ -125,7 +125,7 @@ class TestThreadHandlersThreeTierIntegration:
             assert health_status['recommendations']['use_redis'] is True
             assert health_status['recommendations']['avoid_clickhouse'] is True
 
-class TestThreadHandlersPerformanceRequirements:
+class ThreadHandlersPerformanceRequirementsTests:
     """Test performance requirements for thread handlers with three-tier storage."""
 
     def test_thread_listing_performance_requirements(self, user_id):
@@ -145,7 +145,7 @@ class TestThreadHandlersPerformanceRequirements:
             uncached_time_ms = (time.time() - start_time) * 1000
             assert uncached_time_ms < 500, f'Uncached thread listing should be <500ms, was {uncached_time_ms:.2f}ms'
 
-class TestCurrentThreadHandlerLimitations:
+class CurrentThreadHandlerLimitationsTests:
     """Tests that expose current limitations in thread handler architecture."""
 
     def test_thread_handlers_only_use_postgresql(self, user_id):

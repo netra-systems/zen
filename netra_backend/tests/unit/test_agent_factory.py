@@ -44,7 +44,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.agents.base_agent import BaseAgent
 
 
-class TestUserWebSocketEmitter(SSotBaseTestCase):
+class UserWebSocketEmitterTests(SSotBaseTestCase):
     """Test UserWebSocketEmitter isolation and event handling."""
     
     def setup_method(self, method):
@@ -223,7 +223,7 @@ class TestUserWebSocketEmitter(SSotBaseTestCase):
         self.record_metric("concurrent_notifications_validated", True)
 
 
-class TestExecutionEngineFactory(SSotBaseTestCase):
+class ExecutionEngineFactoryTests(SSotBaseTestCase):
     """Test ExecutionEngineFactory lifecycle management."""
     
     def setup_method(self, method):
@@ -397,7 +397,7 @@ class TestExecutionEngineFactory(SSotBaseTestCase):
         self.record_metric("concurrent_creation_validated", True)
 
 
-class TestAgentInstanceFactory(SSotBaseTestCase):
+class AgentInstanceFactoryTests(SSotBaseTestCase):
     """Test AgentInstanceFactory agent creation patterns."""
     
     def setup_method(self, method):
@@ -543,7 +543,7 @@ class TestAgentInstanceFactory(SSotBaseTestCase):
         self.record_metric("performance_characteristics_validated", True)
 
 
-class TestFactoryIntegrationPatterns(SSotBaseTestCase):
+class FactoryIntegrationPatternsTests(SSotBaseTestCase):
     """Test factory integration patterns and resource management."""
     
     @pytest.mark.unit

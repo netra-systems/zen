@@ -38,7 +38,7 @@ from typing import Dict, Any, List, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestConfigManagerSSotViolationsIssue757(SSotBaseTestCase):
+class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
     """
     Mission Critical Tests: Configuration Manager SSOT Violations - Issue #757
 

@@ -177,7 +177,7 @@ class GCPHTTPClient:
 
 @pytest.mark.e2e
 @pytest.mark.gcp_staging
-class TestUnifiedWebSocketManagerGCPGoldenPath(BaseIntegrationTest):
+class UnifiedWebSocketManagerGCPGoldenPathTests(BaseIntegrationTest):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

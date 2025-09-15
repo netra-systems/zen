@@ -16,7 +16,7 @@ try:
 except ImportError:
     pytest.skip("Data sub agent execution engine has been removed/moved", allow_module_level=True)
 
-class TestKeyParametersAccess:
+class KeyParametersAccessTests:
     """Test proper handling of KeyParameters as Pydantic model vs dict."""
 
     @pytest.fixture

@@ -42,7 +42,7 @@ from test_framework.fixtures.real_services import real_services_fixture
 from shared.isolated_environment import get_env
 
 
-class TestAuthCircuitBreakerIntegration:
+class AuthCircuitBreakerIntegrationTests:
     """Test authentication circuit breaker integration with real components."""
 
     @pytest.mark.integration

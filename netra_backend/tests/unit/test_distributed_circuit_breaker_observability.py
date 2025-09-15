@@ -24,7 +24,7 @@ class CircuitState(Enum):
     HALF_OPEN = "half_open"
 
 
-class TestDistributedCircuitBreakerCoordination:
+class DistributedCircuitBreakerCoordinationTests:
     """Test suite for distributed circuit breaker coordination patterns."""
 
     @pytest.fixture

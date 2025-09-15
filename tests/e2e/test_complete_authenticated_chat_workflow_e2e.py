@@ -41,7 +41,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.e2e
 @pytest.mark.staging_compatible
-class TestCompleteAuthenticatedChatWorkflowE2E(SSotBaseTestCase):
+class CompleteAuthenticatedChatWorkflowE2ETests(SSotBaseTestCase):
     """
     MISSION CRITICAL E2E Tests for Complete Authenticated Chat Workflow.
     

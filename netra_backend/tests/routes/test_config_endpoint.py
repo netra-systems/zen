@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 from netra_backend.app.main import app
 import json
 
-class TestConfigEndpoint:
+class ConfigEndpointTests:
     
     def test_get_public_config(self):
         """Test retrieving public configuration"""

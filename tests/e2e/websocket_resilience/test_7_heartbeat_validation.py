@@ -151,7 +151,7 @@ class HeartbeatTracker:
         }
 
 
-class TestHeartbeatClient:
+class HeartbeatClientTests:
     """WebSocket client with configurable heartbeat response behavior."""
     
     def __init__(self, uri: str, session_token: str, tracker: HeartbeatTracker, 

@@ -34,7 +34,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestSingleWebSocketManagerSsotValidation(SSotBaseTestCase):
+class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
     """Phase 2 SSOT Validation Test: Validate only one WebSocket manager implementation exists."""
     
     def setup_method(self, method):

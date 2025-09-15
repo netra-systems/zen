@@ -49,7 +49,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestInterServiceAuthCommunication(SSotBaseTestCase):
+class InterServiceAuthCommunicationTests(SSotBaseTestCase):
     """
     Inter-Service Authentication and Communication Integration Tests.
     

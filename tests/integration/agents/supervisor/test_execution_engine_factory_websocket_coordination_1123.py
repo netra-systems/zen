@@ -39,7 +39,7 @@ from test_framework.fixtures.real_services_fixtures import RealServicesFixtureMi
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.integration
-class TestExecutionEngineFactoryWebSocketCoordination1123(SSotAsyncTestCase, RealServicesFixtureMixin):
+class ExecutionEngineFactoryWebSocketCoordination1123Tests(SSotAsyncTestCase, RealServicesFixtureMixin):
     """Phase 2 Integration Tests: Factory WebSocket Coordination Issues
 
     These tests are designed to FAIL initially to demonstrate the WebSocket

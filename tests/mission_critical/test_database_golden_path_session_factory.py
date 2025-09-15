@@ -80,7 +80,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 logger = logging.getLogger(__name__)
 
 
-class TestDatabaseGoldenPathSessionFactory(SSotAsyncTestCase):
+class DatabaseGoldenPathSessionFactoryTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

@@ -32,7 +32,7 @@ from netra_backend.app.core.backend_environment import BackendEnvironment
 
 
 @pytest.mark.integration
-class TestEnvironmentDetection:
+class EnvironmentDetectionTests:
     """Test environment detection across various deployment contexts."""
     
     @pytest.fixture(autouse=True)
@@ -335,7 +335,7 @@ class TestEnvironmentDetection:
 
 
 @pytest.mark.integration
-class TestDockerConfigurationConsistency:
+class DockerConfigurationConsistencyTests:
     """Test consistency between Docker Compose and application configuration."""
     
     @pytest.fixture(autouse=True)
@@ -536,7 +536,7 @@ class TestDockerConfigurationConsistency:
 
 
 @pytest.mark.integration
-class TestEnvironmentConfigurationLoading:
+class EnvironmentConfigurationLoadingTests:
     """Test environment-specific configuration file loading."""
     
     @pytest.fixture
@@ -640,7 +640,7 @@ JWT_SECRET_KEY=prod-jwt-secret-key-32-chars-long
 
 
 @pytest.mark.integration
-class TestConfigurationValidationIntegration:
+class ConfigurationValidationIntegrationTests:
     """Test integrated configuration validation across environments."""
     
     @pytest.fixture(autouse=True)

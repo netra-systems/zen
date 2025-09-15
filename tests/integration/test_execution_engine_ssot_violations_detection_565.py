@@ -60,7 +60,7 @@ except ImportError:
 
 
 @pytest.mark.integration
-class TestExecutionEngineSSotViolationsDetection565(SSotBaseTestCase):
+class ExecutionEngineSSotViolationsDetection565Tests(SSotBaseTestCase):
     """
     Integration tests to detect SSOT violations in ExecutionEngine migration.
     
@@ -659,7 +659,7 @@ if __name__ == '__main__':
     print("💡 Expected: FAIL before remediation, PASS after complete migration")
     
     # Create comprehensive test suite
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestExecutionEngineSSotViolationsDetection565)
+    suite = unittest.TestLoader().loadTestsFromTestCase(ExecutionEngineSSotViolationsDetection565Tests)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     

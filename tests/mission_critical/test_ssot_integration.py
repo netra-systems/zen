@@ -272,7 +272,7 @@ class SSotIntegrationUserSimulator:
 
 
 @pytest.mark.usefixtures("isolated_test_env")
-class TestSSotIntegrationWithIsolation(IntegrationTestCase):
+class SSotIntegrationWithIsolationTests(IntegrationTestCase):
     """
     CRITICAL: SSOT Integration testing with comprehensive isolation.
     

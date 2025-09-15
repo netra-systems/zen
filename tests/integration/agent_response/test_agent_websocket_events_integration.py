@@ -93,7 +93,7 @@ class MockWebSocketEventCapture:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
+class AgentWebSocketEventsIntegrationTests(BaseIntegrationTest):
     """Test agent response WebSocket events integration."""
     
     def setup_method(self):

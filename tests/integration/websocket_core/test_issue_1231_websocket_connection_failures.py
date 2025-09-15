@@ -39,7 +39,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestIssue1231WebSocketConnectionFailures:
+class Issue1231WebSocketConnectionFailuresTests:
     """
     INTEGRATION TESTS: Demonstrate WebSocket connection failures due to async/await bug
 

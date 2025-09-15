@@ -92,7 +92,7 @@ except ImportError:
             return f"{self.user_id}:{self.request_id}"
 
 
-class TestAnalyticsDataPipelineIntegration(SSotBaseTestCase):
+class AnalyticsDataPipelineIntegrationTests(SSotBaseTestCase):
     """
     COMPREHENSIVE Analytics Data Pipeline Integration Tests
     

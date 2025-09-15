@@ -25,7 +25,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.integration
 @pytest.mark.startup
 @pytest.mark.database
-class TestDatabaseStartupIntegration(DatabaseIntegrationTest):
+class DatabaseStartupIntegrationTests(DatabaseIntegrationTest):
     """Integration tests for database startup and connection pool initialization."""
 
     async def async_setup(self):
@@ -242,7 +242,7 @@ class ConnectionRetryManager:
 @pytest.mark.integration
 @pytest.mark.startup
 @pytest.mark.business_value
-class TestDatabaseStartupBusinessValue(DatabaseIntegrationTest):
+class DatabaseStartupBusinessValueTests(DatabaseIntegrationTest):
     """Business value validation for database startup initialization."""
 
     async def test_database_enables_user_data_persistence(self):

@@ -13,7 +13,7 @@ from typing import Dict, List
 import pytest
 from netra_backend.tests.test_business_value_fixtures import BusinessValueFixtures
 
-class TestBusinessValueCore(BusinessValueFixtures):
+class BusinessValueCoreTests(BusinessValueFixtures):
     """
     Core business value tests focused on essential optimization scenarios
     """

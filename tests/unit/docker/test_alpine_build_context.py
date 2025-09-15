@@ -21,7 +21,7 @@ from typing import Dict, List, Any, Optional, Set
 from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestAlpineBuildContextValidation(SSotBaseTestCase):
+class AlpineBuildContextValidationTests(SSotBaseTestCase):
     """Unit tests for Alpine build context validation - FILE SYSTEM ONLY
 
     These tests validate the build context and source directories that are

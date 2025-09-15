@@ -77,7 +77,7 @@ class TimeoutPerformanceMeasurer:
             return {'opportunity': 'NONE', 'description': f'Buffer utilization {buffer_utilization_pct:.1f}% indicates optimal timeout configuration', 'recommendation': 'Current timeout configuration is well-optimized', 'potential_improvement': 'No significant improvement available'}
 
 @pytest.mark.unit
-class TestAuthTimeoutPerformanceOptimization(SSotAsyncTestCase):
+class AuthTimeoutPerformanceOptimizationTests(SSotAsyncTestCase):
     """
     Test suite for auth timeout performance optimization (Issue #469).
     

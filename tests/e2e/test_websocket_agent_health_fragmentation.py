@@ -44,7 +44,7 @@ except ImportError:
     EVENT_MONITOR_AVAILABLE = False
 
 @pytest.mark.e2e
-class TestWebSocketAgentHealthFragmentation(SSotAsyncTestCase):
+class WebSocketAgentHealthFragmentationTests(SSotAsyncTestCase):
     """
     Reproduction tests for WebSocket and agent health monitoring fragmentation.
     These tests SHOULD FAIL with current disconnected implementation.
@@ -201,7 +201,7 @@ class TestWebSocketAgentHealthFragmentation(SSotAsyncTestCase):
             self.fail(f"SSOT VIOLATION: Performance fragmentation from separate health monitoring. Agent health time: {performance_analysis['avg_agent_health_time']:.4f}s, WebSocket health time: {performance_analysis['avg_websocket_health_time']:.4f}s, Total overhead: {performance_analysis['performance_overhead_ms']:.2f}ms, Redundancy ratio: {performance_analysis['redundancy_ratio']:.2f}, Redundant checks: {performance_analysis['redundant_checks']}")
 
 @pytest.mark.skipif(not WEBSOCKET_MANAGER_AVAILABLE, reason='WebSocket manager not available')
-class TestWebSocketHealthIntegrationRequirements(SSotAsyncTestCase):
+class WebSocketHealthIntegrationRequirementsTests(SSotAsyncTestCase):
     """
     Additional tests that require WebSocket components to be available.
     These tests validate specific integration points.

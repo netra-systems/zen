@@ -161,7 +161,7 @@ class GoldenPathTestClient:
 @pytest.mark.real_services
 @pytest.mark.business_value_validation
 @pytest.mark.fallback_prevention
-class TestGoldenPathRealAgentValidation:
+class GoldenPathRealAgentValidationTests:
     """
     E2E Golden Path Real Agent Validation Test Suite
     

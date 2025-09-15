@@ -25,7 +25,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
-class TestWebSocketMultipleConcurrentConnectionsStateIsolationIntegration(BaseIntegrationTest):
+class WebSocketMultipleConcurrentConnectionsStateIsolationIntegrationTests(BaseIntegrationTest):
     """Test multiple concurrent WebSocket connections per user with comprehensive state isolation."""
     
     @pytest.mark.integration

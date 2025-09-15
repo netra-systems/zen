@@ -239,7 +239,7 @@ class AuthenticationError(Exception):
     pass
 
 
-class TestGoldenPathResilience(SSotAsyncTestCase):
+class GoldenPathResilienceTests(SSotAsyncTestCase):
     """
     E2E resilience tests for Golden Path on staging GCP environment.
 

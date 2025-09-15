@@ -391,7 +391,7 @@ class HealthCascadeValidator:
 @pytest.mark.critical
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestServiceStartupHealthReal:
+class ServiceStartupHealthRealTests:
     """Real service startup sequence and health cascade test suite."""
     
     @pytest.fixture

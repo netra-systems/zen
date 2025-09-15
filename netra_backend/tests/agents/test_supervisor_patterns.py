@@ -13,7 +13,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-class TestResourceManagement(BaseTestCase):
+class ResourceManagementTests(BaseTestCase):
     """Test resource management patterns in SupervisorAgent."""
 
     def setUp(self):
@@ -85,7 +85,7 @@ class TestResourceManagement(BaseTestCase):
         self.assertNotEqual(context1.user_id, context2.user_id)
         self.assertNotEqual(context1.metadata, context2.metadata)
 
-class TestWorkflowPatterns(BaseTestCase):
+class WorkflowPatternsTests(BaseTestCase):
     """Test workflow orchestration patterns in SupervisorAgent."""
 
     def setUp(self):

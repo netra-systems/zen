@@ -29,7 +29,7 @@ from netra_backend.app.core.health_types import HealthCheckResult
 from shared.isolated_environment import get_env
 
 @pytest.mark.unit
-class TestConfigurationDriftDataClasses:
+class ConfigurationDriftDataClassesTests:
     """Test Configuration Drift data classes and enums."""
 
     def test_drift_severity_enum(self):
@@ -98,7 +98,7 @@ class TestConfigurationDriftDataClasses:
         assert drift_dict['expected_value'].endswith('...')
 
 @pytest.mark.unit
-class TestE2EOAuthSimulationKeyValidator:
+class E2EOAuthSimulationKeyValidatorTests:
     """Test E2EOAuthSimulationKeyValidator SSOT functionality."""
 
     def setup_method(self):
@@ -220,7 +220,7 @@ class TestE2EOAuthSimulationKeyValidator:
             assert 'test_timestamp' in result, 'Should include test timestamp'
 
 @pytest.mark.unit
-class TestJWTSecretAlignmentValidator:
+class JWTSecretAlignmentValidatorTests:
     """Test JWTSecretAlignmentValidator SSOT functionality."""
 
     def setup_method(self):
@@ -326,7 +326,7 @@ class TestJWTSecretAlignmentValidator:
             assert 'error' in result, 'Should include error message'
 
 @pytest.mark.unit
-class TestWebSocketConfigurationValidator:
+class WebSocketConfigurationValidatorTests:
     """Test WebSocketConfigurationValidator SSOT functionality."""
 
     def setup_method(self):
@@ -452,7 +452,7 @@ class TestWebSocketConfigurationValidator:
         assert 'http://localhost:8000' in expected_origins, 'Should include localhost API'
 
 @pytest.mark.unit
-class TestConfigurationDriftMonitor:
+class ConfigurationDriftMonitorTests:
     """Test ConfigurationDriftMonitor main class functionality."""
 
     def setup_method(self):
@@ -629,7 +629,7 @@ class TestConfigurationDriftMonitor:
         assert self.monitor.drift_history[0].config_key == 'UNRESOLVED_DRIFT', 'Should keep unresolved drift'
 
 @pytest.mark.unit
-class TestConfigurationDriftMonitorUtilityFunctions:
+class ConfigurationDriftMonitorUtilityFunctionsTests:
     """Test utility functions for configuration drift monitoring."""
 
     def test_extend_staging_health_monitor_with_drift_detection(self):

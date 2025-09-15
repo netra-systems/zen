@@ -39,7 +39,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestServiceDependencyIntegrationWithRealServices(BaseTestCase):
+class ServiceDependencyIntegrationWithRealServicesTests(BaseTestCase):
     """Test service dependency resolution with real running services."""
     
     @pytest.fixture(autouse=True)

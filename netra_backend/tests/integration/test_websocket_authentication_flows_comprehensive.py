@@ -50,7 +50,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
+class WebSocketAuthenticationFlowsComprehensiveTests(BaseIntegrationTest):
     """Comprehensive WebSocket authentication integration tests with real services."""
 
     def setup_method(self):
@@ -1411,7 +1411,7 @@ def test_comprehensive_suite_coverage():
     Business Value: Ensure complete test coverage for WebSocket authentication.
     Comprehensive coverage prevents authentication bugs from reaching production.
     """
-    test_class = TestWebSocketAuthenticationFlowsComprehensive
+    test_class = WebSocketAuthenticationFlowsComprehensiveTests
     
     # Get all test methods
     test_methods = [method for method in dir(test_class) if method.startswith('test_')]

@@ -43,7 +43,7 @@ class RaceConditionScenario:
     success: bool = False
 
 
-class TestWebSocketRaceConditionReproduction(BaseIntegrationTest):
+class WebSocketRaceConditionReproductionTests(BaseIntegrationTest):
     """Reproduce WebSocket Manager race conditions for SSOT validation."""
 
     def setUp(self):

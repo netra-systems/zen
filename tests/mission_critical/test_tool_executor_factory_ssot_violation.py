@@ -60,7 +60,7 @@ except ImportError:
     USER_EXECUTION_CONTEXT_AVAILABLE = False
 
 
-class TestToolExecutorFactorySSotViolation(SSotBaseTestCase):
+class ToolExecutorFactorySSotViolationTests(SSotBaseTestCase):
     """
     MISSION CRITICAL: Tests that SHOULD FAIL until SSOT consolidation is complete.
     

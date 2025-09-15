@@ -54,7 +54,7 @@ except ImportError:
     AGENT_SERVICES_AVAILABLE = False
 
 
-class TestRealAgentWebSocketNotifications(BaseE2ETest):
+class RealAgentWebSocketNotificationsTests(BaseE2ETest):
     """MISSION CRITICAL: Test WebSocket event delivery during agent execution."""
 
     def setup_method(self):

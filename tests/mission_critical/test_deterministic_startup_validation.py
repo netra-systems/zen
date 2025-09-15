@@ -57,7 +57,7 @@ class WebSocketTestHelper:
 
 
 @pytest.mark.mission_critical
-class TestDeterministicStartupSequence:
+class DeterministicStartupSequenceTests:
     """Test deterministic startup sequence validation."""
 
     @pytest.mark.asyncio
@@ -214,7 +214,7 @@ class TestDeterministicStartupSequence:
 
 
 @pytest.mark.mission_critical
-class TestWebSocketIntegration:
+class WebSocketIntegrationTests:
     """Test WebSocket integration during startup."""
 
     @pytest.mark.asyncio
@@ -295,7 +295,7 @@ class TestWebSocketIntegration:
 
 
 @pytest.mark.mission_critical
-class TestHealthEndpoints:
+class HealthEndpointsTests:
     """Test health endpoints check startup state."""
 
     @pytest.mark.asyncio
@@ -374,7 +374,7 @@ class TestHealthEndpoints:
 
 
 @pytest.mark.mission_critical
-class TestStartupResourceManagement:
+class StartupResourceManagementTests:
     """Test startup resource management and cleanup."""
 
     @pytest.mark.asyncio

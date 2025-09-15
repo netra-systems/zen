@@ -21,7 +21,7 @@ _test_token_usage_stats = {
 }
 
 
-class TestIssue465IsolatedThresholdLogic(SSotBaseTestCase):
+class Issue465IsolatedThresholdLogicTests(SSotBaseTestCase):
     """
     Isolated tests for the token reuse threshold logic
     

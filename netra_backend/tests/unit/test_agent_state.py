@@ -28,7 +28,7 @@ class MockAgent(AgentStateMixin):
         self.logger = MagicMock()
 
 
-class TestAgentState(SSotBaseTestCase):
+class AgentStateTests(SSotBaseTestCase):
     """Test agent state management functionality."""
 
     def setup_method(self, method=None):

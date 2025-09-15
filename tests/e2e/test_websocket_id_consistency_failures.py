@@ -50,7 +50,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.e2e
-class TestWebSocketIDConsistencyFailures(BaseTestCase):
+class WebSocketIDConsistencyFailuresTests(BaseTestCase):
     """E2E tests exposing WebSocket ID generation and routing consistency failures."""
     
     def setup_method(self):

@@ -150,7 +150,7 @@ class MockWebSocketManager:
         return critical_events
 
 
-class TestWebSocketAgentEventsIntegrationComprehensive(SSotAsyncTestCase):
+class WebSocketAgentEventsIntegrationComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive Integration Tests for WebSocket Agent Event Notifications.
     

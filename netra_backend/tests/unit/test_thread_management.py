@@ -156,7 +156,7 @@ class ThreadManager:
         return True
 
 
-class TestThreadManager(SSotBaseTestCase):
+class ThreadManagerTests(SSotBaseTestCase):
     """Test ThreadManager business logic and lifecycle."""
     
     def setup_method(self, method):
@@ -531,7 +531,7 @@ class TestThreadManager(SSotBaseTestCase):
         self.record_metric("concurrent_operations_validated", True)
 
 
-class TestThreadPerformanceAndScaling(SSotBaseTestCase):
+class ThreadPerformanceAndScalingTests(SSotBaseTestCase):
     """Test thread management performance characteristics."""
     
     def setup_method(self, method):

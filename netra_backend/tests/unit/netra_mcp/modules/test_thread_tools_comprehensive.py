@@ -26,7 +26,7 @@ from test_framework.ssot import BaseTestCase, get_mock_factory
 from shared.types.core_types import UserID, ThreadID, RequestID
 from netra_backend.app.netra_mcp.modules.thread_tools import ThreadTools
 
-class TestThreadToolsComprehensive(BaseTestCase):
+class ThreadToolsComprehensiveTests(BaseTestCase):
     """Comprehensive test suite for ThreadTools MCP module."""
 
     def setUp(self):

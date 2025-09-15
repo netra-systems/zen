@@ -49,7 +49,7 @@ class WebSocketEventMonitor:
         self.events.clear()
         self.start_time = time.time()
 
-class TestWebSocketEventIntegrity(SSotAsyncTestCase):
+class WebSocketEventIntegrityTests(SSotAsyncTestCase):
     """Test suite to validate WebSocket event integrity during SSOT migration."""
 
     async def test_websocket_events_during_migration(self):

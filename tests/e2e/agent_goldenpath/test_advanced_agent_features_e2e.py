@@ -44,7 +44,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
 @pytest.mark.gcp_staging
 @pytest.mark.advanced_features
 @pytest.mark.mission_critical
-class TestAdvancedAgentFeaturesE2E(SSotAsyncTestCase):
+class AdvancedAgentFeaturesE2ETests(SSotAsyncTestCase):
     """
     E2E tests for validating advanced agent features in staging GCP.
 

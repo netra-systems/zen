@@ -87,7 +87,7 @@ class BusinessScalabilityValidator:
             scaling_efficiency=scaling_efficiency
         ))
 
-class TestBusinessScalability:
+class BusinessScalabilityTests:
     """Business validation tests for scalability requirements"""
 
     def setup_method(self, method=None):
@@ -696,7 +696,7 @@ if __name__ == "__main__":
     # Can be run standalone for business validation
     import sys
 
-    validator = TestBusinessScalability()
+    validator = BusinessScalabilityTests()
     validator.setup_method()
 
     print("BUSINESS VALIDATION: Scalability Requirements")

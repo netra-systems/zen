@@ -25,7 +25,7 @@ from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from netra_backend.app.websocket_core.handlers import MessageRouter
 
 
-class TestTimestampConversion:
+class TimestampConversionTests:
     """Test timestamp conversion utility functions."""
     
     def test_staging_error_case(self):
@@ -148,7 +148,7 @@ class TestTimestampConversion:
         assert isinstance(result1, float)
 
 
-class TestWebSocketMessageTimestampHandling:
+class WebSocketMessageTimestampHandlingTests:
     """Test WebSocket message processing with timestamp conversion."""
     
     @pytest.fixture
@@ -222,7 +222,7 @@ class TestWebSocketMessageTimestampHandling:
         assert before <= ws_message.timestamp <= after
 
 
-class TestBusinessValuePreservation:
+class BusinessValuePreservationTests:
     """Test that the fix preserves all business value functionality."""
     
     async def test_chat_message_flow_preserved(self):
@@ -279,7 +279,7 @@ class TestBusinessValuePreservation:
             assert ws_message.user_id == "user_123"
 
 
-class TestPerformanceValidation:
+class PerformanceValidationTests:
     """Test that timestamp conversion meets performance requirements."""
     
     def test_conversion_performance(self):

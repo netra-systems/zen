@@ -22,7 +22,7 @@ from netra_backend.app.core.backend_environment import BackendEnvironment
 from auth_service.auth_core.auth_environment import AuthEnvironment
 
 @pytest.mark.e2e
-class TestCloudSQLProxyURLConstruction:
+class CloudSQLProxyURLConstructionTests:
     """Test Cloud SQL proxy URL construction in DatabaseURLBuilder."""
 
     def test_cloud_sql_detection(self):
@@ -75,7 +75,7 @@ class TestCloudSQLProxyURLConstruction:
         assert 'p%40ss%23word%26special' in url
 
 @pytest.mark.e2e
-class TestBackendEnvironmentCloudSQL:
+class BackendEnvironmentCloudSQLTests:
     """Test that backend environment correctly uses DatabaseURLBuilder."""
 
     @patch.dict(os.environ, {'ENVIRONMENT': 'staging', 'POSTGRES_HOST': '/cloudsql/netra-staging:us-central1:postgres', 'POSTGRES_USER': 'backend_user', 'POSTGRES_PASSWORD': 'backend_pass', 'POSTGRES_DB': 'netra_staging', 'JWT_SECRET_KEY': 'test_jwt', 'SECRET_KEY': 'test_secret'})
@@ -99,7 +99,7 @@ class TestBackendEnvironmentCloudSQL:
         assert '?host=/cloudsql/' in db_url
 
 @pytest.mark.e2e
-class TestAuthEnvironmentCloudSQL:
+class AuthEnvironmentCloudSQLTests:
     """Test that auth environment correctly uses DatabaseURLBuilder."""
 
     @patch.dict(os.environ, {'ENVIRONMENT': 'staging', 'POSTGRES_HOST': '/cloudsql/netra-staging:us-central1:postgres', 'POSTGRES_USER': 'auth_user', 'POSTGRES_PASSWORD': 'auth_pass', 'POSTGRES_DB': 'netra_staging', 'JWT_SECRET_KEY': 'test_jwt'})
@@ -120,7 +120,7 @@ class TestAuthEnvironmentCloudSQL:
             assert 'sqlite+aiosqlite:///:memory:' in db_url
 
 @pytest.mark.e2e
-class TestDeploymentScriptCompliance:
+class DeploymentScriptComplianceTests:
     """Test that deployment scripts follow SSOT principles."""
 
     def test_deploy_script_no_database_url_construction(self):
@@ -143,7 +143,7 @@ class TestDeploymentScriptCompliance:
         assert '/cloudsql/' in content, 'Deployment script should configure Cloud SQL socket path'
 
 @pytest.mark.e2e
-class TestCloudSQLValidation:
+class CloudSQLValidationTests:
     """Test Cloud SQL configuration validation."""
 
     def test_cloud_sql_path_validation(self):
@@ -164,7 +164,7 @@ class TestCloudSQLValidation:
         assert 'Invalid Cloud SQL format' in error
 
 @pytest.mark.e2e
-class TestURLMasking:
+class URLMaskingTests:
     """Test that sensitive information is properly masked in logs."""
 
     def test_cloud_sql_url_masking(self):
@@ -186,7 +186,7 @@ class TestURLMasking:
         assert 'localhost:5432/database' in masked
 
 @pytest.mark.integration
-class TestCloudSQLIntegration:
+class CloudSQLIntegrationTests:
     """Integration tests for Cloud SQL with real environment setup."""
 
     @pytest.mark.skipif(os.environ.get('ENVIRONMENT') != 'staging', reason='Only run in staging environment')

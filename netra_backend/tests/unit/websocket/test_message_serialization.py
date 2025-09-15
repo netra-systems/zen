@@ -108,7 +108,7 @@ class UnserializableObject:
     def __str__(self):
         return f'UnserializableObject({self.value})'
 
-class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
+class MessageSerializationTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive unit tests for _serialize_message_safely function."""
 
     def setup_method(self, method):

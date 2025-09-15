@@ -24,7 +24,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
 
-class TestAuthServiceBackendCoordination(BaseIntegrationTest):
+class AuthServiceBackendCoordinationTests(BaseIntegrationTest):
     """Test auth service and backend coordination with real service simulation."""
 
     def setup_method(self, method):

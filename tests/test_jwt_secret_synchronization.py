@@ -21,7 +21,7 @@ from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
-class TestJWTSecretSynchronization:
+class JWTSecretSynchronizationTests:
     """Test JWT secret consistency across all services."""
 
     def setup_method(self):
@@ -132,7 +132,7 @@ class TestJWTSecretSynchronization:
             assert unified_jwt_secret == shared_jwt_secret, f'UnifiedSecrets not using SharedJWTSecretManager: {unified_jwt_secret} != {shared_jwt_secret}'
             assert unified_jwt_secret == test_secret
 
-class TestJWTSecretValidation:
+class JWTSecretValidationTests:
     """Test JWT secret validation and security requirements."""
 
     def test_jwt_secret_minimum_length_validation(self):

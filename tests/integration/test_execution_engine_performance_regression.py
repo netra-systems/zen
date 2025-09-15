@@ -82,7 +82,7 @@ class PerformanceProfiler:
         cpu_percent = cpu_time_used / (end_time - self.start_time) * 100
         return PerformanceMetrics(execution_time_ms=execution_time, memory_used_mb=memory_used, cpu_percent=cpu_percent, websocket_event_latency_ms=0.0, concurrent_users_supported=1, resource_cleanup_time_ms=0.0, peak_memory_mb=end_memory)
 
-class TestExecutionEnginePerformanceRegression(SSotAsyncTestCase):
+class ExecutionEnginePerformanceRegressionTests(SSotAsyncTestCase):
     """
     Performance regression tests for ExecutionEngine SSOT consolidation.
     

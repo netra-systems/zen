@@ -39,7 +39,7 @@ logger = get_logger(__name__)
 @pytest.mark.websocket_ssot
 @pytest.mark.security_critical
 @pytest.mark.issue_1058_security_boundaries
-class TestSSOTSecurityBoundaries:
+class SSOTSecurityBoundariesTests:
     """Unit tests validating security boundaries in SSOT WebSocket broadcasting.
 
     CRITICAL: These tests ensure SSOT consolidation maintains enterprise-grade
@@ -310,7 +310,7 @@ class TestSSOTSecurityBoundaries:
         logger.info('✅ Security feature validation complete - all features verifiable')
 
 @pytest.mark.enterprise_compliance
-class TestSSOTEnterpriseCompliance:
+class SSOTEnterpriseComplianceTests:
     """Enterprise compliance tests for SSOT security boundaries."""
 
     @pytest.mark.asyncio

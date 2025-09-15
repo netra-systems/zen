@@ -37,7 +37,7 @@ def mock_service_config() -> ServiceConfig:
         full_health_check=lambda: True
     )
 
-class TestHealthStage:
+class HealthStageTests:
     """Test health stage enumeration."""
     
     def test_health_stage_values(self) -> None:
@@ -47,7 +47,7 @@ class TestHealthStage:
         assert HealthStage.WARMING == "warming"
         assert HealthStage.OPERATIONAL == "operational"
 
-class TestServiceConfig:
+class ServiceConfigTests:
     """Test service configuration model."""
     
     def test_service_config_creation(self) -> None:
@@ -63,7 +63,7 @@ class TestServiceConfig:
         assert mock_service_config.process_check is not None
         assert mock_service_config.basic_health_check is not None
 
-class TestHealthCheckResult:
+class HealthCheckResultTests:
     """Test health check result model."""
     
     def test_health_check_result_creation(self) -> None:
@@ -89,7 +89,7 @@ class TestHealthCheckResult:
         assert result.success is False
         assert result.error_message == "Service unavailable"
 
-class TestStageConfig:
+class StageConfigTests:
     """Test stage configuration dataclass."""
     
     def test_stage_config_creation(self) -> None:
@@ -105,7 +105,7 @@ class TestStageConfig:
         assert config.max_failures == 5
         assert config.check_function_name == "basic_health_check"
 
-class TestServiceState:
+class ServiceStateTests:
     """Test service state dataclass."""
     
     def test_service_state_creation(self) -> None:
@@ -119,7 +119,7 @@ class TestServiceState:
         assert len(state.check_history) == 0
         assert state.grace_multiplier == 1.0
 
-class TestStagedHealthMonitorInit:
+class StagedHealthMonitorInitTests:
     """Test staged health monitor initialization."""
     
     def test_monitor_init(self, health_monitor: StagedHealthMonitor) -> None:

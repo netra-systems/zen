@@ -87,7 +87,7 @@ class WebSocketTestHelper:
 
 
 @pytest.mark.mission_critical
-class TestDeterministicStartupMemoryLeakPrevention(SSotAsyncTestCase):
+class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
     """
     Test deterministic startup memory leak prevention with Issue #601 fix.
     
@@ -580,7 +580,7 @@ if __name__ == "__main__":
     import unittest
     
     # Create test suite
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestDeterministicStartupMemoryLeakPrevention)
+    suite = unittest.TestLoader().loadTestsFromTestCase(DeterministicStartupMemoryLeakPreventionTests)
     
     # Run with verbose output
     runner = unittest.TextTestRunner(verbosity=2)

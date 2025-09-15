@@ -24,7 +24,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 
-class TestSupervisorAgentExecution:
+class SupervisorAgentExecutionTests:
     """P0 Security Issue #407: Test execution methods migrated to secure UserExecutionContext."""
     
     @pytest.mark.asyncio
@@ -210,7 +210,7 @@ class TestSupervisorAgentExecution:
         # Result should be secure mock state (not vulnerable DeepAgentState)
         assert hasattr(result, 'user_request')
 
-class TestSupervisorAgentHooks:
+class SupervisorAgentHooksTests:
     """P0 Security Issue #407: Test hook execution migrated to secure UserExecutionContext."""
     
     @pytest.mark.asyncio

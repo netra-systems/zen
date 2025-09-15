@@ -16,7 +16,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
-class TestStagingJWTConfigurationEnvironment(SSotAsyncTestCase):
+class StagingJWTConfigurationEnvironmentTests(SSotAsyncTestCase):
     """Staging environment tests for JWT configuration validation."""
 
     @pytest.fixture(autouse=True)
@@ -163,7 +163,7 @@ class TestStagingJWTConfigurationEnvironment(SSotAsyncTestCase):
             pytest.fail(f'JWT secret validation failed for staging environment. Context: {context}. This confirms Issue #681.')
         logger.info('SUCCESS: Comprehensive JWT configuration validation passed in staging')
 
-class TestStagingWebSocketJWTIntegration(SSotAsyncTestCase):
+class StagingWebSocketJWTIntegrationTests(SSotAsyncTestCase):
     """Test WebSocket JWT integration in staging environment."""
 
     @pytest.fixture(autouse=True)
@@ -218,7 +218,7 @@ class TestStagingWebSocketJWTIntegration(SSotAsyncTestCase):
             else:
                 pytest.fail(f'Unexpected Golden Path JWT validation error: {error_message}')
 
-class TestStagingJWTConfigurationBusinessImpact(SSotAsyncTestCase):
+class StagingJWTConfigurationBusinessImpactTests(SSotAsyncTestCase):
     """Test business impact validation in staging environment."""
 
     @pytest.fixture(autouse=True)

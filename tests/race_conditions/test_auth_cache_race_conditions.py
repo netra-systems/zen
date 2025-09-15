@@ -9,7 +9,7 @@ import time
 from netra_backend.app.clients.auth_client_cache import AuthClientCache
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestAuthClientCacheRaceConditions:
+class AuthClientCacheRaceConditionsTests:
     """Test AuthClientCache race condition fixes."""
 
     @pytest.fixture

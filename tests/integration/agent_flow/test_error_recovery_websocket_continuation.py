@@ -92,7 +92,7 @@ class WebSocketEventType(Enum):
     AGENT_RECOVERY = "agent_recovery"
 
 
-class TestErrorRecoveryWebSocketContinuation(SSotAsyncTestCase):
+class ErrorRecoveryWebSocketContinuationTests(SSotAsyncTestCase):
     """
     Integration Tests for Agent Error Recovery with WebSocket Continuation.
     

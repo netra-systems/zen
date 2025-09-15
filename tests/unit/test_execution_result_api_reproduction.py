@@ -22,7 +22,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.llm.llm_manager import LLMManager
 
 @pytest.mark.unit
-class TestExecutionResultAPIReproduction(SSotAsyncTestCase):
+class ExecutionResultAPIReproductionTests(SSotAsyncTestCase):
     """Reproduce the exact API format mismatch in Issue #261."""
 
     def setup_method(self, method):

@@ -26,7 +26,7 @@ from netra_backend.app.core.health_checkers import (
 )
 from netra_backend.app.schemas.core_models import HealthCheckResult
 
-class TestHealthCheckersCore:
+class HealthCheckersCoreTests:
     """Core test suite for database and service health checkers."""
 
     @pytest.fixture

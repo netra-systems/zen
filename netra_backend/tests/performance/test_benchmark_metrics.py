@@ -17,7 +17,7 @@ import pytest
 from netra_backend.app.schemas.generation import ContentGenParams
 from netra_backend.app.services.generation_service import run_content_generation_job
 
-class TestBenchmarkMetrics:
+class BenchmarkMetricsTests:
     """Test benchmarking and metrics collection"""
 
     @pytest.mark.performance

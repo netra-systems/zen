@@ -733,7 +733,7 @@ class AgentResultValidator:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestAgentResultValidationBusinessLogic:
+class AgentResultValidationBusinessLogicTests:
     """Test agent result validation business logic for quality assurance."""
     
     def setup_method(self):

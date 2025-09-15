@@ -18,7 +18,7 @@ pytestmark = [
     pytest.mark.ssl_configuration
 ]
 
-class TestSSLConfiguration:
+class SSLConfigurationTests:
     """Test SSL/TLS configuration for database connections."""
     
     @pytest.mark.asyncio

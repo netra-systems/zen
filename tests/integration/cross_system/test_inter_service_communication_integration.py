@@ -76,7 +76,7 @@ class CommunicationMetrics:
 @pytest.mark.integration
 @pytest.mark.cross_system
 @pytest.mark.communication
-class TestInterServiceCommunicationIntegration(SSotAsyncTestCase):
+class InterServiceCommunicationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for inter-service communication protocols.
     

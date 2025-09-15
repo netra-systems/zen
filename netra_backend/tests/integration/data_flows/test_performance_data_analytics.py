@@ -335,7 +335,7 @@ class UserEngagementAnalyzer:
         return power_users
 
 
-class TestPerformanceDataAnalytics:
+class PerformanceDataAnalyticsTests:
     """Test suite for performance data collection and analytics processing."""
     
     def setup_method(self):

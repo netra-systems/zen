@@ -25,7 +25,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
-class TestWebSocketConnectionErrorHandlingApplicationStateRecoveryIntegration(BaseIntegrationTest):
+class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(BaseIntegrationTest):
     """Test WebSocket connection error handling with comprehensive application state recovery."""
     
     @pytest.mark.integration

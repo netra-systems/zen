@@ -40,7 +40,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = logging.getLogger(__name__)
 
 
-class TestDatabaseManagerSSOTConsolidation(SSotBaseTestCase):
+class DatabaseManagerSSOTConsolidationTests(SSotBaseTestCase):
     """
     Test suite to detect and validate DatabaseManager SSOT consolidation.
     

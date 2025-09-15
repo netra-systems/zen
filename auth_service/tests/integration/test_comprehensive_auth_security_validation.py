@@ -52,7 +52,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestComprehensiveAuthSecurityValidation(SSotBaseTestCase):
+class ComprehensiveAuthSecurityValidationTests(SSotBaseTestCase):
     """
     Comprehensive Authentication Security Validation Tests.
     

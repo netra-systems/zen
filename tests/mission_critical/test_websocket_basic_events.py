@@ -51,7 +51,7 @@ class BasicEventValidator:
 
 @pytest.mark.critical 
 @pytest.mark.mission_critical
-class TestBasicWebSocketEvents:
+class BasicWebSocketEventsTests:
     """Test basic WebSocket event emission using real connections."""
     
     @pytest.mark.asyncio

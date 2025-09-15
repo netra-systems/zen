@@ -24,7 +24,7 @@ from shared.isolated_environment import IsolatedEnvironment as BackendIsolatedEn
 
 
 @pytest.mark.integration
-class TestEnvironmentInterfaceConsistency:
+class EnvironmentInterfaceConsistencyTests:
     """Test consistency between different IsolatedEnvironment implementations."""
     
     @pytest.fixture(autouse=True)

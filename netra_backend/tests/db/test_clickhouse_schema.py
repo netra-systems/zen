@@ -78,7 +78,7 @@ async def clickhouse_writer():
     await writer.stop()
 
 
-class TestClickHouseSchema:
+class ClickHouseSchemaTests:
     """Test ClickHouse schema management."""
     
     @pytest.mark.asyncio
@@ -168,7 +168,7 @@ class TestClickHouseSchema:
             assert results[table] is True
 
 
-class TestClickHouseTraceWriter:
+class ClickHouseTraceWriterTests:
     """Test ClickHouse trace writer functionality."""
     
     @pytest.mark.asyncio

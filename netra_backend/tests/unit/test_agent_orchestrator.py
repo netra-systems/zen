@@ -24,7 +24,7 @@ from netra_backend.app.agents.supervisor.agent_execution_context_manager import 
 )
 
 
-class TestExecutionSession:
+class ExecutionSessionTests:
     """Test ExecutionSession business logic"""
     
     @pytest.mark.unit
@@ -134,7 +134,7 @@ class TestExecutionSession:
         assert session.is_expired(timeout_minutes=60) is False
 
 
-class TestContextIsolationMetrics:
+class ContextIsolationMetricsTests:
     """Test ContextIsolationMetrics business logic"""
     
     @pytest.mark.unit
@@ -166,7 +166,7 @@ class TestContextIsolationMetrics:
         assert metrics.context_leaks == 0
 
 
-class TestAgentExecutionContextManager:
+class AgentExecutionContextManagerTests:
     """Test AgentExecutionContextManager business logic"""
     
     @pytest.mark.unit
@@ -540,7 +540,7 @@ class TestAgentExecutionContextManager:
         assert metrics.active_sessions == 0
 
 
-class TestContextIsolationValidation:
+class ContextIsolationValidationTests:
     """Test context isolation validation business logic"""
     
     @pytest.mark.unit
@@ -625,7 +625,7 @@ class TestContextIsolationValidation:
         assert manager._validate_context_updates(forbidden_updates, session) is False
 
 
-class TestEdgeCases:
+class EdgeCasesTests:
     """Test edge cases and error conditions"""
     
     @pytest.mark.unit

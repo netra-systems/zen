@@ -710,7 +710,7 @@ class ErrorMessageValidator:
 
 
 @pytest.mark.integration
-class TestErrorMessageFormattingValidation(SSotAsyncTestCase):
+class ErrorMessageFormattingValidationTests(SSotAsyncTestCase):
     """Integration tests for error message formatting and validation."""
     
     def setUp(self):

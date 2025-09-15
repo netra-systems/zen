@@ -22,7 +22,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 
 
 @pytest.mark.integration
-class TestWebSocketEventDeliveryStructure:
+class WebSocketEventDeliveryStructureTests:
     """Integration tests for WebSocket event delivery structure."""
 
     @pytest.fixture
@@ -270,7 +270,7 @@ class TestWebSocketEventDeliveryStructure:
 
 
 @pytest.mark.integration
-class TestWebSocketEventStructureMismatchDetection:
+class WebSocketEventStructureMismatchDetectionTests:
     """Test detection and handling of structure mismatches."""
 
     def test_nested_structure_detection(self):

@@ -11,7 +11,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestWebSocketConnectionEfficiency:
+class WebSocketConnectionEfficiencyTests:
     """Test WebSocket connection efficiency."""
 
     def test_websocket_manager_importable(self):

@@ -31,7 +31,7 @@ from tests.e2e.test_resource_usage import (
 
 
 @pytest.mark.e2e
-class TestResourceEfficiencyIntegration:
+class ResourceEfficiencyIntegrationTests:
     """Integration tests for resource efficiency patterns"""
     
     @pytest.mark.asyncio
@@ -262,7 +262,7 @@ class TestResourceEfficiencyIntegration:
 
 
 @pytest.mark.e2e
-class TestResourceStressPatterns:
+class ResourceStressPatternsTests:
     """Stress test patterns for resource usage validation"""
     
     @pytest.mark.asyncio

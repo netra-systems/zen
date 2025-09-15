@@ -25,7 +25,7 @@ from shared.isolated_environment import get_env
 import httpx
 import aiohttp
 
-class TestFrontendBackendContractValidation(BaseIntegrationTest):
+class FrontendBackendContractValidationTests(BaseIntegrationTest):
     """
     Integration test for frontend-backend API contract validation.
     

@@ -49,7 +49,7 @@ class MockWebSocket:
         self.client_state = "closed"
 
 
-class TestWebSocketMultiComponentIntegration:
+class WebSocketMultiComponentIntegrationTests:
     """Integration tests for WebSocket manager with multiple components."""
     
     @pytest.fixture

@@ -40,7 +40,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerConsolidationValidation(SSotBaseTestCase):
+class WebSocketManagerConsolidationValidationTests(SSotBaseTestCase):
     """
     CRITICAL: Tests for Issue #1182 WebSocket Manager SSOT consolidation.
     

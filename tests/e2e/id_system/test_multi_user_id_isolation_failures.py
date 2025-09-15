@@ -25,7 +25,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from shared.types.core_types import UserID, ThreadID, ExecutionID, ensure_user_id, ensure_thread_id
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_test_user_with_auth, create_authenticated_user_context
 
-class TestMultiUserIDIsolationFailures:
+class MultiUserIDIsolationFailuresTests:
     """
     E2E tests that expose ID isolation failures in multi-user scenarios.
     
@@ -202,7 +202,7 @@ class TestMultiUserIDIsolationFailures:
         isolation_broken = True
         return {'isolation_broken': isolation_broken, 'ws_a': ws_a_id, 'ws_b': ws_b_id, 'vulnerability': 'UUID WebSocket IDs provide no user isolation'}
 
-class TestMultiUserIDScalabilityFailures:
+class MultiUserIDScalabilityFailuresTests:
     """
     E2E tests that expose scalability failures in multi-user scenarios.
     """
@@ -246,7 +246,7 @@ class TestMultiUserIDScalabilityFailures:
 @pytest.mark.multi_user
 @pytest.mark.e2e
 @pytest.mark.auth_required
-class TestCriticalMultiUserIDFailures:
+class CriticalMultiUserIDFailuresTests:
     """
     Most critical E2E tests that prove multi-user ID failures break business.
     """

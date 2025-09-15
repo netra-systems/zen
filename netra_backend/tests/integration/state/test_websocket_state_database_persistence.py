@@ -34,7 +34,7 @@ from shared.types import UserID, ThreadID, RunID, RequestID
 from shared.id_generation import UnifiedIdGenerator
 
 
-class TestWebSocketStateDatabasePersistence(BaseIntegrationTest):
+class WebSocketStateDatabasePersistenceTests(BaseIntegrationTest):
     """Integration tests for WebSocket state persistence in real database."""
 
     @pytest.fixture(autouse=True)

@@ -22,7 +22,7 @@ from netra_backend.app.db.transaction_errors import (
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestClickHouseExceptionIntegration(SSotAsyncTestCase):
+class ClickHouseExceptionIntegrationTests(SSotAsyncTestCase):
     """Test ClickHouse exception handling integration across service boundaries."""
 
     def setup_method(self, method):

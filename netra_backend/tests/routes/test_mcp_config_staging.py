@@ -10,7 +10,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.routes.mcp.config import get_mcp_config, get_claude_config, get_cursor_config, get_standard_mcp_config, get_http_config, get_websocket_config
 
-class TestMCPConfigGeneration:
+class MCPConfigGenerationTests:
     """Test MCP configuration generation for different environments."""
 
     def test_local_development_config(self):

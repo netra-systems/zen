@@ -27,7 +27,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 
-class TestExecutionEngineWebSocketInitialization:
+class ExecutionEngineWebSocketInitializationTests:
     """Test ExecutionEngine initialization with WebSocket components."""
 
     @pytest.fixture
@@ -132,7 +132,7 @@ class TestExecutionEngineWebSocketInitialization:
         assert engine._is_active is False
         assert engine.is_active() is False
 
-class TestExecutionEngineFactoryWebSocketIntegration:
+class ExecutionEngineFactoryWebSocketIntegrationTests:
     """Test ExecutionEngineFactory WebSocket bridge integration."""
 
     @pytest.fixture
@@ -209,7 +209,7 @@ class TestExecutionEngineFactoryWebSocketIntegration:
             except ExecutionEngineFactoryError:
                 pass
 
-class TestWebSocketNotifierExecutionEngineIntegration:
+class WebSocketNotifierExecutionEngineIntegrationTests:
     """Test WebSocketNotifier integration within ExecutionEngine workflow."""
 
     @pytest.fixture

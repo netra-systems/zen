@@ -25,7 +25,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestWebSocketManagerFactoryConsolidation(SSotBaseTestCase, unittest.TestCase):
+class WebSocketManagerFactoryConsolidationTests(SSotBaseTestCase, unittest.TestCase):
     """Test suite to validate factory consolidation for WebSocket managers.
     
     These tests should FAIL initially, proving fragmented factory patterns exist.

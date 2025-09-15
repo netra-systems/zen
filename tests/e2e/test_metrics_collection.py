@@ -338,7 +338,7 @@ class DashboardDataValidator:
         return True
 
 
-class TestMetricsCollectionHarness:
+class MetricsCollectionHarnessTests:
     """Orchestrates comprehensive metrics collection testing"""
     
     def __init__(self, config: UnifiedTestConfig):
@@ -409,7 +409,7 @@ class TestMetricsCollectionHarness:
 # Test Implementation Classes
 
 @pytest.mark.e2e
-class TestAgentMetricsCollection:
+class AgentMetricsCollectionTests:
     """Test agent metrics collection from startup through storage"""
     
     @pytest.fixture
@@ -456,7 +456,7 @@ class TestAgentMetricsCollection:
 # Additional validation tests
 
 @pytest.mark.e2e
-class TestMetricsStorageValidation:
+class MetricsStorageValidationTests:
     """Test metrics storage and retrieval validation"""
     
     @pytest.mark.asyncio 
@@ -486,7 +486,7 @@ class TestMetricsStorageValidation:
 
 
 @pytest.mark.e2e
-class TestDashboardDataAccess:
+class DashboardDataAccessTests:
     """Test dashboard data availability and access"""
     
     @pytest.mark.asyncio

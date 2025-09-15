@@ -67,7 +67,7 @@ class WebSocketManagerImplementation:
     creation_method: str  # "direct", "factory", "adapter", "protocol"
 
 
-class TestWebSocketManagerSSOTConsolidation(BaseIntegrationTest):
+class WebSocketManagerSSOTConsolidationTests(BaseIntegrationTest):
     """Test WebSocket Manager SSOT consolidation for Issue #824."""
 
     def setUp(self):

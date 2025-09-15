@@ -26,7 +26,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
-class TestTimeoutEnforcement:
+class TimeoutEnforcementTests:
     """Test timeout enforcement and detection mechanisms."""
 
     @pytest.fixture
@@ -79,7 +79,7 @@ class TestTimeoutEnforcement:
             resource_status = final_status['resource_guard']
             assert resource_status['current_usage']['concurrent_executions'] == 0
 
-class TestResourceProtection:
+class ResourceProtectionTests:
     """Test resource protection mechanisms."""
 
     @pytest.fixture
@@ -130,7 +130,7 @@ class TestResourceProtection:
         status = await resource_guard.get_resource_status()
         assert status['user_stats']['total_concurrent'] == 0
 
-class TestCircuitBreakerFunctionality:
+class CircuitBreakerFunctionalityTests:
     """Test circuit breaker failure detection and recovery."""
 
     @pytest.fixture
@@ -174,7 +174,7 @@ class TestCircuitBreakerFunctionality:
         agent_status = status['agents'][agent_name]
         assert agent_status['state'] == 'closed'
 
-class TestErrorBoundaryValidation:
+class ErrorBoundaryValidationTests:
     """Test error boundaries that prevent silent failures."""
 
     @pytest.fixture
@@ -224,7 +224,7 @@ class TestErrorBoundaryValidation:
             await execution_engine._run_tool_by_interface_safe(tool, kwargs)
         assert 'Tool error' in str(exc_info.value)
 
-class TestHealthCheckCapability:
+class HealthCheckCapabilityTests:
     """Test health check capability detection."""
 
     @pytest.mark.asyncio
@@ -245,7 +245,7 @@ class TestHealthCheckCapability:
         health_status = await execution_engine.health_check()
         assert 'stuck executions detected' in str(health_status.get('issues', []))
 
-class TestEmergencyRecovery:
+class EmergencyRecoveryTests:
     """Test emergency recovery mechanisms."""
 
     @pytest.mark.asyncio
@@ -275,7 +275,7 @@ class TestEmergencyRecovery:
         assert user_id not in execution_engine._user_execution_counts
         assert execution_id not in execution_engine._active_executions
 
-class TestSecurityIntegration:
+class SecurityIntegrationTests:
     """Test integration of all security components."""
 
     @pytest.mark.asyncio

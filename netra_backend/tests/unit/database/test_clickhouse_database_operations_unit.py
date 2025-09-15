@@ -17,7 +17,7 @@ from typing import Dict, Any, List
 from netra_backend.app.db.clickhouse import ClickHouseCache, ClickHouseService, NoOpClickHouseClient, use_mock_clickhouse, _clickhouse_cache
 from test_framework.base_integration_test import BaseIntegrationTest
 
-class TestClickHouseCacheUnit(BaseIntegrationTest):
+class ClickHouseCacheUnitTests(BaseIntegrationTest):
     """Test ClickHouse cache functionality for user data isolation."""
 
     @pytest.mark.unit
@@ -80,7 +80,7 @@ class TestClickHouseCacheUnit(BaseIntegrationTest):
         assert user456_stats['user_cache_entries'] == 1, 'User-specific cache count'
         assert user123_stats['user_cache_entries'] != user456_stats['user_cache_entries']
 
-class TestClickHouseServiceUnit(BaseIntegrationTest):
+class ClickHouseServiceUnitTests(BaseIntegrationTest):
     """Test ClickHouse service layer functionality."""
 
     @pytest.mark.unit
@@ -132,7 +132,7 @@ class TestClickHouseServiceUnit(BaseIntegrationTest):
         result3 = await service.execute(query, params, user_id='user-456')
         assert mock_client.execute.call_count == 2, 'Different user should bypass cache'
 
-class TestClickHouseNoOpClientUnit:
+class ClickHouseNoOpClientUnitTests:
     """Test NoOp client functionality for testing environments."""
 
     @pytest.mark.unit
@@ -164,7 +164,7 @@ class TestClickHouseNoOpClientUnit:
             assert 'ClickHouse NoOp' in call_args
             assert 'SELECT COUNT(*)' in call_args
 
-class TestClickHouseUtilityFunctions:
+class ClickHouseUtilityFunctionsTests:
     """Test utility functions for ClickHouse configuration and detection."""
 
     @pytest.mark.unit

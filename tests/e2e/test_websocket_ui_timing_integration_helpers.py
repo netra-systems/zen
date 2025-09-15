@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 @pytest.mark.e2e
-class TestWebsocketUiTimingIntegrationHelpers:
+class WebsocketUiTimingIntegrationHelpersTests:
     """Test class for websocket_ui_timing_integration_helpers"""
 
     def setup_method(self):

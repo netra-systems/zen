@@ -14,7 +14,7 @@ from netra_backend.app.redis_manager import redis_manager as RedisService
 from shared.isolated_environment import get_env
 
 
-class TestDataPersistenceRedisL3:
+class DataPersistenceRedisL3Tests:
     """Test Redis data persistence scenarios"""
 
     @pytest.fixture(autouse=True)

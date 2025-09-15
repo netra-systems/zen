@@ -257,7 +257,7 @@ class IsolatingAgentFactory:
         logger.info(f"Factory {self.factory_id} cleaned up {len(agents_to_cleanup)} agents for user {user_id}")
 
 
-class TestBaseAgentFactoryUserIsolation(SSotAsyncTestCase):
+class BaseAgentFactoryUserIsolationTests(SSotAsyncTestCase):
     """Integration tests for base agent factory user isolation patterns."""
     
     def setup_method(self, method):

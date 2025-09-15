@@ -10,7 +10,7 @@ from auth_service.auth_core.models.auth_models import LoginRequest, User
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAuthServiceCore:
+class AuthServiceCoreTests:
     """Test core AuthService functionality"""
     
     @pytest_asyncio.fixture(autouse=True)

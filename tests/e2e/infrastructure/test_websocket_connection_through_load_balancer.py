@@ -26,7 +26,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
 
 
-class TestWebSocketConnectionThroughLoadBalancer(SSotBaseTestCase):
+class WebSocketConnectionThroughLoadBalancerTests(SSotBaseTestCase):
     """
     Test WebSocket connections through load balancer with authentication.
     
@@ -525,7 +525,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_tests():
-        test_instance = TestWebSocketConnectionThroughLoadBalancer()
+        test_instance = WebSocketConnectionThroughLoadBalancerTests()
         
         try:
             await test_instance.test_authenticated_websocket_connection_through_load_balancer()

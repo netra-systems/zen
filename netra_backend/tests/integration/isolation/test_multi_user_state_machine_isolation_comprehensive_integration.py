@@ -76,7 +76,7 @@ class UserIsolationContext:
             self.postgres_records = []
 
 
-class TestMultiUserStateIsolationIntegration(BaseIntegrationTest):
+class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
     """Integration tests for multi-user state machine isolation."""
     
     async def _create_isolated_user_context(self, real_services_fixture, user_index: int,

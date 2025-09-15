@@ -107,7 +107,7 @@ class DatabasePersistenceAgent(BaseAgent):
         self.persistent_data.update(state_updates)
         await asyncio.sleep(0.01)
 
-class TestAgentExecutionDatabase(BaseIntegrationTest):
+class AgentExecutionDatabaseTests(BaseIntegrationTest):
     """Integration tests for agent execution with database persistence."""
 
     def setup_method(self):

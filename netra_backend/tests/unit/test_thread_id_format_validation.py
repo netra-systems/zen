@@ -22,7 +22,7 @@ from unittest.mock import Mock, patch
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator, IdComponents
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 
-class TestThreadIdFormatValidation:
+class ThreadIdFormatValidationTests:
     """Test suite to expose thread ID format validation gaps.
     
     These tests are DESIGNED TO FAIL initially to demonstrate missing

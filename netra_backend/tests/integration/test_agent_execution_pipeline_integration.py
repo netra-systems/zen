@@ -50,7 +50,7 @@ from netra_backend.app.models.user import User
 from netra_backend.app.models.thread import Thread
 
 
-class TestAgentExecutionPipelineIntegration(BaseIntegrationTest):
+class AgentExecutionPipelineIntegrationTests(BaseIntegrationTest):
     """Test agent execution pipeline with real database and proper context isolation."""
 
     @pytest.mark.integration

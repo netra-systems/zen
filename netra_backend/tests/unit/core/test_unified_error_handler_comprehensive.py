@@ -67,7 +67,7 @@ from netra_backend.app.schemas.shared_types import ErrorContext
 
 
 @pytest.mark.unit
-class TestUnifiedErrorHandlerInitialization:
+class UnifiedErrorHandlerInitializationTests:
     """Test UnifiedErrorHandler initialization and configuration."""
     
     def test_unified_error_handler_initializes_with_defaults(self):
@@ -103,7 +103,7 @@ class TestUnifiedErrorHandlerInitialization:
 
 
 @pytest.mark.unit  
-class TestUnifiedErrorHandlerErrorClassification:
+class UnifiedErrorHandlerErrorClassificationTests:
     """Test error classification and categorization."""
     
     def setup_method(self):
@@ -170,7 +170,7 @@ class TestUnifiedErrorHandlerErrorClassification:
 
 
 @pytest.mark.unit
-class TestUnifiedErrorHandlerRecoveryStrategies():
+class UnifiedErrorHandlerRecoveryStrategiesTests():
     """Test recovery strategy selection and execution."""
     
     def setup_method(self):
@@ -248,7 +248,7 @@ class TestUnifiedErrorHandlerRecoveryStrategies():
 
 
 @pytest.mark.unit
-class TestUnifiedErrorHandlerDebugInformation():
+class UnifiedErrorHandlerDebugInformationTests():
     """Test debug information extraction and security."""
     
     def setup_method(self):
@@ -300,7 +300,7 @@ class TestUnifiedErrorHandlerDebugInformation():
 
 
 @pytest.mark.unit
-class TestUnifiedErrorHandlerErrorResponse():
+class UnifiedErrorHandlerErrorResponseTests():
     """Test error response creation and formatting."""
     
     def setup_method(self):
@@ -370,7 +370,7 @@ class TestUnifiedErrorHandlerErrorResponse():
 
 
 @pytest.mark.unit
-class TestUnifiedErrorHandlerMetrics():
+class UnifiedErrorHandlerMetricsTests():
     """Test error metrics tracking and statistics."""
     
     def setup_method(self):
@@ -448,7 +448,7 @@ class TestUnifiedErrorHandlerMetrics():
 
 
 @pytest.mark.unit
-class TestUnifiedErrorHandlerIntegration():
+class UnifiedErrorHandlerIntegrationTests():
     """Test integration with domain-specific handlers."""
     
     @pytest.mark.asyncio
@@ -509,7 +509,7 @@ class TestUnifiedErrorHandlerIntegration():
         
 
 @pytest.mark.unit
-class TestUnifiedErrorHandlerGlobalFunctions():
+class UnifiedErrorHandlerGlobalFunctionsTests():
     """Test global convenience functions."""
     
     @pytest.mark.asyncio
@@ -540,7 +540,7 @@ class TestUnifiedErrorHandlerGlobalFunctions():
 
 
 @pytest.mark.unit
-class TestRetryRecoveryStrategy():
+class RetryRecoveryStrategyTests():
     """Test retry recovery strategy implementation."""
     
     @pytest.mark.asyncio
@@ -583,7 +583,7 @@ class TestRetryRecoveryStrategy():
 
 
 @pytest.mark.unit
-class TestFallbackRecoveryStrategy():
+class FallbackRecoveryStrategyTests():
     """Test fallback recovery strategy implementation."""
     
     @pytest.mark.asyncio

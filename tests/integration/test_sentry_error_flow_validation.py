@@ -15,7 +15,7 @@ import os
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.integration
-class TestEndToEndSentryErrorFlow(SSotAsyncTestCase):
+class EndToEndSentryErrorFlowTests(SSotAsyncTestCase):
     """Test end-to-end error flow through Sentry - expected to FAIL showing gaps"""
 
     async def test_frontend_to_backend_error_correlation(self):
@@ -75,7 +75,7 @@ class TestEndToEndSentryErrorFlow(SSotAsyncTestCase):
             mock_capture.assert_called_once()
 
 @pytest.mark.integration
-class TestSentryEnvironmentConfiguration(SSotAsyncTestCase):
+class SentryEnvironmentConfigurationTests(SSotAsyncTestCase):
     """Test Sentry configuration across environments - expected to FAIL showing gaps"""
 
     async def test_staging_environment_error_tracking(self):
@@ -117,7 +117,7 @@ class TestSentryEnvironmentConfiguration(SSotAsyncTestCase):
             pass
 
 @pytest.mark.integration
-class TestSentryPerformanceIntegration(SSotAsyncTestCase):
+class SentryPerformanceIntegrationTests(SSotAsyncTestCase):
     """Test Sentry performance monitoring integration - expected to FAIL showing gaps"""
 
     async def test_api_request_performance_tracking(self):
@@ -172,7 +172,7 @@ class TestSentryPerformanceIntegration(SSotAsyncTestCase):
             self.assertEqual(call_kwargs['op'], 'llm.request')
 
 @pytest.mark.integration
-class TestSentrySecurityAndPrivacy(SSotAsyncTestCase):
+class SentrySecurityAndPrivacyTests(SSotAsyncTestCase):
     """Test Sentry security and privacy features - expected to FAIL showing gaps"""
 
     async def test_sensitive_data_filtering(self):
@@ -221,7 +221,7 @@ class TestSentrySecurityAndPrivacy(SSotAsyncTestCase):
                 self.assertLess(traces_sample_rate, 1.0, 'Production should have reduced trace sampling')
 
 @pytest.mark.integration
-class TestSentryIntegrationCompleteness(SSotAsyncTestCase):
+class SentryIntegrationCompletenessTests(SSotAsyncTestCase):
     """Test overall completeness of Sentry integration - expected to FAIL showing gaps"""
 
     async def test_all_critical_components_instrumented(self):

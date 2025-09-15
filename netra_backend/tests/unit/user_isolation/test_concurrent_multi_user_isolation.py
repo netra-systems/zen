@@ -104,7 +104,7 @@ class MockConcurrentWebSocket:
         with self._lock:
             self.closed = True
 
-class TestConcurrentMultiUserIsolation(SSotBaseTestCase):
+class ConcurrentMultiUserIsolationTests(SSotBaseTestCase):
     """Test complete user isolation under concurrent multi-user load."""
 
     def setup_method(self):

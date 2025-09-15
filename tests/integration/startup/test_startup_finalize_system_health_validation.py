@@ -31,7 +31,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from shared.isolated_environment import get_env
 
 
-class TestStartupFinalizeSystemHealthValidation(SSotBaseTestCase):
+class StartupFinalizeSystemHealthValidationTests(SSotBaseTestCase):
     """Integration tests for FINALIZE phase system health validation."""
     
     def setup_method(self, method):

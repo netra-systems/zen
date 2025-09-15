@@ -57,7 +57,7 @@ class EventSequenceTestResult:
     total_duration_ms: float
 
 
-class TestWebSocketEventSequenceValidationCore(SSotAsyncTestCase):
+class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
     """
     Core WebSocket event sequence validation tests.
     

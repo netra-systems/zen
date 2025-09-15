@@ -33,7 +33,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 from shared.redis_configuration_builder import RedisConfigurationBuilder
 
-class TestRedisIssue1029ConfigurationValidation(SSotBaseTestCase):
+class RedisIssue1029ConfigurationValidationTests(SSotBaseTestCase):
     """
     Unit Test Suite: Redis Issue #1029 Configuration Validation
 

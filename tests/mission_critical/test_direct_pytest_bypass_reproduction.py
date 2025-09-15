@@ -56,7 +56,7 @@ class PytestBypassViolation:
     violation_type: str  # 'direct_pytest_main', 'pytest_exit_code', 'subprocess_pytest'
 
 
-class TestDirectPytestBypassReproduction(SSotBaseTestCase):
+class DirectPytestBypassReproductionTests(SSotBaseTestCase):
     """
     Test suite to reproduce and validate direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

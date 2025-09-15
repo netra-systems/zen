@@ -28,7 +28,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestDeepAgentStateImportConflictValidation(SSotAsyncTestCase):
+class DeepAgentStateImportConflictValidationTests(SSotAsyncTestCase):
     """Test import conflict validation - MUST FAIL initially to prove violation exists."""
 
     def setup_method(self, method):
@@ -200,7 +200,7 @@ class TestDeepAgentStateImportConflictValidation(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestDeepAgentStateCompatibilityVerification(SSotAsyncTestCase):
+class DeepAgentStateCompatibilityVerificationTests(SSotAsyncTestCase):
     """Test state compatibility verification - MUST FAIL initially to prove differences exist."""
 
     def setup_method(self, method):
@@ -322,7 +322,7 @@ class TestDeepAgentStateCompatibilityVerification(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestDeepAgentStateGoldenPathIndependence(SSotAsyncTestCase):
+class DeepAgentStateGoldenPathIndependenceTests(SSotAsyncTestCase):
     """Test Golden Path independence - MUST FAIL initially to prove WebSocket dependency issues."""
 
     def setup_method(self, method):

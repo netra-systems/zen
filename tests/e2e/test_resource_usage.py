@@ -104,7 +104,7 @@ class ResourceMonitor:
         )
 
 
-class TestDatabaseConnectioner:
+class DatabaseConnectionerTests:
     """Tests database connection pool efficiency"""
     
     def __init__(self, max_connections: int = 20):
@@ -148,7 +148,7 @@ class TestDatabaseConnectioner:
 
 
 # Alias for backward compatibility (fixing typo)
-DatabaseConnectionTester = TestDatabaseConnectioner
+DatabaseConnectionTester = DatabaseConnectionerTests
 
 
 class StorageMonitor:
@@ -188,7 +188,7 @@ class StorageMonitor:
 
 
 @pytest.mark.e2e
-class TestResourceUsage:
+class ResourceUsageTests:
     """Resource usage efficiency tests"""
     
     @pytest.fixture

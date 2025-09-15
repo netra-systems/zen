@@ -102,7 +102,7 @@ class StressTestAgent(BaseAgent):
             await asyncio.sleep(0.001)
         return {'operation_count': self.operation_count, 'memory_allocations': len(self.memory_allocations), 'user_id': context.user_id}
 
-class TestBaseAgentMultiUserConcurrency(AsyncBaseTestCase):
+class BaseAgentMultiUserConcurrencyTests(AsyncBaseTestCase):
     """Test BaseAgent behavior with multiple concurrent users.
     
     CRITICAL: Multi-user isolation is mandatory per CLAUDE.md requirements.
@@ -194,7 +194,7 @@ class TestBaseAgentMultiUserConcurrency(AsyncBaseTestCase):
                 self.assertIsInstance(result, RuntimeError)
                 self.assertIn(f'Intentional failure {i}', str(result))
 
-class TestBaseAgentPerformanceAndEdgeCases(AsyncBaseTestCase):
+class BaseAgentPerformanceAndEdgeCasesTests(AsyncBaseTestCase):
     """Test BaseAgent performance characteristics and edge cases."""
 
     async def test_rapid_sequential_executions(self):
@@ -294,7 +294,7 @@ class TestBaseAgentPerformanceAndEdgeCases(AsyncBaseTestCase):
         self.assertEqual(result, 'success')
         self.assertGreaterEqual(call_count, 3)
 
-class TestBaseAgentAdvancedErrorHandling(AsyncBaseTestCase):
+class BaseAgentAdvancedErrorHandlingTests(AsyncBaseTestCase):
     """Test advanced error handling and recovery scenarios."""
 
     async def test_circuit_breaker_integration_under_failures(self):
@@ -354,7 +354,7 @@ class TestBaseAgentAdvancedErrorHandling(AsyncBaseTestCase):
             agent._validate_session_isolation()
         agent._validate_session_isolation = original_validate
 
-class TestBaseAgentResourceManagement(BaseTestCase):
+class BaseAgentResourceManagementTests(BaseTestCase):
     """Test BaseAgent resource management and cleanup."""
 
     def setUp(self):
@@ -413,7 +413,7 @@ class TestBaseAgentResourceManagement(BaseTestCase):
         with self.assertRaises(NotImplementedError):
             asyncio.run(agent.execute(context))
 
-class TestBaseAgentValidationAndCompliance(BaseTestCase):
+class BaseAgentValidationAndComplianceTests(BaseTestCase):
     """Test BaseAgent pattern validation and compliance checking."""
 
     def setUp(self):

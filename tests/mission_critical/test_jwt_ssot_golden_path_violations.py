@@ -28,7 +28,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestJWTSSOTGoldenPathViolations(SSotAsyncTestCase):
+class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
     """
     Mission critical tests that detect P0 SSOT violations blocking Golden Path.
     These tests MUST FAIL initially to prove violations exist and justify SSOT consolidation.

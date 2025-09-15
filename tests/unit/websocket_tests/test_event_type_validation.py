@@ -39,7 +39,7 @@ from shared.types import (
 
 
 @pytest.mark.unit
-class TestWebSocketEventTypeValidation(SSotBaseTestCase):
+class WebSocketEventTypeValidationTests(SSotBaseTestCase):
     """Test WebSocketEventType enum validation and constraints."""
     
     def test_all_critical_event_types_defined(self):
@@ -165,7 +165,7 @@ class TestWebSocketEventTypeValidation(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestStronglyTypedWebSocketEventValidation(SSotBaseTestCase):
+class StronglyTypedWebSocketEventValidationTests(SSotBaseTestCase):
     """Test StronglyTypedWebSocketEvent validation and construction."""
     
     def setUp(self):
@@ -289,7 +289,7 @@ class TestStronglyTypedWebSocketEventValidation(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestWebSocketEventTypeConstraints(SSotBaseTestCase):
+class WebSocketEventTypeConstraintsTests(SSotBaseTestCase):
     """Test constraints and validation rules for WebSocket event types."""
     
     def test_event_type_immutability(self):
@@ -367,7 +367,7 @@ class TestWebSocketEventTypeConstraints(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestWebSocketEventValidationEdgeCases(SSotBaseTestCase):
+class WebSocketEventValidationEdgeCasesTests(SSotBaseTestCase):
     """Test edge cases and error conditions for WebSocket event validation."""
     
     def test_none_values_validation(self):

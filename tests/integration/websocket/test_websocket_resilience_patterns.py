@@ -352,7 +352,7 @@ class ResilientWebSocketAgentExecutor:
         await context.websocket_notifier.send_event('agent_completed', {'message': 'General processing completed with resilience', 'fault_tolerance_validated': True})
         return {'status': 'completed', 'agent_type': 'general', 'processing_result': 'success', 'resilience_validated': True}
 
-class TestWebSocketResiliencePatterns:
+class WebSocketResiliencePatternsTests:
     """Integration tests for WebSocket resilience patterns."""
 
     @pytest.mark.asyncio

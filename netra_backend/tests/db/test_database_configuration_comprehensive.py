@@ -39,7 +39,7 @@ from netra_backend.app.core.configuration.database import (
 )
 
 
-class TestDatabaseConfigManagerSSO:
+class DatabaseConfigManagerSSOTests:
     """Test Database Configuration Manager as Single Source of Truth for database settings."""
     
     @pytest.fixture
@@ -328,7 +328,7 @@ class TestDatabaseConfigManagerSSO:
             assert "No SSL" in log_call
 
 
-class TestDatabaseConfigurationModuleFunctions:
+class DatabaseConfigurationModuleFunctionsTests:
     """Test module-level database configuration functions for convenience interface."""
     
     @pytest.fixture
@@ -415,7 +415,7 @@ class TestDatabaseConfigurationModuleFunctions:
             mock_config_manager.populate_database_config.assert_called_with("staging")
 
 
-class TestDatabaseConfigurationEnvironmentHandling:
+class DatabaseConfigurationEnvironmentHandlingTests:
     """Test database configuration handling across different environments."""
     
     @pytest.mark.unit
@@ -548,7 +548,7 @@ class TestDatabaseConfigurationEnvironmentHandling:
             assert "prod" not in dev_url
 
 
-class TestDatabaseConfigurationBusinessScenarios:
+class DatabaseConfigurationBusinessScenariosTests:
     """Test business-critical database configuration scenarios for golden path validation."""
     
     @pytest.mark.unit

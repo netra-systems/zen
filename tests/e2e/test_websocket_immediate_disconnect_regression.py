@@ -24,7 +24,7 @@ from shared.isolated_environment import IsolatedEnvironment
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class TestWebSocketImmediateDisconnectRegression:
+class WebSocketImmediateDisconnectRegressionTests:
     """E2E tests to prevent regression of immediate disconnect bug."""
 
     @pytest.fixture
@@ -219,7 +219,7 @@ class TestWebSocketImmediateDisconnectRegression:
         assert second_connection_ok, 'Reconnection failed'
         logger.info('Both initial connection and reconnection successful')
 
-class TestWebSocketChatUIIntegration:
+class WebSocketChatUIIntegrationTests:
     """Test that the fix resolves the actual "Loading chat..." issue."""
 
     @pytest.mark.asyncio

@@ -29,7 +29,7 @@ import unittest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDeepAgentStateElimination(unittest.TestCase):
+class DeepAgentStateEliminationTests(unittest.TestCase):
     """Tests that validate complete DeepAgentState elimination from codebase."""
     
     def setUp(self):
@@ -479,7 +479,7 @@ class TestDeepAgentStateElimination(unittest.TestCase):
         return "\n".join(summary)
 
 
-class TestMigrationReadiness(SSotBaseTestCase):
+class MigrationReadinessTests(SSotBaseTestCase):
     """Tests that validate the codebase is ready for migration."""
     
     def test_userexecutioncontext_is_available(self):

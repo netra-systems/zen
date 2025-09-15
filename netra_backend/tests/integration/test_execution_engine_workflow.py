@@ -199,7 +199,7 @@ class MockAgentWebSocketBridge:
         return [event for event in all_events if event.get("run_id") == run_id]
 
 
-class TestExecutionEngineWorkflow(SSotAsyncTestCase):
+class ExecutionEngineWorkflowTests(SSotAsyncTestCase):
     """Integration tests for Execution Engine workflow patterns.
     
     Tests REAL component interactions without Docker dependencies.

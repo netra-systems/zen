@@ -4,35 +4,35 @@
 import pytest
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestConfigFileChecking:
+class ConfigFileCheckingTests:
     """Test class for config file checking."""
     
     def test_placeholder(self):
         """Placeholder test to make this discoverable by pytest."""
         assert True
 
-class TestConfigLoading:
+class ConfigLoadingTests:
     """Test class for config loading."""
     
     def test_placeholder(self):
         """Placeholder test to make this discoverable by pytest."""
         assert True
 
-class TestEndpointValidation:
+class EndpointValidationTests:
     """Test class for endpoint validation."""
     
     def test_placeholder(self):
         """Placeholder test to make this discoverable by pytest."""
         assert True
 
-class TestServiceConfigValidatorInit:
+class ServiceConfigValidatorInitTests:
     """Test class for service config validator initialization."""
     
     def test_placeholder(self):
         """Placeholder test to make this discoverable by pytest."""
         assert True
 
-class TestValidationWorkflow:
+class ValidationWorkflowTests:
     """Test class for validation workflow."""
     
     def test_placeholder(self):

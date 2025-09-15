@@ -100,7 +100,7 @@ GOLDEN_PATH_CONFIG = {
 }
 
 
-class TestWebSocketConnectionHandlerGoldenPath(SSotBaseTestCase):
+class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

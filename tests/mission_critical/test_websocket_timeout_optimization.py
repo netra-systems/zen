@@ -22,7 +22,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper
 from test_framework.websocket_helpers import WebSocketTestClient
 
 
-class TestWebSocketTimeoutOptimization:
+class WebSocketTimeoutOptimizationTests:
     """Test suite for WebSocket timeout optimization validation."""
     
     @pytest.mark.asyncio

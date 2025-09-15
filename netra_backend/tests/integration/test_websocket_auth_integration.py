@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
 from shared.isolated_environment import get_env
 
-class TestWebSocketAuthIntegration(SSotBaseTestCase):
+class WebSocketAuthIntegrationTests(SSotBaseTestCase):
     """
     CRITICAL Integration Tests for WebSocket Authentication
     
@@ -185,7 +185,7 @@ class TestWebSocketAuthIntegration(SSotBaseTestCase):
             has_rejection = any((keyword in error_msg.lower() for keyword in rejection_indicators))
             self.assertTrue(has_rejection, f'Should reject expired token: {error_msg}')
 
-class TestWebSocketAuthWithRealServices(SSotBaseTestCase):
+class WebSocketAuthWithRealServicesTests(SSotBaseTestCase):
     """
     Integration tests that require real service dependencies.
     

@@ -62,7 +62,7 @@ class FactoryAuditReport:
     detailed_findings: List[FactoryPattern] = field(default_factory=list)
 
 
-class TestFactoryPatternAudit(SSotBaseTestCase):
+class FactoryPatternAuditTests(SSotBaseTestCase):
     """
     Comprehensive factory pattern audit test.
 

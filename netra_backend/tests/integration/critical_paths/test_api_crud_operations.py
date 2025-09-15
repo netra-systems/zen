@@ -20,7 +20,7 @@ from netra_backend.app.config import get_config
 # Get settings instance
 settings = get_config()
 
-class TestAPICRUDOperationsL3:
+class APICRUDOperationsL3Tests:
     """Test API CRUD operation scenarios"""
 
     @pytest.mark.asyncio

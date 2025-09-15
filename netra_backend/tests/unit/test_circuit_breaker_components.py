@@ -25,7 +25,7 @@ from netra_backend.app.agents.base.circuit_breaker_components import (
 from netra_backend.app.core.circuit_breaker import CircuitConfig
 
 
-class TestCircuitBreakerConfig(SSotBaseTestCase):
+class CircuitBreakerConfigTests(SSotBaseTestCase):
     """Test circuit breaker configuration functionality."""
 
     @pytest.mark.unit
@@ -94,7 +94,7 @@ class TestCircuitBreakerConfig(SSotBaseTestCase):
         self.record_metric("config_conversion_accurate", True)
 
 
-class TestCircuitBreaker(SSotBaseTestCase):
+class CircuitBreakerTests(SSotBaseTestCase):
     """Test circuit breaker functionality."""
 
     def setup_method(self, method=None):

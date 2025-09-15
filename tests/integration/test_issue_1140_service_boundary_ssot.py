@@ -157,7 +157,7 @@ class FrontendWebSocketClient:
 @pytest.mark.integration
 @pytest.mark.staging_services
 @pytest.mark.issue_1140
-class TestIssue1140ServiceBoundarySSot(BaseE2ETest):
+class Issue1140ServiceBoundarySSotTests(BaseE2ETest):
     """Test service boundaries maintain SSOT WebSocket pattern."""
     
     def setup_method(self):

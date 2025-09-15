@@ -38,7 +38,7 @@ except ImportError:
     AsyncBaseTestCase = unittest.TestCase
 
 @pytest.mark.integration
-class TestUnifiedTestRunnerSSotFunctionality(BaseTestCase):
+class UnifiedTestRunnerSSotFunctionalityTests(BaseTestCase):
     """Integration tests for unified test runner SSOT functionality"""
 
     def setUp(self):
@@ -88,7 +88,7 @@ class TestUnifiedTestRunnerSSotFunctionality(BaseTestCase):
             self.fail(f'Orchestration status failed: {e}')
 
 @pytest.mark.integration
-class TestGoldenPathReliabilityBaseline(AsyncBaseTestCase):
+class GoldenPathReliabilityBaselineTests(AsyncBaseTestCase):
     """Integration tests to measure Golden Path reliability baseline"""
 
     async def test_golden_path_test_execution_reliability(self):
@@ -155,7 +155,7 @@ class TestGoldenPathReliabilityBaseline(AsyncBaseTestCase):
         self.assertGreaterEqual(integration_reliability, 90.0, f'INTEGRATION CRITICAL: Cross-service reliability {integration_reliability:.1f}% below 90% target. Unauthorized test runners causing service coordination chaos. Golden Path end-to-end flow compromised.')
 
 @pytest.mark.integration
-class TestBusinessCriticalTestScenarios(AsyncBaseTestCase):
+class BusinessCriticalTestScenariosTests(AsyncBaseTestCase):
     """Integration tests for business-critical test scenarios reliability"""
 
     async def test_chat_functionality_test_reliability(self):

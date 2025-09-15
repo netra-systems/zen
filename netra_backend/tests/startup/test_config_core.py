@@ -78,7 +78,7 @@ def mock_services_config() -> ServicesConfiguration:
     config.clickhouse = mock_clickhouse
     return config
 
-class TestConfigStatus:
+class ConfigStatusTests:
     """Test configuration status enumeration."""
 
     def test_config_status_values(self) -> None:
@@ -89,7 +89,7 @@ class TestConfigStatus:
         assert ConfigStatus.MISSING.value == 'missing'
         assert ConfigStatus.UNREACHABLE.value == 'unreachable'
 
-class TestConfigValidationResult:
+class ConfigValidationResultTests:
     """Test configuration validation result model."""
 
     def test_validation_result_creation(self) -> None:
@@ -107,7 +107,7 @@ class TestConfigValidationResult:
         assert len(result.warnings) == 1
         assert result.config_age_days == 45
 
-class TestValidationContext:
+class ValidationContextTests:
     """Test validation context dataclass."""
 
     def test_validation_context_defaults(self, temp_config_path: Path) -> None:

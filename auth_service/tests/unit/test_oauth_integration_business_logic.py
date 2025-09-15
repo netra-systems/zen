@@ -29,7 +29,7 @@ from auth_service.auth_core.oauth.oauth_validator import OAuthValidator
 # MockFactory not available - using standard unittest.mock instead
 
 
-class TestOAuthIntegrationBusinessLogic:
+class OAuthIntegrationBusinessLogicTests:
     """Test OAuth integration business logic patterns."""
     
     @pytest.fixture

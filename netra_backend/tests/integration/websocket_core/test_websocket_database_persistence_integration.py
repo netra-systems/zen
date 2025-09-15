@@ -26,7 +26,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 
-class TestWebSocketDatabasePersistenceIntegration(BaseIntegrationTest):
+class WebSocketDatabasePersistenceIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket database persistence."""
     
     @pytest.fixture

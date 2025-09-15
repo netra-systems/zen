@@ -26,7 +26,7 @@ from netra_backend.tests.helpers.tool_dispatcher_helpers import (
     verify_metadata,
 )
 
-class TestToolDispatcherAdvancedOperations:
+class ToolDispatcherAdvancedOperationsTests:
     """Test advanced dispatcher operations."""
     @pytest.mark.asyncio
     async def test_dispatch_tool_success(self):

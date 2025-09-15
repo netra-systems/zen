@@ -36,7 +36,7 @@ from netra_backend.app.services.user_auth_service import (
 )
 
 
-class TestUserAuthServiceClass:
+class UserAuthServiceClassTests:
     """Test UserAuthService class maintains backward compatibility."""
 
     @pytest.mark.asyncio
@@ -163,7 +163,7 @@ class TestUserAuthServiceClass:
             assert isinstance(result, dict)
 
 
-class TestLegacyFunctionAliases:
+class LegacyFunctionAliasesTests:
     """Test legacy function aliases maintain backward compatibility."""
 
     @pytest.mark.asyncio
@@ -244,7 +244,7 @@ class TestLegacyFunctionAliases:
         assert validate_params == class_validate_params
 
 
-class TestAuthClientIntegration:
+class AuthClientIntegrationTests:
     """Test integration with underlying auth_client."""
 
     def test_auth_client_instance_exists(self):
@@ -286,7 +286,7 @@ class TestAuthClientIntegration:
             mock_login.assert_called_once_with("user@example.com", "pass")
 
 
-class TestErrorHandlingAndEdgeCases:
+class ErrorHandlingAndEdgeCasesTests:
     """Test error handling and edge cases in backward compatibility."""
 
     @pytest.mark.asyncio
@@ -369,7 +369,7 @@ class TestErrorHandlingAndEdgeCases:
             mock_login.assert_called_once_with("test@example.com", "password")
 
 
-class TestLegacyResponseFormat:
+class LegacyResponseFormatTests:
     """Test that response formats match legacy expectations."""
 
     @pytest.mark.asyncio
@@ -455,7 +455,7 @@ class TestLegacyResponseFormat:
             assert result != {"valid": False}  # Should be None, not error dict
 
 
-class TestBackwardCompatibilityIntegration:
+class BackwardCompatibilityIntegrationTests:
     """Test complete backward compatibility with existing integrations."""
 
     @pytest.mark.asyncio
@@ -530,7 +530,7 @@ class TestBackwardCompatibilityIntegration:
             assert function_result is None
 
 
-class TestUserAuthServiceBusinessValueDelivery:
+class UserAuthServiceBusinessValueDeliveryTests:
     """Test that user_auth_service delivers expected business value."""
 
     @pytest.mark.asyncio

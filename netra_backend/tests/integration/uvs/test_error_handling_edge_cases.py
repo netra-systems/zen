@@ -43,7 +43,7 @@ from test_framework.user_execution_context_fixtures import realistic_user_contex
 from test_framework.isolated_environment_fixtures import isolated_env
 from shared.isolated_environment import get_env
 
-class TestContextValidationErrorHandlingAndRecovery(BaseIntegrationTest):
+class ContextValidationErrorHandlingAndRecoveryTests(BaseIntegrationTest):
     """Test suite for context validation error handling and recovery scenarios.
     
     BVJ: Validates system resilience when context validation fails, ensuring graceful
@@ -221,7 +221,7 @@ class TestContextValidationErrorHandlingAndRecovery(BaseIntegrationTest):
         final_test_context = root_context.create_child_context('final_validation_test', additional_agent_context={'test': 'system_recovery_validated'})
         assert final_test_context.agent_context['test'] == 'system_recovery_validated'
 
-class TestFactoryErrorHandlingAndResourceCleanup(BaseIntegrationTest):
+class FactoryErrorHandlingAndResourceCleanupTests(BaseIntegrationTest):
     """Test suite for factory error handling and resource cleanup scenarios.
     
     BVJ: Validates proper resource management under error conditions preventing
@@ -449,7 +449,7 @@ class TestFactoryErrorHandlingAndResourceCleanup(BaseIntegrationTest):
                 except asyncio.CancelledError:
                     pass
 
-class TestWebSocketErrorHandlingAndConnectionResilience(BaseIntegrationTest):
+class WebSocketErrorHandlingAndConnectionResilienceTests(BaseIntegrationTest):
     """Test suite for WebSocket error handling and connection resilience scenarios.
     
     BVJ: Validates WebSocket infrastructure resilience ensuring real-time chat
@@ -683,7 +683,7 @@ class TestWebSocketErrorHandlingAndConnectionResilience(BaseIntegrationTest):
         assert engine.context.websocket_client_id == reconnected_engine.context.websocket_client_id
         assert engine.context.run_id != reconnected_engine.context.run_id
 
-class TestConcurrentOperationErrorHandlingAndIsolation(BaseIntegrationTest):
+class ConcurrentOperationErrorHandlingAndIsolationTests(BaseIntegrationTest):
     """Test suite for concurrent operation error handling and isolation scenarios.
     
     BVJ: Validates system stability under concurrent load and ensures proper
@@ -1009,7 +1009,7 @@ class TestConcurrentOperationErrorHandlingAndIsolation(BaseIntegrationTest):
                 assert ctx.operation_depth >= 1
         self.logger.info(f"Deadlock prevention test - Successes: {len(successes)}, Errors: {len(errors)}, Max duration: {max([r.get('duration', 0) for r in deadlock_test_results]):.3f}s")
 
-class TestSystemBoundaryAndResourceLimitErrorHandling(BaseIntegrationTest):
+class SystemBoundaryAndResourceLimitErrorHandlingTests(BaseIntegrationTest):
     """Test suite for system boundary and resource limit error handling scenarios.
     
     BVJ: Validates system behavior at operational limits and ensures graceful

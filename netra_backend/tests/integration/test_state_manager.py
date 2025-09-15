@@ -242,7 +242,7 @@ class MockStateManager(StateManager):
         """Get cache statistics."""
         return {'total_operations': self.operation_count, 'cache_hits': self.cache_hits, 'cache_misses': self.cache_misses, 'cache_hit_rate': self.cache_hits / max(self.operation_count, 1), 'in_memory_entries': len(self.in_memory_cache), 'redis_enabled': self.redis_manager is not None, 'database_enabled': self.db_session is not None}
 
-class TestStateManager(BaseIntegrationTest):
+class StateManagerTests(BaseIntegrationTest):
     """Integration tests for state manager with real services."""
 
     def setup_method(self):

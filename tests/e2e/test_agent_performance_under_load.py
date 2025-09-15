@@ -93,7 +93,7 @@ class LoadTestResults:
             self.min_response_time = min(response_times)
         self.total_events_received = sum((len(m.events_received) for m in user_metrics))
 
-class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
+class AgentPerformanceUnderLoadE2ETests(BaseE2ETest):
     """
     E2E test for agent performance under concurrent user load.
     

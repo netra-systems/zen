@@ -40,7 +40,7 @@ def scaling_analysis_setup(real_llm_manager, real_websocket_manager, real_tool_d
     return {"agents": agents, "llm_manager": real_llm_manager, "websocket_manager": real_websocket_manager}
 
 @pytest.mark.e2e
-class TestScalingWorkflowIntegrity:
+class ScalingWorkflowIntegrityTests:
     """Test integrity of complete scaling analysis workflows."""
     
     @pytest.mark.e2e

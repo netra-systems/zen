@@ -134,7 +134,7 @@ def create_admin_user_context(user_id: str='admin_user_123', run_id: str=None) -
     metadata = {'roles': ['admin'], 'permissions': ['admin_tools', 'corpus_admin', 'user_admin']}
     return create_user_context(user_id=user_id, run_id=run_id, metadata=metadata)
 
-class TestFactoryPatternSecurity:
+class FactoryPatternSecurityTests:
     """Test factory pattern security and enforcement."""
 
     def test_direct_instantiation_forbidden(self):
@@ -181,7 +181,7 @@ class TestFactoryPatternSecurity:
         await dispatcher1.cleanup()
         await dispatcher2.cleanup()
 
-class TestEdgeCasesAndErrorConditions:
+class EdgeCasesAndErrorConditionsTests:
     """Test edge cases and error conditions."""
 
     @pytest.mark.asyncio
@@ -270,7 +270,7 @@ class TestEdgeCasesAndErrorConditions:
         assert dispatcher.has_tool('tool-with_special.chars')
         await dispatcher.cleanup()
 
-class TestWebSocketIntegrationEdgeCases:
+class WebSocketIntegrationEdgeCasesTests:
     """Test WebSocket integration edge cases."""
 
     @pytest.mark.asyncio
@@ -348,7 +348,7 @@ class TestWebSocketIntegrationEdgeCases:
             assert field in completed_data, f'Missing required field: {field}'
         await dispatcher.cleanup()
 
-class TestPermissionAndSecurity:
+class PermissionAndSecurityTests:
     """Test permission validation and security boundaries."""
 
     @pytest.mark.asyncio
@@ -419,7 +419,7 @@ class TestPermissionAndSecurity:
                 assert mock_executor.execute_tool_with_input.call_count == 0
             await dispatcher.cleanup()
 
-class TestLifecycleAndCleanup:
+class LifecycleAndCleanupTests:
     """Test dispatcher lifecycle and cleanup behavior."""
 
     @pytest.mark.asyncio
@@ -475,7 +475,7 @@ class TestLifecycleAndCleanup:
         assert len(UnifiedToolDispatcher._active_dispatchers) == initial_count
         assert dispatcher.dispatcher_id not in UnifiedToolDispatcher._active_dispatchers
 
-class TestPerformanceAndStress:
+class PerformanceAndStressTests:
     """Test performance characteristics and stress scenarios."""
 
     @pytest.mark.asyncio
@@ -530,7 +530,7 @@ class TestPerformanceAndStress:
         assert metrics['permission_checks'] >= 10
         await dispatcher.cleanup()
 
-class TestLegacyCompatibility:
+class LegacyCompatibilityTests:
     """Test legacy compatibility methods and deprecation warnings."""
 
     def test_legacy_global_factory_deprecation_warning(self):
@@ -582,7 +582,7 @@ class TestLegacyCompatibility:
         await dispatcher1.cleanup()
         await dispatcher2.cleanup()
 
-class TestContextManagers:
+class ContextManagersTests:
     """Test context manager functionality."""
 
     @pytest.mark.asyncio

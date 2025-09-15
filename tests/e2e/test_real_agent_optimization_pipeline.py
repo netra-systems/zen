@@ -315,7 +315,7 @@ class RealOptimizationPipelineE2ETest(BaseE2ETest):
         )
 
 
-class TestRealOptimizationPipeline(RealOptimizationPipelineE2ETest):
+class RealOptimizationPipelineTests(RealOptimizationPipelineE2ETest):
     """Test suite for real optimization pipeline flows."""
     
     @pytest.mark.e2e
@@ -623,7 +623,7 @@ if __name__ == "__main__":
     async def run_direct_tests():
         logger.info("Starting real optimization pipeline E2E tests...")
         
-        test_instance = TestRealOptimizationPipeline()
+        test_instance = RealOptimizationPipelineTests()
         
         try:
             # Mock real_services_fixture for direct testing

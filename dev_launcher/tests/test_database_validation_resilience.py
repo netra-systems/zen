@@ -13,7 +13,7 @@ from dev_launcher.launcher import DevLauncher
 from dev_launcher.config import LauncherConfig
 from dev_launcher.network_resilience import NetworkResilientClient, RetryPolicy
 
-class TestDatabaseValidationResilience:
+class DatabaseValidationResilienceTests:
     """Test cases for database validation with network resilience."""
 
     @pytest.fixture
@@ -173,7 +173,7 @@ class TestDatabaseValidationResilience:
             assert any(('Clickhouse connection validated' in m[2] for m in success_messages))
             assert any(('Redis connection failed' in m[2] for m in warning_messages))
 
-class TestDatabaseConnectionErrorMessages:
+class DatabaseConnectionErrorMessagesTests:
     """Test that error messages are consistent and informative."""
 
     @pytest.mark.asyncio

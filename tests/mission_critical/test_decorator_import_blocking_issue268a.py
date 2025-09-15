@@ -20,7 +20,7 @@ from typing import List, Dict, Any
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDecoratorImportBlockingIssue268A(SSotBaseTestCase):
+class DecoratorImportBlockingIssue268ATests(SSotBaseTestCase):
     """
     MISSION CRITICAL: Test that reproduces and validates fix for decorator import issue.
     
@@ -189,7 +189,7 @@ class TestDecoratorImportBlockingIssue268A(SSotBaseTestCase):
             self.fail(f"Package interface missing decorators: {missing_from_package}")
 
 
-class TestPostFixValidation(SSotBaseTestCase):
+class PostFixValidationTests(SSotBaseTestCase):
     """
     POST-FIX VALIDATION: Tests that run AFTER the fix to validate success.
     """

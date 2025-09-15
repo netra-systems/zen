@@ -406,7 +406,7 @@ async def first_time_user_tester():
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.mission_critical
-class TestRealFirstTimeUserExperience:
+class RealFirstTimeUserExperienceTests:
     """Comprehensive E2E test suite for first-time user experience."""
 
     async def test_complete_first_time_user_journey(self, first_time_user_tester):

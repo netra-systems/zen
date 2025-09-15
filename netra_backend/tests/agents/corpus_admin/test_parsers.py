@@ -7,7 +7,7 @@ Business Value: Revenue-critical component
 import pytest
 from netra_backend.app.agents.corpus_admin.parsers import CorpusRequestParser
 
-class TestCorpusRequestParser:
+class CorpusRequestParserTests:
     """Test suite for CorpusRequestParser"""
 
     @pytest.fixture

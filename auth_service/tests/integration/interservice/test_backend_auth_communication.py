@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import BaseTestCase
 from shared.isolated_environment import get_env
 
 
-class TestAuthServiceBackendCommunication(BaseTestCase):
+class AuthServiceBackendCommunicationTests(BaseTestCase):
     """Integration tests for Auth Service -> Backend communication patterns."""
     
     @pytest.mark.integration

@@ -86,7 +86,7 @@ class EventDeliveryTest:
     headers: Dict[str, str] = field(default_factory=dict)
 
 
-class TestWebSocketEventsAllAuthModes(SSotBaseTestCase):
+class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
     """
     Mission critical tests for WebSocket event delivery with all auth modes.
     
@@ -848,7 +848,7 @@ class TestWebSocketEventsAllAuthModes(SSotBaseTestCase):
         await super().asyncTearDown()
 
 
-class TestWebSocketEventResilience(SSotBaseTestCase):
+class WebSocketEventResilienceTests(SSotBaseTestCase):
     """Test WebSocket event delivery resilience across auth failures."""
     
     async def test_events_persist_through_auth_degradation(self):

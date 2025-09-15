@@ -64,7 +64,7 @@ from netra_backend.app.smd import (
 )
 
 
-class TestStartupPhaseEnum(BaseTestCase):
+class StartupPhaseEnumTests(BaseTestCase):
     """Test StartupPhase enum defines correct business-critical phases."""
     
     def test_startup_phases_cover_all_business_requirements(self):
@@ -119,7 +119,7 @@ class TestStartupPhaseEnum(BaseTestCase):
         )
 
 
-class TestDeterministicStartupError(BaseTestCase):
+class DeterministicStartupErrorTests(BaseTestCase):
     """Test DeterministicStartupError provides proper business context."""
     
     def test_deterministic_startup_error_inheritance(self):
@@ -149,7 +149,7 @@ class TestDeterministicStartupError(BaseTestCase):
                 )
 
 
-class TestStartupOrchestrator(BaseTestCase):
+class StartupOrchestratorTests(BaseTestCase):
     """Test StartupOrchestrator manages deterministic startup with business validation."""
     
     REQUIRES_DATABASE = False  # Unit tests mock database  
@@ -365,7 +365,7 @@ class TestStartupOrchestrator(BaseTestCase):
         self.assertIn("failed", error_context.lower())
 
 
-class TestDeterministicStartupPhases(BaseTestCase):
+class DeterministicStartupPhasesTests(BaseTestCase):
     """Test each phase of deterministic startup for business requirements."""
     
     REQUIRES_DATABASE = False
@@ -618,7 +618,7 @@ class TestDeterministicStartupPhases(BaseTestCase):
             mock_monitoring.assert_called_once()
 
 
-class TestDeterministicStartupIntegration(BaseTestCase):
+class DeterministicStartupIntegrationTests(BaseTestCase):
     """Test complete deterministic startup integration for business scenarios."""
     
     REQUIRES_DATABASE = False
@@ -754,7 +754,7 @@ class TestDeterministicStartupIntegration(BaseTestCase):
         super().tearDown()
 
 
-class TestBusinessCriticalValidation(BaseTestCase):
+class BusinessCriticalValidationTests(BaseTestCase):
     """Test business-critical validation patterns in deterministic startup."""
     
     def test_startup_phase_enum_business_completeness(self):

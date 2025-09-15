@@ -20,7 +20,7 @@ from typing import Dict, Any, Tuple
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestTokenRefreshFlowIntegration(SSotBaseTestCase):
+class TokenRefreshFlowIntegrationTests(SSotBaseTestCase):
     """Integration tests for token refresh flow with real auth service."""
     
     def setup_method(self, method=None):

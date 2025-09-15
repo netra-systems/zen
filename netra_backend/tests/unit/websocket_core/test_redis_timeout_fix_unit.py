@@ -36,7 +36,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import (
 )
 
 
-class TestRedisTimeoutFixUnit(SSotAsyncTestCase):
+class RedisTimeoutFixUnitTests(SSotAsyncTestCase):
     """
     Unit tests for Redis timeout configuration in GCP WebSocket validator.
     

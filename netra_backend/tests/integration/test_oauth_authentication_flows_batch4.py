@@ -27,7 +27,7 @@ from netra_backend.app.services.unified_authentication_service import UnifiedAut
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
-class TestOAuthFlowsIntegrationBatch4(SSotAsyncTestCase):
+class OAuthFlowsIntegrationBatch4Tests(SSotAsyncTestCase):
     """
     OAuth authentication flows integration tests with real services.
     
@@ -298,7 +298,7 @@ class TestOAuthFlowsIntegrationBatch4(SSotAsyncTestCase):
             payload['hd'] = hosted_domain
         return jwt.encode(payload, 'mock_google_secret', algorithm='HS256')
 
-class TestAuthServiceClientIntegrationBatch4(SSotAsyncTestCase):
+class AuthServiceClientIntegrationBatch4Tests(SSotAsyncTestCase):
     """
     Auth Service Client integration tests with real auth service.
     

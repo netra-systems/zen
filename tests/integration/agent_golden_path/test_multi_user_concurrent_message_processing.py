@@ -86,7 +86,7 @@ class ConcurrentExecutionResult:
     errors: List[str]
     isolation_verified: bool
 
-class TestMultiUserConcurrentMessageProcessing(SSotAsyncTestCase):
+class MultiUserConcurrentMessageProcessingTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Multi-User Concurrent Agent Message Processing.
 

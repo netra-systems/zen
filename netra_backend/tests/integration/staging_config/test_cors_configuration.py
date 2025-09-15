@@ -19,7 +19,7 @@ import httpx
 
 from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
-class TestCORSConfiguration(StagingConfigTestBase):
+class CORSConfigurationTests(StagingConfigTestBase):
     """Test CORS configuration in staging."""
 
     @pytest.mark.asyncio

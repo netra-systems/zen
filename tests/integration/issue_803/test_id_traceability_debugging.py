@@ -34,7 +34,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.integration
-class TestIssue803IDTraceabilityDebugging(SSotAsyncTestCase):
+class Issue803IDTraceabilityDebuggingTests(SSotAsyncTestCase):
     """Integration tests for ID traceability debugging and analysis."""
 
     async def asyncSetUp(self):

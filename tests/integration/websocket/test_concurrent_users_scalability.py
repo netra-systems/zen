@@ -74,7 +74,7 @@ class ScalabilityTestLLM:
             self.concurrent_calls -= 1
 
 
-class TestConcurrentUsersScalability(BaseIntegrationTest):
+class ConcurrentUsersScalabilityTests(BaseIntegrationTest):
     """
     Scalability tests for concurrent WebSocket user scenarios.
     

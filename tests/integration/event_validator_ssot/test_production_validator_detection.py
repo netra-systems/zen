@@ -57,7 +57,7 @@ except ImportError as e:
     websocket_manager_import_error = str(e)
 
 @pytest.mark.integration
-class TestProductionValidatorDetection(SSotAsyncTestCase):
+class ProductionValidatorDetectionTests(SSotAsyncTestCase):
     """
     Integration tests for production EventValidator detection and analysis.
     

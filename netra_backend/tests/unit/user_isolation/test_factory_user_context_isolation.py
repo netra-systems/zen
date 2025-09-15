@@ -39,7 +39,7 @@ class IsolationTestContext:
     shared_state_violations: List[str]
     isolation_verified: bool = False
 
-class TestFactoryUserContextIsolation(SSotBaseTestCase):
+class FactoryUserContextIsolationTests(SSotBaseTestCase):
     """Test Factory Pattern ensures complete user context isolation."""
 
     def setup_method(self):

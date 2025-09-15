@@ -24,7 +24,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.gcp_staging
-class TestUnifiedIdManagerWebSocketE2E(SSotBaseTestCase):
+class UnifiedIdManagerWebSocketE2ETests(SSotBaseTestCase):
     """
     End-to-end validation of UnifiedIDManager in complete WebSocket workflows.
 

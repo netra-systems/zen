@@ -37,7 +37,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 
 
-class TestWebSocketBridgeSSoTIntegration(SSotAsyncTestCase):
+class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
     """Critical P0 tests protecting $500K+ ARR WebSocket functionality during SSOT consolidation"""
     
     def setUp(self):

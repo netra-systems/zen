@@ -46,7 +46,7 @@ class ImportPatternViolation:
     recommended_replacement: str
 
 
-class TestSSOTImportPatternViolations(SSotBaseTestCase):
+class SSOTImportPatternViolationsTests(SSotBaseTestCase):
     """
     Mission Critical test suite to detect and validate SSOT import compliance.
     

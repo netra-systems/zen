@@ -112,7 +112,7 @@ class MockLLMManager:
         return {'content': 'Mock LLM response', 'usage': {'total_tokens': 100}}
 
 @pytest.mark.integration
-class TestAgentRegistryUserIsolationIntegration(SSotAsyncTestCase):
+class AgentRegistryUserIsolationIntegrationTests(SSotAsyncTestCase):
     """Integration tests for AgentRegistry user isolation and factory patterns.
     
     CRITICAL: Tests Enterprise customer isolation ($15K+ MRR protection)

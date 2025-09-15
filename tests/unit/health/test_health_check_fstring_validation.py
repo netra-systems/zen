@@ -13,7 +13,7 @@ from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestHealthCheckFStringValidation(SSotAsyncTestCase):
+class HealthCheckFStringValidationTests(SSotAsyncTestCase):
     """Test suite for health check f-string validation - Issue #894."""
 
     def test_health_check_fstring_syntax_validation(self):

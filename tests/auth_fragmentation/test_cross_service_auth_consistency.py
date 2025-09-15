@@ -38,7 +38,7 @@ class AuthServiceTestScenario:
     expected_error: Optional[str]
     auth_service_response: Dict[str, Any]
 
-class TestCrossServiceAuthenticationConsistency(SSotAsyncTestCase):
+class CrossServiceAuthenticationConsistencyTests(SSotAsyncTestCase):
     """
     Test cross-service authentication consistency.
 
@@ -203,7 +203,7 @@ class TestCrossServiceAuthenticationConsistency(SSotAsyncTestCase):
             assert time_ratio < 10, f'Performance inconsistent: {time_ratio:.1f}x variation'
         logger.info(f'✅ Authentication performance consistent: {avg_time:.3f}s average, {time_ratio:.1f}x variation')
 
-class TestCrossServiceAuthenticationFragmentationDetection(SSotAsyncTestCase):
+class CrossServiceAuthenticationFragmentationDetectionTests(SSotAsyncTestCase):
     """
     Test suite to detect cross-service authentication fragmentation.
 

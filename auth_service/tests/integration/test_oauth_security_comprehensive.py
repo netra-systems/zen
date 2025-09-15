@@ -53,7 +53,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestOAuthSecurityComprehensive(SSotBaseTestCase):
+class OAuthSecurityComprehensiveTests(SSotBaseTestCase):
     """
     OAuth Provider Integration and Security Validation Tests.
     

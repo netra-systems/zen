@@ -99,7 +99,7 @@ def sample_tool():
     """Provide sample mock tool."""
     return MockTool('test-tool')
 
-class TestRegistryItem:
+class RegistryItemTests:
     """Test RegistryItem data class."""
 
     def test_registry_item_creation(self):
@@ -135,7 +135,7 @@ class TestRegistryItem:
         assert item.access_count == 2
         assert item.last_accessed > first_access
 
-class TestUniversalRegistryCore:
+class UniversalRegistryCoreTests:
     """Test core UniversalRegistry functionality."""
 
     def test_registry_initialization(self):
@@ -300,7 +300,7 @@ class TestUniversalRegistryCore:
         assert len(registry.list_by_tag('utility')) == 0
         assert registry.list_keys() == []
 
-class TestUniversalRegistryFrozen:
+class UniversalRegistryFrozenTests:
     """Test registry frozen state functionality."""
 
     def test_freeze_registry(self, sample_agent):
@@ -333,7 +333,7 @@ class TestUniversalRegistryFrozen:
         registry.freeze()
         assert registry.is_frozen()
 
-class TestUniversalRegistryValidation:
+class UniversalRegistryValidationTests:
     """Test validation functionality."""
 
     def test_add_validation_handler(self, sample_agent):
@@ -390,7 +390,7 @@ class TestUniversalRegistryValidation:
         updated_metrics = registry.get_metrics()
         assert updated_metrics['metrics']['validation_failures'] == 1
 
-class TestUniversalRegistryMetrics:
+class UniversalRegistryMetricsTests:
     """Test metrics and health functionality."""
 
     def test_get_metrics(self, sample_agent, mock_context):
@@ -491,7 +491,7 @@ class TestUniversalRegistryMetrics:
         assert health['status'] == 'degraded'
         assert any(('High failure rate: 20.0%' in issue for issue in health['issues']))
 
-class TestUniversalRegistryConfiguration:
+class UniversalRegistryConfigurationTests:
     """Test configuration loading functionality."""
 
     def test_load_from_config_basic(self):
@@ -508,7 +508,7 @@ class TestUniversalRegistryConfiguration:
         with pytest.raises(RuntimeError, match="Registry 'TestRegistry' is frozen"):
             registry.load_from_config({})
 
-class TestUniversalRegistrySpecialMethods:
+class UniversalRegistrySpecialMethodsTests:
     """Test special methods (__len__, __contains__, __repr__)."""
 
     def test_len(self, sample_agent, sample_tool):
@@ -546,7 +546,7 @@ class TestUniversalRegistrySpecialMethods:
         assert '1 items' in repr_str
         assert 'frozen' in repr_str
 
-class TestUniversalRegistryThreadSafety:
+class UniversalRegistryThreadSafetyTests:
     """Test thread safety for multi-user scenarios."""
 
     def test_concurrent_registration(self):
@@ -742,7 +742,7 @@ class TestUniversalRegistryThreadSafety:
         metrics = registry.get_metrics()
         assert metrics['metrics']['validation_failures'] == len(validation_failures)
 
-class TestAgentRegistry:
+class AgentRegistryTests:
     """Test AgentRegistry specialized functionality."""
 
     def test_agent_registry_initialization(self):
@@ -974,7 +974,7 @@ class TestAgentRegistry:
             registry.set_websocket_manager(mock_manager)
             mock_enhance_func.assert_called_once_with(real_dispatcher, websocket_manager=mock_manager, enable_notifications=True)
 
-class TestOtherSpecializedRegistries:
+class OtherSpecializedRegistriesTests:
     """Test other specialized registry classes."""
 
     def test_tool_registry_initialization(self):
@@ -1003,7 +1003,7 @@ class TestOtherSpecializedRegistries:
         registry = StrategyRegistry()
         assert registry.name == 'StrategyRegistry'
 
-class TestGlobalRegistryManagement:
+class GlobalRegistryManagementTests:
     """Test global registry management functions."""
 
     def test_get_global_registry_agent(self, clean_global_registries):
@@ -1092,7 +1092,7 @@ class TestGlobalRegistryManagement:
         assert isinstance(registry, UniversalRegistry)
         assert registry.name == 'custom_test-scope'
 
-class TestUniversalRegistryEdgeCases:
+class UniversalRegistryEdgeCasesTests:
     """Test edge cases and error conditions."""
 
     def test_empty_key_registration(self, sample_agent):
@@ -1350,7 +1350,7 @@ class TestUniversalRegistryEdgeCases:
         assert first_result[2] == 10
         assert first_result[3] == 4
 
-class TestUniversalRegistrySystemIntegration:
+class UniversalRegistrySystemIntegrationTests:
     """Test integration with broader system components."""
 
     def test_multiple_registries_isolation(self):

@@ -59,7 +59,7 @@ from unittest.mock import MagicMock, AsyncMock, Mock, patch
 
 import pytest
 
-class TestAPIErrorHandlingCritical:
+class APIErrorHandlingCriticalTests:
     """Critical API error handling tests."""
     @pytest.mark.asyncio
     async def test_bad_request_error(self):

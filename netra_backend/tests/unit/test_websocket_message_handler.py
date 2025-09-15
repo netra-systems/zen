@@ -29,7 +29,7 @@ from netra_backend.app.core.websocket_recovery_types import MessageState
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestWebSocketMessageHandler(BaseIntegrationTest):
+class WebSocketMessageHandlerTests(BaseIntegrationTest):
     """Comprehensive test suite for WebSocketMessageHandler."""
     
     @pytest.fixture

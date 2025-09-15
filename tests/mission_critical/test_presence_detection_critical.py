@@ -129,7 +129,7 @@ async def critical_heartbeat_manager(critical_heartbeat_config):
     await manager.stop()
 
 
-class TestPresenceDetectionCritical:
+class PresenceDetectionCriticalTests:
     """Mission-critical tests that MUST pass."""
     
     @pytest.mark.critical
@@ -466,7 +466,7 @@ class TestPresenceDetectionCritical:
         logger.info("[U+2713] CRITICAL TEST PASSED: UI presence accuracy")
 
 
-class TestPresenceFailureRecovery:
+class PresenceFailureRecoveryTests:
     """Test recovery from various failure modes."""
     
     @pytest.mark.critical

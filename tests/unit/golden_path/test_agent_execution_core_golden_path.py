@@ -55,7 +55,7 @@ from shared.logging.unified_logging_ssot import get_logger
 from shared.isolated_environment import get_env
 logger = get_logger(__name__)
 
-class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
+class AgentExecutionCoreGoldenPathTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for agent execution core in the golden path.
     

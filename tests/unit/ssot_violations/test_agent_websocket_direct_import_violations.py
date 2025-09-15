@@ -28,7 +28,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestAgentWebSocketDirectImportViolations(SSotBaseTestCase):
+class AgentWebSocketDirectImportViolationsTests(SSotBaseTestCase):
     """
     Test suite for detecting direct WebSocketManager imports in agent files.
     

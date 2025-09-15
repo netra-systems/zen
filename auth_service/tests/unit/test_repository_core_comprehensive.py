@@ -72,7 +72,7 @@ async def unified_repo(db_session):
     return AuthRepository(db_session)
 
 
-class TestAuthUserRepositoryCore:
+class AuthUserRepositoryCoreTests:
     """Test core AuthUserRepository functionality with real database operations"""
     
     @pytest.mark.asyncio
@@ -159,7 +159,7 @@ class TestAuthUserRepositoryCore:
             assert result is None, f"Should return None for invalid ID: {invalid_id}"
 
 
-class TestAuthUserRepositoryOAuthUserCreation:
+class AuthUserRepositoryOAuthUserCreationTests:
     """Test OAuth user creation with race condition protection"""
     
     @pytest.mark.asyncio
@@ -289,7 +289,7 @@ class TestAuthUserRepositoryOAuthUserCreation:
             assert final_user is not None, "User should exist in database"
 
 
-class TestAuthUserRepositoryLocalUserCreation:
+class AuthUserRepositoryLocalUserCreationTests:
     """Test local user creation with validation"""
     
     @pytest.mark.asyncio
@@ -344,7 +344,7 @@ class TestAuthUserRepositoryLocalUserCreation:
             await user_repo.create_local_user(test_email, "", "Empty Password User")
 
 
-class TestAuthUserRepositoryAccountLocking:
+class AuthUserRepositoryAccountLockingTests:
     """Test account locking mechanism"""
     
     @pytest.mark.asyncio
@@ -515,7 +515,7 @@ class TestAuthUserRepositoryAccountLocking:
         assert is_locked is False
 
 
-class TestAuthUserRepositoryUpdateOperations:
+class AuthUserRepositoryUpdateOperationsTests:
     """Test user update operations"""
     
     @pytest.mark.asyncio
@@ -558,7 +558,7 @@ class TestAuthUserRepositoryUpdateOperations:
         await user_repo.update_login_time(nonexistent_id)
 
 
-class TestAuthSessionRepositoryCore:
+class AuthSessionRepositoryCoreTests:
     """Test core AuthSessionRepository functionality"""
     
     @pytest.mark.asyncio
@@ -711,7 +711,7 @@ class TestAuthSessionRepositoryCore:
         assert result is None  # Should be cleaned up
 
 
-class TestAuthAuditRepositoryCore:
+class AuthAuditRepositoryCoreTests:
     """Test core AuthAuditRepository functionality"""
     
     @pytest.mark.asyncio
@@ -789,7 +789,7 @@ class TestAuthAuditRepositoryCore:
         assert len(events) == 3
 
 
-class TestUnifiedAuthRepository:
+class UnifiedAuthRepositoryTests:
     """Test unified AuthRepository that delegates to specific repositories"""
     
     @pytest.mark.asyncio
@@ -830,7 +830,7 @@ class TestUnifiedAuthRepository:
         assert retrieved_session.client_info == client_info
 
 
-class TestRepositoryConcurrencyAndRaceConditions:
+class RepositoryConcurrencyAndRaceConditionsTests:
     """Test concurrent operations and race condition handling"""
     
     @pytest.mark.asyncio
@@ -904,7 +904,7 @@ class TestRepositoryConcurrencyAndRaceConditions:
             assert 1 <= final_user.failed_login_attempts <= 3
 
 
-class TestRepositoryBoundaryConditionsAndErrorHandling:
+class RepositoryBoundaryConditionsAndErrorHandlingTests:
     """Test boundary conditions and error handling"""
     
     @pytest.mark.asyncio

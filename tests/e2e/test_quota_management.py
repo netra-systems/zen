@@ -25,7 +25,7 @@ from tests.e2e.quota_management_helpers import (
 
 
 @pytest.mark.e2e
-class TestQuotaEnforcement:
+class QuotaEnforcementTests:
     """Test core quota enforcement across all tiers."""
 
     @pytest.mark.asyncio
@@ -82,7 +82,7 @@ class TestQuotaEnforcement:
 
 
 @pytest.mark.e2e
-class TestRateLimiting:
+class RateLimitingTests:
     """Test rate limiting enforcement."""
 
     @pytest.mark.asyncio
@@ -110,7 +110,7 @@ class TestRateLimiting:
 
 
 @pytest.mark.e2e
-class TestQuotaResets:
+class QuotaResetsTests:
     """Test quota reset functionality."""
 
     @pytest.mark.asyncio
@@ -140,7 +140,7 @@ class TestQuotaResets:
 
 
 @pytest.mark.e2e
-class TestOverageNotifications:
+class OverageNotificationsTests:
     """Test overage notification system."""
 
     @pytest.mark.asyncio
@@ -169,7 +169,7 @@ class TestOverageNotifications:
 
 
 @pytest.mark.e2e
-class TestFairUsageValidation:
+class FairUsageValidationTests:
     """Test fair usage enforcement across platform."""
 
     @pytest.mark.asyncio
@@ -246,7 +246,7 @@ class TestFairUsageValidation:
 
 
 @pytest.mark.e2e
-class TestQuotaIntegration:
+class QuotaIntegrationTests:
     """Test integrated quota management scenarios."""
 
     @pytest.mark.asyncio

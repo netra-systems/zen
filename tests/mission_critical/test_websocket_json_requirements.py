@@ -40,7 +40,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketJSONRequirements:
+class WebSocketJSONRequirementsTests:
     """Test specific requirements for WebSocket JSON handling."""
 
     @pytest.fixture

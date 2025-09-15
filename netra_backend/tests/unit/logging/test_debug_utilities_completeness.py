@@ -29,7 +29,7 @@ from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.logging.auth_trace_logger import AuthTraceLogger, AuthTraceContext
 
 
-class TestDebugUtilitiesCompleteness(SSotBaseTestCase):
+class DebugUtilitiesCompletenessTests(SSotBaseTestCase):
     """Test that debug utilities provide complete information for production debugging."""
     
     def setup_method(self, method=None):

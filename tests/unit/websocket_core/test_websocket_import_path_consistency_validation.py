@@ -24,7 +24,7 @@ from pathlib import Path
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestWebSocketImportPathConsistencyValidation(BaseIntegrationTest):
+class WebSocketImportPathConsistencyValidationTests(BaseIntegrationTest):
     """Test WebSocket import path consistency for SSOT validation."""
 
     def setUp(self):

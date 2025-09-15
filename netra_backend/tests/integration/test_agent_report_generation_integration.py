@@ -82,7 +82,7 @@ class BusinessValueReportValidator:
         return True
 
 
-class TestAgentReportGeneration(BaseIntegrationTest):
+class AgentReportGenerationTests(BaseIntegrationTest):
     """Test agent report generation with real services."""
     
     @pytest.mark.integration

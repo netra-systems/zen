@@ -53,7 +53,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 @pytest.mark.mission_critical
 @pytest.mark.golden_path
 @pytest.mark.sla_critical
-class TestWebSocketEventSLACompliance(BaseE2ETest):
+class WebSocketEventSLAComplianceTests(BaseE2ETest):
     """
     Test WebSocket event delivery SLA compliance in GCP staging.
     

@@ -99,7 +99,7 @@ class AgentLoadSimulator:
         """Execute mock agent operation."""
         await asyncio.sleep(0.01 + 0.02 * len(request_data.get('tools', [])))
 
-class TestAgentLoadScenarios:
+class AgentLoadScenariosTests:
     """Load test scenarios for agent system."""
 
     @pytest.mark.performance
@@ -236,7 +236,7 @@ class TestAgentLoadScenarios:
         except Exception as e:
             metrics.record_error(type(e).__name__)
 
-class TestAgentStressScenarios:
+class AgentStressScenariosTests:
     """Stress test scenarios pushing system beyond limits."""
 
     @pytest.mark.performance

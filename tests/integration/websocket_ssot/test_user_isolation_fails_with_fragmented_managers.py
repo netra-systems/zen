@@ -33,7 +33,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestUserIsolationFailsWithFragmentedManagers(SSotAsyncTestCase):
+class UserIsolationFailsWithFragmentedManagersTests(SSotAsyncTestCase):
     """Phase 1 Reproduction Test: Prove user isolation fails with fragmented managers."""
     
     def setup_method(self, method):

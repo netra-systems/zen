@@ -26,7 +26,7 @@ from fastapi.websockets import WebSocketState
 from netra_backend.app.logging_config import central_logger
 
 
-class TestWebSocketStateJSONSerialization(SSotAsyncTestCase):
+class WebSocketStateJSONSerializationTests(SSotAsyncTestCase):
     """Critical tests for WebSocket state JSON serialization safety."""
     
     def setUp(self):
@@ -151,7 +151,7 @@ class TestWebSocketStateJSONSerialization(SSotAsyncTestCase):
         json.dumps(log_entry)
 
 
-class TestWebSocketStateLoggingIntegration(unittest.IsolatedAsyncioTestCase):
+class WebSocketStateLoggingIntegrationTests(unittest.IsolatedAsyncioTestCase):
     """Integration tests for WebSocket state logging in real scenarios."""
     
     async def test_websocket_route_connection_validation_logging(self):

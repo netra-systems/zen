@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOr
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 
-class TestWorkflowOrchestratorSSotValidation(SSotBaseTestCase, unittest.TestCase):
+class WorkflowOrchestratorSSotValidationTests(SSotBaseTestCase, unittest.TestCase):
     """Test that WorkflowOrchestrator enforces SSOT UserExecutionEngine compliance.
     
     These tests should FAIL initially, proving the SSOT violation exists.
@@ -180,7 +180,7 @@ class TestWorkflowOrchestratorSSotValidation(SSotBaseTestCase, unittest.TestCase
         self.assertIn("user_execution_engine.py", error_message)
 
 
-class TestWorkflowOrchestratorSSotIntegration(SSotBaseTestCase, unittest.TestCase):
+class WorkflowOrchestratorSSotIntegrationTests(SSotBaseTestCase, unittest.TestCase):
     """Integration tests for WorkflowOrchestrator SSOT compliance with real dependencies."""
     
     def test_workflow_orchestrator_with_real_user_execution_engine_interface(self):

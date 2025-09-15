@@ -253,7 +253,7 @@ class MockWebSocketManager:
         return len(self.events)
 
 
-class TestUnifiedToolDispatcherComprehensive(BaseIntegrationTest):
+class UnifiedToolDispatcherComprehensiveTests(BaseIntegrationTest):
     """Comprehensive integration tests for UnifiedToolDispatcher."""
     
     def setup_method(self):

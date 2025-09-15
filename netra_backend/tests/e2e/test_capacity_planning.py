@@ -46,7 +46,7 @@ def scaling_analysis_setup(real_llm_manager, real_websocket_manager, real_tool_d
 'websocket_manager': real_websocket_manager
 }
 
-class TestCapacityPlanningWorkflows:
+class CapacityPlanningWorkflowsTests:
     """Test capacity planning workflows for different scaling scenarios."""
 
     @pytest.mark.asyncio
@@ -66,7 +66,7 @@ class TestCapacityPlanningWorkflows:
             _validate_spike_handling_strategy(results)
 
             @pytest.mark.real_llm
-            class TestExamplePromptsCapacityPlanning:
+            class ExamplePromptsCapacityPlanningTests:
                 """Test specific example prompt EP-3 with real LLM validation."""
 
                 @pytest.mark.asyncio

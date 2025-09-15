@@ -44,7 +44,7 @@ from test_framework.ssot.no_docker_mode_detector import NoDockerModeDetector
 logger = logging.getLogger(__name__)
 
 
-class TestJwtSecretConsistencyViolation(SSotAsyncTestCase):
+class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
     """
     SSOT Violation Reproduction: Tests JWT secret/algorithm consistency across services.
     

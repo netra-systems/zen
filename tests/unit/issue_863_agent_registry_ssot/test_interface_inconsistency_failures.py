@@ -23,7 +23,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 @pytest.mark.unit
-class TestAgentRegistryInterfaceInconsistencyFailures(SSotAsyncTestCase):
+class AgentRegistryInterfaceInconsistencyFailuresTests(SSotAsyncTestCase):
     """
     Test interface inconsistencies between AgentRegistry implementations.
     

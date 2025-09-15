@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestFrontendInitialization:
+class FrontendInitializationTests:
     """Test suite for frontend loading and initialization."""
 
     def setup_method(self):

@@ -28,7 +28,7 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.websocket_core.error_recovery_handler import ErrorRecoveryHandler
 from netra_backend.app.services.unified_authentication_service import UnifiedAuthenticationService
 
-class TestErrorBoundaryPatterns(SSotBaseTestCase):
+class ErrorBoundaryPatternsTests(SSotBaseTestCase):
     """
     Test error boundary patterns for graceful degradation.
     
@@ -94,7 +94,7 @@ class TestErrorBoundaryPatterns(SSotBaseTestCase):
             self.assertEqual(result['error_type'], 'rate_limit')
             self.assertIn('try again', result['user_message'])
 
-class TestErrorMessageClarity(SSotBaseTestCase):
+class ErrorMessageClarityTests(SSotBaseTestCase):
     """
     Test error message clarity for customer-facing interactions.
     
@@ -140,7 +140,7 @@ class TestErrorMessageClarity(SSotBaseTestCase):
                 self.assertNotEqual(result['message'], 'Invalid input')
                 self.assertNotEqual(result['message'], 'Validation failed')
 
-class TestGracefulDegradation(SSotBaseTestCase):
+class GracefulDegradationTests(SSotBaseTestCase):
     """
     Test graceful degradation patterns.
     
@@ -188,7 +188,7 @@ class TestGracefulDegradation(SSotBaseTestCase):
                 self.assertEqual(result['status'], 'degraded')
                 self.assertEqual(result['degradation_reason'], 'database_timeout')
 
-class TestErrorLogging(SSotBaseTestCase):
+class ErrorLoggingTests(SSotBaseTestCase):
     """
     Test error logging and metrics collection.
     
@@ -239,7 +239,7 @@ class TestErrorLogging(SSotBaseTestCase):
                     mock_counter.assert_called_with(f'errors.{error_type}.count', tags={'service': 'netra_backend'})
                     mock_duration.assert_called_with(f'errors.{error_type}.duration', 150, tags={'service': 'netra_backend'})
 
-class TestRetryMechanisms(SSotBaseTestCase):
+class RetryMechanismsTests(SSotBaseTestCase):
     """
     Test retry mechanisms and circuit breakers.
     
@@ -314,7 +314,7 @@ class TestRetryMechanisms(SSotBaseTestCase):
                 self.assertTrue(result['connection_restored'])
                 self.assertLess(result['recovery_time_ms'], 5000)
 
-class TestErrorRecovery(SSotBaseTestCase):
+class ErrorRecoveryTests(SSotBaseTestCase):
     """
     Test error recovery and cleanup procedures.
     

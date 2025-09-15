@@ -49,7 +49,7 @@ except ImportError:
         user_id: Optional[str] = None
         action: str = CorpusAuditAction.CREATE
 
-class TestIssue841AuditModelsViolations(SSotBaseTestCase):
+class Issue841AuditModelsViolationsTests(SSotBaseTestCase):
     """
     Issue #841 Audit Models ID Generation Violation Tests
     

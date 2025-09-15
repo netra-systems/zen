@@ -41,7 +41,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
 @pytest.mark.integration
-class TestWebSocketConnectionEstablishment(SSotBaseTestCase):
+class WebSocketConnectionEstablishmentTests(SSotBaseTestCase):
     """
     Test WebSocket connection establishment patterns and protocols.
     
@@ -187,7 +187,7 @@ class TestWebSocketConnectionEstablishment(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestWebSocketAuthentication(SSotBaseTestCase):
+class WebSocketAuthenticationTests(SSotBaseTestCase):
     """
     Test WebSocket authentication integration patterns.
     
@@ -322,7 +322,7 @@ class TestWebSocketAuthentication(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestWebSocketConnectionLifecycle(SSotBaseTestCase):
+class WebSocketConnectionLifecycleTests(SSotBaseTestCase):
     """
     Test complete WebSocket connection lifecycle management.
     

@@ -59,7 +59,7 @@ from test_framework.websocket_helpers import (
 )
 
 
-class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
+class CompleteThreadLifecycleStagingTests(BaseIntegrationTest):
     """
     Comprehensive E2E test suite for complete thread lifecycle in staging environment.
     

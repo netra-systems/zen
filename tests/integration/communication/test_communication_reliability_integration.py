@@ -96,7 +96,7 @@ class ReliabilityTracker:
 
 
 @pytest.mark.integration
-class TestCommunicationFaultTolerance(SSotBaseTestCase):
+class CommunicationFaultToleranceTests(SSotBaseTestCase):
     """
     Test communication fault tolerance and error recovery.
     
@@ -438,7 +438,7 @@ class TestCommunicationFaultTolerance(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestMessageDeliveryGuarantees(SSotBaseTestCase):
+class MessageDeliveryGuaranteesTests(SSotBaseTestCase):
     """
     Test message delivery guarantees and reliability patterns.
     
@@ -735,7 +735,7 @@ class TestMessageDeliveryGuarantees(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestCommunicationMonitoring(SSotBaseTestCase):
+class CommunicationMonitoringTests(SSotBaseTestCase):
     """
     Test communication monitoring and health checking.
     

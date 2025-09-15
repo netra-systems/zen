@@ -26,7 +26,7 @@ class MockUserExecutionContext:
         self.websocket_client_id = websocket_client_id
 
 @pytest.mark.unit
-class TestSSOTFactoryBasicValidation1142(SSotBaseTestCase):
+class SSOTFactoryBasicValidation1142Tests(SSotBaseTestCase):
     """Basic validation tests for SSOT factory migration."""
 
     def setUp(self):

@@ -109,7 +109,7 @@ class ResourceMonitoringWebSocket:
 
 
 @pytest.mark.unit
-class TestMemoryManagementValidation(SSotAsyncTestCase):
+class MemoryManagementValidationTests(SSotAsyncTestCase):
     """Unit Test 4: Validate memory management in UserExecutionEngine"""
     
     def setUp(self):

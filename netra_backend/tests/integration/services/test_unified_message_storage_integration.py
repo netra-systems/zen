@@ -25,7 +25,7 @@ from netra_backend.app.services.unified_message_storage_service import (
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-class TestUnifiedMessageStorageIntegration:
+class UnifiedMessageStorageIntegrationTests:
     """Integration tests for UnifiedMessageStorageService with real dependencies."""
     
     @pytest.fixture
@@ -337,7 +337,7 @@ class TestUnifiedMessageStorageIntegration:
 @pytest.mark.integration
 @pytest.mark.performance
 @pytest.mark.asyncio
-class TestMessageStorageBusinessValueMetrics:
+class MessageStorageBusinessValueMetricsTests:
     """Performance and business value validation tests."""
     
     async def test_business_value_performance_benchmarks(self):

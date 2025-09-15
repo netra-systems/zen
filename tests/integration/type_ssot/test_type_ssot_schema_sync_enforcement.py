@@ -34,7 +34,7 @@ class SchemaChangeEvent:
     changes: Dict[str, Any]
 
 
-class TestSchemaSyncEnforcement(BaseIntegrationTest):
+class SchemaSyncEnforcementTests(BaseIntegrationTest):
     """Integration tests for schema synchronization enforcement."""
     
     @pytest.mark.integration

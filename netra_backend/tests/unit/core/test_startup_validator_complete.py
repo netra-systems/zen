@@ -28,7 +28,7 @@ from test_framework.ssot.base import BaseTestCase
 from shared.isolated_environment import get_env
 from netra_backend.app.core.startup_validator import ValidationStatus, ValidationResult, StartupValidator, validate_startup, require_startup_validation
 
-class TestValidationStatus(BaseTestCase):
+class ValidationStatusTests(BaseTestCase):
     """Test ValidationStatus enum values and behavior."""
 
     def test_validation_status_enum_values(self):
@@ -57,7 +57,7 @@ class TestValidationStatus(BaseTestCase):
         assert ValidationStatus.PASSED.value == 'passed'
         assert ValidationStatus.RUNNING.value != 'failed'
 
-class TestValidationResult(BaseTestCase):
+class ValidationResultTests(BaseTestCase):
     """Test ValidationResult dataclass with all fields and edge cases."""
 
     def test_validation_result_creation(self):
@@ -104,7 +104,7 @@ class TestValidationResult(BaseTestCase):
         assert isinstance(result_dict['error'], ValueError)
         assert result_dict['traceback'] == 'test traceback'
 
-class TestStartupValidatorInitialization(BaseTestCase):
+class StartupValidatorInitializationTests(BaseTestCase):
     """Test StartupValidator initialization and basic setup."""
 
     def test_startup_validator_initialization(self):
@@ -123,7 +123,7 @@ class TestStartupValidatorInitialization(BaseTestCase):
             assert hasattr(StartupValidator, method), f'Missing method: {method}'
             assert callable(getattr(StartupValidator, method))
 
-class TestStartupValidatorMainFlow(BaseTestCase):
+class StartupValidatorMainFlowTests(BaseTestCase):
     """Test StartupValidator main validation flow including concurrent scenarios."""
 
     def setUp(self):
@@ -244,7 +244,7 @@ class TestStartupValidatorMainFlow(BaseTestCase):
                                         assert async_result.message == 'Async validation complete'
                                         assert sync_result.message == 'Sync validation complete'
 
-class TestStartupValidatorIndividualMethods(BaseTestCase):
+class StartupValidatorIndividualMethodsTests(BaseTestCase):
     """Test all individual validation methods (_validate_*) with success and failure cases."""
 
     def setUp(self):
@@ -550,7 +550,7 @@ class TestStartupValidatorIndividualMethods(BaseTestCase):
             assert 'Configuration error' in message
             assert 'Settings module not found' in message
 
-class TestStartupValidatorSummaryAndOutput(BaseTestCase):
+class StartupValidatorSummaryAndOutputTests(BaseTestCase):
     """Test validation summary and output functionality."""
 
     def setUp(self):
@@ -603,7 +603,7 @@ class TestStartupValidatorSummaryAndOutput(BaseTestCase):
         assert 'VALIDATION SUMMARY' in output
         assert 'Results: 0/0 passed, 0 failed' in output
 
-class TestStartupValidatorUtilityFunctions(BaseTestCase):
+class StartupValidatorUtilityFunctionsTests(BaseTestCase):
     """Test utility functions and entry points."""
 
     @pytest.mark.asyncio
@@ -652,7 +652,7 @@ class TestStartupValidatorUtilityFunctions(BaseTestCase):
             assert 'called without startup validation' in warning_call
             assert 'test_function' in warning_call
 
-class TestStartupValidatorConcurrentExecution(BaseTestCase):
+class StartupValidatorConcurrentExecutionTests(BaseTestCase):
     """Test concurrent validation scenarios and thread safety."""
 
     @pytest.mark.asyncio
@@ -717,7 +717,7 @@ class TestStartupValidatorConcurrentExecution(BaseTestCase):
         results = await asyncio.gather(*tasks)
         assert results == [False, True, False]
 
-class TestStartupValidatorErrorEdgeCases(BaseTestCase):
+class StartupValidatorErrorEdgeCasesTests(BaseTestCase):
     """Test error handling, exception scenarios, and edge cases."""
 
     def setUp(self):
@@ -792,7 +792,7 @@ class TestStartupValidatorErrorEdgeCases(BaseTestCase):
         assert '__main__' in test_script
         assert 'sys.exit' in test_script
 
-class TestStartupValidatorPerformance(BaseTestCase):
+class StartupValidatorPerformanceTests(BaseTestCase):
     """Test validation timing, metrics, and performance requirements."""
 
     def setUp(self):
@@ -874,7 +874,7 @@ class TestStartupValidatorPerformance(BaseTestCase):
                                         slow_result = next((r for r in self.validator.results if r.name == 'ID Generation'))
                                         assert slow_result.duration_ms >= 200
 
-class TestStartupValidatorBusinessValue(BaseTestCase):
+class StartupValidatorBusinessValueTests(BaseTestCase):
     """Test business value scenarios - preventing broken deployments."""
 
     def setUp(self):
@@ -960,7 +960,7 @@ class TestStartupValidatorBusinessValue(BaseTestCase):
                                         assert thread_result.traceback is not None
 
 @pytest.mark.unit
-class TestStartupValidatorIntegration(BaseTestCase):
+class StartupValidatorIntegrationTests(BaseTestCase):
     """Integration tests for complete startup validation flow."""
 
     @pytest.mark.asyncio

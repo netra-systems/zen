@@ -316,7 +316,7 @@ class MessagePipelineTracker:
         return indicators
 
 
-class TestCompleteMessagePipelineIntegration(SSotAsyncTestCase):
+class CompleteMessagePipelineIntegrationTests(SSotAsyncTestCase):
     """
     Complete Message Pipeline Integration Tests.
     
@@ -690,7 +690,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_test():
-        test_instance = TestCompleteMessagePipelineIntegration()
+        test_instance = CompleteMessagePipelineIntegrationTests()
         test_instance.setup_method()
         await test_instance.test_complete_message_pipeline_business_value_delivery()
         print("Direct test execution completed successfully")

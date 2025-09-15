@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestFactoryConsolidationNoRegressions884(SSotAsyncTestCase):
+class FactoryConsolidationNoRegressions884Tests(SSotAsyncTestCase):
     """
     Regression Test: Validate existing agent functionality after factory consolidation
     
@@ -98,13 +98,13 @@ class TestFactoryConsolidationNoRegressions884(SSotAsyncTestCase):
             try:
                 from netra_backend.app.agents.user_execution_context import UserExecutionContext
             except ImportError:
-                class TestUserExecutionContext:
+                class UserExecutionContextTests:
                     def __init__(self, user_id: str, session_id: str, **kwargs):
                         self.user_id = user_id
                         self.session_id = session_id
                         for key, value in kwargs.items():
                             setattr(self, key, value)
-                UserExecutionContext = TestUserExecutionContext
+                UserExecutionContext = UserExecutionContextTests
                 
         except Exception as e:
             pytest.skip(f"Required components not available: {e}")
@@ -212,13 +212,13 @@ class TestFactoryConsolidationNoRegressions884(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.user_execution_context import UserExecutionContext
         except ImportError:
-            class TestUserExecutionContext:
+            class UserExecutionContextTests:
                 def __init__(self, user_id: str, session_id: str, **kwargs):
                     self.user_id = user_id
                     self.session_id = session_id
                     for key, value in kwargs.items():
                         setattr(self, key, value)
-            UserExecutionContext = TestUserExecutionContext
+            UserExecutionContext = UserExecutionContextTests
         
         # Create context and execution engine
         user_context = UserExecutionContext(
@@ -296,13 +296,13 @@ class TestFactoryConsolidationNoRegressions884(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.user_execution_context import UserExecutionContext
         except ImportError:
-            class TestUserExecutionContext:
+            class UserExecutionContextTests:
                 def __init__(self, user_id: str, session_id: str, **kwargs):
                     self.user_id = user_id
                     self.session_id = session_id
                     for key, value in kwargs.items():
                         setattr(self, key, value)
-            UserExecutionContext = TestUserExecutionContext
+            UserExecutionContext = UserExecutionContextTests
         
         # Create context and execution engine
         user_context = UserExecutionContext(
@@ -379,13 +379,13 @@ class TestFactoryConsolidationNoRegressions884(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.user_execution_context import UserExecutionContext
         except ImportError:
-            class TestUserExecutionContext:
+            class UserExecutionContextTests:
                 def __init__(self, user_id: str, session_id: str, **kwargs):
                     self.user_id = user_id
                     self.session_id = session_id
                     for key, value in kwargs.items():
                         setattr(self, key, value)
-            UserExecutionContext = TestUserExecutionContext
+            UserExecutionContext = UserExecutionContextTests
         
         # Create context and execution engine
         user_context = UserExecutionContext(
@@ -480,13 +480,13 @@ class TestFactoryConsolidationNoRegressions884(SSotAsyncTestCase):
                 try:
                     from netra_backend.app.agents.user_execution_context import UserExecutionContext
                 except ImportError:
-                    class TestUserExecutionContext:
+                    class UserExecutionContextTests:
                         def __init__(self, user_id: str, session_id: str, **kwargs):
                             self.user_id = user_id
                             self.session_id = session_id
                             for key, value in kwargs.items():
                                 setattr(self, key, value)
-                    UserExecutionContext = TestUserExecutionContext
+                    UserExecutionContext = UserExecutionContextTests
                 
                 user_context = UserExecutionContext(
                     user_id=f"{agent_name.lower()}_test_user_{uuid.uuid4().hex[:8]}",

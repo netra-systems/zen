@@ -23,7 +23,7 @@ from netra_backend.app.auth_integration.auth import (
 )
 
 
-class TestIssue465TokenReuseThreshold(SSotAsyncTestCase):
+class Issue465TokenReuseThresholdTests(SSotAsyncTestCase):
     """
     Unit tests for token reuse detection threshold
     

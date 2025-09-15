@@ -41,7 +41,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.dependencies import get_request_scoped_db_session
 
 
-class TestAuthServiceIDIntegrationViolations(BaseTestCase):
+class AuthServiceIDIntegrationViolationsTests(BaseTestCase):
     """Integration tests exposing auth service ID generation SSOT violations."""
     
     def setup_method(self):

@@ -26,7 +26,7 @@ from tests.e2e.harness_utils import (
 
 
 @pytest.mark.e2e
-class TestUnifiedHarness:
+class UnifiedHarnessTests:
     """Test the unified test harness functionality."""
     
     @pytest.mark.asyncio
@@ -141,7 +141,7 @@ class TestUnifiedHarness:
 
 @pytest.mark.real_e2e
 @pytest.mark.e2e
-class TestRealServiceIntegration:
+class RealServiceIntegrationTests:
     """Test with real service processes (marked for real_e2e tests)."""
     
     @pytest.mark.asyncio
@@ -180,4 +180,4 @@ class TestRealServiceIntegration:
 
 if __name__ == "__main__":
     # Run basic test manually for debugging
-    asyncio.run(TestUnifiedHarness().test_harness_service_startup_sequence())
+    asyncio.run(UnifiedHarnessTests().test_harness_service_startup_sequence())

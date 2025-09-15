@@ -47,7 +47,7 @@ class MockTool(BaseTool):
         return f"Mock async result for: {query}"
 
 
-class TestToolDispatcherCoreBusiness:
+class ToolDispatcherCoreBusinessTests:
     """Unit tests for Tool Dispatcher Core business logic validation."""
     
     def setup_method(self):

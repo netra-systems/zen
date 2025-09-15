@@ -24,7 +24,7 @@ from netra_backend.app.services.security.input_validator import InputValidator, 
 from netra_backend.app.services.security.injection_detector import InjectionDetector, InjectionType
 from netra_backend.app.services.security.data_sanitizer import DataSanitizer, SanitizationConfig, SanitizedOutput
 
-class TestInputValidationSecurityBusinessLogic:
+class InputValidationSecurityBusinessLogicTests:
     """Test input validation security business logic"""
 
     def setup_method(self):

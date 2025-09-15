@@ -67,7 +67,7 @@ async def sync_validator():
 
 
 @pytest.mark.e2e
-class TestDatabaseSyncE2E:
+class DatabaseSyncE2ETests:
     """E2E Tests for database synchronization across services."""
     
     @pytest.mark.critical
@@ -221,7 +221,7 @@ class TestDatabaseSyncE2E:
 
 
 @pytest.mark.e2e
-class TestDatabaseSyncPerformance:
+class DatabaseSyncPerformanceTests:
     """Performance tests for database synchronization."""
     
     @pytest.mark.performance
@@ -276,7 +276,7 @@ class TestDatabaseSyncPerformance:
 
 
 @pytest.mark.e2e
-class TestDatabaseSyncResilience:
+class DatabaseSyncResilienceTests:
     """Resilience tests for database synchronization."""
     
     @pytest.mark.resilience

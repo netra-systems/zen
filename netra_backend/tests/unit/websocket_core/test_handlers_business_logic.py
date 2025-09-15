@@ -37,7 +37,7 @@ from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from netra_backend.app.websocket_core.utils import is_websocket_connected
 from test_framework.base import BaseUnitTest
 
-class TestConnectionHandlerBusinessLogic(BaseUnitTest):
+class ConnectionHandlerBusinessLogicTests(BaseUnitTest):
     """Test ConnectionHandler business logic for user connection lifecycle."""
 
     def setUp(self):
@@ -128,7 +128,7 @@ class TestConnectionHandlerBusinessLogic(BaseUnitTest):
         assert result is False, 'Must reject unsupported message types'
         self.mock_websocket.send_json.assert_not_called()
 
-class TestTypingHandlerBusinessLogic(BaseUnitTest):
+class TypingHandlerBusinessLogicTests(BaseUnitTest):
     """Test TypingHandler business logic for real-time typing indicators."""
 
     def setUp(self):
@@ -192,7 +192,7 @@ class TestTypingHandlerBusinessLogic(BaseUnitTest):
         call_args = self.mock_websocket.send_json.call_args[0][0]
         assert call_args['payload']['thread_id'] == thread_id_in_payload, 'Must extract thread_id from payload'
 
-class TestHeartbeatHandlerBusinessLogic(BaseUnitTest):
+class HeartbeatHandlerBusinessLogicTests(BaseUnitTest):
     """Test HeartbeatHandler business logic for connection health monitoring."""
 
     def setUp(self):
@@ -262,7 +262,7 @@ class TestHeartbeatHandlerBusinessLogic(BaseUnitTest):
             result = await self.handler.handle_message(user_id, self.mock_websocket, ping_message)
             assert result is False, 'Must fail when WebSocket is disconnected'
 
-class TestMessageRouterBusinessLogic(BaseUnitTest):
+class MessageRouterBusinessLogicTests(BaseUnitTest):
     """Test MessageRouter business logic for message routing and handler management."""
 
     def setUp(self):
@@ -376,7 +376,7 @@ class TestMessageRouterBusinessLogic(BaseUnitTest):
     def test_message_router_tracks_comprehensive_statistics(self):
         """Test MessageRouter tracks comprehensive statistics for monitoring."""
 
-        class TestStatsHandler(BaseMessageHandler):
+        class StatsHandlerTests(BaseMessageHandler):
 
             def __init__(self):
                 super().__init__([MessageType.USER_MESSAGE])
@@ -387,18 +387,18 @@ class TestMessageRouterBusinessLogic(BaseUnitTest):
 
             def get_stats(self):
                 return {'test_stat': self.test_stat}
-        stats_handler = TestStatsHandler()
+        stats_handler = StatsHandlerTests()
         self.router.add_handler(stats_handler)
         stats = self.router.get_stats()
         required_stats = ['messages_routed', 'unhandled_messages', 'handler_errors', 'message_types', 'handler_stats', 'handler_order', 'handler_count', 'handler_status']
         for required_stat in required_stats:
             assert required_stat in stats, f'Must track {required_stat} statistic'
-        assert 'TestStatsHandler' in stats['handler_stats'], 'Must include custom handler stats'
-        assert stats['handler_stats']['TestStatsHandler']['test_stat'] == 'active', 'Must preserve handler stats'
+        assert 'StatsHandlerTests' in stats['handler_stats'], 'Must include custom handler stats'
+        assert stats['handler_stats']['StatsHandlerTests']['test_stat'] == 'active', 'Must preserve handler stats'
         assert len(stats['handler_order']) > 0, 'Must track handler execution order'
-        assert '[0] TestStatsHandler' in stats['handler_order'], 'Must show custom handler precedence'
+        assert '[0] StatsHandlerTests' in stats['handler_order'], 'Must show custom handler precedence'
 
-class TestAgentRequestHandlerBusinessLogic(BaseUnitTest):
+class AgentRequestHandlerBusinessLogicTests(BaseUnitTest):
     """Test AgentRequestHandler business logic for E2E test agent communication."""
 
     def setUp(self):
@@ -459,7 +459,7 @@ class TestAgentRequestHandlerBusinessLogic(BaseUnitTest):
         assert response_data['error_code'] == 'AGENT_REQUEST_ERROR', 'Must use appropriate error code'
         assert 'Failed to process agent request' in response_data['error_message'], 'Must explain error'
 
-class TestGlobalMessageRouterFunctions(BaseUnitTest):
+class GlobalMessageRouterFunctionsTests(BaseUnitTest):
     """Test global message router functions and utilities."""
 
     @pytest.mark.unit
@@ -477,14 +477,14 @@ class TestGlobalMessageRouterFunctions(BaseUnitTest):
         assert initial_count >= 0, 'Handler count must be non-negative'
         router = get_message_router()
 
-        class TestCountHandler(BaseMessageHandler):
+        class CountHandlerTests(BaseMessageHandler):
 
             def __init__(self):
                 super().__init__([MessageType.USER_MESSAGE])
 
             async def handle_message(self, user_id, websocket, message):
                 return True
-        test_handler = TestCountHandler()
+        test_handler = CountHandlerTests()
         router.add_handler(test_handler)
         updated_count = get_router_handler_count()
         assert updated_count == initial_count + 1, 'Handler count must increase when handler added'

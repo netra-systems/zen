@@ -77,7 +77,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.e2e
-class TestGoldenPathValidationStagingIssues:
+class GoldenPathValidationStagingIssuesTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -397,7 +397,7 @@ class TestGoldenPathValidationStagingIssues:
 
 
 @pytest.mark.e2e
-class TestStagingEnvironmentRealityCheck:
+class StagingEnvironmentRealityCheckTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

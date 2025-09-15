@@ -44,7 +44,7 @@ import unittest
 
 
 @pytest.mark.unit
-class TestWebSocketEventTypeSerialization(SSotBaseTestCase):
+class WebSocketEventTypeSerializationTests(SSotBaseTestCase):
     """Test JSON serialization of WebSocketEventType enums."""
     
     def test_agent_started_serialization(self):
@@ -122,7 +122,7 @@ class TestWebSocketEventTypeSerialization(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestWebSocketMessageSerialization(SSotBaseTestCase):
+class WebSocketMessageSerializationTests(SSotBaseTestCase):
     """Test Pydantic WebSocketMessage model serialization."""
     
     def setUp(self):
@@ -316,7 +316,7 @@ class TestWebSocketMessageSerialization(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestWebSocketEventMetadataValidation(SSotBaseTestCase):
+class WebSocketEventMetadataValidationTests(SSotBaseTestCase):
     """Test event metadata and typing validation."""
     
     def test_required_fields_validation(self):

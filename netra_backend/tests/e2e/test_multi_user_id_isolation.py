@@ -47,7 +47,7 @@ try:
 except ImportError:
     AUTH_HELPER_AVAILABLE = False
 
-class TestMultiUserIDIsolation(BaseIntegrationTest):
+class MultiUserIDIsolationTests(BaseIntegrationTest):
     """E2E tests for multi-user ID isolation with real authentication.
     
     CRITICAL PURPOSE: Validate complete multi-user isolation in real scenarios.
@@ -458,7 +458,7 @@ async def test_comprehensive_multi_user_isolation_e2e(real_services_fixture):
     scenarios with authentication, WebSockets, and agent execution.
     Will FAIL until complete isolation is implemented.
     """
-    test_instance = TestMultiUserIDIsolation()
+    test_instance = MultiUserIDIsolationTests()
     test_instance.setup_method()
     try:
         await test_instance.test_concurrent_user_authentication_isolation(real_services_fixture)

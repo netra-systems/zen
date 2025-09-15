@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import List, Dict, Set
 import json
 
-class TestMissingMarkerReproduction:
+class MissingMarkerReproductionTests:
     """
     Reproduce pytest marker configuration issues showing exact missing markers
     """

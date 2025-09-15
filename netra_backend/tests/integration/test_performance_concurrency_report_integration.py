@@ -112,7 +112,7 @@ class PerformanceConcurrencyValidator:
         }
 
 
-class TestPerformanceConcurrencyReportIntegration(BaseIntegrationTest):
+class PerformanceConcurrencyReportIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for report generation performance and concurrency
     

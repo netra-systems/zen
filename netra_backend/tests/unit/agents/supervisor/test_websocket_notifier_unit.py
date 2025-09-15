@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 
-class TestWebSocketNotifier:
+class WebSocketNotifierTests:
     """Unit tests for WebSocketNotifier.create_for_user(deprecated functionality, None)  # MANUAL_REVIEW: Validate exec_context."""
 
     @pytest.fixture

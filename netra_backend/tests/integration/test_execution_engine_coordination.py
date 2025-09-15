@@ -63,7 +63,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestExecutionEngineCoordination(BaseIntegrationTest):
+class ExecutionEngineCoordinationTests(BaseIntegrationTest):
     """Focused integration tests for ExecutionEngine coordination SSOT patterns."""
     
     def setup_method(self):

@@ -32,7 +32,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
-class TestAgentExecutionCoreE2E(BaseE2ETest):
+class AgentExecutionCoreE2ETests(BaseE2ETest):
     """E2E tests for AgentExecutionCore with authenticated full-stack integration."""
     
     @pytest.fixture

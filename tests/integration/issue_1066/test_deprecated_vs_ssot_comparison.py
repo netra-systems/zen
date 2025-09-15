@@ -33,7 +33,7 @@ sys.path.insert(0, str(project_root))
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestDeprecatedVsSSotComparison(BaseIntegrationTest):
+class DeprecatedVsSSotComparisonTests(BaseIntegrationTest):
     """Integration tests comparing deprecated factory patterns vs SSOT patterns."""
 
     def setup_method(self):

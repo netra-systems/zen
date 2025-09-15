@@ -41,7 +41,7 @@ except ImportError:
     pytest.skip('Test framework functions have been removed', allow_module_level=True)
 from auth_service.tests.helpers.test_repository_factory import TestRepositoryFactory, real_user_repository, real_session_repository, real_audit_repository
 
-class TestRealDatabaseConnections:
+class RealDatabaseConnectionsTests:
     """Test real database connections without mocks."""
 
     @pytest.fixture
@@ -95,7 +95,7 @@ class TestRealDatabaseConnections:
         finally:
             await db_session.close()
 
-class TestRealRedisConnections:
+class RealRedisConnectionsTests:
     """Test real Redis connections for session management."""
 
     @pytest.fixture
@@ -164,7 +164,7 @@ class TestRealRedisConnections:
         is_not_blacklisted = await real_redis_manager.is_token_blacklisted(other_token)
         assert is_not_blacklisted is False
 
-class TestRealJWTValidation:
+class RealJWTValidationTests:
     """Test real JWT validation without mocks."""
 
     @pytest.fixture
@@ -211,7 +211,7 @@ class TestRealJWTValidation:
         finally:
             real_jwt_handler.access_expiry = original_expiry
 
-class TestRealAuthServiceFlows:
+class RealAuthServiceFlowsTests:
     """Test complete auth service flows with real dependencies."""
 
     @pytest.fixture
@@ -288,7 +288,7 @@ class TestRealAuthServiceFlows:
         finally:
             await session.close()
 
-class TestRealHTTPEndpoints:
+class RealHTTPEndpointsTests:
     """Test HTTP endpoints with real FastAPI test client."""
 
     @pytest.fixture
@@ -321,7 +321,7 @@ class TestRealHTTPEndpoints:
             response = await client.post('/auth/refresh', content=b'invalid json', headers={'content-type': 'application/json'})
             assert response.status_code == 422
 
-class TestRealOAuthFlows:
+class RealOAuthFlowsTests:
     """Test OAuth flows with real HTTP clients (where possible)."""
 
     async def test_oauth_state_generation_real(self, isolated_test_env):
@@ -342,7 +342,7 @@ class TestRealOAuthFlows:
         assert len(session_id) >= 32
         assert isinstance(session_id, str)
 
-class TestRealErrorHandling:
+class RealErrorHandlingTests:
     """Test error handling with real services."""
 
     async def test_database_connection_failure_handling(self, isolated_test_env):

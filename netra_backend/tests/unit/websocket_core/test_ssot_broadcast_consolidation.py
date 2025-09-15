@@ -36,7 +36,7 @@ logger = get_logger(__name__)
 @pytest.mark.unit
 @pytest.mark.websocket_ssot
 @pytest.mark.issue_1058_broadcast_consolidation
-class TestSSOTBroadcastConsolidation:
+class SSOTBroadcastConsolidationTests:
     """Unit tests validating SSOT consolidation for WebSocket broadcasting.
 
     CRITICAL: These tests validate the consolidation of 3 duplicate broadcast
@@ -277,7 +277,7 @@ class TestSSOTBroadcastConsolidation:
         logger.info(f'✅ SSOT concurrent operations validated: {len(user_ids)} concurrent broadcasts')
 
 @pytest.mark.integration_demo
-class TestSSOTConsolidationIntegrationDemo:
+class SSOTConsolidationIntegrationDemoTests:
     """Demonstrate SSOT consolidation benefits through integration scenarios."""
 
     @pytest.mark.asyncio

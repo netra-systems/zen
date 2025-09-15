@@ -39,7 +39,7 @@ class MockWebSocketConnection:
 
 
 @pytest.mark.smoke
-class TestCriticalWiring:
+class CriticalWiringTests:
     """Smoke tests for critical component wiring."""
 
     @pytest.mark.asyncio
@@ -160,7 +160,7 @@ class TestCriticalWiring:
 
 
 @pytest.mark.smoke
-class TestStartupSequenceSmoke:
+class StartupSequenceSmokeTests:
     """Smoke tests for startup sequence."""
 
     @pytest.mark.asyncio

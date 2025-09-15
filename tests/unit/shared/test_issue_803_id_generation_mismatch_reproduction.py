@@ -20,7 +20,7 @@ from unittest.mock import patch, MagicMock
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 @pytest.mark.unit
-class TestIssue803IDGenerationMismatchReproduction(unittest.TestCase):
+class Issue803IDGenerationMismatchReproductionTests(unittest.TestCase):
     """Test suite to reproduce the ID generation mismatch issue."""
 
     def test_thread_run_id_counter_mismatch_reproduction(self):

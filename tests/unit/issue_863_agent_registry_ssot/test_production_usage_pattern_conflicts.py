@@ -25,7 +25,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 @pytest.mark.unit
-class TestAgentRegistryProductionUsagePatternConflicts(SSotAsyncTestCase):
+class AgentRegistryProductionUsagePatternConflictsTests(SSotAsyncTestCase):
     """
     Test production usage pattern conflicts in AgentRegistry implementations.
     

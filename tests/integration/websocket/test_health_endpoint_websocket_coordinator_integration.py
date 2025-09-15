@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.real_services_test_fixtures import E2ETestFixture
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestHealthEndpointWebSocketCoordinatorIntegration(SSotBaseTestCase):
+class HealthEndpointWebSocketCoordinatorIntegrationTests(SSotBaseTestCase):
     """Integration tests for health endpoint and WebSocket coordinator.
     
     These tests validate that health endpoints properly coordinate with

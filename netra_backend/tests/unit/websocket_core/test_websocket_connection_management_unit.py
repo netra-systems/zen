@@ -27,7 +27,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 
 
-class TestWebSocketConnectionLifecycle:
+class WebSocketConnectionLifecycleTests:
     """
     Unit tests for WebSocket connection lifecycle management.
     
@@ -287,7 +287,7 @@ class TestWebSocketConnectionLifecycle:
             assert sent_message["user_id"] == user_id
 
 
-class TestWebSocketManager:
+class WebSocketManagerTests:
     """
     Unit tests for WebSocket manager factory patterns.
     
@@ -414,7 +414,7 @@ class TestWebSocketManager:
             assert health is not None
 
 
-class TestWebSocketMessageHandling:
+class WebSocketMessageHandlingTests:
     """
     Unit tests for WebSocket message handling and serialization.
     

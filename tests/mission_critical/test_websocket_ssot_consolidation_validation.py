@@ -37,7 +37,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.core_types import UserID, ensure_user_id
 
 
-class TestWebSocketSsotConsolidationValidation(SSotAsyncTestCase):
+class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
     """Validate expected behavior after WebSocket SSOT consolidation."""
     
     async def asyncSetUp(self):
@@ -377,7 +377,7 @@ class TestWebSocketSsotConsolidationValidation(SSotAsyncTestCase):
         self.logger.warning(f"Golden Path FAILURE - {event_type}: {failure_reason}")
 
 
-class TestSsotConsolidationIntegration(SSotBaseTestCase):
+class SsotConsolidationIntegrationTests(SSotBaseTestCase):
     """Integration tests for SSOT consolidation patterns."""
     
     def test_ssot_consolidation_maintains_service_boundaries(self):

@@ -23,7 +23,7 @@ from netra_backend.tests.test_route_fixtures import (
     authenticated_test_client,
 )
 
-class TestThreadAnalytics:
+class ThreadAnalyticsTests:
     """Test thread analytics, statistics, and metrics functionality."""
     
     def test_thread_statistics(self, authenticated_test_client):

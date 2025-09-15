@@ -117,7 +117,7 @@ def mock_services_config() -> ServicesConfiguration:
     config.clickhouse = mock_clickhouse
     return config
 
-class TestServiceConfigValidatorInit:
+class ServiceConfigValidatorInitTests:
     """Test service config validator initialization."""
 
     def test_validator_init(self, mock_validation_context: ValidationContext) -> None:
@@ -126,7 +126,7 @@ class TestServiceConfigValidatorInit:
         assert validator.context == mock_validation_context
         assert validator.stale_threshold_days == 30
 
-class TestConfigFileChecking:
+class ConfigFileCheckingTests:
     """Test configuration file existence and age checking."""
 
     @pytest.mark.asyncio
@@ -167,7 +167,7 @@ class TestConfigFileChecking:
             assert result.status == ConfigStatus.STALE
             assert result.config_age_days == 45
 
-class TestConfigLoading:
+class ConfigLoadingTests:
     """Test configuration loading functionality."""
 
     def test_load_config_success(self, mock_validation_context: ValidationContext, temp_config_path: Path) -> None:
@@ -188,7 +188,7 @@ class TestConfigLoading:
             config = validator._load_config()
             assert config is None
 
-class TestEndpointValidation:
+class EndpointValidationTests:
     """Test service endpoint validation."""
 
     def test_get_service_endpoints_shared_redis(self, mock_validation_context: ValidationContext, mock_services_config: ServicesConfiguration) -> None:
@@ -289,7 +289,7 @@ class TestEndpointValidation:
             result = await validator._check_redis_endpoint('redis://redis.example.com:6379')
             assert result is True
 
-class TestValidationWorkflow:
+class ValidationWorkflowTests:
     """Test complete validation workflow."""
 
     @pytest.mark.asyncio

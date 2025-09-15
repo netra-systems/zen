@@ -53,7 +53,7 @@ except ImportError as e:
     IMPORT_ERROR = str(e)
 
 
-class TestMultipleEmitterRaceConditionReproduction(SSotAsyncTestCase):
+class MultipleEmitterRaceConditionReproductionTests(SSotAsyncTestCase):
     """
     Phase 1 test to reproduce race conditions with multiple WebSocket emitters.
     

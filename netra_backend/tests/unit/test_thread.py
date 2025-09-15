@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from netra_backend.app.models.thread import Thread
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestThread:
+class ThreadTests:
     """Test suite for Thread"""
 
     @pytest.fixture

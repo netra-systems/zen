@@ -41,7 +41,7 @@ INTEGRATION_CONFIG = {
     "isolation_score_min": 0.8
 }
 
-class TestResourceIsolationIntegration:
+class ResourceIsolationIntegrationTests:
     """Integration tests for complete resource isolation system"""
     
     @pytest.mark.asyncio

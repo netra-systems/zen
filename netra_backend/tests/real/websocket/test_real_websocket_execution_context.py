@@ -34,7 +34,7 @@ env = get_env()
 @pytest.mark.execution_context
 @pytest.mark.security_critical
 @skip_if_no_real_services
-class TestRealWebSocketExecutionContext:
+class RealWebSocketExecutionContextTests:
     """Test real WebSocket UserExecutionContext functionality.
     
     CRITICAL: Tests the security foundation of the multi-user system.

@@ -13,7 +13,7 @@ import traceback
 from unittest.mock import AsyncMock, MagicMock, patch
 from auth_service.auth_core.unified_auth_interface import UnifiedAuthInterface, get_unified_auth
 
-class TestUnifiedAuthServiceMissingMethodDetection:
+class UnifiedAuthServiceMissingMethodDetectionTests:
     """Test suite to detect missing validateTokenAndGetUser method."""
 
     def test_unified_auth_interface_missing_validate_token_and_get_user_method(self):
@@ -91,7 +91,7 @@ class TestUnifiedAuthServiceMissingMethodDetection:
         print(f'Available user methods: {user_methods}')
         print('Missing: validateTokenAndGetUser (combined token validation + user lookup)')
 
-class TestExpectedMethodBehavior:
+class ExpectedMethodBehaviorTests:
     """Test suite to document expected behavior of the missing method."""
 
     def test_expected_method_interface_design(self):

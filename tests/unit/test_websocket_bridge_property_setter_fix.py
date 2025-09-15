@@ -40,7 +40,7 @@ class MockWebSocketManagerInvalid:
         pass
 
 @pytest.mark.unit
-class TestWebSocketBridgePropertySetterFix:
+class WebSocketBridgePropertySetterFixTests:
     """Test suite for WebSocket Bridge property setter fix."""
 
     @pytest.fixture
@@ -157,7 +157,7 @@ class TestWebSocketBridgePropertySetterFix:
         logger.info(' PASS:  Basic thread safety verification passed')
 
 @pytest.mark.unit
-class TestIntegrationTestCompatibility:
+class IntegrationTestCompatibilityTests:
     """Test suite for integration test compatibility."""
 
     def test_base_agent_execution_test_pattern(self):

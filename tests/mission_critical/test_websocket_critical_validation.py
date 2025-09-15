@@ -180,7 +180,7 @@ class WebSocketEventTracker:
         self.event_counts.clear()
 
 
-class TestWebSocketCriticalValidation:
+class WebSocketCriticalValidationTests:
     """Critical WebSocket validation tests using REAL WebSocket connections."""
     
     @pytest.fixture(autouse=True)
@@ -624,7 +624,7 @@ class TestWebSocketCriticalValidation:
         print(" PASS:  Run ID generation and validation completed")
 
 
-class TestWebSocketEventContent:
+class WebSocketEventContentTests:
     """Test WebSocket event content validation."""
     
     @pytest.fixture(autouse=True)

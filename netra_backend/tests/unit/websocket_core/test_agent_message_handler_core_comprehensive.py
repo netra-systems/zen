@@ -34,7 +34,7 @@ from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from netra_backend.app.websocket_core.context import WebSocketContext
 from netra_backend.app.services.message_handlers import MessageHandlerService
 
-class TestAgentMessageHandlerCore(SSotAsyncTestCase):
+class AgentMessageHandlerCoreTests(SSotAsyncTestCase):
     """Core unit tests for AgentMessageHandler initialization and basic functionality."""
 
     def setup_method(self, method):
@@ -103,7 +103,7 @@ class TestAgentMessageHandlerCore(SSotAsyncTestCase):
         assert 'malicious_field' not in stats2
         assert stats1['messages_processed'] != stats2['messages_processed']
 
-class TestAgentMessageHandlerMessageTypes(SSotAsyncTestCase):
+class AgentMessageHandlerMessageTypesTests(SSotAsyncTestCase):
     """Unit tests for message type handling and routing logic."""
 
     def setup_method(self, method):
@@ -151,7 +151,7 @@ class TestAgentMessageHandlerMessageTypes(SSotAsyncTestCase):
         except (ImportError, AttributeError):
             pytest.skip('No unsupported message types available for testing')
 
-class TestAgentMessageHandlerUserIsolation(SSotAsyncTestCase):
+class AgentMessageHandlerUserIsolationTests(SSotAsyncTestCase):
     """Unit tests for user isolation and context management."""
 
     def setup_method(self, method):
@@ -206,7 +206,7 @@ class TestAgentMessageHandlerUserIsolation(SSotAsyncTestCase):
         assert message.payload.get('thread_id') is None
         assert message.payload.get('run_id') is None
 
-class TestAgentMessageHandlerErrorHandling(SSotAsyncTestCase):
+class AgentMessageHandlerErrorHandlingTests(SSotAsyncTestCase):
     """Unit tests for error handling and recovery scenarios."""
 
     def setup_method(self, method):
@@ -241,7 +241,7 @@ class TestAgentMessageHandlerErrorHandling(SSotAsyncTestCase):
         updated_stats = self.handler.get_stats()
         assert updated_stats['errors'] == initial_errors + 1
 
-class TestAgentMessageHandlerLogging(SSotAsyncTestCase):
+class AgentMessageHandlerLoggingTests(SSotAsyncTestCase):
     """Unit tests for logging and monitoring functionality."""
 
     def setup_method(self, method):

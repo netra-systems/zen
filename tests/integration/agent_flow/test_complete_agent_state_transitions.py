@@ -81,7 +81,7 @@ class AgentFlowState(Enum):
     ERROR = "error"
 
 
-class TestCompleteAgentStateTransitions(SSotAsyncTestCase):
+class CompleteAgentStateTransitionsTests(SSotAsyncTestCase):
     """
     Integration Tests for Complete Agent State Transitions.
     

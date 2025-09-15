@@ -40,7 +40,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator, genera
 from shared.types.core_types import ConnectionID, WebSocketID, UserID
 
 
-class TestWebSocketIdMigrationUuidExposure:
+class WebSocketIdMigrationUuidExposureTests:
     """
     Unit tests that EXPOSE uuid.uuid4() dependencies in WebSocket core.
     

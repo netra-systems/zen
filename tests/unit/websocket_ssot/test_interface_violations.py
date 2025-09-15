@@ -61,7 +61,7 @@ class ExpectedWebSocketManagerProtocol(Protocol):
 
 
 @pytest.mark.unit
-class TestWebSocketManagerInterfaceViolations(SSotAsyncTestCase):
+class WebSocketManagerInterfaceViolationsTests(SSotAsyncTestCase):
     """
     Tests to prove WebSocket manager interface violations exist.
     

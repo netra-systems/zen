@@ -120,7 +120,7 @@ async def authenticated_user_fixture():
     }
 
 
-class TestSSOTMigrationWorkflow(SSotBaseTestCase):
+class SSOTMigrationWorkflowTests(SSotBaseTestCase):
     """
     SSOT Integration Tests for Complete Migration Workflows.
     
@@ -615,7 +615,7 @@ class TestSSOTMigrationWorkflow(SSotBaseTestCase):
 
 # SSOT Export Control
 __all__ = [
-    "TestSSOTMigrationWorkflow",
+    "SSOTMigrationWorkflowTests",
     "real_services_fixture",
     "authenticated_user_fixture"
 ]

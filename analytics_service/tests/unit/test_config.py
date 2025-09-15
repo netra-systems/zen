@@ -30,7 +30,7 @@ from analytics_service.analytics_core.config import (
 from shared.isolated_environment import get_env
 
 
-class TestAnalyticsConfig:
+class AnalyticsConfigTests:
     """Test suite for AnalyticsConfig class."""
 
     def setup_method(self):
@@ -529,7 +529,7 @@ class TestAnalyticsConfig:
             os.environ.pop("ENVIRONMENT", None)
 
 
-class TestGlobalConfigFunctions:
+class GlobalConfigFunctionsTests:
     """Test suite for global configuration functions."""
 
     def test_get_config_singleton(self):
@@ -635,7 +635,7 @@ class TestGlobalConfigFunctions:
             os.environ.pop("ANALYTICS_SERVICE_PORT", None)
 
 
-class TestConfigIntegration:
+class ConfigIntegrationTests:
     """Integration tests for configuration with real environment."""
 
     def test_config_with_real_environment_defaults(self):

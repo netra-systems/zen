@@ -33,7 +33,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.unit
-class TestLoggingCircularDependencyPrevention(SSotBaseTestCase):
+class LoggingCircularDependencyPreventionTests(SSotBaseTestCase):
     """
     CRITICAL BUSINESS VALUE: Prevents circular dependencies that cause startup failures.
     
@@ -420,7 +420,7 @@ class TestLoggingCircularDependencyPrevention(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestCircularDependencyResolutionStrategies(SSotBaseTestCase):
+class CircularDependencyResolutionStrategiesTests(SSotBaseTestCase):
     """
     Advanced test suite for circular dependency resolution strategies.
     Tests specific patterns that can break circular dependencies.

@@ -23,7 +23,7 @@ from netra_backend.app.core.environment_validator import (
 env = get_env()
 
 
-class TestEnvironmentValidator:
+class EnvironmentValidatorTests:
     """Test suite for EnvironmentValidator."""
     
     def setup_method(self):

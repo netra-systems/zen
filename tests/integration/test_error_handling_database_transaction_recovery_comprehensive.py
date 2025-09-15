@@ -177,7 +177,7 @@ class DatabaseTransactionContext:
             self.operations.append(operation_record)
             raise
 
-class TestDatabaseTransactionRecovery(BaseIntegrationTest):
+class DatabaseTransactionRecoveryTests(BaseIntegrationTest):
     """Integration tests for database transaction rollback and recovery patterns."""
 
     def setup_method(self):

@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from shared.isolated_environment import get_env
 
 
-class TestServiceAuthenticationRegression:
+class ServiceAuthenticationRegressionTests:
     """Test suite to prevent service authentication regressions."""
     
     def test_backend_service_id_configuration(self):
@@ -275,7 +275,7 @@ if __name__ == "__main__":
     # Run tests
     import unittest
     loader = unittest.TestLoader()
-    suite = loader.loadTestsFromTestCase(TestServiceAuthenticationRegression)
+    suite = loader.loadTestsFromTestCase(ServiceAuthenticationRegressionTests)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     

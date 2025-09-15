@@ -34,7 +34,7 @@ from netra_backend.app.websocket_core.types import (
 #     TestServerToClientMessageTypes,
 # )
 
-class TestWebSocketTypeSafetyMain:
+class WebSocketTypeSafetyMainTests:
     """Main test class that orchestrates all WebSocket type safety tests."""
     
     def test_complete_type_safety_suite(self):
@@ -113,7 +113,7 @@ class TestWebSocketTypeSafetyMain:
         
         print("WebSocket send functionality tests passed!")
 
-class TestWebSocketMessageValidationEdgeCases:
+class WebSocketMessageValidationEdgeCasesTests:
     """Test edge cases in WebSocket message validation."""
     
     def test_message_size_limits(self):
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     # Run type safety tests
     def run_main_tests():
         """Run main type safety tests."""
-        main_tests = TestWebSocketTypeSafetyMain()
+        main_tests = WebSocketTypeSafetyMainTests()
         
         print("Running message factory tests...")
         main_tests.test_message_factory_functionality()
@@ -204,7 +204,7 @@ if __name__ == "__main__":
         main_tests.test_complete_type_safety_suite()
         
         print("Running edge case tests...")
-        edge_tests = TestWebSocketMessageValidationEdgeCases()
+        edge_tests = WebSocketMessageValidationEdgeCasesTests()
         edge_tests.test_message_size_limits()
         edge_tests.test_special_characters_in_messages()
         edge_tests.test_empty_and_null_values()

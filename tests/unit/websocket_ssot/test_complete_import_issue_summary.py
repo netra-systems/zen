@@ -19,7 +19,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = logging.getLogger(__name__)
 
 @pytest.mark.unit
-class TestCompleteWebSocketSSotImportResolutionSummary(SSotBaseTestCase):
+class CompleteWebSocketSSotImportResolutionSummaryTests(SSotBaseTestCase):
     """Comprehensive validation of resolved WebSocket SSOT import issue and success monitoring."""
 
     def setUp(self):

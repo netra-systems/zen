@@ -36,7 +36,7 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestConfigurationLoadingIntegration:
+class ConfigurationLoadingIntegrationTests:
     """Integration tests for configuration loading with real environment scenarios."""
     
     @pytest.fixture

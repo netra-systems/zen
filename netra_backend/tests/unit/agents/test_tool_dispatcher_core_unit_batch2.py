@@ -30,7 +30,7 @@ from netra_backend.app.agents.tool_dispatcher_core import (
 )
 
 
-class TestToolDispatcherCoreUnit(SSotBaseTestCase):
+class ToolDispatcherCoreUnitTests(SSotBaseTestCase):
     """Unit tests for core tool dispatcher logic."""
     
     def setup_method(self, method):
@@ -207,7 +207,7 @@ class TestToolDispatcherCoreUnit(SSotBaseTestCase):
         self.record_metric("response_error_model", "validated")
 
 
-class TestToolDispatcherCoreWebSocketIntegration(SSotBaseTestCase):
+class ToolDispatcherCoreWebSocketIntegrationTests(SSotBaseTestCase):
     """Unit tests for WebSocket bridge integration in core dispatcher."""
     
     def setup_method(self, method):
@@ -330,7 +330,7 @@ class TestToolDispatcherCoreWebSocketIntegration(SSotBaseTestCase):
         self.record_metric("websocket_missing_bridge_detection", "validated")
 
 
-class TestToolDispatcherCoreSecurityValidation(SSotBaseTestCase):
+class ToolDispatcherCoreSecurityValidationTests(SSotBaseTestCase):
     """Unit tests for security validation in core dispatcher."""
     
     def setup_method(self, method):

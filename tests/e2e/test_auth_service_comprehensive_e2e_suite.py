@@ -28,7 +28,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from tests.e2e.real_services_manager import RealServicesManager
 
 
-class TestMultiUserConcurrentAuthE2E(SSotBaseTestCase):
+class MultiUserConcurrentAuthE2ETests(SSotBaseTestCase):
     """Test 2: Multi-user concurrent authentication flows."""
 
     @pytest.fixture
@@ -115,7 +115,7 @@ class TestMultiUserConcurrentAuthE2E(SSotBaseTestCase):
         assert len(set(tokens)) == len(successful_auths)    # All unique
 
 
-class TestAuthErrorHandlingE2E(SSotBaseTestCase):
+class AuthErrorHandlingE2ETests(SSotBaseTestCase):
     """Test 3: Authentication error handling and recovery."""
 
     @pytest.fixture
@@ -193,7 +193,7 @@ class TestAuthErrorHandlingE2E(SSotBaseTestCase):
         assert rate_limited_count > 0 or unauthorized_count == len(rapid_login_attempts)
 
 
-class TestCrossServiceAuthE2E(SSotBaseTestCase):
+class CrossServiceAuthE2ETests(SSotBaseTestCase):
     """Test 4: Cross-service authentication integration."""
 
     @pytest.fixture
@@ -268,7 +268,7 @@ class TestCrossServiceAuthE2E(SSotBaseTestCase):
         assert decoded_token["sub"] == user_id
 
 
-class TestAuthPerformanceE2E(SSotBaseTestCase):
+class AuthPerformanceE2ETests(SSotBaseTestCase):
     """Test 5: Authentication performance under realistic load."""
 
     @pytest.fixture

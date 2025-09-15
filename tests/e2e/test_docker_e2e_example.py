@@ -25,7 +25,7 @@ from test_framework.websocket_helpers import WebSocketTestHelpers
 from shared.isolated_environment import get_env
 
 @pytest.mark.e2e
-class TestE2EDockerExample:
+class E2EDockerExampleTests:
     """
     Example E2E test class showing proper Docker usage.
     
@@ -117,7 +117,7 @@ class TestE2EDockerExample:
                 assert health_data.get('status') in ['healthy', 'ok']
 
 @pytest.mark.e2e
-class TestE2EDockerReliability:
+class E2EDockerReliabilityTests:
     """
     Tests that demonstrate Docker reliability features:
     - Port isolation
@@ -157,7 +157,7 @@ class TestE2EDockerReliability:
             print(f' PASS:  {var_name} = {var_value}')
 
 @pytest.mark.slow
-class TestE2EDockerPerformance:
+class E2EDockerPerformanceTests:
     """
     Performance tests for Docker E2E environment.
     These tests verify that the Docker setup is performant enough for CI/CD.

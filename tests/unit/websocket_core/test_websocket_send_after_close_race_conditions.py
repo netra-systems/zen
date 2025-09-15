@@ -34,7 +34,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 @pytest.mark.unit
-class TestWebSocketSendAfterCloseRaceConditions(SSotAsyncTestCase):
+class WebSocketSendAfterCloseRaceConditionsTests(SSotAsyncTestCase):
     """Unit tests for WebSocket send after close race conditions."""
 
     def setup_method(self):

@@ -40,7 +40,7 @@ from analytics_service.analytics_core.config import get_config
 from shared.isolated_environment import get_env
 
 
-class TestAppFactory:
+class AppFactoryTests:
     """Test suite for FastAPI application factory."""
 
     def setup_method(self):
@@ -160,7 +160,7 @@ class TestAppFactory:
         # Test that exception handling works properly (no need to verify logging)
 
 
-class TestApplicationRoutes:
+class ApplicationRoutesTests:
     """Test suite for application route registration."""
 
     def setup_method(self):
@@ -306,7 +306,7 @@ class TestApplicationRoutes:
         assert "placeholder" in data["message"].lower()
 
 
-class TestApplicationLifespan:
+class ApplicationLifespanTests:
     """Test suite for application lifespan management."""
 
     def setup_method(self):
@@ -402,7 +402,7 @@ class TestApplicationLifespan:
         assert exited is True
 
 
-class TestApplicationConfiguration:
+class ApplicationConfigurationTests:
     """Test suite for application configuration integration."""
 
     def setup_method(self):
@@ -475,7 +475,7 @@ class TestApplicationConfiguration:
         assert config.worker_count == 4
 
 
-class TestApplicationIntegration:
+class ApplicationIntegrationTests:
     """Integration tests for the complete application."""
 
     def test_global_app_instance(self):
@@ -555,7 +555,7 @@ class TestApplicationIntegration:
         assert analytics_service.main.SERVICE_START_TIME > 0
 
 
-class TestApplicationRobustness:
+class ApplicationRobustnessTests:
     """Test suite for application robustness and edge cases."""
 
     def setup_method(self):

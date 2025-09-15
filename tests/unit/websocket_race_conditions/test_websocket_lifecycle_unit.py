@@ -36,7 +36,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.isolated_environment import get_env
 
 @pytest.mark.unit
-class TestWebSocketAcceptTiming:
+class WebSocketAcceptTimingTests:
     """
     CRITICAL TEST: Validates accept() completion timing before message handling.
     
@@ -88,7 +88,7 @@ class TestWebSocketAcceptTiming:
             assert is_ready, 'GCP readiness validation should succeed with healthy services'
 
 @pytest.mark.unit
-class TestMessageHandlerServiceConsistency:
+class MessageHandlerServiceConsistencyTests:
     """
     CRITICAL TEST: Validates consistent constructor signatures across all initialization paths.
     
@@ -124,7 +124,7 @@ class TestMessageHandlerServiceConsistency:
             pytest.fail(f'Factory signature mismatch detected: {signature_error}')
 
 @pytest.mark.unit
-class TestBidirectionalHandshakeCompletion:
+class BidirectionalHandshakeCompletionTests:
     """
     CRITICAL TEST: Validates actual send/receive capability before operations.
     
@@ -178,7 +178,7 @@ class TestBidirectionalHandshakeCompletion:
             pass
 
 @pytest.mark.unit
-class TestHeartbeatConfigurationAlignment:
+class HeartbeatConfigurationAlignmentTests:
     """
     CRITICAL TEST: Validates heartbeat timing matches GCP infrastructure settings.
     
@@ -234,7 +234,7 @@ class TestHeartbeatConfigurationAlignment:
         assert not monitor.running, 'Heartbeat monitor should be stopped'
 
 @pytest.mark.unit
-class TestGCPReadinessValidationStaging:
+class GCPReadinessValidationStagingTests:
     """
     CRITICAL TEST: Validates staging-appropriate timeout values and readiness checks.
     
@@ -273,7 +273,7 @@ class TestGCPReadinessValidationStaging:
                 assert not result, 'Should fail when services unavailable'
 
 @pytest.mark.requires_docker
-class TestWebSocketRaceConditionIntegration:
+class WebSocketRaceConditionIntegrationTests:
     """
     Integration tests that combine multiple race condition patterns.
     

@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestServiceFailureRecovery:
+class ServiceFailureRecoveryTests:
     """Test #4: Service Failure Recovery Chain."""
     
     @pytest.fixture
@@ -276,9 +276,9 @@ class TestServiceFailureRecovery:
                 "State was not preserved during recovery"
 
 # Test execution helper functions
-def create_service_failure_recovery_test_suite() -> TestServiceFailureRecovery:
+def create_service_failure_recovery_test_suite() -> ServiceFailureRecoveryTests:
     """Create service failure recovery test suite instance."""
-    return TestServiceFailureRecovery()
+    return ServiceFailureRecoveryTests()
 
 async def run_service_failure_recovery_validation() -> Dict[str, Any]:
     """Run service failure recovery validation and return results."""

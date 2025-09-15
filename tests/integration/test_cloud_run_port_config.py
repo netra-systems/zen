@@ -154,7 +154,7 @@ class CloudRunPortConfigurationValidator:
         binding_results['binding_time_ms'] = (time.time() - start_time) * 1000
         return binding_results
 
-class TestCloudRunPortConfiguration(SSotBaseTestCase):
+class CloudRunPortConfigurationTests(SSotBaseTestCase):
     """
     Integration tests for Cloud Run port configuration validation.
     

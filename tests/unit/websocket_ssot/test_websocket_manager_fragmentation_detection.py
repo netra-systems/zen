@@ -34,7 +34,7 @@ import unittest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestWebSocketManagerFragmentationDetection(SSotBaseTestCase, unittest.TestCase):
+class WebSocketManagerFragmentationDetectionTests(SSotBaseTestCase, unittest.TestCase):
     """Test suite to detect WebSocket Manager fragmentation causing SSOT violations."""
 
     def setUp(self):
@@ -185,7 +185,7 @@ class TestWebSocketManagerFragmentationDetection(SSotBaseTestCase, unittest.Test
             self.assertEqual(len(unique_ids), 1, f"IMPORT INCONSISTENCY: WebSocket imports resolve to {len(unique_ids)} different classes. All imports must resolve to the same SSOT implementation. Classes found: {[info['module'] + '.' + info['name'] for info in valid_classes]}")
 
 @pytest.mark.unit
-class TestWebSocketManagerUserIsolationFragmentation(SSotBaseTestCase, unittest.TestCase):
+class WebSocketManagerUserIsolationFragmentationTests(SSotBaseTestCase, unittest.TestCase):
     """Test user isolation failures caused by WebSocket Manager fragmentation."""
 
     def test_user_context_isolation_with_multiple_managers(self):

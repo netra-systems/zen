@@ -29,7 +29,7 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestIssue263ReproductionValidation(SSotAsyncTestCase):
+class Issue263ReproductionValidationTests(SSotAsyncTestCase):
     """
     Test suite that reproduces the exact issues described in GitHub issue #263.
     
@@ -161,7 +161,7 @@ class TestIssue263ReproductionValidation(SSotAsyncTestCase):
         assert result.result == result.data  # Compatibility property
 
 
-class TestIssue263BrokenPatternsSimulation:
+class Issue263BrokenPatternsSimulationTests:
     """
     THIS CLASS SIMULATES THE BROKEN PATTERNS - It intentionally uses bad patterns.
     
@@ -205,7 +205,7 @@ class TestIssue263BrokenPatternsSimulation:
             pass
 
 
-class TestIssue263FixValidation(SSotAsyncTestCase):
+class Issue263FixValidationTests(SSotAsyncTestCase):
     """
     Test suite that validates the fix works correctly.
     

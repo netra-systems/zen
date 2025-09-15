@@ -81,7 +81,7 @@ class PerformanceBenchmarks:
     min_delivery_rate: float = 0.99  # 99% minimum delivery rate
 
 
-class TestWebSocketPerformanceLoadIntegration(BaseIntegrationTest):
+class WebSocketPerformanceLoadIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket performance and load handling."""
 
     async def async_setup(self):

@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestWebSocketFactoryPatternSSOTViolations(SSotAsyncTestCase):
+class WebSocketFactoryPatternSSOTViolationsTests(SSotAsyncTestCase):
     """Test for WebSocket factory pattern SSOT violations."""
 
     async def asyncSetUp(self):
@@ -472,7 +472,7 @@ if __name__ == '__main__':
     import asyncio
 
     async def run_factory_tests():
-        test_instance = TestWebSocketFactoryPatternSSOTViolations()
+        test_instance = WebSocketFactoryPatternSSOTViolationsTests()
         await test_instance.asyncSetUp()
 
         # Run sync tests

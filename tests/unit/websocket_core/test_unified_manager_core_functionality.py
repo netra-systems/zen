@@ -56,7 +56,7 @@ class MockWebSocketConnection:
         return self.messages_sent.copy()
 
 @pytest.mark.unit
-class TestUnifiedWebSocketManagerCore(SSotAsyncTestCase):
+class UnifiedWebSocketManagerCoreTests(SSotAsyncTestCase):
     """Test core functionality of UnifiedWebSocketManager.
 
     Focuses on business-critical functionality without external dependencies.
@@ -167,7 +167,7 @@ class TestUnifiedWebSocketManagerCore(SSotAsyncTestCase):
         self.assertFalse(await self.manager.has_connection('nonexistent_connection'))
 
 @pytest.mark.unit
-class TestWebSocketManagerModes(SSotAsyncTestCase):
+class WebSocketManagerModesTests(SSotAsyncTestCase):
     """Test different WebSocket manager modes."""
 
     async def test_unified_mode_compatibility(self):
@@ -185,7 +185,7 @@ class TestWebSocketManagerModes(SSotAsyncTestCase):
             self.assertEqual(manager.mode, WebSocketManagerMode.UNIFIED)
 
 @pytest.mark.unit
-class TestWebSocketManagerWithUserContext(SSotAsyncTestCase):
+class WebSocketManagerWithUserContextTests(SSotAsyncTestCase):
     """Test WebSocket manager integration with UserExecutionContext."""
 
     async def asyncSetUp(self):

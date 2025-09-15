@@ -38,7 +38,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from shared.types.core_types import UserID, ThreadID, RunID
 
 
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Mock WebSocket connection for testing."""
     
     def __init__(self):
@@ -62,7 +62,7 @@ class TestWebSocketConnection:
         return self.messages_sent.copy()
 
 
-class TestAgentPipelineMinimal(SSotAsyncTestCase):
+class AgentPipelineMinimalTests(SSotAsyncTestCase):
     """Minimal agent pipeline test using SSOT test framework."""
     
     def setup_method(self, method):
@@ -77,7 +77,7 @@ class TestAgentPipelineMinimal(SSotAsyncTestCase):
         # Create required dependencies using SSOT patterns
         try:
             # Use test WebSocket connection
-            test_websocket = TestWebSocketConnection()
+            test_websocket = WebSocketConnectionTests()
             
             # Get configuration
             config = get_config()
@@ -145,7 +145,7 @@ class TestAgentPipelineMinimal(SSotAsyncTestCase):
 @pytest.mark.e2e
 async def test_supervisor_agent_creation_standalone():
     """Standalone test function for direct execution."""
-    test_instance = TestAgentPipelineMinimal()
+    test_instance = AgentPipelineMinimalTests()
     test_instance.setup_method(test_supervisor_agent_creation_standalone)
     await test_instance.test_supervisor_agent_creation_minimal()
 

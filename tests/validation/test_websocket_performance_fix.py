@@ -20,7 +20,7 @@ import httpx
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.services.unified_authentication_service import UnifiedAuthenticationService
 
-class TestWebSocketPerformanceFix:
+class WebSocketPerformanceFixTests:
     """Test suite validating WebSocket performance improvements."""
 
     @pytest.mark.asyncio
@@ -163,7 +163,7 @@ class TestWebSocketPerformanceFix:
         print(f'  Business Impact: Restored AI chat functionality')
 
 @pytest.mark.integration
-class TestWebSocketPerformanceIntegration:
+class WebSocketPerformanceIntegrationTests:
     """Integration tests for WebSocket performance with real components."""
 
     @pytest.mark.asyncio

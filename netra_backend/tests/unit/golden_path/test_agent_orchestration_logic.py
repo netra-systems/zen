@@ -285,7 +285,7 @@ class MockAgentOrchestrator:
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestAgentOrchestrationLogic(SSotBaseTestCase):
+class AgentOrchestrationLogicTests(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

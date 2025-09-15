@@ -87,7 +87,7 @@ from shared.logging.unified_logging_ssot import (
 )
 
 
-class TestLoggingEmptyCriticalReproduction(SSotBaseTestCase):
+class LoggingEmptyCriticalReproductionTests(SSotBaseTestCase):
     """
     Test suite reproducing empty CRITICAL log entries issue #253.
     

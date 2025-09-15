@@ -23,7 +23,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
 
 @pytest.mark.integration
-class TestEnterpriseSecurityValidation:
+class EnterpriseSecurityValidationTests:
     """Integration tests for enterprise security compliance scenarios."""
 
     @pytest.mark.asyncio
@@ -152,7 +152,7 @@ class TestEnterpriseSecurityValidation:
         assert vulnerable_segments == len(enterprise_segments), f'All {len(enterprise_segments)} enterprise segments affected by interface vulnerability'
 
 @pytest.mark.integration
-class TestProductionScenarioReproduction:
+class ProductionScenarioReproductionTests:
     """Integration tests reproducing production failure scenarios."""
 
     @pytest.mark.asyncio

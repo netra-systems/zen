@@ -21,7 +21,7 @@ from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestStartupFixesIntegrationRobust:
+class StartupFixesIntegrationRobustTests:
     """Robust tests for startup fixes integration with real services."""
 
     @pytest.fixture
@@ -104,7 +104,7 @@ class TestStartupFixesIntegrationRobust:
         assert 'results' in result, 'Result must include individual results'
         assert isinstance(result['results'], dict), 'Individual results must be a dictionary'
 
-class TestStartupFixesValidatorRobust:
+class StartupFixesValidatorRobustTests:
     """Robust tests for startup fixes validator with real services."""
 
     @pytest.fixture
@@ -154,7 +154,7 @@ class TestStartupFixesValidatorRobust:
         for key in expected_keys:
             assert key in diagnosis, f'Missing expected key in diagnosis: {key}'
 
-class TestRealServiceIntegrationRobust:
+class RealServiceIntegrationRobustTests:
     """Robust tests for real service integration."""
 
     @pytest.mark.integration
@@ -202,7 +202,7 @@ class TestRealServiceIntegrationRobust:
         execution_time = time.time() - start_time
         assert execution_time >= 0.0 and execution_time < 5.0, f'Environment operations timing: {execution_time}s'
 
-class TestConvenienceFunctionsRobust:
+class ConvenienceFunctionsRobustTests:
     """Robust tests for convenience functions."""
 
     @pytest.mark.integration

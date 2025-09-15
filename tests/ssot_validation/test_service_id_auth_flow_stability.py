@@ -28,7 +28,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 
-class TestServiceIdAuthFlowStability(SSotAsyncTestCase):
+class ServiceIdAuthFlowStabilityTests(SSotAsyncTestCase):
     """
     Validate SERVICE_ID authentication flow stability with SSOT.
     

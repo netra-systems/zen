@@ -13,7 +13,7 @@ from netra_backend.app.services.file_storage_service import FileStorageService
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestFileCounterMismatch(SSotAsyncTestCase):
+class FileCounterMismatchTests(SSotAsyncTestCase):
     """Unit tests to reproduce the file counter mismatch issue"""
 
     def setUp(self):
@@ -194,7 +194,7 @@ class TestFileCounterMismatch(SSotAsyncTestCase):
 
 if __name__ == "__main__":
     # Run the test to demonstrate the bug
-    test = TestFileCounterMismatch()
+    test = FileCounterMismatchTests()
     
     async def run_tests():
         await test.test_upload_document_does_not_create_corpus_record()

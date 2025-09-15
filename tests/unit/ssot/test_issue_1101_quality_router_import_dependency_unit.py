@@ -16,7 +16,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestQualityRouterImportDependencyUnit(SSotBaseTestCase):
+class QualityRouterImportDependencyUnitTests(SSotBaseTestCase):
     """Test QualityMessageRouter import dependency problems - SHOULD FAIL initially."""
 
     def setUp(self):

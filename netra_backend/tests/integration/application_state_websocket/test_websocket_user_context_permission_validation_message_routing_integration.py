@@ -498,7 +498,7 @@ class WebSocketPermissionValidator:
         return isolation_results
 
 
-class TestWebSocketUserPermissionValidation(BaseIntegrationTest):
+class WebSocketUserPermissionValidationTests(BaseIntegrationTest):
     """
     Integration test for user permission validation during WebSocket message routing and processing.
     

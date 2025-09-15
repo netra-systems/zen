@@ -21,7 +21,7 @@ from unittest.mock import MagicMock, patch, AsyncMock
 from fastapi import FastAPI
 
 
-class TestIssue601TargetedFix:
+class Issue601TargetedFixTests:
     """Targeted test for Issue #601 hang fix."""
 
     def setup_method(self):
@@ -277,7 +277,7 @@ if __name__ == "__main__":
     print("=" * 50)
     
     # Run the specific tests
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestIssue601TargetedFix)
+    suite = unittest.TestLoader().loadTestsFromTestCase(Issue601TargetedFixTests)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     

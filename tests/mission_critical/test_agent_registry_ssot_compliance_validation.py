@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAgentRegistrySSoTComplianceValidation(SSotAsyncTestCase):
+class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
     """
     Validation tests for AgentRegistry SSOT compliance.
     

@@ -30,7 +30,7 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 from test_framework.environment_markers import staging_only, env_requires
 
 
-class TestEnvironmentAuthSeparation(SSotAsyncTestCase):
+class EnvironmentAuthSeparationTests(SSotAsyncTestCase):
     """
     E2E tests validating environment-specific auth flow separation in staging.
     

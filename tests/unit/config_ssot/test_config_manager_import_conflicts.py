@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestConfigManagerImportConflicts(SSotBaseTestCase):
+class ConfigManagerImportConflictsTests(SSotBaseTestCase):
     """Unit tests to demonstrate configuration manager SSOT violations."""
 
     def test_multiple_config_managers_importable_ssot_violation(self):

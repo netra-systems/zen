@@ -177,7 +177,7 @@ class MockExecutionRegistry(AgentRegistry):
         """List available agent keys."""
         return list(self.agents.keys())
 
-class TestExecutionEngine(BaseIntegrationTest):
+class ExecutionEngineTests(BaseIntegrationTest):
     """Integration tests for execution engine with real database persistence."""
 
     def setup_method(self):

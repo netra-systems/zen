@@ -62,7 +62,7 @@ class BusinessSession:
     expires_at: Optional[datetime] = None
     is_valid: bool = True
 
-class TestDatabaseManagerBusinessScenarios(BaseIntegrationTest):
+class DatabaseManagerBusinessScenariosTests(BaseIntegrationTest):
     """Realistic business scenario testing for DatabaseManager."""
 
     def setup_method(self):

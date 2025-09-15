@@ -23,7 +23,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.network_constants import URLConstants, ServiceEndpoints, NetworkEnvironmentHelper
 
 
-class TestNetworkConstantsStagingCompliance(SSotBaseTestCase):
+class NetworkConstantsStagingComplianceTests(SSotBaseTestCase):
     """
     Test network constants compliance with staging domain requirements.
     
@@ -502,7 +502,7 @@ class TestNetworkConstantsStagingCompliance(SSotBaseTestCase):
 
 if __name__ == "__main__":
     # Run this test standalone to check network constants staging compliance
-    test_instance = TestNetworkConstantsStagingCompliance()
+    test_instance = NetworkConstantsStagingComplianceTests()
     
     tests = [
         test_instance.test_url_constants_staging_compliance,

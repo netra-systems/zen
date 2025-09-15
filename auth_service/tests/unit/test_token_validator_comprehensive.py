@@ -35,7 +35,7 @@ from auth_service.auth_core.models.auth_models import User
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
-class TestTokenValidatorBasicOperations:
+class TokenValidatorBasicOperationsTests:
     """Test core TokenValidator operations - token creation and validation"""
 
     def setup_method(self):
@@ -115,7 +115,7 @@ class TestTokenValidatorBasicOperations:
         assert self.test_user_data == original_data
         assert token is not None
 
-class TestTokenValidatorValidationOperations:
+class TokenValidatorValidationOperationsTests:
     """Test TokenValidator validation operations"""
 
     def setup_method(self):
@@ -185,7 +185,7 @@ class TestTokenValidatorValidationOperations:
         except jwt.InvalidIssuedAtError:
             pass
 
-class TestTokenValidatorSecurityPatterns:
+class TokenValidatorSecurityPatternsTests:
     """Test TokenValidator security patterns and vulnerability prevention"""
 
     def setup_method(self):
@@ -260,7 +260,7 @@ class TestTokenValidatorSecurityPatterns:
         for key, value in special_data.items():
             assert payload[key] == value
 
-class TestTokenValidatorDatetimeHandling:
+class TokenValidatorDatetimeHandlingTests:
     """Test TokenValidator datetime conversion and timezone handling"""
 
     def setup_method(self):
@@ -338,7 +338,7 @@ class TestTokenValidatorDatetimeHandling:
             except (OverflowError, OSError):
                 pass
 
-class TestTokenValidatorErrorHandling:
+class TokenValidatorErrorHandlingTests:
     """Test TokenValidator error handling and edge cases"""
 
     def setup_method(self):
@@ -396,7 +396,7 @@ class TestTokenValidatorErrorHandling:
         with pytest.raises((TypeError, ValueError)):
             self.validator.create_token(non_serializable_data)
 
-class TestTokenValidatorPerformanceCharacteristics:
+class TokenValidatorPerformanceCharacteristicsTests:
     """Test TokenValidator performance characteristics and behavior"""
 
     def setup_method(self):
@@ -459,7 +459,7 @@ class TestTokenValidatorPerformanceCharacteristics:
             assert payload is not None
             assert len(payload['large_field']) == 1000 * size_multiplier
 
-class TestTokenValidatorBusinessValueScenarios(BaseIntegrationTest):
+class TokenValidatorBusinessValueScenariosTests(BaseIntegrationTest):
     """Test TokenValidator in realistic business scenarios"""
 
     def setup_method(self):
@@ -522,7 +522,7 @@ class TestTokenValidatorBusinessValueScenarios(BaseIntegrationTest):
         assert tenant_payload['subscription_tier'] == 'enterprise'
         assert 'manage_users' in tenant_payload['tenant_permissions']
 
-class TestTokenValidatorRegressionPrevention(BaseIntegrationTest):
+class TokenValidatorRegressionPreventionTests(BaseIntegrationTest):
     """Test TokenValidator against known issues and regression prevention"""
 
     def setup_method(self):

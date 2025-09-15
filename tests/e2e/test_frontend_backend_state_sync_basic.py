@@ -18,12 +18,12 @@ import pytest
 # Fallback mode for environments without test infrastructure
 TEST_MODE_AVAILABLE = False
 try:
-    from tests.clients.factory import TestClientFactory
+    from tests.clients.factory import ClientFactoryTests
     from tests.e2e.websocket_tests.state_helpers import StateValidator
     TEST_MODE_AVAILABLE = True
 except ImportError:
     @pytest.mark.e2e
-    class TestClientFactory:
+    class ClientFactoryTests:
         async def create_auth_client(self): return MockClient()
         async def create_backend_client(self, token): return MockClient()
         async def create_websocket_client(self, token): return MockClient()
@@ -67,16 +67,16 @@ class MockClient:
         await self.disconnect()
 
 
-class TestFrontendBackendStateSyncer:
+class FrontendBackendStateSyncerTests:
     """Core state synchronization tester for frontend-backend consistency."""
     
     def __init__(self):
         """Initialize with real or mock infrastructure."""
         if TEST_MODE_AVAILABLE:
-            self.factory = TestClientFactory()
+            self.factory = ClientFactoryTests()
             self.validator = StateValidator()
         else:
-            self.factory = TestClientFactory()
+            self.factory = ClientFactoryTests()
             self.validator = StateValidator()
         
         self.test_results = []

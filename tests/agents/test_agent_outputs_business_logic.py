@@ -30,7 +30,7 @@ from test_framework.environment_isolation import EnvironmentTestManager
 @pytest.mark.agents
 @pytest.mark.env("dev")
 @pytest.mark.env("staging")
-class TestOptimizationRecommendationsBusiness:
+class OptimizationRecommendationsBusinessTests:
     """Test optimization recommendations are actionable and valuable."""
     
     @pytest.fixture
@@ -303,7 +303,7 @@ class TestOptimizationRecommendationsBusiness:
 @pytest.mark.agents
 @pytest.mark.env("dev")
 @pytest.mark.env("staging") 
-class TestActionPlanExecutability:
+class ActionPlanExecutabilityTests:
     """Test action plans are executable and realistic for implementation."""
     
     @pytest.fixture
@@ -609,7 +609,7 @@ class TestActionPlanExecutability:
 @pytest.mark.agents
 @pytest.mark.env("dev")
 @pytest.mark.env("staging")
-class TestReportingBusinessValue:
+class ReportingBusinessValueTests:
     """Test that reports provide clear business value and insights."""
     
     @pytest.fixture

@@ -41,7 +41,7 @@ class ResourceSnapshot:
     open_file_descriptors: int = 0
 
 
-class TestLLMResourceManagementIntegration(BaseIntegrationTest):
+class LLMResourceManagementIntegrationTests(BaseIntegrationTest):
     """
     Test LLM resource management and cleanup integration.
     

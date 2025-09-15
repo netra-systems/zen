@@ -49,7 +49,7 @@ from shared.jwt_secret_manager import SharedJWTSecretManager
 from shared.port_discovery import PortDiscovery
 
 @pytest.mark.integration
-class TestConfigurationEnvironmentConsistency(SSotBaseTestCase):
+class ConfigurationEnvironmentConsistencyTests(SSotBaseTestCase):
     """
     Comprehensive integration tests for configuration management across all environments.
     

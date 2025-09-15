@@ -60,7 +60,7 @@ class AuditSeverity(Enum):
 @pytest.mark.audit_logging
 @pytest.mark.compliance
 @pytest.mark.asyncio
-class TestRealAuthAuditLogging:
+class RealAuthAuditLoggingTests:
     """
     Real auth audit logging tests using Docker services.
     

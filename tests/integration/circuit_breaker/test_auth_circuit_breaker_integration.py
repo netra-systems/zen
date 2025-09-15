@@ -13,7 +13,7 @@ from unittest.mock import patch, MagicMock, AsyncMock
 import asyncio
 from typing import Dict, Any
 
-class TestAuthCircuitBreakerIntegration:
+class AuthCircuitBreakerIntegrationTests:
     """Test auth service integration with unified circuit breakers."""
 
     def test_auth_service_can_import_circuit_breakers(self):
@@ -129,7 +129,7 @@ class TestAuthCircuitBreakerIntegration:
         assert 'metrics' in status, 'Status should include metrics'
         print('\nAUTH INDEPENDENCE: Auth circuit breakers work independently of resilience framework availability')
 
-class TestAuthCircuitBreakerCompatibilityIssues:
+class AuthCircuitBreakerCompatibilityIssuesTests:
     """Test specific compatibility issues that might affect auth service."""
 
     def test_auth_import_error_handling(self):
@@ -196,7 +196,7 @@ class TestAuthCircuitBreakerCompatibilityIssues:
             await async_auth_operation(456, True)
         print('\nAUTH ASYNC: Async circuit breakers work with auth operations')
 
-class TestAuthCircuitBreakerErrorScenarios:
+class AuthCircuitBreakerErrorScenariosTests:
     """Test error scenarios specific to auth circuit breaker integration."""
 
     def test_auth_circuit_breaker_cascading_failures(self):

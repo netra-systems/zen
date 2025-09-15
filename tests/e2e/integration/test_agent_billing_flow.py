@@ -46,7 +46,7 @@ from shared.isolated_environment import get_env
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAgentBillingFlow:
+class AgentBillingFlowTests:
     """Test #2: Agent Request  ->  Processing  ->  Response  ->  Billing Record Flow."""
     
     @pytest_asyncio.fixture
@@ -232,7 +232,7 @@ class TestAgentBillingFlow:
 
 @pytest.mark.asyncio 
 @pytest.mark.e2e
-class TestAgentBillingPerformance:
+class AgentBillingPerformanceTests:
     """Performance validation for agent billing operations."""
     
     @pytest_asyncio.fixture

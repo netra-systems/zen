@@ -28,7 +28,7 @@ from auth_service.services.jwt_service import JWTService
 from auth_service.services.redis_service import RedisService
 
 
-class TestAuthPerformanceLoadIntegration(SSotAsyncTestCase):
+class AuthPerformanceLoadIntegrationTests(SSotAsyncTestCase):
     """Performance load testing for auth integration with real services."""
 
     @pytest.fixture(autouse=True)

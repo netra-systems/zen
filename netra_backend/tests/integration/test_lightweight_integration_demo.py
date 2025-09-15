@@ -25,7 +25,7 @@ from netra_backend.app.models.session import Session
 from shared.isolated_environment import get_env
 
 
-class TestLightweightIntegrationDemo:
+class LightweightIntegrationDemoTests:
     """Demo class showing lightweight integration testing without Docker."""
     
     @pytest.mark.integration

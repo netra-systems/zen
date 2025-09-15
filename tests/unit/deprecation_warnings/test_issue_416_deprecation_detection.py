@@ -29,7 +29,7 @@ import contextlib
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDeprecationWarningDetection(SSotBaseTestCase):
+class DeprecationWarningDetectionTests(SSotBaseTestCase):
     """Test suite to detect and validate deprecation warnings - should initially FAIL"""
     
     def setUp(self):

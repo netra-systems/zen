@@ -32,7 +32,7 @@ from shared.isolated_environment import get_env
 from test_framework.base import BaseTestCase, AsyncTestCase
 from netra_backend.app.websocket_core.connection_state_machine import ApplicationConnectionState, StateTransitionInfo, ConnectionStateMachine, ConnectionStateMachineRegistry, get_connection_state_registry, get_connection_state_machine, is_connection_ready_for_messages
 
-class TestApplicationConnectionState(BaseTestCase):
+class ApplicationConnectionStateTests(BaseTestCase):
     """Test ApplicationConnectionState enum and helper methods."""
 
     def test_state_classification_methods(self):
@@ -55,7 +55,7 @@ class TestApplicationConnectionState(BaseTestCase):
         actual_states = {state.value for state in ApplicationConnectionState}
         assert actual_states == expected_states, f'State enum mismatch: {actual_states} vs {expected_states}'
 
-class TestConnectionStateMachineCore(BaseTestCase):
+class ConnectionStateMachineCoreTests(BaseTestCase):
     """Test core ConnectionStateMachine functionality."""
 
     def setup_method(self):
@@ -181,7 +181,7 @@ class TestConnectionStateMachineCore(BaseTestCase):
         assert len(callback_calls) == 1
         assert callback_calls[0] == ('callback2', ApplicationConnectionState.ACCEPTED, ApplicationConnectionState.AUTHENTICATED)
 
-class TestConnectionStateMachineRaceConditions(AsyncTestCase):
+class ConnectionStateMachineRaceConditionsTests(AsyncTestCase):
     """Test race condition scenarios that the state machine prevents."""
 
     def setup_method(self):
@@ -536,7 +536,7 @@ class TestConnectionStateMachineRaceConditions(AsyncTestCase):
         self.record_metric('final_state_after_rollbacks', final_state.value)
         self.record_metric('state_integrity_maintained', True)
 
-class TestConnectionStateMachineSSotIntegration(BaseTestCase):
+class ConnectionStateMachineSSotIntegrationTests(BaseTestCase):
     """Test integration with existing SSOT functions and patterns."""
 
     def setup_method(self):
@@ -657,7 +657,7 @@ class TestConnectionStateMachineSSotIntegration(BaseTestCase):
         retry_machine.force_failed_state('test_failure')
         retry_success = retry_machine.transition_to(ApplicationConnectionState.CONNECTING, 'retry_attempt')
 
-class TestConnectionStateMachineBusinessValue(BaseTestCase):
+class ConnectionStateMachineBusinessValueTests(BaseTestCase):
     """Test business value validation scenarios."""
 
     def setup_method(self):

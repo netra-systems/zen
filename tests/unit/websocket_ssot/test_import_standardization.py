@@ -32,7 +32,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerImportStandardization(SSotBaseTestCase):
+class WebSocketManagerImportStandardizationTests(SSotBaseTestCase):
     """
     Tests to prove WebSocket manager import standardization violations exist.
     

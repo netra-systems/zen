@@ -32,7 +32,7 @@ except ImportError:
 @pytest.mark.integration
 @pytest.mark.staging
 @pytest.mark.skipif(not WEBSOCKETS_AVAILABLE, reason='websockets library not available')
-class TestWebSocketSSOTConnectionValidation(SSotAsyncTestCase):
+class WebSocketSSOTConnectionValidationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket connection validation with SSOT (Issue #507)"""
 
     def setup_method(self, method):

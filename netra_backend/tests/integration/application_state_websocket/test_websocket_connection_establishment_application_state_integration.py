@@ -38,7 +38,7 @@ from test_framework.real_services import RealServicesManager
 import redis.asyncio as redis_async
 
 
-class TestWebSocketConnectionEstablishmentApplicationStateIntegration(WebSocketIntegrationTest):
+class WebSocketConnectionEstablishmentApplicationStateIntegrationTests(WebSocketIntegrationTest):
     """Test WebSocket connection establishment with comprehensive application state validation."""
     
     @pytest.mark.integration

@@ -51,7 +51,7 @@ def mock_get_jwt_secret() -> str:
     secret = env.get(f'JWT_SECRET_{environment.upper()}') or env.get('JWT_SECRET_KEY') or env.get('JWT_SECRET') or 'dev-jwt-secret'
     return secret
 
-class TestBackendEnvironmentComprehensive:
+class BackendEnvironmentComprehensiveTests:
     """
     Comprehensive test suite for BackendEnvironment class.
     
@@ -923,7 +923,7 @@ class TestBackendEnvironmentComprehensive:
         assert execution_time < 0.1, f'Execution took too long: {execution_time:.3f}s'
         self.record_metric('performance_test_time', execution_time)
 
-class TestBackendEnvironmentIntegrationPoints:
+class BackendEnvironmentIntegrationPointsTests:
     """
     Test integration points between BackendEnvironment and other system components.
     

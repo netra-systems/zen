@@ -36,7 +36,7 @@ from test_framework.ssot.real_services_test_fixtures import *
 
 
 @pytest.mark.integration
-class TestUserContextIsolationRealServices:
+class UserContextIsolationRealServicesTests:
     """Integration tests for user context isolation with real services."""
     
     @pytest.mark.asyncio

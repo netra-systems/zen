@@ -25,7 +25,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
-class TestConfigurationIntegrationOffline(SSotBaseTestCase):
+class ConfigurationIntegrationOfflineTests(SSotBaseTestCase):
     """Offline integration tests for configuration management system."""
 
     def setup_method(self, method=None):

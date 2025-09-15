@@ -50,7 +50,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestAgentWebSocketBridgeStateManagement(SSotAsyncTestCase):
+class AgentWebSocketBridgeStateManagementTests(SSotAsyncTestCase):
     """
     Test AgentWebSocketBridge state management and transitions.
     

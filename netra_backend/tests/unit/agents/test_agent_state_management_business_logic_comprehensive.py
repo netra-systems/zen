@@ -38,7 +38,7 @@ from test_framework.unified import TestCategory
 from shared.isolated_environment import get_env
 
 
-class TestAgentStateManagementBusiness(SSotBaseTestCase):
+class AgentStateManagementBusinessTests(SSotBaseTestCase):
     """Comprehensive unit tests for agent state management business logic."""
 
     def setup_method(self, method):
@@ -512,7 +512,7 @@ class TestAgentStateManagementBusiness(SSotBaseTestCase):
         self.metrics.record_custom("audit_trail_enabled", True)
 
 
-class TestAgentStateManagementBusinessScenarios(SSotBaseTestCase):
+class AgentStateManagementBusinessScenariosTests(SSotBaseTestCase):
     """Business scenario tests for agent state management edge cases."""
 
     def test_enterprise_scale_optimization_result_validation(self):

@@ -92,7 +92,7 @@ class ConcurrentUser:
     race_condition_detected: bool = False
 
 
-class TestWebSocketRaceConditionsIntegration:
+class WebSocketRaceConditionsIntegrationTests:
     """
     Integration tests for WebSocket race conditions using real services.
     
@@ -981,7 +981,7 @@ class TestWebSocketRaceConditionsIntegration:
         }
 
 
-class TestWebSocketRaceConditionRecovery:
+class WebSocketRaceConditionRecoveryTests:
     """
     Advanced integration tests for WebSocket race condition recovery scenarios.
     

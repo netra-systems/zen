@@ -69,7 +69,7 @@ class IntegrationTestUser:
 
 
 @pytest.mark.integration
-class TestIssue1116MultiUserAgentExecution(SSotAsyncTestCase):
+class Issue1116MultiUserAgentExecutionTests(SSotAsyncTestCase):
     """
     Integration test suite proving singleton creates multi-user agent execution vulnerabilities.
     

@@ -147,7 +147,7 @@ def validator():
     return StartupValidator()
 
 
-class TestStartupValidation:
+class StartupValidationTests:
     """Test the startup validation system."""
     
     @pytest.mark.asyncio
@@ -431,7 +431,7 @@ class TestStartupValidation:
 
 
 @pytest.mark.mission_critical
-class TestServiceDependencyResolution:
+class ServiceDependencyResolutionTests:
     """Tests for service dependency resolution during startup validation."""
     
     @pytest.fixture
@@ -548,7 +548,7 @@ class TestServiceDependencyResolution:
 
 
 @pytest.mark.mission_critical
-class TestRaceConditionPrevention:
+class RaceConditionPreventionTests:
     """Tests for preventing race conditions during startup validation."""
     
     @pytest.mark.asyncio
@@ -619,7 +619,7 @@ class TestRaceConditionPrevention:
 
 
 @pytest.mark.mission_critical  
-class TestConnectionPoolValidation:
+class ConnectionPoolValidationTests:
     """Tests for connection pool validation during startup."""
     
     def test_database_connection_pool_health(self, validator):

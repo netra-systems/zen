@@ -23,7 +23,7 @@ from netra_backend.app.main import app
 from netra_backend.app.db.models_auth import User
 
 
-class TestHistoryEndpointUnit(SSotAsyncTestCase):
+class HistoryEndpointUnitTests(SSotAsyncTestCase):
     """Unit tests for history endpoint - reproducing 404 behavior and defining expectations."""
     
     def setup_method(self, method):

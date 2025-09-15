@@ -51,7 +51,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.asyncio
-class TestAgentHandlerComprehensiveFix:
+class AgentHandlerComprehensiveFixTests:
     """Comprehensive test suite for agent handler fix."""
 
     async def test_agent_handler_with_real_flow(self):

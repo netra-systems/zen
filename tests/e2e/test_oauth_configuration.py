@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.e2e
-class TestOAuthConfigurationValidation:
+class OAuthConfigurationValidationTests:
     """Test OAuth configuration validation and error handling."""
     
     @pytest.fixture
@@ -176,7 +176,7 @@ class TestOAuthConfigurationValidation:
 
 
 @pytest.mark.e2e
-class TestOAuthEnvironmentSpecificConfiguration:
+class OAuthEnvironmentSpecificConfigurationTests:
     """Test OAuth configuration for different environments."""
     
     @pytest.mark.e2e
@@ -242,7 +242,7 @@ class TestOAuthEnvironmentSpecificConfiguration:
 
 
 @pytest.mark.e2e
-class TestOAuthDeploymentValidation:
+class OAuthDeploymentValidationTests:
     """Test the OAuth deployment validation script."""
     
     @pytest.mark.e2e
@@ -309,7 +309,7 @@ class TestOAuthDeploymentValidation:
 
 
 @pytest.mark.e2e
-class TestOAuthFrontendErrorHandling:
+class OAuthFrontendErrorHandlingTests:
     """Test frontend OAuth error handling and display."""
     
     @pytest.mark.e2e
@@ -339,7 +339,7 @@ class TestOAuthFrontendErrorHandling:
 
 
 @pytest.mark.e2e
-class TestOAuthRedirectConfiguration:
+class OAuthRedirectConfigurationTests:
     """Test OAuth redirect URI configuration and validation."""
     
     @pytest.mark.e2e
@@ -393,7 +393,7 @@ class TestOAuthRedirectConfiguration:
 
 @pytest.mark.integration
 @pytest.mark.e2e
-class TestOAuthIntegration:
+class OAuthIntegrationTests:
     """Integration tests for OAuth configuration across services."""
     
     @pytest.fixture

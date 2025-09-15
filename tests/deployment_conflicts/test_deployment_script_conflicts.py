@@ -34,7 +34,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDeploymentScriptConflicts(SSotBaseTestCase):
+class DeploymentScriptConflictsTests(SSotBaseTestCase):
     """Test suite to identify and validate deployment script conflicts."""
     
     @classmethod
@@ -500,7 +500,7 @@ class TestDeploymentScriptConflicts(SSotBaseTestCase):
         return f"Found '{search_term}' but could not extract snippet"
 
 
-class TestSSotDeploymentValidation(SSotBaseTestCase):
+class SSotDeploymentValidationTests(SSotBaseTestCase):
     """Test suite for SSOT deployment consolidation validation."""
     
     def test_single_canonical_deployment_source(self):
@@ -699,7 +699,7 @@ class TestSSotDeploymentValidation(SSotBaseTestCase):
         return all_cycles
 
 
-class TestGoldenPathDeploymentProtection(SSotBaseTestCase):
+class GoldenPathDeploymentProtectionTests(SSotBaseTestCase):
     """Test suite for Golden Path protection during deployment."""
     
     def test_deployment_preserves_user_login_flow(self):
@@ -841,11 +841,11 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         test_suite = sys.argv[1]
         if test_suite == "conflicts":
-            suite = pytest.TestLoader().loadTestsFromTestCase(TestDeploymentScriptConflicts)
+            suite = pytest.TestLoader().loadTestsFromTestCase(DeploymentScriptConflictsTests)
         elif test_suite == "ssot":
-            suite = pytest.TestLoader().loadTestsFromTestCase(TestSSotDeploymentValidation)
+            suite = pytest.TestLoader().loadTestsFromTestCase(SSotDeploymentValidationTests)
         elif test_suite == "golden_path":
-            suite = pytest.TestLoader().loadTestsFromTestCase(TestGoldenPathDeploymentProtection)
+            suite = pytest.TestLoader().loadTestsFromTestCase(GoldenPathDeploymentProtectionTests)
         else:
             # Run all tests
             suite = pytest.TestLoader().loadTestsFromModule(sys.modules[__name__])

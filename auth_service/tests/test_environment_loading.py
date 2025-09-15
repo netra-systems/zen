@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Dict, Optional
 import pytest
 
-class TestEnvironmentLoading:
+class EnvironmentLoadingTests:
     """Test suite for environment variable loading in auth service."""
 
     @pytest.fixture
@@ -68,7 +68,7 @@ class TestEnvironmentLoading:
         assert result.returncode == 0, f'Test failed: {result.stdout}\n{result.stderr}'
         assert 'SUCCESS' in result.stdout
 
-class TestMainEntrypoint:
+class MainEntrypointTests:
     """Test the main.py entrypoint for proper environment loading."""
 
     def test_main_loads_env_before_imports(self):

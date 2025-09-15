@@ -24,7 +24,7 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestMessageRouterSSOTCompliance(SSotBaseTestCase):
+class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
     """Test that verifies Single Source of Truth for MessageRouter implementations."""
 
     def setup_method(self, method=None):

@@ -50,7 +50,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.integration
-class TestWebSocketSystemResilienceAndRecovery(SSotAsyncTestCase):
+class WebSocketSystemResilienceAndRecoveryTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket authentication system resilience and recovery.
     

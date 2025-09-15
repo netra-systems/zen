@@ -33,7 +33,7 @@ from test_framework.websocket_helpers import WebSocketTestClient
 from tests.e2e.staging_config import get_staging_config
 
 
-class TestAgentOptimizationCompleteFlow(BaseE2ETest):
+class AgentOptimizationCompleteFlowTests(BaseE2ETest):
     """Test complete agent optimization flows with mandatory authentication."""
     
     def setup_method(self):

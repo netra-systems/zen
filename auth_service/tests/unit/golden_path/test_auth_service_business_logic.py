@@ -26,7 +26,7 @@ from auth_service.auth_core.database.repository import AuthUserRepository
 
 
 @pytest.mark.unit
-class TestAuthServiceBusinessLogic:
+class AuthServiceBusinessLogicTests:
     """Test auth service core business logic for golden path scenarios."""
 
     def test_user_registration_business_rules(self):
@@ -386,7 +386,7 @@ class TestAuthServiceBusinessLogic:
 
 
 @pytest.mark.unit  
-class TestAuthServiceErrorHandlingBusinessContinuity:
+class AuthServiceErrorHandlingBusinessContinuityTests:
     """Test auth service error handling maintains business continuity."""
 
     def test_database_unavailable_business_fallback(self):

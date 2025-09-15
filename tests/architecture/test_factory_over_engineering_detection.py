@@ -79,7 +79,7 @@ class FactoryComplexityAnalyzer(ast.NodeVisitor):
                 self.imports.append(f"{node.module}.{alias.name}")
 
 
-class TestFactoryOverEngineeringDetection(SSotBaseTestCase):
+class FactoryOverEngineeringDetectionTests(SSotBaseTestCase):
     """
     Phase 1: Factory Discovery and Classification
 

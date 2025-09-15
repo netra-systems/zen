@@ -86,7 +86,7 @@ class MockMessageHandler:
 
 
 @pytest.mark.integration
-class TestMessageRouterUserIsolation(SSotBaseTestCase):
+class MessageRouterUserIsolationTests(SSotBaseTestCase):
     """Test suite for MessageRouter user isolation validation."""
 
     def setUp(self):

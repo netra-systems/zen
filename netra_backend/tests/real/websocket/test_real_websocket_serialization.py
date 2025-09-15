@@ -31,7 +31,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.serialization
 @skip_if_no_real_services
-class TestRealWebSocketSerialization:
+class RealWebSocketSerializationTests:
     """Test real WebSocket message serialization and deserialization."""
     
     @pytest.fixture

@@ -20,7 +20,7 @@ from netra_backend.app.services.websocket.message_queue import MessagePriority, 
 from netra_backend.app.llm.llm_defaults import LLMModel
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestMessageRoutingLogic(SSotBaseTestCase):
+class MessageRoutingLogicTests(SSotBaseTestCase):
     """Test message routing logic with SSOT patterns."""
 
     def setup_method(self, method=None) -> None:

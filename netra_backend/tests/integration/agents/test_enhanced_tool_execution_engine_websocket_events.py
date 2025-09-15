@@ -203,7 +203,7 @@ class DataVisualizationTool(BaseTool):
         result = {'data_source': data_source, 'charts_created': self.created_charts, 'chart_count': len(self.created_charts)}
         return json.dumps(result)
 
-class TestEnhancedToolExecutionEngineWebSocketEvents(SSotAsyncTestCase):
+class EnhancedToolExecutionEngineWebSocketEventsTests(SSotAsyncTestCase):
     """Integration tests for Enhanced Tool Execution Engine WebSocket events."""
 
     def setUp(self):

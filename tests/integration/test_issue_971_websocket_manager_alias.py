@@ -34,7 +34,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
 from test_framework.ssot.orchestration import get_orchestration_config
 
 @pytest.mark.integration
-class TestPreFixValidation(SSotBaseTestCase):
+class PreFixValidationTests(SSotBaseTestCase):
     """
     Phase 1: Pre-Fix Validation Tests
 
@@ -79,7 +79,7 @@ class TestPreFixValidation(SSotBaseTestCase):
         self.assertIn('WebSocketTestUtility', module_all)
 
 @pytest.mark.integration
-class TestIntegrationTestCollectionFailures(SSotBaseTestCase):
+class IntegrationTestCollectionFailuresTests(SSotBaseTestCase):
     """
     Phase 2: Integration Test Collection Failure Verification
 
@@ -131,7 +131,7 @@ class TestIntegrationTestCollectionFailures(SSotBaseTestCase):
         self.assertEqual(import_failures, 2, f'Expected exactly 2 integration test import failures, got {import_failures}')
 
 @pytest.mark.integration
-class TestPostFixValidation(SSotBaseTestCase):
+class PostFixValidationTests(SSotBaseTestCase):
     """
     Phase 3: Post-Fix Validation Tests
 
@@ -202,7 +202,7 @@ class TestPostFixValidation(SSotBaseTestCase):
         self.assertTrue(issubclass(WebSocketTestManager, WebSocketBridgeTestHelper), 'WebSocketTestManager should inherit from WebSocketBridgeTestHelper')
 
 @pytest.mark.integration
-class TestIntegrationTestCollectionRecovery(SSotBaseTestCase):
+class IntegrationTestCollectionRecoveryTests(SSotBaseTestCase):
     """
     Phase 4: Integration Test Collection Recovery Verification
 
@@ -252,7 +252,7 @@ class TestIntegrationTestCollectionRecovery(SSotBaseTestCase):
         self.assertTrue(callable(getattr(manager, 'get_staging_websocket_url', None)))
 
 @pytest.mark.integration
-class TestSSOTComplianceValidation(SSotBaseTestCase):
+class SSOTComplianceValidationTests(SSotBaseTestCase):
     """
     Phase 5: SSOT Compliance and Regression Prevention
 
@@ -298,7 +298,7 @@ class TestSSOTComplianceValidation(SSotBaseTestCase):
             self.assertTrue(hasattr(utility_instance, method_name), f'WebSocketTestUtility should still have {method_name} method')
 
 @pytest.mark.integration
-class TestE2ETestPathIntegrity(SSotBaseTestCase):
+class E2ETestPathIntegrityTests(SSotBaseTestCase):
     """
     Phase 6: E2E Test Path Integrity Verification
 

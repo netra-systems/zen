@@ -32,7 +32,7 @@ from analytics_service.main import create_app
 from shared.isolated_environment import get_env
 
 
-class TestEventIngestionEndpoints:
+class EventIngestionEndpointsTests:
     """Test suite for event ingestion endpoint functionality."""
 
     def setup_method(self):
@@ -215,7 +215,7 @@ class TestEventIngestionEndpoints:
         assert data["events_processed"] == 1
 
 
-class TestEventIngestionErrorHandling:
+class EventIngestionErrorHandlingTests:
     """Test suite for event ingestion error handling."""
 
     def setup_method(self):
@@ -334,7 +334,7 @@ class TestEventIngestionErrorHandling:
         assert data["events_processed"] == 1
 
 
-class TestUserActivityReportEndpoint:
+class UserActivityReportEndpointTests:
     """Test suite for user activity report endpoint."""
 
     def setup_method(self):
@@ -417,7 +417,7 @@ class TestUserActivityReportEndpoint:
         assert response_time < 0.1, f"Report endpoint took {response_time}s, should be under 0.1s"
 
 
-class TestAnalyticsEndpointIntegration:
+class AnalyticsEndpointIntegrationTests:
     """Integration tests for analytics endpoints working together."""
 
     def setup_method(self):
@@ -524,7 +524,7 @@ class TestAnalyticsEndpointIntegration:
             assert data["events_processed"] == 1
 
 
-class TestAnalyticsEndpointValidation:
+class AnalyticsEndpointValidationTests:
     """Test suite for analytics endpoint input validation."""
 
     def setup_method(self):
@@ -627,7 +627,7 @@ class TestAnalyticsEndpointValidation:
         assert response.json()["events_processed"] == 1
 
 
-class TestAnalyticsEndpointSecurity:
+class AnalyticsEndpointSecurityTests:
     """Test suite for analytics endpoint security considerations."""
 
     def setup_method(self):

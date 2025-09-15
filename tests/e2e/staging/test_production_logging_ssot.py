@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.e2e
-class TestProductionSSotLogging(SSotAsyncTestCase):
+class ProductionSSotLoggingTests(SSotAsyncTestCase):
     """
     CRITICAL BUSINESS VALUE: Validates production-ready SSOT logging on staging.
     
@@ -604,7 +604,7 @@ class TestProductionSSotLogging(SSotAsyncTestCase):
 
 
 @pytest.mark.e2e
-class TestProductionLoggingPerformanceAndScalability(SSotAsyncTestCase):
+class ProductionLoggingPerformanceAndScalabilityTests(SSotAsyncTestCase):
     """
     Performance and scalability tests for production SSOT logging.
     Validates production-grade performance requirements.

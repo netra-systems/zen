@@ -60,7 +60,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from netra_backend.app.services.thread_run_registry import get_thread_run_registry, ThreadRunRegistry
 
 
-class TestAgentWebSocketBridgeIntegration(BaseIntegrationTest):
+class AgentWebSocketBridgeIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for AgentWebSocketBridge using real services and real agent-WebSocket coordination.
     

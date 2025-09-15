@@ -25,7 +25,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper
 from shared.isolated_environment import get_env
 
 
-class TestThreadSessionManagement(BaseIntegrationTest):
+class ThreadSessionManagementTests(BaseIntegrationTest):
     """Integration tests for thread and session management with real services."""
     
     @pytest.mark.integration

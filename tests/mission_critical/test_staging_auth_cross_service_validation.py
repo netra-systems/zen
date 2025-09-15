@@ -314,7 +314,7 @@ class StagingAuthCrossServiceValidator:
 
 @pytest.mark.asyncio
 @pytest.mark.mission_critical
-class TestStagingCrossServiceJWTValidation:
+class StagingCrossServiceJWTValidationTests:
     """
     CRITICAL MISSION TEST: Cross-Service JWT Validation Failures
     
@@ -953,7 +953,7 @@ class TestStagingCrossServiceJWTValidation:
 # Helper functions for running individual tests
 async def run_single_test(test_name: str):
     """Run a single test for debugging purposes."""
-    test_instance = TestStagingCrossServiceJWTValidation()
+    test_instance = StagingCrossServiceJWTValidationTests()
     test_method = getattr(test_instance, test_name)
     await test_method()
 
@@ -2996,7 +2996,7 @@ if __name__ == "__main__":
     )
     
     async def main():
-        test_instance = TestStagingCrossServiceJWTValidation()
+        test_instance = StagingCrossServiceJWTValidationTests()
         
         try:
             logger.critical("Starting comprehensive cross-service JWT validation test suite...")

@@ -25,7 +25,7 @@ from test_framework.ssot.real_services_test_fixtures import real_services_fixtur
 from shared.isolated_environment import get_env
 import aiohttp
 
-class TestFrontendConnectivity404Reproduction(BaseE2ETest):
+class FrontendConnectivity404ReproductionTests(BaseE2ETest):
     """
     E2E test to reproduce 404 errors affecting frontend connectivity.
     

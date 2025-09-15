@@ -26,7 +26,7 @@ from unittest.mock import Mock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestWebSocketHandshakeRaceConditionsCloudRun(SSotAsyncTestCase):
+class WebSocketHandshakeRaceConditionsCloudRunTests(SSotAsyncTestCase):
     """Test that demonstrates WebSocket handshake race conditions in Cloud Run.
     
     This test MUST FAIL before consolidation to prove race conditions exist.

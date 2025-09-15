@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.integration
-class TestIssue1182CrossServiceIntegration(SSotBaseTestCase):
+class Issue1182CrossServiceIntegrationTests(SSotBaseTestCase):
     """Integration tests to detect cross-service WebSocket Manager SSOT violations"""
 
     @pytest.fixture

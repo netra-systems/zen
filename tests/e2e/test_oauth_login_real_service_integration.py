@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
-class TestOAuthLoginRealServiceIntegration(SSotAsyncTestCase):
+class OAuthLoginRealServiceIntegrationTests(SSotAsyncTestCase):
     """E2E tests for OAuth login with real service integration."""
     
     async def async_setup_method(self, method=None):

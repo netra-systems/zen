@@ -156,7 +156,7 @@ class GoldenPathTestContext:
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.asyncio
-class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
+class GoldenPathCompleteE2EComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive Golden Path End-to-End Integration Test Suite.
     

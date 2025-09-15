@@ -17,7 +17,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestDemoWebSocketFixValidation(SSotBaseTestCase):
+class DemoWebSocketFixValidationTests(SSotBaseTestCase):
     """Test suite to validate Issue #584 fix in demo_websocket.py."""
 
     def test_demo_websocket_now_uses_ssot_patterns(self):

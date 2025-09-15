@@ -41,7 +41,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDeploymentSsotComplianceMissionCritical(SSotBaseTestCase):
+class DeploymentSsotComplianceMissionCriticalTests(SSotBaseTestCase):
     """
     Mission critical tests for deployment SSOT compliance.
     

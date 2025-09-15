@@ -33,7 +33,7 @@ from pathlib import Path
 from shared.isolated_environment import get_env, IsolatedEnvironment
 from netra_backend.app.core.backend_environment import BackendEnvironment
 
-class TestInfrastructureResourceValidation:
+class InfrastructureResourceValidationTests:
     """
     Unit Test Suite: Infrastructure Resource Configuration Validation for Issue #131
     

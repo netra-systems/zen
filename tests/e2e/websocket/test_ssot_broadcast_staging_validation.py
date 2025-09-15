@@ -37,7 +37,7 @@ env = get_env()
 @pytest.mark.staging
 @pytest.mark.websocket_ssot
 @pytest.mark.issue_1058_staging_validation
-class TestSSOTBroadcastStagingValidation(SSotAsyncTestCase):
+class SSOTBroadcastStagingValidationTests(SSotAsyncTestCase):
     """E2E staging validation tests for SSOT WebSocket broadcast consolidation.
 
     CRITICAL: These tests validate SSOT consolidation works correctly
@@ -280,7 +280,7 @@ class TestSSOTBroadcastStagingValidation(SSotAsyncTestCase):
         logger.info(f'   ⏱️  Total test time: {total_performance_time:.2f}s')
 
 @pytest.mark.staging_readiness
-class TestSSOTStagingReadinessValidation:
+class SSOTStagingReadinessValidationTests:
     """Staging readiness validation for SSOT consolidation."""
 
     @pytest.mark.asyncio

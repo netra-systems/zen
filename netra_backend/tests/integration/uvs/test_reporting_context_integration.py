@@ -55,7 +55,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocketEventDeliveryAndBusinessValueTracking(BaseIntegrationTest):
+class WebSocketEventDeliveryAndBusinessValueTrackingTests(BaseIntegrationTest):
     """
     Test WebSocket event delivery and business value tracking.
     
@@ -468,7 +468,7 @@ class TestWebSocketEventDeliveryAndBusinessValueTracking(BaseIntegrationTest):
             logger.info(" PASS:  agent_error events maintain user trust through transparency")
 
 
-class TestFactoryMetricsAndPerformanceMonitoring(BaseIntegrationTest):
+class FactoryMetricsAndPerformanceMonitoringTests(BaseIntegrationTest):
     """
     Test factory metrics and performance monitoring for business optimization.
     
@@ -927,7 +927,7 @@ class TestFactoryMetricsAndPerformanceMonitoring(BaseIntegrationTest):
             await factory.shutdown()
 
 
-class TestAuditTrailAndComplianceReporting(BaseIntegrationTest):
+class AuditTrailAndComplianceReportingTests(BaseIntegrationTest):
     """
     Test audit trail and compliance reporting for enterprise requirements.
     

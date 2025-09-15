@@ -32,7 +32,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestWebSocketConnectionBusinessLogic:
+class WebSocketConnectionBusinessLogicTests:
     """Test WebSocket connection management business logic."""
 
     def test_websocket_message_creation_business_rules(self):
@@ -384,7 +384,7 @@ class TestWebSocketConnectionBusinessLogic:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestWebSocketNotificationBusinessLogic:
+class WebSocketNotificationBusinessLogicTests:
     """Test WebSocket notification system business logic."""
 
     @pytest.mark.asyncio

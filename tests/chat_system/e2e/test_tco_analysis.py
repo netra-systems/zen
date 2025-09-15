@@ -11,7 +11,7 @@ from typing import Dict, Any
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestTCOAnalysis:
+class TCOAnalysisTests:
     """Test TCO analysis end-to-end scenarios."""
     
     @pytest.mark.asyncio

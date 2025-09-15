@@ -27,7 +27,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestAuthServiceStartupOAuthFailures(SSotAsyncTestCase):
+class AuthServiceStartupOAuthFailuresTests(SSotAsyncTestCase):
     """Test auth service startup failures with missing OAuth configuration."""
 
     def setup_method(self, method=None):

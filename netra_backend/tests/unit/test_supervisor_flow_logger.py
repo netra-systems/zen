@@ -22,7 +22,7 @@ FlowState,
 SupervisorPipelineLogger,
 TodoState)
 
-class TestSupervisorFlowLogger:
+class SupervisorFlowLoggerTests:
     """Test cases for SupervisorFlowLogger functionality."""
 
     @pytest.fixture
@@ -204,7 +204,7 @@ class TestSupervisorFlowLogger:
                                                                                 flow_logger.log_agent_completion("agent1", True, 1.0)
                                                                                 assert flow_logger.flow_state == FlowState.AGENT_COMPLETED
 
-                                                                                class TestSupervisorFlowLoggerDataStructures:
+                                                                                class SupervisorFlowLoggerDataStructuresTests:
                                                                                     """Test data structure building methods."""
 
                                                                                     @pytest.fixture

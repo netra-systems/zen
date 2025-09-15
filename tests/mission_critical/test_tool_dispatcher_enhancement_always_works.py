@@ -64,7 +64,7 @@ class MockTool(BaseTool):
         return f"Mock async result for: {query}"
 
 
-class TestToolDispatcherEnhancementAlwaysWorks:
+class ToolDispatcherEnhancementAlwaysWorksTests:
     """CRITICAL: Validate tool dispatcher ALWAYS uses proper factory patterns."""
 
     @pytest.fixture(autouse=True)
@@ -386,7 +386,7 @@ if __name__ == "__main__":
     import asyncio
 
     async def run_tests():
-        test_instance = TestToolDispatcherEnhancementAlwaysWorks()
+        test_instance = ToolDispatcherEnhancementAlwaysWorksTests()
         test_instance.setup_method()
 
         print("Running Tool Dispatcher Enhancement Always Works Tests...")

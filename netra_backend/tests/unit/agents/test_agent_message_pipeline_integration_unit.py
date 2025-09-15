@@ -70,7 +70,7 @@ class MockMessagePipelineData:
     context_data: Dict[str, Any]
 
 
-class TestAgentMessagePipelineIntegration(SSotAsyncTestCase):
+class AgentMessagePipelineIntegrationTests(SSotAsyncTestCase):
     """Unit tests for agent message pipeline integration patterns"""
 
     def setup_method(self, method):

@@ -418,7 +418,7 @@ class RealAgentOrchestrationTester:
 
 
 @pytest.mark.e2e
-class TestRealAgentOrchestration(SSotBaseTestCase):
+class RealAgentOrchestrationTests(SSotBaseTestCase):
     """REAL E2E tests for agent orchestration with MANDATORY authentication and business value validation."""
     
     def setup_method(self):
@@ -713,7 +713,7 @@ class TestRealAgentOrchestration(SSotBaseTestCase):
 
 @pytest.mark.critical
 @pytest.mark.e2e
-class TestCriticalRealOrchestrationScenarios(SSotBaseTestCase):
+class CriticalRealOrchestrationScenariosTests(SSotBaseTestCase):
     """MISSION CRITICAL orchestration scenarios with REAL business value and MANDATORY authentication."""
     
     def setup_method(self):

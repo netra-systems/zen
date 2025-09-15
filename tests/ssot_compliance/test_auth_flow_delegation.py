@@ -32,7 +32,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestAuthFlowDelegationCompliance(BaseIntegrationTest):
+class AuthFlowDelegationComplianceTests(BaseIntegrationTest):
     """
     Test suite to validate auth flow delegation to auth service SSOT.
     

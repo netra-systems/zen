@@ -38,7 +38,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.e2e
-class TestGCPCloudRunTracebackE2E(SSotAsyncTestCase):
+class GCPCloudRunTracebackE2ETests(SSotAsyncTestCase):
     """End-to-End tests for Cloud Run traceback capture simulation."""
     
     def setup_method(self, method):

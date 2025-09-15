@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 
 
-class TestJWTTokenValidationCore(SSotBaseTestCase):
+class JWTTokenValidationCoreTests(SSotBaseTestCase):
     """
     Unit tests for JWT token validation business logic.
     Tests core token validation without external service dependencies.

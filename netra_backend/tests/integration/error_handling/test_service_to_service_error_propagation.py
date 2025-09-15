@@ -31,7 +31,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 logger = logging.getLogger(__name__)
 
-class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
+class ServiceToServiceErrorPropagationTests(SSotBaseTestCase):
     """
     INTEGRATION: Cross-Service Error Propagation Test Suite
     

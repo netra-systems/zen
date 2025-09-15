@@ -129,7 +129,7 @@ class MockWebSocketManager:
             self.user_connections[user_id]["active"] = False
 
 
-class TestAuthenticationSessionFlowIntegration:
+class AuthenticationSessionFlowIntegrationTests:
     """Integration tests for authentication flow with session management."""
     
     @pytest.fixture

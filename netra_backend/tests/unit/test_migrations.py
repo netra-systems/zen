@@ -9,7 +9,7 @@ from netra_backend.app.db.migrations.migration_runner import MigrationRunner
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestMigrations:
+class MigrationsTests:
     """Test suite for Migrations"""
 
     @pytest.fixture

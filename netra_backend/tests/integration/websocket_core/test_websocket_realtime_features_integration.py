@@ -24,7 +24,7 @@ from netra_backend.app.models import User, Thread
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestWebSocketRealTimeFeaturesIntegration(BaseIntegrationTest):
+class WebSocketRealTimeFeaturesIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket real-time features."""
     
     @pytest.fixture

@@ -70,7 +70,7 @@ class UserSession:
         self.is_active = False
 
 @pytest.mark.e2e
-class TestAuthenticatedMultiUserScenarios(BaseE2ETest):
+class AuthenticatedMultiUserScenariosTests(BaseE2ETest):
     """
     Authenticated Multi-User E2E Scenarios for Staging Environment.
     

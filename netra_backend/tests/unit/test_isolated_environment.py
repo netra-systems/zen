@@ -22,7 +22,7 @@ from unittest.mock import patch
 from shared.isolated_environment import IsolatedEnvironment, get_env, ValidationResult
 
 
-class TestIsolatedEnvironmentCore:
+class IsolatedEnvironmentCoreTests:
     """Test core IsolatedEnvironment functionality that ensures configuration consistency."""
     
     def setup_method(self):
@@ -224,7 +224,7 @@ class TestIsolatedEnvironmentCore:
         assert any("too short" in issue.lower() for issue in weak_password_result["issues"]), f"Validation must identify weak password: {weak_password_result['issues']}"
 
 
-class TestIsolatedEnvironmentValueSanitization:
+class IsolatedEnvironmentValueSanitizationTests:
     """Test environment value sanitization that prevents corruption and security issues."""
     
     def setup_method(self):

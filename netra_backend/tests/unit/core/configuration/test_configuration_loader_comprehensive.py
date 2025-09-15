@@ -39,7 +39,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.core.configuration.loader import ConfigurationLoader, get_configuration, reload_configuration, _configuration_loader
 from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig, NetraTestingConfig, ProductionConfig, StagingConfig
 
-class TestConfigurationLoaderInitialization(BaseTestCase):
+class ConfigurationLoaderInitializationTests(BaseTestCase):
     """Test ConfigurationLoader initialization and basic functionality."""
 
     def test_configuration_loader_creates_real_instance(self):
@@ -64,7 +64,7 @@ class TestConfigurationLoaderInitialization(BaseTestCase):
             assert hasattr(loader, method), f'Missing required method: {method}'
             assert callable(getattr(loader, method)), f'Method {method} is not callable'
 
-class TestConfigurationLoading(BaseTestCase):
+class ConfigurationLoadingTests(BaseTestCase):
     """Test configuration loading functionality."""
 
     def test_load_creates_real_config_instance(self):
@@ -105,7 +105,7 @@ class TestConfigurationLoading(BaseTestCase):
                 assert isinstance(config, AppConfig)
                 assert config.environment == env
 
-class TestEnvironmentDetection(BaseTestCase):
+class EnvironmentDetectionTests(BaseTestCase):
     """Test environment detection and environment-specific methods."""
 
     def test_get_environment_returns_current_environment(self):
@@ -159,7 +159,7 @@ class TestEnvironmentDetection(BaseTestCase):
             assert loader.is_production() is False
             assert loader.is_development() is False
 
-class TestConfigurationCreation(BaseTestCase):
+class ConfigurationCreationTests(BaseTestCase):
     """Test configuration creation for different environments."""
 
     def test_creates_development_config_for_development_environment(self):
@@ -212,7 +212,7 @@ class TestConfigurationCreation(BaseTestCase):
         assert config is not None
         assert isinstance(config, AppConfig)
 
-class TestReloadFunctionality(BaseTestCase):
+class ReloadFunctionalityTests(BaseTestCase):
     """Test configuration reload and cache management."""
 
     def test_reload_without_force_returns_cached_config(self):
@@ -254,7 +254,7 @@ class TestReloadFunctionality(BaseTestCase):
         new_cache_info = loader.load.cache_info()
         assert new_cache_info.hits == 0
 
-class TestDatabaseURLAccess(BaseTestCase):
+class DatabaseURLAccessTests(BaseTestCase):
     """Test database URL access functionality."""
 
     def test_get_database_url_returns_postgres_url_by_default(self):
@@ -283,7 +283,7 @@ class TestDatabaseURLAccess(BaseTestCase):
             assert url == 'clickhouse://localhost:8123/analytics'
             mock_config.get_clickhouse_url.assert_called_once()
 
-class TestServiceConfigurationAccess(BaseTestCase):
+class ServiceConfigurationAccessTests(BaseTestCase):
     """Test service-specific configuration access."""
 
     def test_get_service_config_returns_redis_configuration(self):
@@ -348,7 +348,7 @@ class TestServiceConfigurationAccess(BaseTestCase):
             unknown_config = loader.get_service_config('unknown_service')
             assert unknown_config == {}
 
-class TestConfigurationValidation(BaseTestCase):
+class ConfigurationValidationTests(BaseTestCase):
     """Test configuration validation functionality."""
 
     def test_validate_returns_true_for_valid_configuration(self):
@@ -372,7 +372,7 @@ class TestConfigurationValidation(BaseTestCase):
             is_valid = loader.validate()
             assert is_valid is False
 
-class TestGlobalFunctionAccess(BaseTestCase):
+class GlobalFunctionAccessTests(BaseTestCase):
     """Test global configuration access functions."""
 
     def test_get_configuration_returns_app_config(self):
@@ -410,7 +410,7 @@ class TestGlobalFunctionAccess(BaseTestCase):
         assert _configuration_loader is not None
         assert isinstance(_configuration_loader, ConfigurationLoader)
 
-class TestErrorHandlingAndEdgeCases(BaseTestCase):
+class ErrorHandlingAndEdgeCasesTests(BaseTestCase):
     """Test error handling and edge case scenarios."""
 
     def test_config_creation_failure_fallback(self):
@@ -464,7 +464,7 @@ class TestErrorHandlingAndEdgeCases(BaseTestCase):
         for config in results[1:]:
             assert config is first_config
 
-class TestPerformanceAndMemory(BaseTestCase):
+class PerformanceAndMemoryTests(BaseTestCase):
     """Test performance characteristics and memory usage."""
 
     def test_configuration_loading_performance(self):

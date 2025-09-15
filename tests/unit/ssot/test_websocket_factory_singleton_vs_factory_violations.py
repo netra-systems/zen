@@ -23,7 +23,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestWebSocketFactorySingletonVsFactoryViolations(SSotBaseTestCase):
+class WebSocketFactorySingletonVsFactoryViolationsTests(SSotBaseTestCase):
     """Test suite to detect singleton pattern violations (SHOULD FAIL)"""
 
     def setUp(self):

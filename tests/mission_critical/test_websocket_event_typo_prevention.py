@@ -62,7 +62,7 @@ class TypoTestCase:
     revenue_risk: str
 
 
-class TestWebSocketEventTypoPrevention(SSotAsyncTestCase):
+class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
     """
     Mission Critical Tests for WebSocket Event Typo Prevention.
     
@@ -744,7 +744,7 @@ class TestWebSocketEventTypoPrevention(SSotAsyncTestCase):
         super().teardown_method(method)
 
 
-class TestWebSocketEventTypoProductionSimulation(SSotAsyncTestCase):
+class WebSocketEventTypoProductionSimulationTests(SSotAsyncTestCase):
     """
     Production simulation tests for typo scenarios based on real incidents.
     
@@ -841,10 +841,10 @@ def test_suite():
     suite = unittest.TestSuite()
     
     # Add main typo prevention test class
-    suite.addTests(loader.loadTestsFromTestCase(TestWebSocketEventTypoPrevention))
+    suite.addTests(loader.loadTestsFromTestCase(WebSocketEventTypoPreventionTests))
     
     # Add production simulation test class
-    suite.addTests(loader.loadTestsFromTestCase(TestWebSocketEventTypoProductionSimulation))
+    suite.addTests(loader.loadTestsFromTestCase(WebSocketEventTypoProductionSimulationTests))
     
     return suite
 

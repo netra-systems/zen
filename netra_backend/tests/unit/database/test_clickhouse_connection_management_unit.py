@@ -17,7 +17,7 @@ from unittest.mock import call
 from netra_backend.app.db.clickhouse import get_clickhouse_client, _create_real_client, _test_and_yield_client, ClickHouseService
 from test_framework.base_integration_test import BaseIntegrationTest
 
-class TestClickHouseConnectionManagementUnit(BaseIntegrationTest):
+class ClickHouseConnectionManagementUnitTests(BaseIntegrationTest):
     """Test ClickHouse connection management unit functionality."""
 
     @pytest.mark.unit
@@ -119,7 +119,7 @@ class TestClickHouseConnectionManagementUnit(BaseIntegrationTest):
                 pass
             mock_cleanup.assert_called_once_with(mock_client)
 
-class TestClickHouseConnectionHealthUnit(BaseIntegrationTest):
+class ClickHouseConnectionHealthUnitTests(BaseIntegrationTest):
     """Test ClickHouse connection health monitoring."""
 
     @pytest.mark.unit
@@ -182,7 +182,7 @@ class TestClickHouseConnectionHealthUnit(BaseIntegrationTest):
         assert 'circuit_breaker_state' in metrics
         assert 'cache_stats' in metrics
 
-class TestClickHouseConnectionRecoveryUnit(BaseIntegrationTest):
+class ClickHouseConnectionRecoveryUnitTests(BaseIntegrationTest):
     """Test ClickHouse connection recovery and resilience patterns."""
 
     @pytest.mark.unit

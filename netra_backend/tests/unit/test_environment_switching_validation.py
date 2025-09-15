@@ -17,7 +17,7 @@ from test_framework.base import BaseTestCase
 from shared.isolated_environment import IsolatedEnvironment, EnvironmentValidator
 
 
-class TestEnvironmentSwitchingValidation(BaseTestCase):
+class EnvironmentSwitchingValidationTests(BaseTestCase):
     """Test environment switching and validation logic prevents configuration corruption."""
     
     def setup_method(self):

@@ -25,7 +25,7 @@ from netra_backend.app.websocket_core.user_context_extractor import UserContextE
 
 
 @pytest.mark.integration
-class TestWebSocketJWTAuthFix:
+class WebSocketJWTAuthFixTests:
     """Test class to reproduce and verify WebSocket JWT authentication fix."""
 
     async def test_reproduce_jwt_secret_mismatch(self):
@@ -273,7 +273,7 @@ class TestWebSocketJWTAuthFix:
 
 if __name__ == "__main__":
     # Run tests directly for debugging
-    test = TestWebSocketJWTAuthFix()
+    test = WebSocketJWTAuthFixTests()
     
     print("Running WebSocket JWT Authentication Bug Reproduction Tests")
     print("=" * 60)

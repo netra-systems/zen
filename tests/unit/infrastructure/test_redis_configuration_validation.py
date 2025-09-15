@@ -30,7 +30,7 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.core.backend_environment import BackendEnvironment
 
-class TestRedisConfigurationValidation:
+class RedisConfigurationValidationTests:
     """
     Unit Test Suite: Redis Configuration Validation for GCP Infrastructure
     

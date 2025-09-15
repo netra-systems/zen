@@ -29,7 +29,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.e2e
-class TestAgentOrchestrationAuthenticatedE2E:
+class AgentOrchestrationAuthenticatedE2ETests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

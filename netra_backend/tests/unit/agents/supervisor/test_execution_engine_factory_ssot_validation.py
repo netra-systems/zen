@@ -34,7 +34,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
-class TestExecutionEngineFactorySSotValidation:
+class ExecutionEngineFactorySSotValidationTests:
     """Test SSOT validation failures in ExecutionEngineFactory."""
     
     def test_factory_requires_websocket_bridge_ssot_validation(self):

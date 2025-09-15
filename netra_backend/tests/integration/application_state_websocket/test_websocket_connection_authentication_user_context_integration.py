@@ -26,7 +26,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
-class TestWebSocketConnectionAuthenticationUserContextIntegration(BaseIntegrationTest):
+class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrationTest):
     """Test WebSocket connection authentication flow with comprehensive user context state validation."""
     
     def _create_test_jwt_token(self, user_id: str, additional_claims: Optional[Dict] = None) -> str:

@@ -130,7 +130,7 @@ class RealAuthTestClient:
             raise ValueError('No JWT token available')
         return {'Authorization': f'Bearer {self.jwt_token}', 'X-User-ID': self.user_info.get('user_id') if self.user_info else 'unknown'}
 
-class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
+class AuthenticationIntegrationAgentWorkflowsTests(SSotAsyncTestCase):
     """
     Comprehensive tests for authentication integration in agent workflows.
 

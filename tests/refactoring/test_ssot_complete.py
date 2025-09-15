@@ -21,7 +21,7 @@ from tests.refactoring.continuous_validation import RefactoringValidator
 from tests.refactoring.legacy_file_tracker import LegacyFileTracker
 from tests.refactoring.import_scanner import LegacyImportScanner
 
-class TestSSOTRefactoringComplete:
+class SSOTRefactoringCompleteTests:
     """Comprehensive validation of SSOT refactoring completion."""
 
     @classmethod

@@ -9,7 +9,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 
-class TestAdvancedLLMIntegration:
+class AdvancedLLMIntegrationTests:
     """Advanced LLM agent integration tests."""
 
     @pytest.mark.asyncio

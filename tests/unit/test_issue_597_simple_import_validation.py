@@ -17,7 +17,7 @@ import importlib
 
 
 @pytest.mark.unit
-class TestIssue597SimpleImportValidation(unittest.TestCase):
+class Issue597SimpleImportValidationTests(unittest.TestCase):
     """
     Simple tests to validate Issue #597 import problems.
     
@@ -123,7 +123,7 @@ class TestIssue597SimpleImportValidation(unittest.TestCase):
 
 
 @pytest.mark.unit
-class TestIssue597RealWorldScenarios(unittest.TestCase):
+class Issue597RealWorldScenariosTests(unittest.TestCase):
     """
     Test real-world scenarios that are failing in the codebase.
     """

@@ -139,7 +139,7 @@ class MockAgent(BaseAgent if BaseAgent else object):
             return error_result
 
 
-class TestWebSocketSSotAgentIntegrationValidation(SSotAsyncTestCase):
+class WebSocketSSotAgentIntegrationValidationTests(SSotAsyncTestCase):
     """Mission Critical: WebSocket SSOT Agent Integration Validation
     
     This test validates that WebSocket SSOT consolidation maintains proper

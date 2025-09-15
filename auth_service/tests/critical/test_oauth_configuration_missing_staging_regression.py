@@ -36,7 +36,7 @@ from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider
 
 @pytest.mark.staging
 @pytest.mark.critical
-class TestOAuthConfigurationMissingRegression:
+class OAuthConfigurationMissingRegressionTests:
     """Tests that replicate OAuth configuration issues from staging audit"""
 
     def test_google_oauth_client_id_missing_staging_regression(self):
@@ -299,7 +299,7 @@ class TestOAuthConfigurationMissingRegression:
 
 @pytest.mark.staging
 @pytest.mark.critical
-class TestOAuthServiceIntegrationRegression:
+class OAuthServiceIntegrationRegressionTests:
     """Tests OAuth service integration with proper mocking"""
 
     def test_auth_service_oauth_providers_availability(self):

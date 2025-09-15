@@ -62,7 +62,7 @@ class LegacyPatternAgent(BaseAgent):
         """Legacy-style implementation for validation testing."""
         return {'status': 'legacy_success', 'response': f'Legacy: {request}'}
 
-class TestBaseAgentMigrationValidation(SSotBaseTestCase):
+class BaseAgentMigrationValidationTests(SSotBaseTestCase):
     """Test BaseAgent migration status and validation functionality."""
 
     def setUp(self):
@@ -184,7 +184,7 @@ class TestBaseAgentMigrationValidation(SSotBaseTestCase):
         else:
             self.assertGreater(len(completeness_result['warnings']), 0)
 
-class TestBaseAgentContextCreation(SSotBaseTestCase):
+class BaseAgentContextCreationTests(SSotBaseTestCase):
     """Test BaseAgent context-based creation and factory patterns."""
 
     def setUp(self):
@@ -226,7 +226,7 @@ class TestBaseAgentContextCreation(SSotBaseTestCase):
         except (TypeError, ValueError, InvalidContextError):
             pass
 
-class TestBaseAgentMigrationValidationAsync(SSotAsyncTestCase):
+class BaseAgentMigrationValidationAsyncTests(SSotAsyncTestCase):
     """Test BaseAgent async migration validation functionality."""
 
     async def setUp(self):

@@ -35,7 +35,7 @@ except ImportError:
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestMultiUserAgentIsolation(SSotAsyncTestCase):
+class MultiUserAgentIsolationTests(SSotAsyncTestCase):
     """Test multi-user agent isolation with SSOT registry patterns."""
 
     def setUp(self):
@@ -565,7 +565,7 @@ if __name__ == '__main__':
     import unittest
 
     # Run tests
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestMultiUserAgentIsolation)
+    suite = unittest.TestLoader().loadTestsFromTestCase(MultiUserAgentIsolationTests)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
 

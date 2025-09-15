@@ -35,7 +35,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.e2e
-class TestWebSocketAgentEventsE2E:
+class WebSocketAgentEventsE2ETests:
     """End-to-end tests for WebSocket agent events."""
     
     @pytest.fixture

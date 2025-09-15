@@ -12,7 +12,7 @@ from typing import Any, Dict
 import pytest
 from netra_backend.app.schemas import StreamChunk, StreamComplete, WebSocketMessage, WebSocketMessageType
 
-class TestWebSocketMessageSerialization:
+class WebSocketMessageSerializationTests:
     """Test WebSocket message serialization."""
 
     def test_websocket_message_serialization(self) -> None:
@@ -55,7 +55,7 @@ class TestWebSocketMessageSerialization:
         assert ping_json['type'] == 'ping'
         assert pong_json['type'] == 'pong'
 
-class TestStreamingResponseSerialization:
+class StreamingResponseSerializationTests:
     """Test streaming response serialization."""
 
     def test_stream_chunk_structure(self) -> None:
@@ -99,7 +99,7 @@ class TestStreamingResponseSerialization:
         assert json_data['chunk_id'] == 'error_chunk'
         assert json_data['is_final'] is True
 
-class TestRealtimeMessageFlow:
+class RealtimeMessageFlowTests:
     """Test realistic real-time message flow scenarios."""
 
     def test_agent_lifecycle_websocket_flow(self) -> None:

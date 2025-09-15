@@ -46,7 +46,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
-class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
+class GCPLoadBalancerHeaderValidationTests(SSotBaseTestCase):
     """
     CRITICAL E2E Tests for GCP Load Balancer Header Forwarding
     
@@ -388,7 +388,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
         logger.info(' PASS:  CRITICAL TEST PASSED: Multi-user isolation preserved through GCP Load Balancer')
 
 @pytest.mark.e2e
-class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
+class GCPLoadBalancerConfigurationTests(SSotBaseTestCase):
     """
     Tests for GCP Load Balancer configuration validation.
     

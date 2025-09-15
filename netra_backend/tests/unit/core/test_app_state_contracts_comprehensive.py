@@ -40,7 +40,7 @@ from netra_backend.app.services.websocket_connection_pool import WebSocketConnec
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 from netra_backend.app.llm.llm_manager import LLMManager
 
-class TestAppStateContractValidator(BaseIntegrationTest):
+class AppStateContractValidatorTests(BaseIntegrationTest):
     """Comprehensive tests for AppStateContractValidator core functionality."""
 
     def setup_method(self):
@@ -189,7 +189,7 @@ class TestAppStateContractValidator(BaseIntegrationTest):
             impact = results['business_impact'][0]
             assert impact['severity'] == case['expected_severity']
 
-class TestValidatorClasses(BaseIntegrationTest):
+class ValidatorClassesTests(BaseIntegrationTest):
     """Test individual validator classes for component-specific validation logic."""
 
     def setup_method(self):
@@ -320,7 +320,7 @@ class TestValidatorClasses(BaseIntegrationTest):
         assert len(result.warnings) > 0
         assert any(('missing expected method: add_connection' in warning for warning in result.warnings))
 
-class TestContractFramework(BaseIntegrationTest):
+class ContractFrameworkTests(BaseIntegrationTest):
     """Test contract framework components including contracts, results, and exceptions."""
 
     def setup_method(self):
@@ -381,7 +381,7 @@ class TestContractFramework(BaseIntegrationTest):
         validator = CompleteValidator()
         assert validator is not None
 
-class TestUtilityFunctions(BaseIntegrationTest):
+class UtilityFunctionsTests(BaseIntegrationTest):
     """Test utility functions and main entry points."""
 
     def setup_method(self):
@@ -453,7 +453,7 @@ class TestUtilityFunctions(BaseIntegrationTest):
         assert 'RECOMMENDED ACTIONS:' in report
         assert 'smd.py' in report
 
-class TestErrorHandlingAndBusinessImpact(BaseIntegrationTest):
+class ErrorHandlingAndBusinessImpactTests(BaseIntegrationTest):
     """Test comprehensive error handling and business impact assessment scenarios."""
 
     def setup_method(self):
@@ -519,7 +519,7 @@ class TestErrorHandlingAndBusinessImpact(BaseIntegrationTest):
         assert len(result.warnings) > 0
         assert any(('missing expected method' in warning for warning in result.warnings))
 
-class TestPerformanceValidation(BaseIntegrationTest):
+class PerformanceValidationTests(BaseIntegrationTest):
     """Test performance aspects of contract validation to ensure sub-100ms validation times."""
 
     def setup_method(self):
@@ -578,7 +578,7 @@ class TestPerformanceValidation(BaseIntegrationTest):
         assert enforcement_time < 200
         self.logger.info(f'Contract enforcement completed in {enforcement_time:.2f}ms')
 
-class TestRealSystemIntegration(BaseIntegrationTest):
+class RealSystemIntegrationTests(BaseIntegrationTest):
     """Test contract validation against more realistic scenarios."""
 
     def setup_method(self):

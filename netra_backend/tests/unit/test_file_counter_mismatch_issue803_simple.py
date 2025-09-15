@@ -10,7 +10,7 @@ from netra_backend.app.services.corpus_service import CorpusService
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestFileCounterMismatchConcept(SSotAsyncTestCase):
+class FileCounterMismatchConceptTests(SSotAsyncTestCase):
     """Simple demonstration of the file counter mismatch issue"""
 
     async def test_upload_methods_demonstrate_mismatch_concept(self):
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     # Run the conceptual demonstration
     import asyncio
     
-    test = TestFileCounterMismatchConcept()
+    test = FileCounterMismatchConceptTests()
     
     async def run_concept_tests():
         print("=== ISSUE #803: FILE COUNTER MISMATCH DEMONSTRATION ===")

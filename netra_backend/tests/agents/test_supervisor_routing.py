@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
 """
 Test module: Supervisor Agent Routing
 Split from large test file for architecture compliance
-Test classes: TestSupervisorConsolidatedAgentRouting, TestSupervisorErrorCascadePrevention
+Test classes: SupervisorConsolidatedAgentRoutingTests, SupervisorErrorCascadePreventionTests
 """""
 
 import sys
@@ -61,7 +61,7 @@ setup_triage_agent_mock,
 # Install extension methods for testing
 install_supervisor_extensions()
 
-class TestSupervisorConsolidatedAgentRouting:
+class SupervisorConsolidatedAgentRoutingTests:
     """Test 1: Test multi-agent routing decisions based on message content"""
     @pytest.mark.asyncio
     async def test_routes_to_triage_for_classification(self):
@@ -154,7 +154,7 @@ class TestSupervisorConsolidatedAgentRouting:
                         assert_agent_called(supervisor, "data")  # Should be called due to requires_data
                         assert_agent_called(supervisor, "optimization")
 
-                        class TestSupervisorErrorCascadePrevention:
+                        class SupervisorErrorCascadePreventionTests:
                             """Test 2: Test error handling when sub-agents fail"""
                             @pytest.mark.asyncio
                             async def test_prevents_cascade_on_single_agent_failure(self):

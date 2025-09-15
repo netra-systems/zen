@@ -27,7 +27,7 @@ from tests.e2e.fixtures.error_propagation_fixtures import (
 
 @pytest.mark.asyncio
 @pytest.mark.e2e  
-class TestNetworkFailureSimulation:
+class NetworkFailureSimulationTests:
     """Test network failure simulation and recovery."""
     
     @pytest.mark.resilience

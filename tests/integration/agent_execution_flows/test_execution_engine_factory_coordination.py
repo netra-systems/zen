@@ -28,7 +28,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
-class TestExecutionEngineFactoryCoordination(BaseIntegrationTest):
+class ExecutionEngineFactoryCoordinationTests(BaseIntegrationTest):
     """Integration tests for execution engine factory coordination."""
 
     @pytest.mark.integration

@@ -177,7 +177,7 @@ class ConcurrentTestMetrics:
 
 
 @pytest.mark.mission_critical
-class TestRealConcurrentUserIsolation:
+class RealConcurrentUserIsolationTests:
     """
     Mission Critical test suite for concurrent user isolation using REAL services.
     

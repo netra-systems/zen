@@ -40,7 +40,7 @@ from sqlalchemy.exc import OperationalError, TimeoutError as SQLTimeoutError
 logger = logging.getLogger(__name__)
 
 
-class TestIssue1263CloudSQLConnectivityIntegration(SSotAsyncTestCase):
+class Issue1263CloudSQLConnectivityIntegrationTests(SSotAsyncTestCase):
     """Integration tests for Issue #1263 using real Cloud SQL connectivity."""
 
     async def asyncSetUp(self):
@@ -388,7 +388,7 @@ class TestIssue1263CloudSQLConnectivityIntegration(SSotAsyncTestCase):
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestIssue1263DatabaseManagerIntegration(SSotAsyncTestCase):
+class Issue1263DatabaseManagerIntegrationTests(SSotAsyncTestCase):
     """Integration tests for DatabaseManager with Issue #1263 scenario."""
 
     async def test_database_manager_initialization_vpc_timing(self):

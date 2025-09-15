@@ -26,7 +26,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestWorkflowOrchestratorUserIsolation(SSotAsyncTestCase):
+class WorkflowOrchestratorUserIsolationTests(SSotAsyncTestCase):
     """Integration tests for WorkflowOrchestrator user isolation with SSOT compliance.
     
     These tests should FAIL initially, proving user isolation violations exist.

@@ -38,7 +38,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
-class TestExecutionEngineAgentInstanceFactoryDuplication(BaseIntegrationTest):
+class ExecutionEngineAgentInstanceFactoryDuplicationTests(BaseIntegrationTest):
     """Test SSOT violations between ExecutionEngineFactory and AgentInstanceFactory."""
     
     @pytest.mark.integration

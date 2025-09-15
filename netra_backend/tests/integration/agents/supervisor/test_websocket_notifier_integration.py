@@ -18,7 +18,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from test_framework.ssot.websocket import create_test_websocket_manager
 
 
-class TestWebSocketNotifierIntegration:
+class WebSocketNotifierIntegrationTests:
     """Integration tests for WebSocketNotifier with real WebSocket components."""
 
     @pytest.fixture

@@ -136,7 +136,7 @@ class MockConnectionManager:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestWebSocketAgentIntegrationComprehensive:
+class WebSocketAgentIntegrationComprehensiveTests:
     """Comprehensive WebSocket agent integration tests."""
     
     @pytest.fixture

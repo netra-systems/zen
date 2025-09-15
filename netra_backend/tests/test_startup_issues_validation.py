@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 import pytest
 
-class TestStartupCheckResultImport:
+class StartupCheckResultImportTests:
     """Test that StartupCheckResult is properly imported"""
 
     def test_startup_check_result_has_correct_signature(self):
@@ -40,7 +40,7 @@ class TestStartupCheckResultImport:
             assert hasattr(result, 'name'), "Result should have 'name' attribute"
             assert result.name == 'environment_variables'
 
-class TestExecutionMonitor:
+class ExecutionMonitorTests:
     """Test that ExecutionMonitor has required methods"""
 
     def test_execution_monitor_has_start_monitoring(self):
@@ -64,7 +64,7 @@ class TestExecutionMonitor:
         else:
             pytest.fail('ExecutionMonitor missing start_monitoring method')
 
-class TestSchemaValidationService:
+class SchemaValidationServiceTests:
     """Test schema validation service errors"""
 
     @pytest.mark.asyncio
@@ -103,7 +103,7 @@ class TestSchemaValidationService:
         result = await run_comprehensive_validation(mock_engine)
         assert isinstance(result, bool)
 
-class TestStartupIntegration:
+class StartupIntegrationTests:
     """Test the full startup process with all components"""
 
     @pytest.mark.asyncio

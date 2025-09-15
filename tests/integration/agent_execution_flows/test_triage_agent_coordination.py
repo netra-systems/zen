@@ -28,7 +28,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
-class TestTriageAgentCoordination(BaseIntegrationTest):
+class TriageAgentCoordinationTests(BaseIntegrationTest):
     """Integration tests for triage agent coordination."""
 
     @pytest.mark.integration

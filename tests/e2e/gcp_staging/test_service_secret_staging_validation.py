@@ -27,7 +27,7 @@ from shared.isolated_environment import IsolatedEnvironment
 logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
-class TestServiceSecretStagingValidation(SSotAsyncTestCase):
+class ServiceSecretStagingValidationTests(SSotAsyncTestCase):
     """
     E2E tests validating Issue #1037 in GCP staging environment.
     These tests will FAIL if the regression exists in actual deployment.

@@ -103,16 +103,16 @@ class ConnectionHandlerTests(SSotBaseTestCase):
         problematic_content = '''
 """Temporary file with problematic Test* classes."""
 
-class TestProblematicClass:
+class ProblematicClassTests:
     """This causes collection issues - no proper inheritance."""
     pass
 
-class TestAnotherProblematic:
+class AnotherProblematicTests:
     """This also causes issues - pytest tries to collect it."""
     def some_method(self):
         pass
 
-class TestConfusingClass:
+class ConfusingClassTests:
     """Another problematic class."""
     def __init__(self):
         pass

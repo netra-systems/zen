@@ -16,7 +16,7 @@ import sys
 import unittest
 from pathlib import Path
 
-class TestIssue1228RegressionPrevention(unittest.TestCase):
+class Issue1228RegressionPreventionTests(unittest.TestCase):
     """Prevent regression of Issue #1228 unit test collection failures."""
 
     def test_execution_engine_comprehensive_test_collection(self):

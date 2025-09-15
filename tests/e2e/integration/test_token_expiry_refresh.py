@@ -27,7 +27,7 @@ from tests.e2e.token_lifecycle_helpers import (
 )
 
 @pytest.mark.e2e
-class TestTokenExpiryRefreshE2E:
+class TokenExpiryRefreshE2ETests:
     """E2E test for seamless JWT token refresh during active sessions."""
     
     # @pytest.fixture

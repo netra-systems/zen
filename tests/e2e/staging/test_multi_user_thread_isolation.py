@@ -60,7 +60,7 @@ from test_framework.websocket_helpers import (
 )
 
 
-class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
+class MultiUserThreadIsolationStagingTests(BaseIntegrationTest):
     """
     Comprehensive E2E test suite for multi-user thread isolation in staging environment.
     

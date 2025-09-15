@@ -15,7 +15,7 @@ from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
 @pytest.mark.e2e
-class TestTokenExpiryUnified:
+class TokenExpiryUnifiedTests:
     """Unified token expiry validation across all services."""
     
     @pytest.fixture
@@ -39,7 +39,7 @@ class TestTokenExpiryUnified:
 
 
 @pytest.mark.e2e
-class TestTokenExpiryBasicFlow(TestTokenExpiryUnified):
+class TokenExpiryBasicFlowTests(TokenExpiryUnifiedTests):
     """Test 1: Token works before expiry, fails after."""
     
     @pytest.mark.asyncio
@@ -84,7 +84,7 @@ class TestTokenExpiryBasicFlow(TestTokenExpiryUnified):
 
 
 @pytest.mark.e2e
-class TestUnifiedServiceRejection(TestTokenExpiryUnified):
+class UnifiedServiceRejectionTests(TokenExpiryUnifiedTests):
     """Test 2: All services reject expired tokens consistently."""
     
     @pytest.mark.asyncio
@@ -113,7 +113,7 @@ class TestUnifiedServiceRejection(TestTokenExpiryUnified):
 
 
 @pytest.mark.e2e
-class TestWebSocketAutoDisconnect(TestTokenExpiryUnified):
+class WebSocketAutoDisconnectTests(TokenExpiryUnifiedTests):
     """Test 3: WebSocket disconnects on token expiry."""
     
     @pytest.mark.asyncio
@@ -154,7 +154,7 @@ class TestWebSocketAutoDisconnect(TestTokenExpiryUnified):
 
 
 @pytest.mark.e2e
-class TestRefreshTokenFlow(TestTokenExpiryUnified):
+class RefreshTokenFlowTests(TokenExpiryUnifiedTests):
     """Test 4: Refresh token renews access properly."""
     
     @pytest.mark.asyncio
@@ -198,7 +198,7 @@ class TestRefreshTokenFlow(TestTokenExpiryUnified):
 
 
 @pytest.mark.e2e
-class TestGracePeriodHandling(TestTokenExpiryUnified):
+class GracePeriodHandlingTests(TokenExpiryUnifiedTests):
     """Test 5: Grace period handling for token expiry."""
     
     @pytest.mark.asyncio
@@ -234,7 +234,7 @@ class TestGracePeriodHandling(TestTokenExpiryUnified):
 
 
 @pytest.mark.e2e
-class TestExpiryPerformance(TestTokenExpiryUnified):
+class ExpiryPerformanceTests(TokenExpiryUnifiedTests):
     """Test 6 & 7: Performance requirements for token expiry."""
     
     @pytest.mark.asyncio

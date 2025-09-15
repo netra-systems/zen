@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
 @pytest.mark.integration
-class TestWebSocketManagerSSOTComplianceIntegration(SSotAsyncTestCase):
+class WebSocketManagerSSOTComplianceIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket Manager SSOT compliance with staging services."""
 
     @classmethod

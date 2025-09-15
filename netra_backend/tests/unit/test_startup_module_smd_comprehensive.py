@@ -47,7 +47,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app import startup_module
 
 
-class TestStartupModuleSMDComprehensive(BaseTestCase):
+class StartupModuleSMDComprehensiveTests(BaseTestCase):
     """
     Comprehensive SMD unit tests for startup_module.py with business value focus.
     
@@ -1681,7 +1681,7 @@ class TestStartupModuleSMDComprehensive(BaseTestCase):
 # SECTION 11: INTEGRATION HELPER TESTS FOR COMPLETENESS
 # =============================================================================
 
-class TestStartupModuleSMDIntegrationHelpers(BaseTestCase):
+class StartupModuleSMDIntegrationHelpersTests(BaseTestCase):
     """
     Additional comprehensive tests for startup module integration helpers.
     

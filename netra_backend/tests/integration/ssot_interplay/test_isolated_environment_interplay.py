@@ -45,7 +45,7 @@ from netra_backend.app.services.agent_service_factory import get_agent_service
 from netra_backend.app.websocket_core import create_websocket_manager
 
 
-class TestIsolatedEnvironmentInterplay(BaseIntegrationTest):
+class IsolatedEnvironmentInterplayTests(BaseIntegrationTest):
     """Integration tests for IsolatedEnvironment SSOT interactions."""
 
     def setup_method(self):

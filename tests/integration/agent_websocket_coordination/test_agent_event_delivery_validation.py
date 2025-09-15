@@ -93,7 +93,7 @@ class MockAgentInstanceFactory:
         return mock_agent
 
 
-class TestAgentEventDeliveryValidation(SSotAsyncTestCase):
+class AgentEventDeliveryValidationTests(SSotAsyncTestCase):
     """Test Agent Event Delivery Validation."""
     
     @pytest.mark.integration

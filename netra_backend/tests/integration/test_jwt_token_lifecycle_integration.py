@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.real_services_test_fixtures import real_services_fixture
 
 
-class TestJWTTokenLifecycleIntegration(SSotBaseTestCase):
+class JWTTokenLifecycleIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for JWT token lifecycle with real auth service.
     Tests token operations against real authentication infrastructure.

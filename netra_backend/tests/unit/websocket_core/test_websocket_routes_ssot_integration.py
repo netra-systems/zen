@@ -58,7 +58,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.testclient import TestClient
 
 
-class TestWebSocketRoutesCompatibilityLayer(SSotBaseTestCase):
+class WebSocketRoutesCompatibilityLayerTests(SSotBaseTestCase):
     """
     Comprehensive unit tests for WebSocket routes compatibility layer.
     
@@ -241,7 +241,7 @@ class TestWebSocketRoutesCompatibilityLayer(SSotBaseTestCase):
         assert consolidation_mentioned, "Docstring should mention consolidation scope (4 competing routes)"
 
 
-class TestWebSocketRoutesSSOTFunctionality(SSotBaseTestCase):
+class WebSocketRoutesSSOTFunctionalityTests(SSotBaseTestCase):
     """
     Functional tests to ensure SSOT routes work correctly.
     
@@ -417,7 +417,7 @@ class TestWebSocketRoutesSSOTFunctionality(SSotBaseTestCase):
         assert all_size < 2000, f"__all__ list too large: {all_size} bytes"
 
 
-class TestWebSocketRoutesGoldenPathIntegration(SSotBaseTestCase):
+class WebSocketRoutesGoldenPathIntegrationTests(SSotBaseTestCase):
     """
     Integration tests to ensure Golden Path functionality is preserved.
     
@@ -551,7 +551,7 @@ class TestWebSocketRoutesGoldenPathIntegration(SSotBaseTestCase):
         assert business_value_mentioned, f"Docstring should mention business value. Found business terms: {[term for term in business_value_terms if term in docstring_lower]}"
 
 
-class TestWebSocketRoutesErrorHandling(SSotBaseTestCase):
+class WebSocketRoutesErrorHandlingTests(SSotBaseTestCase):
     """
     Error handling tests for WebSocket routes compatibility layer.
     

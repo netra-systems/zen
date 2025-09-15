@@ -11,7 +11,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 @pytest.mark.integration
-class TestIssue585SimpleSerializationValidation:
+class Issue585SimpleSerializationValidationTests:
     """Simple validation tests for Issue #585 pickle serialization errors."""
 
     def test_agent_pipeline_context_serialization_issue(self):

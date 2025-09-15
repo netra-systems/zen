@@ -45,7 +45,7 @@ else:
     DIRECT_IMPORT_AVAILABLE = False
     DIRECT_IMPORT_ERROR = 'WebSocketContext not available'
 
-class TestWebSocketContextImportRegression:
+class WebSocketContextImportRegressionTests:
     """Test WebSocketContext import regression.
     
     These tests MUST FAIL initially to prove the regression exists.

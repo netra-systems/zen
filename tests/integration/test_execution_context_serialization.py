@@ -27,7 +27,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext, upgr
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 
 @pytest.mark.integration
-class TestContextSerializationIntegration:
+class ContextSerializationIntegrationTests:
     """Test context serialization integration with real execution patterns."""
 
     @pytest.fixture
@@ -108,7 +108,7 @@ class TestContextSerializationIntegration:
         assert context.user_id == real_user_context.user_id
 
 @pytest.mark.integration
-class TestContextQueueIntegration:
+class ContextQueueIntegrationTests:
     """Test ContextQueue integration for background task processing."""
 
     @pytest.fixture
@@ -172,7 +172,7 @@ class TestContextQueueIntegration:
         asyncio.run(test_queue_clear())
 
 @pytest.mark.integration
-class TestStronglyTypedContextSerialization:
+class StronglyTypedContextSerializationTests:
     """Test serialization integration with strongly typed contexts."""
 
     def test_strongly_typed_context_upgrade_serialization(self, strongly_typed_context):
@@ -204,7 +204,7 @@ class TestStronglyTypedContextSerialization:
             assert isinstance(typed_again.websocket_client_id, WebSocketID)
 
 @pytest.mark.integration
-class TestExecutionBoundaryContextSerialization:
+class ExecutionBoundaryContextSerializationTests:
     """Test context serialization across execution boundaries."""
 
     @pytest.mark.asyncio

@@ -48,7 +48,7 @@ class IsolatedUserSession:
             self.session_data = {}
 
 
-class TestSupervisorMultiUserIsolation(SSotAsyncTestCase):
+class SupervisorMultiUserIsolationTests(SSotAsyncTestCase):
     """
     E2E Tests for Supervisor Agent Multi-User Isolation.
     

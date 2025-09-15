@@ -289,7 +289,7 @@ class MockPatternDetectionEngine:
 
 
 @pytest.mark.unit
-class TestMockPatternDetectionEngine(SSotBaseTestCase):
+class MockPatternDetectionEngineTests(SSotBaseTestCase):
     """
     Test suite for advanced mock pattern detection engine.
 

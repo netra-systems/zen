@@ -32,7 +32,7 @@ from netra_backend.app.agents.registry import AgentRegistry
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 
 
-class TestGoldenPathMessageRouterConflicts(BaseIntegrationTest):
+class GoldenPathMessageRouterConflictsTests(BaseIntegrationTest):
     """Test MessageRouter conflicts causing Golden Path failures."""
 
     @pytest.mark.integration

@@ -19,7 +19,7 @@ from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcherCore
 from netra_backend.app.websocket_core.connection_executor import ConnectionExecutor
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
-class TestUserIsolationValidation:
+class UserIsolationValidationTests:
     """Test suite to validate user isolation after migration from DeepAgentState."""
 
     @pytest.fixture
@@ -120,7 +120,7 @@ class TestUserIsolationValidation:
             assert user1_result['user_id'] == 'test_user_1'
             assert user2_result['user_id'] == 'test_user_2'
 
-class TestMigrationFunctionalityValidation:
+class MigrationFunctionalityValidationTests:
     """Test suite to validate functionality is preserved after migration."""
 
     @pytest.fixture
@@ -161,7 +161,7 @@ class TestMigrationFunctionalityValidation:
             assert isinstance(workflow_context, UserExecutionContext)
             assert workflow_context.user_id == sample_context.user_id
 
-class TestContextValidationAndSecurity:
+class ContextValidationAndSecurityTests:
     """Test suite for context validation and security features."""
 
     def test_invalid_context_detection(self):
@@ -190,7 +190,7 @@ class TestContextValidationAndSecurity:
         assert child_context.operation_depth == parent_context.operation_depth + 1
         assert child_context.parent_request_id == parent_context.request_id
 
-class TestPerformanceAndResourceManagement:
+class PerformanceAndResourceManagementTests:
     """Test suite for performance and resource management after migration."""
 
     async def test_concurrent_execution_performance(self):
@@ -230,7 +230,7 @@ class TestPerformanceAndResourceManagement:
         object_difference = abs(final_objects - initial_objects)
         assert object_difference < 50
 
-class TestBusinessContinuityValidation:
+class BusinessContinuityValidationTests:
     """Test suite to validate business continuity after migration."""
 
     async def test_golden_path_user_flow_preserved(self):

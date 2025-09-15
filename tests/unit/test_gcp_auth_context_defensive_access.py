@@ -16,7 +16,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestGCPAuthContextDefensiveAccess(SSotBaseTestCase):
+class GCPAuthContextDefensiveAccessTests(SSotBaseTestCase):
     """Test defensive session access patterns in GCPAuthContextMiddleware."""
     
     def setUp(self):

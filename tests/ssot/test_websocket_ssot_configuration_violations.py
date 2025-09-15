@@ -24,7 +24,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestWebSocketSSotConfigurationViolations(SSotBaseTestCase):
+class WebSocketSSotConfigurationViolationsTests(SSotBaseTestCase):
     """Test configuration SSOT violations."""
     
     def test_websocket_configuration_source_consistency(self):

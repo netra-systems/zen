@@ -39,7 +39,7 @@ docker_manager = UnifiedDockerManager()
 @pytest.mark.real_services
 @pytest.mark.token_refresh
 @pytest.mark.asyncio
-class TestRealTokenRefresh:
+class RealTokenRefreshTests:
     """
     Real token refresh tests using Docker services.
     

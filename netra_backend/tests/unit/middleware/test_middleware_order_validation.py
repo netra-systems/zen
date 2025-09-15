@@ -15,7 +15,7 @@ from netra_backend.app.core.app_factory import setup_middleware
 from netra_backend.app.core.middleware_setup import setup_gcp_auth_context_middleware
 from netra_backend.app.middleware.gcp_auth_context_middleware import GCPAuthContextMiddleware
 
-class TestMiddlewareOrderValidation:
+class MiddlewareOrderValidationTests:
     """Test middleware dependency order validation."""
 
     def test_session_middleware_installed_before_gcp_auth_context(self):
@@ -137,7 +137,7 @@ class TestMiddlewareOrderValidation:
         assert session_middleware_found, f"SessionMiddleware not found in middleware stack. Current stack: {[info['class'] for info in middleware_info]}"
         assert True, 'Diagnostic test completed'
 
-class TestSSOTMiddlewareCompliance:
+class SSOTMiddlewareComplianceTests:
     """Test SSOT middleware setup compliance."""
 
     def test_ssot_middleware_function_exists(self):

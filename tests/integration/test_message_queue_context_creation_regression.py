@@ -133,7 +133,7 @@ class ContextTrackingHandler:
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.asyncio
-class TestMessageQueueContextCreationRegression:
+class MessageQueueContextCreationRegressionTests:
     """Integration tests for message queue context creation regression prevention.
     
     Tests the CRITICAL regression where message queue processors incorrectly create new contexts
@@ -757,7 +757,7 @@ def test_message_queue_context_regression_test_structure():
     """Unit test to validate the structure of the integration test suite."""
     
     # Validate test class structure
-    test_class = TestMessageQueueContextCreationRegression
+    test_class = MessageQueueContextCreationRegressionTests
     
     # Check that all required test methods exist
     test_methods = [method for method in dir(test_class) if method.startswith("test_")]

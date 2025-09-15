@@ -132,7 +132,7 @@ class MockEventConfirmationSystem:
         return False
 
 @pytest.mark.integration
-class TestToolEventDeliveryConfirmationIntegration(SSotAsyncTestCase):
+class ToolEventDeliveryConfirmationIntegrationTests(SSotAsyncTestCase):
     """Integration tests for tool event delivery confirmation.
     
     EXPECTED TO FAIL: These tests demonstrate missing confirmation integration.
@@ -308,7 +308,7 @@ class TestToolEventDeliveryConfirmationIntegration(SSotAsyncTestCase):
                 assert degradation_status['graceful_degradation_active'] is True
 
 @pytest.mark.integration
-class TestEventConfirmationWebSocketIntegration(SSotAsyncTestCase):
+class EventConfirmationWebSocketIntegrationTests(SSotAsyncTestCase):
     """Test integration between event confirmation and WebSocket infrastructure.
     
     EXPECTED TO FAIL: Integration points don't exist.

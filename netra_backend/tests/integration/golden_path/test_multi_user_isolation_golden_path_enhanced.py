@@ -77,7 +77,7 @@ class IsolationValidationResult:
     business_value_isolation_verified: bool = True
 
 
-class TestMultiUserIsolationGoldenPath(ServiceOrchestrationIntegrationTest):
+class MultiUserIsolationGoldenPathTests(ServiceOrchestrationIntegrationTest):
     """
     Enhanced Multi-User Isolation Integration Tests
     

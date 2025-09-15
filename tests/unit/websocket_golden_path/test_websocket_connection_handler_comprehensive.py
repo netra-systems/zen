@@ -44,7 +44,7 @@ from shared.types.core_types import UserID, ThreadID, ConnectionID
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 @pytest.mark.unit
-class TestConnectionHandlerComprehensive(SSotAsyncTestCase):
+class ConnectionHandlerComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for WebSocket Connection Handler.
     
@@ -320,7 +320,7 @@ class TestConnectionHandlerComprehensive(SSotAsyncTestCase):
         self.assertGreater(context.events_filtered, 0, 'Should have filtered cross-user events')
 
 @pytest.mark.unit
-class TestConnectionContextEdgeCases(SSotBaseTestCase):
+class ConnectionContextEdgeCasesTests(SSotBaseTestCase):
     """
     Unit tests for ConnectionContext edge cases and error conditions.
     

@@ -27,7 +27,7 @@ from netra_backend.app.config import get_config
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 
-class TestClickHouseSecretFormattingIssues:
+class ClickHouseSecretFormattingIssuesTests:
     """Test ClickHouse secret formatting issues from GCP Secret Manager."""
 
     @pytest.mark.asyncio

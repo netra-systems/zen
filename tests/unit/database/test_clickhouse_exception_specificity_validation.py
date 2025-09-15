@@ -37,7 +37,7 @@ from netra_backend.app.db.transaction_errors import (
 
 @pytest.mark.unit
 @pytest.mark.database
-class TestClickHouseExceptionSpecificityValidation(SSotAsyncTestCase):
+class ClickHouseExceptionSpecificityValidationTests(SSotAsyncTestCase):
     """
     Unit tests validating ClickHouse specific exception types are properly implemented.
     

@@ -22,7 +22,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
 
-class TestJWTTokenLifecycleManagement(BaseIntegrationTest):
+class JWTTokenLifecycleManagementTests(BaseIntegrationTest):
     """Test JWT token lifecycle management and performance optimization"""
 
     def setup_method(self):

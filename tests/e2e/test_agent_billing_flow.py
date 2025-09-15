@@ -48,7 +48,7 @@ from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAgentBillingFlow(SSotBaseTestCase):
+class AgentBillingFlowTests(SSotBaseTestCase):
     """Test #2: Agent Request  ->  Processing  ->  Response  ->  Billing Record Flow.
     
     CLAUDE.md Compliance:
@@ -355,7 +355,7 @@ class TestAgentBillingFlow(SSotBaseTestCase):
 
 @pytest.mark.asyncio 
 @pytest.mark.e2e
-class TestAgentBillingPerformance(SSotBaseTestCase):
+class AgentBillingPerformanceTests(SSotBaseTestCase):
     """Performance validation for agent billing operations with SSOT patterns."""
     
     @pytest_asyncio.fixture

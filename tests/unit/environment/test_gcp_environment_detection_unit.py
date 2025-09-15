@@ -28,7 +28,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 @pytest.mark.unit
-class TestGCPEnvironmentDetection(SSotBaseTestCase):
+class GCPEnvironmentDetectionTests(SSotBaseTestCase):
     """
     Unit tests for GCP Cloud Run environment detection without Docker dependencies.
     

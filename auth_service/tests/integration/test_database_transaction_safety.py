@@ -54,7 +54,7 @@ from auth_service.services.jwt_service import JWTService
 from auth_service.services.redis_service import RedisService
 
 
-class TestDatabaseTransactionSafety(SSotBaseTestCase):
+class DatabaseTransactionSafetyTests(SSotBaseTestCase):
     """
     PRIORITY 3: Comprehensive database transaction safety tests.
     
@@ -692,4 +692,4 @@ class TestDatabaseTransactionSafety(SSotBaseTestCase):
         assert max_stress_time < 10.0, f"Maximum stress operation time too slow: {max_stress_time:.3f}s"
 
 
-__all__ = ["TestDatabaseTransactionSafety"]
+__all__ = ["DatabaseTransactionSafetyTests"]

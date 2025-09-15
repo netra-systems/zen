@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -47,7 +47,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 @pytest.mark.e2e
-class TestStagingDeploymentErrors:
+class StagingDeploymentErrorsTests:
     """Test suite for critical staging deployment errors."""
     
     # Test 1: PostgreSQL Authentication Error

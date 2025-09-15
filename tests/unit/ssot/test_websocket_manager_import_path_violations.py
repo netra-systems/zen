@@ -32,7 +32,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerImportPathViolations(SSotBaseTestCase):
+class WebSocketManagerImportPathViolationsTests(SSotBaseTestCase):
     """Test suite to detect WebSocket Manager import path violations."""
 
     # CRITICAL: Files with legacy import paths (should cause failures)

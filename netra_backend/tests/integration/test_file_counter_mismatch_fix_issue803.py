@@ -13,7 +13,7 @@ from netra_backend.app.services.corpus.search_operations import SearchOperations
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestFileCounterMismatchFix(SSotAsyncTestCase):
+class FileCounterMismatchFixTests(SSotAsyncTestCase):
     """Integration tests to validate the fix for file counter mismatch"""
 
     def setUp(self):
@@ -254,7 +254,7 @@ class TestFileCounterMismatchFix(SSotAsyncTestCase):
 
 if __name__ == "__main__":
     # Run tests to validate the fix implementation expectations
-    test = TestFileCounterMismatchFix()
+    test = FileCounterMismatchFixTests()
     
     async def run_integration_tests():
         print("Running integration tests for Issue #803 fix validation...")

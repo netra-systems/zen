@@ -18,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from shared.configuration.central_config_validator import CentralConfigurationValidator
 
 
-class TestConfigurationSSOTCompliance(BaseTestCase):
+class ConfigurationSSOTComplianceTests(BaseTestCase):
     """Test SSOT compliance validation for configuration management."""
     
     def setup_method(self):

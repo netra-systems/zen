@@ -39,7 +39,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 logger = central_logger.get_logger(__name__)
 
-class TestWebSocketCrossSystemFailures:
+class WebSocketCrossSystemFailuresTests:
     """Test suite designed to FAIL and expose WebSocket cross-system issues."""
 
     @pytest.fixture
@@ -380,7 +380,7 @@ class TestWebSocketCrossSystemFailures:
             logger.error(f'Test 35 failed as expected - Message size limit violation: {e}')
             raise AssertionError(f'Message size limit handling failed: {e}')
 
-class TestWebSocketFailureAnalysis:
+class WebSocketFailureAnalysisTests:
     """Additional analysis tests to understand failure patterns."""
 
     @pytest.mark.asyncio

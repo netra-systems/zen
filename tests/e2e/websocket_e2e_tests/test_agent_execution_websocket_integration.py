@@ -289,7 +289,7 @@ class RealAgentExecutionWebSocketIntegrator:
         await context.websocket_notifier.send_event('agent_completed', {'message': 'General agent execution completed', 'status': 'success'})
         return {'status': 'completed', 'agent_type': 'general', 'processing_result': 'success'}
 
-class TestAgentExecutionWebSocketIntegration:
+class AgentExecutionWebSocketIntegrationTests:
     """E2E tests for agent execution WebSocket integration."""
 
     @pytest.mark.asyncio

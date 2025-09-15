@@ -33,7 +33,7 @@ from tests.e2e.staging_test_helpers import (
 
 @pytest.mark.asyncio
 @pytest.mark.websocket
-class TestWebSocketAuthentication:
+class WebSocketAuthenticationTests:
     """Test WebSocket authentication and authorization flows."""
     
     @pytest.mark.skip(reason="Service startup issues - testing websocket logic in basic tests")
@@ -143,7 +143,7 @@ class TestWebSocketAuthentication:
 
 @pytest.mark.asyncio
 @pytest.mark.websocket
-class TestWebSocketTokenValidation:
+class WebSocketTokenValidationTests:
     """Test WebSocket token validation and security."""
     
     @pytest.mark.skip(reason="Service startup issues - testing websocket logic in basic tests")
@@ -229,7 +229,7 @@ class TestWebSocketTokenValidation:
 
 @pytest.mark.asyncio
 @pytest.mark.websocket
-class TestWebSocketAuthRecovery:
+class WebSocketAuthRecoveryTests:
     """Test WebSocket authentication error recovery."""
     
     @pytest.mark.skip(reason="Service startup issues - testing websocket logic in basic tests")

@@ -46,7 +46,7 @@ from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig, Stagi
 from netra_backend.app.services.config_service import ConfigService
 from netra_backend.app.routes.config import backup_config, restore_config
 
-class TestAuthConfigOAuthDualNamingConvention:
+class AuthConfigOAuthDualNamingConventionTests:
     """Test AuthConfig OAuth dual naming convention management.
     
     BVJ: CRITICAL - Prevents OAuth regression that blocked enterprise customers.
@@ -220,7 +220,7 @@ class TestAuthConfigOAuthDualNamingConvention:
         except Exception as e:
             pytest.fail(f'OAuth configuration API compatibility test failed: {e}')
 
-class TestAuthServiceEnvironmentDetectionPortDiscovery:
+class AuthServiceEnvironmentDetectionPortDiscoveryTests:
     """Test auth service environment detection and port discovery integration.
     
     BVJ: Ensures Docker compatibility and proper service communication.
@@ -356,7 +356,7 @@ class TestAuthServiceEnvironmentDetectionPortDiscovery:
         except Exception as e:
             pytest.fail(f'CORS origins environment test failed: {e}')
 
-class TestJWTSecretBackendIntegration:
+class JWTSecretBackendIntegrationTests:
     """Test JWT secret integration between auth service and backend.
     
     BVJ: CRITICAL - Fixes WebSocket 403 authentication failures ($50K MRR impact).
@@ -503,7 +503,7 @@ class TestJWTSecretBackendIntegration:
         except Exception as e:
             pytest.fail(f'JWT WebSocket authentication config test failed: {e}')
 
-class TestDockerEnvironmentIntegration:
+class DockerEnvironmentIntegrationTests:
     """Test auth service Docker detection and environment setup.
     
     BVJ: Ensures auth service works in containerized deployment environments.
@@ -620,7 +620,7 @@ class TestDockerEnvironmentIntegration:
         except Exception as e:
             pytest.fail(f'Docker service discovery integration test failed: {e}')
 
-class TestBackendAppConfigSchemaValidation:
+class BackendAppConfigSchemaValidationTests:
     """Test backend AppConfig schema validation and loading patterns.
     
     BVJ: Ensures backend configuration supports agent execution and WebSocket events.
@@ -763,7 +763,7 @@ class TestBackendAppConfigSchemaValidation:
         except Exception as e:
             pytest.fail(f'AppConfig agent execution support test failed: {e}')
 
-class TestConfigServiceAPIEndpoints:
+class ConfigServiceAPIEndpointsTests:
     """Test configuration service API endpoints (backup, restore, validation).
     
     BVJ: Enables configuration management and disaster recovery capabilities.
@@ -908,7 +908,7 @@ class TestConfigServiceAPIEndpoints:
         except Exception as e:
             pytest.fail(f'Config API error handling test failed: {e}')
 
-class TestConfigurationHotReloadCaching:
+class ConfigurationHotReloadCachingTests:
     """Test configuration hot-reload and caching mechanisms with real services.
     
     BVJ: Enables development velocity without service restarts.

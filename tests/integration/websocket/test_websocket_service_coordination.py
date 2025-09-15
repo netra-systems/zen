@@ -345,7 +345,7 @@ class WebSocketServiceCoordinationTester:
         from netra_backend.app.websocket_core import create_websocket_manager
         return await create_websocket_manager()
 
-class TestWebSocketServiceCoordination:
+class WebSocketServiceCoordinationTests:
     """Integration tests for WebSocket service coordination."""
 
     @pytest.mark.asyncio

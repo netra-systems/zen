@@ -24,7 +24,7 @@ import inspect
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestMessageRouterSSOTViolationsReproduction(SSotBaseTestCase):
+class MessageRouterSSOTViolationsReproductionTests(SSotBaseTestCase):
     """Reproduce and validate MessageRouter SSOT violations."""
 
     @pytest.mark.unit
@@ -127,11 +127,11 @@ class TestMessageRouterSSOTViolationsReproduction(SSotBaseTestCase):
             router2 = MessageRouter()
 
             # Create a test handler
-            class TestHandler:
+            class HandlerTests:
                 def handle_message(self, message):
                     return {"status": "handled", "message": message}
 
-            test_handler = TestHandler()
+            test_handler = HandlerTests()
 
             # Check if both routers support same registration methods
             router1_methods = {method for method in dir(router1) if 'handler' in method.lower()}

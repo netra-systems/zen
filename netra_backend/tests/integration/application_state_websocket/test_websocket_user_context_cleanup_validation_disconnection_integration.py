@@ -682,7 +682,7 @@ class WebSocketContextCleanupValidator:
         return validation_result
 
 
-class TestWebSocketUserContextCleanupValidation(BaseIntegrationTest):
+class WebSocketUserContextCleanupValidationTests(BaseIntegrationTest):
     """
     Integration test for user context cleanup validation during WebSocket disconnection.
     

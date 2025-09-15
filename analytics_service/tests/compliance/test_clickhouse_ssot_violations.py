@@ -23,7 +23,7 @@ from shared.isolated_environment import IsolatedEnvironment
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from analytics_service.analytics_core.database.clickhouse_manager import ClickHouseManager, ClickHouseConnectionError, ClickHouseQueryError
 
-class TestClickHouseSSotViolations:
+class ClickHouseSSotViolationsTests:
     """Test suite to detect and prevent ClickHouse SSOT violations."""
 
     @pytest.fixture(scope='class')

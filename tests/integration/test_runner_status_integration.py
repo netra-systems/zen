@@ -30,7 +30,7 @@ from test_framework.category_system import ExecutionPlan
 
 
 @pytest.mark.integration
-class TestRunnerStatusIntegration(SSotBaseTestCase):
+class RunnerStatusIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for the test runner status aggregation bug.
     

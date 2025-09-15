@@ -236,7 +236,7 @@ class SSotUserContextSimulator:
 
 
 @pytest.mark.usefixtures("isolated_test_env")
-class TestSSotFrameworkWithIsolation(BaseTestCase):
+class SSotFrameworkWithIsolationTests(BaseTestCase):
     """
     CRITICAL: SSOT Framework validation with comprehensive isolation testing.
     

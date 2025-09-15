@@ -41,7 +41,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestIssue932GoldenPathConfigIntegration(SSotAsyncTestCase, unittest.TestCase):
+class Issue932GoldenPathConfigIntegrationTests(SSotAsyncTestCase, unittest.TestCase):
     """Integration tests for Golden Path configuration flow for Issue #932."""
     
     def setUp(self):

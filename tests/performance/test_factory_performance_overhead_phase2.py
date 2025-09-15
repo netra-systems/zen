@@ -180,7 +180,7 @@ class MockFactoryPatterns:
             )
 
 
-class TestFactoryPerformanceOverheadPhase2(SSotBaseTestCase):
+class FactoryPerformanceOverheadPhase2Tests(SSotBaseTestCase):
     """
     Factory Performance Overhead Analysis - Phase 2
 

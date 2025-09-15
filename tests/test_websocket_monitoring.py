@@ -19,7 +19,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.monitoring.websocket_metrics import WebSocketMetricsCollector, get_websocket_metrics_collector, reset_metrics_collector, record_websocket_event, record_websocket_connection, record_websocket_queue, record_factory_event, get_user_websocket_metrics, get_all_websocket_metrics, export_metrics_prometheus
 from netra_backend.app.monitoring.websocket_dashboard import WebSocketDashboard, get_websocket_dashboard, DashboardView
 
-class TestWebSocketMetrics:
+class WebSocketMetricsTests:
     """Test WebSocket metrics collection."""
 
     def setup_method(self):
@@ -131,7 +131,7 @@ class TestWebSocketMetrics:
         metrics = get_user_websocket_metrics(user_id)
         assert metrics['events']['sent'] == 0
 
-class TestWebSocketDashboard:
+class WebSocketDashboardTests:
     """Test WebSocket dashboard functionality."""
 
     @pytest.fixture
@@ -214,7 +214,7 @@ class TestWebSocketDashboard:
         data = await dashboard.get_dashboard_data(DashboardView.EVENTS)
         assert data['view'] == 'events'
 
-class TestMonitoringIntegration:
+class MonitoringIntegrationTests:
     """Test integration with WebSocket factories."""
 
     @pytest.mark.asyncio

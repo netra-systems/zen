@@ -60,7 +60,7 @@ from netra_backend.app.schemas.config import (
 )
 
 
-class TestConfigComprehensive:
+class ConfigComprehensiveTests:
     """
     Comprehensive test suite for netra_backend.app.config module.
     

@@ -159,7 +159,7 @@ class RealCircuitBreakerHealthValidator:
 @pytest.mark.e2e
 @pytest.mark.env_test
 @pytest.mark.real_services
-class TestCircuitBreakerEdgeCases(SSotAsyncTestCase):
+class CircuitBreakerEdgeCasesTests(SSotAsyncTestCase):
     """
     Test edge cases for circuit breaker functionality using REAL services.
     
@@ -573,7 +573,7 @@ class TestCircuitBreakerEdgeCases(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestCircuitBreakerBusinessImpact(SSotAsyncTestCase):
+class CircuitBreakerBusinessImpactTests(SSotAsyncTestCase):
     """
     Integration tests for circuit breaker business impact scenarios.
     

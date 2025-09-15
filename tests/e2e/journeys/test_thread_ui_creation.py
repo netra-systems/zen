@@ -167,7 +167,7 @@ async def test_ui_state_tracker(test_users):
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestThreadUICreation:
+class ThreadUICreationTests:
     """Thread UI Creation Test Suite."""
     
     @pytest.mark.e2e

@@ -30,7 +30,7 @@ from fastapi.testclient import TestClient
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context, get_test_jwt_token, create_authenticated_user
 from netra_backend.app.websocket_core.unified_websocket_auth import extract_e2e_context_from_websocket, authenticate_websocket_ssot, WebSocketAuthResult
 
-class TestStagingWebSocketAuthScopingE2E:
+class StagingWebSocketAuthScopingE2ETests:
     """E2E tests for staging environment WebSocket authentication scoping bug."""
 
     @pytest.fixture
@@ -259,7 +259,7 @@ class TestStagingWebSocketAuthScopingE2E:
                 else:
                     raise
 
-class TestStagingScopingEdgeCases:
+class StagingScopingEdgeCasesTests:
     """E2E tests for edge cases in staging environment scoping."""
 
     @pytest.mark.e2e

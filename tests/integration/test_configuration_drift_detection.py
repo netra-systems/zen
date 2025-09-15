@@ -320,7 +320,7 @@ class ConfigurationDriftDetector:
 
 
 @pytest.mark.integration
-class TestConfigurationDriftDetection:
+class ConfigurationDriftDetectionTests:
     """Test configuration drift detection functionality."""
     
     @pytest.fixture(autouse=True)
@@ -538,7 +538,7 @@ class TestConfigurationDriftDetection:
 
 
 @pytest.mark.integration
-class TestRealTimeConfigurationMonitoring:
+class RealTimeConfigurationMonitoringTests:
     """Test real-time configuration drift monitoring."""
     
     @pytest.fixture(autouse=True)
@@ -630,7 +630,7 @@ class TestRealTimeConfigurationMonitoring:
 
 
 @pytest.mark.integration
-class TestConfigurationDriftPrevention:
+class ConfigurationDriftPreventionTests:
     """Test configuration drift prevention mechanisms."""
     
     @pytest.fixture(autouse=True)
@@ -772,7 +772,7 @@ class TestConfigurationDriftPrevention:
 
 
 @pytest.mark.integration
-class TestConfigurationDriftReporting:
+class ConfigurationDriftReportingTests:
     """Test configuration drift reporting and documentation."""
     
     @pytest.fixture(autouse=True)

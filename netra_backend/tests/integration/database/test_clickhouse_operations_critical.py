@@ -44,7 +44,7 @@ from netra_backend.app.db.clickhouse_initializer import ClickHouseInitializer
 from netra_backend.app.db.clickhouse_schema import ClickHouseSchema
 from netra_backend.app.db.models_clickhouse import EventRecord, MetricsRecord, UserActivityRecord
 
-class TestClickHouseOperationsCritical(SSotBaseTestCase):
+class ClickHouseOperationsCriticalTests(SSotBaseTestCase):
     """
     Critical ClickHouse operations tests.
     

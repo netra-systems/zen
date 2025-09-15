@@ -243,7 +243,7 @@ class ToolExecutionEventCollector:
         validation['business_value_indicators']['has_actionable_insights'] = total_savings > 0
         return validation
 
-class TestWebSocketToolExecutionIntegrationStateTracking(BaseIntegrationTest):
+class WebSocketToolExecutionIntegrationStateTrackingTests(BaseIntegrationTest):
     """Integration test for tool execution with WebSocket events and state tracking."""
 
     def setup_method(self):

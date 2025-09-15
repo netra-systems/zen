@@ -56,7 +56,7 @@ from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from netra_backend.app.schemas.websocket_models import WebSocketValidationError
 
 
-class TestEventValidationFramework(SSotAsyncTestCase):
+class EventValidationFrameworkTests(SSotAsyncTestCase):
     """Test suite for WebSocket event validation framework functionality."""
 
     def setup_method(self, method):

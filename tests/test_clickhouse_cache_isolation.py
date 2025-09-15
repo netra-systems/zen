@@ -16,7 +16,7 @@ from typing import Dict, Any, Optional
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.db.clickhouse import ClickHouseCache, _clickhouse_cache
 
-class TestClickHouseCacheIsolation:
+class ClickHouseCacheIsolationTests:
     """Test suite for ClickHouse cache user isolation."""
 
     @pytest.fixture

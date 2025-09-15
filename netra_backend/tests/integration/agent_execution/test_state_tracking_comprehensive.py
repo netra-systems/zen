@@ -106,7 +106,7 @@ class StateTrackingMetrics:
 @pytest.mark.real_services
 @pytest.mark.redis
 @pytest.mark.database
-class TestStateTrackingComprehensive(BaseAgentExecutionTest):
+class StateTrackingComprehensiveTests(BaseAgentExecutionTest):
     """Comprehensive tests for agent execution state tracking with Redis and PostgreSQL."""
 
     async def setup_method(self):

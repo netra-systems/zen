@@ -63,7 +63,7 @@ class GoldenPathTestSession:
     agent_execution_completed: bool = False
 
 
-class TestWebSocketGoldenPathSSOTIntegration(BaseIntegrationTest):
+class WebSocketGoldenPathSSOTIntegrationTests(BaseIntegrationTest):
     """Test WebSocket Manager SSOT integration with Golden Path user flow."""
 
     def setUp(self):

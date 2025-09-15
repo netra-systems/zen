@@ -29,7 +29,7 @@ from urllib.parse import urlencode, parse_qs
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestOAuthStateManagement(SSotBaseTestCase):
+class OAuthStateManagementTests(SSotBaseTestCase):
     """
     Unit tests for OAuth state management business logic.
     Tests state generation, validation, and security without external OAuth providers.

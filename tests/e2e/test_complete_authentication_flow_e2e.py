@@ -22,7 +22,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
-class TestCompleteAuthenticationFlowE2E(BaseE2ETest):
+class CompleteAuthenticationFlowE2ETests(BaseE2ETest):
     """Test complete authentication flow end-to-end."""
     
     @pytest.mark.e2e

@@ -100,7 +100,7 @@ ERROR_RECOVERY_CRITERIA = {
 }
 
 
-class TestGoldenPathErrorRecovery(SSotAsyncTestCase):
+class GoldenPathErrorRecoveryTests(SSotAsyncTestCase):
     """
     Golden Path Error Recovery Test Suite
     

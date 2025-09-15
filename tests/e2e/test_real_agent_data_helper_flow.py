@@ -254,7 +254,7 @@ class RealDataHelperE2ETest(BaseE2ETest):
                    f"confidence: {self.metrics.confidence_score:.2f}")
 
 
-class TestRealDataHelperFlow(RealDataHelperE2ETest):
+class RealDataHelperFlowTests(RealDataHelperE2ETest):
     """Test suite for real data helper agent flows."""
     
     @pytest.mark.e2e
@@ -502,7 +502,7 @@ if __name__ == "__main__":
     async def run_direct_tests():
         logger.info("Starting real data helper flow E2E tests...")
         
-        test_instance = TestRealDataHelperFlow()
+        test_instance = RealDataHelperFlowTests()
         
         try:
             # Mock real_services_fixture for direct testing

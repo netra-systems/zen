@@ -17,7 +17,7 @@ from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.e2e
-class TestHealthEndpointDatabaseManagerStaging(SSotAsyncTestCase):
+class HealthEndpointDatabaseManagerStagingTests(SSotAsyncTestCase):
     """E2E test for health endpoint database manager issues on staging."""
 
     @classmethod

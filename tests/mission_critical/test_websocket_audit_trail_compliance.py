@@ -75,7 +75,7 @@ class AuditTrailEntry:
 @pytest.mark.websocket
 @pytest.mark.audit_trail
 @pytest.mark.compliance
-class TestWebSocketAuditTrailComplianceMissionCritical(BaseMissionCriticalTest):
+class WebSocketAuditTrailComplianceMissionCriticalTests(BaseMissionCriticalTest):
     """
     Mission Critical tests that EXPOSE audit trail compliance failures with uuid.uuid4().
     

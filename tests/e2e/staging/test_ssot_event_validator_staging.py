@@ -20,7 +20,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.e2e
-class TestSsotEventValidatorStaging(SSotAsyncTestCase):
+class SsotEventValidatorStagingTests(SSotAsyncTestCase):
     """
     Staging environment E2E tests for EventValidator SSOT.
     

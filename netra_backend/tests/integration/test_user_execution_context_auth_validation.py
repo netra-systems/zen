@@ -28,7 +28,7 @@ from test_framework.user_execution_context_fixtures import clean_context_registr
 from netra_backend.app.services.user_execution_context import UserExecutionContext, InvalidContextError, ContextIsolationError, validate_user_context
 from shared.isolated_environment import get_env
 
-class TestUserExecutionContextAuthentication(BaseIntegrationTest):
+class UserExecutionContextAuthenticationTests(BaseIntegrationTest):
     """Test UserExecutionContext integration with authentication systems"""
 
     def setup_method(self):
@@ -129,7 +129,7 @@ class TestUserExecutionContextAuthentication(BaseIntegrationTest):
         expired_context = UserExecutionContext(user_id=user_id, thread_id='thread_expired_test_77889900112233445566', run_id=f'run_expired_test_{int(time.time())}', agent_context={'agent_name': 'expired_session_agent', 'session_id': f'expired_session_{int(time.time())}', 'session_valid': True, 'session_timeout': (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()}, audit_metadata={'session_expired': True})
         assert validate_session(expired_context) is False
 
-class TestUserExecutionContextAuthorization(BaseIntegrationTest):
+class UserExecutionContextAuthorizationTests(BaseIntegrationTest):
     """Test UserExecutionContext integration with authorization systems"""
 
     def setup_method(self):

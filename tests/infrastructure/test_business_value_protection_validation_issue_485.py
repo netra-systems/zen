@@ -25,7 +25,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
 sys.path.insert(0, str(PROJECT_ROOT))
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestBusinessValueProtectionValidation(SSotBaseTestCase):
+class BusinessValueProtectionValidationTests(SSotBaseTestCase):
     """
     Test business value protection validation capability.
     
@@ -235,7 +235,7 @@ class TestBusinessValueProtectionValidation(SSotBaseTestCase):
         except Exception as e:
             return {'functional': False, 'issue': f'Mission critical infrastructure assessment failed: {e}'}
 
-class TestARRProtectionCapability(SSotBaseTestCase):
+class ARRProtectionCapabilityTests(SSotBaseTestCase):
     """
     Test ARR protection through reliable test infrastructure.
     

@@ -211,7 +211,7 @@ class DataPipelineProcessor:
         return metrics
 
 
-class TestDataProcessingPipelines(BaseIntegrationTest):
+class DataProcessingPipelinesTests(BaseIntegrationTest):
     """Integration tests for data processing pipelines functionality."""
     
     def setup_method(self):

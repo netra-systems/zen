@@ -11,7 +11,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestSessionMiddlewareGCPInstallation(SSotBaseTestCase):
+class SessionMiddlewareGCPInstallationTests(SSotBaseTestCase):
     """Test SessionMiddleware installation in GCP-like environments."""
 
     def test_session_middleware_installed_in_app_factory(self):

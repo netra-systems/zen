@@ -29,7 +29,7 @@ from shared.jwt_secret_manager import get_jwt_secret_manager, JWTSecretManager
 from shared.isolated_environment import get_env
 
 
-class TestJWTDecisionChain:
+class JWTDecisionChainTests:
     """Test the complete JWT decision chain from resolution to validation."""
     
     @pytest.mark.asyncio
@@ -458,7 +458,7 @@ if __name__ == "__main__":
         print("🧪 Running JWT Dependency Chain Tests")
         print("=" * 60)
         
-        test_instance = TestJWTDecisionChain()
+        test_instance = JWTDecisionChainTests()
         
         print("\n1. Testing JWT Manager Decision Logic...")
         try:

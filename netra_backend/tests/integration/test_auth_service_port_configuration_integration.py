@@ -38,7 +38,7 @@ from netra_backend.app.websocket_core import WebSocketManager, get_websocket_man
 from netra_backend.app.routes.websocket import websocket_endpoint
 
 
-class TestAuthServicePortConfigurationIntegration(BaseIntegrationTest):
+class AuthServicePortConfigurationIntegrationTests(BaseIntegrationTest):
     """Integration tests for auth service port configuration with real services."""
     
     def setup_method(self):

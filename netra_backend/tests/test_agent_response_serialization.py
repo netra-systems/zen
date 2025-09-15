@@ -13,7 +13,7 @@ from netra_backend.app.schemas.agent import AgentCompleted, AgentErrorMessage, A
 from netra_backend.app.schemas import AgentUpdate
 from netra_backend.app.schemas.tool import ToolCompleted, ToolStarted, ToolStatus
 
-class TestAgentResponseSerialization:
+class AgentResponseSerializationTests:
     """Test agent response serialization for frontend consumption."""
 
     def test_agent_started_response_structure(self) -> None:
@@ -57,7 +57,7 @@ class TestAgentResponseSerialization:
         assert json_data['run_id'] == 'run123'
         assert json_data['metadata']['step'] == 'analysis'
 
-class TestToolResponseSerialization:
+class ToolResponseSerializationTests:
     """Test tool response serialization for frontend consumption."""
 
     def test_tool_started_response_structure(self) -> None:
@@ -91,7 +91,7 @@ class TestToolResponseSerialization:
         assert json_data['status'] == 'error'
         assert json_data['tool_output']['error'] == 'Connection timeout'
 
-class TestErrorResponseSerialization:
+class ErrorResponseSerializationTests:
     """Test error response serialization."""
 
     def test_agent_error_message_structure(self) -> None:
@@ -109,7 +109,7 @@ class TestErrorResponseSerialization:
         assert json_data['details']['code'] == 'TIMEOUT_ERROR'
         assert json_data['details']['context']['step'] == 'data_processing'
 
-class TestComplexResponseSerialization:
+class ComplexResponseSerializationTests:
     """Test complex nested response serialization."""
 
     def test_nested_agent_result_serialization(self) -> None:

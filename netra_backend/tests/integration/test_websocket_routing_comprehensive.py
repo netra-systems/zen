@@ -302,7 +302,7 @@ class MockWebSocketConnectionManager:
         return self.connection_stats.copy()
 
 
-class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
+class WebSocketRoutingComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive WebSocket routing integration tests.
     

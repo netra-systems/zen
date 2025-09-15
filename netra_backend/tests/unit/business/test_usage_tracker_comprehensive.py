@@ -32,7 +32,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestUsageTrackerInitialization(BaseTestCase):
+class UsageTrackerInitializationTests(BaseTestCase):
     """Test UsageTracker initialization and configuration."""
 
     def test_usage_tracker_initialization_success(self):
@@ -94,7 +94,7 @@ class TestUsageTrackerInitialization(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestUsageEventCreation(BaseTestCase):
+class UsageEventCreationTests(BaseTestCase):
     """Test UsageEvent data model."""
 
     def test_usage_event_creation_basic(self):
@@ -160,7 +160,7 @@ class TestUsageEventCreation(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestUsageTracking(BaseTestCase):
+class UsageTrackingTests(BaseTestCase):
     """Test core usage tracking functionality."""
 
     def setup_method(self):
@@ -340,7 +340,7 @@ class TestUsageTracking(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestUsageRetrieval(BaseTestCase):
+class UsageRetrievalTests(BaseTestCase):
     """Test usage retrieval and reporting functionality."""
 
     def setup_method(self):
@@ -466,7 +466,7 @@ class TestUsageRetrieval(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestRateLimiting(BaseTestCase):
+class RateLimitingTests(BaseTestCase):
     """Test rate limiting functionality."""
 
     def setup_method(self):
@@ -584,7 +584,7 @@ class TestRateLimiting(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestUsageAnalytics(BaseTestCase):
+class UsageAnalyticsTests(BaseTestCase):
     """Test analytics and reporting functionality."""
 
     def setup_method(self):
@@ -702,7 +702,7 @@ class TestUsageAnalytics(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestPricingManagement(BaseTestCase):
+class PricingManagementTests(BaseTestCase):
     """Test pricing configuration and updates."""
 
     def setup_method(self):
@@ -784,7 +784,7 @@ class TestPricingManagement(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestRateLimitManagement(BaseTestCase):
+class RateLimitManagementTests(BaseTestCase):
     """Test rate limit configuration and updates."""
 
     def setup_method(self):
@@ -878,7 +878,7 @@ class TestRateLimitManagement(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestTrackerStatistics(BaseTestCase):
+class TrackerStatisticsTests(BaseTestCase):
     """Test tracker statistics and monitoring."""
 
     def setup_method(self):
@@ -954,7 +954,7 @@ class TestTrackerStatistics(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestEdgeCasesAndErrorHandling(BaseTestCase):
+class EdgeCasesAndErrorHandlingTests(BaseTestCase):
     """Test edge cases and error handling scenarios."""
 
     def setup_method(self):
@@ -1096,7 +1096,7 @@ class TestEdgeCasesAndErrorHandling(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestBusinessValueScenarios(BaseTestCase):
+class BusinessValueScenariosTests(BaseTestCase):
     """Test scenarios that directly impact business value and revenue."""
 
     def setup_method(self):

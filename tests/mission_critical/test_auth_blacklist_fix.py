@@ -28,7 +28,7 @@ from auth_service.auth_core.core.jwt_handler import JWTHandler
 logger = logging.getLogger(__name__)
 
 
-class TestBlacklistAsyncFix:
+class BlacklistAsyncFixTests:
     """Test the Five Whys fix for auth service async/await issues"""
     
     @pytest.fixture
@@ -193,7 +193,7 @@ class TestBlacklistAsyncFix:
         logger.info(" PASS:  Concurrent operations validated")
 
 
-class TestBlacklistEndpointIntegration:
+class BlacklistEndpointIntegrationTests:
     """Test the /auth/check-blacklist endpoint integration"""
     
     @pytest.mark.asyncio

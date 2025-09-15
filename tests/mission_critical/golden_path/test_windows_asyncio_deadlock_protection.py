@@ -43,7 +43,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
+class WindowsAsyncioDeadlockProtectionTests(SSotAsyncTestCase):
     """
      ALERT:  MISSION CRITICAL TEST SUITE  ALERT: 
     

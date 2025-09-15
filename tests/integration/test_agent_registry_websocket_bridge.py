@@ -183,7 +183,7 @@ class MockWebSocketBridge:
         self.events_emitted.append(event)
 
 
-class TestAgentRegistryWebSocketBridge(BaseIntegrationTest):
+class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
     """Integration tests designed to expose Agent Registry WebSocket bridge gaps."""
     
     def __init__(self):
@@ -1125,7 +1125,7 @@ if __name__ == "__main__":
         """Run tests directly for development and debugging."""
         print("Starting Agent Registry WebSocket Bridge Integration Tests...")
         
-        test_instance = TestAgentRegistryWebSocketBridge()
+        test_instance = AgentRegistryWebSocketBridgeTests()
         test_instance.setup_method()
         
         try:

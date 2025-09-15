@@ -31,7 +31,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketEmissionFix:
+class WebSocketEmissionFixTests:
     """Test that the WebSocket emission method fix is working correctly."""
     
     @pytest.mark.asyncio

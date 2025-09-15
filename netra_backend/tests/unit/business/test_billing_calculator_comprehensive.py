@@ -25,7 +25,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestBillingCalculatorInitialization(BaseTestCase):
+class BillingCalculatorInitializationTests(BaseTestCase):
     """Test BillingCalculator initialization and setup."""
 
     def test_billing_calculator_initialization_success(self):
@@ -61,7 +61,7 @@ class TestBillingCalculatorInitialization(BaseTestCase):
 
 
 @pytest.mark.unit  
-class TestCalculateUsageCost(BaseTestCase):
+class CalculateUsageCostTests(BaseTestCase):
     """Test calculate_usage_cost method with comprehensive scenarios."""
 
     @pytest.fixture
@@ -177,7 +177,7 @@ class TestCalculateUsageCost(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestCalculateMonthlyFee(BaseTestCase):
+class CalculateMonthlyFeeTests(BaseTestCase):
     """Test calculate_monthly_fee method for all subscription plans."""
 
     @pytest.fixture
@@ -287,7 +287,7 @@ class TestCalculateMonthlyFee(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestCalculateOverageCost(BaseTestCase):
+class CalculateOverageCostTests(BaseTestCase):
     """Test calculate_overage_cost method with comprehensive scenarios."""
 
     @pytest.fixture
@@ -455,7 +455,7 @@ class TestCalculateOverageCost(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestCalculateTotalBill(BaseTestCase):
+class CalculateTotalBillTests(BaseTestCase):
     """Test calculate_total_bill method with comprehensive scenarios."""
 
     @pytest.fixture
@@ -609,7 +609,7 @@ class TestCalculateTotalBill(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestBillingCalculatorEdgeCases(BaseTestCase):
+class BillingCalculatorEdgeCasesTests(BaseTestCase):
     """Test edge cases and error handling scenarios."""
 
     @pytest.fixture
@@ -725,7 +725,7 @@ class TestBillingCalculatorEdgeCases(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestBillingCalculatorMathematicalPrecision(BaseTestCase):
+class BillingCalculatorMathematicalPrecisionTests(BaseTestCase):
     """Test mathematical precision and rounding in billing calculations."""
 
     @pytest.fixture
@@ -824,7 +824,7 @@ class TestBillingCalculatorMathematicalPrecision(BaseTestCase):
 
 
 @pytest.mark.unit
-class TestBillingCalculatorIntegration(BaseTestCase):
+class BillingCalculatorIntegrationTests(BaseTestCase):
     """Integration tests combining multiple BillingCalculator methods."""
 
     @pytest.fixture

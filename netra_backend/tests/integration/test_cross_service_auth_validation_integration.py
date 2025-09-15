@@ -19,7 +19,7 @@ from typing import Dict, Any, Tuple
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestCrossServiceAuthValidationIntegration(SSotBaseTestCase):
+class CrossServiceAuthValidationIntegrationTests(SSotBaseTestCase):
     """Integration tests for cross-service authentication validation."""
     
     def setup_method(self, method=None):

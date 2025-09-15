@@ -314,7 +314,7 @@ async def handoff_flows_tester():
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestRealAgentHandoffFlows:
+class RealAgentHandoffFlowsTests:
     """Test suite for real agent handoff flow execution."""
 
     async def test_triage_to_data_analysis_handoff(self, handoff_flows_tester):

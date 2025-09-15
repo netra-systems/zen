@@ -19,7 +19,7 @@ from netra_backend.app.websocket_core.message_buffer import MessageBuffer, Buffe
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 
 
-class TestMessageBuffer:
+class MessageBufferTests:
     """Unit tests for WebSocket message buffering."""
     
     @pytest.fixture

@@ -31,7 +31,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
-class TestThreadSSOTCompliance:
+class ThreadSSOTComplianceTests:
     """Test suite for thread storage SSOT compliance."""
 
     def test_no_legacy_stub_functions_exist(self):

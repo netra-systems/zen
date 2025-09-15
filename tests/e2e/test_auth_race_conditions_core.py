@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -397,7 +397,7 @@ class MockRedisWithRaceConditions:
         return True
 
 @pytest.mark.e2e
-class TestConcurrentTokenRefreshRaceConditions:
+class ConcurrentTokenRefreshRaceConditionsTests:
     """Test Case 1: Concurrent Token Refresh Race Conditions"""
     
     @pytest.mark.asyncio
@@ -464,7 +464,7 @@ class TestConcurrentTokenRefreshRaceConditions:
             })
 
 @pytest.mark.e2e
-class TestMultiDeviceLoginCollision:
+class MultiDeviceLoginCollisionTests:
     """Test Case 2: Multi-Device Login Collision"""
     
     @pytest.mark.asyncio
@@ -556,7 +556,7 @@ class TestMultiDeviceLoginCollision:
         race_detector.take_memory_snapshot("after_multidevice_test")
 
 @pytest.mark.e2e
-class TestConcurrentSessionInvalidation:
+class ConcurrentSessionInvalidationTests:
     """Test Case 3: Session Invalidation Race Conditions"""
     
     @pytest.mark.asyncio
@@ -665,7 +665,7 @@ class TestConcurrentSessionInvalidation:
         race_detector.take_memory_snapshot("after_invalidation_test")
 
 @pytest.mark.e2e
-class TestJWTTokenCollisionDetection:
+class JWTTokenCollisionDetectionTests:
     """Test Case 4: JWT Token Collision Detection"""
     
     @pytest.mark.asyncio
@@ -791,7 +791,7 @@ class TestJWTTokenCollisionDetection:
         race_detector.take_memory_snapshot("after_token_collision_test")
 
 @pytest.mark.e2e
-class TestRaceConditionLoadStress:
+class RaceConditionLoadStressTests:
     """Comprehensive load stress test for race condition detection"""
     
     @pytest.mark.asyncio

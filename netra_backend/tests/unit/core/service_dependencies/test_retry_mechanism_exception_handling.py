@@ -23,7 +23,7 @@ from typing import Any, Dict
 from netra_backend.app.core.service_dependencies.retry_mechanism import RetryMechanism, CircuitBreakerState
 from netra_backend.app.core.service_dependencies.models import ServiceType, EnvironmentType
 
-class TestRetryMechanismExceptionHandling:
+class RetryMechanismExceptionHandlingTests:
     """Test suite for exception handling in retry mechanism."""
 
     def setup_method(self):
@@ -148,7 +148,7 @@ class TestRetryMechanismExceptionHandling:
         with pytest.raises(TypeError):
             asyncio.run(self.retry_mechanism.execute_with_retry(failing_operation, self.service_type, self.operation_name))
 
-class TestExceptionConstructorCompatibility:
+class ExceptionConstructorCompatibilityTests:
     """Test suite analyzing exception constructor compatibility patterns."""
 
     def test_builtin_exceptions_constructor_analysis(self):

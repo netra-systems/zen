@@ -28,7 +28,7 @@ from auth_service.services.jwt_service import JWTService
 from auth_service.services.redis_service import RedisService
 
 
-class TestAuthErrorRecoveryIntegration(SSotAsyncTestCase):
+class AuthErrorRecoveryIntegrationTests(SSotAsyncTestCase):
     """Error recovery testing for auth integration with real services."""
 
     @pytest.fixture(autouse=True)

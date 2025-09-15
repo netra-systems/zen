@@ -73,7 +73,7 @@ from test_framework.test_context import WebSocketContext, create_test_context
 from test_framework.websocket_helpers import WebSocketTestHelpers
 
 
-class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
+class PipelineExecutorComprehensiveGoldenPathTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for PipelineExecutor SSOT class. 
     
@@ -821,7 +821,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
 # ENHANCED AGENT INTEGRATION TESTS - MISSION CRITICAL BUSINESS VALUE
 # ============================================================================
 
-class TestAgentWebSocketIntegrationEnhanced:
+class AgentWebSocketIntegrationEnhancedTests:
     """Enhanced agent integration tests for WebSocket agent events.
     
     Business Value: Validates the complete agent execution lifecycle through WebSocket events.
@@ -1082,7 +1082,7 @@ class TestAgentWebSocketIntegrationEnhanced:
 # BUSINESS VALUE ENHANCED TESTS - ISSUE #1059 COVERAGE IMPROVEMENT
 # ============================================================================
 
-class TestAgentBusinessValueDelivery:
+class AgentBusinessValueDeliveryTests:
     """
     Enhanced tests validating agent responses deliver substantive business value.
 

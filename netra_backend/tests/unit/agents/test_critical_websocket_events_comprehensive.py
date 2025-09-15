@@ -71,7 +71,7 @@ class WebSocketEventTestScenario:
     performance_metrics: Dict[str, int]
 
 
-class TestCriticalWebSocketEventsComprehensive(SSotAsyncTestCase):
+class CriticalWebSocketEventsComprehensiveTests(SSotAsyncTestCase):
     """Comprehensive unit tests for critical WebSocket events in agent golden path"""
 
     def setup_method(self, method):

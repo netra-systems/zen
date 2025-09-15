@@ -15,7 +15,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from netra_backend.app.websocket_core.types import ConnectionInfo
 from shared.types.core_types import ensure_user_id, ensure_websocket_id
 
-class TestUnifiedManagerConnectionValidation(SSotAsyncTestCase):
+class UnifiedManagerConnectionValidationTests(SSotAsyncTestCase):
     """Test connection validation logic in UnifiedWebSocketManager."""
 
     def setUp(self):

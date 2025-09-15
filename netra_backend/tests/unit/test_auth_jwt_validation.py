@@ -22,7 +22,7 @@ from unittest.mock import patch, MagicMock
 from shared.isolated_environment import get_env
 
 
-class TestJWTValidationCore:
+class JWTValidationCoreTests:
     """Test core JWT validation functionality that protects business authentication flow."""
     
     @pytest.fixture(autouse=True)
@@ -189,7 +189,7 @@ class TestJWTValidationCore:
         assert handler.is_user_blacklisted(user_id) is True, "User must report as blacklisted"
 
 
-class TestJWTRefreshTokenValidation:
+class JWTRefreshTokenValidationTests:
     """Test JWT refresh token functionality critical for secure session management."""
     
     @pytest.fixture(autouse=True)

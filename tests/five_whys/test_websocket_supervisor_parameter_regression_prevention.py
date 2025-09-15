@@ -40,7 +40,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.database_test_utilities import DatabaseTestUtilities
 
 
-class TestSpecificWebSocketParameterRegression(SSotBaseTestCase):
+class SpecificWebSocketParameterRegressionTests(SSotBaseTestCase):
     """
     Regression prevention tests for the exact WebSocket supervisor parameter issue.
     
@@ -368,7 +368,7 @@ class TestSpecificWebSocketParameterRegression(SSotBaseTestCase):
         print(" PASS:  All factories use standardized websocket_client_id parameter")
 
 
-class TestWebSocketSupervisorSpecificErrorScenarios(SSotBaseTestCase):
+class WebSocketSupervisorSpecificErrorScenariosTests(SSotBaseTestCase):
     """
     Tests for specific error scenarios that caused the original regression.
     

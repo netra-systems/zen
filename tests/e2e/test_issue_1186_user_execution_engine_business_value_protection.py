@@ -27,7 +27,7 @@ from pathlib import Path
 import uuid
 
 
-class TestIssue1186UserExecutionEngineBusinessValueProtection(unittest.TestCase):
+class Issue1186UserExecutionEngineBusinessValueProtectionTests(unittest.TestCase):
     """E2E test suite validating business value protection after import consolidation.
 
     Focus: Business value protection and revenue continuity validation

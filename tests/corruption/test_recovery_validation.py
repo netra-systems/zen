@@ -254,7 +254,7 @@ class RecoveryValidator:
         )
 
 
-class TestRecoveryValidation:
+class RecoveryValidationTests:
     """Test cases for recovery validation."""
 
     def setup_method(self):

@@ -43,7 +43,7 @@ from tests.e2e.staging_config import StagingTestConfig
 from shared.isolated_environment import get_env
 
 @pytest.mark.e2e
-class TestAgentGoldenPathSmoke(SSotAsyncTestCase):
+class AgentGoldenPathSmokeTests(SSotAsyncTestCase):
     """
     Fast smoke tests for agent golden path functionality.
     
@@ -295,7 +295,7 @@ class TestAgentGoldenPathSmoke(SSotAsyncTestCase):
         return any((indicator in error_msg for indicator in unavailable_indicators))
 
 @pytest.mark.e2e
-class TestAgentGoldenPathSmokeStaging(SSotAsyncTestCase):
+class AgentGoldenPathSmokeStagingTests(SSotAsyncTestCase):
     """
     Staging-specific smoke tests with optimizations for GCP Cloud Run.
     

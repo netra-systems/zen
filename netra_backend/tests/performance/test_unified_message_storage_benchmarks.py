@@ -27,7 +27,7 @@ from netra_backend.tests.unit.services.test_unified_message_storage_service impo
 
 @pytest.mark.performance
 @pytest.mark.asyncio
-class TestUnifiedMessageStoragePerformance:
+class UnifiedMessageStoragePerformanceTests:
     """Performance benchmarks validating business value delivery."""
     
     @pytest.fixture

@@ -71,7 +71,7 @@ class MockAdminTool:
         return f"Admin operation {self.name} executed for user {operation['user_id']}"
 
 
-class TestToolSecuritySandboxing(BaseIntegrationTest):
+class ToolSecuritySandboxingTests(BaseIntegrationTest):
     """Test tool security sandboxing with real services."""
     
     @pytest.mark.integration

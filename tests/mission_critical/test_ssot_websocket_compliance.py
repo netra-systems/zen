@@ -90,7 +90,7 @@ class SSoTComplianceMetrics:
     architecture_compliance_score: float = 0.0
 
 
-class TestSSoTWebSocketCompliance(SSotAsyncTestCase):
+class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
     """
     Mission Critical Test Suite: SSOT WebSocket Compliance & Revenue Protection
     
@@ -888,7 +888,7 @@ if __name__ == "__main__":
     
     async def run_mission_critical_tests():
         """Execute all mission critical tests."""
-        test_suite = TestSSoTWebSocketCompliance()
+        test_suite = SSoTWebSocketComplianceTests()
         
         try:
             logger.info("🚨 STARTING MISSION CRITICAL SSOT WEBSOCKET COMPLIANCE TESTS")

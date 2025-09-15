@@ -24,7 +24,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.websocket_helpers import WebSocketTestClient
 
-class TestToolDispatcherRealWorldScenariosE2E(BaseE2ETest):
+class ToolDispatcherRealWorldScenariosE2ETests(BaseE2ETest):
     """E2E tests for tool dispatcher in real-world customer scenarios."""
     
     @pytest.fixture

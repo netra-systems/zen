@@ -38,7 +38,7 @@ from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.unified_tool_execution import EnhancedToolExecutionEngine
 from netra_backend.app.factories.websocket_bridge_factory import StandardWebSocketBridge
 
-class TestWebSocketBridgeAdapterSSOTCompliance(SSotAsyncTestCase):
+class WebSocketBridgeAdapterSSOTComplianceTests(SSotAsyncTestCase):
     """SSOT compliance tests for WebSocket bridge adapter patterns - MUST FAIL initially."""
 
     def setup_method(self, method):

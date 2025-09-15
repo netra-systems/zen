@@ -59,7 +59,7 @@ from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsC
 @pytest.mark.integration
 @pytest.mark.business_critical
 @pytest.mark.real_services
-class TestGoldenPathAgentExecutionNonDocker(SSotAsyncTestCase):
+class GoldenPathAgentExecutionNonDockerTests(SSotAsyncTestCase):
     """
     Golden Path Agent Execution Pipeline Integration Tests - NO DOCKER
     

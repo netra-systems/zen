@@ -23,7 +23,7 @@ from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime
 from netra_backend.app.core.thread_cleanup_manager import ThreadCleanupManager, ThreadInfo
 
-class TestThreadCleanupNoneTypeErrorFix:
+class ThreadCleanupNoneTypeErrorFixTests:
     """Test suite validating the comprehensive NoneType error fix for Issue #704."""
 
     def setup_method(self):
@@ -175,7 +175,7 @@ class TestThreadCleanupNoneTypeErrorFix:
                 assert not self.manager._cleanup_scheduled
                 assert any(('Background cleanup scheduled in separate thread' in msg for msg in self.log_messages))
 
-class TestNoneTypeValidationEdgeCases:
+class NoneTypeValidationEdgeCasesTests:
     """Additional edge case tests for comprehensive NoneType validation."""
 
     def setup_method(self):
@@ -239,11 +239,11 @@ def test_comprehensive_validation_logging():
     manager = ThreadCleanupManager()
     log_messages = []
 
-    class TestLogHandler(logging.Handler):
+    class LogHandlerTests(logging.Handler):
 
         def emit(self, record):
             log_messages.append(record.getMessage())
-    log_handler = TestLogHandler()
+    log_handler = LogHandlerTests()
     logger = logging.getLogger('netra_backend.app.core.thread_cleanup_manager')
     logger.addHandler(log_handler)
     logger.setLevel(logging.DEBUG)

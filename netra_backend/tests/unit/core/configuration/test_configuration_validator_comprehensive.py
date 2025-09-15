@@ -40,7 +40,7 @@ from netra_backend.app.core.configuration.validator import ConfigurationValidato
 from netra_backend.app.core.configuration.validator_types import ValidationResult
 from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig, ProductionConfig, StagingConfig, NetraTestingConfig
 
-class TestConfigurationValidatorInitialization(BaseTestCase):
+class ConfigurationValidatorInitializationTests(BaseTestCase):
     """Test ConfigurationValidator initialization and setup."""
 
     def test_configuration_validator_creates_real_instance(self):
@@ -97,7 +97,7 @@ class TestConfigurationValidatorInitialization(BaseTestCase):
         assert isinstance(validator._environment, str)
         assert validator._environment in ['development', 'staging', 'production', 'testing']
 
-class TestValidationModeLogic(BaseTestCase):
+class ValidationModeLogicTests(BaseTestCase):
     """Test validation mode logic and progressive enforcement."""
 
     def test_validation_mode_enum_values(self):
@@ -133,7 +133,7 @@ class TestValidationModeLogic(BaseTestCase):
         assert prod_rules['allow_localhost'] is False
         assert prod_rules['require_secrets'] is True
 
-class TestCompleteConfigurationValidation(BaseTestCase):
+class CompleteConfigurationValidationTests(BaseTestCase):
     """Test complete configuration validation orchestration."""
 
     def test_validate_complete_config_returns_validation_result(self):
@@ -178,7 +178,7 @@ class TestCompleteConfigurationValidation(BaseTestCase):
             assert isinstance(result, ValidationResult)
             assert isinstance(result.score, int)
 
-class TestProgressiveValidation(BaseTestCase):
+class ProgressiveValidationTests(BaseTestCase):
     """Test progressive validation enforcement based on environment."""
 
     def test_progressive_validation_warn_mode_converts_errors_to_warnings(self):
@@ -207,7 +207,7 @@ class TestProgressiveValidation(BaseTestCase):
             assert errors == test_errors
             assert warnings == test_warnings
 
-class TestConfigurationHealthScore(BaseTestCase):
+class ConfigurationHealthScoreTests(BaseTestCase):
     """Test configuration health scoring algorithm."""
 
     def test_health_score_calculation_with_no_issues(self):
@@ -246,7 +246,7 @@ class TestConfigurationHealthScore(BaseTestCase):
             score = validator._compute_final_score(base_score, penalties, bonus)
             assert 0 <= score <= 100
 
-class TestCriticalFieldDetection(BaseTestCase):
+class CriticalFieldDetectionTests(BaseTestCase):
     """Test critical field detection and completeness calculation."""
 
     def test_count_critical_fields_returns_valid_counts(self):
@@ -288,7 +288,7 @@ class TestCriticalFieldDetection(BaseTestCase):
         assert total == len(test_fields)
         assert 0 <= present <= total
 
-class TestEnvironmentSpecificBehavior(BaseTestCase):
+class EnvironmentSpecificBehaviorTests(BaseTestCase):
     """Test environment-specific validation behavior."""
 
     def test_environment_refresh_updates_validators(self):
@@ -315,7 +315,7 @@ class TestEnvironmentSpecificBehavior(BaseTestCase):
         assert dev_rules['require_secrets'] != prod_rules['require_secrets']
         assert dev_rules['validation_mode'] != prod_rules['validation_mode']
 
-class TestSubValidatorOrchestration(BaseTestCase):
+class SubValidatorOrchestrationTests(BaseTestCase):
     """Test orchestration of sub-validators."""
 
     def test_sub_validators_initialized_correctly(self):
@@ -344,7 +344,7 @@ class TestSubValidatorOrchestration(BaseTestCase):
                             errors = validator._collect_all_errors(config)
                             assert isinstance(errors, list)
 
-class TestRealConfigurationValidation(BaseTestCase):
+class RealConfigurationValidationTests(BaseTestCase):
     """Test validation with real configuration instances."""
 
     def test_development_config_validation(self):
@@ -386,7 +386,7 @@ class TestRealConfigurationValidation(BaseTestCase):
             assert isinstance(result, ValidationResult)
             assert isinstance(result.score, int)
 
-class TestValidationResultStructure(BaseTestCase):
+class ValidationResultStructureTests(BaseTestCase):
     """Test ValidationResult structure and properties."""
 
     def test_validation_result_has_required_properties(self):
@@ -419,7 +419,7 @@ class TestValidationResultStructure(BaseTestCase):
         else:
             assert result.is_valid is False
 
-class TestValidationErrorHandling(BaseTestCase):
+class ValidationErrorHandlingTests(BaseTestCase):
     """Test error handling in validation processes."""
 
     def test_validation_handles_invalid_config_gracefully(self):

@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
-class TestDemoModeConfiguration(SSotAsyncTestCase):
+class DemoModeConfigurationTests(SSotAsyncTestCase):
     """
     Test demo mode configuration detection and behavior.
     

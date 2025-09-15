@@ -16,7 +16,7 @@ from netra_backend.app.websocket_core.auth import WebSocketAuthenticator, AuthHa
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.asyncio
-class TestWebSocketAuthAsync:
+class WebSocketAuthAsyncTests:
     """Async test suite for WebSocket Authentication using SSOT patterns"""
 
     async def test_auth_result_creation(self):

@@ -21,7 +21,7 @@ from shared.jwt_secret_manager import SharedJWTSecretManager
 
 
 @pytest.mark.integration
-class TestRealEnvironmentConfigValidation:
+class RealEnvironmentConfigValidationTests:
     """Test configuration validation with real environment dependencies."""
 
     @pytest.fixture(autouse=True)
@@ -226,7 +226,7 @@ class TestRealEnvironmentConfigValidation:
 
 
 @pytest.mark.integration
-class TestCrossServiceConfigValidation:
+class CrossServiceConfigValidationTests:
     """Test configuration validation across multiple services."""
 
     @pytest.fixture(autouse=True)

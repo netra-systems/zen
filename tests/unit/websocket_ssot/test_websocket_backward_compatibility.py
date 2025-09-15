@@ -56,7 +56,7 @@ class BackwardCompatibilityTest:
     should_emit_warning: bool = True
 
 
-class TestWebSocketBackwardCompatibility(BaseIntegrationTest):
+class WebSocketBackwardCompatibilityTests(BaseIntegrationTest):
     """Test WebSocket Manager migration safety and backward compatibility."""
 
     def setUp(self):

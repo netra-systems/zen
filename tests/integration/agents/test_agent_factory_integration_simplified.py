@@ -74,7 +74,7 @@ class FactoryTestContext:
 
 
 @pytest.mark.integration
-class TestAgentFactoryIntegrationSimplified(SSotAsyncTestCase):
+class AgentFactoryIntegrationSimplifiedTests(SSotAsyncTestCase):
     """
     Agent Instance Factory Simplified Integration Tests - Issue #870 Phase 1
     

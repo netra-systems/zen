@@ -136,7 +136,7 @@ class MissionCriticalEventValidator:
 
 @pytest.mark.critical
 @pytest.mark.mission_critical
-class TestMissionCriticalWebSocketEvents:
+class MissionCriticalWebSocketEventsTests:
     """Mission critical tests for WebSocket agent events."""
 
     @pytest.mark.asyncio

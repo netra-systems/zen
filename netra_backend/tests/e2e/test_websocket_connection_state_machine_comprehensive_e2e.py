@@ -46,7 +46,7 @@ class E2EConnectionState(Enum):
     ERROR = "error"
 
 
-class TestWebSocketConnectionStateMachineE2E(BaseE2ETest):
+class WebSocketConnectionStateMachineE2ETests(BaseE2ETest):
     """E2E tests for WebSocket connection state machine with full user journeys."""
     
     def __init__(self):

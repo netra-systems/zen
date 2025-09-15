@@ -98,7 +98,7 @@ class ConcurrencyTestMetrics:
             return 0.0
         return self.deadlock_count / self.total_operations
 
-class TestConcurrentToolConflictFramework:
+class ConcurrentToolConflictFrameworkTests:
     """Test framework for concurrent tool execution conflict scenarios."""
     
     def __init__(self):
@@ -352,7 +352,7 @@ class ConcurrentCreditDeductionTool:
         raise Exception("Transaction failed after maximum retries")
 
 @pytest.mark.e2e
-class TestConcurrentToolExecutionConflicts:
+class ConcurrentToolExecutionConflictsTests:
     """Test suite for concurrent tool execution conflicts."""
     
     @pytest.fixture(autouse=True)

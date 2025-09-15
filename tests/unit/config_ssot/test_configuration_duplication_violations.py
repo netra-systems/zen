@@ -35,7 +35,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestConfigurationDuplicationViolations(SSotBaseTestCase):
+class ConfigurationDuplicationViolationsTests(SSotBaseTestCase):
     """
     Unit Tests: Configuration Manager Duplication Detection and Validation
 

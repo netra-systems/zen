@@ -73,7 +73,7 @@ class ConcurrentUserSession:
     success: bool = False
 
 
-class TestNoRaceConditionsSingleEmitter(SSotAsyncTestCase):
+class NoRaceConditionsSingleEmitterTests(SSotAsyncTestCase):
     """
     Phase 3 test to validate that single emitter eliminates race conditions.
     

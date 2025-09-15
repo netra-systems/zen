@@ -25,7 +25,7 @@ from netra_backend.app.monitoring.configuration_drift_monitor import Configurati
 from shared.isolated_environment import get_env
 
 
-class TestInfrastructureValidationGapsReproduction:
+class InfrastructureValidationGapsReproductionTests:
     """
     Tests that reproduce specific infrastructure validation gaps.
     

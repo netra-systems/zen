@@ -39,7 +39,7 @@ logger = get_logger(__name__)
 @pytest.mark.websocket_ssot
 @pytest.mark.issue_1058_integration
 @pytest.mark.no_docker
-class TestSSOTEventRouterIntegration:
+class SSOTEventRouterIntegrationTests:
     """Integration tests validating SSOT event router delegation patterns.
 
     CRITICAL: These tests validate that Issue #1058 SSOT consolidation maintains

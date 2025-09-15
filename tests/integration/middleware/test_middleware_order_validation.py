@@ -11,7 +11,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestMiddlewareOrderValidation(SSotBaseTestCase):
+class MiddlewareOrderValidationTests(SSotBaseTestCase):
     """Test middleware ordering to prevent session access failures."""
 
     def test_session_middleware_installed_first_in_stack(self):

@@ -190,7 +190,7 @@ class UserIsolationTestHarness:
         }
 
 
-class TestMultiUserIsolationRouting(BaseIntegrationTest):
+class MultiUserIsolationRoutingTests(BaseIntegrationTest):
     """Comprehensive test suite for multi-user isolation routing patterns."""
 
     def setup_method(self):

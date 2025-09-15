@@ -26,7 +26,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
-class TestAuthSecurityPatternsIntegration(BaseIntegrationTest):
+class AuthSecurityPatternsIntegrationTests(BaseIntegrationTest):
     """Integration tests for authentication security patterns and threat prevention."""
     
     def setup_method(self):

@@ -42,7 +42,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 
 
-class TestAgentExecutionPipeline(BaseIntegrationTest):
+class AgentExecutionPipelineTests(BaseIntegrationTest):
     """
     Integration tests for Agent Execution Pipeline and Factory Patterns.
     

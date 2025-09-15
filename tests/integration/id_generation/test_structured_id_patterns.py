@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 @pytest.mark.integration
-class TestStructuredIdPatterns(SSotBaseTestCase):
+class StructuredIdPatternsTests(SSotBaseTestCase):
     """Integration tests validating structured ID patterns after SSOT migration"""
 
     def test_session_id_structured_pattern_validation_post_migration(self):

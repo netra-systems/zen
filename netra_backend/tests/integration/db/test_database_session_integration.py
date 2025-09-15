@@ -16,7 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
-class TestWebSocketManagerFactoryIntegration:
+class WebSocketManagerFactoryIntegrationTests:
     """Integration tests that reproduce WebSocket manager factory creation failures."""
     
     def test_websocket_manager_factory_creation_fails(self):
@@ -129,7 +129,7 @@ class TestWebSocketManagerFactoryIntegration:
         print("Then use: db_manager = get_database_manager() instead of get_db_session_factory()")
 
 
-class TestIntegrationWithRealServices:
+class IntegrationWithRealServicesTests:
     """Integration tests using real services (if available without Docker)."""
     
     @pytest.mark.skipif(

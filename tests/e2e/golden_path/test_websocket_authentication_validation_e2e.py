@@ -58,7 +58,7 @@ import websockets
 @pytest.mark.real_services
 @pytest.mark.asyncio
 @pytest.mark.websocket_authentication
-class TestWebSocketAuthenticationValidationE2E(SSotAsyncTestCase):
+class WebSocketAuthenticationValidationE2ETests(SSotAsyncTestCase):
     """
     Phase 1 Authentication Compliance: WebSocket authentication validation.
     

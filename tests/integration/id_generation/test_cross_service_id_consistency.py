@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 @pytest.mark.integration
-class TestCrossServiceIdConsistency(SSotBaseTestCase):
+class CrossServiceIdConsistencyTests(SSotBaseTestCase):
     """Integration tests validating cross-service ID consistency after SSOT migration"""
 
     def test_auth_service_backend_id_correlation_post_migration(self):

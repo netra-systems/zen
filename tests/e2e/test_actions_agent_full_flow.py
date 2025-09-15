@@ -247,7 +247,7 @@ class RealServiceIntegrator:
             logger.info('[U+1F9F9] HTTP session cleaned up')
 
 @pytest.mark.e2e
-class TestActionsAgentCompleteUserFlow:
+class ActionsAgentCompleteUserFlowTests:
     """E2E tests for complete ActionsAgent user experience."""
 
     @pytest.fixture

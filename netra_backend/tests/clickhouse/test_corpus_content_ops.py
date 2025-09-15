@@ -12,7 +12,7 @@ from uuid import uuid4
 logger = logging.getLogger(__name__)
 
 
-class TestBatchProcessing:
+class BatchProcessingTests:
     """Test class for corpus batch processing operations"""
     
     @pytest.mark.asyncio
@@ -64,7 +64,7 @@ class TestBatchProcessing:
         logger.info(f"Successfully deleted {deleted_count} corpus entries")
 
 
-class TestContentGeneration:
+class ContentGenerationTests:
     """Test class for corpus content generation operations"""
     
     @pytest.mark.asyncio

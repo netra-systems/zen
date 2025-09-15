@@ -31,7 +31,7 @@ from auth_service.services.user_service import UserService
 from auth_service.database import get_database
 
 
-class TestTokenRefreshIntegration(BaseIntegrationTest):
+class TokenRefreshIntegrationTests(BaseIntegrationTest):
     """Integration tests for token refresh mechanisms with real services."""
     
     @pytest.fixture(autouse=True)

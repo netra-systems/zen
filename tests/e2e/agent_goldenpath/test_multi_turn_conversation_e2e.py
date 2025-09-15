@@ -44,7 +44,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
 @pytest.mark.gcp_staging
 @pytest.mark.agent_goldenpath
 @pytest.mark.mission_critical
-class TestMultiTurnConversationE2E(SSotAsyncTestCase):
+class MultiTurnConversationE2ETests(SSotAsyncTestCase):
     """
     E2E tests for validating multi-turn conversation flow and context persistence.
 

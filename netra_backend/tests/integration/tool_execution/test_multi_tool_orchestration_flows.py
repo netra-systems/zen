@@ -195,7 +195,7 @@ class MockActionTool:
         return action_result
 
 
-class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
+class MultiToolOrchestrationFlowsTests(BaseIntegrationTest):
     """Test multi-tool orchestration flows with real services."""
     
     @pytest.mark.integration

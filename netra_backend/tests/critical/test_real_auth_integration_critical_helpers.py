@@ -9,7 +9,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from typing import Any, Dict, List, Optional
 import pytest
 
-class TestRealAuthIntegrationCriticalHelpers:
+class RealAuthIntegrationCriticalHelpersTests:
     """Test class for real_auth_integration_critical_helpers"""
 
     def setup_method(self):

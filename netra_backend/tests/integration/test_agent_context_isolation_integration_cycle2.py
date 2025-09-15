@@ -25,7 +25,7 @@ from test_framework.database_test_utilities import DatabaseTestUtilities
 from test_framework.ssot.websocket import WebSocketTestClient
 
 
-class TestAgentContextIsolationIntegration:
+class AgentContextIsolationIntegrationTests:
     """Test agent context isolation across real service boundaries."""
     
     @pytest.mark.integration

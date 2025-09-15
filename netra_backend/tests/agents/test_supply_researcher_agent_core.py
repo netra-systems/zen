@@ -26,7 +26,7 @@ SupplyResearcherAgent)
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 
-class TestSupplyResearcherAgentCore:
+class SupplyResearcherAgentCoreTests:
     """Test suite for SupplyResearcherAgent core functionality"""
 
     @pytest.fixture

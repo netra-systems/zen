@@ -89,7 +89,7 @@ class TokenRefreshTestScenarios:
 
 
 @pytest.mark.asyncio
-class TestTokenRefreshDuringActiveChat:
+class TokenRefreshDuringActiveChatTests:
     """Test token refresh during active WebSocket chat sessions."""
     
     async def test_seamless_token_refresh_mid_conversation(self):
@@ -344,7 +344,7 @@ class TestTokenRefreshDuringActiveChat:
 
 
 @pytest.mark.asyncio
-class TestTokenRefreshRaceConditions:
+class TokenRefreshRaceConditionsTests:
     """Test race conditions during token refresh."""
     
     async def test_simultaneous_refresh_requests(self):
@@ -433,7 +433,7 @@ class TestTokenRefreshRaceConditions:
 
 
 @pytest.mark.asyncio
-class TestTokenRefreshPerformance:
+class TokenRefreshPerformanceTests:
     """Test performance characteristics of token refresh."""
     
     async def test_refresh_latency_under_load(self):
@@ -558,13 +558,13 @@ if __name__ == "__main__":
     test_suite = sys.argv[1] if len(sys.argv) > 1 else "all"
     
     if test_suite == "seamless":
-        asyncio.run(TestTokenRefreshDuringActiveChat().test_seamless_token_refresh_mid_conversation())
+        asyncio.run(TokenRefreshDuringActiveChatTests().test_seamless_token_refresh_mid_conversation())
     elif test_suite == "concurrent":
-        asyncio.run(TestTokenRefreshDuringActiveChat().test_token_refresh_with_concurrent_api_calls())
+        asyncio.run(TokenRefreshDuringActiveChatTests().test_token_refresh_with_concurrent_api_calls())
     elif test_suite == "race":
-        asyncio.run(TestTokenRefreshRaceConditions().test_simultaneous_refresh_requests())
+        asyncio.run(TokenRefreshRaceConditionsTests().test_simultaneous_refresh_requests())
     elif test_suite == "performance":
-        asyncio.run(TestTokenRefreshPerformance().test_refresh_latency_under_load())
+        asyncio.run(TokenRefreshPerformanceTests().test_refresh_latency_under_load())
     else:
         # Run all tests
         print("Please use: python tests/unified_test_runner.py --category mission_critical")

@@ -17,7 +17,7 @@ from typing import get_type_hints
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestAgentLifecycleMethodRegression(SSotBaseTestCase):
+class AgentLifecycleMethodRegressionTests(SSotBaseTestCase):
     """Test suite to validate agent lifecycle method signature regressions."""
 
     def setUp(self):
@@ -139,7 +139,7 @@ class TestAgentLifecycleMethodRegression(SSotBaseTestCase):
             self.fail(f'REGRESSION CONFIRMED: cleanup method signature uses DeepAgentState\nMethod: AgentLifecycleMixin.cleanup\nState parameter annotation: {annotation_str}\nFull signature: {signature}\nExpected: Should use UserExecutionContext or compatible type\nImpact: Agent cleanup using deprecated state pattern')
         self.assertTrue(True, 'cleanup method signature properly migrated')
 
-class TestAgentLifecycleRuntimeBehavior(SSotBaseTestCase):
+class AgentLifecycleRuntimeBehaviorTests(SSotBaseTestCase):
     """Test suite to validate agent lifecycle runtime behavior with deprecated state."""
 
     def setUp(self):
@@ -158,10 +158,10 @@ class TestAgentLifecycleRuntimeBehavior(SSotBaseTestCase):
         except ImportError as e:
             self.skip(f'Cannot import required classes: {e}')
 
-        class TestAgent(AgentLifecycleMixin):
+        class AgentTests(AgentLifecycleMixin):
 
             def __init__(self):
-                self.name = 'TestAgent'
+                self.name = 'AgentTests'
                 self.logger = Mock()
                 self.start_time = 0.0
                 self.end_time = 0.0
@@ -176,7 +176,7 @@ class TestAgentLifecycleRuntimeBehavior(SSotBaseTestCase):
             async def execute(self, state, run_id, stream_updates):
                 """Mock execute method."""
                 pass
-        agent = TestAgent()
+        agent = AgentTests()
         deprecated_state = DeepAgentState(user_request='test request', user_id='test_user_123', run_id='test_run_456')
         run_id = 'test_run_789'
         try:

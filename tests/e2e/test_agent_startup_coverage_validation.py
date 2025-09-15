@@ -41,7 +41,7 @@ class CoverageLevel(str, Enum):
     MEDIUM = "medium"
     COMPLETE = "complete"
 
-class TestStartupArea(str, Enum):
+class StartupAreaTests(str, Enum):
     """Agent startup test areas"""
     COLD_START = "cold_start"
     PERFORMANCE = "performance"
@@ -68,16 +68,16 @@ class CoverageMetrics:
 
 @dataclass
 @pytest.mark.e2e
-class TestValidationResult:
+class ValidationResultTests:
     """Result of test validation"""
     test_file: str
-    test_area: TestStartupArea
+    test_area: StartupAreaTests
     implemented: bool
     test_count: int
     edge_cases: List[str] = field(default_factory=list)
     performance_metrics: Dict[str, Any] = field(default_factory=dict)
 
-class TestStartupDiscoverer:
+class StartupDiscovererTests:
     """Discovers and analyzes agent startup tests"""
     
     def __init__(self):
@@ -100,10 +100,10 @@ class TestStartupDiscoverer:
     
 
 @pytest.mark.e2e
-class TestSyntaxFix:
+class SyntaxFixTests:
     """Generated test class"""
 
-    def get_test_areas_covered(self) -> Set[TestStartupArea]:
+    def get_test_areas_covered(self) -> Set[StartupAreaTests]:
         """Identify which startup test areas are covered"""
         covered_areas = set()
         test_files = self.discover_startup_tests()
@@ -114,18 +114,18 @@ class TestSyntaxFix:
             
         return covered_areas
     
-    def _analyze_test_file_areas(self, test_file: Path) -> List[TestStartupArea]:
+    def _analyze_test_file_areas(self, test_file: Path) -> List[StartupAreaTests]:
         """Analyze test file to identify covered areas"""
         areas = []
         filename = test_file.name.lower()
         
         area_mapping = {
-            "cold_start": TestStartupArea.COLD_START,
-            "performance": TestStartupArea.PERFORMANCE,
-            "resilience": TestStartupArea.RESILIENCE,
-            "reconnection": TestStartupArea.RECONNECTION,
-            "load": TestStartupArea.LOAD_TESTING,
-            "context": TestStartupArea.CONTEXT_PRESERVATION
+            "cold_start": StartupAreaTests.COLD_START,
+            "performance": StartupAreaTests.PERFORMANCE,
+            "resilience": StartupAreaTests.RESILIENCE,
+            "reconnection": StartupAreaTests.RECONNECTION,
+            "load": StartupAreaTests.LOAD_TESTING,
+            "context": StartupAreaTests.CONTEXT_PRESERVATION
         }
         for keyword, area in area_mapping.items():
             if keyword in filename:
@@ -134,14 +134,14 @@ class TestSyntaxFix:
         return areas
 
 @pytest.mark.e2e
-class TestContentAnalyzer:
+class ContentAnalyzerTests:
     """Analyzes test file content for completeness"""
     
     def __init__(self):
         """Initialize content analyzer"""
         self.critical_patterns = self._get_critical_patterns()
         
-    def analyze_test_file(self, test_file: Path) -> TestValidationResult:
+    def analyze_test_file(self, test_file: Path) -> ValidationResultTests:
         """Analyze individual test file for coverage"""
         with open(test_file, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -151,9 +151,9 @@ class TestContentAnalyzer:
         performance_metrics = self._extract_performance_metrics(content)
         test_areas = self._identify_test_areas(test_file.name, content)
         
-        return TestValidationResult(
+        return ValidationResultTests(
             test_file=test_file.name,
-            test_area=test_areas[0] if test_areas else TestStartupArea.COLD_START,
+            test_area=test_areas[0] if test_areas else StartupAreaTests.COLD_START,
             implemented=test_count > 0,
             test_count=test_count,
             edge_cases=edge_cases,
@@ -191,16 +191,16 @@ class TestContentAnalyzer:
             
         return metrics
     
-    def _identify_test_areas(self, filename: str, content: str) -> List[TestStartupArea]:
+    def _identify_test_areas(self, filename: str, content: str) -> List[StartupAreaTests]:
         """Identify test areas from filename and content"""
         areas = []
         
         if "cold_start" in filename:
-            areas.append(TestStartupArea.COLD_START)
+            areas.append(StartupAreaTests.COLD_START)
         if "performance" in filename:
-            areas.append(TestStartupArea.PERFORMANCE)
+            areas.append(StartupAreaTests.PERFORMANCE)
         if "resilience" in filename:
-            areas.append(TestStartupArea.RESILIENCE)
+            areas.append(StartupAreaTests.RESILIENCE)
             
         return areas
     
@@ -219,7 +219,7 @@ class CoverageReportGenerator:
         """Initialize report generator"""
         self.report_file = Path(__file__).parent / "startup_coverage_report.json"
         
-    def generate_coverage_report(self, validation_results: List[TestValidationResult],
+    def generate_coverage_report(self, validation_results: List[ValidationResultTests],
                                 coverage_metrics: CoverageMetrics) -> Dict[str, Any]:
         """Generate comprehensive coverage report"""
         report = {
@@ -243,7 +243,7 @@ class CoverageReportGenerator:
             "status": "COMPLETE" if metrics.coverage_percentage >= 95 else "INCOMPLETE"
         }
     
-    def _analyze_tests(self, results: List[TestValidationResult]) -> Dict[str, Any]:
+    def _analyze_tests(self, results: List[ValidationResultTests]) -> Dict[str, Any]:
         """Analyze test implementations"""
         implemented = [r for r in results if r.implemented]
         total_test_functions = sum(r.test_count for r in implemented)
@@ -254,15 +254,15 @@ class CoverageReportGenerator:
             "files_by_area": self._group_by_area(implemented)
         }
     
-    def _identify_gaps(self, results: List[TestValidationResult]) -> List[str]:
+    def _identify_gaps(self, results: List[ValidationResultTests]) -> List[str]:
         """Identify coverage gaps"""
-        required_areas = set(TestStartupArea)
+        required_areas = set(StartupAreaTests)
         covered_areas = {r.test_area for r in results if r.implemented}
         missing = required_areas - covered_areas
         
         return [area.value for area in missing]
     
-    def _analyze_performance_coverage(self, results: List[TestValidationResult]) -> Dict[str, Any]:
+    def _analyze_performance_coverage(self, results: List[ValidationResultTests]) -> Dict[str, Any]:
         """Analyze performance test coverage"""
         perf_tests = [r for r in results if r.performance_metrics]
         
@@ -271,7 +271,7 @@ class CoverageReportGenerator:
             "metrics_tracked": self._summarize_metrics(perf_tests)
         }
     
-    def _generate_recommendations(self, results: List[TestValidationResult],
+    def _generate_recommendations(self, results: List[ValidationResultTests],
                                  metrics: CoverageMetrics) -> List[str]:
         """Generate coverage improvement recommendations"""
         recommendations = []
@@ -288,7 +288,7 @@ class CoverageReportGenerator:
             
         return recommendations
     
-    def _group_by_area(self, results: List[TestValidationResult]) -> Dict[str, int]:
+    def _group_by_area(self, results: List[ValidationResultTests]) -> Dict[str, int]:
         """Group test results by area"""
         area_counts = {}
         for result in results:
@@ -296,7 +296,7 @@ class CoverageReportGenerator:
             area_counts[area] = area_counts.get(area, 0) + result.test_count
         return area_counts
     
-    def _summarize_metrics(self, perf_tests: List[TestValidationResult]) -> Dict[str, int]:
+    def _summarize_metrics(self, perf_tests: List[ValidationResultTests]) -> Dict[str, int]:
         """Summarize performance metrics across tests"""
         metrics_summary = {}
         for test in perf_tests:
@@ -315,8 +315,8 @@ class StartupCoverageValidator:
     
     def __init__(self):
         """Initialize coverage validator"""
-        self.discoverer = TestStartupDiscoverer()
-        self.analyzer = TestContentAnalyzer()
+        self.discoverer = StartupDiscovererTests()
+        self.analyzer = ContentAnalyzerTests()
         self.reporter = CoverageReportGenerator()
         
     async def validate_complete_coverage(self) -> Dict[str, Any]:
@@ -327,7 +327,7 @@ class StartupCoverageValidator:
         
         return self.reporter.generate_coverage_report(validation_results, coverage_metrics)
     
-    async def _analyze_all_tests(self, test_files: List[Path]) -> List[TestValidationResult]:
+    async def _analyze_all_tests(self, test_files: List[Path]) -> List[ValidationResultTests]:
         """Analyze all discovered test files"""
         results = []
         
@@ -337,13 +337,13 @@ class StartupCoverageValidator:
             
         return results
     
-    def _calculate_coverage_metrics(self, results: List[TestValidationResult]) -> CoverageMetrics:
+    def _calculate_coverage_metrics(self, results: List[ValidationResultTests]) -> CoverageMetrics:
         """Calculate comprehensive coverage metrics"""
         implemented_tests = [r for r in results if r.implemented]
         total_edge_cases = sum(len(r.edge_cases) for r in implemented_tests)
         performance_tests = len([r for r in results if r.performance_metrics])
         
-        required_areas = len(TestStartupArea)
+        required_areas = len(StartupAreaTests)
         covered_areas = len(set(r.test_area for r in implemented_tests))
         
         return CoverageMetrics(
@@ -436,8 +436,8 @@ def sample_coverage_data():
 __all__ = [
     'StartupCoverageValidator',
     'CoverageReportGenerator', 
-    'TestContentAnalyzer',
-    'TestStartupDiscoverer',
+    'ContentAnalyzerTests',
+    'StartupDiscovererTests',
     'CoverageMetrics',
-    'TestValidationResult'
+    'ValidationResultTests'
 ]

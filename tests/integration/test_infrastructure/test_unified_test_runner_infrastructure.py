@@ -132,7 +132,7 @@ class MockExecutionCoordinator:
         return []
 
 @pytest.mark.integration
-class TestUnifiedTestRunnerIntegration(SSotBaseTestCase, UnifiedTestRunnerTestMixin):
+class UnifiedTestRunnerIntegrationTests(SSotBaseTestCase, UnifiedTestRunnerTestMixin):
     """
     Integration tests for UnifiedTestRunner SSOT infrastructure.
     
@@ -194,7 +194,7 @@ class TestUnifiedTestRunnerIntegration(SSotBaseTestCase, UnifiedTestRunnerTestMi
         self.test_runner.create_business_continuity_plan = self._mock_create_business_continuity_plan
 
 @pytest.mark.integration
-class TestDiscoveryAndCollection(TestUnifiedTestRunnerIntegration):
+class DiscoveryAndCollectionTests(UnifiedTestRunnerIntegrationTests):
     """Test the critical test discovery functionality that's currently failing."""
 
     def test_real_test_file_discovery_across_codebase(self):
@@ -317,7 +317,7 @@ class TestDiscoveryAndCollection(TestUnifiedTestRunnerIntegration):
             self.assertEqual(mission_critical_cat.priority, CategoryPriority.CRITICAL, 'Mission critical tests must have CRITICAL priority')
 
 @pytest.mark.integration
-class TestRealServiceOrchestration(TestUnifiedTestRunnerIntegration):
+class RealServiceOrchestrationTests(UnifiedTestRunnerIntegrationTests):
     """Test real Docker service orchestration and coordination."""
 
     def setUp(self):
@@ -402,7 +402,7 @@ class TestRealServiceOrchestration(TestUnifiedTestRunnerIntegration):
         self.record_metric('python_command_working', python_cmd)
 
 @pytest.mark.integration
-class TestExecutionEngine(TestUnifiedTestRunnerIntegration):
+class ExecutionEngineTests(UnifiedTestRunnerIntegrationTests):
     """Test the core test execution engine functionality."""
 
     def test_fast_feedback_execution_mode(self):
@@ -510,7 +510,7 @@ class TestExecutionEngine(TestUnifiedTestRunnerIntegration):
         self.assertEqual(resource_conflicts_count, 0, 'Should have no conflicts')
 
 @pytest.mark.integration
-class TestSSotTestInfrastructure(TestUnifiedTestRunnerIntegration):
+class SSotTestInfrastructureTests(UnifiedTestRunnerIntegrationTests):
     """Test SSOT test infrastructure compliance and integration."""
 
     def test_ssot_base_test_case_inheritance_validation(self):
@@ -613,7 +613,7 @@ class TestSSotTestInfrastructure(TestUnifiedTestRunnerIntegration):
         self.assertNotEqual(post_isolation_env.get(test_var, ''), test_value)
 
 @pytest.mark.integration
-class TestTestCategorizationAndFiltering(TestUnifiedTestRunnerIntegration):
+class TestCategorizationAndFilteringTests(UnifiedTestRunnerIntegrationTests):
     """Test test categorization and filtering protecting business value."""
 
     def test_mission_critical_test_identification(self):
@@ -680,7 +680,7 @@ class TestTestCategorizationAndFiltering(TestUnifiedTestRunnerIntegration):
         self.record_metric('dependency_resolved_order', dependency_order)
 
 @pytest.mark.integration
-class TestErrorHandlingAndReporting(TestUnifiedTestRunnerIntegration):
+class ErrorHandlingAndReportingTests(UnifiedTestRunnerIntegrationTests):
     """Test error handling and comprehensive reporting functionality."""
 
     def test_test_collection_error_separation_from_test_failures(self):
@@ -776,7 +776,7 @@ class TestErrorHandlingAndReporting(TestUnifiedTestRunnerIntegration):
         self.record_metric('category_timeout_variants', len(category_timeouts))
 
 @pytest.mark.integration
-class TestCoverageReporting(TestUnifiedTestRunnerIntegration):
+class CoverageReportingTests(UnifiedTestRunnerIntegrationTests):
     """Test coverage reporting and analysis functionality."""
 
     def test_coverage_report_generation(self):
@@ -821,7 +821,7 @@ class TestCoverageReporting(TestUnifiedTestRunnerIntegration):
         self.record_metric('business_impact_analysis_available', True)
 
 @pytest.mark.integration
-class TestPerformanceAndScaling(TestUnifiedTestRunnerIntegration):
+class PerformanceAndScalingTests(UnifiedTestRunnerIntegrationTests):
     """Test performance and scaling capabilities of the test runner."""
 
     def test_large_test_suite_handling(self):
@@ -889,7 +889,7 @@ class TestPerformanceAndScaling(TestUnifiedTestRunnerIntegration):
         self.record_metric('bottleneck_detection_available', True)
 
 @pytest.mark.integration
-class TestBusinessContinuityAndResilience(TestUnifiedTestRunnerIntegration):
+class BusinessContinuityAndResilienceTests(UnifiedTestRunnerIntegrationTests):
     """Test business continuity and resilience features."""
 
     def test_graceful_degradation_on_service_failures(self):

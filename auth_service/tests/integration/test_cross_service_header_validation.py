@@ -42,7 +42,7 @@ from shared.types.core_types import UserID, ensure_user_id
 logger = logging.getLogger(__name__)
 
 
-class TestCrossServiceHeaderValidation(BaseIntegrationTest):
+class CrossServiceHeaderValidationTests(BaseIntegrationTest):
     """
     Test cross-service header validation in auth service.
     

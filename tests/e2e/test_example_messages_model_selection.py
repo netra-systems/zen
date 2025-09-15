@@ -66,7 +66,7 @@ async def test_user_id():
 
 
 @pytest.mark.e2e
-class TestModelSelectionPrompts:
+class ModelSelectionPromptsTests:
     """Test model selection example prompts"""
 
     @pytest.mark.e2e
@@ -148,7 +148,7 @@ class TestModelSelectionPrompts:
 
 
 @pytest.mark.e2e
-class TestModelSelectionBusinessValue:
+class ModelSelectionBusinessValueTests:
     """Test business value tracking for model selection"""
 
     @pytest.mark.e2e

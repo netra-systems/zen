@@ -65,7 +65,7 @@ class ExportPipelineCore:
         await self.request_manager.cleanup_connections()
 
 
-class TestExportPipelineE2Eer:
+class ExportPipelineE2EerTests:
     """Executes complete export pipeline E2E test flow."""
     
     def __init__(self, harness: UnifiedTestHarnessComplete):

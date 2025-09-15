@@ -44,7 +44,7 @@ from netra_backend.app.schemas.monitoring_schemas import GCPErrorServiceConfig
 from shared.types import StronglyTypedUserExecutionContext, UserID
 
 
-class TestGCPErrorReportingCompleteIntegration:
+class GCPErrorReportingCompleteIntegrationTests:
     """Complete integration tests for GCP Error Reporting remediation."""
     
     @pytest.fixture
@@ -531,7 +531,7 @@ if __name__ == "__main__":
     print("=" * 80)
     
     # Run all tests
-    test_suite = TestGCPErrorReportingCompleteIntegration()
+    test_suite = GCPErrorReportingCompleteIntegrationTests()
     
     # Note: In a real environment, these would be run with pytest
     # For demonstration, we're showing the test structure and validation logic

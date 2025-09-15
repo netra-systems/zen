@@ -17,7 +17,7 @@ from shared.isolated_environment import get_env
 
 
 env = get_env()
-class TestSecurityConfigVariations:
+class SecurityConfigVariationsTests:
     """Additional test variations for security and configuration issues."""
 
     @staging_only

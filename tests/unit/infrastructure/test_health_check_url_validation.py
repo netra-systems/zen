@@ -21,7 +21,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.unit
-class TestHealthCheckURLValidation:
+class HealthCheckURLValidationTests:
     """
     Tests designed to FAIL initially and prove URL validation issues.
     
@@ -344,7 +344,7 @@ class TestHealthCheckURLValidation:
 
 
 @pytest.mark.unit
-class TestInfrastructureHealthValidation:
+class InfrastructureHealthValidationTests:
     """
     Tests for infrastructure health validation patterns.
     

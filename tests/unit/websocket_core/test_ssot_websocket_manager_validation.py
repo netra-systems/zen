@@ -31,7 +31,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestWebSocketManagerSSOTSingletonEnforcement(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketManagerSSOTSingletonEnforcementTests(SSotAsyncTestCase, unittest.TestCase):
     """Test WebSocket Manager singleton pattern enforcement."""
 
     def setup_method(self, method):
@@ -166,7 +166,7 @@ class TestWebSocketManagerSSOTSingletonEnforcement(SSotAsyncTestCase, unittest.T
         logger.info("Concurrent manager access isolation test PASSED")
 
 
-class TestWebSocketManagerImportPathFragmentation(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketManagerImportPathFragmentationTests(SSotAsyncTestCase, unittest.TestCase):
     """Test detection of fragmented WebSocket Manager import paths."""
 
     def setup_method(self, method):
@@ -324,7 +324,7 @@ class TestWebSocketManagerImportPathFragmentation(SSotAsyncTestCase, unittest.Te
         logger.info(f"Duplicate manager class detection: {len(duplicate_violations)} violations found")
 
 
-class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketManagerUserIsolationValidationTests(SSotAsyncTestCase, unittest.TestCase):
     """Test WebSocket Manager user isolation and state contamination detection."""
 
     def setup_method(self, method):

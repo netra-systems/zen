@@ -20,7 +20,7 @@ from typing import List, Dict, Any
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestSupervisorAgentSSOTViolations(SSotBaseTestCase):
+class SupervisorAgentSSOTViolationsTests(SSotBaseTestCase):
     """Tests that expose SSOT violations in SupervisorAgent implementations.
 
     These tests are designed to FAIL when multiple SupervisorAgent implementations exist

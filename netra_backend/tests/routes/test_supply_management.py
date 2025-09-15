@@ -21,7 +21,7 @@ from netra_backend.tests.test_route_fixtures import (
     basic_test_client,
 )
 
-class TestSupplyManagement:
+class SupplyManagementTests:
     """Test supply chain management and optimization functionality."""
     
     # TODO: Implement supply risk assessment functionality

@@ -43,7 +43,7 @@ from netra_backend.app.db.models_postgres import Thread, Message
 from netra_backend.app.websocket_core import create_websocket_manager
 
 
-class TestThreadSwitchingErrorHandling(BaseIntegrationTest):
+class ThreadSwitchingErrorHandlingTests(BaseIntegrationTest):
     """Integration tests for error handling and edge cases in thread switching"""
     
     # Tests 81-85: Database Connection Failures and Recovery

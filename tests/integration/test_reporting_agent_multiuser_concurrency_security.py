@@ -74,7 +74,7 @@ class ConcurrencyTestResult:
 
 
 @pytest.mark.integration
-class TestReportingAgentMultiUserConcurrencySecurity(SSotAsyncTestCase):
+class ReportingAgentMultiUserConcurrencySecurityTests(SSotAsyncTestCase):
     """
     Integration tests for multi-user concurrent ReportingSubAgent execution security.
     

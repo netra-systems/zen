@@ -42,7 +42,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 logger = logging.getLogger(__name__)
 
 
-class TestConcurrentUserWebSocketFailures(SSotAsyncTestCase):
+class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
     """
     FAILING TEST: Proves WebSocket SSOT violations cause 0% concurrent user success rate.
     

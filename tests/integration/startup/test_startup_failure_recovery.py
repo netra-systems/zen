@@ -44,7 +44,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 # UnifiedWebSocketInit class does not exist - removed import
 
 
-class TestStartupFailureRecovery(BaseIntegrationTest):
+class StartupFailureRecoveryTests(BaseIntegrationTest):
     """Test comprehensive failure scenarios and recovery mechanisms."""
     
     def __init__(self):

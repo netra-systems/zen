@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 @pytest.mark.e2e
-class TestAgentStateSyncIntegrationCore:
+class AgentStateSyncIntegrationCoreTests:
     """Test class for agent_state_sync_integration_core"""
 
     def setup_method(self):

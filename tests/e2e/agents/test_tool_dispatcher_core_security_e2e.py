@@ -59,7 +59,7 @@ class SecurityTestTool(BaseTool):
         return self._run(test_data)
 
 
-class TestToolDispatcherCoreSecurity(BaseE2ETest):
+class ToolDispatcherCoreSecurityTests(BaseE2ETest):
     """E2E security tests for ToolDispatcherCore with authenticated multi-user scenarios."""
     
     @pytest.fixture

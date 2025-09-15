@@ -44,7 +44,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.logging_compliance_scanner import LoggingComplianceScanner, LoggingViolation, LoggingComplianceReport
 
 @pytest.mark.integration
-class TestLoggingSSotCrossService(SSotBaseTestCase):
+class LoggingSSotCrossServiceTests(SSotBaseTestCase):
     """
     Integration test for cross-service logging SSOT compliance.
     

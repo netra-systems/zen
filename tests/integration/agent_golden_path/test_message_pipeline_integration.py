@@ -63,7 +63,7 @@ except ImportError as e:
     SupervisorAgent = MagicMock
     AgentRegistry = MagicMock
 
-class TestMessagePipelineIntegration(SSotAsyncTestCase):
+class MessagePipelineIntegrationTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Message Pipeline Processing.
 

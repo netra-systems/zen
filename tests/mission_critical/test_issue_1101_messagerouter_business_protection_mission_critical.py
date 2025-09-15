@@ -36,7 +36,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestMessageRouterBusinessProtection(SSotAsyncTestCase):
+class MessageRouterBusinessProtectionTests(SSotAsyncTestCase):
     """Mission critical tests for MessageRouter business protection."""
     
     def setUp(self):

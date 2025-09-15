@@ -26,7 +26,7 @@ import dns.resolver
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestStagingDomainsResolveCorrectly(SSotBaseTestCase):
+class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
     """
     Test that all staging domains resolve correctly and are accessible.
     
@@ -374,7 +374,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_tests():
-        test_instance = TestStagingDomainsResolveCorrectly()
+        test_instance = StagingDomainsResolveCorrectlyTests()
         
         try:
             await test_instance.test_all_staging_domains_resolve_dns()

@@ -76,7 +76,7 @@ class WebSocketConnectionMock:
         self.is_connected = True
         self.messages_sent = []
         self.send_failures = 0
-        self.client_state = TestWebSocketState.CONNECTED
+        self.client_state = WebSocketStateTests.CONNECTED
         
     async def send_json(self, data: Dict[str, Any]) -> None:
         """Simulate sending JSON data through WebSocket."""
@@ -101,7 +101,7 @@ class WebSocketConnectionMock:
     def close(self) -> None:
         """Close the test WebSocket connection."""
         self.is_connected = False
-        self.client_state = TestWebSocketState.CLOSED
+        self.client_state = WebSocketStateTests.CLOSED
         
     @property
     def closed(self) -> bool:
@@ -109,7 +109,7 @@ class WebSocketConnectionMock:
         return not self.is_connected
 
 
-class TestWebSocketState:
+class WebSocketStateTests:
     """Test WebSocket state enumeration to replace mock state."""
     CONNECTING = 0
     CONNECTED = 1
@@ -347,7 +347,7 @@ class ResourceLeakTracker:
         }
 
 
-class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
+class WebSocketResourceLeakDetectionTests(SSotAsyncTestCase):
     """Critical WebSocket resource leak detection tests."""
     
     def setup_method(self, method=None):

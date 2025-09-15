@@ -69,7 +69,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 
 
 @pytest.mark.unit
-class TestGoldenPathLoggingDisconnectionReproduction(SSotBaseTestCase):
+class GoldenPathLoggingDisconnectionReproductionTests(SSotBaseTestCase):
     """
     CRITICAL: This test MUST FAIL initially.
     
@@ -298,7 +298,7 @@ class TestGoldenPathLoggingDisconnectionReproduction(SSotBaseTestCase):
         standard_logs = []
         
         # Mock handlers to capture log records
-        class TestHandler(logging.Handler):
+        class HandlerTests(logging.Handler):
             def __init__(self, log_storage):
                 super().__init__()
                 self.log_storage = log_storage
@@ -311,8 +311,8 @@ class TestGoldenPathLoggingDisconnectionReproduction(SSotBaseTestCase):
                     'level': record.levelname
                 })
         
-        central_handler = TestHandler(central_logs)
-        standard_handler = TestHandler(standard_logs)
+        central_handler = HandlerTests(central_logs)
+        standard_handler = HandlerTests(standard_logs)
         
         central_log.addHandler(central_handler)
         standard_log.addHandler(standard_handler)
@@ -360,9 +360,9 @@ if __name__ == '__main__':
     
     # Run the async test
     suite = unittest.TestSuite()
-    suite.addTest(TestGoldenPathLoggingDisconnectionReproduction('test_logging_correlation_breaks_across_execution_boundary'))
-    suite.addTest(TestGoldenPathLoggingDisconnectionReproduction('test_detects_mixed_logging_patterns_in_execution_chain'))
-    suite.addTest(TestGoldenPathLoggingDisconnectionReproduction('test_golden_path_debug_correlation_failure_impact'))
+    suite.addTest(GoldenPathLoggingDisconnectionReproductionTests('test_logging_correlation_breaks_across_execution_boundary'))
+    suite.addTest(GoldenPathLoggingDisconnectionReproductionTests('test_detects_mixed_logging_patterns_in_execution_chain'))
+    suite.addTest(GoldenPathLoggingDisconnectionReproductionTests('test_golden_path_debug_correlation_failure_impact'))
     
     runner = unittest.TextTestRunner(verbosity=2)
     

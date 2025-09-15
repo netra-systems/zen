@@ -51,7 +51,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.e2e
-class TestStagingDeploymentValidation(SSotBaseTestCase):
+class StagingDeploymentValidationTests(SSotBaseTestCase):
     """
     E2E tests for staging deployment validation.
     

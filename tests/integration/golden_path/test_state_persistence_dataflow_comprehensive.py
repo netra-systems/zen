@@ -47,7 +47,7 @@ from netra_backend.app.services.state_persistence import state_cache_manager
 from shared.isolated_environment import get_env
 
 
-class TestStatePersistenceDataflow(SSotAsyncTestCase):
+class StatePersistenceDataflowTests(SSotAsyncTestCase):
     """Comprehensive integration tests for state persistence and data flow."""
     
     async def async_setup_method(self, method=None):

@@ -30,7 +30,7 @@ logger = central_logger.get_logger(__name__)
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestServiceReadinessTiming:
+class ServiceReadinessTimingTests:
     """Integration tests for service readiness timing with real Docker services."""
     
     @pytest.fixture(autouse=True)
@@ -335,7 +335,7 @@ class TestServiceReadinessTiming:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestBackgroundTaskStabilityValidation:
+class BackgroundTaskStabilityValidationTests:
     """Test background task stability with real services."""
     
     @pytest.mark.asyncio

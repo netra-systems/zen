@@ -10,7 +10,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.websocket.message_handler import StartAgentHandler
 
 @pytest.mark.unit
-class TestWebSocketEventEmissionFixes:
+class WebSocketEventEmissionFixesTests:
     """Test suite for WebSocket event emission fixes."""
 
     def test_supervisor_has_websocket_bridge_attribute(self):

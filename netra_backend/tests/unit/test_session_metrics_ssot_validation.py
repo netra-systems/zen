@@ -35,7 +35,7 @@ except ImportError as e:
     SHARED_SESSION_METRICS_AVAILABLE = False
     pytest.skip(f'Shared SessionMetrics not available: {e}', allow_module_level=True)
 
-class TestSessionMetricsSSotValidation:
+class SessionMetricsSSotValidationTests:
     """
     Test suite to validate SessionMetrics SSOT compliance.
     
@@ -139,7 +139,7 @@ class TestSessionMetricsSSotValidation:
         assert isinstance(metrics_dict, dict), 'to_dict should return a dictionary'
         assert len(fields) > 0, 'SharedSessionMetrics should have fields'
 
-class TestSessionMetricsArchitecturalIssues:
+class SessionMetricsArchitecturalIssuesTests:
     """
     Additional tests that highlight architectural problems with SessionMetrics.
     """

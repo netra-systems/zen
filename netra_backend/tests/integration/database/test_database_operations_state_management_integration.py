@@ -135,7 +135,7 @@ class MockRedisConnection:
         pass
 
 
-class TestDatabaseOperationsStateManagementIntegration(BaseIntegrationTest):
+class DatabaseOperationsStateManagementIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for database operations and state management.
     

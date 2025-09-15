@@ -26,7 +26,7 @@ from netra_backend.app.models import User, Thread
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketAuthenticationSecurityIntegration(BaseIntegrationTest):
+class WebSocketAuthenticationSecurityIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket authentication and security."""
     
     @pytest.fixture

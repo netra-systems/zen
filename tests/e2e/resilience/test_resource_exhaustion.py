@@ -28,7 +28,7 @@ from netra_backend.tests.e2e.concurrent_load_helpers import (
 
 # Add project root to path
 @pytest.mark.e2e
-class TestResourceExhaustion:
+class ResourceExhaustionTests:
     """Test resource pool exhaustion handling"""
     
     @pytest.mark.e2e

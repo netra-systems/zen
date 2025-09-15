@@ -26,7 +26,7 @@ from typing import Dict, List, Set, Tuple
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestServiceIdSsotViolationDetection(SSotBaseTestCase):
+class ServiceIdSsotViolationDetectionTests(SSotBaseTestCase):
     """
     Detect SERVICE_ID SSOT violations in the codebase.
     

@@ -113,7 +113,7 @@ class MockLongRunningTool(BaseTool):
             progress = (step + 1) / self.total_steps * 100
         return f"Long running operation '{operation}' completed in {self.total_steps} steps"
 
-class TestUnifiedToolExecutionEngineWebSocketNotifications(SSotAsyncTestCase):
+class UnifiedToolExecutionEngineWebSocketNotificationsTests(SSotAsyncTestCase):
     """Unit tests for UnifiedToolExecutionEngine WebSocket notification system."""
 
     def setUp(self):

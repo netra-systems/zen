@@ -56,7 +56,7 @@ class MockSecurityControl:
     evidence_files: List[str]
     responsible_team: str
 
-class TestComplianceValidationAlgorithmsBusinessLogic:
+class ComplianceValidationAlgorithmsBusinessLogicTests:
     """Test compliance validation algorithms business logic"""
 
     def setup_method(self):

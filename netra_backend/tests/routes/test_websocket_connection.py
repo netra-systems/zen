@@ -17,7 +17,7 @@ from netra_backend.app.routes.utils.websocket_helpers import (
     extract_app_services,
 )
 
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     
     @pytest.mark.asyncio
     async def test_websocket_authentication_success(self):

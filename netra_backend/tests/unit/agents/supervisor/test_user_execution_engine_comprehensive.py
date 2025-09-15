@@ -63,7 +63,7 @@ if TYPE_CHECKING:
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
-class TestUserExecutionEngineComprehensive:
+class UserExecutionEngineComprehensiveTests:
     """Comprehensive unit tests for UserExecutionEngine with 100% method coverage.
     
     Focus Areas:

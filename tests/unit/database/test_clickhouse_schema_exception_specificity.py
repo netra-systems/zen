@@ -26,7 +26,7 @@ from netra_backend.app.db.transaction_errors import (
 )
 
 
-class TestClickHouseSchemaExceptionSpecificity:
+class ClickHouseSchemaExceptionSpecificityTests:
     """Test suite proving clickhouse_schema.py uses broad exception handling."""
     
     @pytest.mark.unit
@@ -156,7 +156,7 @@ class TestClickHouseSchemaExceptionSpecificity:
                 pass  # Placeholder until we verify the exact API
 
 
-class TestClickHouseSchemaBusinessImpact:
+class ClickHouseSchemaBusinessImpactTests:
     """Tests demonstrating business impact of broad ClickHouse schema exception handling."""
     
     @pytest.mark.unit

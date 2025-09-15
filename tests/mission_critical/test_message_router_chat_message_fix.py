@@ -30,7 +30,7 @@ from netra_backend.app.websocket_core.types import MessageType, LEGACY_MESSAGE_T
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 
 
-class TestChatMessageBusinessValue:
+class ChatMessageBusinessValueTests:
     """
     Test suite focused on business value of 'chat_message' type handling.
     
@@ -263,7 +263,7 @@ class TestChatMessageBusinessValue:
         print(f"[U+1F916] BUSINESS VALUE LOST: Core AI functionality is inaccessible via chat")
 
 
-class TestChatMessageTechnicalValidation:
+class ChatMessageTechnicalValidationTests:
     """
     Technical validation tests for 'chat_message' mapping fix.
     
@@ -414,7 +414,7 @@ class TestChatMessageTechnicalValidation:
         )
 
 
-class TestChatMessageRouterIntegration:
+class ChatMessageRouterIntegrationTests:
     """
     Integration tests for MessageRouter with 'chat_message' type.
     

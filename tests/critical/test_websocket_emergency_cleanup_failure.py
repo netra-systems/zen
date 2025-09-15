@@ -85,7 +85,7 @@ class MockIsolatedManager:
             return False
 
 
-class TestWebSocketEmergencyCleanupFailure:
+class WebSocketEmergencyCleanupFailureTests:
     """Test suite for WebSocket emergency cleanup failure scenarios"""
     
     @pytest.fixture

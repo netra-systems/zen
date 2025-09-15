@@ -98,7 +98,7 @@ class WebSocketEventCapture:
 
 
 @pytest.mark.unit
-class TestWebSocketEventConsistency(SSotAsyncTestCase):
+class WebSocketEventConsistencyTests(SSotAsyncTestCase):
     """Unit Test 3: Validate WebSocket event consistency in UserExecutionEngine"""
     
     def setUp(self):

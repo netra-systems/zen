@@ -32,7 +32,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestRedisIssue1029ConfigurationBuilder(SSotBaseTestCase):
+class RedisIssue1029ConfigurationBuilderTests(SSotBaseTestCase):
     """
     Unit Test Suite: Redis Issue #1029 Configuration Builder
 

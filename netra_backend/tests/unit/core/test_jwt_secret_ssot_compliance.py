@@ -29,7 +29,7 @@ def reset_jwt_secret_singletons():
     netra_backend.app.core.configuration.unified_secrets._secrets_manager = None
 
 
-class TestJWTSecretSSOTCompliance:
+class JWTSecretSSOTComplianceTests:
     """Test JWT secret SSOT compliance across all components."""
     
     def test_canonical_jwt_secret_method_fallback_chain(self):
@@ -229,7 +229,7 @@ class TestJWTSecretSSOTCompliance:
                 FastAPIAuthMiddleware._get_jwt_secret_with_validation(None, None, mock_settings)
 
 
-class TestJWTSecretSSOTIntegration:
+class JWTSecretSSOTIntegrationTests:
     """Integration tests for JWT secret SSOT compliance."""
     
     def test_no_duplicate_jwt_secret_loading_logic(self):

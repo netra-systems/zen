@@ -23,7 +23,7 @@ from netra_backend.app.schemas.user import UserUpdate
 from netra_backend.app.services.user_service import CRUDUser
 
 
-class TestUserUpdateSchemaRegression:
+class UserUpdateSchemaRegressionTests:
     """Test UserUpdate schema regression prevention."""
 
     def test_user_update_all_fields_optional(self):
@@ -108,7 +108,7 @@ class TestUserUpdateSchemaRegression:
         assert deserialized.is_active is True
 
 
-class TestCRUDUserInitializationRegression:
+class CRUDUserInitializationRegressionTests:
     """Test CRUDUser initialization regression prevention."""
 
     def test_crud_user_initialization_with_required_params(self):
@@ -170,7 +170,7 @@ class TestCRUDUserInitializationRegression:
             assert callable(getattr(crud_user, method_name)), f"Method not callable: {method_name}"
 
 
-class TestUserUpdateSchemaCompatibility:
+class UserUpdateSchemaCompatibilityTests:
     """Test UserUpdate schema compatibility with update operations."""
 
     def test_user_update_works_with_dict_conversion(self):

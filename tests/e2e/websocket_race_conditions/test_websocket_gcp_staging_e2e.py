@@ -32,7 +32,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.isolated_environment import get_env
 from tests.e2e.staging_config import StagingTestConfig, staging_urls
 
-class TestRealGCPWebSocketConnectionLifecycle:
+class RealGCPWebSocketConnectionLifecycleTests:
     """
     CRITICAL E2E TEST: Real GCP Cloud Run WebSocket connection lifecycle.
     
@@ -144,7 +144,7 @@ class TestRealGCPWebSocketConnectionLifecycle:
             return self.auth_helper.create_test_jwt_token(user_id=f'gcp-test-{uuid.uuid4().hex[:8]}')
 
 @requires_docker
-class TestUserChatValueDeliveryE2E:
+class UserChatValueDeliveryE2ETests:
     """
     CRITICAL E2E TEST: Complete user chat interaction with agent events.
     
@@ -233,7 +233,7 @@ class TestUserChatValueDeliveryE2E:
         return {'chat_processing_time': chat_total_time, 'agent_events_delivered': len(event_validation.required_events_found), 'total_events_captured': event_validation.total_events, 'missing_events': list(event_validation.missing_events), 'has_substantial_response': has_substantial_response, 'followup_processed': followup_processed, 'business_value_delivered': event_validation.success and has_substantial_response and (chat_total_time < 180.0)}
 
 @pytest.mark.e2e_auth_required
-class TestWebSocketRaceConditionE2EIntegration:
+class WebSocketRaceConditionE2EIntegrationTests:
     """
     Integration of both E2E tests - validates complete GCP WebSocket + Chat scenarios.
     """
@@ -247,14 +247,14 @@ class TestWebSocketRaceConditionE2EIntegration:
         """
         env = get_env()
         environment = env.get('TEST_ENV', 'test')
-        infrastructure_test = TestRealGCPWebSocketConnectionLifecycle()
+        infrastructure_test = RealGCPWebSocketConnectionLifecycleTests()
         await infrastructure_test.setup_staging_environment().__aenter__()
         try:
             infrastructure_result = await infrastructure_test.test_real_gcp_websocket_connection_lifecycle()
             assert infrastructure_result['stability_rate'] >= 0.7, 'Infrastructure test failed'
         finally:
             await infrastructure_test.setup_staging_environment().__aexit__(None, None, None)
-        chat_test = TestUserChatValueDeliveryE2E()
+        chat_test = UserChatValueDeliveryE2ETests()
         await chat_test.setup_chat_test_environment().__aenter__()
         try:
             chat_result = await chat_test.test_user_chat_value_delivery_e2e()

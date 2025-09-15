@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.unit
-class TestAgentFactoryDataHelperSSot(SSotAsyncTestCase):
+class AgentFactoryDataHelperSSotTests(SSotAsyncTestCase):
     """Test AgentInstanceFactory ability to create DataHelper agent with SSOT compliance."""
 
     def setup_method(self, method):

@@ -24,7 +24,7 @@ from test_framework.conftest_real_services import real_services
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
-class TestConfigurationManagement(ServiceOrchestrationIntegrationTest):
+class ConfigurationManagementTests(ServiceOrchestrationIntegrationTest):
     """Test configuration management with real services and environment isolation."""
 
     @pytest.mark.integration

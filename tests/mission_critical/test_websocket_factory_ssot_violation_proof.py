@@ -37,7 +37,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.core_types import UserID, ensure_user_id
 
 
-class TestWebSocketFactorySsotViolationProof(SSotAsyncTestCase):
+class WebSocketFactorySsotViolationProofTests(SSotAsyncTestCase):
     """Prove that WebSocket factory pattern violates SSOT principles."""
     
     async def asyncSetUp(self):
@@ -201,7 +201,7 @@ class TestWebSocketFactorySsotViolationProof(SSotAsyncTestCase):
         )
 
 
-class TestFactoryPatternSsotCompliance(SSotBaseTestCase):
+class FactoryPatternSsotComplianceTests(SSotBaseTestCase):
     """Synchronous tests for factory pattern SSOT compliance."""
     
     def test_factory_registration_violates_ssot_registry_pattern(self):

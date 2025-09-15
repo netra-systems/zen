@@ -21,7 +21,7 @@ _active_token_sessions = {}
 _token_usage_stats = {}
 
 
-class TestIssue465BoundaryConditions(SSotAsyncTestCase):
+class Issue465BoundaryConditionsTests(SSotAsyncTestCase):
     """
     Boundary condition tests for token reuse detection threshold
     

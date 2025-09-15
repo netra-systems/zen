@@ -106,7 +106,7 @@ FORBIDDEN_ORCHESTRATION_PATTERNS = [
 ]
 
 
-class TestSSOTTestRunnerEnforcement(SSotBaseTestCase):
+class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
     """Enforce SSOT test runner policy with real filesystem scanning."""
 
     def setup_method(self, method=None):

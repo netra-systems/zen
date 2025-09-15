@@ -23,7 +23,7 @@ from shared.id_generation import UnifiedIdGenerator
 
 
 @pytest.mark.integration
-class TestWebSocketManagerFix:
+class WebSocketManagerFixTests:
     """Test suite for WebSocket manager factory fixes."""
     
     def test_create_websocket_manager_positional_argument(self):

@@ -24,7 +24,7 @@ from netra_backend.app.business.credit_manager import CreditManager
 from netra_backend.app.db.models_postgres import User, CreditTransaction
 
 
-class TestCreditManagerInitialization:
+class CreditManagerInitializationTests:
     """Test CreditManager initialization and basic setup."""
 
     def test_init_without_session(self):
@@ -45,7 +45,7 @@ class TestCreditManagerInitialization:
         assert manager.session == mock_session
 
 
-class TestGetUserCredits:
+class GetUserCreditsTests:
     """Test get_user_credits method - core credit balance retrieval."""
 
     @pytest.mark.asyncio
@@ -118,7 +118,7 @@ class TestGetUserCredits:
         assert manager.session is not None
 
 
-class TestAddCredits:
+class AddCreditsTests:
     """Test add_credits method - credit addition and validation."""
 
     @pytest.mark.asyncio
@@ -210,7 +210,7 @@ class TestAddCredits:
         assert manager.session is not None
 
 
-class TestDeductCredits:
+class DeductCreditsTests:
     """Test deduct_credits method - credit deduction and validation."""
 
     @pytest.mark.asyncio
@@ -302,7 +302,7 @@ class TestDeductCredits:
         assert manager.session is not None
 
 
-class TestCreateTransaction:
+class CreateTransactionTests:
     """Test create_transaction method - transaction record creation."""
 
     @pytest.mark.asyncio
@@ -398,7 +398,7 @@ class TestCreateTransaction:
             assert transaction.description == description
 
 
-class TestErrorHandlingAndEdgeCases:
+class ErrorHandlingAndEdgeCasesTests:
     """Test error handling and edge case scenarios."""
 
     @pytest.mark.asyncio
@@ -504,7 +504,7 @@ class TestErrorHandlingAndEdgeCases:
         assert all(result is True for result in operation_results)
 
 
-class TestBusinessLogicValidation:
+class BusinessLogicValidationTests:
     """Test business logic validation and consistency."""
 
     @pytest.mark.asyncio
@@ -590,7 +590,7 @@ class TestBusinessLogicValidation:
             assert transaction.user_id == user_id
 
 
-class TestFinancialPrecisionAndAccuracy:
+class FinancialPrecisionAndAccuracyTests:
     """Test financial precision, decimal handling, and mathematical accuracy."""
 
     @pytest.mark.asyncio
@@ -678,7 +678,7 @@ class TestFinancialPrecisionAndAccuracy:
             assert add_result is True
 
 
-class TestCreditHistoryAndTransactionOrdering:
+class CreditHistoryAndTransactionOrderingTests:
     """Test credit history tracking and transaction chronological ordering."""
 
     @pytest.mark.asyncio
@@ -750,7 +750,7 @@ class TestCreditHistoryAndTransactionOrdering:
         assert all(balance == 100.0 for balance in balance_history)  # Stub implementation
 
 
-class TestPerformanceAndScalability:
+class PerformanceAndScalabilityTests:
     """Test performance requirements and scalability scenarios."""
 
     @pytest.mark.asyncio

@@ -58,7 +58,7 @@ async def id_generator():
     return UnifiedIdGenerator()
 
 
-class TestMultiUserIsolationConcurrentAccess(BaseIntegrationTest):
+class MultiUserIsolationConcurrentAccessTests(BaseIntegrationTest):
     """
     Comprehensive multi-user state isolation and concurrent access tests.
     

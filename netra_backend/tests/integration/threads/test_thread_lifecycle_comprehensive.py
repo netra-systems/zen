@@ -114,7 +114,7 @@ async def clean_test_data(database_manager):
         await session.execute(text("DELETE FROM messages WHERE thread_id LIKE 'test_%'"))
 
 
-class TestThreadLifecycleComprehensive(BaseIntegrationTest):
+class ThreadLifecycleComprehensiveTests(BaseIntegrationTest):
     """Comprehensive thread lifecycle integration tests with real services."""
 
     # =============================================================================

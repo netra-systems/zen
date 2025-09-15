@@ -323,7 +323,7 @@ class ConcurrentSessionIsolationValidator:
         return validation_results
 
 
-class TestWebSocketUserSessionConcurrentIsolation(BaseIntegrationTest):
+class WebSocketUserSessionConcurrentIsolationTests(BaseIntegrationTest):
     """
     Integration test for user session isolation during concurrent message processing.
     

@@ -45,7 +45,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
-class TestUserExecutionEngineContextIsolation(SSotAsyncTestCase):
+class UserExecutionEngineContextIsolationTests(SSotAsyncTestCase):
     """Test UserExecutionEngine context isolation and concurrent user safety."""
 
     def setup_method(self, method):

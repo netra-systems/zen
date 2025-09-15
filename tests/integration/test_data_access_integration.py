@@ -49,7 +49,7 @@ async def cleanup_factories():
     await cleanup_all_factories()
 
 @pytest.mark.integration
-class TestDataAccessCapabilities:
+class DataAccessCapabilitiesTests:
     """Test DataAccessCapabilities class functionality."""
 
     async def test_data_access_capabilities_initialization(self, user_context):
@@ -79,7 +79,7 @@ class TestDataAccessCapabilities:
             assert redis_context.user_id == user_context.user_id
 
 @pytest.mark.integration
-class TestUserExecutionEngineIntegration:
+class UserExecutionEngineIntegrationTests:
     """Test UserExecutionEngine data access integration."""
 
     async def test_engine_has_data_access_methods(self, mock_engine):
@@ -111,7 +111,7 @@ class TestUserExecutionEngineIntegration:
             assert callable(engine.execute_analytics_query)
 
 @pytest.mark.integration
-class TestAgentDataAccessIntegration:
+class AgentDataAccessIntegrationTests:
     """Test agent integration with data access capabilities."""
 
     async def test_data_analysis_core_with_capabilities(self, user_context):
@@ -139,7 +139,7 @@ class TestAgentDataAccessIntegration:
         assert hasattr(agent, 'anomaly_detector')
 
 @pytest.mark.integration
-class TestDataIsolation:
+class DataIsolationTests:
     """Test that data access is properly isolated between users."""
 
     async def test_user_isolation_different_contexts(self, cleanup_factories):
@@ -174,7 +174,7 @@ class TestDataIsolation:
         assert redis_stats['users_with_contexts'] >= 0
 
 @pytest.mark.integration
-class TestWebSocketCompatibility:
+class WebSocketCompatibilityTests:
     """Test that WebSocket events still work with factory integration."""
 
     async def test_data_sub_agent_websocket_events(self, user_context):

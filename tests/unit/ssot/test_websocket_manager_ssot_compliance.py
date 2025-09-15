@@ -31,7 +31,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerSSotCompliance(SSotBaseTestCase):
+class WebSocketManagerSSotComplianceTests(SSotBaseTestCase):
     """Test suite to validate SSOT compliance for WebSocket Manager imports."""
 
     # CANONICAL SSOT import patterns (these are the ONLY allowed patterns)

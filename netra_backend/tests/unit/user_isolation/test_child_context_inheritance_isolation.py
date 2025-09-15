@@ -30,7 +30,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from netra_backend.app.services.user_execution_context import UserExecutionContext, UserContextFactory, InvalidContextError, ContextIsolationError, validate_user_context
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestChildContextInheritanceIsolation(SSotBaseTestCase):
+class ChildContextInheritanceIsolationTests(SSotBaseTestCase):
     """Test child context inheritance maintains complete isolation."""
 
     def setup_method(self):

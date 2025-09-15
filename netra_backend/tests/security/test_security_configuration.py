@@ -9,7 +9,7 @@ import pytest
 from netra_backend.app.core.enhanced_secret_manager import EnhancedSecretManager, EnvironmentType
 from netra_backend.app.core.exceptions import NetraSecurityException
 
-class TestSecurityConfiguration:
+class SecurityConfigurationTests:
     """Test security configuration and environment handling."""
 
     def test_environment_specific_config(self):

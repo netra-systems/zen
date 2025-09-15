@@ -608,7 +608,7 @@ class ComprehensiveBillingTestCore:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestBillingEventGeneration:
+class BillingEventGenerationTests:
     """Test comprehensive billing event generation for all scenarios per CLAUDE.md"""
     
     @pytest_asyncio.fixture
@@ -768,7 +768,7 @@ class TestBillingEventGeneration:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e 
-class TestCompensationCalculations:
+class CompensationCalculationsTests:
     """Test comprehensive agent compensation calculations per CLAUDE.md"""
     
     @pytest_asyncio.fixture
@@ -870,7 +870,7 @@ class TestCompensationCalculations:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestBillingAccuracyPerTier:
+class BillingAccuracyPerTierTests:
     """Test billing accuracy across all user tiers per CLAUDE.md business requirements"""
     
     @pytest_asyncio.fixture
@@ -1005,7 +1005,7 @@ class TestBillingAccuracyPerTier:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestBillingEventLifecycle:
+class BillingEventLifecycleTests:
     """Test complete billing event lifecycle per CLAUDE.md requirements"""
     
     @pytest_asyncio.fixture
@@ -1159,7 +1159,7 @@ class TestBillingEventLifecycle:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestBillingEdgeCases:
+class BillingEdgeCasesTests:
     """Test billing edge cases and error scenarios per CLAUDE.md"""
     
     @pytest_asyncio.fixture
@@ -1307,7 +1307,7 @@ class TestBillingEdgeCases:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestBillingPerformanceRequirements:
+class BillingPerformanceRequirementsTests:
     """Test billing performance requirements per CLAUDE.md specifications"""
     
     @pytest_asyncio.fixture

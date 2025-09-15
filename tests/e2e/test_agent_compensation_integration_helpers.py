@@ -141,7 +141,7 @@ def create_helper_test_context(operation_id: str, error: Exception, metadata: Di
     return RecoveryContext(operation_id=operation_id, operation_type=OperationType.AGENT_EXECUTION, error=error, severity=ErrorSeverity.MEDIUM, metadata=metadata or {})
 
 @pytest.mark.e2e
-class TestRealCompensationHelperFunctions:
+class RealCompensationHelperFunctionsTests:
     """Test real compensation helper functions - BVJ: Platform reliability through helper utilities"""
 
     @pytest.mark.asyncio
@@ -283,7 +283,7 @@ class TestRealCompensationHelperFunctions:
             pass
 
 @pytest.mark.e2e
-class TestRealHelperBusinessIntegration:
+class RealHelperBusinessIntegrationTests:
     """Test helper integration with real business processes - BVJ: End-to-end business value"""
 
     @pytest.mark.asyncio

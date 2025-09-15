@@ -32,7 +32,7 @@ from test_framework.environment_isolation import get_test_env_manager
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestRealAgentCollaboration:
+class RealAgentCollaborationTests:
     """Test #1: Real Multi-Agent Collaboration with LLM Integration."""
     
     @pytest_asyncio.fixture
@@ -314,7 +314,7 @@ class TestRealAgentCollaboration:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAgentCollaborationPerformance:
+class AgentCollaborationPerformanceTests:
     """Performance validation for multi-agent collaboration operations."""
     
     @pytest_asyncio.fixture

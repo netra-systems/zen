@@ -55,7 +55,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env, Validation
 
 
 @pytest.mark.integration
-class TestEnvironmentIsolationCore(SSotBaseTestCase):
+class EnvironmentIsolationCoreTests(SSotBaseTestCase):
     """
     Core environment isolation tests.
     
@@ -266,7 +266,7 @@ class TestEnvironmentIsolationCore(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestEnvironmentInheritanceAndOverrides(SSotBaseTestCase):
+class EnvironmentInheritanceAndOverridesTests(SSotBaseTestCase):
     """
     Test environment variable inheritance and override behavior.
     
@@ -444,7 +444,7 @@ class TestEnvironmentInheritanceAndOverrides(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestMultiEnvironmentConfiguration(SSotBaseTestCase):
+class MultiEnvironmentConfigurationTests(SSotBaseTestCase):
     """
     Test multi-environment configuration management.
     
@@ -579,7 +579,7 @@ class TestMultiEnvironmentConfiguration(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestEnvironmentValidationAndTypeConversion(SSotBaseTestCase):
+class EnvironmentValidationAndTypeConversionTests(SSotBaseTestCase):
     """
     Test environment variable validation and type conversion.
     
@@ -674,7 +674,7 @@ class TestEnvironmentValidationAndTypeConversion(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestEnvironmentStateManagement(SSotBaseTestCase):
+class EnvironmentStateManagementTests(SSotBaseTestCase):
     """
     Test environment state cleanup and restoration.
     
@@ -803,7 +803,7 @@ class TestEnvironmentStateManagement(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestEnvironmentNamespacingAndCollisionPrevention(SSotBaseTestCase):
+class EnvironmentNamespacingAndCollisionPreventionTests(SSotBaseTestCase):
     """
     Test environment variable namespacing and collision prevention.
     
@@ -898,7 +898,7 @@ class TestEnvironmentNamespacingAndCollisionPrevention(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestDynamicEnvironmentSwitching(SSotAsyncTestCase):
+class DynamicEnvironmentSwitchingTests(SSotAsyncTestCase):
     """
     Test dynamic environment switching during runtime.
     
@@ -993,7 +993,7 @@ class TestDynamicEnvironmentSwitching(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestEnvironmentSecurityAndAccessControl(SSotBaseTestCase):
+class EnvironmentSecurityAndAccessControlTests(SSotBaseTestCase):
     """
     Test environment security and access control features.
     
@@ -1094,7 +1094,7 @@ class TestEnvironmentSecurityAndAccessControl(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestEnvironmentHealthValidation(SSotBaseTestCase):
+class EnvironmentHealthValidationTests(SSotBaseTestCase):
     """
     Test environment health validation and monitoring.
     
@@ -1206,7 +1206,7 @@ class TestEnvironmentHealthValidation(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestEnvironmentMonitoringAndLogging(SSotBaseTestCase):
+class EnvironmentMonitoringAndLoggingTests(SSotBaseTestCase):
     """
     Test environment monitoring and logging capabilities.
     

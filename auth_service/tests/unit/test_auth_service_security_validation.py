@@ -19,7 +19,7 @@ from auth_service.auth_core.services.auth_service import AuthService
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestAuthServiceSecurityValidation(BaseIntegrationTest):
+class AuthServiceSecurityValidationTests(BaseIntegrationTest):
     """Test auth service security validation and attack prevention"""
 
     def setup_method(self):

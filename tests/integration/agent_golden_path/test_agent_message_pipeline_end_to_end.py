@@ -65,7 +65,7 @@ except ImportError as e:
     AgentExecutionResult = MagicMock
     PipelineExecutor = MagicMock
 
-class TestAgentMessagePipelineEndToEnd(SSotAsyncTestCase):
+class AgentMessagePipelineEndToEndTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Complete Agent Message Pipeline.
 

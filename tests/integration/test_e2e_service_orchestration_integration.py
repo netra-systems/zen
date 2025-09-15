@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestE2EServiceOrchestration:
+class E2EServiceOrchestrationTests:
     """Test E2E service orchestration integration."""
 
     async def test_basic_service_orchestration(self):
@@ -318,7 +318,7 @@ class TestE2EServiceOrchestration:
 @pytest.mark.asyncio 
 @pytest.mark.integration
 @pytest.mark.slow
-class TestE2EServiceOrchestrationPerformance:
+class E2EServiceOrchestrationPerformanceTests:
     """Performance tests for E2E service orchestration."""
     
     async def test_orchestration_performance(self):

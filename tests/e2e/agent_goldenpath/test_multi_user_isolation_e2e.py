@@ -52,7 +52,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
 @pytest.mark.agent_goldenpath
 @pytest.mark.multi_user_isolation
 @pytest.mark.mission_critical
-class TestMultiUserIsolationE2E(SSotAsyncTestCase):
+class MultiUserIsolationE2ETests(SSotAsyncTestCase):
     """
     E2E tests validating complete multi-user isolation in the agent system.
 

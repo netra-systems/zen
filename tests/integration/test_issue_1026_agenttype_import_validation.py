@@ -18,7 +18,7 @@ from typing import Any
 from enum import Enum
 
 
-class TestIssue1026AgentTypeImportValidation:
+class Issue1026AgentTypeImportValidationTests:
     """
     Test class to validate AgentType import patterns for Issue #1026.
 

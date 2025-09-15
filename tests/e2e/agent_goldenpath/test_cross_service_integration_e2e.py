@@ -44,7 +44,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, Authenti
 @pytest.mark.agent_goldenpath
 @pytest.mark.cross_service
 @pytest.mark.mission_critical
-class TestCrossServiceIntegrationE2E(SSotAsyncTestCase):
+class CrossServiceIntegrationE2ETests(SSotAsyncTestCase):
     """
     E2E tests for cross-service integration in agent golden path.
     

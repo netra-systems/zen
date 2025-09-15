@@ -16,7 +16,7 @@ from netra_backend.app.websocket_core.context import WebSocketContext
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
-class TestWebSocketThreadPersistence:
+class WebSocketThreadPersistenceTests:
     """Test suite for WebSocket thread ID persistence and session continuity."""
 
     @pytest.fixture

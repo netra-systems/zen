@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestMessageRouterRaceConditionPrevention(SSotAsyncTestCase):
+class MessageRouterRaceConditionPreventionTests(SSotAsyncTestCase):
     """Test race condition prevention in consolidated MessageRouter."""
 
     def setUp(self):
@@ -272,7 +272,7 @@ class TestMessageRouterRaceConditionPrevention(SSotAsyncTestCase):
             
             if not handlers:
                 # Create a simple handler for testing
-                class TestHandler:
+                class HandlerTests:
                     def __init__(self):
                         self.processed_count = 0
                         self.lock = threading.Lock()
@@ -282,7 +282,7 @@ class TestMessageRouterRaceConditionPrevention(SSotAsyncTestCase):
                             self.processed_count += 1
                         return f"processed_{self.processed_count}"
                 
-                test_handler = TestHandler()
+                test_handler = HandlerTests()
                 handlers = [test_handler]
             
             # Test concurrent handler execution
@@ -383,7 +383,7 @@ class TestMessageRouterRaceConditionPrevention(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestMessageRouterSingletonBehaviorValidation(SSotAsyncTestCase):
+class MessageRouterSingletonBehaviorValidationTests(SSotAsyncTestCase):
     """Test that consolidated router behaves as singleton when needed."""
 
     def test_router_factory_consistency(self):

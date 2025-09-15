@@ -22,7 +22,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestExecutionResultAPICompatibility(SSotBaseTestCase):
+class ExecutionResultAPICompatibilityTests(SSotBaseTestCase):
     """Test suite to expose ExecutionResult API breaking changes."""
 
     def setup_method(self, method=None):
@@ -356,7 +356,7 @@ class TestExecutionResultAPICompatibility(SSotBaseTestCase):
         super().teardown_method(method)
 
 
-class TestExecutionResultAPIMigrationValidation(SSotBaseTestCase):
+class ExecutionResultAPIMigrationValidationTests(SSotBaseTestCase):
     """Additional tests to validate complete API migration."""
 
     @pytest.mark.unit

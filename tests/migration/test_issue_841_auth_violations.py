@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
-class TestIssue841AuthenticationViolations(SSotBaseTestCase):
+class Issue841AuthenticationViolationsTests(SSotBaseTestCase):
     """
     Issue #841 Authentication ID Generation Violation Tests
     

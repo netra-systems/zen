@@ -26,7 +26,7 @@ from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestMetricsCollectorCore:
+class MetricsCollectorCoreTests:
     """Core test suite for MetricsCollector billing accuracy."""
 
     @pytest.fixture

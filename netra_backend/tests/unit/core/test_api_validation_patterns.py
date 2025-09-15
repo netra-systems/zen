@@ -28,7 +28,7 @@ class MockAPIResponse(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
-class TestAPIValidationPatterns:
+class APIValidationPatternsTests:
     """Test API validation patterns and error handling"""
 
     def test_request_validation_success(self):
@@ -147,7 +147,7 @@ class TestAPIValidationPatterns:
         assert "priority" in error_message
 
 
-class TestAPIErrorBoundaries:
+class APIErrorBoundariesTests:
     """Test API error boundary patterns"""
 
     @pytest.mark.asyncio
@@ -319,7 +319,7 @@ class TestAPIErrorBoundaries:
             })
 
 
-class TestAPIResponsePatterns:
+class APIResponsePatternsTests:
     """Test API response patterns and serialization"""
 
     def test_standardized_response_format(self):

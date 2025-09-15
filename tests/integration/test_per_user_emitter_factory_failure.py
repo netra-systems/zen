@@ -33,7 +33,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 logger = logging.getLogger(__name__)
 
 
-class TestPerUserEmitterFactoryFailure(BaseIntegrationTest):
+class PerUserEmitterFactoryFailureTests(BaseIntegrationTest):
     """
     Test the per-user WebSocket emitter factory pattern failures.
     

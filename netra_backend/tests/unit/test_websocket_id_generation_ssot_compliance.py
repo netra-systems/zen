@@ -22,7 +22,7 @@ from typing import Optional, Dict, Any
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from netra_backend.app.database.request_scoped_session_factory import RequestScopedSessionFactory
 
-class TestWebSocketIdGenerationSSOTCompliance:
+class WebSocketIdGenerationSSOTComplianceTests:
     """Test suite to expose SSOT violations in WebSocket ID generation.
     
     These tests are DESIGNED TO FAIL initially to demonstrate the specific

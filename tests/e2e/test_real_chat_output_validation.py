@@ -243,7 +243,7 @@ async def chat_tester():
 @pytest.mark.asyncio
 @pytest.mark.real_llm
 @pytest.mark.e2e
-class TestRealChatOutput:
+class RealChatOutputTests:
     """Test suite for real chat output validation."""
 
     async def test_simple_question_full_flow(self, chat_tester):

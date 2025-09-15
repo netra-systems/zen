@@ -17,7 +17,7 @@ from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestReportingResilience:
+class ReportingResilienceTests:
     """Test suite for UVS resilience requirements."""
     
     @pytest.mark.asyncio

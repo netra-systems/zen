@@ -15,7 +15,7 @@ from test_framework.fixtures.auth import create_real_jwt_token
 
 
 @pytest.mark.integration
-class TestJWTFrontendTestCompatibility:
+class JWTFrontendTestCompatibilityTests:
     """Test JWT token creation patterns used by frontend integration tests."""
     
     def test_frontend_auth_flow_token_creation_reproduces_issue_520(self):
@@ -114,7 +114,7 @@ class TestJWTFrontendTestCompatibility:
 
 
 @pytest.mark.integration
-class TestJWTFrontendTestCompatibilityWithFix:
+class JWTFrontendTestCompatibilityWithFixTests:
     """Test how frontend tests should work after the fix is applied."""
     
     def test_frontend_auth_flow_with_email_parameter_should_work(self):

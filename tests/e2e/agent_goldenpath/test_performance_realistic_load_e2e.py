@@ -78,7 +78,7 @@ class LoadTestResults:
 @pytest.mark.agent_goldenpath
 @pytest.mark.performance
 @pytest.mark.mission_critical
-class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
+class PerformanceRealisticLoadE2ETests(SSotAsyncTestCase):
     """
     E2E tests for validating agent performance under realistic production load.
 

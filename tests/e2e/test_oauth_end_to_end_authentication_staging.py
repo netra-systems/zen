@@ -38,7 +38,7 @@ from shared.types.core_types import UserID, ThreadID, WebSocketID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
+class OAuthEndToEndAuthenticationStagingTests(BaseE2ETest):
     """E2E tests for complete OAuth authentication flow in staging environment."""
     
     @pytest.fixture(autouse=True)

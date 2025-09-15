@@ -37,7 +37,7 @@ from tests.e2e.oauth_test_providers import OAuthUserFactory
 logger = central_logger.get_logger(__name__)
 
 
-class TestOAuthIntegrationRunner(OAuthFlowTestRunner):
+class OAuthIntegrationRunnerTests(OAuthFlowTestRunner):
     """Extended OAuth test runner for integration scenarios - REAL PROVIDERS ONLY"""
     
     def __init__(self):
@@ -339,7 +339,7 @@ class TestOAuthIntegrationRunner(OAuthFlowTestRunner):
 @pytest.mark.critical
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestOAuthIntegration:
+class OAuthIntegrationTests:
     """OAuth Integration and Session Management Tests."""
     
     @pytest.fixture

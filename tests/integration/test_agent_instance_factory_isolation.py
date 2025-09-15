@@ -26,7 +26,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 
 
 @pytest.mark.integration
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
@@ -106,7 +106,7 @@ class MockAgent:
 
 
 @pytest.mark.integration
-class TestAgentInstanceFactoryIsolation(SSotAsyncTestCase):
+class AgentInstanceFactoryIsolationTests(SSotAsyncTestCase):
     """Test AgentInstanceFactory creates properly isolated instances."""
 
     def setup_method(self, method):
@@ -243,7 +243,7 @@ class TestAgentInstanceFactoryIsolation(SSotAsyncTestCase):
         
         for i in range(3):
             user_id = f'user_{i}'
-            connection = TestWebSocketConnection()
+            connection = WebSocketConnectionTests()
             user_connections[user_id] = connection
 
         # Simulate sending messages to specific users

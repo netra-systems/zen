@@ -46,7 +46,7 @@ from netra_backend.app import startup_module, smd
 from netra_backend.app.smd import StartupPhase, DeterministicStartupError, StartupOrchestrator
 
 
-class TestStartupSmdIntegration(IntegrationTestCase):
+class StartupSmdIntegrationTests(IntegrationTestCase):
     """
     Integration tests for startup_module + smd deterministic startup integration.
     
@@ -750,7 +750,7 @@ class TestStartupSmdIntegration(IntegrationTestCase):
         super().tearDown()
 
 
-class TestStartupModuleSmdCompatibility(BaseTestCase):
+class StartupModuleSmdCompatibilityTests(BaseTestCase):
     """Test compatibility between startup_module helper functions and SMD requirements."""
     
     REQUIRES_DATABASE = False  # Compatibility tests can use mocks

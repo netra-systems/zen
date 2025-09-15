@@ -21,7 +21,7 @@ from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 from netra_backend.app.tools.data_helper import DataHelper
 
 
-class TestDataHelperAgentCoreFunctionality(SSotAsyncTestCase, unittest.TestCase):
+class DataHelperAgentCoreFunctionalityTests(SSotAsyncTestCase, unittest.TestCase):
     """Test suite for Data Helper Agent core functionality."""
     
     def setUp(self):

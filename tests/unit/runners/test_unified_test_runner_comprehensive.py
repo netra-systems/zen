@@ -27,7 +27,7 @@ from unittest.mock import Mock, patch, MagicMock
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerCore:
+class UnifiedTestRunnerCoreTests:
     """Core test runner functionality tests"""
     
     @patch('tests.unified_test_runner.PROJECT_ROOT')
@@ -96,7 +96,7 @@ class TestUnifiedTestRunnerCore:
 
 
 @pytest.mark.unit
-class TestComponentInitialization:
+class ComponentInitializationTests:
     """Test component initialization and configuration"""
     
     def test_initialize_components_with_progress_tracking(self):
@@ -165,7 +165,7 @@ class TestComponentInitialization:
 
 
 @pytest.mark.unit
-class TestEnvironmentConfiguration:
+class EnvironmentConfigurationTests:
     """Test environment configuration and validation"""
     
     def test_configure_environment_dev_mode(self):
@@ -227,7 +227,7 @@ class TestEnvironmentConfiguration:
 
 
 @pytest.mark.unit
-class TestDockerManagement:
+class DockerManagementTests:
     """Test Docker management and service orchestration - CRITICAL for CI/CD"""
     
     def test_cleanup_test_environment(self):
@@ -268,7 +268,7 @@ class TestDockerManagement:
 
 
 @pytest.mark.unit
-class TestServiceOrchestration:
+class ServiceOrchestrationTests:
     """Test service orchestration functionality - supports development velocity"""
     
     def test_auto_services_orchestration(self):
@@ -330,7 +330,7 @@ class TestServiceOrchestration:
 
 
 @pytest.mark.unit
-class TestTestExecution:
+class TestExecutionTests:
     """Test test execution functionality and orchestration"""
     
     def test_test_execution_tracking(self):
@@ -385,7 +385,7 @@ class TestTestExecution:
 
 
 @pytest.mark.unit
-class TestCypressIntegration:
+class CypressIntegrationTests:
     """Test Cypress test runner integration"""
     
     def test_cypress_runner_lazy_initialization(self):
@@ -411,7 +411,7 @@ class TestCypressIntegration:
 
 
 @pytest.mark.unit
-class TestProgressTracking:
+class ProgressTrackingTests:
     """Test progress tracking and reporting functionality"""
     
     def test_progress_tracker_initialization(self):
@@ -449,7 +449,7 @@ class TestProgressTracking:
 
 
 @pytest.mark.unit
-class TestFailFastStrategies:
+class FailFastStrategiesTests:
     """Test fail-fast strategies for efficient feedback"""
     
     def test_fail_fast_strategy_initialization(self):
@@ -481,7 +481,7 @@ class TestFailFastStrategies:
 
 
 @pytest.mark.unit
-class TestCategorySystem:
+class CategorySystemTests:
     """Test category-based test execution system"""
     
     def test_category_system_initialization(self):
@@ -515,7 +515,7 @@ class TestCategorySystem:
 
 
 @pytest.mark.unit
-class TestOrchestrationIntegration:
+class OrchestrationIntegrationTests:
     """Test orchestration system integration - advanced test management"""
     
     def test_orchestration_config_import(self):
@@ -563,7 +563,7 @@ class TestOrchestrationIntegration:
 
 
 @pytest.mark.unit
-class TestEnvironmentSpecificBehavior:
+class EnvironmentSpecificBehaviorTests:
     """Test environment-specific behavior and configuration"""
     
     def test_windows_encoding_setup_handling(self):
@@ -615,7 +615,7 @@ class TestEnvironmentSpecificBehavior:
 
 
 @pytest.mark.unit
-class TestErrorHandlingAndRecovery:
+class ErrorHandlingAndRecoveryTests:
     """Test error handling and recovery mechanisms"""
     
     def test_pre_test_cleanup_error_handling(self):
@@ -673,7 +673,7 @@ class TestErrorHandlingAndRecovery:
 
 
 @pytest.mark.unit
-class TestPerformanceOptimizations:
+class PerformanceOptimizationsTests:
     """Test performance optimizations and resource management"""
     
     def test_test_collection_size_limits(self):
@@ -723,7 +723,7 @@ class TestPerformanceOptimizations:
 
 
 @pytest.mark.unit
-class TestBusinessScenarios:
+class BusinessScenariosTests:
     """Test complete business scenarios - protects $500K+ ARR"""
     
     def test_ci_cd_pipeline_scenario(self):

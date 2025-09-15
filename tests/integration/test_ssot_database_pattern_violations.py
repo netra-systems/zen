@@ -35,7 +35,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 @pytest.mark.integration
-class TestSSotDatabasePatternIntegration:
+class SSotDatabasePatternIntegrationTests:
     """
     Integration Tests for SSOT Database Pattern Compliance
     
@@ -190,7 +190,7 @@ class TestSSotDatabasePatternIntegration:
         logger.info('SSOT Database Error Handling Integration Test Completed')
 
 @pytest.mark.integration
-class TestSSotDatabaseConcurrencyIntegration:
+class SSotDatabaseConcurrencyIntegrationTests:
     """
     Integration Tests for SSOT Database Concurrency Patterns
     

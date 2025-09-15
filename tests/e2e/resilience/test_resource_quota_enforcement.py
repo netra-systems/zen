@@ -34,7 +34,7 @@ QUOTA_CONFIG = {
     "recovery_timeout": 60         # seconds
 }
 
-class TestResourceQuotaEnforcement:
+class ResourceQuotaEnforcementTests:
     """Test resource quota enforcement mechanisms"""
     
     @pytest.mark.asyncio

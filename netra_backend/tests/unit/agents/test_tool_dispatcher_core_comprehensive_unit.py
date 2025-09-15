@@ -60,7 +60,7 @@ class MockAsyncTool(BaseTool):
         return {"success": True, "result": "mock_async_result"}
 
 
-class TestToolDispatcherCoreUnit(SSotBaseTestCase):
+class ToolDispatcherCoreUnitTests(SSotBaseTestCase):
     """Comprehensive unit tests for ToolDispatcher core functionality."""
 
     @pytest.fixture

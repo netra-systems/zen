@@ -31,7 +31,7 @@ from test_framework.ssot.e2e_auth_helper import (
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketLifecycleManagement(BaseIntegrationTest):
+class WebSocketLifecycleManagementTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket lifecycle management with real services.
     

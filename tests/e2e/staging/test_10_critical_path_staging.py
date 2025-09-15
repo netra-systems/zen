@@ -15,7 +15,7 @@ from tests.e2e.staging_test_base import StagingTestBase, staging_test
 
 
 @pytest.mark.e2e
-class TestCriticalPathStaging(StagingTestBase):
+class CriticalPathStagingTests(StagingTestBase):
     """Test critical path in staging environment"""
     
     @staging_test
@@ -140,7 +140,7 @@ class TestCriticalPathStaging(StagingTestBase):
 
 if __name__ == "__main__":
     async def run_tests():
-        test_class = TestCriticalPathStaging()
+        test_class = CriticalPathStagingTests()
         test_class.setup_class()
         
         try:

@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.unit
-class TestTenantAgentManagerMissingMethods:
+class TenantAgentManagerMissingMethodsTests:
     """Test class for missing TenantAgentManager methods."""
     
     @pytest.fixture
@@ -254,7 +254,7 @@ class TestTenantAgentManagerMissingMethods:
 
 
 @pytest.mark.unit
-class TestTenantAgentManagerExistingMethods:
+class TenantAgentManagerExistingMethodsTests:
     """Test existing methods to ensure they still work after adding missing methods."""
     
     @pytest.fixture
@@ -302,7 +302,7 @@ class TestTenantAgentManagerExistingMethods:
 
 
 @pytest.mark.unit
-class TestTenantAgentCompatibility:
+class TenantAgentCompatibilityTests:
     """Test compatibility with TenantAgent class expectations."""
     
     def test_tenant_agent_attributes(self):
@@ -329,7 +329,7 @@ class TestTenantAgentCompatibility:
 
 # Error-specific tests for debugging
 @pytest.mark.unit
-class TestMethodErrorScenarios:
+class MethodErrorScenariosTests:
     """Test specific error scenarios to aid in debugging."""
     
     @pytest.fixture

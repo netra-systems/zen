@@ -29,7 +29,7 @@ from test_framework.http_client import ClientConfig, ConnectionState
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
-class TestAuthWebSocketer:
+class AuthWebSocketerTests:
     """Simple auth WebSocket tester for integration testing."""
     
     def __init__(self):
@@ -43,7 +43,7 @@ class TestAuthWebSocketer:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAuthWebSocketHandshakeIntegration:
+class AuthWebSocketHandshakeIntegrationTests:
     """P0 CRITICAL: Auth-WebSocket handshake integration tests."""
     
     def setup_method(self):

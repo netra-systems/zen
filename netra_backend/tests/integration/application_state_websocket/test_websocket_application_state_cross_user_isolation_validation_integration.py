@@ -259,7 +259,7 @@ class IsolationTestValidator:
         return isolation_results
 
 
-class TestWebSocketApplicationStateCrossUserIsolationValidation(BaseIntegrationTest):
+class WebSocketApplicationStateCrossUserIsolationValidationTests(BaseIntegrationTest):
     """Test cross-user state isolation validation during concurrent WebSocket operations."""
     
     async def create_isolated_user_environment(self, services, user_count: int = 3) -> List[UserTestContext]:

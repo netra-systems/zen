@@ -32,7 +32,7 @@ from shared.types.core_types import UserID, ConnectionID
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.unit
-class TestSendAfterCloseRaceCondition(SSotAsyncTestCase):
+class SendAfterCloseRaceConditionTests(SSotAsyncTestCase):
     """
     Unit tests to reproduce WebSocket send-after-close race condition.
 
@@ -167,7 +167,7 @@ class TestSendAfterCloseRaceCondition(SSotAsyncTestCase):
                 asyncio.run(self.manager.send_message(self.user_id, {'type': 'test'}))
 
 @pytest.mark.unit
-class TestWebSocketStateValidationMissing(SSotAsyncTestCase):
+class WebSocketStateValidationMissingTests(SSotAsyncTestCase):
     """
     Tests to demonstrate missing validation patterns that cause race conditions.
 

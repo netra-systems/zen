@@ -28,7 +28,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from auth_service.auth_core.oauth_manager import OAuthManager
 from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider, GoogleOAuthError
 
-class TestOAuthManagerInitialization(SSotBaseTestCase):
+class OAuthManagerInitializationTests(SSotBaseTestCase):
     """Test OAuth manager initialization and basic functionality."""
 
     def setup_method(self, method=None):
@@ -63,7 +63,7 @@ class TestOAuthManagerInitialization(SSotBaseTestCase):
             assert isinstance(providers, list)
             self.record_metric('providers_after_failure', len(providers))
 
-class TestOAuthManagerProviderManagement(SSotBaseTestCase):
+class OAuthManagerProviderManagementTests(SSotBaseTestCase):
     """Test OAuth manager provider management functionality."""
 
     def setup_method(self, method=None):
@@ -104,7 +104,7 @@ class TestOAuthManagerProviderManagement(SSotBaseTestCase):
         provider = self.manager.get_provider(None)
         assert provider is None
 
-class TestOAuthManagerProviderStatus(SSotBaseTestCase):
+class OAuthManagerProviderStatusTests(SSotBaseTestCase):
     """Test OAuth manager provider status functionality."""
 
     def setup_method(self, method=None):
@@ -158,7 +158,7 @@ class TestOAuthManagerProviderStatus(SSotBaseTestCase):
             for field in available_fields:
                 assert field in status, f"Available provider field '{field}' missing"
 
-class TestOAuthManagerErrorHandling(SSotBaseTestCase):
+class OAuthManagerErrorHandlingTests(SSotBaseTestCase):
     """Test OAuth manager error handling and edge cases."""
 
     def setup_method(self, method=None):
@@ -212,7 +212,7 @@ class TestOAuthManagerErrorHandling(SSotBaseTestCase):
         assert growth < 1000, f'Excessive memory growth: {growth} objects'
         self.record_metric('memory_growth', growth)
 
-class TestOAuthManagerIntegration(SSotBaseTestCase):
+class OAuthManagerIntegrationTests(SSotBaseTestCase):
     """Test OAuth manager integration scenarios."""
 
     def setup_method(self, method=None):
@@ -263,7 +263,7 @@ class TestOAuthManagerIntegration(SSotBaseTestCase):
         self.record_metric('operations_completed', operations_count)
         assert operations_count >= 8
 
-class TestOAuthManagerConfiguration(SSotBaseTestCase):
+class OAuthManagerConfigurationTests(SSotBaseTestCase):
     """Test OAuth manager configuration scenarios."""
 
     def setup_method(self, method=None):
@@ -307,7 +307,7 @@ class TestOAuthManagerConfiguration(SSotBaseTestCase):
             assert 'available' in new_status
             assert initial_status['provider'] == new_status['provider']
 
-class TestOAuthManagerSecurity(SSotBaseTestCase):
+class OAuthManagerSecurityTests(SSotBaseTestCase):
     """Test OAuth manager security features."""
 
     def setup_method(self, method=None):
@@ -347,7 +347,7 @@ class TestOAuthManagerSecurity(SSotBaseTestCase):
         assert status1['available'] == status2['available']
         self.record_metric('state_isolation_verified', True)
 
-class TestOAuthManagerPerformance(SSotBaseTestCase):
+class OAuthManagerPerformanceTests(SSotBaseTestCase):
     """Test OAuth manager performance characteristics."""
 
     def setup_method(self, method=None):

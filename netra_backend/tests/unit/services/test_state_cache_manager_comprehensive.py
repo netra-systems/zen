@@ -41,7 +41,7 @@ from netra_backend.app.redis_manager import redis_manager
 
 
 @pytest.mark.unit
-class TestStateCacheManagerInitialization():
+class StateCacheManagerInitializationTests():
     """Test StateCacheManager initialization and basic functionality."""
     
     def test_state_cache_manager_initializes_correctly(self):
@@ -61,7 +61,7 @@ class TestStateCacheManagerInitialization():
 
 
 @pytest.mark.unit
-class TestStateCacheManagerSerialization():
+class StateCacheManagerSerializationTests():
     """Test data serialization and deserialization."""
     
     def setup_method(self):
@@ -120,7 +120,7 @@ class TestStateCacheManagerSerialization():
 
 
 @pytest.mark.unit
-class TestStateCacheManagerPrimaryStateOperations():
+class StateCacheManagerPrimaryStateOperationsTests():
     """Test primary state operations (save/load/delete)."""
     
     def setup_method(self):
@@ -279,7 +279,7 @@ class TestStateCacheManagerPrimaryStateOperations():
 
 
 @pytest.mark.unit
-class TestStateCacheManagerAliasOperations():
+class StateCacheManagerAliasOperationsTests():
     """Test alias methods that delegate to primary operations."""
     
     def setup_method(self):
@@ -310,7 +310,7 @@ class TestStateCacheManagerAliasOperations():
 
 
 @pytest.mark.unit
-class TestStateCacheManagerUtilityOperations():
+class StateCacheManagerUtilityOperationsTests():
     """Test utility operations like caching, marking completion, etc."""
     
     def setup_method(self):
@@ -381,7 +381,7 @@ class TestStateCacheManagerUtilityOperations():
 
 
 @pytest.mark.unit
-class TestStateCacheManagerThreadContextHandling():
+class StateCacheManagerThreadContextHandlingTests():
     """Test thread context handling in Redis operations."""
     
     def setup_method(self):
@@ -437,7 +437,7 @@ class TestStateCacheManagerThreadContextHandling():
 
 
 @pytest.mark.unit
-class TestStateCacheManagerErrorHandling():
+class StateCacheManagerErrorHandlingTests():
     """Test error handling and exception scenarios."""
     
     def setup_method(self):
@@ -490,7 +490,7 @@ class TestStateCacheManagerErrorHandling():
 
 
 @pytest.mark.unit
-class TestStateCacheManagerRedisVersionHandling():
+class StateCacheManagerRedisVersionHandlingTests():
     """Test version tracking in Redis operations."""
     
     def setup_method(self):
@@ -542,7 +542,7 @@ class TestStateCacheManagerRedisVersionHandling():
 
 
 @pytest.mark.unit  
-class TestStateCacheManagerIntegrationPatterns():
+class StateCacheManagerIntegrationPatternsTests():
     """Test integration patterns and realistic usage scenarios."""
     
     def setup_method(self):

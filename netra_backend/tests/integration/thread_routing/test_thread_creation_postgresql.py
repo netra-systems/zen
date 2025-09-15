@@ -68,7 +68,7 @@ except ImportError:
     OperationalError = Exception
 
 
-class TestThreadCreationPostgreSQL(BaseIntegrationTest):
+class ThreadCreationPostgreSQLTests(BaseIntegrationTest):
     """Test thread creation and persistence with real PostgreSQL database."""
 
     @pytest.mark.integration

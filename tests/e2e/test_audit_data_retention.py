@@ -17,7 +17,7 @@ import pytest
 
 
 @pytest.mark.e2e
-class TestAuditRetentionPolicy:
+class AuditRetentionPolicyTests:
     """Test audit data retention policy and lifecycle management.
     
     Enterprise BVJ: Proper data lifecycle management ensures compliance with 

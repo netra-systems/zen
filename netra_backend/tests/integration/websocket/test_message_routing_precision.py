@@ -61,7 +61,7 @@ class RoutingTestLLM:
         }
 
 
-class TestWebSocketMessageRoutingPrecision(BaseIntegrationTest):
+class WebSocketMessageRoutingPrecisionTests(BaseIntegrationTest):
     """
     Precision tests for WebSocket message routing scenarios.
     

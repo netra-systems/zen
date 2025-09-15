@@ -43,7 +43,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 
 
-class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
+class MultiUserIsolationUnderLoadTests(SSotAsyncTestCase):
     """
      ALERT:  MISSION CRITICAL TEST SUITE  ALERT: 
     

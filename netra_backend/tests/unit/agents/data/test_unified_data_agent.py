@@ -24,7 +24,7 @@ from netra_backend.app.agents.data.unified_data_agent import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestUnifiedDataAgentFactory:
+class UnifiedDataAgentFactoryTests:
     """Test factory pattern for user isolation."""
     
     def test_factory_creates_isolated_agents(self):
@@ -111,7 +111,7 @@ class TestUnifiedDataAgentFactory:
         assert "user2" in status["active_users"]
 
 
-class TestUnifiedDataAgent:
+class UnifiedDataAgentTests:
     """Test UnifiedDataAgent core functionality."""
     
     @pytest.fixture
@@ -280,7 +280,7 @@ class TestUnifiedDataAgent:
         assert len(result["available_types"]) == 5
 
 
-class TestAnalysisStrategies:
+class AnalysisStrategiesTests:
     """Test individual analysis strategy implementations."""
     
     def test_performance_strategy_metrics_extraction(self):
@@ -384,7 +384,7 @@ class TestAnalysisStrategies:
 
 
 @pytest.mark.asyncio
-class TestUnifiedDataAgentExecution:
+class UnifiedDataAgentExecutionTests:
     """Test end-to-end execution of UnifiedDataAgent."""
     
     async def test_execute_performance_analysis(self):

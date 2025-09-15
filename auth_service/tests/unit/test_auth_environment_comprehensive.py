@@ -30,7 +30,7 @@ from auth_service.auth_core.auth_environment import AuthEnvironment, get_auth_en
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAuthEnvironmentInitialization:
+class AuthEnvironmentInitializationTests:
     """Test AuthEnvironment initialization and validation."""
 
     def setup_method(self):
@@ -76,7 +76,7 @@ class TestAuthEnvironmentInitialization:
             env._validate_auth_config()  # Should not raise exception
 
 
-class TestJWTConfiguration:
+class JWTConfigurationTests:
     """Test JWT-related configuration methods."""
 
     def setup_method(self):
@@ -254,7 +254,7 @@ class TestJWTConfiguration:
                     assert self.env.get_refresh_token_expiration_days() == expected
 
 
-class TestSecretKeyConfiguration:
+class SecretKeyConfigurationTests:
     """Test general secret key configuration."""
 
     def setup_method(self):
@@ -305,7 +305,7 @@ class TestSecretKeyConfiguration:
                     assert self.env.get_bcrypt_rounds() == expected
 
 
-class TestDatabaseConfiguration:
+class DatabaseConfigurationTests:
     """Test database configuration methods."""
 
     def setup_method(self):
@@ -450,7 +450,7 @@ class TestDatabaseConfiguration:
                         assert self.env.get_postgres_db() == expected
 
 
-class TestRedisConfiguration:
+class RedisConfigurationTests:
     """Test Redis configuration methods."""
 
     def setup_method(self):
@@ -537,7 +537,7 @@ class TestRedisConfiguration:
                     assert self.env.get_session_ttl() == expected
 
 
-class TestOAuthConfiguration:
+class OAuthConfigurationTests:
     """Test OAuth configuration methods."""
 
     def setup_method(self):
@@ -606,7 +606,7 @@ class TestOAuthConfiguration:
             assert self.env.get_oauth_github_client_secret() == "github-secret"
 
 
-class TestServiceURLConfiguration:
+class ServiceURLConfigurationTests:
     """Test service URL configuration methods."""
 
     def setup_method(self):
@@ -703,7 +703,7 @@ class TestServiceURLConfiguration:
                 assert uri == "http://localhost:8081/auth/callback"
 
 
-class TestEnvironmentDetection:
+class EnvironmentDetectionTests:
     """Test environment detection methods."""
 
     def setup_method(self):
@@ -762,7 +762,7 @@ class TestEnvironmentDetection:
                 assert self.env.is_testing() is True
 
 
-class TestCORSConfiguration:
+class CORSConfigurationTests:
     """Test CORS configuration methods."""
 
     def setup_method(self):
@@ -792,7 +792,7 @@ class TestCORSConfiguration:
                     assert set(origins) == set(expected_origins)
 
 
-class TestLoggingConfiguration:
+class LoggingConfigurationTests:
     """Test logging configuration methods."""
 
     def setup_method(self):
@@ -843,7 +843,7 @@ class TestLoggingConfiguration:
             assert self.env.should_enable_debug() is False
 
 
-class TestRateLimitingConfiguration:
+class RateLimitingConfigurationTests:
     """Test rate limiting configuration methods."""
 
     def setup_method(self):
@@ -907,7 +907,7 @@ class TestRateLimitingConfiguration:
             assert self.env.get_account_lockout_duration() == 900
 
 
-class TestPasswordPolicyConfiguration:
+class PasswordPolicyConfigurationTests:
     """Test password policy configuration methods."""
 
     def setup_method(self):
@@ -945,7 +945,7 @@ class TestPasswordPolicyConfiguration:
                     assert self.env.require_password_complexity() == expected
 
 
-class TestEmailConfiguration:
+class EmailConfigurationTests:
     """Test email configuration methods."""
 
     def setup_method(self):
@@ -993,7 +993,7 @@ class TestEmailConfiguration:
                 assert self.env.is_smtp_enabled() is False
 
 
-class TestGenericAccessors:
+class GenericAccessorsTests:
     """Test generic accessor methods."""
 
     def setup_method(self):
@@ -1023,7 +1023,7 @@ class TestGenericAccessors:
             assert result == {"KEY": "value"}
 
 
-class TestValidationMethod:
+class ValidationMethodTests:
     """Test the validate method."""
 
     def setup_method(self):
@@ -1085,7 +1085,7 @@ class TestValidationMethod:
                     assert any("MIN_PASSWORD_LENGTH" in warning for warning in result["warnings"])
 
 
-class TestSingletonBehavior:
+class SingletonBehaviorTests:
     """Test singleton behavior of auth environment."""
 
     def test_get_auth_env_returns_same_instance(self):
@@ -1125,7 +1125,7 @@ class TestSingletonBehavior:
             assert mock_get_env.call_count == 5
 
 
-class TestErrorHandlingAndEdgeCases:
+class ErrorHandlingAndEdgeCasesTests:
     """Test error handling and edge cases."""
 
     def setup_method(self):
@@ -1436,7 +1436,7 @@ class TestErrorHandlingAndEdgeCases:
             assert self.env.get_smtp_port() == 2525
 
 
-class TestJWTSecretFallbackScenarios:
+class JWTSecretFallbackScenariosTests:
     """Test JWT secret fallback scenarios comprehensively."""
 
     def setup_method(self):
@@ -1483,7 +1483,7 @@ class TestJWTSecretFallbackScenarios:
                     assert secret == "whitespace-secret"
 
 
-class TestEnvironmentSpecificBehaviorEdgeCases:
+class EnvironmentSpecificBehaviorEdgeCasesTests:
     """Test environment-specific behavior edge cases."""
 
     def setup_method(self):
@@ -1573,7 +1573,7 @@ class TestEnvironmentSpecificBehaviorEdgeCases:
                             assert result is True
 
 
-class TestSecurityValidationComprehensive:
+class SecurityValidationComprehensiveTests:
     """Test security validation comprehensively."""
 
     def setup_method(self):
@@ -1618,7 +1618,7 @@ class TestSecurityValidationComprehensive:
             pass
 
 
-class TestConfigurationOverridePatterns:
+class ConfigurationOverridePatternsTests:
     """Test configuration override patterns."""
 
     def setup_method(self):
@@ -1671,7 +1671,7 @@ class TestConfigurationOverridePatterns:
             assert len([o for o in unique_origins if o]) >= 2  # At least 2 non-empty origins
 
 
-class TestSecretGenerationAndFallbacks:
+class SecretGenerationAndFallbacksTests:
     """Test secret generation and fallback mechanisms."""
 
     def setup_method(self):

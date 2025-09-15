@@ -24,7 +24,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.monitoring.observability_pipeline import ObservabilityPipeline, LogAggregator
 from netra_backend.app.monitoring.trace_collector import TraceCollector
 
-class TestObservabilityPipelineIntegration(SSotBaseTestCase):
+class ObservabilityPipelineIntegrationTests(SSotBaseTestCase):
     """Test observability pipeline with real monitoring services"""
 
     def setup_method(self):

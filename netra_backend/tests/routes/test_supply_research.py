@@ -22,7 +22,7 @@ from netra_backend.tests.test_route_fixtures import (
     basic_test_client,
 )
 
-class TestSupplyResearch:
+class SupplyResearchTests:
     """Test supply chain research and validation functionality."""
     
     def test_supply_research(self, basic_test_client):

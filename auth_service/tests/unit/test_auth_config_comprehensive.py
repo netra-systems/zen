@@ -10,7 +10,7 @@ from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAuthConfigBasics:
+class AuthConfigBasicsTests:
     """Test basic AuthConfig functionality"""
     
     def test_get_environment(self):
@@ -124,7 +124,7 @@ class TestAuthConfigBasics:
         env.set("ENVIRONMENT", "test", "test")  # Reset
 
 
-class TestAuthConfigGoogleOAuth:
+class AuthConfigGoogleOAuthTests:
     """Test Google OAuth configuration"""
     
     def test_get_google_client_id(self):
@@ -166,7 +166,7 @@ class TestAuthConfigGoogleOAuth:
         assert "profile" in scopes
 
 
-class TestAuthConfigDatabase:
+class AuthConfigDatabaseTests:
     """Test database configuration"""
     
     def test_get_database_host(self):
@@ -222,7 +222,7 @@ class TestAuthConfigDatabase:
         assert "sqlite" in url
 
 
-class TestAuthConfigRedis:
+class AuthConfigRedisTests:
     """Test Redis configuration"""
     
     def test_get_redis_host(self):
@@ -278,7 +278,7 @@ class TestAuthConfigRedis:
         assert ttl > 0
 
 
-class TestAuthConfigSecurity:
+class AuthConfigSecurityTests:
     """Test security-related configuration"""
     
     def test_get_bcrypt_rounds(self):
@@ -337,7 +337,7 @@ class TestAuthConfigSecurity:
         assert len(origins) > 0
 
 
-class TestAuthConfigDefaults:
+class AuthConfigDefaultsTests:
     """Test configuration defaults"""
     
     def test_default_values_when_env_empty(self):
@@ -404,7 +404,7 @@ class TestAuthConfigDefaults:
         env.set("ENVIRONMENT", "test", "test")
 
 
-class TestAuthConfigValidation:
+class AuthConfigValidationTests:
     """Test configuration validation"""
     
     def test_validate_jwt_secret_length(self):

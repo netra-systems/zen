@@ -564,7 +564,7 @@ class ErrorRecoveryValidator:
         )
 
 
-class TestErrorRecoveryIntegration(SSotAsyncTestCase):
+class ErrorRecoveryIntegrationTests(SSotAsyncTestCase):
     """
     Error Recovery Integration Tests.
     
@@ -810,7 +810,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_test():
-        test_instance = TestErrorRecoveryIntegration()
+        test_instance = ErrorRecoveryIntegrationTests()
         test_instance.setup_method()
         await test_instance.test_comprehensive_error_recovery_validation()
         print("Direct test execution completed successfully")

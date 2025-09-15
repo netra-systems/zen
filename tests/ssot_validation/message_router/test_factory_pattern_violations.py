@@ -32,7 +32,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestFactoryPatternViolations(SSotAsyncTestCase):
+class FactoryPatternViolationsTests(SSotAsyncTestCase):
     """
     Phase 1 SSOT Violation Detection: Mixed singleton/factory patterns in WebSocket bridge
 

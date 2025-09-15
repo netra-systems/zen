@@ -60,7 +60,7 @@ from netra_backend.app.services.state_persistence_optimized import StatePersiste
 from netra_backend.app.config import get_config
 
 
-class TestAgentStateManagement(SSotAsyncTestCase):
+class AgentStateManagementTests(SSotAsyncTestCase):
     """Integration tests for agent state management and user context isolation."""
     
     async def async_setup_method(self, method=None):

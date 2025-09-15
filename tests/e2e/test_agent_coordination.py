@@ -196,7 +196,7 @@ def create_shared_resources():
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAgentHandoff:
+class AgentHandoffTests:
     """Test clean agent-to-agent handoffs - BVJ: Seamless value delivery chain"""
 
     @pytest.mark.e2e
@@ -230,7 +230,7 @@ class TestAgentHandoff:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestParallelExecution:
+class ParallelExecutionTests:
     """Test parallel agent execution patterns - BVJ: Efficiency through parallelization"""
 
     @pytest.mark.e2e
@@ -295,7 +295,7 @@ class TestParallelExecution:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestResultAggregation:
+class ResultAggregationTests:
     """Test agent result aggregation patterns - BVJ: Comprehensive value delivery"""
 
     @pytest.mark.e2e
@@ -327,7 +327,7 @@ class TestResultAggregation:
 
 @pytest.mark.asyncio 
 @pytest.mark.e2e
-class TestFailureIsolation:
+class FailureIsolationTests:
     """Test agent failure isolation patterns - BVJ: Resilient value delivery"""
 
     @pytest.mark.e2e

@@ -46,7 +46,7 @@ from test_framework.ssot.database import DatabaseTestHelper
 logger = logging.getLogger(__name__)
 
 
-class TestAgentStateResetFailuresWarningUpgrade(SsotAsyncWarningUpgradeTestCase):
+class AgentStateResetFailuresWarningUpgradeTests(SsotAsyncWarningUpgradeTestCase):
     """
     Test suite for agent state reset failure warning-to-error upgrades.
     
@@ -72,13 +72,13 @@ class TestAgentStateResetFailuresWarningUpgrade(SsotAsyncWarningUpgradeTestCase)
                 from netra_backend.app.agents.base_agent import BaseAgent
                 
                 # Create test agent instance
-                class TestAgent(BaseAgent):
+                class AgentTests(BaseAgent):
                     def __init__(self):
                         super().__init__("test_agent_context_reset")
                         self.context = mock_context
                         self.logger = logger
                 
-                agent = TestAgent()
+                agent = AgentTests()
                 
                 # Populate context with sensitive user data
                 agent.context = {
@@ -127,14 +127,14 @@ class TestAgentStateResetFailuresWarningUpgrade(SsotAsyncWarningUpgradeTestCase)
                 from netra_backend.app.agents.base_agent import BaseAgent
                 
                 # Create test agent with WebSocket adapter
-                class TestAgentWithWebSocket(BaseAgent):
+                class AgentWithWebSocketTests(BaseAgent):
                     def __init__(self):
                         super().__init__("test_agent_websocket_reset")
                         self._websocket_adapter = Mock()
                         self._websocket_context = {"connection_id": "test_conn_123"}
                         self.logger = logger
                 
-                agent = TestAgentWithWebSocket()
+                agent = AgentWithWebSocketTests()
                 
                 # CRITICAL: WebSocket state reset failure should raise ERROR
                 with self.expect_exception(ConnectionError, "WebSocket adapter reset failed"):
@@ -173,13 +173,13 @@ class TestAgentStateResetFailuresWarningUpgrade(SsotAsyncWarningUpgradeTestCase)
             from netra_backend.app.agents.base_agent import BaseAgent
             
             # Create test agent with circuit breaker
-            class TestAgentWithCircuitBreaker(BaseAgent):
+            class AgentWithCircuitBreakerTests(BaseAgent):
                 def __init__(self):
                     super().__init__("test_agent_circuit_breaker_reset")
                     self.circuit_breaker = mock_circuit_breaker
                     self.logger = logger
             
-            agent = TestAgentWithCircuitBreaker()
+            agent = AgentWithCircuitBreakerTests()
             
             # CRITICAL: Circuit breaker reset failure should raise ERROR
             with self.expect_exception(RuntimeError, "Circuit breaker reset failed"):

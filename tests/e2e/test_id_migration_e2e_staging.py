@@ -59,7 +59,7 @@ from test_framework.environment_isolation import IsolatedEnvironment
 
 
 @pytest.mark.e2e
-class TestIDMigrationE2EStagingWorkflows(SSotAsyncTestCase, BaseE2ETest, StagingTestBase):
+class IDMigrationE2EStagingWorkflowsTests(SSotAsyncTestCase, BaseE2ETest, StagingTestBase):
     """E2E tests for ID migration in GCP staging environment."""
     
     async def setup_method(self, method):

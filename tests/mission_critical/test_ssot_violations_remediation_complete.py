@@ -73,7 +73,7 @@ class SsotComplianceReport:
     ssot_infrastructure_max: int = 10
 
 
-class TestSsotViolationsRemediationComplete(SSotBaseTestCase):
+class SsotViolationsRemediationCompleteTests(SSotBaseTestCase):
     """
     Comprehensive integration test validating complete SSOT violations remediation.
     

@@ -26,7 +26,7 @@ from pathlib import Path
 import inspect
 
 
-class TestIssue1186UserExecutionEngineServiceIntegration(unittest.TestCase):
+class Issue1186UserExecutionEngineServiceIntegrationTests(unittest.TestCase):
     """Integration test suite for UserExecutionEngine service integration validation.
 
     Focus: Service integration validation after import consolidation

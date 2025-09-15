@@ -26,7 +26,7 @@ from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 
-class TestWebSocketNotifierE2EAgentFlow(BaseTestCase):
+class WebSocketNotifierE2EAgentFlowTests(BaseTestCase):
     """
     E2E test for complete agent execution flow with WebSocket event delivery.
     

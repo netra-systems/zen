@@ -18,7 +18,7 @@ import os
 from typing import Optional
 
 
-class TestUserSessionsSimpleValidation:
+class UserSessionsSimpleValidationTests:
     """Simple validation test for user_sessions table existence."""
     
     @pytest.mark.integration

@@ -43,7 +43,7 @@ logger = central_logger.get_logger(__name__)
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentResponseSecurityPrivacy(BaseIntegrationTest):
+class AgentResponseSecurityPrivacyTests(BaseIntegrationTest):
     """Test agent response security and data privacy mechanisms."""
     
     def setup_method(self):

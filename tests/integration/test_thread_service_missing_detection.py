@@ -100,7 +100,7 @@ class ThreadServiceMissingSimulator:
 @pytest.mark.real_services
 @pytest.mark.fallback_prevention
 @pytest.mark.thread_service_testing
-class TestThreadServiceMissingDetection:
+class ThreadServiceMissingDetectionTests:
     """
     Integration tests for thread service missing detection and fallback prevention.
     

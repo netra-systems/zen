@@ -48,7 +48,7 @@ from deployment.secrets_config import SecretConfig
 setup_windows_encoding()
 
 @pytest.mark.unit
-class TestServiceConfig(SSotBaseTestCase):
+class ServiceConfigTests(SSotBaseTestCase):
     """Test ServiceConfig dataclass business logic."""
 
     def test_service_config_creation_backend(self):
@@ -95,7 +95,7 @@ class TestServiceConfig(SSotBaseTestCase):
         self.record_metric('service_config_defaults_validation', True)
 
 @pytest.mark.unit
-class TestGCPDeployerInitialization(SSotBaseTestCase):
+class GCPDeployerInitializationTests(SSotBaseTestCase):
     """Test GCPDeployer initialization and configuration."""
 
     def test_gcp_deployer_initialization_staging(self):
@@ -147,7 +147,7 @@ class TestGCPDeployerInitialization(SSotBaseTestCase):
         self.record_metric('windows_platform', sys.platform == 'win32')
 
 @pytest.mark.unit
-class TestConfigurationValidation(SSotBaseTestCase):
+class ConfigurationValidationTests(SSotBaseTestCase):
     """Test deployment configuration validation business logic."""
 
     def test_frontend_environment_variables_validation_success(self):
@@ -209,7 +209,7 @@ class TestConfigurationValidation(SSotBaseTestCase):
         self.record_metric('staging_url_validation', not is_localhost_url)
 
 @pytest.mark.unit
-class TestDockerOperationsLogic(SSotBaseTestCase):
+class DockerOperationsLogicTests(SSotBaseTestCase):
     """Test Docker operations business logic without actual builds."""
 
     def test_build_image_local_command_generation_backend(self):
@@ -262,7 +262,7 @@ class TestDockerOperationsLogic(SSotBaseTestCase):
         self.record_metric('frontend_build_stages', len(expected_stages))
 
 @pytest.mark.unit
-class TestCloudRunConfiguration(SSotBaseTestCase):
+class CloudRunConfigurationTests(SSotBaseTestCase):
     """Test Cloud Run service configuration generation logic."""
 
     def test_deploy_service_command_generation_backend(self):
@@ -330,7 +330,7 @@ class TestCloudRunConfiguration(SSotBaseTestCase):
         self.record_metric('cloud_sql_instance_validation', True)
 
 @pytest.mark.unit
-class TestSecretsManagement(SSotBaseTestCase):
+class SecretsManagementTests(SSotBaseTestCase):
     """Test secrets management business logic."""
 
     def test_secrets_config_integration(self):
@@ -386,7 +386,7 @@ class TestSecretsManagement(SSotBaseTestCase):
         self.record_metric('redis_mappings_validation', True)
 
 @pytest.mark.unit
-class TestErrorDetectionAndValidation(SSotBaseTestCase):
+class ErrorDetectionAndValidationTests(SSotBaseTestCase):
     """Test error detection and validation capabilities."""
 
     def test_gcloud_validation_logic(self):
@@ -443,7 +443,7 @@ class TestErrorDetectionAndValidation(SSotBaseTestCase):
         self.record_metric('traffic_routing_logic', True)
 
 @pytest.mark.unit
-class TestDeploymentOrchestration(SSotBaseTestCase):
+class DeploymentOrchestrationTests(SSotBaseTestCase):
     """Test deployment orchestration and workflow logic."""
 
     def test_deployment_phases_logic(self):
@@ -505,7 +505,7 @@ class TestDeploymentOrchestration(SSotBaseTestCase):
         self.record_metric('timeout_configurations', True)
 
 @pytest.mark.unit
-class TestWindowsCompatibility(SSotBaseTestCase):
+class WindowsCompatibilityTests(SSotBaseTestCase):
     """Test Windows-specific compatibility logic."""
 
     def test_windows_path_handling(self):
@@ -546,7 +546,7 @@ class TestWindowsCompatibility(SSotBaseTestCase):
             self.record_metric('non_windows_platform', True)
 
 @pytest.mark.unit
-class TestBusinessValueValidation(SSotBaseTestCase):
+class BusinessValueValidationTests(SSotBaseTestCase):
     """Test business value scenarios and edge cases."""
 
     def test_cost_optimization_configuration(self):

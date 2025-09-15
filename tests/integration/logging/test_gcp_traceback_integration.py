@@ -35,7 +35,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.integration
-class TestGCPTracebackIntegration(SSotAsyncTestCase):
+class GCPTracebackIntegrationTests(SSotAsyncTestCase):
     """Integration tests for GCP traceback capture with real logging services."""
     
     def setup_method(self, method):

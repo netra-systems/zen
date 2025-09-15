@@ -15,7 +15,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.conftest_real_services import real_services, real_postgres, real_redis, real_clickhouse, real_websocket_client, real_http_client, test_user, test_organization, test_agent, performance_monitor, require_real_services
 
 @require_real_services()
-class TestRealServicesInfrastructure:
+class RealServicesInfrastructureTests:
     """Test suite validating real services infrastructure."""
 
     async def test_services_health_check(self, real_services):
@@ -155,7 +155,7 @@ class TestRealServicesInfrastructure:
         print(f'Successfully created conversation {conversation_id} with {len(messages)} messages')
 
 @require_real_services()
-class TestMockReplacementValidation:
+class MockReplacementValidationTests:
     """Test that real services can properly replace common mock patterns."""
 
     async def test_replace_database_mock(self, real_postgres):

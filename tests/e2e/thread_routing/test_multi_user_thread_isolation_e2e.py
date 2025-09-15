@@ -219,7 +219,7 @@ class IsolatedUserWebSocketClient:
             await asyncio.sleep(0.1)
         return {'success': False, 'events': collected_events, 'duration': timeout}
 
-class TestMultiUserThreadIsolationE2E:
+class MultiUserThreadIsolationE2ETests:
     """
     CRITICAL E2E test suite for multi-user thread isolation.
     

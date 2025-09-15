@@ -37,7 +37,7 @@ from test_framework.ssot.base import BaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.managers.unified_state_manager import UnifiedStateManager, StateManagerFactory, StateEntry, StateChangeEvent, StateQuery, StateScope, StateType, StateStatus, SessionStateContext, AgentStateContext, ThreadStateContext, get_state_manager
 
-class TestUnifiedStateManagerCoreOperations(BaseTestCase):
+class UnifiedStateManagerCoreOperationsTests(BaseTestCase):
     """Test core state operations with real UnifiedStateManager instance."""
 
     def setUp(self):
@@ -119,7 +119,7 @@ class TestUnifiedStateManagerCoreOperations(BaseTestCase):
         session_keys = self.state_manager.keys(pattern='session_info_.*')
         assert len(session_keys) == 2
 
-class TestUnifiedStateManagerScopedOperations(BaseTestCase):
+class UnifiedStateManagerScopedOperationsTests(BaseTestCase):
     """Test scoped state operations (user, session, thread, agent, websocket)."""
 
     def setUp(self):
@@ -180,7 +180,7 @@ class TestUnifiedStateManagerScopedOperations(BaseTestCase):
         assert user_id == 'user123'
         assert connected_at == '2024-01-01T10:00:00Z'
 
-class TestUnifiedStateManagerBulkOperations(BaseTestCase):
+class UnifiedStateManagerBulkOperationsTests(BaseTestCase):
     """Test bulk state operations for efficiency."""
 
     def setUp(self):
@@ -235,7 +235,7 @@ class TestUnifiedStateManagerBulkOperations(BaseTestCase):
         assert self.state_manager.get_session_state(session_id, 'data1') == 'session_value1'
         assert self.state_manager.get('global_key') == 'global_value'
 
-class TestUnifiedStateManagerTTLAndExpiration(BaseTestCase):
+class UnifiedStateManagerTTLAndExpirationTests(BaseTestCase):
     """Test TTL (Time To Live) and expiration functionality."""
 
     def setUp(self):
@@ -275,7 +275,7 @@ class TestUnifiedStateManagerTTLAndExpiration(BaseTestCase):
         assert self.state_manager.get_user_state(user_id, 'temp_pref') is None
         assert self.state_manager.get_agent_state(agent_id, 'temp_status') is None
 
-class TestUnifiedStateManagerQuerying(BaseTestCase):
+class UnifiedStateManagerQueryingTests(BaseTestCase):
     """Test state querying and filtering capabilities."""
 
     def setUp(self):
@@ -352,7 +352,7 @@ class TestUnifiedStateManagerQuerying(BaseTestCase):
         assert StateType.USER_PREFERENCES.value in type_stats
         assert StateType.SESSION_DATA.value in type_stats
 
-class TestUnifiedStateManagerConcurrency(BaseTestCase):
+class UnifiedStateManagerConcurrencyTests(BaseTestCase):
     """Test thread safety and concurrent state access."""
 
     def setUp(self):
@@ -427,7 +427,7 @@ class TestUnifiedStateManagerConcurrency(BaseTestCase):
         assert scope_stats[StateScope.SESSION.value] >= 10
         assert scope_stats[StateScope.AGENT.value] >= 10
 
-class TestUnifiedStateManagerContextManagers(BaseTestCase):
+class UnifiedStateManagerContextManagersTests(BaseTestCase):
     """Test context managers for scoped operations."""
 
     def setUp(self):
@@ -485,7 +485,7 @@ class TestUnifiedStateManagerContextManagers(BaseTestCase):
                 assert ctx1.get('shared_key') == 'value_from_session_1'
                 assert ctx2.get('shared_key') == 'value_from_session_2'
 
-class TestUnifiedStateManagerFactoryPattern(BaseTestCase):
+class UnifiedStateManagerFactoryPatternTests(BaseTestCase):
     """Test factory pattern and user isolation."""
 
     def setUp(self):
@@ -543,7 +543,7 @@ class TestUnifiedStateManagerFactoryPattern(BaseTestCase):
         global_manager2 = get_state_manager()
         assert global_manager is global_manager2
 
-class TestUnifiedStateManagerEventSystem(BaseTestCase):
+class UnifiedStateManagerEventSystemTests(BaseTestCase):
     """Test state change event system and notifications."""
 
     def setUp(self):
@@ -599,7 +599,7 @@ class TestUnifiedStateManagerEventSystem(BaseTestCase):
         self.state_manager.enable_websocket_events(True)
         assert self.state_manager._enable_websocket_events
 
-class TestUnifiedStateManagerStatusAndMonitoring(BaseTestCase):
+class UnifiedStateManagerStatusAndMonitoringTests(BaseTestCase):
     """Test status monitoring and health check functionality."""
 
     def setUp(self):
@@ -656,7 +656,7 @@ class TestUnifiedStateManagerStatusAndMonitoring(BaseTestCase):
         assert metrics['cache_hits'] >= 1
         assert metrics['cache_misses'] >= 1
 
-class TestUnifiedStateManagerEdgeCasesAndErrors(BaseTestCase):
+class UnifiedStateManagerEdgeCasesAndErrorsTests(BaseTestCase):
     """Test edge cases and error scenarios."""
 
     def setUp(self):
@@ -723,7 +723,7 @@ class TestUnifiedStateManagerEdgeCasesAndErrors(BaseTestCase):
         result = self.state_manager.get('validation_test', scope=StateScope.USER, state_type=StateType.USER_PREFERENCES)
         assert result == 'value'
 
-class TestUnifiedStateManagerAsyncOperations(BaseTestCase):
+class UnifiedStateManagerAsyncOperationsTests(BaseTestCase):
     """Test async operations and background tasks."""
 
     def setUp(self):
@@ -771,7 +771,7 @@ class TestUnifiedStateManagerAsyncOperations(BaseTestCase):
         background_tasks = status.get('background_tasks', {})
         await self.state_manager.shutdown()
 
-class TestUnifiedStateManagerPerformanceCharacteristics(BaseTestCase):
+class UnifiedStateManagerPerformanceCharacteristicsTests(BaseTestCase):
     """Test performance characteristics and optimization."""
 
     def setUp(self):
@@ -835,7 +835,7 @@ class TestUnifiedStateManagerPerformanceCharacteristics(BaseTestCase):
         assert metrics['set_operations'] >= num_entries
         assert metrics['total_operations'] >= num_entries
 
-class TestUnifiedStateManagerIntegration(BaseTestCase):
+class UnifiedStateManagerIntegrationTests(BaseTestCase):
     """Integration tests for overall state manager behavior."""
 
     def setUp(self):

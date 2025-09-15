@@ -42,7 +42,7 @@ except ImportError as e:
     DEPRECATED_EXECUTION_ENGINE_AVAILABLE = False
     DEPRECATED_ENGINE_ERROR = str(e)
 
-class TestGoldenPathExecutionEngineStagingE2E(BaseE2ETest):
+class GoldenPathExecutionEngineStagingE2ETests(BaseE2ETest):
     """E2E test suite for Golden Path ExecutionEngine migration in staging environment.
     
     This test suite validates that the core Golden Path user workflow continues to work

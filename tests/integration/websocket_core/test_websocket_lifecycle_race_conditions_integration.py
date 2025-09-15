@@ -33,7 +33,7 @@ from shared.types.core_types import UserID, ConnectionID, ThreadID
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.integration
-class TestWebSocketLifecycleRaceConditions(SSotAsyncTestCase):
+class WebSocketLifecycleRaceConditionsTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket lifecycle race conditions.
 
@@ -209,7 +209,7 @@ class TestWebSocketLifecycleRaceConditions(SSotAsyncTestCase):
         assert len(overlapping_sends) > 0, 'Some sends should have overlapped with connection close'
 
 @pytest.mark.integration
-class TestWebSocketStateTransitionValidation(SSotAsyncTestCase):
+class WebSocketStateTransitionValidationTests(SSotAsyncTestCase):
     """
     Integration tests for missing state transition validation.
 

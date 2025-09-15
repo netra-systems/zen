@@ -63,7 +63,7 @@ class RaceConditionTest:
 
 
 @pytest.mark.unit
-class TestWebSocketManagerRaceConditionDetection(SSotAsyncTestCase):
+class WebSocketManagerRaceConditionDetectionTests(SSotAsyncTestCase):
     """
     CRITICAL: Tests for Issue #1182 WebSocket Manager race condition detection.
     

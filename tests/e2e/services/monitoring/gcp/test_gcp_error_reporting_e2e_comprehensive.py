@@ -36,7 +36,7 @@ from netra_backend.app.schemas.monitoring_schemas import GCPErrorServiceConfig, 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.error_codes import ErrorCode
 
-class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
+class GCPErrorReportingE2EComprehensiveTests(SSotBaseTestCase):
     """
     E2E: GCP Error Reporting End-to-End Comprehensive Test Suite
     

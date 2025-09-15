@@ -329,7 +329,7 @@ class MockAgent:
         }
 
 
-class TestExecutionEngineRaceConditions(BaseIntegrationTest):
+class ExecutionEngineRaceConditionsTests(BaseIntegrationTest):
     """Comprehensive unit tests for agent execution engine race conditions."""
     
     def setup_method(self):

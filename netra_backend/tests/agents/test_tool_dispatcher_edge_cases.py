@@ -18,7 +18,7 @@ from netra_backend.tests.helpers.tool_dispatcher_helpers import (
     create_test_state,
 )
 
-class TestToolDispatcherEdgeCases:
+class ToolDispatcherEdgeCasesTests:
     """Test edge cases and error scenarios."""
     @pytest.mark.asyncio
     async def test_dispatch_with_none_parameters(self):

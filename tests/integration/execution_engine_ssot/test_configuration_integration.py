@@ -61,7 +61,7 @@ class ConfigurationAccessCapture:
 
 
 @pytest.mark.integration
-class TestConfigurationIntegration(SSotAsyncTestCase):
+class ConfigurationIntegrationTests(SSotAsyncTestCase):
     """Integration Test 7: Validate configuration integration with UserExecutionEngine SSOT"""
     
     def setUp(self):

@@ -34,7 +34,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestWebSocketManagerInitializationRace(SSotAsyncTestCase):
+class WebSocketManagerInitializationRaceTests(SSotAsyncTestCase):
     """Test suite to demonstrate WebSocket Manager initialization race conditions."""
 
     def setUp(self):

@@ -118,7 +118,7 @@ class ConfigUsageAnalyzer(ast.NodeVisitor):
             pass
         return False
 
-class TestCentralConfigUsage:
+class CentralConfigUsageTests:
     """Test Suite 1: Validate Central Configuration Usage"""
     
     @pytest.fixture

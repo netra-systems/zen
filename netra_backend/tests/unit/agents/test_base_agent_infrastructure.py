@@ -29,7 +29,7 @@ class MockInfrastructureAgent(BaseAgent):
             raise RuntimeError('Simulated execution failure')
         return {'status': 'success', 'data': self.execution_result_data, 'agent_name': self.name}
 
-class TestBaseAgentInitialization:
+class BaseAgentInitializationTests:
     """Test BaseAgent initialization and configuration."""
 
     @pytest.fixture
@@ -59,7 +59,7 @@ class TestBaseAgentInitialization:
         assert agent.validation_should_pass is False
         assert agent.execution_should_succeed is True
 
-class TestExecutionContext:
+class ExecutionContextTests:
     """Test ExecutionContext functionality."""
 
     @pytest.fixture
@@ -77,7 +77,7 @@ class TestExecutionContext:
         assert context.state == {'user_request': 'Test request'}
         assert context.correlation_id == 'test_correlation_789'
 
-class TestAgentExecution:
+class AgentExecutionTests:
     """Test agent execution patterns and workflows."""
 
     @pytest.fixture
@@ -101,7 +101,7 @@ class TestAgentExecution:
         agent = MockInfrastructureAgent(llm_manager=mock_llm_manager, name='ExecutionFailureAgent', validation_should_pass=True, execution_should_succeed=False)
         assert agent.get_health_status() is not None
 
-class TestReliabilityFeatures:
+class ReliabilityFeaturesTests:
     """Test agent reliability features like circuit breakers and retries."""
 
     @pytest.fixture
@@ -129,7 +129,7 @@ class TestReliabilityFeatures:
         assert health_status is not None
         assert isinstance(health_status, dict)
 
-class TestErrorHandling:
+class ErrorHandlingTests:
     """Test error handling patterns."""
 
     @pytest.fixture
@@ -148,7 +148,7 @@ class TestErrorHandling:
         agent = MockInfrastructureAgent(llm_manager=mock_llm_manager, name='ExceptionAgent', enable_reliability=True)
         assert agent.get_health_status() is not None
 
-class TestAgentLifecycle:
+class AgentLifecycleTests:
     """Test agent lifecycle management."""
 
     @pytest.fixture
@@ -170,7 +170,7 @@ class TestAgentLifecycle:
             pass
         assert agent is not None
 
-class TestConcurrencyHandling:
+class ConcurrencyHandlingTests:
     """Test agent behavior under concurrent conditions."""
 
     @pytest.fixture

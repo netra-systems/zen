@@ -149,7 +149,7 @@ class MultiUserExecutionTracker:
             }
 
 
-class TestMultiUserSSot(SSotAsyncTestCase):
+class MultiUserSSotTests(SSotAsyncTestCase):
     """Validate multi-user SSOT compliance with concurrent execution engines."""
 
     def setUp(self):

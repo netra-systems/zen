@@ -18,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from dev_launcher.config import LauncherConfig
 
 
-class TestPathResolution(SSotBaseTestCase):
+class PathResolutionTests(SSotBaseTestCase):
     """Test suite for path resolution issues."""
     
     def setUp(self):

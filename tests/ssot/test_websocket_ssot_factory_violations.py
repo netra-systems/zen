@@ -31,7 +31,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from shared.types.core_types import UserID, ensure_user_id
 
 
-class TestWebSocketSSotFactoryViolations(SSotAsyncTestCase):
+class WebSocketSSotFactoryViolationsTests(SSotAsyncTestCase):
     """
     Test suite to detect WebSocket SSOT factory pattern violations.
     

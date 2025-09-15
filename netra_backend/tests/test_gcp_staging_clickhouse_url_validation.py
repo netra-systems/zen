@@ -21,7 +21,7 @@ from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestClickHouseURLControlCharacters:
+class ClickHouseURLControlCharactersTests:
     """Tests that replicate ClickHouse URL control character issues from staging logs"""
     
     def test_clickhouse_url_contains_newline_character(self):
@@ -146,7 +146,7 @@ class TestClickHouseURLControlCharacters:
         return True
 
 
-class TestClickHouseConfigurationValidation:
+class ClickHouseConfigurationValidationTests:
     """Test ClickHouse configuration validation from environment"""
     
     def test_clickhouse_host_environment_variable_parsing(self):
@@ -285,7 +285,7 @@ class TestClickHouseConfigurationValidation:
         return f"http://{user}:{password}@{host}:{port}/{database}"
 
 
-class TestClickHouseConnectionValidation:
+class ClickHouseConnectionValidationTests:
     """Test ClickHouse connection validation with malformed URLs"""
     
     @pytest.mark.asyncio

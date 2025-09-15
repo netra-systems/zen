@@ -44,7 +44,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestIssue1231FixValidation:
+class Issue1231FixValidationTests:
     """
     FIX VALIDATION TESTS: These tests validate that the async/await bug is fixed
 

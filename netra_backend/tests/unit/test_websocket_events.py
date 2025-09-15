@@ -31,7 +31,7 @@ from shared.types.core_types import (
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketEventGeneration:
+class WebSocketEventGenerationTests:
     """Test WebSocket event generation that enables real-time AI interaction visibility."""
     
     @pytest.fixture(autouse=True)
@@ -246,7 +246,7 @@ class TestWebSocketEventGeneration:
             assert isinstance(user["websocket_id"], WebSocketID), f"WebSocket ID {i+1} must be strongly typed"
 
 
-class TestWebSocketEventDelivery:
+class WebSocketEventDeliveryTests:
     """Test WebSocket event delivery mechanisms that ensure chat value reaches users."""
     
     @pytest.fixture(autouse=True) 

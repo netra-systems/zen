@@ -64,7 +64,7 @@ def real_services_manager():
     return manager
 
 
-class TestThreadCreationComprehensive(BaseIntegrationTest):
+class ThreadCreationComprehensiveTests(BaseIntegrationTest):
     """Comprehensive thread creation integration tests with real services."""
 
     # =============================================================================
@@ -2476,4 +2476,4 @@ class TestThreadCreationComprehensive(BaseIntegrationTest):
 
 
 # Export test class for discovery
-__all__ = ["TestThreadCreationComprehensive"]
+__all__ = ["ThreadCreationComprehensiveTests"]

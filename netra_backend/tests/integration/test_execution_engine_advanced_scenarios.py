@@ -173,7 +173,7 @@ class ResourceTrackingAgent(MockAgentForTesting):
             return None
 
 
-class TestExecutionEngineAdvancedScenarios(SSotAsyncTestCase):
+class ExecutionEngineAdvancedScenariosTests(SSotAsyncTestCase):
     """Advanced integration tests for ExecutionEngine edge cases and complex scenarios."""
     
     def setup_method(self, method=None):

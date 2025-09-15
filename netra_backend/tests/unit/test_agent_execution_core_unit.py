@@ -84,7 +84,7 @@ class MockAgent:
         self.trace_context = trace_context
 
 
-class TestAgentExecutionCoreUnit(SSotBaseTestCase):
+class AgentExecutionCoreUnitTests(SSotBaseTestCase):
     """Unit tests for Agent Execution Core functionality."""
     
     def setup_method(self):

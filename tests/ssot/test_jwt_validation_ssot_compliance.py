@@ -30,7 +30,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestJWTValidationSSOTCompliance(SSotAsyncTestCase):
+class JWTValidationSSOTComplianceTests(SSotAsyncTestCase):
     """SSOT compliance tests for JWT validation consolidation."""
 
     def setup_method(self, method):
@@ -486,7 +486,7 @@ class TestJWTValidationSSOTCompliance(SSotAsyncTestCase):
         assert len(collection) == 0, msg or f"Expected empty collection, got {len(collection)} items: {list(collection)[:5]}"
 
 
-class TestJWTValidationSSOTIntegration(SSotAsyncTestCase):
+class JWTValidationSSOTIntegrationTests(SSotAsyncTestCase):
     """Integration tests for JWT SSOT compliance across services."""
 
     def setup_method(self, method):

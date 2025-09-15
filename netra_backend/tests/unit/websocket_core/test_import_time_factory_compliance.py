@@ -8,7 +8,7 @@ import sys
 from unittest.mock import patch
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestImportTimeFactoryCompliance:
+class ImportTimeFactoryComplianceTests:
     """Test suite for WebSocket factory import-time compliance."""
 
     def test_agent_service_factory_imports_without_error(self):

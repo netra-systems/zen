@@ -18,7 +18,7 @@ from netra_backend.app.logging.auth_trace_logger import AuthTraceLogger, AuthTra
 
 
 @pytest.mark.unit
-class TestAuthTraceLoggerNoneErrorBug:
+class AuthTraceLoggerNoneErrorBugTests:
     """Test suite to reproduce the exact NoneType error bug in AuthTraceLogger."""
     
     def setup_method(self):

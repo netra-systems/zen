@@ -82,7 +82,7 @@ class SessionSyncResult:
         )
 
 
-class TestCrossServiceSessionSyncer:
+class CrossServiceSessionSyncerTests:
     """Tests session synchronization between backend service and WebSocket via Redis."""
     
     def __init__(self):

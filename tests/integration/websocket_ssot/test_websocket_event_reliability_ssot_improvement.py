@@ -35,7 +35,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestWebSocketEventReliabilitySsotImprovement(SSotAsyncTestCase):
+class WebSocketEventReliabilitySsotImprovementTests(SSotAsyncTestCase):
     """Phase 2 SSOT Validation Test: Validate 100% reliable event delivery with consolidated SSOT manager."""
     
     def setup_method(self, method):

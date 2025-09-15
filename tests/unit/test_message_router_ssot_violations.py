@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestMessageRouterSSOTViolations(SSotBaseTestCase):
+class MessageRouterSSOTViolationsTests(SSotBaseTestCase):
     """Unit tests to detect MessageRouter SSOT violations."""
     
     def setup_method(self, method):

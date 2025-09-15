@@ -84,7 +84,7 @@ except ImportError:
     BACKEND_IMPORTS_AVAILABLE = False
 
 
-class TestWebSocketMessageHandlingComprehensive(WebSocketIntegrationTest):
+class WebSocketMessageHandlingComprehensiveTests(WebSocketIntegrationTest):
     """
     Comprehensive integration tests for WebSocket message handling in golden path.
     

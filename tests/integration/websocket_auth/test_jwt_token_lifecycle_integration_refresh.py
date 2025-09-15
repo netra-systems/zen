@@ -105,7 +105,7 @@ class RefreshEvent:
 
 
 @pytest.mark.integration
-class TestJWTTokenLifecycleRefreshIntegration(SSotAsyncTestCase):
+class JWTTokenLifecycleRefreshIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for JWT Token Lifecycle Manager refresh mechanisms.
     

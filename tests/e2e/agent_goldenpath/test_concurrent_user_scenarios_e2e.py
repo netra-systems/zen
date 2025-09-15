@@ -46,7 +46,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
 @pytest.mark.gcp_staging
 @pytest.mark.concurrent_scenarios
 @pytest.mark.mission_critical
-class TestConcurrentUserScenariosE2E(SSotAsyncTestCase):
+class ConcurrentUserScenariosE2ETests(SSotAsyncTestCase):
     """
     E2E tests for validating concurrent user scenarios in staging GCP.
 

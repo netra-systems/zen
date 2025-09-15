@@ -87,7 +87,7 @@ class StreamingSession:
     streaming_active: bool
     websocket_events: List[Dict]
 
-class TestRealTimeResponseStreaming(SSotAsyncTestCase):
+class RealTimeResponseStreamingTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Real-Time Response Streaming.
 

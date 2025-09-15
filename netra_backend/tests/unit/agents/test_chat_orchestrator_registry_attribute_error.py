@@ -16,7 +16,7 @@ from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.chat_orchestrator.pipeline_executor import PipelineExecutor
 
-class TestChatOrchestratorRegistryAttributeError(SSotAsyncTestCase):
+class ChatOrchestratorRegistryAttributeErrorTests(SSotAsyncTestCase):
     """Test cases for Issue #956: ChatOrchestrator Registry AttributeError."""
 
     def setup_method(self, method):

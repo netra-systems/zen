@@ -14,7 +14,7 @@ import ast
 import importlib.util
 
 @pytest.mark.unit
-class TestSafeRemovalValidation:
+class SafeRemovalValidationTests:
     """Phase 2 Tests - Validate safe removal of deprecated manager"""
 
     def test_canonical_config_provides_all_required_functionality(self):
@@ -133,7 +133,7 @@ class TestSafeRemovalValidation:
             pytest.fail(f'Cannot test canonical UnifiedConfigManager environment handling: {e}')
 
 @pytest.mark.unit
-class TestMigrationPrerequisites:
+class MigrationPrerequisitesTests:
     """Validate prerequisites for safe migration"""
 
     def test_backup_verification_readiness(self):

@@ -22,7 +22,7 @@ from fastapi.testclient import TestClient
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
-class TestWebSocketAuthSSOTIntegration(SSotBaseTestCase):
+class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
     """
     Integration tests that validate SSOT delegation in WebSocket authentication flows.
     These tests should FAIL initially to prove integration-level violations exist.

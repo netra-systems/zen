@@ -93,7 +93,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.unit
-class TestConsolidatedExecutionEngineSSotViolationDetection(SSotAsyncTestCase):
+class ConsolidatedExecutionEngineSSotViolationDetectionTests(SSotAsyncTestCase):
     """DESIGNED TO FAIL: Detect SSOT violations in execution engine implementations.
     
     These tests are specifically designed to FAIL before SSOT consolidation
@@ -599,7 +599,7 @@ class TestConsolidatedExecutionEngineSSotViolationDetection(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestExecutionEngineSSotComplianceValidation(SSotAsyncTestCase):
+class ExecutionEngineSSotComplianceValidationTests(SSotAsyncTestCase):
     """Validate SSOT compliance requirements for execution engines.
     
     These tests verify that execution engines follow SSOT principles

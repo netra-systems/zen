@@ -30,7 +30,7 @@ from netra_backend.app.core.auth_startup_validator import (
 from netra_backend.app.core.environment_constants import Environment
 
 
-class TestAuthStartupValidatorInitialization(BaseIntegrationTest):
+class AuthStartupValidatorInitializationTests(BaseIntegrationTest):
     """Test AuthStartupValidator initialization and basic setup."""
     
     def setup_method(self):
@@ -70,7 +70,7 @@ class TestAuthStartupValidatorInitialization(BaseIntegrationTest):
         assert validator.validation_results == []
 
 
-class TestAuthStartupValidatorJWTSecretValidation(BaseIntegrationTest):
+class AuthStartupValidatorJWTSecretValidationTests(BaseIntegrationTest):
     """Test JWT secret validation using SSOT JWT manager integration."""
     
     def setup_method(self):
@@ -187,7 +187,7 @@ class TestAuthStartupValidatorJWTSecretValidation(BaseIntegrationTest):
             assert "JWT validation error" in jwt_results[0].error
 
 
-class TestAuthStartupValidatorServiceCredentials(BaseIntegrationTest):
+class AuthStartupValidatorServiceCredentialsTests(BaseIntegrationTest):
     """Test SERVICE_SECRET validation - ULTRA CRITICAL with 173+ dependencies."""
     
     def setup_method(self):
@@ -434,7 +434,7 @@ class TestAuthStartupValidatorServiceCredentials(BaseIntegrationTest):
             assert "Environment error" in service_results[0].details["exception"]
 
 
-class TestAuthStartupValidatorAuthServiceURL(BaseIntegrationTest):
+class AuthStartupValidatorAuthServiceURLTests(BaseIntegrationTest):
     """Test auth service URL configuration validation."""
     
     def setup_method(self):
@@ -545,7 +545,7 @@ class TestAuthStartupValidatorAuthServiceURL(BaseIntegrationTest):
             assert "Auth service URL validation error" in url_results[0].error
 
 
-class TestAuthStartupValidatorOAuthCredentials(BaseIntegrationTest):
+class AuthStartupValidatorOAuthCredentialsTests(BaseIntegrationTest):
     """Test OAuth provider credentials validation."""
     
     def setup_method(self):
@@ -731,7 +731,7 @@ class TestAuthStartupValidatorOAuthCredentials(BaseIntegrationTest):
             assert "OAuth validation error" in oauth_results[0].error
 
 
-class TestAuthStartupValidatorCORSConfiguration(BaseIntegrationTest):
+class AuthStartupValidatorCORSConfigurationTests(BaseIntegrationTest):
     """Test CORS allowed origins configuration validation."""
     
     def setup_method(self):
@@ -842,7 +842,7 @@ class TestAuthStartupValidatorCORSConfiguration(BaseIntegrationTest):
             assert "CORS validation error" in cors_results[0].error
 
 
-class TestAuthStartupValidatorTokenExpirySettings(BaseIntegrationTest):
+class AuthStartupValidatorTokenExpirySettingsTests(BaseIntegrationTest):
     """Test token expiry configuration validation."""
     
     def setup_method(self):
@@ -979,7 +979,7 @@ class TestAuthStartupValidatorTokenExpirySettings(BaseIntegrationTest):
             assert "Token expiry validation error" in token_results[0].error
 
 
-class TestAuthStartupValidatorCircuitBreakerConfig(BaseIntegrationTest):
+class AuthStartupValidatorCircuitBreakerConfigTests(BaseIntegrationTest):
     """Test auth circuit breaker configuration validation."""
     
     def setup_method(self):
@@ -1079,7 +1079,7 @@ class TestAuthStartupValidatorCircuitBreakerConfig(BaseIntegrationTest):
             assert "Circuit breaker validation error" in cb_results[0].error
 
 
-class TestAuthStartupValidatorCacheConfiguration(BaseIntegrationTest):
+class AuthStartupValidatorCacheConfigurationTests(BaseIntegrationTest):
     """Test auth cache configuration validation."""
     
     def setup_method(self):
@@ -1187,7 +1187,7 @@ class TestAuthStartupValidatorCacheConfiguration(BaseIntegrationTest):
             assert "Cache validation error" in cache_results[0].error
 
 
-class TestAuthStartupValidatorProductionRequirements(BaseIntegrationTest):
+class AuthStartupValidatorProductionRequirementsTests(BaseIntegrationTest):
     """Test production-specific authentication validation requirements."""
     
     def setup_method(self):
@@ -1279,7 +1279,7 @@ class TestAuthStartupValidatorProductionRequirements(BaseIntegrationTest):
         assert len(https_failures) == 0
 
 
-class TestAuthStartupValidatorValidateAll(BaseIntegrationTest):
+class AuthStartupValidatorValidateAllTests(BaseIntegrationTest):
     """Test complete AuthStartupValidator.validate_all() orchestration."""
     
     def setup_method(self):
@@ -1451,7 +1451,7 @@ class TestAuthStartupValidatorValidateAll(BaseIntegrationTest):
             assert components_tested == all_components
 
 
-class TestAuthStartupValidatorConvenienceFunction(BaseIntegrationTest):
+class AuthStartupValidatorConvenienceFunctionTests(BaseIntegrationTest):
     """Test the validate_auth_startup convenience function."""
     
     def setup_method(self):
@@ -1502,7 +1502,7 @@ class TestAuthStartupValidatorConvenienceFunction(BaseIntegrationTest):
             await validate_auth_startup()
 
 
-class TestAuthStartupValidatorEnvironmentIntegration(BaseIntegrationTest):
+class AuthStartupValidatorEnvironmentIntegrationTests(BaseIntegrationTest):
     """Test AuthStartupValidator integration with different environments."""
     
     def setup_method(self):
@@ -1555,7 +1555,7 @@ class TestAuthStartupValidatorEnvironmentIntegration(BaseIntegrationTest):
         # May have failures but should not crash
 
 
-class TestAuthStartupValidatorDataClassesAndEnums(BaseIntegrationTest):
+class AuthStartupValidatorDataClassesAndEnumsTests(BaseIntegrationTest):
     """Test AuthValidationResult and AuthComponent data structures."""
     
     def test_auth_component_enum_values(self):

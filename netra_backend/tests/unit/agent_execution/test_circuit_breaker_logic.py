@@ -25,7 +25,7 @@ from freezegun import freeze_time
 from netra_backend.app.core.agent_execution_tracker import TimeoutConfig, CircuitBreakerState, AgentExecutionTracker, ExecutionState, get_execution_tracker
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestCircuitBreakerLogic(SSotBaseTestCase):
+class CircuitBreakerLogicTests(SSotBaseTestCase):
     """Unit tests for circuit breaker logic and state transitions."""
 
     def setup_method(self):

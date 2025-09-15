@@ -24,7 +24,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from shared.types import UserID, ThreadID, RunID
 from shared.isolated_environment import get_env
 
-class TestWebSocketEventStateManagement(BaseIntegrationTest):
+class WebSocketEventStateManagementTests(BaseIntegrationTest):
     """Integration tests for WebSocket event state management with real services."""
     
     @pytest.mark.integration

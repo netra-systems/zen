@@ -11,7 +11,7 @@ import pytest
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestUserExecutionContextValidation:
+class UserExecutionContextValidationTests:
     """Test class for UserExecutionContext validation logic."""
 
     def test_valid_context_creation(self):
@@ -72,7 +72,7 @@ class TestUserExecutionContextValidation:
         with pytest.raises(ValueError, match='UserExecutionContext.request_id cannot be empty'):
             UserExecutionContext(user_id='user_12345', thread_id='thread_67890', run_id='run_abcdef', request_id='')
 
-class TestUserExecutionContextMethods:
+class UserExecutionContextMethodsTests:
     """Test class for UserExecutionContext utility methods."""
 
     def test_to_dict_method(self):
@@ -105,7 +105,7 @@ class TestUserExecutionContextMethods:
         expected = "UserExecutionContext(user_id='user_12345', thread_id='thread_67890', run_id='run_abcdef', request_id='req_xyz123')"
         assert repr_result == expected
 
-class TestUserExecutionContextEdgeCases:
+class UserExecutionContextEdgeCasesTests:
     """Test class for edge cases and security scenarios."""
 
     def test_multiple_validation_failures(self):

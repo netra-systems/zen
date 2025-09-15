@@ -79,7 +79,7 @@ except ImportError:
 
 
 @pytest.mark.integration
-class TestAgentFactoryWebSocketManagerIntegration(SSotBaseTestCase):
+class AgentFactoryWebSocketManagerIntegrationTests(SSotBaseTestCase):
     """Test agent factory and WebSocket manager integration conflicts."""
     
     async def asyncSetUp(self):
@@ -258,7 +258,7 @@ class TestAgentFactoryWebSocketManagerIntegration(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestFactoryPatternCrossComponentIntegration(SSotBaseTestCase):
+class FactoryPatternCrossComponentIntegrationTests(SSotBaseTestCase):
     """Test factory pattern cross-component integration conflicts."""
     
     async def asyncSetUp(self):

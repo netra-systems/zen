@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @dataclass
-class TestInfrastructureViolation:
+class InfrastructureViolationTests:
     """Represents a detected test infrastructure violation."""
     file_path: str
     line_number: Optional[int]
@@ -57,7 +57,7 @@ class FixtureDefinition:
     parameters: List[str]
 
 
-class TestSSOTTestInfrastructureViolations(SSotBaseTestCase):
+class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
     """
     Mission Critical test suite to detect and validate SSOT test infrastructure compliance.
     
@@ -251,7 +251,7 @@ class TestSSOTTestInfrastructureViolations(SSotBaseTestCase):
         for conftest_path in conftest_files:
             relative_path = str(conftest_path.relative_to(self.project_root))
             if not any(authorized in relative_path for authorized in self.authorized_conftest_files):
-                all_violations.append(TestInfrastructureViolation(
+                all_violations.append(InfrastructureViolationTests(
                     file_path=str(conftest_path),
                     line_number=None,
                     violation_type='DUPLICATE_CONFTEST',
@@ -265,7 +265,7 @@ class TestSSOTTestInfrastructureViolations(SSotBaseTestCase):
         for fixture_name, conflicts in fixture_conflicts.items():
             if len(conflicts) > 1:
                 for conflict in conflicts[1:]:  # Skip first as reference
-                    all_violations.append(TestInfrastructureViolation(
+                    all_violations.append(InfrastructureViolationTests(
                         file_path=conflict.file_path,
                         line_number=conflict.line_number,
                         violation_type='FIXTURE_CONFLICT',
@@ -408,7 +408,7 @@ SSOT TARGET STATE:
                         return keyword.value.s
         return 'function'
         
-    def _find_pytest_config_conflicts(self) -> List[TestInfrastructureViolation]:
+    def _find_pytest_config_conflicts(self) -> List[InfrastructureViolationTests]:
         """Find conflicting pytest configuration files."""
         violations = []
         
@@ -416,7 +416,7 @@ SSOT TARGET STATE:
         pytest_ini_files = list(self.project_root.rglob('pytest.ini'))
         if len(pytest_ini_files) > 1:
             for pytest_ini in pytest_ini_files[1:]:  # Skip first as reference
-                violations.append(TestInfrastructureViolation(
+                violations.append(InfrastructureViolationTests(
                     file_path=str(pytest_ini),
                     line_number=None,
                     violation_type='CONFIG_CONFLICT',
@@ -432,7 +432,7 @@ SSOT TARGET STATE:
                 config = configparser.ConfigParser()
                 config.read(setup_cfg)
                 if 'tool:pytest' in config.sections():
-                    violations.append(TestInfrastructureViolation(
+                    violations.append(InfrastructureViolationTests(
                         file_path=str(setup_cfg),
                         line_number=None,
                         violation_type='CONFIG_CONFLICT',
@@ -450,7 +450,7 @@ SSOT TARGET STATE:
                 with open(pyproject_file, 'r', encoding='utf-8') as f:
                     content = f.read()
                     if '[tool.pytest' in content:
-                        violations.append(TestInfrastructureViolation(
+                        violations.append(InfrastructureViolationTests(
                             file_path=str(pyproject_file),
                             line_number=None,
                             violation_type='CONFIG_CONFLICT',
@@ -463,7 +463,7 @@ SSOT TARGET STATE:
                 
         return violations
         
-    def _find_test_runner_duplicates(self) -> List[TestInfrastructureViolation]:
+    def _find_test_runner_duplicates(self) -> List[InfrastructureViolationTests]:
         """Find duplicate test runner implementations."""
         violations = []
         
@@ -481,7 +481,7 @@ SSOT TARGET STATE:
                     if 'unified_test_runner.py' in file_path.name:
                         continue
                         
-                    violations.append(TestInfrastructureViolation(
+                    violations.append(InfrastructureViolationTests(
                         file_path=str(file_path),
                         line_number=None,
                         violation_type='RUNNER_DUPLICATION',
@@ -492,7 +492,7 @@ SSOT TARGET STATE:
                     
         return violations
         
-    def _find_direct_pytest_patterns(self) -> List[TestInfrastructureViolation]:
+    def _find_direct_pytest_patterns(self) -> List[InfrastructureViolationTests]:
         """Find direct pytest execution patterns."""
         violations = []
         
@@ -520,7 +520,7 @@ SSOT TARGET STATE:
                             for line_num, line in enumerate(content.splitlines(), 1):
                                 for pattern in pytest_patterns:
                                     if re.search(pattern, line):
-                                        violations.append(TestInfrastructureViolation(
+                                        violations.append(InfrastructureViolationTests(
                                             file_path=str(file_path),
                                             line_number=line_num,
                                             violation_type='DIRECT_PYTEST',

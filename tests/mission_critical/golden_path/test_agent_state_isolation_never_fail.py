@@ -248,7 +248,7 @@ def auth_helper():
 
 @pytest.mark.mission_critical
 @pytest.mark.auth_required
-class TestAgentStateIsolationNeverFail:
+class AgentStateIsolationNeverFailTests:
     """
     Mission Critical test suite for agent state isolation - Legal/Compliance Protection.
     

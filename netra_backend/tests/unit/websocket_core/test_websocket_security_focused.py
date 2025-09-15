@@ -24,7 +24,7 @@ from netra_backend.app.websocket_core.canonical_imports import FactoryInitializa
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 
-class TestWebSocketSecurityFocused(SSotAsyncTestCase):
+class WebSocketSecurityFocusedTests(SSotAsyncTestCase):
     """
     Focused security tests for WebSocket factory isolation.
     

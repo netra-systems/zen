@@ -39,7 +39,7 @@ docker_manager = UnifiedDockerManager()
 @pytest.mark.real_services
 @pytest.mark.middleware
 @pytest.mark.asyncio
-class TestRealAuthMiddleware:
+class RealAuthMiddlewareTests:
     """
     Real auth middleware tests using Docker services.
     

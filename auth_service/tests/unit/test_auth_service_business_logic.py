@@ -20,7 +20,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
 
-class TestAuthServiceBusinessLogic(BaseIntegrationTest):
+class AuthServiceBusinessLogicTests(BaseIntegrationTest):
     """Test auth service business logic and user lifecycle management"""
 
     def setup_method(self):

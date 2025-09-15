@@ -19,7 +19,7 @@ from test_framework.ssot.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.user_context_test_helpers import UserContextTestHelper
 from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 
-class TestWebSocketFactoryPreservation(BaseIntegrationTest, unittest.TestCase):
+class WebSocketFactoryPreservationTests(BaseIntegrationTest, unittest.TestCase):
     """Test that WebSocket SSOT consolidation preserves factory patterns."""
 
     def setUp(self):

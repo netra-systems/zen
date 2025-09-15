@@ -61,7 +61,7 @@ class IsolationTestLLM:
         }
 
 
-class TestUserIsolationBulletproof(BaseIntegrationTest):
+class UserIsolationBulletproofTests(BaseIntegrationTest):
     """
     Bulletproof tests for user context isolation in WebSocket scenarios.
     

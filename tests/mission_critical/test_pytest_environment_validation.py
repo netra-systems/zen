@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional, Set, Tuple
 
 
-class TestPythonEnvironmentConsistency:
+class PythonEnvironmentConsistencyTests:
     """Test Python environment setup for consistent pytest execution."""
     
     def test_phase3_python_version_consistency(self):
@@ -170,7 +170,7 @@ class TestPythonEnvironmentConsistency:
         assert True, f"Module import paths validated. test_framework: {test_framework_path}"
 
 
-class TestPytestEnvironmentConfiguration:
+class PytestEnvironmentConfigurationTests:
     """Test pytest-specific environment configuration."""
     
     def test_phase3_pytest_plugin_discovery_environment(self):
@@ -308,7 +308,7 @@ class TestPytestEnvironmentConfiguration:
         assert True, f"Conftest loading environment validated for {len(project_conftest_files)} files"
 
 
-class TestSystemLevelConfiguration:
+class SystemLevelConfigurationTests:
     """Test system-level configuration that might affect pytest."""
     
     def test_phase3_system_pytest_configuration(self):
@@ -440,7 +440,7 @@ class TestSystemLevelConfiguration:
         assert True, f"Plugin installation environment validated. {len(pytest_plugins)} plugins found."
 
 
-class TestConcurrencyAndIsolation:
+class ConcurrencyAndIsolationTests:
     """Test concurrent execution and test isolation environment."""
     
     def test_phase3_concurrent_pytest_execution_safety(self):

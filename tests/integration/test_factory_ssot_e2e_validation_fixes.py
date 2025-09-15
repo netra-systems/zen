@@ -26,7 +26,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from fastapi import WebSocket
 
 @pytest.mark.integration
-class TestFactorySSotValidationFixes:
+class FactorySSotValidationFixesTests:
     """
     Test Factory SSOT validation enhancements for GCP Cloud Run staging patterns.
     
@@ -82,7 +82,7 @@ class TestFactorySSotValidationFixes:
                 _validate_ssot_user_context_staging_safe(invalid_context)
 
 @pytest.mark.integration
-class TestE2EAuthValidationFixes:
+class E2EAuthValidationFixesTests:
     """
     Test E2E authentication bypass fixes for SSOT Auth chain.
     
@@ -174,7 +174,7 @@ class TestE2EAuthValidationFixes:
                 assert user_context is not None
 
 @pytest.mark.integration
-class TestIntegratedFactoryAndAuthFixes:
+class IntegratedFactoryAndAuthFixesTests:
     """
     Test integrated Factory SSOT and E2E Auth fixes working together.
     

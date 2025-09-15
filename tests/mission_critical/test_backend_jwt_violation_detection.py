@@ -363,7 +363,7 @@ class BackendJWTViolationDetector:
         }
 
 
-class TestBackendJWTViolationDetection(SSotBaseTestCase):
+class BackendJWTViolationDetectionTests(SSotBaseTestCase):
     """
     P0 Mission Critical Test Suite: Backend JWT SSOT Violation Detection
     

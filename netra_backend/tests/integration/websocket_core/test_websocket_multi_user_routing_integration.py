@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = central_logger.get_logger(__name__)
 
 @pytest.mark.integration
-class TestWebSocketMultiUserRoutingIntegration(SSotBaseTestCase):
+class WebSocketMultiUserRoutingIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for multi-user WebSocket routing with complete isolation.
     

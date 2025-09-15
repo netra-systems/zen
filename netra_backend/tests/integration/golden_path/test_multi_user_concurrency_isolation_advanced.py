@@ -97,7 +97,7 @@ class UserTestSession:
             self.performance_metrics = {}
 
 
-class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
+class AdvancedMultiUserConcurrencyIsolationTests(BaseIntegrationTest):
     """Advanced integration tests for multi-user concurrency and isolation."""
 
     @pytest.mark.asyncio

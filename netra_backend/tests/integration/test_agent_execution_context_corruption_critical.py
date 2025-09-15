@@ -96,7 +96,7 @@ class MockAgentExecution:
     status: str = "running"
 
 
-class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
+class AgentExecutionContextCorruptionTests(SSotAsyncTestCase):
     """
     CRITICAL FAILING TESTS: Agent Execution Context Corruption
     

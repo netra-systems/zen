@@ -35,7 +35,7 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from shared.types.core_types import UserID, ConnectionID
 
 
-class TestWebSocketMessageLossScenarios(SSotAsyncTestCase):
+class WebSocketMessageLossScenariosTests(SSotAsyncTestCase):
     """Test message loss scenarios caused by queue implementation conflicts."""
 
     def setup_method(self, method):

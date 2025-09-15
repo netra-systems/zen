@@ -24,7 +24,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketBusinessValueValidationE2E(SSotBaseTestCase):
+class WebSocketBusinessValueValidationE2ETests(SSotBaseTestCase):
     """E2E tests for complete business value delivery via WebSocket."""
     
     @pytest.fixture

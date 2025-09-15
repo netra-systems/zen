@@ -26,7 +26,7 @@ class Permission(Enum):
     ADMIN = "admin"
 
 
-class TestPermissionValidationDatabaseIntegration(SSotBaseTestCase):
+class PermissionValidationDatabaseIntegrationTests(SSotBaseTestCase):
     """Integration tests for permission validation with database."""
     
     def setup_method(self, method=None):

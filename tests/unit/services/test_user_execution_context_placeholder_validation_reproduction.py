@@ -42,7 +42,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 
 
 @pytest.mark.unit
-class TestUserExecutionContextPlaceholderValidationReproduction(SSotBaseTestCase):
+class UserExecutionContextPlaceholderValidationReproductionTests(SSotBaseTestCase):
     """Test suite reproducing the exact 'default_user' validation issue from GCP logs.
     
     This test class reproduces Issue: GCP log error where UserExecutionContext validation

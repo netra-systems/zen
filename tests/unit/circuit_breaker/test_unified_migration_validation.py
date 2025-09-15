@@ -15,7 +15,7 @@ import time
 from typing import Dict, Any
 
 @pytest.mark.unit
-class TestUnifiedMigrationValidation:
+class UnifiedMigrationValidationTests:
     """Test validation of unified circuit breaker migration patterns."""
 
     def test_legacy_to_unified_mapping_completeness(self):
@@ -133,7 +133,7 @@ class TestUnifiedMigrationValidation:
         print('\nASYNC FUNCTIONALITY: Unified circuit breaker properly supports async operations')
 
 @pytest.mark.unit
-class TestMigrationImpactAnalysis:
+class MigrationImpactAnalysisTests:
     """Test the impact of migration on existing code patterns."""
 
     def test_legacy_import_patterns_still_work(self):
@@ -186,7 +186,7 @@ class TestMigrationImpactAnalysis:
         print('\nSTATE COMPATIBILITY: Backward-compatible property access maintained')
 
 @pytest.mark.unit
-class TestMigrationFailureScenarios:
+class MigrationFailureScenariosTests:
     """Test scenarios where migration might fail or cause issues."""
 
     def test_import_dependency_chain_validation(self):

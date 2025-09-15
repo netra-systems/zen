@@ -25,7 +25,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestWebSocketRealServices(BaseIntegrationTest):
+class WebSocketRealServicesTests(BaseIntegrationTest):
     """Test WebSocket integration with real services."""
     
     @pytest.mark.integration

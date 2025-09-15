@@ -27,7 +27,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 @pytest.mark.unit
-class TestWebSocketFactoryDeprecationProof(SSotAsyncTestCase):
+class WebSocketFactoryDeprecationProofTests(SSotAsyncTestCase):
     """
     Prove WebSocket Factory can be safely removed and all functionality migrated.
     

@@ -337,7 +337,7 @@ class AgentStatePersistenceValidator:
         return metrics
 
 
-class TestAgentStatePersistenceIntegration(SSotAsyncTestCase):
+class AgentStatePersistenceIntegrationTests(SSotAsyncTestCase):
     """
     Agent State Persistence Integration Tests.
     
@@ -662,7 +662,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_test():
-        test_instance = TestAgentStatePersistenceIntegration()
+        test_instance = AgentStatePersistenceIntegrationTests()
         test_instance.setup_method()
         await test_instance.test_multi_turn_conversation_state_persistence()
         print("Direct test execution completed successfully")

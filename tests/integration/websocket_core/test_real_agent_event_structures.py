@@ -27,7 +27,7 @@ from tests.clients.factory import TestClientFactory
 from test_framework.staging_config import StagingConfig
 
 
-class TestRealAgentEventStructures:
+class RealAgentEventStructuresTests:
     """Integration test suite for real agent WebSocket event structures."""
 
     @pytest.fixture

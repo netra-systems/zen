@@ -279,7 +279,7 @@ class ThreadSwitchingWebSocketClient:
         client_thread_info = self.user_threads.get(self.current_thread_id, {})
         return {'valid': history_validation['preserved'], 'current_thread_id': self.current_thread_id, 'client_message_count': client_thread_info.get('message_count', 0), 'tracked_message_count': history_validation['message_count'], 'history_validation': history_validation}
 
-class TestThreadSwitchingConsistencyE2E:
+class ThreadSwitchingConsistencyE2ETests:
     """
     CRITICAL E2E test suite for thread switching consistency.
     

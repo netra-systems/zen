@@ -90,7 +90,7 @@ class HighLoadMetrics:
     system_resource_usage: Dict[str, float]
 
 
-class TestConcurrentUserHighLoadIntegration(BaseIntegrationTest):
+class ConcurrentUserHighLoadIntegrationTests(BaseIntegrationTest):
     """Test high-load concurrent user scenarios with real services."""
     
     def setup_method(self):

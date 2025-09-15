@@ -127,7 +127,7 @@ class AsyncioDeadlockDetector:
             is_win  # Windows platform
         )
 
-class TestWindowsAsyncioDeadlockReproduction:
+class WindowsAsyncioDeadlockReproductionTests:
     """
     CRITICAL: Reproduce exact Windows asyncio deadlock failures from SESSION5
     

@@ -53,7 +53,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestUnifiedWebSocketAuthenticatorCore(SSotBaseTestCase):
+class UnifiedWebSocketAuthenticatorCoreTests(SSotBaseTestCase):
     """
     Unit tests for UnifiedWebSocketAuthenticator core authentication logic.
     
@@ -228,7 +228,7 @@ class TestUnifiedWebSocketAuthenticatorCore(SSotBaseTestCase):
         assert 'websocket' in param_names
 
 @pytest.mark.unit
-class TestWebSocketAuthenticationFailureScenarios(SSotBaseTestCase):
+class WebSocketAuthenticationFailureScenariosTests(SSotBaseTestCase):
     """
     Unit tests focusing on WebSocket authentication failure scenarios.
     

@@ -67,7 +67,7 @@ class EventSourceAnalysis:
     business_impact: str = "NONE"  # NONE, LOW, MEDIUM, HIGH, CRITICAL
 
 
-class TestEventSourceValidationFailsWithDuplicates(SSotAsyncTestCase):
+class EventSourceValidationFailsWithDuplicatesTests(SSotAsyncTestCase):
     """
     Phase 1 test to prove that duplicate event sources violate SSOT and cause issues.
     

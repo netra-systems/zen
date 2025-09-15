@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class TestUserData:
+class UserDataTests:
     """User data structure for cross-database testing."""
     id: str
     email: str
@@ -69,7 +69,7 @@ class TestUserData:
     is_active: bool = True
 
 
-class TestDatabaseUserSyncer:
+class DatabaseUserSyncerTests:
     """Manages cross-database user synchronization testing with real services."""
     
     def __init__(self):
@@ -326,7 +326,7 @@ async def sync_tester():
         await tester.cleanup()
 
 
-class TestDatabaseUserSync:
+class DatabaseUserSyncTests:
     """E2E Tests for auth_users [U+2194] userbase synchronization."""
     
     @pytest.mark.asyncio
@@ -466,7 +466,7 @@ class TestDatabaseUserSync:
         )
 
 
-class TestDatabaseUserSyncEdgeCases:
+class DatabaseUserSyncEdgeCasesTests:
     """Edge case tests for database user synchronization."""
     
     @pytest.mark.asyncio

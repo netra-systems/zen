@@ -246,7 +246,7 @@ class MissionCriticalWebSocketTester:
         return stats
 
 
-class TestWebSocketSupervisorStartupSequence(SSotAsyncTestCase):
+class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
     """Mission critical tests for WebSocket supervisor startup sequence."""
     
     def setUp(self):
@@ -661,7 +661,7 @@ class TestWebSocketSupervisorStartupSequence(SSotAsyncTestCase):
         self.test_metrics.record_custom("chat_service_availability_percent", chat_service_availability)
 
 
-class TestWebSocketAgentInteractionFlow(SSotAsyncTestCase):
+class WebSocketAgentInteractionFlowTests(SSotAsyncTestCase):
     """Mission critical tests for complete WebSocket agent interaction flow."""
     
     def setUp(self):

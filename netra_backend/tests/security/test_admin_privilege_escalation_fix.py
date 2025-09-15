@@ -37,7 +37,7 @@ from netra_backend.app.auth_integration.auth import extract_admin_status_from_jw
 from netra_backend.app.db.models_user import User
 from netra_backend.app.services.audit_service import AuditService
 
-class TestJWTAdminValidation:
+class JWTAdminValidationTests:
     """Test JWT-based admin validation."""
 
     @pytest.mark.asyncio
@@ -85,7 +85,7 @@ class TestJWTAdminValidation:
             result = await verify_admin_role_from_jwt('valid_admin_perm_token')
             assert result is True
 
-class TestPrivilegeEscalationPrevention:
+class PrivilegeEscalationPreventionTests:
     """Test prevention of privilege escalation attacks."""
 
     @pytest.mark.asyncio
@@ -161,7 +161,7 @@ class TestPrivilegeEscalationPrevention:
         assert exc_info.value.status_code == 401
         assert 'Bearer token missing' in str(exc_info.value.detail)
 
-class TestAuditLoggingValidation:
+class AuditLoggingValidationTests:
     """Test comprehensive audit logging for admin operations."""
 
     @pytest.mark.asyncio
@@ -227,7 +227,7 @@ class TestAuditLoggingValidation:
             await log_admin_operation('TEST_OPERATION', 'admin_user_123', {'test': 'data'}, '127.0.0.1')
             mock_audit_service.log_action.assert_called_once()
 
-class TestSecurityBoundaries:
+class SecurityBoundariesTests:
     """Test security boundary enforcement."""
 
     @pytest.mark.asyncio
@@ -267,7 +267,7 @@ class TestSecurityBoundaries:
             assert result['is_admin'] is True
             assert 'system:*' in result['permissions']
 
-class TestErrorHandlingAndAttackDetection:
+class ErrorHandlingAndAttackDetectionTests:
     """Test error handling and attack detection mechanisms."""
 
     @pytest.mark.asyncio

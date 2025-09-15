@@ -48,7 +48,7 @@ from test_framework.ssot.orchestration import OrchestrationConfig
 @pytest.mark.e2e
 @pytest.mark.staging
 @pytest.mark.database  
-class TestMissingClickHouseExceptionTypesStagingE2E(SSotAsyncTestCase):
+class MissingClickHouseExceptionTypesStagingE2ETests(SSotAsyncTestCase):
     """
     End-to-end tests demonstrating the 5 missing ClickHouse schema exception types
     in staging environment with complete operational workflows.

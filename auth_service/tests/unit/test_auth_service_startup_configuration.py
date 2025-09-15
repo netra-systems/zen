@@ -30,7 +30,7 @@ from auth_service.auth_core.config import AuthConfig, get_config
 from auth_service.auth_core.auth_environment import AuthEnvironment, get_auth_env
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestAuthServiceStartupConfiguration:
+class AuthServiceStartupConfigurationTests:
     """
     Test auth service startup configuration validation.
     

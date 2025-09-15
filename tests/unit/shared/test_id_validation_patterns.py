@@ -29,7 +29,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType, 
 from shared.types.core_types import ensure_user_id, UserID
 
 @pytest.mark.unit
-class TestIDValidationPatterns:
+class IDValidationPatternsTests:
     """Test suite for ID validation pattern bug reproduction and fix validation."""
 
     @pytest.fixture

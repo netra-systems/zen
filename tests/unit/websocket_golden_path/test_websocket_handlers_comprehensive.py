@@ -40,7 +40,7 @@ from shared.types.core_types import UserID, ThreadID, ConnectionID
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 @pytest.mark.unit
-class TestWebSocketMessageHandlersComprehensive(SSotAsyncTestCase):
+class WebSocketMessageHandlersComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for WebSocket Message Handlers.
     
@@ -279,7 +279,7 @@ class TestWebSocketMessageHandlersComprehensive(SSotAsyncTestCase):
             self.assertIsInstance(e, (ConnectionError, RuntimeError))
 
 @pytest.mark.unit
-class TestWebSocketMessageTypes(SSotBaseTestCase):
+class WebSocketMessageTypesTests(SSotBaseTestCase):
     """
     Unit tests for WebSocket message type handling and validation.
     

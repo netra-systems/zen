@@ -58,7 +58,7 @@ from test_framework.websocket_helpers import WebSocketTestClient, assert_websock
 logger = logging.getLogger(__name__)
 
 
-class TestAuthServiceStartupE2E(BaseE2ETest):
+class AuthServiceStartupE2ETests(BaseE2ETest):
     """
     Comprehensive E2E tests for auth service startup and complete authentication workflows.
     
@@ -805,7 +805,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
 @pytest.fixture
 async def auth_service_e2e_setup():
     """Fixture providing comprehensive auth service E2E test setup."""
-    test_instance = TestAuthServiceStartupE2E()
+    test_instance = AuthServiceStartupE2ETests()
     test_instance.setup_method()
     
     try:

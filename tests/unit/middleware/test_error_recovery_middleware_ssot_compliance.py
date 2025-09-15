@@ -33,7 +33,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestErrorRecoveryMiddlewareSsotCompliance(SSotBaseTestCase):
+class ErrorRecoveryMiddlewareSsotComplianceTests(SSotBaseTestCase):
     """Unit tests for Error Recovery Middleware SSOT configuration compliance."""
 
     def setup_method(self, method=None):

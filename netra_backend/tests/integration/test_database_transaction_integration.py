@@ -48,7 +48,7 @@ from netra_backend.app.models.session import Session
 from netra_backend.app.models.agent_execution import AgentExecution
 
 
-class TestDatabaseTransactionIntegration(BaseIntegrationTest):
+class DatabaseTransactionIntegrationTests(BaseIntegrationTest):
     """Test database transactions and persistence with real PostgreSQL."""
 
     @pytest.mark.integration

@@ -35,7 +35,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
 @pytest.mark.e2e
-class TestHealthReadyTimeoutFixE2E(SSotAsyncTestCase):
+class HealthReadyTimeoutFixE2ETests(SSotAsyncTestCase):
     """
     End-to-end tests for /health/ready endpoint timeout fix validation.
     

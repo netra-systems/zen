@@ -18,7 +18,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 @pytest.mark.integration
-class TestWebSocketEventEmissionIntegration(SSotAsyncTestCase):
+class WebSocketEventEmissionIntegrationTests(SSotAsyncTestCase):
     """Integration test for WebSocket event emission during agent execution"""
 
     def setup_method(self, method):

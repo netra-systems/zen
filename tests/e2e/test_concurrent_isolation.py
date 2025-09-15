@@ -1,5 +1,5 @@
 @pytest.mark.e2e
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
@@ -62,7 +62,7 @@ from shared.isolated_environment import get_env
 logger = central_logger.get_logger(__name__)
 
 @pytest.mark.e2e
-class TestE2EConcurrentIsolation:
+class E2EConcurrentIsolationTests:
     """End-to-end concurrent isolation tests with real production services."""
 
     @pytest.mark.asyncio

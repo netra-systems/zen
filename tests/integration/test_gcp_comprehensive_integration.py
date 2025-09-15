@@ -67,7 +67,7 @@ except ImportError as e:
     google = None
 logger = logging.getLogger(__name__)
 
-class TestGCPCloudRunDeployment(BaseIntegrationTest):
+class GCPCloudRunDeploymentTests(BaseIntegrationTest):
     """
     Test Cloud Run service deployment and configuration validation.
     
@@ -156,7 +156,7 @@ class TestGCPCloudRunDeployment(BaseIntegrationTest):
         assert backend_service.timeout == 600, 'Service timeout must accommodate AI agent execution'
         self.assert_business_value_delivered({'websocket_reliability': True, 'chat_stability': True, 'timeout_optimization': True}, 'infrastructure')
 
-class TestGCPVPCConnectivity(BaseIntegrationTest):
+class GCPVPCConnectivityTests(BaseIntegrationTest):
     """
     Test VPC connector setup and database connectivity.
     
@@ -224,7 +224,7 @@ class TestGCPVPCConnectivity(BaseIntegrationTest):
             await redis_client.set('ws_connection:test_connection', json.dumps({'user_id': '123', 'connected_at': time.time()}))
         self.assert_business_value_delivered({'redis_connectivity': True, 'session_management': True, 'websocket_tracking': True}, 'infrastructure')
 
-class TestGCPSecretManager(BaseIntegrationTest):
+class GCPSecretManagerTests(BaseIntegrationTest):
     """
     Test Secret Manager integration for sensitive data.
     
@@ -302,7 +302,7 @@ class TestGCPSecretManager(BaseIntegrationTest):
                 assert rotated_api_key.payload.data is not None, f'{api_key} must support rotation'
         self.assert_business_value_delivered({'key_rotation_capability': True, 'zero_downtime_rotation': True, 'api_security': True}, 'infrastructure')
 
-class TestGCPIAMAndSecurity(BaseIntegrationTest):
+class GCPIAMAndSecurityTests(BaseIntegrationTest):
     """
     Test IAM role and service account permission testing.
     
@@ -372,7 +372,7 @@ class TestGCPIAMAndSecurity(BaseIntegrationTest):
             assert len(critical_vulns) == 0, 'Container images must not have critical vulnerabilities'
         self.assert_business_value_delivered({'vulnerability_assessment': True, 'security_monitoring': True, 'container_security': True}, 'infrastructure')
 
-class TestGCPMonitoringAndLogging(BaseIntegrationTest):
+class GCPMonitoringAndLoggingTests(BaseIntegrationTest):
     """
     Test Cloud operations monitoring and logging integration.
     
@@ -441,7 +441,7 @@ class TestGCPMonitoringAndLogging(BaseIntegrationTest):
             assert len(database_errors) < len(log_entries) * 0.1, 'Database error rate must be low'
         self.assert_business_value_delivered({'log_aggregation': True, 'performance_analysis': True, 'error_tracking': True}, 'insights')
 
-class TestGCPCostOptimizationAndBilling(BaseIntegrationTest):
+class GCPCostOptimizationAndBillingTests(BaseIntegrationTest):
     """
     Test GCP resource cost optimization and billing validation.
     
@@ -520,7 +520,7 @@ class TestGCPCostOptimizationAndBilling(BaseIntegrationTest):
             assert len(notifications['monitoring_notification_channels']) > 0, 'Must notify team of budget issues'
         self.assert_business_value_delivered({'budget_monitoring': True, 'cost_alerts': True, 'proactive_cost_management': True}, 'cost_savings')
 
-class TestGCPBackupAndDisasterRecovery(BaseIntegrationTest):
+class GCPBackupAndDisasterRecoveryTests(BaseIntegrationTest):
     """
     Test backup and disaster recovery capabilities.
     

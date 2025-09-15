@@ -27,7 +27,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestSharedTypesBusinessLogic:
+class SharedTypesBusinessLogicTests:
     """Test shared types support business requirements across services."""
 
     def test_strongly_typed_user_id_business_safety(self):
@@ -148,7 +148,7 @@ class TestSharedTypesBusinessLogic:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestIsolatedEnvironmentBusinessSafety:
+class IsolatedEnvironmentBusinessSafetyTests:
     """Test isolated environment provides business configuration safety."""
 
     def test_environment_isolation_business_security(self):
@@ -262,7 +262,7 @@ class TestIsolatedEnvironmentBusinessSafety:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestCrossServiceBusinessContracts:
+class CrossServiceBusinessContractsTests:
     """Test cross-service business contracts and integration patterns."""
 
     def test_service_communication_business_patterns(self):

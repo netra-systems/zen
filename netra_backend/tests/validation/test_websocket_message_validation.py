@@ -25,7 +25,7 @@ from netra_backend.app.agents.example_message_processor import ExampleMessagePro
 from netra_backend.app.agents.synthetic_data_approval_handler import ApprovalMessageBuilder as MessageBuilder
 from netra_backend.app.core.exceptions_base import WebSocketValidationError
 
-class TestWebSocketMessageValidation:
+class WebSocketMessageValidationTests:
     """Tests for message structure validation and field extraction."""
     
     def test_validate_user_message_structure(self):

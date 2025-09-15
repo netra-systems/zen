@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.integration
-class TestOAuthSecurityComprehensive:
+class OAuthSecurityComprehensiveTests:
     """Test suite for OAuth security validation using SSOT - Issue #213."""
     
     def setup_method(self):
@@ -405,7 +405,7 @@ def test_oauth_security_validation_capability():
     
     This meta-test ensures our security validation tests work correctly.
     """
-    test_instance = TestOAuthSecurityComprehensive()
+    test_instance = OAuthSecurityComprehensiveTests()
     test_instance.setup_method()
     
     try:

@@ -42,7 +42,7 @@ class MockWebSocketState(Enum):
     CLOSED = 'closed'
 
 @pytest.mark.unit
-class TestUnifiedManagerCoreFunctions:
+class UnifiedManagerCoreFunctionsTests:
     """Test core utility functions that support WebSocket business logic."""
 
     def test_serialize_message_safely_handles_basic_dict(self):
@@ -96,7 +96,7 @@ class TestUnifiedManagerCoreFunctions:
         assert result == '3'
 
 @pytest.mark.unit
-class TestWebSocketConnectionDataClass:
+class WebSocketConnectionDataClassTests:
     """Test WebSocketConnection dataclass for business logic validation."""
 
     def test_websocket_connection_creation_with_required_fields(self):
@@ -126,7 +126,7 @@ class TestWebSocketConnectionDataClass:
         assert connection.metadata['session_id'] == 'session-123'
 
 @pytest.mark.unit
-class TestUnifiedWebSocketManagerBusiness:
+class UnifiedWebSocketManagerBusinessTests:
     """Test UnifiedWebSocketManager business logic with minimal mocking."""
 
     def test_manager_initialization_sets_up_business_state(self):

@@ -163,7 +163,7 @@ class MockTestAgent(BaseAgent):
         self._run_id = run_id
 
 
-class TestAgentExecutionCore(BaseIntegrationTest):
+class AgentExecutionCoreTests(BaseIntegrationTest):
     """
     Test agent execution core functionality with real services.
     

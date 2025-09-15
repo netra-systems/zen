@@ -26,7 +26,7 @@ from shared.isolated_environment import get_env
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
-class TestStartupSequenceValidation(SSotBaseTestCase):
+class StartupSequenceValidationTests(SSotBaseTestCase):
     """
     Test startup sequence and initialization order without Docker dependencies.
     
@@ -156,7 +156,7 @@ class TestStartupSequenceValidation(SSotBaseTestCase):
         self.record_metric('health_checks_total', health_results.get('total_checks', 0))
 
 @pytest.mark.integration
-class TestStartupErrorHandling(SSotBaseTestCase):
+class StartupErrorHandlingTests(SSotBaseTestCase):
     """
     Test startup error handling and failure recovery patterns.
     
@@ -222,7 +222,7 @@ class TestStartupErrorHandling(SSotBaseTestCase):
             self.record_metric('config_validation_time', time.time())
 
 @pytest.mark.integration
-class TestStartupPerformanceCharacteristics(SSotBaseTestCase):
+class StartupPerformanceCharacteristicsTests(SSotBaseTestCase):
     """
     Test startup performance characteristics and timing requirements.
     
@@ -317,7 +317,7 @@ class TestStartupPerformanceCharacteristics(SSotBaseTestCase):
         self.record_metric('concurrent_errors', len(errors))
 
 @pytest.mark.integration
-class TestStartupServiceReadiness(SSotBaseTestCase):
+class StartupServiceReadinessTests(SSotBaseTestCase):
     """
     Test startup service readiness and health status reporting.
     
@@ -432,7 +432,7 @@ class TestStartupServiceReadiness(SSotBaseTestCase):
         self.record_metric('health_endpoint_tests_passed', 4)
 
 @pytest.mark.integration
-class TestStartupConfigurationManagement(SSotBaseTestCase):
+class StartupConfigurationManagementTests(SSotBaseTestCase):
     """
     Test startup configuration loading, validation, and environment-specific behavior.
     

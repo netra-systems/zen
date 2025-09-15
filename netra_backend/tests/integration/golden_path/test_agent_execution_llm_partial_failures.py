@@ -127,7 +127,7 @@ class LLMPartialFailureSimulator:
         return None  # Success
 
 
-class TestAgentExecutionLLMPartialFailures(BaseIntegrationTest):
+class AgentExecutionLLMPartialFailuresTests(BaseIntegrationTest):
     """Integration test for agent execution with partial LLM API failures."""
     
     @pytest.mark.integration

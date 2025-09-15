@@ -31,7 +31,7 @@ from shared.isolated_environment import get_env
 from netra_backend.tests.unit.test_base import BaseUnitTest
 
 
-class TestUnifiedCorpusAdminSSOTViolations(BaseUnitTest):
+class UnifiedCorpusAdminSSOTViolationsTests(BaseUnitTest):
     """Test SSOT violations in corpus admin functions that compromise user isolation."""
     
     def setup_method(self):

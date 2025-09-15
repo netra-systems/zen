@@ -28,7 +28,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.routes.messages import get_current_user_from_jwt
 
 
-class TestMessagesRouteJWTValidation(SSotBaseTestCase):
+class MessagesRouteJWTValidationTests(SSotBaseTestCase):
     """
     Unit tests for JWT validation in messages route - Issue #1234 reproduction.
     

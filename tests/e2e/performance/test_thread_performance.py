@@ -131,7 +131,7 @@ async def mock_db_session():
 
 @pytest.mark.e2e
 @pytest.mark.performance
-class TestThreadPerformance:
+class ThreadPerformanceTests:
     """Thread performance E2E tests."""
 
     @pytest.mark.asyncio

@@ -71,7 +71,7 @@ class MockMessageHandler(BaseMessageHandler):
         return self.should_succeed
 
 
-class TestAgentMessageRoutingValidation(SSotAsyncTestCase):
+class AgentMessageRoutingValidationTests(SSotAsyncTestCase):
     """Test suite for agent message routing and validation logic."""
 
     def setup_method(self, method):

@@ -28,7 +28,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.types.core_types import UserID, ConnectionID, ensure_user_id
 
 
-class TestWebSocketSSotConnectionLifecycle(SSotAsyncTestCase):
+class WebSocketSSotConnectionLifecycleTests(SSotAsyncTestCase):
     """Test connection lifecycle SSOT violations."""
     
     async def test_connection_creation_through_unified_path(self):

@@ -24,7 +24,7 @@ from netra_backend.tests.helpers.rate_retry_monitoring_test_helpers import (
 )
 
 # Test 98: Monitoring utils metrics
-class TestMonitoringUtilsMetrics:
+class MonitoringUtilsMetricsTests:
     """test_monitoring_utils_metrics - Test metric collection and aggregation"""
     
     @pytest.mark.asyncio
@@ -75,7 +75,7 @@ class TestMonitoringUtilsMetrics:
         assert "api_requests" in metrics
 
 # Test 99: Debug utils profiling
-class TestDebugUtilsProfiling:
+class DebugUtilsProfilingTests:
     """test_debug_utils_profiling - Test profiling utilities and performance metrics"""
     
     @pytest.mark.asyncio
@@ -147,7 +147,7 @@ class TestDebugUtilsProfiling:
         assert stats["max"] >= stats["min"]
 
 # Test 100: Migration utils scripts
-class TestMigrationUtilsScripts:
+class MigrationUtilsScriptsTests:
     """test_migration_utils_scripts - Test migration utilities and data transformation"""
     
     @pytest.mark.asyncio

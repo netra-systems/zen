@@ -56,7 +56,7 @@ class AgentWorkflowCase:
     complexity_level: str  # "simple", "medium", "complex"
 
 
-class TestAgentWorkflowData:
+class AgentWorkflowDataTests:
     """Test data for agent workflow validation."""
     
     @staticmethod
@@ -213,8 +213,8 @@ class WorkflowState:
         }
 
 
-# Missing methods for TestAgentWorkflowValidationRealLLM class
-class TestAgentWorkflowValidationRealLLM:
+# Missing methods for AgentWorkflowValidationRealLLMTests class
+class AgentWorkflowValidationRealLLMTests:
     """Test complete agent workflow validation with real LLM."""
     
     @pytest.fixture
@@ -236,7 +236,7 @@ class TestAgentWorkflowValidationRealLLM:
         return WorkflowValidator()
     
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("workflow_case", TestAgentWorkflowData.get_workflow_test_cases())
+    @pytest.mark.parametrize("workflow_case", AgentWorkflowDataTests.get_workflow_test_cases())
     @pytest.mark.e2e
     async def test_complete_workflow_execution(self, test_core, use_real_llm, workflow_validator, workflow_case):
         """Test complete workflow execution for each test case."""

@@ -48,7 +48,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class TestUserExecutionContextComprehensive(BaseTestCase):
+class UserExecutionContextComprehensiveTests(BaseTestCase):
     """Comprehensive test suite for UserExecutionContext - MISSION CRITICAL."""
     
     def setUp(self):

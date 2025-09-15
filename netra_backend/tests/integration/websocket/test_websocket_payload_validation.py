@@ -188,7 +188,7 @@ class ValidatingWebSocketMock:
 @pytest.mark.websocket
 @pytest.mark.security
 @pytest.mark.asyncio
-class TestWebSocketPayloadValidation(SSotAsyncTestCase):
+class WebSocketPayloadValidationTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket payload validation.
     

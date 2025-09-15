@@ -85,7 +85,7 @@ class SupervisorIsolationTracker:
 @pytest.mark.integration
 @pytest.mark.requires_docker
 @pytest.mark.supervisor_isolation
-class TestAgentSupervisorIsolation(DockerTestBase):
+class AgentSupervisorIsolationTests(DockerTestBase):
     """Integration Test 9: Agent supervisor isolation testing"""
 
     @pytest.fixture(autouse=True)

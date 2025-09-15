@@ -60,7 +60,7 @@ async def staging_websocket_manager():
 
 @pytest.mark.e2e
 @pytest.mark.staging
-class TestStagingWebSocketChatFlows:
+class StagingWebSocketChatFlowsTests:
     """E2E tests for complete chat flows with WebSocket events in staging."""
     
     @pytest.mark.asyncio
@@ -417,7 +417,7 @@ class TestStagingWebSocketChatFlows:
 
 @pytest.mark.e2e
 @pytest.mark.staging
-class TestStagingWebSocketPerformance:
+class StagingWebSocketPerformanceTests:
     """E2E performance tests for WebSocket in staging environment."""
     
     @pytest.mark.asyncio

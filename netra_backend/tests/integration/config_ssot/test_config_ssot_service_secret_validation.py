@@ -38,7 +38,7 @@ from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestConfigSSoTServiceSecretValidation(SSotAsyncTestCase):
+class ConfigSSoTServiceSecretValidationTests(SSotAsyncTestCase):
     """Integration tests for SSOT configuration with real backend services."""
 
     def setup_method(self, method=None):

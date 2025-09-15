@@ -19,7 +19,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestUserExecutionContextParameters(SSotAsyncTestCase):
+class UserExecutionContextParametersTests(SSotAsyncTestCase):
     """Test suite for validating UserExecutionContext constructor parameters.
 
     These tests are designed to fail and demonstrate parameter issues.
@@ -281,7 +281,7 @@ if __name__ == "__main__":
 
     # Run the async test
     async def run_tests():
-        test_instance = TestUserExecutionContextParameters()
+        test_instance = UserExecutionContextParametersTests()
         await test_instance.asyncSetUp()
 
         test_methods = [

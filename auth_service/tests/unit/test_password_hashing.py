@@ -29,7 +29,7 @@ from auth_service.services.password_service import PasswordService, PasswordPoli
 from auth_service.auth_core.config import AuthConfig
 
 
-class TestPasswordHashing(SSotBaseTestCase):
+class PasswordHashingTests(SSotBaseTestCase):
     """Unit tests for password hashing security business logic."""
     
     def setup_method(self, method=None):

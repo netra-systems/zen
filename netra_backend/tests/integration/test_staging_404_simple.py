@@ -28,7 +28,7 @@ logger = central_logger.get_logger(__name__)
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.authentication
-class TestStaging404Simple:
+class Staging404SimpleTests:
     """Simple test to reproduce the staging 404 error without complex fixtures."""
 
     def test_system_user_context_creation(self):

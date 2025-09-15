@@ -72,7 +72,7 @@ class UserExecutionResult:
     errors: List[str] = field(default_factory=list)
 
 @pytest.mark.integration
-class TestMultiUserConcurrency(SSotAsyncTestCase):
+class MultiUserConcurrencyTests(SSotAsyncTestCase):
     """Integration tests reproducing multi-user concurrency issues from Issue #414."""
 
     def setup_method(self, method):

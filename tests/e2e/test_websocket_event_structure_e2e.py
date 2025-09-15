@@ -18,7 +18,7 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from auth_service.auth_core.test_utilities.auth_test_harness import AuthAgentFlowHarness
 
-class TestWebSocketEventStructureE2E(SSotAsyncTestCase):
+class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
     """E2E validation of WebSocket event structure in staging environment"""
 
     async def asyncSetUp(self):

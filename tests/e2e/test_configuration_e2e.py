@@ -23,7 +23,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 @pytest.mark.e2e
-class TestStagingConfiguration:
+class StagingConfigurationTests:
     """Test staging environment configuration requirements."""
 
     @pytest.fixture
@@ -91,7 +91,7 @@ class TestStagingConfiguration:
                 assert '0.0.0.0' not in value
 
 @pytest.mark.e2e
-class TestProductionConfiguration:
+class ProductionConfigurationTests:
     """Test production environment configuration requirements."""
 
     @pytest.fixture
@@ -123,7 +123,7 @@ class TestProductionConfiguration:
                 validator.validate_environment_at_startup()
 
 @pytest.mark.e2e
-class TestDevelopmentConfiguration:
+class DevelopmentConfigurationTests:
     """Test development environment configuration."""
 
     @pytest.fixture
@@ -145,7 +145,7 @@ class TestDevelopmentConfiguration:
             validator.validate_environment_at_startup()
 
 @pytest.mark.e2e
-class TestCrossServiceConfiguration:
+class CrossServiceConfigurationTests:
     """Test configuration consistency between services."""
 
     def test_jwt_secrets_match_between_services(self):
@@ -166,7 +166,7 @@ class TestCrossServiceConfiguration:
             assert '10.107.0.3' in redis_url
 
 @pytest.mark.e2e
-class TestConfigurationValidation:
+class ConfigurationValidationTests:
     """Test configuration validation and error handling."""
 
     def test_fail_fast_on_missing_critical_vars(self):

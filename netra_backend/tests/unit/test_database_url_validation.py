@@ -24,7 +24,7 @@ from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig, StagingConfig, ProductionConfig, NetraTestingConfig
 
-class TestDatabaseURLValidation:
+class DatabaseURLValidationTests:
     """Test suite for database URL validation and handling."""
 
     def test_appconfig_database_url_none_by_default(self):
@@ -101,7 +101,7 @@ class TestDatabaseURLValidation:
                 assert config.database_url is not None
                 assert 'prod-db.example.com' in config.database_url
 
-class TestHealthCheckDatabaseValidation:
+class HealthCheckDatabaseValidationTests:
     """Test suite for health check database validation."""
 
     @pytest.mark.asyncio

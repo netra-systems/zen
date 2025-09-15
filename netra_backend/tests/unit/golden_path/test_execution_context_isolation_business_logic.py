@@ -539,7 +539,7 @@ class UserExecutionContextFactory:
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestExecutionContextIsolationBusinessLogic:
+class ExecutionContextIsolationBusinessLogicTests:
     """Test execution context isolation business logic for multi-user platform."""
     
     def setup_method(self):

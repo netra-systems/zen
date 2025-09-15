@@ -24,7 +24,7 @@ except ImportError:
     TracerProvider = Mock
 
 
-class TestDistributedTracingPerformanceOverhead:
+class DistributedTracingPerformanceOverheadTests:
     """Monitors tracing performance impact to prevent system degradation."""
     
     @pytest.fixture

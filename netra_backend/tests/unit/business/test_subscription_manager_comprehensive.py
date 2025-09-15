@@ -27,7 +27,7 @@ from netra_backend.app.business.subscription_manager import SubscriptionManager
 from netra_backend.app.db.models_postgres import Subscription
 from test_framework.ssot.base_test_case import BaseTestCase
 
-class TestSubscriptionManagerInitialization(BaseTestCase):
+class SubscriptionManagerInitializationTests(BaseTestCase):
     """Test SubscriptionManager initialization and basic setup."""
 
     def test_init_without_session(self):
@@ -81,7 +81,7 @@ class TestSubscriptionManagerInitialization(BaseTestCase):
         assert len(set((id(m) for m in managers))) == 10
         self.record_metric('concurrent_managers_created', 10)
 
-class TestGetUserSubscription(BaseTestCase):
+class GetUserSubscriptionTests(BaseTestCase):
     """Test get_user_subscription method - core subscription retrieval logic."""
 
     @pytest.mark.asyncio
@@ -167,7 +167,7 @@ class TestGetUserSubscription(BaseTestCase):
             assert result is None or isinstance(result, Subscription)
         self.record_metric('return_type_consistency_verified', len(test_ids))
 
-class TestCreateSubscription(BaseTestCase):
+class CreateSubscriptionTests(BaseTestCase):
     """Test create_subscription method - critical subscription creation logic."""
 
     @pytest.mark.asyncio
@@ -236,7 +236,7 @@ class TestCreateSubscription(BaseTestCase):
         assert result.plan_name is not None
         assert result.status is not None
 
-class TestCancelSubscription(BaseTestCase):
+class CancelSubscriptionTests(BaseTestCase):
     """Test cancel_subscription method - critical revenue protection logic."""
 
     @pytest.mark.asyncio
@@ -284,7 +284,7 @@ class TestCancelSubscription(BaseTestCase):
         assert result1 == result2
         assert result1 is True
 
-class TestUpgradeSubscription(BaseTestCase):
+class UpgradeSubscriptionTests(BaseTestCase):
     """Test upgrade_subscription method - critical revenue growth logic."""
 
     @pytest.mark.asyncio
@@ -340,7 +340,7 @@ class TestUpgradeSubscription(BaseTestCase):
         result = await manager.upgrade_subscription(subscription_id=12345, new_plan='')
         assert result is True
 
-class TestGetUserSubscriptions(BaseTestCase):
+class GetUserSubscriptionsTests(BaseTestCase):
     """Test get_user_subscriptions method - multi-subscription management logic."""
 
     @pytest.mark.asyncio
@@ -390,7 +390,7 @@ class TestGetUserSubscriptions(BaseTestCase):
         assert isinstance(result1, list)
         assert len(result1) == 0
 
-class TestSubscriptionManagerErrorHandling(BaseTestCase):
+class SubscriptionManagerErrorHandlingTests(BaseTestCase):
     """Test error handling and edge cases - critical for revenue protection."""
 
     @pytest.mark.asyncio
@@ -434,7 +434,7 @@ class TestSubscriptionManagerErrorHandling(BaseTestCase):
         assert manager1.session == session1
         assert manager2.session == session2
 
-class TestSubscriptionManagerBusinessLogicValidation(BaseTestCase):
+class SubscriptionManagerBusinessLogicValidationTests(BaseTestCase):
     """Test business logic validation and data integrity."""
 
     @pytest.mark.asyncio
@@ -474,7 +474,7 @@ class TestSubscriptionManagerBusinessLogicValidation(BaseTestCase):
             subscription = await manager.create_subscription(user_id=user_id, plan_name='premium')
             assert subscription.user_id == user_id
 
-class TestSubscriptionManagerPerformance(BaseTestCase):
+class SubscriptionManagerPerformanceTests(BaseTestCase):
     """Test performance characteristics and resource usage."""
 
     @pytest.mark.asyncio
@@ -527,7 +527,7 @@ class TestSubscriptionManagerPerformance(BaseTestCase):
         self.record_metric('rapid_state_changes_time', execution_time)
         self.record_metric('operations_per_second', operations_count * 3 / execution_time)
 
-class TestSubscriptionManagerEdgeCases(BaseTestCase):
+class SubscriptionManagerEdgeCasesTests(BaseTestCase):
     """Test edge cases and boundary conditions for robustness."""
 
     @pytest.mark.asyncio
@@ -636,7 +636,7 @@ class TestSubscriptionManagerEdgeCases(BaseTestCase):
         self.record_metric('boundary_subscription_ids_tested', len(boundary_subscription_ids))
         self.record_metric('boundary_operations_successful', operations_successful)
 
-class TestSubscriptionManagerConcurrency(BaseTestCase):
+class SubscriptionManagerConcurrencyTests(BaseTestCase):
     """Test concurrent access patterns and thread safety."""
 
     @pytest.mark.asyncio
@@ -690,7 +690,7 @@ class TestSubscriptionManagerConcurrency(BaseTestCase):
         assert len(list_results) == 5
         self.record_metric('concurrent_mixed_operations', 15)
 
-class TestSubscriptionManagerBusinessRules(BaseTestCase):
+class SubscriptionManagerBusinessRulesTests(BaseTestCase):
     """Test business rule validation and constraints."""
 
     @pytest.mark.asyncio
@@ -778,7 +778,7 @@ class TestSubscriptionManagerBusinessRules(BaseTestCase):
         assert len(set(upgrade_results)) == 1
         self.record_metric('idempotency_tests_completed', 10)
 
-class TestSubscriptionManagerErrorRecovery(BaseTestCase):
+class SubscriptionManagerErrorRecoveryTests(BaseTestCase):
     """Test error recovery and resilience patterns."""
 
     @pytest.mark.asyncio

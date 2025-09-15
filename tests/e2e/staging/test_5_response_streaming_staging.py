@@ -15,7 +15,7 @@ from tests.e2e.staging_test_base import StagingTestBase, staging_test
 
 
 @pytest.mark.e2e
-class TestResponseStreamingStaging(StagingTestBase):
+class ResponseStreamingStagingTests(StagingTestBase):
     """Test response streaming in staging environment"""
     
     @staging_test
@@ -115,7 +115,7 @@ class TestResponseStreamingStaging(StagingTestBase):
 
 if __name__ == "__main__":
     async def run_tests():
-        test_class = TestResponseStreamingStaging()
+        test_class = ResponseStreamingStagingTests()
         test_class.setup_class()
         
         try:

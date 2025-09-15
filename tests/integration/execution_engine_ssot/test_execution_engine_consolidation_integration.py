@@ -32,7 +32,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.integration
-class TestExecutionEngineConsolidationIntegration(SSotAsyncTestCase):
+class ExecutionEngineConsolidationIntegrationTests(SSotAsyncTestCase):
     """Integration tests for execution engine SSOT consolidation."""
 
     def setup_method(self, method):

@@ -35,7 +35,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 
-class TestDatabaseConnectionTimeoutIssue1263(SSotAsyncTestCase):
+class DatabaseConnectionTimeoutIssue1263Tests(SSotAsyncTestCase):
     """
     Unit tests for Issue #1263 - Database connection timeout causing WebSocket blocking.
 

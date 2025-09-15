@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.unit
-class TestE2EHarnessInfrastructure(SSotBaseTestCase):
+class E2EHarnessInfrastructureTests(SSotBaseTestCase):
     """Unit tests for E2E harness infrastructure components."""
 
     def setup_method(self, method):

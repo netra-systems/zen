@@ -14,7 +14,7 @@ import sys
 from unittest.mock import patch, Mock
 from test_framework.ssot.test_context_decorator import ContextValidationError, TestContextValidator, test_decorator, validate_no_test_imports_in_production
 
-class TestTestContextValidation:
+class TestContextValidationTests:
     """Test the test context validation system itself."""
 
     def test_test_environment_detection_in_pytest(self):
@@ -58,7 +58,7 @@ class TestTestContextValidation:
             result = legacy_function()
             assert result == 'allowed'
 
-class TestClickHouseDecoratorCompliance:
+class ClickHouseDecoratorComplianceTests:
     """Tests that verify ClickHouse functions are properly decorated."""
 
     def test_noop_client_methods_are_decorated(self):
@@ -104,7 +104,7 @@ class TestClickHouseDecoratorCompliance:
             with pytest.raises(ContextValidationError):
                 result = _is_real_database_test()
 
-class TestProductionContaminationPrevention:
+class ProductionContaminationPreventionTests:
     """Tests to prevent test code leakage into production."""
 
     def test_no_test_imports_in_production_code(self):
@@ -129,7 +129,7 @@ class TestProductionContaminationPrevention:
         assert config['message'] == 'Test function'
         assert config['allow_production'] == False
 
-class TestContextInformationGathering:
+class ContextInformationGatheringTests:
     """Tests for context detection and information gathering."""
 
     def test_get_test_context_info_returns_complete_data(self):
@@ -147,7 +147,7 @@ class TestContextInformationGathering:
         assert 'unittest' in modules
 
 @pytest.mark.integration
-class TestRealClickHouseDecoratorBehavior:
+class RealClickHouseDecoratorBehaviorTests:
     """Integration tests for decorator behavior with real ClickHouse connections."""
 
     @pytest.mark.skip(reason='Requires complete decorator implementation')

@@ -116,7 +116,7 @@ class ThreadPropagationTestMessageHandler:
             }
 
 
-class TestThreadPropagationVerification(SSotAsyncTestCase):
+class ThreadPropagationVerificationTests(SSotAsyncTestCase):
     """
     Mission-critical thread propagation validation using real services.
     

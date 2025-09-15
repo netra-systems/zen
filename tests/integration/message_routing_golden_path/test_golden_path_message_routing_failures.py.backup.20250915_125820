@@ -1,0 +1,336 @@
+"""
+Test Golden Path Message Routing Integration Failures
+
+Focus: End-to-end message routing through the complete Golden Path
+Uses real services but no Docker required.
+
+Business Value Justification:
+- Segment: Platform Infrastructure
+- Business Goal: Golden Path Reliability ($500K+ ARR protection)
+- Value Impact: Validate complete user->agent->response flow works reliably
+- Strategic Impact: Ensure business-critical chat functionality operates correctly
+
+Purpose: This test file is designed to FAIL initially due to routing conflicts
+and SSOT violations. After consolidation, all tests should PASS.
+
+Issue #1067: MessageRouter SSOT Consolidation Test Suite
+"""
+
+import pytest
+import asyncio
+import uuid
+from typing import Dict, Any, List
+from unittest.mock import Mock, AsyncMock
+
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from test_framework.ssot.real_services_test_fixtures import real_services_fixture
+from test_framework.ssot.websocket_test_infrastructure_factory import WebSocketTestInfrastructureFactory
+from shared.isolated_environment import get_env
+
+
+class TestGoldenPathMessageRoutingFailures(SSotAsyncTestCase):
+    """Test Golden Path message routing with real services."""
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    @pytest.mark.golden_path
+    async def test_complete_user_message_flow_failures(self, real_services_fixture):
+        """FAILING TEST: Complete user->agent->response flow should work reliably.
+
+        This test should FAIL initially due to routing conflicts.
+        """
+        # Setup real services from fixture
+        services = real_services_fixture
+
+        # Create test infrastructure
+        ws_factory = WebSocketTestInfrastructureFactory()
+        test_user_id = str(uuid.uuid4())
+
+        message_routing_success = False
+        routing_errors = []
+
+        try:
+            # Create WebSocket test client
+            ws_config = {
+                "factory_id": "golden_path_test",
+                "mock_mode": False,
+                "enable_metrics_collection": True
+            }
+
+            async with ws_factory.create_test_infrastructure(ws_config) as ws_infrastructure:
+                # Simulate complete message flow
+                user_message = {
+                    "type": "user_message",
+                    "content": "Test message for routing",
+                    "user_id": test_user_id,
+                    "message_id": str(uuid.uuid4()),
+                    "timestamp": asyncio.get_event_loop().time()
+                }
+
+                # Test routing through MessageRouter
+                try:
+                    from netra_backend.app.websocket_core.handlers import MessageRouter
+                    router = MessageRouter()
+
+                    # Mock WebSocket for testing
+                    class MockWebSocket:
+                        def __init__(self):
+                            self.messages_sent = []
+                            self.closed = False
+
+                        async def send_json(self, data):
+                            self.messages_sent.append(data)
+
+                        async def close(self):
+                            self.closed = True
+
+                    mock_websocket = MockWebSocket()
+
+                    # Attempt message routing - this should fail due to SSOT violations
+                    if hasattr(router, 'route_message'):
+                        routing_result = await router.route_message(
+                            user_id=test_user_id,
+                            websocket=mock_websocket,
+                            raw_message=user_message
+                        )
+                        message_routing_success = routing_result
+                    else:
+                        # Try alternative routing method
+                        if hasattr(router, 'handle_message'):
+                            routing_result = await router.handle_message(mock_websocket, user_message)
+                            message_routing_success = bool(routing_result)
+                        else:
+                            routing_errors.append("No routing method found on MessageRouter")
+
+                    # Verify expected responses
+                    expected_response_count = 5  # All 5 WebSocket events
+                    actual_response_count = len(mock_websocket.messages_sent)
+
+                    if actual_response_count != expected_response_count:
+                        routing_errors.append(
+                            f"Expected {expected_response_count} responses, got {actual_response_count}"
+                        )
+
+                    # Check for specific event types
+                    expected_events = {"agent_started", "agent_thinking", "tool_executing",
+                                     "tool_completed", "agent_completed"}
+                    received_events = {msg.get("type") for msg in mock_websocket.messages_sent}
+                    missing_events = expected_events - received_events
+
+                    if missing_events:
+                        routing_errors.append(f"Missing expected events: {missing_events}")
+
+                except ImportError as e:
+                    routing_errors.append(f"Failed to import MessageRouter: {str(e)}")
+                except Exception as e:
+                    routing_errors.append(f"Message routing exception: {str(e)}")
+
+        except Exception as e:
+            routing_errors.append(f"Infrastructure setup failed: {str(e)}")
+
+        # This assertion should FAIL initially, demonstrating the Golden Path issue
+        assert message_routing_success and len(routing_errors) == 0, (
+            f"GOLDEN PATH FAILURE: Message routing failed. "
+            f"Success: {message_routing_success}, Errors: {routing_errors}. "
+            f"This demonstrates SSOT violations that break $500K+ ARR chat functionality."
+        )
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    @pytest.mark.user_isolation
+    async def test_multi_user_message_isolation_failures(self, real_services_fixture):
+        """FAILING TEST: Concurrent users should have isolated message routing.
+
+        This test should FAIL initially, showing user isolation violations.
+        """
+        services = real_services_fixture
+        ws_factory = WebSocketTestInfrastructureFactory()
+
+        # Create two test users
+        user1_id = str(uuid.uuid4())
+        user2_id = str(uuid.uuid4())
+
+        isolation_violations = []
+
+        try:
+            # Create test infrastructure for both users
+            ws_config = {
+                "factory_id": "multi_user_isolation_test",
+                "mock_mode": False,
+                "max_concurrent_clients": 2
+            }
+
+            async with ws_factory.create_test_infrastructure(ws_config) as ws_infrastructure:
+                from netra_backend.app.websocket_core.handlers import MessageRouter
+                router = MessageRouter()
+
+                # Create separate WebSocket mocks for each user
+                class IsolationTestWebSocket:
+                    def __init__(self, user_id: str):
+                        self.user_id = user_id
+                        self.messages_received = []
+                        self.connection_id = str(uuid.uuid4())
+
+                    async def send_json(self, data):
+                        self.messages_received.append(data)
+
+                ws1 = IsolationTestWebSocket(user1_id)
+                ws2 = IsolationTestWebSocket(user2_id)
+
+                # Send messages for both users simultaneously
+                user1_message = {
+                    "type": "user_message",
+                    "content": "User 1 secret message",
+                    "user_id": user1_id,
+                    "sensitive_data": "user1_confidential_info"
+                }
+                user2_message = {
+                    "type": "user_message",
+                    "content": "User 2 secret message",
+                    "user_id": user2_id,
+                    "sensitive_data": "user2_confidential_info"
+                }
+
+                # Route messages concurrently - this should reveal isolation violations
+                try:
+                    if hasattr(router, 'route_message'):
+                        results = await asyncio.gather(
+                            router.route_message(user1_id, ws1, user1_message),
+                            router.route_message(user2_id, ws2, user2_message),
+                            return_exceptions=True
+                        )
+                    else:
+                        # Fallback to handle_message if route_message doesn't exist
+                        results = await asyncio.gather(
+                            router.handle_message(ws1, user1_message),
+                            router.handle_message(ws2, user2_message),
+                            return_exceptions=True
+                        )
+
+                    # Analyze isolation - check for cross-contamination
+                    user1_content = str(ws1.messages_received)
+                    user2_content = str(ws2.messages_received)
+
+                    # Check if User 1 received User 2's sensitive data
+                    if "user2_confidential_info" in user1_content:
+                        isolation_violations.append("User 1 received User 2's confidential data")
+
+                    # Check if User 2 received User 1's sensitive data
+                    if "user1_confidential_info" in user2_content:
+                        isolation_violations.append("User 2 received User 1's confidential data")
+
+                    # Check for message content cross-contamination
+                    if "User 2 secret message" in user1_content:
+                        isolation_violations.append("User 1 received User 2's message")
+
+                    if "User 1 secret message" in user2_content:
+                        isolation_violations.append("User 2 received User 1's message")
+
+                    # Check for shared state violations
+                    if len(ws1.messages_received) > 0 and len(ws2.messages_received) > 0:
+                        # If both users receive the same number of identical messages,
+                        # it suggests shared routing state
+                        if (len(ws1.messages_received) == len(ws2.messages_received) and
+                            ws1.messages_received == ws2.messages_received):
+                            isolation_violations.append("Users received identical messages (shared state)")
+
+                except Exception as e:
+                    isolation_violations.append(f"Multi-user routing exception: {str(e)}")
+
+        except Exception as e:
+            isolation_violations.append(f"Infrastructure setup failed: {str(e)}")
+
+        # This assertion should FAIL initially, demonstrating isolation violations
+        assert len(isolation_violations) == 0, (
+            f"USER ISOLATION VIOLATIONS: {len(isolation_violations)} violations detected. "
+            f"Details: {isolation_violations}. "
+            f"This demonstrates critical security and privacy violations in message routing."
+        )
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    @pytest.mark.websocket_events
+    async def test_websocket_event_delivery_consistency_failures(self, real_services_fixture):
+        """FAILING TEST: All 5 WebSocket events should be delivered consistently.
+
+        This test should FAIL initially due to routing fragmentation.
+        """
+        services = real_services_fixture
+        event_delivery_violations = []
+
+        try:
+            # Test each event type for consistent delivery
+            required_events = ["agent_started", "agent_thinking", "tool_executing",
+                             "tool_completed", "agent_completed"]
+
+            for event_type in required_events:
+                try:
+                    # Simulate event generation
+                    test_event = {
+                        "type": event_type,
+                        "user_id": str(uuid.uuid4()),
+                        "data": {"test": True},
+                        "timestamp": asyncio.get_event_loop().time()
+                    }
+
+                    # Check if event can be properly routed
+                    # This will likely fail due to routing fragmentation
+                    delivery_success = await self._test_event_delivery(test_event)
+
+                    if not delivery_success:
+                        event_delivery_violations.append(f"Event {event_type} delivery failed")
+
+                except Exception as e:
+                    event_delivery_violations.append(f"Event {event_type} test failed: {str(e)}")
+
+        except Exception as e:
+            event_delivery_violations.append(f"Event consistency test setup failed: {str(e)}")
+
+        assert len(event_delivery_violations) == 0, (
+            f"WEBSOCKET EVENT DELIVERY FAILURES: {len(event_delivery_violations)} violations. "
+            f"Details: {event_delivery_violations}. "
+            f"This breaks the Golden Path user experience for $500K+ ARR chat functionality."
+        )
+
+    # Helper methods
+    async def _test_event_delivery(self, event: Dict[str, Any]) -> bool:
+        """Test if an event can be delivered through the current routing system."""
+        try:
+            # Try to import and use different routers - this will reveal fragmentation
+            from netra_backend.app.websocket_core.handlers import MessageRouter
+
+            router = MessageRouter()
+
+            # Create mock WebSocket
+            class EventTestWebSocket:
+                def __init__(self):
+                    self.events_received = []
+
+                async def send_json(self, data):
+                    self.events_received.append(data)
+
+            ws = EventTestWebSocket()
+
+            # Try to deliver the event
+            if hasattr(router, 'send_event'):
+                await router.send_event(ws, event)
+            elif hasattr(router, 'broadcast_event'):
+                await router.broadcast_event(event)
+            else:
+                # Fallback: try generic message handling
+                await router.handle_message(ws, event)
+
+            # Check if event was delivered
+            return len(ws.events_received) > 0
+
+        except Exception:
+            return False
+
+    def _create_test_user(self, user_id: str) -> Dict[str, Any]:
+        """Create a test user context."""
+        return {
+            "id": user_id,
+            "email": f"test-{user_id}@netra.ai",
+            "subscription_tier": "enterprise",
+            "created_at": asyncio.get_event_loop().time()
+        }

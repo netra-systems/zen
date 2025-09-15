@@ -74,7 +74,7 @@ class UserIsolationTestScenario:
     contamination_checks: List[str]
 
 
-class TestConcurrentUserMessageIsolation(SSotAsyncTestCase):
+class ConcurrentUserMessageIsolationTests(SSotAsyncTestCase):
     """Unit tests for concurrent user message isolation patterns"""
 
     def setup_method(self, method):

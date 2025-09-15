@@ -481,7 +481,7 @@ async def real_services_fixture():
         except:
             pass
 
-class TestRealAgentRegistryInitialization(BaseE2ETest):
+class RealAgentRegistryInitializationTests(BaseE2ETest):
     """E2E test suite for agent registry initialization with real services."""
 
     @pytest.fixture(autouse=True)

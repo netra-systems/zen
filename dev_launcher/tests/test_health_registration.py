@@ -12,7 +12,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from dev_launcher.health_registration import HealthRegistrationHelper
 
 
-class TestHealthRegistrationHelper(SSotBaseTestCase):
+class HealthRegistrationHelperTests(SSotBaseTestCase):
     """Test cases for HealthRegistrationHelper."""
     
     def setUp(self):

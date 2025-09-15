@@ -71,7 +71,7 @@ def sample_operation_result(sample_corpus_metadata):
     'Create sample CorpusOperationResult for testing.'
     return CorpusOperationResult(success=True, operation=CorpusOperation.CREATE, corpus_metadata=sample_corpus_metadata, affected_documents=10)
 
-class TestCorpusAdminSubAgentInitialization:
+class CorpusAdminSubAgentInitializationTests:
     """Test CorpusAdminSubAgent initialization."""
 
     def test_initialization_basic(self, mock_llm_manager, mock_tool_dispatcher):
@@ -104,7 +104,7 @@ class TestCorpusAdminSubAgentInitialization:
                     assert corpus_admin_agent.execution_engine is not None
                     assert corpus_admin_agent.error_handler is not None
 
-                    class TestEntryConditions:
+                    class EntryConditionsTests:
                         """Test entry condition checking logic."""
 
                         @pytest.mark.asyncio
@@ -155,7 +155,7 @@ class TestCorpusAdminSubAgentInitialization:
                                                 result = await corpus_admin_agent.check_entry_conditions(state, 'test_run_123')
                                                 assert result is False
 
-                                                class TestPreconditionValidation:
+                                                class PreconditionValidationTests:
                                                     """Test precondition validation logic."""
 
                                                     @pytest.mark.asyncio
@@ -189,7 +189,7 @@ class TestCorpusAdminSubAgentInitialization:
                                                                             with pytest.raises(ValidationError, match='Corpus admin components not initialized'):
                                                                                 await corpus_admin_agent._validate_execution_resources(context)
 
-                                                                                class TestCoreLogicExecution:
+                                                                                class CoreLogicExecutionTests:
                                                                                     """Test core logic execution methods."""
 
                                                                                     @pytest.mark.asyncio
@@ -219,7 +219,7 @@ class TestCorpusAdminSubAgentInitialization:
                                                                                                         assert result['corpus_admin_result'] == 'completed'
                                                                                                         mock_workflow.assert_called_once_with(sample_state, 'test_run_123', False)
 
-                                                                                                        class TestBackwardCompatibilityExecution:
+                                                                                                        class BackwardCompatibilityExecutionTests:
                                                                                                             """Test backward compatibility execute method."""
 
                                                                                                             @pytest.mark.asyncio
@@ -252,7 +252,7 @@ class TestCorpusAdminSubAgentInitialization:
                                                                                                                                         context = call_args[0]
                                                                                                                                         assert context.stream_updates is True
 
-                                                                                                                                        class TestLegacyWorkflowExecution:
+                                                                                                                                        class LegacyWorkflowExecutionTests:
                                                                                                                                             """Test legacy workflow execution methods."""
 
                                                                                                                                             @pytest.mark.asyncio
@@ -297,7 +297,7 @@ class TestCorpusAdminSubAgentInitialization:
                                                                                                                                                                                             mock_execute.assert_called_once_with(sample_operation_request, 'test_run_123', False)
                                                                                                                                                                                             mock_finalize.assert_called_once()
 
-                                                                                                                                                                                            class TestApprovalValidation:
+                                                                                                                                                                                            class ApprovalValidationTests:
                                                                                                                                                                                                 """Test approval validation logic."""
 
                                                                                                                                                                                                 @pytest.mark.asyncio
@@ -317,7 +317,7 @@ class TestCorpusAdminSubAgentInitialization:
                                                                                                                                                                                                         assert corpus_admin_agent.validator is not None
                                                                                                                                                                                                         assert corpus_admin_agent.validator is not None
 
-                                                                                                                                                                                                        class TestOperationTypes:
+                                                                                                                                                                                                        class OperationTypesTests:
                                                                                                                                                                                                             """Test handling of different operation types."""
 
                                                                                                                                                                                                             @pytest.mark.parametrize('operation', [CorpusOperation.CREATE, CorpusOperation.UPDATE, CorpusOperation.DELETE, CorpusOperation.SEARCH, CorpusOperation.ANALYZE, CorpusOperation.EXPORT, CorpusOperation.IMPORT, CorpusOperation.VALIDATE])
@@ -333,7 +333,7 @@ class TestCorpusAdminSubAgentInitialization:
                                                                                                                                                                                                                         await corpus_admin_agent._complete_corpus_operation(operation_request, sample_state, 'test_run_123', False, start_time)
                                                                                                                                                                                                                         mock_execute.assert_called_once_with(operation_request, 'test_run_123', False)
 
-                                                                                                                                                                                                                        class TestErrorHandling:
+                                                                                                                                                                                                                        class ErrorHandlingTests:
                                                                                                                                                                                                                             """Test error handling scenarios."""
 
                                                                                                                                                                                                                             @pytest.mark.asyncio
@@ -363,7 +363,7 @@ class TestCorpusAdminSubAgentInitialization:
                                                                                                                                                                                                                                                             await corpus_admin_agent._handle_execution_exception(test_error, context, sample_state, 'test_run_123', False)
                                                                                                                                                                                                                                                             mock_handler.assert_called_with(test_error, context)
 
-                                                                                                                                                                                                                                                            class TestHealthStatus:
+                                                                                                                                                                                                                                                            class HealthStatusTests:
                                                                                                                                                                                                                                                                 """Test health status reporting."""
 
                                                                                                                                                                                                                                                                 def test_get_health_status_complete(self, corpus_admin_agent):
@@ -385,7 +385,7 @@ class TestCorpusAdminSubAgentInitialization:
                                                                                                                                                                                                                                                                         reliability_health = corpus_admin_agent.reliability_manager.get_health_status()
                                                                                                                                                                                                                                                                         assert isinstance(reliability_health, dict)
 
-                                                                                                                                                                                                                                                                        class TestUtilityMethods:
+                                                                                                                                                                                                                                                                        class UtilityMethodsTests:
                                                                                                                                                                                                                                                                             """Test utility and helper methods."""
 
                                                                                                                                                                                                                                                                             def test_has_corpus_keywords_detection(self, corpus_admin_agent):
@@ -438,7 +438,7 @@ class TestCorpusAdminSubAgentInitialization:
                                                                                                                                                                                                                                                                                                             corpus_name = corpus_admin_agent._get_corpus_name(empty_result)
                                                                                                                                                                                                                                                                                                             assert corpus_name is None
 
-                                                                                                                                                                                                                                                                                                            class TestExecutionContextCreation:
+                                                                                                                                                                                                                                                                                                            class ExecutionContextCreationTests:
                                                                                                                                                                                                                                                                                                                 """Test execution context creation and management."""
 
                                                                                                                                                                                                                                                                                                                 def test_create_execution_context(self, corpus_admin_agent, sample_state):
@@ -461,7 +461,7 @@ class TestCorpusAdminSubAgentInitialization:
                                                                                                                                                                                                                                                                                                                         assert context.thread_id is None
                                                                                                                                                                                                                                                                                                                         assert context.user_id is None
 
-                                                                                                                                                                                                                                                                                                                        class TestCleanupAndFinalization:
+                                                                                                                                                                                                                                                                                                                        class CleanupAndFinalizationTests:
                                                                                                                                                                                                                                                                                                                             """Test cleanup and finalization methods."""
 
                                                                                                                                                                                                                                                                                                                             @pytest.mark.asyncio
@@ -497,7 +497,7 @@ class TestCorpusAdminSubAgentInitialization:
                                                                                                                                                                                                                                                                                                                                                                     """Test final metrics logging without result."""
                                                                                                                                                                                                                                                                                                                                                                     corpus_admin_agent._log_final_metrics(sample_state)
 
-                                                                                                                                                                                                                                                                                                                                                                    class TestCircuitBreakerIntegration:
+                                                                                                                                                                                                                                                                                                                                                                    class CircuitBreakerIntegrationTests:
                                                                                                                                                                                                                                                                                                                                                                         """Test circuit breaker integration."""
 
                                                                                                                                                                                                                                                                                                                                                                         def test_circuit_breaker_configuration(self, corpus_admin_agent):
@@ -519,7 +519,7 @@ class TestCorpusAdminSubAgentInitialization:
                                                                                                                                                                                                                                                                                                                                                                                     mock_execute.assert_called_once()
 
                                                                                                                                                                                                                                                                                                                                                                                     @pytest.mark.unit
-                                                                                                                                                                                                                                                                                                                                                                                    class TestUnitMarker:
+                                                                                                                                                                                                                                                                                                                                                                                    class UnitMarkerTests:
                                                                                                                                                                                                                                                                                                                                                                                         """Test class to verify unit test marker works."""
 
                                                                                                                                                                                                                                                                                                                                                                                         def test_unit_marker(self):

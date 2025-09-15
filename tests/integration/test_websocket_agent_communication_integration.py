@@ -80,7 +80,7 @@ except ImportError as e:
     DeepAgentState = MagicMock
     E2EWebSocketAuthHelper = MagicMock
 
-class TestWebSocketAgentCommunicationIntegration(SSotAsyncTestCase):
+class WebSocketAgentCommunicationIntegrationTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for WebSocket-Agent Communication.
     

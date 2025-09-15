@@ -24,7 +24,7 @@ from analytics_service.analytics_core.services.event_processor import (
 from analytics_service.analytics_core import create_event_processor, FrontendEvent
 
 
-class TestSimpleAnalyticsValidation(SSotBaseTestCase):
+class SimpleAnalyticsValidationTests(SSotBaseTestCase):
     """Simple validation tests for analytics integration"""
     
     def setup_method(self, method=None):

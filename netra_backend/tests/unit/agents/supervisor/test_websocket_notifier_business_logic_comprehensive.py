@@ -35,7 +35,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SsotTestMetrics
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketNotifierBusinessLogic(SSotBaseTestCase):
+class WebSocketNotifierBusinessLogicTests(SSotBaseTestCase):
     """Comprehensive unit tests for WebSocketNotifier business-critical functionality."""
 
     def setup_method(self, method):
@@ -445,7 +445,7 @@ class TestWebSocketNotifierBusinessLogic(SSotBaseTestCase):
         self.metrics.record_custom("silent_failures_prevented", True)
 
 
-class TestWebSocketNotifierBusinessScenarios(SSotBaseTestCase):
+class WebSocketNotifierBusinessScenariosTests(SSotBaseTestCase):
     """Business scenario tests for WebSocket notification edge cases."""
 
     async def test_high_value_customer_event_prioritization(self):

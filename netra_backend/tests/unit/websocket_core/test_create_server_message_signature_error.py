@@ -23,7 +23,7 @@ from netra_backend.app.websocket_core.types import create_server_message as type
 from netra_backend.app.websocket_core import create_server_message as init_create_server_message
 from netra_backend.app.websocket_core.types import MessageType, ServerMessage
 
-class TestCreateServerMessageSignatureError(SSotBaseTestCase):
+class CreateServerMessageSignatureErrorTests(SSotBaseTestCase):
     """Test suite for create_server_message signature errors (Issue #405)."""
 
     def setUp(self):
@@ -123,7 +123,7 @@ class TestCreateServerMessageSignatureError(SSotBaseTestCase):
         with pytest.raises(TypeError):
             types_create_server_message(MessageType.SYSTEM_MESSAGE)
 
-class TestSignatureCompatibilityAnalysis(SSotBaseTestCase):
+class SignatureCompatibilityAnalysisTests(SSotBaseTestCase):
     """Additional tests for analyzing signature compatibility issues."""
 
     def setUp(self):

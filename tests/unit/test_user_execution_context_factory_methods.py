@@ -19,7 +19,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.unit
-class TestUserExecutionContextFactoryMethods:
+class UserExecutionContextFactoryMethodsTests:
     """Test suite validating UserExecutionContext factory methods for Issue #674."""
     
     def test_create_for_user_method_does_not_exist(self):

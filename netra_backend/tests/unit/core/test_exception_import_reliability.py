@@ -21,7 +21,7 @@ from unittest.mock import patch, MagicMock
 import logging
 
 
-class TestServiceErrorImportReliability:
+class ServiceErrorImportReliabilityTests:
     """Test suite to reproduce ServiceError ImportError issues in Docker containers."""
     
     @pytest.fixture(autouse=True)

@@ -23,7 +23,7 @@ sys.path.insert(0, str(project_root))
 
 
 @pytest.mark.unit
-class TestDockerManagerSSOTViolationDetection(unittest.TestCase):
+class DockerManagerSSOTViolationDetectionTests(unittest.TestCase):
     """Test suite to detect Docker Manager SSOT violations."""
 
     def setUp(self):

@@ -24,7 +24,7 @@ from netra_backend.app.services.resource_management.tenant_isolator import Tenan
 from netra_backend.app.services.quality.quality_score_calculators import QualityScoreCalculators
 
 
-class TestBusinessDataValidation:
+class BusinessDataValidationTests:
     """Test suite for business data validation and integrity checks."""
     
     def setup_method(self):

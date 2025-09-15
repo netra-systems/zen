@@ -54,7 +54,7 @@ async def id_generator():
     return UnifiedIdGenerator()
 
 
-class TestUserContextLifecycleManagement(BaseIntegrationTest):
+class UserContextLifecycleManagementTests(BaseIntegrationTest):
     """
     Comprehensive user context lifecycle management tests.
     

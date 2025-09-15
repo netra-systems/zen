@@ -26,7 +26,7 @@ from netra_backend.app.websocket_core.performance_monitor_core import (
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 
 
-class TestWebSocketPerformanceMonitor:
+class WebSocketPerformanceMonitorTests:
     """Unit tests for WebSocket performance monitoring."""
     
     @pytest.fixture

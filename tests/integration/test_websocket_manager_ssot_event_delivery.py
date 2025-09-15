@@ -48,7 +48,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestWebSocketManagerSSOTEventDelivery(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketManagerSSOTEventDeliveryTests(SSotAsyncTestCase, unittest.TestCase):
     """Integration test for WebSocket Manager SSOT event delivery."""
     
     async def asyncSetUp(self):

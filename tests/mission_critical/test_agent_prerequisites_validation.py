@@ -38,7 +38,7 @@ from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecut
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 
-class TestAgentPrerequisitesValidation(SSotAsyncTestCase):
+class AgentPrerequisitesValidationTests(SSotAsyncTestCase):
     """Mission critical tests for agent execution prerequisites validation.
     
     These tests should FAIL initially, demonstrating the current gap in prerequisite validation.

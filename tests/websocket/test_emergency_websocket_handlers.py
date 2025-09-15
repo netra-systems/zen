@@ -21,7 +21,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 @pytest.mark.websocket
-class TestEmergencyWebSocketManager:
+class EmergencyWebSocketManagerTests:
     """Test emergency WebSocket manager stub functionality."""
 
     def _create_test_user_context(self, user_id='emergency_user_123'):
@@ -201,7 +201,7 @@ class TestEmergencyWebSocketManager:
         assert len(manager.get_user_connections()) == 0
 
 @pytest.mark.websocket
-class TestFallbackAgentHandler:
+class FallbackAgentHandlerTests:
     """Test fallback agent handler for E2E testing scenarios."""
 
     def _create_mock_websocket(self):
@@ -301,7 +301,7 @@ class TestFallbackAgentHandler:
         mock_websocket.send_json.assert_called()
 
 @pytest.mark.websocket
-class TestEmergencyWebSocketIntegration:
+class EmergencyWebSocketIntegrationTests:
     """Integration tests for emergency WebSocket patterns."""
 
     @pytest.mark.asyncio

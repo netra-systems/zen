@@ -31,7 +31,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.agents.base.execution_context import AgentExecutionContext
 
 
-class TestUserExecutionEngineDemoWebSocketChain(SSotAsyncTestCase):
+class UserExecutionEngineDemoWebSocketChainTests(SSotAsyncTestCase):
     """Test exact call chain that fails in user_execution_engine.py - Issue #1209."""
 
     def setUp(self):

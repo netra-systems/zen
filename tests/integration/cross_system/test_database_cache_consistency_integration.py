@@ -45,7 +45,7 @@ from netra_backend.app.core.redis_manager import RedisManager
 @pytest.mark.integration
 @pytest.mark.cross_system
 @pytest.mark.database
-class TestDatabaseCacheConsistencyIntegration(SSotAsyncTestCase):
+class DatabaseCacheConsistencyIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for database-cache consistency patterns.
     

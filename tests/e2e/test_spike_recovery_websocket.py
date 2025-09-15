@@ -451,7 +451,7 @@ class RealSpikeLoadGenerator:
 
 
 @pytest.mark.e2e
-class TestWebSocketConnectionAvalanche:
+class WebSocketConnectionAvalancheTests:
     """Test WebSocket Connection Avalanche scenarios using REAL services ONLY."""
     
     @pytest.fixture(autouse=True)  

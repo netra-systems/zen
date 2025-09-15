@@ -143,7 +143,7 @@ def mock_concurrent_agent():
             return self._user_specific_memory.get(run_id, {})
     return MockConcurrentAgent
 
-class TestMultiUserConcurrentExecution(SSotBaseTestCase):
+class MultiUserConcurrentExecutionTests(SSotBaseTestCase):
     """Test multi-user concurrent agent execution with complete isolation."""
 
     @pytest.mark.asyncio
@@ -265,7 +265,7 @@ class TestMultiUserConcurrentExecution(SSotBaseTestCase):
                 event_user_id = event_entry['event']['user_id']
                 assert event_user_id == user_id, f'Event for {user_id} contains data for {event_user_id}'
 
-class TestConcurrentResourceManagement(SSotBaseTestCase):
+class ConcurrentResourceManagementTests(SSotBaseTestCase):
     """Test concurrent resource management and cleanup."""
 
     @pytest.mark.asyncio
@@ -369,7 +369,7 @@ class TestConcurrentResourceManagement(SSotBaseTestCase):
         for user_id in successful_user_ids:
             assert user_id not in error_events_by_user, f'Successful user {user_id} should not have error events'
 
-class TestConcurrentPerformance(SSotBaseTestCase):
+class ConcurrentPerformanceTests(SSotBaseTestCase):
     """Test system performance under concurrent multi-user load."""
 
     @pytest.mark.asyncio

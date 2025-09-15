@@ -97,7 +97,7 @@ class MockWebSocket:
         self.client_state = WebSocketConnectionState.DISCONNECTED
 
 
-class TestWebSocketSystems(SSotBaseTestCase):
+class WebSocketSystemsTests(SSotBaseTestCase):
     """Integration tests for WebSocket systems functionality."""
     
     def setup_method(self, method=None):

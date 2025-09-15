@@ -45,7 +45,7 @@ def create_test_app() -> FastAPI:
     app.include_router(router, prefix='/health', tags=['health'])
     return app
 
-class TestHealthEndpointMethods:
+class HealthEndpointMethodsTests:
     """Test health endpoint HTTP method support that currently fails."""
 
     def setup_method(self):

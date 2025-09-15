@@ -68,7 +68,7 @@ class ReliabilityTestConfig:
 @pytest.mark.consolidation_validation
 @pytest.mark.phase_2_consolidation
 @pytest.mark.websocket_emitter_consolidation
-class TestSingleEmitterReliability(SSotAsyncTestCase):
+class SingleEmitterReliabilityTests(SSotAsyncTestCase):
     """
     Integration tests proving single emitter provides reliable event delivery.
     

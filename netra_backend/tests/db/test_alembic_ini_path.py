@@ -15,7 +15,7 @@ create_alembic_config)
 project_root = Path(__file__).parent.parent.parent.parent  # Go up to netra-core-generation-1
 correct_project_root = project_root  # Same for this case
 
-class TestAlembicIniPath:
+class AlembicIniPathTests:
     """Test suite to expose alembic.ini path configuration issues."""
     
     def test_expected_alembic_ini_path_should_exist(self):

@@ -96,7 +96,7 @@ class WebSocketConnectionLifecycleTracker:
         return {'connection_up_count': len(connection_up_events), 'connection_down_count': len(connection_down_events), 'agent_active_count': len(agent_active_events), 'agent_recovery_count': len(agent_recovery_events), 'has_connection_events': len(self.connection_events) > 0, 'has_agent_events': len(self.agent_state_events) > 0, 'correlation_valid': len(connection_up_events) >= len(agent_active_events) or len(agent_recovery_events) > 0, 'final_connection_state': self.connection_state, 'active_agents': len(self.agent_states)}
 
 @pytest.mark.integration
-class TestWebSocketConnectionLifecycleAgentStatesIntegration(SSotAsyncTestCase):
+class WebSocketConnectionLifecycleAgentStatesIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket connection lifecycle with agent states."""
 
     def setUp(self):

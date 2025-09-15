@@ -23,7 +23,7 @@ from netra_backend.tests.test_route_fixtures import (
     basic_test_client,
 )
 
-class TestAdminRoute:
+class AdminRouteTests:
     """Test admin endpoint security and functionality."""
     
     def test_admin_endpoint_requires_authentication(self, basic_test_client):

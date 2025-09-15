@@ -96,7 +96,7 @@ class StagingBackendDiagnostic:
 
 
 @pytest.mark.asyncio
-class TestStagingBackendOutage:
+class StagingBackendOutageTests:
     """Test suite to confirm and document staging backend service outage"""
 
     @pytest.fixture

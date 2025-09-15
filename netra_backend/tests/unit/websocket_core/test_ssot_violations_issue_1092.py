@@ -99,7 +99,7 @@ except ImportError as e:
     logger.error(f"SSOT VIOLATION: Failed to import unified_init: {e}")
 
 
-class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
+class WebSocketSSOTViolationsIssue1092Tests(SSotBaseTestCase):
     """
     Phase 1 SSOT violations discovery tests for Issue #1092.
 
@@ -680,7 +680,7 @@ class TestWebSocketSSOTViolationsIssue1092(SSotBaseTestCase):
 
 # Additional test classes for specific violation patterns
 
-class TestWebSocketBroadcastMethodViolations(SSotBaseTestCase):
+class WebSocketBroadcastMethodViolationsTests(SSotBaseTestCase):
     """
     Focused tests for broadcast method SSOT violations.
 
@@ -734,7 +734,7 @@ class TestWebSocketBroadcastMethodViolations(SSotBaseTestCase):
             f"Methods: {list(broadcast_signatures.keys())}")
 
 
-class TestWebSocketFactoryPatternViolations(SSotBaseTestCase):
+class WebSocketFactoryPatternViolationsTests(SSotBaseTestCase):
     """
     Focused tests for factory pattern SSOT violations.
 

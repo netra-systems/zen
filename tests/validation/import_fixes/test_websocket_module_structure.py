@@ -20,7 +20,7 @@ import os
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestWebSocketModuleStructure(SSotBaseTestCase):
+class WebSocketModuleStructureTests(SSotBaseTestCase):
     """
     Test WebSocket module structure validation for collection error fixes.
     

@@ -40,7 +40,7 @@ class AuthorizedAgent(BaseAgent):
         await self.websocket_bridge.notify_agent_completed(run_id, self.name, result)
         return result
 
-class TestWebSocketAgentExecutionAuthorizationValidation(BaseIntegrationTest):
+class WebSocketAgentExecutionAuthorizationValidationTests(BaseIntegrationTest):
 
     def setup_method(self):
         super().setup_method()

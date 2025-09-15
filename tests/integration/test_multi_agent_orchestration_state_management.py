@@ -276,7 +276,7 @@ class MultiAgentOrchestrator:
 
 
 @pytest.mark.integration
-class TestMultiAgentOrchestrationStateManagement(BaseIntegrationTest):
+class MultiAgentOrchestrationStateManagementTests(BaseIntegrationTest):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

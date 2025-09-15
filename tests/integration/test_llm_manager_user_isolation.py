@@ -36,7 +36,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestLLMManagerUserIsolation(SSotAsyncTestCase):
+class LLMManagerUserIsolationTests(SSotAsyncTestCase):
     """Test 1: User Context Isolation - Different users get separate LLM instances"""
     
     async def test_user_context_isolation(self):

@@ -68,7 +68,7 @@ class MockWebSocketBridge:
         """Get events for specific run."""
         return [event for event in self.events_sent if event.get('run_id') == run_id]
 
-class TestPipelineExecutorMessageFlow(SSotAsyncTestCase):
+class PipelineExecutorMessageFlowTests(SSotAsyncTestCase):
     """Comprehensive unit tests for PipelineExecutor message flow functionality."""
 
     def setup_method(self, method):

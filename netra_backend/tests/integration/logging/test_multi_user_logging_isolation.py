@@ -30,7 +30,7 @@ from test_framework.conftest_real_services import real_services
 from shared.logging.unified_logging_ssot import get_logger
 
 
-class TestMultiUserLoggingIsolation(SSotAsyncTestCase):
+class MultiUserLoggingIsolationTests(SSotAsyncTestCase):
     """Test multi-user logging isolation and privacy protection."""
     
     def setup_method(self, method=None):

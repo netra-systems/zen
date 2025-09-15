@@ -106,7 +106,7 @@ async def test_contexts():
     return contexts
 
 @pytest.mark.asyncio
-class TestDatabaseConnectionPool:
+class DatabaseConnectionPoolTests:
     """Test suite for database connection pool performance."""
 
     async def test_connection_pool_efficiency(self, mock_database, test_contexts):
@@ -231,7 +231,7 @@ class TestDatabaseConnectionPool:
         assert success_rate >= 0.95, f'Connection operations success rate too low: {success_rate:.2%}'
 
 @pytest.mark.asyncio
-class TestDatabaseTransactionPerformance:
+class DatabaseTransactionPerformanceTests:
     """Test suite for database transaction performance."""
 
     async def test_transaction_throughput(self, mock_database):
@@ -304,7 +304,7 @@ class TestDatabaseTransactionPerformance:
         assert metrics.duration_ms < 3000, f'Concurrent transactions too slow: {metrics.duration_ms}ms'
 
 @pytest.mark.asyncio
-class TestDatabaseSessionIsolation:
+class DatabaseSessionIsolationTests:
     """Test suite for database session isolation."""
 
     async def test_user_session_isolation(self, mock_database):

@@ -78,7 +78,7 @@ class WebSocketMessageMetrics:
     user_id: str
 
 
-class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
+class AdvancedWebSocketEdgeCasesTests(BaseIntegrationTest):
     """Advanced integration tests for WebSocket connection and messaging edge cases."""
 
     @pytest.mark.asyncio

@@ -123,7 +123,7 @@ class CacheAnalyzerTool(BaseTool):
 
 
 @pytest.mark.integration
-class TestToolDispatcherRealServices:
+class ToolDispatcherRealServicesTests:
     """Integration tests for tool dispatcher with real services."""
     
     @pytest.mark.asyncio

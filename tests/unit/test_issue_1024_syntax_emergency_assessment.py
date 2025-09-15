@@ -18,7 +18,7 @@ import unittest
 
 
 @pytest.mark.unit
-class TestIssue1024SyntaxEmergencyAssessment(unittest.TestCase):
+class Issue1024SyntaxEmergencyAssessmentTests(unittest.TestCase):
     """Emergency syntax assessment for Issue #1024 remediation."""
 
     def setUp(self):

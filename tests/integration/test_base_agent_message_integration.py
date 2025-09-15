@@ -42,7 +42,7 @@ from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBr
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from test_framework.ssot.websocket import WebSocketEventType
 
-class TestAgent(BaseAgent):
+class AgentTests(BaseAgent):
     """Test agent implementation for integration testing."""
 
     def __init__(self, *args, **kwargs):
@@ -71,7 +71,7 @@ class TestAgent(BaseAgent):
             self.message_processing_results.append(result)
             return result
 
-class TestBaseAgentMessageIntegration(BaseIntegrationTest):
+class BaseAgentMessageIntegrationTests(BaseIntegrationTest):
     """Integration tests for BaseAgent message processing with real services."""
 
     @pytest.fixture(autouse=True)
@@ -113,7 +113,7 @@ class TestBaseAgentMessageIntegration(BaseIntegrationTest):
             user_id = f'isolated_user_{i}_{uuid.uuid4().hex[:6]}'
             user_context = await create_test_user_context(user_id=user_id, request_id=f'req_{uuid.uuid4().hex[:8]}', thread_id=f'thread_{uuid.uuid4().hex[:8]}', real_services=real_services_fixture)
             user_contexts.append(user_context)
-            agent = TestAgent(llm_manager=self.llm_manager, name=f'TestAgent_{i}', user_context=user_context)
+            agent = AgentTests(llm_manager=self.llm_manager, name=f'TestAgent_{i}', user_context=user_context)
             agents.append(agent)
         execution_tasks = []
         for i, (agent, user_context) in enumerate(zip(agents, user_contexts)):
@@ -144,7 +144,7 @@ class TestBaseAgentMessageIntegration(BaseIntegrationTest):
         retrieved for audit trails and analytics.
         """
         user_context = await create_test_user_context(user_id=self.test_user_id, request_id=f'metadata_test_{uuid.uuid4().hex[:8]}', thread_id=self.test_thread_id, real_services=real_services_fixture)
-        agent = TestAgent(llm_manager=self.llm_manager, name='MetadataTestAgent', user_context=user_context)
+        agent = AgentTests(llm_manager=self.llm_manager, name='MetadataTestAgent', user_context=user_context)
         test_message = 'Analyze system performance and provide optimization recommendations'
         result = await agent.execute(user_message=test_message, context={'enable_metadata_tracking': True, 'analytics_session': f'session_{uuid.uuid4().hex[:8]}'})
         assert 'metadata' in result, 'Execution metadata not collected'
@@ -176,7 +176,7 @@ class TestBaseAgentMessageIntegration(BaseIntegrationTest):
         if not self.llm_manager:
             pytest.skip('LLM manager not available for usage tracking test')
         user_context = await create_test_user_context(user_id=self.test_user_id, request_id=f'llm_tracking_{uuid.uuid4().hex[:8]}', thread_id=self.test_thread_id, real_services=real_services_fixture)
-        agent = TestAgent(llm_manager=self.llm_manager, name='LLMTrackingAgent', user_context=user_context)
+        agent = AgentTests(llm_manager=self.llm_manager, name='LLMTrackingAgent', user_context=user_context)
         test_messages = ['What are the best practices for cloud cost optimization?', 'How can I automate my deployment pipeline?', 'Analyze my infrastructure for security vulnerabilities']
         total_tokens_used = 0
         for i, message in enumerate(test_messages):
@@ -210,7 +210,7 @@ class TestBaseAgentMessageIntegration(BaseIntegrationTest):
         """
         user_context = await create_test_user_context(user_id=self.test_user_id, request_id=f'websocket_test_{uuid.uuid4().hex[:8]}', thread_id=self.test_thread_id, real_services=real_services_fixture)
         async with self.ws_utility.connected_client(user_id=self.test_user_id) as client:
-            agent = TestAgent(llm_manager=self.llm_manager, name='WebSocketTestAgent', user_context=user_context)
+            agent = AgentTests(llm_manager=self.llm_manager, name='WebSocketTestAgent', user_context=user_context)
             ws_bridge = AgentWebSocketBridge(user_context=user_context, websocket_manager=None)
             agent.set_websocket_bridge(ws_bridge)
             start_time = time.time()
@@ -261,7 +261,7 @@ class TestBaseAgentMessageIntegration(BaseIntegrationTest):
             user_id = f'session_user_{i}_{uuid.uuid4().hex[:6]}'
             session_id = f'session_{i}_{uuid.uuid4().hex[:8]}'
             user_context = await create_test_user_context(user_id=user_id, request_id=f'session_req_{i}_{uuid.uuid4().hex[:8]}', thread_id=f'session_thread_{i}_{uuid.uuid4().hex[:8]}', real_services=real_services_fixture, session_id=session_id)
-            agent = TestAgent(llm_manager=self.llm_manager, name=f'SessionAgent_{i}', user_context=user_context)
+            agent = AgentTests(llm_manager=self.llm_manager, name=f'SessionAgent_{i}', user_context=user_context)
             session_data.append({'user_id': user_id, 'session_id': session_id, 'user_context': user_context, 'agent': agent})
         concurrent_tasks = []
         for i, session in enumerate(session_data):
@@ -284,7 +284,7 @@ class TestBaseAgentMessageIntegration(BaseIntegrationTest):
             if hasattr(agent.user_context, 'session_id'):
                 assert agent.user_context.session_id == session['session_id'], f'Agent {i} session context corrupted'
 
-    async def _execute_session_isolated_agent(self, agent: TestAgent, user_context: UserExecutionContext, message: str) -> Dict[str, Any]:
+    async def _execute_session_isolated_agent(self, agent: AgentTests, user_context: UserExecutionContext, message: str) -> Dict[str, Any]:
         """Helper method for session isolation testing."""
         try:
             result = await agent.execute(user_message=message, context={'session_test': True})

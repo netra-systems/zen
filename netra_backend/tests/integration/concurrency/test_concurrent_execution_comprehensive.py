@@ -29,7 +29,7 @@ from netra_backend.app.services.user_execution_context import create_defensive_u
 from test_framework.ssot import AsyncBaseTestCase
 from shared.types import UserID, ThreadID, RunID, RequestID
 
-class TestConcurrentExecutionComprehensive(AsyncBaseTestCase):
+class ConcurrentExecutionComprehensiveTests(AsyncBaseTestCase):
     """
     Comprehensive Integration Tests for Concurrent Execution Scenarios.
     

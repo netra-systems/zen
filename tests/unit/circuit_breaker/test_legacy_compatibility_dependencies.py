@@ -14,7 +14,7 @@ import sys
 import importlib
 
 @pytest.mark.unit
-class TestLegacyCompatibilityDependencies:
+class LegacyCompatibilityDependenciesTests:
     """Test compatibility layer dependencies that cause import failures."""
 
     def test_resilience_framework_imports_are_missing(self):
@@ -96,7 +96,7 @@ class TestLegacyCompatibilityDependencies:
         print('\nUNIFIED IMPLEMENTATIONS WORKING: Core circuit breaker functionality available')
 
 @pytest.mark.unit
-class TestCompatibilityLayerBehavior:
+class CompatibilityLayerBehaviorTests:
     """Test the behavior of the compatibility layer under different conditions."""
 
     def test_import_error_handling_patterns(self):

@@ -39,7 +39,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 @pytest.mark.unit
-class TestClickHouseDriverAvailability(SSotAsyncTestCase):
+class ClickHouseDriverAvailabilityTests(SSotAsyncTestCase):
     """Test suite for ClickHouse driver availability critical infrastructure gaps."""
 
     def setup_method(self, method):

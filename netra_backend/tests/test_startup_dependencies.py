@@ -45,7 +45,7 @@ from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.services.agent_service import get_agent_service
 from shared.isolated_environment import get_env
 
-class TestStartupDependencies:
+class StartupDependenciesTests:
     """Test startup dependency handling that currently fails."""
 
     @pytest.mark.asyncio

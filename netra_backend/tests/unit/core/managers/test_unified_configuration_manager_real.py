@@ -42,7 +42,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.configuration.base import UnifiedConfigManager, get_config, get_config_value, set_config_value, validate_config_value, get_environment, is_production, is_development, is_testing, config_manager
 
-class TestUnifiedConfigurationManagerBasicOperations(SSotBaseTestCase):
+class UnifiedConfigurationManagerBasicOperationsTests(SSotBaseTestCase):
     """Test basic configuration operations using real UnifiedConfigurationManager."""
 
     def setup_method(self, method=None):
@@ -137,7 +137,7 @@ class TestUnifiedConfigurationManagerBasicOperations(SSotBaseTestCase):
         assert retrieved_dict == test_dict
         self.record_metric('list_dict_operations', 3)
 
-class TestConfigurationValidationAndSecurity(SSotBaseTestCase):
+class ConfigurationValidationAndSecurityTests(SSotBaseTestCase):
     """Test configuration validation and security features."""
 
     def setup_method(self, method=None):
@@ -192,7 +192,7 @@ class TestConfigurationValidationAndSecurity(SSotBaseTestCase):
             assert 'user_id' in change
         self.record_metric('change_tracking_tests', len(history))
 
-class TestMultiUserIsolationAndFactory(SSotBaseTestCase):
+class MultiUserIsolationAndFactoryTests(SSotBaseTestCase):
     """Test multi-user isolation via factory pattern."""
 
     def setup_method(self, method=None):
@@ -261,7 +261,7 @@ class TestMultiUserIsolationAndFactory(SSotBaseTestCase):
         assert default_keys_count > 0
         self.record_metric('user_isolation_verified', True)
 
-class TestThreadSafetyAndConcurrency(SSotBaseTestCase):
+class ThreadSafetyAndConcurrencyTests(SSotBaseTestCase):
     """Test thread safety and concurrent access patterns."""
 
     def setup_method(self, method=None):
@@ -331,7 +331,7 @@ class TestThreadSafetyAndConcurrency(SSotBaseTestCase):
             thread.join()
         self.record_metric('concurrent_validation', True)
 
-class TestServiceSpecificConfigurations(SSotBaseTestCase):
+class ServiceSpecificConfigurationsTests(SSotBaseTestCase):
     """Test service-specific configuration methods."""
 
     def setup_method(self, method=None):
@@ -436,7 +436,7 @@ class TestServiceSpecificConfigurations(SSotBaseTestCase):
         assert 'show_legends' in charts_config
         self.record_metric('dashboard_config_consolidated', True)
 
-class TestCachingFunctionality(SSotBaseTestCase):
+class CachingFunctionalityTests(SSotBaseTestCase):
     """Test configuration caching functionality."""
 
     def setup_method(self, method=None):
@@ -492,7 +492,7 @@ class TestCachingFunctionality(SSotBaseTestCase):
         assert self.config_manager.get('cache.clear.test2') == 'value2'
         self.record_metric('cache_clear_operations', 2)
 
-class TestWebSocketIntegrationAndNotifications(SSotAsyncTestCase):
+class WebSocketIntegrationAndNotificationsTests(SSotAsyncTestCase):
     """Test WebSocket integration and change notifications."""
 
     async def setup_method(self, method=None):
@@ -556,7 +556,7 @@ class TestWebSocketIntegrationAndNotifications(SSotAsyncTestCase):
         assert len(self.received_messages) > initial_count
         self.record_metric('websocket_toggle_test', True)
 
-class TestErrorHandlingAndEdgeCases(SSotBaseTestCase):
+class ErrorHandlingAndEdgeCasesTests(SSotBaseTestCase):
     """Test error handling and edge cases."""
 
     def setup_method(self, method=None):
@@ -626,7 +626,7 @@ class TestErrorHandlingAndEdgeCases(SSotBaseTestCase):
         assert result_dict['key_500'] == 'value_500'
         self.record_metric('large_value_size_kb', 10)
 
-class TestStatusMonitoringAndHealth(SSotBaseTestCase):
+class StatusMonitoringAndHealthTests(SSotBaseTestCase):
     """Test status monitoring and health check capabilities."""
 
     def setup_method(self, method=None):
@@ -701,7 +701,7 @@ class TestStatusMonitoringAndHealth(SSotBaseTestCase):
             assert isinstance(scopes[scope.value], int)
         self.record_metric('source_distribution', len(sources))
 
-class TestLegacyCompatibilityFunctions(SSotBaseTestCase):
+class LegacyCompatibilityFunctionsTests(SSotBaseTestCase):
     """Test legacy compatibility functions."""
 
     def test_legacy_dashboard_config_manager_real(self):
@@ -748,7 +748,7 @@ class TestLegacyCompatibilityFunctions(SSotBaseTestCase):
         assert combined_manager.service_name == 'test_service'
         self.record_metric('generic_manager_combinations', 4)
 
-class TestPerformanceCharacteristics(SSotBaseTestCase):
+class PerformanceCharacteristicsTests(SSotBaseTestCase):
     """Test performance characteristics of configuration manager."""
 
     def setup_method(self, method=None):
@@ -817,7 +817,7 @@ class TestPerformanceCharacteristics(SSotBaseTestCase):
         self.record_metric('validation_time_seconds', validation_time)
         self.record_metric('validations_per_second', num_configs / validation_time)
 
-class TestEnvironmentDetectionAndManagement(SSotBaseTestCase):
+class EnvironmentDetectionAndManagementTests(SSotBaseTestCase):
     """Test environment detection and management capabilities."""
 
     def test_environment_detection_real(self):

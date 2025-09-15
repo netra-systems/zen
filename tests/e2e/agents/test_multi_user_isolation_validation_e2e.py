@@ -36,7 +36,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
 @pytest.mark.e2e
-class TestMultiUserIsolationValidationE2E(BaseE2ETest):
+class MultiUserIsolationValidationE2ETests(BaseE2ETest):
     """E2E tests for multi-user isolation validation with authenticated concurrent execution."""
 
     async def create_multiple_authenticated_users(self, count: int = 3) -> List[Dict[str, Any]]:

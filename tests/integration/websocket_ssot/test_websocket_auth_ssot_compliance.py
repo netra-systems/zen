@@ -17,7 +17,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestWebSocketAuthSSOTCompliance(SSotAsyncTestCase):
+class WebSocketAuthSSOTComplianceTests(SSotAsyncTestCase):
     """
     Integration test validating WebSocket authentication SSOT compliance.
     Tests proper delegation to auth service for all WebSocket auth operations.

@@ -46,7 +46,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.database.test_database_manager import DatabaseTestManager
 
 
-class TestClickHouseLoggingIntegration:
+class ClickHouseLoggingIntegrationTests:
     """Integration tests for ClickHouse logging behavior with real connections."""
     
     @contextmanager
@@ -472,7 +472,7 @@ class TestClickHouseLoggingIntegration:
                     )
 
 
-class TestClickHouseRealServiceIntegration:
+class ClickHouseRealServiceIntegrationTests:
     """Test ClickHouse integration with real service dependencies."""
     
     @pytest.mark.asyncio
@@ -608,7 +608,7 @@ class TestClickHouseRealServiceIntegration:
             logger.setLevel(original_level)
 
 
-class TestClickHouseEnvironmentSpecificBehavior:
+class ClickHouseEnvironmentSpecificBehaviorTests:
     """Test environment-specific ClickHouse behavior patterns."""
     
     @pytest.mark.asyncio

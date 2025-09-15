@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 @pytest.mark.e2e
-class TestRealWebsocketAuthIntegrationFixtures:
+class RealWebsocketAuthIntegrationFixturesTests:
     """Test class for real_websocket_auth_integration_fixtures"""
 
     def setup_method(self):

@@ -40,7 +40,7 @@ class MockGCPEnvironment:
         return all((self.service_readiness.get(service, False) for service in required_services))
 
 @pytest.mark.unit
-class TestWebSocketGCPTimeoutCalculation(SSotBaseTestCase):
+class WebSocketGCPTimeoutCalculationTests(SSotBaseTestCase):
     """Unit tests for WebSocket timeout calculations in GCP environments."""
 
     def setUp(self):

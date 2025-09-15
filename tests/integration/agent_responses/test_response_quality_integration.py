@@ -255,7 +255,7 @@ class ResponseQualityAnalyzer:
         return any(indicator in response.lower() for indicator in personal_indicators)
 
 
-class TestResponseQualityIntegration(SSotAsyncTestCase):
+class ResponseQualityIntegrationTests(SSotAsyncTestCase):
     """Integration tests for agent response quality and business value delivery."""
     
     async def async_setup_method(self, method=None):

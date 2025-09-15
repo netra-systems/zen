@@ -94,7 +94,7 @@ pytestmark = [
 # MISSION CRITICAL TEST CLASS
 # ============================================================================
 
-class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
+class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
     """
     MISSION CRITICAL: WebSocket Agent Events Revenue Protection Test Suite
     

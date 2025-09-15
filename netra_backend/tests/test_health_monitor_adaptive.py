@@ -4,7 +4,7 @@ from test_framework.fixtures.health import AdaptiveHealthMonitor
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAdaptiveRules:
+class AdaptiveRulesTests:
     """Placeholder test class for adaptive rules."""
     
     def test_placeholder(self):
@@ -12,7 +12,7 @@ class TestAdaptiveRules:
         assert True
 
 
-class TestHealthCheckFactories:
+class HealthCheckFactoriesTests:
     """Placeholder test class for health check factories."""
     
     def test_placeholder(self):
@@ -20,7 +20,7 @@ class TestHealthCheckFactories:
         assert True
 
 
-class TestServiceStatus:
+class ServiceStatusTests:
     """Placeholder test class for service status."""
     
     def test_placeholder(self):

@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
 @pytest.mark.staging
-class TestAgentRegistryAdapterGCPStaging(SSotAsyncTestCase):
+class AgentRegistryAdapterGCPStagingTests(SSotAsyncTestCase):
     """E2E tests for AgentRegistryAdapter in GCP staging environment."""
 
     def setUp(self):

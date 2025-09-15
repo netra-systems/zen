@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.integration
-class TestCrossServiceApiComprehensive(SSotBaseTestCase):
+class CrossServiceApiComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive tests for cross-service API communication.
     

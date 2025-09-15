@@ -48,7 +48,7 @@ except ImportError:
     WEBSOCKET_BRIDGE_AVAILABLE = False
 
 
-class TestAgentExecutionSSOTIntegration(SSotAsyncTestCase):
+class AgentExecutionSSOTIntegrationTests(SSotAsyncTestCase):
     """Test agent execution with SSOT ExecutionTracker and UserContext."""
     
     def setUp(self):

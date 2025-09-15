@@ -43,7 +43,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestRedisCacheRaces(BaseIntegrationTest):
+class RedisCacheRacesTests(BaseIntegrationTest):
     """Test race conditions in Redis cache operations and management."""
     
     def setup_method(self):

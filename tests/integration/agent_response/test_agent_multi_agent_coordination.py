@@ -114,7 +114,7 @@ class MockCoordinatorAgent(BaseAgent):
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestMultiAgentResponseCoordination(BaseIntegrationTest):
+class MultiAgentResponseCoordinationTests(BaseIntegrationTest):
     """Test multi-agent response coordination scenarios."""
     
     def setup_method(self):

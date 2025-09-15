@@ -61,7 +61,7 @@ from shared.types.core_types import UserID, ConnectionID, ThreadID, ExecutionID
 @pytest.mark.multi_user
 @pytest.mark.isolation
 @pytest.mark.security
-class TestWebSocketMultiUserIsolationE2E(BaseE2ETest):
+class WebSocketMultiUserIsolationE2ETests(BaseE2ETest):
     """
     E2E tests that EXPOSE multi-user isolation failures with uuid.uuid4().
     

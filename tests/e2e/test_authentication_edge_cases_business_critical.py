@@ -118,7 +118,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.e2e
 @pytest.mark.critical 
 @pytest.mark.asyncio
-class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
+class AuthenticationEdgeCasesBusinessCriticalTests(SSotAsyncTestCase):
     """
     Test authentication edge cases and network connectivity failures for business-critical scenarios.
     

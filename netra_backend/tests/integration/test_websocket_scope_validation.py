@@ -51,7 +51,7 @@ except ImportError:
     WEBSOCKETS_AVAILABLE = False
     logger.warning('websockets library not available - some tests will be skipped')
 
-class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
+class WebSocketScopeValidationIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket scope bug validation with real services.
     

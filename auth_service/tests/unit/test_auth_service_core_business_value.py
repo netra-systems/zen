@@ -29,7 +29,7 @@ from auth_service.auth_core.auth_environment import get_auth_env
 from auth_service.auth_core.unified_auth_interface import UnifiedAuthInterface
 
 
-class TestAuthServiceCoreBusinessValue(BaseIntegrationTest):
+class AuthServiceCoreBusinessValueTests(BaseIntegrationTest):
     """Test auth service core business logic delivering user authentication value."""
     
     @pytest.mark.unit

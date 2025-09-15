@@ -71,7 +71,7 @@ from dev_launcher.log_filter import LogFilter, LogLevel, StartupMode
 env = get_env()
 
 
-class TestCriticalDevLauncherIssues(SSotAsyncTestCase):
+class CriticalDevLauncherIssuesTests(SSotAsyncTestCase):
     """Test suite for critical dev launcher issues."""
     
     def setUp(self):
@@ -704,7 +704,7 @@ REDIS_URL=redis://localhost:6379
                 self.fail(f"Async validation should not raise exception: {e}")
 
 
-class TestStartupErrorSequenceRegression(SSotAsyncTestCase):
+class StartupErrorSequenceRegressionTests(SSotAsyncTestCase):
     """Test the sequence of startup errors and their timing."""
     
     def setUp(self):

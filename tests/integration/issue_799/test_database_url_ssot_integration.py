@@ -19,7 +19,7 @@ from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig, Stagi
 from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import get_env
 
-class TestDatabaseURLSSOTIntegration(BaseIntegrationTest):
+class DatabaseURLSSOTIntegrationTests(BaseIntegrationTest):
     """Integration tests for SSOT database URL construction across environments."""
 
     @pytest.mark.integration

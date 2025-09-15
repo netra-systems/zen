@@ -26,7 +26,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 
-class TestAgentExecutionEngineFactoryPatterns(SSotAsyncTestCase, unittest.TestCase):
+class AgentExecutionEngineFactoryPatternsTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive test suite for agent execution engine factory patterns."""
 
     def setUp(self):

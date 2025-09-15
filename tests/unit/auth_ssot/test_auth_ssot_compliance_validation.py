@@ -104,7 +104,7 @@ class AuthSSOTViolationDetector:
         return production_files
 
 
-class TestAuthSSOTComplianceValidation(SSotBaseTestCase):
+class AuthSSOTComplianceValidationTests(SSotBaseTestCase):
     """
     Test suite for validating auth SSOT compliance across the codebase.
     

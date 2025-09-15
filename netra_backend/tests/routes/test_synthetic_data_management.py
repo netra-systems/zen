@@ -23,7 +23,7 @@ from netra_backend.tests.test_route_fixtures import (
     basic_test_client,
 )
 
-class TestSyntheticDataManagement:
+class SyntheticDataManagementTests:
     """Test synthetic data management and lifecycle functionality."""
     
     def test_synthetic_data_export(self, basic_test_client):

@@ -307,7 +307,7 @@ class AgentContextAccumulationTester:
         return persistence_result
 
 @pytest.mark.e2e
-class TestAgentContextAccumulation:
+class AgentContextAccumulationTests:
     """E2E tests for agent context accumulation with REAL services."""
     
     @pytest.fixture(autouse=True)
@@ -474,7 +474,7 @@ class TestAgentContextAccumulation:
 
 @pytest.mark.critical
 @pytest.mark.e2e
-class TestCriticalContextScenarios:
+class CriticalContextScenariosTests:
     """Critical context scenarios with REAL services - CLAUDE.md compliant."""
     
     @pytest.fixture(autouse=True)

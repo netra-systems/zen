@@ -10,7 +10,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestCorpusCreationStorage:
+class CorpusCreationStorageTests:
     """Test suite for CorpusCreationStorage"""
 
     @pytest.fixture

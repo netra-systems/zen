@@ -25,7 +25,7 @@ from tests.e2e.config import UnifiedTestConfig
 
 
 @pytest.mark.e2e
-class TestWebSocketServiceDiscovery:
+class WebSocketServiceDiscoveryTests:
     """Test suite for WebSocket service discovery mechanisms."""
     
     @pytest.fixture

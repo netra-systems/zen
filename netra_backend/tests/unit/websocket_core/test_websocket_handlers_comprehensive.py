@@ -45,7 +45,7 @@ class WebSocketTestMixin:
         mock_websocket.state.value = 1
         return mock_websocket
 
-class TestMessageHandler(SSotBaseTestCase, WebSocketTestMixin):
+class MessageHandlerTests(SSotBaseTestCase, WebSocketTestMixin):
     """Test MessageHandler protocol compliance."""
 
     def setup_method(self):
@@ -69,7 +69,7 @@ class TestMessageHandler(SSotBaseTestCase, WebSocketTestMixin):
         result = await handler.handle_message('test_user_123', mock_websocket, message)
         assert result is True
 
-class TestConnectionHandler(SSotBaseTestCase, WebSocketTestMixin):
+class ConnectionHandlerTests(SSotBaseTestCase, WebSocketTestMixin):
     """Test ConnectionHandler for connection lifecycle management."""
 
     def setup_method(self):
@@ -119,7 +119,7 @@ class TestConnectionHandler(SSotBaseTestCase, WebSocketTestMixin):
         result = await self.handler.handle_message(self.user_id, self.mock_websocket, message)
         assert result is False
 
-class TestTypingHandler(SSotBaseTestCase, WebSocketTestMixin):
+class TypingHandlerTests(SSotBaseTestCase, WebSocketTestMixin):
     """Test TypingHandler for typing indicator management."""
 
     def setup_method(self):
@@ -162,7 +162,7 @@ class TestTypingHandler(SSotBaseTestCase, WebSocketTestMixin):
         result = await self.handler.handle_message(self.user_id, self.mock_websocket, message)
         assert result is False
 
-class TestHeartbeatHandler(SSotBaseTestCase, WebSocketTestMixin):
+class HeartbeatHandlerTests(SSotBaseTestCase, WebSocketTestMixin):
     """Test HeartbeatHandler for connection health monitoring."""
 
     def setup_method(self):
@@ -217,7 +217,7 @@ class TestHeartbeatHandler(SSotBaseTestCase, WebSocketTestMixin):
         assert result is True
         mock_ws.send_json.assert_called_once()
 
-class TestAgentRequestHandler(SSotBaseTestCase, WebSocketTestMixin):
+class AgentRequestHandlerTests(SSotBaseTestCase, WebSocketTestMixin):
     """Test AgentRequestHandler for agent execution requests."""
 
     def setup_method(self):
@@ -273,7 +273,7 @@ class TestAgentRequestHandler(SSotBaseTestCase, WebSocketTestMixin):
         result = await self.handler.handle_message(self.user_id, self.mock_websocket, message)
         assert result is False
 
-class TestUserMessageHandler(SSotBaseTestCase, WebSocketTestMixin):
+class UserMessageHandlerTests(SSotBaseTestCase, WebSocketTestMixin):
     """Test UserMessageHandler for user communication."""
 
     def setup_method(self):
@@ -330,7 +330,7 @@ class TestUserMessageHandler(SSotBaseTestCase, WebSocketTestMixin):
         assert stats['errors'] == 1
         assert stats['processed'] == 1
 
-class TestJsonRpcHandler(SSotBaseTestCase, WebSocketTestMixin):
+class JsonRpcHandlerTests(SSotBaseTestCase, WebSocketTestMixin):
     """Test JsonRpcHandler for JSON-RPC message processing."""
 
     def setup_method(self):
@@ -386,7 +386,7 @@ class TestJsonRpcHandler(SSotBaseTestCase, WebSocketTestMixin):
         stats = self.handler.get_stats()
         assert stats['errors'] == 1
 
-class TestErrorHandler(SSotBaseTestCase, WebSocketTestMixin):
+class ErrorHandlerTests(SSotBaseTestCase, WebSocketTestMixin):
     """Test ErrorHandler for error message processing."""
 
     def setup_method(self):
@@ -429,7 +429,7 @@ class TestErrorHandler(SSotBaseTestCase, WebSocketTestMixin):
         assert stats['error_types']['WEBSOCKET_ERROR'] == 2
         assert stats['error_types']['AUTH_ERROR'] == 1
 
-class TestBatchMessageHandler(SSotBaseTestCase, WebSocketTestMixin):
+class BatchMessageHandlerTests(SSotBaseTestCase, WebSocketTestMixin):
     """Test BatchMessageHandler for batched message processing."""
 
     def setup_method(self):
@@ -503,7 +503,7 @@ class TestBatchMessageHandler(SSotBaseTestCase, WebSocketTestMixin):
         assert stats['batches_created'] == 3
         assert stats['batch_send_successes'] == 3
 
-class TestMessageRouter(SSotBaseTestCase, WebSocketTestMixin):
+class MessageRouterTests(SSotBaseTestCase, WebSocketTestMixin):
     """Test MessageRouter for message routing and handler management."""
 
     def setup_method(self):
@@ -626,7 +626,7 @@ class TestMessageRouter(SSotBaseTestCase, WebSocketTestMixin):
         assert stats['handler_count'] > 0
         assert 'handler_status' in stats
 
-class TestGlobalFunctions(SSotBaseTestCase, WebSocketTestMixin):
+class GlobalFunctionsTests(SSotBaseTestCase, WebSocketTestMixin):
     """Test global WebSocket handler functions."""
 
     def setup_method(self):
@@ -703,7 +703,7 @@ class TestGlobalFunctions(SSotBaseTestCase, WebSocketTestMixin):
         result = await send_system_message(self.mock_websocket, 'Test message')
         assert result is False
 
-class TestWebSocketHandlersIntegration(SSotBaseTestCase, WebSocketTestMixin):
+class WebSocketHandlersIntegrationTests(SSotBaseTestCase, WebSocketTestMixin):
     """Test integration scenarios with multiple handlers."""
 
     def setup_method(self):
@@ -769,7 +769,7 @@ class TestWebSocketHandlersIntegration(SSotBaseTestCase, WebSocketTestMixin):
             pass
         return mock_ws
 
-class TestGoldenPathCriticalScenarios(SSotBaseTestCase, WebSocketTestMixin):
+class GoldenPathCriticalScenariosTests(SSotBaseTestCase, WebSocketTestMixin):
     """
     MISSION CRITICAL: Test Golden Path scenarios that protect $500K+ ARR.
     

@@ -73,7 +73,7 @@ class SupervisorCoordinationContext:
     workflow_progress: Dict[str, Any] = field(default_factory=dict)
 
 
-class TestAgentSupervisorWorkflowCoordination(SSotAsyncTestCase):
+class AgentSupervisorWorkflowCoordinationTests(SSotAsyncTestCase):
     """CRITICAL integration tests for supervisor agent workflow coordination."""
 
     @pytest.fixture

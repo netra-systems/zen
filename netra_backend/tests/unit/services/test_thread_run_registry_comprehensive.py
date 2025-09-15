@@ -82,7 +82,7 @@ async def performance_registry():
     ThreadRunRegistry._instance = None
 
 
-class TestThreadRunRegistrySingletonPattern:
+class ThreadRunRegistrySingletonPatternTests:
     """
     BVJ: Validates SSOT singleton pattern ensuring system-wide consistency.
     Business Impact: Prevents multiple registry instances that would cause routing conflicts.
@@ -164,7 +164,7 @@ class TestThreadRunRegistrySingletonPattern:
         ThreadRunRegistry._instance = None
 
 
-class TestThreadRunRegistryCore:
+class ThreadRunRegistryCoreTests:
     """
     BVJ: Tests core registration and lookup operations that enable WebSocket routing.
     Business Impact: Ensures 100% reliable WebSocket event delivery for chat functionality.
@@ -289,7 +289,7 @@ class TestThreadRunRegistryCore:
         assert not success, "Unregistering nonexistent run should return False"
 
 
-class TestThreadRunRegistryThreadSafety:
+class ThreadRunRegistryThreadSafetyTests:
     """
     BVJ: Validates thread safety for multi-user concurrent operations.
     Business Impact: Ensures registry remains stable under high concurrent load.
@@ -386,7 +386,7 @@ class TestThreadRunRegistryThreadSafety:
         assert isinstance(cleaned_count, int), "Cleanup must complete"
 
 
-class TestThreadRunRegistryTTL:
+class ThreadRunRegistryTTLTests:
     """
     BVJ: Tests TTL and cleanup logic that prevents memory leaks and maintains performance.
     Business Impact: Ensures system remains performant and stable over time.
@@ -497,7 +497,7 @@ class TestThreadRunRegistryTTL:
         assert "run_2" not in remaining_runs, "Expired run should be removed"
 
 
-class TestThreadRunRegistryMetrics:
+class ThreadRunRegistryMetricsTests:
     """
     BVJ: Validates metrics and monitoring functionality for business intelligence.
     Business Impact: Enables performance monitoring and capacity planning decisions.
@@ -576,7 +576,7 @@ class TestThreadRunRegistryMetrics:
         assert status['registry_healthy'] is True, "Active registry must report healthy"
 
 
-class TestThreadRunRegistryPerformance:
+class ThreadRunRegistryPerformanceTests:
     """
     BVJ: Validates performance characteristics for production SLA compliance.
     Business Impact: Ensures sub-10ms lookup times for responsive chat experience.
@@ -692,7 +692,7 @@ class TestThreadRunRegistryPerformance:
         assert metrics['active_mappings'] == 5000, "All mappings must be active"
 
 
-class TestThreadRunRegistryIntegration:
+class ThreadRunRegistryIntegrationTests:
     """
     BVJ: Tests integration scenarios that mirror real WebSocket bridge usage.
     Business Impact: Validates end-to-end WebSocket routing scenarios.
@@ -798,7 +798,7 @@ class TestThreadRunRegistryIntegration:
         assert thread_id == "factory_thread", "Factory operations must affect singleton"
 
 
-class TestThreadRunRegistryErrorHandling:
+class ThreadRunRegistryErrorHandlingTests:
     """
     BVJ: Validates error handling and recovery scenarios for system resilience.
     Business Impact: Ensures WebSocket routing remains stable under error conditions.
@@ -894,7 +894,7 @@ class TestThreadRunRegistryErrorHandling:
         assert thread_id == "normal_thread", "Normal operations must continue after cleanup"
 
 
-class TestThreadRunRegistryEdgeCases:
+class ThreadRunRegistryEdgeCasesTests:
     """
     BVJ: Tests edge cases and boundary conditions for comprehensive coverage.
     Business Impact: Ensures robust behavior in all scenarios.

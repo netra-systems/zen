@@ -120,7 +120,7 @@ async def db_session():
         yield session
 
 @pytest.mark.asyncio
-class TestRealTokenValidation:
+class RealTokenValidationTests:
     """Real token validation tests (replaces mocked tests)"""
     
     @pytest.mark.asyncio
@@ -155,7 +155,7 @@ class TestRealTokenValidation:
         assert result is None or result.get("valid") is False
 
 @pytest.mark.asyncio
-class TestRealUserRetrieval:
+class RealUserRetrievalTests:
     """Real user retrieval tests (replaces mocked database tests)"""
     
     @pytest.mark.asyncio
@@ -225,7 +225,7 @@ class TestRealUserRetrieval:
         assert user is None
 
 @pytest.mark.asyncio 
-class TestRealPermissionValidation:
+class RealPermissionValidationTests:
     """Real permission validation tests (no mocking)"""
     
     @pytest.mark.asyncio
@@ -281,7 +281,7 @@ class TestRealPermissionValidation:
             assert exc_info.value.status_code == status.HTTP_403_FORBIDDEN
 
 @pytest.mark.asyncio
-class TestRealDatabaseIntegration:
+class RealDatabaseIntegrationTests:
     """Real database integration validation"""
     
     @pytest.mark.asyncio
@@ -329,7 +329,7 @@ class TestRealDatabaseIntegration:
         assert user1.is_active == user2.is_active
 
 @pytest.mark.asyncio
-class TestRealServiceCommunication:
+class RealServiceCommunicationTests:
     """Test real service-to-service communication"""
     
     @pytest.mark.asyncio

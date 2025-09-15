@@ -31,7 +31,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 
-class TestWebSocketFactoryChainViolations(BaseIntegrationTest):
+class WebSocketFactoryChainViolationsTests(BaseIntegrationTest):
     """Test SSOT violations in WebSocket factory chain patterns."""
 
     @pytest.mark.integration

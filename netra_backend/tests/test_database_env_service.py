@@ -15,7 +15,7 @@ from netra_backend.app.services.database_env_service import (
     validate_database_environment,
 )
 
-class TestDatabaseEnvironmentValidator:
+class DatabaseEnvironmentValidatorTests:
     
     def test_keyword_constants(self):
         """Test that environment keywords are properly defined"""

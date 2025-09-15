@@ -22,7 +22,7 @@ except ImportError:
         pass
 from netra_backend.app.db.transaction_errors import TransactionError, DeadlockError, ConnectionError, TimeoutError, PermissionError, SchemaError, classify_error, is_retryable_error, _has_deadlock_keywords, _has_connection_keywords, _has_timeout_keywords, _has_permission_keywords, _has_schema_keywords
 
-class TestTransactionErrorClassification:
+class TransactionErrorClassificationTests:
     """Test suite for transaction error classification functions."""
 
     @pytest.mark.unit
@@ -118,7 +118,7 @@ class TestTransactionErrorClassification:
         classified = classify_error(connection_timeout_error)
         assert isinstance(classified, ConnectionError)
 
-class TestRetryableErrorDetection:
+class RetryableErrorDetectionTests:
     """Test suite for retryable error detection functionality."""
 
     @pytest.mark.unit
@@ -147,7 +147,7 @@ class TestRetryableErrorDetection:
         value_error = ValueError('Invalid input')
         assert not is_retryable_error(value_error, enable_deadlock_retry=True, enable_connection_retry=True)
 
-class TestKeywordDetectionFunctions:
+class KeywordDetectionFunctionsTests:
     """Test suite for keyword detection helper functions."""
 
     @pytest.mark.unit
@@ -200,7 +200,7 @@ class TestKeywordDetectionFunctions:
         assert not _has_schema_keywords('connection timeout')
         assert not _has_schema_keywords('permission denied')
 
-class TestDatabaseSpecificErrorIntegration:
+class DatabaseSpecificErrorIntegrationTests:
     """Test suite for database-specific error handling integration."""
 
     @pytest.mark.unit
@@ -232,7 +232,7 @@ class TestDatabaseSpecificErrorIntegration:
         except Exception as e:
             pytest.skip(f'ClickHouse server error classification not yet implemented: {e}')
 
-class TestTransactionErrorHierarchy:
+class TransactionErrorHierarchyTests:
     """Test suite for transaction error class hierarchy."""
 
     @pytest.mark.unit

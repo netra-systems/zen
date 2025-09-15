@@ -56,7 +56,7 @@ from netra_backend.app.core.configuration.compatibility_shim import (
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestUnifiedConfigurationManagerSSotBusinessCritical:
+class UnifiedConfigurationManagerSSotBusinessCriticalTests:
     """Comprehensive unit tests for UnifiedConfigurationManager SSOT protecting business value."""
 
     @pytest.fixture

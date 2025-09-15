@@ -18,7 +18,7 @@ from netra_backend.app.core.service_dependencies.service_health_client import Se
 from netra_backend.app.core.service_dependencies.models import ServiceType, EnvironmentType
 from netra_backend.app.core.environment_context.cloud_environment_detector import CloudEnvironmentDetector, EnvironmentType as DetectorEnvironmentType
 
-class TestServiceHealthClientEnvironmentURLValidation:
+class ServiceHealthClientEnvironmentURLValidationTests:
     """
     Test ServiceHealthClient uses correct URLs for each environment.
     
@@ -100,7 +100,7 @@ class TestServiceHealthClientEnvironmentURLValidation:
         auth_url = client.service_urls[ServiceType.AUTH_SERVICE]
         assert auth_url == 'https://auth.netrasystems.ai', f'Auth service URL incorrect for production: {auth_url}. Expected: https://auth.netrasystems.ai'
 
-class TestCloudRunEnvironmentDetection:
+class CloudRunEnvironmentDetectionTests:
     """
     Test environment detection in Cloud Run scenarios.
     
@@ -172,7 +172,7 @@ class TestCloudRunEnvironmentDetection:
                     auth_url = service_client.service_urls[ServiceType.AUTH_SERVICE]
                     assert 'localhost' not in auth_url, f'localhost URL found for {expected_environment.value}: {auth_url}'
 
-class TestGoldenPathEnvironmentIntegration:
+class GoldenPathEnvironmentIntegrationTests:
     """
     Test Golden Path integration with environment-specific configurations.
     

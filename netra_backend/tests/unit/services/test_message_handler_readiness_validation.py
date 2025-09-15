@@ -32,7 +32,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestMessageHandlerReadinessValidation:
+class MessageHandlerReadinessValidationTests:
     """Unit tests for message handler readiness validation."""
     
     def setup_method(self):
@@ -266,7 +266,7 @@ class TestMessageHandlerReadinessValidation:
         assert False, "SUPERVISOR READINESS ISSUE: LLM provider not ready during agent handler startup"
 
 
-class TestMessageHandlerValidationLogic:
+class MessageHandlerValidationLogicTests:
     """Test message handler validation logic edge cases."""
     
     def setup_method(self):
@@ -357,7 +357,7 @@ class TestMessageHandlerValidationLogic:
         assert False, "CONCURRENT VALIDATION ISSUE: Race conditions expected in validation logic"
 
 
-class TestMessageHandlerBackgroundTaskTiming:
+class MessageHandlerBackgroundTaskTimingTests:
     """Test background task timing and readiness issues."""
     
     @pytest.mark.asyncio

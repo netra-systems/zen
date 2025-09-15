@@ -23,7 +23,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.environment_constants import EnvironmentDetector, Environment, EnvironmentVariables
 
 @pytest.mark.unit
-class TestEnvironmentDetectorEnhancement(SSotBaseTestCase):
+class EnvironmentDetectorEnhancementTests(SSotBaseTestCase):
     """
     Test enhanced environment detection logic for GCP optimization.
     

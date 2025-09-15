@@ -37,7 +37,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
-class TestIssue1069GoldenPathProtection(SSotAsyncTestCase):
+class Issue1069GoldenPathProtectionTests(SSotAsyncTestCase):
     """Test suite for Golden Path protection during Issue #1069 infrastructure fixes."""
 
     def setup_method(self, method):

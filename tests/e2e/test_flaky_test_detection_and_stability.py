@@ -51,7 +51,7 @@ class FlakinessPattern(Enum):
     RANDOM_FAILURE = 'random_failure'
 
 @dataclass
-class TestExecution:
+class ExecutionTests:
     """Single test execution record."""
     test_name: str
     execution_id: str
@@ -108,11 +108,11 @@ class FlakinessAnalysis:
             base_score *= 0.85
         return min(100.0, max(0.0, base_score))
 
-class TestFlakyDetector:
+class FlakyDetectorTests:
     """Advanced flaky test detection and analysis system."""
 
     def __init__(self):
-        self.test_executions: Dict[str, List[TestExecution]] = defaultdict(list)
+        self.test_executions: Dict[str, List[ExecutionTests]] = defaultdict(list)
         self.flakiness_analyses: Dict[str, FlakinessAnalysis] = {}
         self.environmental_data: List[Dict[str, Any]] = []
         self.patterns_detected: Set[FlakinessPattern] = set()
@@ -147,7 +147,7 @@ class TestFlakyDetector:
                 error_message = str(e)
                 logger.debug(f'Execution {i + 1}/{execution_count} of {test_name}: FAILED - {error_type}: {error_message}')
             end_time = time.time()
-            execution = TestExecution(test_name=test_name, execution_id=execution_id, start_time=start_time, end_time=end_time, success=success, error_type=error_type, error_message=error_message, environment_data=env_data)
+            execution = ExecutionTests(test_name=test_name, execution_id=execution_id, start_time=start_time, end_time=end_time, success=success, error_type=error_type, error_message=error_message, environment_data=env_data)
             executions.append(execution)
             self.test_executions[test_name].append(execution)
             await asyncio.sleep(0.1)
@@ -156,7 +156,7 @@ class TestFlakyDetector:
         logger.info(f'Flakiness analysis complete for {test_name}: {analysis.success_rate:.1%} success rate, {analysis.flakiness_level.value} level')
         return analysis
 
-    def _analyze_test_flakiness(self, test_name: str, executions: List[TestExecution]) -> FlakinessAnalysis:
+    def _analyze_test_flakiness(self, test_name: str, executions: List[ExecutionTests]) -> FlakinessAnalysis:
         """Perform comprehensive flakiness analysis."""
         if not executions:
             return FlakinessAnalysis(test_name=test_name, total_executions=0, successful_executions=0, failed_executions=0, success_rate=0.0, flakiness_level=FlakinessLevel.CRITICAL_FLAKY, identified_patterns=[])
@@ -189,7 +189,7 @@ class TestFlakyDetector:
         analysis.stabilization_suggestions = self._generate_stabilization_suggestions(analysis)
         return analysis
 
-    def _detect_flakiness_patterns(self, executions: List[TestExecution]) -> List[FlakinessPattern]:
+    def _detect_flakiness_patterns(self, executions: List[ExecutionTests]) -> List[FlakinessPattern]:
         """Detect common flakiness patterns in test executions."""
         patterns = []
         if not executions:
@@ -334,7 +334,7 @@ def flaky_detector():
 
 @pytest.mark.e2e
 @pytest.mark.env_test
-class TestFlakyTestDetectionAndStability:
+class FlakyTestDetectionAndStabilityTests:
     """Comprehensive flaky test detection and stability validation."""
 
     async def stable_test_example(self):

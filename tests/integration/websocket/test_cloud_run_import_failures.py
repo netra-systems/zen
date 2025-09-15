@@ -25,7 +25,7 @@ from test_framework.ssot.websocket_auth_test_helpers import WebSocketAuthenticat
 from test_framework.ssot.integration_test_base import IntegrationTestBase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
-class TestCloudRunImportFailures(IntegrationTestBase):
+class CloudRunImportFailuresTests(IntegrationTestBase):
     """
     Integration tests with real WebSocket connections under resource pressure.
     
@@ -254,7 +254,7 @@ class TestCloudRunImportFailures(IntegrationTestBase):
         except Exception as e:
             raise Exception(f'Error in {error_context}: {e}')
 
-class TestExceptionHandlerStress(IntegrationTestBase):
+class ExceptionHandlerStressTests(IntegrationTestBase):
     """Test exception handlers under stress conditions."""
 
     @pytest.mark.integration

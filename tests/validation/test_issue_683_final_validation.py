@@ -19,7 +19,7 @@ from unittest.mock import patch, MagicMock
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class TestIssue683FinalValidation:
+class Issue683FinalValidationTests:
     """
     Final validation tests for Issue #683 - Secret Injection Bridge.
 

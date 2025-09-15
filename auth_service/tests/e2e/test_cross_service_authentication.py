@@ -40,7 +40,7 @@ from test_framework.websocket_helpers import WebSocketTestClient
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
-class TestCrossServiceAuthentication(BaseE2ETest):
+class CrossServiceAuthenticationTests(BaseE2ETest):
     """Test cross-service authentication with real services."""
 
     def setup_method(self):

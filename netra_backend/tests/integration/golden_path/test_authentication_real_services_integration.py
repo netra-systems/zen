@@ -33,7 +33,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 logger = logging.getLogger(__name__)
 
 
-class TestAuthenticationRealServicesIntegration(BaseIntegrationTest):
+class AuthenticationRealServicesIntegrationTests(BaseIntegrationTest):
     """Test authentication with real PostgreSQL and Redis services."""
     
     def setup_method(self):

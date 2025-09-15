@@ -25,7 +25,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import AgentRegis
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestAgentRegistryAdapterInterfaceCompliance(SSotAsyncTestCase, unittest.TestCase):
+class AgentRegistryAdapterInterfaceComplianceTests(SSotAsyncTestCase, unittest.TestCase):
     """Test suite for AgentRegistryAdapter interface compliance validation."""
 
     def setUp(self):

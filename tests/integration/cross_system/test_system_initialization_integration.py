@@ -70,7 +70,7 @@ class InitializationStep:
 @pytest.mark.integration
 @pytest.mark.cross_system
 @pytest.mark.initialization
-class TestSystemInitializationIntegration(SSotAsyncTestCase):
+class SystemInitializationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for system initialization coordination.
     

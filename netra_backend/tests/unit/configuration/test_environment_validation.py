@@ -31,7 +31,7 @@ from netra_backend.app.core.environment_constants import EnvironmentDetector, En
 from netra_backend.app.core.configuration.environment import ConfigEnvironment
 
 
-class TestEnvironmentDetection(SSotBaseTestCase):
+class EnvironmentDetectionTests(SSotBaseTestCase):
     """Test environment detection edge cases and failure scenarios."""
 
     def setup_method(self, method):
@@ -172,7 +172,7 @@ class TestEnvironmentDetection(SSotBaseTestCase):
             assert result == "staging"
 
 
-class TestIsolatedEnvironmentEdgeCases(SSotBaseTestCase):
+class IsolatedEnvironmentEdgeCasesTests(SSotBaseTestCase):
     """Test isolated environment behavior under edge cases."""
 
     def setup_method(self, method):
@@ -327,7 +327,7 @@ class TestIsolatedEnvironmentEdgeCases(SSotBaseTestCase):
                 os.environ[test_key] = original_value
 
 
-class TestConfigEnvironment(SSotBaseTestCase):
+class ConfigEnvironmentTests(SSotBaseTestCase):
     """Test ConfigEnvironment functionality and edge cases."""
 
     def setup_method(self, method):
@@ -395,7 +395,7 @@ class TestConfigEnvironment(SSotBaseTestCase):
                 # This ensures no cached state interferes with environment changes
 
 
-class TestEnvironmentIntegration(SSotBaseTestCase):
+class EnvironmentIntegrationTests(SSotBaseTestCase):
     """Integration tests for environment management with real scenarios."""
 
     def setup_method(self, method):

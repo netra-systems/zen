@@ -23,7 +23,7 @@ from tests.e2e.staging_test_config import get_staging_config
 pytestmark = [pytest.mark.staging, pytest.mark.real]
 
 @pytest.mark.e2e
-class TestMediumLowStorage:
+class MediumLowStorageTests:
     """Tests 71-75: Core Storage Operations - REAL TESTS"""
     
     @pytest.mark.asyncio
@@ -385,7 +385,7 @@ class TestMediumLowStorage:
         assert expires > datetime.utcnow()
 
 @pytest.mark.e2e
-class TestMediumLowDataOps:
+class MediumLowDataOpsTests:
     """Tests 76-80: Data Operations - REAL TESTS"""
     
     @pytest.mark.asyncio
@@ -509,7 +509,7 @@ class TestMediumLowDataOps:
         assert retention_policy["compliance"]["gdpr"] is True
 
 @pytest.mark.e2e
-class TestMediumLowCompliance:
+class MediumLowComplianceTests:
     """Tests 81-85: Data Compliance - REAL TESTS"""
     
     @pytest.mark.asyncio

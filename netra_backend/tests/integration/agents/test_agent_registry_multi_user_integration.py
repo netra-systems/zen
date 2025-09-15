@@ -74,7 +74,7 @@ class RegistryTestMetrics:
     registry_operations: List[str] = field(default_factory=list)
 
 
-class TestAgentRegistryMultiUserIntegration(SSotAsyncTestCase):
+class AgentRegistryMultiUserIntegrationTests(SSotAsyncTestCase):
     """
     Comprehensive integration tests for Agent Registry multi-user isolation.
 

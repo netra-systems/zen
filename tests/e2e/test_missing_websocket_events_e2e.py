@@ -282,7 +282,7 @@ class WebSocketEventValidator:
 @pytest.mark.real_services
 @pytest.mark.mission_critical
 @pytest.mark.golden_path
-class TestMissingWebSocketEventsE2E(BaseE2ETest):
+class MissingWebSocketEventsE2ETests(BaseE2ETest):
     """
     E2E tests for complete WebSocket event validation and business value delivery.
     

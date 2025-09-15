@@ -61,7 +61,7 @@ class MockWebSocketBridge:
         return sorted(self.events_sent, key=lambda x: x["timestamp"])
 
 
-class TestWebSocketEventCoordination:
+class WebSocketEventCoordinationTests:
     """Unit tests for WebSocket event coordination business logic."""
     
     def setup_method(self):

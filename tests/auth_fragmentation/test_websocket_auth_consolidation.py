@@ -28,7 +28,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.core_types import UserID, ConnectionID
 logger = logging.getLogger(__name__)
 
-class TestWebSocketAuthenticationConsolidation(SSotAsyncTestCase):
+class WebSocketAuthenticationConsolidationTests(SSotAsyncTestCase):
     """
     Test WebSocket authentication path consolidation.
 
@@ -177,7 +177,7 @@ class TestWebSocketAuthenticationConsolidation(SSotAsyncTestCase):
         assert self.websocket_auth.user_id is None
         logger.info('✅ WebSocket authentication session management verified')
 
-class TestWebSocketAuthenticationFragmentationDetection(SSotAsyncTestCase):
+class WebSocketAuthenticationFragmentationDetectionTests(SSotAsyncTestCase):
     """
     Test suite to detect WebSocket authentication fragmentation.
 

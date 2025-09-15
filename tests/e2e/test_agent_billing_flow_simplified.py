@@ -246,7 +246,7 @@ class RealAgentBillingTestCore:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAgentBillingFlowCompliant:
+class AgentBillingFlowCompliantTests:
     """Agent billing flow tests compliant with CLAUDE.md - REAL services only."""
     
     @pytest_asyncio.fixture
@@ -483,7 +483,7 @@ class TestAgentBillingFlowCompliant:
 
 
 @pytest.mark.e2e
-class TestRealBillingIntegration:
+class RealBillingIntegrationTests:
     """Test real billing integration with complete agent execution per CLAUDE.md."""
     
     @pytest_asyncio.fixture

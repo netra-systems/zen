@@ -42,7 +42,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 
 
-class TestRequestScopedAgentExecutor(SSotBaseTestCase):
+class RequestScopedAgentExecutorTests(SSotBaseTestCase):
     """Test RequestScopedAgentExecutor isolation and lifecycle."""
     
     def setup_method(self, method):
@@ -297,7 +297,7 @@ class TestRequestScopedAgentExecutor(SSotBaseTestCase):
         self.record_metric("resource_cleanup_validated", True)
 
 
-class TestRequestScopedSessionFactory(SSotBaseTestCase):
+class RequestScopedSessionFactoryTests(SSotBaseTestCase):
     """Test RequestScopedSessionFactory database isolation."""
     
     def setup_method(self, method):
@@ -436,7 +436,7 @@ class TestRequestScopedSessionFactory(SSotBaseTestCase):
         self.increment_db_query_count(5)  # Five session creations
 
 
-class TestUserExecutionContextIsolation(SSotBaseTestCase):
+class UserExecutionContextIsolationTests(SSotBaseTestCase):
     """Test UserExecutionContext isolation patterns."""
     
     @pytest.mark.unit
@@ -505,7 +505,7 @@ class TestUserExecutionContextIsolation(SSotBaseTestCase):
         self.record_metric("context_lifecycle_validated", True)
 
 
-class TestResourceMetricsAndPerformance(SSotBaseTestCase):
+class ResourceMetricsAndPerformanceTests(SSotBaseTestCase):
     """Test resource metrics and performance isolation."""
     
     @pytest.mark.unit

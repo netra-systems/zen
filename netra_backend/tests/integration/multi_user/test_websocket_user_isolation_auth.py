@@ -66,7 +66,7 @@ from netra_backend.tests.integration.test_fixtures.database_fixture import Datab
 from netra_backend.tests.integration.test_fixtures.redis_fixture import RedisTestFixture
 
 @pytest.mark.integration
-class TestWebSocketMultiUserAuthenticationIsolation(SSotBaseTestCase):
+class WebSocketMultiUserAuthenticationIsolationTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket multi-user authentication isolation.
     
@@ -276,7 +276,7 @@ class TestWebSocketMultiUserAuthenticationIsolation(SSotBaseTestCase):
             self.assertEqual(remaining_session['user_id'], user_id)
 
 @pytest.mark.integration
-class TestWebSocketMultiUserMessageIsolation(SSotBaseTestCase):
+class WebSocketMultiUserMessageIsolationTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket multi-user message isolation.
     

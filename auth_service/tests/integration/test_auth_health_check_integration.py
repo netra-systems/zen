@@ -29,7 +29,7 @@ from auth_service.health_config import get_auth_health, check_auth_postgres_heal
 from auth_service.auth_core.database import get_db_session
 
 
-class TestAuthHealthCheckIntegration(BaseIntegrationTest):
+class AuthHealthCheckIntegrationTests(BaseIntegrationTest):
     """Integration tests for auth service health checks with real services."""
     
     @pytest.fixture(autouse=True)

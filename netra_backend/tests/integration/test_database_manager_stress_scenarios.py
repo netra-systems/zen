@@ -48,7 +48,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.isolated_environment_fixtures import isolated_env
 logger = logging.getLogger(__name__)
 
-class TestDatabaseManagerStressScenarios(BaseIntegrationTest):
+class DatabaseManagerStressScenariosTests(BaseIntegrationTest):
     """Advanced stress testing for DatabaseManager resilience patterns."""
 
     def setup_method(self):

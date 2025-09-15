@@ -43,7 +43,7 @@ from shared.id_generation import UnifiedIdGenerator
 
 
 @pytest.mark.integration
-class TestWebSocketUserContextIntegration(SSotAsyncTestCase):
+class WebSocketUserContextIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket authentication user context management.
     
@@ -666,4 +666,4 @@ class TestWebSocketUserContextIntegration(SSotAsyncTestCase):
 
 
 # Export test class for pytest discovery
-__all__ = ["TestWebSocketUserContextIntegration"]
+__all__ = ["WebSocketUserContextIntegrationTests"]

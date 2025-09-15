@@ -72,7 +72,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketBridgeRegistryInterface(SSotAsyncTestCase):
+class WebSocketBridgeRegistryInterfaceTests(SSotAsyncTestCase):
     """
     Test suite to protect WebSocket bridge interface stability.
 

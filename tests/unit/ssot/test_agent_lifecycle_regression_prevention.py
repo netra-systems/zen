@@ -22,7 +22,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.unit
-class TestAgentLifecycleRegressionPrevention(SSotAsyncTestCase):
+class AgentLifecycleRegressionPreventionTests(SSotAsyncTestCase):
     """Test suite preventing AgentLifecycleMixin SSOT regression"""
 
     async def asyncSetUp(self):
@@ -59,10 +59,10 @@ class TestAgentLifecycleRegressionPrevention(SSotAsyncTestCase):
         """Create test agent implementing AgentLifecycleMixin"""
         from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
 
-        class TestAgent(AgentLifecycleMixin):
+        class AgentTests(AgentLifecycleMixin):
 
             def __init__(self):
-                self.name = 'TestAgent'
+                self.name = 'AgentTests'
                 self.user_id = 'test_user_123'
                 self.start_time = None
                 self.end_time = None
@@ -78,7 +78,7 @@ class TestAgentLifecycleRegressionPrevention(SSotAsyncTestCase):
             async def execute(self, state, run_id: str, stream_updates: bool) -> None:
                 """Mock execute method"""
                 pass
-        return TestAgent()
+        return AgentTests()
 
     async def test_pre_run_with_user_execution_context(self):
         """

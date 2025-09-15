@@ -12,7 +12,7 @@ from tests.e2e.integration.unified_e2e_harness import create_e2e_harness
 from tests.e2e.integration.user_journey_executor import TestUser
 
 @pytest.mark.e2e
-class TestMultiServiceIntegrationCore:
+class MultiServiceIntegrationCoreTests:
     """Test class for core multi-service integration functionality."""
 
     def setup_method(self):

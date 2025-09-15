@@ -235,7 +235,7 @@ class FrontendBackendAPITester:
 
 # Test Classes
 @pytest.mark.e2e
-class TestFrontendBackendAPICommunication:
+class FrontendBackendAPICommunicationTests:
     """Main test class for Frontend-Backend API communication"""
     
     @pytest_asyncio.fixture
@@ -694,7 +694,7 @@ class TestFrontendBackendAPICommunication:
 
 # Integration test combining all aspects
 @pytest.mark.e2e
-class TestComprehensiveFrontendBackendIntegration:
+class ComprehensiveFrontendBackendIntegrationTests:
     """Comprehensive integration test combining all API communication aspects"""
     
     @pytest_asyncio.fixture

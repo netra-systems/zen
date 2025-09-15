@@ -233,7 +233,7 @@ async def real_database():
     await db_manager.close()
     env_manager.teardown_test_environment()
 
-class TestRealWebSocketMemoryManagement:
+class RealWebSocketMemoryManagementTests:
     """Test real WebSocket memory management and leak detection."""
 
     @pytest.mark.asyncio
@@ -497,7 +497,7 @@ class TestRealWebSocketMemoryManagement:
         finally:
             await client.disconnect()
 
-class TestRealWebSocketResourceManagement:
+class RealWebSocketResourceManagementTests:
     """Test comprehensive resource management with real services."""
 
     @pytest.mark.asyncio

@@ -47,7 +47,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import (
 )
 
 
-class TestRedisRaceConditionWebSocketE2E:
+class RedisRaceConditionWebSocketE2ETests:
     """E2E tests for Redis race condition fix in WebSocket connections."""
     
     @pytest.fixture

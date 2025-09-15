@@ -148,7 +148,7 @@ class MockWebSocketBridge:
 
 
 @pytest.mark.integration
-class TestSSotGoldenPathPreservation(SSotAsyncTestCase):
+class SSotGoldenPathPreservationTests(SSotAsyncTestCase):
     """SSOT Golden Path: Validate golden path integrity with UserExecutionContext consolidation"""
     
     async def test_ssot_golden_path_user_flow_blocked(self):

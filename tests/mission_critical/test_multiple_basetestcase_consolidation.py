@@ -52,7 +52,7 @@ class BaseTestCaseViolation:
     inheritance_chain: List[str]
 
 
-class TestMultipleBaseTestCaseConsolidation(SSotBaseTestCase):
+class MultipleBaseTestCaseConsolidationTests(SSotBaseTestCase):
     """
     Test suite to reproduce and validate multiple BaseTestCase inheritance violations.
     

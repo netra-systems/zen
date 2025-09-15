@@ -29,7 +29,7 @@ except ImportError as e:
     IMPORT_ERROR = str(e)
     IMPORT_SUCCESS = False
 
-class TestE2EAuthMethodResolutionIssue622(SSotBaseTestCase):
+class E2EAuthMethodResolutionIssue622Tests(SSotBaseTestCase):
     """Integration tests for Issue #622 method resolution without Docker."""
 
     def setUp(self):
@@ -170,7 +170,7 @@ class TestE2EAuthMethodResolutionIssue622(SSotBaseTestCase):
         assert len(passing_tests) >= 2, f'Insufficient backwards compatibility: {len(passing_tests)}/3 tests passing'
         print(f'✅ Backwards compatibility validated: {len(passing_tests)}/{len(compatibility_tests)} tests passing')
 
-class TestIssue622ValidationChecklist(SSotBaseTestCase):
+class Issue622ValidationChecklistTests(SSotBaseTestCase):
     """Validation checklist specifically for Issue #622 resolution."""
 
     @pytest.mark.integration

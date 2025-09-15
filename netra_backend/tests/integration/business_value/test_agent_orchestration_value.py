@@ -26,7 +26,7 @@ from netra_backend.tests.integration.business_value.enhanced_base_integration_te
 from test_framework.ssot.websocket import WebSocketEventType
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestAgentOrchestrationValue(EnhancedBaseIntegrationTest):
+class AgentOrchestrationValueTests(EnhancedBaseIntegrationTest):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

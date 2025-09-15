@@ -34,7 +34,7 @@ except ImportError:
 @pytest.mark.staging
 @pytest.mark.golden_path
 @pytest.mark.skipif(not WEBSOCKETS_AVAILABLE, reason='websockets library not available')
-class TestWebSocketSSOTGoldenPathProtection(SSotAsyncTestCase):
+class WebSocketSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
     """E2E tests for WebSocket SSOT Golden Path protection (Issue #507)"""
 
     def setup_method(self, method):

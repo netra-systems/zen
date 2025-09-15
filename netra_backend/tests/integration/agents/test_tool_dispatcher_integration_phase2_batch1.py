@@ -344,7 +344,7 @@ class EnterpriseWebSocketManager:
         return [e for e in user_events if workflow_type in str(e.get("payload", {}))]
 
 
-class TestCompleteToolDispatcherSystemIntegration(SSotBaseTestCase):
+class CompleteToolDispatcherSystemIntegrationTests(SSotBaseTestCase):
     """Test complete tool dispatcher system integration end-to-end."""
     
     @pytest.mark.integration

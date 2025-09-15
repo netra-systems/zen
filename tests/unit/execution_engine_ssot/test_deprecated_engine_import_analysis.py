@@ -234,7 +234,7 @@ RISK ASSESSMENT:
 
 
 @pytest.mark.unit
-class TestDeprecatedEngineImportAnalysis(SSotBaseTestCase):
+class DeprecatedEngineImportAnalysisTests(SSotBaseTestCase):
     """Test suite for deprecated execution engine import analysis"""
     
     def setUp(self):

@@ -59,7 +59,7 @@ class Role(Enum):
 @pytest.mark.security
 @pytest.mark.critical
 @pytest.mark.asyncio
-class TestRealPermissionEnforcement:
+class RealPermissionEnforcementTests:
     """
     Real permission enforcement tests using Docker services.
     

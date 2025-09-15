@@ -31,7 +31,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.e2e
-class TestStagingAuthenticationServiceHealth(SSotAsyncTestCase):
+class StagingAuthenticationServiceHealthTests(SSotAsyncTestCase):
     """
     Comprehensive staging environment health and authentication validation.
     

@@ -27,7 +27,7 @@ from test_framework.resource_monitor import DockerResourceMonitor
 logger = logging.getLogger(__name__)
 
 
-class TestMemoryExhaustionAgentExecution(BaseIntegrationTest):
+class MemoryExhaustionAgentExecutionTests(BaseIntegrationTest):
     """Test agent execution behavior under memory pressure conditions."""
     
     def setup_method(self):

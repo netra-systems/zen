@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestServiceEnvironmentComplianceIntegration(SSotAsyncTestCase):
+class ServiceEnvironmentComplianceIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for validating SSOT environment compliance across services.
 

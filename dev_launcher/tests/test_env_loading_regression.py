@@ -19,7 +19,7 @@ def reset_global_manager():
     _global_env._protected_vars.clear()
     _global_env._variable_sources.clear()
 
-class TestEnvironmentLoadingRegression:
+class EnvironmentLoadingRegressionTests:
     """Test that environment loading prevents conflicts and race conditions."""
 
     def setup_method(self):

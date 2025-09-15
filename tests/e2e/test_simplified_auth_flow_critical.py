@@ -286,7 +286,7 @@ async def auth_tester():
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestSimplifiedAuthFlowCritical:
+class SimplifiedAuthFlowCriticalTests:
     """Critical authentication flow tests - simplified implementation."""
     
     @pytest.mark.asyncio

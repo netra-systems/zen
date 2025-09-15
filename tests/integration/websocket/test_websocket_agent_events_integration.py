@@ -95,7 +95,7 @@ class MockAgentForTesting:
         }
 
 
-class TestWebSocketAgentEventsIntegration(BaseIntegrationTest):
+class WebSocketAgentEventsIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket agent event emission - MISSION CRITICAL for business value."""
 
     async def async_setup(self):

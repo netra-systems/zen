@@ -68,7 +68,7 @@ class ImportPatternAnalysis:
     import_analysis_by_pattern: Dict[str, List[str]] = field(default_factory=dict)
 
 @pytest.mark.integration
-class TestIssue989WebSocketSSOTMigrationValidation(SSotBaseTestCase):
+class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
     """Mission Critical: Issue #989 WebSocket SSOT Migration Validation
 
     This test suite validates that WebSocket factory SSOT migration has been

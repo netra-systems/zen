@@ -23,7 +23,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
 from test_framework.ssot.websocket import RealWebSocketTestClient
 from shared.isolated_environment import get_env
 
-class TestAgentCompletedEvents(BaseIntegrationTest):
+class AgentCompletedEventsTests(BaseIntegrationTest):
     """Integration tests for agent_completed WebSocket events reaching end users.
     
     Business Value: Agent completion transparency is MISSION CRITICAL for user satisfaction.

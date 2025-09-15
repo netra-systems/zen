@@ -67,7 +67,7 @@ class MockWebSocket:
 
 
 @pytest.mark.integration
-class TestWebSocketAuthServiceIntegration(SSotAsyncTestCase):
+class WebSocketAuthServiceIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket and auth service integration."""
 
     def setup_method(self, method):
@@ -329,7 +329,7 @@ class TestWebSocketAuthServiceIntegration(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestWebSocketAuthBackendIntegration(SSotAsyncTestCase):
+class WebSocketAuthBackendIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket authentication with backend auth integration."""
 
     def setup_method(self, method):

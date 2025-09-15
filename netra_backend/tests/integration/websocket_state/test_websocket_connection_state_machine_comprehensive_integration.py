@@ -45,7 +45,7 @@ class IntegrationConnectionState(Enum):
     RECOVERY = "recovery"
 
 
-class TestWebSocketConnectionStateMachineIntegration(BaseIntegrationTest):
+class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket connection state machine with real services."""
     
     async def _create_real_websocket_connection(self, real_services_fixture, user_data: Dict) -> Dict[str, Any]:

@@ -30,7 +30,7 @@ from unittest.mock import MagicMock, AsyncMock, patch
 import unittest
 
 
-class TestUserExecutionEngineFactoryPatterns(unittest.IsolatedAsyncioTestCase):
+class UserExecutionEngineFactoryPatternsTests(unittest.IsolatedAsyncioTestCase):
     """Test suite validating UserExecutionEngine factory pattern consolidation."""
 
     def setUp(self):

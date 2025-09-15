@@ -23,7 +23,7 @@ from typing import Dict, List, Any, Optional, Set
 from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestDockerResourceStateValidation(SSotBaseTestCase):
+class DockerResourceStateValidationTests(SSotBaseTestCase):
     """Unit tests for Docker resource state validation - FILE SYSTEM ONLY
 
     These tests validate system resources and Docker-related file accumulation

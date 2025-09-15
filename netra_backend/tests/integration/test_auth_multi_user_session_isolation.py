@@ -36,7 +36,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestMultiUserSessionIsolationIntegration(BaseIntegrationTest):
+class MultiUserSessionIsolationIntegrationTests(BaseIntegrationTest):
     """Integration tests for multi-user session isolation with real services."""
     
     @pytest.fixture(autouse=True)

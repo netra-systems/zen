@@ -20,7 +20,7 @@ from dev_launcher.launcher import DevLauncher
 from dev_launcher.utils import wait_for_service
 
 
-class TestHealthMonitor(SSotBaseTestCase):
+class HealthMonitorTests(SSotBaseTestCase):
     """Test health monitoring functionality."""
     
     def setUp(self):
@@ -109,7 +109,7 @@ class TestHealthMonitor(SSotBaseTestCase):
         self.monitor.stop()
 
 
-class TestAdvancedHealthMonitor(SSotBaseTestCase):
+class AdvancedHealthMonitorTests(SSotBaseTestCase):
     """Advanced health monitoring tests."""
     
     def setUp(self):
@@ -222,7 +222,7 @@ class TestAdvancedHealthMonitor(SSotBaseTestCase):
         self.assertTrue(status.is_healthy)
 
 
-class TestErrorRecovery(SSotBaseTestCase):
+class ErrorRecoveryTests(SSotBaseTestCase):
     """Test error recovery mechanisms."""
     
     # Mock: Component isolation for testing without external dependencies
@@ -298,7 +298,7 @@ class TestErrorRecovery(SSotBaseTestCase):
                     mock_stop.assert_called()
 
 
-class TestHealthStatusManagement(SSotBaseTestCase):
+class HealthStatusManagementTests(SSotBaseTestCase):
     """Test health status tracking and reporting."""
     
     def test_health_status_initialization(self):

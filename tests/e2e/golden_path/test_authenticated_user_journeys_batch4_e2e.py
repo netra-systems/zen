@@ -47,7 +47,7 @@ import websockets
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.asyncio
-class TestAuthenticatedUserJourneysBatch4E2E(SSotAsyncTestCase):
+class AuthenticatedUserJourneysBatch4E2ETests(SSotAsyncTestCase):
     """Batch 4 E2E Tests for Authenticated User Journeys - Golden Path Validation."""
 
     @pytest.mark.e2e

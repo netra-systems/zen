@@ -20,7 +20,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType, get_id_manager
 
-class TestUnifiedIDCrossServiceIntegration(SSotAsyncTestCase):
+class UnifiedIDCrossServiceIntegrationTests(SSotAsyncTestCase):
     """Test cross-service UnifiedIDManager integration compliance."""
 
     async def asyncSetUp(self):
@@ -264,7 +264,7 @@ class TestUnifiedIDCrossServiceIntegration(SSotAsyncTestCase):
             for violation in self.integration_violations:
                 print(f'  {violation}')
 
-class TestUnifiedIDManagerServiceBoundaryCompliance(SSotAsyncTestCase):
+class UnifiedIDManagerServiceBoundaryComplianceTests(SSotAsyncTestCase):
     """Test service boundary compliance for UnifiedIDManager."""
 
     async def asyncSetUp(self):

@@ -23,7 +23,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from shared.types import UserID, ThreadID, RunID
 
-class TestWebSocketEventGeneration:
+class WebSocketEventGenerationTests:
     """Test WebSocket event generation for agent execution transparency."""
     
     @pytest.fixture

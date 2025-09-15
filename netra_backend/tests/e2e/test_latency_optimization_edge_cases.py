@@ -32,7 +32,7 @@ def latency_optimization_setup(real_llm_manager, real_websocket_manager, real_to
     """Setup real agent environment for latency optimization testing."""
     return create_latency_optimization_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher)
 
-class TestLatencyOptimizationEdgeCases:
+class LatencyOptimizationEdgeCasesTests:
     """Test edge cases in latency optimization workflows."""
 
     @pytest.mark.asyncio
@@ -51,7 +51,7 @@ class TestLatencyOptimizationEdgeCases:
             results = await execute_latency_workflow(setup, state)
             validate_optimized_system_handling(results)
 
-            class TestIntegrationValidation:
+            class IntegrationValidationTests:
                 """Test integration between latency optimization agents."""
 
                 @pytest.mark.asyncio

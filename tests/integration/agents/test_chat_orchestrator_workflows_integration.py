@@ -47,7 +47,7 @@ from test_framework.ssot.orchestration import get_orchestration_config
 from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 
 @pytest.mark.integration
-class TestChatOrchestratorWorkflowsIntegration(BaseIntegrationTest):
+class ChatOrchestratorWorkflowsIntegrationTests(BaseIntegrationTest):
     """Comprehensive integration tests for Chat Orchestrator workflows."""
 
     def setup_method(self) -> None:

@@ -43,7 +43,7 @@ from analytics_service.analytics_core.config import get_config
 from shared.isolated_environment import get_env
 
 
-class TestEventIngestionAPI:
+class EventIngestionAPITests:
     """Integration tests for event ingestion API endpoints."""
 
     @pytest.fixture(autouse=True)
@@ -289,7 +289,7 @@ class TestEventIngestionAPI:
             pytest.skip("Analytics service not available for authentication testing")
 
 
-class TestAnalyticsReportsAPI:
+class AnalyticsReportsAPITests:
     """Integration tests for analytics reports and dashboard APIs."""
 
     @pytest.fixture(autouse=True)
@@ -454,7 +454,7 @@ class TestAnalyticsReportsAPI:
             pytest.skip("Analytics service not available for real-time testing")
 
 
-class TestAnalyticsPerformanceAPI:
+class AnalyticsPerformanceAPITests:
     """Integration tests for API performance and scalability."""
 
     @pytest.fixture(autouse=True)
@@ -660,7 +660,7 @@ class TestAnalyticsPerformanceAPI:
             pytest.fail("Large payload processing exceeded timeout")
 
 
-class TestAPIErrorHandlingIntegration:
+class APIErrorHandlingIntegrationTests:
     """Integration tests for comprehensive API error handling."""
 
     @pytest.fixture(autouse=True)

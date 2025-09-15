@@ -18,7 +18,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
-class TestHealthCheckDateTimeMigration(unittest.TestCase):
+class HealthCheckDateTimeMigrationTests(unittest.TestCase):
     """Test cases for health check datetime migration."""
 
     def setUp(self):
@@ -174,7 +174,7 @@ class TestHealthCheckDateTimeMigration(unittest.TestCase):
                        "New ISO format should include timezone offset")
 
 
-class TestHealthCheckCaching(unittest.TestCase):
+class HealthCheckCachingTests(unittest.TestCase):
     """Tests for health check caching behavior."""
 
     def test_cache_expiration_logic(self):

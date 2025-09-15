@@ -57,7 +57,7 @@ except ImportError:
     WEBSOCKET_SERVICES_AVAILABLE = False
 
 
-class TestRealAgentFactoryPatterns(BaseE2ETest):
+class RealAgentFactoryPatternsTests(BaseE2ETest):
     """Test factory patterns for user isolation in agent execution."""
 
     def setup_method(self):

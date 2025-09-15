@@ -40,7 +40,7 @@ from tests.e2e.real_services_manager import (
 
 
 @pytest.mark.integration
-class TestServiceOrchestrationGap:
+class ServiceOrchestrationGapTests:
     """Integration tests that expose service orchestration gaps."""
     
     async def test_real_service_discovery_failure(self):
@@ -233,7 +233,7 @@ async def main():
     print("that prevents AsyncHealthChecker from working in a real service environment.")
     print()
     
-    test_suite = TestServiceOrchestrationGap()
+    test_suite = ServiceOrchestrationGapTests()
     
     test_results = []
     

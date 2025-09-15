@@ -20,7 +20,7 @@ AgentValidationError as ValidationError,
 from netra_backend.app.schemas.core_enums import ErrorCategory
 from netra_backend.app.core.error_codes import ErrorSeverity
 
-class TestAgentErrors:
+class AgentErrorsTests:
     """Test custom agent error classes."""
 
     def _create_basic_agent_error(self):

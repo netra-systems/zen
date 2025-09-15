@@ -537,7 +537,7 @@ class SessionManager:
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestSessionManagementBusinessLogic:
+class SessionManagementBusinessLogicTests:
     """Test session management business logic for multi-user platform."""
     
     def setup_method(self):

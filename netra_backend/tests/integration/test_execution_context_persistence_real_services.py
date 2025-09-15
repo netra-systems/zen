@@ -26,7 +26,7 @@ from test_framework.ssot.real_services_test_fixtures import *
 
 
 @pytest.mark.integration
-class TestExecutionContextPersistenceRealServices:
+class ExecutionContextPersistenceRealServicesTests:
     """Integration tests for execution context persistence."""
     
     @pytest.mark.asyncio

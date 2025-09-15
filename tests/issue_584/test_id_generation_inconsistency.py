@@ -12,7 +12,7 @@ from unittest.mock import Mock
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestIdGenerationInconsistency(unittest.TestCase):
+class IdGenerationInconsistencyTests(unittest.TestCase):
     """Test ID generation pattern inconsistencies in Issue #584."""
     
     def test_demo_websocket_id_generation_patterns(self):

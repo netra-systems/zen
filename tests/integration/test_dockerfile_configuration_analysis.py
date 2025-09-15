@@ -16,7 +16,7 @@ from typing import Dict, List, Set, Tuple, Optional
 from test_framework.ssot.base_test_case import BaseTestCase
 
 @pytest.mark.integration
-class TestDockerfileConfigurationAnalysis(BaseTestCase):
+class DockerfileConfigurationAnalysisTests(BaseTestCase):
     """Test suite for static analysis of Dockerfile configurations.
     
     These tests analyze Dockerfile content to identify configuration issues

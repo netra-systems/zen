@@ -20,7 +20,7 @@ from typing import List, Dict, Set
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestSsotMigrationComplianceValidation(SSotBaseTestCase):
+class SsotMigrationComplianceValidationTests(SSotBaseTestCase):
     """Validate SSOT compliance before and after migration."""
     
     def setup_method(self, method):
@@ -408,7 +408,7 @@ if __name__ == "__main__":
     print("Running SSOT Migration Compliance Validation for Issue #1097...")
     
     # Create test instance and run
-    test_instance = TestSsotMigrationComplianceValidation()
+    test_instance = SsotMigrationComplianceValidationTests()
     test_instance.setup_method(None)
     
     try:

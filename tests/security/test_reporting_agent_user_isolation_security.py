@@ -72,7 +72,7 @@ class SecurityViolation:
     evidence: Dict[str, Any] = field(default_factory=dict)
 
 
-class TestReportingAgentUserIsolationSecurity(SSotAsyncTestCase):
+class ReportingAgentUserIsolationSecurityTests(SSotAsyncTestCase):
     """
     Security tests for complete user isolation in ReportingSubAgent.
     

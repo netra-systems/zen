@@ -24,7 +24,7 @@ from typing import Dict, List, Set, Optional, Tuple
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestServiceIdHardcodedConsistency(SSotBaseTestCase):
+class ServiceIdHardcodedConsistencyTests(SSotBaseTestCase):
     """
     Validate that all services use consistent hardcoded SERVICE_ID constant.
     

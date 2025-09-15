@@ -62,7 +62,7 @@ class ComplianceTestResult:
 @pytest.mark.enterprise_compliance
 @pytest.mark.websocket_ssot
 @pytest.mark.issue_1058_compliance
-class TestSSOTEnterpriseComplianceStaging(SSotAsyncTestCase):
+class SSOTEnterpriseComplianceStagingTests(SSotAsyncTestCase):
     """E2E staging tests for SSOT enterprise compliance validation.
 
     CRITICAL: These tests validate SSOT consolidation meets enterprise
@@ -336,7 +336,7 @@ class TestSSOTEnterpriseComplianceStaging(SSotAsyncTestCase):
         logger.info(f'🎯 Enterprise Audit Overall: {len(successful_categories)}/{total_categories} categories compliant ({audit_compliance_rate:.1%})')
 
 @pytest.mark.enterprise_readiness
-class TestSSOTEnterpriseReadinessValidation:
+class SSOTEnterpriseReadinessValidationTests:
     """Enterprise readiness validation for SSOT consolidation."""
 
     @pytest.mark.asyncio

@@ -18,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.base_e2e_test import BaseE2ETest
 
 
-class TestToolManagementE2E(BaseE2ETest):
+class ToolManagementE2ETests(BaseE2ETest):
     """End-to-end tests for tool management workflow"""
     
     @pytest.fixture(autouse=True)

@@ -61,7 +61,7 @@ except ImportError as e:
 logger = logging.getLogger(__name__)
 
 
-class TestGCPBasicErrorMessageCreation(SSotAsyncTestCase):
+class GCPBasicErrorMessageCreationTests(SSotAsyncTestCase):
     """
     Integration tests for basic GCP error message creation from error type logs.
     

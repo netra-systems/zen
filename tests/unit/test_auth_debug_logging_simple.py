@@ -16,7 +16,7 @@ from netra_backend.app.logging.auth_trace_logger import (
 
 
 @pytest.mark.unit
-class TestAuthDebugLoggingBasic:
+class AuthDebugLoggingBasicTests:
     """Basic tests for authentication debug logging."""
     
     def setup_method(self):

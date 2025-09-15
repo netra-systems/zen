@@ -57,7 +57,7 @@ except ImportError:
 
 
 @pytest.mark.integration
-class TestSSOTEnvironmentMigrationValidation:
+class SSOTEnvironmentMigrationValidationTests:
     """Test SSOT environment migration validation."""
     
     def setup_method(self):

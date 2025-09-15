@@ -73,7 +73,7 @@ class MockWebSocketConnection:
 @pytest.mark.integration
 @pytest.mark.websocket
 @pytest.mark.asyncio
-class TestWebSocketConnectionLifecycle(SSotAsyncTestCase):
+class WebSocketConnectionLifecycleTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket connection lifecycle management.
     

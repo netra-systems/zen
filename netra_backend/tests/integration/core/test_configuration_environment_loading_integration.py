@@ -20,7 +20,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.configuration_validator import validate_test_config
 
-class TestConfigurationEnvironmentLoadingIntegration(BaseIntegrationTest):
+class ConfigurationEnvironmentLoadingIntegrationTests(BaseIntegrationTest):
     """Test configuration environment loading with real dependencies."""
 
     def setup_method(self):
@@ -94,7 +94,7 @@ class TestConfigurationEnvironmentLoadingIntegration(BaseIntegrationTest):
         metrics_enabled = getattr(config, 'enable_metrics', False)
         assert metrics_enabled is True, 'Should enable metrics in staging'
 
-class TestConfigurationHotReloadingIntegration(BaseIntegrationTest):
+class ConfigurationHotReloadingIntegrationTests(BaseIntegrationTest):
     """Test configuration hot reloading functionality with real services."""
 
     def setup_method(self):
@@ -157,7 +157,7 @@ class TestConfigurationHotReloadingIntegration(BaseIntegrationTest):
         except Exception as e:
             assert 'invalid' in str(e).lower() or 'configuration' in str(e).lower()
 
-class TestConfigurationServiceIntegration(BaseIntegrationTest):
+class ConfigurationServiceIntegrationTests(BaseIntegrationTest):
     """Test configuration integration with real services."""
 
     def setup_method(self):

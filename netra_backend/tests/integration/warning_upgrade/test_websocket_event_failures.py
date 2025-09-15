@@ -45,7 +45,7 @@ from test_framework.ssot.websocket import WebSocketTestClient
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketEventFailuresWarningUpgrade(SsotAsyncWarningUpgradeTestCase):
+class WebSocketEventFailuresWarningUpgradeTests(SsotAsyncWarningUpgradeTestCase):
     """
     Test suite for WebSocket event failure warning-to-error upgrades.
     

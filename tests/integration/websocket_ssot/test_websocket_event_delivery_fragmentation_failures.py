@@ -34,7 +34,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestWebSocketEventDeliveryFragmentationFailures(SSotAsyncTestCase):
+class WebSocketEventDeliveryFragmentationFailuresTests(SSotAsyncTestCase):
     """Phase 1 Reproduction Test: Prove event delivery fails with fragmented managers."""
     
     def setup_method(self, method):

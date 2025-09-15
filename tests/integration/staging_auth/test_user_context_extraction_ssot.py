@@ -20,7 +20,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestUserContextExtractionSSOT(SSotAsyncTestCase):
+class UserContextExtractionSSOTTests(SSotAsyncTestCase):
     """
     Integration test validating user context extraction SSOT compliance.
     Tests that all user context comes from auth service, never from direct JWT parsing.

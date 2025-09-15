@@ -33,7 +33,7 @@ from test_framework.websocket_helpers import WebSocketTestHelpers, WebSocketTest
 from test_framework.utils.websocket import create_test_message
 from shared.isolated_environment import get_env
 
-class TestMultiServiceCommunication(BaseIntegrationTest):
+class MultiServiceCommunicationTests(BaseIntegrationTest):
     """Test cross-service communication patterns with real services.
     
     CRITICAL: This test validates the complete microservice architecture
@@ -364,7 +364,7 @@ class TestMultiServiceCommunication(BaseIntegrationTest):
             self.logger.error(f'WebSocket agent events test failed: {e}')
             pytest.skip(f'WebSocket service not available for testing: {e}')
 
-class TestMultiServicePerformanceValidation(BaseIntegrationTest):
+class MultiServicePerformanceValidationTests(BaseIntegrationTest):
     """Performance validation tests for multi-service communication."""
 
     @pytest.mark.integration

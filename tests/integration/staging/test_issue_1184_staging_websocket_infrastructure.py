@@ -21,7 +21,7 @@ logger = get_logger(__name__)
 
 @pytest.mark.staging
 @pytest.mark.issue_1184
-class TestStagingWebSocketInfrastructure(SSotAsyncTestCase):
+class StagingWebSocketInfrastructureTests(SSotAsyncTestCase):
     """Integration tests for staging WebSocket infrastructure."""
 
     def setUp(self):

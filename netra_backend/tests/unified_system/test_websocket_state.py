@@ -71,7 +71,7 @@ class WebSocketTestSession:
             raise Exception('WebSocket is closed')
         return True
 
-class TestWebSocketStateManagement:
+class WebSocketStateManagementTests:
     """Comprehensive WebSocket state management tests."""
 
     @pytest.fixture

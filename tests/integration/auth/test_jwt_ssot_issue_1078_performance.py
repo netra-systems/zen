@@ -21,7 +21,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 
 
 @pytest.mark.integration
-class TestJWTSSOTIssue1078Performance(BaseIntegrationTest):
+class JWTSSOTIssue1078PerformanceTests(BaseIntegrationTest):
     """Performance tests to validate JWT SSOT delegation efficiency"""
     
     async def setup_method(self):

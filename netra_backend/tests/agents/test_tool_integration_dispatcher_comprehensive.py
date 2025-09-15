@@ -25,7 +25,7 @@ from netra_backend.app.schemas.tool import ToolInput, ToolResult, ToolStatus
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestToolIntegrationDispatcherComprehensive(SSotAsyncTestCase, unittest.TestCase):
+class ToolIntegrationDispatcherComprehensiveTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive test suite for tool integration dispatcher."""
 
     def setUp(self):

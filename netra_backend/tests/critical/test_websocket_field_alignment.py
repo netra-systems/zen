@@ -15,7 +15,7 @@ from netra_backend.app.schemas.websocket_models import UserMessagePayload
 
 from netra_backend.app.services.message_handlers import MessageHandlerService
 
-class TestWebSocketFieldAlignment:
+class WebSocketFieldAlignmentTests:
     """Test WebSocket message field alignment to prevent silent failures."""
 
     def test_user_message_payload_schema_has_content_field(self):

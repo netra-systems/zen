@@ -17,7 +17,7 @@ from unittest.mock import Mock, AsyncMock
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestUserExecutionContextIntegrationMissing(SSotBaseTestCase):
+class UserExecutionContextIntegrationMissingTests(SSotBaseTestCase):
     """Test suite to validate missing UserExecutionContext integration."""
 
     def setUp(self):
@@ -94,7 +94,7 @@ class TestUserExecutionContextIntegrationMissing(SSotBaseTestCase):
             self.fail(f'REGRESSION CONFIRMED: UserExecutionContext not accessible from agent_lifecycle\nExpected: UserExecutionContext should be imported and available\nImpact: Agent lifecycle cannot create proper user execution contexts')
         self.assertTrue(True, 'UserExecutionContext accessible from agent_lifecycle module')
 
-class TestUserIsolationVulnerability(SSotBaseTestCase):
+class UserIsolationVulnerabilityTests(SSotBaseTestCase):
     """Test suite to validate user isolation vulnerabilities from incomplete migration."""
 
     def setUp(self):
@@ -176,7 +176,7 @@ class TestUserIsolationVulnerability(SSotBaseTestCase):
                 raise
         self.assertTrue(True, 'DeepAgentState merge_from provides proper user isolation')
 
-class TestMigrationCompletenessValidation(SSotBaseTestCase):
+class MigrationCompletenessValidationTests(SSotBaseTestCase):
     """Test suite to validate migration completeness claims."""
 
     def test_migration_completeness_claims_are_false(self):

@@ -28,7 +28,7 @@ from netra_backend.app.logging.auth_trace_logger import AuthTraceLogger
 
 
 @pytest.mark.unit
-class TestAuthTraceLoggerSsotViolations(SSotBaseTestCase):
+class AuthTraceLoggerSsotViolationsTests(SSotBaseTestCase):
     """Test suite proving AuthTraceLogger SSOT violations at specific lines."""
 
     def setup_method(self, method):

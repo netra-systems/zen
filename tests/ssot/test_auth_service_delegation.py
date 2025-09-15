@@ -36,7 +36,7 @@ from test_framework.ssot.integration_auth_manager import IntegrationAuthServiceM
 
 logger = logging.getLogger(__name__)
 
-class TestAuthServiceDelegation(SSotAsyncTestCase):
+class AuthServiceDelegationTests(SSotAsyncTestCase):
     """
     SSOT Auth Service Delegation Tests
     

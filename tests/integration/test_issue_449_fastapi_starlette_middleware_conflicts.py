@@ -83,7 +83,7 @@ class AuthMiddlewareWebSocketConflict(BaseHTTPMiddleware):
         return await call_next(request)
 
 @pytest.mark.integration
-class TestIssue449FastAPIStarletteMiddlewareConflicts(SSotBaseTestCase):
+class Issue449FastAPIStarletteMiddlewareConflictsTests(SSotBaseTestCase):
     """
     Integration tests for Issue #449 - FastAPI/Starlette middleware conflicts.
     

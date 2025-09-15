@@ -18,7 +18,7 @@ from shared.session_management.compatibility_aliases import SessionMetrics, Syst
 from shared.metrics.session_metrics import SystemSessionMetrics as SSOTSystemMetrics, DatabaseSessionMetrics
 
 
-class TestSessionMetricsAttributeErrorFix:
+class SessionMetricsAttributeErrorFixTests:
     """Validate that the 'last_activity' attribute error has been fixed."""
 
     def test_compatibility_sessionmetrics_has_last_activity_attribute(self):
@@ -89,7 +89,7 @@ class TestSessionMetricsAttributeErrorFix:
         print(" PASS:  WebSocket handler now works with DatabaseSessionMetrics last_activity")
 
 
-class TestUnifiedImportScenarios:
+class UnifiedImportScenariosTests:
     """Test scenarios validating unified SessionMetrics import works correctly."""
 
     def test_compatibility_sessionmetrics_accepts_any_constructor(self):
@@ -152,7 +152,7 @@ class TestUnifiedImportScenarios:
         print(" PASS:  Real SessionMetrics work without mocking - SSOT violation fixed")
 
 
-class TestSessionMetricsSSOTViolationFixed:
+class SessionMetricsSSOTViolationFixedTests:
     """Test cases proving SSOT violation has been resolved."""
 
     def test_unified_sessionmetrics_compatibility_layer_exists(self):
@@ -234,7 +234,7 @@ class TestSessionMetricsSSOTViolationFixed:
         print(" PASS:  to_dict methods now work consistently across all SessionMetrics")
 
 
-class TestRealWorldScenarioFixes:
+class RealWorldScenarioFixesTests:
     """Test real-world scenarios that now work due to the fix."""
 
     def test_websocket_manager_last_activity_access_now_works(self):

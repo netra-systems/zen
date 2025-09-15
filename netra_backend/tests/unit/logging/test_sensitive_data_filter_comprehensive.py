@@ -51,7 +51,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.logging_formatters import SensitiveDataFilter
 
-class TestSensitiveDataFilterComprehensive(SSotBaseTestCase):
+class SensitiveDataFilterComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive test suite for SensitiveDataFilter security functionality.
     

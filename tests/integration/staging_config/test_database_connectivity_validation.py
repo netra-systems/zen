@@ -37,7 +37,7 @@ from scripts.validate_database_connections import DatabaseConnectionValidator
 # from test_framework.fixtures.isolated_environment import isolated_env_fixture
 
 
-class TestDatabaseConnectivityValidation:
+class DatabaseConnectivityValidationTests:
     """
     Comprehensive database connectivity validation test suite.
     
@@ -575,7 +575,7 @@ class TestDatabaseConnectivityValidation:
             assert len(localhost_issues) > 0, "Staging should flag localhost usage"
 
 
-class TestHealthCheckEndpoints:
+class HealthCheckEndpointsTests:
     """
     Test the health check endpoints for database connectivity.
     
@@ -733,7 +733,7 @@ class TestHealthCheckEndpoints:
 
 
 @pytest.mark.integration
-class TestDatabaseConnectivityIntegration:
+class DatabaseConnectivityIntegrationTests:
     """
     Integration tests for database connectivity with real or mock services.
     

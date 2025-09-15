@@ -17,7 +17,7 @@ from unittest.mock import MagicMock, patch
 from fastapi import FastAPI
 
 # Simple test without complex SSOT dependencies
-class TestIssue601ValidationFix:
+class Issue601ValidationFixTests:
     """Simple validation of Issue #601 fix without infrastructure dependencies."""
 
     def setup_method(self):
@@ -204,7 +204,7 @@ if __name__ == "__main__":
     print("=" * 50)
     
     # Run specific test
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestIssue601ValidationFix)
+    suite = unittest.TestLoader().loadTestsFromTestCase(Issue601ValidationFixTests)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     

@@ -151,7 +151,7 @@ class AuthJWTCoreFlowValidator:
 
 @pytest.mark.mission_critical
 @pytest.mark.real_services
-class TestAuthJWTCoreFlows(BaseIntegrationTest):
+class AuthJWTCoreFlowsTests(BaseIntegrationTest):
     """Mission Critical: Core JWT authentication flows that enable ALL business value."""
     
     @pytest.fixture(autouse=True)
@@ -399,7 +399,7 @@ class TestAuthJWTCoreFlows(BaseIntegrationTest):
 
 @pytest.mark.mission_critical
 @pytest.mark.real_services
-class TestAuthJWTBusinessContinuity(BaseIntegrationTest):
+class AuthJWTBusinessContinuityTests(BaseIntegrationTest):
     """Mission Critical: Authentication business continuity scenarios."""
     
     async def test_auth_service_restart_scenario(self):

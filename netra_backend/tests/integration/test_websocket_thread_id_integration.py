@@ -24,7 +24,7 @@ from typing import Optional, Dict, Any, List
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from netra_backend.app.database.request_scoped_session_factory import RequestScopedSessionFactory, get_isolated_session
 
-class TestWebSocketThreadIdIntegration:
+class WebSocketThreadIdIntegrationTests:
     """Integration test suite to expose WebSocket-Thread ID compatibility issues.
     
     These tests are DESIGNED TO FAIL initially to demonstrate the integration

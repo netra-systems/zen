@@ -38,7 +38,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.asyncio
-class TestRaceConditionScenarios(SSotAsyncTestCase):
+class RaceConditionScenariosTests(SSotAsyncTestCase):
     """Test race condition scenarios in Golden Path with real services."""
 
     def setup_method(self, method=None):

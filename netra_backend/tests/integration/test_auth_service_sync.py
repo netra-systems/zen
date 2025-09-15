@@ -83,7 +83,7 @@ class AuthServiceSyncValidator:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAuthServiceSync(BaseIntegrationTest):
+class AuthServiceSyncTests(BaseIntegrationTest):
     """Integration: Authentication service synchronization testing."""
 
     @pytest.fixture(autouse=True)
@@ -264,7 +264,7 @@ class TestAuthServiceSync(BaseIntegrationTest):
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAuthServiceSyncRobustness(BaseIntegrationTest):
+class AuthServiceSyncRobustnessTests(BaseIntegrationTest):
     """Integration: Authentication service synchronization robustness testing."""
 
     async def test_auth_sync_under_concurrent_load(self):

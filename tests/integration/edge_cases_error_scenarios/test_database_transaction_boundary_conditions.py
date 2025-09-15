@@ -32,7 +32,7 @@ from netra_backend.app.core.config import get_config
 
 
 @pytest.mark.integration
-class TestDatabaseTransactionBoundaryConditions(BaseIntegrationTest):
+class DatabaseTransactionBoundaryConditionsTests(BaseIntegrationTest):
     """
     Test database transaction boundaries under concurrent access conditions.
     

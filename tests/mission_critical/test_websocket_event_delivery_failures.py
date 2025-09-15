@@ -152,7 +152,7 @@ class WebSocketEventCapture:
         }
 
 
-class TestWebSocketEventDeliveryFailures(SSotAsyncTestCase):
+class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
     """
     FAILING TEST: Proves unreliable delivery of 5 critical WebSocket events.
     

@@ -80,7 +80,7 @@ class SystemReliabilityValidator:
             recovery_time=recovery_time
         ))
 
-class TestSystemReliability:
+class SystemReliabilityTests:
     """Business validation tests for system reliability"""
 
     def setup_method(self):
@@ -601,7 +601,7 @@ if __name__ == "__main__":
     # Can be run standalone for business validation
     import sys
 
-    validator = TestSystemReliability()
+    validator = SystemReliabilityTests()
     validator.setup_method()
 
     print("BUSINESS VALIDATION: System Reliability")

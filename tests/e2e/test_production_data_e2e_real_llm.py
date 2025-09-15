@@ -181,7 +181,7 @@ class ProductionDataGenerator:
 @pytest.mark.real_llm
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestProductionDataE2ERealLLM:
+class ProductionDataE2ERealLLMTests:
     """Test production-scale data processing with real LLM."""
     
     @pytest_asyncio.fixture

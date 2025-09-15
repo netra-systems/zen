@@ -24,7 +24,7 @@ from test_framework.real_services import get_real_services
 logger = logging.getLogger(__name__)
 
 
-class TestRateLimitingBoundaryConditions(BaseIntegrationTest):
+class RateLimitingBoundaryConditionsTests(BaseIntegrationTest):
     """Test rate limiting behavior at system boundaries and edge cases."""
     
     @pytest.mark.integration

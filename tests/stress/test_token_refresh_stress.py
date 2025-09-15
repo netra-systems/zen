@@ -73,7 +73,7 @@ class StressTestMetrics:
         return error_counts
 
 @pytest.mark.asyncio
-class TestConcurrentTokenRefresh:
+class ConcurrentTokenRefreshTests:
     """Test concurrent token refresh scenarios."""
 
     async def test_hundred_concurrent_refreshes(self):
@@ -158,7 +158,7 @@ class TestConcurrentTokenRefresh:
         assert all((r['status'] == 'blocked' or r.get('new_token') == new_token for r in results))
 
 @pytest.mark.asyncio
-class TestWebSocketLoadWithRefresh:
+class WebSocketLoadWithRefreshTests:
     """Test WebSocket behavior under load with token refresh."""
 
     async def test_websocket_message_flood_with_refresh(self):
@@ -284,7 +284,7 @@ class TestWebSocketLoadWithRefresh:
             await service_manager.stop_services()
 
 @pytest.mark.asyncio
-class TestTokenRefreshResilience:
+class TokenRefreshResilienceTests:
     """Test system resilience during token refresh failures."""
 
     async def test_refresh_with_auth_service_outage(self):

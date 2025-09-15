@@ -47,7 +47,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
-class TestUserAuthenticationFlowComprehensive(DatabaseIntegrationTest, CacheIntegrationTest, WebSocketIntegrationTest):
+class UserAuthenticationFlowComprehensiveTests(DatabaseIntegrationTest, CacheIntegrationTest, WebSocketIntegrationTest):
     """
     Comprehensive test suite for golden path P0 user authentication flow.
     

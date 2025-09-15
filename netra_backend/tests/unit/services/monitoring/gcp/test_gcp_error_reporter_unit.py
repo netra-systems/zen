@@ -21,7 +21,7 @@ from netra_backend.app.services.monitoring.gcp_error_reporter import GCPErrorRep
 from netra_backend.app.schemas.monitoring_schemas import ErrorSeverity
 from netra_backend.app.core.exceptions_base import NetraException
 
-class TestGCPErrorReporterUnit(SSotBaseTestCase):
+class GCPErrorReporterUnitTests(SSotBaseTestCase):
     """
     UNIT: GCP Error Reporter Unit Test Suite
     

@@ -76,7 +76,7 @@ class MockWebSocketConnection:
         self.is_connected = False
 
 
-class TestWebSocketAwaitExpressionFixes(SSotAsyncTestCase):
+class WebSocketAwaitExpressionFixesTests(SSotAsyncTestCase):
     """Test WebSocket integration after await expression and race condition fixes."""
     
     def setUp(self):

@@ -43,7 +43,7 @@ import ssl
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestGoldenPathCompleteStaging(SSotAsyncTestCase):
+class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

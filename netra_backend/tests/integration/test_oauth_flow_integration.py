@@ -23,7 +23,7 @@ from urllib.parse import urlencode, parse_qs
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestOAuthFlowIntegration(SSotBaseTestCase):
+class OAuthFlowIntegrationTests(SSotBaseTestCase):
     """Integration tests for OAuth flow with simulated real providers."""
     
     def setup_method(self, method=None):

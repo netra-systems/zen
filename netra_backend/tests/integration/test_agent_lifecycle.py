@@ -236,7 +236,7 @@ class MockLifecycleManager:
         """Get comprehensive lifecycle management statistics."""
         return {'total_operations': self.operation_count, 'agents_initialized': len(self.agent_states), 'state_transitions_recorded': len(self.state_transitions), 'cleanups_completed': len(self.cleanup_records), 'redis_enabled': self.redis_manager is not None, 'database_enabled': self.db_session is not None}
 
-class TestAgentLifecycle(BaseIntegrationTest):
+class AgentLifecycleTests(BaseIntegrationTest):
     """Integration tests for agent lifecycle with real services."""
 
     def setup_method(self):

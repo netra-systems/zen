@@ -43,7 +43,7 @@ from netra_backend.app.core.exceptions_database import RecordNotFoundError, Data
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestThreadGettingComprehensive(BaseIntegrationTest):
+class ThreadGettingComprehensiveTests(BaseIntegrationTest):
     """Comprehensive thread retrieval integration tests."""
     
     def setup_method(self):

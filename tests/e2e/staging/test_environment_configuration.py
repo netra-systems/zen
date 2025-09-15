@@ -21,7 +21,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from shared.isolated_environment import get_env
 
 
-class TestEnvironmentConfiguration:
+class EnvironmentConfigurationTests:
     """Test comprehensive environment configuration issues in staging."""
 
     @staging_only

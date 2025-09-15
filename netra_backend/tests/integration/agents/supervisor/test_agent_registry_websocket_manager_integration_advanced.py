@@ -139,7 +139,7 @@ def mock_enterprise_agent_with_advanced_websocket():
                 await self._websocket_bridge.notify_agent_completed(run_id=self._run_id, agent_name=self._agent_name, result={'status': 'cleanup', 'performance': self._performance_metrics}, execution_time_ms=0.0)
     return MockEnterpriseAgent
 
-class TestAdvancedWebSocketConnectionPooling(SSotBaseTestCase):
+class AdvancedWebSocketConnectionPoolingTests(SSotBaseTestCase):
     """Test advanced WebSocket connection pooling and management."""
 
     @pytest.mark.asyncio
@@ -250,7 +250,7 @@ class TestAdvancedWebSocketConnectionPooling(SSotBaseTestCase):
             assert success_count >= 2, 'Should have succeeded on some retry attempts'
             assert failure_count > 3, 'Should have attempted retries after initial failures'
 
-class TestAdvancedWebSocketEventFiltering(SSotBaseTestCase):
+class AdvancedWebSocketEventFilteringTests(SSotBaseTestCase):
     """Test advanced WebSocket event filtering and routing capabilities."""
 
     @pytest.mark.asyncio
@@ -321,7 +321,7 @@ class TestAdvancedWebSocketEventFiltering(SSotBaseTestCase):
         completion_triggered_billing = [e for e in billing_events if e.get('event_type') == 'billing_update']
         assert len(completion_triggered_billing) >= 1, 'Agent completion should trigger billing update'
 
-class TestAdvancedWebSocketSecurity(SSotBaseTestCase):
+class AdvancedWebSocketSecurityTests(SSotBaseTestCase):
     """Test advanced WebSocket security and access control mechanisms."""
 
     @pytest.mark.asyncio

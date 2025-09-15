@@ -21,7 +21,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.config import get_config
 
 
-class TestSecretKeyLengthValidation:
+class SecretKeyLengthValidationTests:
     """Tests that replicate SECRET_KEY length validation issues from staging logs"""
     
     def test_secret_key_too_short_under_32_characters(self):
@@ -208,7 +208,7 @@ class TestSecretKeyLengthValidation:
         return True
 
 
-class TestJWTSecretConsistency:
+class JWTSecretConsistencyTests:
     """Test JWT_SECRET and SECRET_KEY consistency issues"""
     
     def test_jwt_secret_missing_when_secret_key_present(self):
@@ -313,7 +313,7 @@ class TestJWTSecretConsistency:
         return True
 
 
-class TestConfigSystemSecretValidation:
+class ConfigSystemSecretValidationTests:
     """Test config system integration with secret validation"""
     
     def test_config_system_rejects_invalid_secret_key(self):

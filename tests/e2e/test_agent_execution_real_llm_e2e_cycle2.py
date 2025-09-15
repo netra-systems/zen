@@ -24,7 +24,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.websocket_helpers import WebSocketTestClient
 
-class TestAgentExecutionRealLLME2E(BaseE2ETest):
+class AgentExecutionRealLLME2ETests(BaseE2ETest):
     """E2E tests for agent execution with real LLM integration."""
     
     @pytest.fixture

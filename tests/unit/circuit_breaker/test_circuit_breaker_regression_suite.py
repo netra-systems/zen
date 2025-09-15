@@ -17,7 +17,7 @@ from typing import Dict, Any, List
 import concurrent.futures
 
 @pytest.mark.unit
-class TestCircuitBreakerRegressionSuite:
+class CircuitBreakerRegressionSuiteTests:
     """Comprehensive regression tests for circuit breaker functionality."""
 
     def test_basic_circuit_breaker_functionality_regression(self):
@@ -130,7 +130,7 @@ class TestCircuitBreakerRegressionSuite:
         print('ASYNC DECORATOR REGRESSION: Async circuit breaker decorator working correctly')
 
 @pytest.mark.unit
-class TestCircuitBreakerCompatibilityRegression:
+class CircuitBreakerCompatibilityRegressionTests:
     """Test compatibility layer regression scenarios."""
 
     def test_unified_to_legacy_mapping_regression(self):
@@ -189,7 +189,7 @@ class TestCircuitBreakerCompatibilityRegression:
         assert not has_resilience, 'EXPECTED FAILURE: Expected resilience framework to be incomplete due to Issue #455, but _HAS_RESILIENCE_FRAMEWORK is True. Issue may be resolved.'
 
 @pytest.mark.unit
-class TestCircuitBreakerPerformanceRegression:
+class CircuitBreakerPerformanceRegressionTests:
     """Test performance characteristics to ensure no regression."""
 
     def test_circuit_breaker_creation_performance_regression(self):
@@ -278,7 +278,7 @@ class TestCircuitBreakerPerformanceRegression:
         print(f'CONCURRENT PERFORMANCE: 10 threads, 500 total operations in {concurrent_time:.3f}s')
 
 @pytest.mark.unit
-class TestCircuitBreakerEdgeCaseRegression:
+class CircuitBreakerEdgeCaseRegressionTests:
     """Test edge cases to ensure no regression in error handling."""
 
     def test_circuit_breaker_with_none_config_regression(self):

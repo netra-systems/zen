@@ -47,7 +47,7 @@ from netra_backend.app.websocket_core.event_monitor import (
 from shared.monitoring.interfaces import ComponentMonitor, MonitorableComponent
 
 
-class TestChatEventMonitor(SSotAsyncTestCase):
+class ChatEventMonitorTests(SSotAsyncTestCase):
     """Test suite for ChatEventMonitor functionality."""
 
     def setup_method(self, method):

@@ -36,7 +36,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 
 @pytest.mark.unit
-class TestFactoryMigrationValidation(SSotBaseTestCase):
+class FactoryMigrationValidationTests(SSotBaseTestCase):
     """
     Tests for validating WebSocket factory migration from deprecated to canonical patterns.
 
@@ -141,7 +141,7 @@ class TestFactoryMigrationValidation(SSotBaseTestCase):
         print('SUCCESS: SSOT Import Registry compliance validated')
 
 @pytest.mark.unit
-class TestFactoryMigrationIntegration(SSotBaseTestCase):
+class FactoryMigrationIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for factory migration patterns.
 

@@ -42,7 +42,7 @@ from netra_backend.app.websocket_core import MessageRouter, create_server_messag
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
-class TestAuthenticatedChatComponentsIntegration(SSotBaseTestCase):
+class AuthenticatedChatComponentsIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for authenticated chat components working together.
     

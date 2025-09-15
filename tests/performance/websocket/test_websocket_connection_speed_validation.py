@@ -17,7 +17,7 @@ import statistics
 from typing import List, Dict, Any
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestWebSocketConnectionSpeedValidation(SSotBaseTestCase):
+class WebSocketConnectionSpeedValidationTests(SSotBaseTestCase):
     """Validate WebSocket connection speed improvements."""
 
     @pytest.mark.performance
@@ -97,7 +97,7 @@ class TestWebSocketConnectionSpeedValidation(SSotBaseTestCase):
         assert total_time <= 1.0, f'End-to-end connection took {total_time:.3f}s > 1.0s optimized target'
         print(f'End-to-end connection: {total_time:.3f}s (target: <1.0s)')
 
-class TestWebSocketPerformanceRegression(SSotBaseTestCase):
+class WebSocketPerformanceRegressionTests(SSotBaseTestCase):
     """Tests to detect WebSocket performance regressions."""
 
     @pytest.mark.performance

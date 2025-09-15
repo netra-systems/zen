@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
-class TestLoadBalancerRoutingValidation(SSotBaseTestCase):
+class LoadBalancerRoutingValidationTests(SSotBaseTestCase):
     """
     Test load balancer routing to backend services.
     
@@ -430,7 +430,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_tests():
-        test_instance = TestLoadBalancerRoutingValidation()
+        test_instance = LoadBalancerRoutingValidationTests()
         
         try:
             await test_instance.test_load_balancer_routes_to_correct_backend_services()

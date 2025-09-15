@@ -37,7 +37,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.db.database_manager import DatabaseManager
 
-class TestActionsToMeetGoalsExecutionFlowIntegration(SSotAsyncTestCase):
+class ActionsToMeetGoalsExecutionFlowIntegrationTests(SSotAsyncTestCase):
     """Integration tests reproducing ActionsToMeetGoalsSubAgent execution flow failures.
     
     These tests use real components to reproduce the exact failure conditions

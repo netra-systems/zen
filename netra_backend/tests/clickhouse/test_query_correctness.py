@@ -34,11 +34,11 @@ from netra_backend.app.db.models_clickhouse import (
 from netra_backend.app.services.corpus_service import CorpusService
 from netra_backend.tests.clickhouse.helpers.shared_test_types import (
 
-    TestErrorHandling as SharedTestErrorHandling,
+    ErrorHandlingTests as SharedTestErrorHandling,
 
 )
 
-class TestCorpusQueries:
+class CorpusQueriesTests:
 
     """Test corpus-related queries for correctness"""
 
@@ -270,7 +270,7 @@ class TestCorpusQueries:
 
             assert f"SELECT * FROM {source_table}" in query
 
-class TestPerformanceMetricsQueries:
+class PerformanceMetricsQueriesTests:
 
     """Test performance metrics queries"""
     
@@ -366,7 +366,7 @@ class TestPerformanceMetricsQueries:
 
             assert f"{expected_func}(timestamp)" in query
 
-class TestAnomalyDetectionQueries:
+class AnomalyDetectionQueriesTests:
 
     """Test anomaly detection queries"""
     
@@ -440,7 +440,7 @@ class TestAnomalyDetectionQueries:
 
         assert expected_baseline_start in query
 
-class TestUsagePatternQueries:
+class UsagePatternQueriesTests:
 
     """Test usage pattern analysis queries"""
     
@@ -490,7 +490,7 @@ class TestUsagePatternQueries:
 
             assert f"INTERVAL {days} DAY" in query
 
-class TestCorrelationQueries:
+class CorrelationQueriesTests:
 
     """Test correlation analysis queries"""
     
@@ -528,7 +528,7 @@ class TestCorrelationQueries:
 
         assert "sample_size" in query
 
-class TestGenerationServiceQueries:
+class GenerationServiceQueriesTests:
 
     """Test generation service queries"""
 
@@ -610,7 +610,7 @@ class TestGenerationServiceQueries:
 
             assert len(insert_args[0][1]) == 3  # 3 records total
 
-class TestTableInitializationQueries:
+class TableInitializationQueriesTests:
 
     """Test table initialization queries"""
 
@@ -679,7 +679,7 @@ class TestTableInitializationQueries:
 
             assert "SELECT count() FROM workload_events WHERE 1=0" == query
 
-class TestNestedArrayQueries:
+class NestedArrayQueriesTests:
 
     """Test queries with nested array handling"""
     
@@ -734,7 +734,7 @@ class TestNestedArrayQueries:
 
         assert "has(metrics.name" not in query
 
-class TestErrorHandling(SharedTestErrorHandling):
+class ErrorHandlingTests(SharedTestErrorHandling):
 
     """Test query error handling patterns - extends shared error handling."""
     

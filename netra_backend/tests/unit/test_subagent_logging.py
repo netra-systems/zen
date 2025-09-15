@@ -89,7 +89,7 @@ class MockSubAgent(BaseAgent):
                                     assert "2048" in call_args
                                     assert "success" in call_args
 
-                                    class TestBaseAgentLogging:
+                                    class BaseAgentLoggingTests:
                                         """Test BaseAgent logging integration."""
     
                                         @pytest.fixture

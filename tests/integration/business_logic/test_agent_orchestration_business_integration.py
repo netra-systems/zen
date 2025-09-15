@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestAgentOrchestrationBusinessIntegration(BaseIntegrationTest):
+class AgentOrchestrationBusinessIntegrationTests(BaseIntegrationTest):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

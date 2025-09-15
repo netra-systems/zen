@@ -117,7 +117,7 @@ class MockState:
             self.user_request = self.original_request
 
 
-class TestTriageGoldenPath(SSotBaseTestCase):
+class TriageGoldenPathTests(SSotBaseTestCase):
     """Unit tests for triage golden path core logic
     
     This test class validates the critical triage functionality that determines

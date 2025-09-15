@@ -28,7 +28,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestMessageRouterProxyPatternValidation(SSotBaseTestCase):
+class MessageRouterProxyPatternValidationTests(SSotBaseTestCase):
     """Validate MessageRouter proxy pattern implementation."""
 
     def setUp(self):
@@ -294,7 +294,7 @@ class TestMessageRouterProxyPatternValidation(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestMessageRouterSSotComplianceValidation(SSotBaseTestCase):
+class MessageRouterSSotComplianceValidationTests(SSotBaseTestCase):
     """Validate SSOT compliance through proxy pattern."""
 
     def setUp(self):

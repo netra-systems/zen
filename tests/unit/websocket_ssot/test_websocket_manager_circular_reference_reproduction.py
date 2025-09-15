@@ -34,7 +34,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerCircularReferenceReproduction(SSotBaseTestCase):
+class WebSocketManagerCircularReferenceReproductionTests(SSotBaseTestCase):
     """Reproduce circular reference issues in WebSocket manager creation."""
 
     def setup_method(self, method):

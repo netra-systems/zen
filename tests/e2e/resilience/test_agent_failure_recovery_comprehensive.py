@@ -685,7 +685,7 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
         self.record_metric("resilience_cleanup_completed", time.time())
 
 
-class TestAgentFailureRecoveryComprehensive:
+class AgentFailureRecoveryComprehensiveTests:
     """E2E Agent Resilience and Recovery Tests for GCP Staging"""
     
     @pytest.mark.asyncio

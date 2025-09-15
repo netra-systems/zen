@@ -71,7 +71,7 @@ pytestmark = [
 ]
 
 
-class TestServiceDependencyIntegration(BaseIntegrationTest):
+class ServiceDependencyIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for service dependency management with real services.
     

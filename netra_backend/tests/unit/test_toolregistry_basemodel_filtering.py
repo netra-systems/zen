@@ -65,7 +65,7 @@ class InvalidToolMissingExecute:
 
 @pytest.mark.unit
 @pytest.mark.toolregistry
-class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
+class ToolRegistryBaseModelFilteringTests(SSotBaseTestCase):
     """
     Unit tests for BaseModel filtering in ToolRegistry.
     
@@ -354,7 +354,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
 
 @pytest.mark.unit
 @pytest.mark.toolregistry  
-class TestUniversalRegistryDuplicateHandling(SSotBaseTestCase):
+class UniversalRegistryDuplicateHandlingTests(SSotBaseTestCase):
     """
     Unit tests for duplicate registration handling in UniversalRegistry.
     

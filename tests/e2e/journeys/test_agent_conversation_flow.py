@@ -36,7 +36,7 @@ from tests.e2e.agent_conversation_helpers import (
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAgentConversationFlow:
+class AgentConversationFlowTests:
     """Test #2: Complete Agent Conversation Flow with Context Preservation."""
     
     def setup_method(self):
@@ -258,7 +258,7 @@ class TestAgentConversationFlow:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAgentConversationPerformance:
+class AgentConversationPerformanceTests:
     """Performance validation for agent conversation operations."""
     
     def setup_method(self):

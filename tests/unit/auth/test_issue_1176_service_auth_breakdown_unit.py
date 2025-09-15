@@ -36,7 +36,7 @@ from netra_backend.app.clients.auth_client_core import (
 logger = logging.getLogger(__name__)
 
 
-class TestIssue1176ServiceAuthBreakdownUnit(BaseIntegrationTest):
+class Issue1176ServiceAuthBreakdownUnitTests(BaseIntegrationTest):
     """
     Unit tests for Issue #1176 service authentication complete breakdown.
     
@@ -340,7 +340,7 @@ class TestIssue1176ServiceAuthBreakdownUnit(BaseIntegrationTest):
         return any(service_indicators)
 
 
-class TestIssue1176ServiceDetectionLogic(BaseIntegrationTest):
+class Issue1176ServiceDetectionLogicTests(BaseIntegrationTest):
     """Test service user detection logic breakdown in authentication systems."""
     
     @pytest.mark.unit
@@ -415,7 +415,7 @@ class TestIssue1176ServiceDetectionLogic(BaseIntegrationTest):
         return user_id.startswith("service:") and "netra-backend" not in user_id
 
 
-class TestIssue1176AuthenticationCascadeFailures(BaseIntegrationTest):
+class Issue1176AuthenticationCascadeFailuresTests(BaseIntegrationTest):
     """Test authentication cascade failures resulting from service breakdown."""
     
     @pytest.mark.unit

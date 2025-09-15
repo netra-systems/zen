@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
-class TestWebSocket403ReproductionStaging(SSotAsyncTestCase):
+class WebSocket403ReproductionStagingTests(SSotAsyncTestCase):
     """E2E tests reproducing HTTP 403 WebSocket errors in staging environment."""
 
     def setUp(self):

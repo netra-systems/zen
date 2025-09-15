@@ -19,7 +19,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.middleware.nonce_generator import NonceGenerator
 
 
-class TestSecurityNonceGeneration(BaseTestCase):
+class SecurityNonceGenerationTests(BaseTestCase):
     """Test nonce generation delivers secure CSP protection for business security."""
     
     def setup_method(self):

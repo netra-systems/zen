@@ -50,7 +50,7 @@ from netra_backend.app.db.clickhouse import ClickHouseService, _handle_connectio
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestClickHouseLoggingFixValidation:
+class ClickHouseLoggingFixValidationTests:
     """Mission critical tests for ClickHouse logging fix validation."""
     
     @contextmanager
@@ -470,7 +470,7 @@ class TestClickHouseLoggingFixValidation:
                     )
 
 
-class TestClickHouseLoggingRegressionPrevention:
+class ClickHouseLoggingRegressionPreventionTests:
     """Regression prevention tests for ClickHouse logging fixes."""
     
     def test_duplicate_logging_elimination(self):

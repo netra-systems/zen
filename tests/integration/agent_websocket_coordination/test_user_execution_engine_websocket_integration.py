@@ -45,7 +45,7 @@ class MockAgentInstanceFactory:
         return mock_agent
 
 
-class TestUserExecutionEngineWebSocketIntegration(SSotAsyncTestCase):
+class UserExecutionEngineWebSocketIntegrationTests(SSotAsyncTestCase):
     """Test UserExecutionEngine WebSocket Integration."""
     
     @pytest.mark.integration

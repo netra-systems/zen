@@ -27,7 +27,7 @@ from netra_backend.app.websocket_core.batch_message_handler import BatchMessageH
 from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 
 
-class TestWebSocketMessageRoutingBusinessLogic:
+class WebSocketMessageRoutingBusinessLogicTests:
     """Test WebSocket message routing business logic patterns."""
     
     @pytest.fixture

@@ -94,7 +94,7 @@ class FixedWebSocketEventCapture:
         self.start_time = time.time()
 
 
-class TestWebSocketAgentEventsFixed:
+class WebSocketAgentEventsFixedTests:
     """Fixed tests for WebSocket Agent Events validation."""
     
     @pytest.fixture(autouse=True)

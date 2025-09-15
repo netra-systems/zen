@@ -561,7 +561,7 @@ class UserContextFactory:
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestUserContextFactoryBusinessLogic:
+class UserContextFactoryBusinessLogicTests:
     """Test user context factory business logic for multi-tenant platform."""
     
     def setup_method(self):

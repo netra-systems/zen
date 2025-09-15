@@ -35,7 +35,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocketManagerAwaitIssue(SSotAsyncTestCase):
+class WebSocketManagerAwaitIssueTests(SSotAsyncTestCase):
     """Test suite for WebSocket manager await issue fix."""
     
     def setUp(self):
@@ -111,7 +111,7 @@ class TestWebSocketManagerAwaitIssue(SSotAsyncTestCase):
         logger.info(f" PASS:  TEST 2 PASSED: Await on sync function fails as expected: {error_message}")
 
 
-class TestQualityValidationHandlerAwaitFix(SSotAsyncTestCase):
+class QualityValidationHandlerAwaitFixTests(SSotAsyncTestCase):
     """Test quality validation handler await issue fix."""
     
     def setUp(self):
@@ -238,7 +238,7 @@ class TestQualityValidationHandlerAwaitFix(SSotAsyncTestCase):
         logger.info(" PASS:  TEST 4 PASSED: Fixed pattern works correctly")
 
 
-class TestQualityReportHandlerAwaitFix(SSotAsyncTestCase):
+class QualityReportHandlerAwaitFixTests(SSotAsyncTestCase):
     """Test quality report handler await issue fix."""
     
     def setUp(self):
@@ -342,7 +342,7 @@ class TestQualityReportHandlerAwaitFix(SSotAsyncTestCase):
         logger.info(" PASS:  TEST 6 PASSED: Error handling fixed pattern works")
 
 
-class TestQualityManagerAwaitFix(SSotAsyncTestCase):
+class QualityManagerAwaitFixTests(SSotAsyncTestCase):
     """Test quality manager await issue fix."""
     
     def setUp(self):
@@ -400,7 +400,7 @@ class TestQualityManagerAwaitFix(SSotAsyncTestCase):
         logger.info(" PASS:  TEST 7 PASSED: Quality manager unknown message handling fixed")
 
 
-class TestWebSocketEventDeliveryAfterFix(SSotAsyncTestCase):
+class WebSocketEventDeliveryAfterFixTests(SSotAsyncTestCase):
     """Test that WebSocket event delivery still works correctly after the fix."""
     
     def setUp(self):
@@ -455,11 +455,11 @@ class TestWebSocketEventDeliveryAfterFix(SSotAsyncTestCase):
 async def run_all_tests():
     """Helper function to run all tests in sequence."""
     test_classes = [
-        TestWebSocketManagerAwaitIssue,
-        TestQualityValidationHandlerAwaitFix,
-        TestQualityReportHandlerAwaitFix,
-        TestQualityManagerAwaitFix,
-        TestWebSocketEventDeliveryAfterFix
+        WebSocketManagerAwaitIssueTests,
+        QualityValidationHandlerAwaitFixTests,
+        QualityReportHandlerAwaitFixTests,
+        QualityManagerAwaitFixTests,
+        WebSocketEventDeliveryAfterFixTests
     ]
     
     total_tests = 0

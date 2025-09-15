@@ -36,7 +36,7 @@ except ImportError as e:
     AgentFactory = None
 
 
-class TestConcurrentUserIsolation(SSotAsyncTestCase):
+class ConcurrentUserIsolationTests(SSotAsyncTestCase):
     """
     CRITICAL: This test proves concurrent user isolation violations.
 

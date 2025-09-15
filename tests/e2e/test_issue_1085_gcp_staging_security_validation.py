@@ -24,7 +24,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.supervisor.modern_execution_helpers import ModernExecutionHelpers
 
 @pytest.mark.e2e
-class TestGCPStagingSecurityValidation:
+class GCPStagingSecurityValidationTests:
     """E2E tests validating security vulnerabilities in GCP staging environment."""
 
     @pytest.mark.asyncio

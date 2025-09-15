@@ -23,7 +23,7 @@ from shared.metrics.session_metrics import SystemSessionMetrics, DatabaseSession
 from shared.session_management.user_session_manager import get_session_manager
 
 
-class TestSSOTViolationRemediation:
+class SSOTViolationRemediationTests:
     """Validate that SessionMetrics SSOT violations have been successfully remediated."""
 
     def test_ssot_violation_fixed_single_source_of_truth(self):

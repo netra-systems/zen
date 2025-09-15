@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, AsyncMock
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestParameterStandardizationFix:
+class ParameterStandardizationFixTests:
     """
     Test the specific parameter standardization fix from the FIVE WHYS analysis.
     

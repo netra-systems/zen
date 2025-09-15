@@ -17,7 +17,7 @@ from tests.e2e.integration.test_agent_response_quality_grading import AgentRespo
 
 
 @pytest.mark.e2e
-class TestAgentResponseQualitySimple:
+class AgentResponseQualitySimpleTests:
     """Simple tests for agent response quality grading system."""
     
     def setup_method(self):

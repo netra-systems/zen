@@ -29,7 +29,7 @@ pytestmark = [
     pytest.mark.real_services
 ]
 
-class TestMigrationSystem(SSotBaseTestCase):
+class MigrationSystemTests(SSotBaseTestCase):
     """Test database migration system functionality using SSOT patterns.
     
     CRITICAL: This class inherits from SSotBaseTestCase ensuring:

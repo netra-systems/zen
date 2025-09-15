@@ -31,7 +31,7 @@ from shared.isolated_environment import get_env
 
 # Initialize real services
 E2EServiceValidator.enforce_real_services()
-class TestCriticalServiceHealth:
+class CriticalServiceHealthTests:
     """Critical service health checks using real services"""
     
     def setup_method(self):
@@ -109,7 +109,7 @@ class TestCriticalServiceHealth:
 
 # Initialize real services
 E2EServiceValidator.enforce_real_services()
-class TestCriticalSystemStability:
+class CriticalSystemStabilityTests:
     """System stability and resilience tests"""
     
     def setup_method(self):

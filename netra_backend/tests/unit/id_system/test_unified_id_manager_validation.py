@@ -20,7 +20,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType, 
 from shared.types.core_types import UserID, ThreadID, ExecutionID, WebSocketID, ensure_user_id, ensure_thread_id
 from test_framework.fixtures.id_system.id_format_samples import get_uuid_samples, get_unified_samples, get_malformed_samples, EXPECTED_UUID_PATTERN, EXPECTED_UNIFIED_PATTERN
 
-class TestUnifiedIDManagerValidationConsistency:
+class UnifiedIDManagerValidationConsistencyTests:
     """
     Tests that validate critical validation consistency in the ID system.
     
@@ -148,7 +148,7 @@ class TestUnifiedIDManagerValidationConsistency:
             assert format_valid, f'Format validator should accept UUID case variation: {test_id}'
             assert compatibility_valid, f'Compatibility validator should accept UUID case variation: {test_id}'
 
-class TestValidationBusinessRequirementsSupport:
+class ValidationBusinessRequirementsSupportTests:
     """
     Tests that validate the ID system properly supports business requirements.
     """
@@ -234,7 +234,7 @@ class TestValidationBusinessRequirementsSupport:
         assert not check_admin_access(standard_user_id), 'Standard user should not have admin access'
         assert check_admin_access(admin_user_id), 'Admin user should have admin access'
 
-class TestValidationPerformanceConsistency:
+class ValidationPerformanceConsistencyTests:
     """
     Tests that validate consistent performance across validation approaches.
     """
@@ -301,7 +301,7 @@ class TestValidationPerformanceConsistency:
 
 @pytest.mark.critical
 @pytest.mark.id_system_validation
-class TestValidationBusinessCriticalOperations:
+class ValidationBusinessCriticalOperationsTests:
     """
     Critical tests that demonstrate business-critical validation operations work correctly.
     """

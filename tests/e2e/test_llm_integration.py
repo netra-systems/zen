@@ -125,7 +125,7 @@ class RealTokenUsage:
         return 0.003
 
 
-class TestLLMIntegrationer:
+class LLMIntegrationerTests:
     """Core LLM integration testing class"""
     
     def __init__(self):
@@ -155,13 +155,13 @@ def sample_token_usage():
     """Fixture providing sample token usage for cost testing"""
     return RealTokenUsage(prompt_tokens=1000, completion_tokens=500, total_tokens=1500)
 
-class TestNetraException(Exception):
+class NetraExceptionTests(Exception):
     """Test exception for E2E testing"""
     pass
 
 
 @pytest.mark.e2e
-class TestLLMFallbackChain:
+class LLMFallbackChainTests:
     """Test LLM fallback chain: Primary  ->  Fallback model switching"""
     
     @pytest.mark.e2e
@@ -224,7 +224,7 @@ class TestLLMFallbackChain:
 
 
 @pytest.mark.e2e
-class TestLLMRateLimitHandling:
+class LLMRateLimitHandlingTests:
     """Test LLM rate limit handling with exponential backoff"""
     
     @pytest.mark.e2e
@@ -266,7 +266,7 @@ class TestLLMRateLimitHandling:
 
 
 @pytest.mark.e2e
-class TestLLMTimeoutRecovery:
+class LLMTimeoutRecoveryTests:
     """Test LLM timeout handling and recovery across services"""
     
     @pytest.mark.e2e
@@ -325,7 +325,7 @@ class TestLLMTimeoutRecovery:
 
 
 @pytest.mark.e2e
-class TestLLMCostTracking:
+class LLMCostTrackingTests:
     """Test LLM cost tracking for accurate billing"""
     
     @pytest.mark.e2e

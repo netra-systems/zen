@@ -285,7 +285,7 @@ class EventProcessor:
 # BASIC EVENT PROCESSOR TESTS
 # =============================================================================
 
-class TestEventProcessor:
+class EventProcessorTests:
     """Test suite for basic event processor functionality"""
     
     @pytest.fixture
@@ -521,7 +521,7 @@ class TestEventProcessor:
 # BATCH PROCESSING TESTS
 # =============================================================================
 
-class TestBatchProcessing:
+class BatchProcessingTests:
     """Test suite for batch processing functionality"""
     
     @pytest.fixture
@@ -630,7 +630,7 @@ class TestBatchProcessing:
 # ERROR HANDLING TESTS
 # =============================================================================
 
-class TestErrorHandling:
+class ErrorHandlingTests:
     """Test suite for error handling and edge cases"""
     
     @pytest.fixture
@@ -766,7 +766,7 @@ class TestErrorHandling:
 # REPORT GENERATION TESTS
 # =============================================================================
 
-class TestReportGeneration:
+class ReportGenerationTests:
     """Test suite for report generation functionality"""
     
     @pytest.fixture
@@ -840,7 +840,7 @@ class TestReportGeneration:
 # PERFORMANCE TESTS
 # =============================================================================
 
-class TestEventProcessorPerformance:
+class EventProcessorPerformanceTests:
     """Test suite for event processor performance"""
     
     async def test_single_event_processing_latency(self, analytics_performance_monitor):
@@ -917,7 +917,7 @@ class TestEventProcessorPerformance:
 # INTEGRATION WITH FIXTURES
 # =============================================================================
 
-class TestProcessorWithFixtures:
+class ProcessorWithFixturesTests:
     """Test event processor using conftest fixtures with real services - NO MOCKS"""
     
     async def test_processor_with_sample_events(self, sample_chat_interaction_event, 

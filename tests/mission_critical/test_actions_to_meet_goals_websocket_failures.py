@@ -45,7 +45,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from tests.mission_critical.test_websocket_mission_critical_fixed import MissionCriticalEventValidator
 
 
-class TestActionsToMeetGoalsWebSocketFailures(SSotAsyncTestCase):
+class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
     """Mission critical tests for WebSocket event handling during agent failures.
     
     These tests ensure that even when ActionsToMeetGoalsSubAgent fails, users

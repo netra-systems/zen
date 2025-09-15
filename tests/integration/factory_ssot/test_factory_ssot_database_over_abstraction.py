@@ -31,7 +31,7 @@ from netra_backend.app.redis_manager import redis_manager  # RedisFactory consol
 from netra_backend.app.factories.clickhouse_factory import ClickHouseFactory
 
 
-class TestDatabaseFactoryOverAbstraction(BaseIntegrationTest):
+class DatabaseFactoryOverAbstractionTests(BaseIntegrationTest):
     """Test SSOT violations in database factory over-abstraction patterns."""
 
     @pytest.mark.integration

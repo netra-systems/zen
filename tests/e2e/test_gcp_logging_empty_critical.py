@@ -89,7 +89,7 @@ from auth_service.auth_core.services.auth_service import AuthService
 
 
 @pytest.mark.e2e
-class TestGCPLoggingEmptyCritical(SSotBaseTestCase):
+class GCPLoggingEmptyCriticalTests(SSotBaseTestCase):
     """
     E2E test suite for GCP logging empty CRITICAL reproduction.
     

@@ -104,7 +104,7 @@ class ToolExecutionResultValidator:
         }
 
 
-class TestToolExecutionResultIntegration(BaseIntegrationTest):
+class ToolExecutionResultIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for tool execution result integration into reports
     

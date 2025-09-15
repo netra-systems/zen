@@ -18,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 
-class TestCoverageGeneration:
+class CoverageGenerationTests:
     """Test coverage generation compliance across test levels."""
 
     def test_unit_level_generates_coverage(self):

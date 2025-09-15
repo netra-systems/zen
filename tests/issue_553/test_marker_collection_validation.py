@@ -28,7 +28,7 @@ import re
 import time
 import json
 
-class TestMarkerCollectionValidation:
+class MarkerCollectionValidationTests:
     """
     Validate pytest marker collection behavior and configuration completeness
     """

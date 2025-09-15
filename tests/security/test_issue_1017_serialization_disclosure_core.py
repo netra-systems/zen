@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
-class TestIssue1017SerializationDisclosureCore(SSotBaseTestCase, unittest.TestCase):
+class Issue1017SerializationDisclosureCoreTests(SSotBaseTestCase, unittest.TestCase):
     """
     Core serialization information disclosure vulnerability tests for Issue #1017.
 

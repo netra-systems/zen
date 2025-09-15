@@ -30,7 +30,7 @@ from auth_service.auth_core.database.models import (
 )
 
 
-class TestDatabaseModelsBusinessValue(BaseIntegrationTest):
+class DatabaseModelsBusinessValueTests(BaseIntegrationTest):
     """Test database models delivering reliable user data persistence for business operations."""
     
     @pytest.mark.unit

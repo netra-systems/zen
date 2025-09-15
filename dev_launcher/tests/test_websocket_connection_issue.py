@@ -18,7 +18,7 @@ from dev_launcher.websocket_validator import WebSocketValidator, WebSocketEndpoi
 pytest.skip("WebSocket connection tests require running services", allow_module_level=True)
 
 
-class TestWebSocketConnectionIssue:
+class WebSocketConnectionIssueTests:
     """Test that reproduces WebSocket connection failure."""
     
     @pytest.mark.asyncio

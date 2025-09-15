@@ -51,7 +51,7 @@ from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 
 
-class TestBaseAgentLifecyclePatterns(BaseAgent):
+class BaseAgentLifecyclePatternsTests(BaseAgent):
     """Test BaseAgent implementation with modern UserExecutionContext pattern."""
     
     def __init__(self, *args, **kwargs):
@@ -106,7 +106,7 @@ class TestBaseAgentLifecyclePatterns(BaseAgent):
 
 
 @pytest.mark.integration
-class TestBaseAgentLifecycleIntegration(SSotAsyncTestCase):
+class BaseAgentLifecycleIntegrationTests(SSotAsyncTestCase):
     """Integration tests for BaseAgent lifecycle management."""
     
     def create_test_user_context(self, user_id: str = None, metadata: Dict[str, Any] = None) -> UserExecutionContext:
@@ -248,7 +248,7 @@ class TestBaseAgentLifecycleIntegration(SSotAsyncTestCase):
         })
         
         # Create agent with test pattern
-        agent = TestBaseAgentLifecyclePatterns(user_context=user_context)
+        agent = BaseAgentLifecyclePatternsTests(user_context=user_context)
         agent.set_websocket_bridge(mock_websocket_bridge, user_context.run_id)
         
         # Execute with user context
@@ -296,7 +296,7 @@ class TestBaseAgentLifecycleIntegration(SSotAsyncTestCase):
         
         # Create agents using factory pattern
         agents = [
-            TestBaseAgentLifecyclePatterns(user_context=context)
+            BaseAgentLifecyclePatternsTests(user_context=context)
             for context in user_contexts
         ]
         
@@ -402,7 +402,7 @@ class TestBaseAgentLifecycleIntegration(SSotAsyncTestCase):
         
         for i in range(num_agents):
             user_context = self.create_test_user_context(f"memory_test_user_{i}")
-            agent = TestBaseAgentLifecyclePatterns(user_context=user_context)
+            agent = BaseAgentLifecyclePatternsTests(user_context=user_context)
             
             # Add bulk data to test cleanup
             agent.context[f"test_data_{i}"] = "x" * 1000

@@ -45,7 +45,7 @@ from shared.types.core_types import UserID, ThreadID, ConnectionID
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 @pytest.mark.unit
-class TestAgentMessageHandlerComprehensive(SSotAsyncTestCase):
+class AgentMessageHandlerComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for WebSocket Agent Message Handler.
     
@@ -352,7 +352,7 @@ class TestAgentMessageHandlerComprehensive(SSotAsyncTestCase):
                     self.execution_contexts_created += 1
 
 @pytest.mark.unit
-class TestAgentHandlerEdgeCases(SSotBaseTestCase):
+class AgentHandlerEdgeCasesTests(SSotBaseTestCase):
     """
     Unit tests for Agent Handler edge cases and error conditions.
     

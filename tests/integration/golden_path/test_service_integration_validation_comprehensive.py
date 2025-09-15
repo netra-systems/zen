@@ -37,7 +37,7 @@ from test_framework.websocket_helpers import WebSocketTestHelpers
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
-class TestServiceIntegrationValidationComprehensive(SSotAsyncTestCase):
+class ServiceIntegrationValidationComprehensiveTests(SSotAsyncTestCase):
     """
     [U+1F517] COMPREHENSIVE SERVICE INTEGRATION TEST [U+1F517]
     

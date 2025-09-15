@@ -41,7 +41,7 @@ sys.path.insert(0, str(project_root))
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestExecutionEngineSSotMigrationCompletion(SSotBaseTestCase):
+class ExecutionEngineSSotMigrationCompletionTests(SSotBaseTestCase):
     """
     Unit tests to verify Issue #565 SSOT migration is completely finished.
     

@@ -27,7 +27,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from shared.types import UserID, ThreadID, RunID
 from shared.isolated_environment import get_env
 
-class TestToolDispatcherPerformanceReliability(BaseIntegrationTest):
+class ToolDispatcherPerformanceReliabilityTests(BaseIntegrationTest):
     """Integration tests for tool dispatcher performance and reliability."""
     
     @pytest.mark.integration

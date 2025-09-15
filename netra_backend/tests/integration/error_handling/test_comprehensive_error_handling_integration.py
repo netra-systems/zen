@@ -31,7 +31,7 @@ from netra_backend.app.services.unified_authentication_service import UnifiedAut
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 
-class TestDatabaseErrorRecovery(SSotAsyncTestCase):
+class DatabaseErrorRecoveryTests(SSotAsyncTestCase):
     """
     Test database error recovery with real PostgreSQL and Redis.
     
@@ -120,7 +120,7 @@ class TestDatabaseErrorRecovery(SSotAsyncTestCase):
         verification_result = await db_utility.verify_transaction_rollback(real_db, 'user_threads', {'user_id': user_id})
         self.assertTrue(verification_result['rollback_successful'])
 
-class TestWebSocketErrorResilience(SSotAsyncTestCase):
+class WebSocketErrorResilienceTests(SSotAsyncTestCase):
     """
     Test WebSocket error resilience with real connections.
     
@@ -180,7 +180,7 @@ class TestWebSocketErrorResilience(SSotAsyncTestCase):
                 else:
                     self.assertIn('message_dropped', delivery_result['status'])
 
-class TestAuthenticationErrorFlows(SSotAsyncTestCase):
+class AuthenticationErrorFlowsTests(SSotAsyncTestCase):
     """
     Test authentication error flows with real auth service integration.
     
@@ -238,7 +238,7 @@ class TestAuthenticationErrorFlows(SSotAsyncTestCase):
             else:
                 self.assertFalse(result['should_retry'])
 
-class TestAgentExecutionErrorPropagation(SSotAsyncTestCase):
+class AgentExecutionErrorPropagationTests(SSotAsyncTestCase):
     """
     Test agent execution error propagation across service boundaries.
     
@@ -296,7 +296,7 @@ class TestAgentExecutionErrorPropagation(SSotAsyncTestCase):
             self.assertNotIn('database', execution_result['response'].lower())
             self.assertIn('recent activity', execution_result['response'].lower())
 
-class TestSystemWideErrorCoordination(SSotAsyncTestCase):
+class SystemWideErrorCoordinationTests(SSotAsyncTestCase):
     """
     Test system-wide error coordination and circuit breakers.
     

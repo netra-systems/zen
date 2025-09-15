@@ -122,7 +122,7 @@ class APIService:
         pass
 
 @pytest.mark.integration
-class TestCoreAPIL3Integration:
+class CoreAPIL3IntegrationTests:
     """Comprehensive L3 integration tests for core API functionality."""
 
     @pytest.fixture

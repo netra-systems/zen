@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 logger = logging.getLogger(__name__)
 
 
-class TestMessageHandlerServiceEdgeCases:
+class MessageHandlerServiceEdgeCasesTests:
     """
     Unit tests for MessageHandlerService constructor validation and edge cases.
     

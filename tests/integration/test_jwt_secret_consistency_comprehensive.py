@@ -41,7 +41,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestJWTSecretConsistency:
+class JWTSecretConsistencyTests:
     """Test JWT secret consistency across all services."""
     
     @pytest.fixture(autouse=True)
@@ -354,7 +354,7 @@ class TestJWTSecretConsistency:
         logger.info(f" PASS:  {token_type} token type consistency validated")
 
 
-class TestJWTSecretDriftMonitoring:
+class JWTSecretDriftMonitoringTests:
     """Test JWT secret drift monitoring functionality."""
     
     @pytest.mark.asyncio
@@ -419,7 +419,7 @@ class TestJWTSecretDriftMonitoring:
 
 # Integration with existing test infrastructure
 @pytest.mark.integration
-class TestJWTSecretE2EIntegration:
+class JWTSecretE2EIntegrationTests:
     """End-to-end integration tests for JWT secret consistency."""
     
     @pytest.mark.asyncio

@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 @pytest.mark.unit
-class TestIDFormatSecurity(SSotBaseTestCase):
+class IDFormatSecurityTests(SSotBaseTestCase):
     """
     Test suite to validate ID format consistency and security properties.
 

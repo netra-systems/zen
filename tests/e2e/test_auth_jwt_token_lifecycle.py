@@ -31,7 +31,7 @@ from shared.isolated_environment import get_env
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestJWTTokenLifecycle(SSotBaseTestCase):
+class JWTTokenLifecycleTests(SSotBaseTestCase):
     """
     Comprehensive JWT Token Lifecycle Tests with Real Services
     

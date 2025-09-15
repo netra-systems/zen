@@ -89,7 +89,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
-class TestAgentCommunicationComprehensiveGoldenPath(SSotAsyncTestCase):
+class AgentCommunicationComprehensiveGoldenPathTests(SSotAsyncTestCase):
     """
     Comprehensive integration tests for agent-to-agent communication.
     

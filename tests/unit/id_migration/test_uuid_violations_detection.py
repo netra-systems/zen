@@ -27,7 +27,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
 @pytest.mark.unit
-class TestAuthenticationUuidViolations(unittest.TestCase):
+class AuthenticationUuidViolationsTests(unittest.TestCase):
     """Test authentication system uuid.uuid4() violations."""
     
     def setUp(self):
@@ -145,7 +145,7 @@ class TestAuthenticationUuidViolations(unittest.TestCase):
 
 
 @pytest.mark.unit
-class TestWebSocketAuthViolations(unittest.TestCase):
+class WebSocketAuthViolationsTests(unittest.TestCase):
     """Test WebSocket authentication system uuid.uuid4() violations."""
     
     def setUp(self):
@@ -311,7 +311,7 @@ class TestWebSocketAuthViolations(unittest.TestCase):
 
 
 @pytest.mark.unit
-class TestFactoryPatternViolations(unittest.TestCase):
+class FactoryPatternViolationsTests(unittest.TestCase):
     """Test factory pattern compliance violations."""
     
     def setUp(self):

@@ -25,7 +25,7 @@ from unittest.mock import patch, Mock, AsyncMock
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context, get_test_jwt_token
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
-class TestWebSocketUserSessionConsistencyE2E:
+class WebSocketUserSessionConsistencyE2ETests:
     """E2E test suite to expose WebSocket user session consistency failures with real authentication.
     
     These tests are DESIGNED TO FAIL initially to demonstrate how ID generation

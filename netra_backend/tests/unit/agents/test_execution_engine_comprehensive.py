@@ -216,7 +216,7 @@ class MockAgentExecutionCore:
             execution_time = time.time() - start_time
             return AgentExecutionResult(success=False, agent_name=context.agent_name, execution_time=execution_time, error=str(e), state=None, metadata={'execution_count': self.execution_count})
 
-class TestExecutionEngineConstruction(SSotAsyncTestCase):
+class ExecutionEngineConstructionTests(SSotAsyncTestCase):
     """Test ExecutionEngine construction and initialization patterns"""
 
     async def test_direct_construction_succeeds(self):
@@ -265,7 +265,7 @@ class TestExecutionEngineConstruction(SSotAsyncTestCase):
         error_message = str(exc_info.value)
         assert any((word in error_message.lower() for word in ['context', 'attribute', 'type']))
 
-class TestUserExecutionContextIntegration(SSotAsyncTestCase):
+class UserExecutionContextIntegrationTests(SSotAsyncTestCase):
     """Test UserExecutionContext integration for multi-user isolation"""
 
     async def test_user_context_storage_and_isolation(self):
@@ -295,7 +295,7 @@ class TestUserExecutionContextIntegration(SSotAsyncTestCase):
         assert isinstance(lock_1, asyncio.Lock)
         assert isinstance(lock_2, asyncio.Lock)
 
-class TestContextValidation(SSotAsyncTestCase):
+class ContextValidationTests(SSotAsyncTestCase):
     """Test execution context validation to prevent placeholder values"""
 
     async def test_validation_rejects_empty_user_id(self):
@@ -326,7 +326,7 @@ class TestContextValidation(SSotAsyncTestCase):
         valid_context = AgentExecutionContext(agent_name='test_agent', run_id='run_123', thread_id='thread_456', user_id='user_789')
         engine._validate_execution_context(valid_context)
 
-class TestWebSocketEventEmission(SSotAsyncTestCase):
+class WebSocketEventEmissionTests(SSotAsyncTestCase):
     """Test WebSocket event emission for all 5 critical events"""
 
     async def test_websocket_bridge_direct_notification_calls(self):
@@ -346,7 +346,7 @@ class TestWebSocketEventEmission(SSotAsyncTestCase):
         assert started_events[0]['run_id'] == 'test_run'
         assert started_events[0]['agent_name'] == 'test_agent'
 
-class TestConcurrencyAndIsolation(SSotAsyncTestCase):
+class ConcurrencyAndIsolationTests(SSotAsyncTestCase):
     """Test concurrency control and multi-user isolation"""
 
     async def test_semaphore_initialization(self):
@@ -385,7 +385,7 @@ class TestConcurrencyAndIsolation(SSotAsyncTestCase):
         state_1['active_runs']['test_run'] = {'status': 'running'}
         assert 'test_run' not in state_2['active_runs']
 
-class TestMemoryAndResourceManagement(SSotAsyncTestCase):
+class MemoryAndResourceManagementTests(SSotAsyncTestCase):
     """Test memory cleanup and resource management"""
 
     async def test_history_size_constants(self):
@@ -403,7 +403,7 @@ class TestMemoryAndResourceManagement(SSotAsyncTestCase):
         await engine.shutdown()
         assert len(engine.active_runs) == 0
 
-class TestFactoryPatternsAndMigration(SSotAsyncTestCase):
+class FactoryPatternsAndMigrationTests(SSotAsyncTestCase):
     """Test factory patterns and migration support"""
 
     async def test_detect_global_state_usage_utility(self):

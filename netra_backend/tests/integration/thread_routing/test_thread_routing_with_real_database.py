@@ -53,7 +53,7 @@ except ImportError:
     select = None
 
 
-class TestThreadRoutingRealDatabase(BaseIntegrationTest):
+class ThreadRoutingRealDatabaseTests(BaseIntegrationTest):
     """Test thread routing functionality with real PostgreSQL database."""
 
     @pytest.mark.integration

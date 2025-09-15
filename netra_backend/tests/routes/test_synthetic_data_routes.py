@@ -14,7 +14,7 @@ import pytest
 
 from netra_backend.tests.test_utilities import base_client
 
-class TestSyntheticDataRoute:
+class SyntheticDataRouteTests:
     """Test synthetic data creation."""
     
     def test_synthetic_data_generation(self, base_client):

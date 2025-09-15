@@ -417,7 +417,7 @@ def create_mock_auth_token(user_id: str) -> str:
 # COMPREHENSIVE TEST SUITE
 # ============================================================================
 
-class TestWebSocketEventValidationSuite:
+class WebSocketEventValidationSuiteTests:
     """Comprehensive WebSocket event validation test suite."""
     
     @pytest.fixture(scope="class")

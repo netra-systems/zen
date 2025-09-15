@@ -31,7 +31,7 @@ import pytest
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
-class TestIsolatedEnvironmentCore:
+class IsolatedEnvironmentCoreTests:
     """
     Core integration tests for IsolatedEnvironment functionality.
     
@@ -436,7 +436,7 @@ FILE_ONLY_VAR=file_value
 
 # === LEGACY COMPATIBILITY TESTS ===
 
-class TestIsolatedEnvironmentLegacyCompatibility:
+class IsolatedEnvironmentLegacyCompatibilityTests:
     """Test backwards compatibility with legacy environment patterns."""
 
     def setup_method(self):

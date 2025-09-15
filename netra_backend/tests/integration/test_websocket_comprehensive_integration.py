@@ -100,7 +100,7 @@ WEBSOCKET_EVENT_SCHEMAS = {
 }
 
 
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Test WebSocket connection for business-critical integration testing.
     
     IMPORTANT: This is NOT a mock - it's a test harness that captures real WebSocket 
@@ -250,7 +250,7 @@ class TestWebSocketConnection:
         }
 
 
-class TestWebSocketComprehensiveIntegration(BaseIntegrationTest):
+class WebSocketComprehensiveIntegrationTests(BaseIntegrationTest):
     """
     Comprehensive WebSocket integration tests validating business-critical functionality.
     
@@ -300,9 +300,9 @@ class TestWebSocketComprehensiveIntegration(BaseIntegrationTest):
                 
         super().teardown_method()
 
-    def _create_test_connection(self, user_id: Optional[str] = None) -> TestWebSocketConnection:
+    def _create_test_connection(self, user_id: Optional[str] = None) -> WebSocketConnectionTests:
         """Create test WebSocket connection with proper tracking and real auth validation."""
-        connection = TestWebSocketConnection(user_id or self.test_user_id)
+        connection = WebSocketConnectionTests(user_id or self.test_user_id)
         self._created_connections.append(connection)
         return connection
 

@@ -16,7 +16,7 @@ from shared.database_url_builder import DatabaseURLBuilder
 from netra_backend.app.db.database_manager import DatabaseManager
 
 
-class TestDatabaseURLPassing:
+class DatabaseURLPassingTests:
     """Test suite for #removed-legacyenvironment variable passing."""
     
     def test_database_url_retrieved_from_environment(self):
@@ -149,7 +149,7 @@ class TestDatabaseURLPassing:
 
 if __name__ == "__main__":
     # Run the tests
-    test_suite = TestDatabaseURLPassing()
+    test_suite = DatabaseURLPassingTests()
     
     print("Running #removed-legacypassing tests...")
     

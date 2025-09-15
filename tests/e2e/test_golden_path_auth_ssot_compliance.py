@@ -44,7 +44,7 @@ from test_framework.common_imports import *
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 logger = logging.getLogger(__name__)
 
-class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
+class GoldenPathAuthSsotComplianceTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

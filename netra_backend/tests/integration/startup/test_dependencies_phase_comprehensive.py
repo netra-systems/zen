@@ -35,7 +35,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from fastapi import FastAPI
 
 
-class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
+class DependenciesPhaseComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive integration tests for system startup DEPENDENCIES phase.
     

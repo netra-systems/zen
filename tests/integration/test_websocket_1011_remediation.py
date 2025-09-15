@@ -134,7 +134,7 @@ def websocket_production_strict():
 
 
 @pytest.mark.asyncio
-class TestWebSocket1011Remediation:
+class WebSocket1011RemediationTests:
     """Test complete 1011 error remediation scenarios."""
     
     async def test_gcp_load_balancer_header_stripping_scenario(self, websocket_gcp_staging):
@@ -424,7 +424,7 @@ class TestWebSocket1011Remediation:
 
 
 @pytest.mark.asyncio
-class TestMonitoringAndAlerting:
+class MonitoringAndAlertingTests:
     """Test monitoring and alerting for auth permissiveness system."""
     
     async def test_health_endpoint_during_1011_conditions(self):
@@ -486,7 +486,7 @@ if __name__ == "__main__":
         print("🚀 Starting WebSocket 1011 Error Remediation Test Suite")
         print("=" * 60)
         
-        test_instance = TestWebSocket1011Remediation()
+        test_instance = WebSocket1011RemediationTests()
         
         try:
             # Run comprehensive test

@@ -101,7 +101,7 @@ except ImportError:
 @pytest.mark.e2e_business_logic
 @pytest.mark.business_critical
 @pytest.mark.golden_path
-class TestEndToEndBusinessLogicIntegration(SSotAsyncTestCase):
+class EndToEndBusinessLogicIntegrationTests(SSotAsyncTestCase):
     """
     Phase 3: End-to-End Business Logic Integration Test Suite
 

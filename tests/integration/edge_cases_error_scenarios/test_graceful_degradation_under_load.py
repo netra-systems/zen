@@ -458,7 +458,7 @@ class SimulatedLoadBalancer:
 
 
 @pytest.mark.integration
-class TestGracefulDegradationUnderLoad(BaseIntegrationTest):
+class GracefulDegradationUnderLoadTests(BaseIntegrationTest):
     """
     Test graceful degradation mechanisms under various load conditions.
     

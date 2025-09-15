@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.integration
-class TestWebSocketDeprecatedPatternElimination(SSotBaseTestCase):
+class WebSocketDeprecatedPatternEliminationTests(SSotBaseTestCase):
     """
     SSOT validation tests for WebSocket deprecated pattern elimination.
     

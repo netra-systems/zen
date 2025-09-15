@@ -108,7 +108,7 @@ class JWTPayload:
         )
 
 
-class TestAuthContextSSotCompliance(BaseIntegrationTest):
+class AuthContextSSotComplianceTests(BaseIntegrationTest):
     """Integration tests for AuthContext type SSOT compliance across services."""
     
     @pytest.mark.integration

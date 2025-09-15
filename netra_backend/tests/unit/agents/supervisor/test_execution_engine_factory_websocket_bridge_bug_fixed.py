@@ -27,7 +27,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInst
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
-class TestExecutionEngineFactoryWebSocketBridgeBugFixed:
+class ExecutionEngineFactoryWebSocketBridgeBugFixedTests:
     """
     Verification that the WebSocket bridge bug has been FIXED.
     
@@ -242,7 +242,7 @@ class TestExecutionEngineFactoryWebSocketBridgeBugFixed:
 
 
 # Additional integration-style test to verify the complete fix
-class TestExecutionEngineFactoryIntegrationFixValidation:
+class ExecutionEngineFactoryIntegrationFixValidationTests:
     """
     Integration-style validation that the complete fix works end-to-end.
     """

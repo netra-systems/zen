@@ -284,7 +284,7 @@ class MockWebSocketManager:
         """Check if WebSocket is connected."""
         return self.connected
 
-class TestAgentFactoryIntegrationOffline(SSotBaseTestCase, AsyncTestFixtureMixin):
+class AgentFactoryIntegrationOfflineTests(SSotBaseTestCase, AsyncTestFixtureMixin):
     """Offline integration tests for agent factory and registry."""
 
     def setup_method(self, method=None):

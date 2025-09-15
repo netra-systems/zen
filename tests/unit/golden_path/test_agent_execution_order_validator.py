@@ -169,7 +169,7 @@ class AgentExecutionOrderValidator:
                     executable.append(agent_type)
         return executable
 
-class TestAgentExecutionOrderValidator(SSotAsyncTestCase):
+class AgentExecutionOrderValidatorTests(SSotAsyncTestCase):
     """Test agent execution order validation logic."""
 
     def setup_method(self, method=None):

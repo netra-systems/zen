@@ -57,7 +57,7 @@ class MockEnhancedAgent(BaseAgent):
                 raise RuntimeError(f'Simulated failure in execution #{self.execution_count}')
         return {'status': 'success', 'execution_count': self.execution_count, 'agent_name': self.name, 'timestamp': time.time()}
 
-class TestEnhancedInitialization:
+class EnhancedInitializationTests:
     """Enhanced initialization tests with edge cases."""
 
     @pytest.fixture
@@ -126,7 +126,7 @@ class TestConcurrencyStressTests:
             assert agent.latency_ms == i * 5
             assert agent.name == f'IsolationAgent_{i}'
 
-class TestReliabilityUnderStress:
+class ReliabilityUnderStressTests:
     """Test reliability features under stress conditions."""
 
     @pytest.fixture
@@ -149,7 +149,7 @@ class TestReliabilityUnderStress:
         health_status = agent.get_health_status()
         assert health_status is not None
 
-class TestMemoryManagement:
+class MemoryManagementTests:
     """Test memory management and leak detection."""
 
     @pytest.fixture
@@ -174,7 +174,7 @@ class TestMemoryManagement:
         del agents
         assert agent_count == 5
 
-class TestEdgeCaseScenarios:
+class EdgeCaseScenariosTests:
     """Test edge cases and boundary conditions."""
 
     @pytest.fixture
@@ -198,7 +198,7 @@ class TestEdgeCaseScenarios:
         assert agent_0.get_health_status() is not None
         assert agent_100.get_health_status() is not None
 
-class TestPerformanceBenchmarks:
+class PerformanceBenchmarksTests:
     """Performance benchmarking under stress."""
 
     @pytest.fixture
@@ -228,7 +228,7 @@ class TestPerformanceBenchmarks:
         assert len(agents) == 10
         del agents
 
-class TestFailureCascadeScenarios:
+class FailureCascadeScenariosTests:
     """Test cascade failure scenarios."""
 
     @pytest.fixture

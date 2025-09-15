@@ -94,7 +94,7 @@ class ToolExecutionTestContext:
             self.tool_permissions = {}
 
 
-class TestAgentToolDispatcherIntegration(SSotAsyncTestCase):
+class AgentToolDispatcherIntegrationTests(SSotAsyncTestCase):
     """CRITICAL integration tests for agent tool dispatcher integration."""
     
     @pytest.fixture

@@ -12,7 +12,7 @@ from typing import Any, Dict, List
 import pytest
 from netra_backend.app.core.performance_optimization_manager import MemoryCache, QueryOptimizer
 
-class TestMemoryCache:
+class MemoryCacheTests:
     """Test memory cache performance and functionality."""
 
     @pytest.fixture
@@ -76,7 +76,7 @@ class TestMemoryCache:
         stats = cache.get_stats()
         assert stats['total_hits'] >= items
 
-class TestQueryOptimizer:
+class QueryOptimizerTests:
     """Test database query optimization."""
 
     @pytest.fixture

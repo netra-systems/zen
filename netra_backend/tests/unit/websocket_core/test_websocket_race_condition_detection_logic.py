@@ -34,7 +34,7 @@ from shared.isolated_environment import get_env
 from netra_backend.tests.unit.test_base import BaseUnitTest
 from netra_backend.app.websocket_core.race_condition_prevention import ApplicationConnectionState, RaceConditionPattern, RaceConditionDetector, HandshakeCoordinator
 
-class TestWebSocketRaceConditionDetectionLogic(BaseUnitTest):
+class WebSocketRaceConditionDetectionLogicTests(BaseUnitTest):
     """
     Unit tests for WebSocket race condition detection logic.
     

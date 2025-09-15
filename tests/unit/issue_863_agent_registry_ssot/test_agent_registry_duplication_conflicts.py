@@ -23,7 +23,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 @pytest.mark.unit
-class TestAgentRegistryDuplicationConflicts(SSotAsyncTestCase):
+class AgentRegistryDuplicationConflictsTests(SSotAsyncTestCase):
     """
     Test suite to reproduce AgentRegistry SSOT violations blocking Golden Path.
 

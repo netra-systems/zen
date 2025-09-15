@@ -10,7 +10,7 @@ from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, IntegrationState
 from netra_backend.app import schemas
 
-class TestAgentServiceBridgeIntegration:
+class AgentServiceBridgeIntegrationTests:
     """Integration tests for AgentService with bridge coordination."""
     pass
 
@@ -189,7 +189,7 @@ class TestAgentServiceBridgeIntegration:
                                                             assert hasattr(clean_service.message_handler, '_websocket_manager')
                                                             assert clean_service.message_handler._websocket_manager is clean_service._bridge._websocket_manager
 
-                                                            class TestAgentServiceLegacyCompatibility:
+                                                            class AgentServiceLegacyCompatibilityTests:
                                                                 """Tests ensuring backward compatibility during bridge integration."""
                                                                 pass
 

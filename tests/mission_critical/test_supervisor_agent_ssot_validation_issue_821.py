@@ -18,7 +18,7 @@ from typing import Any, Dict
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestSupervisorAgentSSOTValidation(SSotBaseTestCase):
+class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
     """Tests that validate successful SSOT consolidation.
 
     These tests ensure that after SSOT consolidation:

@@ -41,7 +41,7 @@ from netra_backend.app.data_contexts.user_data_context import (
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestDataAccessFactoryIsolation(BaseIntegrationTest):
+class DataAccessFactoryIsolationTests(BaseIntegrationTest):
     """Test data access factory isolation with real concurrent user scenarios."""
     
     @classmethod

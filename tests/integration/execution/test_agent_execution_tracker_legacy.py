@@ -54,7 +54,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 
 
 @pytest.mark.integration
-class TestAgentExecutionTrackerIntegration(SSotAsyncTestCase):
+class AgentExecutionTrackerIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for the AgentExecutionTracker SSOT class.
     
@@ -865,7 +865,7 @@ class TestAgentExecutionTrackerIntegration(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestAgentExecutionTrackerCompatibility(SSotAsyncTestCase):
+class AgentExecutionTrackerCompatibilityTests(SSotAsyncTestCase):
     """
     Test compatibility aliases and backward compatibility functions.
     
@@ -911,7 +911,7 @@ class TestAgentExecutionTrackerCompatibility(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestAgentExecutionTrackerErrorConditions(SSotAsyncTestCase):
+class AgentExecutionTrackerErrorConditionsTests(SSotAsyncTestCase):
     """
     Test error conditions and edge cases for AgentExecutionTracker.
     
@@ -1050,7 +1050,7 @@ class TestAgentExecutionTrackerErrorConditions(SSotAsyncTestCase):
 
 # Export test classes for pytest discovery
 __all__ = [
-    'TestAgentExecutionTrackerIntegration',
-    'TestAgentExecutionTrackerCompatibility', 
-    'TestAgentExecutionTrackerErrorConditions'
+    'AgentExecutionTrackerIntegrationTests',
+    'AgentExecutionTrackerCompatibilityTests', 
+    'AgentExecutionTrackerErrorConditionsTests'
 ]

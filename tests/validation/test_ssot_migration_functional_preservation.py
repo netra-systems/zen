@@ -29,7 +29,7 @@ from unittest.mock import Mock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 
 
-class TestSsotMigrationFunctionalPreservation(SSotBaseTestCase):
+class SsotMigrationFunctionalPreservationTests(SSotBaseTestCase):
     """Validate that SSOT migration preserves all existing functionality."""
     
     def setup_method(self, method):
@@ -463,7 +463,7 @@ class TestSsotMigrationFunctionalPreservation(SSotBaseTestCase):
         print("\n" + "="*70)
 
 
-class TestSsotMigrationAsyncFunctionalPreservation(SSotAsyncTestCase):
+class SsotMigrationAsyncFunctionalPreservationTests(SSotAsyncTestCase):
     """Validate that async SSOT migration preserves functionality."""
     
     async def test_async_functionality_preservation(self):
@@ -545,7 +545,7 @@ if __name__ == "__main__":
     
     # Test sync functionality preservation
     print("\n🧪 Testing sync functionality preservation...")
-    sync_test = TestSsotMigrationFunctionalPreservation()
+    sync_test = SsotMigrationFunctionalPreservationTests()
     sync_test.setup_method(None)
     
     try:
@@ -566,7 +566,7 @@ if __name__ == "__main__":
     # Test async functionality preservation
     print("\n🧪 Testing async functionality preservation...")
     async def run_async_tests():
-        async_test = TestSsotMigrationAsyncFunctionalPreservation()
+        async_test = SsotMigrationAsyncFunctionalPreservationTests()
         async_test.setup_method(None)
         
         try:

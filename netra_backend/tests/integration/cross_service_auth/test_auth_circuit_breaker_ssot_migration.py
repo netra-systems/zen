@@ -32,7 +32,7 @@ from netra_backend.app.core.resilience.unified_circuit_breaker import (
 )
 
 
-class TestAuthCircuitBreakerSSOTMigration(SSotBaseTestCase):
+class AuthCircuitBreakerSSOTMigrationTests(SSotBaseTestCase):
     """Test SSOT compliance for AuthCircuitBreakerManager migration."""
 
     @pytest.mark.integration

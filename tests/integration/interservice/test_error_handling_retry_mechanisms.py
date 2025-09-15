@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import BaseTestCase
 from shared.isolated_environment import get_env
 
 
-class TestErrorHandlingRetryMechanisms(BaseTestCase):
+class ErrorHandlingRetryMechanismsTests(BaseTestCase):
     """Integration tests for error handling and retry mechanisms across services."""
     
     @pytest.mark.integration

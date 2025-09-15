@@ -22,7 +22,7 @@ from netra_backend.app.core.configuration.validator import ConfigurationValidato
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 
 
-class TestConfigurationValidatorCompliance(BaseIntegrationTest):
+class ConfigurationValidatorComplianceTests(BaseIntegrationTest):
     """Test Configuration Validator SSOT compliance."""
     
     @pytest.mark.integration

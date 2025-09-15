@@ -11,7 +11,7 @@ from shared.id_generation import UnifiedIdGenerator
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.unit
-class TestUserSessionManagerValidation:
+class UserSessionManagerValidationTests:
     """Basic validation tests for UserSessionManager."""
 
     @pytest.mark.asyncio

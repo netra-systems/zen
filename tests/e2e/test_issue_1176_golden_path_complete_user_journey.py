@@ -32,7 +32,7 @@ from tests.e2e.staging.staging_test_config import (
 )
 
 
-class TestGoldenPathCompleteUserJourney(BaseE2ETest):
+class GoldenPathCompleteUserJourneyTests(BaseE2ETest):
     """Test complete Golden Path user journey end-to-end."""
 
     @pytest.mark.e2e

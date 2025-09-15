@@ -36,7 +36,7 @@ from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.clients.auth_client_core import auth_client
 
 
-class TestOAuthJWTSecurityVulnerabilities:
+class OAuthJWTSecurityVulnerabilitiesTests:
     """Test OAuth JWT security vulnerabilities and attack vectors"""
     
     def test_jwt_algorithm_switching_attack(self):

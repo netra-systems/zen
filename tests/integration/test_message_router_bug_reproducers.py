@@ -25,7 +25,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from test_framework.database.test_database_manager import DatabaseTestManager
 
 @pytest.mark.integration
-class TestMessageRouterBugReproducers:
+class MessageRouterBugReproducersTests:
     """
     Bug reproducer tests that demonstrate the exact failures and validate fixes.
     
@@ -160,7 +160,7 @@ class TestMessageRouterBugReproducers:
         print(' PASS:  This is what integration tests should validate going forward')
 
 @pytest.mark.integration
-class TestChatMessageIntegrationCorrectBehavior:
+class ChatMessageIntegrationCorrectBehaviorTests:
     """
     Tests that validate the CORRECT current behavior of chat_message handling.
     

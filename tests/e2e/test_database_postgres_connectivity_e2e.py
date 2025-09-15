@@ -42,7 +42,7 @@ logger = get_logger(__name__)
 
 @env_requires(services=['auth_service', 'backend', 'postgres', 'redis'], features=['database_connectivity'])
 @pytest.mark.e2e
-class TestDatabasePostgresConnectivityE2E:
+class DatabasePostgresConnectivityE2ETests:
     """E2E test suite for REAL PostgreSQL connectivity across all services."""
 
     @pytest.fixture
@@ -303,7 +303,7 @@ class TestDatabasePostgresConnectivityE2E:
 
 @env_requires(services=['postgres'], features=['database_naming'])
 @pytest.mark.e2e
-class TestDatabaseNamingConventionE2E:
+class DatabaseNamingConventionE2ETests:
     """E2E tests for REAL database naming convention validation across the platform."""
 
     @pytest.mark.e2e

@@ -47,7 +47,7 @@ from tests.e2e.staging_test_helpers import (
 
 
 @pytest.mark.e2e
-class TestHealthEndpointTimeoutFailures:
+class HealthEndpointTimeoutFailuresTests:
     """
     Test suite replicating critical health endpoint timeout failures from GCP staging.
     
@@ -343,7 +343,7 @@ class TestHealthEndpointTimeoutFailures:
 
 
 @pytest.mark.e2e
-class TestHealthEndpointRecoveryAndOptimization:
+class HealthEndpointRecoveryAndOptimizationTests:
     """
     Additional tests for health endpoint recovery mechanisms and optimizations.
     These tests help identify specific improvement opportunities.

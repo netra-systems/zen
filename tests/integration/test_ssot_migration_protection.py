@@ -21,7 +21,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from test_framework.ssot.orchestration import OrchestrationConfig
 
 
-class TestSSotMigrationProtection(SSotAsyncTestCase):
+class SSotMigrationProtectionTests(SSotAsyncTestCase):
     """Ensure SSOT migrations don't break business functionality."""
 
     def setUp(self):

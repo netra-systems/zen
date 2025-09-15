@@ -27,7 +27,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_db_fixture
 
 
-class TestDatabaseUserSessionManagementRealServices(BaseIntegrationTest):
+class DatabaseUserSessionManagementRealServicesTests(BaseIntegrationTest):
     """Test user session management with real PostgreSQL database."""
     
     @pytest.mark.integration

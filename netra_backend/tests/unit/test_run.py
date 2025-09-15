@@ -9,7 +9,7 @@ import time
 from netra_backend.app.db.models_agent import Run
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestRun:
+class RunTests:
     """Test suite for Run database model"""
     
     @pytest.fixture

@@ -23,7 +23,7 @@ from netra_backend.tests.test_route_fixtures import (
     basic_test_client,
 )
 
-class TestSyntheticDataGeneration:
+class SyntheticDataGenerationTests:
     """Test synthetic data creation and validation functionality."""
     
     def test_synthetic_data_generation(self, basic_test_client):

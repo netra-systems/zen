@@ -114,7 +114,7 @@ def mock_build():
     validator = NextJSConfigValidator()
     return MockNextJSBuild(validator.config_path)
 
-class TestNextJSConfigValidation:
+class NextJSConfigValidationTests:
     """Core configuration validation tests that will initially fail."""
 
     def test_deprecated_swc_minify_option_detected(self, config_validator):
@@ -159,7 +159,7 @@ class TestNextJSConfigValidation:
         if env.get('NODE_ENV') == 'production':
             assert 'productionBrowserSourceMaps: false' in config_content, 'Source maps should be disabled in production'
 
-class TestNextJSVersionMigration:
+class NextJSVersionMigrationTests:
     """Version migration tests that will initially fail."""
 
     def test_migration_from_next_13_to_15(self, config_validator):
@@ -199,7 +199,7 @@ class TestNextJSVersionMigration:
         """Get issues preventing upgrade to target version."""
         return []
 
-class TestNextJSBuildImpact:
+class NextJSBuildImpactTests:
     """Build impact tests that will initially fail."""
 
     def test_build_warnings_with_deprecated_config(self, mock_build):
@@ -239,7 +239,7 @@ class TestNextJSBuildImpact:
         if 'NEXT_PUBLIC_API_URL' not in config_content:
             assert False, 'Missing API URL environment variable should cause runtime failures'
 
-class TestExtendedConfigScenarios:
+class ExtendedConfigScenariosTests:
     """Extended configuration scenario tests that will initially fail."""
 
     def test_dynamic_config_generation_issues(self, config_validator):
@@ -321,7 +321,7 @@ class TestExtendedConfigScenarios:
         if 'typescript:' in config_content:
             assert 'ignoreBuildErrors' in config_content, 'TypeScript section should have ignoreBuildErrors'
 
-class TestConfigValidationIntegration:
+class ConfigValidationIntegrationTests:
     """Integration tests for configuration validation (will initially fail)."""
 
     def test_end_to_end_config_validation(self, config_validator, mock_build):

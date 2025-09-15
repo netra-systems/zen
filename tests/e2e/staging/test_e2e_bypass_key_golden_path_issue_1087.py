@@ -16,7 +16,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 
-class TestE2EBypassKeyGoldenPathIssue1087(SSotAsyncTestCase):
+class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
     """E2E tests for Golden Path authentication with bypass key in staging."""
 
     def setup_method(self, method):

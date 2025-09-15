@@ -69,7 +69,7 @@ from netra_backend.app.core.execution_tracker import ExecutionState
 from shared.isolated_environment import get_env
 
 
-class TestAgentExecutionCoreComprehensive(SSotBaseTestCase):
+class AgentExecutionCoreComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive unit tests for AgentExecutionCore business logic.
     
@@ -1016,7 +1016,7 @@ class TestAgentExecutionCoreComprehensive(SSotBaseTestCase):
 
 # ===== ADDITIONAL SPECIALIZED TEST CLASSES =====
 
-class TestAgentExecutionCoreIntegrationPoints(SSotBaseTestCase):
+class AgentExecutionCoreIntegrationPointsTests(SSotBaseTestCase):
     """Test integration points between AgentExecutionCore and other system components."""
 
     async def test_execution_engine_integration_patterns(self):
@@ -1071,6 +1071,6 @@ class TestAgentExecutionCoreIntegrationPoints(SSotBaseTestCase):
 
 # Export the test classes for discovery
 __all__ = [
-    "TestAgentExecutionCoreComprehensive",
-    "TestAgentExecutionCoreIntegrationPoints"
+    "AgentExecutionCoreComprehensiveTests",
+    "AgentExecutionCoreIntegrationPointsTests"
 ]

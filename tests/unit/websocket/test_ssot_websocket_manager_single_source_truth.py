@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestWebSocketManagerSSotCompliance(SSotBaseTestCase, unittest.TestCase):
+class WebSocketManagerSSotComplianceTests(SSotBaseTestCase, unittest.TestCase):
     """Test suite to validate SSOT compliance for WebSocket managers.
     
     These tests should FAIL initially, proving 7+ managers exist.

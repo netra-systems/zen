@@ -79,7 +79,7 @@ from auth_service.auth_core.models.auth_models import (
 )
 
 
-class TestAuthenticationSecurityIntegration(SSotBaseTestCase):
+class AuthenticationSecurityIntegrationTests(SSotBaseTestCase):
     """
     Comprehensive authentication security integration tests.
     
@@ -1582,7 +1582,7 @@ class TestAuthenticationSecurityIntegration(SSotBaseTestCase):
 
 # Additional test classes for specific auth integration scenarios
 
-class TestAuthenticationPerformanceIntegration(SSotBaseTestCase):
+class AuthenticationPerformanceIntegrationTests(SSotBaseTestCase):
     """
     Authentication performance and scalability integration tests.
     
@@ -1622,7 +1622,7 @@ class TestAuthenticationPerformanceIntegration(SSotBaseTestCase):
         self.record_metric("tokens_created_per_second", 50 / creation_time)
 
 
-class TestAuthenticationErrorHandlingIntegration(SSotBaseTestCase):
+class AuthenticationErrorHandlingIntegrationTests(SSotBaseTestCase):
     """
     Authentication error handling and resilience integration tests.
     
@@ -1672,7 +1672,7 @@ class TestAuthenticationErrorHandlingIntegration(SSotBaseTestCase):
 
 # Export test classes for pytest discovery
 __all__ = [
-    "TestAuthenticationSecurityIntegration",
-    "TestAuthenticationPerformanceIntegration", 
-    "TestAuthenticationErrorHandlingIntegration"
+    "AuthenticationSecurityIntegrationTests",
+    "AuthenticationPerformanceIntegrationTests", 
+    "AuthenticationErrorHandlingIntegrationTests"
 ]

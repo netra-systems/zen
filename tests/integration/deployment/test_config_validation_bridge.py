@@ -45,7 +45,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.integration
-class TestConfigValidationBridge(SSotBaseTestCase):
+class ConfigValidationBridgeTests(SSotBaseTestCase):
     """
     Integration tests for the configuration validation bridge.
     

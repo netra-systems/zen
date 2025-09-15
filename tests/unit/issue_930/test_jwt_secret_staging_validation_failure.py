@@ -20,7 +20,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestJWTSecretStagingValidationFailure:
+class JWTSecretStagingValidationFailureTests:
     """Test suite reproducing JWT_SECRET_STAGING validation failures from staging logs."""
 
     def setup_method(self):
@@ -273,7 +273,7 @@ class TestJWTSecretStagingValidationFailure:
 
 
 @pytest.mark.unit
-class TestJWTSecretManagerEnvironmentAccessPatterns:
+class JWTSecretManagerEnvironmentAccessPatternsTests:
     """Test JWT secret manager environment access patterns causing staging failures."""
 
     def test_isolated_environment_import_failure(self):

@@ -193,7 +193,7 @@ class MockWebSocketNotifier(BaseWebSocketNotifier):
         return [event for event in all_events if event.get("run_id") == run_id]
 
 
-class TestToolExecutionDispatch(SSotAsyncTestCase):
+class ToolExecutionDispatchTests(SSotAsyncTestCase):
     """Integration tests for Tool Execution and Dispatching patterns.
     
     Tests REAL component interactions without Docker dependencies.

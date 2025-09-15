@@ -58,7 +58,7 @@ class MockAgentWebSocketBridge:
         """Get events for specific agent."""
         return [e for e in self.events_received if e.get('agent_name') == agent_name]
 
-class TestWebSocketBridgeAdapter(SSotAsyncTestCase):
+class WebSocketBridgeAdapterTests(SSotAsyncTestCase):
     """Comprehensive unit tests for WebSocketBridgeAdapter functionality."""
 
     def setup_method(self, method):

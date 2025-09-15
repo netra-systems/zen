@@ -11,7 +11,7 @@ import socket
 import requests
 
 @pytest.mark.integration
-class TestStagingWebSocketBaseline:
+class StagingWebSocketBaselineTests:
     
     def test_staging_backend_connectivity_baseline(self):
         """INTEGRATION: Test basic connectivity to staging backend"""

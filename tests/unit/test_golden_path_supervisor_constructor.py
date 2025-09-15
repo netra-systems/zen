@@ -41,7 +41,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 @pytest.mark.unit
-class TestSupervisorAgentConstructor(SSotAsyncTestCase):
+class SupervisorAgentConstructorTests(SSotAsyncTestCase):
     """Unit tests reproducing SupervisorAgent constructor parameter issues from Golden Path.
     
     These tests reproduce constructor TypeError issues that occur when Golden Path

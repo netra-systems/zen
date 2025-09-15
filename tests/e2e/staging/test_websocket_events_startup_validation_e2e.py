@@ -51,7 +51,7 @@ class WebSocketEventCapture:
     delivery_successful: bool
     delivery_time: Optional[float] = None
 
-class TestWebSocketEventsStartupE2E(SSotAsyncTestCase):
+class WebSocketEventsStartupE2ETests(SSotAsyncTestCase):
     """
     E2E validation of WebSocket events during startup in real staging environment.
     

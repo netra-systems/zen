@@ -144,7 +144,7 @@ class UserJourneyTestHarness(AnalyticsE2ETestHarness):
 # NEW USER ONBOARDING JOURNEY TESTS
 # =============================================================================
 
-class TestNewUserOnboardingJourney:
+class NewUserOnboardingJourneyTests:
     """Test suite for new user onboarding analytics journey"""
     
     @pytest.fixture
@@ -284,7 +284,7 @@ class TestNewUserOnboardingJourney:
 # POWER USER ADVANCED ANALYTICS JOURNEY
 # =============================================================================
 
-class TestPowerUserAnalyticsJourney:
+class PowerUserAnalyticsJourneyTests:
     """Test suite for power user advanced analytics workflows"""
     
     @pytest.fixture
@@ -396,7 +396,7 @@ class TestPowerUserAnalyticsJourney:
 # ENTERPRISE MULTI-TENANT JOURNEY
 # =============================================================================
 
-class TestEnterpriseMultiTenantJourney:
+class EnterpriseMultiTenantJourneyTests:
     """Test suite for enterprise multi-tenant analytics workflows"""
     
     @pytest.fixture
@@ -500,7 +500,7 @@ class TestEnterpriseMultiTenantJourney:
 # CROSS-SESSION DATA CONTINUITY TESTS
 # =============================================================================
 
-class TestCrossSessionDataContinuity:
+class CrossSessionDataContinuityTests:
     """Test suite for cross-session data continuity"""
     
     @pytest.fixture
@@ -638,7 +638,7 @@ class TestCrossSessionDataContinuity:
 # USER LIFECYCLE TRACKING TESTS
 # =============================================================================
 
-class TestUserLifecycleTracking:
+class UserLifecycleTrackingTests:
     """Test suite for complete user lifecycle analytics"""
     
     @pytest.fixture

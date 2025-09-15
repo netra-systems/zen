@@ -78,7 +78,7 @@ except ImportError:
             return {'auth': 'http://localhost:8001', 'backend': 'http://localhost:8000'}
 logger = central_logger.get_logger(__name__)
 
-class TestOAuthE2ERunner:
+class OAuthE2ERunnerTests:
     """Critical OAuth E2E test execution manager"""
 
     def __init__(self):
@@ -187,7 +187,7 @@ async def oauth_e2e_runner():
         await runner.backend_client.close()
 
 @pytest.mark.e2e
-class TestOAuthCompleteE2EFlow:
+class OAuthCompleteE2EFlowTests:
     """Critical E2E test: OAuth Login  ->  Dashboard  ->  Chat History"""
 
     @pytest.mark.asyncio

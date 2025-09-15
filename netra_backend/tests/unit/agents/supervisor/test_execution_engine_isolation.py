@@ -50,7 +50,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
 from netra_backend.app.core.agent_execution_tracker import ExecutionState
 
 
-class TestExecutionEngineIsolation(SSotBaseTestCase):
+class ExecutionEngineIsolationTests(SSotBaseTestCase):
     """Comprehensive per-user isolation testing for ExecutionEngine."""
     
     def setup_method(self, method=None):

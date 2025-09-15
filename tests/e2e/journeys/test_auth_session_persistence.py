@@ -99,7 +99,7 @@ class SessionPersistenceValidator:
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.session_persistence
-class TestAuthSessionPersistence(BaseE2ETest):
+class AuthSessionPersistenceTests(BaseE2ETest):
     """E2E: Authentication session persistence across connections."""
 
     @pytest.fixture(autouse=True)
@@ -351,7 +351,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.session_persistence
-class TestSessionPersistenceEdgeCases(BaseE2ETest):
+class SessionPersistenceEdgeCasesTests(BaseE2ETest):
     """E2E: Session persistence edge cases and boundary conditions."""
 
     async def test_rapid_reconnection_session_stability(self):

@@ -25,7 +25,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager,
 from netra_backend.app.websocket_core.ssot_validation_enhancer import SSotValidationError, FactoryBypassDetected, enable_strict_validation, validate_websocket_manager_creation
 
 @pytest.mark.unit
-class TestWebSocketManagerDirectInstantiationPrevention(SSotAsyncTestCase):
+class WebSocketManagerDirectInstantiationPreventionTests(SSotAsyncTestCase):
     """
     Test suite for preventing direct WebSocket Manager instantiation.
 
@@ -154,7 +154,7 @@ class TestWebSocketManagerDirectInstantiationPrevention(SSotAsyncTestCase):
         self.assertTrue(updated_summary['total_validations'] > initial_summary['total_validations'], 'Validation was not recorded in the enhancer summary')
 
 @pytest.mark.unit
-class TestWebSocketManagerValidationGapDocumentation(SSotAsyncTestCase):
+class WebSocketManagerValidationGapDocumentationTests(SSotAsyncTestCase):
     """
     Test suite specifically designed to document validation gaps.
 

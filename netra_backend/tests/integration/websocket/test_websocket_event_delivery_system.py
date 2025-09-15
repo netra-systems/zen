@@ -101,7 +101,7 @@ class EventCapturingWebSocket:
 @pytest.mark.websocket
 @pytest.mark.critical
 @pytest.mark.asyncio
-class TestWebSocketEventDeliverySystem(SSotAsyncTestCase):
+class WebSocketEventDeliverySystemTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket event delivery system.
     

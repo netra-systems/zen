@@ -17,7 +17,7 @@ from netra_backend.app.db.base import Base
 
 from netra_backend.app.db.models_user import ToolUsageLog, User
 
-class TestSchemaConsistency:
+class SchemaConsistencyTests:
     """Test database schema consistency."""
 
     def test_user_trial_period_is_integer(self):

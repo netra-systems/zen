@@ -56,7 +56,7 @@ class EnterpriseUserResult:
     error_message: Optional[str] = None
 
 
-class TestEnterpriseMultiUserIntegration(BaseIntegrationTest):
+class EnterpriseMultiUserIntegrationTests(BaseIntegrationTest):
     """Test Enterprise multi-user scenarios with real services."""
     
     def setup_method(self):

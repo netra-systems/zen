@@ -58,7 +58,7 @@ def test_user_data():
 
 
 @pytest.mark.e2e
-class TestDatabaseDataFlow:
+class DatabaseDataFlowTests:
     """Main test class for database data flow validation."""
     
     @pytest.mark.asyncio
@@ -233,7 +233,7 @@ class TestDatabaseDataFlow:
 
 
 @pytest.mark.e2e
-class TestDatabasePerformance:
+class DatabasePerformanceTests:
     """Performance tests for database operations."""
     
     @pytest.mark.asyncio

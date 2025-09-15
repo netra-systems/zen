@@ -43,7 +43,7 @@ import time
 from unittest.mock import patch
 
 
-class TestMissionCriticalBusinessValueService(SSotAsyncTestCase):
+class MissionCriticalBusinessValueServiceTests(SSotAsyncTestCase):
     """Mission critical service availability and health tests"""
     
     def setup_method(self, method):
@@ -95,7 +95,7 @@ class TestMissionCriticalBusinessValueService(SSotAsyncTestCase):
             assert alert_response['severity'] == 'critical'
 
 
-class TestMissionCriticalWebSocketEventMonitoring(SSotAsyncTestCase):
+class MissionCriticalWebSocketEventMonitoringTests(SSotAsyncTestCase):
     """Mission critical WebSocket event monitoring tests"""
     
     def setup_method(self, method):
@@ -142,7 +142,7 @@ class TestMissionCriticalWebSocketEventMonitoring(SSotAsyncTestCase):
             assert isinstance(business_value_score, (int, float, Decimal))
 
 
-class TestMissionCriticalGoldenPathProtection(SSotAsyncTestCase):
+class MissionCriticalGoldenPathProtectionTests(SSotAsyncTestCase):
     """Mission critical Golden Path business value protection"""
     
     def setup_method(self, method):
@@ -209,7 +209,7 @@ class TestMissionCriticalGoldenPathProtection(SSotAsyncTestCase):
 # ISSUE #938 TESTS: Environment URL Configuration Using Localhost Block Staging
 # ============================================================================
 
-class TestEnvironmentURLConfigurationLocalhostBlockingStaging(SSotBaseTestCase):
+class EnvironmentURLConfigurationLocalhostBlockingStagingTests(SSotBaseTestCase):
     """Test suite for Issue #938 - Environment URL Configuration Using Localhost Block Staging.
     
     **BUSINESS CRITICAL**: This issue blocks staging deployment which impacts $500K+ ARR
@@ -462,7 +462,7 @@ class TestEnvironmentURLConfigurationLocalhostBlockingStaging(SSotBaseTestCase):
                         "Staging should use 'enforce_all' validation mode")
 
 
-class TestEnvironmentURLConfigurationIntegration(SSotBaseTestCase):
+class EnvironmentURLConfigurationIntegrationTests(SSotBaseTestCase):
     """Integration tests for environment URL configuration loading.
     
     Tests configuration loading with different ENVIRONMENT values to ensure
@@ -561,7 +561,7 @@ class TestEnvironmentURLConfigurationIntegration(SSotBaseTestCase):
 
 @pytest.mark.e2e
 @pytest.mark.staging
-class TestGCPStagingEnvironmentValidation(SSotBaseTestCase):
+class GCPStagingEnvironmentValidationTests(SSotBaseTestCase):
     """E2E tests for GCP staging environment validation (remote GCP only).
     
     **CRITICAL**: These tests run against real GCP staging environment to validate

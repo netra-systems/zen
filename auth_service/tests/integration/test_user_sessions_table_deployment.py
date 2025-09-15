@@ -18,7 +18,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
 
 
-class TestUserSessionsTableDeployment(BaseIntegrationTest):
+class UserSessionsTableDeploymentTests(BaseIntegrationTest):
     """Test user_sessions table deployment and schema validation."""
     
     @pytest.mark.integration

@@ -13,7 +13,7 @@ from typing import Dict, Any, List
 from netra_backend.app.services.websocket.message_queue import MessageQueue, QueuedMessage, MessageStatus, MessagePriority
 from netra_backend.app.core.circuit_breaker import CircuitBreakerOpenError
 
-class TestMessageQueueResilience:
+class MessageQueueResilienceTests:
     """Test suite for message queue resilience features"""
 
     @pytest.fixture
@@ -298,7 +298,7 @@ class TestMessageQueueResilience:
         assert message.status == MessageStatus.DEAD_LETTER
 
 @pytest.mark.integration
-class TestMessageQueueResilienceIntegration:
+class MessageQueueResilienceIntegrationTests:
     """Integration tests for message queue resilience with real Redis"""
 
     @pytest.mark.asyncio

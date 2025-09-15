@@ -41,7 +41,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from auth_service.auth_core.auth_environment import AuthEnvironment, get_auth_env
 from shared.isolated_environment import get_env
 
-class TestAuthEnvironmentStartupPerformance(SSotBaseTestCase):
+class AuthEnvironmentStartupPerformanceTests(SSotBaseTestCase):
     """Test AuthEnvironment startup performance across all environments."""
 
     def setup_method(self, method=None):
@@ -128,7 +128,7 @@ class TestAuthEnvironmentStartupPerformance(SSotBaseTestCase):
             self.record_metric('concurrent_max_time', max_time)
             self.record_metric('concurrent_ops_per_sec', operations_per_second)
 
-class TestAuthEnvironmentMemoryPerformance(SSotBaseTestCase):
+class AuthEnvironmentMemoryPerformanceTests(SSotBaseTestCase):
     """Test AuthEnvironment memory usage and resource management."""
 
     def setup_method(self, method=None):
@@ -203,7 +203,7 @@ class TestAuthEnvironmentMemoryPerformance(SSotBaseTestCase):
                     self.record_metric(f'{method_name}_speedup_ratio', speedup_ratio)
             self.record_metric('cached_methods_tested', len(cached_methods))
 
-class TestAuthEnvironmentValidationPerformance(SSotBaseTestCase):
+class AuthEnvironmentValidationPerformanceTests(SSotBaseTestCase):
     """Test AuthEnvironment validation performance."""
 
     def setup_method(self, method=None):
@@ -260,7 +260,7 @@ class TestAuthEnvironmentValidationPerformance(SSotBaseTestCase):
             self.record_metric('validation_variance', variance)
             self.record_metric('validations_performed', len(validation_times))
 
-class TestAuthEnvironmentScalabilityPerformance(SSotBaseTestCase):
+class AuthEnvironmentScalabilityPerformanceTests(SSotBaseTestCase):
     """Test AuthEnvironment scalability and resource efficiency."""
 
     def setup_method(self, method=None):
@@ -320,7 +320,7 @@ class TestAuthEnvironmentScalabilityPerformance(SSotBaseTestCase):
             avg_time_per_call = sum((p['time_per_call'] for p in method_performance.values())) / len(method_performance)
             self.record_metric('avg_time_per_call_under_load', avg_time_per_call)
 
-class TestAuthEnvironmentResourceLeakPrevention(SSotBaseTestCase):
+class AuthEnvironmentResourceLeakPreventionTests(SSotBaseTestCase):
     """Test AuthEnvironment prevents resource leaks in long-running scenarios."""
 
     def setup_method(self, method=None):

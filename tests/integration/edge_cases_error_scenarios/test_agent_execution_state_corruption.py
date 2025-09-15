@@ -27,7 +27,7 @@ from test_framework.real_services import get_real_services
 logger = logging.getLogger(__name__)
 
 
-class TestAgentExecutionStateCorruption(BaseIntegrationTest):
+class AgentExecutionStateCorruptionTests(BaseIntegrationTest):
     """Test agent execution behavior under state corruption conditions."""
     
     @pytest.mark.integration

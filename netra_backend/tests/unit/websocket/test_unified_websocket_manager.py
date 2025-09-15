@@ -78,7 +78,7 @@ def sample_connection(mock_websocket):
     """Create sample WebSocket connection for testing."""
     return WebSocketConnection(connection_id='conn_12345', user_id='user_67890', websocket=mock_websocket, connected_at=datetime.now(), metadata={'test': 'metadata'})
 
-class TestUnifiedWebSocketManagerUnit(SSotAsyncTestCase, unittest.TestCase):
+class UnifiedWebSocketManagerUnitTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive unit tests for UnifiedWebSocketManager."""
 
     def setup_method(self, method):
@@ -554,7 +554,7 @@ class TestUnifiedWebSocketManagerUnit(SSotAsyncTestCase, unittest.TestCase):
         result = self.manager.update_connection_thread('nonexistent', 'thread_123')
         self.assertFalse(result)
 
-class TestSerializeMessageSafely(unittest.TestCase):
+class SerializeMessageSafelyTests(unittest.TestCase):
     """Unit tests for _serialize_message_safely function."""
 
     def test_serialize_dict_already_serializable(self):

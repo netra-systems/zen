@@ -69,7 +69,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 
 
-class TestAgentLifecycleManagementIntegration(SSotAsyncTestCase):
+class AgentLifecycleManagementIntegrationTests(SSotAsyncTestCase):
     """Integration tests for agent lifecycle management and cleanup."""
     
     @pytest.fixture

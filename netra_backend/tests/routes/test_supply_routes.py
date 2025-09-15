@@ -12,7 +12,7 @@ import pytest
 
 from netra_backend.tests.routes.test_utilities import base_client
 
-class TestSupplyRoute:
+class SupplyRouteTests:
     """Test supply chain endpoints."""
     
     def test_supply_research(self, base_client):

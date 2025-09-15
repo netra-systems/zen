@@ -94,7 +94,7 @@ class MockAppStateForStartupPhases:
         return redis_manager
 
 
-class TestStartupPhaseValidationLogicFixed(SSotBaseTestCase):
+class StartupPhaseValidationLogicFixedTests(SSotBaseTestCase):
     """Unit tests for startup phase awareness in GCP WebSocket validator (FIXED VERSION)."""
     
     def setup_method(self, method=None):
@@ -329,7 +329,7 @@ if __name__ == '__main__':
     
     # Create test suite with just the critical test
     suite = unittest.TestSuite()
-    suite.addTest(TestStartupPhaseValidationLogicFixed('test_race_condition_detection_comprehensive'))
+    suite.addTest(StartupPhaseValidationLogicFixedTests('test_race_condition_detection_comprehensive'))
     
     # Run the test
     runner = unittest.TextTestRunner(verbosity=2)

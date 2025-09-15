@@ -20,7 +20,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.unit
-class TestExecutionEngineSSotTransition(SSotBaseTestCase):
+class ExecutionEngineSSotTransitionTests(SSotBaseTestCase):
     """Test SSOT transition compliance for execution engine consolidation."""
     
     def setup_method(self, method=None):
@@ -295,7 +295,7 @@ class TestExecutionEngineSSotTransition(SSotBaseTestCase):
 
 # Golden Path Integration Test
 @pytest.mark.unit
-class TestExecutionEngineGoldenPathProtection(SSotBaseTestCase):
+class ExecutionEngineGoldenPathProtectionTests(SSotBaseTestCase):
     """Verify execution engine SSOT transition doesn't break Golden Path."""
     
     async def test_golden_path_user_login_to_ai_response(self):

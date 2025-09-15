@@ -28,7 +28,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.websocket_core.manager import WebSocketManager
 
 @pytest.mark.integration
-class TestSupervisorAgentMultiUserIsolation(SSotAsyncTestCase):
+class SupervisorAgentMultiUserIsolationTests(SSotAsyncTestCase):
     """
     Integration test suite to PROVE multi-user isolation vulnerabilities.
     

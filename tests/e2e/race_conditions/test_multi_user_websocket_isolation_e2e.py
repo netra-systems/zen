@@ -41,7 +41,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestMultiUserWebSocketIsolationE2E(SSotBaseTestCase):
+class MultiUserWebSocketIsolationE2ETests(SSotBaseTestCase):
     """E2E test for multi-user WebSocket isolation race conditions."""
     
     def setup_method(self):

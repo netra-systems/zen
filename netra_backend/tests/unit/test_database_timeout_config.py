@@ -14,7 +14,7 @@ from netra_backend.app.core.database_timeout_config import (
 )
 
 
-class TestDatabaseTimeoutConfig:
+class DatabaseTimeoutConfigTests:
     """Test database timeout configuration functionality."""
     
     def test_development_timeout_config(self):
@@ -77,7 +77,7 @@ class TestDatabaseTimeoutConfig:
         assert staging_lower == staging_upper == staging_mixed
 
 
-class TestCloudSQLOptimizedConfig:
+class CloudSQLOptimizedConfigTests:
     """Test Cloud SQL specific configuration optimizations."""
     
     def test_staging_cloud_sql_config(self):
@@ -123,7 +123,7 @@ class TestCloudSQLOptimizedConfig:
         assert pool_config["pool_timeout"] == 30.0  # Shorter than staging/production
 
 
-class TestCloudSQLEnvironmentDetection:
+class CloudSQLEnvironmentDetectionTests:
     """Test Cloud SQL environment detection."""
     
     def test_staging_is_cloud_sql_environment(self):
@@ -149,7 +149,7 @@ class TestCloudSQLEnvironmentDetection:
         assert is_cloud_sql_environment("PRODUCTION") is True
 
 
-class TestProgressiveRetryConfig:
+class ProgressiveRetryConfigTests:
     """Test progressive retry configuration for database connections."""
     
     def test_cloud_sql_retry_config(self):
@@ -179,7 +179,7 @@ class TestProgressiveRetryConfig:
         assert test_config == dev_config  # Same config for local environments
 
 
-class TestTimeoutConfigurationLogging:
+class TimeoutConfigurationLoggingTests:
     """Test timeout configuration logging functionality."""
     
     def test_log_timeout_configuration_does_not_raise(self):

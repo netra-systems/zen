@@ -41,7 +41,7 @@ class WebSocketEvent:
     data: Dict[str, Any]
 
 
-class TestWebSocketSSotIntegrationViolations(SSotAsyncTestCase):
+class WebSocketSSotIntegrationViolationsTests(SSotAsyncTestCase):
     """
     Test suite to detect WebSocket SSOT integration violations.
     

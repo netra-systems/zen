@@ -45,7 +45,7 @@ from tests.e2e.staging_config import StagingTestConfig
 from shared.isolated_environment import get_env
 
 @pytest.mark.e2e
-class TestAgentGoldenPathLoadTesting(SSotAsyncTestCase):
+class AgentGoldenPathLoadTestingTests(SSotAsyncTestCase):
     """
     Load testing for agent golden path functionality under concurrent user scenarios.
     

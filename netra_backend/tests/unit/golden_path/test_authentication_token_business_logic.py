@@ -397,7 +397,7 @@ class AuthenticationTokenManager:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestAuthenticationTokenBusinessLogic(BaseTestCase):
+class AuthenticationTokenBusinessLogicTests(BaseTestCase):
     """Test authentication token business logic for secure platform access."""
 
     def setup_method(self):

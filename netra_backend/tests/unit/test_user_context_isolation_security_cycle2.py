@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.services.user_execution_context import UserContextFactory
 from shared.types import UserID, ThreadID, RunID
 
-class TestUserContextIsolationSecurity:
+class UserContextIsolationSecurityTests:
     """Test user context isolation and security mechanisms."""
     
     @pytest.fixture

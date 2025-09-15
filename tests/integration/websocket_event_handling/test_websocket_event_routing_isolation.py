@@ -28,7 +28,7 @@ from test_framework.ssot.websocket import (
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketEventRoutingIsolation(SSotAsyncTestCase):
+class WebSocketEventRoutingIsolationTests(SSotAsyncTestCase):
     """Test WebSocket event routing and user isolation patterns."""
     
     async def setup_method(self, method=None):

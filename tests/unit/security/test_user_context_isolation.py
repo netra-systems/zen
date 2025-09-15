@@ -38,7 +38,7 @@ except ImportError:
 
 
 @pytest.mark.unit
-class TestUserContextSecurity(SSotAsyncTestCase):
+class UserContextSecurityTests(SSotAsyncTestCase):
     """Test user isolation security after DeepAgentState elimination."""
     
     def setUp(self):

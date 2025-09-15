@@ -260,7 +260,7 @@ class EnvironmentAccessViolationDetector:
 
 
 @pytest.mark.unit
-class TestEnvironmentAccessViolationDetection:
+class EnvironmentAccessViolationDetectionTests:
     """Test environment access violation detection."""
     
     def setup_method(self):

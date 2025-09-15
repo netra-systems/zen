@@ -34,7 +34,7 @@ from io import StringIO
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = logging.getLogger(__name__)
 
-class TestConnectionHandlerErrorHandling(SSotBaseTestCase):
+class ConnectionHandlerErrorHandlingTests(SSotBaseTestCase):
     """
     Unit tests for ConnectionHandler error handling and logging completeness.
     

@@ -22,7 +22,7 @@ TEST COMPONENTS:
 
 USAGE:
 - Run unit tests: pytest test_real_error_recovery.py -k "unit"
-- Run logic tests: pytest test_real_error_recovery.py::TestRealErrorRecovery::test_complete_error_recovery_flow
+- Run logic tests: pytest test_real_error_recovery.py::RealErrorRecoveryTests::test_complete_error_recovery_flow
 - Run full integration tests (requires live services): pytest test_real_error_recovery.py
 """
 
@@ -90,7 +90,7 @@ class NetworkFailureSimulator:
         client.config.timeout = original_timeout
         self.failure_active = False
 
-class TestCircuitBreakerer:
+class CircuitBreakererTests:
     """Tests circuit breaker behavior during service failures."""
     
     def __init__(self):
@@ -285,7 +285,7 @@ class ServiceRecoveryCoordinator:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestRealErrorRecovery:
+class RealErrorRecoveryTests:
     """Test #7: Real Error Recovery with Service Failures."""
     
     @pytest.fixture
@@ -627,9 +627,9 @@ class TestRealErrorRecovery:
 
 # Test execution helper functions
 
-def create_error_recovery_test_suite() -> TestRealErrorRecovery:
+def create_error_recovery_test_suite() -> RealErrorRecoveryTests:
     """Create error recovery test suite instance."""
-    return TestRealErrorRecovery()
+    return RealErrorRecoveryTests()
 
 async def run_error_recovery_validation() -> Dict[str, Any]:
     """Run error recovery validation and return results."""

@@ -36,7 +36,7 @@ from netra_backend.app.services.database.unit_of_work import get_unit_of_work
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestBaseMessageHandler(SSotBaseTestCase):
+class BaseMessageHandlerTests(SSotBaseTestCase):
     """Test BaseMessageHandler abstract business logic."""
 
     def test_base_handler_is_abstract(self):
@@ -59,7 +59,7 @@ class TestBaseMessageHandler(SSotBaseTestCase):
         assert callable(handler.handle)
 
 @pytest.mark.unit
-class TestStartAgentHandler(SSotBaseTestCase):
+class StartAgentHandlerTests(SSotBaseTestCase):
     """Test StartAgentHandler business logic - CRITICAL for agent workflow execution."""
 
     def setup_method(self):
@@ -226,7 +226,7 @@ class TestStartAgentHandler(SSotBaseTestCase):
             mock_send_completion.assert_called_once_with(user_id, 'Workflow completed')
 
 @pytest.mark.unit
-class TestUserMessageHandler(SSotBaseTestCase):
+class UserMessageHandlerTests(SSotBaseTestCase):
     """Test UserMessageHandler business logic - processes ongoing user conversations."""
 
     def setup_method(self):
@@ -299,7 +299,7 @@ class TestUserMessageHandler(SSotBaseTestCase):
         assert message['payload'] == response
 
 @pytest.mark.unit
-class TestThreadHistoryHandler(SSotBaseTestCase):
+class ThreadHistoryHandlerTests(SSotBaseTestCase):
     """Test ThreadHistoryHandler business logic - enables conversation continuity."""
 
     def setup_method(self):
@@ -356,7 +356,7 @@ class TestThreadHistoryHandler(SSotBaseTestCase):
         assert formatted['created_at'] == mock_message.created_at
 
 @pytest.mark.unit
-class TestStopAgentHandler(SSotBaseTestCase):
+class StopAgentHandlerTests(SSotBaseTestCase):
     """Test StopAgentHandler business logic - provides user control over AI processing."""
 
     def setup_method(self):
@@ -385,7 +385,7 @@ class TestStopAgentHandler(SSotBaseTestCase):
         assert message['payload']['status'] == 'stopped'
 
 @pytest.mark.unit
-class TestMessageHandlerService(SSotBaseTestCase):
+class MessageHandlerServiceTests(SSotBaseTestCase):
     """Test MessageHandlerService business logic - CRITICAL for message orchestration."""
 
     def setup_method(self):

@@ -76,7 +76,7 @@ class MockAuthService:
         self.websocket = TestWebSocketConnection()
 
 @pytest.mark.unit
-class TestAuthServiceRedisClientCompatibility:
+class AuthServiceRedisClientCompatibilityTests:
     """Test suite for auth service Redis client compatibility fixes."""
 
     def test_auth_service_uses_redis_client_not_session_manager(self):
@@ -201,7 +201,7 @@ class TestAuthServiceRedisClientCompatibility:
         assert redis_status in ['enabled', 'disabled'], "Redis status should be 'enabled' or 'disabled'"
 
 @pytest.mark.unit
-class TestAuthServiceRedisClientErrorHandling:
+class AuthServiceRedisClientErrorHandlingTests:
     """Test suite for auth service Redis client error handling."""
 
     @pytest.mark.asyncio

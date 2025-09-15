@@ -26,7 +26,7 @@ from test_framework.service_dependencies import ExecutionMode
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestUnifiedTestRunnerGCPStaging(SSotAsyncTestCase):
+class UnifiedTestRunnerGCPStagingTests(SSotAsyncTestCase):
     """
     E2E GCP Staging tests for UnifiedTestRunner protecting business value.
     Tests real GCP Cloud Build integration, CI/CD pipelines, and production testing workflows.

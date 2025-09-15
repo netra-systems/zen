@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, IntegrationState, IntegrationConfig, HealthStatus, IntegrationResult, IntegrationMetrics
 
-class TestAgentWebSocketBridgeComprehensive(SSotBaseTestCase):
+class AgentWebSocketBridgeComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive test suite for AgentWebSocketBridge - the bridge pattern
     between agent execution and real-time WebSocket event streaming.

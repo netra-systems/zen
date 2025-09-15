@@ -69,7 +69,7 @@ class ResourceLimit:
 @pytest.mark.integration
 @pytest.mark.cross_system
 @pytest.mark.resource_management
-class TestResourceCoordinationIntegration(SSotAsyncTestCase):
+class ResourceCoordinationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for resource coordination and management.
     

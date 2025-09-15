@@ -55,7 +55,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestMultiUserIsolationSecurity(SSotBaseTestCase):
+class MultiUserIsolationSecurityTests(SSotBaseTestCase):
     """
     Multi-User Isolation and Security Boundary Validation Tests.
     

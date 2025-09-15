@@ -374,7 +374,7 @@ class EventSequenceValidator:
         return metrics
 
 
-class TestWebSocketEventSequenceValidation(SSotAsyncTestCase):
+class WebSocketEventSequenceValidationTests(SSotAsyncTestCase):
     """
     WebSocket Event Sequence Validation Tests.
     
@@ -674,7 +674,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_test():
-        test_instance = TestWebSocketEventSequenceValidation()
+        test_instance = WebSocketEventSequenceValidationTests()
         test_instance.setup_method()
         await test_instance.test_critical_event_sequence_validation()
         print("Direct test execution completed successfully")

@@ -217,7 +217,7 @@ def mock_agent_state():
     """Fixture providing real mock agent state."""
     return RealMockDeepAgentState()
 
-class TestUnifiedToolExecutionEngineBasics(AsyncBaseTestCase):
+class UnifiedToolExecutionEngineBasicsTests(AsyncBaseTestCase):
     """Test basic functionality and initialization of UnifiedToolExecutionEngine."""
 
     @pytest.mark.unit
@@ -258,7 +258,7 @@ class TestUnifiedToolExecutionEngineBasics(AsyncBaseTestCase):
         engine = UserExecutionEngine()
         assert isinstance(engine, UnifiedToolExecutionEngine)
 
-class TestUnifiedToolExecutionEngineExecution(AsyncBaseTestCase):
+class UnifiedToolExecutionEngineExecutionTests(AsyncBaseTestCase):
     """Test core tool execution functionality with real tool execution flows."""
 
     @pytest.mark.unit
@@ -340,7 +340,7 @@ class TestUnifiedToolExecutionEngineExecution(AsyncBaseTestCase):
         assert result['success'] is True
         assert 'run_id' in result['metadata']
 
-class TestUnifiedToolExecutionEngineWebSocketIntegration(AsyncBaseTestCase):
+class UnifiedToolExecutionEngineWebSocketIntegrationTests(AsyncBaseTestCase):
     """Test WebSocket event generation and notification handling."""
 
     @pytest.mark.unit
@@ -388,7 +388,7 @@ class TestUnifiedToolExecutionEngineWebSocketIntegration(AsyncBaseTestCase):
         assert call_args[1]['progress']['percentage'] == 45.5
         assert 'estimated_remaining_ms' in call_args[1]['progress']
 
-class TestUnifiedToolExecutionEngineSecurityValidation(AsyncBaseTestCase):
+class UnifiedToolExecutionEngineSecurityValidationTests(AsyncBaseTestCase):
     """Test security validation and permission checking."""
 
     @pytest.mark.unit
@@ -436,7 +436,7 @@ class TestUnifiedToolExecutionEngineSecurityValidation(AsyncBaseTestCase):
         assert result.status == 'error'
         assert 'Invalid input' in result.error_message
 
-class TestUnifiedToolExecutionEngineMetricsAndPerformance(AsyncBaseTestCase):
+class UnifiedToolExecutionEngineMetricsAndPerformanceTests(AsyncBaseTestCase):
     """Test execution metrics tracking and performance monitoring."""
 
     @pytest.mark.unit
@@ -500,7 +500,7 @@ class TestUnifiedToolExecutionEngineMetricsAndPerformance(AsyncBaseTestCase):
         assert health_status['status'] in ['healthy', 'degraded']
         assert health_status['can_process_agents'] is True
 
-class TestUnifiedToolExecutionEngineRecoveryMechanisms(AsyncBaseTestCase):
+class UnifiedToolExecutionEngineRecoveryMechanismsTests(AsyncBaseTestCase):
     """Test error handling and recovery mechanisms."""
 
     @pytest.mark.unit
@@ -544,7 +544,7 @@ class TestUnifiedToolExecutionEngineRecoveryMechanisms(AsyncBaseTestCase):
         health_status = await engine.health_check()
         assert health_status['can_process_agents'] is True
 
-class TestDispatcherToolExecutionEngine(AsyncBaseTestCase):
+class DispatcherToolExecutionEngineTests(AsyncBaseTestCase):
     """Test ToolExecutionEngine dispatcher functionality and delegation patterns."""
 
     @pytest.mark.unit
@@ -607,7 +607,7 @@ class TestDispatcherToolExecutionEngine(AsyncBaseTestCase):
         assert hasattr(response, 'message')
         assert hasattr(response, 'metadata')
 
-class TestServicesToolExecutionEngine(AsyncBaseTestCase):
+class ServicesToolExecutionEngineTests(AsyncBaseTestCase):
     """Test services layer ToolExecutionEngine with permission validation."""
 
     @pytest.mark.unit
@@ -669,7 +669,7 @@ class TestServicesToolExecutionEngine(AsyncBaseTestCase):
         assert error_response.data is None
         assert 'failed' in error_response.message
 
-class TestToolDispatcherEnhancement(AsyncBaseTestCase):
+class ToolDispatcherEnhancementTests(AsyncBaseTestCase):
     """Test tool dispatcher enhancement with WebSocket notifications."""
 
     @pytest.mark.unit
@@ -701,7 +701,7 @@ class TestToolDispatcherEnhancement(AsyncBaseTestCase):
         assert enhanced_dispatcher._websocket_enhanced is True
         assert isinstance(enhanced_dispatcher.executor, UnifiedToolExecutionEngine)
 
-class TestMultiUserExecutionIsolation(AsyncBaseTestCase):
+class MultiUserExecutionIsolationTests(AsyncBaseTestCase):
     """Test multi-user isolation during tool execution."""
 
     @pytest.mark.unit
@@ -778,7 +778,7 @@ class TestMultiUserExecutionIsolation(AsyncBaseTestCase):
         assert metrics['successful_executions'] >= num_users
         assert metrics['total_executions'] >= num_users
 
-class TestToolExecutionEngineIntegration(AsyncBaseTestCase):
+class ToolExecutionEngineIntegrationTests(AsyncBaseTestCase):
     """Test integration between different tool execution engine components."""
 
     @pytest.mark.unit

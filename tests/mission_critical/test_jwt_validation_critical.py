@@ -35,7 +35,7 @@ from netra_backend.app.core.service_dependencies.models import (
 )
 
 
-class TestJWTValidationMissionCritical:
+class JWTValidationMissionCriticalTests:
     """
     Mission Critical JWT validation tests.
     

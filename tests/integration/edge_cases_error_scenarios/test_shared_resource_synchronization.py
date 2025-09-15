@@ -31,7 +31,7 @@ from netra_backend.app.core.config import get_config
 
 
 @pytest.mark.integration
-class TestSharedResourceSynchronization(BaseIntegrationTest):
+class SharedResourceSynchronizationTests(BaseIntegrationTest):
     """
     Test synchronization mechanisms for shared resources under concurrent access.
     

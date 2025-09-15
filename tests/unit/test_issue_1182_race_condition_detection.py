@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestIssue1182RaceConditionDetection(SSotBaseTestCase):
+class Issue1182RaceConditionDetectionTests(SSotBaseTestCase):
     """Unit tests to detect WebSocket Manager race conditions"""
 
     def test_concurrent_websocket_manager_initialization_race(self):

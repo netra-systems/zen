@@ -21,7 +21,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.core.backend_environment import BackendEnvironment
 
 
-class TestConfigurationEnvironmentServiceIntegration(BaseTestCase):
+class ConfigurationEnvironmentServiceIntegrationTests(BaseTestCase):
     """Test configuration integration across service boundaries."""
     
     def setup_method(self):

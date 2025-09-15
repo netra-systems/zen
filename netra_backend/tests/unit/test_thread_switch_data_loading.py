@@ -22,7 +22,7 @@ from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
 
 
-class TestThreadSwitchDataLoading:
+class ThreadSwitchDataLoadingTests:
     """Test thread switching with data loading"""
     
     @pytest.fixture

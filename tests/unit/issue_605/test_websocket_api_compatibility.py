@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketAPICompatibility(SSotBaseTestCase):
+class WebSocketAPICompatibilityTests(SSotBaseTestCase):
     """
     Unit tests for WebSocket API compatibility issues in Issue #605.
     

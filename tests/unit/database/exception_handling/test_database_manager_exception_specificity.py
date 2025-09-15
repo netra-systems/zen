@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.db.transaction_errors import DeadlockError, ConnectionError, TimeoutError, PermissionError, SchemaError, classify_error
 
-class TestDatabaseManagerExceptionSpecificity:
+class DatabaseManagerExceptionSpecificityTests:
     """Test suite for database manager exception specificity validation."""
 
     @pytest.mark.unit
@@ -119,7 +119,7 @@ class TestDatabaseManagerExceptionSpecificity:
         assert hasattr(db_manager_module, 'ConnectionError'), 'DatabaseManager should import ConnectionError'
         assert hasattr(db_manager_module, 'TimeoutError'), 'DatabaseManager should import TimeoutError'
 
-class TestDatabaseManagerErrorRecovery:
+class DatabaseManagerErrorRecoveryTests:
     """Test suite for database manager error recovery patterns."""
 
     @pytest.mark.unit

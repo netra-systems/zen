@@ -282,7 +282,7 @@ class RealWebSocketReconnectionTester:
         await context.websocket_notifier.send_event('agent_completed', {'message': 'General processing completed', 'network_resilience_validated': True})
         return {'status': 'completed', 'agent_type': 'general', 'processing_result': 'success'}
 
-class TestWebSocketReconnectionDuringAgentExecution:
+class WebSocketReconnectionDuringAgentExecutionTests:
     """E2E tests for WebSocket reconnection during agent execution."""
 
     @pytest.mark.asyncio

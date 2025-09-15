@@ -22,7 +22,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestFactoryLayerDeprecationCompliance(SSotAsyncTestCase):
+class FactoryLayerDeprecationComplianceTests(SSotAsyncTestCase):
     """Test factory layer deprecation compliance for WebSocket Manager SSOT."""
 
     def setUp(self):

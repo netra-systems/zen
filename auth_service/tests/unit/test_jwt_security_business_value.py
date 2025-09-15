@@ -31,7 +31,7 @@ from auth_service.auth_core.core.jwt_cache import jwt_validation_cache
 from auth_service.auth_core.config import AuthConfig
 
 
-class TestJWTSecurityBusinessValue(BaseIntegrationTest):
+class JWTSecurityBusinessValueTests(BaseIntegrationTest):
     """Test JWT security delivering business asset protection and secure user access."""
     
     @pytest.mark.unit

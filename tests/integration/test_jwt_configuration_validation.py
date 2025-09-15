@@ -27,7 +27,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.integration
-class TestJWTConfigurationSynchronization:
+class JWTConfigurationSynchronizationTests:
     """
     Tests JWT configuration synchronization issues (no Docker).
     
@@ -511,7 +511,7 @@ class TestJWTConfigurationSynchronization:
 
 
 @pytest.mark.integration
-class TestCrossServiceJWTIntegration:
+class CrossServiceJWTIntegrationTests:
     """
     Test JWT integration patterns across services without Docker.
     

@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.real_services
-class TestSystemUserAuthReproduction(SSotBaseTestCase):
+class SystemUserAuthReproductionTests(SSotBaseTestCase):
     """
     Test suite to reproduce the exact system user authentication failure
     that is blocking golden path user flows.

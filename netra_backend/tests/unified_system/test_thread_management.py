@@ -37,7 +37,7 @@ from netra_backend.tests.fixtures import (
 
 )
 
-class TestThreadLifecycle:
+class ThreadLifecycleTests:
 
     """Test complete thread lifecycle operations"""
 

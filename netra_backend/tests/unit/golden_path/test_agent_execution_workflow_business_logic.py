@@ -44,7 +44,7 @@ class MockLLMResponse:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestAgentWorkflowBusinessLogic:
+class AgentWorkflowBusinessLogicTests:
     """Test agent execution workflow business logic with mocked LLM."""
 
     def test_agent_session_user_isolation_business_rules(self):
@@ -544,7 +544,7 @@ class TestAgentWorkflowBusinessLogic:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestAgentBusinessValueValidation:
+class AgentBusinessValueValidationTests:
     """Test agent execution provides measurable business value."""
 
     def test_agent_cost_analysis_business_value(self):

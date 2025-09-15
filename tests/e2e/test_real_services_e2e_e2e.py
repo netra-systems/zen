@@ -34,7 +34,7 @@ class ServiceEndpoints:
     clickhouse_url: str = "clickhouse://localhost:8123/netra_test"
 
 
-class TestE2EMetrics:
+class E2EMetricsTests:
     """Metrics collection for E2E test performance tracking."""
     test_name: str
     start_time: float = field(default_factory=time.time)
@@ -55,7 +55,7 @@ class TestE2EMetrics:
         """Add sub-operation timing."""
         self.sub_metrics[name] = duration
 
-class TestRealServiceE2ESuite:
+class RealServiceE2ESuiteTests:
     """
     Comprehensive E2E test suite using real services.
     
@@ -876,7 +876,7 @@ class TestRealServiceE2ESuite:
         return report
 
 @pytest.mark.e2e
-class TestRealServicesE2E:
+class RealServicesE2ETests:
     """Pytest integration for real services E2E testing."""
     
     @pytest.mark.e2e

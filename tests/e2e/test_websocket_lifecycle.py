@@ -205,7 +205,7 @@ async def agent_client(lifecycle_harness):
 
 
 @pytest.mark.e2e
-class TestWebSocketAgentMessageLifecycle:
+class WebSocketAgentMessageLifecycleTests:
     """Test complete WebSocket-to-Agent message lifecycle with real connections."""
     
     @pytest.mark.e2e
@@ -328,7 +328,7 @@ class TestWebSocketAgentMessageLifecycle:
 
 
 @pytest.mark.e2e
-class TestAgentStateManagement:
+class AgentStateManagementTests:
     """Test agent state transitions during WebSocket lifecycle."""
     
     @pytest.mark.e2e
@@ -371,7 +371,7 @@ class TestAgentStateManagement:
 
 
 @pytest.mark.e2e
-class TestWebSocketReliability:
+class WebSocketReliabilityTests:
     """Test WebSocket connection reliability and error handling."""
     
     @pytest.mark.e2e

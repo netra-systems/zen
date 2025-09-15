@@ -28,7 +28,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
-class TestReportingSubAgentJSONIntegration(SSotAsyncTestCase):
+class ReportingSubAgentJSONIntegrationTests(SSotAsyncTestCase):
     """Integration tests for ReportingSubAgent SSOT JSON functionality."""
     
     def setUp(self):
@@ -250,7 +250,7 @@ class TestReportingSubAgentJSONIntegration(SSotAsyncTestCase):
 if __name__ == '__main__':
     # Run async test manually
     async def run_async_tests():
-        test_instance = TestReportingSubAgentJSONIntegration()
+        test_instance = ReportingSubAgentJSONIntegrationTests()
         test_instance.setUp()
         await test_instance.test_redis_cache_ssot_workflow_simulation()
         print("Async integration test completed")

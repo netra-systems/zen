@@ -18,7 +18,7 @@ from pathlib import Path
 
 
 @pytest.mark.unit
-class TestWebSocketFactoryPatternCompliance(unittest.TestCase):
+class WebSocketFactoryPatternComplianceTests(unittest.TestCase):
     """Test WebSocket factory pattern SSOT compliance."""
 
     def setUp(self):

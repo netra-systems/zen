@@ -125,7 +125,7 @@ class FactorySSotValidator(ast.NodeVisitor):
         return str(base)
 
 
-class TestFactorySSotCompliancePhase2(SSotBaseTestCase):
+class FactorySSotCompliancePhase2Tests(SSotBaseTestCase):
     """
     Factory SSOT Compliance Validation - Phase 2
 

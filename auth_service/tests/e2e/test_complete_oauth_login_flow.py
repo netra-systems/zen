@@ -38,7 +38,7 @@ from test_framework.unified_docker_manager import UnifiedDockerManager
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
-class TestCompleteOAuthLoginFlow(BaseE2ETest):
+class CompleteOAuthLoginFlowTests(BaseE2ETest):
     """Test complete OAuth login flow with real services."""
 
     def setup_method(self):

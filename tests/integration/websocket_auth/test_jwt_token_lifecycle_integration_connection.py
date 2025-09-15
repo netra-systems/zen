@@ -70,7 +70,7 @@ class ConnectionMetricsSnapshot:
 
 
 @pytest.mark.integration
-class TestJWTTokenLifecycleConnectionIntegration(SSotAsyncTestCase):
+class JWTTokenLifecycleConnectionIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for JWT Token Lifecycle Manager connection lifecycle.
     

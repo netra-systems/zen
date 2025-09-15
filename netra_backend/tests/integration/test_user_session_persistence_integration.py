@@ -20,7 +20,7 @@ from typing import Dict, Any, List
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestUserSessionPersistenceIntegration(SSotBaseTestCase):
+class UserSessionPersistenceIntegrationTests(SSotBaseTestCase):
     """Integration tests for user session persistence with real storage."""
     
     def setup_method(self, method=None):

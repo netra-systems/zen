@@ -35,7 +35,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from test_framework.database.test_database_manager import DatabaseTestManager as DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestAuthRefreshEndpointBugSimple:
+class AuthRefreshEndpointBugSimpleTests:
     """Demonstrate the await request.body() bug"""
 
     def test_request_body_is_not_awaitable(self):
@@ -61,7 +61,7 @@ class TestAuthRefreshEndpointBugSimple:
         result = await request.json()
         assert result == {'refresh_token': 'test'}
 
-class TestUserModelFieldsSimple:
+class UserModelFieldsSimpleTests:
     """Demonstrate missing fields in User model"""
 
     def test_user_model_missing_fields(self):
@@ -76,7 +76,7 @@ class TestUserModelFieldsSimple:
         for field in missing_fields:
             assert not hasattr(user, field), f'User should not have {field} field (but tests expect it)'
 
-class TestImportPathsSimple:
+class ImportPathsSimpleTests:
     """Demonstrate import path issues"""
 
     def test_jwt_manager_import_fails(self):
@@ -103,7 +103,7 @@ class TestImportPathsSimple:
                 continue
         assert not found, 'JWTGenerationTestManager should not be found in any expected location'
 
-class TestAsyncClientUsageSimple:
+class AsyncClientUsageSimpleTests:
     """Demonstrate AsyncClient usage issues"""
 
     @pytest.mark.asyncio

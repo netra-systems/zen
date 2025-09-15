@@ -42,7 +42,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAgentMessageHandlerCore(SSotAsyncTestCase):
+class AgentMessageHandlerCoreTests(SSotAsyncTestCase):
     """Test suite for core AgentMessageHandler functionality."""
 
     def setup_method(self, method):

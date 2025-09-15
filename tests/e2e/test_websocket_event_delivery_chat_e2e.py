@@ -47,7 +47,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.e2e
 @pytest.mark.staging_compatible
-class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
+class WebSocketEventDeliveryChatE2ETests(SSotBaseTestCase):
     """
     MISSION CRITICAL E2E Tests for WebSocket Event Delivery During Chat.
     

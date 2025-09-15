@@ -354,7 +354,7 @@ class ServiceStartupDependencyChainValidator:
 @pytest.mark.critical
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestServiceStartupDependencyChain:
+class ServiceStartupDependencyChainTests:
     """Comprehensive service startup dependency chain test suite."""
     
     @pytest.fixture

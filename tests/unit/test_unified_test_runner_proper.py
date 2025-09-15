@@ -43,7 +43,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
 from unified_test_runner import UnifiedTestRunner
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerProper(SSotBaseTestCase):
+class UnifiedTestRunnerProperTests(SSotBaseTestCase):
     """
     Proper unit tests for UnifiedTestRunner that test REAL functionality.
     

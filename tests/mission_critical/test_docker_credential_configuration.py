@@ -79,7 +79,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
-class TestDockerCredentialConfiguration:
+class DockerCredentialConfigurationTests:
     """Test suite for Docker credential configuration mismatches."""
     
     # Expected credentials per environment (from docker-compose files)
@@ -192,7 +192,7 @@ class TestDockerCredentialConfiguration:
         assert creds['database'] == 'netra_dev', f"Development should use 'netra_dev' database"
 
 
-class TestPortDiscovery:
+class PortDiscoveryTests:
     """Test suite for port discovery and allocation issues."""
     
     def test_port_discovery_from_existing_containers(self):
@@ -251,7 +251,7 @@ class TestPortDiscovery:
             assert len(ports) > 0, "Should allocate ports despite conflicts"
 
 
-class TestServiceURLConstruction:
+class ServiceURLConstructionTests:
     """Test suite for service URL construction issues."""
     
     def test_service_url_uses_environment_credentials(self):
@@ -299,7 +299,7 @@ class TestServiceURLConstruction:
             assert 'netra:netra123' in db_url, f"Development #removed-legacyshould use netra:netra123"
 
 
-class TestEnvironmentIsolation:
+class EnvironmentIsolationTests:
     """Test suite for environment isolation and configuration."""
     
     def test_container_name_patterns_match_environment(self):
@@ -334,7 +334,7 @@ class TestEnvironmentIsolation:
         )
 
 
-class TestConfigurationValidation:
+class ConfigurationValidationTests:
     """Test suite for configuration validation."""
     
     def test_validate_compose_file_matches_manager_config(self):
@@ -386,7 +386,7 @@ class CredentialSecurityMetrics:
     compliance_violations: List[str] = field(default_factory=list)
 
 
-class TestDockerCredentialSecurityInfrastructure:
+class DockerCredentialSecurityInfrastructureTests:
     """Infrastructure tests for Docker credential security and configuration."""
     
     def __init__(self):

@@ -60,7 +60,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
-class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
+class AgentExecutionToolPipelineIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for Agent Execution & Tool Pipeline coordination.
     

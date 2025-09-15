@@ -29,7 +29,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from shared.types import UserID, ThreadID, RunID
 from shared.isolated_environment import get_env
 
-class TestAgentExecutionLifecycleIntegration(BaseIntegrationTest):
+class AgentExecutionLifecycleIntegrationTests(BaseIntegrationTest):
     """Integration tests for agent execution lifecycle with real services."""
     
     @pytest.mark.integration

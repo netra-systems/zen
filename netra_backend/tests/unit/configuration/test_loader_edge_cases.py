@@ -35,7 +35,7 @@ from netra_backend.app.schemas.config import AppConfig
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestConfigurationLoaderEdgeCases(SSotBaseTestCase):
+class ConfigurationLoaderEdgeCasesTests(SSotBaseTestCase):
     """Test configuration loader edge cases and error scenarios."""
 
     def setup_method(self, method):
@@ -318,7 +318,7 @@ class TestConfigurationLoaderEdgeCases(SSotBaseTestCase):
         assert "host" in redis_config
 
 
-class TestConfigurationLoaderIntegration(SSotBaseTestCase):
+class ConfigurationLoaderIntegrationTests(SSotBaseTestCase):
     """Integration tests for configuration loader with real environment scenarios."""
 
     def setup_method(self, method):

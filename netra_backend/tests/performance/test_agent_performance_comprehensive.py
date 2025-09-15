@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 
 @pytest.mark.performance
-class TestAgentLatencyPerformance:
+class AgentLatencyPerformanceTests:
     """Test agent operation latency and response times."""
     
     @pytest.mark.asyncio
@@ -238,7 +238,7 @@ class TestAgentLatencyPerformance:
 
 
 @pytest.mark.performance
-class TestAgentMemoryPerformance:
+class AgentMemoryPerformanceTests:
     """Test agent memory usage and optimization."""
     
     @pytest.mark.asyncio
@@ -438,7 +438,7 @@ class TestAgentMemoryPerformance:
 
 
 @pytest.mark.performance
-class TestAgentThroughputOptimization:
+class AgentThroughputOptimizationTests:
     """Test agent throughput optimization and scaling."""
     
     @pytest.mark.asyncio

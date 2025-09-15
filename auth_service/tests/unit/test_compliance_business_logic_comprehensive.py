@@ -28,7 +28,7 @@ from auth_service.auth_core.compliance.compliance_business_logic import (
 from netra_backend.app.schemas.tenant import SubscriptionTier
 
 
-class TestComplianceBusinessLogic(SSotBaseTestCase):
+class ComplianceBusinessLogicTests(SSotBaseTestCase):
     """Comprehensive unit tests for compliance business logic."""
 
     def setUp(self):
@@ -467,7 +467,7 @@ class TestComplianceBusinessLogic(SSotBaseTestCase):
         self.assertEqual(hipaa_req["breach_notification_hours"], 60)
 
 
-class TestComplianceResult(SSotBaseTestCase):
+class ComplianceResultTests(SSotBaseTestCase):
     """Test the ComplianceResult dataclass."""
 
     def test_compliance_result_creation(self):
@@ -507,7 +507,7 @@ class TestComplianceResult(SSotBaseTestCase):
         self.assertEqual(result.recommendations, [])
 
 
-class TestDataRetentionPolicyResult(SSotBaseTestCase):
+class DataRetentionPolicyResultTests(SSotBaseTestCase):
     """Test the DataRetentionPolicyResult dataclass."""
 
     def test_data_retention_policy_result_creation(self):
@@ -544,7 +544,7 @@ class TestDataRetentionPolicyResult(SSotBaseTestCase):
         self.assertEqual(result.compliance_frameworks, [])
 
 
-class TestComplianceFramework(SSotBaseTestCase):
+class ComplianceFrameworkTests(SSotBaseTestCase):
     """Test the ComplianceFramework enum."""
 
     def test_compliance_framework_values(self):
@@ -562,7 +562,7 @@ class TestComplianceFramework(SSotBaseTestCase):
             self.assertEqual(framework.value, enum_value)
 
 
-class TestDataRetentionPolicy(SSotBaseTestCase):
+class DataRetentionPolicyTests(SSotBaseTestCase):
     """Test the DataRetentionPolicy enum."""
 
     def test_data_retention_policy_values(self):

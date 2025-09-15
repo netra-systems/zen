@@ -11,7 +11,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestQueryBuilder:
+class QueryBuilderTests:
     """Test suite for QueryBuilder"""
 
     @pytest.fixture

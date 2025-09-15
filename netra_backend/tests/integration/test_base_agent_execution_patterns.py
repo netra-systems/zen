@@ -95,7 +95,7 @@ def mock_reliability_manager():
     return mock_rm
 
 @pytest.mark.integration
-class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
+class BaseAgentExecutionPatternsTests(BaseIntegrationTest):
     """Test BaseAgent execution patterns with core SSOT classes integration."""
 
     async def setup_method(self):
@@ -450,7 +450,7 @@ class MockCostAnalysisAgent(BaseAgent):
         return result
 
 @pytest.mark.integration
-class TestMockAgentIntegrationScenarios(BaseIntegrationTest):
+class MockAgentIntegrationScenariosTests(BaseIntegrationTest):
     """Test realistic agent integration scenarios using mock agents."""
 
     @pytest.mark.asyncio

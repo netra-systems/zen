@@ -77,7 +77,7 @@ class MockWebSocketStress:
         await asyncio.sleep(0.001)  # Minimal delay
 
 
-class TestPresenceDetectionStress:
+class PresenceDetectionStressTests:
     """Stress tests for presence detection system."""
     
     @pytest.fixture

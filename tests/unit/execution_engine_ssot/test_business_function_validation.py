@@ -43,7 +43,7 @@ except ImportError as e:
 
 
 @pytest.mark.unit
-class TestBusinessFunctionValidation(SSotAsyncTestCase):
+class BusinessFunctionValidationTests(SSotAsyncTestCase):
     """Comprehensive validation of business-critical functions through UserExecutionEngine"""
     
     def setUp(self):

@@ -23,7 +23,7 @@ from netra_backend.tests.fixtures.realistic_test_fixtures import (
     validate_array_query_syntax,
 )
 
-class TestClickHouseArrayOperations:
+class ClickHouseArrayOperationsTests:
     """Test proper array operations and the query fixer"""
     
     def test_fix_incorrect_array_syntax(self):

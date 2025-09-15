@@ -34,7 +34,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerSSotViolationDiscovery(SSotBaseTestCase):
+class WebSocketManagerSSotViolationDiscoveryTests(SSotBaseTestCase):
     """
     Core tests to systematically discover WebSocket manager SSOT violations.
     

@@ -132,7 +132,7 @@ class MockAgent(BaseAgent):
         return result
 
 
-class TestAgentStateIntegration(BaseIntegrationTest):
+class AgentStateIntegrationTests(BaseIntegrationTest):
     """Test BaseAgent execution with UnifiedStateManager integration."""
     
     @pytest.fixture

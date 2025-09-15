@@ -40,7 +40,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import (
 
 
 @pytest.mark.performance
-class TestHealthEndpointTimingBenchmarks(SSotAsyncTestCase):
+class HealthEndpointTimingBenchmarksTests(SSotAsyncTestCase):
     """
     Performance benchmarks for health endpoint timing with Redis timeout validation.
     

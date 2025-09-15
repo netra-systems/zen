@@ -112,7 +112,7 @@ from shared.types.core_types import AuthValidationResult, SessionValidationResul
 @pytest.mark.integration  
 @pytest.mark.authentication
 @pytest.mark.websocket
-class TestWebSocketAuthIdIntegration(BaseIntegrationTest):
+class WebSocketAuthIdIntegrationTests(BaseIntegrationTest):
     """
     Integration tests that EXPOSE auth integration failures with uuid.uuid4().
     

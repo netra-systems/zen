@@ -419,7 +419,7 @@ async def mock_agent_system(websocket_manager):
     """Create mock agent system for testing."""
     return MockAgentSystemForTesting(websocket_manager)
 
-class TestBasicEventTransmission:
+class BasicEventTransmissionTests:
     """Test basic WebSocket event transmission functionality."""
 
     @pytest.mark.asyncio
@@ -467,7 +467,7 @@ class TestBasicEventTransmission:
             if 'run_id' in payload:
                 assert payload['run_id'], f'Run ID cannot be empty in {event_type}'
 
-class TestConcurrentUserIsolation:
+class ConcurrentUserIsolationTests:
     """Test concurrent user scenarios and cross-user isolation."""
 
     @pytest.mark.asyncio
@@ -521,7 +521,7 @@ class TestConcurrentUserIsolation:
         await asyncio.sleep(delay)
         return await mock_agent_system.simulate_agent_execution(user_id)
 
-class TestPerformanceAndLoad:
+class PerformanceAndLoadTests:
     """Test WebSocket performance under load conditions."""
 
     @pytest.mark.asyncio
@@ -579,7 +579,7 @@ class TestPerformanceAndLoad:
         assert len(session.events) > 0, 'No events received before disconnection'
         assert 'error' not in execution_result or 'connection' in execution_result['error'].lower(), f"Unexpected error type: {execution_result.get('error')}"
 
-class TestErrorHandlingAndEdgeCases:
+class ErrorHandlingAndEdgeCasesTests:
     """Test error handling and edge case scenarios."""
 
     @pytest.mark.asyncio
@@ -650,7 +650,7 @@ class TestErrorHandlingAndEdgeCases:
         user_summary = session_summary[user_id]
         assert len(user_summary['missing_events']) > 0, 'Missing events not tracked in session summary'
 
-class TestComprehensiveIntegration:
+class ComprehensiveIntegrationTests:
     """Comprehensive integration test covering all scenarios."""
 
     @pytest.mark.asyncio

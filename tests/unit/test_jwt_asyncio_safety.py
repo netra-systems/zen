@@ -14,7 +14,7 @@ from tests.utils.asyncio_test_utils import AsyncioTestUtils, EventLoopTestError
 from test_framework.ssot.auth_test_helpers import SSOTAuthTestHelper
 
 @pytest.mark.unit
-class TestJWTAsyncioSafety:
+class JWTAsyncioSafetyTests:
     """Test JWT operations for asyncio safety"""
 
     @pytest.mark.asyncio
@@ -146,7 +146,7 @@ class TestJWTAsyncioSafety:
         assert result['expires_in'] == 3600
 
 @pytest.mark.unit
-class TestJWTEventLoopPatterns:
+class JWTEventLoopPatternsTests:
     """Test specific JWT event loop patterns"""
 
     def test_detect_problematic_jwt_pattern(self):
@@ -203,7 +203,7 @@ class TestJWTEventLoopPatterns:
         assert result2 == result1
 
 @pytest.mark.unit
-class TestJWTAsyncioMigration:
+class JWTAsyncioMigrationTests:
     """Test patterns for migrating JWT code to proper async"""
 
     @pytest.mark.asyncio

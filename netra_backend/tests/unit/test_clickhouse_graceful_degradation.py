@@ -34,7 +34,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from shared.isolated_environment import get_env
 
 
-class TestClickHouseGracefulDegradation:
+class ClickHouseGracefulDegradationTests:
     """Test ClickHouse graceful degradation patterns for staging reliability."""
     
     @pytest.mark.asyncio
@@ -245,7 +245,7 @@ class TestClickHouseGracefulDegradation:
             return "unavailable"
 
 
-class TestClickHouseServiceIsolation:
+class ClickHouseServiceIsolationTests:
     """Test ClickHouse service isolation and failure containment."""
     
     def test_clickhouse_failure_does_not_affect_core_services(self):
@@ -340,7 +340,7 @@ class TestClickHouseServiceIsolation:
             return True
 
 
-class TestClickHouseTimeoutScenarios:
+class ClickHouseTimeoutScenariosTests:
     """Test ClickHouse timeout scenarios and recovery."""
     
     @pytest.mark.asyncio

@@ -25,7 +25,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
 from test_framework.ssot.websocket import RealWebSocketTestClient
 from shared.isolated_environment import get_env
 
-class TestCrossCuttingIntegration(BaseIntegrationTest):
+class CrossCuttingIntegrationTests(BaseIntegrationTest):
     """Integration tests for cross-cutting WebSocket concerns affecting all event types.
     
     Business Value: System-wide reliability is MISSION CRITICAL for platform success.

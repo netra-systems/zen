@@ -2,7 +2,7 @@
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 
-class TestErrorHandlingIntegration(BaseIntegrationTest):
+class ErrorHandlingIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     def test_error_recovery_patterns(self):

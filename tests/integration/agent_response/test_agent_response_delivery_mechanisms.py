@@ -63,7 +63,7 @@ class MockWebSocketConnection:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentResponseDeliveryMechanisms(BaseIntegrationTest):
+class AgentResponseDeliveryMechanismsTests(BaseIntegrationTest):
     """Test agent response delivery mechanisms."""
     
     def setup_method(self):

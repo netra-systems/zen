@@ -30,7 +30,7 @@ from shared.types import UserID, ThreadID, RunID
 from test_framework.fixtures.websocket_manager_mock import MockWebSocketManager
 
 
-class TestOrchestratorFactoryPatternIssue118:
+class OrchestratorFactoryPatternIssue118Tests:
     """
     Test suite validating GitHub Issue #118 fixes.
     

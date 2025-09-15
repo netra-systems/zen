@@ -36,7 +36,7 @@ from test_framework.unified_docker_manager import UnifiedDockerManager
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
-class TestAuthServiceBusinessFlows(BaseE2ETest):
+class AuthServiceBusinessFlowsTests(BaseE2ETest):
     """Test business-critical auth flows with real services."""
 
     def setup_method(self):

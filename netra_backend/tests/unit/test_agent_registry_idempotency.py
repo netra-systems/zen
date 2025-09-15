@@ -15,7 +15,7 @@ import pytest
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 
 
-class TestAgentRegistryIdempotency:
+class AgentRegistryIdempotencyTests:
     """Test suite for agent registry idempotency."""
 
     @pytest.fixture

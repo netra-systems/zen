@@ -62,7 +62,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
-class TestRealUnifiedFlower:
+class RealUnifiedFlowerTests:
     """Tests complete user journey with hybrid real/controlled services."""
     
     def __init__(self):
@@ -134,7 +134,7 @@ class TestRealUnifiedFlower:
 
 
 # Alias for backward compatibility
-RealUnifiedFlowTester = TestRealUnifiedFlower
+RealUnifiedFlowTester = RealUnifiedFlowerTests
 
 
 @pytest.mark.asyncio

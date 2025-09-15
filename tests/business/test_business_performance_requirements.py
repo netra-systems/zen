@@ -76,7 +76,7 @@ class BusinessPerformanceValidator:
             percentile_data=percentile_data
         ))
 
-class TestBusinessPerformanceRequirements:
+class BusinessPerformanceRequirementsTests:
     """Business validation tests for performance requirements"""
 
     def setup_method(self, method=None):
@@ -526,7 +526,7 @@ if __name__ == "__main__":
     # Can be run standalone for business validation
     import sys
 
-    validator = TestBusinessPerformanceRequirements()
+    validator = BusinessPerformanceRequirementsTests()
     validator.setup_method()
 
     print("BUSINESS VALIDATION: Performance Requirements")

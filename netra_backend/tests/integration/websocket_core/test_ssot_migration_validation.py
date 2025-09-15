@@ -48,7 +48,7 @@ logger = get_logger(__name__)
 @pytest.mark.websocket_ssot
 @pytest.mark.non_docker
 @pytest.mark.issue_1058_migration_validation
-class TestSSOTMigrationValidation(SSotAsyncTestCase):
+class SSOTMigrationValidationTests(SSotAsyncTestCase):
     """Integration tests validating safe SSOT migration and rollback capabilities.
 
     CRITICAL: These tests ensure SSOT migration can be deployed to production
@@ -345,7 +345,7 @@ class TestSSOTMigrationValidation(SSotAsyncTestCase):
         logger.info(f'✅ Data consistency validated: {len(successful_patterns)}/{total_patterns} patterns consistent')
 
 @pytest.mark.migration_stress_test
-class TestSSOTMigrationStressValidation:
+class SSOTMigrationStressValidationTests:
     """Stress tests for SSOT migration validation."""
 
     @pytest.mark.asyncio

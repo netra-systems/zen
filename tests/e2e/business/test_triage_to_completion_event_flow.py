@@ -130,7 +130,7 @@ class BusinessWorkflowTracker:
         }
 
 
-class TestTriageToCompletionEventFlow(BaseE2ETest):
+class TriageToCompletionEventFlowTests(BaseE2ETest):
     """E2E tests for complete business workflow with event delivery validation."""
     
     @pytest.fixture

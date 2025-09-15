@@ -27,7 +27,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.supervisor.execution_context import PipelineStep
 
 
-class TestComprehensiveAgentResilienceDisasterRecovery(BaseIntegrationTest):
+class ComprehensiveAgentResilienceDisasterRecoveryTests(BaseIntegrationTest):
     """Integration tests for comprehensive agent resilience and disaster recovery."""
 
     @pytest.mark.integration

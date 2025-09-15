@@ -50,7 +50,7 @@ from auth_service.auth_core.business_logic.user_business_logic import UserBusine
 from netra_backend.app.schemas.tenant import SubscriptionTier
 logger = logging.getLogger(__name__)
 
-class TestUserBusinessLogicIntegration(BaseIntegrationTest):
+class UserBusinessLogicIntegrationTests(BaseIntegrationTest):
     """Integration tests for UserBusinessLogic with real database/service integration."""
 
     @pytest.fixture(autouse=True)

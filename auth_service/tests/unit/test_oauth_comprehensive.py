@@ -14,7 +14,7 @@ from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestOAuthManagerBasics:
+class OAuthManagerBasicsTests:
     """Test basic OAuth manager functionality"""
 
     @pytest.fixture(autouse=True)
@@ -73,7 +73,7 @@ class TestOAuthManagerBasics:
                                         assert "error" in status
 
 
-                                        class TestGoogleOAuthProvider:
+                                        class GoogleOAuthProviderTests:
                                             """Test Google OAuth provider functionality"""
 
                                             @pytest.fixture(autouse=True)
@@ -163,7 +163,7 @@ class TestOAuthManagerBasics:
                                                                                             pass
 
 
-                                                                                            class TestOAuthSecurity:
+                                                                                            class OAuthSecurityTests:
                                                                                                 """Test OAuth security features"""
 
                                                                                                 @pytest.fixture(autouse=True) 
@@ -207,7 +207,7 @@ class TestOAuthManagerBasics:
                                                                                                                 assert len(message) > 0  # Message should not be empty
 
 
-                                                                                                                class TestOAuthIntegration:
+                                                                                                                class OAuthIntegrationTests:
                                                                                                                     """Test OAuth integration scenarios"""
 
                                                                                                                     @pytest.fixture(autouse=True)

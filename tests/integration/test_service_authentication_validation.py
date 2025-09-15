@@ -30,7 +30,7 @@ from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
-class TestServiceAuthenticationValidation(SSotBaseTestCase):
+class ServiceAuthenticationValidationTests(SSotBaseTestCase):
     """
     Integration Tests: Validate service-to-service authentication for Issue #115.
     

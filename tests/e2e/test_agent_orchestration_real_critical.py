@@ -227,7 +227,7 @@ class RealServiceChatTester:
             await self.ws_client.disconnect()
 
 @pytest.mark.e2e
-class TestRealAgentOrchestrationCritical:
+class RealAgentOrchestrationCriticalTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

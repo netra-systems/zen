@@ -49,7 +49,7 @@ from netra_backend.app.websocket_core.connection_state_machine import get_connec
 from fastapi import WebSocket
 
 
-class TestWebSocketScopeBugReproduction:
+class WebSocketScopeBugReproductionTests:
     """
     Reproduce exact WebSocket scope bug from issue #165.
     

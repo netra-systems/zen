@@ -27,7 +27,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 
 @pytest.mark.integration
 @pytest.mark.golden_path
-class TestWebSocketDatabaseIntegrationRealServices(SSotBaseTestCase):
+class WebSocketDatabaseIntegrationRealServicesTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket + Database integration with real services.
     

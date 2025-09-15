@@ -31,7 +31,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from shared.isolated_environment import get_env
 
 
-class TestAuthRouteSecurityIntegration(SSotBaseTestCase):
+class AuthRouteSecurityIntegrationTests(SSotBaseTestCase):
     """Comprehensive auth route security integration tests."""
 
     @pytest.fixture

@@ -13,7 +13,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 @pytest.mark.staging
-class TestCORSStagingSpecific:
+class CORSStagingSpecificTests:
     """Test CORS configuration specifically for staging environment."""
 
     @pytest.fixture
@@ -182,7 +182,7 @@ class TestCORSStagingSpecific:
 
 @pytest.mark.staging
 @pytest.mark.e2e
-class TestStagingCORSE2E:
+class StagingCORSE2ETests:
     """End-to-end CORS tests for staging environment."""
 
     @pytest.mark.asyncio

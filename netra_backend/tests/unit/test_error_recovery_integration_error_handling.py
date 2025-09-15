@@ -17,7 +17,7 @@ try:
 except ImportError:
     pytest.skip('Error recovery integration modules have missing dependencies', allow_module_level=True)
 
-class TestEnhancedErrorRecoverySystemErrorHandling:
+class EnhancedErrorRecoverySystemErrorHandlingTests:
     """Test error handling capabilities of EnhancedErrorRecoverySystem."""
 
     def setup_method(self):

@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestIssue172ScopeIsolation(SSotAsyncTestCase):
+class Issue172ScopeIsolationTests(SSotAsyncTestCase):
     """Unit tests to reproduce Issue #172: Variable scope isolation problems."""
 
     @pytest.mark.asyncio
@@ -321,7 +321,7 @@ if __name__ == "__main__":
     
     async def run_issue_172_tests():
         """Run all Issue #172 scope isolation tests."""
-        test_instance = TestIssue172ScopeIsolation()
+        test_instance = Issue172ScopeIsolationTests()
         
         print(" ALERT:  STARTING ISSUE #172 SCOPE ISOLATION TESTS")
         print("=" * 60)

@@ -53,7 +53,7 @@ except ImportError:
     Redis = None
 
 
-class TestWebSocketThreadAssociation(BaseIntegrationTest):
+class WebSocketThreadAssociationTests(BaseIntegrationTest):
     """Test WebSocket connection to thread mapping with real Redis infrastructure."""
 
     @pytest.mark.integration

@@ -26,7 +26,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from auth_service.auth_core.services.auth_service import AuthService
 
 
-class TestUserCreationFlexible(SSotAsyncTestCase):
+class UserCreationFlexibleTests(SSotAsyncTestCase):
     """
     Test user creation flexibility in demo mode.
     

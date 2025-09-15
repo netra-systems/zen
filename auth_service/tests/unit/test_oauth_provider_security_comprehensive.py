@@ -36,7 +36,7 @@ from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider, Googl
 from auth_service.auth_core.auth_environment import get_auth_env
 from shared.isolated_environment import get_env
 
-class TestOAuthProviderEnvironmentIsolation(SSotBaseTestCase):
+class OAuthProviderEnvironmentIsolationTests(SSotBaseTestCase):
     """Test OAuth provider environment isolation to prevent credential leakage."""
 
     def setup_method(self, method=None):
@@ -96,7 +96,7 @@ class TestOAuthProviderEnvironmentIsolation(SSotBaseTestCase):
                     assert 'staging' not in redirect_uri, f'Production redirect URI must not contain staging: {redirect_uri}'
         self.record_metric('production_security_validated', True)
 
-class TestOAuthStateParameterSecurity(SSotBaseTestCase):
+class OAuthStateParameterSecurityTests(SSotBaseTestCase):
     """Test OAuth state parameter security (CSRF protection)."""
 
     def setup_method(self, method=None):
@@ -169,7 +169,7 @@ class TestOAuthStateParameterSecurity(SSotBaseTestCase):
                     pass
         self.record_metric('malicious_state_tests', len(malicious_states))
 
-class TestOAuthRedirectURISecurity(SSotBaseTestCase):
+class OAuthRedirectURISecurityTests(SSotBaseTestCase):
     """Test OAuth redirect URI security to prevent callback hijacking."""
 
     def setup_method(self, method=None):
@@ -225,7 +225,7 @@ class TestOAuthRedirectURISecurity(SSotBaseTestCase):
                         assert not is_valid, f'Should reject HTTP URI in production: {http_uri}'
         self.record_metric('https_enforcement_tests', len(http_uris))
 
-class TestOAuthCredentialSecurity(SSotBaseTestCase):
+class OAuthCredentialSecurityTests(SSotBaseTestCase):
     """Test OAuth credential security and sanitization."""
 
     def setup_method(self, method=None):
@@ -289,7 +289,7 @@ class TestOAuthCredentialSecurity(SSotBaseTestCase):
             assert status['is_configured'] in [True, False], 'Should indicate overall configuration status'
         self.record_metric('configuration_status_sanitization_validated', True)
 
-class TestOAuthInputValidationSecurity(SSotBaseTestCase):
+class OAuthInputValidationSecurityTests(SSotBaseTestCase):
     """Test OAuth input validation and sanitization security."""
 
     def setup_method(self, method=None):
@@ -337,7 +337,7 @@ class TestOAuthInputValidationSecurity(SSotBaseTestCase):
                     pass
         self.record_metric('malicious_scope_tests', len(malicious_scopes))
 
-class TestOAuthPerformanceAndResourceSecurity(SSotBaseTestCase):
+class OAuthPerformanceAndResourceSecurityTests(SSotBaseTestCase):
     """Test OAuth performance characteristics and resource security."""
 
     def setup_method(self, method=None):

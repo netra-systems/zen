@@ -46,7 +46,7 @@ from netra_backend.app.logging_config import central_logger
 from shared.isolated_environment import get_env
 logger = central_logger.get_logger(__name__)
 
-class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
+class WebSocketEventValidationComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for WebSocket event validation in the golden path.
     

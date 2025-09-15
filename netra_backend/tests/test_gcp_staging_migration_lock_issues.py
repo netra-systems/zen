@@ -36,7 +36,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.db.migration_utils import execute_migration
 from netra_backend.app.core.unified_logging import get_logger
 
-class TestMigrationLockIssues:
+class MigrationLockIssuesTests:
     """Test database migration lock issues from GCP staging deployment."""
 
     @pytest.mark.asyncio

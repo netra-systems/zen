@@ -26,7 +26,7 @@ class ConcreteTestAgent(BaseAgent):
         return True
 
 
-class TestBaseAgent:
+class BaseAgentTests:
     """Test suite for BaseAgent"""
     
     @pytest.fixture

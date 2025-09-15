@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.integration
-class TestWebSocketFactoryPatternConsistency(SSotAsyncTestCase):
+class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
     """Integration tests for WebSocket factory pattern consistency."""
     
     def setup_method(self, method):

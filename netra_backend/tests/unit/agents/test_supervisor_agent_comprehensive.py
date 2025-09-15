@@ -83,7 +83,7 @@ class MockAgentInstance(BaseAgent):
         context.metadata[result_key] = self.execution_result
         return self.execution_result
 
-class TestSupervisorAgentCore(BaseTestCase):
+class SupervisorAgentCoreTests(BaseTestCase):
     """Test core SupervisorAgent functionality - MISSION CRITICAL for chat delivery."""
 
     def setUp(self):
@@ -491,7 +491,7 @@ class TestSupervisorAgentCore(BaseTestCase):
         self.assertIn('triage_result', self.test_context.metadata)
         self.assertEqual(self.test_context.metadata['triage_result'], test_result)
 
-class TestSupervisorAgentErrorScenarios(BaseTestCase):
+class SupervisorAgentErrorScenariosTests(BaseTestCase):
     """Test SupervisorAgent error scenarios and edge cases."""
 
     def setUp(self):
@@ -592,7 +592,7 @@ class TestSupervisorAgentErrorScenarios(BaseTestCase):
             self.assertGreater(failing_bridge.emit_agent_event.call_count, 0)
         self.track_resource(supervisor_with_failing_ws)
 
-class TestSupervisorAgentPerformance(BaseTestCase):
+class SupervisorAgentPerformanceTests(BaseTestCase):
     """Performance and load testing for SupervisorAgent."""
 
     def setUp(self):

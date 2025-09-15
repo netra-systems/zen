@@ -25,7 +25,7 @@ from netra_backend.tests.test_route_fixtures import (
     basic_test_client,
 )
 
-class TestConfigRoute:
+class ConfigRouteTests:
     """Test configuration API retrieval, updates, and validation."""
     
     def test_config_retrieval(self, basic_test_client):

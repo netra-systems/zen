@@ -14,7 +14,7 @@ from typing import Dict, List
 import pytest
 from netra_backend.tests.test_business_value_fixtures import BusinessValueFixtures
 
-class TestBusinessValueAdvanced(BusinessValueFixtures):
+class BusinessValueAdvancedTests(BusinessValueFixtures):
     """
     Advanced business value tests focused on complex optimization scenarios
     """

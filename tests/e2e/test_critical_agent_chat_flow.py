@@ -179,7 +179,7 @@ class MockWebSocketConnection:
         logger.info(f'WebSocket connection closed: {code} - {reason}')
 
 @pytest.mark.e2e
-class TestCriticalAgentChatFlow(SSotBaseTestCase):
+class CriticalAgentChatFlowTests(SSotBaseTestCase):
     """
     MISSION CRITICAL E2E Tests for Agent Chat WebSocket Flow.
     

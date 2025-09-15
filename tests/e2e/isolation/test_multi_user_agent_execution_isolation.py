@@ -230,7 +230,7 @@ class UserExecutionContext:
         self.execution_results.clear()
 
 
-class TestMultiUserAgentExecutionIsolation(BaseE2ETest):
+class MultiUserAgentExecutionIsolationTests(BaseE2ETest):
     """E2E tests for complete multi-user agent execution isolation."""
     
     @pytest.fixture

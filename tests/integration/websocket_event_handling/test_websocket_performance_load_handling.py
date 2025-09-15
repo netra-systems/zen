@@ -30,7 +30,7 @@ from test_framework.ssot.websocket import (
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketPerformanceLoadHandling(SSotAsyncTestCase):
+class WebSocketPerformanceLoadHandlingTests(SSotAsyncTestCase):
     """Test WebSocket performance and load handling patterns."""
     
     async def setup_method(self, method=None):

@@ -79,7 +79,7 @@ class MockResponsePersistence:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentResponseTrackingPersistence(BaseIntegrationTest):
+class AgentResponseTrackingPersistenceTests(BaseIntegrationTest):
     """Test agent response tracking and persistence."""
     
     def setup_method(self):

@@ -31,7 +31,7 @@ from shared.types.core_types import UserID
 logger = logging.getLogger(__name__)
 
 
-class TestUserSessionsTableValidation(BaseIntegrationTest):
+class UserSessionsTableValidationTests(BaseIntegrationTest):
     """
     Critical integration test for user_sessions table deployment validation.
     
@@ -323,7 +323,7 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
             )
 
 
-class TestUserSessionsAuthenticationIntegration(BaseIntegrationTest):
+class UserSessionsAuthenticationIntegrationTests(BaseIntegrationTest):
     """
     Integration test that validates authentication flows depending on user_sessions table.
     
@@ -411,7 +411,7 @@ class TestUserSessionsAuthenticationIntegration(BaseIntegrationTest):
             )
 
 
-class TestUserSessionsDatabaseDeploymentValidation(BaseIntegrationTest):
+class UserSessionsDatabaseDeploymentValidationTests(BaseIntegrationTest):
     """
     Test that validates database deployment succeeded for user_sessions table.
     

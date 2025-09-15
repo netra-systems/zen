@@ -308,7 +308,7 @@ class ConnectionRecoveryManager:
         return recovery_report
 
 
-class TestWebSocketApplicationStateConnectionInterruptionRecovery(BaseIntegrationTest):
+class WebSocketApplicationStateConnectionInterruptionRecoveryTests(BaseIntegrationTest):
     """Test state synchronization validation during WebSocket connection interruptions and recovery."""
     
     @pytest.mark.integration

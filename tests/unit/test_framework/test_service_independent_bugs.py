@@ -26,7 +26,7 @@ from test_framework.ssot.service_independent_test_base import (
 from test_framework.ssot.hybrid_execution_manager import ExecutionMode
 
 
-class TestServiceIndependentBugs:
+class ServiceIndependentBugsTests:
     """Reproduce critical bugs in service-independent test infrastructure."""
     
     def test_execution_strategy_missing_attribute_error(self):
@@ -115,7 +115,7 @@ class TestServiceIndependentBugs:
             test_instance.assert_execution_confidence_acceptable(min_confidence=0.6)
 
 
-class TestAgentExecutionHybridBugs:
+class AgentExecutionHybridBugsTests:
     """
     Reproduce bugs specific to AgentExecutionIntegrationTestBase.
     
@@ -158,7 +158,7 @@ class TestAgentExecutionHybridBugs:
             websocket_service = test_instance.get_websocket_service()
 
 
-class TestWebSocketIntegrationTestBaseBugs:
+class WebSocketIntegrationTestBaseBugsTests:
     """Reproduce bugs in WebSocketIntegrationTestBase."""
     
     def test_websocket_test_base_initialization_error(self):
@@ -181,7 +181,7 @@ class TestWebSocketIntegrationTestBaseBugs:
             await test_instance.test_websocket_connection_establishment()
 
 
-class TestAuthIntegrationTestBaseBugs:
+class AuthIntegrationTestBaseBugsTests:
     """Reproduce bugs in AuthIntegrationTestBase."""
     
     def test_auth_test_base_service_access_error(self):
@@ -203,7 +203,7 @@ class TestAuthIntegrationTestBaseBugs:
             await test_instance.test_user_authentication_flow()
 
 
-class TestDatabaseIntegrationTestBaseBugs:
+class DatabaseIntegrationTestBaseBugsTests:
     """Reproduce bugs in DatabaseIntegrationTestBase."""
     
     def test_database_test_base_service_access_error(self):
@@ -225,7 +225,7 @@ class TestDatabaseIntegrationTestBaseBugs:
             await test_instance.test_database_connection_and_query()
 
 
-class TestPyTestCollectionSimulation:
+class PyTestCollectionSimulationTests:
     """
     Simulate pytest collection behavior that triggers the bugs.
     
@@ -282,7 +282,7 @@ class TestPyTestCollectionSimulation:
             test_instance.assert_execution_confidence_acceptable()
 
 
-class TestBugImpactAnalysis:
+class BugImpactAnalysisTests:
     """
     Analyze the impact and scope of the bugs.
     
@@ -333,7 +333,7 @@ class TestBugImpactAnalysis:
 
 
 # This would fail with the current implementation
-class TestCurrentImplementationFailures:
+class CurrentImplementationFailuresTests:
     """
     Document expected failures with current implementation.
     

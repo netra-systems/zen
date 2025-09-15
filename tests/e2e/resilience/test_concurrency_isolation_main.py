@@ -47,7 +47,7 @@ from tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
 logger = logging.getLogger(__name__)
 
 
-class TestConcurrencyIsolationIntegration:
+class ConcurrencyIsolationIntegrationTests:
     """Integration tests for concurrency and isolation system"""
     
     def setup_method(self):

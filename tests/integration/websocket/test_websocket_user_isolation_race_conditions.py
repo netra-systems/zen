@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.integration
-class TestWebSocketUserIsolationRaceConditions(SSotBaseTestCase):
+class WebSocketUserIsolationRaceConditionsTests(SSotBaseTestCase):
     """Test suite to detect user isolation race conditions (SHOULD FAIL)"""
 
     def setUp(self):

@@ -41,7 +41,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestDatabaseManagerSSOTFunctionViolations(SSotBaseTestCase):
+class DatabaseManagerSSOTFunctionViolationsTests(SSotBaseTestCase):
     """
     Test suite to detect and validate DatabaseManager SSOT function violations.
     

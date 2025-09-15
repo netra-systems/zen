@@ -35,7 +35,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
+class SSotExecutionEngineMigrationValidationTests(SSotBaseTestCase):
     """Test suite for Issue #565 SSOT ExecutionEngine migration validation.
     
     This test suite validates the complete migration from deprecated ExecutionEngine

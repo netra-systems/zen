@@ -56,7 +56,7 @@ def sample_user_context():
     return context
 
 
-class TestAgentWebSocketBridgeFactory:
+class AgentWebSocketBridgeFactoryTests:
     """Unit tests for AgentWebSocketBridge factory creation pattern."""
     
     def test_factory_creates_bridge_with_websocket_manager(self, sample_user_context):
@@ -178,7 +178,7 @@ class TestAgentWebSocketBridgeFactory:
                        mock_websocket_manager.send_to_user.called), f"Manager must be called for {event_type}"
 
 
-class TestAgentWebSocketBridgeCreation:
+class AgentWebSocketBridgeCreationTests:
     """Unit tests for direct AgentWebSocketBridge creation."""
     
     def test_bridge_initializes_with_valid_manager(self, mock_websocket_manager, sample_user_context):
@@ -307,7 +307,7 @@ class TestAgentWebSocketBridgeCreation:
         assert result is False, "Bridge must return False when no manager available"
 
 
-class TestWebSocketBridgeConfiguration:
+class WebSocketBridgeConfigurationTests:
     """Unit tests for WebSocket bridge configuration and customization."""
     
     def test_integration_config_default_values(self):
@@ -400,7 +400,7 @@ class TestWebSocketBridgeConfiguration:
         assert IntegrationState.FAILED.value == "failed"
 
 
-class TestWebSocketBridgeUserIsolation:
+class WebSocketBridgeUserIsolationTests:
     """Unit tests for WebSocket bridge user isolation and security."""
     
     @pytest.mark.asyncio

@@ -44,7 +44,7 @@ from netra_backend.app.database import get_db
 from netra_backend.app.dependencies import get_request_scoped_db_session
 
 
-class TestDatabaseModelIDViolations(BaseTestCase):
+class DatabaseModelIDViolationsTests(BaseTestCase):
     """Unit tests exposing database model ID generation SSOT violations."""
     
     def setup_method(self):

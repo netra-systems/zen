@@ -47,7 +47,7 @@ from netra_backend.app.agents.supervisor.agent_registry import UserAgentSession
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestUserAgentSessionComprehensive(BaseTestCase):
+class UserAgentSessionComprehensiveTests(BaseTestCase):
     """Comprehensive test suite for UserAgentSession - MISSION CRITICAL for user isolation."""
     
     def setUp(self):
@@ -395,13 +395,13 @@ class TestUserAgentSessionComprehensive(BaseTestCase):
         session = UserAgentSession(self.test_user_id)
         
         # Create object that can be weakly referenced
-        class TestAgent:
+        class AgentTests:
             async def cleanup(self):
                 pass
             async def close(self):
                 pass
         
-        test_agent = TestAgent()
+        test_agent = AgentTests()
         weak_ref = weakref.ref(test_agent)
         
         await session.register_agent("test_agent", test_agent)

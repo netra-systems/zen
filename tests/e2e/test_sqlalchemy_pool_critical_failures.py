@@ -89,7 +89,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestSQLAlchemyPoolCriticalFailures:
+class SQLAlchemyPoolCriticalFailuresTests:
     """E2E tests for SQLAlchemy pool configuration critical failures."""
     
     @pytest.fixture

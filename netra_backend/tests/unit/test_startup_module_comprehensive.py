@@ -50,7 +50,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app import startup_module
 
 
-class TestStartupModuleComprehensive(BaseTestCase):
+class StartupModuleComprehensiveTests(BaseTestCase):
     """
     Comprehensive unit tests for startup_module.py covering all critical paths.
     

@@ -47,7 +47,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocketManagerSSotViolationsUnit(SSotBaseTestCase):
+class WebSocketManagerSSotViolationsUnitTests(SSotBaseTestCase):
     """
     Unit tests detecting WebSocket Manager SSOT violations.
     
@@ -365,7 +365,7 @@ class TestWebSocketManagerSSotViolationsUnit(SSotBaseTestCase):
             logger.info("No user isolation architecture violations detected")
 
 
-class TestWebSocketManagerSSotViolationsIntegration(SSotBaseTestCase):
+class WebSocketManagerSSotViolationsIntegrationTests(SSotBaseTestCase):
     """
     Integration tests detecting WebSocket Manager SSOT violations with real services.
     
@@ -621,7 +621,7 @@ class TestWebSocketManagerSSotViolationsIntegration(SSotBaseTestCase):
             logger.info("No factory vs SSOT behavior inconsistencies detected")
 
 
-class TestWebSocketManagerSSotViolationsE2EStaging(SSotAsyncTestCase):
+class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
     """
     E2E tests detecting WebSocket Manager SSOT violations on staging environment.
     

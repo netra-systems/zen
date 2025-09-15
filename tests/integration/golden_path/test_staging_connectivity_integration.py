@@ -34,7 +34,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
-class TestStagingConnectivityIntegration(SSotAsyncTestCase):
+class StagingConnectivityIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for staging environment connectivity.
 

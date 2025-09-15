@@ -26,7 +26,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestDualSSOTIDManagerCompatibilityBridge(SSotBaseTestCase):
+class DualSSOTIDManagerCompatibilityBridgeTests(SSotBaseTestCase):
     """Test compatibility bridge between dual SSOT ID systems."""
 
     def setup_method(self):
@@ -147,7 +147,7 @@ class TestDualSSOTIDManagerCompatibilityBridge(SSotBaseTestCase):
         return user_prefix in generated_id or expected_user_id[:4] in generated_id
 
 @pytest.mark.unit
-class TestWebSocketResourceCleanupFix(SSotBaseTestCase):
+class WebSocketResourceCleanupFixTests(SSotBaseTestCase):
     """Specific tests for WebSocket 1011 error fix through ID pattern consistency."""
 
     def setup_method(self):

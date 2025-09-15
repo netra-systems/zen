@@ -42,7 +42,7 @@ class AgentState:
             self.accumulated_data = {}
 
 
-class TestChatOrchestratorExecutionPlanner(SSotAsyncTestCase, unittest.TestCase):
+class ChatOrchestratorExecutionPlannerTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive tests for ChatOrchestrator execution planning business logic."""
 
     def setUp(self):

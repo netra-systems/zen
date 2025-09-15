@@ -65,7 +65,7 @@ class ConcurrentTestResult:
     memory_usage: Optional[int] = None
 
 
-class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
+class AgentExecutionCoreConcurrencyTests(SSotAsyncTestCase):
     """Comprehensive concurrency testing for AgentExecutionCore."""
     
     @pytest.fixture

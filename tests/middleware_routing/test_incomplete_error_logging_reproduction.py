@@ -25,7 +25,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette._exception_handler import wrap_app_handling_exceptions
 from shared.isolated_environment import get_env
 
-class TestErrorLoggingReproduction:
+class ErrorLoggingReproductionTests:
     """Tests to reproduce incomplete error logging patterns that hide routing errors."""
 
     def setup_method(self, method=None):

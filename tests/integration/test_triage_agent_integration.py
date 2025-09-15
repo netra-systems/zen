@@ -248,7 +248,7 @@ class MockWebSocketBridge:
 
 
 @pytest.mark.integration
-class TestTriageAgentIntegration(SSotBaseTestCase):
+class TriageAgentIntegrationTests(SSotBaseTestCase):
     """Integration tests for triage agent with real service patterns
     
     This test class validates triage agent integration with infrastructure

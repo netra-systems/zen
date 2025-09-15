@@ -118,7 +118,7 @@ class WebSocketEventCollector:
         return last_event in ['agent_completed', 'agent_error']
 
 
-class TestAgentExecutionCoreWebSocketIntegration(BaseIntegrationTest):
+class AgentExecutionCoreWebSocketIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket event delivery during agent execution."""
     
     @pytest.fixture

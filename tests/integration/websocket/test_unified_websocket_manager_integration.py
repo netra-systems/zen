@@ -86,7 +86,7 @@ class MockWebSocketConnection:
         return self.messages_received.copy()
 
 
-class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
+class UnifiedWebSocketManagerIntegrationTests(SSotBaseTestCase):
     """
     Comprehensive integration tests for UnifiedWebSocketManager.
     

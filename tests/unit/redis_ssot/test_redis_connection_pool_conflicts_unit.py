@@ -26,7 +26,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestRedisConnectionPoolConflicts(SSotAsyncTestCase):
+class RedisConnectionPoolConflictsTests(SSotAsyncTestCase):
     """Unit tests validating Redis connection pool sharing and conflicts.
     
     These tests are designed to FAIL initially, proving the existence

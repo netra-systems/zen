@@ -56,7 +56,7 @@ def create_mock_websocket_event(event_type: str, data: dict) -> WebSocketEvent:
     return WebSocketEvent.from_message(message)
 
 
-class TestEventValidationSmoke:
+class EventValidationSmokeTests:
     """Smoke tests for event validation infrastructure."""
     
     def test_event_sequence_validator_initialization(self):

@@ -318,7 +318,7 @@ async def context_management_tester(request):
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestRealAgentContextManagement:
+class RealAgentContextManagementTests:
     """Test suite for real agent context management and isolation."""
 
     async def test_concurrent_user_session_isolation(self, context_management_tester):

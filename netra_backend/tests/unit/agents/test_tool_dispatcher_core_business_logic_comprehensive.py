@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SsotTestMetrics
 from shared.isolated_environment import get_env
 
 
-class TestToolDispatcherCoreBusiness(SSotBaseTestCase):
+class ToolDispatcherCoreBusinessTests(SSotBaseTestCase):
     """Comprehensive unit tests for ToolDispatcher core business logic."""
 
     def setup_method(self, method):
@@ -470,7 +470,7 @@ class TestToolDispatcherCoreBusiness(SSotBaseTestCase):
         self.metrics.record_custom("business_users_informed", True)
 
 
-class TestToolDispatcherBusinessScenarios(SSotBaseTestCase):
+class ToolDispatcherBusinessScenariosTests(SSotBaseTestCase):
     """Business scenario tests for tool dispatcher edge cases."""
 
     async def test_enterprise_customer_tool_access_priority(self):

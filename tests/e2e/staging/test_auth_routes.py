@@ -25,7 +25,7 @@ env = get_env()
 # Import staging configuration for SSOT compliance
 from tests.e2e.staging_test_config import get_staging_config
 
-class TestAuthRoutes:
+class AuthRoutesTests:
     """Test authentication service route availability issues in staging."""
 
     @staging_only

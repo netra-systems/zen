@@ -40,7 +40,7 @@ from test_framework.ssot.websocket import (
 
 
 @pytest.mark.integration
-class TestRealTimeEventStreaming(SSotBaseTestCase):
+class RealTimeEventStreamingTests(SSotBaseTestCase):
     """
     Test real-time event streaming patterns and delivery.
     
@@ -326,7 +326,7 @@ class TestRealTimeEventStreaming(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestEventStreamingReliability(SSotBaseTestCase):
+class EventStreamingReliabilityTests(SSotBaseTestCase):
     """
     Test event streaming reliability and recovery patterns.
     
@@ -603,7 +603,7 @@ class TestEventStreamingReliability(SSotBaseTestCase):
 
 
 @pytest.mark.integration  
-class TestEventStreamingPerformance(SSotBaseTestCase):
+class EventStreamingPerformanceTests(SSotBaseTestCase):
     """
     Test event streaming performance characteristics.
     

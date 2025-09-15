@@ -68,7 +68,7 @@ def test_user_context():
     """Create test user execution context."""
     return UserExecutionContext(user_id=f'test_user_{uuid.uuid4().hex[:8]}', request_id=f'test_request_{uuid.uuid4().hex[:8]}', thread_id=f'test_thread_{uuid.uuid4().hex[:8]}', run_id=f'test_run_{uuid.uuid4().hex[:8]}')
 
-class TestAgentFactoryRegistration(SSotBaseTestCase):
+class AgentFactoryRegistrationTests(SSotBaseTestCase):
     """Test agent factory registration and management."""
 
     def test_register_default_agents_sets_registration_flag(self, mock_llm_manager):
@@ -143,7 +143,7 @@ class TestAgentFactoryRegistration(SSotBaseTestCase):
             assert 'failing_agent' in registry.registration_errors
             assert 'Registration failed' in registry.registration_errors['failing_agent']
 
-class TestCoreAndAuxiliaryAgentRegistration(SSotBaseTestCase):
+class CoreAndAuxiliaryAgentRegistrationTests(SSotBaseTestCase):
     """Test core and auxiliary agent registration patterns."""
 
     @pytest.mark.asyncio
@@ -193,7 +193,7 @@ class TestCoreAndAuxiliaryAgentRegistration(SSotBaseTestCase):
             registry._register_auxiliary_agents()
             assert mock_register.call_count >= 0
 
-class TestAgentFactoryPatternIntegration(SSotBaseTestCase):
+class AgentFactoryPatternIntegrationTests(SSotBaseTestCase):
     """Test integration between registry and factory patterns."""
 
     @pytest.mark.asyncio
@@ -248,7 +248,7 @@ class TestAgentFactoryPatternIntegration(SSotBaseTestCase):
         assert reset_report['failed_resets'] >= 1
         assert reset_report['agents_without_reset'] >= 1
 
-class TestToolDispatcherFactoryRegistration(SSotBaseTestCase):
+class ToolDispatcherFactoryRegistrationTests(SSotBaseTestCase):
     """Test tool dispatcher factory registration and creation patterns."""
 
     def test_set_tool_dispatcher_factory_custom(self, mock_llm_manager):
@@ -304,7 +304,7 @@ class TestToolDispatcherFactoryRegistration(SSotBaseTestCase):
         assert registry._legacy_dispatcher == mock_dispatcher
         assert registry.tool_dispatcher is None
 
-class TestRegistrationStateAndErrorManagement(SSotBaseTestCase):
+class RegistrationStateAndErrorManagementTests(SSotBaseTestCase):
     """Test registration state management and error tracking."""
 
     def test_registration_errors_tracking(self, mock_llm_manager):
@@ -365,7 +365,7 @@ class TestRegistrationStateAndErrorManagement(SSotBaseTestCase):
         result = registry.remove_agent('nonexistent_agent')
         assert result is False
 
-class TestRegistrationFactoryIntegration(SSotBaseTestCase):
+class RegistrationFactoryIntegrationTests(SSotBaseTestCase):
     """Test integration between registration and agent factory patterns."""
 
     @pytest.mark.asyncio

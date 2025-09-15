@@ -94,7 +94,7 @@ class MockAgent:
 
 
 @pytest.mark.integration
-class TestAgentWebSocketBridgeRealIntegration:
+class AgentWebSocketBridgeRealIntegrationTests:
     """Integration tests for Agent WebSocket Bridge with real services."""
     
     @pytest.mark.asyncio

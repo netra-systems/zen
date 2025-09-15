@@ -50,7 +50,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestSupervisorSsotComplianceValidation(SSotAsyncTestCase):
+class SupervisorSsotComplianceValidationTests(SSotAsyncTestCase):
     """
     Phase 3.4 Supervisor SSOT Compliance Validation Tests
     

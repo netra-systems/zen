@@ -195,7 +195,7 @@ class InterfaceContractValidator:
         return violations
 
 
-class TestInterfaceContractValidation(SSotBaseTestCase):
+class InterfaceContractValidationTests(SSotBaseTestCase):
     """
     Test interface contract validation across the codebase.
     
@@ -446,7 +446,7 @@ class TestInterfaceContractValidation(SSotBaseTestCase):
         print(f" PASS:  Core factory parameters: {list(core_params.keys())}")
 
 
-class TestInterfaceContractRegressionPrevention(SSotBaseTestCase):
+class InterfaceContractRegressionPreventionTests(SSotBaseTestCase):
     """
     Test interface contract regression prevention mechanisms.
     
@@ -529,7 +529,7 @@ class TestInterfaceContractRegressionPrevention(SSotBaseTestCase):
         
         # Test source code analysis
         test_source = '''
-class TestClass:
+class ClassTests:
     def test_method(self):
         context = UserExecutionContext(
             user_id="test",

@@ -34,7 +34,7 @@ class TimeoutType:
     GRACEFUL_TIMEOUT = "graceful_timeout"
 
 
-class TestWebSocketConnectionTimeoutHandlingGracefulStateIntegration(BaseIntegrationTest):
+class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegrationTest):
     """Test WebSocket connection timeout handling with comprehensive graceful state preservation."""
     
     def _create_timeout_handling_websocket(self, connection_id: str, user_id: str, timeout_config: Dict[str, float]):

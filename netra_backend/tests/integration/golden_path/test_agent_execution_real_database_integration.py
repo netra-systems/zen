@@ -29,7 +29,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 
 @pytest.mark.integration
 @pytest.mark.golden_path
-class TestAgentExecutionRealDatabaseIntegration(SSotBaseTestCase):
+class AgentExecutionRealDatabaseIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for Agent Execution with real database persistence.
     

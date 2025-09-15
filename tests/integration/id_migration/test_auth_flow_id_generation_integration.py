@@ -40,7 +40,7 @@ except ImportError:
 
 
 @pytest.mark.integration
-class TestAuthFlowIdGenerationIntegration(SSotBaseTestCase):
+class AuthFlowIdGenerationIntegrationTests(SSotBaseTestCase):
     """Integration tests for auth flow ID generation patterns."""
     
     def setUp(self):
@@ -266,7 +266,7 @@ class TestAuthFlowIdGenerationIntegration(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestMultiUserAuthIdIsolationIntegration(SSotBaseTestCase):
+class MultiUserAuthIdIsolationIntegrationTests(SSotBaseTestCase):
     """Integration tests for multi-user auth ID isolation patterns."""
     
     def setUp(self):

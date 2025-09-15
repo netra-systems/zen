@@ -136,7 +136,7 @@ class MockAgentPipeline:
             print(f'Event {event_type} failed to send or timed out')
 
 @pytest.mark.integration
-class TestAgentTimeoutPipelineIntegration:
+class AgentTimeoutPipelineIntegrationTests:
     """Integration tests for agent pipeline timeout scenarios"""
 
     @pytest.mark.asyncio

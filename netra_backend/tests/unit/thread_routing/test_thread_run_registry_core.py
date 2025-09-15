@@ -20,7 +20,7 @@ from typing import Dict, Any, Optional, List
 from netra_backend.app.services.thread_run_registry import ThreadRunRegistry, RegistryConfig, RunMapping, MappingState, get_thread_run_registry, initialize_thread_run_registry
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestThreadRunRegistryCore(SSotAsyncTestCase):
+class ThreadRunRegistryCoreTests(SSotAsyncTestCase):
     """Test thread run registry core functionality with SSOT patterns."""
 
     @pytest.fixture(autouse=True)

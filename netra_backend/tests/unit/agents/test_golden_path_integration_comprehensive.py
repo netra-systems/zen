@@ -59,7 +59,7 @@ from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestGoldenPathIntegrationComprehensive(SSotAsyncTestCase):
+class GoldenPathIntegrationComprehensiveTests(SSotAsyncTestCase):
     """Comprehensive integration tests for the complete golden path workflow."""
 
     def setup_method(self, method):

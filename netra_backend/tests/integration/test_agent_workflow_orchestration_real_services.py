@@ -23,7 +23,7 @@ from test_framework.conftest_real_services import real_services
 from shared.isolated_environment import get_env
 
 
-class TestAgentWorkflowOrchestration(ServiceOrchestrationIntegrationTest):
+class AgentWorkflowOrchestrationTests(ServiceOrchestrationIntegrationTest):
     """Test agent workflow orchestration with real services coordination."""
 
     @pytest.mark.integration

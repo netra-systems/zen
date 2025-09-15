@@ -16,7 +16,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 
 
-class TestUnifiedConfigManager(SSotBaseTestCase):
+class UnifiedConfigManagerTests(SSotBaseTestCase):
     """Test suite for UnifiedConfigManager following SSOT patterns."""
     
     def setup_method(self, method):

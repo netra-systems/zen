@@ -23,7 +23,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketPerformanceReliabilityE2E(SSotBaseTestCase):
+class WebSocketPerformanceReliabilityE2ETests(SSotBaseTestCase):
     """E2E tests for WebSocket performance and reliability."""
     
     @pytest.fixture

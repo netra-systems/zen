@@ -112,7 +112,7 @@ class FailingLifecycleAgent(BaseAgent):
         }
 
 
-class TestBaseAgentLifecycleManagement(SSotAsyncTestCase):
+class BaseAgentLifecycleManagementTests(SSotAsyncTestCase):
     """Test BaseAgent lifecycle management and state transitions."""
 
     def setup_method(self, method):

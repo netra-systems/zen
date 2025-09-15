@@ -40,7 +40,7 @@ import unittest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.integration
-class TestWebSocketEventDeliveryFragmentation(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketEventDeliveryFragmentationTests(SSotAsyncTestCase, unittest.TestCase):
     """Test event delivery failures caused by WebSocket Manager fragmentation."""
 
     def setUp(self):
@@ -380,7 +380,7 @@ class TestWebSocketEventDeliveryFragmentation(SSotAsyncTestCase, unittest.TestCa
             self.fail(f"RACE CONDITION FRAGMENTATION: Cannot test race conditions due to manager fragmentation: {e}")
 
 @pytest.mark.integration
-class TestWebSocketManagerGoldenPathFragmentation(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketManagerGoldenPathFragmentationTests(SSotAsyncTestCase, unittest.TestCase):
     """Test Golden Path chat functionality degradation caused by WebSocket Manager fragmentation."""
 
     async def test_golden_path_chat_functionality_degradation(self):

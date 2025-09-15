@@ -140,14 +140,14 @@ async def create_mock_tool_dispatcher(user_context: UserExecutionContext, websoc
     )
     
     # Register a simple test tool
-    class TestTool:
+    class ToolTests:
         name = "test_tool"
         
         async def arun(self, test_param: str = "default") -> str:
             await asyncio.sleep(0.1)  # Simulate work
             return f"Tool executed with param: {test_param}"
     
-    test_tool = TestTool()
+    test_tool = ToolTests()
     dispatcher.register_tool(test_tool)
     
     return dispatcher
@@ -307,14 +307,14 @@ async def test_websocket_events_with_tool_dispatcher_integration(
     )
     
     # Register a test tool
-    class TestTool:
+    class ToolTests:
         name = "integration_test_tool"
         
         async def arun(self, message: str = "test") -> str:
             await asyncio.sleep(0.05)  # Brief work simulation
             return f"Processed: {message}"
     
-    test_tool = TestTool()
+    test_tool = ToolTests()
     dispatcher.register_tool(test_tool)
     
     # Execute tool (should trigger WebSocket events)

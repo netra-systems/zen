@@ -72,7 +72,7 @@ class UserContextValidator:
         return True
 
 
-class TestUserContextReportIsolation(BaseIntegrationTest):
+class UserContextReportIsolationTests(BaseIntegrationTest):
     """Test user context isolation with real services."""
     
     @pytest.mark.integration

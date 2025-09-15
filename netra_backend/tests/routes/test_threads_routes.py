@@ -13,7 +13,7 @@ import pytest
 
 from netra_backend.tests.test_utilities import base_client
 
-class TestThreadsRoute:
+class ThreadsRouteTests:
     """Test thread conversation management."""
     
     def test_thread_creation(self, base_client):

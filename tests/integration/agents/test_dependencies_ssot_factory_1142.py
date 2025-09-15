@@ -40,7 +40,7 @@ class MockRequest:
             self.headers['user-id'] = user_id
 
 @pytest.mark.integration
-class TestDependenciesSSOTFactory1142(SSotAsyncTestCase):
+class DependenciesSSOTFactory1142Tests(SSotAsyncTestCase):
     """Validate SSOT factory pattern in FastAPI dependencies."""
 
     async def asyncSetUp(self):

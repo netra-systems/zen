@@ -147,7 +147,7 @@ def reconnection_tracker():
     tracker = ReconnectionTracker()
     yield tracker
 
-class TestReconnectionFailureScenarios:
+class ReconnectionFailureScenariosTests:
     """Test WebSocket reconnection failure scenarios."""
 
     @pytest.mark.asyncio
@@ -397,7 +397,7 @@ class TestReconnectionFailureScenarios:
         corruption_events = [e for e in failed_events if 'corruption' in e.reason.lower()]
         assert len(corruption_events) > 0, 'Expected state corruption to affect multiple users'
 
-class TestReconnectionRecoveryFailures:
+class ReconnectionRecoveryFailuresTests:
     """Test recovery failure scenarios during reconnection."""
 
     @pytest.mark.asyncio

@@ -63,7 +63,7 @@ except ImportError:
 
 
 @pytest.mark.unit
-class TestWebSocketManagerMethodSignatureConflicts:
+class WebSocketManagerMethodSignatureConflictsTests:
     """Test WebSocket manager method signature conflicts."""
     
     @pytest.fixture
@@ -267,7 +267,7 @@ class TestWebSocketManagerMethodSignatureConflicts:
 
 
 @pytest.mark.unit
-class TestWebSocketBridgeAdapterInterfaceConflicts:
+class WebSocketBridgeAdapterInterfaceConflictsTests:
     """Test WebSocket bridge adapter interface conflicts."""
     
     @pytest.fixture

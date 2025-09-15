@@ -157,7 +157,7 @@ class BackendServerController:
                 print('   - Missing dependencies')
                 print('   - Port binding failure')
 
-class TestBackendServerListening:
+class BackendServerListeningTests:
     """Test backend server listening functionality."""
 
     def setup_method(self):

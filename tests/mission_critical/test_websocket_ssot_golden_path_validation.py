@@ -41,7 +41,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestWebSocketSSOTGoldenPathValidation(SSotBaseTestCase, unittest.TestCase):
+class WebSocketSSOTGoldenPathValidationTests(SSotBaseTestCase, unittest.TestCase):
     """Mission Critical: WebSocket SSOT Golden Path validation."""
     
     def setUp(self):

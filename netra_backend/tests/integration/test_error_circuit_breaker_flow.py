@@ -182,7 +182,7 @@ class MockErrorProneService:
         return {"user_id": user_id, "api_name": api_name, "response": "success"}
 
 
-class TestErrorPropagationCircuitBreakerIntegration:
+class ErrorPropagationCircuitBreakerIntegrationTests:
     """Integration tests for error propagation and circuit breaker patterns."""
     
     @pytest.fixture

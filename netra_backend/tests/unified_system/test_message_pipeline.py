@@ -95,7 +95,7 @@ async def agent_service_with_mocks():
     yield (agent_service, supervisor, llm_manager)
 
 @pytest.mark.asyncio
-class TestMessagePipeline:
+class MessagePipelineTests:
     """Test complete message processing pipeline."""
 
     @pytest.mark.asyncio

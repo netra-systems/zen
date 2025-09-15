@@ -15,7 +15,7 @@ from pathlib import Path
 
 
 @pytest.mark.e2e
-class TestColdStartFixesValidation:
+class ColdStartFixesValidationTests:
     """Validate that the cold start fixes are working correctly."""
 
     @pytest.mark.asyncio

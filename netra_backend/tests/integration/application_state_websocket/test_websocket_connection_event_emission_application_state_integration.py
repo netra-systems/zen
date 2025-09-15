@@ -25,7 +25,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
-class TestWebSocketConnectionEventEmissionApplicationStateIntegration(BaseIntegrationTest):
+class WebSocketConnectionEventEmissionApplicationStateIntegrationTests(BaseIntegrationTest):
     """Test WebSocket connection event emission with comprehensive application state notifications."""
     
     @pytest.mark.integration

@@ -55,7 +55,7 @@ logger = central_logger.get_logger(__name__)
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.websocket
-class TestWebSocketIntegration(BaseAgentExecutionTest):
+class WebSocketIntegrationTests(BaseAgentExecutionTest):
     """Integration tests for agent execution WebSocket event delivery with real connections."""
 
     async def setup_method(self):

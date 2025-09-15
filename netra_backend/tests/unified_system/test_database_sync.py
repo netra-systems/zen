@@ -39,7 +39,7 @@ from netra_backend.tests.fixtures import (
 
 )
 
-class TestDatabaseSynchronization:
+class DatabaseSynchronizationTests:
 
     """Test database synchronization and real-time updates"""
 

@@ -46,7 +46,7 @@ from auth_service.services.password_service import PasswordService, PasswordPoli
 from auth_service.services.redis_service import RedisService
 
 
-class TestPasswordSecurityComprehensive(SSotBaseTestCase):
+class PasswordSecurityComprehensiveTests(SSotBaseTestCase):
     """
     PRIORITY 2: Comprehensive password security tests with attack prevention focus.
     
@@ -648,4 +648,4 @@ class TestPasswordSecurityComprehensive(SSotBaseTestCase):
                 assert result.strength_score > 0, f"Valid unicode password should have positive score: {unicode_password}"
 
 
-__all__ = ["TestPasswordSecurityComprehensive"]
+__all__ = ["PasswordSecurityComprehensiveTests"]

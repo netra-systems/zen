@@ -36,7 +36,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthH
 from shared.isolated_environment import get_env
 
 
-class TestStartupFinalizeChatReadiness(SSotBaseTestCase):
+class StartupFinalizeChatReadinessTests(SSotBaseTestCase):
     """Integration tests for FINALIZE phase complete chat workflow readiness."""
     
     def setup_method(self, method):

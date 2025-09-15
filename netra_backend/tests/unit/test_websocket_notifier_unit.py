@@ -42,7 +42,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 
-class TestWebSocketNotifierUnit(SSotBaseTestCase):
+class WebSocketNotifierUnitTests(SSotBaseTestCase):
     """Unit tests for WebSocket Notifier functionality."""
     
     def setup_method(self):

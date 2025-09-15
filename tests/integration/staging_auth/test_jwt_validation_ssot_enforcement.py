@@ -20,7 +20,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestJWTValidationSSOTEnforcement(SSotAsyncTestCase):
+class JWTValidationSSOTEnforcementTests(SSotAsyncTestCase):
     """
     Integration test validating JWT validation SSOT enforcement.
     Tests that all JWT validation is performed by auth service in staging.

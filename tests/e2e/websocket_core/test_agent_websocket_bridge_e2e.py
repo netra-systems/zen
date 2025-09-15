@@ -30,7 +30,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 
-class TestAgentWebSocketBridgeE2EIntegration(BaseTestCase):
+class AgentWebSocketBridgeE2EIntegrationTests(BaseTestCase):
     """
     E2E test for complete agent-WebSocket integration with real authentication and components.
     

@@ -8,7 +8,7 @@ import pytest
 from netra_backend.app.utils.crypto_utils import CryptoUtils
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestCryptoUtils:
+class CryptoUtilsTests:
     """Test suite for CryptoUtils"""
     
     @pytest.fixture

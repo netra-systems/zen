@@ -33,7 +33,7 @@ from netra_backend.app.agents.chat_orchestrator.quality_evaluator import (
 from netra_backend.app.core.quality_types import QualityMetrics, QualityLevel
 
 
-class TestChatOrchestratorQualityEvaluator(SSotAsyncTestCase, unittest.TestCase):
+class ChatOrchestratorQualityEvaluatorTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive tests for ChatOrchestrator quality evaluation business logic."""
 
     def setUp(self):

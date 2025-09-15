@@ -57,7 +57,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.logging_formatters import LogFormatter, SensitiveDataFilter, LogEntry, LogHandlerConfig
 from netra_backend.app.core.logging_context import request_id_context, trace_id_context, user_id_context
 
-class TestLogFormatterGcpTracebackComprehensive(SSotBaseTestCase):
+class LogFormatterGcpTracebackComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive test suite for LogFormatter GCP JSON formatting traceback issue.
     
@@ -495,7 +495,7 @@ def sample_complex_exception():
             return sys.exc_info()
     return create_exception()
 
-class TestLogFormatterGcpTracebackRegressionPrevention(SSotBaseTestCase):
+class LogFormatterGcpTracebackRegressionPreventionTests(SSotBaseTestCase):
     """
     Regression prevention tests to ensure the GCP traceback issue never reoccurs.
     
@@ -552,7 +552,7 @@ class TestLogFormatterGcpTracebackRegressionPrevention(SSotBaseTestCase):
         assert gcp_data['severity'] == 'WARNING', 'REGRESSION: Severity mapping changed'
         self.record_metric('regression_structure_validation_test', 'PASSED')
 
-class TestLogFormatterGcpTracebackParametrized(SSotBaseTestCase):
+class LogFormatterGcpTracebackParametrizedTests(SSotBaseTestCase):
     """Parametrized tests for comprehensive coverage of edge cases."""
 
     def setup_method(self, method=None):

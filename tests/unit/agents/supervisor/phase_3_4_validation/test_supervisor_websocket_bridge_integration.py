@@ -51,7 +51,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestSupervisorWebSocketBridgeIntegration(SSotAsyncTestCase):
+class SupervisorWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
     """
     Phase 3.4 Supervisor WebSocket Bridge Integration Tests
     

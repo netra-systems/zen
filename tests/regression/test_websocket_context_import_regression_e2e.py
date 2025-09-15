@@ -74,7 +74,7 @@ except ImportError:
     WEBSOCKETS_AVAILABLE = False
 
 @pytest.mark.e2e
-class TestWebSocketContextE2ERegression:
+class WebSocketContextE2ERegressionTests:
     """E2E tests for WebSocket context import regression.
     
     These tests validate that the regression breaks real end-to-end flows

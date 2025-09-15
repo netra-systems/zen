@@ -73,7 +73,7 @@ class ReconnectionTestLLM:
         }
 
 
-class TestReconnectionResilience(BaseIntegrationTest):
+class ReconnectionResilienceTests(BaseIntegrationTest):
     """
     Resilience tests for WebSocket reconnection scenarios.
     

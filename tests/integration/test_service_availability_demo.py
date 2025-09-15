@@ -34,7 +34,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestServiceAvailabilityDemo:
+class ServiceAvailabilityDemoTests:
     """Demonstration of service availability detection patterns."""
 
     @pytest.fixture(scope='class')
@@ -259,7 +259,7 @@ def test_service_availability_full_demo():
     print(f"Backend URL: {environment_setup['backend_url']}")
     print(f"Auth URL: {environment_setup['auth_url']}")
     print(f"WebSocket URL: {environment_setup['websocket_url']}")
-    demo = TestServiceAvailabilityDemo()
+    demo = ServiceAvailabilityDemoTests()
     try:
         demo.test_service_detection_synchronous(environment_setup)
         asyncio.run(demo.test_service_detection_asynchronous(environment_setup))

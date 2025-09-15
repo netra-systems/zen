@@ -23,7 +23,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.base_e2e_test import BaseE2ETest
 from shared.isolated_environment import get_env
 
-class TestEndToEndUserJourneyPerformanceE2E(BaseE2ETest):
+class EndToEndUserJourneyPerformanceE2ETests(BaseE2ETest):
     """Test complete end-to-end user journey performance"""
 
     def setup_method(self):

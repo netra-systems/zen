@@ -254,7 +254,7 @@ class MockWebSocket:
         return self._send_times.copy()
 
 
-class TestWebSocketBridgePerformance:
+class WebSocketBridgePerformanceTests:
     """Comprehensive WebSocket bridge performance tests."""
     
     @pytest.fixture(autouse=True)
@@ -1083,7 +1083,7 @@ if __name__ == "__main__":
             websocket = WebSocketTestHelper()  # Real WebSocket implementation
         )
         
-        test_instance = TestWebSocketBridgePerformance()
+        test_instance = WebSocketBridgePerformanceTests()
         test_instance.setup_monitoring()
         
         try:

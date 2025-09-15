@@ -44,7 +44,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, E2EAuthC
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketErrorHandling(BaseIntegrationTest):
+class WebSocketErrorHandlingTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket error handling and recovery.
     

@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 
 @pytest.mark.monitoring
-class TestAgentMetricsCollection:
+class AgentMetricsCollectionTests:
     """Test comprehensive agent metrics collection."""
     
     @pytest.mark.asyncio
@@ -268,7 +268,7 @@ class TestAgentMetricsCollection:
 
 
 @pytest.mark.monitoring
-class TestAgentTracing:
+class AgentTracingTests:
     """Test distributed tracing for agent operations."""
     
     @pytest.mark.asyncio
@@ -527,7 +527,7 @@ class TestAgentTracing:
 
 
 @pytest.mark.monitoring
-class TestAgentConfigurationMonitoring:
+class AgentConfigurationMonitoringTests:
     """Test agent configuration monitoring and management."""
     
     @pytest.mark.asyncio

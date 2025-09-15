@@ -15,7 +15,7 @@ from tests.e2e.staging_test_base import StagingTestBase, staging_test
 
 
 @pytest.mark.e2e
-class TestLifecycleEventsStaging(StagingTestBase):
+class LifecycleEventsStagingTests(StagingTestBase):
     """Test lifecycle events in staging environment"""
     
     @staging_test
@@ -128,7 +128,7 @@ class TestLifecycleEventsStaging(StagingTestBase):
 
 if __name__ == "__main__":
     async def run_tests():
-        test_class = TestLifecycleEventsStaging()
+        test_class = LifecycleEventsStagingTests()
         test_class.setup_class()
         
         try:

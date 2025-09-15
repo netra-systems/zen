@@ -60,7 +60,7 @@ from netra_backend.app.core.configuration.compatibility_shim import (
 )
 
 
-class TestUnifiedConfigurationManagerIntegration(BaseIntegrationTest):
+class UnifiedConfigurationManagerIntegrationTests(BaseIntegrationTest):
     """Comprehensive integration tests for UnifiedConfigurationManager."""
 
     def setup_method(self):

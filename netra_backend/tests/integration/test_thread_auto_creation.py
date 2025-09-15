@@ -33,7 +33,7 @@ from netra_backend.app.services.thread_service import ThreadService
 from test_framework.real_services import get_real_services
 
 @pytest.mark.asyncio
-class TestThreadAutoCreation:
+class ThreadAutoCreationTests:
     """Test automatic thread creation on first user message."""
 
     @pytest.fixture

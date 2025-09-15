@@ -57,7 +57,7 @@ class ExecutionResult:
     coordination_metadata: Dict[str, Any]
 
 
-class TestExecutionEngineCoordination(BaseIntegrationTest):
+class ExecutionEngineCoordinationTests(BaseIntegrationTest):
     """Test execution engine coordination with real service simulation."""
 
     def setup_method(self, method):

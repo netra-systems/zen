@@ -30,7 +30,7 @@ from tests.e2e.websocket_guarantees_helpers import (
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestMessageOrderingPreservation:
+class MessageOrderingPreservationTests:
     @pytest.fixture
     def ordering_core(self):
         return MessageOrderingCore()
@@ -86,7 +86,7 @@ class TestMessageOrderingPreservation:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAtLeastOnceDeliveryGuarantee:
+class AtLeastOnceDeliveryGuaranteeTests:
     @pytest.fixture
     def delivery_core(self):
         return AtLeastOnceDeliveryCore()
@@ -135,7 +135,7 @@ class TestAtLeastOnceDeliveryGuarantee:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestDuplicateMessageDetection:
+class DuplicateMessageDetectionTests:
     @pytest.fixture
     def duplicate_core(self):
         return DuplicateDetectionCore()
@@ -191,7 +191,7 @@ class TestDuplicateMessageDetection:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestReconnectionWithMessageRecovery:
+class ReconnectionWithMessageRecoveryTests:
     @pytest.fixture
     def recovery_core(self):
         return ReconnectionRecoveryCore()
@@ -250,7 +250,7 @@ class TestReconnectionWithMessageRecovery:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestConcurrentMessageHandling:
+class ConcurrentMessageHandlingTests:
     @pytest.fixture
     def concurrent_core(self):
         return ConcurrentMessageCore()

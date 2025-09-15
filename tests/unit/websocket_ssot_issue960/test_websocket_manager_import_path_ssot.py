@@ -22,7 +22,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 @pytest.mark.unit
-class TestWebSocketManagerImportPathSSOT(SSotBaseTestCase):
+class WebSocketManagerImportPathSSOTTests(SSotBaseTestCase):
     """Test WebSocket manager import path SSOT compliance - SHOULD FAIL before consolidation."""
 
     def setUp(self):

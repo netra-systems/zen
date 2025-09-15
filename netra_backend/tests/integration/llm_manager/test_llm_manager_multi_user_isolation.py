@@ -25,7 +25,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.isolated_environment import get_env
 
 
-class TestLLMManagerMultiUserIsolation(BaseIntegrationTest):
+class LLMManagerMultiUserIsolationTests(BaseIntegrationTest):
     """
     Test LLM Manager factory pattern and multi-user isolation.
     

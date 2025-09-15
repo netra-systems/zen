@@ -37,7 +37,7 @@ from test_framework.isolated_environment_fixtures import (
     temporary_env_vars, clean_env_context, patch_env
 )
 
-class TestIsolatedEnvironmentCompliance:
+class IsolatedEnvironmentComplianceTests:
     """Test suite to validate IsolatedEnvironment compliance across the codebase."""
     
     def test_isolated_environment_basic_functionality(self, isolated_env):

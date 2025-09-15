@@ -58,7 +58,7 @@ class MockUnifiedIdGenerator:
         raise ValueError(f"Invalid correlation ID format: {correlation_id}")
 
 
-class TestCorrelationIdGeneration(SSotBaseTestCase):
+class CorrelationIdGenerationTests(SSotBaseTestCase):
     """Test correlation ID generation for effective distributed tracing."""
     
     def setup_method(self, method=None):

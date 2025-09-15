@@ -74,7 +74,7 @@ from netra_backend.app.agents.data.unified_data_agent import UnifiedDataAgent
 
 @pytest.mark.e2e
 @pytest.mark.staging
-class TestIssue581DataSubAgentGCPStaging(SSotAsyncTestCase):
+class Issue581DataSubAgentGCPStagingTests(SSotAsyncTestCase):
     """
     E2E tests for Issue #581 on GCP staging environment.
     

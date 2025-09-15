@@ -21,7 +21,7 @@ from typing import Any, Dict, List
 
 import pytest
 
-class TestImportStructureFailures:
+class ImportStructureFailuresTests:
     """Tests that expose import structure failures in the codebase"""
 
     def test_startup_checker_import_from_app_checker_fails(self):
@@ -168,7 +168,7 @@ class TestImportStructureFailures:
                                                                         startup_checker = StartupChecker(app)
                                                                         assert hasattr(startup_checker, 'run_all_checks')
 
-                                                                        class TestImportErrorConsequences:
+                                                                        class ImportErrorConsequencesTests:
                                                                             """Tests that demonstrate the consequences of the import error"""
 
                                                                             @pytest.mark.asyncio
@@ -249,7 +249,7 @@ class TestImportStructureFailures:
             # Error should indicate the module path
                                                                                                                     assert "netra_backend.app.checker" in error_msg
 
-                                                                                                                    class TestCorrectImportStructure:
+                                                                                                                    class CorrectImportStructureTests:
                                                                                                                         """Tests that validate the correct import structure after fix"""
 
                                                                                                                         def test_startup_checker_importable_from_correct_location(self):

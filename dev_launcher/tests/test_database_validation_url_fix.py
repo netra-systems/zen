@@ -10,7 +10,7 @@ from pathlib import Path
 from shared.isolated_environment import IsolatedEnvironment
 from dev_launcher.network_resilience import NetworkResilientClient, RetryPolicy
 
-class TestDatabaseValidationURLFix:
+class DatabaseValidationURLFixTests:
     """Test that database validation uses URLs, not service names."""
 
     @pytest.mark.asyncio

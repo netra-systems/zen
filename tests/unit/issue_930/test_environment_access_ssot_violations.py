@@ -21,7 +21,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
 @pytest.mark.unit
-class TestEnvironmentAccessSSOTViolations(SSotTestCase):
+class EnvironmentAccessSSOTViolationsTests(SSotTestCase):
     """Tests identifying SSOT violations in environment variable access patterns."""
 
     def test_direct_os_environ_jwt_secret_access_violation(self):

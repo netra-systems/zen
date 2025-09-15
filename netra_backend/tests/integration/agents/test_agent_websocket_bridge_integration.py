@@ -52,7 +52,7 @@ class WebSocketEventCapture:
     delivery_method: str
     user_id: str
 
-class TestAgentWebSocketBridgeIntegration(SSotAsyncTestCase):
+class AgentWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket bridge patterns - MUST FAIL initially."""
 
     def setup_method(self, method):

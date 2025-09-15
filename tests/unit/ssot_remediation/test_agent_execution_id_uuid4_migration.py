@@ -33,7 +33,7 @@ from shared.types.core_types import ExecutionID, AgentID, UserID
 
 
 @pytest.mark.unit
-class TestAgentExecutionIdUuid4Migration(SSotBaseTestCase):
+class AgentExecutionIdUuid4MigrationTests(SSotBaseTestCase):
     """Test agent execution ID migration from uuid.uuid4() to SSOT patterns."""
 
     def setup_method(self, method=None):

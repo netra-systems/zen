@@ -123,7 +123,7 @@ class IsolatedUserTool(BaseTool):
         """Check if any cross-user access attempts occurred."""
         return len(self.cross_user_access_attempts) > 0
 
-class TestToolExecutionUserContextIsolation(SSotAsyncTestCase):
+class ToolExecutionUserContextIsolationTests(SSotAsyncTestCase):
     """Integration tests for user context isolation in tool execution."""
 
     def setUp(self):

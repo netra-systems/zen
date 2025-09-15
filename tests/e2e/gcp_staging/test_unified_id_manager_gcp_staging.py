@@ -22,7 +22,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType, 
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestUnifiedIDManagerGCPStaging(SSotAsyncTestCase):
+class UnifiedIDManagerGCPStagingTests(SSotAsyncTestCase):
     """
     E2E GCP Staging tests for UnifiedIDManager protecting business value.
     Tests real GCP Cloud SQL performance, distributed generation, and production scale.

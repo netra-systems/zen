@@ -46,7 +46,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestWebSocketSSOTComplianceValidation(SSotBaseTestCase):
+class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
     """
     SSOT compliance validation tests for WebSocket subsystem.
 

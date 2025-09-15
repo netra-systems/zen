@@ -105,7 +105,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 @pytest.mark.mission_critical
 @pytest.mark.golden_path
-class TestGoldenPathWebSocketAuthentication:
+class GoldenPathWebSocketAuthenticationTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

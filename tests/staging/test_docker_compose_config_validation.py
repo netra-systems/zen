@@ -13,7 +13,7 @@ import pytest
 import yaml
 from pathlib import Path
 
-class TestDockerComposeConfigValidation:
+class DockerComposeConfigValidationTests:
     """Validate docker-compose.staging.yml configuration fix for Issue #115."""
 
     def test_staging_backend_has_service_id_configured(self):
@@ -100,7 +100,7 @@ class TestDockerComposeConfigValidation:
         assert not missing_vars, f"Missing required authentication variables in docker-compose.staging.yml backend environment: {', '.join(missing_vars)}. These are required to fix Issue #115."
         assert not invalid_vars, f"Invalid authentication variables in docker-compose.staging.yml backend environment: {', '.join(invalid_vars)}. Check configuration requirements."
 
-class TestServiceAuthConfigurationRegression:
+class ServiceAuthConfigurationRegressionTests:
     """Regression prevention tests for service authentication configuration."""
 
     def test_no_dynamic_service_id_generation(self):

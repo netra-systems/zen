@@ -72,7 +72,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 
 
 @pytest.mark.unit
-class TestGoldenPathBusinessValueProtection(SSotAsyncTestCase, unittest.TestCase):
+class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCase):
     """
     Validates unified logging protects $500K+ ARR debugging capabilities.
     
@@ -405,9 +405,9 @@ if __name__ == '__main__':
     import unittest
     
     suite = unittest.TestSuite()
-    suite.addTest(TestGoldenPathBusinessValueProtection('test_customer_support_correlation_tracking_works'))
-    suite.addTest(TestGoldenPathBusinessValueProtection('test_golden_path_execution_flow_traceable'))
-    suite.addTest(TestGoldenPathBusinessValueProtection('test_business_impact_of_logging_disconnection'))
+    suite.addTest(GoldenPathBusinessValueProtectionTests('test_customer_support_correlation_tracking_works'))
+    suite.addTest(GoldenPathBusinessValueProtectionTests('test_golden_path_execution_flow_traceable'))
+    suite.addTest(GoldenPathBusinessValueProtectionTests('test_business_impact_of_logging_disconnection'))
     
     runner = unittest.TextTestRunner(verbosity=2)
     

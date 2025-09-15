@@ -10,7 +10,7 @@ from netra_backend.app.main import app
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.api
-class TestOrganizationsAPI:
+class OrganizationsAPITests:
     """API test suite for organizations"""
     
     @pytest.fixture

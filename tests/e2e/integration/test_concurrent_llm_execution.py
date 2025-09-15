@@ -130,7 +130,7 @@ class ConcurrentLLMExecutor:
 
 
 @pytest.mark.e2e
-class TestConcurrentLLMExecution:
+class ConcurrentLLMExecutionTests:
     """Concurrent LLM execution tests."""
     
     @pytest.fixture
@@ -270,7 +270,7 @@ class TestConcurrentLLMExecution:
 
 @pytest.mark.stress
 @pytest.mark.e2e
-class TestStressConcurrency:
+class StressConcurrencyTests:
     """Stress testing for concurrent execution."""
     
     @pytest.mark.asyncio

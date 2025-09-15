@@ -16,7 +16,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from netra_backend.app.core.middleware_setup import setup_middleware as ssot_setup_middleware, setup_gcp_auth_context_middleware
 from netra_backend.app.middleware.gcp_auth_context_middleware import GCPAuthContextMiddleware
 
-class TestMiddlewareDependencyDemonstration:
+class MiddlewareDependencyDemonstrationTests:
     """Demonstrate the exact middleware dependency violation."""
 
     def test_gcp_middleware_requires_session_access(self):
@@ -161,7 +161,7 @@ class TestMiddlewareDependencyDemonstration:
         assert broken_auth.get('user_id') == 'golden-path-user-123', f"GOLDEN PATH BLOCKED: Broken middleware order loses user authentication context. Expected user_id='golden-path-user-123', got '{broken_auth.get('user_id')}'. This prevents proper user isolation and causes WebSocket authentication failures."
         assert broken_auth.get('session_id') == 'golden-session-456', f"GOLDEN PATH BLOCKED: Session context lost. Expected session_id='golden-session-456', got '{broken_auth.get('session_id')}'. This breaks multi-user session management."
 
-class TestSSOTComplianceRestoration:
+class SSOTComplianceRestorationTests:
     """Tests that validate the SSOT compliance has been restored."""
 
     def test_validate_ssot_compliance_restoration(self):

@@ -40,7 +40,7 @@ from netra_backend.app.services.cost_calculator import (
 from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector
 
 
-class TestBillingPipelineCore:
+class BillingPipelineCoreTests:
     """Core test infrastructure for billing pipeline validation."""
     
     def __init__(self):
@@ -161,7 +161,7 @@ class ClickHouseMetricsValidator:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestRealBillingPipeline:
+class RealBillingPipelineTests:
     """Test #9: Real Billing Pipeline with ClickHouse Integration."""
     
     @pytest_asyncio.fixture
@@ -356,7 +356,7 @@ class TestRealBillingPipeline:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestBillingEdgeCases:
+class BillingEdgeCasesTests:
     """Test billing edge cases and error scenarios."""
     
     @pytest_asyncio.fixture

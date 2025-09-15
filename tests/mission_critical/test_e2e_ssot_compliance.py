@@ -328,7 +328,7 @@ class E2ESsotValidationEnhancer:
         return file_result
 
 
-class TestE2ESsotCompliance(SSotBaseTestCase):
+class E2ESsotComplianceTests(SSotBaseTestCase):
     """
     Mission Critical: E2E SSOT Compliance Enhancement Suite.
     
@@ -583,22 +583,22 @@ class TestE2ESsotCompliance(SSotBaseTestCase):
         
         # Test validation functionality
         try:
-            class TestValidationClass(SSotBaseTestCase):
+            class ValidationClassTests(SSotBaseTestCase):
                 def test_example(self):
                     pass
             
-            validation_result = self.validation_enhancer.enhanced_validate_test_class(TestValidationClass)
+            validation_result = self.validation_enhancer.enhanced_validate_test_class(ValidationClassTests)
             enhancement_report['test_validation_functional'] = validation_result['is_valid']
         except Exception as e:
             logger.warning(f"Test validation test failed: {e}")
         
         # Test pattern validation functionality
         try:
-            class TestPatternClass(SSotBaseTestCase):
+            class PatternClassTests(SSotBaseTestCase):
                 def test_example(self):
                     pass
             
-            pattern_result = self.validation_enhancer.validate_e2e_ssot_patterns(TestPatternClass)
+            pattern_result = self.validation_enhancer.validate_e2e_ssot_patterns(PatternClassTests)
             enhancement_report['pattern_validation_functional'] = (
                 'patterns_score' in pattern_result and pattern_result['patterns_score'] >= 0
             )

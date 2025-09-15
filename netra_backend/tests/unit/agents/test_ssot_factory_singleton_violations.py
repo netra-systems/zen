@@ -31,7 +31,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
-class TestSSOTFactorySingletonViolations(SSotAsyncTestCase):
+class SSOTFactorySingletonViolationsTests(SSotAsyncTestCase):
     """Test that exposes singleton patterns breaking factory pattern expectations.
 
     These tests SHOULD FAIL before SSOT remediation because singleton patterns

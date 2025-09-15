@@ -31,7 +31,7 @@ from netra_backend.app.agents.models import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestUserAgentSession:
+class UserAgentSessionTests:
     """Test user agent session isolation and management."""
     
     def test_user_agent_session_creation_requires_valid_user_id(self):
@@ -145,7 +145,7 @@ class TestUserAgentSession:
         assert session._created_at.tzinfo == timezone.utc
 
 
-class TestAgentMetadataModels:
+class AgentMetadataModelsTests:
     """Test agent metadata model functionality and business logic."""
     
     def test_data_requirement_priority_comparison(self):
@@ -270,7 +270,7 @@ class TestAgentMetadataModels:
         assert assessment.optimization_quality["performance_optimization"] == "low"
 
 
-class TestAgentRegistryIntegration:
+class AgentRegistryIntegrationTests:
     """Test agent registry integration and global state management."""
     
     def test_global_registry_singleton_pattern(self):
@@ -354,7 +354,7 @@ class TestAgentRegistryIntegration:
         assert hasattr(mock_context, 'thread_id')
 
 
-class TestAgentMetadataEdgeCases:
+class AgentMetadataEdgeCasesTests:
     """Test edge cases and error conditions in agent metadata."""
     
     def test_data_requirement_with_minimal_fields(self):

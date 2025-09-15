@@ -22,7 +22,7 @@ from netra_backend.app.shutdown import _stop_performance_monitoring, run_complet
 from netra_backend.app.core.lifespan_manager import lifespan
 
 
-class TestShutdownErrors:
+class ShutdownErrorsTests:
     """Test suite for shutdown process error scenarios."""
     
     @pytest.mark.asyncio

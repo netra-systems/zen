@@ -228,7 +228,7 @@ class SSotImportComplianceValidator:
 
 
 @pytest.mark.unit
-class TestSSotImportCompliance(SSotBaseTestCase):
+class SSotImportComplianceTests(SSotBaseTestCase):
     """
     Automated tests for SSOT import compliance validation.
 

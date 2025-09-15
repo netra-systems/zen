@@ -18,7 +18,7 @@ from netra_backend.app.core.middleware_setup import WebSocketExclusionMiddleware
 from netra_backend.app.routes.websocket_ssot import extract_query_params
 
 @pytest.mark.integration
-class TestWebSocketASGIMiddleware:
+class WebSocketASGIMiddlewareTests:
     """Integration tests for WebSocket ASGI middleware processing."""
 
     @pytest.fixture
@@ -148,7 +148,7 @@ class TestWebSocketASGIMiddleware:
                 raise
 
 @pytest.mark.integration
-class TestASGIScopeErrorScenarios:
+class ASGIScopeErrorScenariosTests:
     """Specific error scenario reproduction tests."""
 
     @pytest.mark.asyncio

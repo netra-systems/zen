@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestMessageRouterSSOTImportValidation(SSotBaseTestCase):
+class MessageRouterSSOTImportValidationTests(SSotBaseTestCase):
     """Test that MessageRouter imports resolve to single implementation."""
 
     def setUp(self):
@@ -214,7 +214,7 @@ class TestMessageRouterSSOTImportValidation(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestMessageRouterRaceConditionPrevention(SSotBaseTestCase):
+class MessageRouterRaceConditionPreventionTests(SSotBaseTestCase):
     """Test that consolidated router prevents race conditions."""
 
     def test_concurrent_routing_uses_same_router_instance(self):

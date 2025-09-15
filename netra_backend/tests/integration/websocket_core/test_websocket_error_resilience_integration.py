@@ -24,7 +24,7 @@ from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from netra_backend.app.models import User, Thread
 
 
-class TestWebSocketErrorResilienceIntegration(BaseIntegrationTest):
+class WebSocketErrorResilienceIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket error resilience."""
     
     @pytest.fixture

@@ -48,7 +48,7 @@ except ImportError:
     AsyncSession = None
 
 
-class TestConnectionPoolingCleanup(BaseIntegrationTest):
+class ConnectionPoolingCleanupTests(BaseIntegrationTest):
     """Test database connection pooling and cleanup with user context."""
 
     def setUp(self):

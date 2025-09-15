@@ -15,7 +15,7 @@ from netra_backend.tests.helpers.tool_dispatcher_helpers import (
     create_mock_tool,
 )
 
-class TestToolDispatcherInitialization:
+class ToolDispatcherInitializationTests:
     """Test ToolDispatcher initialization and tool registration."""
     
     def test_init_empty(self):

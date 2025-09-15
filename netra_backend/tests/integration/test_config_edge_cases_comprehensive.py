@@ -44,7 +44,7 @@ from netra_backend.app.core.environment_constants import EnvironmentDetector
 from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig, StagingConfig, ProductionConfig, NetraTestingConfig, RedisConfig, GoogleCloudConfig, OAuthConfig, ClickHouseNativeConfig
 from test_framework.base_integration_test import BaseIntegrationTest
 
-class TestConfigurationValidationFailures(BaseIntegrationTest):
+class ConfigurationValidationFailuresTests(BaseIntegrationTest):
     """Test configuration validation failure scenarios and error recovery.
     
     BVJ: Ensures configuration validation catches errors before they cause
@@ -181,7 +181,7 @@ class TestConfigurationValidationFailures(BaseIntegrationTest):
             enhanced_result = validator.validate_complete_config(enhanced_config)
             assert enhanced_result.score >= result.score
 
-class TestMalformedConfigurationHandling(BaseIntegrationTest):
+class MalformedConfigurationHandlingTests(BaseIntegrationTest):
     """Test handling of malformed configuration data.
     
     BVJ: Malformed configuration can cause silent failures in agent execution.
@@ -268,7 +268,7 @@ class TestMalformedConfigurationHandling(BaseIntegrationTest):
                 if hasattr(config, 'secret_key') and config.secret_key:
                     assert '\x00' not in config.secret_key
 
-class TestConfigurationPrecedenceEdgeCases(BaseIntegrationTest):
+class ConfigurationPrecedenceEdgeCasesTests(BaseIntegrationTest):
     """Test configuration precedence edge cases.
     
     BVJ: Configuration precedence issues can cause production values to leak
@@ -332,7 +332,7 @@ class TestConfigurationPrecedenceEdgeCases(BaseIntegrationTest):
             env.set('ENVIRONMENT', 'production', 'test')
             production_config = ProductionConfig()
 
-class TestConcurrentConfigurationAccess(BaseIntegrationTest):
+class ConcurrentConfigurationAccessTests(BaseIntegrationTest):
     """Test configuration access under high concurrency and load.
     
     BVJ: Multi-user agent execution requires thread-safe configuration access.
@@ -440,7 +440,7 @@ class TestConcurrentConfigurationAccess(BaseIntegrationTest):
                 assert result['config_type'] in ['NetraTestingConfig', 'DevelopmentConfig']
                 assert result['actual_env'] in ['testing', 'development']
 
-class TestDatabaseConnectionStringValidation(BaseIntegrationTest):
+class DatabaseConnectionStringValidationTests(BaseIntegrationTest):
     """Test configuration validation with invalid database connection strings.
     
     BVJ: Invalid database connections prevent agent execution and cause 
@@ -515,7 +515,7 @@ class TestDatabaseConnectionStringValidation(BaseIntegrationTest):
                     if all_issues:
                         issue_text = ' '.join(all_issues).lower()
 
-class TestOAuthCredentialValidation(BaseIntegrationTest):
+class OAuthCredentialValidationTests(BaseIntegrationTest):
     """Test configuration with malformed OAuth credentials.
     
     BVJ: OAuth credential errors prevent user authentication,
@@ -587,7 +587,7 @@ class TestOAuthCredentialValidation(BaseIntegrationTest):
             assert staging_result is not None
             assert production_result is not None
 
-class TestConfigurationRecoveryMechanisms(BaseIntegrationTest):
+class ConfigurationRecoveryMechanismsTests(BaseIntegrationTest):
     """Test configuration recovery mechanisms and corrupted file handling.
     
     BVJ: Configuration corruption can bring down the entire platform.

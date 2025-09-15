@@ -33,7 +33,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.unit
-class TestStagingEnvironmentConfiguration:
+class StagingEnvironmentConfigurationTests:
     """Test suite for staging environment configuration handling."""
     
     def test_staging_environment_secret_generation(self):
@@ -244,7 +244,7 @@ class TestStagingEnvironmentConfiguration:
 
 
 @pytest.mark.unit
-class TestStagingDeploymentErrorPrevention:
+class StagingDeploymentErrorPreventionTests:
     """Test suite focused on preventing staging deployment errors."""
     
     @pytest.mark.parametrize("service_name", ["auth", "backend"])

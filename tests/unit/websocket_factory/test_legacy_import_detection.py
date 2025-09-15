@@ -16,7 +16,7 @@ from typing import List, Dict, Set, Tuple
 
 
 @pytest.mark.unit
-class TestWebSocketLegacyImportDetection:
+class WebSocketLegacyImportDetectionTests:
     """
     Test suite to detect and validate WebSocket import patterns across the codebase.
 

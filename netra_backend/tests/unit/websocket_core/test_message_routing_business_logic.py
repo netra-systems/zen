@@ -51,7 +51,7 @@ from netra_backend.app.websocket_core.types import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestMessageRoutingBusinessLogicComprehensive(SSotAsyncTestCase):
+class MessageRoutingBusinessLogicComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive business logic tests for WebSocket message routing.
     

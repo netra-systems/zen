@@ -51,7 +51,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
 @pytest.mark.gcp_staging
 @pytest.mark.websocket_events
 @pytest.mark.mission_critical
-class TestWebSocketEventsE2E(SSotAsyncTestCase):
+class WebSocketEventsE2ETests(SSotAsyncTestCase):
     """
     E2E tests for the 5 critical WebSocket events in staging GCP.
     

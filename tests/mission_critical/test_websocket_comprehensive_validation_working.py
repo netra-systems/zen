@@ -350,7 +350,7 @@ class WebSocketTestHarness:
 # ULTRA-COMPREHENSIVE TEST SUITE
 # ============================================================================
 
-class TestUltraComprehensiveWebSocketValidation:
+class UltraComprehensiveWebSocketValidationTests:
     """The most comprehensive WebSocket validation test suite."""
     
     @pytest.fixture(autouse=True)
@@ -535,7 +535,7 @@ class TestUltraComprehensiveWebSocketValidation:
         print("[U+1F4BC] Business value preservation: Chat functionality fully operational")
 
 
-class TestWebSocketEventTypes:
+class WebSocketEventTypesTests:
     """Test specific WebSocket event types and their requirements."""
     
     @pytest.fixture(autouse=True)

@@ -52,7 +52,7 @@ from test_framework.websocket_helpers import WebSocketTestHelpers
 
 
 @pytest.mark.integration
-class TestRealWebSocketConfirmationGaps(SSotAsyncTestCase):
+class RealWebSocketConfirmationGapsTests(SSotAsyncTestCase):
     """
     Integration tests using real WebSocket services to demonstrate confirmation gaps.
     
@@ -487,7 +487,7 @@ class TestRealWebSocketConfirmationGaps(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestRealWebSocketTimeoutGaps(SSotAsyncTestCase):
+class RealWebSocketTimeoutGapsTests(SSotAsyncTestCase):
     """
     Integration tests demonstrating real WebSocket timeout gaps with staging services.
     

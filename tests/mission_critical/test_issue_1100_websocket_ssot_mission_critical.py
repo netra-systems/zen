@@ -22,7 +22,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestWebSocketSSotMissionCritical(SSotAsyncTestCase):
+class WebSocketSSotMissionCriticalTests(SSotAsyncTestCase):
     """Mission critical WebSocket SSOT validation tests."""
     
     @pytest.mark.mission_critical

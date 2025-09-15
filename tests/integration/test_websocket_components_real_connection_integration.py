@@ -42,7 +42,7 @@ from netra_backend.app.websocket_core.utils import is_websocket_connected, is_we
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
-class TestWebSocketComponentsRealConnectionIntegration(SSotBaseTestCase):
+class WebSocketComponentsRealConnectionIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for real WebSocket connections with authentication.
     

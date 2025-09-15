@@ -79,7 +79,7 @@ class MockWebSocket:
             self.type = 1    # SOCK_STREAM
 
 
-class TestUnifiedAuthenticationServiceIntegration(BaseIntegrationTest):
+class UnifiedAuthenticationServiceIntegrationTests(BaseIntegrationTest):
     """Comprehensive integration tests for UnifiedAuthenticationService with real services."""
     
     def setup_method(self):

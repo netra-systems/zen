@@ -31,7 +31,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.clients.auth_client_core import AuthServiceClient, AuthServiceError
 
 
-class TestMultiUserIsolationIntegration(BaseIntegrationTest):
+class MultiUserIsolationIntegrationTests(BaseIntegrationTest):
     """Integration tests for multi-user isolation patterns."""
     
     def setup_method(self):

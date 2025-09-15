@@ -29,7 +29,7 @@ except ImportError:
 @pytest.mark.integration
 @pytest.mark.security
 @pytest.mark.no_skip
-class TestMultiUserAgentExecutionIsolation(SSotAsyncTestCase):
+class MultiUserAgentExecutionIsolationTests(SSotAsyncTestCase):
     """Integration tests for multi-user agent execution isolation vulnerabilities."""
 
     def setUp(self):

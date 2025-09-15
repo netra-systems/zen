@@ -510,7 +510,7 @@ class SimulatedServiceMesh:
 
 
 @pytest.mark.integration
-class TestCascadeFailurePrevention(BaseIntegrationTest):
+class CascadeFailurePreventionTests(BaseIntegrationTest):
     """
     Test cascade failure prevention mechanisms across distributed service architecture.
     

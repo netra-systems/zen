@@ -49,7 +49,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 
 
-class TestAuthDatabaseOperationsIntegration(SSotBaseTestCase):
+class AuthDatabaseOperationsIntegrationTests(SSotBaseTestCase):
     """
     Comprehensive auth database operations integration tests.
     

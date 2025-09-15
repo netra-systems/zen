@@ -30,7 +30,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestIssue1263ConnectionTimeoutUnit(SSotAsyncTestCase):
+class Issue1263ConnectionTimeoutUnitTests(SSotAsyncTestCase):
     """Unit tests for Issue #1263 database connection timeout validation."""
 
     async def asyncSetUp(self):
@@ -281,7 +281,7 @@ class TestIssue1263ConnectionTimeoutUnit(SSotAsyncTestCase):
             assert retry_delay <= 5.0, "Database retry delay should be <= 5.0s"
 
 
-class TestIssue1263DatabaseConfigurationEdgeCases(SSotAsyncTestCase):
+class Issue1263DatabaseConfigurationEdgeCasesTests(SSotAsyncTestCase):
     """Additional unit tests for edge cases related to Issue #1263."""
 
     async def test_database_timeout_edge_cases(self):

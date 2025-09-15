@@ -35,7 +35,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
-class TestUserContextManagerSSotIntegration(SSotBaseTestCase):
+class UserContextManagerSSotIntegrationTests(SSotBaseTestCase):
     """Tests for UserContextManager SSOT compliance and integration."""
 
     def setUp(self):
@@ -89,7 +89,7 @@ class TestUserContextManagerSSotIntegration(SSotBaseTestCase):
             self.assertIn(field, audit_trail, f'SSOT audit field {field} missing')
 
 @pytest.mark.integration
-class TestUserContextManagerWebSocketIntegration(SSotBaseTestCase):
+class UserContextManagerWebSocketIntegrationTests(SSotBaseTestCase):
     """Tests for UserContextManager WebSocket integration."""
 
     def setUp(self):
@@ -135,7 +135,7 @@ class TestUserContextManagerWebSocketIntegration(SSotBaseTestCase):
             self.assertEqual(user_b_data, 'user_b_data')
 
 @pytest.mark.integration
-class TestUserContextManagerAgentExecution(SSotBaseTestCase):
+class UserContextManagerAgentExecutionTests(SSotBaseTestCase):
     """Tests for UserContextManager integration with agent execution."""
 
     def setUp(self):
@@ -192,7 +192,7 @@ class TestUserContextManagerAgentExecution(SSotBaseTestCase):
                 self.assertEqual(results[key]['secret'], expected_secret)
 
 @pytest.mark.integration
-class TestUserContextManagerDatabaseIntegration(SSotBaseTestCase):
+class UserContextManagerDatabaseIntegrationTests(SSotBaseTestCase):
     """Tests for UserContextManager database integration."""
 
     def setUp(self):
@@ -235,7 +235,7 @@ class TestUserContextManagerDatabaseIntegration(SSotBaseTestCase):
             mock_transaction_b.execute.assert_called_with('SELECT 2')
 
 @pytest.mark.integration
-class TestUserContextManagerPerformance(SSotBaseTestCase):
+class UserContextManagerPerformanceTests(SSotBaseTestCase):
     """Performance and resource management tests for UserContextManager."""
 
     def setUp(self):
@@ -302,7 +302,7 @@ class TestUserContextManagerPerformance(SSotBaseTestCase):
                 mock_session.close.assert_called()
 
 @pytest.mark.integration
-class TestUserContextManagerErrorHandling(SSotBaseTestCase):
+class UserContextManagerErrorHandlingTests(SSotBaseTestCase):
     """Error handling and resilience tests for UserContextManager."""
 
     def setUp(self):

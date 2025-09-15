@@ -63,7 +63,7 @@ except ImportError:
     MockThread = None
 
 
-class TestSQLAlchemyORMUserScoping(BaseUnitTest):
+class SQLAlchemyORMUserScopingTests(BaseUnitTest):
     """Test SQLAlchemy ORM operations with proper user scoping."""
 
     def setUp(self):

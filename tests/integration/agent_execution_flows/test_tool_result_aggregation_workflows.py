@@ -24,7 +24,7 @@ from netra_backend.app.tools.result_aggregator import ToolResultAggregator
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestToolResultAggregationWorkflows(BaseIntegrationTest):
+class ToolResultAggregationWorkflowsTests(BaseIntegrationTest):
     """Integration tests for tool result aggregation workflows."""
 
     @pytest.mark.integration

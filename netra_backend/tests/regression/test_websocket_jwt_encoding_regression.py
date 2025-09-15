@@ -50,7 +50,7 @@ def backend_decode(encoded_token: str) -> str:
     decoded_string = decoded_bytes.decode('utf-8')
     return decoded_string
 
-class TestWebSocketJWTEncodingRegression:
+class WebSocketJWTEncodingRegressionTests:
     """Test suite for WebSocket JWT encoding regression."""
 
     def test_new_frontend_encoding_matches_backend_decoding(self):
@@ -160,7 +160,7 @@ class TestWebSocketJWTEncodingRegression:
         assert payload_json['sub'] == '1234567890'
         assert payload_json['name'] == 'John Doe'
 
-class TestWebSocketAuthenticationIntegration:
+class WebSocketAuthenticationIntegrationTests:
     """Integration tests for WebSocket authentication flow."""
 
     @pytest.mark.asyncio
@@ -186,7 +186,7 @@ class TestWebSocketAuthenticationIntegration:
         if '+' in standard_b64 or '/' in standard_b64:
             pass
 
-class TestRegressionPrevention:
+class RegressionPreventionTests:
     """Tests to prevent regression of the JWT encoding issue."""
 
     def test_frontend_encoding_contract(self):

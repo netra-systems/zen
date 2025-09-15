@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
-class TestWebSocketSSotRegressionPrevention(SSotBaseTestCase):
+class WebSocketSSotRegressionPreventionTests(SSotBaseTestCase):
     """
     Test suite to prevent regression of WebSocket SSOT violations.
     

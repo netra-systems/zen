@@ -38,7 +38,7 @@ logger = get_logger(__name__)
 
 @env_requires(services=['postgres'], features=['database_monitoring'])
 @pytest.mark.e2e
-class TestDatabaseConnectionPoolMonitoring:
+class DatabaseConnectionPoolMonitoringTests:
     """REAL E2E test suite for database connection pool monitoring capabilities."""
 
     @pytest.fixture

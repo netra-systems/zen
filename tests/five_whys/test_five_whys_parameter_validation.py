@@ -18,7 +18,7 @@ import os
 import pytest
 from typing import Dict, List, Any
 
-class TestFiveWhysParameterValidation:
+class FiveWhysParameterValidationTests:
     """
     Simple validation tests for the Five Whys parameter fix without external dependencies.
     

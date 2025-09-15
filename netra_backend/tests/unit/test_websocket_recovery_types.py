@@ -26,7 +26,7 @@ from netra_backend.app.core.websocket_recovery_types import (
 )
 
 
-class TestConnectionState:
+class ConnectionStateTests:
     """Test ConnectionState enum values and behavior."""
     
     @pytest.mark.unit
@@ -76,7 +76,7 @@ class TestConnectionState:
         assert ConnectionState.CONNECTED.value != "connecting"
 
 
-class TestReconnectionReason:
+class ReconnectionReasonTests:
     """Test ReconnectionReason enum values and behavior."""
     
     @pytest.mark.unit
@@ -114,7 +114,7 @@ class TestReconnectionReason:
         assert ReconnectionReason.MANUAL in all_reasons
 
 
-class TestConnectionMetrics:
+class ConnectionMetricsTests:
     """Test ConnectionMetrics dataclass functionality."""
     
     @pytest.fixture
@@ -244,7 +244,7 @@ class TestConnectionMetrics:
         assert metrics.latency_ms == -1.0
 
 
-class TestMessageState:
+class MessageStateTests:
     """Test MessageState dataclass functionality."""
     
     @pytest.fixture
@@ -389,7 +389,7 @@ class TestMessageState:
         assert set(message_dict.keys()) == expected_fields
 
 
-class TestReconnectionConfig:
+class ReconnectionConfigTests:
     """Test ReconnectionConfig dataclass functionality."""
     
     @pytest.mark.unit
@@ -537,7 +537,7 @@ class TestReconnectionConfig:
         assert set(config_dict.keys()) == expected_fields
 
 
-class TestWebSocketRecoveryTypesIntegration:
+class WebSocketRecoveryTypesIntegrationTests:
     """Integration tests for WebSocket recovery types working together."""
     
     @pytest.mark.unit
@@ -689,7 +689,7 @@ class TestWebSocketRecoveryTypesIntegration:
         assert message_time_from_content == metrics.connect_time
 
 
-class TestWebSocketRecoveryTypesEdgeCases:
+class WebSocketRecoveryTypesEdgeCasesTests:
     """Test edge cases and error conditions for WebSocket recovery types."""
     
     @pytest.mark.unit

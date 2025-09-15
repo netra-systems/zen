@@ -53,7 +53,7 @@ _redis_skip_reason = f"Redis unavailable: {_service_status['redis']}" if not _re
 
 
 @pytest.mark.skipif(not _redis_available, reason=_redis_skip_reason)
-class TestCachePhaseComprehensive(BaseIntegrationTest):
+class CachePhaseComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive integration tests for system startup CACHE phase.
     

@@ -20,7 +20,7 @@ import pytest
 from pathlib import Path
 from typing import List, Dict, Any
 
-class TestImportFailureReproduction:
+class ImportFailureReproductionTests:
     """Reproduce Issue #551 import failures from different directory contexts."""
     
     def test_import_works_from_root_directory(self):
@@ -198,7 +198,7 @@ print('WORKAROUND_SUCCESS')
             pytest.skip(f"Issue #551 not yet resolved: {success_count} working, {len(failures)} failing. Failures: {failures}")
 
 
-class TestImportContextAnalysis:
+class ImportContextAnalysisTests:
     """Analyze import context and path resolution for Issue #551."""
     
     def test_analyze_python_path_from_different_contexts(self):

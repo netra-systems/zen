@@ -67,7 +67,7 @@ class RaceConditionMetrics:
     max_close_time: float = 0.0
 
 
-class TestWebSocketSafeCloseRaceConditions(SSotBaseTestCase):
+class WebSocketSafeCloseRaceConditionsTests(SSotBaseTestCase):
     """
     Unit tests for WebSocket safe_websocket_close race conditions.
 

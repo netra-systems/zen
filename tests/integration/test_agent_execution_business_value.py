@@ -58,7 +58,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 
-class TestAgentExecutionBusinessValue(SSotAsyncTestCase):
+class AgentExecutionBusinessValueTests(SSotAsyncTestCase):
     """
     Integration tests for agent execution flows focusing on real business value delivery.
     

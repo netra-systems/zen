@@ -206,7 +206,7 @@ class PersistenceExitPointLogic:
         validation_result['cleanup_order'] = critical_resources + optional_resources
         return validation_result
 
-class TestPersistenceExitPointLogic(SSotAsyncTestCase):
+class PersistenceExitPointLogicTests(SSotAsyncTestCase):
     """Test persistence exit point logic."""
 
     def setup_method(self, method=None):

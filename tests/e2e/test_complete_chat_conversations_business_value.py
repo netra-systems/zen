@@ -38,7 +38,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
+class CompleteChatConversationsBusinessValueTests(SSotBaseTestCase):
     """
     E2E tests for complete chat conversations that deliver measurable business value.
     Tests the entire chat experience from initial question to actionable business outcome.

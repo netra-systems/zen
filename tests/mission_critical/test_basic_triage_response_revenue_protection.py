@@ -75,7 +75,7 @@ class BusinessContinuityResult:
 @pytest.mark.mission_critical
 @pytest.mark.revenue_protection
 @pytest.mark.issue_135
-class TestBasicTriageResponseRevenueProtection(SSotAsyncTestCase):
+class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
     """
     Mission Critical: Basic Triage & Response Revenue Protection Tests
     

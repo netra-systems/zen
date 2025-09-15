@@ -377,7 +377,7 @@ class MockUnifiedWebSocketEmitter:
         return [event for event in self.emitted_events if event.user_id == user_id]
 
 
-class TestUnifiedEmitterUnit(SSotAsyncTestCase):
+class UnifiedEmitterUnitTests(SSotAsyncTestCase):
     """Unit tests for unified WebSocket emitter functionality
     
     This test class validates the critical event emission capabilities that

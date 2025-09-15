@@ -184,7 +184,7 @@ class E2EFunctionalityTester:
         self.cleanup_tasks.clear()
 
 @pytest.mark.integration
-class TestE2EFunctionalityPreservation(SSotBaseTestCase):
+class E2EFunctionalityPreservationTests(SSotBaseTestCase):
     """
     Integration Test Suite: E2E Functionality Preservation.
     
@@ -408,7 +408,7 @@ class TestE2EFunctionalityPreservation(SSotBaseTestCase):
         logger.info(f' PASS:  COMPREHENSIVE VALIDATION PASSED: {preservation_percentage:.1f}% E2E functionality preserved')
 
 @pytest.mark.integration
-class TestE2EAsyncFunctionalityPreservation(SSotAsyncTestCase):
+class E2EAsyncFunctionalityPreservationTests(SSotAsyncTestCase):
     """
     Async variant of E2E functionality preservation tests.
     

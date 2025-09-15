@@ -43,7 +43,7 @@ class AgentResponse:
     execution_time: float
 
 
-class TestWebSocketAgentCoordination(BaseIntegrationTest):
+class WebSocketAgentCoordinationTests(BaseIntegrationTest):
     """Test WebSocket and agent coordination with real service simulation."""
 
     def setup_method(self, method):

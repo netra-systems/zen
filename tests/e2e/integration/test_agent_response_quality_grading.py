@@ -484,7 +484,7 @@ class EnterpriseAgentQualityEvaluator:
         }
 
 
-class TestAgentResponseQualityGrading(BaseE2ETest):
+class AgentResponseQualityGradingTests(BaseE2ETest):
     """Enterprise-grade E2E tests for agent response quality evaluation.
     
     CRITICAL: This test validates the core business value of our platform -

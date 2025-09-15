@@ -23,7 +23,7 @@ from netra_backend.app.auth_integration.auth import (
 )
 
 
-class TestIssue465SecurityRegression(SSotAsyncTestCase):
+class Issue465SecurityRegressionTests(SSotAsyncTestCase):
     """
     Security regression tests for token reuse detection
     

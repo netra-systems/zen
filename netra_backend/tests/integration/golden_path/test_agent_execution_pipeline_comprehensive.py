@@ -55,7 +55,7 @@ class AgentExecutionState(Enum):
     ERROR = "agent_error"
 
 
-class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
+class AgentExecutionPipelineComprehensiveTests(BaseIntegrationTest):
     """Test comprehensive agent execution pipeline state transitions."""
     
     def setup_method(self):

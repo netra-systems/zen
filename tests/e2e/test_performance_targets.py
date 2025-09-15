@@ -212,7 +212,7 @@ def performance_measurer():
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAPIResponseTime:
+class APIResponseTimeTests:
     """Test API response time meets < 2s target"""
 
     async def test_backend_response_time(self, performance_measurer):
@@ -250,7 +250,7 @@ class TestAPIResponseTime:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestFirstResponseLatency:
+class FirstResponseLatencyTests:
     """Test first response latency meets < 1s target for warm services"""
 
     async def test_warm_service_latency(self, performance_measurer):
@@ -272,7 +272,7 @@ class TestFirstResponseLatency:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e 
-class TestThroughputCapacity:
+class ThroughputCapacityTests:
     """Test throughput capacity meets targets"""
 
     async def test_sustained_throughput(self, performance_measurer):
@@ -291,7 +291,7 @@ class TestThroughputCapacity:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestLatencyPercentiles:
+class LatencyPercentilesTests:
     """Test P99 latency meets < 5s target"""
 
     async def test_p99_latency_target(self, performance_measurer):
@@ -308,7 +308,7 @@ class TestLatencyPercentiles:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestComprehensivePerformance:
+class ComprehensivePerformanceTests:
     """Test comprehensive performance validation against all SLAs"""
 
     async def test_all_performance_targets(self, performance_measurer):

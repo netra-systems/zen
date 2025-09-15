@@ -73,7 +73,7 @@ logger = logging.getLogger(__name__)
 @env("staging") 
 @env_requires(services=["auth_service", "backend", "frontend"], features=["full_system_configured"])
 @pytest.mark.e2e
-class TestCriticalAuthServiceCascadeFailures(SSotAsyncTestCase):
+class CriticalAuthServiceCascadeFailuresTests(SSotAsyncTestCase):
     """E2E test suite for auth service cascade failures across the system."""
     
     @pytest.mark.asyncio
@@ -379,7 +379,7 @@ class TestCriticalAuthServiceCascadeFailures(SSotAsyncTestCase):
 @env("staging")
 @env_requires(services=["auth_service", "backend"], features=["service_mesh_configured"])
 @pytest.mark.e2e
-class TestAuthServiceInterdependencyFailures(SSotAsyncTestCase):
+class AuthServiceInterdependencyFailuresTests(SSotAsyncTestCase):
     """Test auth service interdependency failures in service mesh."""
     
     @pytest.mark.asyncio

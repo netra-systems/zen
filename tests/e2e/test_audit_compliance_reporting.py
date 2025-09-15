@@ -24,7 +24,7 @@ from netra_backend.app.security.audit_compliance import (
 
 
 @pytest.mark.e2e
-class TestComplianceReporting:
+class ComplianceReportingTests:
     """Test GDPR/SOC2 compliance report generation capabilities.
     
     Enterprise BVJ: Automated compliance reporting enables rapid Enterprise

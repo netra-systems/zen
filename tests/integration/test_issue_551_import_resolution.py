@@ -25,7 +25,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
 
 
-class TestImportResolutionIntegration(BaseIntegrationTest):
+class ImportResolutionIntegrationTests(BaseIntegrationTest):
     """Integration test for Issue #551 import resolution fix."""
     
     def setup_method(self):
@@ -151,7 +151,7 @@ sys.path.insert(0, str(root_dir))
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import get_real_services
 
-class TestRealServicesImport(BaseIntegrationTest):
+class RealServicesImportTests(BaseIntegrationTest):
     async def test_real_services_available(self):
         # This should work after Issue #551 is fixed
         services = await get_real_services()
@@ -159,7 +159,7 @@ class TestRealServicesImport(BaseIntegrationTest):
 
 # Run the test
 import asyncio
-test = TestRealServicesImport()
+test = RealServicesImportTests()
 test.setup_method()
 result = asyncio.run(test.test_real_services_available())
 print(f"REAL_SERVICES_SUCCESS:{result}")
@@ -211,7 +211,7 @@ print(f"REAL_SERVICES_SUCCESS:{result}")
         }
 
 
-class TestImportResolutionDiagnostics(BaseIntegrationTest):
+class ImportResolutionDiagnosticsTests(BaseIntegrationTest):
     """Diagnostic tests to analyze import resolution patterns."""
     
     @pytest.mark.integration

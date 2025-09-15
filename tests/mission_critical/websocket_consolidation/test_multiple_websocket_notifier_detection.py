@@ -25,7 +25,7 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestMultipleWebSocketNotifierDetection(SSotBaseTestCase):
+class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
     """
     CRITICAL: This test detects duplicate WebSocket implementations.
 

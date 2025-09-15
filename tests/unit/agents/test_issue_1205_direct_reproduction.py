@@ -17,7 +17,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import AgentRegis
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestIssue1205DirectReproduction(SSotAsyncTestCase, unittest.TestCase):
+class Issue1205DirectReproductionTests(SSotAsyncTestCase, unittest.TestCase):
     """Direct reproduction of Issue #1205 TypeError."""
 
     def setUp(self):

@@ -38,7 +38,7 @@ import statistics
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestLoggingSSOTPerformance(SSotBaseTestCase):
+class LoggingSSOTPerformanceTests(SSotBaseTestCase):
     """
     Performance tests to validate SSOT logging efficiency.
     

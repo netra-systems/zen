@@ -94,7 +94,7 @@ def create_test_config_file(config_dir: Path, filename: str, data: Dict) -> Path
         json.dump(data, f, ensure_ascii=False)
     return config_path
 
-class TestInitializationAndBasicOperations:
+class InitializationAndBasicOperationsTests:
     """Test initialization and basic CRUD operations with 100% coverage."""
 
     def test_manager_initialization_with_all_parameters(self, isolated_env):
@@ -190,7 +190,7 @@ class TestInitializationAndBasicOperations:
         assert all_configs_with_sensitive['sensitive.password'] == 'password123'
         assert all_configs_with_sensitive['sensitive.short'] == 'abc'
 
-class TestTypeCoercionAndConversion:
+class TypeCoercionAndConversionTests:
     """Test all type coercion and conversion functionality."""
 
     def test_get_int_comprehensive(self, config_manager):
@@ -293,7 +293,7 @@ class TestTypeCoercionAndConversion:
         assert config_manager.get_dict('nonexistent.dict') == {}
         assert config_manager.get_dict('nonexistent.dict', {'default': 'dict'}) == {'default': 'dict'}
 
-class TestConfigurationValidation:
+class ConfigurationValidationTests:
     """Test all configuration validation functionality."""
 
     def test_configuration_entry_validation_comprehensive(self):
@@ -356,7 +356,7 @@ class TestConfigurationValidation:
         config_manager.set('strict.test', 50)
         assert config_manager.get('strict.test') == 50
 
-class TestServiceSpecificConfigurations:
+class ServiceSpecificConfigurationsTests:
     """Test all service-specific configuration methods with comprehensive coverage."""
 
     def test_database_configuration_complete(self, config_manager):
@@ -484,7 +484,7 @@ class TestServiceSpecificConfigurations:
         assert charts_config['show_legends'] is False
         assert charts_config['color_scheme'] == 'rainbow'
 
-class TestMultiUserIsolationAndFactoryPatterns:
+class MultiUserIsolationAndFactoryPatternsTests:
     """Test factory patterns and multi-user isolation with complete coverage."""
 
     def test_factory_global_manager_singleton(self, factory_cleanup):
@@ -614,7 +614,7 @@ class TestMultiUserIsolationAndFactoryPatterns:
         dashboard_mgr2 = get_dashboard_config_manager()
         assert dashboard_mgr is dashboard_mgr2
 
-class TestWebSocketIntegration:
+class WebSocketIntegrationTests:
     """Test WebSocket integration with proper async handling and error coverage."""
 
     def test_websocket_manager_setup_and_integration(self, config_manager):
@@ -675,7 +675,7 @@ class TestWebSocketIntegration:
         config_manager.set('test.disabled_events', 'value')
         assert len(config_manager._change_listeners) > 0
 
-class TestCachingFunctionality:
+class CachingFunctionalityTests:
     """Test all caching functionality with comprehensive coverage."""
 
     def test_cache_enable_disable_comprehensive(self, config_manager):
@@ -785,7 +785,7 @@ class TestCachingFunctionality:
         config_manager._cache_timestamps.pop('validity.test', None)
         assert config_manager._is_cached_valid('validity.test') is False
 
-class TestThreadSafetyAndConcurrency:
+class ThreadSafetyAndConcurrencyTests:
     """Test thread safety and concurrent access with comprehensive scenarios."""
 
     def test_concurrent_basic_operations_stress_test(self, config_manager):
@@ -951,7 +951,7 @@ class TestThreadSafetyAndConcurrency:
         global_mgr = ConfigurationManagerFactory.get_global_manager()
         assert len(global_mgr._cache) == 0
 
-class TestErrorHandlingAndEdgeCases:
+class ErrorHandlingAndEdgeCasesTests:
     """Test comprehensive error handling and edge case scenarios."""
 
     def test_unicode_and_international_characters(self, config_manager):
@@ -1075,7 +1075,7 @@ class TestErrorHandlingAndEdgeCases:
         except Exception as e:
             pytest.fail(f'Configuration merge should handle malformed data gracefully: {e}')
 
-class TestStatusAndMonitoringComplete:
+class StatusAndMonitoringCompleteTests:
     """Test complete status reporting and monitoring functionality."""
 
     def test_comprehensive_status_report_all_fields(self, config_manager):
@@ -1191,7 +1191,7 @@ class TestStatusAndMonitoringComplete:
             health_status = snapshot['health']['status']
             assert health_status in ['healthy', 'unhealthy']
 
-class TestIsolatedEnvironmentIntegrationComplete:
+class IsolatedEnvironmentIntegrationCompleteTests:
     """Test complete IsolatedEnvironment integration and CLAUDE.md compliance."""
 
     def test_isolated_environment_initialization_and_usage(self, isolated_env):
@@ -1309,7 +1309,7 @@ class TestIsolatedEnvironmentIntegrationComplete:
             except Exception as e:
                 assert 'IsolatedEnvironment' in str(e) or 'environment' in str(e).lower()
 
-class TestLegacyCompatibilityComplete:
+class LegacyCompatibilityCompleteTests:
     """Test complete legacy compatibility and migration support."""
 
     def test_all_legacy_compatibility_functions(self, factory_cleanup):

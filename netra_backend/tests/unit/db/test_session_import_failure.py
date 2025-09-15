@@ -11,7 +11,7 @@ import pytest
 from unittest.mock import patch
 
 
-class TestSessionImportFailure:
+class SessionImportFailureTests:
     """Test class to reproduce the import failure from GitHub issue #135."""
     
     def test_direct_get_db_session_factory_import_fails(self):
@@ -107,7 +107,7 @@ class TestSessionImportFailure:
                 print(f"Function {missing_func} is in __all__ but exists: {has_function}")
 
 
-class TestWebSocketManagerFactoryImportReproduction:
+class WebSocketManagerFactoryImportReproductionTests:
     """Tests that reproduce the specific failure in WebSocket manager factory creation."""
     
     def test_health_check_database_import_failure(self):

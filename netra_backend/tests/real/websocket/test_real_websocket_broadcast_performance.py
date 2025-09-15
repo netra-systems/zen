@@ -29,7 +29,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.broadcast_performance
 @skip_if_no_real_services
-class TestRealWebSocketBroadcastPerformance:
+class RealWebSocketBroadcastPerformanceTests:
     """Test real WebSocket broadcast performance and delivery."""
     
     @pytest.fixture

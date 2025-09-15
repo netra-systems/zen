@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestDockerManagerGoldenPathIntegration(SSotAsyncTestCase):
+class DockerManagerGoldenPathIntegrationTests(SSotAsyncTestCase):
     """
     CRITICAL: Integration tests validating Docker Manager supports Golden Path workflows.
 

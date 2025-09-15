@@ -24,7 +24,7 @@ from netra_backend.tests.rate_retry_monitoring_test_helpers import (
 pytestmark = pytest.mark.skip(reason="Utility modules (pagination_utils, rate_limiter, retry_utils) not implemented yet")
 
 # Test 95: Pagination utils cursors
-class TestPaginationUtilsCursors:
+class PaginationUtilsCursorsTests:
     """test_pagination_utils_cursors - Test cursor pagination and edge cases"""
     
     @pytest.mark.asyncio
@@ -81,7 +81,7 @@ class TestPaginationUtilsCursors:
         assert decoded == None or decoded == {}
 
 # Test 96: Rate limiter throttling
-class TestRateLimiterThrottling:
+class RateLimiterThrottlingTests:
     """test_rate_limiter_throttling - Test rate limiting and bucket algorithms"""
     
     @pytest.mark.asyncio
@@ -117,7 +117,7 @@ class TestRateLimiterThrottling:
         await RateLimiterTestHelpers.assert_burst_allowed(limiter, 5)
 
 # Test 97: Retry utils backoff
-class TestRetryUtilsBackoff:
+class RetryUtilsBackoffTests:
     """test_retry_utils_backoff - Test retry strategies and exponential backoff"""
     
     @pytest.mark.asyncio

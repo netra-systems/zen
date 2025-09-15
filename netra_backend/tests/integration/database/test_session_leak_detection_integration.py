@@ -36,7 +36,7 @@ from netra_backend.app.services.database.message_repository import MessageReposi
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 
 
-class TestSessionLeakDetectionIntegration(SessionLeakTestBase):
+class SessionLeakDetectionIntegrationTests(SessionLeakTestBase):
     """
     Integration tests for session leak detection with real database operations.
     

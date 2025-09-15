@@ -72,7 +72,7 @@ class SSotComplianceReport:
     recommendations: List[str]
 
 
-class TestSSotWebSocketNotifierValidation(SSotBaseTestCase):
+class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
     """Mission Critical Test Suite: SSOT WebSocketNotifier Validation."""
 
     def setup_method(self, method):

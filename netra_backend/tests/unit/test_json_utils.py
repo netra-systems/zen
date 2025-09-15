@@ -8,7 +8,7 @@ import pytest
 from netra_backend.app.core.serialization.unified_json_handler import CircularReferenceHandler
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestJsonUtils:
+class JsonUtilsTests:
     """Test suite for JsonUtils"""
 
     @pytest.fixture

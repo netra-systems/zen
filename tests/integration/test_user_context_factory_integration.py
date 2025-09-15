@@ -21,7 +21,7 @@ from netra_backend.app.dependencies import get_user_execution_context
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestUserContextFactoryIntegration:
+class UserContextFactoryIntegrationTests:
     """Integration test for user context factory with thread isolation validation."""
     
     def setup_method(self):

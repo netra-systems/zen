@@ -13,7 +13,7 @@ from unittest.mock import patch, MagicMock
 import importlib
 
 @pytest.mark.integration
-class TestServiceConfigurationIndependence:
+class ServiceConfigurationIndependenceTests:
     """Phase 2 Tests - Service independence during config migration"""
 
     def test_backend_service_canonical_config_integration(self):
@@ -162,7 +162,7 @@ class TestServiceConfigurationIndependence:
             pytest.fail(f'Cannot test WebSocket configuration compatibility: {e}')
 
 @pytest.mark.integration
-class TestCrossServiceCommunication:
+class CrossServiceCommunicationTests:
     """Test cross-service communication during configuration migration"""
 
     def test_service_config_environment_consistency(self):

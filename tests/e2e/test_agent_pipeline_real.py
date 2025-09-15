@@ -68,7 +68,7 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 # )
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAgentPipelineReal:
+class AgentPipelineRealTests:
     """CRITICAL Test: Real Agent Message Processing Pipeline."""
     
     @pytest_asyncio.fixture

@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
-class TestPermissionBasedAccessControlFlow(SSotAsyncTestCase):
+class PermissionBasedAccessControlFlowTests(SSotAsyncTestCase):
     """E2E tests for permission-based access control flow."""
     
     async def async_setup_method(self, method=None):

@@ -432,7 +432,7 @@ def startup_validator():
 
 @pytest.mark.e2e
 @pytest.mark.env_test
-class TestServiceStartupReadinessValidation:
+class ServiceStartupReadinessValidationTests:
     """Comprehensive service startup and readiness validation tests."""
 
     @pytest.mark.asyncio

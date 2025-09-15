@@ -43,7 +43,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 from auth_service.auth_core.config import AuthConfig, get_config
 
-class TestAuthConfigCore(SSotBaseTestCase):
+class AuthConfigCoreTests(SSotBaseTestCase):
     """Test core AuthConfig functionality and delegation."""
 
     def test_config_instance_creation(self):
@@ -72,7 +72,7 @@ class TestAuthConfigCore(SSotBaseTestCase):
             assert hasattr(AuthConfig, method_name)
             assert callable(getattr(AuthConfig, method_name))
 
-class TestAuthConfigEnvironment(SSotBaseTestCase):
+class AuthConfigEnvironmentTests(SSotBaseTestCase):
     """Test environment detection and defaults."""
 
     def test_get_environment_delegates_to_auth_env(self):
@@ -104,7 +104,7 @@ class TestAuthConfigEnvironment(SSotBaseTestCase):
         assert env1 == env2
         assert env1 == AuthConfig().ENVIRONMENT
 
-class TestAuthConfigOAuth(SSotBaseTestCase):
+class AuthConfigOAuthTests(SSotBaseTestCase):
     """Test OAuth configuration methods."""
 
     def test_get_google_client_id(self):
@@ -155,7 +155,7 @@ class TestAuthConfigOAuth(SSotBaseTestCase):
             assert client_secret == 'test_client_secret'
             assert AuthConfig.is_google_oauth_enabled() is True
 
-class TestAuthConfigJWT(SSotBaseTestCase):
+class AuthConfigJWTTests(SSotBaseTestCase):
     """Test JWT configuration and security."""
 
     def test_get_jwt_secret(self):
@@ -199,7 +199,7 @@ class TestAuthConfigJWT(SSotBaseTestCase):
         refresh_minutes = refresh_expiry * 24 * 60
         assert refresh_minutes > access_expiry
 
-class TestAuthConfigService(SSotBaseTestCase):
+class AuthConfigServiceTests(SSotBaseTestCase):
     """Test service configuration methods."""
 
     def test_get_service_secret(self):
@@ -240,7 +240,7 @@ class TestAuthConfigService(SSotBaseTestCase):
             assert 'staging' in staging_id
             assert prod_id != staging_id
 
-class TestAuthConfigURLs(SSotBaseTestCase):
+class AuthConfigURLsTests(SSotBaseTestCase):
     """Test URL configuration methods."""
 
     def test_get_frontend_url(self):
@@ -274,7 +274,7 @@ class TestAuthConfigURLs(SSotBaseTestCase):
                 assert 'localhost' not in url
                 assert '127.0.0.1' not in url
 
-class TestAuthConfigDatabase(SSotBaseTestCase):
+class AuthConfigDatabaseTests(SSotBaseTestCase):
     """Test database configuration methods."""
 
     def test_get_database_url(self):
@@ -361,7 +361,7 @@ class TestAuthConfigDatabase(SSotBaseTestCase):
         elif current_env == 'production':
             assert pool_size >= 10
 
-class TestAuthConfigRedis(SSotBaseTestCase):
+class AuthConfigRedisTests(SSotBaseTestCase):
     """Test Redis configuration methods."""
 
     def test_get_redis_url(self):
@@ -432,7 +432,7 @@ class TestAuthConfigRedis(SSotBaseTestCase):
         elif current_env == 'test':
             assert db_num == 3
 
-class TestAuthConfigSecurity(SSotBaseTestCase):
+class AuthConfigSecurityTests(SSotBaseTestCase):
     """Test security configuration methods."""
 
     def test_get_bcrypt_rounds(self):
@@ -493,7 +493,7 @@ class TestAuthConfigSecurity(SSotBaseTestCase):
         elif current_env == 'test':
             assert bcrypt_rounds <= 8
 
-class TestAuthConfigCORS(SSotBaseTestCase):
+class AuthConfigCORSTests(SSotBaseTestCase):
     """Test CORS configuration methods."""
 
     def test_get_cors_origins(self):
@@ -521,7 +521,7 @@ class TestAuthConfigCORS(SSotBaseTestCase):
         elif current_env in ['development', 'test']:
             assert any(('localhost' in origin for origin in origins))
 
-class TestAuthConfigLogging(SSotBaseTestCase):
+class AuthConfigLoggingTests(SSotBaseTestCase):
     """Test configuration logging and status methods."""
 
     def test_log_configuration(self):
@@ -551,7 +551,7 @@ class TestAuthConfigLogging(SSotBaseTestCase):
         finally:
             logger.removeHandler(handler)
 
-class TestAuthConfigErrorHandling(SSotBaseTestCase):
+class AuthConfigErrorHandlingTests(SSotBaseTestCase):
     """Test configuration error handling and edge cases."""
 
     def test_handles_missing_auth_env(self):
@@ -589,7 +589,7 @@ class TestAuthConfigErrorHandling(SSotBaseTestCase):
             assert isinstance(result, expected_type)
             assert validator(result), f'{method.__name__} returned invalid value: {result}'
 
-class TestAuthConfigDeprecatedMethods(SSotBaseTestCase):
+class AuthConfigDeprecatedMethodsTests(SSotBaseTestCase):
     """Test deprecated methods and warnings."""
 
     def test_deprecated_oauth_redirect_uri_warning(self):
@@ -602,7 +602,7 @@ class TestAuthConfigDeprecatedMethods(SSotBaseTestCase):
             assert isinstance(redirect_uri, str)
             assert 'callback' in redirect_uri
 
-class TestAuthConfigIntegration(SSotBaseTestCase):
+class AuthConfigIntegrationTests(SSotBaseTestCase):
     """Test integration between config methods."""
 
     def test_jwt_and_service_secrets_consistency(self):
@@ -663,7 +663,7 @@ class TestAuthConfigIntegration(SSotBaseTestCase):
         jwt_refresh_minutes = jwt_refresh_days * 24 * 60
         assert jwt_refresh_minutes > jwt_access_minutes
 
-class TestAuthConfigBusinessValue(SSotBaseTestCase):
+class AuthConfigBusinessValueTests(SSotBaseTestCase):
     """Test configuration provides business value."""
 
     def test_production_security_standards(self):

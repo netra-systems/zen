@@ -30,7 +30,7 @@ from shared.isolated_environment import get_env
 from shared.types.core_types import UserID
 logger = logging.getLogger(__name__)
 
-class TestDataPipelineMockPrevention(BaseE2ETest):
+class DataPipelineMockPreventionTests(BaseE2ETest):
     """
     FAILING TESTS: Prove data pipeline can return fabricated data to users.
     

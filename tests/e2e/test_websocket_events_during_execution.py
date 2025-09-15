@@ -134,7 +134,7 @@ class MockWebSocketBridge:
         return {**self.business_value_metrics, 'users_served_count': len(self.business_value_metrics['users_served']), 'connections_active': len([c for c in self.connections.values() if c.connected])}
 
 @pytest.mark.e2e
-class TestWebSocketEventsE2E(SSotBaseTestCase):
+class WebSocketEventsE2ETests(SSotBaseTestCase):
     """Test WebSocket events during execution end-to-end with authentication."""
 
     @pytest.fixture

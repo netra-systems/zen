@@ -83,7 +83,7 @@ class WebSocketEventCollector:
 
 @pytest.mark.e2e
 @pytest.mark.requires_docker
-class TestWebSocketEventDeliveryDuringChat(SSotAsyncTestCase):
+class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
     """
     CRITICAL: E2E tests for real-time WebSocket event delivery during chat interactions.
     

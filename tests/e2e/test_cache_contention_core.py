@@ -137,7 +137,7 @@ class CacheContentionMetrics:
             "cache_stats": dict(self.cache_stats),
         }
 
-class TestRedisClient:
+class RedisClientTests:
     """Redis client wrapper for cache contention testing."""
     
     def __init__(self, redis_url: str = REDIS_URL):
@@ -184,7 +184,7 @@ class TestRedisClient:
         info = await self.client.info("clients")
         return info.get("connected_clients", 0)
 
-class TestCacheContentionSuite:
+class CacheContentionSuiteTests:
     """Main test suite for cache contention scenarios."""
     
     def __init__(self):
@@ -250,13 +250,13 @@ class TestCacheContentionSuite:
         return list(self.test_keys)[key_idx]
 
 @pytest.mark.e2e
-class TestCacheContentionSuite:
+class CacheContentionSuiteTests:
     """Cache contention test suite implementation."""
     
     @pytest.fixture(autouse=True)
     async def setup_suite(self):
         """Setup test suite."""
-        self.suite = TestCacheContentionSuite()
+        self.suite = CacheContentionSuiteTests()
         await self.suite.setup_test_environment()
         yield
         await self.suite.teardown_test_environment()
@@ -928,18 +928,18 @@ async def test_comprehensive_cache_contention_validation():
     """
     logger.info("Starting comprehensive cache contention validation")
     
-    suite = TestCacheContentionSuite()
+    suite = CacheContentionSuiteTests()
     await suite.setup_test_environment()
     
     try:
         # Run core test scenarios in sequence
         test_scenarios = [
-            ("Concurrent Counters", TestCacheContentionSuite().test_concurrent_counter_operations),
-            ("Cache Stampede", TestCacheContentionSuite().test_cache_stampede_prevention),
-            ("Transaction Atomicity", TestCacheContentionSuite().test_multi_key_transaction_atomicity),
-            ("Cache Invalidation", TestCacheContentionSuite().test_cache_invalidation_consistency),
-            ("Lock-Free Performance", TestCacheContentionSuite().test_lock_free_performance_validation),
-            ("Memory Pressure", TestCacheContentionSuite().test_memory_pressure_cache_eviction),
+            ("Concurrent Counters", CacheContentionSuiteTests().test_concurrent_counter_operations),
+            ("Cache Stampede", CacheContentionSuiteTests().test_cache_stampede_prevention),
+            ("Transaction Atomicity", CacheContentionSuiteTests().test_multi_key_transaction_atomicity),
+            ("Cache Invalidation", CacheContentionSuiteTests().test_cache_invalidation_consistency),
+            ("Lock-Free Performance", CacheContentionSuiteTests().test_lock_free_performance_validation),
+            ("Memory Pressure", CacheContentionSuiteTests().test_memory_pressure_cache_eviction),
         ]
         
         results_summary = {}
@@ -950,7 +950,7 @@ async def test_comprehensive_cache_contention_validation():
             
             try:
                 # Set suite context for individual tests
-                test_instance = TestCacheContentionSuite()
+                test_instance = CacheContentionSuiteTests()
                 test_instance.suite = suite
                 
                 await test_func(test_instance)

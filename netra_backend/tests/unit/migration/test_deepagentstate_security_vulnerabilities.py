@@ -99,7 +99,7 @@ class SecurityError(Exception):
     pass
 
 
-class TestDeepAgentStateSecurityVulnerabilities(SSotAsyncTestCase):
+class DeepAgentStateSecurityVulnerabilitiesTests(SSotAsyncTestCase):
     """
     Demonstrates security vulnerabilities in DeepAgentState vs UserExecutionContext
     

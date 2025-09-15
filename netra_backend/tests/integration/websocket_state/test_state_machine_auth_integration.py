@@ -60,7 +60,7 @@ from netra_backend.tests.integration.test_fixtures.database_fixture import Datab
 from netra_backend.tests.integration.test_fixtures.redis_fixture import RedisTestFixture
 
 @pytest.mark.integration
-class TestWebSocketStateMachineAuthenticationIntegration(SSotBaseTestCase):
+class WebSocketStateMachineAuthenticationIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket state machine authentication integration.
     

@@ -38,7 +38,7 @@ logger = get_logger(__name__)
 
 @env_requires(services=['backend', 'auth_service', 'postgres', 'redis'], features=['real_services'])
 @pytest.mark.e2e
-class TestCompleteSystemHealthValidation:
+class CompleteSystemHealthValidationTests:
     """Comprehensive system health validation tests with REAL services."""
 
     @pytest.fixture

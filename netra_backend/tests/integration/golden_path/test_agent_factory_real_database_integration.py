@@ -103,7 +103,7 @@ class MockWebSocketEmitter:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentFactoryRealDatabaseIntegration(DatabaseIntegrationTest):
+class AgentFactoryRealDatabaseIntegrationTests(DatabaseIntegrationTest):
     """
     Integration tests for Agent Factory patterns with real PostgreSQL database.
     

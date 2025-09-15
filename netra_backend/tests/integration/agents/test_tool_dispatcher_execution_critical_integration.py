@@ -357,7 +357,7 @@ class MockPermissionValidator:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestToolDispatcherExecutionCriticalIntegration(BaseIntegrationTest):
+class ToolDispatcherExecutionCriticalIntegrationTests(BaseIntegrationTest):
     """Critical integration tests for tool dispatcher execution with real services."""
     
     @pytest.fixture

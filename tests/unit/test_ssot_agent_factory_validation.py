@@ -138,7 +138,7 @@ class AgentFactoryValidator:
 @pytest.mark.unit
 @pytest.mark.ssot_validation
 @pytest.mark.agent_factory_testing
-class TestSSotAgentFactoryValidation:
+class SSotAgentFactoryValidationTests:
     """
     Unit tests for SSOT agent factory validation.
     
@@ -243,7 +243,7 @@ class TestSSotAgentFactoryValidation:
         """
         logger.info('[U+1F9EA] UNIT TEST: Agent instantiation follows factory patterns')
 
-        class TestDirectInstantiation:
+        class DirectInstantiationTests:
             """Test class for direct instantiation detection."""
 
             def create_agent_directly(self):
@@ -255,7 +255,7 @@ class TestSSotAgentFactoryValidation:
                 """Method that uses factory pattern (compliant)."""
                 registry = AgentRegistry()
                 return registry.create_agent('TestAgent', user_context=None)
-        validation_result = self.validator.validate_factory_class(TestDirectInstantiation)
+        validation_result = self.validator.validate_factory_class(DirectInstantiationTests)
         boundary_violations = [v for v in validation_result['violations'] if 'BOUNDARY_VIOLATION' in v]
         assert len(boundary_violations) > 0, ' ALERT:  VALIDATOR FAILURE: Direct agent instantiation not detected as violation'
         logger.info(f' PASS:  Boundary violations correctly detected: {len(boundary_violations)}')

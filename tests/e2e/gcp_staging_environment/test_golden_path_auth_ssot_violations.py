@@ -27,7 +27,7 @@ from test_framework.websocket_helpers import WebSocketTestClient
 from shared.isolated_environment import get_env
 
 
-class TestGoldenPathAuthSSOTViolations(BaseE2ETest):
+class GoldenPathAuthSSOTViolationsTests(BaseE2ETest):
     """Test Golden Path authentication flow with SSOT environment violations."""
     
     def setup_method(self):

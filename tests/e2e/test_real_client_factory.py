@@ -28,7 +28,7 @@ from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 @pytest.mark.e2e
-class TestRealClientFactory:
+class RealClientFactoryTests:
     """Test suite for RealClientFactory"""
     
     @pytest.mark.e2e
@@ -99,7 +99,7 @@ class TestRealClientFactory:
 
 
 @pytest.mark.e2e
-class TestRealHTTPClient:
+class RealHTTPClientTests:
     """Test suite for RealHTTPClient"""
     
     @pytest.mark.e2e
@@ -137,7 +137,7 @@ class TestRealHTTPClient:
 
 
 @pytest.mark.e2e
-class TestRealWebSocketClient:
+class RealWebSocketClientTests:
     """Test suite for RealWebSocketClient"""
     
     @pytest.mark.e2e
@@ -165,7 +165,7 @@ class TestRealWebSocketClient:
 
 
 @pytest.mark.e2e
-class TestClientConfig:
+class ClientConfigTests:
     """Test suite for ClientConfig"""
     
     @pytest.mark.e2e
@@ -200,7 +200,7 @@ class TestClientConfig:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAsyncOperations:
+class AsyncOperationsTests:
     """Test suite for async operations"""
     
     @pytest.mark.e2e

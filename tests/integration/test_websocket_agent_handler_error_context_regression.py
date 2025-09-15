@@ -68,7 +68,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper
 from tests.e2e.staging_config import StagingTestConfig
 
 
-class TestWebSocketAgentHandlerErrorContextRegression:
+class WebSocketAgentHandlerErrorContextRegressionTests:
     """
     Integration tests for WebSocket agent handler error path context regression prevention.
     

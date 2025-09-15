@@ -19,7 +19,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
 
-class TestWebSocketErrorValidator:
+class WebSocketErrorValidatorTests:
     """Test comprehensive WebSocket event validation."""
 
     def setup_method(self):
@@ -95,7 +95,7 @@ class TestWebSocketErrorValidator:
         assert stats['mission_critical_failures'] == 1
         assert stats['success_rate'] == 50.0
 
-class TestUserWebSocketEmitterErrorHandling:
+class UserWebSocketEmitterErrorHandlingTests:
     """Test enhanced error handling in UserWebSocketEmitter."""
 
     def setup_method(self):
@@ -174,7 +174,7 @@ class TestUserWebSocketEmitterErrorHandling:
             assert any(('SYSTEM FAILURE' in msg for msg in error_messages))
             assert any(('Stack trace' in msg for msg in error_messages))
 
-class TestWebSocketBridgeAdapterErrorHandling:
+class WebSocketBridgeAdapterErrorHandlingTests:
     """Test enhanced error handling in WebSocketBridgeAdapter."""
 
     def setup_method(self):
@@ -244,7 +244,7 @@ class TestWebSocketBridgeAdapterErrorHandling:
         assert any(('User will not know when valuable response is ready' in msg for msg in error_messages))
         assert any(('may wait indefinitely for response completion' in msg for msg in error_messages))
 
-class TestErrorHandlingIntegration:
+class ErrorHandlingIntegrationTests:
     """Test integration of error handling across components."""
 
     def setup_method(self):

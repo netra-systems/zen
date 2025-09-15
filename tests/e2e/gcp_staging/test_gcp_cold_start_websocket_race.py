@@ -36,7 +36,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 @pytest.mark.e2e
 @pytest.mark.gcp_staging  
 @pytest.mark.mission_critical
-class TestGCPColdStartWebSocketRace(BaseE2ETest):
+class GCPColdStartWebSocketRaceTests(BaseE2ETest):
     """Test GCP cold start WebSocket race condition scenarios."""
     
     @classmethod
@@ -475,7 +475,7 @@ class TestGCPColdStartWebSocketRace(BaseE2ETest):
 
 @pytest.mark.e2e
 @pytest.mark.gcp_staging
-class TestWebSocketStabilityMetrics:
+class WebSocketStabilityMetricsTests:
     """Test WebSocket stability metrics and performance during cold starts."""
     
     @pytest.mark.asyncio

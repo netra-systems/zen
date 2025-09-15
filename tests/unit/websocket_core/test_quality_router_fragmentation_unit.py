@@ -11,7 +11,7 @@ from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestQualityRouterFragmentationUnit(SSotBaseTestCase):
+class QualityRouterFragmentationUnitTests(SSotBaseTestCase):
     """Unit tests demonstrating Quality Router fragmentation issues."""
 
     def setUp(self):

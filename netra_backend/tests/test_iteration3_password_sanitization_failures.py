@@ -17,7 +17,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.db.database_manager import DatabaseManager
 
 
-class TestPasswordSanitizationCorruption:
+class PasswordSanitizationCorruptionTests:
     """Tests that demonstrate password corruption during sanitization"""
     
     def test_password_with_special_characters_corrupted_by_sanitization(self):
@@ -165,7 +165,7 @@ class TestPasswordSanitizationCorruption:
                 f"Expected password extraction error for: {password}"
 
 
-class TestPasswordValidationBeforeConnection:
+class PasswordValidationBeforeConnectionTests:
     """Tests for password validation before attempting database connections"""
     
     def test_empty_password_after_sanitization_detected(self):
@@ -265,7 +265,7 @@ class TestPasswordValidationBeforeConnection:
                         f"Expected password length validation error for '{original_password}'"
 
 
-class TestStagingPasswordRequirements:
+class StagingPasswordRequirementsTests:
     """Tests for strict password requirements in staging environment"""
     
     def test_staging_rejects_passwords_corrupted_by_sanitization(self):

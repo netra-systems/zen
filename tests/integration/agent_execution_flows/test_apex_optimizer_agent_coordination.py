@@ -28,7 +28,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
-class TestApexOptimizerAgentCoordination(BaseIntegrationTest):
+class ApexOptimizerAgentCoordinationTests(BaseIntegrationTest):
     """Integration tests for APEX optimizer agent coordination."""
 
     @pytest.mark.integration

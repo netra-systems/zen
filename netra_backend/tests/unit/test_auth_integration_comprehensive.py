@@ -130,7 +130,7 @@ def admin_jwt_validation_result():
     }
 
 
-class TestTokenValidationCore:
+class TokenValidationCoreTests:
     """Test core JWT token validation business logic."""
 
     @pytest.mark.asyncio
@@ -182,7 +182,7 @@ class TestTokenValidationCore:
             assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-class TestUserDatabaseOperations:
+class UserDatabaseOperationsTests:
     """Test user database operations and user creation logic."""
 
     @pytest.mark.asyncio
@@ -304,7 +304,7 @@ class TestUserDatabaseOperations:
             )
 
 
-class TestCurrentUserDependencies:
+class CurrentUserDependenciesTests:
     """Test FastAPI dependency injection for current user."""
 
     @pytest.mark.asyncio
@@ -391,7 +391,7 @@ class TestCurrentUserDependencies:
         assert "Database session not provided" in exc_info.value.detail
 
 
-class TestJWTValidationAndClaims:
+class JWTValidationAndClaimsTests:
     """Test JWT validation and claims extraction."""
 
     @pytest.mark.asyncio
@@ -500,7 +500,7 @@ class TestJWTValidationAndClaims:
         assert claims == {}
 
 
-class TestPermissionChecking:
+class PermissionCheckingTests:
     """Test permission checking and authorization logic."""
 
     def test_check_admin_permissions_superuser(self, mock_user):
@@ -587,7 +587,7 @@ class TestPermissionChecking:
         assert "Permission 'admin' required" in exc_info.value.detail
 
 
-class TestAdminRequirements:
+class AdminRequirementsTests:
     """Test admin requirement dependencies."""
 
     @pytest.mark.asyncio
@@ -685,7 +685,7 @@ class TestAdminRequirements:
         assert exc_info.value.status_code == status.HTTP_403_FORBIDDEN
 
 
-class TestTypeAnnotationsDependencies:
+class TypeAnnotationsDependenciesTests:
     """Test that type annotation dependencies are properly defined."""
 
     def test_active_user_dep_annotation(self):
@@ -710,7 +710,7 @@ class TestTypeAnnotationsDependencies:
         assert EnhancedAdminDep is not None
 
 
-class TestBackwardCompatibilityAliases:
+class BackwardCompatibilityAliasesTests:
     """Test backward compatibility aliases and functions."""
 
     def test_get_current_active_user_alias(self):
@@ -723,7 +723,7 @@ class TestBackwardCompatibilityAliases:
         assert ActiveUserWsDep is not None
 
 
-class TestSecurityLoggingAndAudit:
+class SecurityLoggingAndAuditTests:
     """Test security logging and audit functionality."""
 
     @pytest.mark.asyncio
@@ -781,7 +781,7 @@ class TestSecurityLoggingAndAudit:
             assert any("Syncing admin status from JWT" in call for call in info_calls)
 
 
-class TestErrorHandlingAndEdgeCases:
+class ErrorHandlingAndEdgeCasesTests:
     """Test error handling and edge cases."""
 
     @pytest.mark.asyncio
@@ -843,7 +843,7 @@ class TestErrorHandlingAndEdgeCases:
             assert "user123" in warning_call  # Should include user ID
 
 
-class TestAuthIntegrationBusinessValueDelivery:
+class AuthIntegrationBusinessValueDeliveryTests:
     """Test that auth integration delivers expected business value."""
 
     @pytest.mark.asyncio

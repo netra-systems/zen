@@ -44,7 +44,7 @@ from netra_backend.app.core.environment_context import (
 )
 
 
-class TestGoldenPathValidatorComprehensive(SSotAsyncTestCase):
+class GoldenPathValidatorComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for GoldenPathValidator business logic.
     

@@ -11,7 +11,7 @@ import asyncio
 from unittest.mock import Mock, patch, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestWebSocketSilentFailureMinimal(SSotAsyncTestCase):
+class WebSocketSilentFailureMinimalTests(SSotAsyncTestCase):
     """
     Minimal test demonstrating WebSocket silent failure patterns.
     """

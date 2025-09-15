@@ -153,7 +153,7 @@ class MockWebSocket:
         self.messages_to_receive.append(json.dumps(message))
 
 @pytest.mark.e2e
-class TestAgentFailureHandlingE2E:
+class AgentFailureHandlingE2ETests:
     """End-to-end tests for agent failure handling"""
 
     @pytest.fixture

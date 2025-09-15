@@ -28,7 +28,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_redis_fixture
 
 
-class TestRedisCachingRealServices(BaseIntegrationTest):
+class RedisCachingRealServicesTests(BaseIntegrationTest):
     """Test Redis caching with real Redis instance."""
     
     @pytest.mark.integration

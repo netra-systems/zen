@@ -159,7 +159,7 @@ class WebSocketIsolationValidator:
         self.received_events.clear()
 
 @pytest.mark.websocket
-class TestWebSocketConnectionIsolation(RealWebSocketTestBase):
+class WebSocketConnectionIsolationTests(RealWebSocketTestBase):
     """Test suite for WebSocket connection isolation."""
 
     @pytest.fixture

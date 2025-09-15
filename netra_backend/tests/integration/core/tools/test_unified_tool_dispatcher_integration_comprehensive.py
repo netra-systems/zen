@@ -178,7 +178,7 @@ class MockPermissionService:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestUnifiedToolDispatcherIntegrationComprehensive:
+class UnifiedToolDispatcherIntegrationComprehensiveTests:
     """Comprehensive tool dispatcher integration tests."""
     
     @pytest.fixture

@@ -15,7 +15,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAuthEndpointInputValidation:
+class AuthEndpointInputValidationTests:
     """Test that auth endpoints properly validate input data."""
 
     @pytest.fixture
@@ -112,7 +112,7 @@ class TestAuthEndpointInputValidation:
                         assert response.status_code == 422
 
 
-                        class TestAuthEndpointSecurity:
+                        class AuthEndpointSecurityTests:
                             """Test security measures and authentication requirements for auth endpoints."""
 
                             @pytest.fixture
@@ -221,7 +221,7 @@ class TestAuthEndpointInputValidation:
                                                                     assert response.status_code == 422
 
 
-                                                                    class TestAuthEndpointHTTPMethods:
+                                                                    class AuthEndpointHTTPMethodsTests:
                                                                         """Test that auth endpoints only accept appropriate HTTP methods."""
 
                                                                         @pytest.fixture

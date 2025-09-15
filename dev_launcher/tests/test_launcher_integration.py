@@ -23,7 +23,7 @@ from dev_launcher.service_config import ResourceMode, ServicesConfiguration
 from dev_launcher.utils import wait_for_service, check_dependencies, check_project_structure
 
 
-class TestDevLauncher(SSotBaseTestCase):
+class DevLauncherTests(SSotBaseTestCase):
     """Test the main launcher functionality."""
     
     def setUp(self):
@@ -127,7 +127,7 @@ class TestDevLauncher(SSotBaseTestCase):
         self.assertIsNone(streamer)
 
 
-class TestFullIntegration(SSotBaseTestCase):
+class FullIntegrationTests(SSotBaseTestCase):
     """Integration tests for complete launch cycles."""
     
     # Mock: Component isolation for testing without external dependencies
@@ -204,7 +204,7 @@ class TestFullIntegration(SSotBaseTestCase):
         mock_start_frontend.assert_called_once()
 
 
-class TestRollingRestart(SSotBaseTestCase):
+class RollingRestartTests(SSotBaseTestCase):
     """Test rolling restart scenarios."""
     
     # Mock: Component isolation for testing without external dependencies
@@ -263,7 +263,7 @@ class TestRollingRestart(SSotBaseTestCase):
         self.assertTrue(launcher.process_manager.is_running("Backend"))
 
 
-class TestMultiEnvironment(SSotBaseTestCase):
+class MultiEnvironmentTests(SSotBaseTestCase):
     """Test multi-environment support."""
     
     def test_dev_to_prod_configuration_switch(self):
@@ -305,7 +305,7 @@ class TestMultiEnvironment(SSotBaseTestCase):
             self.assertIsNotNone(config)
 
 
-class TestFileManagement(SSotBaseTestCase):
+class FileManagementTests(SSotBaseTestCase):
     """Test file and resource management."""
     
     def test_file_handle_management(self):

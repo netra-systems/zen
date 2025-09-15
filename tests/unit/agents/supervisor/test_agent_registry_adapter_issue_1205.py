@@ -32,7 +32,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import AgentRegis
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestAgentRegistryAdapterIssue1205(SSotBaseTestCase):
+class AgentRegistryAdapterIssue1205Tests(SSotBaseTestCase):
     """Test suite reproducing and validating fix for Issue #1205."""
 
     def setup_method(self, method):

@@ -24,7 +24,7 @@ from tests.mission_critical.websocket_real_test_base import RealWebSocketTestCon
 
 
 @pytest.mark.e2e
-class TestWebSocketInfrastructureStaging:
+class WebSocketInfrastructureStagingTests:
     """E2E tests for WebSocket infrastructure against staging GCP environment."""
     
     @pytest.fixture(autouse=True)

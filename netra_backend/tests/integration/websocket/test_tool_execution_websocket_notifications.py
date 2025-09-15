@@ -177,7 +177,7 @@ class MockReportingTool(BaseTool):
                 await self.last_progress_callback(progress, f'Processing step {step + 1}')
         return f'Report generated: {report_type} with {self.progress_steps} steps'
 
-class TestWebSocketToolExecutionNotifications(SSotAsyncTestCase):
+class WebSocketToolExecutionNotificationsTests(SSotAsyncTestCase):
     """Integration tests for WebSocket tool execution notifications."""
 
     def setUp(self):

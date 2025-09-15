@@ -282,7 +282,7 @@ class FirstMessageEventValidator:
         return "\n".join(report)
 
 
-class TestFirstMessageExperience:
+class FirstMessageExperienceTests:
     """E2E tests for first message user experience."""
     
     @pytest.fixture(autouse=True)
@@ -914,7 +914,7 @@ class TestFirstMessageExperience:
         logger.info(" PASS:  All malformed messages handled appropriately")
 
 
-class TestFirstMessageIntegration:
+class FirstMessageIntegrationTests:
     """Integration tests for first message with system components."""
     
     @pytest.fixture(autouse=True)
@@ -1030,7 +1030,7 @@ class TestFirstMessageIntegration:
         logger.info(" PASS:  AgentRegistry properly enhances with WebSocket support")
 
 
-class TestFirstMessagePerformance:
+class FirstMessagePerformanceTests:
     """Performance tests for first message experience."""
     
     @pytest.fixture(autouse=True)

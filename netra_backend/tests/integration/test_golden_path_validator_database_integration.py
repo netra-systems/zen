@@ -58,7 +58,7 @@ from shared.types import ServiceType, EnvironmentType
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestGoldenPathValidatorDatabaseIntegration(BaseIntegrationTest):
+class GoldenPathValidatorDatabaseIntegrationTests(BaseIntegrationTest):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

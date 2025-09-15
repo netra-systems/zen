@@ -31,7 +31,7 @@ sys.path.insert(0, str(project_root))
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestWebSocketSSotValidation(BaseIntegrationTest):
+class WebSocketSSotValidationTests(BaseIntegrationTest):
     """Integration tests for WebSocket SSOT pattern validation."""
 
     def setup_method(self):
@@ -379,7 +379,7 @@ class TestWebSocketSSotValidation(BaseIntegrationTest):
             pytest.fail(f"Memory isolation test failed: {e}")
 
 
-class TestSSotWebSocketDeprecationTransition:
+class SSotWebSocketDeprecationTransitionTests:
     """Test the transition period behavior during SSOT migration."""
 
     @pytest.mark.integration

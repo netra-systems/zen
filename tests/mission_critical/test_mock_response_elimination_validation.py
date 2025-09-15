@@ -35,7 +35,7 @@ from shared.types.core_types import UserID, ThreadID, RequestID
 logger = logging.getLogger(__name__)
 
 
-class TestMockResponseEliminationValidation(BaseE2ETest):
+class MockResponseEliminationValidationTests(BaseE2ETest):
     """
     MISSION CRITICAL FAILING TESTS: Prove ANY mock response can reach users
     

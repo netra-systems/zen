@@ -20,7 +20,7 @@ except ImportError:
     TraceContextTextMapPropagator = Mock
 
 
-    class TestDistributedTracingSpanPropagation:
+    class DistributedTracingSpanPropagationTests:
         """Validates span context propagation across distributed operations."""
 
         @pytest.fixture

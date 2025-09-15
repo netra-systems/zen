@@ -35,7 +35,7 @@ from dev_launcher.process_manager import ProcessManager
 
 
 @pytest.mark.integration
-class TestSyntaxFix:
+class SyntaxFixTests:
     """Test class for orphaned methods"""
 
     def setup_method(self):

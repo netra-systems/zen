@@ -25,7 +25,7 @@ from netra_backend.tests.test_route_fixtures import (
     basic_test_client,
 )
 
-class TestThreadMessaging:
+class ThreadMessagingTests:
     """Test thread messaging and search functionality."""
     
     def test_thread_pagination(self, basic_test_client):

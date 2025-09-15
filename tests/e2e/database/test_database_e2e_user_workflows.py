@@ -43,7 +43,7 @@ except ImportError:
     AsyncSession = None
 
 
-class TestDatabaseE2EUserWorkflows(BaseE2ETest):
+class DatabaseE2EUserWorkflowsTests(BaseE2ETest):
     """E2E test for complete database user workflows with authentication."""
 
     def setUp(self):

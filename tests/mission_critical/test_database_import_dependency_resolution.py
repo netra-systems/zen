@@ -92,7 +92,7 @@ class SimpleDirectedGraph:
         return cycles
 
 
-class TestDatabaseImportDependencyResolution(SSotBaseTestCase):
+class DatabaseImportDependencyResolutionTests(SSotBaseTestCase):
     """
     Test suite to detect and validate database import dependency resolution.
     

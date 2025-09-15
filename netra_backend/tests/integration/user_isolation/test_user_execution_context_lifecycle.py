@@ -43,7 +43,7 @@ from shared.isolated_environment import get_env
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestUserExecutionContextLifecycle(BaseIntegrationTest):
+class UserExecutionContextLifecycleTests(BaseIntegrationTest):
     """Test UserExecutionContext lifecycle management under realistic conditions."""
     
     async def setup_method(self, method):

@@ -39,7 +39,7 @@ class UserPerformanceMetrics:
     errors: List[str]
 
 
-class TestConcurrentUserManagementPerformance(BaseIntegrationTest):
+class ConcurrentUserManagementPerformanceTests(BaseIntegrationTest):
     """Test concurrent user management with real services and authentication."""
     
     @pytest.mark.integration

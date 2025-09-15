@@ -79,7 +79,7 @@ class MockWebSocket:
 
 
 @pytest.mark.integration
-class TestMessageHandler:
+class MessageHandlerTests:
     """Test message handler for routing validation."""
 
     def __init__(self, handler_id: str, supported_types: List[str]):
@@ -118,7 +118,7 @@ class TestMessageHandler:
 
 
 @pytest.mark.integration
-class TestMessageRouterCoreFunctionality(SSotAsyncTestCase):
+class MessageRouterCoreFunctionalityTests(SSotAsyncTestCase):
     """Integration tests for message router core functionality."""
 
     def setUp(self):
@@ -208,9 +208,9 @@ class TestMessageRouterCoreFunctionality(SSotAsyncTestCase):
             self.skipTest(f"Cannot import MessageRouter: {e}")
 
         # Create custom test handlers
-        handler_a = TestMessageHandler("custom_handler_a", ["user_message", "custom_type_a"])
-        handler_b = TestMessageHandler("custom_handler_b", ["agent_request", "custom_type_b"])
-        handler_c = TestMessageHandler("fallback_handler", ["unknown_type"])
+        handler_a = MessageHandlerTests("custom_handler_a", ["user_message", "custom_type_a"])
+        handler_b = MessageHandlerTests("custom_handler_b", ["agent_request", "custom_type_b"])
+        handler_c = MessageHandlerTests("fallback_handler", ["unknown_type"])
 
         # Test handler registration
         initial_count = len(router.handlers)
@@ -273,7 +273,7 @@ class TestMessageRouterCoreFunctionality(SSotAsyncTestCase):
             self.skipTest(f"Cannot import MessageRouter: {e}")
 
         # Add test handler with statistics
-        test_handler = TestMessageHandler("stats_test_handler", ["user_message", "agent_request"])
+        test_handler = MessageHandlerTests("stats_test_handler", ["user_message", "agent_request"])
         router.add_handler(test_handler)
 
         # Get initial statistics
@@ -321,8 +321,8 @@ class TestMessageRouterCoreFunctionality(SSotAsyncTestCase):
         self.assertIsInstance(handler_stats, dict)
 
         # Check our test handler statistics
-        if 'TestMessageHandler' in handler_stats:
-            test_handler_stats = handler_stats['TestMessageHandler']
+        if 'MessageHandlerTests' in handler_stats:
+            test_handler_stats = handler_stats['MessageHandlerTests']
             self.assertIn('total_messages', test_handler_stats)
 
         # Verify router status information
@@ -341,9 +341,9 @@ class TestMessageRouterCoreFunctionality(SSotAsyncTestCase):
             self.skipTest(f"Cannot import MessageRouter: {e}")
 
         # Create user-specific test handlers
-        user_a_handler = TestMessageHandler("user_a_handler", ["user_message"])
-        user_b_handler = TestMessageHandler("user_b_handler", ["user_message"])
-        shared_handler = TestMessageHandler("shared_handler", ["agent_request", "heartbeat"])
+        user_a_handler = MessageHandlerTests("user_a_handler", ["user_message"])
+        user_b_handler = MessageHandlerTests("user_b_handler", ["user_message"])
+        shared_handler = MessageHandlerTests("shared_handler", ["agent_request", "heartbeat"])
 
         router.add_handler(user_a_handler)
         router.add_handler(user_b_handler)
@@ -442,7 +442,7 @@ class TestMessageRouterCoreFunctionality(SSotAsyncTestCase):
             self.skipTest(f"Cannot import MessageRouter: {e}")
 
         # Create offline/mock handler that doesn't require WebSocket
-        offline_handler = TestMessageHandler("offline_handler", ["user_message", "system_test"])
+        offline_handler = MessageHandlerTests("offline_handler", ["user_message", "system_test"])
         router.add_handler(offline_handler)
 
         # Test with disconnected WebSocket
@@ -512,9 +512,9 @@ class TestMessageRouterCoreFunctionality(SSotAsyncTestCase):
             self.skipTest(f"Cannot import MessageRouter: {e}")
 
         # Create handlers with overlapping capabilities
-        priority_handler = TestMessageHandler("priority_handler", ["user_message", "special_message"])
-        secondary_handler = TestMessageHandler("secondary_handler", ["user_message", "backup_message"])
-        fallback_handler = TestMessageHandler("fallback_handler", ["user_message", "any_message"])
+        priority_handler = MessageHandlerTests("priority_handler", ["user_message", "special_message"])
+        secondary_handler = MessageHandlerTests("secondary_handler", ["user_message", "backup_message"])
+        fallback_handler = MessageHandlerTests("fallback_handler", ["user_message", "any_message"])
 
         # Add handlers in specific order to test precedence
         router.add_handler(priority_handler)  # First added should have precedence
@@ -552,7 +552,7 @@ class TestMessageRouterCoreFunctionality(SSotAsyncTestCase):
         if hasattr(router, 'get_handler_order'):
             handler_order = router.get_handler_order()
             self.assertIsInstance(handler_order, list)
-            self.assertIn('TestMessageHandler', str(handler_order))
+            self.assertIn('MessageHandlerTests', str(handler_order))
 
         # Test handler removal functionality
         initial_handler_count = len(router.handlers)
@@ -594,7 +594,7 @@ class TestMessageRouterCoreFunctionality(SSotAsyncTestCase):
         # Test different failure scenarios
         can_handle_failing_handler = FailingHandler("can_handle_error")
         handle_failing_handler = FailingHandler("handle_error")
-        working_handler = TestMessageHandler("working_handler", ["error_test", "recovery_test"])
+        working_handler = MessageHandlerTests("working_handler", ["error_test", "recovery_test"])
 
         # Add handlers including failing ones
         try:

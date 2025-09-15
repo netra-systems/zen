@@ -46,7 +46,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 @pytest.mark.e2e
-class TestBackendAuthenticationFailures:
+class BackendAuthenticationFailuresTests:
     """
     Test suite replicating critical backend authentication failures from GCP staging.
     
@@ -391,7 +391,7 @@ class TestBackendAuthenticationFailures:
 
 
 @pytest.mark.e2e
-class TestAuthenticationRecoveryAndDiagnostics:
+class AuthenticationRecoveryAndDiagnosticsTests:
     """
     Additional tests for authentication recovery mechanisms and diagnostics.
     These tests help identify specific failure points in the auth system.

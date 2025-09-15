@@ -28,7 +28,7 @@ from netra_backend.app.agents.state import ActionPlanResult, PlanStep
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestActionPlanUVS:
+class ActionPlanUVSTests:
     """Test suite for UVS-enhanced ActionPlanBuilder"""
     
     @pytest.fixture

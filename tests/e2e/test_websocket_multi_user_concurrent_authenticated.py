@@ -634,7 +634,7 @@ class MultiUserWebSocketValidator:
 
 # CLAUDE.md COMPLIANT TEST CASES
 @pytest.mark.e2e
-class TestWebSocketMultiUserConcurrentAuthenticated:
+class WebSocketMultiUserConcurrentAuthenticatedTests:
     """
     CLAUDE.md COMPLIANT: Multi-User Concurrent WebSocket Tests with MANDATORY Authentication
     

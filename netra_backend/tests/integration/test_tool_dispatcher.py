@@ -35,7 +35,7 @@ from test_framework.fixtures.real_services import real_services_fixture
 from shared.isolated_environment import get_env
 logger = central_logger.get_logger(__name__)
 
-class TestTool:
+class ToolTests:
     """Test tool for dispatcher integration testing."""
 
     def __init__(self, tool_name: str, execution_time: float=0.1, failure_rate: float=0.0):
@@ -199,7 +199,7 @@ class MockToolDispatcher(UnifiedToolDispatcher):
 
     def _register_test_tools(self):
         """Register test tools with the dispatcher."""
-        self.tools = {'cost_analyzer': TestTool('cost_analyzer', execution_time=0.2), 'performance_monitor': TestTool('performance_monitor', execution_time=0.15), 'security_scanner': TestTool('security_scanner', execution_time=0.3), 'data_processor': TestTool('data_processor', execution_time=0.1), 'failing_tool': TestTool('failing_tool', execution_time=0.05, failure_rate=0.5)}
+        self.tools = {'cost_analyzer': ToolTests('cost_analyzer', execution_time=0.2), 'performance_monitor': ToolTests('performance_monitor', execution_time=0.15), 'security_scanner': ToolTests('security_scanner', execution_time=0.3), 'data_processor': ToolTests('data_processor', execution_time=0.1), 'failing_tool': ToolTests('failing_tool', execution_time=0.05, failure_rate=0.5)}
 
     async def execute_tool(self, tool_name: str, parameters: Dict[str, Any], context: Optional[UserExecutionContext]=None) -> Dict[str, Any]:
         """Execute tool with Redis caching integration."""
@@ -264,7 +264,7 @@ class MockToolDispatcher(UnifiedToolDispatcher):
         """Get comprehensive dispatcher statistics."""
         return {'total_executions': self.execution_count, 'cache_hits': self.cache_hits, 'cache_misses': self.cache_misses, 'cache_hit_rate': self.cache_hits / max(self.execution_count, 1), 'error_count': self.error_count, 'error_rate': self.error_count / max(self.execution_count, 1), 'available_tools': len(self.tools), 'redis_enabled': self.redis_manager is not None}
 
-class TestToolDispatcher(BaseIntegrationTest):
+class ToolDispatcherTests(BaseIntegrationTest):
     """Integration tests for tool dispatcher with real Redis caching."""
 
     def setup_method(self):

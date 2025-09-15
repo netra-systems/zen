@@ -22,7 +22,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
-class TestIssue860WindowsWebSocketFailures(BaseIntegrationTest):
+class Issue860WindowsWebSocketFailuresTests(BaseIntegrationTest):
     """Test Windows-specific WebSocket connection failures."""
 
     def setup_method(self):

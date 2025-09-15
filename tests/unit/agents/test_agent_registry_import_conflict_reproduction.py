@@ -65,7 +65,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.unit
-class TestAgentRegistryImportConflictReproduction(SSotAsyncTestCase):
+class AgentRegistryImportConflictReproductionTests(SSotAsyncTestCase):
     """
     Test suite to reproduce and validate AgentRegistry SSOT violations.
 

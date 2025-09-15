@@ -43,7 +43,7 @@ from tests.e2e.search_filter_helpers import (
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestSearchFilterFunctionality:
+class SearchFilterFunctionalityTests:
     """Test #8: Search and Filter Functionality with Performance Validation."""
     
     @pytest_asyncio.fixture
@@ -231,7 +231,7 @@ class TestSearchFilterFunctionality:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestSearchFilterQueryOptimization:
+class SearchFilterQueryOptimizationTests:
     """Query optimization validation for search and filter operations."""
     
     @pytest_asyncio.fixture

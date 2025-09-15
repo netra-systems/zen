@@ -195,7 +195,7 @@ class RealMockUserExecutionContext:
         """Track request completion."""
         self.active_requests = max(0, self.active_requests - 1)
 
-class TestEngineConfigComprehensive(BaseTestCase):
+class EngineConfigComprehensiveTests(BaseTestCase):
     """Comprehensive tests for EngineConfig model and validation."""
 
     def test_engine_config_default_values_business_requirements(self):
@@ -241,7 +241,7 @@ class TestEngineConfigComprehensive(BaseTestCase):
         feature_flags = [full_config.enable_user_features, full_config.enable_mcp, full_config.enable_data_features, full_config.enable_websocket_events, full_config.enable_metrics, full_config.enable_fallback]
         self.assertTrue(all(feature_flags), 'All features should be enabled')
 
-class TestExecutionExtensionsAdvanced(AsyncBaseTestCase):
+class ExecutionExtensionsAdvancedTests(AsyncBaseTestCase):
     """Advanced tests for execution engine extensions with business scenarios."""
 
     async def test_user_execution_extension_business_isolation(self):
@@ -320,7 +320,7 @@ class TestExecutionExtensionsAdvanced(AsyncBaseTestCase):
         self.assertIn('chart_generator', mcp_tools_used)
         self.assertEqual(len(mcp_tools_used), 3)
 
-class TestExecutionEngineBusinessScenarios(AsyncBaseTestCase):
+class ExecutionEngineBusinessScenariosTests(AsyncBaseTestCase):
     """Test ExecutionEngine with real business scenarios."""
 
     def setUp(self):
@@ -459,7 +459,7 @@ class TestExecutionEngineBusinessScenarios(AsyncBaseTestCase):
         for field in required_metric_fields:
             self.assertIn(field, metrics, f'Metrics must include {field}')
 
-class TestRequestScopedExecutionEngineAdvanced(AsyncBaseTestCase):
+class RequestScopedExecutionEngineAdvancedTests(AsyncBaseTestCase):
     """Advanced tests for RequestScopedExecutionEngine isolation."""
 
     def setUp(self):
@@ -536,7 +536,7 @@ class TestRequestScopedExecutionEngineAdvanced(AsyncBaseTestCase):
             await success_engine.close()
             await failure_engine.close()
 
-class TestExecutionEngineFactoryAdvanced(BaseTestCase):
+class ExecutionEngineFactoryAdvancedTests(BaseTestCase):
     """Advanced tests for ExecutionEngineFactory configurations."""
 
     def setUp(self):
@@ -598,7 +598,7 @@ class TestExecutionEngineFactoryAdvanced(BaseTestCase):
         self.assertIsInstance(scoped_engine, RequestScopedExecutionEngine)
         self.assertEqual(scoped_engine.request_id, 'test_req')
 
-class TestWebSocketEventIntegrationAdvanced(AsyncBaseTestCase):
+class WebSocketEventIntegrationAdvancedTests(AsyncBaseTestCase):
     """Advanced WebSocket event integration tests with business scenarios."""
 
     def setUp(self):

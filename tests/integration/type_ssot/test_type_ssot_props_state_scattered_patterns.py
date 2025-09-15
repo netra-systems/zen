@@ -47,7 +47,7 @@ class ComponentStateDefinition:
     initial_state: Dict[str, Any] = field(default_factory=dict)
 
 
-class TestPropsStateScatteredPatterns(BaseIntegrationTest):
+class PropsStateScatteredPatternsTests(BaseIntegrationTest):
     """Integration tests for Props and State definition consolidation."""
     
     @pytest.mark.integration

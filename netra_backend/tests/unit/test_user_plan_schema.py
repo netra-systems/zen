@@ -20,7 +20,7 @@ from netra_backend.app.schemas.user_plan import (
     UserPlan,
 )
 
-class TestUserPlanSchema:
+class UserPlanSchemaTests:
     """Test UserPlan schema validation."""
     
     def test_trial_period_accepts_integer_days(self):

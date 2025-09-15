@@ -175,7 +175,7 @@ class VulnerabilityTestAgent(BaseAgent):
 
 @pytest.mark.security
 @pytest.mark.integration
-class TestUserIsolationVulnerabilities(SSotAsyncTestCase):
+class UserIsolationVulnerabilitiesTests(SSotAsyncTestCase):
     """Integration tests for user isolation security vulnerabilities."""
 
     def create_test_user_context(self, user_id: str, scenario: str = "security_test") -> UserExecutionContext:

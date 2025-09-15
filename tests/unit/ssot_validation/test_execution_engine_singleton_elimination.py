@@ -35,7 +35,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 
 
 @pytest.mark.unit
-class TestExecutionEngineSingletonElimination(SSotAsyncTestCase):
+class ExecutionEngineSingletonEliminationTests(SSotAsyncTestCase):
     """
     Test suite validating singleton pattern elimination in ExecutionEngine migration.
 

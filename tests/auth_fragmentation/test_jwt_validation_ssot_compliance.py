@@ -27,7 +27,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
-class TestJWTValidationSSOTCompliance(SSotAsyncTestCase):
+class JWTValidationSSOTComplianceTests(SSotAsyncTestCase):
     """
     Test JWT validation SSOT compliance across services.
 
@@ -206,7 +206,7 @@ class TestJWTValidationSSOTCompliance(SSotAsyncTestCase):
                 pass
         logger.info('✅ Cross-service JWT validation paths mapped and verified')
 
-class TestJWTValidationFragmentationDetection(SSotAsyncTestCase):
+class JWTValidationFragmentationDetectionTests(SSotAsyncTestCase):
     """
     Test suite to detect JWT validation fragmentation patterns.
 

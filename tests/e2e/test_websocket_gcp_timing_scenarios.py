@@ -25,7 +25,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 
 @pytest.mark.e2e
-class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
+class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
     """
     E2E tests with REQUIRED AUTHENTICATION reproducing WebSocket import bugs under GCP conditions.
     

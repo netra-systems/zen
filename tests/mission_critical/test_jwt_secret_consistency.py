@@ -537,7 +537,7 @@ class JWTSecretConsistencyValidator:
         return recommendations
 
 
-class TestJWTSecretConsistency(SSotBaseTestCase):
+class JWTSecretConsistencyTests(SSotBaseTestCase):
     """
     P0 Mission Critical Test Suite: JWT Secret Consistency
     

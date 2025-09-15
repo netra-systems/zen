@@ -26,7 +26,7 @@ from shared.isolated_environment import get_env
 from test_framework.real_services_test_fixtures import real_services_fixture
 
 
-class TestAuthUserModel:
+class AuthUserModelTests:
     """Comprehensive tests for AuthUser model"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -239,7 +239,7 @@ class TestAuthUserModel:
             assert retrieved_user.provider_data["boolean_flag"] is True
 
 
-class TestAuthSessionModel:
+class AuthSessionModelTests:
     """Comprehensive tests for AuthSession model"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -367,7 +367,7 @@ class TestAuthSessionModel:
                 assert session_obj.is_active is True
 
 
-class TestAuthAuditLogModel:
+class AuthAuditLogModelTests:
     """Comprehensive tests for AuthAuditLog model"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -493,7 +493,7 @@ class TestAuthAuditLogModel:
             assert retrieved_log.event_metadata["attempt_count"] == 1
 
 
-class TestPasswordResetTokenModel:
+class PasswordResetTokenModelTests:
     """Comprehensive tests for PasswordResetToken model"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -617,7 +617,7 @@ class TestPasswordResetTokenModel:
                 await session.commit()
 
 
-class TestDatabaseModelIntegration:
+class DatabaseModelIntegrationTests:
     """Integration tests between different models"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -748,7 +748,7 @@ class TestDatabaseModelIntegration:
             await session.commit()
 
 
-class TestDatabaseModelConstraintsAndEdgeCases:
+class DatabaseModelConstraintsAndEdgeCasesTests:
     """Test database constraints and edge cases"""
     
     @pytest_asyncio.fixture(autouse=True)

@@ -38,7 +38,7 @@ class ToolAtomicityLevel(Enum):
 
 @dataclass
 @pytest.mark.e2e
-class TestToolResult:
+class ToolResultTests:
     """Result of tool atomicity testing."""
     tool_name: str
     atomicity_level: ToolAtomicityLevel
@@ -55,7 +55,7 @@ class TestToolResult:
 
 
 @pytest.mark.e2e
-class TestToolAtomicityer:
+class ToolAtomicityerTests:
     """Tester for agent tool atomicity."""
 
     def __init__(self):
@@ -63,7 +63,7 @@ class TestToolAtomicityer:
         self.jwt_helper = JWTTestHelper()
         self.backend_url = "http://localhost:8000"
         self.test_tools = self._define_test_tools()
-        self.test_results: List[TestToolResult] = []
+        self.test_results: List[ToolResultTests] = []
 
     def _define_test_tools(self) -> Dict[str, Dict[str, Any]]:
         """Define test tools with expected atomic behaviors."""
@@ -199,7 +199,7 @@ class TestToolAtomicityer:
 @pytest.mark.integration
 async def test_tool_atomicity_basic_validation():
     """Test basic tool atomicity validation."""
-    tester = TestToolAtomicityer()
+    tester = ToolAtomicityerTests()
     
     # Test a simple atomic output
     mock_output = {
@@ -222,7 +222,7 @@ async def test_tool_atomicity_basic_validation():
 @pytest.mark.integration 
 async def test_tool_complexity_detection():
     """Test detection of non-atomic tool outputs."""
-    tester = TestToolAtomicityer()
+    tester = ToolAtomicityerTests()
     
     # Test a complex output with multiple responsibilities
     mock_output = {

@@ -19,7 +19,7 @@ from shared.isolated_environment import IsolatedEnvironment
 @pytest.mark.mission_critical
 @pytest.mark.github_integration
 @pytest.mark.reliability
-class TestGitHubIssueCreationReliability(BaseTestCase):
+class GitHubIssueCreationReliabilityTests(BaseTestCase):
     """Mission critical tests for GitHub issue creation reliability."""
 
     def setup_method(self):
@@ -235,7 +235,7 @@ class TestGitHubIssueCreationReliability(BaseTestCase):
 @pytest.mark.mission_critical
 @pytest.mark.github_integration
 @pytest.mark.security
-class TestGitHubDataSanitization(BaseTestCase):
+class GitHubDataSanitizationTests(BaseTestCase):
     """Mission critical tests for data sanitization in GitHub issues."""
 
     def setup_method(self):

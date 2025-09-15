@@ -318,7 +318,7 @@ class ErrorHandlingTester:
 @pytest.mark.e2e
 @pytest.mark.frontend
 @pytest.mark.error_handling
-class TestFrontendErrorHandling:
+class FrontendErrorHandlingTests:
     """Test error handling and edge cases"""
     
     @pytest.fixture(autouse=True)

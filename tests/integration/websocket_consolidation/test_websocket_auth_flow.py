@@ -39,7 +39,7 @@ except ImportError as e:
     UserExecutionContext = None
 
 @pytest.mark.integration
-class TestWebSocketAuthFlow(SSotAsyncTestCase):
+class WebSocketAuthFlowTests(SSotAsyncTestCase):
     """
     CRITICAL: This test proves WebSocket authentication race conditions.
 

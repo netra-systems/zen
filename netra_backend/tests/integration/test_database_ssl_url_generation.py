@@ -10,7 +10,7 @@ pytestmark = [
 ]
 
 
-class TestDatabaseSSLUrlGeneration:
+class DatabaseSSLUrlGenerationTests:
     """Test SSL URL generation functionality."""
     
     def test_staging_url_includes_ssl_requirement(self):

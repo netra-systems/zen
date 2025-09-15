@@ -25,7 +25,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
-class TestCorpusAdminPreConsolidation(unittest.IsolatedAsyncioTestCase):
+class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
     """
     CRITICAL: Pre-consolidation tests to ensure all corpus functionality is preserved.
     Tests multi-user isolation, thread safety, and all corpus operations.
@@ -376,7 +376,7 @@ class TestCorpusAdminPreConsolidation(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(result.operation, CorpusOperation.CREATE)
 
 
-class TestCorpusAdminFactoryPattern(unittest.IsolatedAsyncioTestCase):
+class CorpusAdminFactoryPatternTests(unittest.IsolatedAsyncioTestCase):
     """Test that corpus admin will support factory pattern for user isolation"""
     
     async def test_factory_pattern_readiness(self):

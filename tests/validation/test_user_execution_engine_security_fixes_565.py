@@ -40,7 +40,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from shared.types import UserID, ThreadID, RunID
 
 
-class TestUserExecutionEngineSecurityFixes565(unittest.TestCase):
+class UserExecutionEngineSecurityFixes565Tests(unittest.TestCase):
     """
     Tests to validate Issue #565 security fixes work correctly.
     

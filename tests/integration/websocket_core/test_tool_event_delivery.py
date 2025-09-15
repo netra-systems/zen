@@ -49,7 +49,7 @@ class MockWebSocketConnection:
         self.is_connected = False
 
 @pytest.mark.integration
-class TestToolEventDeliveryConfirmation:
+class ToolEventDeliveryConfirmationTests:
     """Integration tests for tool event delivery confirmation.
     
     These tests use real WebSocket connections and should FAIL to demonstrate

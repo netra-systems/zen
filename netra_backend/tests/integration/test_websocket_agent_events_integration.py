@@ -53,7 +53,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.message_handlers import MessageHandlerService
 
 
-class TestWebSocketAgentEventsIntegration(SSotAsyncTestCase):
+class WebSocketAgentEventsIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket agent event delivery with real connections."""
     
     async def async_setup_method(self):
@@ -948,7 +948,7 @@ class TestWebSocketAgentEventsIntegration(SSotAsyncTestCase):
         self.record_metric("event_timing_validated", True)
 
 
-class TestWebSocketAgentEventsRealServices(SSotAsyncTestCase):
+class WebSocketAgentEventsRealServicesTests(SSotAsyncTestCase):
     """
     Integration tests with real WebSocket services for agent events.
     

@@ -100,7 +100,7 @@ class MockAppStateForStartupPhases:
         return redis_manager
 
 
-class TestStartupPhaseValidationLogic(SSotBaseTestCase):
+class StartupPhaseValidationLogicTests(SSotBaseTestCase):
     """Unit tests for startup phase awareness in GCP WebSocket validator."""
     
     def setup_method(self, method=None):
@@ -360,7 +360,7 @@ class TestStartupPhaseValidationLogic(SSotBaseTestCase):
         self.test_metrics.record_custom("startup_completion_logic_tested", True)
 
 
-class TestServiceReadinessValidationLogic(SSotBaseTestCase):
+class ServiceReadinessValidationLogicTests(SSotBaseTestCase):
     """Unit tests for individual service readiness checks with startup awareness."""
     
     def setup_method(self, method=None):
@@ -480,7 +480,7 @@ class TestServiceReadinessValidationLogic(SSotBaseTestCase):
         self.test_metrics.record_custom("missing_thread_service_test_passed", True)
 
 
-class TestRetryAndTimingLogic(SSotBaseTestCase):
+class RetryAndTimingLogicTests(SSotBaseTestCase):
     """Unit tests for retry mechanisms and timeout handling in GCP environment."""
     
     def setup_method(self, method=None):
@@ -646,7 +646,7 @@ class TestRetryAndTimingLogic(SSotBaseTestCase):
         self.test_metrics.record_custom("gcp_timeout_optimization_verified", True)
 
 
-class TestStartupPhaseTransitions(SSotBaseTestCase):
+class StartupPhaseTransitionsTests(SSotBaseTestCase):
     """Unit tests for startup phase transition edge cases."""
     
     def setup_method(self, method=None):

@@ -69,7 +69,7 @@ class MockWebSocketConnection:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
+class UserExecutionContextFactoryIntegrationTests(BaseIntegrationTest):
     """
     Comprehensive integration tests for UserExecutionContext and ExecutionEngineFactory
     isolation patterns. Validates multi-user concurrent execution scenarios.

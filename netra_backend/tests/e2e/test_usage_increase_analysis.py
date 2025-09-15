@@ -23,7 +23,7 @@ from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAg
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
 
 
-class TestUsageIncreaseAnalysis(BaseE2ETest):
+class UsageIncreaseAnalysisTests(BaseE2ETest):
     """Test usage increase analysis for proactive scaling management."""
 
     @pytest.mark.asyncio

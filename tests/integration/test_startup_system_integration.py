@@ -43,7 +43,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 @pytest.mark.integration
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -69,7 +69,7 @@ class TestWebSocketConnection:
 
 
 @pytest.mark.integration
-class TestStartupSystemIntegration:
+class StartupSystemIntegrationTests:
     """Integration Tests for startup system components."""
     
     def setup_method(self):
@@ -199,7 +199,7 @@ class TestStartupSystemIntegration:
     @pytest.mark.asyncio
     async def test_websocket_connection_integration(self):
         """Test WebSocket connection integration.""" 
-        websocket = TestWebSocketConnection()
+        websocket = WebSocketConnectionTests()
         
         # Test basic WebSocket operations
         assert websocket.is_connected
@@ -244,7 +244,7 @@ class TestStartupSystemIntegration:
         assert isinstance(env_result, bool)
         
         # Test WebSocket integration in context
-        websocket = TestWebSocketConnection()
+        websocket = WebSocketConnectionTests()
         await websocket.send_json({"type": "startup_test", "phase": "integration"})
         
         messages = await websocket.get_messages()

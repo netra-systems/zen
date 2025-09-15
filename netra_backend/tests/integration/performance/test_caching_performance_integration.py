@@ -22,7 +22,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.services.cache_service import CacheConsistencyManager
 from netra_backend.app.services.state_persistence import StateCacheManager
 
-class TestCachingPerformanceIntegration(SSotBaseTestCase):
+class CachingPerformanceIntegrationTests(SSotBaseTestCase):
     """Test caching performance with real cache systems"""
 
     def setup_method(self):

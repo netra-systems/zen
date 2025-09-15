@@ -18,7 +18,7 @@ from unittest.mock import patch
 import traceback
 
 
-class TestSSotImportRegistryComplianceIssue1196(unittest.TestCase):
+class SSotImportRegistryComplianceIssue1196Tests(unittest.TestCase):
     """Integration test suite for SSOT Import Registry compliance validation.
 
     Tests MUST demonstrate registry inaccuracies and performance inconsistencies

@@ -41,7 +41,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import validate_
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.unit
-class TestHealthReportTypeValidationUnit(SSotBaseTestCase):
+class HealthReportTypeValidationUnitTests(SSotBaseTestCase):
     """
     UNIT TEST: Reproduce and validate WebSocket coroutine error fix.
     

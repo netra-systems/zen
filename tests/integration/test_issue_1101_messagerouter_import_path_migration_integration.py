@@ -27,7 +27,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 @pytest.mark.integration
-class TestMessageRouterImportPathMigration(SSotAsyncTestCase):
+class MessageRouterImportPathMigrationTests(SSotAsyncTestCase):
     """Integration tests for MessageRouter import path migration with real services."""
 
     def setUp(self):

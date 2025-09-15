@@ -56,7 +56,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
-class TestStatePersistenceIntegrationCore(SSotAsyncTestCase):
+class StatePersistenceIntegrationCoreTests(SSotAsyncTestCase):
     """Core integration tests for StatePersistence with real 3-tier architecture"""
 
     @classmethod
@@ -117,7 +117,7 @@ class TestStatePersistenceIntegrationCore(SSotAsyncTestCase):
         return (user_id, thread_id)
 
 @pytest.mark.integration
-class TestThreeTierArchitectureIntegration(TestStatePersistenceIntegrationCore):
+class ThreeTierArchitectureIntegrationTests(StatePersistenceIntegrationCoreTests):
     """Integration tests for 3-tier architecture coordination"""
 
     async def test_tier1_redis_primary_storage_workflow(self):
@@ -189,7 +189,7 @@ class TestThreeTierArchitectureIntegration(TestStatePersistenceIntegrationCore):
         self.assertIn('audit_info', tier_data[2])
 
 @pytest.mark.integration
-class TestDataMigrationIntegration(TestStatePersistenceIntegrationCore):
+class DataMigrationIntegrationTests(StatePersistenceIntegrationCoreTests):
     """Integration tests for data migration between tiers"""
 
     async def test_tier1_to_tier2_migration_workflow(self):
@@ -246,7 +246,7 @@ class TestDataMigrationIntegration(TestStatePersistenceIntegrationCore):
         self.assertEqual(rare_retrieved['type'], 'rare')
 
 @pytest.mark.integration
-class TestPerformanceOptimizationIntegration(TestStatePersistenceIntegrationCore):
+class PerformanceOptimizationIntegrationTests(StatePersistenceIntegrationCoreTests):
     """Integration tests for performance optimization under real load"""
 
     async def test_concurrent_multi_tier_operations(self):
@@ -358,7 +358,7 @@ class TestPerformanceOptimizationIntegration(TestStatePersistenceIntegrationCore
             self.assertGreaterEqual(item['score'], 0.5)
 
 @pytest.mark.integration
-class TestDisasterRecoveryIntegration(TestStatePersistenceIntegrationCore):
+class DisasterRecoveryIntegrationTests(StatePersistenceIntegrationCoreTests):
     """Integration tests for disaster recovery scenarios"""
 
     async def test_cross_tier_backup_consistency(self):

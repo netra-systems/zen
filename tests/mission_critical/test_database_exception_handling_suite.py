@@ -39,7 +39,7 @@ from netra_backend.app.db.transaction_errors import (
 )
 
 
-class TestDatabaseExceptionHandlingSystemicIssues:
+class DatabaseExceptionHandlingSystemicIssuesTests:
     """Mission critical tests proving systemic database exception handling issues."""
     
     @pytest.mark.mission_critical
@@ -292,7 +292,7 @@ class TestDatabaseExceptionHandlingSystemicIssues:
             f"Database error handling workflow failures: {workflow_failures}"
 
 
-class TestDatabaseExceptionRemediationReadiness:
+class DatabaseExceptionRemediationReadinessTests:
     """Tests validating system readiness for exception handling remediation."""
     
     @pytest.mark.mission_critical

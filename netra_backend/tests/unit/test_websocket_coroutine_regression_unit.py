@@ -29,7 +29,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from netra_backend.app.routes.websocket import websocket_endpoint
 
 
-class TestWebSocketCoroutineRegression(SSotAsyncTestCase):
+class WebSocketCoroutineRegressionTests(SSotAsyncTestCase):
     """
     Unit tests for WebSocket coroutine regression prevention.
     

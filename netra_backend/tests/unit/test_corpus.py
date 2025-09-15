@@ -9,7 +9,7 @@ from datetime import datetime
 from netra_backend.app.schemas.corpus import Corpus, CorpusCreate, CorpusUpdate
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestCorpus:
+class CorpusTests:
     """Test suite for Corpus Pydantic model"""
     
     @pytest.fixture

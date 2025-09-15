@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.auth_required
-class TestCompleteDatabaseWorkflowsE2E:
+class CompleteDatabaseWorkflowsE2ETests:
     """E2E tests for complete database workflows with authentication."""
     
     @pytest.fixture

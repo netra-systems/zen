@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.e2e
-class TestConfigSSotStagingValidation(SSotAsyncTestCase):
+class ConfigSSotStagingValidationTests(SSotAsyncTestCase):
     """E2E tests for configuration SSOT validation on GCP staging environment."""
 
     def setUp(self):

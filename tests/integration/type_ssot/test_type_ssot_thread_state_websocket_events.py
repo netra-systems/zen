@@ -34,7 +34,7 @@ class ThreadStateEvent:
     connection_id: Optional[ConnectionID] = None
 
 
-class TestThreadStateWebSocketEventConsistency(BaseIntegrationTest):
+class ThreadStateWebSocketEventConsistencyTests(BaseIntegrationTest):
     """Integration tests for thread state WebSocket event type consistency."""
     
     @pytest.mark.integration

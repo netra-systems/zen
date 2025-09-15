@@ -64,7 +64,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.unified_authentication_service import AuthResult
 
 
-class TestWebSocketAuthComprehensive(BaseIntegrationTest):
+class WebSocketAuthComprehensiveTests(BaseIntegrationTest):
     """Comprehensive test suite for WebSocket authentication module."""
     
     def setup_method(self):
@@ -87,7 +87,7 @@ class TestWebSocketAuthComprehensive(BaseIntegrationTest):
 
 
 @pytest.mark.unit
-class TestAuthInfo:
+class AuthInfoTests:
     """Test AuthInfo dataclass."""
     
     def test_auth_info_creation(self):
@@ -117,7 +117,7 @@ class TestAuthInfo:
 
 
 @pytest.mark.unit
-class TestUnifiedWebSocketAuthenticator(TestWebSocketAuthComprehensive):
+class UnifiedWebSocketAuthenticatorTests(WebSocketAuthComprehensiveTests):
     """Test UnifiedWebSocketAuthenticator class comprehensively (SSOT compliant)."""
     
     def test_authenticator_initialization(self):
@@ -397,7 +397,7 @@ class TestUnifiedWebSocketAuthenticator(TestWebSocketAuthComprehensive):
 
 @pytest.mark.unit
 @pytest.mark.skip(reason="ConnectionSecurityManager eliminated in SSOT consolidation - security handled by UnifiedWebSocketAuthenticator")
-class TestConnectionSecurityManager(TestWebSocketAuthComprehensive):
+class ConnectionSecurityManagerTests(WebSocketAuthComprehensiveTests):
     """Test ConnectionSecurityManager class - SKIPPED (SSOT compliance).
     
     This class has been eliminated as part of SSOT consolidation.
@@ -572,7 +572,7 @@ class TestConnectionSecurityManager(TestWebSocketAuthComprehensive):
 
 @pytest.mark.unit
 @pytest.mark.skip(reason="RateLimiter extracted to separate module - not part of WebSocket auth testing scope")
-class TestRateLimiter(TestWebSocketAuthComprehensive):
+class RateLimiterTests(WebSocketAuthComprehensiveTests):
     """Test RateLimiter class - SKIPPED (moved to dedicated rate limiting module).
     
     Rate limiting functionality has been moved to dedicated modules and is
@@ -608,7 +608,7 @@ class TestRateLimiter(TestWebSocketAuthComprehensive):
 
 
 @pytest.mark.unit
-class TestGlobalFunctions(TestWebSocketAuthComprehensive):
+class GlobalFunctionsTests(WebSocketAuthComprehensiveTests):
     """Test global utility functions (SSOT unified auth)."""
     
     def test_get_websocket_authenticator_singleton(self):
@@ -655,7 +655,7 @@ class TestGlobalFunctions(TestWebSocketAuthComprehensive):
 
 
 @pytest.mark.unit
-class TestEdgeCasesAndFailureScenarios(TestWebSocketAuthComprehensive):
+class EdgeCasesAndFailureScenariosTests(WebSocketAuthComprehensiveTests):
     """Test edge cases and failure scenarios (SSOT unified auth)."""
     
     def setup_method(self):
@@ -789,7 +789,7 @@ class TestEdgeCasesAndFailureScenarios(TestWebSocketAuthComprehensive):
 # Additional comprehensive coverage tests
 @pytest.mark.unit
 @pytest.mark.comprehensive
-class TestComplexIntegrationScenarios(TestWebSocketAuthComprehensive):
+class ComplexIntegrationScenariosTests(WebSocketAuthComprehensiveTests):
     """Test complex integration scenarios (SSOT unified auth)."""
     
     @pytest.mark.asyncio

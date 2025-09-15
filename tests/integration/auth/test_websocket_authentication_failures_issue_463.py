@@ -27,7 +27,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient, AuthSe
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestWebSocketServiceToServiceAuth(SSotAsyncTestCase):
+class WebSocketServiceToServiceAuthTests(SSotAsyncTestCase):
     """Test service-to-service authentication integration failures."""
 
     async def setup_method(self, method):
@@ -101,7 +101,7 @@ class TestWebSocketServiceToServiceAuth(SSotAsyncTestCase):
             assert any((keyword in result.error_message.lower() for keyword in ['format', 'invalid', 'response']))
 
 @pytest.mark.integration
-class TestWebSocketMiddlewareAuthFailures(SSotAsyncTestCase):
+class WebSocketMiddlewareAuthFailuresTests(SSotAsyncTestCase):
     """Test WebSocket middleware authentication failures."""
 
     async def setup_method(self, method):
@@ -177,7 +177,7 @@ class TestWebSocketMiddlewareAuthFailures(SSotAsyncTestCase):
             assert any((keyword in result.error_message.lower() for keyword in ['invalid', 'signature', 'validation']))
 
 @pytest.mark.integration
-class TestStagingEnvironmentAuthIntegration(SSotAsyncTestCase):
+class StagingEnvironmentAuthIntegrationTests(SSotAsyncTestCase):
     """Test staging environment authentication integration issues."""
 
     async def setup_method(self, method):
@@ -246,7 +246,7 @@ class TestStagingEnvironmentAuthIntegration(SSotAsyncTestCase):
                     assert result.error_code in ['AUTH_CIRCUIT_BREAKER_OPEN', 'CIRCUIT_BREAKER_OPEN']
 
 @pytest.mark.integration
-class TestWebSocketAuthenticationServiceIntegration(SSotAsyncTestCase):
+class WebSocketAuthenticationServiceIntegrationTests(SSotAsyncTestCase):
     """Test full service integration scenarios."""
 
     async def setup_method(self, method):

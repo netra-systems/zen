@@ -16,7 +16,7 @@ from auth_service.auth_core.config import AuthConfig
 import asyncio
 
 
-class TestRefreshEndpointCompatibility:
+class RefreshEndpointCompatibilityTests:
     """Test suite for refresh endpoint field naming compatibility"""
 
     @pytest.fixture
@@ -238,7 +238,7 @@ class TestRefreshEndpointCompatibility:
                                                                                     assert response.status_code in [expected_status, 401]
 
 
-                                                                                    class TestRefreshEndpointIntegration:
+                                                                                    class RefreshEndpointIntegrationTests:
                                                                                         """Integration tests for refresh endpoint with real auth service"""
 
                                                                                         @pytest.fixture
@@ -303,7 +303,7 @@ class TestRefreshEndpointCompatibility:
                                                                                                         assert "refresh_token" in data
 
 
-                                                                                                        class TestRefreshEndpointStagingCompatibility:
+                                                                                                        class RefreshEndpointStagingCompatibilityTests:
                                                                                                             """Test refresh endpoint for staging environment compatibility"""
 
                                                                                                             @pytest.mark.env("staging")

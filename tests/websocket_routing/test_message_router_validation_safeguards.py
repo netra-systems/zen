@@ -23,7 +23,7 @@ from netra_backend.app.websocket_core.handlers import MessageRouter, MessageHand
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 
 
-class TestMessageRouterValidationSafeguards:
+class MessageRouterValidationSafeguardsTests:
     """Tests for MessageRouter validation that should prevent function handler bugs."""
     
     @pytest.fixture
@@ -241,7 +241,7 @@ class TestMessageRouterValidationSafeguards:
         assert len(router.builtin_handlers) > 0
 
 
-class TestMessageRouterProtocolValidation:
+class MessageRouterProtocolValidationTests:
     """Tests for MessageHandler protocol validation using typing."""
     
     def test_protocol_checking_with_typing(self):
@@ -329,7 +329,7 @@ class TestMessageRouterProtocolValidation:
             comprehensive_handler_validation(function_handler)
 
 
-class TestMessageRouterRuntimeProtection:
+class MessageRouterRuntimeProtectionTests:
     """Tests for runtime protection against protocol violations."""
     
     def test_find_handler_should_handle_invalid_handlers_gracefully(self):

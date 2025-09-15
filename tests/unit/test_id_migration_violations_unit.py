@@ -57,7 +57,7 @@ import inspect
 
 
 @pytest.mark.unit
-class TestUUIDViolationDetection(SSotBaseTestCase):
+class UUIDViolationDetectionTests(SSotBaseTestCase):
     """Unit tests to detect direct UUID violations requiring migration."""
     
     def setup_method(self, method):
@@ -413,7 +413,7 @@ class TestUUIDViolationDetection(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestIDMigrationImpactAnalysis(SSotBaseTestCase):
+class IDMigrationImpactAnalysisTests(SSotBaseTestCase):
     """Tests to analyze the business impact of ID migration gaps."""
     
     def setup_method(self, method):

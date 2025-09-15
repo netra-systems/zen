@@ -137,7 +137,7 @@ class MetricsCollector:
         failed_executions = [e for e in self.executions.values() if e.get('status') == 'error']
         return {'total_executions': self.total_executions, 'total_operations': self.total_operations, 'total_errors': self.total_errors, 'success_rate': len(successful_executions) / max(self.total_executions, 1), 'error_rate': len(failed_executions) / max(self.total_executions, 1), 'average_execution_time': sum((e.get('total_duration', 0) for e in successful_executions)) / max(len(successful_executions), 1), 'operation_types': len(self.operations), 'traces_collected': len(self.executions)}
 
-class TestObservability(BaseIntegrationTest):
+class ObservabilityTests(BaseIntegrationTest):
     """Integration tests for observability with real services."""
 
     def setup_method(self):

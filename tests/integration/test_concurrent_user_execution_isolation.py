@@ -33,7 +33,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocke
 
 
 @pytest.mark.integration
-class TestConcurrentUserExecutionIsolation:
+class ConcurrentUserExecutionIsolationTests:
     """Test concurrent user execution maintains isolation guarantees."""
     
     @pytest.fixture

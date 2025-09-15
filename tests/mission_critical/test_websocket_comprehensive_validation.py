@@ -352,7 +352,7 @@ class WebSocketFactoryTestHarness:
 # ULTRA-COMPREHENSIVE TEST SUITE FOR FACTORY ARCHITECTURE
 # ============================================================================
 
-class TestUltraComprehensiveWebSocketValidation:
+class UltraComprehensiveWebSocketValidationTests:
     """The most comprehensive WebSocket validation test suite for factory architecture."""
     
     @pytest.fixture(autouse=True)
@@ -605,7 +605,7 @@ class TestUltraComprehensiveWebSocketValidation:
 # SPECIALIZED REGRESSION TESTS FOR FACTORY PATTERN
 # ============================================================================
 
-class TestFactoryPatternRegressionPrevention:
+class FactoryPatternRegressionPreventionTests:
     """Specialized tests to prevent regressions in factory pattern implementation."""
     
     @pytest.fixture(autouse=True)

@@ -47,7 +47,7 @@ class ServiceHealthStatus:
     fallback_active: bool = False
 
 
-class TestServiceDependencyIntegration(BaseIntegrationTest):
+class ServiceDependencyIntegrationTests(BaseIntegrationTest):
     """Test service dependency management with real services."""
     
     def setup_method(self):

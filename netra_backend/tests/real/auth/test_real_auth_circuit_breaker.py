@@ -45,7 +45,7 @@ class CircuitState(Enum):
 @pytest.mark.circuit_breaker
 @pytest.mark.reliability
 @pytest.mark.asyncio
-class TestRealAuthCircuitBreaker:
+class RealAuthCircuitBreakerTests:
     """
     Real auth circuit breaker tests using Docker services.
     

@@ -120,7 +120,7 @@ async def _create_mock_llm_manager():
     mock_manager.health_check = AsyncMock(return_value=True)
     return mock_manager
 
-class TestDataHelperCoreBasicGeneration(SSotBaseTestCase):
+class DataHelperCoreBasicGenerationTests(SSotBaseTestCase):
     """Test Suite 1.1: Basic Data Request Generation (5 tests)"""
 
     @pytest.mark.integration
@@ -318,7 +318,7 @@ class TestDataHelperCoreBasicGeneration(SSotBaseTestCase):
             assert isinstance(item['required'], bool), 'required field must be boolean'
         logger.info(' PASS:  Response structure validation test passed')
 
-class TestDataHelperUserExecutionContext(SSotBaseTestCase):
+class DataHelperUserExecutionContextTests(SSotBaseTestCase):
     """Test Suite 1.2: UserExecutionContext Integration (5 tests)"""
 
     @pytest.mark.integration
@@ -530,7 +530,7 @@ class TestDataHelperUserExecutionContext(SSotBaseTestCase):
         assert result_context.metadata['validation_checksum'] == expected_checksum
         logger.info(' PASS:  Context factory pattern test passed')
 
-class TestDataHelperLLMIntegration(SSotBaseTestCase):
+class DataHelperLLMIntegrationTests(SSotBaseTestCase):
     """Test Suite 1.3: LLM Integration and Response Handling (5 tests)"""
 
     @pytest.mark.integration
@@ -786,7 +786,7 @@ class TestDataHelperLLMIntegration(SSotBaseTestCase):
         assert call_count == 2, f'Should have made exactly 2 LLM calls (1 failure + 1 success), made {call_count}'
         logger.info(' PASS:  LLM retry mechanism test passed')
 
-class TestDataHelperWebSocketIntegration(SSotBaseTestCase):
+class DataHelperWebSocketIntegrationTests(SSotBaseTestCase):
     """Test Suite 1.4: WebSocket Event Integration (5 tests)"""
 
     @pytest.mark.integration

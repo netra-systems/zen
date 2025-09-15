@@ -37,7 +37,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 @pytest.mark.e2e
-class TestWebSocketSendAfterCloseStagingE2E(SSotAsyncTestCase):
+class WebSocketSendAfterCloseStagingE2ETests(SSotAsyncTestCase):
     """E2E tests for WebSocket race conditions in staging environment."""
 
     @classmethod

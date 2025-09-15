@@ -47,7 +47,7 @@ from test_framework.ssot.database import DatabaseTestHelper
 from shared.isolated_environment import get_env
 
 
-class TestOAuthBusinessLogicIntegration(SSotBaseTestCase):
+class OAuthBusinessLogicIntegrationTests(SSotBaseTestCase):
     """
     REVENUE CRITICAL: OAuth Business Logic Integration Tests
     

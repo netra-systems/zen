@@ -27,7 +27,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 @pytest.mark.unit
-class TestWebSocketFactoryImportValidation(SSotAsyncTestCase):
+class WebSocketFactoryImportValidationTests(SSotAsyncTestCase):
     """
     Validate WebSocket Factory Import patterns for safe SSOT transition.
     

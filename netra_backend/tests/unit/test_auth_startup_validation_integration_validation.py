@@ -32,7 +32,7 @@ from shared.jwt_secret_manager import get_jwt_secret_manager
 from shared.isolated_environment import get_env
 
 
-class TestAuthStartupIntegration:
+class AuthStartupIntegrationTests:
     """Test complete authentication startup integration flow."""
     
     @pytest.mark.asyncio
@@ -474,7 +474,7 @@ if __name__ == "__main__":
         print("🧪 Running Integration Validation Tests")
         print("=" * 60)
         
-        test_instance = TestAuthStartupIntegration()
+        test_instance = AuthStartupIntegrationTests()
         
         print("\n1. Testing Complete Startup Flow (Success Case)...")
         try:

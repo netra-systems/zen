@@ -36,7 +36,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestOAuthSSOTMigration:
+class OAuthSSOTMigrationTests:
     """Test suite to validate OAuth SSOT migration safety - Issue #213."""
     
     def setup_method(self):
@@ -350,7 +350,7 @@ def test_oauth_migration_validation_capability():
     
     This meta-test ensures our migration validation tests work correctly.
     """
-    test_instance = TestOAuthSSOTMigration()
+    test_instance = OAuthSSOTMigrationTests()
     test_instance.setup_method()
     
     try:

@@ -39,7 +39,7 @@ from auth_service.auth_core.performance.startup_optimizer import AuthServiceStar
 from shared.isolated_environment import IsolatedEnvironment
 logger = logging.getLogger(__name__)
 
-class TestStartupMetricsDataClass:
+class StartupMetricsDataClassTests:
     """Test StartupMetrics dataclass functionality."""
 
     def test_startup_metrics_initialization_default(self):
@@ -68,7 +68,7 @@ class TestStartupMetricsDataClass:
         assert metrics.component_times == {}
         assert metrics.failed_components == []
 
-class TestAuthServiceStartupOptimizerCore:
+class AuthServiceStartupOptimizerCoreTests:
     """Core AuthServiceStartupOptimizer functionality tests with real instances."""
 
     def test_startup_optimizer_initialization(self):
@@ -101,7 +101,7 @@ class TestAuthServiceStartupOptimizerCore:
         assert optimizer.is_component_ready('security_components') is True
         assert optimizer.is_component_ready('redis_manager') is False
 
-class TestAuthServiceStartupOptimizerReports:
+class AuthServiceStartupOptimizerReportsTests:
     """Test startup reporting and metrics functionality."""
 
     def test_get_startup_report_initial_state(self):
@@ -154,7 +154,7 @@ class TestAuthServiceStartupOptimizerReports:
         report = optimizer.get_startup_report()
         assert report['critical_components_ok'] is False
 
-class TestAuthServiceStartupOptimizerLazyLoading:
+class AuthServiceStartupOptimizerLazyLoadingTests:
     """Test lazy loading functionality."""
 
     def test_lazy_load_component_first_time(self):
@@ -208,7 +208,7 @@ class TestAuthServiceStartupOptimizerLazyLoading:
         actual_time = end_time - start_time
         assert abs(recorded_time - actual_time) < 0.005
 
-class TestAuthServiceStartupOptimizerAsync:
+class AuthServiceStartupOptimizerAsyncTests:
     """Test async startup functionality with mocked dependencies."""
 
     @pytest.mark.asyncio
@@ -311,7 +311,7 @@ class TestAuthServiceStartupOptimizerAsync:
                 assert 'database' in optimizer.metrics.failed_components
                 assert 'database' in optimizer.metrics.component_times
 
-class TestAuthServiceStartupOptimizerBackground:
+class AuthServiceStartupOptimizerBackgroundTests:
     """Test background component initialization."""
 
     @pytest.mark.asyncio
@@ -341,7 +341,7 @@ class TestAuthServiceStartupOptimizerBackground:
             assert 'audit_logging' in optimizer.initialized_components
             assert 'cleanup_tasks' in optimizer.initialized_components
 
-class TestAuthServiceStartupOptimizerComponentInit:
+class AuthServiceStartupOptimizerComponentInitTests:
     """Test individual component initialization methods."""
 
     @pytest.mark.asyncio
@@ -409,7 +409,7 @@ class TestAuthServiceStartupOptimizerComponentInit:
                 await optimizer._init_security_components()
             assert 'security_components' in optimizer.metrics.component_times
 
-class TestAuthServiceStartupOptimizerDatabasePrewarm:
+class AuthServiceStartupOptimizerDatabasePrewarmTests:
     """Test database pre-warming functionality."""
 
     @pytest.mark.asyncio
@@ -446,7 +446,7 @@ class TestAuthServiceStartupOptimizerDatabasePrewarm:
             mock_db.get_session.side_effect = RuntimeError('DB connection failed')
             await optimizer._test_db_connection()
 
-class TestAuthServiceStartupOptimizerPeriodicCleanup:
+class AuthServiceStartupOptimizerPeriodicCleanupTests:
     """Test periodic cleanup functionality."""
 
     @pytest.mark.asyncio
@@ -492,7 +492,7 @@ class TestAuthServiceStartupOptimizerPeriodicCleanup:
                 await optimizer._periodic_cleanup()
             assert sleep_count == 2
 
-class TestAuthServiceStartupOptimizerConcurrentSafety:
+class AuthServiceStartupOptimizerConcurrentSafetyTests:
     """Test concurrent execution safety and race conditions."""
 
     @pytest.mark.asyncio
@@ -542,7 +542,7 @@ class TestAuthServiceStartupOptimizerConcurrentSafety:
         assert all((r['load_count'] == 1 for r in results))
         assert all((r is results[0] for r in results))
 
-class TestAuthServiceStartupOptimizerRealTiming:
+class AuthServiceStartupOptimizerRealTimingTests:
     """Test real timing and performance requirements."""
 
     @pytest.mark.asyncio
@@ -599,7 +599,7 @@ class TestAuthServiceStartupOptimizerRealTiming:
         sequential_time = sequential_end - sequential_start
         assert parallel_time < sequential_time * 0.5
 
-class TestAuthServiceStartupOptimizerEdgeCases:
+class AuthServiceStartupOptimizerEdgeCasesTests:
     """Test edge cases and boundary conditions."""
 
     def test_empty_startup_metrics(self):
@@ -648,7 +648,7 @@ class TestAuthServiceStartupOptimizerEdgeCases:
             startup_time = end_time - start_time
             assert startup_time < 0.05
 
-class TestAuthServiceStartupOptimizerBusinessValue:
+class AuthServiceStartupOptimizerBusinessValueTests:
     """Test business value and performance requirements."""
 
     @pytest.mark.asyncio

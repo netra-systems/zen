@@ -23,7 +23,7 @@ from netra_backend.app.websocket_core.unified_manager import (
 )
 
 
-class TestUnifiedWebSocketManagerCore:
+class UnifiedWebSocketManagerCoreTests:
     """Unit tests for core UnifiedWebSocketManager functionality."""
 
     @pytest.fixture
@@ -196,7 +196,7 @@ class TestUnifiedWebSocketManagerCore:
         assert connection_detail['metadata'] == sample_connection.metadata
 
 
-class TestMessageSerialization:
+class MessageSerializationTests:
     """Unit tests for the critical message serialization system."""
     
     def test_serializes_basic_dict_messages(self):
@@ -217,15 +217,15 @@ class TestMessageSerialization:
     
     def test_serializes_enum_objects_safely(self):
         """Test serialization of enum objects (critical for WebSocketState)."""
-        class TestEnum(Enum):
+        class EnumTests(Enum):
             CONNECTED = "connected"
             DISCONNECTED = "disconnected"
         
         # Test enum in message
         message = {
             "type": "connection_status",
-            "status": TestEnum.CONNECTED,
-            "data": {"state": TestEnum.DISCONNECTED}
+            "status": EnumTests.CONNECTED,
+            "data": {"state": EnumTests.DISCONNECTED}
         }
         
         result = _serialize_message_safely(message)
@@ -290,13 +290,13 @@ class TestMessageSerialization:
             count: int
         
         @dataclass
-        class TestDataclass:
+        class DataclassTests:
             name: str
             nested: NestedData
             timestamp: datetime
         
         nested = NestedData("test_value", 42)
-        test_obj = TestDataclass("test_name", nested, datetime.now(timezone.utc))
+        test_obj = DataclassTests("test_name", nested, datetime.now(timezone.utc))
         
         result = _serialize_message_safely(test_obj)
         
@@ -366,7 +366,7 @@ class TestMessageSerialization:
         json.dumps(result)  # Should be JSON serializable
 
 
-class TestUnifiedWebSocketManagerCompatibility:
+class UnifiedWebSocketManagerCompatibilityTests:
     """Unit tests for legacy compatibility features."""
 
     @pytest.fixture

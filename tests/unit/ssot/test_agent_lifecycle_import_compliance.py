@@ -22,7 +22,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestAgentLifecycleImportCompliance(SSotBaseTestCase):
+class AgentLifecycleImportComplianceTests(SSotBaseTestCase):
     """Test suite validating agent_lifecycle.py SSOT import compliance"""
 
     @classmethod

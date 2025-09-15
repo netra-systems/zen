@@ -40,7 +40,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestUserExecutionContextIsolation(BaseIntegrationTest):
+class UserExecutionContextIsolationTests(BaseIntegrationTest):
     """Focused integration tests for UserExecutionContext isolation SSOT patterns."""
     
     def setup_method(self):

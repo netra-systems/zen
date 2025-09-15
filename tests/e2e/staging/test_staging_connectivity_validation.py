@@ -296,7 +296,7 @@ class StagingConnectivityValidator:
 
 
 @pytest.mark.e2e
-class TestStagingConnectivityValidation:
+class StagingConnectivityValidationTests:
     """Test suite for validating staging environment connectivity"""
     
     @pytest.fixture

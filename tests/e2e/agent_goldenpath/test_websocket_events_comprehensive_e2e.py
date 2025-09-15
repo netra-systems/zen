@@ -75,7 +75,7 @@ class WebSocketEventSequence:
 @pytest.mark.agent_goldenpath
 @pytest.mark.websocket_events
 @pytest.mark.mission_critical
-class TestWebSocketEventsComprehensiveE2E(SSotAsyncTestCase):
+class WebSocketEventsComprehensiveE2ETests(SSotAsyncTestCase):
     """
     Comprehensive E2E tests for WebSocket event delivery in agent golden path.
     

@@ -36,7 +36,7 @@ from test_framework.fixtures.websocket_manager_mock import MockWebSocketManager
 from test_framework.helpers.auth_helpers import create_test_jwt_token
 
 
-class TestAgentOrchestratorAccessIntegrationIssue118:
+class AgentOrchestratorAccessIntegrationIssue118Tests:
     """
     Integration test suite validating GitHub Issue #118 fixes in real scenarios.
     

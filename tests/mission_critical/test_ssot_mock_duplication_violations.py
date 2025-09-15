@@ -47,7 +47,7 @@ class MockDuplicationViolation:
     violation_severity: str  # CRITICAL, HIGH, MEDIUM, LOW
 
 
-class TestSSOTMockDuplicationViolations(SSotBaseTestCase):
+class SSOTMockDuplicationViolationsTests(SSotBaseTestCase):
     """
     Mission Critical test suite to detect and validate SSOT mock compliance.
     

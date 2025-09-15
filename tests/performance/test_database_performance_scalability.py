@@ -109,7 +109,7 @@ class PerformanceProfiler:
 
 @pytest.mark.performance
 @pytest.mark.real_services
-class TestDatabasePerformanceScalability:
+class DatabasePerformanceScalabilityTests:
     """Performance and scalability tests for database operations."""
     
     @pytest.fixture

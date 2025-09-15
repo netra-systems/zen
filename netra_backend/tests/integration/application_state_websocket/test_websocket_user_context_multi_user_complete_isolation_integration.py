@@ -316,7 +316,7 @@ class UserContextIsolationValidator:
         return operation_results
 
 
-class TestWebSocketUserContextCompleteIsolation(BaseIntegrationTest):
+class WebSocketUserContextCompleteIsolationTests(BaseIntegrationTest):
     """
     Integration test for complete WebSocket user context isolation.
     

@@ -42,7 +42,7 @@ def generate_test_user_id(suffix: str = "") -> str:
 
 
 @pytest.mark.e2e
-class TestWebSocket1011Prevention:
+class WebSocket1011PreventionTests:
     """
     E2E validation that WebSocket 1011 errors have been prevented.
     
@@ -398,7 +398,7 @@ class TestWebSocket1011Prevention:
 
 
 @pytest.mark.asyncio
-class TestWebSocket1011BusinessValueValidation:
+class WebSocket1011BusinessValueValidationTests:
     """
     Business value focused validation of WebSocket 1011 error prevention.
     

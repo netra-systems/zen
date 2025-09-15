@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.e2e
-class TestGoldenPathExecutionEngineIntegration(SSotBaseTestCase):
+class GoldenPathExecutionEngineIntegrationTests(SSotBaseTestCase):
     """Validates Golden Path user flow integration with UserExecutionEngine."""
 
     def setUp(self):

@@ -58,7 +58,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.core_types import UserID, ThreadID, ensure_user_id
 
 
-class TestUnifiedWebSocketAuthAuthentication(SSotAsyncTestCase):
+class UnifiedWebSocketAuthAuthenticationTests(SSotAsyncTestCase):
     """Test suite for unified WebSocket authentication functionality."""
 
     def setup_method(self, method):

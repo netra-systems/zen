@@ -128,7 +128,7 @@ class MockIDManager:
         return f"thread_{self._counter}_{uuid.uuid4().hex[:8]}"
 
 # Sample validation test class demonstrating the E2E structure
-class TestUnifiedStateManagerValidation(MockSSotAsyncTestCase):
+class UnifiedStateManagerValidationTests(MockSSotAsyncTestCase):
     """
     Validation test demonstrating E2E GCP staging test structure and functionality.
     Shows both successful operation and legitimate failure scenarios.
@@ -361,7 +361,7 @@ async def run_validation_tests():
     print("=" * 60)
     
     # Initialize test class
-    test_instance = TestUnifiedStateManagerValidation()
+    test_instance = UnifiedStateManagerValidationTests()
     await test_instance.asyncSetUpClass()
     
     tests_to_run = [

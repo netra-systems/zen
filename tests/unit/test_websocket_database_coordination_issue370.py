@@ -109,7 +109,7 @@ class MockDatabaseSession:
         """Get all operations with specific correlation ID."""
         return [op for op in self.operations if op.correlation_id == correlation_id]
 
-class TestWebSocketDatabaseCoordination(SSotAsyncTestCase):
+class WebSocketDatabaseCoordinationTests(SSotAsyncTestCase):
     """Unit tests for WebSocket + Database coordination patterns."""
 
     def setup_method(self, method):

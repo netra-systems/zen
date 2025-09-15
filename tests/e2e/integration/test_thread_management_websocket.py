@@ -64,7 +64,7 @@ async def thread_validator():
         validator.clear_errors()
 
 @pytest.mark.e2e
-class TestThreadManagementWebSocket:
+class ThreadManagementWebSocketTests:
     """Test thread management via WebSocket connections."""
     
     pass

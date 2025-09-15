@@ -48,7 +48,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.integration
-class TestWebSocketConnectionFailureEdgeCases(SSotAsyncTestCase):
+class WebSocketConnectionFailureEdgeCasesTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket connection failure edge cases during authentication.
     

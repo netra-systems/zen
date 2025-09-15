@@ -41,7 +41,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.base.interface import ExecutionContext
 
 
-class TestDomainExpert(BaseDomainExpert):
+class DomainExpertTests(BaseDomainExpert):
     """Concrete test implementation of BaseDomainExpert for testing."""
 
     def __init__(self, llm_manager: LLMManager, domain: str = "test_domain"):
@@ -97,7 +97,7 @@ class TestDomainExpert(BaseDomainExpert):
         return any(key in request for key in ["performance", "benchmarks", "optimization"])
 
 
-class TestBaseDomainExpert(SSotAsyncTestCase):
+class BaseDomainExpertTests(SSotAsyncTestCase):
     """Test BaseDomainExpert foundation class and domain expert patterns."""
 
     def setup_method(self, method):
@@ -158,7 +158,7 @@ class TestBaseDomainExpert(SSotAsyncTestCase):
     def test_base_domain_expert_initialization(self):
         """Test BaseDomainExpert initialization and configuration."""
         # Test: BaseDomainExpert can be instantiated via concrete class
-        domain_expert = TestDomainExpert(
+        domain_expert = DomainExpertTests(
             llm_manager=self.llm_manager,
             domain="test_domain"
         )
@@ -179,7 +179,7 @@ class TestBaseDomainExpert(SSotAsyncTestCase):
 
     def test_base_domain_expert_expertise_areas_initialization(self):
         """Test expertise areas initialization and management."""
-        domain_expert = TestDomainExpert(self.llm_manager)
+        domain_expert = DomainExpertTests(self.llm_manager)
 
         # Verify: Expertise areas are properly initialized
         assert isinstance(domain_expert.expertise_areas, list)
@@ -219,7 +219,7 @@ class TestBaseDomainExpert(SSotAsyncTestCase):
 
     def test_domain_expert_requirement_validation_system(self):
         """Test domain expert requirement validation system."""
-        domain_expert = TestDomainExpert(self.llm_manager)
+        domain_expert = DomainExpertTests(self.llm_manager)
 
         # Test: Valid requests with all requirements
         comprehensive_request = {
@@ -264,7 +264,7 @@ class TestBaseDomainExpert(SSotAsyncTestCase):
 
     async def test_domain_expert_execution_context_processing(self):
         """Test domain expert execution context processing."""
-        domain_expert = TestDomainExpert(self.llm_manager)
+        domain_expert = DomainExpertTests(self.llm_manager)
 
         # Create execution context with domain-specific request
         execution_context = ExecutionContext(
@@ -310,7 +310,7 @@ class TestBaseDomainExpert(SSotAsyncTestCase):
 
     async def test_domain_expert_requirements_validation_execution(self):
         """Test domain expert requirements validation during execution."""
-        domain_expert = TestDomainExpert(self.llm_manager)
+        domain_expert = DomainExpertTests(self.llm_manager)
 
         # Mock _validate_requirements method to track calls
         original_validate = domain_expert._validate_requirements
@@ -348,7 +348,7 @@ class TestBaseDomainExpert(SSotAsyncTestCase):
 
     async def test_domain_expert_recommendations_generation(self):
         """Test domain expert recommendations generation."""
-        domain_expert = TestDomainExpert(self.llm_manager)
+        domain_expert = DomainExpertTests(self.llm_manager)
 
         # Mock _generate_recommendations method to track execution
         original_generate = domain_expert._generate_recommendations
@@ -394,7 +394,7 @@ class TestBaseDomainExpert(SSotAsyncTestCase):
 
     def test_domain_expert_compliance_checking_system(self):
         """Test domain expert compliance checking system."""
-        domain_expert = TestDomainExpert(self.llm_manager)
+        domain_expert = DomainExpertTests(self.llm_manager)
 
         # Test: Comprehensive compliance checking
         comprehensive_request = {
@@ -436,7 +436,7 @@ class TestBaseDomainExpert(SSotAsyncTestCase):
 
     def test_domain_expert_response_formatting(self):
         """Test domain expert response formatting."""
-        domain_expert = TestDomainExpert(self.llm_manager)
+        domain_expert = DomainExpertTests(self.llm_manager)
 
         # Mock components for response formatting test
         mock_requirements = {
@@ -477,7 +477,7 @@ class TestBaseDomainExpert(SSotAsyncTestCase):
 
     def test_domain_expert_request_extraction(self):
         """Test domain expert request extraction from execution context."""
-        domain_expert = TestDomainExpert(self.llm_manager)
+        domain_expert = DomainExpertTests(self.llm_manager)
 
         # Test: Context with state containing request
         context_with_state = ExecutionContext(
@@ -557,7 +557,7 @@ class TestBaseDomainExpert(SSotAsyncTestCase):
         # for specialized domain expertise while maintaining core patterns
 
 
-class TestBaseDomainExpertEdgeCases(SSotBaseTestCase):
+class BaseDomainExpertEdgeCasesTests(SSotBaseTestCase):
     """Test BaseDomainExpert edge cases and error conditions."""
 
     def setUp(self):
@@ -587,11 +587,11 @@ class TestBaseDomainExpertEdgeCases(SSotBaseTestCase):
         """Test domain expert handles invalid configuration."""
         # Test: None LLM manager
         with pytest.raises((TypeError, ValueError, AttributeError)):
-            TestDomainExpert(llm_manager=None)
+            DomainExpertTests(llm_manager=None)
 
         # Test: Empty domain name
         try:
-            empty_domain_expert = TestDomainExpert(self.llm_manager, domain="")
+            empty_domain_expert = DomainExpertTests(self.llm_manager, domain="")
             # If successful, domain should still be set (empty string is valid)
             assert empty_domain_expert.domain == ""
         except (ValueError, TypeError):
@@ -600,7 +600,7 @@ class TestBaseDomainExpertEdgeCases(SSotBaseTestCase):
 
         # Test: None domain
         try:
-            none_domain_expert = TestDomainExpert(self.llm_manager, domain=None)
+            none_domain_expert = DomainExpertTests(self.llm_manager, domain=None)
             # If successful, should handle None domain
             assert none_domain_expert.domain is None
         except (ValueError, TypeError):
@@ -614,7 +614,7 @@ class TestBaseDomainExpertEdgeCases(SSotBaseTestCase):
         failing_llm._get_model_name = Mock(return_value="failing_model")
         failing_llm.ask_llm = AsyncMock(side_effect=Exception("LLM service unavailable"))
 
-        domain_expert = TestDomainExpert(failing_llm)
+        domain_expert = DomainExpertTests(failing_llm)
 
         # Test: Execution with failing LLM
         context = ExecutionContext(
@@ -632,7 +632,7 @@ class TestBaseDomainExpertEdgeCases(SSotBaseTestCase):
 
     def test_domain_expert_confidence_threshold_validation(self):
         """Test domain expert confidence threshold is properly configured."""
-        domain_expert = TestDomainExpert(self.llm_manager)
+        domain_expert = DomainExpertTests(self.llm_manager)
 
         # Verify: Confidence threshold is reasonable
         assert 0.0 <= domain_expert.confidence_threshold <= 1.0

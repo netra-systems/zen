@@ -19,7 +19,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
 @pytest.mark.integration
-class TestWebSocket1011ErrorFix:
+class WebSocket1011ErrorFixTests:
     """Regression tests for the specific 1011 WebSocket error scenario."""
 
     @pytest.fixture
@@ -201,7 +201,7 @@ class TestWebSocket1011ErrorFix:
 
 
 @pytest.mark.integration
-class TestRegressionPrevention:
+class RegressionPreventionTests:
     """Ensure this fix prevents future regressions of the 1011 error."""
 
     def test_direct_websocket_state_logging_raises_error(self):
@@ -266,7 +266,7 @@ class TestRegressionPrevention:
 
 
 @pytest.mark.integration
-class TestProductionScenarios:
+class ProductionScenariosTests:
     """Test scenarios that mirror production conditions where 1011 errors occurred."""
 
     def test_staging_environment_websocket_logging(self):

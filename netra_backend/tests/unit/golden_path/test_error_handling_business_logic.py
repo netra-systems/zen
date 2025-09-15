@@ -56,7 +56,7 @@ class BusinessValidationError(BusinessError):
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestErrorHandlingBusinessContinuity:
+class ErrorHandlingBusinessContinuityTests:
     """Test error handling maintains business continuity."""
 
     def test_authentication_error_business_handling(self):
@@ -234,7 +234,7 @@ class TestErrorHandlingBusinessContinuity:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestErrorClassificationBusinessLogic:
+class ErrorClassificationBusinessLogicTests:
     """Test error classification for business operations."""
 
     def test_error_severity_classification_business_rules(self):
@@ -415,7 +415,7 @@ class TestErrorClassificationBusinessLogic:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestErrorMonitoringBusinessOperations:
+class ErrorMonitoringBusinessOperationsTests:
     """Test error monitoring supports business operations."""
 
     def test_error_tracking_business_metrics(self):
@@ -591,7 +591,7 @@ class TestErrorMonitoringBusinessOperations:
 
 @pytest.mark.unit  
 @pytest.mark.golden_path
-class TestErrorRecoveryBusinessContinuity:
+class ErrorRecoveryBusinessContinuityTests:
     """Test error recovery maintains business continuity."""
 
     @pytest.mark.asyncio

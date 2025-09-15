@@ -18,7 +18,7 @@ from unittest.mock import MagicMock, Mock, patch
 from netra_backend.app.agents.tool_permission_layer import UnifiedToolPermissionLayer, ToolPermissionPolicy, UserContext, PermissionCheckResult, PermissionResult, SecurityLevel, RateLimitTracker, ConcurrencyTracker, get_global_permission_layer, create_request_scoped_permission_layer
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestToolPermissionPolicy(SSotAsyncTestCase):
+class ToolPermissionPolicyTests(SSotAsyncTestCase):
     """Unit tests for ToolPermissionPolicy."""
 
     def test_policy_creation_defaults(self):
@@ -54,7 +54,7 @@ class TestToolPermissionPolicy(SSotAsyncTestCase):
         assert policy_dict['max_calls_per_minute'] == 60
         assert 'created_at' in policy_dict
 
-class TestUserContext(SSotAsyncTestCase):
+class UserContextTests(SSotAsyncTestCase):
     """Unit tests for UserContext."""
 
     def test_user_context_defaults(self):
@@ -87,7 +87,7 @@ class TestUserContext(SSotAsyncTestCase):
         context = UserContext(user_id='user', plan_tier='free')
         assert context.security_clearance == SecurityLevel.BASIC
 
-class TestRateLimitTracker(SSotAsyncTestCase):
+class RateLimitTrackerTests(SSotAsyncTestCase):
     """Unit tests for RateLimitTracker."""
 
     def setup_method(self, method=None):
@@ -117,7 +117,7 @@ class TestRateLimitTracker(SSotAsyncTestCase):
         assert remaining == 0
         assert reset_time is not None
 
-class TestConcurrencyTracker(SSotAsyncTestCase):
+class ConcurrencyTrackerTests(SSotAsyncTestCase):
     """Unit tests for ConcurrencyTracker."""
 
     def setup_method(self, method=None):
@@ -138,7 +138,7 @@ class TestConcurrencyTracker(SSotAsyncTestCase):
         assert self.tracker.get_concurrent_count('user1') == 0
         assert 'user1' not in self.tracker.active_executions
 
-class TestUnifiedToolPermissionLayer(SSotAsyncTestCase):
+class UnifiedToolPermissionLayerTests(SSotAsyncTestCase):
     """Unit tests for UnifiedToolPermissionLayer."""
 
     def setup_method(self, method=None):
@@ -234,7 +234,7 @@ class TestUnifiedToolPermissionLayer(SSotAsyncTestCase):
         assert latest_entry['tool_name'] == 'health_check'
         assert latest_entry['layer_id'] == 'test_layer'
 
-class TestGlobalAndFactoryFunctions(SSotAsyncTestCase):
+class GlobalAndFactoryFunctionsTests(SSotAsyncTestCase):
     """Unit tests for global instance and factory functions."""
 
     def test_get_global_permission_layer(self):

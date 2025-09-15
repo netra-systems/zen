@@ -11,7 +11,7 @@ from netraoptimizer import NetraOptimizerClient
 from netraoptimizer.analytics import parse_command, extract_features
 
 
-class TestIntegration:
+class IntegrationTests:
     """Integration tests for the complete NetraOptimizer system."""
 
     @pytest.mark.asyncio

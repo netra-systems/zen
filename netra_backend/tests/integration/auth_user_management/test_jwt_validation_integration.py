@@ -33,7 +33,7 @@ from netra_backend.app.core.service_dependencies.models import (
 )
 
 
-class TestJWTValidationIntegration:
+class JWTValidationIntegrationTests:
     """Integration tests for JWT validation with real auth service."""
     
     @pytest.fixture

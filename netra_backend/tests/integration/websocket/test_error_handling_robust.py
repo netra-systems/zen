@@ -78,7 +78,7 @@ class ErrorSimulatingLLM:
             }
 
 
-class TestWebSocketErrorHandlingRobust(BaseIntegrationTest):
+class WebSocketErrorHandlingRobustTests(BaseIntegrationTest):
     """
     Robust tests for WebSocket error handling scenarios.
     

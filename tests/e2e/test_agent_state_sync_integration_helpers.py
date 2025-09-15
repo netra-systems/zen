@@ -61,7 +61,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-class TestAgentStateSyncIntegrationHelpers(SSotBaseTestCase):
+class AgentStateSyncIntegrationHelpersTests(SSotBaseTestCase):
     """E2E tests for agent state synchronization with real services.
     
     This test class validates that multiple agents can coordinate state changes

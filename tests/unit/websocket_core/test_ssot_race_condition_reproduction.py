@@ -41,7 +41,7 @@ class RaceConditionTestResult:
 
 
 @pytest.mark.unit
-class TestWebSocketManagerRaceConditionReproduction(SSotBaseTestCase, unittest.TestCase):
+class WebSocketManagerRaceConditionReproductionTests(SSotBaseTestCase, unittest.TestCase):
     """Test suite to reproduce and validate elimination of WebSocket manager race conditions.
 
     These tests should FAIL initially, proving race conditions exist due to fragmentation.

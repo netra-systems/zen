@@ -42,7 +42,7 @@ class AgentState:
 from netra_backend.app.llm.llm_manager import LLMManager
 
 
-class TestChatOrchestratorIntentClassification(SSotAsyncTestCase, unittest.TestCase):
+class ChatOrchestratorIntentClassificationTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive tests for ChatOrchestrator intent classification business logic."""
 
     def setUp(self):
@@ -296,7 +296,7 @@ class TestChatOrchestratorIntentClassification(SSotAsyncTestCase, unittest.TestC
         super().tearDown()
 
 
-class TestIntentClassifierEdgeCases(SSotAsyncTestCase):
+class IntentClassifierEdgeCasesTests(SSotAsyncTestCase):
     """Test edge cases and error scenarios for intent classification."""
 
     async def setUp(self):

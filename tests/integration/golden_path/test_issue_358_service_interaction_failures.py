@@ -57,7 +57,7 @@ except ImportError as e:
 logger = logging.getLogger(__name__)
 
 
-class TestIssue358ServiceInteractionFailures(SSotAsyncTestCase):
+class Issue358ServiceInteractionFailuresTests(SSotAsyncTestCase):
     """
     Integration tests for Issue #358 service interaction failures.
     

@@ -31,7 +31,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.core.backend_environment import BackendEnvironment, get_backend_env
 
 
-class TestRedisConfigurationIntegration:
+class RedisConfigurationIntegrationTests:
     """Integration tests for Redis configuration across all environments."""
     
     @pytest.fixture(autouse=True)
@@ -466,7 +466,7 @@ class TestRedisConfigurationIntegration:
         assert backend_env.get_redis_host() == ""  # This would cause connection failure
 
 
-class TestConfigurationPatternCompliance:
+class ConfigurationPatternComplianceTests:
     """Test configuration patterns follow SSOT principles."""
     
     def test_backend_environment_uses_isolated_environment(self):
@@ -548,7 +548,7 @@ class TestConfigurationPatternCompliance:
 
 
 @pytest.mark.integration
-class TestDockerComposeIntegration:
+class DockerComposeIntegrationTests:
     """Integration tests requiring Docker Compose services."""
     
     @pytest.fixture(scope="class")

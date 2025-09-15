@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import BaseTestCase
 from shared.isolated_environment import get_env
 
 
-class TestFactoryPatternCoordination(BaseTestCase):
+class FactoryPatternCoordinationTests(BaseTestCase):
     """Test factory pattern coordination maintains Golden Path user isolation."""
 
     def setup_method(self, method):
@@ -254,7 +254,7 @@ class TestFactoryPatternCoordination(BaseTestCase):
         return True
 
 
-class TestFactoryPatternWebSocketCoordination(BaseTestCase):
+class FactoryPatternWebSocketCoordinationTests(BaseTestCase):
     """Test factory pattern coordination with WebSocket components."""
 
     def setup_method(self, method):
@@ -300,7 +300,7 @@ class TestFactoryPatternWebSocketCoordination(BaseTestCase):
         return True
 
 
-class TestFactoryPatternSecurityCoordination(BaseTestCase):
+class FactoryPatternSecurityCoordinationTests(BaseTestCase):
     """Test factory pattern security coordination for enterprise compliance."""
 
     def setup_method(self, method):

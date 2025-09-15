@@ -198,7 +198,7 @@ class RealRaceConditionTester:
         logger.info('[U+2713] All connections cleaned up')
 
 @pytest.mark.e2e
-class TestWebSocketStartupRaceConditionReal(BaseE2ETest):
+class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
     """REAL race condition testing for WebSocket startup scenarios."""
 
     def setup_method(self):

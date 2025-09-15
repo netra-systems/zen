@@ -54,7 +54,7 @@ class MockWebSocket:
         self.messages_to_receive.append(message)
 
 
-class TestWebSocketConnectionPatterns(BaseIntegrationTest):
+class WebSocketConnectionPatternsTests(BaseIntegrationTest):
     """Integration tests for WebSocket connection patterns with real authentication."""
     
     @pytest.mark.integration

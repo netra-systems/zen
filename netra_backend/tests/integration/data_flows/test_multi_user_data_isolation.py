@@ -177,7 +177,7 @@ class SessionManager:
             }
 
 
-class TestMultiUserDataIsolation:
+class MultiUserDataIsolationTests:
     """Test suite for multi-user data isolation and privacy protection."""
     
     def setup_method(self):

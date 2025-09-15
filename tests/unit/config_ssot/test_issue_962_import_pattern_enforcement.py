@@ -42,7 +42,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestIssue962ImportPatternEnforcement(SSotBaseTestCase, unittest.TestCase):
+class Issue962ImportPatternEnforcementTests(SSotBaseTestCase, unittest.TestCase):
     """
     Unit tests to enforce SSOT configuration import patterns for Issue #962.
 

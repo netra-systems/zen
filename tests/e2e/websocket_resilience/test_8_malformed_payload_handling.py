@@ -100,7 +100,7 @@ class PayloadAttackSimulator:
         return snapshot
 
 
-class TestMalformedPayloadClient:
+class MalformedPayloadClientTests:
     """WebSocket client for testing payload attacks."""
     
     def __init__(self, uri: str, session_token: str, simulator: PayloadAttackSimulator):

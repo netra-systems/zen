@@ -38,7 +38,7 @@ GCP_STAGING_CONFIG = {
 }
 
 
-class TestServiceAuthFailuresStaging(BaseE2ETest):
+class ServiceAuthFailuresStagingTests(BaseE2ETest):
     """
     E2E tests for service authentication failures in GCP staging environment.
 
@@ -285,7 +285,7 @@ class TestServiceAuthFailuresStaging(BaseE2ETest):
         logger.info("Golden Path service authentication test completed")
 
 
-class TestRealGCPSecretManagerIntegration(BaseE2ETest):
+class RealGCPSecretManagerIntegrationTests(BaseE2ETest):
     """Test real GCP Secret Manager integration in staging environment."""
 
     @pytest.mark.e2e
@@ -409,7 +409,7 @@ class TestRealGCPSecretManagerIntegration(BaseE2ETest):
 
 # Test Suite Summary for Issue #1037 E2E Tests
 
-class TestIssue1037E2EReproductionSuite:
+class Issue1037E2EReproductionSuiteTests:
     """
     Complete E2E test suite for Issue #1037 in GCP staging environment.
 

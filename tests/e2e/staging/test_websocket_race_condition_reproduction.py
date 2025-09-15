@@ -42,7 +42,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.staging_only
 @pytest.mark.websocket_race_conditions
 @pytest.mark.real_llm
-class TestWebSocketRaceConditionStaging(BaseE2ETest):
+class WebSocketRaceConditionStagingTests(BaseE2ETest):
     """
     E2E tests to reproduce WebSocket race conditions in actual GCP staging environment.
     

@@ -29,7 +29,7 @@ from netra_backend.app.db.transaction_errors import (
 )
 
 
-class TestDatabaseInitializerExceptionSpecificity:
+class DatabaseInitializerExceptionSpecificityTests:
     """Test suite proving database_initializer.py uses broad exception handling."""
     
     @pytest.mark.unit
@@ -147,7 +147,7 @@ class TestDatabaseInitializerExceptionSpecificity:
                 pass  # Placeholder until we verify the exact API
 
 
-class TestDatabaseInitializerBusinessImpact:
+class DatabaseInitializerBusinessImpactTests:
     """Tests demonstrating business impact of broad database initialization exception handling."""
     
     @pytest.mark.unit

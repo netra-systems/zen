@@ -32,7 +32,7 @@ except ImportError:
     REDIS_AVAILABLE = False
 
 
-class TestRedisConnectionPatterns(SSotAsyncTestCase):
+class RedisConnectionPatternsTests(SSotAsyncTestCase):
     """Integration tests for Redis connection patterns with real Redis instances."""
 
     def setup_method(self, method):

@@ -21,7 +21,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.e2e
-class TestChatFunctionalityBusinessValue(SSotAsyncTestCase):
+class ChatFunctionalityBusinessValueTests(SSotAsyncTestCase):
     """Test chat functionality business value protection during SSOT changes."""
 
     def setUp(self):

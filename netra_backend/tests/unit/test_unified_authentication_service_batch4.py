@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user
 from shared.isolated_environment import get_env
 
-class TestUnifiedAuthenticationServiceBatch4(SSotAsyncTestCase):
+class UnifiedAuthenticationServiceBatch4Tests(SSotAsyncTestCase):
     """
     Comprehensive Unified Authentication Service tests for Batch 4.
     
@@ -422,7 +422,7 @@ class TestUnifiedAuthenticationServiceBatch4(SSotAsyncTestCase):
         assert time.time() - validated_at < 60, 'Validation timestamp should be recent'
         self.record_metric('auth_result_compatibility_format', True)
 
-class TestUnifiedAuthenticationServiceErrorHandling(SSotAsyncTestCase):
+class UnifiedAuthenticationServiceErrorHandlingTests(SSotAsyncTestCase):
     """
     Error handling and edge case tests for Unified Authentication Service.
     

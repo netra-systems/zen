@@ -32,7 +32,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 
-class TestLoggingMetricser:
+class LoggingMetricserTests:
     """Tests logging and metrics pipeline functionality."""
     
     def __init__(self):

@@ -18,7 +18,7 @@ from netra_backend.app.db.clickhouse import get_clickhouse_client, get_clickhous
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.configuration_validator import validate_test_config
 
-class TestClickHouseCorpusTableIntegration(BaseIntegrationTest):
+class ClickHouseCorpusTableIntegrationTests(BaseIntegrationTest):
     """Test ClickHouse corpus table operations with real database connections."""
 
     def setup_method(self):
@@ -157,7 +157,7 @@ class TestClickHouseCorpusTableIntegration(BaseIntegrationTest):
         finally:
             await self.cleanup_table(self.table_name)
 
-class TestClickHouseCorpusTableServiceIntegration(BaseIntegrationTest):
+class ClickHouseCorpusTableServiceIntegrationTests(BaseIntegrationTest):
     """Test corpus table operations through ClickHouse service layer."""
 
     def setup_method(self):

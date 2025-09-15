@@ -37,7 +37,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
+class WebSocketEventsNeverFailTests(SSotAsyncTestCase):
     """
      ALERT:  MISSION CRITICAL TEST  ALERT: 
     

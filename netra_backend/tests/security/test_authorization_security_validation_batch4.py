@@ -25,7 +25,7 @@ from netra_backend.app.services.unified_authentication_service import UnifiedAut
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import get_env
 
-class TestAuthorizationSecurityValidation(SSotAsyncTestCase):
+class AuthorizationSecurityValidationTests(SSotAsyncTestCase):
     """
     Comprehensive authorization and security validation tests.
     

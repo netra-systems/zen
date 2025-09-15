@@ -30,7 +30,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 from starlette.websockets import WebSocketState
 
-class TestWebSocketCloseCodes:
+class WebSocketCloseCodesTests:
     """Test basic WebSocket close code handling and clean disconnection."""
 
     @pytest.mark.asyncio

@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestDeprecationPatternDetection(SSotBaseTestCase):
+class DeprecationPatternDetectionTests(SSotBaseTestCase):
     """Systematic detection and measurement of all deprecation warning patterns."""
 
     def setup_method(self, method):

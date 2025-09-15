@@ -57,7 +57,7 @@ class ScalingMetrics:
     timestamp: str
 
 
-class TestThreadScalingIntegration(SSotAsyncTestCase):
+class ThreadScalingIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for thread system scaling and load handling.
     

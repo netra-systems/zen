@@ -41,7 +41,7 @@ from test_framework.ssot.websocket import (
 
 
 @pytest.mark.integration
-class TestWebSocketThroughput(SSotBaseTestCase):
+class WebSocketThroughputTests(SSotBaseTestCase):
     """
     Test WebSocket throughput and message processing performance.
     
@@ -322,7 +322,7 @@ class TestWebSocketThroughput(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestWebSocketScaling(SSotBaseTestCase):
+class WebSocketScalingTests(SSotBaseTestCase):
     """
     Test WebSocket scaling patterns and connection management.
     
@@ -552,7 +552,7 @@ class TestWebSocketScaling(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestWebSocketLatencyOptimization(SSotBaseTestCase):
+class WebSocketLatencyOptimizationTests(SSotBaseTestCase):
     """
     Test WebSocket latency optimization and response time characteristics.
     

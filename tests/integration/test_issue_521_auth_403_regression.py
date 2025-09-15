@@ -25,7 +25,7 @@ from test_framework.ssot.orchestration import OrchestrationConfig
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestIssue521AuthenticationRegression(SSotBaseTestCase):
+class Issue521AuthenticationRegressionTests(SSotBaseTestCase):
     """
     Issue #521 Regression Test Suite
     

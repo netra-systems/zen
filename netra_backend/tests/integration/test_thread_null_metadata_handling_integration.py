@@ -52,7 +52,7 @@ from netra_backend.app.routes.utils.thread_validators import (
 )
 
 
-class TestThreadNullMetadataHandling(BaseIntegrationTest):
+class ThreadNullMetadataHandlingTests(BaseIntegrationTest):
     """Integration tests for thread null metadata handling with real services."""
     
     @pytest.mark.integration

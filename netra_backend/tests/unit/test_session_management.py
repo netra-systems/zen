@@ -44,7 +44,7 @@ from netra_backend.app.models.user_session import UserSession
 from shared.types import UserID
 
 
-class TestUserSessionManager(SSotBaseTestCase):
+class UserSessionManagerTests(SSotBaseTestCase):
     """Test UserSessionManager business logic and lifecycle."""
     
     def setup_method(self, method):
@@ -344,7 +344,7 @@ class TestUserSessionManager(SSotBaseTestCase):
         self.record_metric("concurrent_operations_validated", True)
 
 
-class TestDatabaseSessionManager(SSotBaseTestCase):
+class DatabaseSessionManagerTests(SSotBaseTestCase):
     """Test DatabaseSessionManager and session isolation."""
     
     def setup_method(self, method):
@@ -453,7 +453,7 @@ class TestDatabaseSessionManager(SSotBaseTestCase):
         self.record_metric("agent_validations_completed", 2)
 
 
-class TestSessionLifecycleIntegration(SSotBaseTestCase):
+class SessionLifecycleIntegrationTests(SSotBaseTestCase):
     """Test complete session lifecycle integration."""
     
     def setup_method(self, method):

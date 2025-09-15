@@ -35,7 +35,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketContextTiming:
+class WebSocketContextTimingTests:
     """Test critical WebSocket timing and race condition scenarios."""
 
     @pytest.fixture

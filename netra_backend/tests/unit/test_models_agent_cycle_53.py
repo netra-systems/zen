@@ -27,7 +27,7 @@ from netra_backend.app.db.models_agent import (
 @pytest.mark.unit
 @pytest.mark.database
 @pytest.mark.models
-class TestAgentModels:
+class AgentModelsTests:
     """Test agent database models."""
 
     def test_agent_base_exists(self):

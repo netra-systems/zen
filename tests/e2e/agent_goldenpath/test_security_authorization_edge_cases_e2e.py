@@ -45,7 +45,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
 @pytest.mark.gcp_staging
 @pytest.mark.security_edge_cases
 @pytest.mark.mission_critical
-class TestSecurityAuthorizationEdgeCasesE2E(SSotAsyncTestCase):
+class SecurityAuthorizationEdgeCasesE2ETests(SSotAsyncTestCase):
     """
     E2E tests for validating security and authorization edge cases in staging GCP.
 

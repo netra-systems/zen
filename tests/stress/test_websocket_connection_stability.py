@@ -123,7 +123,7 @@ class SimulatedWebSocket:
         """Get connection lifetime in seconds."""
         return time.time() - self.created_at
 
-class TestWebSocketConnectionStability:
+class WebSocketConnectionStabilityTests:
     """Stress tests for WebSocket connection stability."""
 
     @pytest.fixture(autouse=True)

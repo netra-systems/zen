@@ -27,7 +27,7 @@ from netra_backend.app.services.agent_websocket_bridge import create_agent_webso
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 
-class TestWebSocketAgentEventsLoadIntegration(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketAgentEventsLoadIntegrationTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive test suite for WebSocket agent event integration under load."""
 
     def setUp(self):

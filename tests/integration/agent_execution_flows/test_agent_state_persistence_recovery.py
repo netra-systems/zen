@@ -27,7 +27,7 @@ from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
 from netra_backend.app.services.state_persistence import StatePersistenceService
 
 
-class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
+class AgentStatePersistenceRecoveryTests(BaseIntegrationTest):
     """Integration tests for agent state persistence and recovery."""
 
     @pytest.mark.integration

@@ -89,7 +89,7 @@ class MockWebSocketConnection:
         self.is_connected = False
 
 
-class TestWebSocketApplicationStateBroadcastSynchronization(BaseIntegrationTest):
+class WebSocketApplicationStateBroadcastSynchronizationTests(BaseIntegrationTest):
     """Test real-time state broadcast synchronization across multiple WebSocket connections."""
     
     async def setup_broadcast_infrastructure(self, services, state_manager):

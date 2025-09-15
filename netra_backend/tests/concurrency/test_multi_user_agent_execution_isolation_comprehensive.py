@@ -46,7 +46,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
-class TestMultiUserAgentExecutionIsolationComprehensive(SSotAsyncTestCase):
+class MultiUserAgentExecutionIsolationComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive concurrency tests for multi-user agent execution isolation.
     

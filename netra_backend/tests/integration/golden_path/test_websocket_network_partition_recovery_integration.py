@@ -49,7 +49,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.event_validator import AgentEventValidator, CriticalAgentEventType, WebSocketEventMessage
 logger = logging.getLogger(__name__)
 
-class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
+class WebSocketNetworkPartitionRecoveryIntegrationTests(BaseIntegrationTest):
     """
     CRITICAL Integration Test: WebSocket connection recovery after network partitions.
     

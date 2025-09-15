@@ -39,7 +39,7 @@ class ConnectionState(Enum):
     ERROR = "error"
 
 
-class TestWebSocketConnectionStateMachineApplicationStateIntegration(BaseIntegrationTest):
+class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegrationTest):
     """Test WebSocket connection state machine transitions with comprehensive application state persistence."""
     
     def _create_state_tracking_websocket(self, initial_state: ConnectionState = ConnectionState.INITIALIZING):

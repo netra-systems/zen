@@ -82,7 +82,7 @@ def create_test_factory():
     return SupervisorFactory(websocket_bridge=mock_bridge)
 
 
-class TestExecutionEngineSSotViolationDetection(SSotAsyncTestCase):
+class ExecutionEngineSSotViolationDetectionTests(SSotAsyncTestCase):
     """Test 1 & 2: SSOT Violation Detection - Multiple execution engine implementations"""
     
     async def test_execution_engine_implementation_duplicates_detected(self):
@@ -230,7 +230,7 @@ class TestExecutionEngineSSotViolationDetection(SSotAsyncTestCase):
         pytest.fail(f"Factory Pattern Violations Detected ({len(factory_violations)} issues): {factory_violations}")
 
 
-class TestUserIsolationFailures(SSotAsyncTestCase):
+class UserIsolationFailuresTests(SSotAsyncTestCase):
     """Test 3 & 4: User Isolation Failures - Shared state and event collisions"""
     
     async def test_user_execution_context_shared_state_detected(self):
@@ -425,7 +425,7 @@ class TestUserIsolationFailures(SSotAsyncTestCase):
         pytest.fail(f"WebSocket Event Collisions Detected ({len(event_collision_violations)} issues): {event_collision_violations}")
 
 
-class TestFactoryPatternIssues(SSotAsyncTestCase):
+class FactoryPatternIssuesTests(SSotAsyncTestCase):
     """Test 5 & 6: Factory Pattern Issues - Resource leaks and performance degradation"""
     
     async def test_factory_resource_leakage_detected(self):
@@ -630,7 +630,7 @@ class TestFactoryPatternIssues(SSotAsyncTestCase):
         pytest.fail(f"Performance Violations Detected ({len(performance_violations)} issues): {performance_violations}")
 
 
-class TestGoldenPathProtection(SSotAsyncTestCase):
+class GoldenPathProtectionTests(SSotAsyncTestCase):
     """Test 7: Golden Path Protection - End-to-end user flow integrity"""
     
     async def test_golden_path_execution_engine_integration_protected(self):

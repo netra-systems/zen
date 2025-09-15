@@ -431,7 +431,7 @@ class Phase4PostMigrationVerification(unittest.TestCase):
         print(f"\n✅ PHASE 4 VALIDATION: All functional areas maintained post-migration")
 
 
-class TestSSotComplianceExecutor(unittest.TestCase):
+class SSotComplianceExecutorTests(unittest.TestCase):
     """
     SSOT Compliance Test Executor
 

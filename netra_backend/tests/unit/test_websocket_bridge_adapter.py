@@ -34,7 +34,7 @@ from test_framework.ssot.base import BaseTestCase, AsyncBaseTestCase
 from shared.isolated_environment import get_env
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
 
-class TestWebSocketBridgeAdapterInitialization(BaseTestCase):
+class WebSocketBridgeAdapterInitializationTests(BaseTestCase):
     """Test WebSocketBridgeAdapter initialization and state management."""
 
     @pytest.mark.unit
@@ -63,7 +63,7 @@ class TestWebSocketBridgeAdapterInitialization(BaseTestCase):
         assert adapter1._bridge is not adapter2._bridge, 'Bridges should be independent'
         assert adapter1._run_id != adapter2._run_id, 'Run IDs should be independent'
 
-class TestWebSocketBridgeAdapterConfiguration(AsyncBaseTestCase):
+class WebSocketBridgeAdapterConfigurationTests(AsyncBaseTestCase):
     """Test WebSocketBridgeAdapter bridge configuration and management."""
 
     @pytest.mark.unit
@@ -152,7 +152,7 @@ class TestWebSocketBridgeAdapterConfiguration(AsyncBaseTestCase):
         adapter._run_id = None
         assert not adapter.has_websocket_bridge()
 
-class TestWebSocketBridgeAdapterEventEmission(AsyncBaseTestCase):
+class WebSocketBridgeAdapterEventEmissionTests(AsyncBaseTestCase):
     """Test WebSocketBridgeAdapter event emission methods (MISSION CRITICAL for chat value)."""
 
     def create_test_adapter(self):
@@ -372,7 +372,7 @@ class TestWebSocketBridgeAdapterEventEmission(AsyncBaseTestCase):
             await self.adapter.emit_error('Original error message')
             mock_logger.debug.assert_called_once_with('Failed to emit error: Error notification failed')
 
-class TestWebSocketBridgeAdapterBackwardCompatibility(AsyncBaseTestCase):
+class WebSocketBridgeAdapterBackwardCompatibilityTests(AsyncBaseTestCase):
     """Test WebSocketBridgeAdapter backward compatibility methods."""
 
     def create_test_adapter_for_compatibility(self):
@@ -445,7 +445,7 @@ class TestWebSocketBridgeAdapterBackwardCompatibility(AsyncBaseTestCase):
             assert any(('Failed to emit subagent_started' in msg for msg in debug_calls))
             assert any(('Failed to emit subagent_completed' in msg for msg in debug_calls))
 
-class TestWebSocketBridgeAdapterErrorHandlingAndEdgeCases(AsyncBaseTestCase):
+class WebSocketBridgeAdapterErrorHandlingAndEdgeCasesTests(AsyncBaseTestCase):
     """Test WebSocketBridgeAdapter error handling and edge cases."""
 
     @pytest.mark.unit
@@ -545,7 +545,7 @@ class TestWebSocketBridgeAdapterErrorHandlingAndEdgeCases(AsyncBaseTestCase):
         assert mock_bridge2.notify_tool_executing.call_count == 1
         assert mock_bridge2.notify_agent_completed.call_count == 1
 
-class TestWebSocketBridgeAdapterPerformanceAndReliability(AsyncBaseTestCase):
+class WebSocketBridgeAdapterPerformanceAndReliabilityTests(AsyncBaseTestCase):
     """Test WebSocketBridgeAdapter performance characteristics and reliability."""
 
     @pytest.mark.unit

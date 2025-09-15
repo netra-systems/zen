@@ -42,7 +42,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
+class ErrorHandlingRecoveryWorkflowsTests(SSotBaseTestCase):
     """
     E2E tests for error handling and recovery workflows.
     Tests complete error scenarios and recovery mechanisms that preserve business value.

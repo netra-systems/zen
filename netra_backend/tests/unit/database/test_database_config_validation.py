@@ -34,7 +34,7 @@ from netra_backend.app.core.configuration.database import (
 from netra_backend.app.core.configuration.base import get_unified_config
 
 
-class TestDatabaseConfigValidation(SSotBaseTestCase):
+class DatabaseConfigValidationTests(SSotBaseTestCase):
     """
     Database Configuration Validation Tests - Issue #1263
 

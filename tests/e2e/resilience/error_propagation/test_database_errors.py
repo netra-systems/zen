@@ -27,7 +27,7 @@ from tests.e2e.fixtures.error_propagation_fixtures import (
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestDatabaseErrorHandling:
+class DatabaseErrorHandlingTests:
     """Test database error handling and recovery."""
     
     @pytest.mark.resilience

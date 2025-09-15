@@ -235,7 +235,7 @@ class RealWebSocketNotifier:
         return self.user_sessions.get(user_id, [])
 
 
-class TestToolDispatcherRealComponentIntegration(SSotBaseTestCase):
+class ToolDispatcherRealComponentIntegrationTests(SSotBaseTestCase):
     """Test tool dispatcher integration with real system components."""
     
     @pytest.mark.integration

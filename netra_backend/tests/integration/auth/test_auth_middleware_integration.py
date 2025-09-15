@@ -26,7 +26,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
-class TestAuthMiddlewareIntegration(BaseIntegrationTest):
+class AuthMiddlewareIntegrationTests(BaseIntegrationTest):
     """Integration tests for authentication middleware with real FastAPI application."""
     
     def setup_method(self):

@@ -79,7 +79,7 @@ from netra_backend.app.core import security
 from netra_backend.app.middleware.auth_middleware import AuthMiddleware
 
 
-class TestAuthenticationSecurityComprehensive(BaseIntegrationTest):
+class AuthenticationSecurityComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive authentication security integration tests.
     

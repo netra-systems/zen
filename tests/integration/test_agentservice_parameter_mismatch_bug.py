@@ -14,7 +14,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 
 @pytest.mark.integration
-class TestAgentServiceParameterMismatch:
+class AgentServiceParameterMismatchTests:
     """Test class to reproduce and verify the AgentService parameter mismatch bug."""
 
     @pytest.fixture

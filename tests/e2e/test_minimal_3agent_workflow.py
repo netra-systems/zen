@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -78,10 +78,10 @@ class MinimalOrchestrationSuite:
         })
         
         # Mock WebSocket manager
-        self.websocket = TestWebSocketConnection()  # TODO: Use real service instead of Mock
+        self.websocket = WebSocketConnectionTests()  # TODO: Use real service instead of Mock
         
         # Initialize the 3 core agents
-        websocket = TestWebSocketConnection()  # TODO: Use real service instead of Mock
+        websocket = WebSocketConnectionTests()  # TODO: Use real service instead of Mock
         
         self.agents = {
             'triage': UnifiedTriageAgent(

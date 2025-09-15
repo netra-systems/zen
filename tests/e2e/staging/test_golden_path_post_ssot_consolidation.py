@@ -125,7 +125,7 @@ class MockAgentResponse:
         """Create a mock triage response."""
         return cls(response_type='triage_analysis', business_value={'query_category': 'cost_optimization', 'complexity': 'medium', 'recommended_agent': 'cost_optimizer', 'estimated_value': 'high', 'can_help': True})
 
-class TestGoldenPathPostSsotConsolidation(SSotAsyncTestCase):
+class GoldenPathPostSsotConsolidationTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

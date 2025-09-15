@@ -62,7 +62,7 @@ class MockWebSocket:
         self.is_closed = True
 
 
-class TestWebSocketStateMultiUserIntegration(BaseIntegrationTest):
+class WebSocketStateMultiUserIntegrationTests(BaseIntegrationTest):
     """Test WebSocket-State-MultiUser integration patterns."""
     
     @pytest.fixture

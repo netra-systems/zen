@@ -25,7 +25,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestMessageRoutingConsistency(SSotAsyncTestCase):
+class MessageRoutingConsistencyTests(SSotAsyncTestCase):
     """Validate consistent routing behavior across implementations."""
 
     def setUp(self) -> None:

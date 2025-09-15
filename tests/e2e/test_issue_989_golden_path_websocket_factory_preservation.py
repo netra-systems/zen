@@ -66,7 +66,7 @@ class GoldenPathTestResult:
     execution_time_seconds: float = 0.0
 
 @pytest.mark.e2e
-class TestIssue989GoldenPathWebSocketFactoryPreservation(SSotAsyncTestCase):
+class Issue989GoldenPathWebSocketFactoryPreservationTests(SSotAsyncTestCase):
     """Mission Critical: Issue #989 Golden Path WebSocket Factory Migration Preservation
 
     This test suite ensures that WebSocket factory SSOT migration does not break

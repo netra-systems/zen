@@ -291,7 +291,7 @@ class RealWebSocketEventManager:
         return [e for e in self.events_sent if e.get("tool_name") == tool_name]
 
 
-class TestToolExecutionEngineRealDataFlows(SSotBaseTestCase):
+class ToolExecutionEngineRealDataFlowsTests(SSotBaseTestCase):
     """Test tool execution engine with real data flows and business scenarios."""
     
     @pytest.mark.integration

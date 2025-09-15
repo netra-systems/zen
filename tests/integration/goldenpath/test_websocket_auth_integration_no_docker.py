@@ -55,7 +55,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSo
 @pytest.mark.integration
 @pytest.mark.business_critical
 @pytest.mark.real_services
-class TestGoldenPathWebSocketAuthNonDocker(SSotAsyncTestCase):
+class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
     """
     Golden Path WebSocket Authentication Integration Tests - NO DOCKER
     

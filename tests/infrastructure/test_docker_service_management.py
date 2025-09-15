@@ -18,7 +18,7 @@ import time
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDockerServiceManagement(SSotBaseTestCase):
+class DockerServiceManagementTests(SSotBaseTestCase):
     """Test Docker service management and detection."""
 
     def setUp(self):
@@ -119,7 +119,7 @@ class TestDockerServiceManagement(SSotBaseTestCase):
             self.assertTrue(len(option) > 10, f"Recovery option should be descriptive: {option}")
 
 
-class TestDockerRecoveryProcedures(SSotBaseTestCase):
+class DockerRecoveryProceduresTests(SSotBaseTestCase):
     """Test Docker automatic recovery procedures."""
 
     def test_docker_automatic_recovery_procedures(self):
@@ -164,7 +164,7 @@ class TestDockerRecoveryProcedures(SSotBaseTestCase):
         self.assertTrue(staging_fallback_available, "Staging environment fallback should be available")
 
 
-class TestDockerInfrastructureIntegration(SSotBaseTestCase):
+class DockerInfrastructureIntegrationTests(SSotBaseTestCase):
     """Test Docker infrastructure integration with test framework."""
 
     def test_unified_test_runner_docker_integration(self):

@@ -44,7 +44,7 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from shared.types.core_types import UserID, ConnectionID
 
 
-class TestMessageQueueRaceConditions(SSotAsyncTestCase):
+class MessageQueueRaceConditionsTests(SSotAsyncTestCase):
     """Test race conditions between competing message queue implementations."""
 
     def setup_method(self, method):

@@ -488,7 +488,7 @@ class MockWebSocketBridge:
         return len([agent for agent in self.registered_agents.values() if agent["active"]])
 
 
-class TestWebSocketBridgeMessageRouting(SSotAsyncTestCase):
+class WebSocketBridgeMessageRoutingTests(SSotAsyncTestCase):
     """Unit tests for WebSocket bridge message routing functionality
     
     This test class validates the critical bridge routing capabilities that

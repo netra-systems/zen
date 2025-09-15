@@ -15,7 +15,7 @@ from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.migration.migration_support import migration_manager, MigrationFlag
 
-class TestJWTValidationAPI:
+class JWTValidationAPITests:
     """Test JWT validation API endpoints"""
 
     @pytest.fixture
@@ -117,7 +117,7 @@ class TestJWTValidationAPI:
         assert 'validation_time_ms' in data
         assert 'performance_stats' in data
 
-class TestWebSocketAuthAPI:
+class WebSocketAuthAPITests:
     """Test WebSocket authentication API endpoints"""
 
     @pytest.fixture
@@ -232,7 +232,7 @@ class TestWebSocketAuthAPI:
         assert data['status'] == 'healthy'
         assert data['service'] == 'websocket-authentication'
 
-class TestServiceAuthAPI:
+class ServiceAuthAPITests:
     """Test service-to-service authentication API endpoints"""
 
     @pytest.fixture
@@ -311,7 +311,7 @@ class TestServiceAuthAPI:
         assert 'services_registered' in data
         assert data['services_registered'] > 0
 
-class TestMigrationSupport:
+class MigrationSupportTests:
     """Test migration support features"""
 
     @pytest.fixture
@@ -335,7 +335,7 @@ class TestMigrationSupport:
         assert status['api_status']['websocket_auth_api'] is True
         assert status['api_status']['service_auth_api'] is True
 
-class TestGoldenPathProtection:
+class GoldenPathProtectionTests:
     """Test that Golden Path functionality is preserved"""
 
     @pytest.fixture
@@ -389,7 +389,7 @@ class TestGoldenPathProtection:
         assert response.json()['valid'] is True
         assert new_api_time < existing_api_time * 2.0, f'New API too slow: {new_api_time}s vs {existing_api_time}s'
 
-class TestBackwardCompatibility:
+class BackwardCompatibilityTests:
     """Test backward compatibility with existing systems"""
 
     @pytest.fixture
@@ -441,7 +441,7 @@ class TestBackwardCompatibility:
             assert new_data['valid'] is True
             assert old_data['user_id'] == new_data['user_id']
 
-class TestAPIPerformance:
+class APIPerformanceTests:
     """Test API performance and load handling"""
 
     @pytest.fixture

@@ -26,7 +26,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
-class TestDemoWebSocketBridgeInterfaceCompliance(SSotAsyncTestCase):
+class DemoWebSocketBridgeInterfaceComplianceTests(SSotAsyncTestCase):
     """Test DemoWebSocketBridge interface compliance - Phase 1 Issue #1209 reproduction."""
 
     def setUp(self):

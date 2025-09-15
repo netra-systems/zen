@@ -64,7 +64,7 @@ except ImportError as e:
     BaseAgent = MagicMock
     AgentExecutionContext = MagicMock
 
-class TestAgentGoldenPathMessages(SSotAsyncTestCase):
+class AgentGoldenPathMessagesTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Agent Golden Path Message Processing.
 

@@ -47,7 +47,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient, AuthSe
 logger = logging.getLogger(__name__)
 
 
-class TestAuthenticationFlowsIntegration(BaseIntegrationTest):
+class AuthenticationFlowsIntegrationTests(BaseIntegrationTest):
     """Integration tests for golden path authentication flows with real services."""
 
     def setup_method(self):

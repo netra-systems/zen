@@ -29,7 +29,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.rate_limiting
 @skip_if_no_real_services
-class TestRealWebSocketRateLimiting:
+class RealWebSocketRateLimitingTests:
     """Test real WebSocket rate limiting enforcement."""
     
     @pytest.fixture

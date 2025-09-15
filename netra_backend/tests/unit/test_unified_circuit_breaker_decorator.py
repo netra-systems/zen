@@ -13,7 +13,7 @@ get_unified_circuit_breaker_manager
 from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
 
 
-class TestUnifiedCircuitBreakerDecorator:
+class UnifiedCircuitBreakerDecoratorTests:
     """Test the unified circuit breaker decorator."""
     
     @pytest.fixture(autouse=True)

@@ -55,7 +55,7 @@ class MockHandler:
 
 @pytest.mark.mission_critical
 @pytest.mark.asyncio
-class TestWebSocketMessageQueueResilience:
+class WebSocketMessageQueueResilienceTests:
     """Mission critical tests for WebSocket message queue resilience"""
 
     @pytest.fixture

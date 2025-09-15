@@ -42,7 +42,7 @@ from netra_backend.app.data_contexts.user_data_context import (
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestCrossUserDataIsolation(BaseIntegrationTest):
+class CrossUserDataIsolationTests(BaseIntegrationTest):
     """Test cross-user data isolation with real database and cache operations."""
     
     async def setup_method(self, method):

@@ -98,7 +98,7 @@ class RealisticWebSocketManager:
         return len(self.sent_messages)
 
 
-class TestWebSocketNotifierIntegration(SSotBaseTestCase):
+class WebSocketNotifierIntegrationTests(SSotBaseTestCase):
     """Integration tests for WebSocket Notifier functionality."""
     
     def setup_method(self):

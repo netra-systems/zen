@@ -90,7 +90,7 @@ class DatabaseTransactionMetrics:
     concurrent_operations_peak: int
 
 
-class TestDatabaseTransactionIsolationConcurrentAgents(BaseIntegrationTest):
+class DatabaseTransactionIsolationConcurrentAgentsTests(BaseIntegrationTest):
     """Test database transaction isolation during concurrent agent executions."""
     
     def setup_method(self):

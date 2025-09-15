@@ -21,7 +21,7 @@ project_root = Path(__file__).parent.parent.parent.absolute()
 sys.path.insert(0, str(project_root))
 
 
-class TestUnifiedCorpusAdmin(unittest.IsolatedAsyncioTestCase):
+class UnifiedCorpusAdminTests(unittest.IsolatedAsyncioTestCase):
     """
     Test the new UnifiedCorpusAdmin implementation.
     Uses standard unittest for better compatibility.

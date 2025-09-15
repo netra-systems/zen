@@ -18,7 +18,7 @@ import websockets
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
-class TestJWTSecretSynchronizationer:
+class JWTSecretSynchronizationerTests:
     """Comprehensive JWT secret synchronization validator with UnifiedE2ETestHarness integration."""
 
     def __init__(self):

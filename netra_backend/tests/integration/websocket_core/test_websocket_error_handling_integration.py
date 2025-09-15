@@ -47,7 +47,7 @@ async def error_handling_websocket_manager():
 
 
 @pytest.mark.integration
-class TestWebSocketConnectionFailures:
+class WebSocketConnectionFailuresTests:
     """Integration tests for WebSocket connection failure handling."""
     
     @pytest.mark.asyncio
@@ -345,7 +345,7 @@ class TestWebSocketConnectionFailures:
 
 
 @pytest.mark.integration  
-class TestWebSocketEventDeliveryErrors:
+class WebSocketEventDeliveryErrorsTests:
     """Integration tests for WebSocket event delivery error scenarios."""
     
     @pytest.mark.asyncio

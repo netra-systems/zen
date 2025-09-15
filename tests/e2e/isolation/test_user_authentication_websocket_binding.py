@@ -50,7 +50,7 @@ import jwt
 from datetime import datetime, timezone, timedelta
 
 
-class TestUserAuthenticationWebSocketBinding(BaseE2ETest):
+class UserAuthenticationWebSocketBindingTests(BaseE2ETest):
     """E2E tests for user authentication binding to WebSocket connections."""
     
     @pytest.fixture

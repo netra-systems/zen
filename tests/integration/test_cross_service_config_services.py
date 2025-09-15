@@ -1,5 +1,5 @@
 @pytest.mark.integration
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -49,18 +49,18 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.integration
-class TestSyntaxFix:
+class SyntaxFixTests:
     """Test class for orphaned methods"""
 
     def create_test_request_with_origin(self, origin: str, method: str = "GET") -> Mock:
         """Create mock request with specified origin."""
         # Mock: Generic component isolation for controlled unit testing
         request = Mock()
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        websocket = WebSocketConnectionTests()  # Real WebSocket implementation
         request.method = method
         request.headers = {"origin": origin}
         # Mock: Generic component isolation for controlled unit testing
-        request.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        request.websocket = WebSocketConnectionTests()  # Real WebSocket implementation
         request.url.path = "/api/test"
         return request
 

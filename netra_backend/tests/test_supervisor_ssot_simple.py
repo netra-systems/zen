@@ -5,7 +5,7 @@ import pytest
 from pathlib import Path
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestSSOTFixesApplied:
+class SSOTFixesAppliedTests:
     """Verify that all SSOT fixes have been properly applied."""
 
     def test_json_handler_usage_in_observability(self):
@@ -95,7 +95,7 @@ class TestSSOTFixesApplied:
                 except SyntaxError as e:
                     pytest.fail(f'Syntax error in {file_path}: {e}')
 
-class TestWebSocketIntegration:
+class WebSocketIntegrationTests:
     """Test WebSocket event integration."""
 
     def test_supervisor_websocket_events(self):

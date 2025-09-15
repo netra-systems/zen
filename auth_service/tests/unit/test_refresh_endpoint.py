@@ -14,7 +14,7 @@ import asyncio
 
 @pytest.mark.unit
 @pytest.mark.auth
-class TestRefreshEndpointUnit:
+class RefreshEndpointUnitTests:
     """Unit tests for refresh token endpoint"""
 
     @pytest.fixture
@@ -90,7 +90,7 @@ class TestRefreshEndpointUnit:
         assert response.status_code == 500
         assert 'Internal server error' in response.json()['detail']
 
-class TestJWTHandlerRefreshTokens:
+class JWTHandlerRefreshTokensTests:
     """Unit tests for JWT handler refresh token functionality"""
 
     @pytest.fixture
@@ -159,7 +159,7 @@ class TestJWTHandlerRefreshTokens:
         expected_exp = datetime.now(UTC) + timedelta(days=1)
         assert abs((exp_time - expected_exp).total_seconds()) < 60
 
-class TestAuthServiceRefreshLogic:
+class AuthServiceRefreshLogicTests:
     """Unit tests for auth service refresh token business logic"""
 
     @pytest.fixture

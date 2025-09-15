@@ -43,7 +43,7 @@ from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.oauth_manager import OAuthManager
 
 
-class TestAuthEndpointsBusinessIntegration(BaseIntegrationTest):
+class AuthEndpointsBusinessIntegrationTests(BaseIntegrationTest):
     """Integration tests for auth service endpoints with real business value."""
     
     @pytest.fixture(autouse=True)

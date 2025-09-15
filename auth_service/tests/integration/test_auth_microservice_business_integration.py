@@ -40,7 +40,7 @@ from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.services.auth_service import AuthService
 
 
-class TestAuthMicroserviceBusinessIntegration(BaseIntegrationTest):
+class AuthMicroserviceBusinessIntegrationTests(BaseIntegrationTest):
     """Integration tests for auth service microservice communication with real business value."""
     
     @pytest.fixture(autouse=True)

@@ -20,7 +20,7 @@ from typing import List, Tuple
 import pytest
 from shared.id_generation import UnifiedIdGenerator, generate_uuid_replacement
 
-class TestSSOTCompliance:
+class SSOTComplianceTests:
     """Test suite for SSOT ID generation compliance."""
 
     @pytest.fixture
@@ -186,7 +186,7 @@ class TestSSOTCompliance:
         if not violations_found:
             print(' PASS:  All critical production files are SSOT compliant')
 
-class TestIDGenerationRegression:
+class IDGenerationRegressionTests:
     """Test suite to prevent regression in ID generation patterns."""
 
     def test_no_new_uuid_imports(self, project_root: Path):

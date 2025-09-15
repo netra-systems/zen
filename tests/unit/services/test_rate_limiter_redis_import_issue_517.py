@@ -40,7 +40,7 @@ def test_basic():
 
 
 @pytest.mark.unit
-class TestRateLimiterRedisImportIssue517(unittest.TestCase):
+class RateLimiterRedisImportIssue517Tests(unittest.TestCase):
     """
     Test suite for Issue #517 - Redis Import Error in Rate Limiter Service
     

@@ -21,7 +21,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
 sys.path.insert(0, str(PROJECT_ROOT))
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestExistingFunctionalityProtection(SSotBaseTestCase):
+class ExistingFunctionalityProtectionTests(SSotBaseTestCase):
     """
     Test existing functionality is protected during fixes.
     
@@ -90,11 +90,11 @@ class TestExistingFunctionalityProtection(SSotBaseTestCase):
         try:
             from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-            class TestWebSocketInheritance(SSotBaseTestCase):
+            class WebSocketInheritanceTests(SSotBaseTestCase):
 
                 def test_simple(self):
                     pass
-            if not issubclass(TestWebSocketInheritance, SSotBaseTestCase):
+            if not issubclass(WebSocketInheritanceTests, SSotBaseTestCase):
                 websocket_protection_issues.append('WebSocket test inheritance broken')
         except Exception as e:
             websocket_protection_issues.append(f'WebSocket test inheritance test failed: {e}')
@@ -129,11 +129,11 @@ class TestExistingFunctionalityProtection(SSotBaseTestCase):
         try:
             from test_framework.base_integration_test import BaseIntegrationTest
 
-            class TestIntegrationInheritance(BaseIntegrationTest):
+            class IntegrationInheritanceTests(BaseIntegrationTest):
 
                 def test_simple_integration(self):
                     pass
-            if not issubclass(TestIntegrationInheritance, BaseIntegrationTest):
+            if not issubclass(IntegrationInheritanceTests, BaseIntegrationTest):
                 integration_protection_issues.append('Integration test inheritance broken')
         except Exception as e:
             integration_protection_issues.append(f'Integration test inheritance test failed: {e}')
@@ -257,7 +257,7 @@ class TestExistingFunctionalityProtection(SSotBaseTestCase):
                 docker_protection_issues.append(f'{module_path}: Unexpected error - {e}')
         assert len(docker_protection_issues) == 0, f'Existing Docker management broken ({len(docker_protection_issues)} issues):\n' + '\n'.join((f'  - {issue}' for issue in docker_protection_issues)) + '\n\nFixes for Issue #485 must NOT break existing working Docker management.'
 
-class TestBackwardCompatibilityProtection(SSotBaseTestCase):
+class BackwardCompatibilityProtectionTests(SSotBaseTestCase):
     """
     Test backward compatibility is maintained during Issue #485 fixes.
     

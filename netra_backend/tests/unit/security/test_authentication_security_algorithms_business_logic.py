@@ -26,7 +26,7 @@ from netra_backend.app.services.auth.token_security_validator import TokenSecuri
 from netra_backend.app.services.auth.session_security_manager import SessionSecurityManager, SessionSecurityResult, SessionAnomaly, ThreatLevel
 from netra_backend.app.services.auth.cryptographic_security import CryptographicSecurity, PasswordSecurityAnalyzer, EncryptionResult
 
-class TestAuthenticationSecurityAlgorithmsBusinessLogic:
+class AuthenticationSecurityAlgorithmsBusinessLogicTests:
     """Test authentication security algorithms business logic"""
 
     def setup_method(self):

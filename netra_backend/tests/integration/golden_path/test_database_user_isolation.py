@@ -25,7 +25,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper
 from shared.isolated_environment import get_env
 
 
-class TestDatabaseUserIsolation(DatabaseIntegrationTest):
+class DatabaseUserIsolationTests(DatabaseIntegrationTest):
     """Integration tests for database operations with user isolation using real PostgreSQL."""
     
     @pytest.mark.integration

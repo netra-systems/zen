@@ -22,7 +22,7 @@ from dev_launcher.parallel_executor import (
 )
 
 
-class TestParallelExecutorComprehensive:
+class ParallelExecutorComprehensiveTests:
     """Comprehensive test suite for ParallelExecutor retry functionality."""
     
     def setup_method(self):

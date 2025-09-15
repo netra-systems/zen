@@ -228,7 +228,7 @@ class WebSocketManagerCompat:
         }
 
 
-class TestWebSocketConnectionLifecycle:
+class WebSocketConnectionLifecycleTests:
     """Test WebSocket connection lifecycle management patterns."""
     
     @pytest.mark.unit

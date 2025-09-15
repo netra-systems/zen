@@ -91,7 +91,7 @@ class RoutedMessage:
     completed_at: Optional[datetime] = None
 
 
-class TestMessageRoutingPersistenceIntegration(BaseIntegrationTest):
+class MessageRoutingPersistenceIntegrationTests(BaseIntegrationTest):
     """15 comprehensive tests for message routing and persistence patterns."""
     
     def setup_method(self):

@@ -45,7 +45,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 from shared.id_generation import UnifiedIdGenerator
 
 
-class TestAgentRegistryWebSocketManagementComprehensive(BaseIntegrationTest):
+class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     """Comprehensive integration tests for Agent Registry and WebSocket management focused on business value delivery."""
     
     @pytest.fixture(autouse=True)

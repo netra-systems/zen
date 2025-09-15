@@ -20,7 +20,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.types.core_types import UserID, ThreadID, RunID
 
 @pytest.mark.unit
-class TestWebSocketPrerequisiteValidation(SSotBaseTestCase):
+class WebSocketPrerequisiteValidationTests(SSotBaseTestCase):
     """Unit tests for WebSocket prerequisite validation functions.
     
     These tests should FAIL initially, demonstrating missing WebSocket prerequisite functions.
@@ -69,7 +69,7 @@ class TestWebSocketPrerequisiteValidation(SSotBaseTestCase):
             self.fail(f'WebSocket manager validation function not implemented: {e}. Expected: validate_websocket_manager_initialized() in prerequisites_validator.py')
 
 @pytest.mark.unit
-class TestDatabasePrerequisiteValidation(SSotBaseTestCase):
+class DatabasePrerequisiteValidationTests(SSotBaseTestCase):
     """Unit tests for database prerequisite validation functions.
     
     These tests should FAIL initially, demonstrating missing database prerequisite functions.
@@ -119,7 +119,7 @@ class TestDatabasePrerequisiteValidation(SSotBaseTestCase):
             self.fail(f'PostgreSQL availability validation function not implemented: {e}. Expected: validate_postgres_availability() in prerequisites_validator.py')
 
 @pytest.mark.unit
-class TestAgentRegistryPrerequisiteValidation(SSotBaseTestCase):
+class AgentRegistryPrerequisiteValidationTests(SSotBaseTestCase):
     """Unit tests for agent registry prerequisite validation functions.
     
     These tests should FAIL initially, demonstrating missing agent registry prerequisite functions.
@@ -156,7 +156,7 @@ class TestAgentRegistryPrerequisiteValidation(SSotBaseTestCase):
             self.fail(f'Agent availability validation function not implemented: {e}. Expected: validate_agent_availability(agent_name) in prerequisites_validator.py')
 
 @pytest.mark.unit
-class TestResourceLimitsPrerequisiteValidation(SSotBaseTestCase):
+class ResourceLimitsPrerequisiteValidationTests(SSotBaseTestCase):
     """Unit tests for resource limits prerequisite validation functions.
     
     These tests should FAIL initially, demonstrating missing resource limits prerequisite functions.
@@ -196,7 +196,7 @@ class TestResourceLimitsPrerequisiteValidation(SSotBaseTestCase):
             self.fail(f'System resource availability validation function not implemented: {e}. Expected: validate_system_resource_availability() in prerequisites_validator.py')
 
 @pytest.mark.unit
-class TestUserContextPrerequisiteValidation(SSotBaseTestCase):
+class UserContextPrerequisiteValidationTests(SSotBaseTestCase):
     """Unit tests for user context prerequisite validation functions.
     
     These tests should FAIL initially, demonstrating missing user context prerequisite functions.
@@ -237,7 +237,7 @@ class TestUserContextPrerequisiteValidation(SSotBaseTestCase):
             self.fail(f'User permissions validation function not implemented: {e}. Expected: validate_user_permissions(user_id, permissions) in prerequisites_validator.py')
 
 @pytest.mark.unit
-class TestServiceDependenciesPrerequisiteValidation(SSotBaseTestCase):
+class ServiceDependenciesPrerequisiteValidationTests(SSotBaseTestCase):
     """Unit tests for service dependencies prerequisite validation functions.
     
     These tests should FAIL initially, demonstrating missing service dependencies prerequisite functions.
@@ -274,7 +274,7 @@ class TestServiceDependenciesPrerequisiteValidation(SSotBaseTestCase):
             self.fail(f'External services validation function not implemented: {e}. Expected: validate_external_services() in prerequisites_validator.py')
 
 @pytest.mark.unit
-class TestPrerequisiteValidationResultStructure(SSotBaseTestCase):
+class PrerequisiteValidationResultStructureTests(SSotBaseTestCase):
     """Unit tests for prerequisite validation result structure.
     
     These tests should FAIL initially, demonstrating missing result structure definitions.

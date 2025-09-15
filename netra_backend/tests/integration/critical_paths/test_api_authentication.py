@@ -21,7 +21,7 @@ import pytest
 
 from netra_backend.app.config import get_config
 
-class TestAPIAuthenticationL3:
+class APIAuthenticationL3Tests:
     """Test API authentication scenarios"""
 
     @pytest.mark.asyncio

@@ -230,7 +230,7 @@ class WebSocketBroadcastManager:
                 del self._broadcast_groups[group_name]
 
 
-class TestWebSocketBroadcastManager:
+class WebSocketBroadcastManagerTests:
     """Unit tests for WebSocket broadcast management."""
     
     @pytest.fixture

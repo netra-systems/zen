@@ -20,7 +20,7 @@ from typing import Dict, Any, Optional
 from unittest.mock import Mock, AsyncMock, patch
 from netra_backend.app.clients.auth_client_cache import TokenCache, AuthClientCache, CacheEntry
 
-class TestTokenCacheRegression:
+class TokenCacheRegressionTests:
     """Regression test suite for TokenCache to ensure cache_token method exists and works correctly."""
 
     @pytest.fixture
@@ -169,7 +169,7 @@ class TestTokenCacheRegression:
         cached = await token_cache.get_cached_token(test_token)
         assert cached is None, 'Blacklisted token should be removed'
 
-class TestTokenCacheErrorScenarios:
+class TokenCacheErrorScenariosTests:
     """Test error scenarios and edge cases for TokenCache."""
 
     @pytest.fixture

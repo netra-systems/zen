@@ -6,7 +6,7 @@ from netra_backend.app.core.serialization.unified_json_handler import llm_parser
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestJSONFragmentParsing:
+class JSONFragmentParsingTests:
     """Test handling of JSON fragments."""
     
     def test_detects_json_fragments(self):

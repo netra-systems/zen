@@ -191,7 +191,7 @@ class ContextPreservationValidator:
             isolation_report['isolation_score'] = 0.0
         return isolation_report
 
-class TestWebSocketAgentExecutionContextPreservationIntegration(BaseIntegrationTest):
+class WebSocketAgentExecutionContextPreservationIntegrationTests(BaseIntegrationTest):
     """Integration test for agent execution context preservation across WebSocket events."""
 
     def setup_method(self):

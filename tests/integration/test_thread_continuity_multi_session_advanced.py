@@ -86,7 +86,7 @@ class ThreadStateTracker:
 @pytest.mark.integration
 @pytest.mark.requires_docker
 @pytest.mark.requires_database
-class TestThreadContinuityMultiSession(DockerTestBase):
+class ThreadContinuityMultiSessionTests(DockerTestBase):
     """Integration Test 7: Thread continuity across multiple sessions"""
 
     @pytest.fixture(autouse=True)

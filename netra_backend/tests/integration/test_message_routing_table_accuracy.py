@@ -127,7 +127,7 @@ class RoutingTableValidator:
         return [entry for entry in self.entries if entry.is_stale(threshold_minutes)]
 
 
-class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
+class MessageRoutingTableAccuracyTests(BaseIntegrationTest):
     """Test message routing table accuracy and synchronization."""
     
     @pytest.mark.integration

@@ -37,7 +37,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 
 
 @pytest.mark.unit
-class TestIssue1113ConstructorFix(unittest.TestCase):
+class Issue1113ConstructorFixTests(unittest.TestCase):
     """
     Simplified test suite for Issue #1113 UserExecutionEngine constructor fix.
 
@@ -118,7 +118,7 @@ class TestIssue1113ConstructorFix(unittest.TestCase):
 
 
 @pytest.mark.unit
-class TestIssue1113SSotComplianceValidation(unittest.TestCase):
+class Issue1113SSotComplianceValidationTests(unittest.TestCase):
     """
     Test that UserExecutionEngine follows SSOT factory pattern requirements.
 

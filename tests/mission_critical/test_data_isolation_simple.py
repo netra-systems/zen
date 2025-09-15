@@ -86,7 +86,7 @@ async def backend_client(isolated_env):
 
 
 @pytest.mark.mission_critical
-class TestRealDataLayerIsolation:
+class RealDataLayerIsolationTests:
     """
     Mission Critical test suite for data layer isolation using REAL services.
     

@@ -17,7 +17,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import BaseTestCase
 
 @pytest.mark.integration
-class TestPortEnvironmentSimulation(BaseTestCase):
+class PortEnvironmentSimulationTests(BaseTestCase):
     """Test suite to simulate Cloud Run PORT environment behavior.
     
     These tests simulate the Cloud Run environment without requiring actual Docker deployment.

@@ -134,7 +134,7 @@ class DirectEnvironmentAccessDetector:
         return None
 
 
-class TestDirectEnvironAccessViolations(BaseIntegrationTest):
+class DirectEnvironAccessViolationsTests(BaseIntegrationTest):
     """Test for direct os.environ access SSOT violations."""
     
     @pytest.mark.integration

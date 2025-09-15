@@ -16,7 +16,7 @@ pytestmark = [
 
 
 env = get_env()
-class TestDatabaseURLBuilderIntegration:
+class DatabaseURLBuilderIntegrationTests:
     """Test DatabaseURLBuilder integration with real environment configurations."""
     
     def test_development_environment_url_resolution(self):

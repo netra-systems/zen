@@ -40,7 +40,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 
 
 @pytest.mark.integration
-class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
+class ExecutionEngineFactoryWebSocketIntegrationTests(SSotAsyncTestCase):
     """SSOT Integration test for ExecutionEngineFactory WebSocket functionality.
     
     This test ensures factory-created engines have proper WebSocket integration

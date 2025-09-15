@@ -38,7 +38,7 @@ from shared.types.core_types import (
 from fastapi.websockets import WebSocketState
 
 
-class TestWebSocketManagerComprehensive:
+class WebSocketManagerComprehensiveTests:
     """Comprehensive test suite for WebSocketManager."""
     
     @pytest.fixture

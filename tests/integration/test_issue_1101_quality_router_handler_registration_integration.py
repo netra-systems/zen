@@ -17,7 +17,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestQualityRouterHandlerRegistrationIntegration(SSotAsyncTestCase):
+class QualityRouterHandlerRegistrationIntegrationTests(SSotAsyncTestCase):
     """Test QualityMessageRouter handler registration integration issues - SHOULD FAIL initially."""
 
     def setUp(self):

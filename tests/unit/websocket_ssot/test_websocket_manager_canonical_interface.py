@@ -67,7 +67,7 @@ class InterfaceAnalysis:
     error_message: Optional[str] = None
 
 
-class TestWebSocketManagerCanonicalInterface(SSotBaseTestCase):
+class WebSocketManagerCanonicalInterfaceTests(SSotBaseTestCase):
     """
     Test WebSocket Manager canonical interface for Issue #996.
 

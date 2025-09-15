@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.unit
-class TestGCPHeaderValidation(SSotBaseTestCase):
+class GCPHeaderValidationTests(SSotBaseTestCase):
     """
     Unit tests for GCP header validation patterns in Issue #605.
     

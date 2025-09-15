@@ -38,7 +38,7 @@ class EventRecord:
     data: Dict[str, Any]
 
 
-class TestWebSocketSSotEventOrdering(SSotAsyncTestCase):
+class WebSocketSSotEventOrderingTests(SSotAsyncTestCase):
     """Test event ordering SSOT violations."""
     
     def setUp(self):

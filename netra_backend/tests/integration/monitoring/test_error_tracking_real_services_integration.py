@@ -13,7 +13,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 from netra_backend.app.services.monitoring.error_tracker import ErrorTracker
 
-class TestErrorTrackingRealServicesIntegration(SSotBaseTestCase):
+class ErrorTrackingRealServicesIntegrationTests(SSotBaseTestCase):
     """Test error tracking with real services"""
 
     def setup_method(self):

@@ -30,7 +30,8 @@ from netra_backend.app.websocket_core.types import (
 )
 from netra_backend.app.websocket_core.unified_manager import (
     _UnifiedWebSocketManagerImplementation,
-    MAX_CONNECTIONS_PER_USER
+    MAX_CONNECTIONS_PER_USER,
+    RegistryCompat
 )
 # SSOT Protocol import consolidated from protocols module
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol

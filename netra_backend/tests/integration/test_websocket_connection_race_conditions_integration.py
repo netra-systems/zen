@@ -62,7 +62,7 @@ from shared.isolated_environment import get_env
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestWebSocketConnectionRaceConditionsIntegration(IntegrationTestCase):
+class WebSocketConnectionRaceConditionsIntegrationTests(IntegrationTestCase):
     """
     Integration tests for WebSocket connection race conditions and Golden Path reliability.
     

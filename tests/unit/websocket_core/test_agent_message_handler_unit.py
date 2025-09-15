@@ -59,7 +59,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.message_handlers import MessageHandlerService
 
 
-class TestAgentMessageHandler(SSotAsyncTestCase):
+class AgentMessageHandlerTests(SSotAsyncTestCase):
     """Unit tests for AgentMessageHandler functionality
     
     This test class validates the critical message handling capabilities that

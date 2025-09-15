@@ -147,7 +147,7 @@ class RealWebSocketAuthTestCore:
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.integration
-class TestRealWebSocketAuthIntegration:
+class RealWebSocketAuthIntegrationTests:
     """Real WebSocket authentication integration tests."""
 
     @pytest_asyncio.fixture
@@ -295,7 +295,7 @@ class TestRealWebSocketAuthIntegration:
 @pytest.mark.e2e
 @pytest.mark.integration
 @pytest.mark.stress
-class TestRealWebSocketAuthStress:
+class RealWebSocketAuthStressTests:
     """Stress tests for WebSocket authentication with real services."""
 
     @pytest_asyncio.fixture

@@ -25,7 +25,7 @@ from netra_backend.tests.test_route_fixtures import (
     basic_test_client,
 )
 
-class TestLLMCacheRoute:
+class LLMCacheRouteTests:
     """Test cache management, metrics, and invalidation functionality."""
     
     def test_cache_metrics(self, basic_test_client):

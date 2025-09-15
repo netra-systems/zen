@@ -71,7 +71,7 @@ except ImportError as e:
     InvalidContextError = Exception
     ContextIsolationError = Exception
 
-class TestMultiUserMessageIsolation(SSotAsyncTestCase):
+class MultiUserMessageIsolationTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Multi-User Message Isolation.
 

@@ -41,7 +41,7 @@ from test_framework.unified import TestCategory
 from shared.isolated_environment import get_env
 
 
-class TestToolExecutionEngineBusiness(SSotBaseTestCase):
+class ToolExecutionEngineBusinessTests(SSotBaseTestCase):
     """Comprehensive unit tests for ToolExecutionEngine business logic."""
 
     def setup_method(self, method):
@@ -502,7 +502,7 @@ class TestToolExecutionEngineBusiness(SSotBaseTestCase):
         self.metrics.record_custom("business_optimization_enabled", True)
 
 
-class TestToolExecutionEngineBusinessScenarios(SSotBaseTestCase):
+class ToolExecutionEngineBusinessScenariosTests(SSotBaseTestCase):
     """Business scenario tests for tool execution edge cases."""
 
     async def test_high_volume_tool_execution_maintains_performance(self):

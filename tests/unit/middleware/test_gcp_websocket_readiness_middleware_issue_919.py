@@ -29,7 +29,7 @@ from starlette.responses import JSONResponse
 from starlette.testclient import TestClient
 
 @pytest.mark.unit
-class TestGCPWebSocketReadinessMiddleware:
+class GCPWebSocketReadinessMiddlewareTests:
     """Unit tests for GCP WebSocket readiness middleware."""
 
     def setup_method(self):
@@ -270,7 +270,7 @@ class TestGCPWebSocketReadinessMiddleware:
         assert content['details']['cloud_run_timeout'] == middleware.load_balancer_timeout
 
 @pytest.mark.unit
-class TestGCPWebSocketMiddlewareFactory:
+class GCPWebSocketMiddlewareFactoryTests:
     """Test middleware factory functions."""
 
     def setup_method(self):
@@ -314,7 +314,7 @@ class TestGCPWebSocketMiddlewareFactory:
             assert kwargs['timeout_seconds'] == 30.0
 
 @pytest.mark.unit
-class TestWebSocketReadinessHealthCheck:
+class WebSocketReadinessHealthCheckTests:
     """Test health check integration."""
 
     def setup_method(self):

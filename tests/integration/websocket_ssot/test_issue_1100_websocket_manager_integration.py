@@ -25,7 +25,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestWebSocketManagerIntegration(BaseIntegrationTest):
+class WebSocketManagerIntegrationTests(BaseIntegrationTest):
     """Test WebSocket manager integration with real services."""
     
     @pytest.mark.integration

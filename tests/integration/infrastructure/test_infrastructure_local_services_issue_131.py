@@ -38,7 +38,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.core.backend_environment import BackendEnvironment
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
-class TestInfrastructureLocalServicesIssue131:
+class InfrastructureLocalServicesIssue131Tests:
     """
     Integration Test Suite: Local Service Connectivity for Issue #131
     

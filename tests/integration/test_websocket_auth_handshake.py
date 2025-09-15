@@ -14,7 +14,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
-class TestWebSocketAuthHandshake(SSotBaseTestCase):
+class WebSocketAuthHandshakeTests(SSotBaseTestCase):
     """Integration tests for WebSocket authentication handshake"""
 
     def setup_method(self, method=None):
