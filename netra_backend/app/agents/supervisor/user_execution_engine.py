@@ -1487,9 +1487,8 @@ class UserExecutionEngine(IExecutionEngine, ToolExecutionEngineInterface):
             # This avoids async initialization issues during component setup
             # The tool dispatcher will be created when first requested, ensuring proper WebSocket integration
             
-            # ISSUE #1186 FIX: Add websocket_notifier attribute for mission critical test compatibility
-            # The websocket_notifier provides test access to the WebSocket bridge used by components
-            self.websocket_notifier = websocket_bridge
+            # ISSUE #1186 FIX: websocket_notifier property already provides mission critical test compatibility
+            # The websocket_notifier property provides test access to the WebSocket bridge used by components
 
             self.agent_core = AgentExecutionCore(registry, websocket_bridge)
             # Use minimal fallback manager with user context
