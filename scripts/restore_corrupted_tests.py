@@ -107,8 +107,14 @@ class TestRestorationManager:
 
     def _matches_pattern(self, file_path: str, pattern: str) -> bool:
         """Check if file path matches glob-like pattern."""
-        pattern_regex = pattern.replace("*", ".*").replace("?", ".")
-        return re.match(pattern_regex, file_path) is not None
+        # Handle glob patterns more flexibly
+        if "*" in pattern:
+            # Convert glob pattern to regex
+            pattern_regex = pattern.replace("*", ".*").replace("?", ".")
+            return bool(re.search(pattern_regex, file_path))
+        else:
+            # Exact match
+            return pattern in file_path
 
     def restore_file(self, file_path: Path, backup: bool = True) -> bool:
         """Restore a single corrupted file."""
@@ -251,7 +257,10 @@ def main():
     print(f"Total files processed: {total_results['total']}")
     print(f"Successfully restored: {total_results['restored']}")
     print(f"Failed restorations: {total_results['failed']}")
-    print(f"Overall success rate: {total_results['restored']/total_results['total']*100:.1f}%")
+    if total_results['total'] > 0:
+        print(f"Overall success rate: {total_results['restored']/total_results['total']*100:.1f}%")
+    else:
+        print("Overall success rate: N/A (no files processed)")
 
     if not args.dry_run and total_results['restored'] > 0:
         print(f"\nNEXT STEPS:")
