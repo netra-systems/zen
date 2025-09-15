@@ -921,6 +921,34 @@ class UnifiedTestRunner:
         self.docker_manager = None
         self.docker_environment = None
         self.docker_ports = None
+        
+        # Test execution timeout fix for iterations 41-60
+        from shared.isolated_environment import get_env
+        env = get_env()
+        self.max_collection_size = int(env.get("MAX_TEST_COLLECTION_SIZE", "1000"))
+        
+        # Test configurations - Use project root as working directory to fix import issues
+        # ISSUE #558 FIX: Use centralized pyproject.toml instead of missing service-specific pytest.ini files
+        self.test_configs = {
+            "backend": {
+                "path": self.project_root,  # Changed from backend_path to project_root
+                "test_dir": "netra_backend/tests",  # Updated to full path from root
+                "config": "pyproject.toml",  # FIXED: Use centralized config instead of missing pytest.ini
+                "command": f"{self.python_command} -m pytest"
+            },
+            "auth": {
+                "path": self.project_root,  # Changed from auth_path to project_root
+                "test_dir": "auth_service/tests",  # Updated to full path from root
+                "config": "pyproject.toml",  # FIXED: Use centralized config instead of missing pytest.ini
+                "command": f"{self.python_command} -m pytest"
+            },
+            "frontend": {
+                "path": self.frontend_path,  # Frontend can stay as-is since it uses npm
+                "test_dir": "__tests__",
+                "config": "jest.config.cjs",
+                "command": "npm test"
+            }
+        }
 
     def _detect_staging_environment(self, args) -> bool:
         """Enhanced staging environment detection for GCP staging context.
@@ -978,33 +1006,6 @@ class UnifiedTestRunner:
                 return True
                 
         return False
-        
-        # Test execution timeout fix for iterations 41-60
-        env = get_env()
-        self.max_collection_size = int(env.get("MAX_TEST_COLLECTION_SIZE", "1000"))
-        
-        # Test configurations - Use project root as working directory to fix import issues
-        # ISSUE #558 FIX: Use centralized pyproject.toml instead of missing service-specific pytest.ini files
-        self.test_configs = {
-            "backend": {
-                "path": self.project_root,  # Changed from backend_path to project_root
-                "test_dir": "netra_backend/tests",  # Updated to full path from root
-                "config": "pyproject.toml",  # FIXED: Use centralized config instead of missing pytest.ini
-                "command": f"{self.python_command} -m pytest"
-            },
-            "auth": {
-                "path": self.project_root,  # Changed from auth_path to project_root
-                "test_dir": "auth_service/tests",  # Updated to full path from root
-                "config": "pyproject.toml",  # FIXED: Use centralized config instead of missing pytest.ini
-                "command": f"{self.python_command} -m pytest"
-            },
-            "frontend": {
-                "path": self.frontend_path,  # Frontend can stay as-is since it uses npm
-                "test_dir": "__tests__",
-                "config": "jest.config.cjs",
-                "command": "npm test"
-            }
-        }
     
     def _detect_python_command(self) -> str:
         """Detect the correct Python command for the current platform."""
@@ -1919,6 +1920,14 @@ class UnifiedTestRunner:
             env.set('ENVIRONMENT', 'staging', 'staging_config')
             env.set('NETRA_ENVIRONMENT', 'staging', 'staging_config')
             env.set('TEST_ENV', 'staging', 'staging_config')  # Required by environment_markers.py
+            
+            # CRITICAL FIX Issue #1270: Add staging-specific database environment guards
+            # Prevent ClickHouse cloud connection attempts during staging tests
+            env.set('CLICKHOUSE_MODE', 'mock', 'staging_database_guard')
+            env.set('CLICKHOUSE_REQUIRED', 'false', 'staging_database_guard')
+            env.set('DATABASE_CATEGORY_TEST_MODE', 'staging', 'staging_database_guard')
+            
+            print("[INFO] Issue #1270 Fix: Set staging database environment guards to prevent cloud connections")
             if self.docker_ports:
                 # Set discovered PostgreSQL URL
                 postgres_port = self.docker_ports.get('postgres', 5434)

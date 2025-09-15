@@ -40,7 +40,7 @@ class TestWebSocketAsyncCompatibility(SSotAsyncTestCase):
         # This should FAIL with TypeError initially - demonstrates the exact issue
         # Many places in codebase incorrectly await this synchronous function
         try:
-            manager_async = get_websocket_manager(user_context=user_context)
+            manager_async = await get_websocket_manager(user_context=user_context)
             logger.error("❌ Unexpected: await on synchronous function did not fail")
             # If this doesn't fail, it means the function signature changed or there's wrapping
             assert False, "Expected TypeError when awaiting synchronous get_websocket_manager()"
@@ -99,7 +99,7 @@ class TestWebSocketAsyncCompatibility(SSotAsyncTestCase):
                 await asyncio.sleep(delay)
             # Incorrect usage that causes staging issues
             try:
-                return get_websocket_manager(user_context=ctx)
+                return await get_websocket_manager(user_context=ctx)
             except TypeError as e:
                 logger.info(f"Expected error from incorrect await usage: {e}")
                 # Return proper call as fallback

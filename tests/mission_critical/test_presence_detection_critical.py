@@ -55,7 +55,7 @@ from netra_backend.app.websocket_core import (
     create_server_message,
     MessageType
 )
-from netra_backend.app.websocket_core.manager import (
+from netra_backend.app.websocket_core.websocket_manager import (
     WebSocketHeartbeatManager,
     HeartbeatConfig,
     get_heartbeat_manager

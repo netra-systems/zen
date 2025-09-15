@@ -25,9 +25,9 @@ from shared.isolated_environment import get_env
 class TestFactoryPatternCoordination(BaseTestCase):
     """Test factory pattern coordination maintains Golden Path user isolation."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment with factory pattern coordination."""
-        super().setUp()
+        super().setup_method(method)
         self.env = get_env()
         
         # Factory pattern coordination components
@@ -257,9 +257,9 @@ class TestFactoryPatternCoordination(BaseTestCase):
 class TestFactoryPatternWebSocketCoordination(BaseTestCase):
     """Test factory pattern coordination with WebSocket components."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up WebSocket factory coordination test environment."""
-        super().setUp()
+        super().setup_method(method)
         
         # WebSocket factory coordination components
         self.websocket_factory_components = {
@@ -303,9 +303,9 @@ class TestFactoryPatternWebSocketCoordination(BaseTestCase):
 class TestFactoryPatternSecurityCoordination(BaseTestCase):
     """Test factory pattern security coordination for enterprise compliance."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up security coordination test environment."""
-        super().setUp()
+        super().setup_method(method)
         
         # Security coordination requirements
         self.security_requirements = {

@@ -46,9 +46,9 @@ class AgentResponse:
 class TestWebSocketAgentCoordination(BaseIntegrationTest):
     """Test WebSocket and agent coordination with real service simulation."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up integration test environment with WebSocket-agent coordination."""
-        super().setUp()
+        super().setup_method()
         self.env = get_env()
         
         # WebSocket coordination components

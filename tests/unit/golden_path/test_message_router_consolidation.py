@@ -24,9 +24,9 @@ from shared.isolated_environment import get_env
 class TestMessageRouterConsolidation(BaseTestCase):
     """Test message router consolidation maintains Golden Path success."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment with consolidated routing configuration."""
-        super().setUp()
+        super().setup_method(method)
         self.env = get_env()
         
         # Consolidated message routing components
@@ -235,9 +235,9 @@ class TestMessageRouterConsolidation(BaseTestCase):
 class TestMessageRouterPerformanceConsolidation(BaseTestCase):
     """Test message router performance improvements from consolidation."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up performance testing environment."""
-        super().setUp()
+        super().setup_method(method)
         
         # Performance benchmarks for consolidated routing
         self.performance_benchmarks = {

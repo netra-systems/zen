@@ -39,7 +39,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
+from netra_backend.app.agents.supervisor.agent_instance_factory import create_agent_instance_factory, get_agent_instance_factory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, AgentExecutionResult, PipelineStep
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
@@ -187,22 +187,46 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             except Exception as mock_error:
                 logger.error(f'   - Even mock agent creation failed: {mock_error}')
 
-    async def _ensure_agent_factory_configured(self):
-        """Ensure the agent factory is configured before creating agents.
+    async def _configure_factory_with_agent_registry(self, factory):
+        """Configure an agent instance factory with test agent registry.
         
-        This method can be called multiple times safely - it will only configure
-        the factory once.
+        This method configures a per-request factory with the agent class registry
+        needed for creating agent instances in tests.
         """
-        from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
-        factory = get_agent_instance_factory()
-        if hasattr(factory, '_agent_class_registry') and factory._agent_class_registry is not None:
-            logger.debug(f'AgentInstanceFactory already configured with {len(factory._agent_class_registry)} agents')
-            return
-        if hasattr(factory, '_agent_registry') and factory._agent_registry is not None:
-            logger.debug('AgentInstanceFactory already configured with legacy registry')
-            return
-        logger.info('AgentInstanceFactory not configured, configuring now...')
-        await self._configure_agent_instance_factory_for_tests()
+        from netra_backend.app.agents.supervisor.agent_class_registry import get_agent_class_registry
+        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+        
+        logger.info('🔧 Configuring AgentInstanceFactory with agent registry...')
+        try:
+            agent_class_registry = get_agent_class_registry()
+            if len(agent_class_registry) == 0:
+                logger.info('   - Populating agent class registry for tests...')
+                await self._populate_test_agent_registry(agent_class_registry)
+                agent_class_registry.freeze()
+                logger.info(f'   - Agent class registry populated with {len(agent_class_registry)} agents')
+            else:
+                logger.info(f'   - Using existing agent class registry with {len(agent_class_registry)} agents')
+            
+            mock_websocket_bridge = AgentWebSocketBridge()
+            factory.configure(
+                agent_class_registry=agent_class_registry, 
+                agent_registry=None, 
+                websocket_bridge=mock_websocket_bridge, 
+                llm_manager=self.mock_llm_manager, 
+                tool_dispatcher=None
+            )
+            logger.info('✅ AgentInstanceFactory configured successfully for tests')
+        except Exception as e:
+            logger.error(f'❌ Failed to configure AgentInstanceFactory: {e}')
+            raise
+            
+    async def _ensure_agent_factory_configured(self):
+        """DEPRECATED: Use _configure_factory_with_agent_registry instead.
+        
+        This method is deprecated as part of Issue #1186 Phase 2 SSOT migration.
+        The singleton pattern has been eliminated.
+        """
+        logger.warning("DEPRECATED: _ensure_agent_factory_configured() is deprecated. Use _configure_factory_with_agent_registry(factory) instead.")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -286,8 +310,8 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         updated_agent_context = realistic_user_context.agent_context.copy()
         updated_agent_context.update({'test_scenario': 'pipeline_sequencing', 'pipeline_type': 'sequential_agent_execution'})
         user_context = UserExecutionContext(user_id=realistic_user_context.user_id, thread_id=realistic_user_context.thread_id, run_id=realistic_user_context.run_id, request_id=realistic_user_context.request_id, websocket_client_id=realistic_user_context.websocket_client_id, agent_context=updated_agent_context, audit_metadata=realistic_user_context.audit_metadata.copy(), operation_depth=realistic_user_context.operation_depth, parent_request_id=realistic_user_context.parent_request_id)
-        factory = get_agent_instance_factory()
-        await self._ensure_agent_factory_configured()
+        factory = create_agent_instance_factory(user_context)
+        await self._configure_factory_with_agent_registry(factory)
         triage_agent = await factory.create_agent_instance('triage', user_context)
         data_agent = await factory.create_agent_instance('data_helper', user_context)
         optimizer_agent = await factory.create_agent_instance('optimization', user_context)

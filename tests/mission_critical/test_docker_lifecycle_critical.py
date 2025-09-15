@@ -46,7 +46,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 try:
     from netra_backend.app.core.configuration.base import get_config
     from netra_backend.app.services.user_execution_context import UserExecutionContext
-    from netra_backend.app.websocket_core.manager import WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.agents.registry import AgentRegistry
     REAL_SERVICES_AVAILABLE = True
 except ImportError as e:

@@ -132,13 +132,24 @@ class RealAgentOrchestrationTester:
     def __init__(self):
         self.env = get_env()
         self.config = get_config()
-        self.llm_manager = LLMManager(self.config)
+        # Create proper UserExecutionContext for e2e testing with user isolation
+        self.user_context = UserExecutionContext.from_request(
+            user_id="test-user-e2e-orchestration", 
+            thread_id="test-thread-orchestration",
+            run_id="test-run-orchestration"
+        )
+        self.llm_manager = LLMManager(self.user_context)
         
         # REAL services - no mocks allowed per Claude.md
         # WebSocket manager will be created with factory pattern during async initialization
         self.websocket_manager = None
         self.agent_registry = AgentRegistry()
-        self.execution_engine = UserExecutionEngine()
+        # Create execution engine with required parameters for user isolation
+        self.execution_engine = ExecutionEngine(
+            context=self.user_context,
+            agent_factory=self.agent_registry,
+            websocket_emitter=None  # Will be set during async initialization
+        )
         self.websocket_notifier = None  # Will be set during async init
         self.bridge = AgentWebSocketBridge.get_instance()
         

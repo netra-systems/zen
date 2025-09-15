@@ -270,6 +270,9 @@ markers = [
     "integration_errors: Integration errors tests",
     "health_check_errors: Health check errors tests",
     "concurrent_errors: Concurrent errors tests",
+    
+    # Issue #1184 WebSocket Infrastructure test markers
+    "issue_1184: Issue #1184 WebSocket infrastructure async/await compatibility tests",
     "recovery_mechanisms: Recovery mechanisms tests",
     "resource_cleanup: Resource cleanup tests",
     "memory_errors: Memory errors tests",

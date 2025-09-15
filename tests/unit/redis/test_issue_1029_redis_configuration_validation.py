@@ -48,9 +48,9 @@ class TestRedisIssue1029ConfigurationValidation(SSotBaseTestCase):
     - Environment-specific configuration rules
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test fixtures for Issue #1029 configuration validation."""
-        super().setUp()
+        super().setup_method(method)
         self.gcp_staging_config = {'ENVIRONMENT': 'staging', 'GCP_PROJECT_ID': 'netra-staging', 'USE_GCP_SECRET_MANAGER': 'true', 'VPC_CONNECTOR': 'projects/netra-staging/locations/us-central1/connectors/vpc-connector'}
         self.complete_gcp_config = {'ENVIRONMENT': 'staging', 'GCP_PROJECT_ID': 'netra-staging', 'USE_GCP_SECRET_MANAGER': 'true', 'VPC_CONNECTOR': 'projects/netra-staging/locations/us-central1/connectors/vpc-connector', 'REDIS_HOST': '10.166.204.83', 'REDIS_PORT': '6379', 'REDIS_PASSWORD': 'redis-staging-password'}
         self.local_dev_config = {'ENVIRONMENT': 'development', 'REDIS_HOST': 'localhost', 'REDIS_PORT': '6379'}
