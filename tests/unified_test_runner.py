@@ -3140,8 +3140,8 @@ class UnifiedTestRunner:
         """
         Determine if a category should use pattern filtering (-k expressions).
 
-        Issue #1270 Fix: Pattern filtering should only apply to categories that are designed
-        for keyword-based test selection, not categories that use specific files or directories.
+        Issue #1270 Fix: Enhanced pattern filtering logic to handle combined categories
+        and prevent WebSocket event routing breakdowns.
 
         Categories that SHOULD use patterns:
         - websocket: Uses -k "websocket or ws" by design
@@ -3149,14 +3149,43 @@ class UnifiedTestRunner:
         - e2e: Pattern filtering can help narrow down e2e tests
         - e2e_critical: Pattern filtering can help narrow down critical e2e tests
         - agent: Pattern filtering useful for agent-related tests
+        - database: When combined with agent tests (agent+database), enables pattern filtering
 
-        Categories that should NOT use patterns:
+        Categories that should NOT use patterns (standalone):
         - unit: Uses directory paths, should run all unit tests
         - integration: Uses directory paths, should run all integration tests
-        - database: Uses specific test files, should run all database tests
         - api: Uses specific test files, should run all API tests
         - smoke: Uses markers, not patterns
+
+        Combined categories (e.g., agent+database):
+        - If ANY component supports pattern filtering, enable for the combination
+        - Special handling for WebSocket-aware patterns to prevent event routing issues
         """
+        # Handle combined categories (e.g., "agent+database", "websocket+integration")
+        if '+' in category_name:
+            category_parts = [part.strip() for part in category_name.split('+')]
+
+            # Special case: WebSocket-aware pattern filtering
+            # If any part involves websocket, ensure WebSocket event routing works
+            has_websocket = any('websocket' in part.lower() or 'ws' in part.lower() for part in category_parts)
+
+            # Check if any component in the combination supports pattern filtering
+            pattern_enabled_categories = {
+                'websocket', 'security', 'e2e', 'e2e_critical', 'e2e_full',
+                'agent', 'performance', 'database'  # database now enabled for combinations
+            }
+
+            # If any part supports pattern filtering, enable for the whole combination
+            any_supports_patterns = any(part in pattern_enabled_categories for part in category_parts)
+
+            if has_websocket:
+                # For WebSocket combinations, always enable pattern filtering to ensure
+                # proper test selection and prevent event routing breakdowns
+                return True
+
+            return any_supports_patterns
+
+        # Single category logic
         pattern_enabled_categories = {
             'websocket',
             'security',
@@ -3165,6 +3194,7 @@ class UnifiedTestRunner:
             'e2e_full',
             'agent',
             'performance'  # Performance tests may benefit from pattern filtering
+            # Note: 'database' excluded for standalone use, but included in combinations
         }
 
         return category_name in pattern_enabled_categories
