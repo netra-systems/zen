@@ -729,6 +729,9 @@ markers = [
     # Scalability and performance markers
     "scalability: Scalability and concurrent user load testing",
     "advanced_scenarios: Advanced user scenarios for enterprise and complex business use cases",
+
+    # Issue #1174 specific marker
+    "issue_1174: Issue #1174 auth token validation unit tests",
 ]
 
 # Coverage settings
