@@ -320,14 +320,14 @@ class TestSSotWebSocketPatternCompliance:
         Validates the underlying SSOT implementation.
         """
         try:
-            from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
             # Verify SSOT implementation exists
-            assert _UnifiedWebSocketManagerImplementation is not None
+            assert UnifiedWebSocketManager is not None
 
             # Check for user context requirement in implementation
             import inspect
-            sig = inspect.signature(_UnifiedWebSocketManagerImplementation.__init__)
+            sig = inspect.signature(UnifiedWebSocketManager.__init__)
             assert 'user_context' in sig.parameters, (
                 "Unified implementation should require user_context for user isolation"
             )

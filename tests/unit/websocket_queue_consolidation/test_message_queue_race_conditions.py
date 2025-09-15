@@ -39,7 +39,7 @@ from netra_backend.app.websocket_core.message_buffer import (
     WebSocketMessageBuffer, BufferedMessage, BufferPriority, BufferConfig
 )
 from netra_backend.app.websocket_core.utils import WebSocketMessageQueue
-from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
 from shared.types.core_types import UserID, ConnectionID
 
@@ -81,7 +81,7 @@ class TestMessageQueueRaceConditions(SSotAsyncTestCase):
         utils_queue = WebSocketMessageQueue()
 
         # Simulate unified manager with internal queues
-        unified_manager = _UnifiedWebSocketManagerImplementation()
+        unified_manager = UnifiedWebSocketManager()
 
         # Track messages processed by each queue
         message_queue_results = []

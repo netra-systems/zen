@@ -34,7 +34,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 from netra_backend.app.websocket_core.message_queue import MessageQueue, MessagePriority
 from netra_backend.app.websocket_core.message_buffer import WebSocketMessageBuffer, BufferPriority
 from netra_backend.app.websocket_core.utils import WebSocketMessageQueue
-from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
 from shared.types.core_types import UserID, ConnectionID
 
@@ -160,7 +160,7 @@ class TestGoldenPathQueueDisruption(SSotAsyncTestCase):
         priority_queue = MessageQueue(self.golden_path_connection_id, self.golden_path_user_id)
         buffer_queue = WebSocketMessageBuffer()
         simple_queue = WebSocketMessageQueue()
-        unified_manager = _UnifiedWebSocketManagerImplementation()
+        unified_manager = UnifiedWebSocketManager()
 
         # Track Golden Path event delivery for each queue
         priority_queue_events = []
