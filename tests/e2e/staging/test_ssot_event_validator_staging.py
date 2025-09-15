@@ -34,8 +34,8 @@ class TestSsotEventValidatorStaging(SSotAsyncTestCase):
         """Set up staging test environment with real services."""
         await super().asyncSetUp()
         self.env = IsolatedEnvironment()
-        self.staging_base_url = self.env.get_env_var('STAGING_BASE_URL', 'https://staging.netra-apex.com')
-        self.staging_websocket_url = self.env.get_env_var('STAGING_WEBSOCKET_URL', 'wss://staging.netra-apex.com/ws')
+        self.staging_base_url = self.env.get_env_var('STAGING_BASE_URL', 'https://api.staging.netrasystems.ai')
+        self.staging_websocket_url = self.env.get_env_var('STAGING_WEBSOCKET_URL', 'wss://api.staging.netrasystems.ai/ws')
         self.max_validation_time = 2.0
         self.max_concurrent_validations = 50
         self.target_success_rate = 0.98
