@@ -37,7 +37,7 @@ from netra_backend.app.db.models_auth import User
 from shared.isolated_environment import get_env
 
 
-class TestThreadIsolationIntegration(SSotAsyncTestCase):
+class ThreadIsolationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for thread isolation and multi-user security.
     

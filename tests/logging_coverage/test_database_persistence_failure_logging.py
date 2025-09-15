@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 import uuid
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
+class DatabaseConnectionFailureLoggingTests(SSotAsyncTestCase):
     """Test database connection failure logging coverage."""
 
     def setUp(self):
@@ -120,7 +120,7 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
         assert f'{pool_size} PostgreSQL connections' in message1
         assert f'{waiting_requests} waiting' in message1
 
-class TestDataPersistenceFailureLogging(SSotAsyncTestCase):
+class DataPersistenceFailureLoggingTests(SSotAsyncTestCase):
     """Test data persistence operation failure logging coverage."""
 
     def setUp(self):
@@ -245,7 +245,7 @@ class TestDataPersistenceFailureLogging(SSotAsyncTestCase):
         assert backup_type in message1
         assert backup_destination in message1
 
-class TestThreeTierPersistenceFailureLogging(SSotAsyncTestCase):
+class ThreeTierPersistenceFailureLoggingTests(SSotAsyncTestCase):
     """Test 3-tier persistence architecture failure logging coverage."""
 
     def setUp(self):
@@ -323,7 +323,7 @@ class TestThreeTierPersistenceFailureLogging(SSotAsyncTestCase):
         assert 'All 3 tiers unavailable' in message1
         assert self.user_id[:8] in message1
 
-class TestDatabaseLoggingCoverageGaps(SSotAsyncTestCase):
+class DatabaseLoggingCoverageGapsTests(SSotAsyncTestCase):
     """Identify database/persistence logging coverage gaps."""
 
     def test_database_logging_coverage_analysis(self):

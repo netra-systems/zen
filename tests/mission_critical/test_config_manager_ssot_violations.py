@@ -33,7 +33,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestConfigManagerSSotViolations(SSotBaseTestCase):
+class ConfigManagerSSotViolationsTests(SSotBaseTestCase):
     """Test suite to reproduce and validate config manager SSOT violations."""
 
     def test_config_manager_import_conflicts_detected(self):

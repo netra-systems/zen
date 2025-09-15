@@ -18,7 +18,7 @@ from shared.configuration.central_config_validator import CentralConfigurationVa
 from shared.lifecycle.service_lifecycle_manager import ServiceLifecycleManager, ServiceRegistration, ServiceDependency, ReadinessContract, InitializationPhase, ServiceState, get_lifecycle_manager
 
 @pytest.mark.unit
-class TestRaceConditionProtection:
+class RaceConditionProtectionTests:
     """Test race condition protection in central config validator."""
 
     @pytest.fixture
@@ -120,7 +120,7 @@ class TestRaceConditionProtection:
                 assert 'Validation failed' in str(e)
 
 @pytest.mark.unit
-class TestServiceLifecycleManager:
+class ServiceLifecycleManagerTests:
     """Test service lifecycle management and dependency resolution."""
 
     @pytest.fixture
@@ -229,7 +229,7 @@ class TestServiceLifecycleManager:
         assert service_status['phase'] == InitializationPhase.BOOTSTRAP.value
 
 @pytest.mark.unit
-class TestIntegrationScenarios:
+class IntegrationScenariosTests:
     """Integration tests for race condition scenarios."""
 
     @pytest.mark.asyncio

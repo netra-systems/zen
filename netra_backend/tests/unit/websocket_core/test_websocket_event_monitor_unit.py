@@ -25,7 +25,7 @@ from netra_backend.app.websocket_core.event_monitor import (
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 
 
-class TestWebSocketEventMonitor:
+class WebSocketEventMonitorTests:
     """Unit tests for WebSocket event monitoring."""
     
     @pytest.fixture

@@ -21,7 +21,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType, get_id_manager
 
-class TestUnifiedIDManagerViolations(SSotBaseTestCase):
+class UnifiedIDManagerViolationsTests(SSotBaseTestCase):
     """Test suite to detect direct UUID.uuid4() violations in auth service code."""
 
     def setUp(self):
@@ -197,7 +197,7 @@ class TestUnifiedIDManagerViolations(SSotBaseTestCase):
             if len(self.violations_found) > 20:
                 print(f'  ... and {len(self.violations_found) - 20} more')
 
-class TestUnifiedIDManagerCorrectUsage(SSotBaseTestCase):
+class UnifiedIDManagerCorrectUsageTests(SSotBaseTestCase):
     """Test correct UnifiedIDManager usage patterns."""
 
     def test_unified_id_manager_basic_functionality(self):

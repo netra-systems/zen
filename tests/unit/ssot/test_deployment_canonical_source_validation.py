@@ -35,7 +35,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestDeploymentCanonicalSourceValidation(SSotBaseTestCase):
+class DeploymentCanonicalSourceValidationTests(SSotBaseTestCase):
     """
     Unit tests for deployment canonical source validation.
     
@@ -244,7 +244,7 @@ class TestDeploymentCanonicalSourceValidation(SSotBaseTestCase):
         return deployment_scripts
 
 @pytest.mark.unit
-class TestDeploymentCanonicalSourceEdgeCases(SSotBaseTestCase):
+class DeploymentCanonicalSourceEdgeCasesTests(SSotBaseTestCase):
     """
     Edge case tests for deployment canonical source validation.
     """

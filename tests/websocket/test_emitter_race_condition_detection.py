@@ -30,7 +30,7 @@ from netra_backend.app.services.websocket.transparent_websocket_events import Tr
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.websocket
-class TestWebSocketEmitterRaceConditions(SSotAsyncTestCase):
+class WebSocketEmitterRaceConditionsTests(SSotAsyncTestCase):
     """
     Test race conditions in WebSocket emitter implementations.
     
@@ -131,7 +131,7 @@ class TestWebSocketEmitterRaceConditions(SSotAsyncTestCase):
             self.assertEqual(emission['user_id'], user_context, 'User context should match emission user_id')
 
 @pytest.mark.websocket
-class TestSSotEmitterCompliance(SSotAsyncTestCase):
+class SSotEmitterComplianceTests(SSotAsyncTestCase):
     """
     Test SSOT compliance of WebSocket emitter implementations.
     
@@ -201,7 +201,7 @@ class TestSSotEmitterCompliance(SSotAsyncTestCase):
         self.assertEqual(pool.get_statistics()['releases'], 1, 'Should track releases')
 
 @pytest.mark.websocket
-class TestCriticalEventDelivery(SSotAsyncTestCase):
+class CriticalEventDeliveryTests(SSotAsyncTestCase):
     """
     Test critical event delivery through SSOT emitter.
     
@@ -278,7 +278,7 @@ class TestCriticalEventDelivery(SSotAsyncTestCase):
             self.assertEqual(actual_event, expected_event, f'Event {i} should be {expected_event}')
 
 @pytest.mark.websocket
-class TestEmitterAPICompatibility(SSotAsyncTestCase):
+class EmitterAPICompatibilityTests(SSotAsyncTestCase):
     """
     Test API compatibility of consolidated emitter.
     

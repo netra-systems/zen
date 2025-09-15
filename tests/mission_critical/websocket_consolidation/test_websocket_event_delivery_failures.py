@@ -49,7 +49,7 @@ except ImportError as e:
     EnhancedToolDispatcher = None
 
 
-class TestWebSocketEventDeliveryFailures(SSotAsyncTestCase):
+class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
     """
     CRITICAL: This test proves WebSocket event delivery failures.
 

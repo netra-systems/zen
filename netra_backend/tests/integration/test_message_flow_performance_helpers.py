@@ -19,7 +19,7 @@ from netra_backend.app.logging_config import central_logger
 
 # Removed unused import: from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
 
-class TestSyntaxFix:
+class SyntaxFixTests:
     """Test class for orphaned methods"""
 
     def setup_method(self):

@@ -191,7 +191,7 @@ class FinalizePhaseIntegrationTest(BaseIntegrationTest):
             assert not failed_phases, f"Startup phases failed: {failed_phases}"
 
 
-class TestFinalizePhaseSystemValidation(FinalizePhaseIntegrationTest):
+class FinalizePhaseSystemValidationTests(FinalizePhaseIntegrationTest):
     """Test FINALIZE phase system-wide validation and readiness."""
 
     @pytest.mark.asyncio
@@ -381,7 +381,7 @@ class TestFinalizePhaseSystemValidation(FinalizePhaseIntegrationTest):
         logger.info(" PASS:  Resource allocation validated for chat operations")
 
 
-class TestFinalizePhasePerformanceValidation(FinalizePhaseIntegrationTest):
+class FinalizePhasePerformanceValidationTests(FinalizePhaseIntegrationTest):
     """Test FINALIZE phase performance and monitoring setup."""
 
     @pytest.mark.asyncio
@@ -495,7 +495,7 @@ class TestFinalizePhasePerformanceValidation(FinalizePhaseIntegrationTest):
         self.startup_metrics['timing_requirement_met'] = True
 
 
-class TestFinalizePhaseErrorHandlingValidation(FinalizePhaseIntegrationTest):
+class FinalizePhaseErrorHandlingValidationTests(FinalizePhaseIntegrationTest):
     """Test FINALIZE phase error handling and recovery capabilities."""
 
     @pytest.mark.asyncio
@@ -587,7 +587,7 @@ class TestFinalizePhaseErrorHandlingValidation(FinalizePhaseIntegrationTest):
         logger.info(" PASS:  System recovery readiness validated")
 
 
-class TestFinalizePhaseBusinessValueValidation(FinalizePhaseIntegrationTest):
+class FinalizePhaseBusinessValueValidationTests(FinalizePhaseIntegrationTest):
     """Test FINALIZE phase business value and production readiness."""
 
     @pytest.mark.asyncio

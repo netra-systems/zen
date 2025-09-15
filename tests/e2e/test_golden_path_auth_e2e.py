@@ -39,7 +39,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.e2e
-class TestGoldenPathAuthE2E(SSotAsyncTestCase):
+class GoldenPathAuthE2ETests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

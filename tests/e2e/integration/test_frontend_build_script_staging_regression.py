@@ -32,7 +32,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 
 @pytest.mark.staging
 @pytest.mark.critical  
-class TestFrontendBuildScriptRegression:
+class FrontendBuildScriptRegressionTests:
     """Tests that replicate frontend build script issues from staging audit"""
 
     @pytest.mark.e2e
@@ -292,7 +292,7 @@ class TestFrontendBuildScriptRegression:
 
 @pytest.mark.staging
 @pytest.mark.critical
-class TestFrontendBuildEnvironmentRegression:
+class FrontendBuildEnvironmentRegressionTests:
     """Tests frontend build environment configuration issues"""
 
     @pytest.mark.e2e

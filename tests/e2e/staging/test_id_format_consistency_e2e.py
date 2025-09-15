@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 @pytest.mark.e2e
-class TestIdFormatConsistencyE2EStaging(SSotAsyncTestCase):
+class IdFormatConsistencyE2EStagingTests(SSotAsyncTestCase):
     """End-to-end staging tests validating ID format consistency across all services"""
 
     def setUp(self):

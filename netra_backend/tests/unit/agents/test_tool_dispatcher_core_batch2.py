@@ -24,7 +24,7 @@ from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher, ToolDi
 from netra_backend.app.schemas.tool import ToolInput, ToolResult, ToolStatus
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
-class TestToolDispatcherCoreUnit(SSotBaseTestCase):
+class ToolDispatcherCoreUnitTests(SSotBaseTestCase):
     """Unit tests for core tool dispatcher functionality."""
 
     def setup_method(self, method):
@@ -177,13 +177,13 @@ class TestToolDispatcherCoreUnit(SSotBaseTestCase):
         """
         from langchain_core.tools import BaseTool
 
-        class TestTool(BaseTool):
+        class ToolTests(BaseTool):
             name: str = 'test_base_tool'
             description: str = 'Test BaseTool'
 
             def _run(self, *args, **kwargs):
                 return 'test result'
-        mock_tool = TestTool()
+        mock_tool = ToolTests()
         with patch('netra_backend.app.agents.tool_dispatcher_core.ToolRegistry') as mock_registry_class:
             with patch('netra_backend.app.agents.tool_dispatcher_core.UnifiedToolExecutionEngine'):
                 with patch('netra_backend.app.agents.tool_dispatcher_core.ToolValidator'):
@@ -342,7 +342,7 @@ class TestToolDispatcherCoreUnit(SSotBaseTestCase):
                     assert 'WebSocket bridge is None' in diagnosis['critical_issues']
         self.record_metric('websocket_diagnostics_tested', True)
 
-class TestToolDispatcherDataModelsUnit(SSotBaseTestCase):
+class ToolDispatcherDataModelsUnitTests(SSotBaseTestCase):
     """Unit tests for data models in tool_dispatcher_core."""
 
     def test_tool_dispatch_request_model_validation(self):

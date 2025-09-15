@@ -50,7 +50,7 @@ from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestRealtimeCommunicationGoldenPath(SSotAsyncTestCase):
+class RealtimeCommunicationGoldenPathTests(SSotAsyncTestCase):
     """Unit tests for real-time communication in the golden path."""
 
     def setup_method(self, method):

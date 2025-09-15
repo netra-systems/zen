@@ -18,7 +18,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 @pytest.mark.e2e
 @pytest.mark.production_validation
-class TestProductionConfigurationValidation:
+class ProductionConfigurationValidationTests:
     """Test production configuration validation and security compliance."""
 
     @pytest.fixture(autouse=True)

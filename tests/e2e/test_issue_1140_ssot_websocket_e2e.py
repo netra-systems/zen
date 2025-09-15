@@ -185,7 +185,7 @@ class WebSocketTestClient:
 @pytest.mark.e2e
 @pytest.mark.staging_gcp
 @pytest.mark.issue_1140
-class TestIssue1140SSOTWebSocketE2E(BaseE2ETest):
+class Issue1140SSOTWebSocketE2ETests(BaseE2ETest):
     """Test complete SSOT WebSocket implementation on staging."""
     
     def setup_method(self):

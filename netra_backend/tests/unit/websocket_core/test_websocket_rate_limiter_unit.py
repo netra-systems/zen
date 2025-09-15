@@ -24,7 +24,7 @@ from netra_backend.app.websocket_core.rate_limiter import (
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 
 
-class TestWebSocketRateLimiter:
+class WebSocketRateLimiterTests:
     """Unit tests for WebSocket rate limiting."""
     
     @pytest.fixture

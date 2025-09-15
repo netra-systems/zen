@@ -19,7 +19,7 @@ from test_framework.environment_markers import staging_only, env_requires
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestFrontendBackendConnection:
+class FrontendBackendConnectionTests:
     """Test frontend-backend connectivity issues in staging."""
 
     @staging_only

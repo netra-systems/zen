@@ -31,7 +31,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthH
 from shared.logging.unified_logging_ssot import get_logger
 
 
-class TestAgentExecutionLoggingE2E(SSotAsyncTestCase):
+class AgentExecutionLoggingE2ETests(SSotAsyncTestCase):
     """Test complete agent execution logging in end-to-end scenarios."""
     
     def setup_method(self, method=None):

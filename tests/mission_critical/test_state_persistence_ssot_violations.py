@@ -30,7 +30,7 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestStatePersistenceSSotViolations(SSotBaseTestCase):
+class StatePersistenceSSotViolationsTests(SSotBaseTestCase):
     """Reproduction tests that expose state persistence SSOT violations."""
     
     def test_reproduction_demo_script_import_failure(self):
@@ -161,7 +161,7 @@ class TestStatePersistenceSSotViolations(SSotBaseTestCase):
         pytest.fail(f"GOLDEN PATH IMPACT: SSOT violation affects business-critical functionality: {ssot_violation_impact}")
 
 
-class TestStatePersistenceModuleStructure(SSotBaseTestCase):
+class StatePersistenceModuleStructureTests(SSotBaseTestCase):
     """Tests validating the problematic module structure that violates SSOT."""
     
     def test_multiple_persistence_service_references(self):

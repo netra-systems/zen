@@ -22,7 +22,7 @@ from datetime import datetime
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType, IDMetadata
 from test_framework.fixtures.id_system.id_format_samples import get_business_audit_samples, CRITICAL_BUSINESS_SCENARIOS
 
-class TestEnhancedUUIDBusinessRequirements:
+class EnhancedUUIDBusinessRequirementsTests:
     """
     Tests that validate enhanced UUID system meets business requirements.
     
@@ -271,7 +271,7 @@ class TestEnhancedUUIDBusinessRequirements:
                 return False
         return True
 
-class TestEnhancedUUIDScalabilityCapabilities:
+class EnhancedUUIDScalabilityCapabilitiesTests:
     """
     Tests that validate enhanced UUID system scales for business needs.
     """
@@ -338,7 +338,7 @@ class TestEnhancedUUIDScalabilityCapabilities:
 
 @pytest.mark.critical
 @pytest.mark.business_requirements
-class TestUUIDBusinessValueDelivery:
+class UUIDBusinessValueDeliveryTests:
     """
     Critical tests that prove enhanced UUID system delivers business value.
     """

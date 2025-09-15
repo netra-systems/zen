@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestWebSocketComplexityMetrics(SSotBaseTestCase, unittest.TestCase):
+class WebSocketComplexityMetricsTests(SSotBaseTestCase, unittest.TestCase):
     """Test current WebSocket complexity to validate consolidation benefits."""
 
     def setUp(self):

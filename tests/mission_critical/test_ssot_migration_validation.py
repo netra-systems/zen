@@ -17,7 +17,7 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestSSotMigrationValidation(SSotBaseTestCase):
+class SSotMigrationValidationTests(SSotBaseTestCase):
     """Validate SSOT migration completion for mission-critical files."""
 
     def setup_method(self, method):

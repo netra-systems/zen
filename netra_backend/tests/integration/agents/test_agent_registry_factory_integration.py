@@ -89,7 +89,7 @@ class UserTestData:
             self.websocket_events = []
 
 
-class TestAgentRegistryFactoryIntegration(SSotAsyncTestCase):
+class AgentRegistryFactoryIntegrationTests(SSotAsyncTestCase):
     """Comprehensive integration tests for Agent Registry and Factory patterns."""
     
     @pytest.fixture

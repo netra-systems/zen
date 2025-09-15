@@ -61,7 +61,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.asyncio
-class TestServiceDependencyCore:
+class ServiceDependencyCoreTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

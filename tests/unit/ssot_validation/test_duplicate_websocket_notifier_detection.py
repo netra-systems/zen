@@ -26,7 +26,7 @@ from unittest.mock import patch
 import unittest
 
 @pytest.mark.unit
-class TestDuplicateWebSocketNotifierDetection(unittest.TestCase):
+class DuplicateWebSocketNotifierDetectionTests(unittest.TestCase):
     """
     CRITICAL SSOT Test: Detect duplicate WebSocketNotifier implementations
     

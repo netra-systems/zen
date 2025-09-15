@@ -32,7 +32,7 @@ except ImportError as e:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestMultiUserIdIsolation(SSotAsyncTestCase):
+class MultiUserIdIsolationTests(SSotAsyncTestCase):
     """
     Integration test suite for multi-user ID isolation validation.
 

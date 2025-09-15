@@ -436,7 +436,7 @@ class AgentExecutionOrchestrator:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestAgentExecutionSequenceBusinessLogic(BaseTestCase):
+class AgentExecutionSequenceBusinessLogicTests(BaseTestCase):
     """Test agent execution sequence business logic for Golden Path delivery."""
 
     def setup_method(self):

@@ -11,7 +11,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestDisasterRecoveryBackupValidation:
+class DisasterRecoveryBackupValidationTests:
     """Validates backup and restoration procedures for disaster recovery."""
     
     @pytest.fixture

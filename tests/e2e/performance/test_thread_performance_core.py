@@ -31,7 +31,7 @@ from tests.e2e.fixtures.core.thread_test_fixtures_core import (
 
 logger = central_logger.get_logger(__name__)
 
-class TestThreadPerformanceer:
+class ThreadPerformanceerTests:
     """Comprehensive thread performance testing."""
     
     def __init__(self, ws_fixtures: ThreadWebSocketFixtures, 
@@ -373,7 +373,7 @@ class TestThreadPerformanceer:
 
 
 # Alias for backward compatibility (fixing typo)
-ThreadPerformanceTester = TestThreadPerformanceer
+ThreadPerformanceTester = ThreadPerformanceerTests
 
 
 @pytest.fixture

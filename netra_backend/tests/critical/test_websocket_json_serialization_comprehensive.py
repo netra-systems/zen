@@ -15,7 +15,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSo
 from netra_backend.app.services.unified_authentication_service import UnifiedAuthenticationService
 from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging
 
-class TestWebSocketJSONSerialization:
+class WebSocketJSONSerializationTests:
     """Test WebSocket components for JSON serialization safety."""
 
     def test_safe_websocket_state_logging_function(self):
@@ -119,7 +119,7 @@ class TestWebSocketJSONSerialization:
         assert parsed['failure_context']['websocket_state'] == 'connected'
         assert parsed['environment'] == 'staging'
 
-class TestWebSocketComponentsIntegration:
+class WebSocketComponentsIntegrationTests:
     """Integration tests for WebSocket components with JSON serialization."""
 
     def test_end_to_end_websocket_flow_json_safety(self):

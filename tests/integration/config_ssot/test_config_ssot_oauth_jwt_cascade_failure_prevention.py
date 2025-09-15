@@ -21,7 +21,7 @@ from shared.isolated_environment import get_env
 from shared.jwt_secret_manager import SharedJWTSecretManager
 
 
-class TestOAuthJWTCascadeFailurePrevention(BaseIntegrationTest):
+class OAuthJWTCascadeFailurePreventionTests(BaseIntegrationTest):
     """Test OAuth/JWT configuration SSOT compliance and cascade failure prevention."""
     
     @pytest.mark.integration

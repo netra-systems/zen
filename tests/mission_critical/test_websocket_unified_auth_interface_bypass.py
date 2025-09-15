@@ -42,7 +42,7 @@ from test_framework.ssot.no_docker_mode_detector import NoDockerModeDetector
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketUnifiedAuthInterfaceBypass(SSotAsyncTestCase):
+class WebSocketUnifiedAuthInterfaceBypassTests(SSotAsyncTestCase):
     """
     SSOT Violation Reproduction: Tests that WebSocket bypasses UnifiedAuthInterface.
     

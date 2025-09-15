@@ -43,7 +43,7 @@ from netra_backend.app.agents.triage_sub_agent import TriageSubAgent
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 
-class TestAuthenticatedChatWorkflowComprehensive(SSotAsyncTestCase):
+class AuthenticatedChatWorkflowComprehensiveTests(SSotAsyncTestCase):
     """
     CRITICAL: Integration tests for authenticated chat workflows that deliver business value.
     

@@ -79,7 +79,7 @@ class MockWebSocketFactory:
 
 
 @pytest.mark.integration
-class TestWebSocketFactoryResourceLeakIntegration(SSotBaseTestCase):
+class WebSocketFactoryResourceLeakIntegrationTests(SSotBaseTestCase):
     """Integration tests for WebSocket factory resource leak patterns."""
     
     def setUp(self):
@@ -311,7 +311,7 @@ class TestWebSocketFactoryResourceLeakIntegration(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestAuthSessionMultiUserIntegration(SSotBaseTestCase):
+class AuthSessionMultiUserIntegrationTests(SSotBaseTestCase):
     """Integration tests for multi-user auth session isolation."""
     
     def setUp(self):
@@ -491,7 +491,7 @@ class TestAuthSessionMultiUserIntegration(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestFactoryPatternResourceLeakIntegration(SSotBaseTestCase):
+class FactoryPatternResourceLeakIntegrationTests(SSotBaseTestCase):
     """Integration tests for factory pattern resource leak detection."""
     
     def setUp(self):

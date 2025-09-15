@@ -31,7 +31,7 @@ from netra_backend.app.core.config import get_config
 
 
 @pytest.mark.integration
-class TestUserSessionIsolationBoundaries(BaseIntegrationTest):
+class UserSessionIsolationBoundariesTests(BaseIntegrationTest):
     """
     Test user session isolation boundaries under concurrent access patterns.
     

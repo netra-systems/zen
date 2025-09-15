@@ -36,7 +36,7 @@ docker_manager = UnifiedDockerManager()
 @pytest.mark.config_validation
 @pytest.mark.critical
 @pytest.mark.asyncio
-class TestRealAuthConfigValidation:
+class RealAuthConfigValidationTests:
     """
     Real auth config validation tests using Docker services.
     

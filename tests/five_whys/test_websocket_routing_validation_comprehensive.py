@@ -52,7 +52,7 @@ from test_framework.fixtures.database_fixtures import test_db_session, netra_bac
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
-class TestWebSocketConnectionEstablishment(SSotBaseTestCase):
+class WebSocketConnectionEstablishmentTests(SSotBaseTestCase):
     """
     [U+1F50C] PHASE 1: WebSocket Connection Establishment Validation
     
@@ -218,7 +218,7 @@ class TestWebSocketConnectionEstablishment(SSotBaseTestCase):
                     await websocket.close()
 
 
-class TestSupervisorCreationSuccess(SSotBaseTestCase):
+class SupervisorCreationSuccessTests(SSotBaseTestCase):
     """
     [U+1F468][U+200D][U+1F4BC] PHASE 2: Supervisor Creation Success Validation
     
@@ -398,7 +398,7 @@ class TestSupervisorCreationSuccess(SSotBaseTestCase):
                 await websocket.close()
 
 
-class TestCompleteMessageRoutingChain(SSotBaseTestCase):
+class CompleteMessageRoutingChainTests(SSotBaseTestCase):
     """
     [U+1F4E8] PHASE 3: Complete Message Routing Chain Validation
     
@@ -539,7 +539,7 @@ class TestCompleteMessageRoutingChain(SSotBaseTestCase):
                 await websocket.close()
 
 
-class TestMultiUserIsolationMaintenance(SSotBaseTestCase):
+class MultiUserIsolationMaintenanceTests(SSotBaseTestCase):
     """
     [U+1F465] PHASE 4: Multi-User Isolation Maintenance Validation
     
@@ -629,7 +629,7 @@ class TestMultiUserIsolationMaintenance(SSotBaseTestCase):
                     await websocket.close()
 
 
-class TestRealTimeAgentCommunication(SSotBaseTestCase):
+class RealTimeAgentCommunicationTests(SSotBaseTestCase):
     """
     [U+1F916] PHASE 5: Real-Time Agent Communication Validation
     
@@ -703,7 +703,7 @@ class TestRealTimeAgentCommunication(SSotBaseTestCase):
                 await websocket.close()
 
 
-class TestEndToEndValidationSummary(SSotBaseTestCase):
+class EndToEndValidationSummaryTests(SSotBaseTestCase):
     """
      TARGET:  PHASE 6: End-to-End Validation Summary
     

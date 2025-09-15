@@ -29,7 +29,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
-class TestIsolationViolationDetection:
+class IsolationViolationDetectionTests:
     """
     Verification Tests: Ensure isolation violation detection works correctly.
     
@@ -151,7 +151,7 @@ class TestIsolationViolationDetection:
         logger.info(' PASS:  test_websocket_events_isolation correctly detected violations')
 
 @pytest.mark.e2e
-class TestIsolationViolationScenarios:
+class IsolationViolationScenariosTests:
     """
     Test various scenarios where isolation violations might occur
     to ensure our detection is comprehensive.

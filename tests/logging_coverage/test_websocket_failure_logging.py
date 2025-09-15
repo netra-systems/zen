@@ -16,7 +16,7 @@ import uuid
 import asyncio
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestWebSocketConnectionFailureLogging(SSotAsyncTestCase):
+class WebSocketConnectionFailureLoggingTests(SSotAsyncTestCase):
     """Test WebSocket connection failure logging coverage."""
 
     def setUp(self):
@@ -254,7 +254,7 @@ class TestWebSocketConnectionFailureLogging(SSotAsyncTestCase):
         assert 'GOLDEN PATH ESTABLISHED' in message1
         assert '5 critical events' in message1
 
-class TestWebSocketPerformanceLogging(SSotAsyncTestCase):
+class WebSocketPerformanceLoggingTests(SSotAsyncTestCase):
     """Test WebSocket performance-related logging."""
 
     def setUp(self):

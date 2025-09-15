@@ -48,7 +48,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 @pytest.mark.e2e
 @pytest.mark.staging_compatible
 @pytest.mark.recovery
-class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
+class BusinessValueChatRecoveryE2ETests(SSotBaseTestCase):
     """
     MISSION CRITICAL E2E Tests for Business Value Chat Recovery Patterns.
     

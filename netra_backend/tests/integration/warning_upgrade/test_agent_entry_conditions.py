@@ -46,7 +46,7 @@ from test_framework.ssot.database import DatabaseTestHelper
 logger = logging.getLogger(__name__)
 
 
-class TestAgentEntryConditionsEnhancedWarnings(SsotAsyncWarningUpgradeTestCase):
+class AgentEntryConditionsEnhancedWarningsTests(SsotAsyncWarningUpgradeTestCase):
     """
     Test suite for agent entry conditions enhanced warning diagnostics.
     

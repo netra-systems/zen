@@ -409,7 +409,7 @@ class RealMultiAgentCollaborationE2ETest(BaseE2ETest):
         )
 
 
-class TestRealMultiAgentCollaboration(RealMultiAgentCollaborationE2ETest):
+class RealMultiAgentCollaborationTests(RealMultiAgentCollaborationE2ETest):
     """Test suite for real multi-agent collaboration flows."""
     
     @pytest.mark.e2e
@@ -727,7 +727,7 @@ if __name__ == "__main__":
     async def run_direct_tests():
         logger.info("Starting real multi-agent collaboration E2E tests...")
         
-        test_instance = TestRealMultiAgentCollaboration()
+        test_instance = RealMultiAgentCollaborationTests()
         
         try:
             # Mock real_services_fixture for direct testing

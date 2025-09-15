@@ -36,7 +36,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.user_execution_context_fixtures import realistic_user_context, multi_user_contexts, clean_context_registry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestGoldenPathExecutionStatePropagation(SSotAsyncTestCase):
+class GoldenPathExecutionStatePropagationTests(SSotAsyncTestCase):
     """Test execution state propagation through Golden Path user flow."""
 
     def setup_method(self):
@@ -324,7 +324,7 @@ class TestGoldenPathExecutionStatePropagation(SSotAsyncTestCase):
 @pytest.mark.integration
 @pytest.mark.golden_path
 @pytest.mark.ssot_validation
-class TestGoldenPathSSotReadiness:
+class GoldenPathSSotReadinessTests:
     """Test Golden Path readiness for SSOT consolidation."""
 
     def test_golden_path_execution_components_inventory(self):

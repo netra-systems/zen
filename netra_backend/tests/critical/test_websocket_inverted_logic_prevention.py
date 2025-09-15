@@ -16,7 +16,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
-class TestWebSocketInvertedLogicPrevention:
+class WebSocketInvertedLogicPreventionTests:
     """Placeholder tests for WebSocket inverted logic prevention."""
 
     @pytest.mark.asyncio

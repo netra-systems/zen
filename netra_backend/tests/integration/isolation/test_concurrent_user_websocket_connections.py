@@ -35,7 +35,7 @@ from shared.types import UserID, ThreadID, RunID, RequestID
 from shared.id_generation import UnifiedIdGenerator
 
 
-class TestConcurrentUserWebSocketConnections(BaseIntegrationTest):
+class ConcurrentUserWebSocketConnectionsTests(BaseIntegrationTest):
     """Integration tests for concurrent user WebSocket connections and isolation."""
 
     @pytest.fixture(autouse=True)

@@ -9,7 +9,7 @@ import pytest
 from fastapi.websockets import WebSocketState
 from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging
 
-class TestWebSocketJSONSerializationFixes:
+class WebSocketJSONSerializationFixesTests:
     """Essential tests for WebSocket JSON serialization safety."""
 
     def test_websocket_state_safe_logging_all_states(self):

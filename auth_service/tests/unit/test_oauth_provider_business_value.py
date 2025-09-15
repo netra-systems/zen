@@ -26,7 +26,7 @@ from auth_service.auth_core.oauth_manager import OAuthManager
 from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider, GoogleOAuthError
 
 
-class TestOAuthProviderBusinessValue(BaseIntegrationTest):
+class OAuthProviderBusinessValueTests(BaseIntegrationTest):
     """Test OAuth provider business logic delivering user onboarding value."""
     
     @pytest.mark.unit

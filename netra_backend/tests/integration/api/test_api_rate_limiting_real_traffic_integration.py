@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 from netra_backend.app.services.rate_limiting.api_rate_limiter import APIRateLimiter
 
-class TestAPIRateLimitingRealTrafficIntegration(SSotBaseTestCase):
+class APIRateLimitingRealTrafficIntegrationTests(SSotBaseTestCase):
     """Test API rate limiting with real HTTP traffic"""
 
     def setup_method(self):

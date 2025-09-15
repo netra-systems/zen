@@ -31,7 +31,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager 
 
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestAuthenticationFlow:
+class AuthenticationFlowTests:
     """Test suite for real authentication flows protecting business value."""
 
     def get_service_urls(self) -> Dict[str, str]:

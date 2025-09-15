@@ -25,7 +25,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 @pytest.mark.unit
-class TestUuidViolationDetection(SSotBaseTestCase):
+class UuidViolationDetectionTests(SSotBaseTestCase):
     """
     Test suite to detect uuid.uuid4() violations across production code.
 

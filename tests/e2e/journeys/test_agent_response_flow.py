@@ -185,7 +185,7 @@ class AgentResponseFlowTester:
     data=["test_agents", "mock_llm_responses"]
 )
 @pytest.mark.e2e
-class TestAgentResponseFlow:
+class AgentResponseFlowTests:
     """E2E tests for agent response flow."""
     
     @pytest.fixture
@@ -320,7 +320,7 @@ class TestAgentResponseFlow:
 )
 @pytest.mark.critical
 @pytest.mark.e2e
-class TestCriticalResponseFlows:
+class CriticalResponseFlowsTests:
     """Critical response flow scenarios."""
     
     @pytest.mark.asyncio

@@ -264,7 +264,7 @@ class DockerInfrastructureValidator:
 
 
 @pytest.mark.mission_critical
-class TestDockerStabilityP1:
+class DockerStabilityP1Tests:
     """P1 PRIORITY: Critical Docker infrastructure stability tests"""
 
     @pytest.fixture

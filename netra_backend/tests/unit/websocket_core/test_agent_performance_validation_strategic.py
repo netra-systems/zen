@@ -75,7 +75,7 @@ class PerformanceMetrics:
         index = int(len(sorted_times) * 0.95)
         return sorted_times[index] * 1000
 
-class TestAgentPerformanceValidationStrategic(SSotAsyncTestCase):
+class AgentPerformanceValidationStrategicTests(SSotAsyncTestCase):
     """
     Strategic unit tests for agent performance validation under load conditions.
     

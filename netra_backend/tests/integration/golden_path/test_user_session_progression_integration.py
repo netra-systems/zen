@@ -46,7 +46,7 @@ class SessionProgressionState:
     timestamp: datetime
 
 
-class TestUserSessionProgressionIntegration(WebSocketIntegrationTest):
+class UserSessionProgressionIntegrationTests(WebSocketIntegrationTest):
     """Test user session and context progression with real services."""
     
     def setup_method(self):

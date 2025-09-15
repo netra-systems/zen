@@ -111,7 +111,7 @@ class CacheService:
         pass
 
 @pytest.mark.integration
-class TestDatabasePersistenceL3Integration:
+class DatabasePersistenceL3IntegrationTests:
     """Comprehensive L3 integration tests for database and persistence."""
 
     @pytest.mark.asyncio

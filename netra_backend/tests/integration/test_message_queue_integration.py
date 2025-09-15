@@ -2,7 +2,7 @@
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 
-class TestMessageQueueIntegration(BaseIntegrationTest):
+class MessageQueueIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     def test_message_queue_reliability(self):

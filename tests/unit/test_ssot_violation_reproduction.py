@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestSSotViolationReproduction(SSotBaseTestCase):
+class SSotViolationReproductionTests(SSotBaseTestCase):
     """Reproduce SSOT violations to prove they exist (tests will FAIL by design)."""
 
     @pytest.mark.xfail(reason="Expected to fail - reproducing duplicate mock violations")

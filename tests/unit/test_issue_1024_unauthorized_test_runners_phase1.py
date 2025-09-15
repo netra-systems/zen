@@ -34,7 +34,7 @@ except ImportError:
     BaseTestCase = unittest.TestCase
 
 @pytest.mark.unit
-class TestUnauthorizedTestRunnerDetection(BaseTestCase):
+class UnauthorizedTestRunnerDetectionTests(BaseTestCase):
     """Unit tests to detect unauthorized test runners violating SSOT patterns"""
 
     def setUp(self):
@@ -146,7 +146,7 @@ class TestUnauthorizedTestRunnerDetection(BaseTestCase):
         self.assertEqual(len(unauthorized_patterns), 0, f'CRITICAL SSOT VIOLATION: Found {len(unauthorized_patterns)} unauthorized test execution patterns bypassing unified test runner. This creates deployment chaos.')
 
 @pytest.mark.unit
-class TestGoldenPathTestReliabilityMetrics(BaseTestCase):
+class GoldenPathTestReliabilityMetricsTests(BaseTestCase):
     """Unit tests to measure and validate Golden Path test reliability"""
 
     def test_golden_path_test_success_rate_baseline(self):

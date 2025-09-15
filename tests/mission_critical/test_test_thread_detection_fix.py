@@ -32,7 +32,7 @@ from shared.isolated_environment import get_env
 logger = central_logger.get_logger(__name__)
 
 
-class TestThreadDetectionFix:
+class ThreadDetectionFixTests:
     """Test suite for test thread detection bug fix."""
 
     @pytest.fixture

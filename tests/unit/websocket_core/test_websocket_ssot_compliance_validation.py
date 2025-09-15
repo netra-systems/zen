@@ -26,7 +26,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestWebSocketSSOTComplianceValidation(SSotAsyncTestCase):
+class WebSocketSSOTComplianceValidationTests(SSotAsyncTestCase):
     """Comprehensive SSOT compliance validation for WebSocket imports."""
 
     async def asyncSetUp(self):
@@ -446,7 +446,7 @@ if __name__ == '__main__':
     import asyncio
 
     async def run_async_tests():
-        test_instance = TestWebSocketSSOTComplianceValidation()
+        test_instance = WebSocketSSOTComplianceValidationTests()
         await test_instance.asyncSetUp()
 
         # Run sync tests

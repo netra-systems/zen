@@ -90,7 +90,7 @@ class ConnectionPoolMetrics:
     connection_cleanup_time: float
 
 
-class TestDatabaseConnectionPoolRaceConditions(BaseIntegrationTest):
+class DatabaseConnectionPoolRaceConditionsTests(BaseIntegrationTest):
     """Comprehensive tests for database connection pool race conditions."""
     
     def setup_method(self):

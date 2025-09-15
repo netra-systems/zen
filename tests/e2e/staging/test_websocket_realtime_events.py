@@ -68,7 +68,7 @@ class WebSocketConnectionMetrics:
     reconnection_attempts: int
     error_count: int
 
-class TestWebSocketRealTimeEvents:
+class WebSocketRealTimeEventsTests:
     """
     Complete E2E WebSocket real-time event tests for staging environment.
     

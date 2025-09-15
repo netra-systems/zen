@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 @pytest.mark.integration
-class TestUnifiedIdGeneratorAdoption(SSotBaseTestCase):
+class UnifiedIdGeneratorAdoptionTests(SSotBaseTestCase):
     """Integration tests validating UnifiedIdGenerator adoption across all components"""
 
     def test_auth_session_id_uses_unified_generator_post_migration(self):

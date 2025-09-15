@@ -329,7 +329,7 @@ class WebSocketAgentLoadTester:
         except asyncio.CancelledError:
             logger.debug('Throughput monitoring stopped')
 
-class TestWebSocketAgentEventLoad:
+class WebSocketAgentEventLoadTests:
     """Performance load tests for WebSocket agent events."""
 
     @pytest.mark.asyncio

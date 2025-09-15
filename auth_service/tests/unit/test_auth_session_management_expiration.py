@@ -29,7 +29,7 @@ from auth_service.auth_core.config import AuthConfig
 from shared.isolated_environment import get_env
 
 
-class TestAuthSessionManagementCore:
+class AuthSessionManagementCoreTests:
     """Unit tests for authentication session management core logic."""
     
     @pytest.fixture(autouse=True)

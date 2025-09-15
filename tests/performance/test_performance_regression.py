@@ -458,7 +458,7 @@ class PerformanceBaselineManager:
         return " | ".join(recommendations) if recommendations else "Performance within acceptable parameters"
 
 
-class TestPerformanceRegression(SSotAsyncTestCase):
+class PerformanceRegressionTests(SSotAsyncTestCase):
     """
     Performance Regression Baseline Test Suite for Issue #1200
 

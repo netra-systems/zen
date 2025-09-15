@@ -183,7 +183,7 @@ class MockFactoryValidator:
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestFactoryInitializationLogic(SSotBaseTestCase):
+class FactoryInitializationLogicTests(SSotBaseTestCase):
     """Test factory initialization business logic validation."""
 
     def setup_method(self, method=None):

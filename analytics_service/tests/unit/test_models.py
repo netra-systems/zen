@@ -182,7 +182,7 @@ class UserActivitySummary(BaseModel):
 # EVENT MODEL VALIDATION TESTS
 # =============================================================================
 
-class TestEventModel:
+class EventModelTests:
     """Test suite for EventModel validation"""
     
     def test_valid_chat_interaction_event(self, sample_chat_interaction_event):
@@ -327,7 +327,7 @@ class TestEventModel:
 # PROPERTY MODEL VALIDATION TESTS
 # =============================================================================
 
-class TestPropertyModels:
+class PropertyModelsTests:
     """Test suite for event property models"""
     
     def test_chat_interaction_properties_validation(self):
@@ -412,7 +412,7 @@ class TestPropertyModels:
 # REPORT MODEL TESTS
 # =============================================================================
 
-class TestReportModel:
+class ReportModelTests:
     """Test suite for report models"""
     
     def test_valid_report_model(self):
@@ -477,7 +477,7 @@ class TestReportModel:
 # EDGE CASES AND ERROR CONDITIONS
 # =============================================================================
 
-class TestEdgeCases:
+class EdgeCasesTests:
     """Test suite for edge cases and error conditions"""
     
     def test_empty_properties_json(self):
@@ -623,7 +623,7 @@ class TestEdgeCases:
 # INTEGRATION WITH EXISTING FIXTURES
 # =============================================================================
 
-class TestWithFixtures:
+class WithFixturesTests:
     """Test models using conftest fixtures"""
     
     def test_sample_events_validation(self, sample_chat_interaction_event, 

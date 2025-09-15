@@ -36,7 +36,7 @@ from netra_backend.app.services.user_context_factory import (
 )
 
 
-class TestUserContextFactory(SSotBaseTestCase):
+class UserContextFactoryTests(SSotBaseTestCase):
     """Unit tests for UserContextFactory business logic."""
     
     def setup_method(self, method=None):

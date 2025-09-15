@@ -12,7 +12,7 @@ from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.asyncio
-class TestProtocolAsync:
+class ProtocolAsyncTests:
     """Async test suite for WebSocket Protocol"""
 
     def setup_method(self):

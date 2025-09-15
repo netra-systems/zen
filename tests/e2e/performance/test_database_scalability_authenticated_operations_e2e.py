@@ -23,7 +23,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.ssot.database import DatabaseTestHelper
 from shared.isolated_environment import get_env
 
-class TestDatabaseScalabilityAuthenticatedOperationsE2E(BaseE2ETest):
+class DatabaseScalabilityAuthenticatedOperationsE2ETests(BaseE2ETest):
     """Test database scalability with authenticated user operations"""
 
     def setup_method(self):

@@ -26,7 +26,7 @@ try:
         TEST_CONFIG,
         TEST_ENDPOINTS,
         TEST_USERS,
-        TestDataFactory,
+        DataFactoryTests,
     )
 except ImportError:
     # Fallback if config not available
@@ -34,7 +34,7 @@ except ImportError:
     TEST_USERS = {}
     TEST_ENDPOINTS = {}
     @pytest.mark.e2e
-    class TestDataFactory:
+    class DataFactoryTests:
         pass
 
 try:
@@ -122,7 +122,7 @@ class WebSocketEventValidator:
             self.validation_results.append(result)
 
 
-class TestEventPropagationer:
+class EventPropagationerTests:
     """Tests WebSocket event propagation to frontend UI layers"""
     
     def __init__(self, websocket_client: RealWebSocketClient):

@@ -61,7 +61,7 @@ class MockDeploymentValidator:
         return {'valid': True, 'errors': []}
 
 @pytest.mark.unit
-class TestDeploymentConfigValidation:
+class DeploymentConfigValidationTests:
     """Test deployment configuration validation."""
 
     def test_validates_development_environment(self):

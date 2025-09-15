@@ -25,7 +25,7 @@ import re
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDeprecationCategoryCoverage(SSotBaseTestCase):
+class DeprecationCategoryCoverageTests(SSotBaseTestCase):
     """Test deprecation fixes across all file categories"""
     
     def setUp(self):

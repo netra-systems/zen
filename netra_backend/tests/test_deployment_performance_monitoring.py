@@ -25,7 +25,7 @@ class PerformanceMetric:
     threshold: Optional[float] = None
     status: str = 'normal'
 
-class TestDeploymentPerformanceMonitoring(BaseTestCase):
+class DeploymentPerformanceMonitoringTests(BaseTestCase):
     """Test continuous performance monitoring during deployment."""
 
     def setup_method(self):
@@ -196,7 +196,7 @@ class TestDeploymentPerformanceMonitoring(BaseTestCase):
         slope = (n * sum_xy - sum_x * sum_y) / (n * sum_x2 - sum_x * sum_x)
         return slope
 
-class TestDeploymentHealthMetrics(BaseTestCase):
+class DeploymentHealthMetricsTests(BaseTestCase):
     """Test deployment health metrics collection and analysis."""
 
     @pytest.mark.asyncio

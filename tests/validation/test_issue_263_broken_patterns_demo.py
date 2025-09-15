@@ -20,7 +20,7 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestBrokenExecutionResultInterface:
+class BrokenExecutionResultInterfaceTests:
     """
     Test class that demonstrates ExecutionResult parameter incompatibility.
     
@@ -123,7 +123,7 @@ class TestBrokenExecutionResultInterface:
         assert result.result == result.data  # Compatibility property
 
 
-class TestSetupMethodVsSetUpIncompatibility:
+class SetupMethodVsSetUpIncompatibilityTests:
     """
     Test class that demonstrates the setUp() vs setup_method() issue.
     
@@ -173,7 +173,7 @@ class TestSetupMethodVsSetUpIncompatibility:
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestDemonstrateSSotSetupMethodRequirement(SSotAsyncTestCase):
+class DemonstrateSSotSetupMethodRequirementTests(SSotAsyncTestCase):
     """
     This class shows the CORRECT way to use SSOT base classes.
     
@@ -212,7 +212,7 @@ class TestDemonstrateSSotSetupMethodRequirement(SSotAsyncTestCase):
         assert self.golden_user_context.thread_id == "ssot_test_thread"
 
 
-class TestCombinedIssueReproduction(SSotAsyncTestCase):
+class CombinedIssueReproductionTests(SSotAsyncTestCase):
     """
     Test class that demonstrates how both issues work together.
     
@@ -274,7 +274,7 @@ class TestCombinedIssueReproduction(SSotAsyncTestCase):
         print(" PASS:  Complete workflow orchestrator pattern works with all fixes applied!")
 
 
-class TestOldPatternFailureSimulation:
+class OldPatternFailureSimulationTests:
     """
     Simulation of what the TestWorkflowOrchestratorGoldenPath class 
     would have looked like with the broken patterns.

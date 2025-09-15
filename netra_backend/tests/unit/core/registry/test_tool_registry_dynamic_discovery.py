@@ -97,7 +97,7 @@ def create_user_specific_tool_factory(base_config: Dict[str, Any]=None):
         return tool
     return factory
 
-class TestToolRegistryDynamicDiscovery(SSotAsyncTestCase):
+class ToolRegistryDynamicDiscoveryTests(SSotAsyncTestCase):
     """Unit tests for tool registry and dynamic discovery patterns."""
 
     def setUp(self):

@@ -31,7 +31,7 @@ class ServiceState(Enum):
     FAILED = "failed"
 
 
-class TestStartupServiceDependencyOrchestration(BaseIntegrationTest):
+class StartupServiceDependencyOrchestrationTests(BaseIntegrationTest):
     """Test startup sequences and service dependency orchestration."""
 
     @pytest.mark.integration

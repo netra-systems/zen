@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.unit
-class TestJWTValidationCascadeFailures(SSotAsyncTestCase):
+class JWTValidationCascadeFailuresTests(SSotAsyncTestCase):
     """Test JWT validation cascade failures between auth service and backend."""
     
     def setup_method(self, method):
@@ -306,7 +306,7 @@ class TestJWTValidationCascadeFailures(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestAuthenticationIntegrationConflictsUnit(SSotBaseTestCase):
+class AuthenticationIntegrationConflictsUnitTests(SSotBaseTestCase):
     """Unit tests for authentication integration conflicts without async dependencies."""
     
     def setup_method(self, method):

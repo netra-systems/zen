@@ -94,7 +94,7 @@ class MockAuthenticatedWebSocket:
 @pytest.mark.websocket
 @pytest.mark.security
 @pytest.mark.asyncio
-class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
+class WebSocketAuthenticationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket authentication.
     

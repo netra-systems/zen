@@ -33,7 +33,7 @@ except ImportError as e:
 from netra_backend.app.services.user_execution_context import UserExecutionContext, InvalidContextError, ContextIsolationError, create_isolated_execution_context
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestUserContextManagerSecurity(SSotBaseTestCase):
+class UserContextManagerSecurityTests(SSotBaseTestCase):
     """Security-focused tests for UserContextManager implementation.
     
     These tests validate that UserContextManager provides complete isolation
@@ -216,7 +216,7 @@ class TestUserContextManagerSecurity(SSotBaseTestCase):
                 if i != j:
                     self.assertNotIn(f'secret_for_user_{j}', str(retrieved.agent_context))
 
-class TestUserContextManagerIntegrationSecurity(SSotBaseTestCase):
+class UserContextManagerIntegrationSecurityTests(SSotBaseTestCase):
     """Integration security tests with UserExecutionContext."""
 
     async def test_websocket_isolation_security(self):

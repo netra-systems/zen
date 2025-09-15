@@ -111,7 +111,7 @@ class CrossServiceJWTValidator:
 
 @pytest.mark.critical
 @pytest.mark.e2e
-class TestJWTCrossServiceFlow(JWTTestFixtures):
+class JWTCrossServiceFlowTests(JWTTestFixtures):
     """Critical JWT cross-service flow tests."""
 
     @pytest.fixture

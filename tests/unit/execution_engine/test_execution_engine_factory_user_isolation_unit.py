@@ -39,7 +39,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 
 
 @pytest.mark.unit
-class TestExecutionEngineFactoryUserIsolationUnit(SSotBaseTestCase):
+class ExecutionEngineFactoryUserIsolationUnitTests(SSotBaseTestCase):
     """SSOT Unit test for ExecutionEngineFactory user isolation compliance.
     
     This test ensures the factory creates properly isolated user execution engines,

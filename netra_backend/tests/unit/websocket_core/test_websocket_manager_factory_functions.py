@@ -61,7 +61,7 @@ from netra_backend.app.websocket_core.unified_manager import (
 )
 
 
-class TestWebSocketManagerFactoryFunctions(SSotAsyncTestCase):
+class WebSocketManagerFactoryFunctionsTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for WebSocket manager factory functions.
     
@@ -323,7 +323,7 @@ class TestWebSocketManagerFactoryFunctions(SSotAsyncTestCase):
         assert 'issue #89' in docstring.lower() or '#89' in docstring
 
 
-class TestWebSocketManagerFactoryEdgeCases(SSotAsyncTestCase):
+class WebSocketManagerFactoryEdgeCasesTests(SSotAsyncTestCase):
     """
     Edge case and error scenario tests for WebSocket manager factory functions.
     
@@ -432,11 +432,11 @@ class TestWebSocketManagerFactoryEdgeCases(SSotAsyncTestCase):
         from dataclasses import dataclass
         
         @dataclass
-        class TestDataclass:
+        class DataclassTests:
             value: str
             number: int
         
-        class TestEnum(Enum):
+        class EnumTests(Enum):
             OPTION_A = "option_a"
             OPTION_B = 42
         
@@ -445,8 +445,8 @@ class TestWebSocketManagerFactoryEdgeCases(SSotAsyncTestCase):
             None,  # None value
             {"circular": None},  # Will be modified to create circular reference
             datetime.now(timezone.utc),  # Datetime object
-            TestEnum.OPTION_A,  # Enum value
-            TestDataclass("test", 123),  # Dataclass instance
+            EnumTests.OPTION_A,  # Enum value
+            DataclassTests("test", 123),  # Dataclass instance
             {"nested": {"deep": {"very": {"deep": "value"}}}},  # Deep nesting
             {"large_list": list(range(1000))},  # Large list
             {"unicode": "🚀💎🎯"},  # Unicode characters
@@ -466,7 +466,7 @@ class TestWebSocketManagerFactoryEdgeCases(SSotAsyncTestCase):
                 pytest.fail(f"Serialization failed for {type(test_input)}: {e}")
 
 
-class TestWebSocketManagerFactoryPerformance(SSotAsyncTestCase):
+class WebSocketManagerFactoryPerformanceTests(SSotAsyncTestCase):
     """
     Performance and resource management tests for WebSocket manager factory functions.
 

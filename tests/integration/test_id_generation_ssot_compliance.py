@@ -17,7 +17,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.integration
-class TestIdGenerationSSOTCompliance(unittest.TestCase):
+class IdGenerationSSOTComplianceTests(unittest.TestCase):
     """Integration tests for ID generation SSOT compliance across system."""
     
     def setUp(self):

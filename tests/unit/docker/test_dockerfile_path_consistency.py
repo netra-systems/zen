@@ -16,7 +16,7 @@ import re
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestDockerfilePathConsistency(SSotBaseTestCase):
+class DockerfilePathConsistencyTests(SSotBaseTestCase):
     """Unit tests for Dockerfile path consistency - FILE SYSTEM ONLY"""
 
     @classmethod

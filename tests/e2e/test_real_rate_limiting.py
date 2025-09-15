@@ -29,7 +29,7 @@ from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 from tests.e2e.rate_limiting_core import RedisManager, MessageSender, UserManager, RateLimitFlowValidator
 from tests.e2e.rate_limiting_advanced import APIRateLimitTester, WebSocketRateLimitTester, AgentThrottleTester, TierBasedRateLimitTester, DistributedRateLimitValidator, ResponseHeaderValidator, APIRateLimitTester, WebSocketRateLimitTester, AgentThrottleTester, TierBasedRateLimitTester, DistributedRateLimitValidator, ResponseHeaderValidator
 
-class TestRedisRateLimiter:
+class RedisRateLimiterTests:
     """Tests real Redis-backed rate limiting."""
 
     def __init__(self, harness: UnifiedTestHarnessComplete):

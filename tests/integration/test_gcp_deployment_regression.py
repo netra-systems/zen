@@ -23,7 +23,7 @@ sys.path.insert(0, str(project_root))
 
 
 @pytest.mark.integration
-class TestGCPDeploymentRegression(SSotBaseTestCase):
+class GCPDeploymentRegressionTests(SSotBaseTestCase):
     """Regression tests for GCP deployment configuration."""
     
     @classmethod
@@ -360,7 +360,7 @@ def run_regression_tests():
     """Run the regression test suite."""
     # Create test suite
     loader = unittest.TestLoader()
-    suite = loader.loadTestsFromTestCase(TestGCPDeploymentRegression)
+    suite = loader.loadTestsFromTestCase(GCPDeploymentRegressionTests)
     
     # Run tests with detailed output
     runner = unittest.TextTestRunner(verbosity=2)

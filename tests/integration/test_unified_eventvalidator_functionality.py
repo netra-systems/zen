@@ -35,7 +35,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestUnifiedEventValidatorFunctionality(SSotBaseTestCase):
+class UnifiedEventValidatorFunctionalityTests(SSotBaseTestCase):
     """
     Test unified EventValidator SSOT implementation functionality.
     
@@ -376,7 +376,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     
     # Run the test
-    suite = pytest.TestLoader().loadTestsFromTestCase(TestUnifiedEventValidatorFunctionality)
+    suite = pytest.TestLoader().loadTestsFromTestCase(UnifiedEventValidatorFunctionalityTests)
     runner = pytest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     

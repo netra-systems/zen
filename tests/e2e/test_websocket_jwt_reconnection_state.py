@@ -64,7 +64,7 @@ class ReconnectionMetrics:
     auth_validation_time: float
 
 
-class TestWebSocketJWTReconnectioner:
+class WebSocketJWTReconnectionerTests:
     """Core tester for WebSocket JWT reconnection state management."""
     
     def __init__(self):
@@ -171,7 +171,7 @@ class TestWebSocketJWTReconnectioner:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestWebSocketJWTReconnectionState:
+class WebSocketJWTReconnectionStateTests:
     """Test Suite: WebSocket JWT Reconnection State Management."""
     
     @pytest.fixture

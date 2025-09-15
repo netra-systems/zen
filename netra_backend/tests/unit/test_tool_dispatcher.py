@@ -26,7 +26,7 @@ from netra_backend.app.agents.tool_dispatcher import (
 )
 
 
-class TestToolDispatcher(BaseIntegrationTest):
+class ToolDispatcherTests(BaseIntegrationTest):
     """Test ToolDispatcher pure business logic."""
 
     def setUp(self):

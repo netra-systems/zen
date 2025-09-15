@@ -69,7 +69,7 @@ from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 
 
-class TestWebSocketManagerComprehensive(SSotAsyncTestCase):
+class WebSocketManagerComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for WebSocketManager.
     

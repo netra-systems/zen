@@ -35,7 +35,7 @@ from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.core.token_validator import TokenValidator
 
 
-class TestIssue1174AuthTokenValidationUnit(SSotBaseTestCase):
+class Issue1174AuthTokenValidationUnitTests(SSotBaseTestCase):
     """
     Unit tests reproducing Issue #1174 authentication token validation failures.
 

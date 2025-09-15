@@ -22,7 +22,7 @@ sys.path.insert(0, str(project_root))
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestExecutionEngineSSotViolationDetection(SSotBaseTestCase):
+class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
     """
     CRITICAL: Tests that enforce single execution engine (UserExecutionEngine) pattern.
     

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.e2e
 @pytest.mark.auth
 @pytest.mark.asyncio
-class TestAuthRefreshFlow:
+class AuthRefreshFlowTests:
     """Test suite for auth token refresh flow end-to-end"""
 
     @pytest.mark.auth
@@ -112,7 +112,7 @@ class TestAuthRefreshFlow:
         logger.info('Frontend-backend refresh flow test completed')
 
 @pytest.mark.asyncio
-class TestAuthServiceIntegration:
+class AuthServiceIntegrationTests:
     """Integration tests for auth service refresh functionality"""
 
     @pytest.mark.auth
@@ -143,7 +143,7 @@ class TestAuthServiceIntegration:
         assert result is None
 
 @pytest.mark.asyncio
-class TestFrontendAuthRefresh:
+class FrontendAuthRefreshTests:
     """Frontend-specific auth refresh tests"""
 
     @pytest.mark.auth

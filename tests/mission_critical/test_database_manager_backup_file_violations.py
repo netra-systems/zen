@@ -34,7 +34,7 @@ if project_root not in sys.path:
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDatabaseManagerBackupFileViolations(SSotBaseTestCase):
+class DatabaseManagerBackupFileViolationsTests(SSotBaseTestCase):
     """Test suite to detect DatabaseManager SSOT backup file violations."""
 
     def test_no_backup_files_exist(self):

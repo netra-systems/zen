@@ -40,7 +40,7 @@ LINEAR_SCALING_CONFIG = {
     "degraded_delivery_ratio": 0.8  # Acceptable ratio beyond limits
 }
 
-class TestLinearThroughputScaling:
+class LinearThroughputScalingTests:
     """Test linear throughput scaling characteristics"""
     
     @pytest.mark.asyncio

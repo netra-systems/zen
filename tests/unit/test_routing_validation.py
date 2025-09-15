@@ -14,7 +14,7 @@ client = TestClient(app)
 
 
 @pytest.mark.unit
-class TestRoutingValidation:
+class RoutingValidationTests:
     """Test suite for route validation and consistency."""
 
     def test_messages_root_endpoint_exists(self):
@@ -145,7 +145,7 @@ class TestRoutingValidation:
 
 if __name__ == "__main__":
     # Run basic validation
-    test_suite = TestRoutingValidation()
+    test_suite = RoutingValidationTests()
     
     print("Testing critical routing endpoints...")
     

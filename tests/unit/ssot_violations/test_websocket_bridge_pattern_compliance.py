@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestWebSocketBridgePatternCompliance(SSotAsyncTestCase):
+class WebSocketBridgePatternComplianceTests(SSotAsyncTestCase):
     """
     Test suite for validating SSOT WebSocket bridge pattern compliance.
     

@@ -32,7 +32,7 @@ from shared.types.core_types import UserID, ThreadID, RequestID
 logger = logging.getLogger(__name__)
 
 
-class TestServiceFallbackDetection(BaseIntegrationTest):
+class ServiceFallbackDetectionTests(BaseIntegrationTest):
     """
     FAILING INTEGRATION TESTS: Prove individual services can return 
     mock/fallback responses that reach users.

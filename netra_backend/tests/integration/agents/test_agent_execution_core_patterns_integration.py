@@ -262,7 +262,7 @@ class RetryPatternTestAgent(BaseAgent):
 
 
 @pytest.mark.integration
-class TestAgentExecutionCorePatterns(SSotAsyncTestCase):
+class AgentExecutionCorePatternsTests(SSotAsyncTestCase):
     """Integration tests for agent execution patterns."""
     
     def create_test_user_context(self, user_id: str = None, scenario: str = "execution_test") -> UserExecutionContext:

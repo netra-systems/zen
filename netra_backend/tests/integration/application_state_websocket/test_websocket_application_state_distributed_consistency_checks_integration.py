@@ -534,7 +534,7 @@ class DistributedConsistencyChecker:
         return False
 
 
-class TestWebSocketApplicationStateDistributedConsistencyChecks(BaseIntegrationTest):
+class WebSocketApplicationStateDistributedConsistencyChecksTests(BaseIntegrationTest):
     """Test distributed state consistency checks across WebSocket events and background processes."""
     
     @pytest.mark.integration

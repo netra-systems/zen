@@ -8,7 +8,7 @@ from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestMultiTenantResourceQuotas:
+class MultiTenantResourceQuotasTests:
     """Validates resource quota enforcement across tenant boundaries."""
 
     @pytest.fixture

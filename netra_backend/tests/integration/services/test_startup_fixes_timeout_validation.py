@@ -27,7 +27,7 @@ from netra_backend.app.services.secure_background_task_manager import SecureBack
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestStartupFixesTimeoutValidation(SSotBaseTestCase):
+class StartupFixesTimeoutValidationTests(SSotBaseTestCase):
     """Test startup validation of background task timeout configuration.
     
     **CRITICAL TESTS**: These tests MUST FAIL initially to prove Issue #573 exists.

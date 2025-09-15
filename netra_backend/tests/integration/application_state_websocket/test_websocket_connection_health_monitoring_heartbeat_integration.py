@@ -33,7 +33,7 @@ class HealthStatus:
     DISCONNECTED = "disconnected"
 
 
-class TestWebSocketConnectionHealthMonitoringHeartbeatIntegration(BaseIntegrationTest):
+class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrationTest):
     """Test WebSocket connection health monitoring and heartbeat with comprehensive application state validation."""
     
     def _create_health_monitoring_websocket(self, connection_id: str, user_id: str, simulate_issues: bool = False):

@@ -92,7 +92,7 @@ class UserContextMock:
             self.connection_id = f"conn-{self.user_id}-{self.session_id}"
 
 
-class TestIssue889WebSocketManagerDuplicationUnit(SSotBaseTestCase):
+class Issue889WebSocketManagerDuplicationUnitTests(SSotBaseTestCase):
     """
     Unit tests to reproduce WebSocket manager duplication for demo-user-001.
 

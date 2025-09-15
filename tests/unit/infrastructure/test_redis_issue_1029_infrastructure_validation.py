@@ -33,7 +33,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
-class TestRedisIssue1029InfrastructureValidation(SSotBaseTestCase):
+class RedisIssue1029InfrastructureValidationTests(SSotBaseTestCase):
     """
     Unit Test Suite: Redis Issue #1029 Infrastructure Validation
 

@@ -14,7 +14,7 @@ import inspect
 import sys
 
 @pytest.mark.unit
-class TestDeepAgentStateSSotViolation:
+class DeepAgentStateSSotViolationTests:
     """Test suite proving DeepAgentState SSOT violation exists"""
 
     def test_deepagentstate_import_conflict_violation(self):

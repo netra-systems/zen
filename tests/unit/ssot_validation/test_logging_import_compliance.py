@@ -42,7 +42,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.logging_compliance_scanner import LoggingComplianceScanner, LoggingViolation, LoggingComplianceReport
 
 @pytest.mark.unit
-class TestLoggingImportCompliance(SSotBaseTestCase):
+class LoggingImportComplianceTests(SSotBaseTestCase):
     """
     Unit test for logging import SSOT compliance in critical files.
     

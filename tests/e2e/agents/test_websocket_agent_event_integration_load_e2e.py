@@ -41,7 +41,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 
 @pytest.mark.e2e
-class TestWebSocketAgentEventIntegrationLoadE2E(BaseE2ETest):
+class WebSocketAgentEventIntegrationLoadE2ETests(BaseE2ETest):
     """E2E tests for WebSocket agent event integration under load with authenticated full-stack testing."""
 
     async def create_multiple_authenticated_users(self, count: int = 5) -> List[Dict[str, Any]]:

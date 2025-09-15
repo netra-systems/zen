@@ -128,7 +128,7 @@ class StagingTokenValidator:
 
 @pytest.mark.asyncio
 @pytest.mark.staging
-class TestJWTValidationFiveWhysAnalysis:
+class JWTValidationFiveWhysAnalysisTests:
     """Test suite that validates the Five Whys analysis findings."""
 
     @pytest.fixture

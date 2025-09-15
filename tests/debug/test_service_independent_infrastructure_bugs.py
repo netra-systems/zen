@@ -25,7 +25,7 @@ from unittest.mock import MagicMock, AsyncMock
 logger = logging.getLogger(__name__)
 
 
-class TestServiceIndependentInfrastructureBugs:
+class ServiceIndependentInfrastructureBugsTests:
     """
     Test class to reproduce exact AttributeError bugs from Issue #862.
     
@@ -378,7 +378,7 @@ class TestServiceIndependentInfrastructureBugs:
             pytest.fail(f"Cannot import test class: {e}")
 
 
-class TestInfrastructureDependencyValidation:
+class InfrastructureDependencyValidationTests:
     """
     Test class to validate that all required infrastructure dependencies exist.
     
@@ -451,7 +451,7 @@ class TestInfrastructureDependencyValidation:
             # Don't fail for missing test classes as they might be in development
 
 
-class TestCollectionPhaseSimulation:
+class CollectionPhaseSimulationTests:
     """
     Test class to simulate exact pytest collection phase behavior.
     

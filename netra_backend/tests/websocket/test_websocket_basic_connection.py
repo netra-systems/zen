@@ -28,7 +28,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 pytestmark = [pytest.mark.env_test]
 
-class TestWebSocketBasicConnection:
+class WebSocketBasicConnectionTests:
     """Test basic WebSocket connectivity using mocked connections."""
 
     @pytest.mark.asyncio

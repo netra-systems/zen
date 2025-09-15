@@ -57,7 +57,7 @@ from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestSupervisorWebSocketIntegration:
+class SupervisorWebSocketIntegrationTests:
 
     """Test supervisor agent WebSocket integration."""
 

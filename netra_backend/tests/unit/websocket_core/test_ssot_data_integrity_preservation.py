@@ -38,7 +38,7 @@ logger = get_logger(__name__)
 @pytest.mark.unit
 @pytest.mark.websocket_ssot
 @pytest.mark.issue_1058_data_integrity
-class TestSSOTDataIntegrityPreservation:
+class SSOTDataIntegrityPreservationTests:
     """Unit tests validating data integrity preservation in SSOT consolidation.
 
     CRITICAL: These tests validate that Issue #1058 SSOT implementation correctly

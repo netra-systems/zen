@@ -36,7 +36,7 @@ from netra_backend.app.core.startup_validation import (
 )
 
 
-class TestStartupValidationTimeoutUnit(SSotAsyncTestCase):
+class StartupValidationTimeoutUnitTests(SSotAsyncTestCase):
     """Unit tests for startup validation timeout handling."""
 
     def setup_method(self, method):
@@ -363,7 +363,7 @@ class TestStartupValidationTimeoutUnit(SSotAsyncTestCase):
         # The key is that timeout handling exists and works for clearly excessive times
 
 
-class TestStartupValidationTimeoutIntegration(SSotAsyncTestCase):
+class StartupValidationTimeoutIntegrationTests(SSotAsyncTestCase):
     """Integration tests for timeout handling across validation components."""
 
     def setup_method(self, method):

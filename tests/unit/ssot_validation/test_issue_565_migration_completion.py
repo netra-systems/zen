@@ -33,7 +33,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.unit
-class TestIssue565MigrationCompletion(SSotAsyncTestCase):
+class Issue565MigrationCompletionTests(SSotAsyncTestCase):
     """
     Test suite validating Issue #565 ExecutionEngine migration completion.
 

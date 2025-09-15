@@ -15,7 +15,7 @@ from fastapi import FastAPI
 from netra_backend.app.core.middleware_setup import _create_inline_websocket_exclusion_middleware
 
 
-class TestWebSocketExclusionMiddlewareLifespan:
+class WebSocketExclusionMiddlewareLifespanTests:
     """Test ASGI lifespan scope handling in WebSocketExclusionMiddleware."""
 
     @pytest.fixture
@@ -221,7 +221,7 @@ class TestWebSocketExclusionMiddlewareLifespan:
         assert mock_app.call_count == 100
 
 
-class TestLifespanIntegration:
+class LifespanIntegrationTests:
     """Integration tests for lifespan scope with actual FastAPI application."""
 
     async def test_real_fastapi_lifespan_integration(self):

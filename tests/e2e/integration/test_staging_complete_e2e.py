@@ -31,7 +31,7 @@ from tests.e2e.test_environment_config import TestEnvironmentType
 logger = logging.getLogger(__name__)
 
 
-class TestStagingE2ESuite:
+class StagingE2ESuiteTests:
     """Complete staging environment E2E test suite."""
     
     def __init__(self):
@@ -490,7 +490,7 @@ class TestStagingE2ESuite:
 )
 @pytest.mark.staging
 @pytest.mark.e2e
-class TestStagingE2E:
+class StagingE2ETests:
     """Pytest integration for staging E2E tests."""
     
     @pytest.fixture

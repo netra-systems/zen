@@ -54,7 +54,7 @@ def staging_websocket_auth_helper(staging_config):
 
 
 @pytest.mark.e2e
-class TestWebSocket1011ErrorSolutionValidation:
+class WebSocket1011ErrorSolutionValidationTests:
     """
     Test suite that validates solutions for WebSocket 1011 internal errors.
     
@@ -612,7 +612,7 @@ if __name__ == "__main__":
         staging_config = StagingTestConfig()
         auth_helper = E2EWebSocketAuthHelper(environment="staging")
         
-        test_instance = TestWebSocket1011ErrorSolutionValidation()
+        test_instance = WebSocket1011ErrorSolutionValidationTests()
         
         solution_tests = [
             ("header_based_detection", test_instance.test_websocket_header_based_e2e_detection_solution),

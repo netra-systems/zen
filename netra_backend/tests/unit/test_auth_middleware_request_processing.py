@@ -18,7 +18,7 @@ from unittest.mock import Mock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestAuthMiddlewareRequestProcessing(SSotBaseTestCase):
+class AuthMiddlewareRequestProcessingTests(SSotBaseTestCase):
     """Unit tests for authentication middleware request processing logic."""
     
     def setup_method(self, method=None):

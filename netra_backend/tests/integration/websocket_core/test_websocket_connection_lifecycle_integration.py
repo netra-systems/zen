@@ -88,7 +88,7 @@ class MockWebSocketState:
         self._connection_failures = 0
 
 @pytest.mark.integration
-class TestWebSocketConnectionLifecycleIntegration(SSotBaseTestCase):
+class WebSocketConnectionLifecycleIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket connection lifecycle management.
     

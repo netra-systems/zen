@@ -17,7 +17,7 @@ from typing import Dict, Any, Optional
 from test_framework.gcp_integration import GCPStagingEnvironment
 from test_framework.websocket_test_utility import WebSocketTestClient
 
-class TestGCPWebSocketASGI:
+class GCPWebSocketASGITests:
     """E2E tests for WebSocket ASGI scope handling in GCP environment."""
 
     @pytest.fixture
@@ -202,7 +202,7 @@ class TestGCPWebSocketASGI:
             else:
                 raise
 
-class TestWebSocketASGIRecovery:
+class WebSocketASGIRecoveryTests:
     """Tests for WebSocket ASGI error recovery and resilience."""
 
     @pytest.mark.asyncio

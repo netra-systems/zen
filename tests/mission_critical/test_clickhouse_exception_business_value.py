@@ -22,7 +22,7 @@ from netra_backend.app.db.transaction_errors import (
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestClickHouseExceptionBusinessValue(SSotAsyncTestCase):
+class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
     """Mission Critical: Business Value Protection for ClickHouse Exception Handling."""
 
     def setup_method(self, method):

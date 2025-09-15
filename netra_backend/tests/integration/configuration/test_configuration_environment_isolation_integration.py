@@ -40,7 +40,7 @@ from shared.isolated_environment import get_env, IsolatedEnvironment, Validation
 logger = logging.getLogger(__name__)
 
 
-class TestConfigurationEnvironmentIsolation(BaseIntegrationTest):
+class ConfigurationEnvironmentIsolationTests(BaseIntegrationTest):
     """
     Integration tests for configuration environment isolation and SSOT patterns.
     

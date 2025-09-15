@@ -22,7 +22,7 @@ from test_framework.fixtures.real_services import real_services_fixture
 from shared.isolated_environment import get_env
 
 
-class TestAgentExecutionPipeline(BaseIntegrationTest):
+class AgentExecutionPipelineTests(BaseIntegrationTest):
     """Test core agent execution pipeline with real backend services."""
 
     @pytest.mark.integration

@@ -53,7 +53,7 @@ from auth_service.services.redis_service import RedisService
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 
 
-class TestCrossServiceAuthValidation(SSotBaseTestCase):
+class CrossServiceAuthValidationTests(SSotBaseTestCase):
     """
     PRIORITY 1: Comprehensive cross-service authentication validation tests.
     
@@ -834,4 +834,4 @@ class TestCrossServiceAuthValidation(SSotBaseTestCase):
                 assert False, f"Recovery scenario '{scenario_name}' failed to recover"
 
 
-__all__ = ["TestCrossServiceAuthValidation"]
+__all__ = ["CrossServiceAuthValidationTests"]

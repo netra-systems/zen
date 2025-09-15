@@ -42,7 +42,7 @@ logger = central_logger.get_logger(__name__)
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentResponseInternationalizationLocalization(BaseIntegrationTest):
+class AgentResponseInternationalizationLocalizationTests(BaseIntegrationTest):
     """Test agent response internationalization and localization."""
     
     def setup_method(self):

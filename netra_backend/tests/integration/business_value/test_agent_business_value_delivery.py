@@ -25,7 +25,7 @@ from typing import Dict, Any, List
 from netra_backend.tests.integration.business_value.enhanced_base_integration_test import EnhancedBaseIntegrationTest
 from test_framework.ssot.websocket import WebSocketEventType
 
-class TestAgentBusinessValueDelivery(EnhancedBaseIntegrationTest):
+class AgentBusinessValueDeliveryTests(EnhancedBaseIntegrationTest):
     """
     Integration tests validating agents deliver measurable business value.
     

@@ -70,7 +70,7 @@ class NetworkInterfaceSimulator:
         self.message_log.append(log_entry)
 
 
-class TestNetworkSwitchingClient:
+class NetworkSwitchingClientTests:
     """WebSocket client that simulates network interface switching."""
     
     def __init__(self, uri: str, session_token: str, simulator: NetworkInterfaceSimulator):

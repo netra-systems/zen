@@ -28,7 +28,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
 @pytest.mark.integration
-class TestJWTSecretEnvironmentAccessIntegration:
+class JWTSecretEnvironmentAccessIntegrationTests:
     """Integration tests for JWT secret environment access patterns in staging."""
 
     def setup_method(self):

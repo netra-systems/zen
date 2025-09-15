@@ -27,7 +27,7 @@ from netra_backend.app.websocket_core.error_recovery_handler import (
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 
 
-class TestWebSocketErrorRecoveryHandler:
+class WebSocketErrorRecoveryHandlerTests:
     """Unit tests for WebSocket error recovery handling."""
     
     @pytest.fixture

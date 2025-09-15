@@ -50,7 +50,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app import smd, startup_module
 
 
-class TestStartupWebSocketEventsMissionCritical(IntegrationTestCase):
+class StartupWebSocketEventsMissionCriticalTests(IntegrationTestCase):
     """
     Mission-critical tests for startup + WebSocket events integration.
     

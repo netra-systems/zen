@@ -95,7 +95,7 @@ from netra_backend.app.core.configuration.compatibility_shim import (
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestUnifiedConfigurationManagerRealServicesCritical(BaseIntegrationTest):
+class UnifiedConfigurationManagerRealServicesCriticalTests(BaseIntegrationTest):
     """Integration tests for UnifiedConfigurationManager with real services protecting business value."""
 
     @pytest.fixture

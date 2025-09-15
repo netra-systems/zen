@@ -39,7 +39,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, ThreadID, WebSocketID
 
 
-class TestConnectionIdGenerationConsistency(BaseIntegrationTest):
+class ConnectionIdGenerationConsistencyTests(BaseIntegrationTest):
     """Test connection ID generation consistency across WebSocket routing components."""
     
     @pytest.mark.integration

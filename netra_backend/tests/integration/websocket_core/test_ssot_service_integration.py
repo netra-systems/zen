@@ -47,7 +47,7 @@ logger = get_logger(__name__)
 @pytest.mark.websocket_ssot
 @pytest.mark.non_docker
 @pytest.mark.issue_1058_service_integration
-class TestSSOTServiceIntegration(SSotAsyncTestCase):
+class SSOTServiceIntegrationTests(SSotAsyncTestCase):
     """Integration tests validating SSOT service integration across system boundaries.
 
     CRITICAL: These tests validate SSOT consolidation works correctly with
@@ -264,7 +264,7 @@ class TestSSOTServiceIntegration(SSotAsyncTestCase):
         logger.info(f'✅ Integration error resilience validated - {len(error_scenarios)} scenarios tested')
 
 @pytest.mark.integration_performance
-class TestSSOTIntegrationPerformance:
+class SSOTIntegrationPerformanceTests:
     """Performance integration tests for SSOT service."""
 
     @pytest.mark.asyncio

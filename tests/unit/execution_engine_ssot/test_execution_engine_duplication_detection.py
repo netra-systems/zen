@@ -36,7 +36,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestExecutionEngineDuplicationDetection(SSotBaseTestCase, unittest.TestCase):
+class ExecutionEngineDuplicationDetectionTests(SSotBaseTestCase, unittest.TestCase):
     """Unit tests to detect and validate execution engine SSOT violations."""
 
     def setUp(self):

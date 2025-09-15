@@ -51,7 +51,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
 @pytest.mark.agent_goldenpath
 @pytest.mark.websocket_events
 @pytest.mark.mission_critical
-class TestWebSocketEventValidationE2E(SSotAsyncTestCase):
+class WebSocketEventValidationE2ETests(SSotAsyncTestCase):
     """
     E2E tests validating the complete WebSocket event delivery system for
     agent processing. These events enable the real-time chat experience.

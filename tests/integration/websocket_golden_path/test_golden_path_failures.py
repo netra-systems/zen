@@ -99,7 +99,7 @@ class MockWebSocketConnection:
 
 
 @pytest.mark.integration
-class TestWebSocketManagerGoldenPathFailures(SSotAsyncTestCase):
+class WebSocketManagerGoldenPathFailuresTests(SSotAsyncTestCase):
     """
     Tests to prove Golden Path failures due to WebSocket manager SSOT violations.
     
@@ -673,20 +673,20 @@ def run_async_test(test_method):
 
 
 # Apply async wrapper to async test methods
-TestWebSocketManagerGoldenPathFailures.test_websocket_event_delivery_inconsistency = run_async_test(
-    TestWebSocketManagerGoldenPathFailures.test_websocket_event_delivery_inconsistency
+WebSocketManagerGoldenPathFailuresTests.test_websocket_event_delivery_inconsistency = run_async_test(
+    WebSocketManagerGoldenPathFailuresTests.test_websocket_event_delivery_inconsistency
 )
 
-TestWebSocketManagerGoldenPathFailures.test_multi_user_isolation_failure = run_async_test(
-    TestWebSocketManagerGoldenPathFailures.test_multi_user_isolation_failure
+WebSocketManagerGoldenPathFailuresTests.test_multi_user_isolation_failure = run_async_test(
+    WebSocketManagerGoldenPathFailuresTests.test_multi_user_isolation_failure
 )
 
-TestWebSocketManagerGoldenPathFailures.test_user_login_to_chat_response_flow_failure = run_async_test(
-    TestWebSocketManagerGoldenPathFailures.test_user_login_to_chat_response_flow_failure
+WebSocketManagerGoldenPathFailuresTests.test_user_login_to_chat_response_flow_failure = run_async_test(
+    WebSocketManagerGoldenPathFailuresTests.test_user_login_to_chat_response_flow_failure
 )
 
-TestWebSocketManagerGoldenPathFailures.test_agent_execution_pipeline_breaks = run_async_test(
-    TestWebSocketManagerGoldenPathFailures.test_agent_execution_pipeline_breaks
+WebSocketManagerGoldenPathFailuresTests.test_agent_execution_pipeline_breaks = run_async_test(
+    WebSocketManagerGoldenPathFailuresTests.test_agent_execution_pipeline_breaks
 )
 
 

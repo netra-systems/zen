@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestWebSocketImportConsolidation(SSotBaseTestCase, unittest.TestCase):
+class WebSocketImportConsolidationTests(SSotBaseTestCase, unittest.TestCase):
     """Test WebSocket import patterns to validate SSOT consolidation benefits."""
 
     def setUp(self):

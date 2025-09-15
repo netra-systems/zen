@@ -17,7 +17,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestAgentExecutionRealServices(BaseIntegrationTest):
+class AgentExecutionRealServicesTests(BaseIntegrationTest):
     """Test agent execution with real services."""
     
     @pytest.mark.integration

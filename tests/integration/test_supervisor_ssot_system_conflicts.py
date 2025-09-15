@@ -21,7 +21,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestSupervisorSystemLevelSSotConflicts(SSotBaseTestCase):
+class SupervisorSystemLevelSSotConflictsTests(SSotBaseTestCase):
     """Integration tests exposing supervisor SSOT conflicts at system level."""
 
     def test_supervisor_registry_integration_conflict_SHOULD_FAIL(self):
@@ -429,7 +429,7 @@ class TestSupervisorSystemLevelSSotConflicts(SSotBaseTestCase):
 
 # After SSOT remediation validation tests (currently skipped)
 @pytest.mark.integration
-class TestSupervisorSystemLevelSSotValidation(SSotBaseTestCase):
+class SupervisorSystemLevelSSotValidationTests(SSotBaseTestCase):
     """Integration tests that will pass after SSOT remediation."""
     
     @pytest.mark.skip("Will be enabled after SSOT remediation")
@@ -492,7 +492,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_analysis():
-        test_instance = TestSupervisorSystemLevelSSotConflicts()
+        test_instance = SupervisorSystemLevelSSotConflictsTests()
         
         print("🔍 Running SupervisorAgent System-Level SSOT Conflict Analysis:")
         

@@ -24,7 +24,7 @@ from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
 @pytest.mark.e2e
-class TestRealTokenGeneration:
+class RealTokenGenerationTests:
     """Test real JWT token generation via auth service."""
     
     @pytest.fixture
@@ -69,7 +69,7 @@ class TestRealTokenGeneration:
 
 
 @pytest.mark.e2e
-class TestCrossServiceTokenValidation:
+class CrossServiceTokenValidationTests:
     """Test token validation across auth service and backend."""
     
     @pytest.fixture
@@ -116,7 +116,7 @@ class TestCrossServiceTokenValidation:
 
 
 @pytest.mark.e2e
-class TestTokenExpiryAndRefresh:
+class TokenExpiryAndRefreshTests:
     """Test token expiration and refresh mechanisms."""
     
     @pytest.fixture
@@ -171,7 +171,7 @@ class TestTokenExpiryAndRefresh:
 
 
 @pytest.mark.e2e
-class TestWebSocketAuthentication:
+class WebSocketAuthenticationTests:
     """Test WebSocket authentication with JWT tokens."""
     
     @pytest.fixture
@@ -225,7 +225,7 @@ class TestWebSocketAuthentication:
 
 
 @pytest.mark.e2e
-class TestTokenSecurity:
+class TokenSecurityTests:
     """Test token security and tampering prevention."""
     
     @pytest.fixture
@@ -269,7 +269,7 @@ class TestTokenSecurity:
 
 
 @pytest.mark.e2e
-class TestAgentContextExtraction:
+class AgentContextExtractionTests:
     """Test agent context extraction from JWT tokens."""
     
     @pytest.fixture
@@ -333,7 +333,7 @@ class TestAgentContextExtraction:
 
 
 @pytest.mark.e2e
-class TestCrossServiceConsistency:
+class CrossServiceConsistencyTests:
     """Test cross-service token handling consistency."""
     
     @pytest.fixture

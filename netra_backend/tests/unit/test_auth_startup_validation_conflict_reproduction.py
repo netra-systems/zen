@@ -28,7 +28,7 @@ from shared.jwt_secret_manager import get_jwt_secret_manager
 from shared.isolated_environment import get_env
 
 
-class TestJWTManagerValidatorConflict:
+class JWTManagerValidatorConflictTests:
     """Test architectural conflict between JWT Manager and Auth Validator."""
     
     @pytest.mark.asyncio
@@ -207,7 +207,7 @@ class TestJWTManagerValidatorConflict:
             get_jwt_secret_manager().clear_cache()
 
 
-class TestArchitecturalBehaviorMismatches:
+class ArchitecturalBehaviorMismatchesTests:
     """Test behavioral mismatches between architectural components."""
     
     @pytest.mark.asyncio
@@ -329,7 +329,7 @@ if __name__ == "__main__":
         print("🧪 Running Architecture Conflict Reproduction Tests")
         print("=" * 60)
         
-        test_instance = TestJWTManagerValidatorConflict()
+        test_instance = JWTManagerValidatorConflictTests()
         
         try:
             print("\n1. Testing Deterministic Secret Rejection Conflict...")

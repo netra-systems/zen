@@ -66,7 +66,7 @@ class GoldenPathWebSocketEvent:
     golden_path_stage: str
 
 
-class TestWebSocketPatternGoldenPathCompliance(SSotAsyncTestCase):
+class WebSocketPatternGoldenPathComplianceTests(SSotAsyncTestCase):
     """Mission-critical tests for Golden Path WebSocket SSOT compliance - MUST FAIL initially."""
 
     def setup_method(self, method):

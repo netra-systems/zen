@@ -11,7 +11,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e
-class TestSystemIntrospection:
+class SystemIntrospectionTests:
     """Test suite for system introspection endpoints."""
     
     @pytest.mark.asyncio

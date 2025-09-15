@@ -43,7 +43,7 @@ logger = central_logger.get_logger(__name__)
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentResponseCachingOptimization(BaseIntegrationTest):
+class AgentResponseCachingOptimizationTests(BaseIntegrationTest):
     """Test agent response caching and optimization mechanisms."""
     
     def setup_method(self):

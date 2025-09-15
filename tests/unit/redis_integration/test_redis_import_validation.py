@@ -20,7 +20,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestRedisImportValidation(SSotBaseTestCase):
+class RedisImportValidationTests(SSotBaseTestCase):
     """
     SSOT Compliance: Redis import validation and error reproduction
     

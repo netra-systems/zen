@@ -35,7 +35,7 @@ from tests.e2e.staging_config import StagingTestConfig, staging_urls
 
 
 @pytest.mark.integration
-class TestWebSocketCoroutineRegressionIntegration(BaseIntegrationTest):
+class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket coroutine regression prevention.
     

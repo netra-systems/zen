@@ -28,7 +28,7 @@ from netra_backend.app.agents.registry import AgentRegistry as BasicRegistry
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry as AdvancedRegistry
 
 @pytest.mark.unit
-class TestAgentRegistryWebSocketIntegrationFailures(SSotAsyncTestCase):
+class AgentRegistryWebSocketIntegrationFailuresTests(SSotAsyncTestCase):
     """
     CRITICAL P0 Tests: Prove WebSocket integration failures block Golden Path
     

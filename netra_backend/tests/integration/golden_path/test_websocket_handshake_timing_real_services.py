@@ -210,7 +210,7 @@ class MockWebSocketConnection:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestWebSocketHandshakeTimingRealServices(WebSocketIntegrationTest, DatabaseIntegrationTest):
+class WebSocketHandshakeTimingRealServicesTests(WebSocketIntegrationTest, DatabaseIntegrationTest):
     """
     Integration tests for WebSocket handshake timing with real services.
     

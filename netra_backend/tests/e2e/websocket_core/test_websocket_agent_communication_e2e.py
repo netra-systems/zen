@@ -28,7 +28,7 @@ from netra_backend.app.websocket_core.handlers import WebSocketHandler
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.core.registry.universal_registry import get_global_registry
 
-class TestWebSocketAgentCommunicationE2E(SSotBaseTestCase):
+class WebSocketAgentCommunicationE2ETests(SSotBaseTestCase):
     """
     End-to-end WebSocket agent communication tests.
     

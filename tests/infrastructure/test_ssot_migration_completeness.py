@@ -16,7 +16,7 @@ import re
 import pytest
 from typing import List, Dict, Tuple
 
-class TestSSOTMigrationCompleteness:
+class SSOTMigrationCompletenessTests:
     """Test suite to validate SSOT migration completed successfully."""
 
     def test_no_migration_artifacts_in_mission_critical_files(self):

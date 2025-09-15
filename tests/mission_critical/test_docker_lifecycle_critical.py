@@ -61,7 +61,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestServiceLifecycleCritical(SSotAsyncTestCase):
+class ServiceLifecycleCriticalTests(SSotAsyncTestCase):
     """
     Comprehensive tests for service lifecycle management without Docker dependencies.
 

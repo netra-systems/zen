@@ -34,7 +34,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerSSOTConsolidationValidation(SSotBaseTestCase):
+class WebSocketManagerSSOTConsolidationValidationTests(SSotBaseTestCase):
     """Validate SSOT consolidation of WebSocket Manager implementations."""
 
     def setup_method(self, method):

@@ -34,7 +34,7 @@ class MockFailingAgent(BaseAgent):
                 raise RuntimeError(f'Simulated execution failure #{self.failure_count}')
         return {'status': 'success', 'failure_count': self.failure_count}
 
-class TestCircuitBreakerEdgeCases:
+class CircuitBreakerEdgeCasesTests:
     """Test circuit breaker behavior under extreme conditions."""
 
     @pytest.fixture
@@ -49,7 +49,7 @@ class TestCircuitBreakerEdgeCases:
         cb_status = agent.get_circuit_breaker_status()
         assert cb_status.get('status') in ['closed', 'healthy', 'unknown']
 
-class TestRetryMechanismEdgeCases:
+class RetryMechanismEdgeCasesTests:
     """Test retry mechanisms under extreme conditions."""
 
     @pytest.fixture
@@ -63,7 +63,7 @@ class TestRetryMechanismEdgeCases:
         agent = MockFailingAgent(llm_manager=mock_llm_manager, failure_mode='execution', max_failures=100, enable_reliability=True)
         assert agent.get_health_status() is not None
 
-class TestCacheCorruptionScenarios:
+class CacheCorruptionScenariosTests:
     """Test cache behavior under corruption and failure scenarios."""
 
     @pytest.fixture

@@ -21,7 +21,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e
-class TestWebSocketDevConnectivity:
+class WebSocketDevConnectivityTests:
     """Test suite for WebSocket connectivity in development environment."""
 
     @pytest.mark.websocket
@@ -357,7 +357,7 @@ class TestWebSocketDevConnectivity:
 if __name__ == "__main__":
     # Allow running the test directly for quick validation
     async def run_quick_test():
-        test_instance = TestWebSocketDevConnectivity()
+        test_instance = WebSocketDevConnectivityTests()
         try:
             await test_instance.test_websocket_availability_check()
             print("Quick WebSocket connectivity test passed")

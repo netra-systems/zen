@@ -51,7 +51,7 @@ from netra_backend.app.database import get_engine, get_sessionmaker, get_databas
 from netra_backend.app.dependencies import get_request_scoped_db_session
 
 
-class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
+class SQLAlchemyAsyncPoolConfigurationE2ETests(BaseE2ETest):
     """
     E2E Tests for SQLAlchemy Async Pool Configuration Bug - Reproduces Exact Staging Failure.
     

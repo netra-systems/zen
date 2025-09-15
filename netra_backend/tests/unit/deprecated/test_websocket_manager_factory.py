@@ -47,7 +47,7 @@ from netra_backend.app.core.user_execution_context import UserExecutionContext
 from netra_backend.app.services.user_execution_context import InvalidContextError
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 
-class TestFactoryMetrics(SSotBaseTestCase):
+class FactoryMetricsTests(SSotBaseTestCase):
     """Test FactoryMetrics data class."""
 
     @pytest.mark.unit
@@ -77,7 +77,7 @@ class TestFactoryMetrics(SSotBaseTestCase):
         assert metrics_dict['security_violations_detected'] == 1
         self.record_metric('factory_metrics_dict_keys_verified', len(expected_keys))
 
-class TestManagerMetrics(SSotBaseTestCase):
+class ManagerMetricsTests(SSotBaseTestCase):
     """Test ManagerMetrics data class."""
 
     @pytest.mark.unit
@@ -112,7 +112,7 @@ class TestManagerMetrics(SSotBaseTestCase):
         assert metrics_dict['last_activity'] is None
         self.record_metric('manager_metrics_none_datetime_handling', 1)
 
-class TestWebSocketManagerFactory(SSotAsyncTestCase):
+class WebSocketManagerFactoryTests(SSotAsyncTestCase):
     """Test WebSocketManagerFactory core functionality."""
 
     def setup_method(self, method=None):
@@ -325,7 +325,7 @@ class TestWebSocketManagerFactory(SSotAsyncTestCase):
         assert len(self.factory._manager_creation_time) == 0
         self.record_metric('factory_shutdown', 1)
 
-class TestIsolatedWebSocketManager(SSotAsyncTestCase):
+class IsolatedWebSocketManagerTests(SSotAsyncTestCase):
     """Test IsolatedWebSocketManager functionality."""
 
     def setup_method(self, method=None):
@@ -574,7 +574,7 @@ class TestIsolatedWebSocketManager(SSotAsyncTestCase):
         assert stats['error_count'] == 2
         self.record_metric('manager_stats_comprehensive', 1)
 
-class TestConnectionLifecycleManager(SSotAsyncTestCase):
+class ConnectionLifecycleManagerTests(SSotAsyncTestCase):
     """Test ConnectionLifecycleManager functionality."""
 
     def setup_method(self, method=None):
@@ -676,7 +676,7 @@ class TestConnectionLifecycleManager(SSotAsyncTestCase):
         assert self.ws_manager.remove_connection.call_count == 3
         self.record_metric('force_cleanup_all', 1)
 
-class TestGlobalFactoryFunctions(SSotBaseTestCase):
+class GlobalFactoryFunctionsTests(SSotBaseTestCase):
     """Test global factory functions and singleton behavior."""
 
     def setup_method(self, method=None):
@@ -704,7 +704,7 @@ class TestGlobalFactoryFunctions(SSotBaseTestCase):
         assert manager.user_context == test_user_context
         self.record_metric('convenience_function_verified', 1)
 
-class TestSecurityAndConcurrency(SSotAsyncTestCase):
+class SecurityAndConcurrencyTests(SSotAsyncTestCase):
     """Test security features and concurrent access scenarios."""
 
     def setup_method(self, method=None):

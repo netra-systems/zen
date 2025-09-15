@@ -148,7 +148,7 @@ class ReportContentValidator:
         return min(base_score, 10.0)
 
 
-class TestReportFormatContentValidationIntegration(BaseIntegrationTest):
+class ReportFormatContentValidationIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for report format and content validation
     

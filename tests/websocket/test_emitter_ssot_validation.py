@@ -25,7 +25,7 @@ import threading
 
 
 @pytest.mark.websocket
-class TestEmitterSSotValidation(unittest.IsolatedAsyncioTestCase):
+class EmitterSSotValidationTests(unittest.IsolatedAsyncioTestCase):
     """
     Simplified SSOT validation tests for WebSocket emitters.
     

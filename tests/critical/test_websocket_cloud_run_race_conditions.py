@@ -51,7 +51,7 @@ class CloudRunRaceCondition:
             return (self.end_time - self.start_time) * 1000
         return 0.0
 
-class TestWebSocketCloudRunRaceConditions:
+class WebSocketCloudRunRaceConditionsTests:
     """
     Tests that reproduce the exact race conditions that occur in GCP Cloud Run environments.
     

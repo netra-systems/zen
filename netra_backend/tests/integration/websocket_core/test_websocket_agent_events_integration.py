@@ -58,7 +58,7 @@ except ImportError as e:
     pytest.skip(f"Integration components not available: {e}", allow_module_level=True)
 
 
-class TestWebSocketAgentEventsIntegration(BaseIntegrationTest):
+class WebSocketAgentEventsIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket agent events with real services."""
 
     async def async_setup(self):

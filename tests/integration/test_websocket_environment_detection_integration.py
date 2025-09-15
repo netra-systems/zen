@@ -38,7 +38,7 @@ pytestmark = [
 
 
 @pytest.mark.integration
-class TestWebSocketEnvironmentDetectionIntegration(SSotBaseTestCase):
+class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket E2E environment detection system.
     
@@ -546,7 +546,7 @@ if __name__ == "__main__":
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../"))
     
     # Run a specific integration test
-    test_instance = TestWebSocketEnvironmentDetectionIntegration()
+    test_instance = WebSocketEnvironmentDetectionIntegrationTests()
     test_instance.setup_method()
     
     try:

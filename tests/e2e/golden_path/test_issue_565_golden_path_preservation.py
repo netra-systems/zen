@@ -36,7 +36,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 
 
 @pytest.mark.e2e
-class TestIssue565GoldenPathPreservation(SSotAsyncTestCase):
+class Issue565GoldenPathPreservationTests(SSotAsyncTestCase):
     """
     End-to-end test suite validating Golden Path preservation in ExecutionEngine migration.
 

@@ -31,7 +31,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from shared.logging.unified_logging_ssot import get_logger
 
 
-class TestProductionDebuggingScenarios(SSotAsyncTestCase):
+class ProductionDebuggingScenariosTests(SSotAsyncTestCase):
     """Test production debugging scenarios with comprehensive logging."""
     
     def setup_method(self, method=None):

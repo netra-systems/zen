@@ -41,7 +41,7 @@ def generate_llm_metrics():
 }
 ]
 
-class TestLLMMetricsAggregation:
+class LLMMetricsAggregationTests:
     """Test LLM-specific metrics and optimizations"""
 
     def test_llm_cost_optimization_query(self):

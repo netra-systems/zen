@@ -73,7 +73,7 @@ class WebSocketEventCollector:
         """Get the order of events received."""
         return [event_type for _, event_type in self.event_timeline]
 
-class TestWebSocketAuthSecurity(SSotBaseTestCase):
+class WebSocketAuthSecurityTests(SSotBaseTestCase):
     """
     Comprehensive WebSocket Authentication Security Tests
     

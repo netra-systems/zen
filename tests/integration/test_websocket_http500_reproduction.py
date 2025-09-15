@@ -24,7 +24,7 @@ from tests.helpers.auth_test_utils import TestAuthHelper
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
-class TestWebSocketHTTP500Reproduction(SSotAsyncTestCase):
+class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
     """Reproduce WebSocket HTTP 500 errors in integration environment"""
 
     def setup_method(self):
@@ -181,7 +181,7 @@ class TestWebSocketHTTP500Reproduction(SSotAsyncTestCase):
             raise e
 
 @pytest.mark.integration
-class TestWebSocketMiddlewareIntegration(SSotAsyncTestCase):
+class WebSocketMiddlewareIntegrationTests(SSotAsyncTestCase):
     """Test WebSocket middleware integration for HTTP 500 prevention"""
 
     def setup_method(self):

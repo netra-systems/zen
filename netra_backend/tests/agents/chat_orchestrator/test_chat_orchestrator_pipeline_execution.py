@@ -39,7 +39,7 @@ class AgentState:
             self.accumulated_data = {}
 
 
-class TestChatOrchestratorPipelineExecution(SSotAsyncTestCase, unittest.TestCase):
+class ChatOrchestratorPipelineExecutionTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive tests for ChatOrchestrator pipeline execution business logic."""
 
     def setUp(self):
@@ -377,7 +377,7 @@ class TestChatOrchestratorPipelineExecution(SSotAsyncTestCase, unittest.TestCase
         super().tearDown()
 
 
-class TestPipelineExecutorAgentRouting(SSotAsyncTestCase, unittest.TestCase):
+class PipelineExecutorAgentRoutingTests(SSotAsyncTestCase, unittest.TestCase):
     """Specialized tests for agent routing logic within pipeline execution."""
 
     def setUp(self):

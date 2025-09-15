@@ -23,7 +23,7 @@ from test_framework.conftest_real_services import real_services
 from shared.isolated_environment import get_env
 
 
-class TestUserSessionManagement(DatabaseIntegrationTest, CacheIntegrationTest):
+class UserSessionManagementTests(DatabaseIntegrationTest, CacheIntegrationTest):
     """Test user session management with real database and Redis cache."""
 
     @pytest.mark.integration

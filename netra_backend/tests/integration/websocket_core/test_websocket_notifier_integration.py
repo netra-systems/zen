@@ -22,7 +22,7 @@ from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from test_framework.ssot.base_test_case import BaseTestCase
 
 
-class TestWebSocketNotifierEventDelivery(BaseTestCase):
+class WebSocketNotifierEventDeliveryTests(BaseTestCase):
     """Integration tests for WebSocket event delivery and guaranteed delivery system."""
     
     @pytest.fixture
@@ -178,7 +178,7 @@ class TestWebSocketNotifierEventDelivery(BaseTestCase):
                not websocket_notifier.active_operations[sample_context.thread_id]["processing"]
 
 
-class TestWebSocketNotifierBacklogHandling(BaseTestCase):
+class WebSocketNotifierBacklogHandlingTests(BaseTestCase):
     """Integration tests for WebSocket event backlog handling and recovery."""
     
     @pytest.fixture
@@ -300,7 +300,7 @@ class TestWebSocketNotifierBacklogHandling(BaseTestCase):
         assert delivery_stats["queued_events"] >= 0  # Confirms queueing system is active
 
 
-class TestWebSocketNotifierErrorRecovery(BaseTestCase):
+class WebSocketNotifierErrorRecoveryTests(BaseTestCase):
     """Integration tests for WebSocket notifier error recovery and emergency handling."""
     
     @pytest.fixture

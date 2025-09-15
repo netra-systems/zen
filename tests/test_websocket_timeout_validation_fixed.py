@@ -45,7 +45,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import (
 )
 
 
-class TestWebSocketTimeoutValidation(SSotBaseTestCase):
+class WebSocketTimeoutValidationTests(SSotBaseTestCase):
     """Test WebSocket timeout configuration validation for Issue #404."""
     
     def setUp(self):
@@ -298,7 +298,7 @@ class TestWebSocketTimeoutValidation(SSotBaseTestCase):
         print("   [PASS] Race condition properly detected in old configuration")
 
 
-class TestEnvironmentDetection(SSotBaseTestCase):
+class EnvironmentDetectionTests(SSotBaseTestCase):
     """Test environment detection for timeout configuration."""
     
     def setUp(self):
@@ -381,17 +381,17 @@ def run_timeout_validation_tests():
     suite = unittest.TestSuite()
     
     # Add timeout validation tests
-    suite.addTest(TestWebSocketTimeoutValidation('test_staging_websocket_recv_timeout_is_35_seconds'))
-    suite.addTest(TestWebSocketTimeoutValidation('test_staging_agent_execution_timeout_is_30_seconds'))
-    suite.addTest(TestWebSocketTimeoutValidation('test_timeout_hierarchy_validation_staging'))
-    suite.addTest(TestWebSocketTimeoutValidation('test_convenience_functions_return_staging_values'))
-    suite.addTest(TestWebSocketTimeoutValidation('test_gcp_initialization_validator_timeout_optimization'))
-    suite.addTest(TestWebSocketTimeoutValidation('test_race_condition_detection_in_old_configuration'))
+    suite.addTest(WebSocketTimeoutValidationTests('test_staging_websocket_recv_timeout_is_35_seconds'))
+    suite.addTest(WebSocketTimeoutValidationTests('test_staging_agent_execution_timeout_is_30_seconds'))
+    suite.addTest(WebSocketTimeoutValidationTests('test_timeout_hierarchy_validation_staging'))
+    suite.addTest(WebSocketTimeoutValidationTests('test_convenience_functions_return_staging_values'))
+    suite.addTest(WebSocketTimeoutValidationTests('test_gcp_initialization_validator_timeout_optimization'))
+    suite.addTest(WebSocketTimeoutValidationTests('test_race_condition_detection_in_old_configuration'))
     
     # Add environment detection tests
-    suite.addTest(TestEnvironmentDetection('test_environment_detection_staging'))
-    suite.addTest(TestEnvironmentDetection('test_environment_detection_production'))
-    suite.addTest(TestEnvironmentDetection('test_environment_detection_local'))
+    suite.addTest(EnvironmentDetectionTests('test_environment_detection_staging'))
+    suite.addTest(EnvironmentDetectionTests('test_environment_detection_production'))
+    suite.addTest(EnvironmentDetectionTests('test_environment_detection_local'))
     
     # Run tests
     runner = unittest.TextTestRunner(verbosity=2, stream=sys.stdout, buffer=False)

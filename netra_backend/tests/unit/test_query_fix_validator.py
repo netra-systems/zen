@@ -12,7 +12,7 @@ from netra_backend.app.services.query_fix_validator import (
     validate_and_fix_query,
 )
 
-class TestQueryFixValidator:
+class QueryFixValidatorTests:
     """Test suite for query fix validator."""
     
     def test_validate_and_fix_simple_array_access(self):

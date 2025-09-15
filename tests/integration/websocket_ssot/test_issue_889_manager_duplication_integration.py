@@ -62,7 +62,7 @@ except ImportError as e:
 
 
 @pytest.mark.integration
-class TestIssue889ManagerDuplicationIntegration(SSotAsyncTestCase):
+class Issue889ManagerDuplicationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for Issue #889 WebSocket Manager SSOT Violations
     

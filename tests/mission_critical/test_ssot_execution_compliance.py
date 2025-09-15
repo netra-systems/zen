@@ -47,7 +47,7 @@ class SSOTViolation:
     line_number: Optional[int] = None
     severity: str = "HIGH"
 
-class TestSSOTExecutionCompliance(SSotBaseTestCase):
+class SSOTExecutionComplianceTests(SSotBaseTestCase):
     """
     MISSION CRITICAL: Test SSOT execution compliance across all test files.
     

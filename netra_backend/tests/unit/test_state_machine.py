@@ -121,7 +121,7 @@ class MockUserStateMachine:
 
 
 @pytest.mark.unit
-class TestApplicationStateMachine(SSotBaseTestCase):
+class ApplicationStateMachineTests(SSotBaseTestCase):
     """Test ApplicationStateMachine business logic and state transitions."""
     
     def setup_method(self, method):
@@ -275,7 +275,7 @@ class TestApplicationStateMachine(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestUserStateMachine(SSotBaseTestCase):
+class UserStateMachineTests(SSotBaseTestCase):
     """Test UserStateMachine business logic and user isolation."""
     
     def setup_method(self, method):

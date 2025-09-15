@@ -42,7 +42,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from test_framework.base import BaseUnitTest
 
-class TestCriticalAgentEventDelivery(BaseUnitTest):
+class CriticalAgentEventDeliveryTests(BaseUnitTest):
     """Test critical agent event delivery for chat business value."""
 
     def setUp(self):
@@ -151,7 +151,7 @@ class TestCriticalAgentEventDelivery(BaseUnitTest):
         assert conversation_context['goal_achieved'] is True, 'Must confirm user goal was achieved'
         assert conversation_context['confidence_score'] >= 0.9, 'Must show high confidence in results'
 
-class TestAgentEventSequenceValidation(BaseUnitTest):
+class AgentEventSequenceValidationTests(BaseUnitTest):
     """Test proper sequencing and completeness of agent events."""
 
     def setUp(self):
@@ -208,7 +208,7 @@ class TestAgentEventSequenceValidation(BaseUnitTest):
         assert 'tool_executing' in missing_events, 'Must detect missing tool_executing event'
         assert 'tool_completed' in missing_events, 'Must detect missing tool_completed event'
 
-class TestAgentEventBusinessValueValidation(BaseUnitTest):
+class AgentEventBusinessValueValidationTests(BaseUnitTest):
     """Test agent events deliver specific business value."""
 
     @pytest.mark.unit

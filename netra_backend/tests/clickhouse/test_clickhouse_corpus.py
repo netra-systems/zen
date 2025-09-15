@@ -10,7 +10,7 @@ from test_framework.performance_helpers import fast_test
 @pytest.mark.unit
 @pytest.mark.database
 @fast_test
-class TestCorpusTableOperations:
+class CorpusTableOperationsTests:
     """Unit tests for corpus table creation and management"""
 
     def _build_corpus_create_query(self, table_name):

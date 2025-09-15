@@ -36,7 +36,7 @@ class ProviderStatus(Enum):
     TIMEOUT = "timeout"
 
 
-class TestLLMProviderFailoverIntegration(BaseIntegrationTest):
+class LLMProviderFailoverIntegrationTests(BaseIntegrationTest):
     """
     Test LLM provider failover scenarios with user context preservation.
     

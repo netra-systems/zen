@@ -11,7 +11,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestJWTSSOTCompliance(SSotBaseTestCase):
+class JWTSSOTComplianceTests(SSotBaseTestCase):
     """Unit tests to validate proper JWT SSOT compliance patterns"""
     
     def setup_method(self):

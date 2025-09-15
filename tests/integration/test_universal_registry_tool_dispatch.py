@@ -97,7 +97,7 @@ class MockTool:
 
 
 @pytest.mark.integration
-class TestUniversalRegistryToolDispatch:
+class UniversalRegistryToolDispatchTests:
     """CRITICAL: UniversalRegistry tool dispatch integration testing."""
 
     async def asyncSetUp(self):
@@ -507,7 +507,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_integration_tests():
-        test_case = TestUniversalRegistryToolDispatch()
+        test_case = UniversalRegistryToolDispatchTests()
         await test_case.asyncSetUp()
         
         print("Running UniversalRegistry Tool Dispatch Integration Tests...")

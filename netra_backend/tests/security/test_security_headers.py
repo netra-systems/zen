@@ -8,7 +8,7 @@ import pytest
 from fastapi import Response
 from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
 
-class TestSecurityHeaders:
+class SecurityHeadersTests:
     """Test security headers middleware."""
 
     @pytest.fixture

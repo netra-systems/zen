@@ -33,7 +33,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestWebSocketManagerFactorySsotConsolidation(SSotAsyncTestCase):
+class WebSocketManagerFactorySsotConsolidationTests(SSotAsyncTestCase):
     """Phase 2 SSOT Validation Test: Validate factory patterns are consolidated to SSOT."""
     
     def setup_method(self, method):

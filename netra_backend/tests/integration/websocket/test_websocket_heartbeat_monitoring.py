@@ -188,7 +188,7 @@ class HeartbeatMonitoringWebSocket:
 @pytest.mark.websocket
 @pytest.mark.reliability
 @pytest.mark.asyncio
-class TestWebSocketHeartbeatMonitoring(SSotAsyncTestCase):
+class WebSocketHeartbeatMonitoringTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket heartbeat and connection monitoring.
     

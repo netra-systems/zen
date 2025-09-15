@@ -12,7 +12,7 @@ from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig, Stagi
 from shared.database_url_builder import DatabaseURLBuilder
 
 
-class TestAppConfigSSotComplianceValidation:
+class AppConfigSSotComplianceValidationTests:
     """Tests to validate proper SSOT compliance after remediation."""
     
     def test_appconfig_uses_database_url_builder_exclusively(self):

@@ -26,7 +26,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 from shared.context_serialization import SecureContextSerializer, serialize_context_for_task, deserialize_context_from_task
 
 @pytest.mark.integration
-class TestExecutionContextHierarchy:
+class ExecutionContextHierarchyTests:
     """Test execution context hierarchy and parent-child relationships."""
 
     @pytest.fixture
@@ -142,7 +142,7 @@ class TestExecutionContextHierarchy:
         assert grandchild_context.operation_depth == 2
 
 @pytest.mark.integration
-class TestContextHierarchySerialization:
+class ContextHierarchySerializationTests:
     """Test context hierarchy serialization and deserialization."""
 
     def test_hierarchical_context_serialization_roundtrip(self):
@@ -191,7 +191,7 @@ class TestContextHierarchySerialization:
         assert result['subtask_parent'] == background_task_context.request_id
 
 @pytest.mark.integration
-class TestContextHierarchyTraceability:
+class ContextHierarchyTraceabilityTests:
     """Test context hierarchy provides proper traceability and audit trails."""
 
     def test_context_hierarchy_audit_trail_construction(self):

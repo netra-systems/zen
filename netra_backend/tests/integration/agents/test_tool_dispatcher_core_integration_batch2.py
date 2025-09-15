@@ -29,7 +29,7 @@ from netra_backend.app.agents.tool_dispatcher_core import (
 )
 
 
-class TestToolDispatcherCoreIntegration(SSotAsyncTestCase):
+class ToolDispatcherCoreIntegrationTests(SSotAsyncTestCase):
     """Integration tests for core tool dispatcher with real components."""
     
     def setup_method(self, method):

@@ -100,7 +100,7 @@ class MockUserInterface:
         self.is_connected = False
 
 @pytest.mark.e2e
-class TestToolExecutionUserVisibilityE2E(SSotAsyncTestCase):
+class ToolExecutionUserVisibilityE2ETests(SSotAsyncTestCase):
     """E2E tests for complete tool execution user visibility flow.
     
     EXPECTED TO FAIL: These tests demonstrate missing confirmation functionality.
@@ -259,7 +259,7 @@ class TestToolExecutionUserVisibilityE2E(SSotAsyncTestCase):
             assert staging_visibility['gcp_websocket_healthy'] is True
 
 @pytest.mark.e2e
-class TestToolExecutionUserExperienceE2E(SSotAsyncTestCase):
+class ToolExecutionUserExperienceE2ETests(SSotAsyncTestCase):
     """E2E tests focused on user experience during tool execution.
     
     EXPECTED TO FAIL: User experience features depend on missing confirmation system.

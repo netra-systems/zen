@@ -72,7 +72,7 @@ class ConcurrentEmitterSimulation:
 @pytest.mark.race_condition_detection
 @pytest.mark.phase_1_pre_consolidation
 @pytest.mark.websocket_emitter_consolidation
-class TestMultipleEmitterRaceConditions(SSotAsyncTestCase):
+class MultipleEmitterRaceConditionsTests(SSotAsyncTestCase):
     """
     Unit tests proving race conditions exist with multiple WebSocket emitters.
     

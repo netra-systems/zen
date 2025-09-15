@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 @pytest.mark.e2e
-class TestWebsocketUserJourneyIntegrationCore:
+class WebsocketUserJourneyIntegrationCoreTests:
     """Test class for websocket_user_journey_integration_core"""
 
     def setup_method(self):

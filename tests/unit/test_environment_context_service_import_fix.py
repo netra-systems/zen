@@ -12,7 +12,7 @@ from typing import Optional
 
 
 @pytest.mark.unit
-class TestEnvironmentContextServiceImportFix:
+class EnvironmentContextServiceImportFixTests:
     """Test suite for environment context service import path fix."""
     
     def test_environment_context_service_import_path_correct(self):

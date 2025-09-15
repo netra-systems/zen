@@ -132,7 +132,7 @@ class AgentExecutionStates(Enum):
     TIMEOUT = "timeout"
 
 
-class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
+class AgentExecutionLifecycleComprehensiveTests(BaseIntegrationTest):
     """Comprehensive integration test for complete agent execution lifecycle."""
     
     def setup_method(self):

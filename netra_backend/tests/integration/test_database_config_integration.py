@@ -30,7 +30,7 @@ from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
-class TestDatabaseConfigurationIntegration(BaseIntegrationTest):
+class DatabaseConfigurationIntegrationTests(BaseIntegrationTest):
     """Test database configuration system integration."""
 
     def setup_method(self):

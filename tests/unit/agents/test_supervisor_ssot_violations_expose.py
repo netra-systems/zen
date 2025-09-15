@@ -21,7 +21,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestSupervisorSSotViolationsExpose:
+class SupervisorSSotViolationsExposeTests:
     """Tests designed to FAIL and expose SupervisorAgent SSOT violations."""
     
     def test_supervisor_import_confusion_violation_SHOULD_FAIL(self):

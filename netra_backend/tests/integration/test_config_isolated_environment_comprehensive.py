@@ -50,7 +50,7 @@ class EnvironmentTestScenario:
     expected_warnings: List[str] = None
 
 
-class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
+class IsolatedEnvironmentComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive integration tests for IsolatedEnvironment functionality.
     
@@ -1286,7 +1286,7 @@ DEPLOYMENT_TIMESTAMP=2024-01-15T10:30:00Z
 
 # === HELPER TEST CLASS FOR LEGACY COMPATIBILITY ===
 
-class TestIsolatedEnvironmentLegacyCompatibility(SSotBaseTestCase):
+class IsolatedEnvironmentLegacyCompatibilityTests(SSotBaseTestCase):
     """
     Tests for backwards compatibility with legacy environment management patterns.
     

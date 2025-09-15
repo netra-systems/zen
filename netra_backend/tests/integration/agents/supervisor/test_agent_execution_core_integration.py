@@ -91,7 +91,7 @@ class RealIntegrationAgent(BaseAgent):
 MockIntegrationAgent = RealIntegrationAgent
 
 
-class TestAgentExecutionCoreIntegration:
+class AgentExecutionCoreIntegrationTests:
     """Integration tests with real components."""
 
     @pytest.fixture

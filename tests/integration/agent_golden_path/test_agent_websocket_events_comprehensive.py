@@ -64,7 +64,7 @@ except ImportError as e:
     BaseAgent = MagicMock
     AgentExecutionContext = MagicMock
 
-class TestAgentWebSocketEventsComprehensive(SSotAsyncTestCase):
+class AgentWebSocketEventsComprehensiveTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Enhanced Agent WebSocket Event Processing.
 

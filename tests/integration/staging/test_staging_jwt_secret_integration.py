@@ -29,7 +29,7 @@ from deployment.secrets_config import SecretConfig
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestStagingJWTSecretIntegration(SSotAsyncTestCase):
+class StagingJWTSecretIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for staging JWT secret management.
 

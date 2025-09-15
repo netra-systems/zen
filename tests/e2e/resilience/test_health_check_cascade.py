@@ -223,7 +223,7 @@ class RecoveryValidator:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestHealthCheckCascade:
+class HealthCheckCascadeTests:
     """Test #10: Health Check Cascade with Degraded Mode."""
     
     @pytest_asyncio.fixture
@@ -364,9 +364,9 @@ class TestHealthCheckCascade:
         assert full_recovery["full_recovery"], "System did not fully recover"
 
 # Test execution helper functions
-def create_health_cascade_test_suite() -> TestHealthCheckCascade:
+def create_health_cascade_test_suite() -> HealthCheckCascadeTests:
     """Create health check cascade test suite instance."""
-    return TestHealthCheckCascade()
+    return HealthCheckCascadeTests()
 
 async def run_health_cascade_validation() -> Dict[str, Any]:
     """Run health check cascade validation and return results."""

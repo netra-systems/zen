@@ -17,7 +17,7 @@ from netraoptimizer.client import NetraOptimizerClient
 from netraoptimizer.database.models import ExecutionRecord
 
 
-class TestNetraOptimizerClient:
+class NetraOptimizerClientTests:
     """Comprehensive test suite for the NetraOptimizerClient."""
 
     @pytest.fixture

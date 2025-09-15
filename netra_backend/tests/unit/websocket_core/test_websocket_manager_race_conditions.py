@@ -77,7 +77,7 @@ class RaceConditionTestResult:
     failed_operations: int = 0
 
 
-class TestWebSocketManagerRaceConditions(BaseTestCase):
+class WebSocketManagerRaceConditionsTests(BaseTestCase):
     """
     Comprehensive race condition tests for WebSocket manager components.
     

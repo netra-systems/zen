@@ -33,7 +33,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestConfigurationManagerDuplicationDetection(SSotBaseTestCase):
+class ConfigurationManagerDuplicationDetectionTests(SSotBaseTestCase):
     """Unit tests to detect and validate configuration manager duplication."""
 
     def setup_method(self, method):
@@ -345,7 +345,7 @@ class TestConfigurationManagerDuplicationDetection(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestConfigurationManagerCompatibilityBridge(SSotBaseTestCase):
+class ConfigurationManagerCompatibilityBridgeTests(SSotBaseTestCase):
     """Test the Issue #667 Phase 1 compatibility bridge functionality."""
 
     def setup_method(self, method):

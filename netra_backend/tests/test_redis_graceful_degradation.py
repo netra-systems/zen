@@ -41,7 +41,7 @@ from netra_backend.app.routes.health_check import readiness_probe, liveness_prob
 from shared.isolated_environment import get_env
 from netra_backend.app.core.configuration.base import get_unified_config
 
-class TestRedisGracefulDegradation:
+class RedisGracefulDegradationTests:
     """Test Redis graceful degradation scenarios that currently fail."""
 
     @pytest.mark.asyncio

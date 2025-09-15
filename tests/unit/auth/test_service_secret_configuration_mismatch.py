@@ -22,7 +22,7 @@ from shared.isolated_environment import IsolatedEnvironment
 logger = logging.getLogger(__name__)
 
 @pytest.mark.unit
-class TestServiceSecretConfigurationMismatch(SSotAsyncTestCase):
+class ServiceSecretConfigurationMismatchTests(SSotAsyncTestCase):
     """
     CRITICAL: These tests will FAIL to prove Issue #1037 regression exists.
 

@@ -45,7 +45,7 @@ class ScopeModifyingMiddleware(BaseHTTPMiddleware):
             request.scope['custom_routing_header'] = 'modified'
         return await call_next(request)
 
-class TestRouteMiddlewareIntegration:
+class RouteMiddlewareIntegrationTests:
     """Integration tests for route-specific middleware conflicts."""
 
     def setup_method(self, method=None):

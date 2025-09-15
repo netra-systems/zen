@@ -42,7 +42,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 from shared.isolated_environment import get_env
 
 
-class TestGCPLoadBalancerHeaders(BaseE2ETest):
+class GCPLoadBalancerHeadersTests(BaseE2ETest):
     """Test GCP Load Balancer header forwarding for WebSocket authentication."""
     
     @pytest.fixture(autouse=True)

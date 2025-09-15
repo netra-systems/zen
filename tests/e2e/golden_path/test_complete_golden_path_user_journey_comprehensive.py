@@ -43,7 +43,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestCompleteGoldenPathUserJourneyComprehensive(SSotAsyncTestCase):
+class CompleteGoldenPathUserJourneyComprehensiveTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

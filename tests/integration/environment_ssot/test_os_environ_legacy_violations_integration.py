@@ -37,7 +37,7 @@ from netra_backend.app.core.auth_startup_validator import AuthStartupValidator
 
 
 @pytest.mark.integration
-class TestLegacyOsEnvironViolationsIntegration(SSotBaseTestCase):
+class LegacyOsEnvironViolationsIntegrationTests(SSotBaseTestCase):
     """Integration test suite for all legacy os.environ SSOT violations."""
 
     def setup_method(self, method):

@@ -24,7 +24,7 @@ from netra_backend.app.websocket_core.handlers import MessageRouter, MessageHand
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 
 
-class TestMessageRouterFunctionBugReproduction:
+class MessageRouterFunctionBugReproductionTests:
     """Test suite that reproduces the exact function object bug from staging."""
     
     @pytest.fixture
@@ -262,7 +262,7 @@ class TestMessageRouterFunctionBugReproduction:
         assert result is False
 
 
-class TestWebSocketSSOTBugReproductionIntegration:
+class WebSocketSSOTBugReproductionIntegrationTests:
     """Integration tests that simulate the complete websocket_ssot.py scenario."""
     
     def test_agent_handler_registration_pattern(self):

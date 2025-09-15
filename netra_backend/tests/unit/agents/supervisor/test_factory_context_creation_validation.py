@@ -59,7 +59,7 @@ def comprehensive_metadata():
     """Create comprehensive metadata for testing."""
     return {'source': 'test_suite', 'priority': 'high', 'client_version': '1.0.0', 'feature_flags': ['feature_a', 'feature_b'], 'user_preferences': {'theme': 'dark', 'language': 'en'}, 'request_metadata': {'ip_address': '127.0.0.1', 'user_agent': 'test-client/1.0', 'timestamp': datetime.now(timezone.utc).isoformat()}}
 
-class TestUserExecutionContextValidation(SSotBaseTestCase):
+class UserExecutionContextValidationTests(SSotBaseTestCase):
     """Test UserExecutionContext validation and creation patterns."""
 
     def test_user_execution_context_basic_validation(self, valid_context_params):
@@ -139,7 +139,7 @@ class TestUserExecutionContextValidation(SSotBaseTestCase):
         assert context.user_id == original_user_id
         assert context.created_at == original_created_at
 
-class TestFactoryContextCreationWithValidation(SSotBaseTestCase):
+class FactoryContextCreationWithValidationTests(SSotBaseTestCase):
     """Test AgentInstanceFactory context creation with comprehensive validation."""
 
     @pytest.mark.asyncio
@@ -257,7 +257,7 @@ class TestFactoryContextCreationWithValidation(SSotBaseTestCase):
         assert context is not None
         assert context.user_id == 'user'
 
-class TestContextParameterValidationAndSanitization(SSotBaseTestCase):
+class ContextParameterValidationAndSanitizationTests(SSotBaseTestCase):
     """Test parameter validation and sanitization in context creation."""
 
     @pytest.mark.asyncio
@@ -319,7 +319,7 @@ class TestContextParameterValidationAndSanitization(SSotBaseTestCase):
         context_empty_client = await factory.create_user_execution_context(user_id='test_user3', thread_id='test_thread3', run_id='test_run3', websocket_client_id='')
         assert context_empty_client.websocket_connection_id == ''
 
-class TestErrorPropagationAndRecoveryPatterns(SSotBaseTestCase):
+class ErrorPropagationAndRecoveryPatternsTests(SSotBaseTestCase):
     """Test error propagation and recovery in context creation."""
 
     @pytest.mark.asyncio
@@ -389,7 +389,7 @@ class TestErrorPropagationAndRecoveryPatterns(SSotBaseTestCase):
         assert len(exceptions) >= 1
         assert factory.get_factory_metrics()['active_contexts'] >= 2
 
-class TestPerformanceAndTimingValidation(SSotBaseTestCase):
+class PerformanceAndTimingValidationTests(SSotBaseTestCase):
     """Test performance characteristics and timing validation."""
 
     @pytest.mark.asyncio

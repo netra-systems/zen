@@ -26,7 +26,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.service_availability import check_service_availability, ServiceUnavailableError
 
 
-class TestCrossServiceAuthIntegration(BaseIntegrationTest):
+class CrossServiceAuthIntegrationTests(BaseIntegrationTest):
     """Integration tests for authentication across microservice boundaries."""
     
     def setup_method(self):

@@ -38,7 +38,7 @@ from netra_backend.app.db.transaction_errors import (
 
 @pytest.mark.unit
 @pytest.mark.database
-class TestClickHouseSchemaExceptionTypes(SSotAsyncTestCase):
+class ClickHouseSchemaExceptionTypesTests(SSotAsyncTestCase):
     """
     Tests validating proper exception type classification in ClickHouse schema operations.
 

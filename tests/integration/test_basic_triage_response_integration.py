@@ -47,7 +47,7 @@ from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager
 @pytest.mark.websocket
 @pytest.mark.no_docker
 @pytest.mark.issue_135
-class TestBasicTriageResponseIntegration(SSotAsyncTestCase):
+class BasicTriageResponseIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for basic triage response processing without Docker.
     

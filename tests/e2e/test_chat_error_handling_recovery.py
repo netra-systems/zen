@@ -80,7 +80,7 @@ class ErrorRecoveryValidator:
 @pytest.mark.e2e
 @pytest.mark.requires_docker
 @pytest.mark.error_handling
-class TestChatErrorHandlingRecovery(SSotAsyncTestCase):
+class ChatErrorHandlingRecoveryTests(SSotAsyncTestCase):
     """
     CRITICAL: E2E test for chat error handling and recovery mechanisms.
     

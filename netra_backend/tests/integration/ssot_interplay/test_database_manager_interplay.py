@@ -69,7 +69,7 @@ class DatabaseTestMetrics:
             self.isolation_violations = []
 
 
-class TestDatabaseManagerInterplay(BaseIntegrationTest):
+class DatabaseManagerInterplayTests(BaseIntegrationTest):
     """Integration tests for DatabaseManager SSOT interactions."""
     
     def setup_method(self):

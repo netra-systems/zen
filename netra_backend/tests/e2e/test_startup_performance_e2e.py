@@ -56,7 +56,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app import smd, startup_module
 
 
-class TestStartupPerformanceE2E(BaseTestCase, E2ETestFixture):
+class StartupPerformanceE2ETests(BaseTestCase, E2ETestFixture):
     """
     Performance E2E tests for startup system with business SLA validation.
     

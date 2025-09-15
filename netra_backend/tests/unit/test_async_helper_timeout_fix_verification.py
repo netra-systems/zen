@@ -27,7 +27,7 @@ def create_slow_connection_factory():
     return create_connection
 
 
-class TestAsyncHelperTimeoutFix:
+class AsyncHelperTimeoutFixTests:
     """Verification tests for the async helper timeout bug fix."""
 
     @pytest.mark.asyncio
@@ -114,7 +114,7 @@ class TestAsyncHelperTimeoutFix:
         )
 
 
-class TestAsyncHelperRegressionPrevention:
+class AsyncHelperRegressionPreventionTests:
     """Tests to prevent regression of the timeout issue."""
     
     @pytest.mark.asyncio

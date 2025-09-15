@@ -49,7 +49,7 @@ from netra_backend.app.core.managers import (
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestSSotNamingConventionCompliance:
+class SSotNamingConventionComplianceTests:
     """
     Test 1: SSOT Naming Convention Test
     Validates business-focused naming principles compliance
@@ -137,7 +137,7 @@ class TestSSotNamingConventionCompliance:
         assert "Manager" not in expected_class_name, "Expected class name avoids Manager suffix"
 
 
-class TestFactoryPatternIntegrity:
+class FactoryPatternIntegrityTests:
     """
     Test 2: Factory Pattern Integrity Test
     Ensures SystemLifecycle maintains user isolation for multi-user chat functionality
@@ -243,7 +243,7 @@ class TestFactoryPatternIntegrity:
         assert LifecycleManagerFactory._global_manager is not None, "Global manager tracked"
 
 
-class TestImportCompatibilityDuringMigration:
+class ImportCompatibilityDuringMigrationTests:
     """
     Test 3: Import Compatibility Test
     Tests backward compatibility during migration phase
@@ -334,7 +334,7 @@ class TestImportCompatibilityDuringMigration:
         assert len(migration_steps) == 5, "Migration strategy has defined steps"
 
 
-class TestWebSocketIntegrationLifecycleEvents:
+class WebSocketIntegrationLifecycleEventsTests:
     """
     Test 4: WebSocket Integration Test
     Ensures lifecycle events still fire correctly for chat functionality
@@ -441,7 +441,7 @@ class TestWebSocketIntegrationLifecycleEvents:
         assert user2_call["user_id"] == "websocket_user_2", "User 2 events have correct user ID"
 
 
-class TestMegaClassComplianceAfterMigration:
+class MegaClassComplianceAfterMigrationTests:
     """
     Test 5: Mega Class Compliance Test
     Verifies SystemLifecycle still within 4000 line limit after rename
@@ -521,7 +521,7 @@ class TestMegaClassComplianceAfterMigration:
         assert len(monitoring_approaches) >= 4, "Multiple monitoring approaches planned"
 
 
-class TestSSotArchitecturalIntegrity:
+class SSotArchitecturalIntegrityTests:
     """
     Additional SSOT Architectural Integrity Tests
     Ensures migration maintains overall SSOT principles
@@ -589,7 +589,7 @@ if __name__ == "__main__":
     # Test 1: SSOT Naming Convention Compliance
     print("Test 1: SSOT Naming Convention Compliance")
     try:
-        test_class = TestSSotNamingConventionCompliance()
+        test_class = SSotNamingConventionComplianceTests()
         test_class.test_current_class_naming_violation()
         print(" FAIL:  EXPECTED FAILURE: Current naming violates business-focused conventions")
     except AssertionError:
@@ -598,7 +598,7 @@ if __name__ == "__main__":
     # Test 2: Factory Pattern Integrity  
     print("\nTest 2: Factory Pattern Integrity")
     try:
-        test_class = TestFactoryPatternIntegrity()
+        test_class = FactoryPatternIntegrityTests()
         test_class.test_factory_user_isolation_integrity()
         print(" PASS:  PASS: Factory pattern maintains user isolation")
     except Exception as e:
@@ -607,7 +607,7 @@ if __name__ == "__main__":
     # Test 3: Import Compatibility
     print("\nTest 3: Import Compatibility")
     try:
-        test_class = TestImportCompatibilityDuringMigration()
+        test_class = ImportCompatibilityDuringMigrationTests()
         test_class.test_current_import_path_works()
         print(" PASS:  PASS: Current import paths work")
     except Exception as e:
@@ -617,7 +617,7 @@ if __name__ == "__main__":
     print("\nTest 4: WebSocket Integration")
     try:
         import asyncio
-        test_class = TestWebSocketIntegrationLifecycleEvents()
+        test_class = WebSocketIntegrationLifecycleEventsTests()
         asyncio.run(test_class.test_websocket_lifecycle_event_integration())
         print(" PASS:  PASS: WebSocket lifecycle events work")
     except Exception as e:
@@ -626,7 +626,7 @@ if __name__ == "__main__":
     # Test 5: Mega Class Compliance
     print("\nTest 5: Mega Class Compliance")
     try:
-        test_class = TestMegaClassComplianceAfterMigration()
+        test_class = MegaClassComplianceAfterMigrationTests()
         test_class.test_current_class_line_count_compliance()
         print(" PASS:  PASS: Class within mega class limits")
     except Exception as e:

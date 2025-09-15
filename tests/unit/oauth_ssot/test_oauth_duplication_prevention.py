@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.unit
-class TestOAuthDuplicationPrevention:
+class OAuthDuplicationPreventionTests:
     """Test suite to prevent OAuth validation duplication - Issue #213."""
     
     def setup_method(self):
@@ -367,7 +367,7 @@ def test_oauth_duplication_detection_capability():
     
     This meta-test ensures our duplication detection tests work correctly.
     """
-    test_instance = TestOAuthDuplicationPrevention()
+    test_instance = OAuthDuplicationPreventionTests()
     test_instance.setup_method()
     
     # Verify we can scan for implementations

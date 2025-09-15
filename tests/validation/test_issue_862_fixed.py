@@ -31,7 +31,7 @@ from test_framework.ssot.hybrid_execution_manager import ExecutionMode
 logger = logging.getLogger(__name__)
 
 
-class TestIssue862FixValidation:
+class Issue862FixValidationTests:
     """
     Validate that Issue #862 critical implementation bugs are fixed.
     
@@ -362,7 +362,7 @@ class TestIssue862FixValidation:
         logger.info(f"✅ Collection phase simulation fixed for {len(test_classes)} test classes")
 
 
-class TestActualServiceIndependentTestExecution:
+class ActualServiceIndependentTestExecutionTests:
     """
     Test that actual service-independent test classes can execute.
     

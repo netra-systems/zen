@@ -54,7 +54,7 @@ from loguru import logger
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestWebSocketFactoryMigration(SSotAsyncTestCase):
+class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
     """Mission Critical: WebSocket Factory Migration Validation Tests
     
     These tests validate the migration process itself:

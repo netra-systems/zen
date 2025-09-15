@@ -32,7 +32,7 @@ from auth_service.auth_core.services.auth_service import AuthService as ErrorHan
 from auth_service.database import get_database
 
 
-class TestAuthErrorHandlingIntegration(BaseIntegrationTest):
+class AuthErrorHandlingIntegrationTests(BaseIntegrationTest):
     """Integration tests for comprehensive auth error handling with real services."""
     
     @pytest.fixture(autouse=True)

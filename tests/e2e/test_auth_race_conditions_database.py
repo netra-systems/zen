@@ -22,7 +22,7 @@ from auth_service.tests.factories.user_factory import UserFactory
 # Add auth_service to path for imports
 
 @pytest.mark.e2e
-class TestDatabaseTransactionIsolation:
+class DatabaseTransactionIsolationTests:
     # """Test Case 5: Database Transaction Isolation Verification"""
     pass
 

@@ -76,7 +76,7 @@ class WorkflowType(Enum):
     DATA_INSIGHTS = "data_insights"
 
 
-class TestMultiAgentWorkflowCoordination(BaseIntegrationTest):
+class MultiAgentWorkflowCoordinationTests(BaseIntegrationTest):
     """Test comprehensive multi-agent workflow coordination."""
     
     def setup_method(self):

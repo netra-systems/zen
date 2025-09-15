@@ -22,7 +22,7 @@ from typing import Dict, List, Any, Optional, Set, Union
 from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestDockerComposeFileValidation(SSotBaseTestCase):
+class DockerComposeFileValidationTests(SSotBaseTestCase):
     """Integration tests for docker-compose file validation - YAML PARSING ONLY
 
     These tests validate docker-compose file configurations and service

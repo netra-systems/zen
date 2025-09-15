@@ -293,7 +293,7 @@ async def tool_execution_tester(request):
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestRealAgentToolExecution:
+class RealAgentToolExecutionTests:
     """Test suite for real agent tool execution."""
 
     async def test_sequential_tool_chain_execution(self, tool_execution_tester):

@@ -24,7 +24,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
 
-class TestAgentWebSocketIntegration(BaseIntegrationTest):
+class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     """Test agent execution with WebSocket event delivery using real services."""
 
     @pytest.fixture(autouse=True)

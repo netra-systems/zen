@@ -28,7 +28,7 @@ from dev_launcher import DevLauncher, LauncherConfig
 from tests.e2e.dev_launcher_test_fixtures import TestEnvironmentManager
 
 
-class TestDevLauncherFixture:
+class DevLauncherFixtureTests:
     """Manages dev launcher lifecycle for testing."""
     
     def __init__(self):

@@ -138,7 +138,7 @@ PERFORMANCE_TEST_SCENARIOS = [
 ]
 
 
-class TestIntegratedPerformance(SSotAsyncTestCase):
+class IntegratedPerformanceTests(SSotAsyncTestCase):
     """
     Integrated Performance SLA Test Suite for Issue #1200
 

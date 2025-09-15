@@ -50,7 +50,7 @@ from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.schemas.config import AppConfig
 
 
-class TestUnifiedConfigurationManagement(SSotBaseTestCase):
+class UnifiedConfigurationManagementTests(SSotBaseTestCase):
     """Test unified configuration management and SSOT compliance patterns."""
     
     @pytest.mark.integration
@@ -199,7 +199,7 @@ class TestUnifiedConfigurationManagement(SSotBaseTestCase):
         self.record_metric("db_config_error_count", len(db_errors))
 
 
-class TestIsolatedEnvironmentManagement(SSotAsyncTestCase):
+class IsolatedEnvironmentManagementTests(SSotAsyncTestCase):
     """Test environment isolation and variable management systems."""
     
     @pytest.mark.integration
@@ -357,7 +357,7 @@ class TestIsolatedEnvironmentManagement(SSotAsyncTestCase):
         self.record_metric("concurrent_worker_count", len(results))
 
 
-class TestDemoModeConfiguration(SSotBaseTestCase):
+class DemoModeConfigurationTests(SSotBaseTestCase):
     """Test DEMO_MODE configuration for isolated demonstration environments."""
     
     @pytest.mark.integration
@@ -430,7 +430,7 @@ class TestDemoModeConfiguration(SSotBaseTestCase):
                 self.record_metric("demo_mode_environment_safe", True)
 
 
-class TestServiceDiscoveryAndDependencyManagement(SSotAsyncTestCase):
+class ServiceDiscoveryAndDependencyManagementTests(SSotAsyncTestCase):
     """Test service discovery and dependency management patterns."""
     
     @pytest.mark.integration
@@ -512,7 +512,7 @@ class TestServiceDiscoveryAndDependencyManagement(SSotAsyncTestCase):
         self.record_metric("auth_postgres_port", auth_postgres_port or 0)
 
 
-class TestCORSAndSecurityConfiguration(SSotBaseTestCase):
+class CORSAndSecurityConfigurationTests(SSotBaseTestCase):
     """Test CORS configuration and security headers management."""
     
     @pytest.mark.integration
@@ -603,7 +603,7 @@ class TestCORSAndSecurityConfiguration(SSotBaseTestCase):
         self.record_metric("oauth_configured", oauth_configured)
 
 
-class TestWebSocketConfigurationSecurity(SSotAsyncTestCase):
+class WebSocketConfigurationSecurityTests(SSotAsyncTestCase):
     """Test WebSocket configuration and security settings."""
     
     @pytest.mark.integration
@@ -688,7 +688,7 @@ class TestWebSocketConfigurationSecurity(SSotAsyncTestCase):
         self.record_metric("critical_events_count", len(critical_events))
 
 
-class TestDatabaseAndRedisConnectionConfiguration(SSotAsyncTestCase):
+class DatabaseAndRedisConnectionConfigurationTests(SSotAsyncTestCase):
     """Test database and Redis connection configuration validation."""
     
     @pytest.mark.integration
@@ -785,7 +785,7 @@ class TestDatabaseAndRedisConnectionConfiguration(SSotAsyncTestCase):
         self.record_metric("production_ssl_required", environment == "production" and database_ssl)
 
 
-class TestPerformanceAndMonitoringConfiguration(SSotBaseTestCase):
+class PerformanceAndMonitoringConfigurationTests(SSotBaseTestCase):
     """Test performance configuration and monitoring settings."""
     
     @pytest.mark.integration
@@ -873,7 +873,7 @@ class TestPerformanceAndMonitoringConfiguration(SSotBaseTestCase):
         self.record_metric("rate_limiting_enabled", rate_limit_enabled)
 
 
-class TestConfigurationHotReloadAndRecovery(SSotAsyncTestCase):
+class ConfigurationHotReloadAndRecoveryTests(SSotAsyncTestCase):
     """Test configuration hot-reloading and recovery mechanisms."""
     
     @pytest.mark.integration

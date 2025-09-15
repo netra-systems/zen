@@ -30,7 +30,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestJWTDelegationSSoTCompliance(BaseIntegrationTest):
+class JWTDelegationSSoTComplianceTests(BaseIntegrationTest):
     """
     Test suite to validate SSOT compliance for JWT operations.
     

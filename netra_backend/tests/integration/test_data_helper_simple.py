@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock
 from netra_backend.app.tools.data_helper import DataHelper, create_data_helper
 
 
-class TestDataHelperSimple:
+class DataHelperSimpleTests:
     """Simple test to validate data helper functionality."""
     
     @pytest.mark.asyncio
@@ -131,7 +131,7 @@ Please provide the requested data for analysis.
 
 if __name__ == "__main__":
     # Run tests directly
-    asyncio.run(TestDataHelperSimple().test_data_helper_basic_functionality())
-    asyncio.run(TestDataHelperSimple().test_data_helper_error_handling())
-    asyncio.run(TestDataHelperSimple().test_data_helper_with_previous_results())
+    asyncio.run(DataHelperSimpleTests().test_data_helper_basic_functionality())
+    asyncio.run(DataHelperSimpleTests().test_data_helper_error_handling())
+    asyncio.run(DataHelperSimpleTests().test_data_helper_with_previous_results())
     print("\nAll simple data helper tests passed!")

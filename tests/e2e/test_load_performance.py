@@ -37,7 +37,7 @@ from tests.e2e.load_test_utilities import (
 )
 
 
-class TestConcurrentLoader:
+class ConcurrentLoaderTests:
     """Tests system with 100 concurrent users"""
     
     def __init__(self, simulator: LoadTestSimulator):
@@ -76,7 +76,7 @@ class TestConcurrentLoader:
         }
 
 
-class TestSustainedLoader:
+class SustainedLoaderTests:
     """Tests system for memory leaks over 24 hours"""
     
     def __init__(self, simulator: LoadTestSimulator):
@@ -109,7 +109,7 @@ class TestSustainedLoader:
         return analysis
 
 
-class TestBurstTrafficer:
+class BurstTrafficerTests:
     """Tests system handling of traffic spikes"""
     
     def __init__(self, simulator: LoadTestSimulator):
@@ -155,7 +155,7 @@ class TestBurstTrafficer:
         }
 
 
-class TestGracefulDegradationer:
+class GracefulDegradationerTests:
     """Tests system graceful degradation under extreme load"""
     
     def __init__(self, simulator: LoadTestSimulator):
@@ -217,7 +217,7 @@ class TestGracefulDegradationer:
 # Test Classes
 
 @pytest.mark.e2e
-class TestConcurrentUserLoad:
+class ConcurrentUserLoadTests:
     """Test 100 concurrent users system handling"""
     
     @pytest_asyncio.fixture
@@ -240,7 +240,7 @@ class TestConcurrentUserLoad:
 
 
 @pytest.mark.e2e
-class TestSustainedLoad:
+class SustainedLoadTests:
     """Test sustained load without memory leaks"""
     
     @pytest_asyncio.fixture
@@ -263,7 +263,7 @@ class TestSustainedLoad:
 
 
 @pytest.mark.e2e
-class TestBurstTrafficHandling:
+class BurstTrafficHandlingTests:
     """Test burst traffic management"""
     
     @pytest_asyncio.fixture
@@ -286,7 +286,7 @@ class TestBurstTrafficHandling:
 
 
 @pytest.mark.e2e
-class TestGracefulDegradation:
+class GracefulDegradationTests:
     """Test graceful system degradation under extreme load"""
     
     @pytest_asyncio.fixture

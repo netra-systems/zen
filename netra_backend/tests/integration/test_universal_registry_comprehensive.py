@@ -125,7 +125,7 @@ class MockWebSocketManager:
         return len(self.connections)
 
 
-class TestUniversalRegistryComprehensive(BaseIntegrationTest):
+class UniversalRegistryComprehensiveTests(BaseIntegrationTest):
     """Comprehensive integration tests for UniversalRegistry with real registry operations."""
     
     def setup_method(self):
@@ -1961,7 +1961,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
 
 # ===================== PERFORMANCE BENCHMARKING =====================
 
-class TestUniversalRegistryPerformanceBenchmarks(BaseIntegrationTest):
+class UniversalRegistryPerformanceBenchmarksTests(BaseIntegrationTest):
     """Performance benchmarking tests for UniversalRegistry scaling characteristics."""
     
     @pytest.mark.integration
@@ -2106,7 +2106,7 @@ class TestUniversalRegistryPerformanceBenchmarks(BaseIntegrationTest):
 # Mark the test to be run at appropriate times
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestUniversalRegistryBusinessCriticalIntegration:
+class UniversalRegistryBusinessCriticalIntegrationTests:
     """Business-critical integration scenarios that must always pass."""
     
     @pytest.mark.mission_critical

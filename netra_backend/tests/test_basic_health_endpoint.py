@@ -41,7 +41,7 @@ class MockAppState:
         self.startup_phase = 'complete'
         self.startup_progress = 100
 
-class TestBasicHealthEndpoint:
+class BasicHealthEndpointTests:
     """Test the basic /health endpoint that was missing from existing coverage."""
 
     @pytest.mark.asyncio

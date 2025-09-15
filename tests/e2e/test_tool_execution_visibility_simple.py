@@ -12,7 +12,7 @@ from netra_backend.app.core.tool_models import ToolExecutionResult
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 @pytest.mark.asyncio
-class TestToolExecutionVisibilityE2E:
+class ToolExecutionVisibilityE2ETests:
     """Simple E2E tests for tool execution visibility."""
 
     def setup_method(self):

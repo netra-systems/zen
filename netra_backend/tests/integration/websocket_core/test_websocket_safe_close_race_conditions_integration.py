@@ -77,7 +77,7 @@ class AuthenticatedWebSocketUser:
     websocket_connection: Optional[Any] = None
 
 
-class TestWebSocketSafeCloseRaceConditionsIntegration(BaseIntegrationTest):
+class WebSocketSafeCloseRaceConditionsIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket safe close race conditions using real connections.
 

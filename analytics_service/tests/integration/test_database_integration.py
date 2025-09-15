@@ -48,7 +48,7 @@ from analytics_service.analytics_core.config import get_config
 from shared.isolated_environment import get_env
 
 
-class TestClickHouseDatabaseIntegration:
+class ClickHouseDatabaseIntegrationTests:
     """Integration tests for ClickHouse database connectivity."""
 
     @pytest.fixture(autouse=True)
@@ -237,7 +237,7 @@ class TestClickHouseDatabaseIntegration:
             await timeout_manager.disconnect()
 
 
-class TestRedisDatabaseIntegration:
+class RedisDatabaseIntegrationTests:
     """Integration tests for Redis database connectivity."""
 
     @pytest.fixture(autouse=True)
@@ -473,7 +473,7 @@ class TestRedisDatabaseIntegration:
         await redis_manager.delete(test_key)
 
 
-class TestDatabaseIntegrationCombined:
+class DatabaseIntegrationCombinedTests:
     """Integration tests combining ClickHouse and Redis operations."""
 
     @pytest.fixture(autouse=True)

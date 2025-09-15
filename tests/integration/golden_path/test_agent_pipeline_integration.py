@@ -43,7 +43,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestAgentPipelineIntegration(SSotAsyncTestCase):
+class AgentPipelineIntegrationTests(SSotAsyncTestCase):
     """Real Service Integration Test for Golden Path Agent Pipeline."""
 
     def setup_method(self, method=None):

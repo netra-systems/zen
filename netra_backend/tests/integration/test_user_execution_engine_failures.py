@@ -44,7 +44,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
-class TestUserExecutionEngineComponentFailures(BaseIntegrationTest):
+class UserExecutionEngineComponentFailuresTests(BaseIntegrationTest):
     """Test UserExecutionEngine component dependency failures with real services."""
     
     def setup_method(self):

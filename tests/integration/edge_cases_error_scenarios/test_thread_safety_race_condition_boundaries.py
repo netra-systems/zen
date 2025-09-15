@@ -35,7 +35,7 @@ from netra_backend.app.core.config import get_config
 
 
 @pytest.mark.integration
-class TestThreadSafetyRaceConditionBoundaries(BaseIntegrationTest):
+class ThreadSafetyRaceConditionBoundariesTests(BaseIntegrationTest):
     """
     Test thread safety and race condition boundaries under concurrent execution.
     

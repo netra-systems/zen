@@ -80,7 +80,7 @@ class ConfigurationTestMetrics:
     cache_hits: int = 0
     cache_misses: int = 0
 
-class TestConfigurationManagementIntegrationComprehensive(SSotBaseTestCase):
+class ConfigurationManagementIntegrationComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive Configuration Management Integration Tests.
     

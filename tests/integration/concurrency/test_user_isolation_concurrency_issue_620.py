@@ -45,7 +45,7 @@ class UserTestProfile:
 
 
 @pytest.mark.integration
-class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
+class UserIsolationConcurrencyIssue620Tests(BaseIntegrationTest):
     """Test user isolation and concurrency for SSOT ExecutionEngine migration."""
     
     # Test configuration
@@ -831,7 +831,7 @@ class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
 
 
 @pytest.mark.integration
-class TestConcurrencyRegressionPrevention(BaseIntegrationTest):
+class ConcurrencyRegressionPreventionTests(BaseIntegrationTest):
     """Prevent regressions in concurrency and isolation."""
     
     async def test_memory_isolation_between_users(self):
@@ -915,7 +915,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_manual_tests():
-        test_instance = TestUserIsolationConcurrencyIssue620()
+        test_instance = UserIsolationConcurrencyIssue620Tests()
         
         try:
             # Test concurrent engine creation
@@ -952,7 +952,7 @@ if __name__ == "__main__":
         
         try:
             # Test memory isolation
-            regression_test = TestConcurrencyRegressionPrevention()
+            regression_test = ConcurrencyRegressionPreventionTests()
             memory_result = await regression_test.test_memory_isolation_between_users()
             print("✅ Memory isolation test passed")
             

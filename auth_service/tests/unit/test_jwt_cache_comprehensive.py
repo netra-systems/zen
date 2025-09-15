@@ -20,7 +20,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
 
-class TestJWTValidationCacheBasics(BaseIntegrationTest):
+class JWTValidationCacheBasicsTests(BaseIntegrationTest):
     """Test basic cache functionality"""
     
     def setup_method(self):
@@ -132,7 +132,7 @@ class TestJWTValidationCacheBasics(BaseIntegrationTest):
         assert cache_key not in self.cache._validation_cache
 
 
-class TestJWTValidationCacheRedis(BaseIntegrationTest):
+class JWTValidationCacheRedisTests(BaseIntegrationTest):
     """Test Redis integration functionality"""
     
     def setup_method(self):
@@ -224,7 +224,7 @@ class TestJWTValidationCacheRedis(BaseIntegrationTest):
         assert self.cache._validation_stats["redis_hits"] == 0
 
 
-class TestJWTValidationCachePerformance(BaseIntegrationTest):
+class JWTValidationCachePerformanceTests(BaseIntegrationTest):
     """Test cache performance and statistics"""
     
     def setup_method(self):
@@ -336,7 +336,7 @@ class TestJWTValidationCachePerformance(BaseIntegrationTest):
         assert len(results) > 0
 
 
-class TestJWTValidationCacheUserInvalidation(BaseIntegrationTest):
+class JWTValidationCacheUserInvalidationTests(BaseIntegrationTest):
     """Test user-specific cache invalidation"""
     
     def setup_method(self):
@@ -408,7 +408,7 @@ class TestJWTValidationCacheUserInvalidation(BaseIntegrationTest):
         # Test passes if no exception is raised
 
 
-class TestJWTValidationCacheClearAndMaintenance(BaseIntegrationTest):
+class JWTValidationCacheClearAndMaintenanceTests(BaseIntegrationTest):
     """Test cache clearing and maintenance operations"""
     
     def setup_method(self):
@@ -468,7 +468,7 @@ class TestJWTValidationCacheClearAndMaintenance(BaseIntegrationTest):
         assert len(self.cache._validation_cache) == 0
 
 
-class TestJWTValidationCacheAsyncOperations(BaseIntegrationTest):
+class JWTValidationCacheAsyncOperationsTests(BaseIntegrationTest):
     """Test async Redis operations"""
     
     def setup_method(self):
@@ -513,7 +513,7 @@ class TestJWTValidationCacheAsyncOperations(BaseIntegrationTest):
         await self.cache._cache_to_redis_async("key", {"test": "data"}, 300)
 
 
-class TestJWTValidationCacheEdgeCases(BaseIntegrationTest):
+class JWTValidationCacheEdgeCasesTests(BaseIntegrationTest):
     """Test edge cases and error conditions"""
     
     def setup_method(self):
@@ -594,7 +594,7 @@ class TestJWTValidationCacheEdgeCases(BaseIntegrationTest):
         assert True  # Test passes if no exception
 
 
-class TestJWTValidationCacheGlobalInstance(BaseIntegrationTest):
+class JWTValidationCacheGlobalInstanceTests(BaseIntegrationTest):
     """Test the global cache instance"""
     
     def test_global_instance_exists(self):

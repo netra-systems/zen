@@ -48,7 +48,7 @@ import pytest
 from loguru import logger
 
 
-class TestWebSocketSSotMultipleManagersViolationDetection(SSotBaseTestCase):
+class WebSocketSSotMultipleManagersViolationDetectionTests(SSotBaseTestCase):
     """Mission Critical: WebSocket SSOT Multiple Managers Violation Detection
     
     This test detects the current SSOT violation where multiple WebSocket managers

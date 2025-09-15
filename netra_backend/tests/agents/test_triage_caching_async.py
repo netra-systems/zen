@@ -31,7 +31,7 @@ def complex_state():
     'Create complex state for testing'
     return DeepAgentState(user_request='I need to optimize my GPT-4 costs by 30% while maintaining sub-100ms latency for my e-commerce application that processes 10,000 requests per day using tools like cost analyzer and performance predictor', user_id='test_user_complex', session_id='session_complex_123')
 
-class TestCachingMechanisms:
+class CachingMechanismsTests:
     """Test comprehensive caching mechanisms"""
 
     @pytest.mark.asyncio
@@ -128,7 +128,7 @@ class TestCachingMechanisms:
                                                             if hasattr(state.triage_result, 'metadata') and state.triage_result.metadata:
                                                                 assert state.triage_result.metadata.cache_hit == True
 
-                                                                class TestErrorHandlingAndRecovery:
+                                                                class ErrorHandlingAndRecoveryTests:
                                                                     """Test comprehensive error handling and recovery"""
 
                                                                     @pytest.mark.asyncio
@@ -185,7 +185,7 @@ class TestCachingMechanisms:
                                                                                                         assert state.triage_result.category == 'General Inquiry'
                                                                                                         assert state.triage_result.metadata.cache_hit == False
 
-                                                                                                        class TestAsyncOperations:
+                                                                                                        class AsyncOperationsTests:
                                                                                                             """Test async operation handling"""
 
                                                                                                             @pytest.mark.asyncio

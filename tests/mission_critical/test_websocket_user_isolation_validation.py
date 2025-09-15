@@ -63,7 +63,7 @@ except ImportError as e:
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestWebSocketUserIsolationValidation(SSotAsyncTestCase):
+class WebSocketUserIsolationValidationTests(SSotAsyncTestCase):
     """
     Mission Critical: WebSocket User Context Isolation Validation
     

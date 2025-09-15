@@ -43,7 +43,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from shared.isolated_environment import get_env
 
 
-class TestAgentWebSocketBridgeConnectionReproduction(BaseIntegrationTest):
+class AgentWebSocketBridgeConnectionReproductionTests(BaseIntegrationTest):
     """
     Reproduce AgentWebSocketBridge connection failures that cause P1 critical issues.
     

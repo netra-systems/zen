@@ -24,7 +24,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 
-class TestSupervisorAgentInitialization:
+class SupervisorAgentInitializationTests:
     """Test initialization and setup methods."""
     
     def test_init_base(self):
@@ -117,7 +117,7 @@ class TestSupervisorAgentInitialization:
         assert supervisor.user_context is None
 
 
-class TestSupervisorAgentRegistration:
+class SupervisorAgentRegistrationTests:
     """Test registration and agent management functionality."""
     
     def test_register_agent(self):
@@ -179,7 +179,7 @@ class TestSupervisorAgentRegistration:
         assert supervisor.name == "Supervisor"
 
 
-class TestSupervisorAgentProperties:
+class SupervisorAgentPropertiesTests:
     """Test properties and getter methods."""
     
     def test_agent_registry_property(self):
@@ -251,7 +251,7 @@ class TestSupervisorAgentProperties:
         assert supervisor.tool_dispatcher == tool_dispatcher
 
 
-class TestSupervisorAgentGetters:
+class SupervisorAgentGettersTests:
     """Test getter methods and computed properties."""
     
     def test_get_registry_status(self):
@@ -300,7 +300,7 @@ class TestSupervisorAgentGetters:
         assert supervisor.llm_manager == llm_manager
 
 
-class TestSupervisorAgentValidation:
+class SupervisorAgentValidationTests:
     """Test validation methods."""
     
     def test_validate_configuration(self):
@@ -349,7 +349,7 @@ class TestSupervisorAgentValidation:
         assert supervisor.agent_instance_factory is not None
 
 
-class TestSupervisorAgentExecution:
+class SupervisorAgentExecutionTests:
     """Test execution and workflow methods."""
     
     def test_prepare_execution(self):
@@ -392,7 +392,7 @@ class TestSupervisorAgentExecution:
         assert supervisor.name == "Supervisor"
 
 
-class TestSupervisorAgentIntegration:
+class SupervisorAgentIntegrationTests:
     """Test integration scenarios."""
     
     def test_full_initialization_sequence(self):

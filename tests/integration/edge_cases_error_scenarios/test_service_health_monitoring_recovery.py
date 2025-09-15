@@ -474,7 +474,7 @@ class SimulatedHealthMonitor:
 
 
 @pytest.mark.integration
-class TestServiceHealthMonitoringRecovery(BaseIntegrationTest):
+class ServiceHealthMonitoringRecoveryTests(BaseIntegrationTest):
     """
     Test service health monitoring and automated recovery mechanisms.
     

@@ -22,7 +22,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestOAuthConfigurationValidation(SSotBaseTestCase):
+class OAuthConfigurationValidationTests(SSotBaseTestCase):
     """Test OAuth configuration validation for deployment."""
 
     def setup_method(self, method=None):

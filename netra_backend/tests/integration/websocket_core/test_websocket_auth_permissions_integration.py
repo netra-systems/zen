@@ -92,7 +92,7 @@ class MockAuthResult:
 
 
 @pytest.mark.integration
-class TestWebSocketAuthPermissionsIntegration(SSotAsyncTestCase):
+class WebSocketAuthPermissionsIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket authentication permissions and user validation."""
 
     def setup_method(self, method):

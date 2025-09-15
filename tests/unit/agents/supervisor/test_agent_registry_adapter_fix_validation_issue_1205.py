@@ -38,7 +38,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import AgentRegis
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestAgentRegistryAdapterFixValidationIssue1205(SSotAsyncTestCase):
+class AgentRegistryAdapterFixValidationIssue1205Tests(SSotAsyncTestCase):
     """Validation tests for Issue #1205 fix."""
 
     async def setup_method(self, method):

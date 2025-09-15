@@ -168,7 +168,7 @@ class DataTransformationProcessor:
         }
 
 
-class TestDataTransformationPipelines:
+class DataTransformationPipelinesTests:
     """Test suite for data transformation pipelines and business intelligence processing."""
     
     def setup_method(self):

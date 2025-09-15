@@ -23,7 +23,7 @@ from netra_backend.app.services.unified_authentication_service import UnifiedAut
 from netra_backend.app.clients.auth_client_core import AuthServiceError, AuthServiceConnectionError, AuthServiceNotAvailableError, AuthServiceValidationError, CircuitBreakerError, validate_jwt_format
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestAuthResult(BaseTestCase):
+class AuthResultTests(BaseTestCase):
     """Test AuthResult class - constructor, to_dict(), all properties."""
 
     def test_auth_result_constructor_success(self):
@@ -90,7 +90,7 @@ class TestAuthResult(BaseTestCase):
         assert dict_result['error'] == 'Service unavailable'
         assert dict_result['error_code'] == 'SERVICE_ERROR'
 
-class TestUnifiedAuthenticationServiceInit(BaseTestCase):
+class UnifiedAuthenticationServiceInitTests(BaseTestCase):
     """Test UnifiedAuthenticationService initialization."""
 
     def test_unified_auth_service_init(self, test_env):
@@ -111,7 +111,7 @@ class TestUnifiedAuthenticationServiceInit(BaseTestCase):
             assert context.value in service._context_counts
             assert service._context_counts[context.value] == 0
 
-class TestAuthenticationEnums(BaseTestCase):
+class AuthenticationEnumsTests(BaseTestCase):
     """Test authentication enum values."""
 
     def test_authentication_method_enum_values(self):
@@ -135,7 +135,7 @@ class TestAuthenticationEnums(BaseTestCase):
         assert AuthenticationContext.GRPC.value == 'grpc'
         assert AuthenticationContext.INTERNAL_SERVICE.value == 'internal_service'
 
-class TestAuthenticateToken(AsyncTestCase):
+class AuthenticateTokenTests(AsyncTestCase):
     """Test authenticate_token() method - all success/failure paths."""
 
     async def test_authenticate_token_jwt_success(self, test_env):
@@ -250,7 +250,7 @@ class TestAuthenticateToken(AsyncTestCase):
         assert failure_debug['validation_result_exists'] is False
         assert failure_debug['auth_service_response_status'] == 'missing'
 
-class TestWebSocketAuthentication(AsyncTestCase):
+class WebSocketAuthenticationTests(AsyncTestCase):
     """Test authenticate_websocket() method - WebSocket auth flows."""
 
     def create_mock_websocket(self, headers: Dict[str, str]=None, query_params: Dict[str, str]=None) -> Mock:
@@ -353,7 +353,7 @@ class TestWebSocketAuthentication(AsyncTestCase):
         assert error_debug['error_type'] == 'Exception'
         assert error_debug['error_message'] == 'Network error'
 
-class TestExtractWebSocketToken(BaseTestCase):
+class ExtractWebSocketTokenTests(BaseTestCase):
     """Test _extract_websocket_token() method - all token extraction methods."""
 
     def create_mock_websocket(self, headers: Dict[str, str]=None, query_params: Dict[str, str]=None) -> Mock:
@@ -443,7 +443,7 @@ class TestExtractWebSocketToken(BaseTestCase):
         token = service._extract_websocket_token(websocket)
         assert token is None
 
-class TestServiceTokenValidation(AsyncTestCase):
+class ServiceTokenValidationTests(AsyncTestCase):
     """Test validate_service_token() method - service authentication."""
 
     async def test_validate_service_token_success(self, test_env):
@@ -489,7 +489,7 @@ class TestServiceTokenValidation(AsyncTestCase):
         assert result.error_code == 'SERVICE_AUTH_ERROR'
         assert result.metadata['service_name'] == 'error-service'
 
-class TestAuthenticationStats(BaseTestCase):
+class AuthenticationStatsTests(BaseTestCase):
     """Test get_authentication_stats() method - statistics tracking."""
 
     async def test_get_authentication_stats_initial(self, test_env):
@@ -537,7 +537,7 @@ class TestAuthenticationStats(BaseTestCase):
         assert stats['context_distribution']['grpc'] == 0
         assert stats['context_distribution']['internal_service'] == 0
 
-class TestHealthCheck(AsyncTestCase):
+class HealthCheckTests(AsyncTestCase):
     """Test health_check() method - health monitoring."""
 
     async def test_health_check_healthy(self, test_env):
@@ -575,7 +575,7 @@ class TestHealthCheck(AsyncTestCase):
         assert health['error'] == 'Health check error'
         assert 'timestamp' in health
 
-class TestUnifiedAuthServiceSingleton(BaseTestCase):
+class UnifiedAuthServiceSingletonTests(BaseTestCase):
     """Test get_unified_auth_service() singleton behavior."""
 
     def test_get_unified_auth_service_singleton(self, test_env):
@@ -603,7 +603,7 @@ class TestUnifiedAuthServiceSingleton(BaseTestCase):
         assert hasattr(service, '_method_counts')
         assert hasattr(service, '_context_counts')
 
-class TestEnhancedResilienceAndRetryLogic(AsyncTestCase):
+class EnhancedResilienceAndRetryLogicTests(AsyncTestCase):
     """Test enhanced resilience and retry logic with circuit breaker scenarios."""
 
     async def test_validate_token_with_enhanced_resilience_success_first_try(self, test_env):
@@ -777,7 +777,7 @@ class TestEnhancedResilienceAndRetryLogic(AsyncTestCase):
         assert status['failure_count'] == 0
         assert 'Error checking circuit breaker' in status['reason']
 
-class TestUserExecutionContextCreation(BaseTestCase):
+class UserExecutionContextCreationTests(BaseTestCase):
     """Test _create_user_execution_context method."""
 
     def test_create_user_execution_context_success(self, test_env):

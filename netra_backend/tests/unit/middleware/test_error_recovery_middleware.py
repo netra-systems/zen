@@ -14,7 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.middleware.error_recovery_middleware import ErrorRecoveryMiddleware
 
 
-class TestErrorRecoveryMiddleware:
+class ErrorRecoveryMiddlewareTests:
     """Test suite for Error Recovery Middleware."""
 
     @pytest.fixture

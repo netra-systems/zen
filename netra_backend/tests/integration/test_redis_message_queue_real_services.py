@@ -22,7 +22,7 @@ from test_framework.ssot.real_services_test_fixtures import *
 
 
 @pytest.mark.integration
-class TestRedisMessageQueueRealServices:
+class RedisMessageQueueRealServicesTests:
     """Integration tests for Redis message queue with real services."""
     
     @pytest.mark.asyncio

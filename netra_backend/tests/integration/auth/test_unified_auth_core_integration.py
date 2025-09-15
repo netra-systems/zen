@@ -52,7 +52,7 @@ from netra_backend.app.clients.auth_client_core import (
 )
 
 
-class TestUnifiedAuthCoreIntegration(BaseIntegrationTest):
+class UnifiedAuthCoreIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for the Unified Authentication Service core functionality.
     

@@ -424,7 +424,7 @@ class RealAgentLLMIntegrationE2ETest(BaseE2ETest):
         )
 
 
-class TestRealAgentLLMIntegration(RealAgentLLMIntegrationE2ETest):
+class RealAgentLLMIntegrationTests(RealAgentLLMIntegrationE2ETest):
     """Test suite for real LLM integration flows."""
     
     @pytest.mark.e2e
@@ -858,7 +858,7 @@ if __name__ == "__main__":
     async def run_direct_tests():
         logger.info("Starting real agent LLM integration E2E tests...")
         
-        test_instance = TestRealAgentLLMIntegration()
+        test_instance = RealAgentLLMIntegrationTests()
         
         try:
             # Mock real_services_fixture for direct testing

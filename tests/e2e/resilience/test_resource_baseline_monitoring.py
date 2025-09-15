@@ -34,7 +34,7 @@ BASELINE_CONFIG = {
     "max_tenant_count": 10
 }
 
-class TestResourceBaselineMonitoring:
+class ResourceBaselineMonitoringTests:
     """Test per-tenant resource baseline monitoring"""
     
     @pytest.mark.asyncio

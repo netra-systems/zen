@@ -27,7 +27,7 @@ import time
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestUserSessionManagementCore(SSotBaseTestCase):
+class UserSessionManagementCoreTests(SSotBaseTestCase):
     """
     Unit tests for user session management core business logic.
     Tests session lifecycle without external dependencies.

@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 
-class TestImportStatementIntegrity(SSotBaseTestCase):
+class ImportStatementIntegrityTests(SSotBaseTestCase):
     """Test import statement integrity for mission critical test collection."""
     
     def test_ssot_base_test_case_import_availability(self):

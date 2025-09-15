@@ -29,7 +29,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 @pytest.mark.integration
-class TestWebSocketManagerProtocolCompliance:
+class WebSocketManagerProtocolComplianceTests:
     """
     Test suite to ensure WebSocket managers implement WebSocketManagerProtocol.
     

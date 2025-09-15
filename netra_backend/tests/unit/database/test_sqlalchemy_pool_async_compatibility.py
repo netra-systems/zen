@@ -38,7 +38,7 @@ from test_framework.isolated_environment_fixtures import isolated_env
 
 
 @pytest.mark.unit
-class TestSQLAlchemyPoolAsyncCompatibility:
+class SQLAlchemyPoolAsyncCompatibilityTests:
     """Unit tests for SQLAlchemy pool and async engine compatibility."""
     
     def test_queuepool_with_async_engine_fails(self, isolated_env):

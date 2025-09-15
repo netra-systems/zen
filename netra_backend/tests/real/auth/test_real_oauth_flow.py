@@ -39,7 +39,7 @@ docker_manager = UnifiedDockerManager()
 @pytest.mark.real_services
 @pytest.mark.oauth
 @pytest.mark.asyncio
-class TestRealOAuthFlow:
+class RealOAuthFlowTests:
     """
     Real OAuth flow tests using Docker services and OAuth providers.
     

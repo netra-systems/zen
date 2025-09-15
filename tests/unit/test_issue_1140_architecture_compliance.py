@@ -283,7 +283,7 @@ class ArchitectureScanner:
 
 
 @pytest.mark.unit
-class TestIssue1140ArchitectureCompliance(BaseE2ETest):
+class Issue1140ArchitectureComplianceTests(BaseE2ETest):
     """Test architecture compliance for SSOT WebSocket pattern."""
     
     def setup_method(self):

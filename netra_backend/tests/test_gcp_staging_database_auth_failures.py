@@ -22,7 +22,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestPostgreSQLAuthenticationFailures:
+class PostgreSQLAuthenticationFailuresTests:
     """Tests that replicate PostgreSQL authentication failures from staging logs"""
     
     @pytest.mark.asyncio
@@ -163,7 +163,7 @@ class TestPostgreSQLAuthenticationFailures:
                 f"Expected credential validation error for URL {url}, got: {exc_info.value}"
 
 
-class TestAuthServiceDatabaseAuthentication:
+class AuthServiceDatabaseAuthenticationTests:
     """Test auth service specific database authentication issues"""
     
     @pytest.mark.asyncio

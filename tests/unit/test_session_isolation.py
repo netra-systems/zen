@@ -12,7 +12,7 @@ import asyncio
 from unittest.mock import Mock, patch
 
 @pytest.mark.unit
-class TestSessionIsolation:
+class SessionIsolationTests:
     """Test session isolation functionality."""
 
     def test_session_isolation_basic(self):

@@ -133,7 +133,7 @@ class MockWebSocketConnection:
             self.last_activity = time.time()
 
 
-class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
+class WebSocketEventMisroutingViolationsTests(SSotAsyncTestCase):
     """
     CRITICAL FAILING TESTS: WebSocket Event Mis-routing Violations
     

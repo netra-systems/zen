@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestSSotConfigurationValidation(SSotBaseTestCase):
+class SSotConfigurationValidationTests(SSotBaseTestCase):
     """Validate SSOT configuration patterns work correctly."""
 
     def test_isolated_environment_ssot_compliance(self):

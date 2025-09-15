@@ -167,7 +167,7 @@ class WebSocketEventCapture:
             inter_event_times.append((curr_time - prev_time).total_seconds())
         return {'run_id': run_id, 'total_events': len(run_events), 'total_duration_seconds': total_duration, 'average_inter_event_time': sum(inter_event_times) / len(inter_event_times) if inter_event_times else 0, 'max_gap_seconds': max(inter_event_times) if inter_event_times else 0, 'min_gap_seconds': min(inter_event_times) if inter_event_times else 0, 'events_per_second': len(run_events) / total_duration if total_duration > 0 else 0, 'real_time_suitable': total_duration < 5.0 and max(inter_event_times) < 1.0 if inter_event_times else False}
 
-class TestAgentWebSocketEvents(BaseIntegrationTest):
+class AgentWebSocketEventsTests(BaseIntegrationTest):
     """Integration tests for agent WebSocket events with real services."""
 
     def setup_method(self):

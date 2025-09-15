@@ -39,7 +39,7 @@ except ImportError:
 STAGING_CONFIG = {'base_url': 'https://api.staging.netrasystems.ai', 'auth_url': 'https://auth.staging.netrasystems.ai', 'websocket_url': 'wss://api.staging.netrasystems.ai/ws', 'frontend_url': 'https://app.staging.netrasystems.ai'}
 
 @pytest.mark.e2e
-class TestStagingGoldenPathEndToEnd(BaseTestCase):
+class StagingGoldenPathEndToEndTests(BaseTestCase):
     """E2E tests for Golden Path validation on GCP staging environment"""
 
     async def asyncSetUp(self):
@@ -180,7 +180,7 @@ class TestStagingGoldenPathEndToEnd(BaseTestCase):
             self.skipTest(f'User context validation unavailable: {e}')
 
 @pytest.mark.e2e
-class TestStagingVsLocalReliabilityComparison(BaseTestCase):
+class StagingVsLocalReliabilityComparisonTests(BaseTestCase):
     """Compare staging environment reliability vs local test infrastructure chaos"""
 
     async def test_staging_vs_local_reliability_baseline(self):

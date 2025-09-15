@@ -248,7 +248,7 @@ async def supply_researcher_tester(request):
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.real_llm
-class TestRealAgentSupplyResearcher:
+class RealAgentSupplyResearcherTests:
     """Test suite for real supply research agent execution."""
 
     async def test_vendor_analysis_research(self, supply_researcher_tester):

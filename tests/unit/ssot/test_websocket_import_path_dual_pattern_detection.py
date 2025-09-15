@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestWebSocketImportPathDualPatternDetection(SSotBaseTestCase):
+class WebSocketImportPathDualPatternDetectionTests(SSotBaseTestCase):
     """Test suite to detect multiple import paths for WebSocket managers (SHOULD FAIL)"""
 
     def setUp(self):

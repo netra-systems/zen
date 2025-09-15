@@ -12,7 +12,7 @@ from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestCrossServiceIntegration:
+class CrossServiceIntegrationTests:
     """Test integration between different services."""
 
     def test_cost_calculation_with_thread_service_pattern(self):
@@ -76,7 +76,7 @@ class TestCrossServiceIntegration:
             assert result["status"] == "completed"
 
 
-class TestDataFlowIntegration:
+class DataFlowIntegrationTests:
     """Test data flow integration scenarios."""
 
     def test_token_usage_cost_calculation_flow(self):
@@ -142,7 +142,7 @@ class TestDataFlowIntegration:
         assert hasattr(thread_service, '_execute_with_uow')
 
 
-class TestEndToEndWorkflows:
+class EndToEndWorkflowsTests:
     """Test end-to-end workflow scenarios."""
 
     @pytest.mark.asyncio
@@ -242,7 +242,7 @@ class TestEndToEndWorkflows:
             assert result["error_handled"] is True
 
 
-class TestServiceBoundaryIntegration:
+class ServiceBoundaryIntegrationTests:
     """Test integration at service boundaries."""
 
     def test_service_interface_compatibility(self):
@@ -315,7 +315,7 @@ class TestServiceBoundaryIntegration:
             assert result["operation"] == "mixed"
 
 
-class TestIntegrationPerformance:
+class IntegrationPerformanceTests:
     """Test performance of integrated operations."""
 
     def test_integrated_operation_performance(self):

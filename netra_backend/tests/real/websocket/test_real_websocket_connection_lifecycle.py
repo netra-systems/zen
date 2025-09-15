@@ -37,7 +37,7 @@ env = get_env()
 @pytest.mark.real_services
 @pytest.mark.websocket
 @skip_if_no_real_services
-class TestRealWebSocketConnectionLifecycle:
+class RealWebSocketConnectionLifecycleTests:
     """Test real WebSocket connection lifecycle with Docker services.
     
     CRITICAL: Tests actual WebSocket connections, not mocks.

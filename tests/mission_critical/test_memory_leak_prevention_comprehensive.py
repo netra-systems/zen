@@ -1126,7 +1126,7 @@ async def test_garbage_collection_effectiveness(memory_profiler):
 # AUTHENTICATION FLOW VALIDATION TESTS
 # ============================================================================
 
-class TestAuthenticationFlowMemoryManagement:
+class AuthenticationFlowMemoryManagementTests:
     """Test authentication flows under memory stress to prevent leaks during user journeys."""
     
     @pytest.fixture(autouse=True)
@@ -1602,7 +1602,7 @@ class TestAuthenticationFlowMemoryManagement:
 # USER JOURNEY TESTING UNDER MEMORY CONSTRAINTS
 # ============================================================================
 
-class TestUserJourneyMemoryOptimization:
+class UserJourneyMemoryOptimizationTests:
     """Test complete user journeys under memory constraints to ensure optimal performance."""
     
     @pytest.fixture(autouse=True)  
@@ -2031,7 +2031,7 @@ class TestUserJourneyMemoryOptimization:
 # PERFORMANCE UNDER LOAD WITH AUTHENTICATION
 # ============================================================================
 
-class TestAuthenticationPerformanceUnderLoad:
+class AuthenticationPerformanceUnderLoadTests:
     """Test authentication and user journey performance under extreme load."""
     
     @pytest.fixture(autouse=True)

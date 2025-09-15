@@ -107,7 +107,7 @@ class RuntimeExecutionEngineMonitor:
 
 
 @pytest.mark.integration
-class TestRuntimeValidation(SSotAsyncTestCase):
+class RuntimeValidationTests(SSotAsyncTestCase):
     """Validate runtime execution engine usage for SSOT compliance."""
 
     def setUp(self):

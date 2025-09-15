@@ -35,7 +35,7 @@ LATENCY_CONFIG = {
     "max_mean_latency_ms": 200
 }
 
-class TestLatencyPercentileDistribution:
+class LatencyPercentileDistributionTests:
     """Test latency distribution analysis"""
     
     @pytest.mark.asyncio

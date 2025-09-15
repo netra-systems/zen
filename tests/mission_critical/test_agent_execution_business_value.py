@@ -78,7 +78,7 @@ except ImportError:
     logger = logging.getLogger(__name__)
 
 
-class TestAgentExecutionBusinessValue(BaseIntegrationTest):
+class AgentExecutionBusinessValueTests(BaseIntegrationTest):
     """
     P0 Mission Critical Test: Agent Execution Business Value Delivery
     

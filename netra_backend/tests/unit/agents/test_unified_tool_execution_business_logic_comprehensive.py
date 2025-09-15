@@ -36,7 +36,7 @@ from test_framework.unified import TestCategory
 from shared.isolated_environment import get_env
 
 
-class TestUnifiedToolExecutionBusiness(SSotBaseTestCase):
+class UnifiedToolExecutionBusinessTests(SSotBaseTestCase):
     """Comprehensive unit tests for UnifiedToolExecution business logic."""
 
     def setup_method(self, method):
@@ -476,7 +476,7 @@ class TestUnifiedToolExecutionBusiness(SSotBaseTestCase):
         self.metrics.record_custom("result_consistency_maintained", True)
 
 
-class TestUnifiedToolExecutionBusinessScenarios(SSotBaseTestCase):
+class UnifiedToolExecutionBusinessScenariosTests(SSotBaseTestCase):
     """Business scenario tests for unified tool execution edge cases."""
 
     async def test_enterprise_customer_concurrent_execution_limits(self):

@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 
 @pytest.mark.unit
-class TestWebSocketTimeoutConfigurationGap:
+class WebSocketTimeoutConfigurationGapTests:
     
     def test_websocket_timeout_configs_exist_in_codebase(self):
         """UNIT: Validate timeout configs exist in deployment script"""

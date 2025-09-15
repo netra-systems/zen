@@ -42,7 +42,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerImportConsistency(SSotBaseTestCase, unittest.TestCase):
+class WebSocketManagerImportConsistencyTests(SSotBaseTestCase, unittest.TestCase):
     """Test WebSocket Manager import consistency for SSOT consolidation."""
     
     def setUp(self):

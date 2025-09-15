@@ -37,7 +37,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 
 
 @pytest.mark.e2e
-class TestChatBusinessValueValidation(SSotAsyncTestCase):
+class ChatBusinessValueValidationTests(SSotAsyncTestCase):
     """
     Test suite validating that chat functionality delivers core business value.
 

@@ -48,7 +48,7 @@ except ImportError as e:
 
 
 @pytest.mark.unit
-class TestIssue889UserIsolationUnit(SSotAsyncTestCase):
+class Issue889UserIsolationUnitTests(SSotAsyncTestCase):
     """
     Unit tests for Issue #889 User Context Isolation Violations
     

@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestAuthServiceTimeoutReproduction(SSotAsyncTestCase):
+class AuthServiceTimeoutReproductionTests(SSotAsyncTestCase):
     """
     Unit tests to reproduce the 0.5s timeout configuration issue.
     

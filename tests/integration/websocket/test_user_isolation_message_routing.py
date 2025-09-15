@@ -60,7 +60,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestUserIsolationMessageRouting(SSotAsyncTestCase):
+class UserIsolationMessageRoutingTests(SSotAsyncTestCase):
     """Test suite for user isolation in message routing after SSOT consolidation.
 
     These tests ensure that SSOT Message Router consolidation maintains strict

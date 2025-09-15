@@ -31,7 +31,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestJWTSSOTMigrationRegression(SSotAsyncTestCase):
+class JWTSSOTMigrationRegressionTests(SSotAsyncTestCase):
     """Regression prevention tests for JWT SSOT migration."""
 
     def setup_method(self, method):

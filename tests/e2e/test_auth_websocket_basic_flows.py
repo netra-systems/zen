@@ -33,7 +33,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.e2e
-class TestBasicAuthFlow:
+class BasicAuthFlowTests:
     """Test 1-3: Basic authentication flow"""
     
     @pytest.mark.e2e
@@ -117,7 +117,7 @@ class TestBasicAuthFlow:
 
 
 @pytest.mark.e2e
-class TestBasicWebSocketConnection:
+class BasicWebSocketConnectionTests:
     """Test 4-6: Basic WebSocket connection flow"""
     
     @pytest.mark.e2e
@@ -182,7 +182,7 @@ class TestBasicWebSocketConnection:
 
 
 @pytest.mark.e2e
-class TestAuthWebSocketIntegration:
+class AuthWebSocketIntegrationTests:
     """Test 7-8: Auth + WebSocket integration"""
     
     @pytest.mark.e2e
@@ -272,7 +272,7 @@ class TestAuthWebSocketIntegration:
 
 
 @pytest.mark.e2e
-class TestCoreServiceCommunication:
+class CoreServiceCommunicationTests:
     """Test 9-10: Core service communication"""
     
     @pytest.mark.e2e

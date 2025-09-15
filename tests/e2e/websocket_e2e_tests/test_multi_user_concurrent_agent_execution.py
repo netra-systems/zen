@@ -47,7 +47,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestMultiUserConcurrentAgentExecution(BaseE2ETest):
+class MultiUserConcurrentAgentExecutionTests(BaseE2ETest):
     """E2E tests for multi-user concurrent agent execution with complete isolation."""
     
     @pytest.fixture

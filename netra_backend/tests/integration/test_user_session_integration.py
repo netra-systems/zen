@@ -2,7 +2,7 @@
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 
-class TestUserSessionIntegration(BaseIntegrationTest):
+class UserSessionIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services  
     def test_session_persistence_integration(self):

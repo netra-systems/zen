@@ -51,7 +51,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestAuthFailureCircuitBreaker(SSotBaseTestCase):
+class AuthFailureCircuitBreakerTests(SSotBaseTestCase):
     """
     Authentication Failure Scenarios and Circuit Breaker Integration Tests.
     

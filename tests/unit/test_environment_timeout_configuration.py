@@ -22,7 +22,7 @@ import httpx
 
 
 @pytest.mark.unit
-class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
+class EnvironmentTimeoutConfigurationTests(SSotAsyncTestCase):
     """
     Unit tests for environment-specific timeout configuration issues.
     

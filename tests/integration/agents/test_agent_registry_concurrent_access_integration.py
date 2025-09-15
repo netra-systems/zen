@@ -205,7 +205,7 @@ class ThreadSafeAgentRegistry:
             await agent.cleanup()
 
 
-class TestAgentRegistryConcurrentAccess(SSotAsyncTestCase):
+class AgentRegistryConcurrentAccessTests(SSotAsyncTestCase):
     """Integration tests for concurrent agent registry access patterns."""
     
     def setup_method(self, method):

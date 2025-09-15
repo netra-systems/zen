@@ -27,7 +27,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestWebSocketConfigurationValidation(unittest.TestCase):
+class WebSocketConfigurationValidationTests(unittest.TestCase):
     """Validate WebSocket configuration without service dependencies."""
 
     def setUp(self):

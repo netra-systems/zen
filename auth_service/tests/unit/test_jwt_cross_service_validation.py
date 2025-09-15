@@ -20,7 +20,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
 
-class TestJWTCrossServiceValidation(BaseIntegrationTest):
+class JWTCrossServiceValidationTests(BaseIntegrationTest):
     """Test JWT cross-service validation and microservice security"""
 
     def setup_method(self):

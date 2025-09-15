@@ -30,7 +30,7 @@ from unittest.mock import AsyncMock, MagicMock, patch, call
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.managers.unified_lifecycle_manager import SystemLifecycle, SystemLifecycleFactory, LifecyclePhase, ComponentType, ComponentStatus, LifecycleMetrics, get_lifecycle_manager, setup_application_lifecycle
 
-class TestSystemLifecyclePhaseTransitions(SSotAsyncTestCase):
+class SystemLifecyclePhaseTransitionsTests(SSotAsyncTestCase):
     """
     Test lifecycle phase management and transitions.
     
@@ -126,7 +126,7 @@ class TestSystemLifecyclePhaseTransitions(SSotAsyncTestCase):
         assert call_args['data']['new_phase'] == 'starting'
         assert call_args['data']['old_phase'] == 'initializing'
 
-class TestSystemLifecycleComponentManagement(SSotAsyncTestCase):
+class SystemLifecycleComponentManagementTests(SSotAsyncTestCase):
     """
     Test component registration and management.
     
@@ -211,7 +211,7 @@ class TestSystemLifecycleComponentManagement(SSotAsyncTestCase):
         await self.lifecycle._validate_websocket_component('websocket')
         assert self.lifecycle._websocket_manager == mock_websocket
 
-class TestSystemLifecycleHealthMonitoring(SSotAsyncTestCase):
+class SystemLifecycleHealthMonitoringTests(SSotAsyncTestCase):
     """
     Test health monitoring and status tracking.
     
@@ -306,7 +306,7 @@ class TestSystemLifecycleHealthMonitoring(SSotAsyncTestCase):
         assert status['status'] == 'unhealthy'
         assert not status['ready']
 
-class TestSystemLifecycleGracefulShutdown(SSotAsyncTestCase):
+class SystemLifecycleGracefulShutdownTests(SSotAsyncTestCase):
     """
     Test graceful shutdown functionality.
     
@@ -416,7 +416,7 @@ class TestSystemLifecycleGracefulShutdown(SSotAsyncTestCase):
         assert metrics['successful_shutdowns'] == 1
         assert metrics['failed_shutdowns'] == 0
 
-class TestSystemLifecycleFactoryPattern(SSotAsyncTestCase):
+class SystemLifecycleFactoryPatternTests(SSotAsyncTestCase):
     """
     Test factory pattern for user isolation.
     
@@ -489,7 +489,7 @@ class TestSystemLifecycleFactoryPattern(SSotAsyncTestCase):
         assert counts['user_specific'] == 2
         assert counts['total'] == 3
 
-class TestSystemLifecycleThreadSafety(SSotAsyncTestCase):
+class SystemLifecycleThreadSafetyTests(SSotAsyncTestCase):
     """
     Test thread safety and concurrent operations.
     
@@ -569,7 +569,7 @@ class TestSystemLifecycleThreadSafety(SSotAsyncTestCase):
         final_phase = self.lifecycle.get_current_phase()
         assert final_phase in phases
 
-class TestSystemLifecyclePerformance(SSotAsyncTestCase):
+class SystemLifecyclePerformanceTests(SSotAsyncTestCase):
     """
     Test performance characteristics and timing requirements.
     
@@ -649,7 +649,7 @@ class TestSystemLifecyclePerformance(SSotAsyncTestCase):
         assert 'memory_usage' in metrics
         assert metrics['memory_usage'] == current_memory
 
-class TestSystemLifecycleErrorHandling(SSotAsyncTestCase):
+class SystemLifecycleErrorHandlingTests(SSotAsyncTestCase):
     """
     Test error handling and recovery scenarios.
     

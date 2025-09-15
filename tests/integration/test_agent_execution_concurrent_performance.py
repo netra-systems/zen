@@ -58,7 +58,7 @@ class AgentConcurrencyTestResult:
     scalability_bottlenecks: List[str]
 
 
-class TestAgentExecutionConcurrentPerformance(BaseIntegrationTest):
+class AgentExecutionConcurrentPerformanceTests(BaseIntegrationTest):
     """Test agent execution performance under concurrent load."""
     
     def _simulate_agent_work(self, complexity_level: str = "medium") -> Dict[str, Any]:

@@ -63,7 +63,7 @@ except ImportError as e:
     SSOT_IMPORTS_AVAILABLE = False
 
 
-class TestWebSocketSSotUnifiedBehaviorValidation(SSotAsyncTestCase):
+class WebSocketSSotUnifiedBehaviorValidationTests(SSotAsyncTestCase):
     """Mission Critical: WebSocket SSOT Unified Behavior Validation
     
     This test validates that the unified WebSocket manager provides all required

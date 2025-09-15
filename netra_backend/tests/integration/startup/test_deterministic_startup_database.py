@@ -33,7 +33,7 @@ from netra_backend.app.core.configuration.database import DatabaseConfigManager
 from netra_backend.app.core.configuration.base import get_unified_config
 
 
-class TestDeterministicStartupDatabase(SSotAsyncTestCase):
+class DeterministicStartupDatabaseTests(SSotAsyncTestCase):
     """
     Deterministic Startup Database Tests - Issue #1263
 

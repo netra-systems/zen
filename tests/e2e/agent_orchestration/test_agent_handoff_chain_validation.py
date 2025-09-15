@@ -72,7 +72,7 @@ class HandoffChainValidation:
     user_id: str
 
 
-class TestAgentHandoffChainValidation(SSotAsyncTestCase):
+class AgentHandoffChainValidationTests(SSotAsyncTestCase):
     """
     E2E Tests for Agent Handoff Chain Validation.
     

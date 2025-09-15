@@ -8,7 +8,7 @@ import pytest
 from netra_backend.app.utils.file_utils import FileUtils
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestFileUtils:
+class FileUtilsTests:
     """Test suite for FileUtils"""
 
     @pytest.fixture

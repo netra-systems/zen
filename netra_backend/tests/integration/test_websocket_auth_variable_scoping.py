@@ -29,7 +29,7 @@ from fastapi.websockets import WebSocketState
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuthenticator, extract_e2e_context_from_websocket, authenticate_websocket_ssot, WebSocketAuthResult
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context, get_test_jwt_token
 
-class TestWebSocketAuthScopingIntegration:
+class WebSocketAuthScopingIntegrationTests:
     """Integration tests for WebSocket authentication variable scoping."""
 
     @pytest.fixture
@@ -214,7 +214,7 @@ class TestWebSocketAuthScopingIntegration:
             elif isinstance(result, Exception):
                 raise result
 
-class TestStagingEnvironmentSpecific:
+class StagingEnvironmentSpecificTests:
     """Specific tests for staging environment scoping issues."""
 
     @pytest.mark.asyncio

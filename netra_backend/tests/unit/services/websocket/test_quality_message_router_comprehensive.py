@@ -98,7 +98,7 @@ def sample_quality_message():
     }
 
 
-class TestQualityMessageRouterInitialization:
+class QualityMessageRouterInitializationTests:
     """
     BVJ: Validates QualityMessageRouter initialization and handler setup.
     Business Impact: Ensures all quality handlers are properly initialized for reliable quality monitoring.
@@ -162,7 +162,7 @@ class TestQualityMessageRouterInitialization:
         assert hasattr(handler, 'monitoring_service') or callable(handler), "Handler must have monitoring service access"
 
 
-class TestQualityMessageRouterMessageHandling:
+class QualityMessageRouterMessageHandlingTests:
     """
     BVJ: Tests core message routing and session continuity functionality.
     Business Impact: Ensures reliable quality message routing with proper context preservation.
@@ -418,7 +418,7 @@ class TestQualityMessageRouterMessageHandling:
         mock_handler.handle.assert_called_once_with("user_123", expected_payload)
 
 
-class TestQualityMessageRouterBroadcasting:
+class QualityMessageRouterBroadcastingTests:
     """
     BVJ: Tests broadcasting functionality for quality updates and alerts.
     Business Impact: Ensures all subscribers receive quality notifications for proactive monitoring.
@@ -570,7 +570,7 @@ class TestQualityMessageRouterBroadcasting:
         assert built_message["payload"]["severity"] == "info", "Default severity must be added"
 
 
-class TestQualityMessageRouterIntegration:
+class QualityMessageRouterIntegrationTests:
     """
     BVJ: Tests integration scenarios and edge cases for system resilience.
     Business Impact: Ensures router remains stable under various operational conditions.
@@ -753,7 +753,7 @@ class TestQualityMessageRouterIntegration:
                 mock_logger.error.assert_called_once()
 
 
-class TestQualityMessageRouterPerformance:
+class QualityMessageRouterPerformanceTests:
     """
     BVJ: Tests performance characteristics for production scalability.
     Business Impact: Ensures quality router can handle high message volumes efficiently.

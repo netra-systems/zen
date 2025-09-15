@@ -98,7 +98,7 @@ class BusinessScenario:
     success_indicators: List[str]
     minimum_quality_threshold: float = 0.7
 
-class TestAgentResponseQualityIntegration(SSotAsyncTestCase):
+class AgentResponseQualityIntegrationTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Agent Response Quality.
 

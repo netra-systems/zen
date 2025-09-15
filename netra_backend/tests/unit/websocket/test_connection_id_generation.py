@@ -42,7 +42,7 @@ from shared.types.core_types import ConnectionID, UserID, ensure_user_id
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestConnectionIdGenerationRouting(SSotBaseTestCase):
+class ConnectionIdGenerationRoutingTests(SSotBaseTestCase):
     """
     Unit tests that expose connection ID generation inconsistencies causing routing failures.
     

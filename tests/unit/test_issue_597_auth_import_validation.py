@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestIssue597AuthImportValidation(SSotBaseTestCase):
+class Issue597AuthImportValidationTests(SSotBaseTestCase):
     """
     Test suite to demonstrate and validate Issue #597 auth import problem.
     
@@ -192,7 +192,7 @@ class TestIssue597AuthImportValidation(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestIssue597IntegrationValidation(SSotBaseTestCase):
+class Issue597IntegrationValidationTests(SSotBaseTestCase):
     """
     Integration tests for Issue #597 to validate real-world scenarios.
     """

@@ -29,7 +29,7 @@ from tests.e2e.real_services_manager import RealServicesManager
 from tests.e2e.staging_test_base import StagingTestBase
 
 
-class TestCompleteAuthenticationSecurityE2E(SSotBaseTestCase):
+class CompleteAuthenticationSecurityE2ETests(SSotBaseTestCase):
     """
     Complete authentication security E2E tests.
     

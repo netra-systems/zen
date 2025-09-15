@@ -12,7 +12,7 @@ import json
 from typing import Optional
 
 @pytest.mark.unit
-class TestFrontendSentryDSNConfiguration:
+class FrontendSentryDSNConfigurationTests:
     """Test frontend Sentry DSN configuration - expected to FAIL showing gaps"""
 
     def test_staging_environment_dsn_exists(self):
@@ -74,7 +74,7 @@ class TestFrontendSentryDSNConfiguration:
         assert "environment === 'production'" in content, 'Production environment check should exist'
 
 @pytest.mark.unit
-class TestSentryConfigurationSecrets:
+class SentryConfigurationSecretsTests:
     """Test Sentry configuration in secret management - expected to FAIL showing gaps"""
 
     def test_staging_secret_manager_dsn(self):
@@ -126,7 +126,7 @@ class TestSentryConfigurationSecrets:
         assert 'SENTRY_DSN' in content, 'Script should reference SENTRY_DSN environment variable'
 
 @pytest.mark.unit
-class TestSentryDeploymentConfiguration:
+class SentryDeploymentConfigurationTests:
     """Test Sentry configuration in deployment - expected to FAIL showing gaps"""
 
     def test_terraform_secret_configuration(self):
@@ -169,7 +169,7 @@ class TestSentryDeploymentConfiguration:
             assert os.environ.get('NEXT_PUBLIC_SENTRY_DSN') is not None
 
 @pytest.mark.unit
-class TestSentryErrorBoundaryIntegration:
+class SentryErrorBoundaryIntegrationTests:
     """Test Sentry integration with React Error Boundaries - expected to FAIL showing gaps"""
 
     def test_error_boundary_sentry_integration(self):
@@ -194,7 +194,7 @@ class TestSentryErrorBoundaryIntegration:
         assert 'setTag' in content or 'setTags' in content, 'Error boundary should set Sentry tags'
 
 @pytest.mark.unit
-class TestSentryPerformanceMonitoring:
+class SentryPerformanceMonitoringTests:
     """Test Sentry performance monitoring configuration - expected to FAIL showing gaps"""
 
     def test_performance_monitoring_enabled(self):

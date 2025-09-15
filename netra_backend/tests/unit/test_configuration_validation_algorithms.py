@@ -18,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from shared.configuration.central_config_validator import CentralConfigurationValidator
 
 
-class TestConfigurationValidationAlgorithms(BaseTestCase):
+class ConfigurationValidationAlgorithmsTests(BaseTestCase):
     """Test core configuration validation algorithms that prevent cascade failures."""
     
     def setup_method(self):

@@ -126,7 +126,7 @@ class ScatteredConfigDetector:
         return violations
 
 
-class TestScatteredConfigurationAntiPatterns(BaseIntegrationTest):
+class ScatteredConfigurationAntiPatternsTests(BaseIntegrationTest):
     """Test detection of scattered configuration anti-patterns."""
     
     @pytest.mark.integration

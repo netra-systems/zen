@@ -30,7 +30,7 @@ import os
 from typing import Dict, List, Set, Optional, Tuple
 from pathlib import Path
 
-class TestAgentRegistryImportPathViolations(SSotBaseTestCase):
+class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
     """Test import path SSOT violations for AgentRegistry implementations."""
     
     def setup_method(self, method=None):

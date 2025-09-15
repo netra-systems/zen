@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 
 
-class TestDataHelperAgentUserIsolation(SSotAsyncTestCase, unittest.TestCase):
+class DataHelperAgentUserIsolationTests(SSotAsyncTestCase, unittest.TestCase):
     """Test suite for Data Helper Agent user isolation and factory patterns."""
     
     def setUp(self):

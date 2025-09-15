@@ -38,7 +38,7 @@ class FactoryPatternAnalysis:
     detected_issues: List[str]
 
 
-class TestWebSocketFactoryConsolidationValidation(BaseIntegrationTest):
+class WebSocketFactoryConsolidationValidationTests(BaseIntegrationTest):
     """Test WebSocket factory pattern consolidation for SSOT validation."""
 
     def setUp(self):

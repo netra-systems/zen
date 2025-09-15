@@ -200,7 +200,7 @@ class StagingBusinessTool:
             await asyncio.sleep(0.02)
 
 @pytest.mark.e2e
-class TestCompleteToolWorkflowsWithAuthentication(SSotAsyncTestCase):
+class CompleteToolWorkflowsWithAuthenticationTests(SSotAsyncTestCase):
     """E2E staging tests for complete authenticated tool workflows."""
 
     def setUp(self):

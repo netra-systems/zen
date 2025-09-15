@@ -59,7 +59,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class TestMigrationMetrics:
+class MigrationMetricsTests:
     """Comprehensive migration and consistency test metrics."""
     test_name: str
     start_time: float = field(default_factory=time.time)
@@ -121,11 +121,11 @@ class TestMigrationMetrics:
 
 
 # Alias for backward compatibility (fixing typo)
-MigrationTestMetrics = TestMigrationMetrics
+MigrationTestMetrics = MigrationMetricsTests
 
 
 @dataclass
-class TestDatabaseConfig:
+class DatabaseConfigTests:
     """Configuration for comprehensive database testing."""
     test_postgresql: bool = True
     test_redis: bool = True  
@@ -153,10 +153,10 @@ class TestDatabaseConfig:
     project_root: Optional[Path] = None
 
 
-class TestDatabaseMigrationConsistencyer:
+class DatabaseMigrationConsistencyerTests:
     """Comprehensive database migration and consistency tester."""
     
-    def __init__(self, config: TestDatabaseConfig):
+    def __init__(self, config: DatabaseConfigTests):
         self.config = config
         self.project_root = config.project_root or self._detect_project_root()
         self.metrics = MigrationTestMetrics(test_name="database_migration_consistency")
@@ -955,18 +955,18 @@ class TestDatabaseMigrationConsistencyer:
 
 
 # Alias for naming consistency
-DatabaseMigrationConsistencyTester = TestDatabaseMigrationConsistencyer
+DatabaseMigrationConsistencyTester = DatabaseMigrationConsistencyerTests
 
 
 @pytest.mark.e2e
 @pytest.mark.asyncio
-class TestDatabaseMigrationRecoveryConsistency:
+class DatabaseMigrationRecoveryConsistencyTests:
     """Comprehensive database migration and consistency test suite."""
     
     @pytest.fixture
     def database_config(self):
         """Create database test configuration."""
-        return TestDatabaseConfig(
+        return DatabaseConfigTests(
             test_postgresql=True,
             test_redis=True,
             test_clickhouse=False,  # Skip ClickHouse by default
@@ -1033,7 +1033,7 @@ class TestDatabaseMigrationRecoveryConsistency:
 
 async def run_database_migration_test():
     """Standalone function to run database migration test.""" 
-    config = TestDatabaseConfig()
+    config = DatabaseConfigTests()
     tester = DatabaseMigrationConsistencyTester(config)
     return await tester.run_comprehensive_migration_test()
 

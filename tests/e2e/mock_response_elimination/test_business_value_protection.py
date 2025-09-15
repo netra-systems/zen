@@ -30,7 +30,7 @@ from shared.isolated_environment import get_env
 from shared.types.core_types import UserID
 logger = logging.getLogger(__name__)
 
-class TestBusinessValueProtection(BaseE2ETest):
+class BusinessValueProtectionTests(BaseE2ETest):
     """
     FAILING TESTS: Prove enterprise customers can receive mock responses
     causing immediate business damage.

@@ -29,7 +29,7 @@ from netra_backend.app.business.credit_manager import CreditManager
 from netra_backend.app.business.subscription_manager import SubscriptionManager
 from netra_backend.app.business.billing_calculator import BillingCalculator
 
-class TestUserCreditSystemComprehensive(SSotBaseTestCase):
+class UserCreditSystemComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive user credit system tests.
     

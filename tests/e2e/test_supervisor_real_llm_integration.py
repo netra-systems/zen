@@ -21,7 +21,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 @pytest.mark.real_llm
 @pytest.mark.e2e
-class TestSupervisorE2EWithRealLLM:
+class SupervisorE2EWithRealLLMTests:
     """E2E tests using real LLM integration."""
     
     def _setup_test_environment(self):

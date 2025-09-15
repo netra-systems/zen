@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 import uuid
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestAuthenticationFailureLogging(SSotAsyncTestCase):
+class AuthenticationFailureLoggingTests(SSotAsyncTestCase):
     """Test authentication failure logging coverage."""
 
     def setUp(self):
@@ -182,7 +182,7 @@ class TestAuthenticationFailureLogging(SSotAsyncTestCase):
             assert gap['current_status'] == 'NO_LOGGING'
             print(f"IMPLEMENTATION REQUIRED: {gap['area']} needs {gap['required_level']} level logging")
 
-class TestAuthorizationFailureLogging(SSotAsyncTestCase):
+class AuthorizationFailureLoggingTests(SSotAsyncTestCase):
     """Test authorization failure logging coverage."""
 
     def setUp(self):

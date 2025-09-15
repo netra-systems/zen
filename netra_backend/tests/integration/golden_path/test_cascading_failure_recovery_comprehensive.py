@@ -308,7 +308,7 @@ class ResilientLLMProvider:
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.mission_critical
-class TestCascadingFailureRecoveryComprehensive(ServiceOrchestrationIntegrationTest):
+class CascadingFailureRecoveryComprehensiveTests(ServiceOrchestrationIntegrationTest):
     """
     Comprehensive integration tests for cascading failure recovery across multiple services.
     

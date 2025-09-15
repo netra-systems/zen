@@ -24,7 +24,7 @@ from netra_backend.tests.validation_formatting_test_helpers import (
 # Utility modules (file_utils, crypto_utils, validation_utils) are now implemented
 
 # Test 89: File utils operations
-class TestFileUtilsOperations:
+class FileUtilsOperationsTests:
     """test_file_utils_operations - Test file operations and cleanup on error"""
     
     @pytest.mark.asyncio
@@ -88,7 +88,7 @@ class TestFileUtilsOperations:
         assert content == "atomic content"
 
 # Test 90: Crypto utils hashing
-class TestCryptoUtilsHashing:
+class CryptoUtilsHashingTests:
     """test_crypto_utils_hashing - Test hashing algorithms and salt generation"""
     
     @pytest.mark.asyncio
@@ -142,7 +142,7 @@ class TestCryptoUtilsHashing:
         assert hash1 != hash2
 
 # Test 91: Validation utils schemas
-class TestValidationUtilsSchemas:
+class ValidationUtilsSchemasTests:
     """test_validation_utils_schemas - Test schema validation and error messages"""
     
     @pytest.mark.asyncio

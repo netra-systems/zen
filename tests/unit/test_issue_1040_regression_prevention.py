@@ -46,7 +46,7 @@ except ImportError:
 
 
 @pytest.mark.unit
-class TestIssue1040RegressionPrevention(SSotBaseTestCase):
+class Issue1040RegressionPreventionTests(SSotBaseTestCase):
     """
     Regression prevention test for Issue #1040 ServiceAvailability SSOT consolidation.
 
@@ -382,7 +382,7 @@ class TestIssue1040RegressionPrevention(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestIssue1040PostFixRegressionValidation(SSotBaseTestCase):
+class Issue1040PostFixRegressionValidationTests(SSotBaseTestCase):
     """
     Post-fix regression validation tests.
 

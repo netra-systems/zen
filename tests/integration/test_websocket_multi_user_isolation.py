@@ -42,7 +42,7 @@ class UserSession:
 
 
 @pytest.mark.integration
-class TestWebSocketMultiUserIsolation(SSotAsyncTestCase):
+class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
     """Test WebSocket manager multi-user isolation and security.
     
     These tests MUST FAIL with current cross-user state contamination.

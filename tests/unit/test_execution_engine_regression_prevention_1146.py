@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestExecutionEngineRegressionPrevention1146(SSotBaseTestCase):
+class ExecutionEngineRegressionPrevention1146Tests(SSotBaseTestCase):
     """Prevents regression to multiple execution engine implementations."""
 
     def setUp(self):

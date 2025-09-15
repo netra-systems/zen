@@ -22,7 +22,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 
 @pytest.mark.e2e
 @pytest.mark.staging
-class TestJWTSSOTIssue1078E2EStaging(BaseE2ETest):
+class JWTSSOTIssue1078E2EStagingTests(BaseE2ETest):
     """E2E staging tests to validate JWT SSOT compliance in production-like environment"""
     
     def setup_method(self):

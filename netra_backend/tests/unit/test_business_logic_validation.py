@@ -17,7 +17,7 @@ def cost_calculator():
     return CostCalculatorService()
 
 
-class TestBusinessRuleValidation:
+class BusinessRuleValidationTests:
     """Test enforcement of business rules."""
 
     def test_cost_calculation_business_constraints(self, cost_calculator):
@@ -96,7 +96,7 @@ class TestBusinessRuleValidation:
             assert estimated_cost < Decimal('100'), "Budget estimates should be reasonable for typical usage"
 
 
-class TestUserExperienceBusinessRules:
+class UserExperienceBusinessRulesTests:
     """Test business rules that affect user experience."""
 
     def test_password_security_business_requirements(self):
@@ -151,7 +151,7 @@ class TestUserExperienceBusinessRules:
         assert "DATABASE" not in error_message.upper() or "database" in error_message.lower(), "Database errors should be business-friendly"
 
 
-class TestComplianceAndGovernance:
+class ComplianceAndGovernanceTests:
     """Test compliance and governance business requirements."""
 
     def test_data_handling_compliance(self):
@@ -205,7 +205,7 @@ class TestComplianceAndGovernance:
         assert cost1 == cost2, "Independent service instances must produce consistent results"
 
 
-class TestBusinessValueValidation:
+class BusinessValueValidationTests:
     """Test that system delivers expected business value."""
 
     def test_cost_optimization_business_value(self, cost_calculator):
@@ -284,7 +284,7 @@ class TestBusinessValueValidation:
         assert malicious_auth is False, "Malicious attempts must be rejected"
 
 
-class TestScalabilityBusinessRequirements:
+class ScalabilityBusinessRequirementsTests:
     """Test scalability meets business growth requirements."""
 
     def test_cost_calculation_scales_for_business_growth(self, cost_calculator):

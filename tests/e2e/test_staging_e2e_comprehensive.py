@@ -67,7 +67,7 @@ async def websocket_client(auth_client):
 
 
 @pytest.mark.e2e
-class TestStagingHealthChecks:
+class StagingHealthChecksTests:
     """Test health endpoints of all staging services."""
     
     @pytest.mark.asyncio
@@ -106,7 +106,7 @@ class TestStagingHealthChecks:
 
 
 @pytest.mark.e2e
-class TestStagingAuthentication:
+class StagingAuthenticationTests:
     """Test authentication flows against staging."""
     
     @pytest.mark.asyncio
@@ -161,7 +161,7 @@ class TestStagingAuthentication:
 
 
 @pytest.mark.e2e
-class TestStagingAPIEndpoints:
+class StagingAPIEndpointsTests:
     """Test API endpoints against staging backend."""
     
     @pytest.mark.asyncio
@@ -206,7 +206,7 @@ class TestStagingAPIEndpoints:
 
 
 @pytest.mark.e2e
-class TestStagingWebSocket:
+class StagingWebSocketTests:
     """Test WebSocket functionality against staging."""
     
     @pytest.mark.asyncio
@@ -271,7 +271,7 @@ class TestStagingWebSocket:
 
 
 @pytest.mark.e2e
-class TestStagingEndToEndScenarios:
+class StagingEndToEndScenariosTests:
     """Test complete end-to-end scenarios."""
     
     @pytest.mark.asyncio
@@ -337,7 +337,7 @@ class TestStagingEndToEndScenarios:
 
 
 @pytest.mark.e2e
-class TestStagingErrorHandling:
+class StagingErrorHandlingTests:
     """Test error handling in staging environment."""
     
     @pytest.mark.asyncio

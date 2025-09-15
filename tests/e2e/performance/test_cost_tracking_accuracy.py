@@ -56,7 +56,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.e2e
-class TestCostTrackingAccuracyE2E:
+class CostTrackingAccuracyE2ETests:
     """Test #6: Complete cost tracking accuracy from operations to billing."""
 
     @pytest_asyncio.fixture

@@ -14,7 +14,7 @@ try:
 except ImportError:
     pytest.skip('Required modules have been removed or have missing dependencies', allow_module_level=True)
 
-class TestSecurityMonitoring:
+class SecurityMonitoringTests:
     """Test security monitoring functionality."""
 
     def test_mock_token_detection(self):
@@ -94,7 +94,7 @@ class TestSecurityMonitoring:
         result = check_and_alert_mock_token('mock_test_token', 'convenience_test')
         assert result is True
 
-class TestSecurityMonitoringIntegration:
+class SecurityMonitoringIntegrationTests:
     """Test security monitoring integration with system components."""
 
     def test_websocket_auth_integration(self):

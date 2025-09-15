@@ -37,7 +37,7 @@ from test_framework.test_config import TEST_PORTS
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
+class WebSocketAuthenticationComprehensiveTests(BaseE2ETest):
     """Comprehensive WebSocket authentication test suite with real services."""
     
     def setup_method(self):

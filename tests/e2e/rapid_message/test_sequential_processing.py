@@ -26,7 +26,7 @@ from tests.e2e.utils.rapid_message_sender import RapidMessageSender
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestSequentialMessageProcessing:
+class SequentialMessageProcessingTests:
     """Test sequential processing of rapid messages."""
     
     async def test_basic_sequence_ordering(self, user_token, message_validator, test_config):

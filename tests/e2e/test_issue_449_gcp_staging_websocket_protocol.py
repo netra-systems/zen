@@ -131,7 +131,7 @@ class GCPStagingWebSocketTester:
         return result
 
 @pytest.mark.e2e
-class TestIssue449GCPStagingWebSocketProtocol(SSotBaseTestCase):
+class Issue449GCPStagingWebSocketProtocolTests(SSotBaseTestCase):
     """
     E2E tests for Issue #449 - GCP staging WebSocket protocol failures.
     

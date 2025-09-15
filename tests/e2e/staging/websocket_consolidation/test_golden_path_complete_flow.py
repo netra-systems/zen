@@ -42,7 +42,7 @@ except ImportError as e:
     requests = None
 
 @pytest.mark.e2e
-class TestGoldenPathCompleteFlow(SSotAsyncTestCase):
+class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
     """
     CRITICAL E2E: This test proves Golden Path is completely broken.
 

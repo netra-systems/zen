@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.unit
-class TestDataHelperSSotImportViolation(SSotBaseTestCase):
+class DataHelperSSotImportViolationTests(SSotBaseTestCase):
     """Test class that reproduces exact SSOT import violation for DataHelper agent."""
 
     def setup_method(self, method):

@@ -57,7 +57,7 @@ class GoldenPathStageResult:
     error_message: Optional[str] = None
     stage_data: Optional[Dict[str, Any]] = None
 
-class TestCompleteGoldenPathIntegrationEnhanced(BaseIntegrationTest):
+class CompleteGoldenPathIntegrationEnhancedTests(BaseIntegrationTest):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

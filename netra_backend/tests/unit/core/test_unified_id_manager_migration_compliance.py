@@ -38,7 +38,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestUnifiedIDManagerMigrationCompliance:
+class UnifiedIDManagerMigrationComplianceTests:
     """Test suite to expose ID generation SSOT violations and validate migration."""
 
     def setup_method(self):

@@ -149,7 +149,7 @@ class StagingPerformanceMonitor:
         regression_analysis['overall_regression_detected'] = any_regression
         return regression_analysis
 
-class TestGCPTimeoutOptimizationE2E(SSotAsyncTestCase):
+class GCPTimeoutOptimizationE2ETests(SSotAsyncTestCase):
     """
     E2E tests for GCP timeout optimization in staging environment (Issue #469).
     

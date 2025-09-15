@@ -27,7 +27,7 @@ from shared.isolated_environment import get_env
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestOAuthAuthorizationFlowIntegration(BaseIntegrationTest):
+class OAuthAuthorizationFlowIntegrationTests(BaseIntegrationTest):
     """Integration tests for OAuth authorization flows with real state management."""
     
     def setup_method(self):
@@ -237,7 +237,7 @@ class TestOAuthAuthorizationFlowIntegration(BaseIntegrationTest):
             self.logger.info(f"OAuth PKCE attack '{attack_name}' properly rejected")
 
 
-class TestOAuthTokenManagementIntegration(BaseIntegrationTest):
+class OAuthTokenManagementIntegrationTests(BaseIntegrationTest):
     """Integration tests for OAuth token lifecycle management."""
     
     def setup_method(self):

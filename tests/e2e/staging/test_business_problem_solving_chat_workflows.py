@@ -117,7 +117,7 @@ class BusinessValueAnalyzer:
 @pytest.mark.e2e
 @pytest.mark.staging
 @pytest.mark.business_critical
-class TestBusinessProblemSolvingChatWorkflows(SSotAsyncTestCase):
+class BusinessProblemSolvingChatWorkflowsTests(SSotAsyncTestCase):
     """
     CRITICAL: E2E tests for complete business problem solving workflows in staging.
     

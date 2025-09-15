@@ -44,7 +44,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestSSOTBridgePatternEnforcement(SSotAsyncTestCase):
+class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
     """
     SSOT integration tests for WebSocket bridge pattern enforcement.
 

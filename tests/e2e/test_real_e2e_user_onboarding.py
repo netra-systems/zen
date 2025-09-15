@@ -681,7 +681,7 @@ class RealUserOnboardingTester(BaseE2ETest):
 # E2E TEST CLASS
 # ============================================================================
 
-class TestRealE2EUserOnboarding:
+class RealE2EUserOnboardingTests:
     """
     MISSION CRITICAL: Complete User Onboarding Experience Test
     
@@ -930,7 +930,7 @@ class TestRealE2EUserOnboarding:
 if __name__ == "__main__":
     """Run the test directly for development."""
     async def run_test():
-        test_instance = TestRealE2EUserOnboarding()
+        test_instance = RealE2EUserOnboardingTests()
         await test_instance.test_complete_user_onboarding_experience_delivers_business_value()
     
     asyncio.run(run_test())

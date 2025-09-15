@@ -150,7 +150,7 @@ class AuthServiceCoordinationValidator:
 
 @pytest.mark.mission_critical
 @pytest.mark.real_services
-class TestAuthServiceCoordination(BaseIntegrationTest):
+class AuthServiceCoordinationTests(BaseIntegrationTest):
     """Mission Critical: Auth service coordination for seamless user experience."""
     
     @pytest.fixture(autouse=True)
@@ -425,7 +425,7 @@ class TestAuthServiceCoordination(BaseIntegrationTest):
 
 @pytest.mark.mission_critical
 @pytest.mark.real_services  
-class TestAuthServiceFailureRecovery(BaseIntegrationTest):
+class AuthServiceFailureRecoveryTests(BaseIntegrationTest):
     """Mission Critical: Auth service failure recovery scenarios."""
     
     async def test_auth_service_timeout_recovery(self):

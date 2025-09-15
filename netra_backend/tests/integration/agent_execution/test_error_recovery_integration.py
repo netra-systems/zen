@@ -114,7 +114,7 @@ class FailureSimulator:
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.error_recovery
-class TestErrorRecoveryIntegration(BaseAgentExecutionTest):
+class ErrorRecoveryIntegrationTests(BaseAgentExecutionTest):
     """Integration tests for agent execution error recovery with real infrastructure failures."""
 
     async def setup_method(self):

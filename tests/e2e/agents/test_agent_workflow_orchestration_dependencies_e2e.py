@@ -230,7 +230,7 @@ class WorkflowOrchestrationEngine:
             await self.agent_client.close()
 
 @pytest.mark.e2e
-class TestSequentialWorkflowDependencies(SSotBaseTestCase):
+class SequentialWorkflowDependenciesTests(SSotBaseTestCase):
     """Test sequential workflow execution with proper dependency management."""
 
     @pytest.mark.asyncio
@@ -280,7 +280,7 @@ class TestSequentialWorkflowDependencies(SSotBaseTestCase):
             await orchestrator.cleanup()
 
 @pytest.mark.e2e
-class TestParallelWorkflowExecution(SSotBaseTestCase):
+class ParallelWorkflowExecutionTests(SSotBaseTestCase):
     """Test parallel workflow execution with complex dependencies."""
 
     @pytest.mark.asyncio
@@ -335,7 +335,7 @@ class TestParallelWorkflowExecution(SSotBaseTestCase):
             await orchestrator.cleanup()
 
 @pytest.mark.e2e
-class TestWorkflowErrorHandlingRecovery(SSotBaseTestCase):
+class WorkflowErrorHandlingRecoveryTests(SSotBaseTestCase):
     """Test workflow error handling and recovery mechanisms."""
 
     @pytest.mark.asyncio
@@ -381,7 +381,7 @@ class TestWorkflowErrorHandlingRecovery(SSotBaseTestCase):
             await orchestrator.cleanup()
 
 @pytest.mark.e2e
-class TestWorkflowWebSocketIntegration(SSotBaseTestCase):
+class WorkflowWebSocketIntegrationTests(SSotBaseTestCase):
     """Test WebSocket event integration during workflow execution."""
 
     @pytest.mark.asyncio
@@ -418,7 +418,7 @@ class TestWorkflowWebSocketIntegration(SSotBaseTestCase):
             await orchestrator.cleanup()
 
 @pytest.mark.e2e
-class TestWorkflowAuthentication(SSotBaseTestCase):
+class WorkflowAuthenticationTests(SSotBaseTestCase):
     """Test authentication is maintained throughout multi-agent workflows."""
 
     @pytest.mark.asyncio

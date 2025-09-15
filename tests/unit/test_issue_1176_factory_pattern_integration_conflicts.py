@@ -66,7 +66,7 @@ except ImportError as e:
 
 
 @pytest.mark.unit
-class TestAgentFactoryWebSocketManagerInterfaceConflicts:
+class AgentFactoryWebSocketManagerInterfaceConflictsTests:
     """Test agent factories expecting different WebSocket manager interfaces."""
     
     @pytest.fixture
@@ -177,7 +177,7 @@ class TestAgentFactoryWebSocketManagerInterfaceConflicts:
 
 
 @pytest.mark.unit
-class TestWebSocketBridgeFactoryIntegrationConflicts:
+class WebSocketBridgeFactoryIntegrationConflictsTests:
     """Test WebSocket bridge factory integration conflicts."""
     
     @pytest.fixture 
@@ -264,7 +264,7 @@ class TestWebSocketBridgeFactoryIntegrationConflicts:
 
 
 @pytest.mark.unit
-class TestExecutionEngineFactoryWebSocketIntegrationConflicts:
+class ExecutionEngineFactoryWebSocketIntegrationConflictsTests:
     """Test ExecutionEngineFactory WebSocket integration conflicts."""
     
     @pytest.fixture
@@ -382,7 +382,7 @@ class TestExecutionEngineFactoryWebSocketIntegrationConflicts:
 
 
 @pytest.mark.unit
-class TestWebSocketManagerFactoryPatternConflicts:
+class WebSocketManagerFactoryPatternConflictsTests:
     """Test WebSocket manager factory pattern conflicts."""
     
     @pytest.fixture

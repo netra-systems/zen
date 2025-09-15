@@ -67,7 +67,7 @@ class CustomerExperienceValidator:
             status=status
         ))
 
-class TestCustomerExperienceQuality:
+class CustomerExperienceQualityTests:
     """Business validation tests for customer experience quality"""
 
     def setup_method(self):
@@ -503,7 +503,7 @@ if __name__ == "__main__":
     # Can be run standalone for business validation
     import sys
 
-    validator = TestCustomerExperienceQuality()
+    validator = CustomerExperienceQualityTests()
     validator.setup_method()
 
     print("BUSINESS VALIDATION: Customer Experience Quality")

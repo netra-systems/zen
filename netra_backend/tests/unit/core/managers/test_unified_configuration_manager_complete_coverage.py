@@ -48,7 +48,7 @@ from test_framework.ssot.base import BaseTestCase
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.core.configuration.base import UnifiedConfigManager, get_config, get_config_value, set_config_value, validate_config_value, get_environment, is_production, is_development, is_testing, config_manager
 
-class TestUnifiedConfigurationManagerExtreme(BaseTestCase):
+class UnifiedConfigurationManagerExtremeTests(BaseTestCase):
     """Extreme edge case testing for 100% coverage."""
 
     def setUp(self):
@@ -556,7 +556,7 @@ class TestUnifiedConfigurationManagerExtreme(BaseTestCase):
         self.assertIn(health['status'], ['healthy', 'unhealthy'])
         self.assertIsInstance(health['validation_result'], bool)
 
-class TestUnifiedConfigurationManagerIsolationCompliance(BaseTestCase):
+class UnifiedConfigurationManagerIsolationComplianceTests(BaseTestCase):
     """Test CLAUDE.md compliance for IsolatedEnvironment usage."""
 
     def setUp(self):

@@ -82,7 +82,7 @@ class ContaminationTestStats:
     auth_token_reuse_cases: int = 0
 
 @pytest.mark.integration
-class TestWebSocketEventContamination(SSotAsyncTestCase):
+class WebSocketEventContaminationTests(SSotAsyncTestCase):
     """Integration tests reproducing WebSocket event contamination issues from Issue #414."""
 
     def setup_method(self, method):

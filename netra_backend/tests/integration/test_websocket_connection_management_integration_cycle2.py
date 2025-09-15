@@ -25,7 +25,7 @@ from test_framework.ssot.websocket import WebSocketTestClient
 from test_framework.database_test_utilities import DatabaseTestUtilities
 
 
-class TestWebSocketConnectionManagementIntegration:
+class WebSocketConnectionManagementIntegrationTests:
     """Test WebSocket connection management with real service integration."""
     
     @pytest.mark.integration

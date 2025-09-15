@@ -22,7 +22,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.integration
-class TestWebSocketEventConsistency(SSotAsyncTestCase):
+class WebSocketEventConsistencyTests(SSotAsyncTestCase):
     """Test WebSocket event consistency across execution engines."""
     
     # Golden Path WebSocket events - CRITICAL for chat UX
@@ -453,7 +453,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestWebSocketEventBridgeConsistency(SSotAsyncTestCase):
+class WebSocketEventBridgeConsistencyTests(SSotAsyncTestCase):
     """Test WebSocket bridge consistency across different execution patterns."""
     
     async def test_websocket_bridge_parameter_mapping(self):

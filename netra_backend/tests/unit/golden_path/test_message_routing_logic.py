@@ -330,7 +330,7 @@ class MockMessageRoutingEngine:
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestMessageRoutingLogic(SSotBaseTestCase):
+class MessageRoutingLogicTests(SSotBaseTestCase):
     """Test message routing business logic validation."""
 
     def setup_method(self, method=None):

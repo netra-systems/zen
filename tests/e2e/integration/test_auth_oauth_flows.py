@@ -343,7 +343,7 @@ class OAuthFlowRunner:
             await self.services_manager.stop_all_services()
 
 
-class TestOAuthIntegrationValidator:
+class OAuthIntegrationValidatorTests:
     """Validator for OAuth integration test results"""
     
     @staticmethod
@@ -375,7 +375,7 @@ class TestOAuthIntegrationValidator:
 @pytest.mark.critical
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestOAuthFlows:
+class OAuthFlowsTests:
     """OAuth Authentication Flow Integration Tests."""
     
     @pytest.fixture

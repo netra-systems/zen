@@ -15,7 +15,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env, Validation
 
 
 @pytest.mark.unit
-class TestEnvironmentSpecificConfigIndependence:
+class EnvironmentSpecificConfigIndependenceTests:
     """Test environment-specific configuration independence to prevent cascade failures."""
 
     def test_development_vs_staging_oauth_isolation(self):
@@ -238,7 +238,7 @@ class TestEnvironmentSpecificConfigIndependence:
 
 
 @pytest.mark.unit
-class TestConfigurationEnvironmentDefaults:
+class ConfigurationEnvironmentDefaultsTests:
     """Test environment-specific default configuration handling."""
 
     def test_test_environment_oauth_defaults(self):

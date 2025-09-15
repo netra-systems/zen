@@ -51,7 +51,7 @@ from shared.types.core_types import (
 
 
 @pytest.mark.integration
-class TestWebSocketManagerMigrationSafety(SSotAsyncTestCase):
+class WebSocketManagerMigrationSafetyTests(SSotAsyncTestCase):
     """
     Migration safety tests validating WebSocket manager migration preserves 
     all critical user isolation and security characteristics.

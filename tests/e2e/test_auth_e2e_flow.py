@@ -20,7 +20,7 @@ env = get_env()
 env.set('TESTING', '1', 'test')
 env.set('DATABASE_URL', 'sqlite+aiosqlite:///:memory:', 'test')
 
-class TestUnifiedE2EHarness:
+class UnifiedE2EHarnessTests:
     """Unified test harness for REAL authentication flow testing - NO MOCKING"""
 
     def __init__(self):
@@ -48,13 +48,13 @@ class TestUnifiedE2EHarness:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAuthE2EFlow:
+class AuthE2EFlowTests:
     """E2E Authentication Flow Test Suite - REAL SERVICES ONLY"""
 
     @pytest.fixture(autouse=True)
     async def setup_harness(self):
         """Setup REAL test harness for each test - NO MOCKING"""
-        self.harness = TestUnifiedE2EHarness()
+        self.harness = UnifiedE2EHarnessTests()
         await self.harness.setup_real_auth_service()
         await self.harness.setup_real_websocket_manager()
 
@@ -257,7 +257,7 @@ if __name__ == '__main__':
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
 
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):

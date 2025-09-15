@@ -170,7 +170,7 @@ class MockResilientWebSocketBridge:
         self.should_fail_executing = False
         self.should_fail_completed = False
 
-class TestToolExecutionErrorHandlingResilience(SSotAsyncTestCase):
+class ToolExecutionErrorHandlingResilienceTests(SSotAsyncTestCase):
     """Unit tests for tool execution error handling and resilience."""
 
     def setup_method(self, method):

@@ -20,7 +20,7 @@ import pytest
 
 
 @pytest.mark.unit
-class TestImportPatternAnalysis:
+class ImportPatternAnalysisTests:
     """Unit test for import pattern analysis related to Issue #551."""
     
     def test_current_import_pattern_analysis(self):
@@ -206,7 +206,7 @@ class TestImportPatternAnalysis:
 
 
 @pytest.mark.unit
-class TestImportResolutionMocking:
+class ImportResolutionMockingTests:
     """Unit tests with mocked imports to simulate different scenarios."""
     
     def test_mock_sys_path_scenarios(self):

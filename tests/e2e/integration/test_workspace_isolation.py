@@ -41,7 +41,7 @@ from netra_backend.app.schemas.user_plan import PlanTier
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestWorkspaceDataIsolation:
+class WorkspaceDataIsolationTests:
     """Critical Test #3: Complete Workspace Data Isolation Security."""
     
     @pytest_asyncio.fixture
@@ -284,7 +284,7 @@ class TestWorkspaceDataIsolation:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestWorkspaceIsolationCompliance:
+class WorkspaceIsolationComplianceTests:
     """Enterprise compliance validation for workspace isolation."""
     
     @pytest.mark.asyncio

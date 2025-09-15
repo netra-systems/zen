@@ -32,7 +32,7 @@ logger = central_logger.get_logger(__name__)
 
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestMessageHandlerWebSocketReadinessE2E:
+class MessageHandlerWebSocketReadinessE2ETests:
     """E2E tests for message handler WebSocket readiness with authentication."""
     
     @pytest.fixture(autouse=True)

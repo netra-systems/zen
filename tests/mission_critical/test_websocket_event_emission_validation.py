@@ -30,7 +30,7 @@ from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmi
 from shared.id_generation import UnifiedIdGenerator
 
 
-class TestWebSocketEventEmissionValidation(SSotBaseTestCase):
+class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
     """Validates that all 5 critical WebSocket events are emitted correctly."""
     
     def setup_method(self):

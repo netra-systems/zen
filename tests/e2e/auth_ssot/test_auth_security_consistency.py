@@ -29,7 +29,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 from shared.isolated_environment import get_env
 
 
-class TestAuthSecurityConsistency(BaseE2ETest):
+class AuthSecurityConsistencyTests(BaseE2ETest):
     """
     E2E tests for auth security consistency with delegation patterns.
     

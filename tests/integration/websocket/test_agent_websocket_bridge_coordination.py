@@ -296,7 +296,7 @@ class AgentWebSocketCoordinationTester:
         from netra_backend.app.websocket_core import create_websocket_manager
         return await create_websocket_manager()
 
-class TestAgentWebSocketBridgeCoordination:
+class AgentWebSocketBridgeCoordinationTests:
     """Integration tests for agent WebSocket bridge coordination."""
 
     @pytest.mark.asyncio

@@ -15,7 +15,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.websocket_core.event_validation_framework import EventValidator, EventSequenceValidator, EventValidationFramework, EventValidationLevel, EventType, ValidationResult, ValidatedEvent, EventSequence, EventMetrics, CircuitBreakerState, get_event_validation_framework, validate_websocket_event
 
-class TestEventValidator:
+class EventValidatorTests:
     """Test suite for EventValidator class."""
 
     def setup_method(self):
@@ -94,7 +94,7 @@ class TestEventValidator:
         assert self.validator.metrics.total_events == initial_total + 1
         assert self.validator.metrics.successful_events > 0
 
-class TestEventSequenceValidator:
+class EventSequenceValidatorTests:
     """Test suite for EventSequenceValidator class."""
 
     def setup_method(self):
@@ -153,7 +153,7 @@ class TestEventSequenceValidator:
         sequence_status = self.sequence_validator.get_sequence_status(self.thread_id)
         assert sequence_status['timing_valid'] is False
 
-class TestEventValidationFramework:
+class EventValidationFrameworkTests:
     """Test suite for the main EventValidationFramework class."""
 
     def setup_method(self):
@@ -256,7 +256,7 @@ class TestEventValidationFramework:
         assert 'active_sequences' in report
         assert 'completed_sequences' in report
 
-class TestConvenienceFunctions:
+class ConvenienceFunctionsTests:
     """Test suite for convenience functions and global framework access."""
 
     @pytest.mark.asyncio

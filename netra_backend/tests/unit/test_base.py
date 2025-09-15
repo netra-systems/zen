@@ -33,7 +33,7 @@ BaseUnitTest = SSotBaseTestCase  # The missing class that was being imported
 BackendBaseTest = SSotBaseTestCase
 BackendAsyncTest = SSotAsyncTestCase
 
-class TestBase:
+class BaseTests:
     """Test suite for Base"""
     
     @pytest.fixture
@@ -58,12 +58,12 @@ class TestBase:
     def test_error_handling(self):
         """Test that Base class can be used for model creation"""
         # Test that we can create a model from Base
-        class TestModel(Base):
+        class ModelTests(Base):
             __tablename__ = 'test_model'
             id = Column(Integer, primary_key=True)
         
-        assert hasattr(TestModel, '__tablename__')
-        assert TestModel.__tablename__ == 'test_model'
+        assert hasattr(ModelTests, '__tablename__')
+        assert ModelTests.__tablename__ == 'test_model'
     
     def test_edge_cases(self, instance):
         """Test boundary conditions"""
@@ -85,5 +85,5 @@ __all__ = [
     'BaseTestCase',
     'AsyncTestCase',
     'BaseIntegrationTest',
-    'TestBase'
+    'BaseTests'
 ]

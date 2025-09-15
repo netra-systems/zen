@@ -20,7 +20,7 @@ TEST_CONFIG = {'auth_service_url': 'http://localhost:8001', 'backend_url': 'http
 MOCK_OAUTH_CONFIG = {'client_id': 'test-google-client-id.apps.googleusercontent.com', 'client_secret': 'mock-client-secret', 'redirect_uri': f"{TEST_CONFIG['frontend_url']}/auth/callback", 'scope': 'openid email profile'}
 TEST_HEADERS = {'Content-Type': 'application/json', 'Origin': 'http://localhost:3000', 'Referer': 'http://localhost:3000/login', 'User-Agent': 'Mozilla/5.0 (Test Browser) AppleWebKit/537.36', 'Accept': 'application/json, text/plain, */*', 'Accept-Language': 'en-US,en;q=0.9', 'Cache-Control': 'no-cache'}
 
-class TestAuthFlower:
+class AuthFlowerTests:
     """Comprehensive authentication flow testing class"""
 
     def __init__(self):
@@ -42,14 +42,14 @@ class TestAuthFlower:
 @pytest.fixture
 async def auth_tester():
     """Async fixture for auth flow tester"""
-    tester = TestAuthFlower()
+    tester = AuthFlowerTests()
     try:
         yield tester
     finally:
         await tester.cleanup()
 
 @pytest.mark.e2e
-class TestDevLoginFlow:
+class DevLoginFlowTests:
     """Test development mode login flow - Expected to expose configuration issues"""
 
     @pytest.mark.e2e
@@ -137,7 +137,7 @@ class TestDevLoginFlow:
             pytest.fail(f'Token validation test failed: {e}')
 
 @pytest.mark.e2e
-class TestOAuth2Flow:
+class OAuth2FlowTests:
     """Test OAuth2 Google login flow - Expected to expose OAuth configuration issues"""
 
     @pytest.mark.e2e
@@ -206,7 +206,7 @@ class TestOAuth2Flow:
         return base64.urlsafe_b64encode(json.dumps(state_data).encode()).decode()
 
 @pytest.mark.e2e
-class TestJWTTokenHandling:
+class JWTTokenHandlingTests:
     """Test JWT token generation and validation - Should expose token handling issues"""
 
     @pytest.mark.e2e
@@ -276,7 +276,7 @@ class TestJWTTokenHandling:
                 pytest.fail('Blacklisted token still valid - security vulnerability')
 
 @pytest.mark.e2e
-class TestTokenPropagation:
+class TokenPropagationTests:
     """Test token propagation to frontend - Should expose token delivery issues"""
 
     @pytest.mark.e2e
@@ -320,7 +320,7 @@ class TestTokenPropagation:
                 logger.warning(f'Cookie {cookie_name} not marked as httponly - XSS vulnerability')
 
 @pytest.mark.e2e
-class TestCORSConfiguration:
+class CORSConfigurationTests:
     """Test CORS configuration - Should expose cross-origin request issues"""
 
     @pytest.mark.e2e
@@ -363,7 +363,7 @@ class TestCORSConfiguration:
             logger.warning(f'Origin check issues: {origin_failures}')
 
 @pytest.mark.e2e
-class TestSecurityHeaders:
+class SecurityHeadersTests:
     """Test security headers - Should expose security configuration issues"""
 
     @pytest.mark.e2e
@@ -403,7 +403,7 @@ class TestSecurityHeaders:
             logger.warning(f'Potential information leaks: {info_leaks}')
 
 @pytest.mark.e2e
-class TestSessionManagement:
+class SessionManagementTests:
     """Test session management - Should expose session handling issues"""
 
     @pytest.mark.e2e
@@ -452,7 +452,7 @@ class TestSessionManagement:
                 logger.warning(f'Session check {i} failed: {e}')
 
 @pytest.mark.e2e
-class TestTokenRefreshMechanism:
+class TokenRefreshMechanismTests:
     """Test token refresh functionality - Should expose refresh token issues"""
 
     @pytest.mark.e2e
@@ -499,7 +499,7 @@ class TestTokenRefreshMechanism:
             pytest.fail('Refresh token reuse allowed - security vulnerability')
 
 @pytest.mark.e2e
-class TestWebSocketAuthentication:
+class WebSocketAuthenticationTests:
     """Test WebSocket authentication - Should expose WebSocket auth issues"""
 
     @pytest.mark.e2e
@@ -542,7 +542,7 @@ class TestWebSocketAuthentication:
                 pytest.fail(f'Missing WebSocket validation fields: {missing_fields}')
 
 @pytest.mark.e2e
-class TestCrossServiceAuthSync:
+class CrossServiceAuthSyncTests:
     """Test cross-service authentication synchronization - Should expose sync issues"""
 
     @pytest.mark.e2e
@@ -588,7 +588,7 @@ class TestCrossServiceAuthSync:
                 pytest.fail(f'Email inconsistency: login={auth_email}, me={me_email}')
 
 @pytest.mark.e2e
-class TestMultiTabSessionHandling:
+class MultiTabSessionHandlingTests:
     """Test multi-tab session handling - Should expose session coordination issues"""
 
     @pytest.mark.e2e
@@ -618,7 +618,7 @@ class TestMultiTabSessionHandling:
                 await client.aclose()
 
 @pytest.mark.e2e
-class TestStagingEnvironmentAuth:
+class StagingEnvironmentAuthTests:
     """Test staging environment authentication - Should expose staging-specific issues"""
 
     @pytest.mark.e2e
@@ -673,7 +673,7 @@ async def test_gcp_staging_comprehensive_auth_flow():
     """Test comprehensive authentication flow using GCP staging services with StagingAuthHelper"""
     if get_env().get('ENVIRONMENT', 'development') != 'staging':
         pytest.skip('Test only runs in staging environment')
-    auth_tester = TestAuthFlower()
+    auth_tester = AuthFlowerTests()
     try:
         if not auth_tester.is_staging or not hasattr(auth_tester, 'staging_auth'):
             pytest.skip('Staging auth helper not initialized')

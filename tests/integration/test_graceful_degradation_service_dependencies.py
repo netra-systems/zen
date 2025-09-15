@@ -90,7 +90,7 @@ def mock_app_state_all_missing():
     return MockAppState({'agent_supervisor': None, 'thread_service': None, 'agent_websocket_bridge': None})
 
 @pytest.mark.integration
-class TestGracefulDegradationManager:
+class GracefulDegradationManagerTests:
     """Test graceful degradation manager functionality."""
 
     @pytest.mark.asyncio
@@ -173,7 +173,7 @@ class TestGracefulDegradationManager:
             assert 'agent_supervisor' in degradation_data['degraded_services']
 
 @pytest.mark.integration
-class TestFallbackChatHandler:
+class FallbackChatHandlerTests:
     """Test fallback chat handler responses."""
 
     @pytest.fixture
@@ -275,7 +275,7 @@ class TestFallbackChatHandler:
             assert len(sent_messages) == 1
 
 @pytest.mark.integration
-class TestServiceRecoveryMonitoring:
+class ServiceRecoveryMonitoringTests:
     """Test service recovery monitoring and transition logic."""
 
     @pytest.mark.asyncio
@@ -314,7 +314,7 @@ class TestServiceRecoveryMonitoring:
         assert callback_args[1].level == DegradationLevel.NONE
 
 @pytest.mark.integration
-class TestBusinessContinuityValidation:
+class BusinessContinuityValidationTests:
     """Test business continuity requirements are met."""
 
     @pytest.mark.asyncio

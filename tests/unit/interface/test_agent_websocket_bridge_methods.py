@@ -18,7 +18,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestAgentWebSocketBridgeMethods(SSotAsyncTestCase):
+class AgentWebSocketBridgeMethodsTests(SSotAsyncTestCase):
     """Test suite for validating AgentWebSocketBridge method implementations.
 
     These tests are designed to fail and demonstrate method issues.
@@ -325,7 +325,7 @@ if __name__ == "__main__":
 
     # Run the async test
     async def run_tests():
-        test_instance = TestAgentWebSocketBridgeMethods()
+        test_instance = AgentWebSocketBridgeMethodsTests()
         await test_instance.asyncSetUp()
 
         test_methods = [

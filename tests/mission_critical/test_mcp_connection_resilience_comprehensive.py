@@ -40,7 +40,7 @@ from netra_backend.app.mcp_client.connection_manager import (
 )
 
 
-class TestMCPConnectionRecoveryComprehensive:
+class MCPConnectionRecoveryComprehensiveTests:
     """Test comprehensive MCP connection recovery functionality."""
 
     @pytest.fixture
@@ -514,7 +514,7 @@ class TestMCPConnectionRecoveryComprehensive:
                 assert conn.retry_count == 0
 
 
-class TestMCPConnectionManagerShutdown:
+class MCPConnectionManagerShutdownTests:
     """Test proper shutdown and cleanup of MCP Connection Manager."""
 
     @pytest.mark.asyncio

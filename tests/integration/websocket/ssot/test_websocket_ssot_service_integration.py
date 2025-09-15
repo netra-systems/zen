@@ -25,7 +25,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 
 @pytest.mark.integration
 @pytest.mark.staging
-class TestWebSocketSSOTServiceIntegration(SSotAsyncTestCase):
+class WebSocketSSOTServiceIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket SSOT service integration (Issue #507)"""
 
     def setup_method(self, method):
@@ -177,7 +177,7 @@ class TestWebSocketSSOTServiceIntegration(SSotAsyncTestCase):
 
 @pytest.mark.integration
 @pytest.mark.staging
-class TestWebSocketSSOTServiceHealthIntegration(SSotAsyncTestCase):
+class WebSocketSSOTServiceHealthIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket service health with SSOT configuration"""
 
     def setup_method(self, method):

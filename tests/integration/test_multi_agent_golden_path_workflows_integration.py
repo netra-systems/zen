@@ -91,7 +91,7 @@ class MultiAgentWorkflowTracker:
         return {'all_agents_executed': all((agent in executed_agents for agent in expected_agents)), 'executed_agents': list(executed_agents), 'handoff_count': len(self.agent_handoffs), 'expected_handoffs': expected_handoffs, 'proper_handoff_sequence': len(self.agent_handoffs) >= expected_handoffs - 1, 'total_workflow_duration_ms': max((event['relative_time_ms'] for event in self.workflow_events), default=0), 'workflow_events_count': len(self.workflow_events)}
 
 @pytest.mark.integration
-class TestMultiAgentGoldenPathWorkflowsIntegration(SSotAsyncTestCase):
+class MultiAgentGoldenPathWorkflowsIntegrationTests(SSotAsyncTestCase):
     """Integration tests for Multi-Agent Golden Path workflows."""
 
     @pytest.fixture(autouse=True)

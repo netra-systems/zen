@@ -25,7 +25,7 @@ from netra_backend.app.schemas.startup_types import (
 )
 
 
-class TestServiceTypeEnum(BaseTestCase):
+class ServiceTypeEnumTests(BaseTestCase):
     """Test ServiceType enum values and validation."""
     
     def test_service_type_values(self):
@@ -51,7 +51,7 @@ class TestServiceTypeEnum(BaseTestCase):
             ServiceType("Frontend")
 
 
-class TestEnvironmentEnum(BaseTestCase):
+class EnvironmentEnumTests(BaseTestCase):
     """Test Environment enum values and validation."""
     
     def test_environment_values(self):
@@ -83,7 +83,7 @@ class TestEnvironmentEnum(BaseTestCase):
             Environment("Test")
 
 
-class TestLastStartupModel(BaseTestCase):
+class LastStartupModelTests(BaseTestCase):
     """Test LastStartup Pydantic model validation."""
     
     def test_last_startup_creation_valid(self):
@@ -159,7 +159,7 @@ class TestLastStartupModel(BaseTestCase):
         assert startup.warnings == []
 
 
-class TestMigrationStatusModel(BaseTestCase):
+class MigrationStatusModelTests(BaseTestCase):
     """Test MigrationStatus Pydantic model validation."""
     
     def test_migration_status_creation_defaults(self):
@@ -206,7 +206,7 @@ class TestMigrationStatusModel(BaseTestCase):
         assert migration.auto_run is True
 
 
-class TestServiceConfigModel(BaseTestCase):
+class ServiceConfigModelTests(BaseTestCase):
     """Test ServiceConfig Pydantic model validation."""
     
     def test_service_config_creation_defaults(self):
@@ -243,7 +243,7 @@ class TestServiceConfigModel(BaseTestCase):
         assert config.validation_errors == []
 
 
-class TestCrashEntryModel(BaseTestCase):
+class CrashEntryModelTests(BaseTestCase):
     """Test CrashEntry Pydantic model validation."""
     
     def test_crash_entry_creation_minimal(self):
@@ -305,7 +305,7 @@ AttributeError: 'NoneType' object has no attribute 'execute'"""
             )
 
 
-class TestHealthCheckHistoryModel(BaseTestCase):
+class HealthCheckHistoryModelTests(BaseTestCase):
     """Test HealthCheckHistory Pydantic model validation."""
     
     def test_health_check_history_creation_defaults(self):
@@ -347,7 +347,7 @@ class TestHealthCheckHistoryModel(BaseTestCase):
         assert history.last_healthy["service2"] is None
 
 
-class TestStartupStatusModel(BaseTestCase):
+class StartupStatusModelTests(BaseTestCase):
     """Test StartupStatus main SSOT model validation."""
     
     def test_startup_status_creation_defaults(self):
@@ -454,7 +454,7 @@ class TestStartupStatusModel(BaseTestCase):
         assert status.crash_history[49].error == "Exact Error 49"
 
 
-class TestStartupEventModel(BaseTestCase):
+class StartupEventModelTests(BaseTestCase):
     """Test StartupEvent Pydantic model validation."""
     
     def test_startup_event_creation_minimal(self):
@@ -505,7 +505,7 @@ class TestStartupEventModel(BaseTestCase):
         assert isinstance(event.context, dict)
 
 
-class TestErrorPhaseEnum(BaseTestCase):
+class ErrorPhaseEnumTests(BaseTestCase):
     """Test ErrorPhase enum values and validation."""
     
     def test_error_phase_values(self):
@@ -528,7 +528,7 @@ class TestErrorPhaseEnum(BaseTestCase):
             ErrorPhase("execution")  # Should be "runtime"
 
 
-class TestErrorTypeEnum(BaseTestCase):
+class ErrorTypeEnumTests(BaseTestCase):
     """Test ErrorType enum values and validation."""
     
     def test_error_type_values(self):
@@ -561,7 +561,7 @@ class TestErrorTypeEnum(BaseTestCase):
             ErrorType("auth")  # Should be "permission"
 
 
-class TestStartupErrorModel(BaseTestCase):
+class StartupErrorModelTests(BaseTestCase):
     """Test StartupError Pydantic model validation."""
     
     def test_startup_error_creation_minimal(self):
@@ -622,7 +622,7 @@ class TestStartupErrorModel(BaseTestCase):
         assert error.resolution == "Increased timeout to 60 seconds"
 
 
-class TestErrorPatternModel(BaseTestCase):
+class ErrorPatternModelTests(BaseTestCase):
     """Test ErrorPattern Pydantic model validation."""
     
     def test_error_pattern_creation_minimal(self):
@@ -687,7 +687,7 @@ class TestErrorPatternModel(BaseTestCase):
         assert "greater than or equal to 1" in str(excinfo.value)
 
 
-class TestErrorTrendModel(BaseTestCase):
+class ErrorTrendModelTests(BaseTestCase):
     """Test ErrorTrend Pydantic model validation."""
     
     def test_error_trend_creation_minimal(self):
@@ -752,7 +752,7 @@ class TestErrorTrendModel(BaseTestCase):
         assert trend.patterns[1].frequency == 5
 
 
-class TestModelSerialization(BaseTestCase):
+class ModelSerializationTests(BaseTestCase):
     """Test serialization and deserialization of all models."""
     
     def test_startup_status_model_dict_serialization(self):
@@ -825,7 +825,7 @@ class TestModelSerialization(BaseTestCase):
         assert reconstructed_pattern.auto_fixable == original_pattern.auto_fixable
 
 
-class TestFieldConstraintsAndEdgeCases(BaseTestCase):
+class FieldConstraintsAndEdgeCasesTests(BaseTestCase):
     """Test field constraints and edge cases across all models."""
     
     def test_empty_list_fields_behavior(self):

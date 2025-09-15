@@ -16,7 +16,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = logging.getLogger(__name__)
 
 @pytest.mark.unit
-class TestJWTSecretStagingCrisis(SSotBaseTestCase):
+class JWTSecretStagingCrisisTests(SSotBaseTestCase):
     """Unit tests demonstrating JWT secret resolution failures in staging environment."""
 
     def setUp(self):
@@ -195,7 +195,7 @@ class TestJWTSecretStagingCrisis(SSotBaseTestCase):
             assert 'staging' in issues_text.lower()
 
 @pytest.mark.unit
-class TestStagingJWTSecretDeploymentScenarios(SSotBaseTestCase):
+class StagingJWTSecretDeploymentScenariosTests(SSotBaseTestCase):
     """Unit tests for various staging deployment JWT secret scenarios."""
 
     def test_gcp_secret_manager_integration_staging(self):
@@ -241,7 +241,7 @@ class TestStagingJWTSecretDeploymentScenarios(SSotBaseTestCase):
         return mock_env
 
 @pytest.mark.unit
-class TestJWTConfigurationBusinessImpact(SSotBaseTestCase):
+class JWTConfigurationBusinessImpactTests(SSotBaseTestCase):
     """Tests demonstrating business impact of JWT configuration failures."""
 
     def test_websocket_revenue_protection_jwt_failure(self):

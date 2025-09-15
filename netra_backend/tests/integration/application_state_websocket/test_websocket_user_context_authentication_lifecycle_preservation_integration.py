@@ -546,7 +546,7 @@ class AuthContextPreservationValidator:
         return validation_results
 
 
-class TestWebSocketAuthenticationContextPreservation(BaseIntegrationTest):
+class WebSocketAuthenticationContextPreservationTests(BaseIntegrationTest):
     """
     Integration test for authentication context preservation during WebSocket lifecycle.
     

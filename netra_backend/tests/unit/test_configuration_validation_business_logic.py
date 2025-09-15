@@ -24,7 +24,7 @@ from netra_backend.app.config import config_manager
 from netra_backend.app.core.environment_constants import EnvironmentDetector
 
 
-class TestConfigurationValidationBusinessLogic:
+class ConfigurationValidationBusinessLogicTests:
     """Test configuration validation business logic patterns."""
     
     @pytest.fixture

@@ -25,7 +25,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
 @pytest.mark.integration
-class TestToolDispatcherIntegrationBaseline(SSotAsyncTestCase):
+class ToolDispatcherIntegrationBaselineTests(SSotAsyncTestCase):
     """Integration baseline tests for tool dispatcher SSOT validation."""
 
     async def asyncSetUp(self):
@@ -238,7 +238,7 @@ class TestToolDispatcherIntegrationBaseline(SSotAsyncTestCase):
                 self.assertGreater(successful_registrations, 0, f'BASELINE FAILURE: No tools successfully registered in {registry_name}')
 
 @pytest.mark.integration
-class TestCrossComponentIntegrationBaseline(SSotAsyncTestCase):
+class CrossComponentIntegrationBaselineTests(SSotAsyncTestCase):
     """Test cross-component integration baseline for SSOT validation."""
 
     async def asyncSetUp(self):

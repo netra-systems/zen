@@ -44,7 +44,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestOAuthRaceConditionFixes:
+class OAuthRaceConditionFixesTests:
     """Test suite for OAuth race condition fixes."""
     
     def setup_method(self):
@@ -75,7 +75,7 @@ class TestOAuthRaceConditionFixes:
         clear_central_validator_cache()
 
 
-class TestLevel1And2RaceConditionProtection(TestOAuthRaceConditionFixes):
+class Level1And2RaceConditionProtectionTests(OAuthRaceConditionFixesTests):
     """Test Level 1-2: Race condition protection in central_config_validator.py"""
     
     def test_environment_readiness_verification(self):
@@ -174,7 +174,7 @@ class TestLevel1And2RaceConditionProtection(TestOAuthRaceConditionFixes):
             "All concurrent validations should succeed without race conditions"
 
 
-class TestLevel3And5ServiceLifecycleManager(TestOAuthRaceConditionFixes):
+class Level3And5ServiceLifecycleManagerTests(OAuthRaceConditionFixesTests):
     """Test Level 3-5: ServiceLifecycleManager implementation"""
     
     def setup_method(self):
@@ -378,7 +378,7 @@ class TestLevel3And5ServiceLifecycleManager(TestOAuthRaceConditionFixes):
             "No services should have failed"
 
 
-class TestIntegrationValidation(TestOAuthRaceConditionFixes):
+class IntegrationValidationTests(OAuthRaceConditionFixesTests):
     """Test integration validation with complete startup sequence"""
     
     @pytest.mark.asyncio
@@ -571,7 +571,7 @@ class TestIntegrationValidation(TestOAuthRaceConditionFixes):
             f"Startup sequence should complete quickly without race condition delays. Took: {total_time}s"
 
 
-class TestRaceConditionScenarios(TestOAuthRaceConditionFixes):
+class RaceConditionScenariosTests(OAuthRaceConditionFixesTests):
     """Test specific race condition scenarios that were problematic"""
     
     def test_original_oauth_validation_error_reproduction(self):

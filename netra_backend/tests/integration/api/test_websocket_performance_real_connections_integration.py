@@ -14,7 +14,7 @@ import time
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 
-class TestWebSocketPerformanceRealConnectionsIntegration(SSotBaseTestCase):
+class WebSocketPerformanceRealConnectionsIntegrationTests(SSotBaseTestCase):
     """Test WebSocket performance with real connections"""
 
     def setup_method(self):

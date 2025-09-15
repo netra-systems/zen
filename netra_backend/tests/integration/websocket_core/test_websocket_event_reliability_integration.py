@@ -51,7 +51,7 @@ except ImportError as e:
     pytest.skip(f"Reliability test components not available: {e}", allow_module_level=True)
 
 
-class TestWebSocketEventReliabilityIntegration(BaseIntegrationTest):
+class WebSocketEventReliabilityIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket event delivery reliability."""
 
     async def async_setup(self):

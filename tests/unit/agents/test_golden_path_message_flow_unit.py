@@ -392,7 +392,7 @@ class MockGoldenPathMessageFlow:
         return self.flow_metrics.copy()
 
 
-class TestGoldenPathMessageFlowUnit(SSotAsyncTestCase):
+class GoldenPathMessageFlowUnitTests(SSotAsyncTestCase):
     """Unit tests for Golden Path message flow functionality
     
     This test class validates the complete end-to-end message flow that

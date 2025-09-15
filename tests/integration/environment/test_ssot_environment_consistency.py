@@ -31,7 +31,7 @@ from shared.isolated_environment import get_env
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestSSOTEnvironmentConsistency(BaseIntegrationTest):
+class SSOTEnvironmentConsistencyTests(BaseIntegrationTest):
     """Test environment variable resolution consistency across components."""
     
     def setup_method(self):

@@ -29,7 +29,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.core_types import UserID, ensure_user_id
 
 @pytest.mark.unit
-class TestUserExecutionContextCreation:
+class UserExecutionContextCreationTests:
     """Test UserExecutionContext creation and validation business logic."""
 
     def test_user_execution_context_creation_with_required_fields(self):
@@ -86,7 +86,7 @@ class TestUserExecutionContextCreation:
                 UserExecutionContext(user_id='test_user_123', thread_id='thread_456', run_id=pattern)
 
 @pytest.mark.unit
-class TestUserExecutionContextBusinessMethods:
+class UserExecutionContextBusinessMethodsTests:
     """Test UserExecutionContext business methods for operations."""
 
     def test_user_execution_context_backward_compatibility_metadata_property(self):
@@ -120,7 +120,7 @@ class TestUserExecutionContextBusinessMethods:
             pytest.skip('create_child_context method not yet implemented - future enhancement')
 
 @pytest.mark.unit
-class TestUserExecutionContextFactoryMethods:
+class UserExecutionContextFactoryMethodsTests:
     """Test UserExecutionContext factory methods for different creation patterns."""
 
     def test_user_execution_context_from_request_factory(self):
@@ -150,7 +150,7 @@ class TestUserExecutionContextFactoryMethods:
             pytest.skip('from_request_supervisor factory method not yet implemented - compatibility pattern documented')
 
 @pytest.mark.unit
-class TestUserExecutionContextSecurity:
+class UserExecutionContextSecurityTests:
     """Test UserExecutionContext security and isolation validation."""
 
     def test_user_execution_context_prevents_cross_user_contamination(self):

@@ -60,7 +60,7 @@ from typing import Any, Dict
 
 import pytest
 
-class TestAPICoreEndpointsCritical:
+class APICoreEndpointsCriticalTests:
     """Critical core API endpoint tests."""
     @pytest.mark.asyncio
     async def test_health_endpoints(self):

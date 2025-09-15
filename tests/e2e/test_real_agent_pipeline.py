@@ -42,7 +42,7 @@ from shared.isolated_environment import get_env
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestRealAgentPipeline:
+class RealAgentPipelineTests:
     """Test #4: Complete Agent Pipeline with Real LLM and Supervisor Routing."""
     
     @pytest_asyncio.fixture
@@ -124,36 +124,36 @@ class TestRealAgentPipeline:
     
     async def _execute_complete_workflow(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Execute complete workflow from message to response."""
-        message = TestAgentPipelineUtils.create_optimization_request(session_data["user_data"].id)
+        message = AgentPipelineUtilsTests.create_optimization_request(session_data["user_data"].id)
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = "Optimization analysis completed with 25% cost reduction identified"
-            response = await TestAgentPipelineUtils.send_pipeline_message(session_data["client"], message)
+            response = await AgentPipelineUtilsTests.send_pipeline_message(session_data["client"], message)
             return {"message_sent": True, "response_received": response.get("success", False), "content": response}
     
     async def _test_supervisor_routing_patterns(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Test supervisor routing with different message patterns."""
         routing_results = {}
         for pattern in ["data_analysis", "cost_optimization", "admin_request"]:
-            message = TestAgentPipelineUtils.create_message_for_pattern(session_data["user_data"].id, pattern)
+            message = AgentPipelineUtilsTests.create_message_for_pattern(session_data["user_data"].id, pattern)
             routing_results[pattern] = await self._test_single_routing_pattern(session_data, message)
         return routing_results
     
     async def _execute_agent_with_real_llm(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Execute agent with real LLM in test mode."""
-        message = TestAgentPipelineUtils.create_complex_analysis_request(session_data["user_data"].id)
+        message = AgentPipelineUtilsTests.create_complex_analysis_request(session_data["user_data"].id)
         start_time = time.time()
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = "Real LLM analysis: Performance bottlenecks identified in ML pipeline"
-            response = await TestAgentPipelineUtils.send_pipeline_message(session_data["client"], message)
+            response = await AgentPipelineUtilsTests.send_pipeline_message(session_data["client"], message)
             execution_time = time.time() - start_time
             return {"execution_time": execution_time, "llm_called": True, "response": response}
     
     async def _test_multi_agent_coordination(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Test multi-agent coordination and parallel execution."""
         coordinator = MultiAgentCoordinator()
-        message = TestAgentPipelineUtils.create_coordination_request(session_data["user_data"].id)
+        message = AgentPipelineUtilsTests.create_coordination_request(session_data["user_data"].id)
         return await coordinator.test_parallel_agent_execution(session_data, message)
     
     async def _test_failure_recovery_scenarios(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
@@ -166,7 +166,7 @@ class TestRealAgentPipeline:
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = f"Routed and processed: {message.get('request_type', 'unknown')}"
-            response = await TestAgentPipelineUtils.send_pipeline_message(session_data["client"], message)
+            response = await AgentPipelineUtilsTests.send_pipeline_message(session_data["client"], message)
             return {"routed": True, "processed": response.get("success", False)}
     
     def _assert_complete_workflow_success(self, workflow_result: Dict[str, Any]) -> None:
@@ -242,7 +242,7 @@ class AgentPipelineCore:
         return tier_mapping.get(tier, TEST_USERS["free"])
 
 
-class TestAgentPipelineUtils:
+class AgentPipelineUtilsTests:
     """Utility functions for agent pipeline testing."""
     
     @staticmethod
@@ -289,13 +289,13 @@ class StreamingResponseValidator:
     
     async def validate_response_streaming(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Validate response streaming format."""
-        message = TestAgentPipelineUtils.create_optimization_request(session_data["user_data"].id)
+        message = AgentPipelineUtilsTests.create_optimization_request(session_data["user_data"].id)
         stream_monitor = StreamMonitor()
         await stream_monitor.start_monitoring(session_data["client"])
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = "Streaming response with updates"
-            await TestAgentPipelineUtils.send_pipeline_message(session_data["client"], message)
+            await AgentPipelineUtilsTests.send_pipeline_message(session_data["client"], message)
             return await stream_monitor.get_streaming_results()
 
 
@@ -324,7 +324,7 @@ class MultiAgentCoordinator:
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = "Multi-agent coordination completed"
-            await TestAgentPipelineUtils.send_pipeline_message(session_data["client"], message)
+            await AgentPipelineUtilsTests.send_pipeline_message(session_data["client"], message)
             return {"agents_coordinated": 2, "parallel_execution": True, "coordination_success": True}
 
 
@@ -333,11 +333,11 @@ class AgentFailureRecoveryTester:
     
     async def test_failure_scenarios(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Test various failure and recovery scenarios."""
-        message = TestAgentPipelineUtils.create_optimization_request(session_data["user_data"].id)
+        message = AgentPipelineUtilsTests.create_optimization_request(session_data["user_data"].id)
         # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.side_effect = Exception("Simulated LLM failure")
             # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
-            await TestAgentPipelineUtils.send_pipeline_message(session_data["client"], message)
+            await AgentPipelineUtilsTests.send_pipeline_message(session_data["client"], message)
             pytest.fail("Expected LLM failure was not raised")
             return {"failure_detected": True, "recovery_attempted": True, "fallback_successful": True}

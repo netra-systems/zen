@@ -19,7 +19,7 @@ from typing import Dict, Any, Tuple
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestAuthMiddlewareIntegration(SSotBaseTestCase):
+class AuthMiddlewareIntegrationTests(SSotBaseTestCase):
     """Integration tests for authentication middleware with real auth service."""
     
     def setup_method(self, method=None):

@@ -59,7 +59,7 @@ class AgentExecutionResult:
     error: Optional[str] = None
 
 
-class TestAgentExecutionDatabaseIntegration(BaseIntegrationTest):
+class AgentExecutionDatabaseIntegrationTests(BaseIntegrationTest):
     """Test agent execution with real PostgreSQL and Redis persistence."""
     
     def setup_method(self):

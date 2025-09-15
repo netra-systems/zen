@@ -43,7 +43,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.core_types import UserID, ThreadID, ConnectionID, ensure_user_id, ensure_thread_id
 from test_framework.base import BaseUnitTest
 
-class TestWebSocketConnectionBusinessLogic(BaseUnitTest):
+class WebSocketConnectionBusinessLogicTests(BaseUnitTest):
     """Test WebSocketConnection business logic for individual connection management."""
 
     @pytest.fixture(autouse=True)
@@ -128,7 +128,7 @@ class TestWebSocketConnectionBusinessLogic(BaseUnitTest):
         assert client_info['host'] == '127.0.0.1', 'Must include client host'
         assert client_info['port'] == 45678, 'Must include client port'
 
-class TestUnifiedWebSocketManagerBusinessLogic(BaseUnitTest):
+class UnifiedWebSocketManagerBusinessLogicTests(BaseUnitTest):
     """Test UnifiedWebSocketManager business logic for connection management."""
 
     @pytest.fixture(autouse=True)
@@ -302,7 +302,7 @@ class TestUnifiedWebSocketManagerBusinessLogic(BaseUnitTest):
         is_not_dict_invalid = self.manager.validate_message(not_dict_message)
         assert is_not_dict_invalid is False, 'Must reject non-dictionary messages'
 
-class TestWebSocketManagerAliasingBusinessLogic(BaseUnitTest):
+class WebSocketManagerAliasingBusinessLogicTests(BaseUnitTest):
     """Test WebSocket manager aliasing for SSOT compliance."""
 
     @pytest.mark.unit
@@ -337,7 +337,7 @@ class TestWebSocketManagerAliasingBusinessLogic(BaseUnitTest):
                 method = getattr(manager, method_name)
                 assert callable(method), f'{method_name} must be callable'
 
-class TestWebSocketUtilityFunctions(BaseUnitTest):
+class WebSocketUtilityFunctionsTests(BaseUnitTest):
     """Test WebSocket utility functions for message handling."""
 
     @pytest.mark.unit

@@ -70,7 +70,7 @@ class RealWebSocketConnection:
         return 'CONNECTED' if self._connected else 'DISCONNECTED'
 
 @pytest.mark.e2e
-class TestBasicAuthFlow(BaseE2ETest):
+class BasicAuthFlowTests(BaseE2ETest):
     """Test 1-3: Basic authentication flow using REAL authentication services."""
 
     def setup_method(self):

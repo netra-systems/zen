@@ -26,7 +26,7 @@ from test_framework.resource_monitor import DockerResourceMonitor
 logger = logging.getLogger(__name__)
 
 
-class TestResourceContentionAgentExecution(BaseIntegrationTest):
+class ResourceContentionAgentExecutionTests(BaseIntegrationTest):
     """Test agent execution under resource contention conditions."""
     
     def setup_method(self):

@@ -39,7 +39,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 logger = logging.getLogger(__name__)
 
 
-class TestFactoryPatternSSotCompliance(SSotAsyncTestCase):
+class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
     """
     FAILING TEST: Proves factory pattern violates user isolation.
     

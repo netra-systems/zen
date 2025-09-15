@@ -142,7 +142,7 @@ def isolated_test_env():
     env.set('DEMO_MODE', '1', source='test')
     return env
 
-class TestWebSocketConnectionEstablishment:
+class WebSocketConnectionEstablishmentTests:
     """Test WebSocket connection establishment and handshake."""
 
     @pytest.mark.integration
@@ -237,7 +237,7 @@ class TestWebSocketConnectionEstablishment:
         assert 'connected' in connection_states
         logger.info(f'Connection states tracked: {connection_states}')
 
-class TestWebSocketCriticalEvents:
+class WebSocketCriticalEventsTests:
     """Test the 5 critical WebSocket events that enable chat functionality."""
 
     @pytest.mark.integration
@@ -330,7 +330,7 @@ class TestWebSocketCriticalEvents:
         assert missing == expected_missing, f'Should detect missing events: {expected_missing}, got: {missing}'
         logger.info('Event completeness validation tests passed')
 
-class TestWebSocketConnectionRecovery:
+class WebSocketConnectionRecoveryTests:
     """Test WebSocket connection recovery and reconnection mechanisms."""
 
     @pytest.mark.integration
@@ -387,7 +387,7 @@ class TestWebSocketConnectionRecovery:
         assert len(connection_states) > 0, 'Should attempt state preservation across connections'
         logger.info(f'State preservation test completed: {len(connection_states)} connection attempts')
 
-class TestWebSocketMultiUserIsolation:
+class WebSocketMultiUserIsolationTests:
     """Test WebSocket multi-user isolation and security."""
 
     @pytest.mark.integration
@@ -453,7 +453,7 @@ class TestWebSocketMultiUserIsolation:
         assert avg_duration < 5.0, f'Average user session duration too high: {avg_duration:.2f}s'
         logger.info(f'Concurrent user performance: {success_rate:.2%} success rate, {avg_duration:.2f}s avg duration, {total_duration:.2f}s total')
 
-class TestWebSocketHeartbeatMonitoring:
+class WebSocketHeartbeatMonitoringTests:
     """Test WebSocket heartbeat and keep-alive mechanisms."""
 
     @pytest.mark.integration
@@ -518,7 +518,7 @@ class TestWebSocketHeartbeatMonitoring:
         assert connection_active_time >= 8.0, f'Connection should stay active for extended period, got {connection_active_time:.1f}s'
         logger.info(f'Keep-alive functionality maintained connection for {connection_active_time:.1f}s')
 
-class TestWebSocketErrorHandling:
+class WebSocketErrorHandlingTests:
     """Test WebSocket error handling and recovery."""
 
     @pytest.mark.integration
@@ -582,7 +582,7 @@ class TestWebSocketErrorHandling:
         assert len(cleanup_scenarios) > 0, 'Should handle cleanup scenarios'
         logger.info(f'Connection cleanup test completed: {len(cleanup_scenarios)} scenarios tested')
 
-class TestWebSocketPerformanceAndLoad:
+class WebSocketPerformanceAndLoadTests:
     """Test WebSocket performance under various load conditions."""
 
     @pytest.mark.integration

@@ -29,7 +29,7 @@ from test_framework.ssot.websocket import (
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketErrorHandlingRecovery(SSotAsyncTestCase):
+class WebSocketErrorHandlingRecoveryTests(SSotAsyncTestCase):
     """Test WebSocket error handling and recovery patterns."""
     
     async def setup_method(self, method=None):

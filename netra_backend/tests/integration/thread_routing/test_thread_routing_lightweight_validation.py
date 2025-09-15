@@ -41,7 +41,7 @@ from netra_backend.app.websocket_core import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestThreadRoutingLightweightValidation(BaseIntegrationTest):
+class ThreadRoutingLightweightValidationTests(BaseIntegrationTest):
     """Test thread routing core logic with lightweight fixtures."""
 
     @pytest.mark.integration

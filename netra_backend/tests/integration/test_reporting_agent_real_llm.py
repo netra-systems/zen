@@ -41,7 +41,7 @@ async def real_llm_manager():
         agent = ReportingSubAgent(llm_manager=real_llm_manager, tool_dispatcher=real_tool_dispatcher, websocket_manager=None)
         yield agent
 
-        class TestReportingSubAgentRealLLM:
+        class ReportingSubAgentRealLLMTests:
             """Test suite for ReportingSubAgent with real LLM interactions."""
 
             @pytest.mark.integration

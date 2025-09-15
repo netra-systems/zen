@@ -32,7 +32,7 @@ from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig, Produ
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestConfigurationValidationErrors(SSotBaseTestCase):
+class ConfigurationValidationErrorsTests(SSotBaseTestCase):
     """Test configuration validation error scenarios and recovery."""
 
     def setup_method(self, method):
@@ -194,7 +194,7 @@ class TestConfigurationValidationErrors(SSotBaseTestCase):
                 assert len(str(e)) > 0
 
 
-class TestConfigurationValidatorErrors(SSotBaseTestCase):
+class ConfigurationValidatorErrorsTests(SSotBaseTestCase):
     """Test configuration validator error handling and edge cases."""
 
     def setup_method(self, method):
@@ -284,7 +284,7 @@ class TestConfigurationValidatorErrors(SSotBaseTestCase):
             assert len(results) + len(errors) == 5
 
 
-class TestConfigurationRecovery(SSotBaseTestCase):
+class ConfigurationRecoveryTests(SSotBaseTestCase):
     """Test configuration recovery mechanisms and fallback strategies."""
 
     def setup_method(self, method):
@@ -393,7 +393,7 @@ class TestConfigurationRecovery(SSotBaseTestCase):
                     assert len(str(e)) > 0
 
 
-class TestConfigurationManagerErrors(SSotBaseTestCase):
+class ConfigurationManagerErrorsTests(SSotBaseTestCase):
     """Test UnifiedConfigurationManager error handling scenarios."""
 
     def setup_method(self, method):

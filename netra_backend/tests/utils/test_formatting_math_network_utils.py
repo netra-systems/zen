@@ -24,7 +24,7 @@ from netra_backend.tests.validation_formatting_test_helpers import (
 )
 
 # Test 92: Formatting utils display
-class TestFormattingUtilsDisplay:
+class FormattingUtilsDisplayTests:
     """test_formatting_utils_display - Test data formatting and localization"""
     
     @pytest.mark.asyncio
@@ -87,7 +87,7 @@ class TestFormattingUtilsDisplay:
         assert "Januar" in utils_de.format_date(date, "long")
 
 # Test 93: Math utils calculations
-class TestMathUtilsCalculations:
+class MathUtilsCalculationsTests:
     """test_math_utils_calculations - Test mathematical operations and precision handling"""
     
     @pytest.mark.asyncio
@@ -142,7 +142,7 @@ class TestMathUtilsCalculations:
         assert utils.round_financial(2.344) == Decimal("2.34")
 
 # Test 94: Network utils requests
-class TestNetworkUtilsRequests:
+class NetworkUtilsRequestsTests:
     """test_network_utils_requests - Test network utilities and retry logic"""
     
     @pytest.mark.asyncio

@@ -11,7 +11,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 from scripts.comprehensive_import_scanner import ComprehensiveImportScanner
 
-class TestImportCheckerEdgeCases:
+class ImportCheckerEdgeCasesTests:
     """Test suite for edge cases that import checkers must catch"""
 
     def setup_method(self):
@@ -121,7 +121,7 @@ class TestImportCheckerEdgeCases:
         assert result.has_issues()
         assert any((issue.issue_type == 'syntax' for issue in result.issues))
 
-class TestImportCheckerRegexPrevalidation:
+class ImportCheckerRegexPrevalidationTests:
     """Test regex-based pre-validation before AST parsing"""
 
     @staticmethod
@@ -172,7 +172,7 @@ class TestImportCheckerRegexPrevalidation:
         assert errors[0][0] == 5
         assert 'app..config' in errors[0][1]
 
-class TestEnhancedImportChecker:
+class EnhancedImportCheckerTests:
     """Test enhancements to make import checker more robust"""
 
     def test_pre_ast_validation(self):

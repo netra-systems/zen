@@ -23,7 +23,7 @@ import pytest
 from test_framework.ssot.base_test_case import BaseIntegrationTest
 
 
-class TestMultiRouterCoordination(BaseIntegrationTest):
+class MultiRouterCoordinationTests(BaseIntegrationTest):
     """Test router coordination with real services."""
 
     @pytest.mark.integration

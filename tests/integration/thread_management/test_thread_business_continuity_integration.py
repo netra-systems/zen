@@ -74,7 +74,7 @@ class BusinessContinuityMetrics:
     affected_messages: int
 
 
-class TestThreadBusinessContinuityIntegration(SSotAsyncTestCase):
+class ThreadBusinessContinuityIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for thread system business continuity and disaster recovery.
     

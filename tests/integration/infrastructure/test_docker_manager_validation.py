@@ -16,7 +16,7 @@ from tests.integration.infrastructure.test_unified_docker_manager_integration im
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestUnifiedDockerManagerValidation(SSotBaseTestCase):
+class UnifiedDockerManagerValidationTests(SSotBaseTestCase):
     """
     Validation tests for UnifiedDockerManager integration test suite.
     

@@ -28,7 +28,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.schemas.tool import ToolInput, ToolResult, ToolStatus
 
 
-class TestToolExecutionEngineE2E(SSotAsyncTestCase):
+class ToolExecutionEngineE2ETests(SSotAsyncTestCase):
     """E2E tests for tool execution engine with full authentication."""
     
     def setup_method(self, method):

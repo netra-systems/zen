@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional, Set
 
 
-class TestPytestPluginManagement:
+class PytestPluginManagementTests:
     """Test pytest plugin registration and management."""
     
     def test_phase2_plugin_registration_order(self):
@@ -185,7 +185,7 @@ class TestPytestPluginManagement:
         assert True, "No problematic wildcard imports from plugins found"
 
 
-class TestConfigurationValidation:
+class ConfigurationValidationTests:
     """Test configuration file validation and precedence."""
     
     def test_phase2_pyproject_toml_validation(self):
@@ -286,7 +286,7 @@ class TestConfigurationValidation:
         return False
 
 
-class TestCommandLineOptions:
+class CommandLineOptionsTests:
     """Test command-line option management and conflicts."""
     
     def test_phase2_option_registration_analysis(self):
@@ -400,7 +400,7 @@ class TestCommandLineOptions:
         assert True, f"Single definition of --analyze-service-deps found in {files_with_option[0]}"
 
 
-class TestPluginLoadingSequence:
+class PluginLoadingSequenceTests:
     """Test the plugin loading sequence and conflicts."""
     
     def test_phase2_plugin_discovery_vs_explicit_import(self):

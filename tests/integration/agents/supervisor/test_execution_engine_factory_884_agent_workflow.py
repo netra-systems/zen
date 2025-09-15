@@ -35,7 +35,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.integration
-class TestExecutionEngineFactoryAgentWorkflow884(SSotAsyncTestCase):
+class ExecutionEngineFactoryAgentWorkflow884Tests(SSotAsyncTestCase):
     """Phase 1 Integration Tests: Execution Engine Factory Agent Workflow
 
     These tests are designed to FAIL initially to demonstrate agent workflow

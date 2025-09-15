@@ -24,7 +24,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.integration
-class TestDockerServiceConfigurationIntegration:
+class DockerServiceConfigurationIntegrationTests:
     """Integration tests for Docker service configuration coordination failures."""
 
     def test_service_discovery_integration_with_compose_files(self):

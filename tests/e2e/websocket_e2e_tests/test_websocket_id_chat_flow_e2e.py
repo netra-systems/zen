@@ -61,7 +61,7 @@ from shared.types.core_types import UserID, ConnectionID, ThreadID, MessageID
 @pytest.mark.websocket
 @pytest.mark.chat_flow
 @pytest.mark.business_value
-class TestWebSocketIdChatFlowE2E(BaseE2ETest):
+class WebSocketIdChatFlowE2ETests(BaseE2ETest):
     """
     E2E tests that EXPOSE chat flow business value failures with uuid.uuid4().
     

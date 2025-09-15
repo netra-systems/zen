@@ -45,7 +45,7 @@ from test_framework.isolated_environment_fixtures import isolated_env, test_env
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.core.configuration.base import UnifiedConfigManager, get_config, get_config_value, set_config_value, validate_config_value, get_environment, is_production, is_development, is_testing, config_manager
 
-class TestIsolatedEnvironmentConfigIntegration(BaseIntegrationTest):
+class IsolatedEnvironmentConfigIntegrationTests(BaseIntegrationTest):
     """
     Core integration tests for IsolatedEnvironment and UnifiedConfigurationManager.
     

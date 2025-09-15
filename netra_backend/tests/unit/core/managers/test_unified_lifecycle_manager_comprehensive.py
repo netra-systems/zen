@@ -40,7 +40,7 @@ from test_framework.websocket_helpers import assert_websocket_events, WebSocketT
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.managers.unified_lifecycle_manager import SystemLifecycle as UnifiedLifecycleManager, SystemLifecycleFactory as LifecycleManagerFactory, LifecyclePhase, ComponentType, ComponentStatus, LifecycleMetrics, get_lifecycle_manager, setup_application_lifecycle
 
-class TestUnifiedLifecycleManagerComprehensive(AsyncBaseTestCase):
+class UnifiedLifecycleManagerComprehensiveTests(AsyncBaseTestCase):
     """
     Comprehensive test suite for the UnifiedLifecycleManager MEGA CLASS.
     
@@ -1079,7 +1079,7 @@ class TestUnifiedLifecycleManagerComprehensive(AsyncBaseTestCase):
         self.assertEqual(self.lifecycle_manager._metrics.failed_shutdowns, 0)
         self.assertGreater(len(self.mock_websocket_manager.broadcasted_events), 0)
 
-class TestLifecycleManagerFactory(AsyncBaseTestCase):
+class LifecycleManagerFactoryTests(AsyncBaseTestCase):
     """Additional tests for LifecycleManagerFactory functionality."""
 
     async def asyncTearDown(self):

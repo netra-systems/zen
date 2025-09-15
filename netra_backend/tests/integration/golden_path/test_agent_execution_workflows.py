@@ -26,7 +26,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper
 from shared.isolated_environment import get_env
 
 
-class TestAgentExecutionWorkflows(BaseIntegrationTest):
+class AgentExecutionWorkflowsTests(BaseIntegrationTest):
     """Integration tests for agent execution workflows with real services."""
     
     @pytest.mark.integration

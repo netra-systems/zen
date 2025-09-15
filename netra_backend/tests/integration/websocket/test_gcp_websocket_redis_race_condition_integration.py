@@ -41,7 +41,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import (
 )
 
 
-class TestGCPWebSocketRedisRaceConditionIntegration(BaseIntegrationTest):
+class GCPWebSocketRedisRaceConditionIntegrationTests(BaseIntegrationTest):
     """Integration tests for GCP WebSocket Redis race condition fix with real Redis."""
     
     @pytest.fixture

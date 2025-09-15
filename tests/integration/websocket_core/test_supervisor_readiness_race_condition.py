@@ -83,7 +83,7 @@ class GCPCloudRunSimulator:
         return health_check_results
 
 @pytest.mark.integration
-class TestStartupSequenceIntegration(SSotAsyncTestCase):
+class StartupSequenceIntegrationTests(SSotAsyncTestCase):
     """Integration tests for complete startup sequence with race condition prevention."""
 
     def setUp(self):
@@ -203,7 +203,7 @@ class TestStartupSequenceIntegration(SSotAsyncTestCase):
         self.test_metrics.record_custom('startup_with_health_pressure_success', True)
 
 @pytest.mark.integration
-class TestGCPEnvironmentSimulation(SSotAsyncTestCase):
+class GCPEnvironmentSimulationTests(SSotAsyncTestCase):
     """Integration tests simulating GCP Cloud Run conditions."""
 
     def setUp(self):
@@ -321,7 +321,7 @@ class TestGCPEnvironmentSimulation(SSotAsyncTestCase):
             pass
 
 @pytest.mark.integration
-class TestRaceConditionPrevention(SSotAsyncTestCase):
+class RaceConditionPreventionTests(SSotAsyncTestCase):
     """Integration tests for race condition prevention mechanisms."""
 
     def setUp(self):

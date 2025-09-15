@@ -25,7 +25,7 @@ from netra_backend.app.core.agent_execution_tracker import TimeoutConfig, AgentE
 from netra_backend.app.agents.base.agent_business_rules import UserTier
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestTimeoutConfiguration(SSotBaseTestCase, unittest.TestCase):
+class TimeoutConfigurationTests(SSotBaseTestCase, unittest.TestCase):
     """Unit tests for timeout configuration and calculations."""
 
     def setUp(self):

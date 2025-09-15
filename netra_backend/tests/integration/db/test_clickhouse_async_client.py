@@ -20,7 +20,7 @@ from netra_backend.app.db.clickhouse_schema import ClickHouseTraceSchema
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 
 
-class TestClickHouseAsyncClientIntegration:
+class ClickHouseAsyncClientIntegrationTests:
     """Integration tests for ClickHouse async client patterns."""
 
     @pytest.mark.asyncio

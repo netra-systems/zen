@@ -365,7 +365,7 @@ class MockWebSocketStateMachine:
         return durations
 
 
-class TestWebSocketConnectionStateMachineUnit:
+class WebSocketConnectionStateMachineUnitTests:
     """Comprehensive unit tests for WebSocket connection state machine."""
     
     def test_initial_state_is_correct(self):

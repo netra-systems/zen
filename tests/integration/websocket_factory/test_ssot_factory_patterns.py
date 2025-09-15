@@ -19,7 +19,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestWebSocketSSOTFactoryPatterns(SSotAsyncTestCase):
+class WebSocketSSOTFactoryPatternsTests(SSotAsyncTestCase):
     """
     Integration test suite for WebSocket SSOT factory patterns.
 

@@ -22,7 +22,7 @@ from typing import Dict, Any
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker, ExecutionState, ExecutionRecord, get_execution_tracker
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestExecutionStateTransitions(unittest.TestCase, SSotBaseTestCase):
+class ExecutionStateTransitionsTests(unittest.TestCase, SSotBaseTestCase):
     """Unit tests for ExecutionState enum transitions and validation."""
 
     def setUp(self):

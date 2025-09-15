@@ -96,7 +96,7 @@ class CircuitBreakerTestAgent(BaseAgent):
         circuit_status = self.circuit_breaker.get_status()
         return {'agent_name': self.name, 'total_executions': self.execution_count, 'failure_count': self.failure_count, 'circuit_opened_count': self.circuit_opened_count, 'failure_rate': self.failure_count / max(self.execution_count, 1), 'circuit_state': circuit_status.get('state', 'unknown'), 'can_execute': self.circuit_breaker.can_execute(), 'configured_failure_rate': self.failure_rate, 'circuit_breaker_enabled': self.circuit_breaker_enabled, 'execution_history_count': len(self.execution_history)}
 
-class TestCircuitBreaker(BaseIntegrationTest):
+class CircuitBreakerTests(BaseIntegrationTest):
     """Integration tests for circuit breaker with real Redis state."""
 
     def setup_method(self):

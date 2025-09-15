@@ -141,7 +141,7 @@ class PerformanceMetrics:
         return summary
 
 
-class TestThreadRoutingPerformanceStress(BaseE2ETest):
+class ThreadRoutingPerformanceStressTests(BaseE2ETest):
     """E2E performance stress tests for thread routing with real authentication."""
     
     def __init__(self, *args, **kwargs):

@@ -43,7 +43,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.websocket_helpers import WebSocketTestHelpers, MockWebSocketConnection
 from shared.isolated_environment import get_env
 
-class TestAgentFailureRecoveryE2E(BaseE2ETest):
+class AgentFailureRecoveryE2ETests(BaseE2ETest):
     """
     E2E test for agent failure recovery using REAL services only.
     

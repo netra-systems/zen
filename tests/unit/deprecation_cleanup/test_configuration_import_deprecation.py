@@ -31,7 +31,7 @@ from unittest.mock import patch, Mock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestConfigurationImportDeprecation(SSotBaseTestCase):
+class ConfigurationImportDeprecationTests(SSotBaseTestCase):
     """
     Test configuration import deprecation patterns.
 
@@ -270,7 +270,7 @@ class TestConfigurationImportDeprecation(SSotBaseTestCase):
         assert True, "SSOT configuration pattern is working correctly"
 
 
-class TestConfigurationMigrationGuidance(SSotBaseTestCase):
+class ConfigurationMigrationGuidanceTests(SSotBaseTestCase):
     """
     Test configuration migration guidance and patterns.
 

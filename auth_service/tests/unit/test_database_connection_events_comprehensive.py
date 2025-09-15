@@ -38,7 +38,7 @@ from shared.isolated_environment import get_env
 from test_framework.real_services_test_fixtures import real_services_fixture
 
 
-class TestAuthDatabaseConfig:
+class AuthDatabaseConfigTests:
     """Test auth database configuration constants"""
     
     @pytest.mark.unit
@@ -71,7 +71,7 @@ class TestAuthDatabaseConfig:
         assert 0.0 < AuthDatabaseConfig.POOL_WARNING_THRESHOLD <= 1.0
 
 
-class TestGetSettings:
+class GetSettingsTests:
     """Test settings retrieval functionality"""
     
     @pytest.mark.unit
@@ -123,7 +123,7 @@ class TestGetSettings:
         assert settings is not None or settings is None
 
 
-class TestTimeoutConfiguration:
+class TimeoutConfigurationTests:
     """Test database timeout configuration functions"""
     
     @pytest.mark.unit
@@ -192,7 +192,7 @@ class TestTimeoutConfiguration:
         mock_conn.rollback.assert_called_once()
 
 
-class TestConnectionPIDHandling:
+class ConnectionPIDHandlingTests:
     """Test connection PID setting and handling"""
     
     @pytest.mark.unit
@@ -234,7 +234,7 @@ class TestConnectionPIDHandling:
         assert mock_record.info['pid'] is None
 
 
-class TestPoolMonitoring:
+class PoolMonitoringTests:
     """Test connection pool monitoring functionality"""
     
     @pytest.mark.unit
@@ -297,7 +297,7 @@ class TestPoolMonitoring:
         _monitor_auth_pool_usage(mock_pool)
 
 
-class TestConnectionLogging:
+class ConnectionLoggingTests:
     """Test connection logging functionality"""
     
     @pytest.mark.unit
@@ -369,7 +369,7 @@ class TestConnectionLogging:
                 mock_logger.debug.assert_not_called()
 
 
-class TestEngineEventSetup:
+class EngineEventSetupTests:
     """Test engine event setup and handler creation"""
     
     @pytest.mark.unit
@@ -420,7 +420,7 @@ class TestEngineEventSetup:
                 assert "Failed to setup engine events" in error_call
 
 
-class TestEventHandlersIntegration:
+class EventHandlersIntegrationTests:
     """Test event handlers with real or realistic scenarios"""
     
     @pytest.mark.unit
@@ -502,7 +502,7 @@ class TestEventHandlersIntegration:
                 mock_log.assert_called_once_with(mock_record)
 
 
-class TestRealEngineIntegration:
+class RealEngineIntegrationTests:
     """Test integration with real database engines"""
     
     @pytest.mark.unit
@@ -565,7 +565,7 @@ class TestRealEngineIntegration:
             await engine.dispose()
 
 
-class TestEventHandlerEdgeCases:
+class EventHandlerEdgeCasesTests:
     """Test edge cases and error scenarios in event handlers"""
     
     @pytest.mark.unit

@@ -80,7 +80,7 @@ class ToolType(Enum):
     DATABASE_QUERIER = "database_querier"
 
 
-class TestToolExecutionPipelineComprehensive(BaseIntegrationTest):
+class ToolExecutionPipelineComprehensiveTests(BaseIntegrationTest):
     """Test comprehensive tool execution pipeline and progression."""
     
     def setup_method(self):

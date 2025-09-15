@@ -399,7 +399,7 @@ class ClickHouseClient:
 # DATABASE CONNECTION TESTS
 # =============================================================================
 
-class TestClickHouseConnection:
+class ClickHouseConnectionTests:
     """Test suite for ClickHouse connection and basic operations"""
     
     @pytest.fixture
@@ -456,7 +456,7 @@ class TestClickHouseConnection:
 # TABLE CREATION AND SCHEMA TESTS
 # =============================================================================
 
-class TestTableCreation:
+class TableCreationTests:
     """Test suite for table creation and schema validation"""
     
     @pytest.fixture
@@ -534,7 +534,7 @@ class TestTableCreation:
 # EVENT INSERTION TESTS
 # =============================================================================
 
-class TestEventInsertion:
+class EventInsertionTests:
     """Test suite for event insertion operations"""
     
     @pytest.fixture
@@ -665,7 +665,7 @@ class TestEventInsertion:
 # QUERY PERFORMANCE TESTS
 # =============================================================================
 
-class TestQueryPerformance:
+class QueryPerformanceTests:
     """Test suite for query performance and optimization"""
     
     @pytest.fixture
@@ -784,7 +784,7 @@ class TestQueryPerformance:
 # MATERIALIZED VIEW TESTS
 # =============================================================================
 
-class TestMaterializedViews:
+class MaterializedViewsTests:
     """Test suite for materialized views and aggregations"""
     
     @pytest.fixture
@@ -882,7 +882,7 @@ class TestMaterializedViews:
 # ERROR HANDLING AND RECOVERY TESTS
 # =============================================================================
 
-class TestErrorHandlingAndRecovery:
+class ErrorHandlingAndRecoveryTests:
     """Test suite for error handling and recovery scenarios"""
     
     @pytest.fixture
@@ -955,7 +955,7 @@ class TestErrorHandlingAndRecovery:
 # PERFORMANCE BENCHMARKS
 # =============================================================================
 
-class TestPerformanceBenchmarks:
+class PerformanceBenchmarksTests:
     """Test suite for ClickHouse performance benchmarks"""
     
     @pytest.fixture
@@ -1063,7 +1063,7 @@ class TestPerformanceBenchmarks:
 # INTEGRATION WITH FIXTURES
 # =============================================================================
 
-class TestClickHouseWithFixtures:
+class ClickHouseWithFixturesTests:
     """Test ClickHouse integration using conftest fixtures"""
     
     @pytest.fixture

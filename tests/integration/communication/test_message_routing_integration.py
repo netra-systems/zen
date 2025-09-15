@@ -40,7 +40,7 @@ from test_framework.ssot.websocket import (
 
 
 @pytest.mark.integration
-class TestMessageRoutingBasics(SSotBaseTestCase):
+class MessageRoutingBasicsTests(SSotBaseTestCase):
     """
     Test basic message routing patterns and delivery mechanisms.
     
@@ -236,7 +236,7 @@ class TestMessageRoutingBasics(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestMessageDeliveryReliability(SSotBaseTestCase):
+class MessageDeliveryReliabilityTests(SSotBaseTestCase):
     """
     Test message delivery reliability and confirmation patterns.
     
@@ -444,7 +444,7 @@ class TestMessageDeliveryReliability(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestMessageRoutingPerformance(SSotBaseTestCase):
+class MessageRoutingPerformanceTests(SSotBaseTestCase):
     """
     Test message routing performance and scalability characteristics.
     

@@ -588,7 +588,7 @@ class WebSocketTestClient:
 @pytest.mark.mission_critical
 @pytest.mark.real_services
 @pytest.mark.fallback_prevention
-class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
+class FallbackHandlerDegradationPreventionTests(BaseE2ETest):
     """
     Mission Critical Test Suite: Fallback Handler Degradation Prevention
     

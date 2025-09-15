@@ -37,7 +37,7 @@ CRITICAL_WEBSOCKET_EVENTS = [
 ]
 
 
-class TestSupervisorWebSocketIntegration(SSotAsyncTestCase):
+class SupervisorWebSocketIntegrationTests(SSotAsyncTestCase):
     """Integration tests for supervisor WebSocket event delivery."""
 
     def setup_method(self, method):
@@ -415,7 +415,7 @@ class TestSupervisorWebSocketIntegration(SSotAsyncTestCase):
             assert supervisor.websocket_bridge is not None
 
 
-class TestSupervisorWebSocketEventDelivery(SSotAsyncTestCase):
+class SupervisorWebSocketEventDeliveryTests(SSotAsyncTestCase):
     """Test WebSocket event delivery patterns in supervisor orchestration."""
 
     def setup_method(self, method):

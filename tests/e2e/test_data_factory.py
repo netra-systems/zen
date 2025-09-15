@@ -31,7 +31,7 @@ from shared.types.user_types import TestUserData
 
 @dataclass
 @pytest.mark.e2e
-class TestMessageData:
+class MessageDataTests:
     """Test message with metadata"""
     id: str
     content: str
@@ -44,7 +44,7 @@ class TestMessageData:
 
 @dataclass
 @pytest.mark.e2e
-class TestThreadData:
+class ThreadDataTests:
     """Test thread with tracking"""
     id: str
     name: str
@@ -55,15 +55,15 @@ class TestThreadData:
 
 
 @pytest.mark.e2e
-class TestDataFactory:
+class DataFactoryTests:
     """Factory for generating unique test data for E2E tests"""
     
     def __init__(self, config: Optional[UnifiedTestConfig] = None):
         """Initialize factory with configuration"""
         self.config = config or UnifiedTestConfig()
         self.created_users: List[TestUserData] = []
-        self.created_messages: List[TestMessageData] = []
-        self.created_threads: List[TestThreadData] = []
+        self.created_messages: List[MessageDataTests] = []
+        self.created_threads: List[ThreadDataTests] = []
         self.session_prefix = self._generate_session_prefix()
     
     def _generate_session_prefix(self) -> str:
@@ -109,33 +109,33 @@ class TestDataFactory:
             created_at=created_at
         )
     
-    def create_test_message(self, user_id: str, content: str, thread_id: Optional[str] = None, message_type: MessageType = MessageType.USER) -> TestMessageData:
+    def create_test_message(self, user_id: str, content: str, thread_id: Optional[str] = None, message_type: MessageType = MessageType.USER) -> MessageDataTests:
         """Create test message with user_id and content"""
         message_data = self._build_message_data(user_id, content, thread_id, message_type)
         self.created_messages.append(message_data)
         return message_data
     
-    def _build_message_data(self, user_id: str, content: str, thread_id: Optional[str], message_type: MessageType) -> TestMessageData:
+    def _build_message_data(self, user_id: str, content: str, thread_id: Optional[str], message_type: MessageType) -> MessageDataTests:
         """Build message data structure"""
         message_id = self._create_unique_id("msg_")
         thread_id = thread_id or self._create_unique_id("thread_")
         created_at = self._generate_timestamp()
         metadata = self._create_message_metadata(user_id, message_type)
-        return TestMessageData(message_id, content, message_type, thread_id, user_id, created_at, metadata)
+        return MessageDataTests(message_id, content, message_type, thread_id, user_id, created_at, metadata)
     
-    def create_test_thread(self, user_id: str, name: Optional[str] = None) -> TestThreadData:
+    def create_test_thread(self, user_id: str, name: Optional[str] = None) -> ThreadDataTests:
         """Create conversation thread for user"""
         thread_data = self._build_thread_data(user_id, name)
         self.created_threads.append(thread_data)
         return thread_data
     
-    def _build_thread_data(self, user_id: str, name: Optional[str]) -> TestThreadData:
+    def _build_thread_data(self, user_id: str, name: Optional[str]) -> ThreadDataTests:
         """Build thread data structure"""
         thread_id = self._create_unique_id("thread_")
         thread_name = name or f"Test Thread {thread_id[-8:]}"
         created_at = self._generate_timestamp()
         updated_at = created_at
-        return TestThreadData(thread_id, thread_name, user_id, created_at, updated_at)
+        return ThreadDataTests(thread_id, thread_name, user_id, created_at, updated_at)
     
     def _create_message_metadata(self, user_id: str, msg_type: MessageType) -> Dict[str, Any]:
         """Create message metadata dictionary"""
@@ -202,13 +202,13 @@ class DatabaseSeeder:
         self.seeded_data.append(record)
         return {"status": "seeded", "table": "users", "id": user_data.id}
     
-    async def seed_message_data(self, message_data: TestMessageData) -> Dict[str, Any]:
+    async def seed_message_data(self, message_data: MessageDataTests) -> Dict[str, Any]:
         """Seed test message into database"""
         record = {"table": "messages", "data": message_data, "id": message_data.id}
         self.seeded_data.append(record)
         return {"status": "seeded", "table": "messages", "id": message_data.id}
     
-    async def seed_thread_data(self, thread_data: TestThreadData) -> Dict[str, Any]:
+    async def seed_thread_data(self, thread_data: ThreadDataTests) -> Dict[str, Any]:
         """Seed test thread into database"""
         record = {"table": "threads", "data": thread_data, "id": thread_data.id}
         self.seeded_data.append(record)
@@ -231,14 +231,14 @@ class DatabaseSeeder:
         return stats
 
 
-class TestConcurrentSupport:
+class ConcurrentSupportTests:
     """Provides support for concurrent test execution"""
     
     @staticmethod
-    def create_isolated_factory() -> TestDataFactory:
+    def create_isolated_factory() -> DataFactoryTests:
         """Create factory with unique session isolation"""
         config = UnifiedTestConfig()
-        return TestDataFactory(config)
+        return DataFactoryTests(config)
     
     @staticmethod
     def create_isolated_seeder() -> DatabaseSeeder:
@@ -264,7 +264,7 @@ def create_test_user_data(identifier: str = None, tier: str = "free") -> Dict[st
         identifier: Test identifier (will be used to generate email)
         tier: User tier for testing
     """
-    factory = TestDataFactory()
+    factory = DataFactoryTests()
     # Generate proper email from identifier
     email = f"{identifier}@test-netra.com" if identifier else None
     user = factory.create_test_user(email=email, tier=tier)
@@ -283,7 +283,7 @@ def create_test_message_data(content: str, user_id: str = None) -> Dict[str, Any
     if not user_id:
         user_id = f"test_user_{uuid.uuid4().hex[:8]}"
     
-    factory = TestDataFactory()
+    factory = DataFactoryTests()
     message = factory.create_test_message(user_id=user_id, content=content)
     return {
         "id": message.id,
@@ -298,19 +298,19 @@ def create_test_message_data(content: str, user_id: str = None) -> Dict[str, Any
 
 def create_test_user(email: str = None, tier: str = "free") -> TestUserData:
     """Quick create test user with unique email"""
-    factory = TestDataFactory()
+    factory = DataFactoryTests()
     return factory.create_test_user(email=email, tier=tier)
 
 
-def create_test_message(user_id: str, content: str) -> TestMessageData:
+def create_test_message(user_id: str, content: str) -> MessageDataTests:
     """Quick create test message with user_id and content"""
-    factory = TestDataFactory()
+    factory = DataFactoryTests()
     return factory.create_test_message(user_id=user_id, content=content)
 
 
-def create_test_thread(user_id: str) -> TestThreadData:
+def create_test_thread(user_id: str) -> ThreadDataTests:
     """Quick create test thread for user"""
-    factory = TestDataFactory()
+    factory = DataFactoryTests()
     return factory.create_test_thread(user_id=user_id)
 
 
@@ -322,7 +322,7 @@ async def test_cleanup_test_data(seeder: DatabaseSeeder) -> Dict[str, int]:
 
 def generate_jwt_token(user_data: TestUserData) -> str:
     """Quick generate JWT token for test user"""
-    factory = TestDataFactory()
+    factory = DataFactoryTests()
     return factory.generate_jwt_token(user_data)
 
 

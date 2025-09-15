@@ -30,7 +30,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestMessageRouterHandlerRegistryValidation(SSotAsyncTestCase):
+class MessageRouterHandlerRegistryValidationTests(SSotAsyncTestCase):
     """Test message handler registry consistency across different router implementations."""
 
     def setUp(self):

@@ -102,7 +102,7 @@ import websockets
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.asyncio
-class TestCompleteGoldenPathBusinessValue(SSotAsyncTestCase):
+class CompleteGoldenPathBusinessValueTests(SSotAsyncTestCase):
     """
     CRITICAL: The PRIMARY test for revenue protection.
     

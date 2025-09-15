@@ -45,7 +45,7 @@ from netra_backend.app.middleware.auth_middleware import AuthMiddleware
 @pytest.mark.integration
 @pytest.mark.cross_system
 @pytest.mark.auth
-class TestAuthBackendIntegration(SSotAsyncTestCase):
+class AuthBackendIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for auth service and backend coordination.
     

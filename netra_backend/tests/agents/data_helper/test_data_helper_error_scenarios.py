@@ -19,7 +19,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 
 
-class TestDataHelperErrorScenarios(SSotAsyncTestCase):
+class DataHelperErrorScenariosTests(SSotAsyncTestCase):
     """Test suite for Data Helper Agent error scenarios and resilience."""
     
     async def setUp(self):

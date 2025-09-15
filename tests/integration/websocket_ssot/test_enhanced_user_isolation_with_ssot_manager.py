@@ -34,7 +34,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestEnhancedUserIsolationWithSsotManager(SSotAsyncTestCase):
+class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
     """Phase 2 SSOT Validation Test: Validate enhanced user isolation with consolidated SSOT manager."""
     
     def setup_method(self, method):

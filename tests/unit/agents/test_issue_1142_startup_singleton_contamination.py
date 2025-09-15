@@ -58,7 +58,7 @@ from netra_backend.app.agents.supervisor.agent_class_registry import AgentClassR
 
 
 @pytest.mark.unit
-class TestIssue1142StartupSingletonContamination(SSotAsyncTestCase):
+class Issue1142StartupSingletonContaminationTests(SSotAsyncTestCase):
     """
     Unit tests proving startup singleton contamination blocking golden path.
 

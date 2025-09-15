@@ -43,7 +43,7 @@ except ImportError:
 
 
 @pytest.mark.unit
-class TestIssue1040SSOTEnumValidation(SSotBaseTestCase):
+class Issue1040SSOTEnumValidationTests(SSotBaseTestCase):
     """
     SSOT Enum availability validation for Issue #1040.
 
@@ -228,7 +228,7 @@ class TestIssue1040SSOTEnumValidation(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestIssue1040SSOTArchitectureCompliance(SSotBaseTestCase):
+class Issue1040SSOTArchitectureComplianceTests(SSotBaseTestCase):
     """
     SSOT Architecture compliance validation for Issue #1040.
 

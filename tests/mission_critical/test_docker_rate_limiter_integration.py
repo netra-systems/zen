@@ -92,7 +92,7 @@ class RateLimiterMetrics:
     circuit_breaker_trips: int = 0
 
 
-class TestDockerRateLimiterIntegration:
+class DockerRateLimiterIntegrationTests:
     """Test Docker rate limiter integration across all modules."""
     
     def test_rate_limiter_singleton_behavior(self):
@@ -188,7 +188,7 @@ class TestDockerRateLimiterIntegration:
             assert "timeout" in str(e).lower() or "expired" in str(e).lower()
 
 
-class TestDockerCircuitBreakerIntegration:
+class DockerCircuitBreakerIntegrationTests:
     """Test Docker circuit breaker integration and protection."""
     
     def test_circuit_breaker_creation_and_basic_operation(self):
@@ -263,7 +263,7 @@ class TestDockerCircuitBreakerIntegration:
         assert breaker_stats["test-convenience"]["total_requests"] > 0
 
 
-class TestDockerIntrospectionRateLimiterIntegration:
+class DockerIntrospectionRateLimiterIntegrationTests:
     """Test that Docker introspection uses rate limiter."""
     
     def test_docker_introspection_uses_rate_limiter(self):
@@ -314,7 +314,7 @@ class TestDockerIntrospectionRateLimiterIntegration:
             assert final_stats["total_operations"] >= initial_stats["total_operations"]
 
 
-class TestPortConflictFixRateLimiterIntegration:
+class PortConflictFixRateLimiterIntegrationTests:
     """Test that port conflict resolution uses rate limiter."""
     
     def test_cleanup_stale_containers_uses_rate_limiter(self):
@@ -331,7 +331,7 @@ class TestPortConflictFixRateLimiterIntegration:
         assert isinstance(cleaned_count, int), "Should return count of cleaned containers"
 
 
-class TestRateLimiterStatistics:
+class RateLimiterStatisticsTests:
     """Test rate limiter statistics and monitoring."""
     
     def test_statistics_tracking(self):
@@ -368,7 +368,7 @@ class TestRateLimiterStatistics:
         assert stats_after["failed_operations"] == 0, "Failed operations should be reset"
 
 
-class TestIntegrationRobustness:
+class IntegrationRobustnessTests:
     """Test overall robustness of the integrated system."""
     
     def test_high_concurrency_stress(self):
@@ -416,7 +416,7 @@ class TestIntegrationRobustness:
         assert stats["success_rate"] > 0
 
 
-class TestDockerRateLimiterInfrastructure:
+class DockerRateLimiterInfrastructureTests:
     """Infrastructure tests for Docker rate limiter performance and reliability."""
     
     def test_rate_limiter_throughput_benchmark(self):

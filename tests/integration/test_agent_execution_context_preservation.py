@@ -75,7 +75,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 @pytest.mark.integration
-class TestExecutionContext:
+class ExecutionContextTests:
     """Test execution context for validation."""
     user_id: str
     session_id: str
@@ -88,7 +88,7 @@ class TestExecutionContext:
 
 
 @pytest.mark.integration
-class TestAgentExecutionContextPreservation(SSotAsyncTestCase):
+class AgentExecutionContextPreservationTests(SSotAsyncTestCase):
     """
     Integration test suite for agent execution context preservation.
 
@@ -101,7 +101,7 @@ class TestAgentExecutionContextPreservation(SSotAsyncTestCase):
         super().setup_method(method)
         self.test_user_id = f"exec_user_{uuid.uuid4().hex[:8]}"
         self.test_session_id = f"exec_session_{uuid.uuid4().hex[:8]}"
-        self.execution_contexts: List[TestExecutionContext] = []
+        self.execution_contexts: List[ExecutionContextTests] = []
         self.registry_instances = []
         self.mock_factory = SSotMockFactory() if SSotMockFactory else None
 
@@ -191,7 +191,7 @@ class TestAgentExecutionContextPreservation(SSotAsyncTestCase):
                         logger.warning(f"Context isolation check failed for {registry_name}: {e}")
 
                 # Create test execution context
-                test_context = TestExecutionContext(
+                test_context = ExecutionContextTests(
                     user_id=self.test_user_id,
                     session_id=self.test_session_id,
                     agent_id=f"test_agent_{uuid.uuid4().hex[:8]}",
@@ -271,7 +271,7 @@ class TestAgentExecutionContextPreservation(SSotAsyncTestCase):
                     self.registry_instances.append(registry)
 
                     # Create execution context
-                    execution_context = TestExecutionContext(
+                    execution_context = ExecutionContextTests(
                         user_id=user_id,
                         session_id=session_id,
                         agent_id=f"concurrent_agent_{i}",
@@ -365,7 +365,7 @@ class TestAgentExecutionContextPreservation(SSotAsyncTestCase):
                     self.registry_instances.append(registry)
 
                 # Create execution context with state
-                execution_context = TestExecutionContext(
+                execution_context = ExecutionContextTests(
                     user_id=self.test_user_id,
                     session_id=self.test_session_id,
                     agent_id=f"state_test_agent_{uuid.uuid4().hex[:8]}",
@@ -497,7 +497,7 @@ class TestAgentExecutionContextPreservation(SSotAsyncTestCase):
 
                 # Create multiple contexts for cleanup testing
                 for i in range(3):
-                    context = TestExecutionContext(
+                    context = ExecutionContextTests(
                         user_id=f"{self.test_user_id}_cleanup_{i}",
                         session_id=f"{self.test_session_id}_cleanup_{i}",
                         agent_id=f"cleanup_agent_{i}",
@@ -624,7 +624,7 @@ class TestAgentExecutionContextPreservation(SSotAsyncTestCase):
                     logger.info(f"Registry {registry_name} properly handles invalid agent ID: {e}")
 
                 # Test error recovery with execution context
-                execution_context = TestExecutionContext(
+                execution_context = ExecutionContextTests(
                     user_id=self.test_user_id,
                     session_id=self.test_session_id,
                     agent_id=f"error_test_agent_{uuid.uuid4().hex[:8]}",

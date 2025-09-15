@@ -28,7 +28,7 @@ from shared.types import UserID, ThreadID, MessageID, OrganizationID
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketApplicationStateConsistencyDatabaseTransactions(BaseIntegrationTest):
+class WebSocketApplicationStateConsistencyDatabaseTransactionsTests(BaseIntegrationTest):
     """Test state consistency validation during WebSocket message processing with database transactions."""
     
     @asynccontextmanager

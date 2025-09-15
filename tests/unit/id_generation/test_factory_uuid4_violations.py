@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 @pytest.mark.unit
-class TestFactoryUuid4Violations(SSotBaseTestCase):
+class FactoryUuid4ViolationsTests(SSotBaseTestCase):
     """Violation detection tests for Factory UUID4 usage - EXPECT FAILURE"""
 
     def test_redis_factory_line_594_violation_EXPECT_FAILURE(self):

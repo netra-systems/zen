@@ -45,7 +45,7 @@ class AgentExecutionState(Enum):
     ERROR = 'error'
     DEAD = 'dead'
 
-class TestAgentMessageStateManagementStrategic(SSotAsyncTestCase):
+class AgentMessageStateManagementStrategicTests(SSotAsyncTestCase):
     """
     Strategic unit tests for message state management during critical system transitions.
     

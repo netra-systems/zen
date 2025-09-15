@@ -13,7 +13,7 @@ import pytest
 import asyncio
 from netra_backend.app.db.clickhouse import NoOpClickHouseClient, _create_test_noop_client, ClickHouseService
 
-class TestNoOpClickHouseClientBehavior:
+class NoOpClickHouseClientBehaviorTests:
     """Unit tests for NoOp ClickHouse client behavior."""
 
     def test_noop_client_initialization(self):
@@ -75,7 +75,7 @@ class TestNoOpClickHouseClientBehavior:
         result = await client.execute_query('SELECT 1', {'param': 'value'})
         assert isinstance(result, list)
 
-class TestNoOpClientFactory:
+class NoOpClientFactoryTests:
     """Unit tests for NoOp client factory function."""
 
     async def test_create_test_noop_client_context_manager(self):
@@ -94,7 +94,7 @@ class TestNoOpClientFactory:
             assert await client.test_connection() == True
         assert await client_ref.test_connection() == False
 
-class TestClickHouseServiceWithNoOpClient:
+class ClickHouseServiceWithNoOpClientTests:
     """Unit tests for ClickHouse service using NoOp client."""
 
     async def test_service_with_force_mock(self):
@@ -167,7 +167,7 @@ class TestClickHouseServiceWithNoOpClient:
         finally:
             await service.close()
 
-class TestNoOpClientRealisticBehavior:
+class NoOpClientRealisticBehaviorTests:
     """Tests to ensure NoOp client behaves realistically for test scenarios."""
 
     async def test_query_types_return_appropriate_responses(self):

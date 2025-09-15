@@ -149,7 +149,7 @@ class PerformanceReliabilityTester:
 @pytest.mark.e2e
 @pytest.mark.frontend
 @pytest.mark.performance
-class TestFrontendPerformanceReliability:
+class FrontendPerformanceReliabilityTests:
     """Test frontend performance and reliability metrics"""
     
     @pytest.fixture(autouse=True)

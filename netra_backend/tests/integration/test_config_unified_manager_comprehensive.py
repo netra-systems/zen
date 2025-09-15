@@ -38,7 +38,7 @@ from netra_backend.app.core.configuration.validator import ConfigurationValidato
 from netra_backend.app.core.environment_constants import EnvironmentDetector
 from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig, StagingConfig, ProductionConfig, NetraTestingConfig
 
-class TestUnifiedConfigManagerCore:
+class UnifiedConfigManagerCoreTests:
     """Core configuration manager functionality tests.
     
     BVJ: Ensures basic configuration loading works for chat functionality.
@@ -144,7 +144,7 @@ class TestUnifiedConfigManagerCore:
         config3 = manager.reload_config(force=True)
         assert config3 is not config1
 
-class TestEnvironmentSpecificConfiguration:
+class EnvironmentSpecificConfigurationTests:
     """Test environment-specific configuration behavior.
     
     BVJ: Ensures proper environment isolation prevents production data exposure.
@@ -276,7 +276,7 @@ class TestEnvironmentSpecificConfiguration:
             else:
                 env.delete('PYTEST_CURRENT_TEST')
 
-class TestDatabaseConfigurationIntegration:
+class DatabaseConfigurationIntegrationTests:
     """Test database configuration validation and URL building.
     
     BVJ: Ensures database connectivity for agent execution persistence.
@@ -349,7 +349,7 @@ class TestDatabaseConfigurationIntegration:
                 else:
                     env.delete('ENVIRONMENT')
 
-class TestJWTSecretManagementIntegration:
+class JWTSecretManagementIntegrationTests:
     """Test JWT secret management integration across services.
     
     BVJ: Prevents WebSocket 403 auth failures that cost $50K MRR.
@@ -441,7 +441,7 @@ class TestJWTSecretManagementIntegration:
                 assert len(config_secret) >= 16
                 assert len(unified_secret) >= 16
 
-class TestOAuthConfigurationRegression:
+class OAuthConfigurationRegressionTests:
     """Test OAuth configuration to prevent regression bugs.
     
     BVJ: CRITICAL - Prevents OAuth regression that blocked enterprise customers.
@@ -524,7 +524,7 @@ class TestOAuthConfigurationRegression:
                 else:
                     env.delete(key)
 
-class TestConfigurationValidationProgressiveEnforcement:
+class ConfigurationValidationProgressiveEnforcementTests:
     """Test progressive configuration validation enforcement.
     
     BVJ: Enables development velocity while maintaining production security.
@@ -603,7 +603,7 @@ class TestConfigurationValidationProgressiveEnforcement:
         if result.is_valid and len(result.errors) == 0:
             assert result.score >= 70
 
-class TestWebSocketSupportingConfiguration:
+class WebSocketSupportingConfigurationTests:
     """Test configuration that supports WebSocket agent events.
     
     BVJ: MISSION CRITICAL - Ensures chat functionality works ($50K MRR dependent).
@@ -646,7 +646,7 @@ class TestWebSocketSupportingConfiguration:
         if manager.is_production():
             assert True
 
-class TestConfigurationIntegrityValidation:
+class ConfigurationIntegrityValidationTests:
     """Test configuration integrity and consistency checks.
     
     BVJ: Prevents configuration drift that causes service failures.

@@ -25,7 +25,7 @@ pytestmark = [pytest.mark.staging, pytest.mark.critical, pytest.mark.real]
 
 
 @pytest.mark.e2e
-class TestWebSocketAuthenticationFix:
+class WebSocketAuthenticationFixTests:
     """Test WebSocket authentication fix by reproducing and then fixing the 403 error."""
     
     def test_debug_jwt_secret_resolution(self):
@@ -315,7 +315,7 @@ class TestWebSocketAuthenticationFix:
 
 if __name__ == "__main__":
     # Run the debug test to show secret resolution
-    test_instance = TestWebSocketAuthenticationFix()
+    test_instance = WebSocketAuthenticationFixTests()
     test_instance.test_debug_jwt_secret_resolution()
     
     print("\n" + "="*80)

@@ -17,7 +17,7 @@ import pytest
 from shared.isolated_environment import get_env
 
 
-class TestIssue724EnvironmentAccessViolations:
+class Issue724EnvironmentAccessViolationsTests:
     """Test direct environment access violations reported in Issue #724."""
 
     def test_secret_manager_core_no_direct_environ_access(self):

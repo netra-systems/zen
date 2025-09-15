@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
-class TestWebSocketSSotImportViolations(SSotBaseTestCase, unittest.TestCase):
+class WebSocketSSotImportViolationsTests(SSotBaseTestCase, unittest.TestCase):
     """
     Test suite to detect and validate WebSocket SSOT import violations.
     

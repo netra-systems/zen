@@ -27,7 +27,7 @@ from unittest.mock import AsyncMock, MagicMock
 logger = logging.getLogger(__name__)
 
 
-class TestIntegrationCoverageValidation:
+class IntegrationCoverageValidationTests:
     """
     Test class to validate integration test coverage and success rates.
     
@@ -493,7 +493,7 @@ class TestIntegrationCoverageValidation:
             pytest.fail(f"Concurrent integration test execution failed: {e}")
 
 
-class TestMockServiceRealism:
+class MockServiceRealismTests:
     """
     Test class to validate mock services provide realistic testing environments.
     

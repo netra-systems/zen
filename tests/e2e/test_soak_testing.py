@@ -150,7 +150,7 @@ class PerformanceMetrics:
 
 @dataclass
 
-class TestSoakResults:
+class SoakResultsTests:
 
     """Comprehensive results from soak testing."""
 
@@ -503,7 +503,7 @@ class AIAgentSimulator:
         return metric
 
 
-class TestWebSocketStress:
+class WebSocketStressTests:
 
     """Stress tests WebSocket connections."""
     
@@ -632,7 +632,7 @@ class TestWebSocketStress:
         self.active_connections.clear()
 
 
-class TestDatabaseStress:
+class DatabaseStressTests:
 
     """Stress tests database operations."""
     
@@ -722,7 +722,7 @@ class TestDatabaseStress:
             await conn.close()
 
 
-class TestSoakOrchestrator:
+class SoakOrchestratorTests:
 
     """Orchestrates the complete soak testing suite."""
     
@@ -1135,9 +1135,9 @@ class TestSoakOrchestrator:
         logger.info(f"  GC efficiency: {self.test_results.gc_efficiency:.2f}")
 
 # Aliases for naming consistency
-SoakTestResults = TestSoakResults
-WebSocketStressTest = TestWebSocketStress  
-DatabaseStressTest = TestDatabaseStress
+SoakTestResults = SoakResultsTests
+WebSocketStressTest = WebSocketStressTests  
+DatabaseStressTest = DatabaseStressTests
 
 # Test implementations
 

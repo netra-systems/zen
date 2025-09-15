@@ -28,7 +28,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
-class TestDataHelperAgentCoordination(BaseIntegrationTest):
+class DataHelperAgentCoordinationTests(BaseIntegrationTest):
     """Integration tests for data helper agent coordination."""
 
     @pytest.mark.integration

@@ -394,7 +394,7 @@ are essential for identifying optimization patterns and seasonal variations.
             self.metrics.retrieval_success = False
 
 
-class TestDataRequestGenerationRealServices(BaseIntegrationTest):
+class DataRequestGenerationRealServicesTests(BaseIntegrationTest):
     """Test suite for data request generation with real services."""
     
     def setup_method(self):
@@ -915,7 +915,7 @@ if __name__ == "__main__":
     async def run_integration_tests():
         logger.info("Starting data request generation integration tests...")
         
-        test_instance = TestDataRequestGenerationRealServices()
+        test_instance = DataRequestGenerationRealServicesTests()
         
         try:
             # Mock fixtures for direct testing

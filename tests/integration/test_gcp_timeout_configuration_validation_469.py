@@ -73,7 +73,7 @@ class TimeoutConfigurationValidator:
         return validation_result
 
 @pytest.mark.integration
-class TestGCPTimeoutConfigurationValidation(SSotAsyncTestCase):
+class GCPTimeoutConfigurationValidationTests(SSotAsyncTestCase):
     """
     Integration tests for GCP timeout configuration validation (Issue #469).
     

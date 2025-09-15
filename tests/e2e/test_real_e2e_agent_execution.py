@@ -465,7 +465,7 @@ async def agent_tester(real_postgres_connection, isolated_test_env):
 @pytest.mark.real_services
 @pytest.mark.mission_critical
 @pytest.mark.no_mocks
-class TestRealAgentExecution(BaseE2ETest):
+class RealAgentExecutionTests(BaseE2ETest):
     """Comprehensive test suite for real agent execution workflows."""
 
     async def test_cost_optimizer_agent_business_value(self, agent_tester):

@@ -29,7 +29,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.error_recovery
 @skip_if_no_real_services
-class TestRealWebSocketErrorRecovery:
+class RealWebSocketErrorRecoveryTests:
     """Test real WebSocket error recovery mechanisms."""
     
     @pytest.fixture

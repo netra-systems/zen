@@ -128,7 +128,7 @@ class ServiceCommunicationMetrics:
 
 
 @dataclass
-class TestServiceConfig:
+class ServiceConfigTests:
     """Configuration for inter-service communication testing."""
     # Services to test
     test_auth_service: bool = True
@@ -162,7 +162,7 @@ class TestServiceConfig:
 class InterServiceCommunicationTester:
     """Comprehensive inter-service communication and dependency tester."""
     
-    def __init__(self, config: TestServiceConfig):
+    def __init__(self, config: ServiceConfigTests):
         self.config = config
         self.project_root = config.project_root or self._detect_project_root()
         self.metrics = ServiceCommunicationMetrics(test_name="inter_service_communication")
@@ -968,13 +968,13 @@ class InterServiceCommunicationTester:
 
 @pytest.mark.e2e  
 @pytest.mark.asyncio
-class TestInterServiceCommunicationDependencyValidation:
+class InterServiceCommunicationDependencyValidationTests:
     """Comprehensive inter-service communication and dependency validation test suite."""
     
     @pytest.fixture
     def service_config(self):
         """Create service test configuration."""
-        return TestServiceConfig(
+        return ServiceConfigTests(
             test_auth_service=True,
             test_backend_service=True,
             test_websocket_service=True,
@@ -1051,7 +1051,7 @@ class TestInterServiceCommunicationDependencyValidation:
 
 async def run_inter_service_communication_test():
     """Standalone function to run inter-service communication test."""
-    config = TestServiceConfig()
+    config = ServiceConfigTests()
     tester = InterServiceCommunicationTester(config)
     return await tester.run_comprehensive_communication_test()
 

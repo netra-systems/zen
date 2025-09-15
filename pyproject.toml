@@ -708,6 +708,7 @@ markers = [
 
     # Scalability and performance markers
     "scalability: Scalability and concurrent user load testing",
+    "advanced_scenarios: Advanced user scenarios for enterprise and complex business use cases",
 ]
 
 # Coverage settings

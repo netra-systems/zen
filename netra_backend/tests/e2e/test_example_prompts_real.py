@@ -41,7 +41,7 @@ validate_tool_migration_result,
 )
 
 @pytest.mark.real_llm
-class TestExamplePromptsComprehensive:
+class ExamplePromptsComprehensiveTests:
     """Test all 9 example prompts with real LLM calls and complete validation."""
 
     @pytest.mark.asyncio

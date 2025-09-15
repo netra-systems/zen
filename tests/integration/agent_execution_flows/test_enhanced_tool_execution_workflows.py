@@ -25,7 +25,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestEnhancedToolExecutionWorkflows(BaseIntegrationTest):
+class EnhancedToolExecutionWorkflowsTests(BaseIntegrationTest):
     """Integration tests for enhanced tool execution workflows."""
 
     @pytest.mark.integration

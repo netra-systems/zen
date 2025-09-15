@@ -23,7 +23,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestAuthCircuitBreakerTimeout(SSotAsyncTestCase):
+class AuthCircuitBreakerTimeoutTests(SSotAsyncTestCase):
     """
     Integration tests to reproduce circuit breaker and timeout configuration issues.
     

@@ -15,7 +15,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
-class TestAuthServiceDelegationUnit(SSotAsyncTestCase):
+class AuthServiceDelegationUnitTests(SSotAsyncTestCase):
     """
     Unit test validating backend authentication delegates to auth service.
     Tests SSOT compliance patterns for authentication flow.

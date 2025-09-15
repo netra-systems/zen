@@ -44,7 +44,7 @@ docker_manager = UnifiedDockerManager()
 @pytest.mark.security
 @pytest.mark.critical
 @pytest.mark.asyncio
-class TestRealMultiUserIsolation:
+class RealMultiUserIsolationTests:
     """
     Real multi-user isolation tests using Docker services.
     

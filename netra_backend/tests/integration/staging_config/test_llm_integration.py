@@ -22,7 +22,7 @@ import httpx
 
 from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
-class TestLLMIntegration(StagingConfigTestBase):
+class LLMIntegrationTests(StagingConfigTestBase):
     """Test LLM integrations in staging."""
 
     @pytest.mark.asyncio

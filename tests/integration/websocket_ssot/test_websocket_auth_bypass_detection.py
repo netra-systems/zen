@@ -18,7 +18,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestWebSocketAuthBypassDetection(SSotAsyncTestCase):
+class WebSocketAuthBypassDetectionTests(SSotAsyncTestCase):
     """
     Integration test detecting WebSocket authentication SSOT violations.
     EXPECTED TO FAIL until WebSocket auth properly delegates to auth service.

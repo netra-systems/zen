@@ -58,7 +58,7 @@ from shared.types.core_types import UserID, WebSocketID
 @pytest.mark.infrastructure_dependencies
 @pytest.mark.asyncio
 @pytest.mark.websocket_infrastructure
-class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
+class WebSocketInfrastructureDependenciesE2ETests(SSotAsyncTestCase):
     """
     WebSocket Infrastructure Dependencies Failure Detection Tests.
     

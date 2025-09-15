@@ -37,7 +37,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-class TestGCPSecretManagerConnectivity(SSotBaseTestCase):
+class GCPSecretManagerConnectivityTests(SSotBaseTestCase):
     """
     Phase 2 Integration Tests: Real GCP Secret Manager connectivity.
     
@@ -535,7 +535,7 @@ class TestGCPSecretManagerConnectivity(SSotBaseTestCase):
             pytest.fail(f"Quota/limits test failed: {e}")
 
 
-class TestGCPSecretManagerConfiguration(SSotBaseTestCase):
+class GCPSecretManagerConfigurationTests(SSotBaseTestCase):
     """
     Additional configuration and integration validation tests.
     

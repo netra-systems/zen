@@ -379,7 +379,7 @@ async def performance_concurrency_tester(request):
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.performance
-class TestAgentPerformanceConcurrency:
+class AgentPerformanceConcurrencyTests:
     """Test suite for agent performance and concurrency validation."""
 
     async def test_basic_agent_performance_baseline(self, performance_concurrency_tester):

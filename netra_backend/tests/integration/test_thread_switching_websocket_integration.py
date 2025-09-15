@@ -47,7 +47,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 from test_framework.websocket_helpers import WebSocketTestClient, assert_websocket_events_sent, WebSocketTestHelpers, MockWebSocket
 
-class TestWebSocketThreadSwitchingIntegration(BaseIntegrationTest):
+class WebSocketThreadSwitchingIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket thread switching functionality (Tests 21-40).
     

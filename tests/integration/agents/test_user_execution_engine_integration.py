@@ -212,7 +212,7 @@ class MockToolDispatcher:
         return result
 
 
-class TestUserExecutionEngineIntegration(SSotAsyncTestCase):
+class UserExecutionEngineIntegrationTests(SSotAsyncTestCase):
     """Integration tests for user execution engine patterns and coordination."""
     
     def setup_method(self, method):

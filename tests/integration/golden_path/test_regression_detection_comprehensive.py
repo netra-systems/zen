@@ -59,7 +59,7 @@ except ImportError:
     CORE_MODELS_AVAILABLE = False
 
 
-class TestRegressionDetectionComprehensive(BaseIntegrationTest):
+class RegressionDetectionComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive regression detection test suite.
     

@@ -34,7 +34,7 @@ from netra_backend.app.core.startup_validation import (
 from netra_backend.app.core.service_dependencies import ServiceType
 
 
-class TestStartupValidationFailureScenarios(SSotAsyncTestCase):
+class StartupValidationFailureScenariosTests(SSotAsyncTestCase):
     """Integration tests for startup validation failure scenarios."""
 
     def setup_method(self, method):
@@ -383,7 +383,7 @@ class TestStartupValidationFailureScenarios(SSotAsyncTestCase):
         assert report["duration"] is not None, "Should have recorded timing"
 
 
-class TestStartupValidationEndToEndScenarios(SSotAsyncTestCase):
+class StartupValidationEndToEndScenariosTests(SSotAsyncTestCase):
     """End-to-end integration tests for startup validation scenarios."""
 
     def setup_method(self, method):

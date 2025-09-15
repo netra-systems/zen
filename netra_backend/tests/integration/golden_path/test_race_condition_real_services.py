@@ -51,7 +51,7 @@ class RaceConditionTestResult:
     error_messages: List[str]
 
 
-class TestRaceConditionRealServices(BaseIntegrationTest):
+class RaceConditionRealServicesTests(BaseIntegrationTest):
     """Test race condition prevention with real PostgreSQL and Redis."""
     
     def setup_method(self):

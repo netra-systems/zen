@@ -33,7 +33,7 @@ def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_d
     agents = create_agent_instances(real_llm_manager, real_tool_dispatcher)
     return build_multi_constraint_setup(agents, real_llm_manager, real_websocket_manager)
 
-class TestSystemWideOptimizationWorkflows:
+class SystemWideOptimizationWorkflowsTests:
     """Test system-wide optimization workflows with multiple constraints."""
 
     @pytest.mark.asyncio

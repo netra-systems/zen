@@ -334,7 +334,7 @@ class SystemHealthValidator:
         )
 
 
-class TestSystemHealthValidation:
+class SystemHealthValidationTests:
     """Test cases for system health validation."""
 
     def setup_method(self):

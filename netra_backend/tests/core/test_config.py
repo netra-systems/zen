@@ -12,7 +12,7 @@ from netra_backend.app.schemas.config import AppConfig
 from netra_backend.app.redis_manager import redis_manager
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestConfig:
+class ConfigTests:
     """Test suite for Config functions"""
 
     def test_get_config_returns_app_config(self):

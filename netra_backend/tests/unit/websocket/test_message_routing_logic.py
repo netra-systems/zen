@@ -49,7 +49,7 @@ from netra_backend.app.websocket_core.batch_message_handler import BatchMessageH
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestMessageRoutingLogicFailures(SSotBaseTestCase):
+class MessageRoutingLogicFailuresTests(SSotBaseTestCase):
     """
     Unit tests that expose message routing logic failures causing "Message routing failed" errors.
     

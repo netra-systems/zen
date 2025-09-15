@@ -43,7 +43,7 @@ from tests.e2e.staging_config import StagingTestConfig
 from shared.isolated_environment import get_env
 
 @pytest.mark.e2e
-class TestAgentGoldenPathAuthIntegration(SSotAsyncTestCase):
+class AgentGoldenPathAuthIntegrationTests(SSotAsyncTestCase):
     """
     Authentication integration tests for agent golden path functionality.
     

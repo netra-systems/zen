@@ -35,7 +35,7 @@ from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 
 @pytest.mark.unit
 @pytest.mark.agent_execution
-class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
+class AgentExecutionCoreBusinessLogicTests(SSotAsyncTestCase):
     """
     BUSINESS VALUE: Core agent execution flow validation
     
@@ -175,7 +175,7 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
 
 @pytest.mark.unit
 @pytest.mark.user_isolation
-class TestAgentExecutionCoreUserIsolation(SSotAsyncTestCase):
+class AgentExecutionCoreUserIsolationTests(SSotAsyncTestCase):
     """
     BUSINESS VALUE: User context isolation validation
     
@@ -254,7 +254,7 @@ class TestAgentExecutionCoreUserIsolation(SSotAsyncTestCase):
 
 @pytest.mark.unit
 @pytest.mark.error_handling
-class TestAgentExecutionCoreErrorHandling(SSotAsyncTestCase):
+class AgentExecutionCoreErrorHandlingTests(SSotAsyncTestCase):
     """
     BUSINESS VALUE: Error recovery and resilience
 
@@ -330,7 +330,7 @@ class TestAgentExecutionCoreErrorHandling(SSotAsyncTestCase):
 
 @pytest.mark.unit
 @pytest.mark.performance
-class TestAgentExecutionCorePerformance(SSotAsyncTestCase):
+class AgentExecutionCorePerformanceTests(SSotAsyncTestCase):
     """
     BUSINESS VALUE: Performance and resource management
     
@@ -375,7 +375,7 @@ class TestAgentExecutionCorePerformance(SSotAsyncTestCase):
 
 @pytest.mark.unit
 @pytest.mark.integration_points
-class TestAgentExecutionCoreIntegrationPoints(SSotAsyncTestCase):
+class AgentExecutionCoreIntegrationPointsTests(SSotAsyncTestCase):
     """
     BUSINESS VALUE: Integration reliability
     
@@ -440,7 +440,7 @@ class TestAgentExecutionCoreIntegrationPoints(SSotAsyncTestCase):
 
 @pytest.mark.unit
 @pytest.mark.compatibility
-class TestAgentExecutionCoreCompatibility(SSotAsyncTestCase):
+class AgentExecutionCoreCompatibilityTests(SSotAsyncTestCase):
     """
     BUSINESS VALUE: Legacy support during migration
     

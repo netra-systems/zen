@@ -13,7 +13,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.middleware.cors_fix_middleware import CORSFixMiddleware
 
 
-class TestCORSFixMiddleware:
+class CORSFixMiddlewareTests:
     """Test suite for CORS Fix Middleware."""
 
     @pytest.fixture

@@ -38,7 +38,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestExternalServiceTimeoutHandling(BaseIntegrationTest):
+class ExternalServiceTimeoutHandlingTests(BaseIntegrationTest):
     """Test external service timeout handling and graceful degradation."""
     
     @pytest.mark.asyncio
@@ -199,7 +199,7 @@ class TestExternalServiceTimeoutHandling(BaseIntegrationTest):
         return "healthy"
 
 
-class TestCircuitBreakerImplementation(BaseIntegrationTest):
+class CircuitBreakerImplementationTests(BaseIntegrationTest):
     """Test circuit breaker implementation for external services."""
     
     @pytest.mark.asyncio
@@ -393,7 +393,7 @@ class TestCircuitBreakerImplementation(BaseIntegrationTest):
         return "service_healthy"
 
 
-class TestTimeoutConfigurationAndBehavior(BaseIntegrationTest):
+class TimeoutConfigurationAndBehaviorTests(BaseIntegrationTest):
     """Test timeout configuration and behavior across services."""
     
     @pytest.mark.asyncio
@@ -486,7 +486,7 @@ class TestTimeoutConfigurationAndBehavior(BaseIntegrationTest):
             return f"{operation_id}_error_{str(e)}"
 
 
-class TestExternalServiceFallbackPatterns(BaseIntegrationTest):
+class ExternalServiceFallbackPatternsTests(BaseIntegrationTest):
     """Test fallback patterns for external service failures."""
     
     @pytest.mark.asyncio

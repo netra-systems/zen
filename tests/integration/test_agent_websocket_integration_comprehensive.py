@@ -36,7 +36,7 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
-class TestAgentWebSocketIntegration(BaseIntegrationTest):
+class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     """Test agent execution with WebSocket event delivery using real services."""
 
     @pytest.fixture(autouse=True)

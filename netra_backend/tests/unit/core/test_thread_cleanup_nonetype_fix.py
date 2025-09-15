@@ -22,7 +22,7 @@ from datetime import datetime
 import logging
 from netra_backend.app.core.thread_cleanup_manager import ThreadCleanupManager, ThreadInfo
 
-class TestThreadCleanupNoneTypeFix:
+class ThreadCleanupNoneTypeFixTests:
     """Test suite for Issue #704 NoneType error fixes."""
 
     def setup_method(self):
@@ -213,7 +213,7 @@ class TestThreadCleanupNoneTypeFix:
                     raise
         asyncio.run(test_with_real_loop())
 
-class TestNoneTypeErrorRegressionPrevention:
+class NoneTypeErrorRegressionPreventionTests:
     """Additional tests to prevent regression of Issue #704."""
 
     def test_all_possible_none_scenarios(self):

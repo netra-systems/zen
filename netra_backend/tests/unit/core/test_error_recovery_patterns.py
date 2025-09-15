@@ -14,7 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.exceptions_service import ServiceError
 
 
-class TestRetryStrategies:
+class RetryStrategiesTests:
     """Test various retry strategies and patterns"""
 
     @pytest.mark.asyncio
@@ -188,7 +188,7 @@ class TestRetryStrategies:
         assert breaker.state == "CLOSED"
 
 
-class TestCompensationPatterns:
+class CompensationPatternsTests:
     """Test compensation and rollback patterns"""
 
     @pytest.mark.asyncio
@@ -330,7 +330,7 @@ class TestCompensationPatterns:
         assert "Transaction rolled back" in transaction_log
 
 
-class TestErrorBoundaryPatterns:
+class ErrorBoundaryPatternsTests:
     """Test error boundary and isolation patterns"""
 
     @pytest.mark.asyncio

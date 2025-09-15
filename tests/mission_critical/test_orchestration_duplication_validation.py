@@ -49,7 +49,7 @@ class OrchestrationViolation:
     orchestration_system: str  # 'docker', 'kubernetes', 'service_discovery', 'enum_definition'
 
 
-class TestOrchestrationDuplicationValidation(SSotBaseTestCase):
+class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
     """
     Test suite to reproduce and validate orchestration duplication violations.
     

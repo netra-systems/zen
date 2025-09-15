@@ -17,7 +17,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.utils.datetime_utils import DatetimeUtils
 
 
-class TestDatetimeUtils(SSotBaseTestCase):
+class DatetimeUtilsTests(SSotBaseTestCase):
     """Test suite for DatetimeUtils following SSOT patterns."""
     
     def setup_method(self, method):

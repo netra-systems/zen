@@ -81,7 +81,7 @@ CRITICAL_WEBSOCKET_EVENTS = {
 }
 
 
-class TestWebSocketEventsIntegration(BaseIntegrationTest):
+class WebSocketEventsIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket event delivery with real agent execution.
     

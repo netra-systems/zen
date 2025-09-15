@@ -33,7 +33,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 logger = logging.getLogger(__name__)
 
-class TestJwtDuplicationDetection(SSotAsyncTestCase):
+class JwtDuplicationDetectionTests(SSotAsyncTestCase):
     """
     SSOT Compliance Tests - JWT Duplication Detection
     

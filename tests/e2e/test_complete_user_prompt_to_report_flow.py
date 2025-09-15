@@ -366,7 +366,7 @@ class CompleteUserPromptToReportTester:
             await self.auth_client.close()
         logger.info('[U+1F9F9] Cleanup completed')
 
-class TestCompleteUserPromptToReportFlow:
+class CompleteUserPromptToReportFlowTests:
     """MISSION CRITICAL: Tests complete user prompt to actionable report flow."""
 
     @pytest.mark.asyncio

@@ -44,7 +44,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestGoldenPathAuthFailureReproduction(SSotAsyncTestCase):
+class GoldenPathAuthFailureReproductionTests(SSotAsyncTestCase):
     """
     Golden Path Auth Failure Reproduction Tests
 

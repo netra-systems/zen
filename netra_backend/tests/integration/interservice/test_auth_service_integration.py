@@ -28,7 +28,7 @@ from netra_backend.app.clients.auth_client_core import (
 )
 
 
-class TestBackendAuthServiceIntegration(BaseTestCase):
+class BackendAuthServiceIntegrationTests(BaseTestCase):
     """Integration tests for Backend <-> Auth Service communication."""
     
     @pytest.mark.integration

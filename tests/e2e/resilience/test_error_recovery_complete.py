@@ -63,7 +63,7 @@ class ErrorRecoveryResult:
     data_integrity_preserved: bool
     within_sla: bool
 
-class TestRealCircuitBreakerer:
+class RealCircuitBreakererTests:
     """Tests real circuit breaker behavior with actual service calls."""
     
     def __init__(self):
@@ -325,7 +325,7 @@ class DataIntegrityTracker:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestCompleteErrorRecovery:
+class CompleteErrorRecoveryTests:
     """Complete error recovery and circuit breaker validation."""
     
     @pytest_asyncio.fixture
@@ -341,7 +341,7 @@ class TestCompleteErrorRecovery:
     @pytest.fixture
     def circuit_breaker_tester(self):
         """Initialize circuit breaker tester."""
-        return TestRealCircuitBreakerer()
+        return RealCircuitBreakererTests()
     
     @pytest.fixture
     def isolation_validator(self, orchestrator):
@@ -439,7 +439,7 @@ class TestCompleteErrorRecovery:
         else:
             logger.warning("Backend service kill failed - may already be stopped")
     
-    async def _test_circuit_breaker_activation(self, tester: TestRealCircuitBreakerer,
+    async def _test_circuit_breaker_activation(self, tester: RealCircuitBreakererTests,
                                              ws_client: RealWebSocketClient) -> Dict[str, Any]:
         """Test circuit breaker activation with failing operations."""
         async def failing_operation():
@@ -464,7 +464,7 @@ class TestCompleteErrorRecovery:
         else:
             logger.warning("Backend service restart failed")
     
-    async def _test_automatic_recovery(self, tester: TestRealCircuitBreakerer,
+    async def _test_automatic_recovery(self, tester: RealCircuitBreakererTests,
                                      ws_client: RealWebSocketClient) -> Dict[str, Any]:
         """Test automatic recovery after service restoration."""
         async def working_operation():
@@ -479,7 +479,7 @@ class TestCompleteErrorRecovery:
         return recovery_result
     
 
-class TestSyntaxFix:
+class SyntaxFixTests:
     """Generated test class"""
 
     def _validate_complete_recovery(self, circuit_result: Dict[str, Any],
@@ -588,7 +588,7 @@ class TestSyntaxFix:
 # Helper functions for test execution
 async def run_error_recovery_test() -> Dict[str, Any]:
     """Run error recovery test and return comprehensive results."""
-    test_instance = TestCompleteErrorRecovery()
+    test_instance = CompleteErrorRecoveryTests()
     
     # This would typically be run by pytest, but can be called directly for validation
     return {

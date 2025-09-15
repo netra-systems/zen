@@ -233,7 +233,7 @@ class HealthEndpointValidator:
         return validation
 
 
-class TestServiceHealthMonitoringDependencyAware(SSotAsyncTestCase):
+class ServiceHealthMonitoringDependencyAwareTests(SSotAsyncTestCase):
     """
     Service health monitoring tests with dependency awareness.
 

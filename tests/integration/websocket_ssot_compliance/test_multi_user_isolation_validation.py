@@ -71,7 +71,7 @@ class UserSession:
 
 
 @pytest.mark.integration
-class TestMultiUserIsolationValidation(SSotBaseIntegrationTest):
+class MultiUserIsolationValidationTests(SSotBaseIntegrationTest):
     """
     Integration tests for multi-user isolation with factory pattern elimination.
 

@@ -29,7 +29,7 @@ from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.redis_manager import RedisManager
 
 
-class TestActionsToMeetGoalsGoldenPattern:
+class ActionsToMeetGoalsGoldenPatternTests:
     """Test ActionsToMeetGoalsSubAgent golden pattern compliance."""
 
     @pytest.fixture
@@ -83,7 +83,7 @@ class TestActionsToMeetGoalsGoldenPattern:
         )
 
 
-class TestGoldenPatternCompliance(TestActionsToMeetGoalsGoldenPattern):
+class GoldenPatternComplianceTests(ActionsToMeetGoalsGoldenPatternTests):
     """Test golden pattern compliance requirements."""
 
     def test_inherits_from_base_agent(self, agent):
@@ -131,7 +131,7 @@ class TestGoldenPatternCompliance(TestActionsToMeetGoalsGoldenPattern):
         assert hasattr(agent, '_websocket_adapter'), "Must use BaseAgent's WebSocket adapter"
 
 
-class TestWebSocketEvents(TestActionsToMeetGoalsGoldenPattern):
+class WebSocketEventsTests(ActionsToMeetGoalsGoldenPatternTests):
     """Test WebSocket events for chat value delivery."""
 
     @pytest.mark.asyncio
@@ -221,7 +221,7 @@ class TestWebSocketEvents(TestActionsToMeetGoalsGoldenPattern):
         assert 'fallback' in started_call.lower(), "Must communicate fallback to user"
 
 
-class TestBusinessLogic(TestActionsToMeetGoalsGoldenPattern):
+class BusinessLogicTests(ActionsToMeetGoalsGoldenPatternTests):
     """Test action plan generation business logic."""
 
     @pytest.mark.asyncio
@@ -286,7 +286,7 @@ class TestBusinessLogic(TestActionsToMeetGoalsGoldenPattern):
             assert execution_context.state.action_plan_result == mock_result, "State must have correct result"
 
 
-class TestResilience(TestActionsToMeetGoalsGoldenPattern):
+class ResilienceTests(ActionsToMeetGoalsGoldenPatternTests):
     """Test resilience and error handling patterns."""
 
     @pytest.mark.asyncio
@@ -341,7 +341,7 @@ class TestResilience(TestActionsToMeetGoalsGoldenPattern):
         assert minimal_state.data_result is not None, "Should apply default data analysis"
 
 
-class TestIntegration(TestActionsToMeetGoalsGoldenPattern):
+class IntegrationTests(ActionsToMeetGoalsGoldenPatternTests):
     """Integration tests with real components."""
 
     @pytest.mark.asyncio
@@ -393,7 +393,7 @@ class TestIntegration(TestActionsToMeetGoalsGoldenPattern):
         assert agent.timing_collector.agent_name == agent.name, "Timing collector must have agent name"
 
 
-class TestPerformance(TestActionsToMeetGoalsGoldenPattern):
+class PerformanceTests(ActionsToMeetGoalsGoldenPatternTests):
     """Performance and efficiency tests."""
 
     @pytest.mark.asyncio

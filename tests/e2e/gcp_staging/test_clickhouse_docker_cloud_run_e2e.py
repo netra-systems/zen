@@ -25,7 +25,7 @@ from netra_backend.app.logging_config import central_logger
 from fastapi import FastAPI
 
 @pytest.mark.e2e
-class TestClickHouseDockerCloudRunE2E:
+class ClickHouseDockerCloudRunE2ETests:
     """End-to-end tests for ClickHouse Docker availability in Cloud Run."""
 
     @pytest.fixture

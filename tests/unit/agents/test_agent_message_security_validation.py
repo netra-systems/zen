@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 @pytest.mark.unit
-class TestAgentMessageSecurityValidation(SSotAsyncTestCase):
+class AgentMessageSecurityValidationTests(SSotAsyncTestCase):
     """
     Unit tests for agent message security validation functionality.
     
@@ -302,7 +302,7 @@ class TestAgentMessageSecurityValidation(SSotAsyncTestCase):
         assert execution_time < 3.0, f'Test took {execution_time:.2f}s, expected <3s'
 
 @pytest.mark.unit
-class TestAgentMessageSecurityValidationPerformance(SSotAsyncTestCase):
+class AgentMessageSecurityValidationPerformanceTests(SSotAsyncTestCase):
     """
     Performance validation for agent message security test suite.
     
@@ -317,7 +317,7 @@ class TestAgentMessageSecurityValidationPerformance(SSotAsyncTestCase):
         Requirement: <5 seconds total execution time
         """
         start_time = time.time()
-        security_test = TestAgentMessageSecurityValidation()
+        security_test = AgentMessageSecurityValidationTests()
         await security_test.setup_method()
         test_methods = [security_test.test_message_input_sanitization_success(), security_test.test_message_input_sanitization_failure(), security_test.test_rate_limiting_enforcement_success(), security_test.test_rate_limiting_enforcement_failure(), security_test.test_authentication_validation_success(), security_test.test_authentication_validation_failure(), security_test.test_user_context_isolation_validation(), security_test.test_audit_logging_compliance(), security_test.test_message_size_validation_enforcement(), security_test.test_comprehensive_security_validation_flow()]
         await asyncio.gather(*test_methods)

@@ -35,7 +35,7 @@ import psutil
 import pytest
 
 
-class TestStartupValidationer:
+class StartupValidationerTests:
     """Helper class for startup validation testing."""
     
     def __init__(self):
@@ -271,12 +271,12 @@ class TestStartupValidationer:
 @pytest.fixture
 def startup_tester():
     """Create startup validation tester fixture."""
-    tester = TestStartupValidationer()
+    tester = StartupValidationerTests()
     yield tester
     tester.cleanup()
 
 
-class TestStartupComprehensiveE2E:
+class StartupComprehensiveE2ETests:
     """Comprehensive E2E tests for system startup."""
     
     @pytest.mark.asyncio

@@ -29,7 +29,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 
 
-class TestAgentExecutionCoreEnhancedBusinessLogic:
+class AgentExecutionCoreEnhancedBusinessLogicTests:
     """Enhanced unit tests focusing on business-critical logic patterns."""
 
     @pytest.fixture

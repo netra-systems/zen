@@ -15,7 +15,7 @@ from typing import List, Dict, Set
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestLegacyExecutionEngineDetection(SSotBaseTestCase):
+class LegacyExecutionEngineDetectionTests(SSotBaseTestCase):
     """Detect legacy execution engine implementations that violate SSOT."""
 
     def setUp(self):

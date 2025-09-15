@@ -58,7 +58,7 @@ from test_framework.environment_isolation import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestIDMigrationSSOTCompliance(SSotAsyncTestCase, BaseIntegrationTest):
+class IDMigrationSSOTComplianceTests(SSotAsyncTestCase, BaseIntegrationTest):
     """Enhanced compliance tests for UnifiedIDManager migration."""
     
     async def setup_method(self, method):

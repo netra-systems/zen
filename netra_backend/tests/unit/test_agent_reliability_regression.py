@@ -42,7 +42,7 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 
-class TestAsyncWrapperPatterns:
+class AsyncWrapperPatternsTests:
     """Test that async wrapper functions work correctly with reliability manager."""
     
     @pytest.mark.asyncio
@@ -138,7 +138,7 @@ class TestAsyncWrapperPatterns:
         assert 'lambda:' not in source or 'lambda' not in source.split('execute_wrapper')[0]
 
 
-class TestDatetimeCompatibility:
+class DatetimeCompatibilityTests:
     """Test datetime and float timestamp compatibility."""
     
     def test_calculate_execution_time_with_datetime(self):
@@ -229,7 +229,7 @@ class TestDatetimeCompatibility:
         assert execution_time == 0.0
 
 
-class TestExecutionResultConsistency:
+class ExecutionResultConsistencyTests:
     """Test ExecutionResult return type consistency."""
     
     @pytest.mark.asyncio
@@ -287,7 +287,7 @@ class TestExecutionResultConsistency:
         assert result.status == ExecutionStatus.COMPLETED
 
 
-class TestOptimizationsCoreSubAgentIntegration:
+class OptimizationsCoreSubAgentIntegrationTests:
     """Integration tests for the complete OptimizationsCoreSubAgent flow."""
     
     @pytest.mark.asyncio
@@ -378,7 +378,7 @@ class TestOptimizationsCoreSubAgentIntegration:
         assert llm_manager.ask_llm.call_count >= 1
 
 
-class TestAgentHealthStatus:
+class AgentHealthStatusTests:
     """Test agent health status reporting."""
     
     def test_health_status_structure(self):

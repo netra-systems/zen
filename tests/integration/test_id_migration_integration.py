@@ -56,7 +56,7 @@ from test_framework.database_test_utilities import DatabaseTestUtilities
 
 
 @pytest.mark.integration
-class TestCrossServiceIDConsistency(SSotAsyncTestCase, BaseIntegrationTest):
+class CrossServiceIDConsistencyTests(SSotAsyncTestCase, BaseIntegrationTest):
     """Integration tests for ID consistency across service boundaries."""
     
     async def setup_method(self, method):

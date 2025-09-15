@@ -421,7 +421,7 @@ class ExecutionOrderTestHarness:
 # MISSION CRITICAL TEST CLASS
 # ============================================================================
 
-class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
+class DataAgentExecutionOrderNeverFailTests(SSotBaseTestCase):
     """
     MISSION CRITICAL: Data Agent Execution Order Test Suite - $200K+ MRR Protection
     

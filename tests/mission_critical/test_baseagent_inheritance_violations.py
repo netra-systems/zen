@@ -41,7 +41,7 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.llm.llm_manager import LLMManager
 
 
-class TestInheritanceViolationAgent(BaseAgent):
+class InheritanceViolationAgentTests(BaseAgent):
     """Test agent that intentionally violates SSOT patterns for violation detection."""
     
     def __init__(self, violation_type: str = "none", **kwargs):
@@ -109,7 +109,7 @@ class ConcurrentAccessAgent(BaseAgent):
 
 
 @pytest.mark.asyncio 
-class TestBaseAgentInheritanceViolations:
+class BaseAgentInheritanceViolationsTests:
     """CRITICAL tests that MUST FAIL if inheritance is broken."""
     
     async def test_ssot_websocket_adapter_violation_detection(self):
@@ -119,7 +119,7 @@ class TestBaseAgentInheritanceViolations:
         violating SSOT pattern.
         """
         # Create agent with WebSocket adapter violation
-        violation_agent = TestInheritanceViolationAgent(
+        violation_agent = InheritanceViolationAgentTests(
             violation_type="duplicate_websocket_adapter",
             name="ViolationTestAgent"
         )
@@ -146,7 +146,7 @@ class TestBaseAgentInheritanceViolations:
         patterns violate expected method resolution.
         """
         # Test agent with potential MRO issues
-        normal_agent = TestInheritanceViolationAgent(name="NormalAgent")
+        normal_agent = InheritanceViolationAgentTests(name="NormalAgent")
         mro_agent = MultipleMROViolationAgent(name="MROAgent")
         
         # Verify MRO contains BaseAgent
@@ -182,7 +182,7 @@ class TestBaseAgentInheritanceViolations:
         """
         # Test agent that bypasses super().__init__()
         try:
-            violation_agent = TestInheritanceViolationAgent(
+            violation_agent = InheritanceViolationAgentTests(
                 violation_type="bypass_super_init",
                 name="InitViolationAgent"
             )
@@ -211,7 +211,7 @@ class TestBaseAgentInheritanceViolations:
         reliability handler violating SSOT pattern.
         """
         # Create agent with SSOT method overrides
-        violation_agent = TestInheritanceViolationAgent(
+        violation_agent = InheritanceViolationAgentTests(
             violation_type="override_ssot_methods",
             name="SSOTViolationAgent"
         )
@@ -239,7 +239,7 @@ class TestBaseAgentInheritanceViolations:
         and MUST FAIL if any are missing or incorrectly implemented.
         """
         # Test normal agent
-        normal_agent = TestInheritanceViolationAgent(name="AbstractTestAgent")
+        normal_agent = InheritanceViolationAgentTests(name="AbstractTestAgent")
         
         # CRITICAL CHECK: All abstract methods must be implemented
         abstract_methods = []
@@ -343,7 +343,7 @@ class TestBaseAgentInheritanceViolations:
         """
         # Create multiple agents with inheritance
         agents = [
-            TestInheritanceViolationAgent(name=f"WebSocketTest{i}")
+            InheritanceViolationAgentTests(name=f"WebSocketTest{i}")
             for i in range(5)
         ]
         
@@ -398,9 +398,9 @@ class TestBaseAgentInheritanceViolations:
         """
         # Create agents with different execution configurations
         agents = [
-            TestInheritanceViolationAgent(name="ExecTest1", enable_execution_engine=True),
-            TestInheritanceViolationAgent(name="ExecTest2", enable_execution_engine=False),
-            TestInheritanceViolationAgent(name="ExecTest3", enable_execution_engine=True)
+            InheritanceViolationAgentTests(name="ExecTest1", enable_execution_engine=True),
+            InheritanceViolationAgentTests(name="ExecTest2", enable_execution_engine=False),
+            InheritanceViolationAgentTests(name="ExecTest3", enable_execution_engine=True)
         ]
         
         enabled_agents = [a for a in agents if a._enable_execution_engine]
@@ -439,7 +439,7 @@ class TestBaseAgentInheritanceViolations:
         This test verifies state management is consistent across inheritance
         and MUST FAIL if state transitions are broken.
         """
-        agent = TestInheritanceViolationAgent(name="StateTestAgent")
+        agent = InheritanceViolationAgentTests(name="StateTestAgent")
         
         # Test state transition consistency
         valid_transitions = {
@@ -484,7 +484,7 @@ class TestBaseAgentInheritanceViolations:
     
     async def test_execute_core_pattern_violation_detection(self):
         """CRITICAL: Must detect _execute_core pattern violations."""
-        agent = TestInheritanceViolationAgent(name="ExecuteCoreTest")
+        agent = InheritanceViolationAgentTests(name="ExecuteCoreTest")
         
         context = ExecutionContext(
             run_id="test_execute_core",
@@ -503,7 +503,7 @@ class TestBaseAgentInheritanceViolations:
         
     async def test_execute_core_context_handling_violations(self):
         """CRITICAL: Must detect context handling violations in _execute_core."""
-        agent = TestInheritanceViolationAgent(name="ContextTest")
+        agent = InheritanceViolationAgentTests(name="ContextTest")
         
         # Test with None context (should handle gracefully or fail predictably)
         try:
@@ -521,7 +521,7 @@ class TestBaseAgentInheritanceViolations:
             
     async def test_execute_core_state_consistency_violations(self):
         """CRITICAL: Must detect state consistency violations during _execute_core."""
-        agent = TestInheritanceViolationAgent(name="StateConsistencyTest")
+        agent = InheritanceViolationAgentTests(name="StateConsistencyTest")
         
         context = ExecutionContext(
             run_id="state_consistency_test",

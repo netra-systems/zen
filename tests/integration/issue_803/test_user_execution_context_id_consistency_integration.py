@@ -28,7 +28,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.integration
-class TestIssue803UserExecutionContextIDConsistency(SSotAsyncTestCase):
+class Issue803UserExecutionContextIDConsistencyTests(SSotAsyncTestCase):
     """Integration tests for UserExecutionContext ID consistency validation."""
 
     def setUp(self):

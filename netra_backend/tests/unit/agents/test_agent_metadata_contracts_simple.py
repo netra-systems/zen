@@ -14,7 +14,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.core_types import UserID, ThreadID, RunID
 
 
-class TestAgentMetadataContractsSimple:
+class AgentMetadataContractsSimpleTests:
     """Test agent metadata contracts without full execution."""
 
     def setup_method(self):

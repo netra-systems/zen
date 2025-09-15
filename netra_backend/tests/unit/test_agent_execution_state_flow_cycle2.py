@@ -33,7 +33,7 @@ class MockAgentExecutionState(Enum):
     COMPLETED = "completed"
     FAILED = "failed"
 
-class TestAgentExecutionStateFlow:
+class AgentExecutionStateFlowTests:
     """Test agent execution engine state flow management."""
     
     @pytest.fixture

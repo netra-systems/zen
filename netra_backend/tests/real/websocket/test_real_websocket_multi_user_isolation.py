@@ -35,7 +35,7 @@ env = get_env()
 @pytest.mark.multi_user_isolation
 @pytest.mark.security_critical
 @skip_if_no_real_services
-class TestRealWebSocketMultiUserIsolation:
+class RealWebSocketMultiUserIsolationTests:
     """Test real multi-user isolation through WebSocket connections.
     
     CRITICAL: Tests complete user isolation per CLAUDE.md:

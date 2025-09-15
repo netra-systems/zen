@@ -78,7 +78,7 @@ except ImportError:
 @pytest.mark.integration
 @pytest.mark.websocket_flow
 @pytest.mark.business_critical
-class TestWebSocketMessageFlowIntegration(SSotAsyncTestCase):
+class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
     """
     Phase 1: WebSocket Message Flow Integration Test Suite
 

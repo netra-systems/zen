@@ -40,7 +40,7 @@ from netra_backend.app.models.user import User
 from netra_backend.app.models.thread import Thread, Message
 
 
-class TestRedisCacheIntegration(BaseIntegrationTest):
+class RedisCacheIntegrationTests(BaseIntegrationTest):
     """Test Redis cache consistency with real database synchronization."""
 
     @pytest.mark.integration

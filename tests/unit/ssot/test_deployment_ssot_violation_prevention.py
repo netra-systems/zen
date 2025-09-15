@@ -36,7 +36,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestDeploymentSsotViolationPrevention(SSotBaseTestCase):
+class DeploymentSsotViolationPreventionTests(SSotBaseTestCase):
     """
     Unit tests for SSOT deployment violation prevention.
     
@@ -294,7 +294,7 @@ class TestDeploymentSsotViolationPrevention(SSotBaseTestCase):
         return {'success': True, 'recovery_time': 20, 'steps_required': 5}
 
 @pytest.mark.unit
-class TestDeploymentSsotViolationPreventionIntegration(SSotBaseTestCase):
+class DeploymentSsotViolationPreventionIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for SSOT violation prevention system.
     """

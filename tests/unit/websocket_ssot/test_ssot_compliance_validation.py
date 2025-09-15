@@ -11,7 +11,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestWebSocketSSOTComplianceValidation(SSotBaseTestCase):
+class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
     """NEW TESTS: Comprehensive SSOT compliance validation for WebSocket agent bridge."""
     
     def test_ssot_single_source_principle_validation(self):
@@ -162,7 +162,7 @@ class TestWebSocketSSOTComplianceValidation(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestWebSocketSSOTRegressionPrevention(SSotBaseTestCase):
+class WebSocketSSOTRegressionPreventionTests(SSotBaseTestCase):
     """NEW TESTS: Regression prevention for WebSocket SSOT implementation."""
 
     def test_regression_prevention_broken_path_monitoring(self):
@@ -304,7 +304,7 @@ class TestWebSocketSSOTRegressionPrevention(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestWebSocketSSOTArchitecturalCompliance(SSotBaseTestCase):
+class WebSocketSSOTArchitecturalComplianceTests(SSotBaseTestCase):
     """NEW TESTS: Architectural compliance validation for WebSocket SSOT implementation."""
 
     def test_ssot_architectural_pattern_compliance(self):

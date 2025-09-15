@@ -48,7 +48,7 @@ except ImportError:
     GCP_CLIENTS_AVAILABLE = False
 logger = logging.getLogger(__name__)
 
-class TestGCPInfrastructureValidation(BaseIntegrationTest):
+class GCPInfrastructureValidationTests(BaseIntegrationTest):
     """
     Comprehensive GCP infrastructure validation using REAL services and configurations.
     

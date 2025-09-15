@@ -272,7 +272,7 @@ class MockAgent(BaseAgent):
         return execution_result
 
 
-class TestAgentWebSocketEventDeliveryNoDB(SSotAsyncTestCase):
+class AgentWebSocketEventDeliveryNoDBTests(SSotAsyncTestCase):
     """Integration tests for agent WebSocket event delivery without database dependencies."""
     
     def setup_method(self, method):

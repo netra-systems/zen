@@ -45,7 +45,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from auth_service.auth_core.oauth_manager import OAuthManager
 from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider, GoogleOAuthError
 
-class TestOAuthManagerSSotInitialization(SSotBaseTestCase):
+class OAuthManagerSSotInitializationTests(SSotBaseTestCase):
     """
     Test OAuth Manager SSOT initialization and basic functionality.
     
@@ -107,7 +107,7 @@ class TestOAuthManagerSSotInitialization(SSotBaseTestCase):
         self.record_metric('initialization_time_seconds', initialization_time)
         self.record_metric('provider_access_time_seconds', access_time)
 
-class TestOAuthManagerSSotProviderManagement(SSotBaseTestCase):
+class OAuthManagerSSotProviderManagementTests(SSotBaseTestCase):
     """
     Test OAuth Manager SSOT provider management and access patterns.
     
@@ -164,7 +164,7 @@ class TestOAuthManagerSSotProviderManagement(SSotBaseTestCase):
             assert provider1 is not direct_provider, 'Manager instance should be separate from direct instance'
         self.record_metric('provider_instance_isolation_validated', True)
 
-class TestOAuthManagerSSotProviderConfiguration(SSotBaseTestCase):
+class OAuthManagerSSotProviderConfigurationTests(SSotBaseTestCase):
     """
     Test OAuth Manager SSOT provider configuration validation and status reporting.
     
@@ -230,7 +230,7 @@ class TestOAuthManagerSSotProviderConfiguration(SSotBaseTestCase):
                 assert configured_via_manager == provider_configured
         self.record_metric('configuration_consistency_validated', True)
 
-class TestOAuthManagerSSotMultiEnvironment(SSotBaseTestCase):
+class OAuthManagerSSotMultiEnvironmentTests(SSotBaseTestCase):
     """
     Test OAuth Manager SSOT behavior across different environments.
     
@@ -304,7 +304,7 @@ class TestOAuthManagerSSotMultiEnvironment(SSotBaseTestCase):
                     assert config_status['environment'] == env
         self.record_metric('environment_isolation_validated', True)
 
-class TestOAuthManagerSSotSecurityPatterns(SSotBaseTestCase):
+class OAuthManagerSSotSecurityPatternsTests(SSotBaseTestCase):
     """
     Test OAuth Manager SSOT security patterns and protections.
     
@@ -389,7 +389,7 @@ class TestOAuthManagerSSotSecurityPatterns(SSotBaseTestCase):
         else:
             self.record_metric('callback_validation_skipped', True)
 
-class TestOAuthManagerSSotConcurrency(SSotBaseTestCase):
+class OAuthManagerSSotConcurrencyTests(SSotBaseTestCase):
     """
     Test OAuth Manager SSOT concurrency and thread safety.
     
@@ -490,7 +490,7 @@ class TestOAuthManagerSSotConcurrency(SSotBaseTestCase):
         self.record_metric('memory_stability_validated', True)
         self.record_metric('memory_growth_objects', memory_growth)
 
-class TestOAuthManagerSSotErrorBoundaries(SSotBaseTestCase):
+class OAuthManagerSSotErrorBoundariesTests(SSotBaseTestCase):
     """
     Test OAuth Manager SSOT error boundaries and failure modes.
     
@@ -566,7 +566,7 @@ class TestOAuthManagerSSotErrorBoundaries(SSotBaseTestCase):
                 assert isinstance(status, dict)
         self.record_metric('partial_configuration_scenarios_handled', len(partial_configs))
 
-class TestOAuthManagerSSotBusinessValueValidation(SSotBaseTestCase):
+class OAuthManagerSSotBusinessValueValidationTests(SSotBaseTestCase):
     """
     Test OAuth Manager SSOT business value protection and validation.
     

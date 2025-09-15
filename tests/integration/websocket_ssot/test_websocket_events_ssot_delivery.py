@@ -21,7 +21,7 @@ from unittest.mock import AsyncMock, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.integration
-class TestWebSocketEventsSSotDelivery(SSotAsyncTestCase):
+class WebSocketEventsSSotDeliveryTests(SSotAsyncTestCase):
     """Test WebSocket events delivery with SSOT patterns."""
     REQUIRED_WEBSOCKET_EVENTS = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
 

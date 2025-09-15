@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Dict
 import pytest
 
-class TestConfigurationMigrationValidation:
+class ConfigurationMigrationValidationTests:
     """Comprehensive validation of configuration migration fixes."""
 
     def test_no_direct_os_environ_in_production_code(self):

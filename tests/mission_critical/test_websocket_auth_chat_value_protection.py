@@ -58,7 +58,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.mission_critical
-class TestWebSocketAuthChatValueProtection:
+class WebSocketAuthChatValueProtectionTests:
     """
      ALERT:  MISSION CRITICAL tests for WebSocket authentication chat value protection.
     

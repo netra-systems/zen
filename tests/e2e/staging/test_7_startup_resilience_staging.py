@@ -14,7 +14,7 @@ from tests.e2e.staging_test_base import StagingTestBase, staging_test
 
 
 @pytest.mark.e2e
-class TestStartupResilienceStaging(StagingTestBase):
+class StartupResilienceStagingTests(StagingTestBase):
     """Test startup resilience in staging environment"""
     
     @staging_test
@@ -125,7 +125,7 @@ class TestStartupResilienceStaging(StagingTestBase):
 
 if __name__ == "__main__":
     async def run_tests():
-        test_class = TestStartupResilienceStaging()
+        test_class = StartupResilienceStagingTests()
         test_class.setup_class()
         
         try:

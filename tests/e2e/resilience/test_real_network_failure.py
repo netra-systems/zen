@@ -151,7 +151,7 @@ class AutoReconnectionValidator:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestRealNetworkFailureWithMessageQueue:
+class RealNetworkFailureWithMessageQueueTests:
     """Test #4: Real Network Failure with Message Queue Preservation."""
     
     @pytest.fixture

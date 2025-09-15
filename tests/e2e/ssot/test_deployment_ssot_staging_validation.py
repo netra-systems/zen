@@ -36,7 +36,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.e2e
-class TestDeploymentSsotStagingValidation(SSotBaseTestCase):
+class DeploymentSsotStagingValidationTests(SSotBaseTestCase):
     """
     E2E tests for deployment SSOT compliance in staging environment.
     
@@ -239,7 +239,7 @@ class TestDeploymentSsotStagingValidation(SSotBaseTestCase):
             return False
 
 @pytest.mark.e2e
-class TestDeploymentSsotStagingEdgeCases(SSotBaseTestCase):
+class DeploymentSsotStagingEdgeCasesTests(SSotBaseTestCase):
     """
     Edge case tests for SSOT deployment staging validation.
     """

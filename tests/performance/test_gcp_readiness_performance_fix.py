@@ -27,7 +27,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import GCPWeb
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.performance
-class TestGCPReadinessPerformanceFix(SSotBaseTestCase):
+class GCPReadinessPerformanceFixTests(SSotBaseTestCase):
     """Test suite for GCP readiness validation performance regression."""
 
     @pytest.fixture(autouse=True)

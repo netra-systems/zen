@@ -45,7 +45,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestDatabaseSessionRaces(SSotBaseTestCase):
+class DatabaseSessionRacesTests(SSotBaseTestCase):
     """Test race conditions in database session management."""
     
     def setup_method(self):

@@ -23,7 +23,7 @@ try:
 except ImportError:
     pytest.skip("Required modules have been removed or have missing dependencies", allow_module_level=True)
 
-    class TestWebSocketConnectionParadoxPrevention:
+    class WebSocketConnectionParadoxPreventionTests:
         pass
 
         """Test suite to prevent WebSocket connection paradox regression."""

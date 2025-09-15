@@ -21,7 +21,7 @@ from typing import List, Tuple, Dict, Any
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestWebSocketImportPathConsistency(SSotBaseTestCase, unittest.TestCase):
+class WebSocketImportPathConsistencyTests(SSotBaseTestCase, unittest.TestCase):
     """Test WebSocket import path consistency for SSOT compliance."""
 
     def get_deprecated_import_paths(self) -> List[Tuple[str, str]]:

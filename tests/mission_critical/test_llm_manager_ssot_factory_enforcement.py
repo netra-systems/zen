@@ -31,7 +31,7 @@ from netra_backend.app.dependencies import get_llm_manager
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestLLMManagerFactoryPatternEnforcement(SSotBaseTestCase):
+class LLMManagerFactoryPatternEnforcementTests(SSotBaseTestCase):
     """Test 1: Factory Pattern Enforcement - Detect direct LLMManager() violations"""
     
     def test_llm_manager_factory_pattern_only(self):

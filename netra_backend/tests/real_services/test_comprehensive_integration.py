@@ -287,7 +287,7 @@ async def integration_server():
     yield server
     await server.stop_server()
 
-class TestComprehensiveIntegration:
+class ComprehensiveIntegrationTests:
     """Comprehensive integration tests with all real services."""
 
     @pytest.mark.asyncio

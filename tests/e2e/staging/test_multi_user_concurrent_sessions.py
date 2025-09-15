@@ -33,7 +33,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from tests.e2e.staging_config import get_staging_config
 
 
-class TestMultiUserConcurrentSessions(BaseE2ETest):
+class MultiUserConcurrentSessionsTests(BaseE2ETest):
     """Test multi-user scenarios with proper isolation and concurrent execution."""
     
     def setup_method(self):

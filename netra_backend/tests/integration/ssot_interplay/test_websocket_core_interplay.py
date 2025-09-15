@@ -134,7 +134,7 @@ class MockWebSocketAgent(BaseAgent):
             raise
 
 
-class TestWebSocketCoreInterplay(BaseIntegrationTest):
+class WebSocketCoreInterplayTests(BaseIntegrationTest):
     """Integration tests for WebSocket Core SSOT interactions."""
     
     def setup_method(self):

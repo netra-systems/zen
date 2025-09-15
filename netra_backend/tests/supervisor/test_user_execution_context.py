@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
 )
 
 
-class TestUserExecutionContextCreation:
+class UserExecutionContextCreationTests:
     """Test UserExecutionContext creation and validation."""
     
     def test_valid_context_creation(self):
@@ -92,7 +92,7 @@ class TestUserExecutionContextCreation:
             context.thread_id = "new_thread"
 
 
-class TestValidation:
+class ValidationTests:
     """Test validation logic."""
     
     def test_empty_user_id_raises_error(self):
@@ -155,7 +155,7 @@ class TestValidation:
             )
 
 
-class TestFactoryMethods:
+class FactoryMethodsTests:
     """Test factory methods."""
     
     def test_from_request_minimal(self):
@@ -205,7 +205,7 @@ class TestFactoryMethods:
         assert context.metadata == metadata
 
 
-class TestChildContexts:
+class ChildContextsTests:
     """Test child context creation."""
     
     def test_create_child_context(self):
@@ -277,7 +277,7 @@ class TestChildContexts:
             parent.create_child_context("")
 
 
-class TestContextModification:
+class ContextModificationTests:
     """Test context modification methods."""
     
     def test_with_db_session(self):
@@ -321,7 +321,7 @@ class TestContextModification:
         assert with_ws.run_id == original.run_id
 
 
-class TestIsolationVerification:
+class IsolationVerificationTests:
     """Test isolation verification functionality."""
     
     def setUp(self):
@@ -365,7 +365,7 @@ class TestIsolationVerification:
         # The core functionality (detecting duplicate IDs) is working as expected.
 
 
-class TestSerialization:
+class SerializationTests:
     """Test serialization functionality."""
     
     def test_to_dict(self):
@@ -426,7 +426,7 @@ class TestSerialization:
         assert correlation_id == expected
 
 
-class TestEdgeCases:
+class EdgeCasesTests:
     """Test edge cases and error conditions."""
     
     def test_very_long_ids(self):

@@ -22,7 +22,7 @@ from netra_backend.app.core.managers.unified_lifecycle_manager import UnifiedLif
 from netra_backend.app.core.configuration.base import UnifiedConfigManager, get_config, get_config_value, set_config_value, validate_config_value, get_environment, is_production, is_development, is_testing, config_manager
 from netra_backend.app.core.managers.unified_state_manager import UnifiedStateManager
 
-class TestSSOTManagersBasic:
+class SSOTManagersBasicTests:
     """Basic functionality tests for SSOT managers."""
 
     def test_ssot_managers_import_successfully(self):
@@ -101,7 +101,7 @@ class TestSSOTManagersBasic:
         except Exception as e:
             print(f'Shutdown had issues in unit test (expected): {e}')
 
-class TestSSOTManagersFactoryPattern:
+class SSOTManagersFactoryPatternTests:
     """Test factory pattern isolation across SSOT managers."""
 
     def test_factory_pattern_creates_isolated_instances(self):

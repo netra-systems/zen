@@ -234,7 +234,7 @@ class MockGoldenPathSupervisor:
             raise
 
 
-class TestWebSocketSSotGoldenPathE2EValidation(SSotAsyncTestCase):
+class WebSocketSSotGoldenPathE2EValidationTests(SSotAsyncTestCase):
     """Mission Critical: WebSocket SSOT Golden Path End-to-End Validation
     
     This test validates the complete Golden Path user journey after SSOT 

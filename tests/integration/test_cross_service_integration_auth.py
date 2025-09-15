@@ -28,7 +28,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 @pytest.mark.integration
-class TestSyntaxFix:
+class SyntaxFixTests:
     """Test class for orphaned methods"""
 
     def service_discovery(self):

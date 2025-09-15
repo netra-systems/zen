@@ -311,7 +311,7 @@ class PerformanceTestHarness(AnalyticsE2ETestHarness):
 # HIGH-VOLUME EVENT INGESTION TESTS
 # =============================================================================
 
-class TestHighVolumeEventIngestion:
+class HighVolumeEventIngestionTests:
     """Test suite for high-volume event ingestion performance"""
     
     @pytest.fixture
@@ -509,7 +509,7 @@ class TestHighVolumeEventIngestion:
 # CONCURRENT USER LOAD TESTS
 # =============================================================================
 
-class TestConcurrentUserLoad:
+class ConcurrentUserLoadTests:
     """Test suite for concurrent user load testing"""
     
     @pytest.fixture
@@ -733,7 +733,7 @@ class TestConcurrentUserLoad:
 # DATABASE PERFORMANCE TESTS
 # =============================================================================
 
-class TestDatabasePerformanceUnderLoad:
+class DatabasePerformanceUnderLoadTests:
     """Test suite for database performance under load"""
     
     @pytest.fixture
@@ -883,7 +883,7 @@ class TestDatabasePerformanceUnderLoad:
 # SCALABILITY AND STRESS TESTS
 # =============================================================================
 
-class TestScalabilityAndStressLimits:
+class ScalabilityAndStressLimitsTests:
     """Test suite for identifying scalability limits and stress testing"""
     
     @pytest.fixture
@@ -1074,7 +1074,7 @@ class TestScalabilityAndStressLimits:
 # PERFORMANCE REGRESSION TESTS
 # =============================================================================
 
-class TestPerformanceRegression:
+class PerformanceRegressionTests:
     """Test suite for performance regression detection"""
     
     @pytest.fixture

@@ -235,7 +235,7 @@ async def real_message_flow_tester():
     await tester.cleanup()
 
 
-class TestMessageFlowComprehensiveE2E:
+class MessageFlowComprehensiveE2ETests:
     """Comprehensive E2E tests for message flow using REAL services only."""
     
     @pytest.mark.asyncio

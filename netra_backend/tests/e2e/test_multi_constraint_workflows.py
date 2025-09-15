@@ -37,7 +37,7 @@ def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_d
 # - TestMultiConstraintEdgeCases -> test_multi_constraint_edge_cases.py
 # - TestWorkflowDataIntegrity -> test_multi_constraint_integrity.py
 
-class TestMultiConstraintWorkflows:
+class MultiConstraintWorkflowsTests:
     """Basic tests for test_multi_constraint_workflows.py functionality."""
 
     @pytest.mark.asyncio

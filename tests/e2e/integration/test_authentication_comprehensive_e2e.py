@@ -32,7 +32,7 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
-class TestAuthenticationE2Eer:
+class AuthenticationE2EerTests:
     """Helper class for authentication E2E testing."""
     
     def __init__(self):
@@ -80,7 +80,7 @@ async def auth_tester():
     await tester.cleanup()
 
 
-class TestAuthenticationComprehensiveE2E:
+class AuthenticationComprehensiveE2ETests:
     """Comprehensive E2E tests for authentication flows."""
     
     @pytest.mark.asyncio

@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.e2e
 @pytest.mark.staging_environment
-class TestClickHouseExceptionE2E(SSotAsyncTestCase):
+class ClickHouseExceptionE2ETests(SSotAsyncTestCase):
     """E2E tests for ClickHouse exception handling in staging environment."""
 
     def setUp(self):

@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 @pytest.mark.unit
-class TestMigrationCompliance(SSotBaseTestCase):
+class MigrationComplianceTests(SSotBaseTestCase):
     """
     Test suite to validate migration compliance across all services.
 

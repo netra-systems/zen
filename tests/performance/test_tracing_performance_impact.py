@@ -29,7 +29,7 @@ from test_framework.ssot.real_websocket_test_client import RealWebSocketTestClie
 from test_framework.ssot.real_services_test_fixtures import real_services_fixture
 
 
-class TestTracingPerformanceImpact(SSotAsyncTestCase):
+class TracingPerformanceImpactTests(SSotAsyncTestCase):
     """Performance impact tests for distributed tracing - MUST FAIL with high overhead."""
 
     @pytest.mark.performance
@@ -368,7 +368,7 @@ class TestTracingPerformanceImpact(SSotAsyncTestCase):
                 f"Redis tracing overhead {simulated_traced_operation_time:.4f}s exceeds 20% threshold {max_acceptable_overhead:.4f}s"
 
 
-class TestTracingResourceConsumption(SSotAsyncTestCase):
+class TracingResourceConsumptionTests(SSotAsyncTestCase):
     """Test tracing resource consumption - MUST FAIL with excessive usage initially."""
 
     @pytest.mark.performance
@@ -548,7 +548,7 @@ class TestTracingResourceConsumption(SSotAsyncTestCase):
                 )
 
 
-class TestPerformanceSLAValidation(SSotAsyncTestCase):
+class PerformanceSLAValidationTests(SSotAsyncTestCase):
     """Test performance SLA compliance with tracing - MUST FAIL if SLAs violated."""
 
     @pytest.mark.performance

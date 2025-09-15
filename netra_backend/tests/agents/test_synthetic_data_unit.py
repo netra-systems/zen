@@ -57,7 +57,7 @@ def synthetic_data_agent(mock_llm_manager, mock_tool_dispatcher):
         agent.approval_requirements = approval_requirements_instance  # Initialize appropriate service
         return agent
 
-    class TestCleanup:
+    class CleanupTests:
         @pytest.mark.asyncio
         async def test_cleanup(self, synthetic_data_agent, sample_agent_state):
             run_id = "test-run-123"
@@ -65,7 +65,7 @@ def synthetic_data_agent(mock_llm_manager, mock_tool_dispatcher):
                 await synthetic_data_agent.cleanup(sample_agent_state, run_id)
                 mock_parent_cleanup.assert_called_once_with(sample_agent_state, run_id)
 
-                class TestApprovalWorkflow:
+                class ApprovalWorkflowTests:
                     @pytest.mark.asyncio
                     async def test_approval_required_high_volume(self, synthetic_data_agent, sample_agent_state):
                         high_volume_profile = WorkloadProfile(
@@ -92,7 +92,7 @@ def synthetic_data_agent(mock_llm_manager, mock_tool_dispatcher):
                             result = synthetic_data_agent.approval_requirements.check_approval_requirements(low_volume_profile, sample_agent_state)
                             assert result is False
 
-                            class TestEdgeCases:
+                            class EdgeCasesTests:
                                 @pytest.mark.asyncio
                                 async def test_execute_with_none_state(self, synthetic_data_agent):
                                     with patch.object(synthetic_data_agent, '_execute_main_flow', new_callable=AsyncMock) as mock_main_flow:

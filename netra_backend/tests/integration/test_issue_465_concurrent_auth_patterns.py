@@ -22,7 +22,7 @@ from netra_backend.app.core.configuration.base import get_unified_config
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestIssue465ConcurrentAuthPatterns(SSotAsyncTestCase):
+class Issue465ConcurrentAuthPatternsTests(SSotAsyncTestCase):
     """
     Integration tests for concurrent authentication patterns
     

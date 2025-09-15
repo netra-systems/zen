@@ -28,7 +28,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
-class TestExecutionEngineMigrationSSotIntegration(SSotAsyncTestCase):
+class ExecutionEngineMigrationSSotIntegrationTests(SSotAsyncTestCase):
     """Test execution engine migration with real services integration."""
 
     def setup_method(self):
@@ -234,7 +234,7 @@ class TestExecutionEngineMigrationSSotIntegration(SSotAsyncTestCase):
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.no_docker
-class TestExecutionEngineRealServiceValidation:
+class ExecutionEngineRealServiceValidationTests:
     """Test execution engine with real services (pytest-style)."""
 
     @pytest.mark.asyncio

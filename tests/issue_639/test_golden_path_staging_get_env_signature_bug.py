@@ -45,7 +45,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestIssue639GetEnvSignatureBug(SSotAsyncTestCase):
+class Issue639GetEnvSignatureBugTests(SSotAsyncTestCase):
     """
     Test suite for Issue #639 - get_env() signature bug reproduction and validation.
     
@@ -366,7 +366,7 @@ class TestIssue639GetEnvSignatureBug(SSotAsyncTestCase):
         logger.info("=" * 80)
 
 
-class TestIssue639StagingConfigurationValidation(SSotAsyncTestCase):
+class Issue639StagingConfigurationValidationTests(SSotAsyncTestCase):
     """
     Test suite for Issue #639 staging environment configuration validation.
     

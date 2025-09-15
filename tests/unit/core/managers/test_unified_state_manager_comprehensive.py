@@ -44,7 +44,7 @@ from netra_backend.app.core.managers.unified_state_manager import (
 
 
 @pytest.mark.unit
-class TestUnifiedStateManagerCore:
+class UnifiedStateManagerCoreTests:
     """Core state manager functionality tests"""
     
     def test_initialization_creates_proper_structures(self):
@@ -103,7 +103,7 @@ class TestUnifiedStateManagerCore:
 
 
 @pytest.mark.unit
-class TestStateScoping:
+class StateScopingTests:
     """Test multi-scope state isolation - CRITICAL for $500K+ ARR protection"""
     
     def test_user_scoped_state_operations(self):
@@ -178,7 +178,7 @@ class TestStateScoping:
 
 
 @pytest.mark.unit
-class TestTTLManagement:
+class TTLManagementTests:
     """Test TTL-based state expiration - critical for memory management"""
     
     def test_ttl_expiration_on_get(self):
@@ -239,7 +239,7 @@ class TestTTLManagement:
 
 
 @pytest.mark.unit
-class TestConcurrencyAndThreadSafety:
+class ConcurrencyAndThreadSafetyTests:
     """Test thread-safe operations - CRITICAL for concurrent users"""
     
     def test_concurrent_state_modifications(self):
@@ -339,7 +339,7 @@ class TestConcurrencyAndThreadSafety:
 
 
 @pytest.mark.unit
-class TestMemoryManagement:
+class MemoryManagementTests:
     """Test memory management and limits - prevents system crashes"""
     
     def test_memory_limit_enforcement(self):
@@ -381,7 +381,7 @@ class TestMemoryManagement:
 
 
 @pytest.mark.unit
-class TestEventSystem:
+class EventSystemTests:
     """Test state change event system - enables real-time WebSocket updates"""
     
     def test_change_event_generation(self):
@@ -440,7 +440,7 @@ class TestEventSystem:
 
 
 @pytest.mark.unit
-class TestFactoryPattern:
+class FactoryPatternTests:
     """Test factory pattern for user isolation - CRITICAL for multi-tenant security"""
     
     def test_global_manager_singleton(self):
@@ -501,7 +501,7 @@ class TestFactoryPattern:
 
 
 @pytest.mark.unit
-class TestStateQuerying:
+class StateQueryingTests:
     """Test advanced state querying and filtering"""
     
     def test_basic_state_query(self):
@@ -560,7 +560,7 @@ class TestStateQuerying:
 
 
 @pytest.mark.unit
-class TestContextManagers:
+class ContextManagersTests:
     """Test context managers for scoped operations"""
     
     @pytest.mark.asyncio
@@ -595,7 +595,7 @@ class TestContextManagers:
 
 
 @pytest.mark.unit
-class TestBulkOperations:
+class BulkOperationsTests:
     """Test bulk state operations for performance"""
     
     def test_bulk_get_operations(self):
@@ -661,7 +661,7 @@ class TestBulkOperations:
 
 
 @pytest.mark.unit
-class TestStatusAndMonitoring:
+class StatusAndMonitoringTests:
     """Test status reporting and monitoring capabilities"""
     
     def test_comprehensive_status_report(self):
@@ -700,7 +700,7 @@ class TestStatusAndMonitoring:
 
 
 @pytest.mark.unit
-class TestConvenienceFunctions:
+class ConvenienceFunctionsTests:
     """Test module-level convenience functions"""
     
     def test_get_state_manager_convenience(self):
@@ -735,7 +735,7 @@ class TestConvenienceFunctions:
 
 
 @pytest.mark.unit
-class TestErrorHandling:
+class ErrorHandlingTests:
     """Test error handling and edge cases"""
     
     def test_invalid_state_operations(self):
@@ -778,7 +778,7 @@ class TestErrorHandling:
 
 # Performance and Load Testing
 @pytest.mark.unit
-class TestPerformanceScenarios:
+class PerformanceScenariosTests:
     """Performance tests for high-load scenarios - protects $500K+ ARR"""
     
     def test_high_volume_state_operations(self):

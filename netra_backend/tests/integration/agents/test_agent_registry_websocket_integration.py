@@ -34,7 +34,7 @@ from shared.types import UserID, ThreadID, RunID, RequestID
 from shared.id_generation import UnifiedIdGenerator
 
 
-class TestAgentRegistryWebSocketIntegration(BaseIntegrationTest):
+class AgentRegistryWebSocketIntegrationTests(BaseIntegrationTest):
     """Integration tests for agent registry WebSocket integration."""
 
     @pytest.fixture(autouse=True)

@@ -22,7 +22,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestCircularReferencePreventionValidation(SSotAsyncTestCase):
+class CircularReferencePreventionValidationTests(SSotAsyncTestCase):
     """Test circular reference prevention for WebSocket Manager SSOT."""
 
     def setUp(self):

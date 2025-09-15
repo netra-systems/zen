@@ -17,7 +17,7 @@ from netra_backend.app.services.websocket.message_handler import MessageHandlerS
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 @pytest.mark.asyncio
-class TestMessageHandlerRealConnections:
+class MessageHandlerRealConnectionsTests:
     """Real WebSocket message handler test suite - NO MOCKS."""
 
     @pytest.fixture(autouse=True)
@@ -192,7 +192,7 @@ class TestMessageHandlerRealConnections:
         assert ws_client._connected is False
 
 @pytest.mark.asyncio
-class TestMessageRoutingReal:
+class MessageRoutingRealTests:
     """Test message routing with real WebSocket connections."""
 
     @pytest.fixture(autouse=True)

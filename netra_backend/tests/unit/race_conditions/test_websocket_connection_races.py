@@ -79,7 +79,7 @@ class MockWebSocket:
         self.received_messages.append(message)
 
 
-class TestWebSocketConnectionRaces(SSotBaseTestCase):
+class WebSocketConnectionRacesTests(SSotBaseTestCase):
     """Test race conditions in WebSocket connection management."""
     
     def setup_method(self):

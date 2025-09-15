@@ -102,7 +102,7 @@ class UserOnboardingJourneyValidator:
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.user_journey
-class TestCompleteUserOnboardingJourney(BaseE2ETest):
+class CompleteUserOnboardingJourneyTests(BaseE2ETest):
     """E2E: Complete user onboarding authentication journey."""
 
     @pytest.fixture(autouse=True)
@@ -277,7 +277,7 @@ class TestCompleteUserOnboardingJourney(BaseE2ETest):
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.user_journey
-class TestOnboardingEdgeCases(BaseE2ETest):
+class OnboardingEdgeCasesTests(BaseE2ETest):
     """E2E: Onboarding edge cases and error recovery."""
 
     async def test_duplicate_registration_handling(self):

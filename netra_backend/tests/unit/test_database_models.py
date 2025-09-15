@@ -36,7 +36,7 @@ from netra_backend.app.agents.models import (
 )
 
 
-class TestAuthUserModel:
+class AuthUserModelTests:
     """Test AuthUser model validation and business logic."""
     
     def test_auth_user_creation_with_required_fields(self):
@@ -108,7 +108,7 @@ class TestAuthUserModel:
         assert user.last_login_at is None
 
 
-class TestAuthSessionModel:
+class AuthSessionModelTests:
     """Test AuthSession model for session management."""
     
     def test_auth_session_creation(self):
@@ -184,7 +184,7 @@ class TestAuthSessionModel:
         assert session.revoked_at is not None
 
 
-class TestAuthAuditLogModel:
+class AuthAuditLogModelTests:
     """Test AuthAuditLog model for security audit trails."""
     
     def test_auth_audit_log_creation(self):
@@ -267,7 +267,7 @@ class TestAuthAuditLogModel:
         uuid.UUID(log2.id)
 
 
-class TestPasswordResetTokenModel:
+class PasswordResetTokenModelTests:
     """Test PasswordResetToken model for secure password resets."""
     
     def test_password_reset_token_creation(self):
@@ -321,7 +321,7 @@ class TestPasswordResetTokenModel:
         uuid.UUID(token2.id)  # Should be valid UUID
 
 
-class TestAgentModels:
+class AgentModelsTests:
     """Test agent-related Pydantic models for business logic validation."""
     
     def test_data_requirement_model_creation(self):
@@ -455,7 +455,7 @@ class TestAgentModels:
         assert "15-20%" in assessment.value_of_additional_data
 
 
-class TestModelValidationEdgeCases:
+class ModelValidationEdgeCasesTests:
     """Test model validation and edge case handling."""
     
     def test_enum_validation_rejects_invalid_values(self):

@@ -25,7 +25,7 @@ from netra_backend.app.services.error_handling.retry_handler import RetryHandler
 from netra_backend.app.services.error_handling.error_classifier import ErrorClassifier
 
 
-class TestErrorHandlingRecoveryBusinessLogic:
+class ErrorHandlingRecoveryBusinessLogicTests:
     """Test error handling and recovery business logic patterns."""
     
     @pytest.fixture

@@ -27,7 +27,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import asyncio
 
 
-class TestAgentHealthCheckerRegistration:
+class AgentHealthCheckerRegistrationTests:
     """Test agent health checker registration functionality."""
 
     @patch('netra_backend.app.core.agent_health_checker.create_agent_checker')
@@ -54,7 +54,7 @@ class TestAgentHealthCheckerRegistration:
             mock_register_func.assert_not_called()
 
 
-class TestAgentHealthCheckerCreation:
+class AgentHealthCheckerCreationTests:
     """Test agent health checker function creation."""
 
     def test_create_agent_checker_returns_callable(self):
@@ -106,7 +106,7 @@ class TestAgentHealthCheckerCreation:
         mock_create_error.assert_called_once()
 
 
-class TestAgentHealthCheckExecution:
+class AgentHealthCheckExecutionTests:
     """Test the core agent health check execution logic."""
 
     @pytest.mark.asyncio
@@ -143,7 +143,7 @@ class TestAgentHealthCheckExecution:
         assert call_args[2] == mock_system_overview  # system_overview
 
 
-class TestAgentHealthScoreCalculation:
+class AgentHealthScoreCalculationTests:
     """Test agent health score calculation logic."""
 
     def test_calculate_health_score_perfect_health(self):
@@ -185,7 +185,7 @@ class TestAgentHealthScoreCalculation:
         assert score == 1.0
 
 
-class TestAgentHealthResultCreation:
+class AgentHealthResultCreationTests:
     """Test agent health result creation functions."""
 
     def test_create_success_result(self):
@@ -217,7 +217,7 @@ class TestAgentHealthResultCreation:
         assert result.error_message == "Test error message"
 
 
-class TestAgentHealthUtilityFunctions:
+class AgentHealthUtilityFunctionsTests:
     """Test utility functions for agent health checking."""
 
     def test_compute_health_score_with_penalties_perfect(self):

@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestMessageRouterSSOTComprehensiveValidation(SSotBaseTestCase):
+class MessageRouterSSOTComprehensiveValidationTests(SSotBaseTestCase):
     """Comprehensive validation of MessageRouter SSOT consolidation."""
 
     def setUp(self):
@@ -422,7 +422,7 @@ class TestMessageRouterSSOTComprehensiveValidation(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestMessageRouterSSOTRegressionPrevention(SSotBaseTestCase):
+class MessageRouterSSOTRegressionPreventionTests(SSotBaseTestCase):
     """Prevent regression after SSOT consolidation."""
 
     def test_no_new_messagerouter_implementations_added(self):

@@ -52,7 +52,7 @@ def enterprise_config():
     return get_enterprise_config()
 
 @pytest.mark.e2e
-class TestOAuthFlow:
+class OAuthFlowTests:
     """OAuth integration test cases for enterprise scenarios"""
 
     @pytest.mark.e2e
@@ -136,7 +136,7 @@ class TestOAuthFlow:
         return dashboard_data['dashboard_loaded']
 
 @pytest.mark.e2e
-class TestOAuthDataConsistency:
+class OAuthDataConsistencyTests:
     """Test data consistency across OAuth services"""
 
     @pytest.mark.e2e
@@ -150,7 +150,7 @@ class TestOAuthDataConsistency:
         assert oauth_validator.enterprise_validations['data_consistency'] is True
 
 @pytest.mark.e2e
-class TestOAuthSessionManagement:
+class OAuthSessionManagementTests:
     """Test OAuth session management scenarios"""
 
     @pytest.mark.e2e

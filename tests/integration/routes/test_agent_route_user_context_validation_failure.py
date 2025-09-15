@@ -48,7 +48,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestAgentRouteUserContextValidationFailure(SSotAsyncTestCase):
+class AgentRouteUserContextValidationFailureTests(SSotAsyncTestCase):
     """Integration test reproducing UserExecutionContext validation failure in API routes.
     
     This test class simulates the exact API request conditions that trigger the

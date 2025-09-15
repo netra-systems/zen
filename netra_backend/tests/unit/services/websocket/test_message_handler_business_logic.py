@@ -39,21 +39,21 @@ from netra_backend.app.services.websocket.message_queue import MessagePriority, 
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from test_framework.base import BaseUnitTest
 
-class TestBaseMessageHandlerInterface(BaseUnitTest):
+class BaseMessageHandlerInterfaceTests(BaseUnitTest):
     """Test BaseMessageHandler abstract interface for consistent handler implementation."""
 
     @pytest.mark.unit
     def test_base_message_handler_defines_required_interface(self):
         """Test BaseMessageHandler defines required interface methods."""
 
-        class TestHandler(BaseMessageHandler):
+        class HandlerTests(BaseMessageHandler):
 
             async def handle(self, user_id: str, payload: Dict[str, Any]) -> None:
                 pass
 
             def get_message_type(self) -> str:
                 return 'test_message'
-        handler = TestHandler()
+        handler = HandlerTests()
         assert hasattr(handler, 'handle'), 'Must define handle method'
         assert hasattr(handler, 'get_message_type'), 'Must define get_message_type method'
         assert callable(handler.handle), 'Handle method must be callable'
@@ -66,7 +66,7 @@ class TestBaseMessageHandlerInterface(BaseUnitTest):
     async def test_base_message_handler_handle_method_signature(self):
         """Test BaseMessageHandler handle method has correct signature."""
 
-        class TestHandler(BaseMessageHandler):
+        class HandlerTests(BaseMessageHandler):
 
             def __init__(self):
                 self.handled_calls = []
@@ -76,7 +76,7 @@ class TestBaseMessageHandlerInterface(BaseUnitTest):
 
             def get_message_type(self) -> str:
                 return 'signature_test'
-        handler = TestHandler()
+        handler = HandlerTests()
         test_user_id = 'test-user-123'
         test_payload = {'message': 'test data', 'priority': 1}
         await handler.handle(test_user_id, test_payload)
@@ -85,7 +85,7 @@ class TestBaseMessageHandlerInterface(BaseUnitTest):
         assert called_user_id == test_user_id, 'Must receive user_id parameter'
         assert called_payload == test_payload, 'Must receive payload parameter'
 
-class TestStartAgentHandlerBusinessLogic(BaseUnitTest):
+class StartAgentHandlerBusinessLogicTests(BaseUnitTest):
     """Test StartAgentHandler business logic for agent execution requests."""
 
     def setUp(self):
@@ -211,7 +211,7 @@ class TestStartAgentHandlerBusinessLogic(BaseUnitTest):
                 await self.handler.handle(user_id, payload)
             mock_websocket_manager.send_to_user.assert_called_with(user_id, {'type': 'agent_completed', 'payload': agent_response})
 
-class TestUserMessageHandlerBusinessLogic(BaseUnitTest):
+class UserMessageHandlerBusinessLogicTests(BaseUnitTest):
     """Test UserMessageHandler business logic for user message processing."""
 
     def setUp(self):
@@ -297,7 +297,7 @@ class TestUserMessageHandlerBusinessLogic(BaseUnitTest):
         assert assistant_call.kwargs.get('metadata', {}).get('type') == 'agent_response', 'Must tag as agent response'
         assert assistant_call.kwargs.get('assistant_id') == 'netra-assistant', 'Must identify assistant'
 
-class TestThreadHistoryHandlerBusinessLogic(BaseUnitTest):
+class ThreadHistoryHandlerBusinessLogicTests(BaseUnitTest):
     """Test ThreadHistoryHandler business logic for conversation history retrieval."""
 
     def setUp(self):
@@ -376,7 +376,7 @@ class TestThreadHistoryHandlerBusinessLogic(BaseUnitTest):
             mock_websocket_manager.send_error.assert_called_once_with(user_id, 'Failed to retrieve thread')
             self.mock_uow.messages.get_thread_messages.assert_not_called()
 
-class TestStopAgentHandlerBusinessLogic(BaseUnitTest):
+class StopAgentHandlerBusinessLogicTests(BaseUnitTest):
     """Test StopAgentHandler business logic for agent termination."""
 
     def setUp(self):
@@ -403,7 +403,7 @@ class TestStopAgentHandlerBusinessLogic(BaseUnitTest):
                 await self.handler.handle(user_id, payload)
             mock_websocket_manager.send_to_user.assert_called_once_with(user_id, {'type': 'agent_stopped', 'payload': {'status': 'stopped'}})
 
-class TestMessageHandlerServiceBusinessLogic(BaseUnitTest):
+class MessageHandlerServiceBusinessLogicTests(BaseUnitTest):
     """Test MessageHandlerService business logic for handler management and message routing."""
 
     def setUp(self):

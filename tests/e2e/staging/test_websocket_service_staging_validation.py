@@ -41,7 +41,7 @@ class StagingTestConfig:
 
 @pytest.mark.staging
 @pytest.mark.websocket
-class TestWebSocketServiceStagingValidation(SSotAsyncTestCase):
+class WebSocketServiceStagingValidationTests(SSotAsyncTestCase):
     """Validate WebSocket service using real staging environment."""
 
     def setUp(self):
@@ -212,7 +212,7 @@ class TestWebSocketServiceStagingValidation(SSotAsyncTestCase):
 
 @pytest.mark.staging
 @pytest.mark.golden_path
-class TestStagingWebSocketBusinessValueValidation(SSotAsyncTestCase):
+class StagingWebSocketBusinessValueValidationTests(SSotAsyncTestCase):
     """Validate business value delivery through staging WebSocket."""
 
     def setUp(self):

@@ -18,7 +18,7 @@ import pytest
 
 from test_framework.import_tester import ImportResult, ImportTester
 
-class TestImports:
+class ImportsTests:
     """Test class for module imports"""
     
     @pytest.fixture(autouse=True)
@@ -194,7 +194,7 @@ Missing Dependencies: {', '.join(result.missing_dependencies) if result.missing_
             pytest.fail(error_msg)
 
 @pytest.mark.fast
-class TestFastFailImports:
+class FastFailImportsTests:
     """Fast-fail import tests for CI/CD"""
     
     def test_critical_imports_fast_fail(self):

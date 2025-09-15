@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 @pytest.mark.e2e
-class TestMultiServiceIntegrationFixtures:
+class MultiServiceIntegrationFixturesTests:
     """Test class for multi_service_integration_fixtures"""
 
     def setup_method(self):

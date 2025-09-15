@@ -24,7 +24,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 
 
-class TestThreeTierMessageFlowIntegration(BaseIntegrationTest):
+class ThreeTierMessageFlowIntegrationTests(BaseIntegrationTest):
     """Integration tests for three-tier message flow - FAILING TESTS."""
     
     @pytest.mark.integration

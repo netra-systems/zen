@@ -48,7 +48,7 @@ async def performance_websocket_manager():
 
 @pytest.mark.integration
 @pytest.mark.performance
-class TestWebSocketConcurrentPerformance:
+class WebSocketConcurrentPerformanceTests:
     """Integration tests for WebSocket concurrent performance."""
     
     @pytest.mark.asyncio
@@ -402,7 +402,7 @@ class TestWebSocketConcurrentPerformance:
 
 @pytest.mark.integration
 @pytest.mark.performance
-class TestWebSocketStressAndResilience:
+class WebSocketStressAndResilienceTests:
     """Integration tests for WebSocket stress testing and resilience."""
     
     @pytest.mark.asyncio

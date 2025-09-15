@@ -809,7 +809,7 @@ class WebSocketContextRecoveryValidator:
         return metrics
 
 
-class TestWebSocketUserContextRecoveryValidation(BaseIntegrationTest):
+class WebSocketUserContextRecoveryValidationTests(BaseIntegrationTest):
     """
     Integration test for user context recovery validation during WebSocket reconnection scenarios.
     

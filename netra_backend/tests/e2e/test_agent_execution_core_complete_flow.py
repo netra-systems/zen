@@ -51,7 +51,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 
 
-class TestAgentExecutionCoreCompleteE2E(SSotBaseTestCase):
+class AgentExecutionCoreCompleteE2ETests(SSotBaseTestCase):
     """Complete E2E tests for Agent Execution Core functionality with authentication."""
     
     def setup_method(self):

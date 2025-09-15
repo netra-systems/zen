@@ -54,7 +54,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from shared.types import UserID, ThreadID, RunID, RequestID
 
 
-class TestAgentExecutionPipelineServiceInteractions(BaseIntegrationTest):
+class AgentExecutionPipelineServiceInteractionsTests(BaseIntegrationTest):
     """
     Integration tests for agent execution pipeline service interactions with real services.
     

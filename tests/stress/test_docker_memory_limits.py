@@ -575,7 +575,7 @@ class DockerMemoryLimitTests:
 
 # Integration with real memory monitoring services
 @pytest.mark.skipif(not MEMORY_SERVICES_AVAILABLE, reason="Memory monitoring services not available")
-class TestMemoryServicesIntegration:
+class MemoryServicesIntegrationTests:
     """
     Tests integration with actual memory monitoring services
     """

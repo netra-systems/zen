@@ -32,7 +32,7 @@ except ImportError:
 
 
 @pytest.mark.e2e
-class TestEnvironmentType(Enum):
+class EnvironmentTypeTests(Enum):
     """Test environment types."""
     LOCAL = "local"
     TEST = "test"
@@ -60,10 +60,10 @@ class DatabaseConfig:
 
 @dataclass
 @pytest.mark.e2e
-class TestEnvironmentConfig:
+class EnvironmentConfigTests:
     """Configuration for test environments."""
     
-    environment: TestEnvironmentType
+    environment: EnvironmentTypeTests
     services: ServiceUrls
     database: DatabaseConfig
     
@@ -86,14 +86,14 @@ class TestEnvironmentConfig:
     detected_services: Optional[Dict[str, Any]] = None
 
 
-async def get_test_environment_config_async(environment: Optional[TestEnvironmentType] = None) -> TestEnvironmentConfig:
+async def get_test_environment_config_async(environment: Optional[EnvironmentTypeTests] = None) -> EnvironmentConfigTests:
     """Get test environment configuration with service availability detection.
     
     Args:
         environment: Optional environment type override
         
     Returns:
-        TestEnvironmentConfig with intelligent service detection
+        EnvironmentConfigTests with intelligent service detection
     """
     # Get base configuration
     base_config = _get_base_test_environment_config(environment)
@@ -126,24 +126,24 @@ async def get_test_environment_config_async(environment: Optional[TestEnvironmen
     return base_config
 
 
-def _get_base_test_environment_config(environment: Optional[TestEnvironmentType] = None) -> TestEnvironmentConfig:
+def _get_base_test_environment_config(environment: Optional[EnvironmentTypeTests] = None) -> EnvironmentConfigTests:
     """Get base test environment configuration without service detection.
     
     Args:
         environment: Optional environment type override
         
     Returns:
-        TestEnvironmentConfig for the specified environment
+        EnvironmentConfigTests for the specified environment
     """
     # Auto-detect environment if not specified
     if environment is None:
         env_var = get_env().get("TEST_ENVIRONMENT", "test").lower()
-        environment = TestEnvironmentType.TEST if env_var == "test" else TestEnvironmentType.DEV
+        environment = EnvironmentTypeTests.TEST if env_var == "test" else EnvironmentTypeTests.DEV
     
     # Environment-specific configurations
-    if environment == TestEnvironmentType.TEST:
-        return TestEnvironmentConfig(
-            environment=TestEnvironmentType.TEST,
+    if environment == EnvironmentTypeTests.TEST:
+        return EnvironmentConfigTests(
+            environment=EnvironmentTypeTests.TEST,
             services=ServiceUrls(
                 backend="http://localhost:8000",
                 auth="http://localhost:8081",
@@ -159,9 +159,9 @@ def _get_base_test_environment_config(environment: Optional[TestEnvironmentType]
             service_detection_enabled=True
         )
     
-    elif environment == TestEnvironmentType.DEV:
-        return TestEnvironmentConfig(
-            environment=TestEnvironmentType.DEV,
+    elif environment == EnvironmentTypeTests.DEV:
+        return EnvironmentConfigTests(
+            environment=EnvironmentTypeTests.DEV,
             services=ServiceUrls(
                 backend="http://localhost:8000",
                 auth="http://localhost:8081",
@@ -177,9 +177,9 @@ def _get_base_test_environment_config(environment: Optional[TestEnvironmentType]
             service_detection_enabled=True
         )
     
-    elif environment == TestEnvironmentType.STAGING:
-        return TestEnvironmentConfig(
-            environment=TestEnvironmentType.STAGING,
+    elif environment == EnvironmentTypeTests.STAGING:
+        return EnvironmentConfigTests(
+            environment=EnvironmentTypeTests.STAGING,
             services=ServiceUrls(
                 backend=get_env().get("STAGING_API_URL", "https://staging.netra.ai"),
                 auth=get_env().get("STAGING_AUTH_URL", "https://auth.staging.netra.ai"),
@@ -198,10 +198,10 @@ def _get_base_test_environment_config(environment: Optional[TestEnvironmentType]
     
     else:
         # Default to local/test configuration
-        return _get_base_test_environment_config(TestEnvironmentType.TEST)
+        return _get_base_test_environment_config(EnvironmentTypeTests.TEST)
 
 
-def get_test_environment_config(environment: Optional[TestEnvironmentType] = None) -> TestEnvironmentConfig:
+def get_test_environment_config(environment: Optional[EnvironmentTypeTests] = None) -> EnvironmentConfigTests:
     """Synchronous wrapper for backward compatibility.
     
     WARNING: This function does not perform service availability detection.
@@ -210,38 +210,38 @@ def get_test_environment_config(environment: Optional[TestEnvironmentType] = Non
     return _get_base_test_environment_config(environment)
 
 
-def get_test_config(env_name: str = "test") -> TestEnvironmentConfig:
+def get_test_config(env_name: str = "test") -> EnvironmentConfigTests:
     """Get test configuration for specified environment name.
     
     WARNING: This function does not perform service availability detection.
     Use get_test_config_async() for full functionality.
     """
     env_map = {
-        "test": TestEnvironmentType.TEST,
-        "dev": TestEnvironmentType.DEV,
-        "staging": TestEnvironmentType.STAGING,
-        "production": TestEnvironmentType.PRODUCTION
+        "test": EnvironmentTypeTests.TEST,
+        "dev": EnvironmentTypeTests.DEV,
+        "staging": EnvironmentTypeTests.STAGING,
+        "production": EnvironmentTypeTests.PRODUCTION
     }
-    env_type = env_map.get(env_name, TestEnvironmentType.TEST)
+    env_type = env_map.get(env_name, EnvironmentTypeTests.TEST)
     return _get_base_test_environment_config(env_type)
 
 
-async def get_test_config_async(env_name: str = "test") -> TestEnvironmentConfig:
+async def get_test_config_async(env_name: str = "test") -> EnvironmentConfigTests:
     """Get test configuration for specified environment name with service detection.
     
     Args:
         env_name: Environment name ("test", "dev", "staging", "production")
         
     Returns:
-        TestEnvironmentConfig with intelligent service detection
+        EnvironmentConfigTests with intelligent service detection
     """
     env_map = {
-        "test": TestEnvironmentType.TEST,
-        "dev": TestEnvironmentType.DEV,
-        "staging": TestEnvironmentType.STAGING,
-        "production": TestEnvironmentType.PRODUCTION
+        "test": EnvironmentTypeTests.TEST,
+        "dev": EnvironmentTypeTests.DEV,
+        "staging": EnvironmentTypeTests.STAGING,
+        "production": EnvironmentTypeTests.PRODUCTION
     }
-    env_type = env_map.get(env_name, TestEnvironmentType.TEST)
+    env_type = env_map.get(env_name, EnvironmentTypeTests.TEST)
     return await get_test_environment_config_async(env_type)
 
 

@@ -27,7 +27,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 
-class TestToolExecutingEvents(BaseIntegrationTest):
+class ToolExecutingEventsTests(BaseIntegrationTest):
     """Integration tests for tool_executing WebSocket events reaching end users.
     
     Business Value: Tool execution transparency is MISSION CRITICAL for user trust.

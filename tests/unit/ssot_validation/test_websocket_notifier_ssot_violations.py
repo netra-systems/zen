@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 @pytest.mark.unit
-class TestWebSocketNotifierMultiImplementationDetection(SSotBaseTestCase):
+class WebSocketNotifierMultiImplementationDetectionTests(SSotBaseTestCase):
     """Test 1-6: Multi-Implementation Detection Tests (FAILING)"""
 
     def test_multiple_websocket_notifier_classes_exist(self):
@@ -154,7 +154,7 @@ class TestWebSocketNotifierMultiImplementationDetection(SSotBaseTestCase):
         self.assertGreater(len(unique_patterns), 2, 'VIOLATION: Multiple dependency injection patterns exist')
 
 @pytest.mark.unit
-class TestWebSocketNotifierFactoryViolationDetection(SSotBaseTestCase):
+class WebSocketNotifierFactoryViolationDetectionTests(SSotBaseTestCase):
     """Test 7-14: Factory Violation Detection Tests (FAILING)"""
 
     def test_direct_instantiation_bypasses_factory(self):
@@ -310,7 +310,7 @@ class TestWebSocketNotifierFactoryViolationDetection(SSotBaseTestCase):
             self.skipTest('WebSocketEmitterFactory not available')
 
 @pytest.mark.unit
-class TestWebSocketNotifierLegacyCodeDetection(SSotBaseTestCase):
+class WebSocketNotifierLegacyCodeDetectionTests(SSotBaseTestCase):
     """Test 15-22: Legacy Code Detection Tests (FAILING)"""
 
     def test_deprecated_websocket_notifier_usage(self):

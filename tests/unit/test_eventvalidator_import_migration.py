@@ -34,7 +34,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestEventValidatorImportMigration(SSotBaseTestCase):
+class EventValidatorImportMigrationTests(SSotBaseTestCase):
     """
     Test EventValidator import migration patterns and backward compatibility.
     
@@ -378,7 +378,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     
     # Run the test
-    suite = pytest.TestLoader().loadTestsFromTestCase(TestEventValidatorImportMigration)
+    suite = pytest.TestLoader().loadTestsFromTestCase(EventValidatorImportMigrationTests)
     runner = pytest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     

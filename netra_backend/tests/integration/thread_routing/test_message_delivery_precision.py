@@ -78,7 +78,7 @@ except ImportError:
     select = None
 
 
-class TestMessageDeliveryPrecision(BaseIntegrationTest):
+class MessageDeliveryPrecisionTests(BaseIntegrationTest):
     """Test message delivery precision across full infrastructure stack with authentication."""
 
     @pytest.mark.integration

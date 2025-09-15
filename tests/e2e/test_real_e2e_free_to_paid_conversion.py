@@ -68,7 +68,7 @@ class SubscriptionManager:
         features_map = {'early_monthly': ['unlimited_agents', 'advanced_analytics', 'api_access', 'email_support'], 'early_annual': ['unlimited_agents', 'advanced_analytics', 'api_access', 'priority_support', 'custom_integrations'], 'mid_monthly': ['unlimited_agents', 'advanced_analytics', 'api_access', 'priority_support', 'custom_integrations', 'team_collaboration', 'sla_guarantee'], 'enterprise': ['unlimited_everything', 'white_glove_support', 'custom_deployment', 'dedicated_account_manager', 'custom_sla', 'audit_logs', 'sso_integration']}
         return features_map.get(plan, ['basic_features'])
 
-class TestRealE2EFreeToPayConversion(BaseE2ETest):
+class RealE2EFreeToPayConversionTests(BaseE2ETest):
     """Test complete free to paid conversion journey."""
 
     def setup_method(self):

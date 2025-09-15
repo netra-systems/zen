@@ -20,7 +20,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType, get_id_manager
 
-class TestUnifiedIDManagerBehaviorValidation(SSotAsyncTestCase):
+class UnifiedIDManagerBehaviorValidationTests(SSotAsyncTestCase):
     """Test behavioral compliance with UnifiedIDManager patterns."""
 
     async def asyncSetUp(self):
@@ -243,7 +243,7 @@ class TestUnifiedIDManagerBehaviorValidation(SSotAsyncTestCase):
             for violation in self.behavioral_violations:
                 print(f'  {violation}')
 
-class TestUnifiedIDManagerMigrationBehavior(SSotAsyncTestCase):
+class UnifiedIDManagerMigrationBehaviorTests(SSotAsyncTestCase):
     """Test migration behavior from UUID to UnifiedIDManager patterns."""
 
     async def asyncSetUp(self):

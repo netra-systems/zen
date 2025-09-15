@@ -26,7 +26,7 @@ from unittest.mock import patch
 import unittest
 
 @pytest.mark.unit
-class TestExecutionEngineFactorySSotValidation(unittest.TestCase):
+class ExecutionEngineFactorySSotValidationTests(unittest.TestCase):
     """
     CRITICAL SSOT Test: Detect execution engine factory pattern proliferation
     

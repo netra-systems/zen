@@ -21,7 +21,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.schemas.agent_models import DeepAgentState, AgentMetadata
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestActionPlanBuilderUVS(SSotAsyncTestCase):
+class ActionPlanBuilderUVSTests(SSotAsyncTestCase):
     """Unit tests for ActionPlanBuilderUVS - UVS-compliant action plan generation."""
 
     def setup_method(self, method=None):

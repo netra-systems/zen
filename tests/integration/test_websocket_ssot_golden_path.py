@@ -46,7 +46,7 @@ logger = central_logger.get_logger(__name__)
 @pytest.mark.no_docker
 @pytest.mark.integration
 @pytest.mark.business_critical
-class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
+class WebSocketSSOTGoldenPathTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

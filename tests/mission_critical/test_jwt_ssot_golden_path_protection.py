@@ -29,7 +29,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestJWTSSOTGoldenPathProtection(SSotAsyncTestCase):
+class JWTSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
     """Golden Path protection tests for JWT SSOT consolidation."""
 
     def setup_method(self, method):
@@ -452,7 +452,7 @@ class TestJWTSSOTGoldenPathProtection(SSotAsyncTestCase):
         }
 
 
-class TestJWTSSOTGoldenPathRegression(SSotAsyncTestCase):
+class JWTSSOTGoldenPathRegressionTests(SSotAsyncTestCase):
     """Regression tests to ensure Golden Path doesn't break during SSOT migration."""
 
     def setup_method(self, method):

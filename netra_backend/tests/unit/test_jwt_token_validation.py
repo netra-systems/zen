@@ -29,7 +29,7 @@ from shared.isolated_environment import get_env
 from shared.types import UserID, ThreadID, SessionID
 
 
-class TestJWTTokenValidationEnhanced(SSotBaseTestCase):
+class JWTTokenValidationEnhancedTests(SSotBaseTestCase):
     """
     Enhanced unit tests for JWT token validation business logic.
     Tests core token validation without external service dependencies.

@@ -40,7 +40,7 @@ from netra_backend.app.core.error_response import ErrorResponse
 from netra_backend.app.schemas.core_enums import ErrorCategory
 
 
-class TestErrorHandling(SSotBaseTestCase):
+class ErrorHandlingTests(SSotBaseTestCase):
     """Unit tests for error handling processing business logic."""
     
     def setup_method(self, method=None):

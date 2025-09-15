@@ -35,7 +35,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestMessageRouterSSOTViolationDetection(SSotBaseTestCase, unittest.TestCase):
+class MessageRouterSSOTViolationDetectionTests(SSotBaseTestCase, unittest.TestCase):
     """
     CRITICAL SSOT Violation Detection Tests for MessageRouter
 

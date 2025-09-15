@@ -219,7 +219,7 @@ class StagingDeploymentValidator:
         golden_path_result['total_time_ms'] = (time.time() - start_time) * 1000
         return golden_path_result
 
-class TestStagingDeployment(SSotBaseTestCase):
+class StagingDeploymentTests(SSotBaseTestCase):
     """
     E2E tests for staging deployment validation.
     

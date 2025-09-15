@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 @pytest.mark.integration
-class TestIdFormatConsistencyValidation(SSotBaseTestCase):
+class IdFormatConsistencyValidationTests(SSotBaseTestCase):
     """Integration tests validating ID format consistency across all migrated components"""
 
     def test_session_id_format_consistency_post_migration(self):

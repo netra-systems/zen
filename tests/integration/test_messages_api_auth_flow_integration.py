@@ -33,7 +33,7 @@ from netra_backend.app.auth_integration.auth import auth_client, get_current_use
 from netra_backend.app.main import app
 
 
-class TestMessagesAPIAuthFlowIntegration(SSotAsyncTestCase):
+class MessagesAPIAuthFlowIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for messages API authentication flow - Issue #1234 reproduction.
     

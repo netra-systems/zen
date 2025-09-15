@@ -152,7 +152,7 @@ class ReconnectingWebSocketMock:
 @pytest.mark.websocket
 @pytest.mark.reliability
 @pytest.mark.asyncio
-class TestWebSocketReconnectionRecovery(SSotAsyncTestCase):
+class WebSocketReconnectionRecoveryTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket reconnection and recovery.
     

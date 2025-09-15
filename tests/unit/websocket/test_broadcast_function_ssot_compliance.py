@@ -225,7 +225,7 @@ class BroadcastFunctionDiscovery:
 
 
 @pytest.mark.unit
-class TestBroadcastFunctionSSotCompliance(SSotBaseTestCase):
+class BroadcastFunctionSSotComplianceTests(SSotBaseTestCase):
     """Test suite for broadcast function SSOT compliance detection."""
 
     def _get_broadcast_functions(self):
@@ -459,7 +459,7 @@ class TestBroadcastFunctionSSotCompliance(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestBroadcastFunctionDiscovery(SSotBaseTestCase):
+class BroadcastFunctionDiscoveryTests(SSotBaseTestCase):
     """Test suite for broadcast function discovery and analysis."""
 
     def setUp(self):

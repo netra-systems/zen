@@ -31,7 +31,7 @@ from netra_backend.app.schemas.monitoring_schemas import ErrorSeverity
 from shared.isolated_environment import get_env
 
 
-class TestGCPErrorIntegrationGapDetection(SSotBaseTestCase):
+class GCPErrorIntegrationGapDetectionTests(SSotBaseTestCase):
     """Unit tests proving the gap between logger.error() and GCP Error objects."""
     
     def setup_method(self, method):
@@ -389,7 +389,7 @@ class TestGCPErrorIntegrationGapDetection(SSotBaseTestCase):
         print(f"=== END GAP ANALYSIS ===\n")
 
 
-class TestGCPErrorIntegrationSpecificGaps(SSotBaseTestCase):
+class GCPErrorIntegrationSpecificGapsTests(SSotBaseTestCase):
     """Specific gap detection tests for known integration points."""
     
     def setup_method(self, method):
@@ -498,6 +498,6 @@ class TestGCPErrorIntegrationSpecificGaps(SSotBaseTestCase):
 
 # Export test classes
 __all__ = [
-    'TestGCPErrorIntegrationGapDetection',
-    'TestGCPErrorIntegrationSpecificGaps'
+    'GCPErrorIntegrationGapDetectionTests',
+    'GCPErrorIntegrationSpecificGapsTests'
 ]

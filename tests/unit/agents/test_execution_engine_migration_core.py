@@ -42,7 +42,7 @@ class MockAgentExecutionResult:
         self.metadata = {}
 
 @pytest.mark.unit
-class TestExecutionEngineMigrationCore:
+class ExecutionEngineMigrationCoreTests:
     """Core validation tests for UserExecutionContext migration."""
 
     def test_user_context_isolation(self):

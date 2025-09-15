@@ -21,7 +21,7 @@ from pathlib import Path
 import pytest
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
-class TestEnvironmentSourceTrackingComprehensive:
+class EnvironmentSourceTrackingComprehensiveTests:
     """Test comprehensive source tracking requirements from unified environment management spec."""
 
     def setup_method(self):

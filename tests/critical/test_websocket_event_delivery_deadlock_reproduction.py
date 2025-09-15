@@ -150,7 +150,7 @@ class WebSocketEventDeliveryMonitor:
             is_win  # Windows platform
         )
 
-class TestWebSocketEventDeliveryDeadlockReproduction:
+class WebSocketEventDeliveryDeadlockReproductionTests:
     """
     CRITICAL: Reproduce exact WebSocket event delivery deadlock from SESSION5
     

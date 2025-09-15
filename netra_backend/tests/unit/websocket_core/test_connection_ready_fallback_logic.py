@@ -26,7 +26,7 @@ from netra_backend.app.websocket_core.connection_state_machine import (
 )
 
 
-class TestConnectionReadyFallbackLogic(SSotBaseTestCase):
+class ConnectionReadyFallbackLogicTests(SSotBaseTestCase):
     """Test suite to reproduce the connection ready fallback logic bug."""
 
     def test_connection_ready_non_existent_connection_should_return_false_but_returns_true(self):

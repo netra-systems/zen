@@ -85,7 +85,7 @@ class MockEnterpriseWebSocketManager:
         """Get metrics for validating user isolation."""
         return {'total_users': len(self.user_contexts), 'total_events': len(self.events), 'events_per_run': {run_id: len(events) for run_id, events in self.event_history.items()}, 'user_context_count': len(self.user_contexts)}
 
-class TestAgentRegistryGoldenPathWorkflows(SSotBaseTestCase):
+class AgentRegistryGoldenPathWorkflowsTests(SSotBaseTestCase):
     """Test AgentRegistry golden path workflows for Issue #758."""
 
     def setup_method(self, method):

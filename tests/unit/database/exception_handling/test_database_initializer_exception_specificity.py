@@ -14,7 +14,7 @@ from sqlalchemy.exc import OperationalError, ProgrammingError
 from netra_backend.app.db.database_initializer import DatabaseInitializer
 from netra_backend.app.db.transaction_errors import DeadlockError, ConnectionError, TimeoutError, PermissionError, SchemaError, classify_error
 
-class TestDatabaseInitializerExceptionSpecificity:
+class DatabaseInitializerExceptionSpecificityTests:
     """Test suite for database initializer exception specificity validation."""
 
     @pytest.mark.unit
@@ -90,7 +90,7 @@ class TestDatabaseInitializerExceptionSpecificity:
         assert hasattr(db_init_module, 'PermissionError'), 'DatabaseInitializer should import PermissionError'
         assert hasattr(db_init_module, 'TimeoutError'), 'DatabaseInitializer should import TimeoutError'
 
-class TestDatabaseInitializerErrorClassification:
+class DatabaseInitializerErrorClassificationTests:
     """Test suite for database initializer error classification patterns."""
 
     @pytest.mark.unit
@@ -128,7 +128,7 @@ class TestDatabaseInitializerErrorClassification:
             assert 'test_db' in error_message, 'Error should include database name context'
             assert any((word in error_message.lower() for word in ['initialization', 'setup', 'create'])), 'Error should include operation context'
 
-class TestDatabaseInitializerIntegrationPatterns:
+class DatabaseInitializerIntegrationPatternsTests:
     """Test suite for database initializer integration and dependency patterns."""
 
     @pytest.mark.unit

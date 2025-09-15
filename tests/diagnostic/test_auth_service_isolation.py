@@ -145,7 +145,7 @@ class AuthServiceDiagnostic:
 
 
 @pytest.mark.asyncio
-class TestAuthServiceIsolation:
+class AuthServiceIsolationTests:
     """Test suite to validate auth service independence from backend"""
 
     @pytest.fixture

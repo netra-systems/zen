@@ -56,7 +56,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 @pytest.mark.mission_critical
 @pytest.mark.golden_path
 @pytest.mark.security_critical
-class TestMultiUserIsolationSecurity(BaseE2ETest):
+class MultiUserIsolationSecurityTests(BaseE2ETest):
     """
     Test multi-user isolation security in GCP staging environment.
     

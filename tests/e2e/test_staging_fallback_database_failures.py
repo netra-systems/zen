@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 @env("staging")
 @env_requires(services=["auth_service"], features=["database_connectivity"])
 @pytest.mark.e2e
-class TestStagingFallbackDatabaseFailures:
+class StagingFallbackDatabaseFailuresTests:
     """E2E tests for problematic staging mode fallback when database connectivity fails."""
     
     @pytest.mark.asyncio
@@ -371,7 +371,7 @@ class TestStagingFallbackDatabaseFailures:
 
 @env("staging")
 @pytest.mark.e2e
-class TestStagingModeHealthCheckProblems:
+class StagingModeHealthCheckProblemsTests:
     """Test suite for health check problems when services are in staging mode."""
     
     @pytest.mark.asyncio

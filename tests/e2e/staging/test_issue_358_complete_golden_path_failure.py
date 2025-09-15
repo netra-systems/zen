@@ -97,7 +97,7 @@ except ImportError as e:
 logger = logging.getLogger(__name__)
 
 
-class TestIssue358CompleteGoldenPathFailure(SSotAsyncTestCase):
+class Issue358CompleteGoldenPathFailureTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

@@ -26,7 +26,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestGoldenPathBlockingScenarios(SSotAsyncTestCase):
+class GoldenPathBlockingScenariosTests(SSotAsyncTestCase):
     """Reproduce Golden Path failures caused by routing fragmentation."""
 
     def setUp(self) -> None:

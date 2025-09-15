@@ -29,7 +29,7 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
-class TestWebSocketConnectioner:
+class WebSocketConnectionerTests:
     """Test utilities for WebSocket connection scenarios."""
     
     def __init__(self):

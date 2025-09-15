@@ -18,7 +18,7 @@ from typing import Any, Dict
 
 import pytest
 
-class TestAPIThreadsMessagesCritical:
+class APIThreadsMessagesCriticalTests:
     """Critical thread and message API endpoint tests."""
     @pytest.mark.asyncio
     async def test_create_thread(self):

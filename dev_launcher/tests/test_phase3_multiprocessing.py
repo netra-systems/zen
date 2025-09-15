@@ -10,7 +10,7 @@ from dev_launcher.dependency_checker import AsyncDependencyChecker, DependencyCh
 from dev_launcher.parallel_executor import ParallelExecutor, ParallelTask, TaskResult, TaskType, create_cpu_task, create_dependency_task, create_io_task
 from dev_launcher.service_startup import ServiceStartupCoordinator
 
-class TestParallelExecutor:
+class ParallelExecutorTests:
     """Test parallel execution engine."""
 
     def test_cpu_worker_allocation(self):
@@ -90,7 +90,7 @@ class TestParallelExecutor:
             assert result.success is True
         executor.cleanup()
 
-class TestAsyncDependencyChecker:
+class AsyncDependencyCheckerTests:
     """Test async dependency checker."""
 
     @pytest.fixture
@@ -144,7 +144,7 @@ class TestAsyncDependencyChecker:
         assert hash1 != hash3
         checker.cleanup()
 
-class TestServiceStartupCoordinator:
+class ServiceStartupCoordinatorTests:
     """Test enhanced service startup coordinator."""
 
     @pytest.fixture

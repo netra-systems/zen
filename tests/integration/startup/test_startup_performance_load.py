@@ -46,7 +46,7 @@ from netra_backend.app.core.registry.universal_registry import UniversalRegistry
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
 
-class TestStartupPerformanceLoad(BaseIntegrationTest):
+class StartupPerformanceLoadTests(BaseIntegrationTest):
     """Test startup performance under various load conditions."""
     
     def __init__(self):

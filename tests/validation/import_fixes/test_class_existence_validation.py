@@ -16,7 +16,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestClassExistenceValidation(SSotBaseTestCase):
+class ClassExistenceValidationTests(SSotBaseTestCase):
     """
     Test class existence validation for collection error fixes.
     

@@ -53,7 +53,7 @@ class SecurityValidationResult:
     test_results: List[UserIsolationTestResult]
 
 @pytest.mark.unit
-class TestWebSocketUserIsolationValidation(SSotBaseTestCase):
+class WebSocketUserIsolationValidationTests(SSotBaseTestCase):
     """
     CRITICAL: WebSocket user isolation security validation.
     

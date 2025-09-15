@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestMessageRouterRoutingConflictReproduction(SSotAsyncTestCase):
+class MessageRouterRoutingConflictReproductionTests(SSotAsyncTestCase):
     """Test that reproduces routing conflicts between multiple MessageRouter implementations."""
 
     def setUp(self):
@@ -453,7 +453,7 @@ class TestMessageRouterRoutingConflictReproduction(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestMessageRouterConcurrencyConflicts(SSotAsyncTestCase):
+class MessageRouterConcurrencyConflictsTests(SSotAsyncTestCase):
     """Test concurrency-specific routing conflicts."""
 
     async def test_concurrent_router_initialization_conflicts(self):

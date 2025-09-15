@@ -30,7 +30,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestAPICompatibilityRegression:
+class APICompatibilityRegressionTests:
     """
     API Compatibility Regression Prevention Test Suite.
     

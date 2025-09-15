@@ -45,7 +45,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 
 
 @pytest.mark.unit
-class TestUnifiedEventValidatorUnit(SSotAsyncTestCase):
+class UnifiedEventValidatorUnitTests(SSotAsyncTestCase):
     """
     Unit tests for UnifiedEventValidator protecting $500K+ ARR.
     
@@ -709,7 +709,7 @@ class TestUnifiedEventValidatorUnit(SSotAsyncTestCase):
 def test_suite():
     """Return test suite for this module."""
     import unittest
-    return unittest.TestLoader().loadTestsFromTestCase(TestUnifiedEventValidatorUnit)
+    return unittest.TestLoader().loadTestsFromTestCase(UnifiedEventValidatorUnitTests)
 
 
 if __name__ == "__main__":

@@ -21,7 +21,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestImportPathUnificationValidation(SSotAsyncTestCase):
+class ImportPathUnificationValidationTests(SSotAsyncTestCase):
     """Test import path unification for WebSocket Manager SSOT."""
 
     def setUp(self):

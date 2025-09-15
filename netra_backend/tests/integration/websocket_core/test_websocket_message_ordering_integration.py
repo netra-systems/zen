@@ -82,7 +82,7 @@ class OrderedWebSocketMock:
         return timestamps == sorted(timestamps)
 
 @pytest.mark.integration
-class TestWebSocketMessageOrderingIntegration(SSotBaseTestCase):
+class WebSocketMessageOrderingIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket message ordering guarantees.
     

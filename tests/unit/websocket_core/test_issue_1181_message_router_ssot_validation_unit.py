@@ -34,7 +34,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestIssue1181MessageRouterSSOTValidation(SSotAsyncTestCase, unittest.TestCase):
+class Issue1181MessageRouterSSOTValidationTests(SSotAsyncTestCase, unittest.TestCase):
     """Test suite to validate MessageRouter SSOT compliance for Issue #1181."""
     
     def setUp(self):
@@ -286,11 +286,11 @@ class TestIssue1181MessageRouterSSOTValidation(SSotAsyncTestCase, unittest.TestC
         logger.info(f" PASS:  Initial state: {initial_builtin_count} builtin, {initial_custom_count} custom handlers")
         
         # Test Case 2: Add custom handler should work and take precedence
-        class TestHandler(BaseMessageHandler):
+        class HandlerTests(BaseMessageHandler):
             def __init__(self):
                 super().__init__([MessageType.USER_MESSAGE])
         
-        test_handler = TestHandler()
+        test_handler = HandlerTests()
         router.add_handler(test_handler)
         
         self.assertEqual(len(router.custom_handlers), 1, "Should have one custom handler")
@@ -300,11 +300,11 @@ class TestIssue1181MessageRouterSSOTValidation(SSotAsyncTestCase, unittest.TestC
         logger.info(" PASS:  Custom handler addition and precedence validated")
         
         # Test Case 3: Insert handler at specific position
-        class TestHandler2(BaseMessageHandler):
+        class Handler2Tests(BaseMessageHandler):
             def __init__(self):
                 super().__init__([MessageType.PING])
         
-        test_handler2 = TestHandler2()
+        test_handler2 = Handler2Tests()
         router.insert_handler(test_handler2, 0)  # Insert at highest precedence
         
         self.assertEqual(len(router.custom_handlers), 2, "Should have two custom handlers")
@@ -326,7 +326,7 @@ class TestIssue1181MessageRouterSSOTValidation(SSotAsyncTestCase, unittest.TestC
         handler_order = router.get_handler_order()
         self.assertIsInstance(handler_order, list, "Handler order should be a list")
         self.assertGreater(len(handler_order), 0, "Should have handler names")
-        self.assertEqual(handler_order[0], "TestHandler2", "First handler should be TestHandler2")
+        self.assertEqual(handler_order[0], "Handler2Tests", "First handler should be Handler2Tests")
         
         logger.info(f" PASS:  Handler order deterministic: {handler_order[:3]}...")
         

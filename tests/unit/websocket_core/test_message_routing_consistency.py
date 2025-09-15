@@ -20,7 +20,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.unit
-class TestMessageRoutingConsistency(SSotAsyncTestCase):
+class MessageRoutingConsistencyTests(SSotAsyncTestCase):
     """Test message routing consistency across MessageRouter implementations."""
 
     def setUp(self):

@@ -49,7 +49,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestServiceDegradationGracefulHandling(BaseIntegrationTest):
+class ServiceDegradationGracefulHandlingTests(BaseIntegrationTest):
     """
     Service degradation graceful handling test suite.
     

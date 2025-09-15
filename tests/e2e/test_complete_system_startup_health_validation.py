@@ -154,7 +154,7 @@ class SystemTestConfig:
     log_level: str = "INFO"
 
 
-class TestComprehensiveSystemer:
+class ComprehensiveSystemerTests:
     """Comprehensive end-to-end system tester with full validation."""
     
     def __init__(self, config: SystemTestConfig):
@@ -799,7 +799,7 @@ class TestComprehensiveSystemer:
 
 @pytest.mark.e2e
 @pytest.mark.asyncio  
-class TestCompleteSystemStartupHealthValidation:
+class CompleteSystemStartupHealthValidationTests:
     """Comprehensive system startup and health validation test suite."""
     
     @pytest.fixture

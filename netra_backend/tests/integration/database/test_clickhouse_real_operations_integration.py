@@ -34,7 +34,7 @@ from shared.isolated_environment import get_env
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestClickHouseRealOperationsIntegration:
+class ClickHouseRealOperationsIntegrationTests:
     """Integration tests for ClickHouse with real database connections."""
     
     @pytest.fixture
@@ -494,7 +494,7 @@ class TestClickHouseRealOperationsIntegration:
 
 @pytest.mark.integration 
 @pytest.mark.real_services
-class TestClickHouseConnectionManagerIntegration:
+class ClickHouseConnectionManagerIntegrationTests:
     """Integration tests for ClickHouse Connection Manager."""
     
     async def test_connection_manager_initialization(self):
@@ -539,7 +539,7 @@ class TestClickHouseConnectionManagerIntegration:
 
 @pytest.mark.integration
 @pytest.mark.real_services 
-class TestClickHouseInitializerIntegration:
+class ClickHouseInitializerIntegrationTests:
     """Integration tests for ClickHouse Initializer."""
     
     async def test_clickhouse_initializer_setup(self):

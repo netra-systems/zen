@@ -62,7 +62,7 @@ except ImportError:
     select = None
 
 
-class TestThreadRoutingErrorScenarios(BaseIntegrationTest):
+class ThreadRoutingErrorScenariosTests(BaseIntegrationTest):
     """Test thread routing error scenarios with comprehensive failure validation."""
 
     @pytest.mark.integration

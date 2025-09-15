@@ -27,7 +27,7 @@ from test_framework.conftest_real_services import real_services
 from shared.isolated_environment import get_env
 
 
-class TestAuthenticationAuthorization(DatabaseIntegrationTest, CacheIntegrationTest):
+class AuthenticationAuthorizationTests(DatabaseIntegrationTest, CacheIntegrationTest):
     """Test authentication and authorization with real services integration."""
 
     @pytest.mark.integration

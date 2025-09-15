@@ -66,7 +66,7 @@ STAGING_BASE_URLS = [
 ]
 
 
-class TestFrontendAssetAvailability:
+class FrontendAssetAvailabilityTests:
     """Test frontend asset availability and loading."""
     
     @pytest.mark.asyncio
@@ -346,7 +346,7 @@ class TestFrontendAssetAvailability:
             )
 
 
-class TestFrontendAssetPerformance:
+class FrontendAssetPerformanceTests:
     """Test frontend asset loading performance."""
     
     @pytest.mark.asyncio

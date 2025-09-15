@@ -22,7 +22,7 @@ _active_token_sessions = {}
 _token_usage_stats = {}
 
 
-class TestIssue465SimpleThresholdValidation(SSotAsyncTestCase):
+class Issue465SimpleThresholdValidationTests(SSotAsyncTestCase):
     """
     Simple, direct tests for Issue #465 token reuse threshold problem
     
@@ -221,7 +221,7 @@ class TestIssue465SimpleThresholdValidation(SSotAsyncTestCase):
             print("   🎯 Multi-user concurrent access: WORKING")
 
 
-class TestBusinessImpactScenarios(SSotAsyncTestCase):
+class BusinessImpactScenariosTests(SSotAsyncTestCase):
     """
     Business impact scenarios that demonstrate real-world Issue #465 problems
     """

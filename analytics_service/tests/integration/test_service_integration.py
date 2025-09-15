@@ -40,7 +40,7 @@ from analytics_service.analytics_core.config import get_config
 from shared.isolated_environment import get_env
 
 
-class TestAuthServiceIntegration:
+class AuthServiceIntegrationTests:
     """Integration tests for Analytics Service communication with Auth Service."""
 
     @pytest.fixture(autouse=True)
@@ -173,7 +173,7 @@ class TestAuthServiceIntegration:
             pytest.skip("Auth service not available for integration testing")
 
 
-class TestBackendServiceIntegration:
+class BackendServiceIntegrationTests:
     """Integration tests for Analytics Service communication with Backend Service."""
 
     @pytest.fixture(autouse=True)
@@ -341,7 +341,7 @@ class TestBackendServiceIntegration:
             pytest.skip("Backend service not available for integration testing")
 
 
-class TestWebSocketServiceIntegration:
+class WebSocketServiceIntegrationTests:
     """Integration tests for WebSocket communication with other services."""
 
     @pytest.fixture(autouse=True)
@@ -429,7 +429,7 @@ class TestWebSocketServiceIntegration:
             pytest.skip(f"WebSocket service not available: {e}")
 
 
-class TestServiceDiscoveryIntegration:
+class ServiceDiscoveryIntegrationTests:
     """Integration tests for service discovery and health checks."""
 
     @pytest.fixture(autouse=True)
@@ -554,7 +554,7 @@ class TestServiceDiscoveryIntegration:
                 print(f"[U+2717] {service} is not available (expected in test environment)")
 
 
-class TestCrossServiceErrorHandling:
+class CrossServiceErrorHandlingTests:
     """Integration tests for error handling across services."""
 
     @pytest.fixture(autouse=True)

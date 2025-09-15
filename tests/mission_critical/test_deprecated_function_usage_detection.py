@@ -22,7 +22,7 @@ from typing import Dict, List, Set, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestDeprecatedFunctionUsageDetection(SSotAsyncTestCase, unittest.TestCase):
+class DeprecatedFunctionUsageDetectionTests(SSotAsyncTestCase, unittest.TestCase):
     """
     Mission Critical Test: Deprecated WebSocket Authentication Function Detection
     

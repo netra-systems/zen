@@ -20,7 +20,7 @@ from netra_backend.app.db.clickhouse import get_clickhouse_client, get_clickhous
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.configuration_validator import validate_test_config
 
-class TestClickHousePerformanceIntegration(BaseIntegrationTest):
+class ClickHousePerformanceIntegrationTests(BaseIntegrationTest):
     """Test ClickHouse performance characteristics and optimizations."""
 
     def setup_method(self):
@@ -160,7 +160,7 @@ class TestClickHousePerformanceIntegration(BaseIntegrationTest):
         finally:
             await self.cleanup_perf_table()
 
-class TestClickHouseCachePerformanceIntegration(BaseIntegrationTest):
+class ClickHouseCachePerformanceIntegrationTests(BaseIntegrationTest):
     """Test ClickHouse caching performance and efficiency."""
 
     def setup_method(self):

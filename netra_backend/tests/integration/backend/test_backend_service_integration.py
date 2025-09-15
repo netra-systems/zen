@@ -44,7 +44,7 @@ from netra_backend.app.agents.supervisor.execution_engine_factory import (
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 
 
-class TestBackendServiceIntegration(BaseIntegrationTest):
+class BackendServiceIntegrationTests(BaseIntegrationTest):
     """Test comprehensive backend service integration with real services."""
 
     # Agent Execution Engine Integration Tests (5 tests)

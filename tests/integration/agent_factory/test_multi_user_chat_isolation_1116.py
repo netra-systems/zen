@@ -133,7 +133,7 @@ class MockChatAgent(BaseAgent):
 
 
 @pytest.mark.integration
-class TestMultiUserChatIsolation1116(SSotAsyncTestCase):
+class MultiUserChatIsolation1116Tests(SSotAsyncTestCase):
     """
     Integration tests proving multi-user chat isolation failures.
     

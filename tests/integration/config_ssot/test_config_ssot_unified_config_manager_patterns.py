@@ -23,7 +23,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.core.configuration.base import UnifiedConfigManager, get_unified_config
 
 
-class TestUnifiedConfigManagerPatterns(BaseIntegrationTest):
+class UnifiedConfigManagerPatternsTests(BaseIntegrationTest):
     """Test UnifiedConfigurationManager SSOT compliance."""
     
     @pytest.mark.integration

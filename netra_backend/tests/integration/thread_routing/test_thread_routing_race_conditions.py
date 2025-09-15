@@ -60,7 +60,7 @@ except ImportError:
     select = None
 
 
-class TestThreadRoutingRaceConditions(BaseIntegrationTest):
+class ThreadRoutingRaceConditionsTests(BaseIntegrationTest):
     """Test thread routing race conditions and concurrent operation safety."""
 
     @pytest.mark.integration

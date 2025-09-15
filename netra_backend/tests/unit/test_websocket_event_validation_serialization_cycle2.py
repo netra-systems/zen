@@ -21,7 +21,7 @@ from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from shared.types import UserID, ThreadID, RunID
 
-class TestWebSocketEventValidationSerialization:
+class WebSocketEventValidationSerializationTests:
     """Test WebSocket event validation and serialization for data quality."""
     
     @pytest.fixture

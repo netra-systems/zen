@@ -8,7 +8,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 @pytest.mark.e2e
-class TestWebsocketEventCompletenessIntegrationCore:
+class WebsocketEventCompletenessIntegrationCoreTests:
     """Test class for websocket_event_completeness_integration_core"""
 
     def setup_method(self):

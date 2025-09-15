@@ -22,7 +22,7 @@ from shared.isolated_environment import get_env
 from test_framework.unified_test_base import UnifiedTestBase
 
 @pytest.mark.e2e
-class TestJWTEnvironmentSecretRegression(UnifiedTestBase):
+class JWTEnvironmentSecretRegressionTests(UnifiedTestBase):
     """
     CRITICAL REGRESSION TEST: JWT Secret Alignment Between Services
     
@@ -199,7 +199,7 @@ class TestJWTEnvironmentSecretRegression(UnifiedTestBase):
         self.assertEqual(secrets[0], 'concurrent-test-secret')
 
 @pytest.mark.e2e
-class TestJWTSecretValidation(UnifiedTestBase):
+class JWTSecretValidationTests(UnifiedTestBase):
     """Additional validation tests for JWT secret configuration."""
 
     @pytest.mark.asyncio
@@ -245,7 +245,7 @@ class TestJWTSecretValidation(UnifiedTestBase):
         self.assertIn('JWT_SECRET_PRODUCTION', error_msg)
 
 @pytest.mark.e2e
-class TestCrossServiceJWTFlow(UnifiedTestBase):
+class CrossServiceJWTFlowTests(UnifiedTestBase):
     """Test complete cross-service JWT flow with real components."""
 
     @pytest.mark.asyncio

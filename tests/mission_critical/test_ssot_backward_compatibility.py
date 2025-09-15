@@ -60,7 +60,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 logger = logging.getLogger(__name__)
 
 
-class TestSSOTBackwardCompatibility:
+class SSOTBackwardCompatibilityTests:
     """
     CRITICAL: Test SSOT backward compatibility with legacy test patterns.
     These tests ensure existing code continues to work during SSOT migration.
@@ -899,7 +899,7 @@ class TestSSOTBackwardCompatibility:
         logger.info(f"Performance compatibility test: {slowdown_ratio:.2f}x slowdown, {memory_overhead} bytes overhead")
 
 
-class TestSSOTLegacyMigrationHelpers:
+class SSOTLegacyMigrationHelpersTests:
     """
     MIGRATION CRITICAL: Test SSOT migration helper functionality.
     These tests validate tools that help migrate legacy code to SSOT patterns.
@@ -1074,7 +1074,7 @@ class NewTest(BaseTestCase):
                            "High priority items should come before low priority items")
 
 
-class TestSSOTDeprecationHandling:
+class SSOTDeprecationHandlingTests:
     """
     DEPRECATION CRITICAL: Test SSOT deprecation handling.
     These tests ensure deprecated patterns are handled gracefully with warnings.

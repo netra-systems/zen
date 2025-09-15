@@ -29,7 +29,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.integration
-class TestWebSocketFactoryConsolidation(SSotAsyncTestCase):
+class WebSocketFactoryConsolidationTests(SSotAsyncTestCase):
     """Test WebSocket factory pattern consolidation and consistency.
     
     These tests MUST FAIL with current inconsistent factory implementations.

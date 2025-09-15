@@ -34,7 +34,7 @@ from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 from netra_backend.app.schemas.core_enums import ErrorCategory
 from netra_backend.app.schemas.shared_types import ErrorContext
 
-class TestMessageRoutingErrorHandling(SSotAsyncTestCase):
+class MessageRoutingErrorHandlingTests(SSotAsyncTestCase):
     """
     Test message routing error handling with graceful degradation.
     
@@ -239,7 +239,7 @@ class TestMessageRoutingErrorHandling(SSotAsyncTestCase):
             self.record_metric('circuit_breaker_failures', failure_count)
             self.record_metric('circuit_breaker_recovery', True)
 
-class TestWebSocketErrorHandlingRouting(SSotAsyncTestCase):
+class WebSocketErrorHandlingRoutingTests(SSotAsyncTestCase):
     """
     Test WebSocket error handling in routing layer.
     
@@ -374,7 +374,7 @@ class TestWebSocketErrorHandlingRouting(SSotAsyncTestCase):
         self.record_metric('websocket_auth_isolation', True)
         self.record_metric('authenticated_users_unaffected', 1)
 
-class TestAgentErrorHandlingRouting(SSotAsyncTestCase):
+class AgentErrorHandlingRoutingTests(SSotAsyncTestCase):
     """
     Test agent execution error handling in routing context.
     
@@ -573,7 +573,7 @@ class TestAgentErrorHandlingRouting(SSotAsyncTestCase):
             self.record_metric('agent_context_recovery_attempted', True)
             self.record_metric('agent_context_recovery_successful', recovery_success)
 
-class TestMultiUserErrorIsolation(SSotAsyncTestCase):
+class MultiUserErrorIsolationTests(SSotAsyncTestCase):
     """
     Test error isolation between multiple users in routing.
     
@@ -730,7 +730,7 @@ class TestMultiUserErrorIsolation(SSotAsyncTestCase):
         self.record_metric('recovery_user_isolation', True)
         self.record_metric('cross_user_recovery_interference', False)
 
-class TestErrorMessageRouting(SSotAsyncTestCase):
+class ErrorMessageRoutingTests(SSotAsyncTestCase):
     """
     Test error message routing and formatting.
     
@@ -809,7 +809,7 @@ class TestErrorMessageRouting(SSotAsyncTestCase):
         self.record_metric('context_fields_preserved', len(sent_message['user_context']))
         self.record_metric('support_info_included', True)
 
-class TestSystemErrorRecovery(SSotAsyncTestCase):
+class SystemErrorRecoveryTests(SSotAsyncTestCase):
     """
     Test system-wide error recovery and graceful degradation.
     

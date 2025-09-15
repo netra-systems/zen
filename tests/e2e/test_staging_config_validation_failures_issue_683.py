@@ -19,7 +19,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.e2e
-class TestStagingConfigValidationFailuresIssue683(SSotAsyncTestCase):
+class StagingConfigValidationFailuresIssue683Tests(SSotAsyncTestCase):
     """
     E2E tests to reproduce complete staging configuration validation failures.
 

@@ -18,7 +18,7 @@ sys.path.insert(0, str(project_root))
 
 
 @pytest.mark.unit
-class TestDockerManagerImplementationCountRefined(unittest.TestCase):
+class DockerManagerImplementationCountRefinedTests(unittest.TestCase):
     """Refined test focusing on actual Docker Manager implementations."""
 
     def setUp(self):

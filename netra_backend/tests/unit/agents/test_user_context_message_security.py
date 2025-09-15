@@ -73,7 +73,7 @@ class SecurityTestScenario:
     performance_requirements: Dict[str, int]
 
 
-class TestUserContextMessageSecurity(SSotAsyncTestCase):
+class UserContextMessageSecurityTests(SSotAsyncTestCase):
     """Unit tests for user context message security patterns"""
 
     def setup_method(self, method):

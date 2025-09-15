@@ -22,7 +22,7 @@ CIRCUIT_BREAKER_ENDPOINT = f"{STAGING_URL}/api/circuit-breakers/status"
 WEBSOCKET_URL = "wss://api.staging.netrasystems.ai/ws"
 
 
-class TestAuthResilienceFixes:
+class AuthResilienceFixesTests:
     """Test suite for auth service resilience improvements."""
     
     @pytest.mark.asyncio
@@ -161,7 +161,7 @@ async def main():
     print("[U+1F9EA] Testing Auth Service Resilience Fixes")
     print("=" * 50)
     
-    test_suite = TestAuthResilienceFixes()
+    test_suite = AuthResilienceFixesTests()
     
     # Run tests
     tests = [

@@ -13,7 +13,7 @@ from unittest.mock import Mock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestE2EBypassKeyValidationIssue1087(SSotBaseTestCase):
+class E2EBypassKeyValidationIssue1087Tests(SSotBaseTestCase):
     """Unit tests for E2E bypass key configuration validation."""
 
     def setup_method(self, method):

@@ -42,7 +42,7 @@ import unittest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.integration
-class TestWebSocketMultiUserIsolationFailures(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketMultiUserIsolationFailuresTests(SSotAsyncTestCase, unittest.TestCase):
     """Test multi-user isolation failures caused by WebSocket Manager fragmentation."""
 
     def setUp(self):
@@ -372,7 +372,7 @@ class TestWebSocketMultiUserIsolationFailures(SSotAsyncTestCase, unittest.TestCa
             self.fail(f"MEMORY LEAK TEST FAILURE: Cannot test memory usage due to manager fragmentation: {e}")
 
 @pytest.mark.integration
-class TestWebSocketEnterpriseComplianceFailures(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketEnterpriseComplianceFailuresTests(SSotAsyncTestCase, unittest.TestCase):
     """Test enterprise compliance failures caused by WebSocket Manager fragmentation."""
 
     async def test_hipaa_compliance_violation_simulation(self):

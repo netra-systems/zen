@@ -42,7 +42,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SsotTestContext, SsotTestMetrics
 
-class TestDomainExpertsComprehensive(SSotBaseTestCase):
+class DomainExpertsComprehensiveTests(SSotBaseTestCase):
     """Comprehensive unit test suite for Domain Expert agents."""
 
     def setup_method(self, method):

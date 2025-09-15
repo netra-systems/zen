@@ -19,7 +19,7 @@ from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.main import app
 
-class TestLevel1BasicAuthFlows:
+class Level1BasicAuthFlowsTests:
     """Level 1: Basic authentication flows that must always work"""
     pass
 
@@ -125,7 +125,7 @@ class TestLevel1BasicAuthFlows:
                                     payload = jwt_handler.validate_token(token, 'access') if token else None
                                     assert payload is None, f'Token {token} should be rejected'
 
-                                    class TestLevel2EdgeCases:
+                                    class Level2EdgeCasesTests:
                                         """Level 2: Edge cases and boundary conditions"""
                                         pass
 
@@ -218,7 +218,7 @@ class TestLevel1BasicAuthFlows:
                                                                             data = response.json()
                                                                             assert 'refresh_token field is required' in str(data.get('detail', ''))
 
-                                                                            class TestLevel3ConcurrencyAndStress:
+                                                                            class Level3ConcurrencyAndStressTests:
                                                                                 """Level 3: Concurrency, race conditions, and stress testing"""
                                                                                 pass
 
@@ -303,7 +303,7 @@ class TestLevel1BasicAuthFlows:
                                                                                                                 assert payload is not None
                                                                                                                 assert validation_time < 0.1, f'Validation too slow: {validation_time}s'
 
-                                                                                                                class TestLevel4SecurityValidation:
+                                                                                                                class Level4SecurityValidationTests:
                                                                                                                     """Level 4: Security-focused tests"""
                                                                                                                     pass
 
@@ -370,7 +370,7 @@ class TestLevel1BasicAuthFlows:
                                                                                                                                             assert jti not in jtis, f'Duplicate jti found: {jti}'
                                                                                                                                             jtis.add(jti)
 
-                                                                                                                                            class TestLevel5IntegrationAndE2E:
+                                                                                                                                            class Level5IntegrationAndE2ETests:
                                                                                                                                                 """Level 5: Full integration and end-to-end tests"""
                                                                                                                                                 pass
 

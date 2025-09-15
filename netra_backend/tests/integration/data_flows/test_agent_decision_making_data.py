@@ -396,7 +396,7 @@ class AgentRoutingEngine:
         return min(0.95, max(0.3, confidence))  # Clamp between 0.3 and 0.95
 
 
-class TestAgentDecisionMakingData:
+class AgentDecisionMakingDataTests:
     """Test suite for agent decision-making data processing and analysis."""
     
     def setup_method(self):

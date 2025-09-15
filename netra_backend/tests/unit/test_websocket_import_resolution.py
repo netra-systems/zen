@@ -21,7 +21,7 @@ from typing import Dict, Any
 from fastapi import WebSocketDisconnect
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestWebSocketImportResolution(SSotBaseTestCase):
+class WebSocketImportResolutionTests(SSotBaseTestCase):
     """
     Unit tests designed to FAIL HARD and reproduce WebSocket import resolution issues.
     

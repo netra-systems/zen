@@ -640,7 +640,7 @@ class WebSocketStressTestRunner:
 # STRESS TEST SUITE
 # ============================================================================
 
-class TestWebSocketStressValidation:
+class WebSocketStressValidationTests:
     """Comprehensive WebSocket stress testing test suite."""
     
     @pytest.fixture(scope="class")

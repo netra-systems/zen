@@ -32,7 +32,7 @@ from netra_backend.app.startup_checks.database_checks import DatabaseChecker
 from tests.e2e.dev_launcher_test_fixtures import TestEnvironmentManager
 
 
-class TestDatabaseConnectioner:
+class DatabaseConnectionerTests:
     """Tests database connectivity for all database types."""
     
     def __init__(self):
@@ -118,7 +118,7 @@ class TestDatabaseConnectioner:
             return result.scalar() == 1
 
 
-class TestDevDatabaseFixture:
+class DevDatabaseFixtureTests:
     """Test fixture for database connectivity in dev environment."""
     
     def __init__(self):

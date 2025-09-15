@@ -20,7 +20,7 @@ from typing import Dict, Any
 from unittest.mock import MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestIssue849WebSocket1011Fix(SSotAsyncTestCase):
+class Issue849WebSocket1011FixTests(SSotAsyncTestCase):
     """Validate WebSocket 1011 error fixes via Redis SSOT consolidation."""
 
     async def asyncSetUp(self):
@@ -122,7 +122,7 @@ class TestIssue849WebSocket1011Fix(SSotAsyncTestCase):
         except Exception as e:
             return {'user_id': user_id, 'message': message, 'error': str(e), 'success': False}
 
-class TestIssue849BusinessImpactValidation(SSotAsyncTestCase):
+class Issue849BusinessImpactValidationTests(SSotAsyncTestCase):
     """Validate the business impact of WebSocket 1011 error fixes."""
 
     def test_business_impact_metrics(self):

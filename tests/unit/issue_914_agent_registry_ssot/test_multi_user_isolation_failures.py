@@ -30,7 +30,7 @@ from netra_backend.app.agents.registry import AgentRegistry as BasicRegistry
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry as AdvancedRegistry
 
 @pytest.mark.unit
-class TestAgentRegistryMultiUserIsolationFailures(SSotAsyncTestCase):
+class AgentRegistryMultiUserIsolationFailuresTests(SSotAsyncTestCase):
     """
     CRITICAL P0 Tests: Prove multi-user isolation failures block Golden Path
     

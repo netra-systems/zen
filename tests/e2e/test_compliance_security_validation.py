@@ -30,7 +30,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.e2e
-class TestComplianceSecurityValidation:
+class ComplianceSecurityValidationTests:
     """Test compliance and security validation patterns."""
 
     @pytest.mark.asyncio

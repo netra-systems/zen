@@ -100,7 +100,7 @@ class WebSocketClassDetector(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-class TestMultipleWebSocketNotifierDetection(SSotBaseTestCase):
+class MultipleWebSocketNotifierDetectionTests(SSotBaseTestCase):
     """
     FAILING TEST: Detects duplicate WebSocketNotifier implementations.
     

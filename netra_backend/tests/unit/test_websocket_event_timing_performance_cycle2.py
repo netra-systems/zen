@@ -20,7 +20,7 @@ from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from shared.types import UserID, ThreadID, RunID
 
-class TestWebSocketEventTimingPerformance:
+class WebSocketEventTimingPerformanceTests:
     """Test WebSocket event timing and performance characteristics."""
     
     @pytest.fixture

@@ -15,7 +15,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 @pytest.mark.e2e
-class TestCSPRegression:
+class CSPRegressionTests:
     """Test suite to prevent CSP configuration regressions."""
 
     @pytest.fixture
@@ -117,7 +117,7 @@ class TestCSPRegression:
                         pytest.fail(f'Staging CSP should not contain non-HTTPS source: {part}')
 
 @pytest.mark.staging
-class TestCSPFunctionalValidation:
+class CSPFunctionalValidationTests:
     """Functional tests to validate CSP doesn't break actual functionality."""
 
     @pytest.mark.skip(reason='Requires browser automation setup')

@@ -46,7 +46,7 @@ except ImportError:
     NoOpClickHouseClient = StubClickHouseManager
 
 
-class TestRealClickHouseConnection:
+class RealClickHouseConnectionTests:
     """Test ClickHouse connection with real service infrastructure."""
     
     # SSOT: Test ports from TEST_CREATION_GUIDE.md

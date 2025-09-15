@@ -39,7 +39,7 @@ try:
 except ImportError:
     AUTH_SERVICE_AVAILABLE = False
 
-class TestIDMigrationE2EStagingWorkflows(SSotAsyncTestCase):
+class IDMigrationE2EStagingWorkflowsTests(SSotAsyncTestCase):
     """E2E tests validating ID consistency in staging environment workflows."""
 
     def setup_method(self, method=None):

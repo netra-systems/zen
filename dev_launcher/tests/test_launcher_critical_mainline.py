@@ -82,7 +82,7 @@ def create_test_project_structure(base_dir: Path) -> None:
     (base_dir / "frontend").mkdir(parents=True, exist_ok=True)
 
 
-class TestDockerServiceDiscoveryIntegration(SSotAsyncTestCase):
+class DockerServiceDiscoveryIntegrationTests(SSotAsyncTestCase):
     """Test 1: Docker Service Discovery Integration - Comprehensive edge cases."""
     
     def setUp(self):
@@ -208,7 +208,7 @@ class TestDockerServiceDiscoveryIntegration(SSotAsyncTestCase):
         self.assertEqual(launcher._running_docker_services, {})
 
 
-class TestPortConflictResolution(SSotAsyncTestCase):
+class PortConflictResolutionTests(SSotAsyncTestCase):
     """Test 2: Port Conflict Resolution - Auto-fallback mechanisms."""
     
     def setUp(self):
@@ -318,7 +318,7 @@ class TestPortConflictResolution(SSotAsyncTestCase):
         self.assertGreater(len(force_free_calls), 0)
 
 
-class TestServiceAvailabilityAutoAdjustment(SSotAsyncTestCase):
+class ServiceAvailabilityAutoAdjustmentTests(SSotAsyncTestCase):
     """Test 3: Service Availability Auto-Adjustment - Mode switching logic."""
     
     def setUp(self):
@@ -442,7 +442,7 @@ class TestServiceAvailabilityAutoAdjustment(SSotAsyncTestCase):
         return mock_config
 
 
-class TestStartupSequenceOrdering(SSotAsyncTestCase):
+class StartupSequenceOrderingTests(SSotAsyncTestCase):
     """Test 4: Startup Sequence Ordering - 13-step sequence validation."""
     
     def setUp(self):
@@ -593,7 +593,7 @@ class TestStartupSequenceOrdering(SSotAsyncTestCase):
             asyncio.run(asyncio.wait_for(run_test(), timeout=5))
 
 
-class TestHealthMonitoringDelayedStart(SSotAsyncTestCase):
+class HealthMonitoringDelayedStartTests(SSotAsyncTestCase):
     """Test 5: Health Monitoring Delayed Start - Proper timing validation."""
     
     def setUp(self):
@@ -709,7 +709,7 @@ class TestHealthMonitoringDelayedStart(SSotAsyncTestCase):
         launcher.health_monitor.start.assert_called_once()
 
 
-class TestDatabaseValidationMockMode(SSotAsyncTestCase):
+class DatabaseValidationMockModeTests(SSotAsyncTestCase):
     """Test 6: Database Validation with Mock Mode - Proper skipping logic."""
     
     def setUp(self):
@@ -820,7 +820,7 @@ class TestDatabaseValidationMockMode(SSotAsyncTestCase):
         asyncio.run(run_test())
 
 
-class TestCrossServiceAuthentication(SSotAsyncTestCase):
+class CrossServiceAuthenticationTests(SSotAsyncTestCase):
     """Test 7: Cross-Service Authentication - Token generation and propagation."""
     
     def setUp(self):
@@ -946,7 +946,7 @@ class TestCrossServiceAuthentication(SSotAsyncTestCase):
             self.assertTrue(url_safe_pattern.match(token), f"Token '{token}' not URL-safe")
 
 
-class TestParallelPreCheckExecution(SSotAsyncTestCase):
+class ParallelPreCheckExecutionTests(SSotAsyncTestCase):
     """Test 8: Parallel Pre-Check Execution - Concurrent validation logic."""
     
     def setUp(self):
@@ -1062,7 +1062,7 @@ class TestParallelPreCheckExecution(SSotAsyncTestCase):
         self.assertIsNone(launcher.parallel_executor)
 
 
-class TestGracefulShutdownCleanup(SSotAsyncTestCase):
+class GracefulShutdownCleanupTests(SSotAsyncTestCase):
     """Test 9: Graceful Shutdown Cleanup - Resource cleanup validation."""
     
     def setUp(self):
@@ -1222,7 +1222,7 @@ class TestGracefulShutdownCleanup(SSotAsyncTestCase):
         launcher.parallel_executor.cleanup.assert_called_once()
 
 
-class TestEmergencyRecovery(SSotAsyncTestCase):
+class EmergencyRecoveryTests(SSotAsyncTestCase):
     """Test 10: Emergency Recovery - Critical error handling scenarios."""
     
     def setUp(self):

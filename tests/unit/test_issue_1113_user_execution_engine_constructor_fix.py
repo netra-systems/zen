@@ -51,7 +51,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.unit
-class TestIssue1113UserExecutionEngineConstructorFix(SSotBaseTestCase):
+class Issue1113UserExecutionEngineConstructorFixTests(SSotBaseTestCase):
     """
     Test remediation for Issue #1113 UserExecutionEngine constructor validation.
 
@@ -227,7 +227,7 @@ class TestIssue1113UserExecutionEngineConstructorFix(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestIssue1113ConstructorErrorMessages(SSotBaseTestCase):
+class Issue1113ConstructorErrorMessagesTests(SSotBaseTestCase):
     """
     Test suite for validating specific error messages in UserExecutionEngine constructor.
 

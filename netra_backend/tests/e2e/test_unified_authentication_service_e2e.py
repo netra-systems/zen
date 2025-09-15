@@ -55,7 +55,7 @@ from netra_backend.app.services.unified_authentication_service import (
 )
 
 
-class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
+class UnifiedAuthenticationServiceE2ETests(BaseE2ETest):
     """
     Comprehensive E2E tests for UnifiedAuthenticationService validating complete user journeys.
     

@@ -32,7 +32,7 @@ from shared.isolated_environment import get_env
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestMultiUserAuthIsolation(SSotBaseTestCase):
+class MultiUserAuthIsolationTests(SSotBaseTestCase):
     """
     Comprehensive Multi-User Authentication Isolation Tests
     

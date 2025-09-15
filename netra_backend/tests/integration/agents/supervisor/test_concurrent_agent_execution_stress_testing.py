@@ -189,7 +189,7 @@ def mock_stress_test_agent():
             return self._stress_metrics.copy()
     return MockStressTestAgent
 
-class TestHighLoadConcurrentStress(SSotBaseTestCase):
+class HighLoadConcurrentStressTests(SSotBaseTestCase):
     """Test system behavior under high concurrent load stress conditions."""
 
     @pytest.mark.asyncio
@@ -368,7 +368,7 @@ class TestHighLoadConcurrentStress(SSotBaseTestCase):
         avg_throughput = throughput_metrics['avg_throughput']
         assert avg_throughput >= 10, f'Average throughput should be  >= 10 events/sec, got {avg_throughput:.1f}'
 
-class TestStressErrorHandlingRecovery(SSotBaseTestCase):
+class StressErrorHandlingRecoveryTests(SSotBaseTestCase):
     """Test error handling and recovery mechanisms under stress conditions."""
 
     @pytest.mark.asyncio

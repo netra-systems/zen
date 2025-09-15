@@ -39,7 +39,7 @@ from netra_backend.app.services.user_execution_context import (
 logger = central_logger.get_logger(__name__)
 
 
-class TestExecutionEngineGoldenPathIntegration1123(SSotAsyncTestCase):
+class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
     """Test for Golden Path integration with SSOT ExecutionEngine Factory (Issue #1123)."""
     
     async def asyncSetUp(self):

@@ -26,7 +26,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.e2e
-class TestAgentCompensationIntegrationCore(SSotAsyncTestCase):
+class AgentCompensationIntegrationCoreTests(SSotAsyncTestCase):
     """E2E integration tests for agent compensation core functionality
     
     These tests validate the complete business scenario where multiple users

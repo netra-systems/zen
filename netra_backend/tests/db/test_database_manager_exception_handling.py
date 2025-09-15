@@ -37,7 +37,7 @@ from netra_backend.app.db.transaction_errors import (
 
 @pytest.mark.unit
 @pytest.mark.database
-class TestDatabaseManagerExceptionHandling(SSotAsyncTestCase):
+class DatabaseManagerExceptionHandlingTests(SSotAsyncTestCase):
     """
     Tests demonstrating current broad exception handling problems.
     

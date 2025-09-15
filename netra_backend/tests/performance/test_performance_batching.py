@@ -16,7 +16,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.performance  # Performance optimization iteration 64
 @pytest.mark.fast_test
-class TestBatchProcessor:
+class BatchProcessorTests:
     """Test batch processing operations - Optimized for performance."""
     
     @pytest.fixture
@@ -60,7 +60,7 @@ class TestBatchProcessor:
         assert len(batches[2]) == 2  # Remainder
 
 
-class TestMessageBatcher:
+class MessageBatcherTests:
     """Test message batching operations."""
     
     @pytest.fixture

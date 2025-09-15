@@ -77,7 +77,7 @@ class AuthSecurityTestHarness:
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.security_critical
-class TestAuthEdgeCaseSecurity:
+class AuthEdgeCaseSecurityTests:
     """Security-critical authentication edge case tests - NO MOCKS ALLOWED"""
 
     def setup_method(self):

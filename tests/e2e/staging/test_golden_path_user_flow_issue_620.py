@@ -31,7 +31,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 from shared.isolated_environment import get_env
 
 
-class TestGoldenPathUserFlowIssue620(BaseE2ETest):
+class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
     """End-to-end Golden Path validation for Issue #620 in staging environment."""
     
     # Staging environment configuration
@@ -504,7 +504,7 @@ class TestGoldenPathUserFlowIssue620(BaseE2ETest):
         print(f"✅ Event sequence validated: {' → '.join(event_types[:5])}")
 
 
-class TestGoldenPathPerformance(BaseE2ETest):
+class GoldenPathPerformanceTests(BaseE2ETest):
     """Performance-focused Golden Path tests."""
     
     @pytest.mark.e2e
@@ -571,7 +571,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_manual_tests():
-        test_instance = TestGoldenPathUserFlowIssue620()
+        test_instance = GoldenPathUserFlowIssue620Tests()
         
         try:
             # Test basic Golden Path

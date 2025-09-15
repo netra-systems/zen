@@ -35,7 +35,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.service_availability import check_service_availability, ServiceUnavailableError
 
 
-class TestServiceTokenUrlPatterns(BaseIntegrationTest):
+class ServiceTokenUrlPatternsTests(BaseIntegrationTest):
     """Integration tests for service token URL pattern validation."""
     
     def setup_method(self):

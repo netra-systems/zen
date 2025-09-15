@@ -29,7 +29,7 @@ from test_framework.websocket_helpers import WebSocketTestClient, WebSocketTestH
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketIntegrationCoreE2E(BaseE2ETest):
+class WebSocketIntegrationCoreE2ETests(BaseE2ETest):
     """Comprehensive E2E tests for WebSocket core functionality with authentication."""
     
     def setup_method(self):

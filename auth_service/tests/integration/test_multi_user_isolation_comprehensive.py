@@ -58,7 +58,7 @@ from auth_service.services.session_service import SessionService
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 
 
-class TestMultiUserIsolationComprehensive(SSotBaseTestCase):
+class MultiUserIsolationComprehensiveTests(SSotBaseTestCase):
     """
     PRIORITY 1: Comprehensive multi-user isolation tests with critical security attack vectors.
     
@@ -931,4 +931,4 @@ class TestMultiUserIsolationComprehensive(SSotBaseTestCase):
                 assert resource_limits["storage_mb"] == -1  # Unlimited
 
 
-__all__ = ["TestMultiUserIsolationComprehensive"]
+__all__ = ["MultiUserIsolationComprehensiveTests"]

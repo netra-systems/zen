@@ -16,7 +16,7 @@ from typing import Dict, List
 import pytest
 from netra_backend.app.services.generation_job_manager import get_corpus_from_clickhouse, save_corpus_to_clickhouse
 
-class TestDatabasePerformance:
+class DatabasePerformanceTests:
     """Test database performance under load"""
 
     @pytest.mark.performance

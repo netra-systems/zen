@@ -33,7 +33,7 @@ env = get_env()
 @pytest.mark.authentication
 @pytest.mark.security_critical
 @skip_if_no_real_services
-class TestRealWebSocketAuthentication:
+class RealWebSocketAuthenticationTests:
     """Test real WebSocket authentication mechanisms.
     
     CRITICAL: Tests authentication security for WebSocket connections:

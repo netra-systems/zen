@@ -26,7 +26,7 @@ from test_framework.websocket_helpers import MockWebSocketConnection
 
 
 @pytest.mark.integration
-class TestAuthenticationRaceConditionPrevention(SSotAsyncTestCase):
+class AuthenticationRaceConditionPreventionTests(SSotAsyncTestCase):
     """
     Integration Test: WebSocket Authentication Race Condition Detection
     

@@ -48,7 +48,7 @@ from test_framework.jwt_test_utils import JWTTestHelper
 logger = logging.getLogger(__name__)
 
 
-class TestAuthCompleteFlow(BaseE2ETest):
+class AuthCompleteFlowTests(BaseE2ETest):
     """Complete authentication flow E2E tests with real services."""
     
     def setup_method(self):
@@ -1044,7 +1044,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
 @pytest.fixture
 async def auth_test_client():
     """Fixture providing authenticated test client."""
-    test_instance = TestAuthCompleteFlow()
+    test_instance = AuthCompleteFlowTests()
     await test_instance.initialize_test_environment()
     
     try:

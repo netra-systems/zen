@@ -47,7 +47,7 @@ from netra_backend.app.services.user_execution_context import (
 )
 
 
-class TestUserExecutionContextRaceConditions(BaseTestCase):
+class UserExecutionContextRaceConditionsTests(BaseTestCase):
     """Comprehensive race condition testing for UserExecutionContext."""
     
     def setup_method(self):

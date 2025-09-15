@@ -44,7 +44,7 @@ logger = get_logger(__name__)
 @pytest.mark.websocket_ssot
 @pytest.mark.non_docker
 @pytest.mark.issue_1058_performance_impact
-class TestSSOTPerformanceImpact(SSotAsyncTestCase):
+class SSOTPerformanceImpactTests(SSotAsyncTestCase):
     """Integration tests validating SSOT performance impact and optimization.
 
     CRITICAL: These tests prove SSOT consolidation improves performance
@@ -306,7 +306,7 @@ class TestSSOTPerformanceImpact(SSotAsyncTestCase):
         logger.info(f'   ⏱️  Enabled: {monitoring_enabled_time:.1f}ms, Disabled: {monitoring_disabled_time:.1f}ms')
 
 @pytest.mark.integration_benchmark
-class TestSSOTPerformanceBenchmarks:
+class SSOTPerformanceBenchmarksTests:
     """Performance benchmark tests for SSOT consolidation."""
 
     @pytest.mark.asyncio

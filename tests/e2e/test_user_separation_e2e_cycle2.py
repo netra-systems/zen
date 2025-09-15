@@ -23,7 +23,7 @@ from test_framework.ssot.database_test_client import DatabaseTestClient
 from shared.types import UserID, ThreadID, RunID
 
 
-class TestUserSeparationE2E:
+class UserSeparationE2ETests:
     """Test complete user separation in production-like E2E scenarios."""
     
     @pytest.mark.e2e

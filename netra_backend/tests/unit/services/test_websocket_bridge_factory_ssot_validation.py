@@ -39,7 +39,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 
 
-class TestWebSocketBridgeFactorySSotValidation:
+class WebSocketBridgeFactorySSotValidationTests:
     """Test SSOT validation failures in WebSocketBridgeFactory."""
     
     def test_factory_requires_connection_pool_ssot_validation(self):

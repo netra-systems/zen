@@ -24,7 +24,7 @@ from test_framework.performance_helpers import fast_test
 
 @pytest.mark.monitoring
 @pytest.mark.fast_test
-class TestSystemHealthMonitoringOptimized:
+class SystemHealthMonitoringOptimizedTests:
     """Optimized system health monitoring tests."""
     
     @pytest.mark.asyncio
@@ -152,7 +152,7 @@ class TestSystemHealthMonitoringOptimized:
 
 @pytest.mark.monitoring
 @pytest.mark.fast_test
-class TestProactiveAlertingOptimized:
+class ProactiveAlertingOptimizedTests:
     """Optimized proactive alerting system tests."""
     
     @pytest.mark.asyncio

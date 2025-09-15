@@ -21,7 +21,7 @@ from netra_backend.app.schemas.monitoring_schemas import GCPErrorServiceConfig, 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.error_codes import ErrorCode
 
-class TestGCPErrorServiceUnit(SSotBaseTestCase):
+class GCPErrorServiceUnitTests(SSotBaseTestCase):
     """
     UNIT: GCP Error Service Unit Test Suite
     

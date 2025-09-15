@@ -47,7 +47,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
 @pytest.mark.gcp_staging
 @pytest.mark.agent_goldenpath
 @pytest.mark.mission_critical
-class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
+class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
     """
     E2E tests for the complete agent message pipeline in staging GCP.
     

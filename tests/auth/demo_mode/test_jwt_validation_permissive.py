@@ -28,7 +28,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.auth_integration.auth import BackendAuthIntegration
 
 
-class TestJWTValidationPermissive(SSotAsyncTestCase):
+class JWTValidationPermissiveTests(SSotAsyncTestCase):
     """
     Test JWT validation in demo mode for permissive behavior.
     

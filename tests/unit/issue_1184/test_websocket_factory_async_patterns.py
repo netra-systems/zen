@@ -21,7 +21,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestWebSocketFactoryAsyncPatterns(SSotAsyncTestCase):
+class WebSocketFactoryAsyncPatternsTests(SSotAsyncTestCase):
     """Test WebSocket factory async pattern compatibility issues."""
 
     def setUp(self):

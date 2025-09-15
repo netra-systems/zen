@@ -61,7 +61,7 @@ class InitializationPatternAnalysis:
     ssot_compliance_percentage: float
 
 @pytest.mark.unit
-class TestIssue989WebSocketFactoryDeprecationSSoT(SSotBaseTestCase):
+class Issue989WebSocketFactoryDeprecationSSoTTests(SSotBaseTestCase):
     """Mission Critical: Issue #989 WebSocket Factory Deprecation SSOT Violation Detection
 
     This test suite detects and validates SSOT violations related to deprecated

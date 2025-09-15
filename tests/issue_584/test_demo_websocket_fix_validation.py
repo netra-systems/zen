@@ -12,7 +12,7 @@ from unittest.mock import patch, Mock
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
-class TestDemoWebSocketFixValidation(unittest.TestCase):
+class DemoWebSocketFixValidationTests(unittest.TestCase):
     """Test validation of Issue #584 fix in demo_websocket.py."""
     
     def test_fixed_demo_websocket_id_generation_pattern(self):

@@ -221,7 +221,7 @@ def environment_tester():
     """Create environment alignment tester instance."""
     return CrossSystemEnvironmentAlignmentTester()
 
-class TestCrossSystemEnvironmentAlignment:
+class CrossSystemEnvironmentAlignmentTests:
     """Test suite for cross-system environment configuration alignment."""
 
     @pytest.mark.asyncio

@@ -82,7 +82,7 @@ class PerformanceMetrics:
         return sorted_data[index]
 
 @pytest.mark.e2e
-class TestPerformanceAndScaling(BaseE2ETest):
+class PerformanceAndScalingTests(BaseE2ETest):
     """
     Performance and Scaling E2E Tests for Staging Environment.
     

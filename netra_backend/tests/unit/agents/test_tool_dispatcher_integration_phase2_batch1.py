@@ -133,7 +133,7 @@ class MockIntegrationTool(BaseTool):
         }
 
 
-class TestToolDispatcherIntegrationInterfaces(SSotBaseTestCase):
+class ToolDispatcherIntegrationInterfacesTests(SSotBaseTestCase):
     """Test integration interfaces between dispatcher components."""
     
     @pytest.mark.unit
@@ -223,7 +223,7 @@ class TestToolDispatcherIntegrationInterfaces(SSotBaseTestCase):
         assert "integration_status" in str(completed_event["result"])
 
 
-class TestToolDispatcherRequestScopedIntegration(SSotBaseTestCase):
+class ToolDispatcherRequestScopedIntegrationTests(SSotBaseTestCase):
     """Test request-scoped integration patterns and isolation."""
     
     @pytest.mark.unit

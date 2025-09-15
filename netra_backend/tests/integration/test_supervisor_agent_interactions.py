@@ -87,7 +87,7 @@ class MockAgent(BaseAgent):
         return result
 
 
-class TestSupervisorAgentInteractions(BaseIntegrationTest):
+class SupervisorAgentInteractionsTests(BaseIntegrationTest):
     """Comprehensive integration tests for SupervisorAgent interactions with SSOT classes."""
     
     def setup_method(self):

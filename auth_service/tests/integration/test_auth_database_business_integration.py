@@ -44,7 +44,7 @@ from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.services.auth_service import AuthService
 
 
-class TestAuthDatabaseBusinessIntegration(BaseIntegrationTest):
+class AuthDatabaseBusinessIntegrationTests(BaseIntegrationTest):
     """Integration tests for auth service database operations with real business value."""
     
     @pytest.fixture(autouse=True)

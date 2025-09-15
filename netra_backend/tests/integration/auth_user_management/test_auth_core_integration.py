@@ -49,7 +49,7 @@ from netra_backend.app.schemas.auth_types import (
 )
 
 
-class TestCoreAuthenticationIntegration(BaseIntegrationTest):
+class CoreAuthenticationIntegrationTests(BaseIntegrationTest):
     """
     Core Authentication and User Management Integration Tests.
     

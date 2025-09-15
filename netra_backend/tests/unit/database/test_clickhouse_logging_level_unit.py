@@ -44,7 +44,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.database.test_database_manager import DatabaseTestManager
 
 
-class TestClickHouseLoggingLevelUnit:
+class ClickHouseLoggingLevelUnitTests:
     """Unit tests for ClickHouse context-aware logging validation."""
     
     @contextmanager
@@ -408,7 +408,7 @@ class TestClickHouseLoggingLevelUnit:
             env.disable_isolation()
 
 
-class TestClickHouseErrorHandlerContextAwareness:
+class ClickHouseErrorHandlerContextAwarenessTests:
     """Test the _handle_connection_error function for context awareness."""
     
     def test_handle_connection_error_respects_required_flag(self):
@@ -547,7 +547,7 @@ class TestClickHouseErrorHandlerContextAwareness:
             logger.setLevel(original_level)
 
 
-class TestClickHouseContextPropagationPatterns:
+class ClickHouseContextPropagationPatternsTests:
     """Test patterns for context propagation in ClickHouse initialization."""
     
     def test_service_context_available_to_connection_layer(self):

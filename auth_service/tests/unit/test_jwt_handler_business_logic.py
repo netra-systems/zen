@@ -24,7 +24,7 @@ from auth_service.auth_core.config import AuthConfig
 # MockFactory not available - using standard unittest.mock instead
 
 
-class TestJWTHandlerBusinessLogic:
+class JWTHandlerBusinessLogicTests:
     """Test JWT handler core business logic without external dependencies."""
     
     @pytest.fixture

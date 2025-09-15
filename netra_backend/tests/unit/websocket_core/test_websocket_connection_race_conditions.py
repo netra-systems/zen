@@ -58,7 +58,7 @@ class ApplicationConnectionState(Enum):
     DISCONNECTED = "disconnected"
 
 
-class TestWebSocketConnectionStateMachine:
+class WebSocketConnectionStateMachineTests:
     """
     Test the missing application-level connection state machine.
     
@@ -159,7 +159,7 @@ class TestWebSocketConnectionStateMachine:
             assert len(results) == 2
 
 
-class TestMessageQueuingDuringSetup:
+class MessageQueuingDuringSetupTests:
     """
     Test message buffering during connection setup phase.
     
@@ -269,7 +269,7 @@ class TestMessageQueuingDuringSetup:
             assert flushed_messages[2]["id"] == 3
 
 
-class TestRaceConditionTiming:
+class RaceConditionTimingTests:
     """
     Test race condition reproduction through controlled timing scenarios.
     
@@ -483,7 +483,7 @@ class TestRaceConditionTiming:
             return False
 
 
-class TestProductionScenarioReproduction:
+class ProductionScenarioReproductionTests:
     """
     Test reproduction of exact production scenarios from staging logs.
     
@@ -572,25 +572,25 @@ def test_race_condition_reproduction_suite():
     """
     test_cases_and_methods = [
         # State machine tests (should all fail)
-        (TestWebSocketConnectionStateMachine, "test_connection_state_progression"),
-        (TestWebSocketConnectionStateMachine, "test_invalid_state_transitions"), 
-        (TestWebSocketConnectionStateMachine, "test_state_rollback_on_failure"),
-        (TestWebSocketConnectionStateMachine, "test_concurrent_state_checks"),
+        (WebSocketConnectionStateMachineTests, "test_connection_state_progression"),
+        (WebSocketConnectionStateMachineTests, "test_invalid_state_transitions"), 
+        (WebSocketConnectionStateMachineTests, "test_state_rollback_on_failure"),
+        (WebSocketConnectionStateMachineTests, "test_concurrent_state_checks"),
         
         # Message queuing tests (should all fail)
-        (TestMessageQueuingDuringSetup, "test_queue_messages_during_setup"),
-        (TestMessageQueuingDuringSetup, "test_flush_queue_after_ready"),
-        (TestMessageQueuingDuringSetup, "test_queue_overflow_protection"),
-        (TestMessageQueuingDuringSetup, "test_queue_message_ordering"),
+        (MessageQueuingDuringSetupTests, "test_queue_messages_during_setup"),
+        (MessageQueuingDuringSetupTests, "test_flush_queue_after_ready"),
+        (MessageQueuingDuringSetupTests, "test_queue_overflow_protection"),
+        (MessageQueuingDuringSetupTests, "test_queue_message_ordering"),
         
         # Race condition timing tests (should all fail)
-        (TestRaceConditionTiming, "test_accept_vs_message_timing"),
-        (TestRaceConditionTiming, "test_auth_vs_accept_timing"),
-        (TestRaceConditionTiming, "test_service_init_vs_message_timing"),
-        (TestRaceConditionTiming, "test_concurrent_component_access"),
+        (RaceConditionTimingTests, "test_accept_vs_message_timing"),
+        (RaceConditionTimingTests, "test_auth_vs_accept_timing"),
+        (RaceConditionTimingTests, "test_service_init_vs_message_timing"),
+        (RaceConditionTimingTests, "test_concurrent_component_access"),
         
         # Production scenario tests (should all fail)
-        (TestProductionScenarioReproduction, "test_staging_user_race_condition_reproduction")
+        (ProductionScenarioReproductionTests, "test_staging_user_race_condition_reproduction")
     ]
     
     failed_tests = []

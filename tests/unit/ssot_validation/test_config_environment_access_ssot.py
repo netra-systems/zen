@@ -33,7 +33,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestConfigEnvironmentAccessSSot(SSotBaseTestCase):
+class ConfigEnvironmentAccessSSotTests(SSotBaseTestCase):
     """Test suite to detect environment access SSOT violations in config managers."""
 
     def test_config_managers_use_isolated_environment_only(self):

@@ -35,7 +35,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestIssue722SSOTViolations(SSotBaseTestCase):
+class Issue722SSOTViolationsTests(SSotBaseTestCase):
     """Test suite to detect specific SSOT violations in 4 critical files per Issue #722."""
 
     @classmethod
@@ -211,7 +211,7 @@ class TestIssue722SSOTViolations(SSotBaseTestCase):
         return None
 
 @pytest.mark.unit
-class TestIssue722IntegrationPatterns(SSotBaseTestCase):
+class Issue722IntegrationPatternsTests(SSotBaseTestCase):
     """Integration tests for Issue #722 SSOT environment access patterns."""
 
     def test_isolated_environment_integration_patterns(self):

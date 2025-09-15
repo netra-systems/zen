@@ -22,7 +22,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.unit
-class TestDeprecatedEnginePrevention(SSotBaseTestCase):
+class DeprecatedEnginePreventionTests(SSotBaseTestCase):
     """Test prevention of deprecated execution engine instantiation."""
     
     def setup_method(self, method=None):
@@ -506,7 +506,7 @@ class TestDeprecatedEnginePrevention(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestSSotConsolidationReadiness(SSotBaseTestCase):
+class SSotConsolidationReadinessTests(SSotBaseTestCase):
     """Test overall SSOT consolidation readiness for execution engines."""
     
     def test_ssot_consolidation_completeness(self):

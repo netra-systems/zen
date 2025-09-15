@@ -302,7 +302,7 @@ async def recovery_strategies_tester():
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestRealAgentRecoveryStrategies:
+class RealAgentRecoveryStrategiesTests:
     """Test suite for real agent recovery strategy execution."""
 
     async def test_llm_api_timeout_recovery_strategy(self, recovery_strategies_tester):

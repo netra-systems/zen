@@ -50,7 +50,7 @@ class ConcreteTestAgent(BaseAgent):
         """Return test system prompt."""
         return 'You are a test agent for comprehensive BaseAgent testing.'
 
-class TestBaseAgentCoreExecution(SSotBaseTestCase):
+class BaseAgentCoreExecutionTests(SSotBaseTestCase):
     """Comprehensive tests for BaseAgent core execution methods."""
 
     def setup_method(self, method):
@@ -163,7 +163,7 @@ class TestBaseAgentCoreExecution(SSotBaseTestCase):
             assert hasattr(agent, method_name), f'Missing lifecycle method: {method_name}'
             assert callable(getattr(agent, method_name)), f'Lifecycle method {method_name} not callable'
 
-class TestBaseAgentFactoryPatterns(SSotBaseTestCase):
+class BaseAgentFactoryPatternsTests(SSotBaseTestCase):
     """Test BaseAgent factory patterns and user isolation."""
 
     def setup_method(self, method):
@@ -214,7 +214,7 @@ class TestBaseAgentFactoryPatterns(SSotBaseTestCase):
         agent1.context['test_key'] = 'user1_value'
         assert 'test_key' not in agent2.context
 
-class TestBaseAgentWebSocketIntegration(SSotBaseTestCase):
+class BaseAgentWebSocketIntegrationTests(SSotBaseTestCase):
     """Test BaseAgent WebSocket integration and event patterns."""
 
     def setup_method(self, method):
@@ -253,7 +253,7 @@ class TestBaseAgentWebSocketIntegration(SSotBaseTestCase):
             assert hasattr(agent, method_name), f'Missing adapter method: {method_name}'
             assert callable(getattr(agent, method_name))
 
-class TestBaseAgentConcurrencyAndIsolation(SSotBaseTestCase):
+class BaseAgentConcurrencyAndIsolationTests(SSotBaseTestCase):
     """Test BaseAgent concurrency patterns and user isolation."""
 
     def setup_method(self, method):
@@ -302,7 +302,7 @@ class TestBaseAgentConcurrencyAndIsolation(SSotBaseTestCase):
             assert hasattr(agent, method_name), f'Missing resource method: {method_name}'
             assert callable(getattr(agent, method_name))
 
-class TestBaseAgentBusinessValuePatterns(SSotBaseTestCase):
+class BaseAgentBusinessValuePatternsTests(SSotBaseTestCase):
     """Test BaseAgent patterns that deliver core business value."""
 
     def setup_method(self, method):

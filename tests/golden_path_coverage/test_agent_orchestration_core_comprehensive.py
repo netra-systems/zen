@@ -49,7 +49,7 @@ from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOr
 from netra_backend.app.agents.supervisor.pipeline_executor import PipelineExecutor
 from netra_backend.app.agents.supervisor.state_manager import StateManager
 
-class TestAgentOrchestrationCore(SSotAsyncTestCase):
+class AgentOrchestrationCoreTests(SSotAsyncTestCase):
     """
     Comprehensive tests for agent orchestration core functionality.
 

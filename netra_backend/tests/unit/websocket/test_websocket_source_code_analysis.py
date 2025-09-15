@@ -11,7 +11,7 @@ import inspect
 from pathlib import Path
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestWebSocketSourceCodeAnalysis(SSotBaseTestCase):
+class WebSocketSourceCodeAnalysisTests(SSotBaseTestCase):
     """
     Source code analysis to validate WebSocket silent failure patterns.
     """

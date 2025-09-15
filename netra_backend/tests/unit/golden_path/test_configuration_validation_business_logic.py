@@ -778,7 +778,7 @@ class ConfigurationValidator:
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestConfigurationValidationBusinessLogic:
+class ConfigurationValidationBusinessLogicTests:
     """Test configuration validation business logic for platform stability."""
     
     def setup_method(self):

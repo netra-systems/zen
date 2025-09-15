@@ -73,7 +73,7 @@ class StateCoordinationTestScenario:
     performance_metrics: Dict[str, int]
 
 
-class TestAgentStateMessageCoordination(SSotAsyncTestCase):
+class AgentStateMessageCoordinationTests(SSotAsyncTestCase):
     """Unit tests for agent state and message coordination patterns"""
 
     def setup_method(self, method):

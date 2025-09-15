@@ -42,7 +42,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestUnifiedTestRunner127KBJsonIssue(SSotBaseTestCase):
+class UnifiedTestRunner127KBJsonIssueTests(SSotBaseTestCase):
     """Critical test reproducing the 127KB+ JSON output issue."""
 
     def setup_method(self, method=None):

@@ -19,7 +19,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestDockerComposePathValidation(SSotBaseTestCase):
+class DockerComposePathValidationTests(SSotBaseTestCase):
     """Unit tests for Docker compose path validation - FILE SYSTEM ONLY"""
 
     @classmethod

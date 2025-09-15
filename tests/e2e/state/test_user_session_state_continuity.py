@@ -59,7 +59,7 @@ except ImportError:
     DatabaseSessionManager = None
 
 
-class TestUserSessionStateContinuity(BaseE2ETest):
+class UserSessionStateContinuityTests(BaseE2ETest):
     """E2E tests for user session state continuity across interactions."""
     
     @pytest.fixture

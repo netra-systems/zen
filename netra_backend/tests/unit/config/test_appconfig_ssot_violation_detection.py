@@ -12,7 +12,7 @@ from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig, Stagi
 from shared.database_url_builder import DatabaseURLBuilder
 
 
-class TestAppConfigSSotViolationDetection:
+class AppConfigSSotViolationDetectionTests:
     """Tests to detect SSOT violation in database URL construction."""
     
     def test_appconfig_should_not_manually_construct_database_url(self):

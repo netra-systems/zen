@@ -41,7 +41,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
-class TestChatWorkflowAgentEventsIntegration(SSotBaseTestCase):
+class ChatWorkflowAgentEventsIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for chat workflow with agent event generation.
     

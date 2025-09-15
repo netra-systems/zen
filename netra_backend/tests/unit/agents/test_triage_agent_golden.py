@@ -57,7 +57,7 @@ class MockTriageAgent(BaseAgent):
             confidence = 0.6
         return {'status': 'success', 'category': category, 'confidence_score': confidence, 'agent_name': self.name, 'should_route': confidence >= self.confidence_threshold}
 
-class TestTriageAgentGoldenPattern:
+class TriageAgentGoldenPatternTests:
     """Test golden pattern implementation for TriageSubAgent."""
 
     @pytest.fixture
@@ -85,7 +85,7 @@ class TestTriageAgentGoldenPattern:
         health = agent.get_health_status()
         assert health is not None
 
-class TestTriageExecutionFlow:
+class TriageExecutionFlowTests:
     """Test triage agent execution flow patterns."""
 
     @pytest.fixture
@@ -111,7 +111,7 @@ class TestTriageExecutionFlow:
         agent = MockTriageAgent(llm_manager=mock_llm_manager, name='ExecutionFailureTriage', should_fail_execution=True, enable_reliability=True)
         assert agent.get_health_status() is not None
 
-class TestTriageCategorizationLogic:
+class TriageCategorizationLogicTests:
     """Test triage categorization decision-making logic."""
 
     @pytest.fixture
@@ -141,7 +141,7 @@ class TestTriageCategorizationLogic:
         assert agent.default_category == 'fallback'
         assert agent.get_health_status() is not None
 
-class TestConfidenceScoring:
+class ConfidenceScoringTests:
     """Test confidence scoring and threshold handling."""
 
     @pytest.fixture
@@ -171,7 +171,7 @@ class TestConfidenceScoring:
         assert agent_low.get_health_status() is not None
         assert agent_high.get_health_status() is not None
 
-class TestTriageEdgeCases:
+class TriageEdgeCasesTests:
     """Test difficult edge cases and error scenarios."""
 
     @pytest.fixture
@@ -201,7 +201,7 @@ class TestTriageEdgeCases:
             assert agent.confidence_threshold == expected_threshold
             assert agent.name == f'ConcurrentTriage_{i}'
 
-class TestTriagePerformancePatterns:
+class TriagePerformancePatternsTests:
     """Test performance optimization patterns for triage."""
 
     @pytest.fixture
@@ -226,7 +226,7 @@ class TestTriagePerformancePatterns:
         agent = MockTriageAgent(llm_manager=mock_llm_manager, name='MemoryEfficientTriage', enable_reliability=True)
         assert agent.get_health_status() is not None
 
-class TestTriageIntegrationReadiness:
+class TriageIntegrationReadinessTests:
     """Test integration readiness with routing and execution systems."""
 
     @pytest.fixture

@@ -211,7 +211,7 @@ class LeakTestAgent(BaseAgent):
 
 
 @pytest.mark.integration
-class TestAgentMemoryManagementIntegration(SSotAsyncTestCase):
+class AgentMemoryManagementIntegrationTests(SSotAsyncTestCase):
     """Integration tests for agent memory management and cleanup."""
     
     def create_test_user_context(self, user_id: str = None, memory_scenario: str = "memory_test") -> UserExecutionContext:

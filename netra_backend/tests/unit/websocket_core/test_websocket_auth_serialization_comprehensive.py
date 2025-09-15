@@ -26,7 +26,7 @@ from netra_backend.app.services.unified_authentication_service import AuthResult
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestWebSocketAuthSerializationFix:
+class WebSocketAuthSerializationFixTests:
     """Test that WebSocket authentication responses use safe serialization."""
     
     @pytest.fixture
@@ -271,7 +271,7 @@ class TestWebSocketAuthSerializationFix:
         assert hasattr(authenticator1, 'create_auth_success_response')
 
 
-class TestWebSocketAuthSerializationRegression:
+class WebSocketAuthSerializationRegressionTests:
     """Regression tests to ensure the serialization fix works in real scenarios."""
     
     async def test_reproduction_of_original_json_serialization_error(self):

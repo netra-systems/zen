@@ -14,7 +14,7 @@ class MockState:
             self.thread_id == thread_id
 
 
-class TestExtractThreadId:
+class ExtractThreadIdTests:
     """Test extract_thread_id function."""
     
     def test_extract_chat_thread_id(self):

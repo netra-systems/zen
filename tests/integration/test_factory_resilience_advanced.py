@@ -74,7 +74,7 @@ class FactoryStressTestManager:
         }
 
 
-class TestAdvancedFactoryResilience(BaseIntegrationTest):
+class AdvancedFactoryResilienceTests(BaseIntegrationTest):
     """Test factory resilience under extreme conditions with REAL services."""
     
     def setup_method(self):

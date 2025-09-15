@@ -42,7 +42,7 @@ from netra_backend.app.db.clickhouse import (
 )
 
 
-class TestClickHouseRealServiceConnectivity(SSotBaseTestCase):
+class ClickHouseRealServiceConnectivityTests(SSotBaseTestCase):
     """
     Integration tests for real ClickHouse service connectivity
     
@@ -259,7 +259,7 @@ class TestClickHouseRealServiceConnectivity(SSotBaseTestCase):
                 await service.close()
 
 
-class TestClickHouseCacheRealServiceIntegration(SSotBaseTestCase):
+class ClickHouseCacheRealServiceIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for ClickHouse cache with real service operations
     
@@ -396,7 +396,7 @@ class TestClickHouseCacheRealServiceIntegration(SSotBaseTestCase):
                 await service.close()
 
 
-class TestClickHouseConnectionRecovery(SSotBaseTestCase):
+class ClickHouseConnectionRecoveryTests(SSotBaseTestCase):
     """
     Integration tests for ClickHouse connection recovery scenarios
     
@@ -500,7 +500,7 @@ class TestClickHouseConnectionRecovery(SSotBaseTestCase):
                 await service.close()
 
 
-class TestClickHouseTableOperations(SSotBaseTestCase):
+class ClickHouseTableOperationsTests(SSotBaseTestCase):
     """
     Integration tests for ClickHouse table operations and schema validation
     
@@ -601,7 +601,7 @@ class TestClickHouseTableOperations(SSotBaseTestCase):
 
 
 # Mark completion of comprehensive integration tests
-class TestClickHouseIntegrationTestsComplete(SSotBaseTestCase):
+class ClickHouseIntegrationTestsCompleteTests(SSotBaseTestCase):
     """Marker class indicating completion of integration test suite"""
 
     def test_integration_test_suite_completion_metrics(self):

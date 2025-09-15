@@ -145,7 +145,7 @@ def auth_token():
 
 
 @pytest.mark.integration
-class TestServiceCommunicationFailure:
+class ServiceCommunicationFailureTests:
     """Test real service communication failures and resilience patterns."""
     
     @pytest.mark.asyncio

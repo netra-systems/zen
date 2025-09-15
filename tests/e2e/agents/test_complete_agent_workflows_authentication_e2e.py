@@ -315,7 +315,7 @@ class EnterpriseWorkflowExecutionEngine:
             await self.http_client.aclose()
 
 @pytest.mark.e2e
-class TestCompleteEnterpriseWorkflows(SSotBaseTestCase):
+class CompleteEnterpriseWorkflowsTests(SSotBaseTestCase):
     """Test complete enterprise workflows with full authentication."""
 
     @pytest.mark.asyncio
@@ -405,7 +405,7 @@ class TestCompleteEnterpriseWorkflows(SSotBaseTestCase):
             await asyncio.gather(*cleanup_tasks, return_exceptions=True)
 
 @pytest.mark.e2e
-class TestAuthenticationSecurityEdgeCases(SSotBaseTestCase):
+class AuthenticationSecurityEdgeCasesTests(SSotBaseTestCase):
     """Test authentication security and edge cases in enterprise workflows."""
 
     @pytest.mark.asyncio

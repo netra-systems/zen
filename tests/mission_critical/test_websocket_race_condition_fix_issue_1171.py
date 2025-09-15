@@ -26,7 +26,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import (
 )
 
 
-class TestWebSocketRaceConditionFix:
+class WebSocketRaceConditionFixTests:
     """Test suite for WebSocket startup race condition fixes."""
     
     @pytest.fixture
@@ -271,7 +271,7 @@ class TestWebSocketRaceConditionFix:
 
 
 @pytest.mark.asyncio
-class TestRaceConditionIntegration:
+class RaceConditionIntegrationTests:
     """Integration tests for race condition fixes."""
     
     async def test_full_race_condition_scenario(self):

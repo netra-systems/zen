@@ -26,7 +26,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
 
-class TestAuthServiceBackendJWTFlow(SSotAsyncTestCase):
+class AuthServiceBackendJWTFlowTests(SSotAsyncTestCase):
     """Test auth service to backend JWT validation integration flow."""
     
     @pytest.fixture

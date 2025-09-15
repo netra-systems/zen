@@ -57,7 +57,7 @@ class WebSocketBusinessValueMetrics:
 @pytest.mark.mission_critical
 @pytest.mark.websocket
 @pytest.mark.no_skip
-class TestWebSocketBusinessValueProtection(SSotAsyncTestCase):
+class WebSocketBusinessValueProtectionTests(SSotAsyncTestCase):
     """Critical tests protecting business value and revenue."""
 
     def setUp(self):

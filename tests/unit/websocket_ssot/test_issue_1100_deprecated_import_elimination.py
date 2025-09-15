@@ -26,7 +26,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestDeprecatedImportElimination(BaseIntegrationTest):
+class DeprecatedImportEliminationTests(BaseIntegrationTest):
     """Test elimination of deprecated websocket_manager_factory imports."""
     
     # Priority files that MUST be migrated to SSOT imports
@@ -357,7 +357,7 @@ class TestDeprecatedImportElimination(BaseIntegrationTest):
         )
 
 
-class TestSSotImportPathConsistency(BaseIntegrationTest):
+class SSotImportPathConsistencyTests(BaseIntegrationTest):
     """Test consistency of SSOT import paths across the codebase."""
     
     @pytest.mark.unit

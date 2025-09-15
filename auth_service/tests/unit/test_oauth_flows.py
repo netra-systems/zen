@@ -169,7 +169,7 @@ class MockGoogleOAuthError(Exception):
     pass
 
 
-class TestOAuthFlowsEnhanced(SSotBaseTestCase):
+class OAuthFlowsEnhancedTests(SSotBaseTestCase):
     """
     Enhanced unit tests for OAuth flows business logic.
     Tests OAuth manager, provider interactions, and security features.

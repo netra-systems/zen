@@ -245,7 +245,7 @@ class ScalabilityTester:
         return result
 
 @pytest.mark.performance
-class TestConcurrentUserPerformance:
+class ConcurrentUserPerformanceTests:
     """Test suite for concurrent user handling performance."""
 
     def setup_method(self):

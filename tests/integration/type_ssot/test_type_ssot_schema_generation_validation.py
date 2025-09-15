@@ -51,7 +51,7 @@ class TypeScriptInterface:
         }
 
 
-class TestSchemaGenerationValidation(BaseIntegrationTest):
+class SchemaGenerationValidationTests(BaseIntegrationTest):
     """Integration tests for schema generation and TypeScript synchronization."""
     
     @pytest.mark.integration

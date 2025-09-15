@@ -23,7 +23,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
 
-class TestOAuthRouteSecurityIntegration(BaseIntegrationTest):
+class OAuthRouteSecurityIntegrationTests(BaseIntegrationTest):
     """Test OAuth route security integration and endpoint protection"""
 
     def setup_method(self):

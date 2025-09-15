@@ -141,7 +141,7 @@ def validate_test_module_structure(module_name: str) -> Dict[str, Any]:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestGoldenPathTestSuiteValidation:
+class GoldenPathTestSuiteValidationTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

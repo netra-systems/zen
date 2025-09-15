@@ -13,7 +13,7 @@ from test_framework.environment_markers import staging_only, env_requires
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestNetworkConnectivityVariations:
+class NetworkConnectivityVariationsTests:
     """Additional test variations for network connectivity issues."""
 
     @staging_only

@@ -97,7 +97,7 @@ class ConcurrencyTestResults:
     user_data_integrity: bool
 
 
-class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
+class AgentRegistryFactoryPatternsTests(BaseIntegrationTest):
     """Integration tests for agent registry and factory patterns."""
     
     @pytest.fixture(autouse=True)

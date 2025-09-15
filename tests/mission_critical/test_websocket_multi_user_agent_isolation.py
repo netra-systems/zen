@@ -358,7 +358,7 @@ class RealAgentExecutionIsolationTest:
 # MISSION CRITICAL MULTI-USER ISOLATION TESTS
 # ============================================================================
 
-class TestMultiUserAgentIsolation:
+class MultiUserAgentIsolationTests:
     """Mission critical multi-user agent isolation validation."""
 
     @pytest.mark.asyncio

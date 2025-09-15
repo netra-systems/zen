@@ -46,7 +46,7 @@ from loguru import logger
 
 
 @dataclass
-class TestResult:
+class ResultTests:
     """Test execution result data structure."""
     test_file: str
     test_name: str
@@ -67,7 +67,7 @@ class SsotWebSocketValidationSuite:
             "test_websocket_factory_migration.py", 
             "test_websocket_health_ssot.py"
         ]
-        self.results: List[TestResult] = []
+        self.results: List[ResultTests] = []
         
     def detect_migration_phase(self) -> str:
         """Detect current migration phase based on codebase state."""
@@ -90,14 +90,14 @@ class SsotWebSocketValidationSuite:
             logger.info("[POST-MIGRATION] Detected post-migration state - no violations found") 
             return "post-migration"
 
-    async def run_test_file(self, test_file: str) -> List[TestResult]:
+    async def run_test_file(self, test_file: str) -> List[ResultTests]:
         """Run a single test file and collect results."""
         logger.info(f"[TEST EXECUTION] Running {test_file}...")
         
         test_file_path = os.path.join(os.path.dirname(__file__), test_file)
         if not os.path.exists(test_file_path):
             logger.error(f"[TEST ERROR] Test file not found: {test_file}")
-            return [TestResult(
+            return [ResultTests(
                 test_file=test_file,
                 test_name="file_not_found",
                 status="error", 
@@ -125,7 +125,7 @@ class SsotWebSocketValidationSuite:
             
             if result.returncode == 0:
                 logger.info(f"[TEST SUCCESS] {test_file} completed successfully in {duration:.2f}s")
-                test_results.append(TestResult(
+                test_results.append(ResultTests(
                     test_file=test_file,
                     test_name="overall",
                     status="passed",
@@ -145,7 +145,7 @@ class SsotWebSocketValidationSuite:
                 
                 if "get_websocket_manager_factory" in output_text:
                     logger.info("[MIGRATION FAILURE] Test failure related to factory migration - expected")
-                    test_results.append(TestResult(
+                    test_results.append(ResultTests(
                         test_file=test_file,
                         test_name="migration_expected",
                         status="expected_failure",
@@ -154,7 +154,7 @@ class SsotWebSocketValidationSuite:
                     ))
                 else:
                     logger.error(f"[TEST FAILURE] {test_file} system failure")
-                    test_results.append(TestResult(
+                    test_results.append(ResultTests(
                         test_file=test_file,
                         test_name="system_error",
                         status="failed",
@@ -166,7 +166,7 @@ class SsotWebSocketValidationSuite:
             
         except subprocess.TimeoutExpired:
             logger.error(f"[TEST TIMEOUT] {test_file} timed out after 300s")
-            return [TestResult(
+            return [ResultTests(
                 test_file=test_file,
                 test_name="timeout",
                 status="error",
@@ -176,7 +176,7 @@ class SsotWebSocketValidationSuite:
             
         except Exception as e:
             logger.error(f"[TEST EXECUTION ERROR] Failed to run {test_file}: {e}")
-            return [TestResult(
+            return [ResultTests(
                 test_file=test_file,
                 test_name="execution_error",
                 status="error",

@@ -19,7 +19,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestMissionCriticalWebSocketEvents1184(SSotAsyncTestCase):
+class MissionCriticalWebSocketEvents1184Tests(SSotAsyncTestCase):
     """Mission critical tests for WebSocket event delivery."""
 
     def setUp(self):

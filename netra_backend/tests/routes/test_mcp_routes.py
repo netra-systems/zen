@@ -25,7 +25,7 @@ from netra_backend.tests.test_route_fixtures import (
     basic_test_client,
 )
 
-class TestMCPRoute:
+class MCPRouteTests:
     """Test MCP protocol implementation and tool execution."""
     
     def test_mcp_message_handling(self, basic_test_client):

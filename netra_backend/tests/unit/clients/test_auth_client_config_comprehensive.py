@@ -47,7 +47,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestAuthClientConfigManagerComprehensive:
+class AuthClientConfigManagerComprehensiveTests:
     """
     Comprehensive unit tests for AuthClientConfigManager SSOT class.
     
@@ -247,7 +247,7 @@ class TestAuthClientConfigManagerComprehensive:
             assert manager.validate_config() is False
 
 
-class TestOAuthConfigGeneratorComprehensive:
+class OAuthConfigGeneratorComprehensiveTests:
     """
     Test OAuth configuration generation for different environments and providers.
     
@@ -414,7 +414,7 @@ class TestOAuthConfigGeneratorComprehensive:
         assert isinstance(oauth_config.redirect_uri, str)
 
 
-class TestAuthClientConfigComprehensive:
+class AuthClientConfigComprehensiveTests:
     """
     Test AuthClientConfig dataclass for various configuration scenarios.
     
@@ -569,7 +569,7 @@ class TestAuthClientConfigComprehensive:
         assert config_dict["api_version"] == "v2"
 
 
-class TestAuthClientSecurityConfigComprehensive:
+class AuthClientSecurityConfigComprehensiveTests:
     """
     Test AuthClientSecurityConfig for security-critical configuration scenarios.
     
@@ -648,7 +648,7 @@ class TestAuthClientSecurityConfigComprehensive:
         assert config.is_valid() is False
 
 
-class TestOAuthConfigComprehensive:
+class OAuthConfigComprehensiveTests:
     """
     Test OAuthConfig dataclass for OAuth-specific configuration scenarios.
     
@@ -779,7 +779,7 @@ class TestOAuthConfigComprehensive:
         assert config.is_configured() is False
 
 
-class TestConfigLoaderFunctionsComprehensive:
+class ConfigLoaderFunctionsComprehensiveTests:
     """
     Test configuration loader functions for proper environment handling.
     
@@ -919,7 +919,7 @@ class TestConfigLoaderFunctionsComprehensive:
         assert config1.token_validation_enabled == config2.token_validation_enabled
 
 
-class TestEnvironmentIsolationCritical:
+class EnvironmentIsolationCriticalTests:
     """
     CRITICAL: Test environment isolation to prevent configuration leakage.
     
@@ -1007,7 +1007,7 @@ class TestEnvironmentIsolationCritical:
         assert not (dev_client_id == prod_client_id == staging_client_id)
 
 
-class TestErrorHandlingAndEdgeCases:
+class ErrorHandlingAndEdgeCasesTests:
     """
     Test error handling and edge cases for robust authentication configuration.
     

@@ -90,7 +90,7 @@ class ImportValidationResult:
     instance_hash: Optional[int] = None
 
 
-class TestWebSocketManagerSSOTImportConsolidation(SSotBaseTestCase):
+class WebSocketManagerSSOTImportConsolidationTests(SSotBaseTestCase):
     """
     Test WebSocket Manager SSOT import consolidation for Issue #996.
 

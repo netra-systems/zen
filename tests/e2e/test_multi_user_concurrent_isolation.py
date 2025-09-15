@@ -38,7 +38,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
+class MultiUserConcurrentIsolationTests(SSotBaseTestCase):
     """
     E2E tests for multi-user concurrent execution with proper isolation.
     Validates the Factory-based isolation patterns work under concurrent load.

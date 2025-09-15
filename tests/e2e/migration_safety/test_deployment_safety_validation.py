@@ -37,7 +37,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 
 
 @pytest.mark.e2e
-class TestDeploymentSafetyValidation(SSotAsyncTestCase):
+class DeploymentSafetyValidationTests(SSotAsyncTestCase):
     """
     Test suite validating deployment safety for ExecutionEngine migration.
 

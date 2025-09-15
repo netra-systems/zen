@@ -35,7 +35,7 @@ from shared.types import UserID, ThreadID, RunID, RequestID
 from shared.id_generation import UnifiedIdGenerator
 
 
-class TestAgentWebSocketEventDelivery(BaseIntegrationTest):
+class AgentWebSocketEventDeliveryTests(BaseIntegrationTest):
     """Integration tests for WebSocket agent event delivery with real services."""
 
     @pytest.fixture(autouse=True)

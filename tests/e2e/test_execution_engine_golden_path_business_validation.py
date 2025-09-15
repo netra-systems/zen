@@ -55,7 +55,7 @@ except ImportError as e:
     SUPPORTING_COMPONENTS_ERROR = str(e)
 
 @pytest.mark.e2e
-class TestExecutionEngineGoldenPathBusinessValidation(SSotAsyncTestCase):
+class ExecutionEngineGoldenPathBusinessValidationTests(SSotAsyncTestCase):
     """
     E2E tests to validate Issue #565 SSOT migration preserves business functionality.
     

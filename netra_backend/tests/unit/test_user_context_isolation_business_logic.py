@@ -25,7 +25,7 @@ from netra_backend.app.services.user_context_factory import UserContextFactory
 from netra_backend.app.services.session_isolation_manager import SessionIsolationManager
 
 
-class TestUserContextIsolationBusinessLogic:
+class UserContextIsolationBusinessLogicTests:
     """Test user context isolation business logic patterns."""
     
     @pytest.fixture

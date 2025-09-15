@@ -121,7 +121,7 @@ class ServiceRestartSimulator:
         logger.info(f"Service {service_name} restart simulation completed ({restart_duration:.1f}s)")
 
 
-class TestCrossServiceContextFailures:
+class CrossServiceContextFailuresTests:
     """Test cross-service context behavior during various failure scenarios."""
     
     def setup_method(self):

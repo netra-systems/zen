@@ -14,7 +14,7 @@ from unittest.mock import Mock, patch
 
 
 @pytest.mark.unit
-class TestDeepAgentStateRuntimeErrorPrevention:
+class DeepAgentStateRuntimeErrorPreventionTests:
     """Test suite reproducing runtime errors from DeepAgentState SSOT violation"""
 
     def test_thread_id_attribute_error_reproduction(self):

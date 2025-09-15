@@ -103,7 +103,7 @@ class FactoryUsageAnalyzer(ast.NodeVisitor):
         return str(base)
 
 
-class TestFactoryProliferationPhase2(SSotBaseTestCase):
+class FactoryProliferationPhase2Tests(SSotBaseTestCase):
     """
     Factory Proliferation Detection - Phase 2 Cleanup
 

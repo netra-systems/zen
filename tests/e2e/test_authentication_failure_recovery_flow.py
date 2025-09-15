@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
-class TestAuthenticationFailureRecoveryFlow(SSotAsyncTestCase):
+class AuthenticationFailureRecoveryFlowTests(SSotAsyncTestCase):
     """E2E tests for authentication failure and recovery flow."""
     
     async def async_setup_method(self, method=None):

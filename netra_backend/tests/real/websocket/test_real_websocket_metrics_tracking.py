@@ -29,7 +29,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.metrics_tracking
 @skip_if_no_real_services
-class TestRealWebSocketMetricsTracking:
+class RealWebSocketMetricsTrackingTests:
     """Test real WebSocket metrics tracking and monitoring."""
     
     @pytest.fixture

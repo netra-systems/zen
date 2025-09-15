@@ -32,7 +32,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerConstructorValidation(SSotBaseTestCase):
+class WebSocketManagerConstructorValidationTests(SSotBaseTestCase):
     """
     Tests to prove WebSocket manager constructor validation violations exist.
     

@@ -33,7 +33,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestSingleConfigManagerSSot(SSotBaseTestCase):
+class SingleConfigManagerSSotTests(SSotBaseTestCase):
     """Test suite to validate single configuration manager SSOT compliance."""
 
     def test_only_one_config_manager_can_be_imported(self):

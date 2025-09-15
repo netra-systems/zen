@@ -22,7 +22,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
-class TestJWTSecretHardRequirements:
+class JWTSecretHardRequirementsTests:
     """Comprehensive JWT secret testing with authentication flow validation."""
     
     def setup_method(self):

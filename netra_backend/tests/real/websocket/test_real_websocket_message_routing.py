@@ -33,7 +33,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.message_routing
 @skip_if_no_real_services
-class TestRealWebSocketMessageRouting:
+class RealWebSocketMessageRoutingTests:
     """Test real WebSocket message routing to correct handlers.
     
     CRITICAL: Tests that messages are properly routed to their handlers:

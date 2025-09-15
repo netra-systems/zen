@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 @pytest.mark.unit
-class TestUnifiedConfigManagerDuplicationCrisis:
+class UnifiedConfigManagerDuplicationCrisisTests:
     """Phase 1 Tests - DESIGNED TO FAIL exposing duplication crisis"""
 
     def test_deprecated_manager_still_exists_SHOULD_FAIL(self):
@@ -81,7 +81,7 @@ class TestUnifiedConfigManagerDuplicationCrisis:
             pytest.skip(f'Import failed: {e}')
 
 @pytest.mark.unit
-class TestCriticalBusinessImpactAnalysis:
+class CriticalBusinessImpactAnalysisTests:
     """Analyze the business-critical impact of this duplication crisis"""
 
     def test_golden_path_configuration_consistency_SHOULD_FAIL(self):

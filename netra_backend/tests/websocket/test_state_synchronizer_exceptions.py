@@ -19,7 +19,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager 
 from netra_backend.app.websocket_core.state_synchronizer import ConnectionStateSynchronizer
 from netra_backend.app.websocket_core.sync_types import CriticalCallbackFailure
 
-class TestStateSynchronizerExceptionHandling:
+class StateSynchronizerExceptionHandlingTests:
     """Test exception handling in state synchronizer."""
     
     @pytest.mark.asyncio
@@ -173,7 +173,7 @@ class TestStateSynchronizerExceptionHandling:
         except Exception as e:
             pytest.fail(f"Invalid callback should be handled gracefully, but raised: {e}")
 
-class TestStateSynchronizerExceptionClassification:
+class StateSynchronizerExceptionClassificationTests:
     """Test exception classification functionality directly."""
     
     @pytest.mark.asyncio

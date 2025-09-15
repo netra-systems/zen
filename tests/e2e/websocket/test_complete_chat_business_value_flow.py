@@ -279,7 +279,7 @@ class RealChatBusinessValueTester:
         await context.websocket_notifier.send_event('agent_completed', {'message': 'Response generated with business recommendations', 'recommendations_count': 3})
         return ai_response
 
-class TestCompleteChatBusinessValueFlow:
+class CompleteChatBusinessValueFlowTests:
     """E2E tests for complete chat business value delivery."""
 
     @pytest.mark.asyncio

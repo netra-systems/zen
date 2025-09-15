@@ -56,7 +56,7 @@ class MockLLMForIsolationTesting:
         }
 
 
-class TestWebSocketMultiUserIsolation(BaseIntegrationTest):
+class WebSocketMultiUserIsolationTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket multi-user isolation.
     

@@ -28,7 +28,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 @pytest.mark.unit
-class TestMessageRouterImportConsolidation(SSotBaseTestCase):
+class MessageRouterImportConsolidationTests(SSotBaseTestCase):
     """Unit tests for MessageRouter import consolidation and SSOT compliance."""
 
     def setUp(self):

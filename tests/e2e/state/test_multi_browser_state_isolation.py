@@ -176,7 +176,7 @@ class BrowserSimulator:
         self.session_data.clear()
 
 
-class TestMultiBrowserStateIsolation(BaseE2ETest):
+class MultiBrowserStateIsolationTests(BaseE2ETest):
     """E2E tests for complete state isolation between browser sessions."""
     
     @pytest.fixture

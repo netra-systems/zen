@@ -22,7 +22,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.websocket_helpers import WebSocketTestClient
 
 
-class TestDeepAgentStateBusinessProtection(SSotAsyncTestCase):
+class DeepAgentStateBusinessProtectionTests(SSotAsyncTestCase):
     """MISSION CRITICAL: Protecting $500K+ ARR from DeepAgentState SSOT violations"""
 
     def setup_method(self, method):

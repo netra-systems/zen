@@ -39,7 +39,7 @@ from netra_backend.app.services.analytics.cost_tracker import CostTracker
 from netra_backend.app.services.monitoring.metrics_service import MetricsService
 
 
-class TestChatOrchestratorModelCascade(SSotAsyncTestCase, unittest.TestCase):
+class ChatOrchestratorModelCascadeTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive tests for ChatOrchestrator model cascade business logic."""
 
     def setUp(self):
@@ -474,7 +474,7 @@ class TestChatOrchestratorModelCascade(SSotAsyncTestCase, unittest.TestCase):
         super().tearDown()
 
 
-class TestModelCascadeErrorHandling(SSotAsyncTestCase, unittest.TestCase):
+class ModelCascadeErrorHandlingTests(SSotAsyncTestCase, unittest.TestCase):
     """Specialized tests for model cascade error handling scenarios."""
 
     def setUp(self):

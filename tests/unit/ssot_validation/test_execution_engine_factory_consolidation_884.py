@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestExecutionEngineFactoryConsolidation884(SSotBaseTestCase):
+class ExecutionEngineFactoryConsolidation884Tests(SSotBaseTestCase):
     """
     CRITICAL SSOT Test: Detect execution engine factory proliferation
     

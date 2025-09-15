@@ -28,7 +28,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, AgentExecutionResult, PipelineStep
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
-class TestExecutionEngineLifecycle:
+class ExecutionEngineLifecycleTests:
     """Test execution engine lifecycle management."""
 
     @pytest.fixture
@@ -166,7 +166,7 @@ class TestExecutionEngineLifecycle:
         assert stats['failed_executions'] == 1
         assert stats['is_active'] is True
 
-class TestExecutionEngineFactoryLifecycle:
+class ExecutionEngineFactoryLifecycleTests:
     """Test ExecutionEngineFactory lifecycle management."""
 
     @pytest.fixture
@@ -286,7 +286,7 @@ class TestExecutionEngineFactoryLifecycle:
             metrics = execution_factory.get_factory_metrics()
             assert metrics['active_engines_count'] == 0
 
-class TestExecutionEngineResourceManagement:
+class ExecutionEngineResourceManagementTests:
     """Test execution engine resource management and limits."""
 
     @pytest.mark.asyncio

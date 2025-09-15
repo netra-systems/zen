@@ -14,7 +14,7 @@ from collections import defaultdict
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestFactoryComplexityPhase2(SSotBaseTestCase):
+class FactoryComplexityPhase2Tests(SSotBaseTestCase):
     """Validate factory implementations against complexity thresholds."""
 
     def setUp(self):

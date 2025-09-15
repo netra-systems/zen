@@ -28,7 +28,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.e2e
-class TestGoldenPathMultiUserConcurrent(SSotAsyncTestCase):
+class GoldenPathMultiUserConcurrentTests(SSotAsyncTestCase):
     """
     E2E test suite to PROVE Golden Path multi-user vulnerabilities.
     

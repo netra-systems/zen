@@ -90,7 +90,7 @@ class WebSocketEventTracker:
 
 
 @pytest.mark.e2e
-class TestWebSocketEventSSot(SSotAsyncTestCase):
+class WebSocketEventSSotTests(SSotAsyncTestCase):
     """Validate WebSocket event delivery through SSOT execution engine."""
 
     def setUp(self):

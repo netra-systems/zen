@@ -64,7 +64,7 @@ from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 
 
-class TestWebSocketManagerComprehensive(SSotAsyncTestCase):
+class WebSocketManagerComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for WebSocketManager.
     
@@ -209,7 +209,7 @@ class TestWebSocketManagerComprehensive(SSotAsyncTestCase):
         assert isinstance(factory1, WebSocketManager)
 
 
-class TestWebSocketManagerComprehensive(SSotAsyncTestCase):
+class WebSocketManagerComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for WebSocketManager.
     
@@ -355,7 +355,7 @@ class TestWebSocketManagerComprehensive(SSotAsyncTestCase):
         assert health["user_id"] == "different_user"
 
 
-class TestConnectionLifecycleManagerComprehensive(SSotAsyncTestCase):
+class ConnectionLifecycleManagerComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for ConnectionLifecycleManager.
     
@@ -450,7 +450,7 @@ class TestConnectionLifecycleManagerComprehensive(SSotAsyncTestCase):
         assert (datetime.utcnow() - health_time).total_seconds() < 1  # Recent
 
 
-class TestWebSocketFactorySecurityIsolation(SSotAsyncTestCase):
+class WebSocketFactorySecurityIsolationTests(SSotAsyncTestCase):
     """
     CRITICAL SECURITY TESTS: User Message Cross-Contamination Prevention
     
@@ -625,7 +625,7 @@ class TestWebSocketFactorySecurityIsolation(SSotAsyncTestCase):
         assert sent_message["data"] == "legitimate_data"
 
 
-class TestWebSocketFactoryGlobalFunctions(SSotAsyncTestCase):
+class WebSocketFactoryGlobalFunctionsTests(SSotAsyncTestCase):
     """
     Test global factory functions and validation utilities.
     """

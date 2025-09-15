@@ -35,7 +35,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestWebSocketSSOTGoldenPathE2E(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketSSOTGoldenPathE2ETests(SSotAsyncTestCase, unittest.TestCase):
     """E2E tests for WebSocket SSOT Golden Path on GCP staging."""
 
     def setup_method(self, method):
@@ -386,7 +386,7 @@ class TestWebSocketSSOTGoldenPathE2E(SSotAsyncTestCase, unittest.TestCase):
                    f"{len(successful_operations)} successful, {len(failed_operations)} failed")
 
 
-class TestWebSocketSSOTStagingRaceConditionPrevention(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketSSOTStagingRaceConditionPreventionTests(SSotAsyncTestCase, unittest.TestCase):
     """Test WebSocket race condition prevention on GCP staging."""
 
     def setup_method(self, method):

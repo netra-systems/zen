@@ -16,7 +16,7 @@ from auth_service.auth_core.database.repository import AuthRepository
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAuthAPIIntegration:
+class AuthAPIIntegrationTests:
     """Test Auth API endpoints with real services"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -278,7 +278,7 @@ class TestAuthAPIIntegration:
         assert data["full_name"] == "Test User"
 
 
-class TestAuthAPIPermissions:
+class AuthAPIPermissionsTests:
     """Test permission-based access control"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -328,7 +328,7 @@ class TestAuthAPIPermissions:
         assert response.status_code in [403, 404]
 
 
-class TestAuthAPIRateLimiting:
+class AuthAPIRateLimitingTests:
     """Test rate limiting on auth endpoints"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -382,7 +382,7 @@ class TestAuthAPIRateLimiting:
         # Test passes either way - just documenting behavior
 
 
-class TestAuthAPIOAuth:
+class AuthAPIOAuthTests:
     """Test OAuth integration endpoints"""
     
     @pytest_asyncio.fixture(autouse=True)
@@ -426,7 +426,7 @@ class TestAuthAPIOAuth:
         assert response.status_code in [400, 401, 404]
 
 
-class TestAuthAPIHealthCheck:
+class AuthAPIHealthCheckTests:
     """Test health check and monitoring endpoints"""
     
     @pytest_asyncio.fixture(autouse=True)

@@ -28,7 +28,7 @@ class MockMessage:
         self.created_at = datetime.utcnow()
         self.role = 'user'
 
-class TestThreeTierStorageArchitecture:
+class ThreeTierStorageArchitectureTests:
     """Test three-tier storage failover chain architecture."""
 
     @pytest.fixture
@@ -103,7 +103,7 @@ class TestThreeTierStorageArchitecture:
             assert hasattr(message_repository, 'get_thread_messages_unified'), 'Should have unified method that searches all storage tiers'
             message_repository._redis_client.get.assert_called()
 
-class TestThreeTierPerformanceBenchmarks:
+class ThreeTierPerformanceBenchmarksTests:
     """Test performance benchmarks for three-tier storage."""
 
     def test_concurrent_redis_operations_performance(self):
@@ -136,7 +136,7 @@ class TestThreeTierPerformanceBenchmarks:
         assert recent_tier == 'redis', 'Recent, active messages should be stored in Redis'
         assert old_tier == 'clickhouse', 'Old, inactive messages should be archived in ClickHouse'
 
-class TestCurrentArchitecturalGaps:
+class CurrentArchitecturalGapsTests:
     """Tests that expose gaps in current message storage architecture."""
 
     def test_only_postgresql_exists_no_three_tier(self):

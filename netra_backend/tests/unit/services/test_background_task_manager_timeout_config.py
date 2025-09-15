@@ -25,7 +25,7 @@ from netra_backend.app.services.secure_background_task_manager import (
 )
 
 
-class TestBackgroundTaskManagerTimeoutConfig(unittest.TestCase):
+class BackgroundTaskManagerTimeoutConfigTests(unittest.TestCase):
     """Test BackgroundTaskManager timeout configuration.
     
     **CRITICAL TESTS**: These tests MUST FAIL initially to prove Issue #573 exists.
@@ -151,7 +151,7 @@ class TestBackgroundTaskManagerTimeoutConfig(unittest.TestCase):
             )
 
 
-class TestBackgroundTaskManagerTimeoutIntegration(unittest.IsolatedAsyncioTestCase):
+class BackgroundTaskManagerTimeoutIntegrationTests(unittest.IsolatedAsyncioTestCase):
     """Test BackgroundTaskManager timeout integration with actual operations."""
     
     async def asyncSetUp(self):

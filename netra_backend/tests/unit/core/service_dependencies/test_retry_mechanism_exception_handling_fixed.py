@@ -24,7 +24,7 @@ from typing import Any, Dict
 from netra_backend.app.core.service_dependencies.retry_mechanism import RetryMechanism, CircuitBreakerState
 from netra_backend.app.core.service_dependencies.models import ServiceType, EnvironmentType
 
-class TestRetryMechanismExceptionHandlingFixed:
+class RetryMechanismExceptionHandlingFixedTests:
     """Test suite validating the fixed exception handling."""
 
     def setup_method(self):
@@ -197,7 +197,7 @@ class TestRetryMechanismExceptionHandlingFixed:
         assert stats['total_attempts'] > 1
         assert stats['total_retries'] > 0
 
-class TestExceptionConstructorSafety:
+class ExceptionConstructorSafetyTests:
     """Test suite validating the safety mechanisms in exception construction."""
 
     def test_safe_construction_attempt_patterns(self):

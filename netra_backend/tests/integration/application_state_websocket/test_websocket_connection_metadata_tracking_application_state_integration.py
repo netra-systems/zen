@@ -25,7 +25,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
-class TestWebSocketConnectionMetadataTrackingApplicationStateIntegration(BaseIntegrationTest):
+class WebSocketConnectionMetadataTrackingApplicationStateIntegrationTests(BaseIntegrationTest):
     """Test WebSocket connection metadata tracking with comprehensive application state correlation."""
     
     @pytest.mark.integration

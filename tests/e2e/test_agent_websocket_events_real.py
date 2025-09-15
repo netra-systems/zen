@@ -117,7 +117,7 @@ class RealWebSocketEventCollector:
         return {'total_events': len(self.events), 'unique_event_types': list(self.event_types), 'mission_critical_missing': list(missing_critical), 'all_missing_events': list(missing_all), 'event_sequence': self.event_sequence, 'valid_order': self.validate_event_order(), 'timing': self.timing, 'mission_critical_coverage': 1.0 - len(missing_critical) / len(MISSION_CRITICAL_EVENTS), 'total_coverage': 1.0 - len(missing_all) / len(ALL_REQUIRED_EVENTS), 'user_id': self.user_id, 'collection_duration': time.time() - self.start_time}
 
 @pytest.mark.e2e
-class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
+class AgentWebSocketEventsRealTests(SSotAsyncTestCase):
     """CLAUDE.md compliant agent WebSocket events tests using REAL services."""
 
     def setup_method(self, method=None):

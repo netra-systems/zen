@@ -14,7 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-class TestClickHouseSSOTCompliance:
+class ClickHouseSSOTComplianceTests:
     """Test suite ensuring Single Source of Truth for ClickHouse clients."""
 
     @pytest.fixture
@@ -134,7 +134,7 @@ class TestClickHouseSSOTCompliance:
                 missing_sections.append(section)
         assert len(missing_sections) == 0, f'ClickHouse spec missing required sections:\n{chr(10).join(missing_sections)}'
 
-class TestClickHouseRegressionPrevention:
+class ClickHouseRegressionPreventionTests:
     """Tests to prevent regression of ClickHouse SSOT violations."""
 
     def test_import_patterns_enforced(self):

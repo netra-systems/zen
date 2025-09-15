@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import BaseIntegrationTest
 
 
 @pytest.mark.integration
-class TestConfigGoldenPathProtection(BaseIntegrationTest):
+class ConfigGoldenPathProtectionTests(BaseIntegrationTest):
     """Integration tests for Golden Path configuration protection."""
 
     def setUp(self):

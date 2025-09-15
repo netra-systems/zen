@@ -38,7 +38,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.e2e
 @pytest.mark.staging_only
-class TestDatabaseManagerGoldenPathViolations(SSotAsyncTestCase):
+class DatabaseManagerGoldenPathViolationsTests(SSotAsyncTestCase):
     """Test suite to detect DatabaseManager Golden Path violations in staging environment."""
 
     async def test_golden_path_complete_user_database_flow(self):

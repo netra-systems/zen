@@ -31,7 +31,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.websocket_core.utils import extract_user_info_from_message
 
-class TestWebSocketEventRoutingTypeSafetyViolations(SSotBaseTestCase):
+class WebSocketEventRoutingTypeSafetyViolationsTests(SSotBaseTestCase):
     """
     Unit tests to expose WebSocket type safety violations.
     
@@ -133,7 +133,7 @@ class TestWebSocketEventRoutingTypeSafetyViolations(SSotBaseTestCase):
         if thread_id_param and thread_id_param.annotation == str:
             pytest.fail('VIOLATION: Protocol defines thread_id as str instead of ThreadID')
 
-        class TestProtocolImpl(WebSocketManagerProtocol):
+        class ProtocolImplTests(WebSocketManagerProtocol):
             """Test implementation of the protocol"""
 
             async def add_connection(self, user_id: str, websocket: Any, request_id: str) -> str:
@@ -147,7 +147,7 @@ class TestWebSocketEventRoutingTypeSafetyViolations(SSotBaseTestCase):
 
             async def send_to_user(self, user_id: str, message: Dict[str, Any]) -> bool:
                 return True
-        impl = TestProtocolImpl()
+        impl = ProtocolImplTests()
         result = impl.update_connection_thread('raw_conn_id', 'raw_thread_id')
         if result:
             pytest.fail('VIOLATION: Protocol implementation accepts raw strings instead of typed IDs')

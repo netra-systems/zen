@@ -14,7 +14,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
 @pytest.mark.unit
-class TestUnifiedIdManagerDemoCompliance(unittest.TestCase):
+class UnifiedIdManagerDemoComplianceTests(unittest.TestCase):
     """Unit tests for UnifiedIDManager demo compliance."""
     
     def setUp(self):

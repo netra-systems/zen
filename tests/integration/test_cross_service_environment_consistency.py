@@ -25,7 +25,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.integration
-class TestCrossServiceEnvironmentConsistency(SSotBaseTestCase):
+class CrossServiceEnvironmentConsistencyTests(SSotBaseTestCase):
     """Test suite for cross-service environment variable consistency."""
 
     def test_production_environment_variables_identical(self):

@@ -108,7 +108,7 @@ class DataHelperBusinessValueMetrics:
         return min(score, 1.0)
 
 
-class TestStagingDataHelperInfrastructure(BaseE2ETest):
+class StagingDataHelperInfrastructureTests(BaseE2ETest):
     """E2E tests designed to reproduce Data Helper Agent staging infrastructure failures."""
     
     def __init__(self):
@@ -1085,7 +1085,7 @@ if __name__ == "__main__":
         print("Starting Staging Data Helper Infrastructure E2E Tests...")
         print("EXPECTED OUTCOME: ALL TESTS SHOULD FAIL (reproducing staging infrastructure issues)")
         
-        test_instance = TestStagingDataHelperInfrastructure()
+        test_instance = StagingDataHelperInfrastructureTests()
         test_instance.setup_method()
         
         try:

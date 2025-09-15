@@ -55,7 +55,7 @@ class ContextFactoryStats:
     validation_bypasses: int = 0
 
 @pytest.mark.integration
-class TestUserContextFactoryIsolation(SSotAsyncTestCase):
+class UserContextFactoryIsolationTests(SSotAsyncTestCase):
     """Unit tests reproducing user context factory isolation issues from Issue #414."""
 
     def setup_method(self, method):

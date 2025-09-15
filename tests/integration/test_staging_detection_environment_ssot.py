@@ -25,7 +25,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.integration
-class TestStagingDetectionEnvironmentSSot(SSotBaseTestCase):
+class StagingDetectionEnvironmentSSotTests(SSotBaseTestCase):
     """Test suite for staging environment detection SSOT validation."""
 
     def test_staging_detection_environment_variable_method(self):

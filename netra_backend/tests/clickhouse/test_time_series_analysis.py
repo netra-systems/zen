@@ -13,7 +13,7 @@ import pytest
 
 from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
 
-class TestTimeSeriesAnalysis:
+class TimeSeriesAnalysisTests:
     """Test time-series analysis capabilities"""
 
     def test_moving_average_calculation(self):

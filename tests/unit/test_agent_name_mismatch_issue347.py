@@ -28,7 +28,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.unit
-class TestAgentNameMismatchUnit(SSotAsyncTestCase):
+class AgentNameMismatchUnitTests(SSotAsyncTestCase):
     """Unit tests demonstrating agent name mismatch issue (Issue #347)."""
     
     def setup_method(self, method=None):
@@ -146,7 +146,7 @@ class TestAgentNameMismatchUnit(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestAgentNamingConsistencyUnit(SSotBaseTestCase):
+class AgentNamingConsistencyUnitTests(SSotBaseTestCase):
     """Additional unit tests for agent naming consistency patterns."""
     
     def test_agent_name_patterns(self):

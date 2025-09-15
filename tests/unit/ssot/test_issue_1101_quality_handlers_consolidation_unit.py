@@ -16,7 +16,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestQualityHandlersConsolidationUnit(SSotBaseTestCase):
+class QualityHandlersConsolidationUnitTests(SSotBaseTestCase):
     """Test QualityMessageRouter handler consolidation challenges - SHOULD FAIL initially."""
 
     def setUp(self):

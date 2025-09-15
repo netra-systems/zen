@@ -29,7 +29,7 @@ from auth_service.services.jwt_service import JWTService
 from auth_service.services.redis_service import RedisService
 
 
-class TestCrossServiceAuthValidationIntegration(SSotAsyncTestCase):
+class CrossServiceAuthValidationIntegrationTests(SSotAsyncTestCase):
     """Cross-service auth validation testing with real services."""
 
     @pytest.fixture(autouse=True)

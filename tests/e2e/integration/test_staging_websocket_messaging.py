@@ -26,7 +26,7 @@ from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 from tests.e2e.test_environment_config import TestEnvironmentType
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
-class TestStagingWebSocketer:
+class StagingWebSocketerTests:
     # """Staging WebSocket test coordinator with comprehensive validation."""
     
     def __init__(self, harness: UnifiedTestHarnessComplete):
@@ -55,7 +55,7 @@ class TestStagingWebSocketer:
         self.websocket_clients.clear()
 
 # Alias for backward compatibility
-StagingWebSocketTester = TestStagingWebSocketer
+StagingWebSocketTester = StagingWebSocketerTests
 
 @pytest.fixture
 async def staging_harness() -> UnifiedE2ETestHarness:
@@ -80,7 +80,7 @@ async def test_user(staging_harness: UnifiedE2ETestHarness) -> TestUser:
     return await staging_harness.create_test_user()
 
 @pytest.mark.e2e
-class TestStagingWebSocketConnection:
+class StagingWebSocketConnectionTests:
     # """Test WebSocket connection establishment in staging environment."""
     pass
     
@@ -109,7 +109,7 @@ class TestStagingWebSocketConnection:
     # assert client.state == ConnectionState.CONNECTED
 
 @pytest.mark.e2e
-class TestStagingWebSocketMessaging:
+class StagingWebSocketMessagingTests:
     # """Test WebSocket messaging functionality in staging environment."""
     pass
     
@@ -189,7 +189,7 @@ class TestStagingWebSocketMessaging:
     # assert "error" in error_response.get("type", "").lower()
 
 @pytest.mark.e2e
-class TestStagingWebSocketAuthentication:
+class StagingWebSocketAuthenticationTests:
     # """Test WebSocket authentication flows in staging environment."""
     pass
     
@@ -224,7 +224,7 @@ class TestStagingWebSocketAuthentication:
     # assert client.state in [ConnectionState.FAILED, ConnectionState.DISCONNECTED]
 
 @pytest.mark.e2e
-class TestStagingWebSocketReconnection:
+class StagingWebSocketReconnectionTests:
     # """Test WebSocket reconnection logic in staging environment."""
     pass
     
@@ -280,7 +280,7 @@ class TestStagingWebSocketReconnection:
     # assert success, "Should be able to send messages after reconnection"
 
 @pytest.mark.e2e
-class TestStagingWebSocketConcurrency:
+class StagingWebSocketConcurrencyTests:
     # """Test concurrent WebSocket connections in staging environment."""
     pass
     
@@ -353,7 +353,7 @@ class TestStagingWebSocketConcurrency:
     # pass
 
 @pytest.mark.e2e
-class TestStagingWebSocketRateLimit:
+class StagingWebSocketRateLimitTests:
     # """Test WebSocket rate limiting in staging environment."""
     pass
     
@@ -387,7 +387,7 @@ class TestStagingWebSocketRateLimit:
     # # This test validates the rate limiting mechanism exists
 
 @pytest.mark.e2e
-class TestStagingWebSocketHeartbeat:
+class StagingWebSocketHeartbeatTests:
     # """Test WebSocket ping/pong heartbeat in staging environment."""
     pass
     
@@ -415,7 +415,7 @@ class TestStagingWebSocketHeartbeat:
     # assert client.state == ConnectionState.CONNECTED
 
 @pytest.mark.e2e
-class TestStagingWebSocketErrorHandling:
+class StagingWebSocketErrorHandlingTests:
     # """Test WebSocket error handling in staging environment."""
     pass
     

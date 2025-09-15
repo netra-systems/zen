@@ -51,7 +51,7 @@ def mock_user_context():
     return context
 
 
-class TestUnifiedWebSocketManager:
+class UnifiedWebSocketManagerTests:
     """Unit tests for UnifiedWebSocketManager event delivery integration."""
     
     @pytest.mark.asyncio
@@ -291,7 +291,7 @@ class TestUnifiedWebSocketManager:
         assert result is False, "Event delivery must return False when user is offline"
 
 
-class TestAgentWebSocketBridgeIntegration:
+class AgentWebSocketBridgeIntegrationTests:
     """Unit tests for AgentWebSocketBridge integration with WebSocket manager."""
     
     @pytest.mark.asyncio
@@ -416,7 +416,7 @@ class TestAgentWebSocketBridgeIntegration:
         failing_manager.send_to_thread.assert_called_once()
 
 
-class TestWebSocketEventRouting:
+class WebSocketEventRoutingTests:
     """Unit tests for WebSocket event routing and delivery guarantees."""
     
     @pytest.mark.asyncio

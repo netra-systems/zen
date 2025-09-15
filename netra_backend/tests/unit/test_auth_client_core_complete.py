@@ -24,7 +24,7 @@ from netra_backend.app.clients.auth_client_core import (
 )
 
 
-class TestAuthServiceClient:
+class AuthServiceClientTests:
     """Test AuthServiceClient initialization and configuration."""
 
     @pytest.fixture
@@ -662,7 +662,7 @@ class TestAuthServiceClient:
         assert AuthResilienceMode.RECOVERY.value == "recovery"
 
 
-class TestGetAuthResilienceService:
+class GetAuthResilienceServiceTests:
     """Test the get_auth_resilience_service function."""
 
     @patch('netra_backend.app.clients.auth_client_core.AuthServiceClient')
@@ -690,7 +690,7 @@ class TestGetAuthResilienceService:
         assert service1 is service2
 
 
-class TestEdgeCasesAndErrorScenarios:
+class EdgeCasesAndErrorScenariosTests:
     """Test edge cases and error scenarios."""
 
     @pytest.fixture

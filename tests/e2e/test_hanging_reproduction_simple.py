@@ -24,7 +24,7 @@ from typing import Dict, Any
 from tests.e2e.real_services_manager import RealServicesManager
 from tests.e2e.enforce_real_services import E2EServiceValidator
 
-class TestHangingReproductionSimple:
+class HangingReproductionSimpleTests:
     """Simple reproduction of E2E hanging behavior"""
 
     def setup_method(self):
@@ -123,7 +123,7 @@ class TestHangingReproductionSimple:
             if elapsed_time > 30.0:
                 pytest.fail(f'Synchronous launch hung for {elapsed_time:.2f}s before failing')
 
-class TestSpecificHangingScenarios:
+class SpecificHangingScenariosTests:
     """Test specific scenarios that might cause hanging"""
 
     def setup_method(self):

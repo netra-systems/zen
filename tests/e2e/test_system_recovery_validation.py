@@ -503,7 +503,7 @@ def recovery_validator():
 
 @pytest.mark.e2e
 @pytest.mark.env_test
-class TestSystemRecoveryValidation:
+class SystemRecoveryValidationTests:
     """Comprehensive system recovery validation tests."""
 
     async def simulate_auth_service_failure(self):

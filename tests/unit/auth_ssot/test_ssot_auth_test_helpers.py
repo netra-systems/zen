@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.unit
-class TestSSOTAuthTestHelpers(SSotAsyncTestCase):
+class SSOTAuthTestHelpersTests(SSotAsyncTestCase):
     """
     Tests for SSOT Auth Test Helpers functionality.
     
@@ -462,7 +462,7 @@ class TestSSOTAuthTestHelpers(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestSSOTAuthTestHelpersConvenienceFunctions(SSotAsyncTestCase):
+class SSOTAuthTestHelpersConvenienceFunctionsTests(SSotAsyncTestCase):
     """
     Tests for SSOT Auth Test Helpers convenience functions.
     
@@ -581,7 +581,7 @@ class TestSSOTAuthTestHelpersConvenienceFunctions(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestSSOTAuthTestHelpersAsyncContextManager(SSotAsyncTestCase):
+class SSOTAuthTestHelpersAsyncContextManagerTests(SSotAsyncTestCase):
     """
     Tests for SSOT Auth Test Helpers async context manager functionality.
     
@@ -660,7 +660,7 @@ class TestSSOTAuthTestHelpersAsyncContextManager(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestSSOTAuthTestHelpersErrorHandling(SSotAsyncTestCase):
+class SSOTAuthTestHelpersErrorHandlingTests(SSotAsyncTestCase):
     """
     Tests for SSOT Auth Test Helpers error handling.
     

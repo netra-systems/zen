@@ -23,7 +23,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
-class TestE2EStagingImportValidationIssue881(SSotBaseTestCase):
+class E2EStagingImportValidationIssue881Tests(SSotBaseTestCase):
     """
     Test suite that reproduces the exact import failures blocking E2E tests in staging.
     

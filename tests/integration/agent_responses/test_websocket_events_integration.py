@@ -123,7 +123,7 @@ class WebSocketEventCapture:
         return [event for event in critical_events if event not in self.events_by_type]
 
 
-class TestWebSocketEventsIntegration(SSotAsyncTestCase):
+class WebSocketEventsIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket events during agent execution."""
     
     async def async_setup_method(self, method=None):

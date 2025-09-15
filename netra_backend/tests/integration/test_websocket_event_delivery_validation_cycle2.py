@@ -29,7 +29,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from shared.types import UserID, ThreadID, RunID
 from shared.isolated_environment import get_env
 
-class TestWebSocketEventDeliveryValidation(BaseIntegrationTest):
+class WebSocketEventDeliveryValidationTests(BaseIntegrationTest):
     """Integration tests for WebSocket event delivery with real connections."""
     
     @pytest.mark.integration

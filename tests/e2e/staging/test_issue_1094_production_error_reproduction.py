@@ -28,7 +28,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.e2e
-class TestIssue1094ProductionErrorReproduction(BaseIntegrationTest):
+class Issue1094ProductionErrorReproductionTests(BaseIntegrationTest):
     """Staging environment tests to reproduce Issue #1094 production errors."""
 
     @pytest.mark.staging

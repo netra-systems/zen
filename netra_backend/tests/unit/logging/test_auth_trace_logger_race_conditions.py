@@ -18,7 +18,7 @@ from netra_backend.app.logging.auth_trace_logger import AuthTraceLogger, AuthTra
 
 
 @pytest.mark.unit
-class TestAuthTraceLoggerRaceConditions:
+class AuthTraceLoggerRaceConditionsTests:
     """Test suite focused on race conditions that trigger the NoneType bug."""
     
     def setup_method(self):

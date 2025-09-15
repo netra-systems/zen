@@ -19,7 +19,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 
-class TestWebSocketNotifierCore:
+class WebSocketNotifierCoreTests:
     """Unit tests for WebSocketNotifier core functionality."""
     
     @pytest.fixture
@@ -151,7 +151,7 @@ class TestWebSocketNotifierCore:
         assert hints["expected_duration"] == "medium"
 
 
-class TestWebSocketNotifierErrorHandling:
+class WebSocketNotifierErrorHandlingTests:
     """Unit tests for WebSocketNotifier error handling and user-friendly messages."""
     
     @pytest.fixture
@@ -254,7 +254,7 @@ class TestWebSocketNotifierErrorHandling:
         assert "unexpected issue" in msg
 
 
-class TestWebSocketNotifierMessageBuilding:
+class WebSocketNotifierMessageBuildingTests:
     """Unit tests for comprehensive message building functionality."""
     
     @pytest.fixture

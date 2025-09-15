@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestConfigurationManagerSSotEnforcement(SSotBaseTestCase):
+class ConfigurationManagerSSotEnforcementTests(SSotBaseTestCase):
     """Compliance tests for configuration manager SSOT enforcement."""
 
     def setup_method(self, method):

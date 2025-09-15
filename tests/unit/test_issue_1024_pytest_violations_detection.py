@@ -17,7 +17,7 @@ import unittest
 
 
 @pytest.mark.unit
-class TestIssue1024PytestViolationsDetection(unittest.TestCase):
+class Issue1024PytestViolationsDetectionTests(unittest.TestCase):
     """SSOT violation detection for Issue #1024 remediation."""
 
     def setUp(self):

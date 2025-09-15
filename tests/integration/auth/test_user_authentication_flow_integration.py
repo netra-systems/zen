@@ -42,7 +42,7 @@ import asyncpg
 import redis.asyncio as redis
 
 
-class TestUserAuthenticationFlowIntegration(BaseIntegrationTest):
+class UserAuthenticationFlowIntegrationTests(BaseIntegrationTest):
     """Integration tests for User Authentication Flows - NO MOCKS, REAL SERVICES ONLY."""
     
     def setup_method(self):

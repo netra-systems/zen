@@ -92,7 +92,7 @@ class MockSharedResource:
 
 
 @pytest.mark.integration
-class TestSSotUserIsolationEnforcement(SSotAsyncTestCase):
+class SSotUserIsolationEnforcementTests(SSotAsyncTestCase):
     """SSOT User Isolation: Validate strict user isolation across UserExecutionContext implementations"""
     
     async def test_ssot_user_memory_isolation_violations(self):

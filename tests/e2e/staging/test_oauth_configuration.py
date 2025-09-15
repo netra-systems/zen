@@ -21,7 +21,7 @@ from test_framework.environment_markers import staging_only, env_requires
 
 
 env = get_env()
-class TestOAuthConfiguration:
+class OAuthConfigurationTests:
     """Test OAuth configuration and credential issues in staging."""
 
     @staging_only

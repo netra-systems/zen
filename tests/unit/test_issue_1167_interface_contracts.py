@@ -30,7 +30,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 
 
 @pytest.mark.unit
-class TestIssue1167InterfaceContracts(SSotBaseTestCase, unittest.TestCase):
+class Issue1167InterfaceContractsTests(SSotBaseTestCase, unittest.TestCase):
     """
     Interface contract tests to prove the identified failures exist.
 

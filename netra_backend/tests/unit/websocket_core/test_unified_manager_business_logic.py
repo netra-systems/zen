@@ -36,7 +36,7 @@ from shared.types.core_types import UserID, ConnectionID, ThreadID
 from netra_backend.app.core.unified_id_manager import get_id_manager, IDType
 
 
-class TestWebSocketManagerBusinessLogic(SSotAsyncTestCase):
+class WebSocketManagerBusinessLogicTests(SSotAsyncTestCase):
     """Focus on business logic testing for WebSocket Manager without external dependencies."""
 
     def setup_method(self, method):
@@ -504,7 +504,7 @@ class TestWebSocketManagerBusinessLogic(SSotAsyncTestCase):
         from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
         from enum import Enum
 
-        class TestEnum(Enum):
+        class EnumTests(Enum):
             VALID_OPTION = "valid"
 
         class ProblematicClass:
@@ -515,7 +515,7 @@ class TestWebSocketManagerBusinessLogic(SSotAsyncTestCase):
         complex_message = {
             "valid_data": {
                 "user_id": self.valid_user_id,
-                "enum_value": TestEnum.VALID_OPTION,
+                "enum_value": EnumTests.VALID_OPTION,
                 "timestamp": datetime.now(timezone.utc)
             },
             "problematic_data": ProblematicClass(),

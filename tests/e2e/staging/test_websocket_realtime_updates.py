@@ -33,7 +33,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from tests.e2e.staging_config import get_staging_config
 
 
-class TestWebSocketRealTimeUpdates(BaseE2ETest):
+class WebSocketRealTimeUpdatesTests(BaseE2ETest):
     """Test WebSocket real-time updates and event delivery pipeline."""
     
     def setup_method(self):

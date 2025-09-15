@@ -92,7 +92,7 @@ class DatabaseURLViolationDetector:
 
 
 @pytest.mark.unit
-class TestActualDatabaseURLSSOTViolations:
+class ActualDatabaseURLSSOTViolationsTests:
     """Test for real SSOT violations in the codebase."""
     
     def test_detect_actual_ssot_violations(self):

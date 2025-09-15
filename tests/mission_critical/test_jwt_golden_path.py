@@ -40,7 +40,7 @@ from test_framework.ssot.websocket_auth_test_helpers import WebSocketAuthenticat
 
 logger = logging.getLogger(__name__)
 
-class TestJwtGoldenPathProtection(SSotAsyncTestCase):
+class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
     """
     JWT Golden Path Protection Tests
     

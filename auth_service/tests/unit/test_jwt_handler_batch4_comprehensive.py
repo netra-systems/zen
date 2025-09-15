@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.isolated_test_helper import create_isolated_user_context
 from shared.isolated_environment import get_env
 
-class TestJWTHandlerSecurityBatch4(SSotAsyncTestCase):
+class JWTHandlerSecurityBatch4Tests(SSotAsyncTestCase):
     """
     Comprehensive JWT Handler security tests for Batch 4.
     
@@ -300,7 +300,7 @@ class TestJWTHandlerSecurityBatch4(SSotAsyncTestCase):
         assert isinstance(blacklist_stats['blacklisted_users'], int)
         self.record_metric('performance_stats_security_test', True)
 
-class TestJWTHandlerTokenOperationsBatch4(SSotAsyncTestCase):
+class JWTHandlerTokenOperationsBatch4Tests(SSotAsyncTestCase):
     """
     JWT Handler token operations tests for Batch 4.
     

@@ -19,7 +19,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.unit
-class TestWebSocketSilentFailureRemediation:
+class WebSocketSilentFailureRemediationTests:
     """Test suite for WebSocket silent failure remediation."""
 
     @pytest.fixture
@@ -265,7 +265,7 @@ class TestWebSocketSilentFailureRemediation:
 
 # Integration test to validate end-to-end functionality
 @pytest.mark.unit
-class TestWebSocketFailureRecoveryIntegration:
+class WebSocketFailureRecoveryIntegrationTests:
     """Integration tests for WebSocket failure recovery."""
 
     @pytest.mark.asyncio

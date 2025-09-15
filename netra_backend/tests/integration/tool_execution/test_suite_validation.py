@@ -19,7 +19,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 
 
-class TestToolExecutionSuiteValidation(BaseIntegrationTest):
+class ToolExecutionSuiteValidationTests(BaseIntegrationTest):
     """Validation tests for the complete tool execution integration test suite."""
     
     @pytest.mark.integration

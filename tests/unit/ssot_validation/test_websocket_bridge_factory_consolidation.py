@@ -26,7 +26,7 @@ from unittest.mock import patch
 import unittest
 
 @pytest.mark.unit
-class TestWebSocketBridgeFactoryConsolidation(unittest.TestCase):
+class WebSocketBridgeFactoryConsolidationTests(unittest.TestCase):
     """
     CRITICAL SSOT Test: Detect WebSocket bridge factory fragmentation
     

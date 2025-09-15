@@ -99,7 +99,7 @@ import httpx
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.asyncio
-class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
+class CompleteGoldenPathUserJourneyE2ETests(SSotAsyncTestCase):
     """
     CRITICAL: Primary Golden Path validation test.
     

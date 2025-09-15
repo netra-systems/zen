@@ -32,7 +32,7 @@ from netra_backend.app.db.observability_core import ObservabilityCore
 from netra_backend.app.db.observability_metrics import MetricsCollector
 from netra_backend.app.db.observability_alerts import AlertManager
 
-class TestObservabilitySystemsComprehensive(SSotBaseTestCase):
+class ObservabilitySystemsComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive observability systems tests.
     

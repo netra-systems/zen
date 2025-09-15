@@ -69,7 +69,7 @@ pytestmark = [
 ]
 
 
-class TestWebSocketHandshakeTiming(BaseIntegrationTest):
+class WebSocketHandshakeTimingTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket handshake timing with real services.
     

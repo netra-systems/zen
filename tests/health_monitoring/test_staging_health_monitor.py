@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from netra_backend.app.monitoring.staging_health_monitor import StagingHealthMonitor, WebSocketHealthChecker, ResourceHealthChecker, ConfigurationHealthChecker, PerformanceMetricsChecker
 from netra_backend.app.core.health_types import HealthCheckResult
 
-class TestWebSocketHealthChecker:
+class WebSocketHealthCheckerTests:
     """Test WebSocket health monitoring functionality."""
 
     @pytest.fixture
@@ -78,7 +78,7 @@ class TestWebSocketHealthChecker:
         score = websocket_checker._calculate_websocket_health_score(False, False, False)
         assert score == 0.0
 
-class TestResourceHealthChecker:
+class ResourceHealthCheckerTests:
     """Test system resource monitoring functionality."""
 
     @pytest.fixture
@@ -117,7 +117,7 @@ class TestResourceHealthChecker:
         score = resource_checker._calculate_resource_health_score(95, 90, 95, 1200)
         assert score < 0.2
 
-class TestConfigurationHealthChecker:
+class ConfigurationHealthCheckerTests:
     """Test configuration consistency monitoring."""
 
     @pytest.fixture
@@ -171,7 +171,7 @@ class TestConfigurationHealthChecker:
             result = await config_checker._check_auth_configuration()
             assert result is False
 
-class TestPerformanceMetricsChecker:
+class PerformanceMetricsCheckerTests:
     """Test performance metrics monitoring."""
 
     @pytest.fixture
@@ -218,7 +218,7 @@ class TestPerformanceMetricsChecker:
         assert 'recent_averages' in trend_analysis
         assert 'historical_averages' in trend_analysis
 
-class TestStagingHealthMonitor:
+class StagingHealthMonitorTests:
     """Test the comprehensive staging health monitor."""
 
     @pytest.fixture
@@ -319,7 +319,7 @@ class TestStagingHealthMonitor:
         stability = health_monitor._calculate_stability_score(unstable_checks)
         assert stability < 0.5
 
-class TestHealthMonitoringIntegration:
+class HealthMonitoringIntegrationTests:
     """Integration tests for the complete health monitoring system."""
 
     @pytest.mark.asyncio

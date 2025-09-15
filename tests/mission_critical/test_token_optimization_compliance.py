@@ -29,7 +29,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
-class TestFrozenDataclassCompliance:
+class FrozenDataclassComplianceTests:
     """Test that token optimization respects UserExecutionContext frozen=True constraint."""
     
     @pytest.fixture
@@ -138,7 +138,7 @@ class TestFrozenDataclassCompliance:
         assert enhanced_context.metadata["existing_key"] == "existing_value"  # Preserved
 
 
-class TestUserIsolationCompliance:
+class UserIsolationComplianceTests:
     """Test that token optimization provides complete user isolation."""
     
     @pytest.fixture
@@ -254,7 +254,7 @@ class TestUserIsolationCompliance:
         asyncio.run(test_isolation())
 
 
-class TestSSOTCompliance:
+class SSOTComplianceTests:
     """Test that token optimization respects SSOT (Single Source of Truth) principles."""
     
     def test_uses_existing_token_counter(self):
@@ -343,7 +343,7 @@ class TestSSOTCompliance:
         # only use "agent_thinking" and "agent_completed" event types
 
 
-class TestBaseAgentIntegration:
+class BaseAgentIntegrationTests:
     """Test BaseAgent integration respects architectural constraints."""
     
     def test_base_agent_has_token_optimization(self):
@@ -400,7 +400,7 @@ class TestBaseAgentIntegration:
         assert "cost_optimization_suggestions" in suggestions_context.metadata
 
 
-class TestProductionReadiness:
+class ProductionReadinessTests:
     """Test production readiness and error handling."""
     
     def test_context_manager_handles_invalid_input(self):
@@ -477,7 +477,7 @@ class TestProductionReadiness:
         assert compliance["factory_pattern_implemented"] is True
 
 
-class TestBusinessValueJustification:
+class BusinessValueJustificationTests:
     """Test that implementation delivers the promised business value."""
     
     def test_cost_analysis_provides_actionable_insights(self):

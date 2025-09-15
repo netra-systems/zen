@@ -31,7 +31,7 @@ from shared.isolated_environment import (
 )
 
 
-class TestIsolatedEnvironmentSingleton:
+class IsolatedEnvironmentSingletonTests:
     """Test suite for IsolatedEnvironment singleton behavior."""
 
     def setup_method(self):
@@ -110,7 +110,7 @@ class TestIsolatedEnvironmentSingleton:
             assert instance is first_instance
 
 
-class TestIsolatedEnvironmentBasicOperations:
+class IsolatedEnvironmentBasicOperationsTests:
     """Test suite for basic environment variable operations."""
 
     def setup_method(self):
@@ -215,7 +215,7 @@ class TestIsolatedEnvironmentBasicOperations:
         assert env.is_set("NONEXISTENT_KEY") is False
 
 
-class TestIsolatedEnvironmentIsolationMode:
+class IsolatedEnvironmentIsolationModeTests:
     """Test suite for isolation mode functionality."""
 
     def setup_method(self):
@@ -335,7 +335,7 @@ class TestIsolatedEnvironmentIsolationMode:
         assert env.get(test_key) is None
 
 
-class TestIsolatedEnvironmentCaching:
+class IsolatedEnvironmentCachingTests:
     """Test suite for environment caching functionality."""
 
     def setup_method(self):
@@ -434,7 +434,7 @@ class TestIsolatedEnvironmentCaching:
             assert result.startswith("value_")
 
 
-class TestIsolatedEnvironmentPrefixOperations:
+class IsolatedEnvironmentPrefixOperationsTests:
     """Test suite for prefix-based operations."""
 
     def setup_method(self):
@@ -516,7 +516,7 @@ class TestIsolatedEnvironmentPrefixOperations:
         assert result == {}
 
 
-class TestIsolatedEnvironmentEnvironmentDetection:
+class IsolatedEnvironmentEnvironmentDetectionTests:
     """Test suite for environment detection methods."""
 
     def setup_method(self):
@@ -619,7 +619,7 @@ class TestIsolatedEnvironmentEnvironmentDetection:
         assert env.is_development() is True
 
 
-class TestIsolatedEnvironmentIntegration:
+class IsolatedEnvironmentIntegrationTests:
     """Integration tests for IsolatedEnvironment with real scenarios."""
 
     def test_real_environment_interaction(self):

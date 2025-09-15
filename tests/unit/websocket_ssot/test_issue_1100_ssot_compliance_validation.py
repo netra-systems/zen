@@ -27,7 +27,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestSSotComplianceValidation(BaseIntegrationTest):
+class SSotComplianceValidationTests(BaseIntegrationTest):
     """Test SSOT compliance for WebSocket manager implementations."""
     
     @pytest.mark.unit
@@ -377,7 +377,7 @@ class TestSSotComplianceValidation(BaseIntegrationTest):
         logger.info("WebSocketManager SSOT attributes validation completed")
 
 
-class TestFactoryPatternElimination(BaseIntegrationTest):
+class FactoryPatternEliminationTests(BaseIntegrationTest):
     """Test elimination of factory patterns in favor of direct instantiation."""
     
     @pytest.mark.unit

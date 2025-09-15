@@ -31,7 +31,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.tool_notifications
 @skip_if_no_real_services
-class TestRealWebSocketToolNotifications:
+class RealWebSocketToolNotificationsTests:
     """Test real WebSocket tool execution notifications."""
     
     @pytest.fixture

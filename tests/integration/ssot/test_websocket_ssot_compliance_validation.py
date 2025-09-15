@@ -63,7 +63,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.integration
-class TestWebSocketSSOTComplianceValidation(SSotAsyncTestCase):
+class WebSocketSSOTComplianceValidationTests(SSotAsyncTestCase):
     """
     Integration Tests: SSOT Compliance Validation
     

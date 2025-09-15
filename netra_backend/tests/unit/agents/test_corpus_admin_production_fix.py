@@ -184,7 +184,7 @@ def test_state(corpus_admin_fixture):
     """Create test state."""
     return corpus_admin_fixture.create_test_state()
 
-class TestNoMockRegression:
+class NoMockRegressionTests:
     """Validate no mock imports and proper BaseExecutionEngine usage."""
 
     def test_no_mock_imports_in_agent(self, agent):
@@ -218,7 +218,7 @@ class TestNoMockRegression:
         for phase in engine._phases:
             assert isinstance(phase, AgentMethodExecutionPhase), f'Phase {phase.name} is not AgentMethodExecutionPhase'
 
-class TestFourPhaseExecution:
+class FourPhaseExecutionTests:
     """Test the 4-phase execution pattern of corpus admin agent."""
 
     @pytest.mark.asyncio
@@ -281,7 +281,7 @@ class TestFourPhaseExecution:
         assert operation_result['executed'] is False, 'Operation should not execute when approval required'
         assert operation_result['reason'] == 'approval_required', 'Should indicate approval required'
 
-class TestExecutionHooks:
+class ExecutionHooksTests:
     """Test pre and post execution hooks functionality."""
 
     @pytest.mark.asyncio
@@ -341,7 +341,7 @@ class TestExecutionHooks:
         expected_order = ['pre', 'pre2', 'post', 'post2']
         assert call_order == expected_order, f'Hook call order incorrect. Expected {expected_order}, got {call_order}'
 
-class TestErrorHandlingAndRecovery:
+class ErrorHandlingAndRecoveryTests:
     """Test error handling and recovery patterns."""
 
     @pytest.mark.asyncio
@@ -395,7 +395,7 @@ class TestErrorHandlingAndRecovery:
         assert 'original_request' in parsing_result
         assert 'default_request' in parsing_result['original_request'].lower() or 'default corpus operation' in parsing_result['original_request']
 
-class TestUserExecutionContextIsolation:
+class UserExecutionContextIsolationTests:
     """Test UserExecutionContext isolation for multi-user scenarios."""
 
     @pytest.mark.asyncio
@@ -452,7 +452,7 @@ class TestUserExecutionContextIsolation:
         assert 'secret' not in user2_parsing['original_request'].lower()
         assert 'confidential' not in user1_parsing['original_request'].lower()
 
-class TestWebSocketEventIntegration:
+class WebSocketEventIntegrationTests:
     """Test WebSocket event integration during execution."""
 
     @pytest.mark.asyncio
@@ -498,7 +498,7 @@ class TestWebSocketEventIntegration:
         assert error_count >= 1, f'Expected at least 1 error event, got {error_count}'
         agent._execute_operation_phase = original_method
 
-class TestDifficultEdgeCases:
+class DifficultEdgeCasesTests:
     """Test difficult edge cases and failure scenarios."""
 
     @pytest.mark.asyncio
@@ -574,7 +574,7 @@ class TestDifficultEdgeCases:
         assert 'pre_execution' in health['hooks_count'], 'Missing pre_execution hook count'
         assert 'post_execution' in health['hooks_count'], 'Missing post_execution hook count'
 
-class TestPerformanceBenchmarks:
+class PerformanceBenchmarksTests:
     """Performance benchmark tests to ensure no degradation."""
 
     @pytest.mark.asyncio

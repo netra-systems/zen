@@ -22,7 +22,7 @@ import inspect
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestWebSocketEventRoutingSSOTViolations(SSotBaseTestCase):
+class WebSocketEventRoutingSSOTViolationsTests(SSotBaseTestCase):
     """Reproduce WebSocket event routing SSOT violations."""
 
     @pytest.mark.unit

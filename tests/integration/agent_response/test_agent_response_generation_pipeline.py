@@ -42,7 +42,7 @@ logger = central_logger.get_logger(__name__)
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentResponseGenerationPipeline(BaseIntegrationTest):
+class AgentResponseGenerationPipelineTests(BaseIntegrationTest):
     """Test agent response generation pipeline integration."""
     
     def setup_method(self):

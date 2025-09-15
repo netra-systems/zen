@@ -25,7 +25,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
-class TestWebSocketMonitoringResilience:
+class WebSocketMonitoringResilienceTests:
     """Test suite for WebSocket Manager monitoring resilience fixes."""
 
     @pytest.fixture

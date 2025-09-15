@@ -28,7 +28,7 @@ from netra_backend.app.services.unified_authentication_service import UnifiedAut
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import get_env
 
-class TestCompleteAuthenticationJourneysE2E(SSotAsyncTestCase):
+class CompleteAuthenticationJourneysE2ETests(SSotAsyncTestCase):
     """
     Complete authentication journeys E2E tests with real services.
     

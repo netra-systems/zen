@@ -4,21 +4,21 @@
 import pytest
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestConfigDecisionEngine:
+class ConfigDecisionEngineTests:
     """Test class for configuration decision engine."""
     
     def test_placeholder(self):
         """Placeholder test to make this discoverable by pytest."""
         assert True
 
-class TestMainValidationFunction:
+class MainValidationFunctionTests:
     """Test class for main validation function."""
     
     def test_placeholder(self):
         """Placeholder test to make this discoverable by pytest."""
         assert True
 
-class TestUtilityFunctions:
+class UtilityFunctionsTests:
     """Test class for utility functions."""
     
     def test_placeholder(self):

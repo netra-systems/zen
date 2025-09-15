@@ -62,7 +62,7 @@ async def ssot_migration_auth_fixture():
 
 
 @pytest.mark.integration
-class TestSSOTPatternMigrations(SSotBaseTestCase):
+class SSOTPatternMigrationsTests(SSotBaseTestCase):
     """
     SSOT Pattern Migration Validation Tests.
     
@@ -561,6 +561,6 @@ class TestSSOTPatternMigrations(SSotBaseTestCase):
 
 # SSOT Export Control
 __all__ = [
-    "TestSSOTPatternMigrations",
+    "SSOTPatternMigrationsTests",
     "ssot_migration_auth_fixture"
 ]

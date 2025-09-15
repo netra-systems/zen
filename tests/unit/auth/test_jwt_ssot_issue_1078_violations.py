@@ -20,7 +20,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestJWTSSOTIssue1078Violations(SSotBaseTestCase):
+class JWTSSOTIssue1078ViolationsTests(SSotBaseTestCase):
     """Unit tests to detect JWT SSOT violations - Issue #1078"""
     
     def setup_method(self):

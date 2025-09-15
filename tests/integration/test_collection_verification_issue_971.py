@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.orchestration import get_orchestration_config
 
 @pytest.mark.integration
-class TestCollectionVerificationPreFix(SSotBaseTestCase):
+class CollectionVerificationPreFixTests(SSotBaseTestCase):
     """
     Pre-fix validation: These tests should FAIL before the alias is added,
     demonstrating the exact collection issues described in Issue #971.
@@ -74,7 +74,7 @@ class TestCollectionVerificationPreFix(SSotBaseTestCase):
             self.fail('Expected ImportError for WebSocketTestManager, but all imports succeeded. Fix might already be applied.')
 
 @pytest.mark.integration
-class TestCollectionVerificationPostFix(SSotBaseTestCase):
+class CollectionVerificationPostFixTests(SSotBaseTestCase):
     """
     Post-fix validation: These tests should PASS after the alias is added,
     demonstrating that the collection issues are resolved.
@@ -135,7 +135,7 @@ class TestCollectionVerificationPostFix(SSotBaseTestCase):
                 self.fail(f'Module {module_path} should import successfully after fix: {e}')
 
 @pytest.mark.integration
-class TestSpecificFileCollectionVerification(SSotBaseTestCase):
+class SpecificFileCollectionVerificationTests(SSotBaseTestCase):
     """
     Specific file-level collection verification to ensure individual
     test files can be collected by pytest/unified test runner.
@@ -174,7 +174,7 @@ class TestSpecificFileCollectionVerification(SSotBaseTestCase):
         self.assertTrue(len(test_count_lines) > 0, f'Expected test collection summary, got: {result.stdout}')
 
 @pytest.mark.integration
-class TestUnifiedTestRunnerIntegration(SSotBaseTestCase):
+class UnifiedTestRunnerIntegrationTests(SSotBaseTestCase):
     """
     Comprehensive integration testing with the unified test runner
     to ensure the fix works within the complete test infrastructure.

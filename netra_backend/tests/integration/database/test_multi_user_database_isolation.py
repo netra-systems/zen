@@ -44,7 +44,7 @@ except ImportError:
     AsyncSession = None
 
 
-class TestMultiUserDatabaseIsolation(BaseIntegrationTest):
+class MultiUserDatabaseIsolationTests(BaseIntegrationTest):
     """Test multi-user database isolation with real PostgreSQL."""
 
     def setUp(self):

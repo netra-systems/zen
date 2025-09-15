@@ -204,7 +204,7 @@ class RapidApiMessageSender:
 
 
 @pytest.mark.e2e
-class TestRapidMessageSuccessionApi:
+class RapidMessageSuccessionApiTests:
     """Test rapid message succession via HTTP API endpoints."""
     
     @pytest.fixture

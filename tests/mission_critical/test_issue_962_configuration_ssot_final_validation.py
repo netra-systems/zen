@@ -43,7 +43,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestIssue962ConfigurationSSOTFinalValidation(SSotAsyncTestCase):
+class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
     """
     MISSION CRITICAL tests for final SSOT configuration validation - Issue #962.
 

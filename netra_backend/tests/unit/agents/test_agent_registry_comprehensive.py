@@ -75,7 +75,7 @@ async def agent_registry(mock_llm_manager):
     await registry.cleanup()
 
 @pytest.mark.asyncio
-class TestAgentRegistryFactoryPatterns:
+class AgentRegistryFactoryPatternsTests:
     """Test factory patterns for user isolation - BUSINESS CRITICAL."""
 
     async def test_user_session_factory_creates_isolated_sessions(self, agent_registry, real_user_context, real_user_context_2):
@@ -131,7 +131,7 @@ class TestAgentRegistryFactoryPatterns:
             mock_unified.create_for_user.assert_called_once_with(user_context=real_user_context, websocket_bridge=None, enable_admin_tools=False)
 
 @pytest.mark.asyncio
-class TestUserAgentSessionLifecycle:
+class UserAgentSessionLifecycleTests:
     """Test UserAgentSession lifecycle management - MEMORY LEAK PREVENTION."""
 
     async def test_user_session_initialization_creates_isolated_state(self, real_user_context):
@@ -212,7 +212,7 @@ class TestUserAgentSessionLifecycle:
         assert metrics['uptime_seconds'] >= 0
 
 @pytest.mark.asyncio
-class TestWebSocketManagerIntegration:
+class WebSocketManagerIntegrationTests:
     """Test WebSocket manager integration - CHAT VALUE ENABLEMENT."""
 
     async def test_websocket_manager_propagation_to_existing_sessions(self, agent_registry, mock_websocket_manager, real_user_context):
@@ -250,7 +250,7 @@ class TestWebSocketManagerIntegration:
             assert session._websocket_bridge is None
 
 @pytest.mark.asyncio
-class TestMemoryLeakPrevention:
+class MemoryLeakPreventionTests:
     """Test memory leak prevention - AGENTLIFECYCLEMANAGER INTEGRATION."""
 
     async def test_lifecycle_manager_cleanup_agent_resources(self, agent_registry, real_user_context):
@@ -307,7 +307,7 @@ class TestMemoryLeakPrevention:
         assert len(new_session._agents) == 0
 
 @pytest.mark.asyncio
-class TestConcurrentUserSessionManagement:
+class ConcurrentUserSessionManagementTests:
     """Test concurrent user session management - 10+ USERS SUPPORT."""
 
     async def test_concurrent_user_session_creation_is_thread_safe(self, agent_registry):
@@ -361,7 +361,7 @@ class TestConcurrentUserSessionManagement:
         await asyncio.gather(*tasks)
         assert agent_registry.websocket_manager in mock_managers
 
-class TestSSotUniversalRegistryExtension:
+class SSotUniversalRegistryExtensionTests:
     """Test SSOT UniversalRegistry extension - PROPER INHERITANCE."""
 
     def test_agent_registry_extends_universal_registry(self, mock_llm_manager):
@@ -431,7 +431,7 @@ class TestSSotUniversalRegistryExtension:
         assert status['user_isolation_enforced'] is True
         assert status['global_state_eliminated'] is True
 
-class TestBusinessValueValidation:
+class BusinessValueValidationTests:
     """Test business value validation - CHAT VALUE DELIVERY."""
 
     @pytest.mark.asyncio

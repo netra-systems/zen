@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestAgentRegistryInterfaceViolation:
+class AgentRegistryInterfaceViolationTests:
     """Test suite focused on the specific interface violation in set_websocket_manager()."""
 
     def test_interface_signature_mismatch_violation(self):
@@ -263,7 +263,7 @@ class TestAgentRegistryInterfaceViolation:
             "Type confusion: Registry stores WebSocketManager but interface expects AgentWebSocketBridge"
 
 
-class TestInterfaceContractCompliance:
+class InterfaceContractComplianceTests:
     """Test suite for validating proper interface contract compliance post-fix."""
 
     def test_unified_websocket_interface_compliance(self):

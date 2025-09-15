@@ -26,7 +26,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import (
 )
 
 
-class TestGCPWebSocketInitializationValidator:
+class GCPWebSocketInitializationValidatorTests:
     """Test the core GCP WebSocket initialization validator."""
     
     @pytest.fixture
@@ -237,7 +237,7 @@ class TestGCPWebSocketInitializationValidator:
         assert "timeout" in result.failed_services
 
 
-class TestGCPWebSocketMiddleware:
+class GCPWebSocketMiddlewareTests:
     """Test the GCP WebSocket readiness middleware."""
     
     @pytest.fixture
@@ -315,7 +315,7 @@ class TestGCPWebSocketMiddleware:
             assert details.get("cached") is True
 
 
-class TestHealthEndpointIntegration:
+class HealthEndpointIntegrationTests:
     """Test health endpoint integration with WebSocket readiness."""
     
     @pytest.mark.asyncio
@@ -340,7 +340,7 @@ class TestHealthEndpointIntegration:
         assert result["service"] == "websocket_readiness"
 
 
-class TestSSotCompliance:
+class SSotComplianceTests:
     """Test SSOT compliance of the WebSocket initialization fix."""
     
     def test_uses_shared_isolated_environment(self):
@@ -390,7 +390,7 @@ class TestSSotCompliance:
         assert middleware.timeout_seconds == 30.0
 
 
-class TestRaceConditionPrevention:
+class RaceConditionPreventionTests:
     """Test that the fix prevents the original race condition."""
     
     @pytest.mark.asyncio
@@ -458,7 +458,7 @@ class TestRaceConditionPrevention:
 
 
 @pytest.mark.integration
-class TestEndToEndIntegration:
+class EndToEndIntegrationTests:
     """End-to-end integration tests."""
     
     @pytest.mark.asyncio

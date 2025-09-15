@@ -26,7 +26,7 @@ import requests
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestLoadBalancerSSLCertificateValid(SSotBaseTestCase):
+class LoadBalancerSSLCertificateValidTests(SSotBaseTestCase):
     """
     Test SSL certificate validity for load balancer domains.
     
@@ -441,7 +441,7 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_tests():
-        test_instance = TestLoadBalancerSSLCertificateValid()
+        test_instance = LoadBalancerSSLCertificateValidTests()
         
         try:
             await test_instance.test_all_load_balancer_domains_ssl_valid()

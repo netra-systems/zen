@@ -21,7 +21,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from shared.types.core_types import UserID, ThreadID, RunID
 
-class TestWebSocketBridgeUserContextIntegration(SSotAsyncTestCase):
+class WebSocketBridgeUserContextIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket bridge with UserExecutionContext patterns"""
 
     async def asyncSetUp(self):

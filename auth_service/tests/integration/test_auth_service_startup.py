@@ -30,7 +30,7 @@ from netra_backend.app.redis_manager import redis_manager as auth_redis_manager
 from auth_service.auth_core.oauth_manager import OAuthManager
 
 
-class TestAuthServiceStartup(BaseIntegrationTest):
+class AuthServiceStartupTests(BaseIntegrationTest):
     """Integration tests for auth service startup sequence with real services."""
     
     @pytest.fixture(autouse=True)

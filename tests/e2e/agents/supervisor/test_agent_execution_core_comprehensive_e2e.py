@@ -394,7 +394,7 @@ class E2EComprehensiveAgent:
         self._user_context = user_context
 
 
-class TestAgentExecutionCoreComprehensiveE2E(BaseE2ETest):
+class AgentExecutionCoreComprehensiveE2ETests(BaseE2ETest):
     """
     Comprehensive E2E tests for AgentExecutionCore with complete authentication and user isolation.
     

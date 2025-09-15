@@ -74,7 +74,7 @@ class MockWebSocketConnection:
         return [msg for msg in self.messages_sent if msg['message'].get('event_type') == event_type]
 
 @pytest.mark.e2e
-class TestActionsToMeetGoalsUserExperienceFailures(SSotAsyncTestCase):
+class ActionsToMeetGoalsUserExperienceFailuresTests(SSotAsyncTestCase):
     """E2E tests reproducing ActionsToMeetGoalsSubAgent user experience failures.
     
     These tests simulate complete user journeys to reproduce the exact errors

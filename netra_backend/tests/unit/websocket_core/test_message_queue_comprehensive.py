@@ -45,7 +45,7 @@ def generate_test_connection_id() -> ConnectionID:
     """Generate a unique connection ID for testing."""
     return ConnectionID(f'conn_{uuid.uuid4().hex[:8]}')
 
-class TestQueuedMessage:
+class QueuedMessageTests:
     """Test the QueuedMessage dataclass functionality."""
 
     def test_queued_message_creation_with_defaults(self):
@@ -112,7 +112,7 @@ class TestQueuedMessage:
         msg.mark_attempt()
         assert not msg.can_retry()
 
-class TestMessageQueueCore:
+class MessageQueueCoreTests:
     """Test core MessageQueue functionality."""
 
     def setup_method(self):
@@ -257,7 +257,7 @@ class TestMessageQueueCore:
         assert attempt_count == 3
         await queue.close()
 
-class TestMessageQueueStateMachineIntegration:
+class MessageQueueStateMachineIntegrationTests:
     """Test MessageQueue integration with ConnectionStateMachine."""
 
     def setup_method(self):
@@ -355,7 +355,7 @@ class TestMessageQueueStateMachineIntegration:
         await queue.close()
         state_machine.remove_state_change_callback.assert_called_once_with(callback)
 
-class TestMessageQueueRaceConditionsAndConcurrency:
+class MessageQueueRaceConditionsAndConcurrencyTests:
     """Test race conditions and concurrency scenarios."""
 
     def setup_method(self):
@@ -484,7 +484,7 @@ class TestMessageQueueRaceConditionsAndConcurrency:
             assert priority_count >= 0
         await queue.close()
 
-class TestMessageQueueBusinessValueProtection:
+class MessageQueueBusinessValueProtectionTests:
     """Test business value protection - message ordering and critical preservation."""
 
     def setup_method(self):
@@ -596,7 +596,7 @@ class TestMessageQueueBusinessValueProtection:
         assert remaining_size >= 0
         await queue.close()
 
-class TestMessageQueueRegistryAndLifecycle:
+class MessageQueueRegistryAndLifecycleTests:
     """Test MessageQueueRegistry and lifecycle management."""
 
     def setup_method(self):

@@ -33,7 +33,7 @@ except ImportError:
 from netra_backend.app.db.clickhouse import ClickHouseDatabase as ClickHouseDB
 from netra_backend.app.db.transaction_errors import DeadlockError, ConnectionError, TimeoutError, PermissionError, SchemaError, classify_error
 
-class TestClickHouseExceptionSpecificity:
+class ClickHouseExceptionSpecificityTests:
     """Test suite for ClickHouse exception specificity validation."""
 
     @pytest.mark.unit
@@ -96,7 +96,7 @@ class TestClickHouseExceptionSpecificity:
         assert hasattr(clickhouse_module, 'SchemaError'), 'ClickHouse module should import SchemaError'
         assert hasattr(clickhouse_module, 'PermissionError'), 'ClickHouse module should import PermissionError'
 
-class TestClickHouseConnectionManager:
+class ClickHouseConnectionManagerTests:
     """Test suite for ClickHouse connection manager exception specificity."""
 
     @pytest.mark.unit
@@ -135,7 +135,7 @@ class TestClickHouseConnectionManager:
             assert 'clickhouse' in error_message.lower(), 'Error should include ClickHouse context'
             assert any((word in error_message.lower() for word in ['insert', 'query', 'operation'])), 'Error should include operation context'
 
-class TestClickHouseAnalyticsIntegration:
+class ClickHouseAnalyticsIntegrationTests:
     """Test suite for ClickHouse analytics integration exception handling."""
 
     @pytest.mark.unit

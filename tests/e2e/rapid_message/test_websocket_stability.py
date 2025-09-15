@@ -25,7 +25,7 @@ from tests.e2e.utils.rapid_message_sender import RapidMessageSender
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestWebSocketStability:
+class WebSocketStabilityTests:
     """Test WebSocket connection stability during message bursts."""
     
     @pytest.mark.websocket

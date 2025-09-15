@@ -15,7 +15,7 @@ from auth_service.auth_core.database.models import AuthUser
 
 
 @pytest.mark.asyncio
-class TestRegistrationRegression:
+class RegistrationRegressionTests:
     """Regression tests to prevent auth service from reverting to in-memory storage"""
     
     async def test_create_user_uses_database_not_memory(self):

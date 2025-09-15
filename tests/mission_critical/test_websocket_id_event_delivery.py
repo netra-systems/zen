@@ -59,7 +59,7 @@ from shared.types.core_types import UserID, ConnectionID, ExecutionID, MessageID
 @pytest.mark.websocket
 @pytest.mark.event_delivery
 @pytest.mark.business_value
-class TestWebSocketIdEventDeliveryMissionCritical(BaseMissionCriticalTest):
+class WebSocketIdEventDeliveryMissionCriticalTests(BaseMissionCriticalTest):
     """
     Mission Critical tests that EXPOSE event delivery failures with uuid.uuid4().
     

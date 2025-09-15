@@ -51,7 +51,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 @pytest.mark.integration
 @pytest.mark.asyncio  
-class TestWebSocketAuthServiceRealTimeCommunication(BaseIntegrationTest):
+class WebSocketAuthServiceRealTimeCommunicationTests(BaseIntegrationTest):
     """Integration tests for real-time WebSocket-to-Auth service communication."""
     
     async def setup_method(self):
@@ -372,7 +372,7 @@ class TestWebSocketAuthServiceRealTimeCommunication(BaseIntegrationTest):
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-class TestWebSocketAuthServiceLifecycleIntegration(BaseIntegrationTest):
+class WebSocketAuthServiceLifecycleIntegrationTests(BaseIntegrationTest):
     """Tests WebSocket authentication throughout complete service lifecycle."""
     
     async def setup_method(self):

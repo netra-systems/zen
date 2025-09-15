@@ -30,7 +30,7 @@ except ImportError:
     ExecutionEngine = Mock
 
 @pytest.mark.unit
-class TestAgentExecutionTimeoutReproduction:
+class AgentExecutionTimeoutReproductionTests:
     """Unit tests for agent execution timeout scenarios"""
 
     @pytest.mark.asyncio

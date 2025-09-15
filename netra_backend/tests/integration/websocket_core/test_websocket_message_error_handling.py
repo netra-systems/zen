@@ -21,7 +21,7 @@ import json
 from unittest.mock import AsyncMock, patch, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestWebSocketMessageErrorHandling(SSotAsyncTestCase):
+class WebSocketMessageErrorHandlingTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket message error handling scenarios.
     
@@ -207,7 +207,7 @@ class TestWebSocketMessageErrorHandling(SSotAsyncTestCase):
         except Exception as e:
             self.fail(f'Error message creation failed during connection recovery: {e}')
 
-class TestWebSocketImportResolutionIntegration(SSotAsyncTestCase):
+class WebSocketImportResolutionIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for import resolution behavior in WebSocket error scenarios.
     

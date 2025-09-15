@@ -74,7 +74,7 @@ class StartupValidationResult:
 
 
 @dataclass 
-class TestDevLauncherConfig:
+class DevLauncherConfigTests:
     """Configuration for dev launcher E2E testing."""
     use_dynamic_ports: bool = True
     enable_secrets: bool = False
@@ -85,7 +85,7 @@ class TestDevLauncherConfig:
     temp_dir: Optional[Path] = None
 
 
-class TestDevLauncherE2Eer:
+class DevLauncherE2EerTests:
     """Comprehensive E2E tester for dev launcher startup sequence."""
     
     def __init__(self, config: DevLauncherTestConfig):
@@ -590,7 +590,7 @@ class TestDevLauncherE2Eer:
 
 @pytest.mark.e2e
 @pytest.mark.asyncio
-class TestDevLauncherE2E:
+class DevLauncherE2ETests:
     """Comprehensive end-to-end test suite for dev launcher."""
     
     @pytest.fixture

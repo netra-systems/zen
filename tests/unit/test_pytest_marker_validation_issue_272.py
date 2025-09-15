@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 @pytest.mark.unit
-class TestPytestMarkerValidationIssue272:
+class PytestMarkerValidationIssue272Tests:
     """Test suite to reproduce missing staging_compatible marker issue"""
     
     def test_staging_compatible_marker_not_configured(self):

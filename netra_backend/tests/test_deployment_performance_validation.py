@@ -25,7 +25,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.configuration import unified_config_manager
 from test_framework.base import BaseTestCase
 
-class TestStartupPerformanceValidation(BaseTestCase):
+class StartupPerformanceValidationTests(BaseTestCase):
     """Test startup performance and timeout compliance."""
 
     @pytest.mark.asyncio
@@ -89,7 +89,7 @@ class TestStartupPerformanceValidation(BaseTestCase):
         duration = stage_durations.get(stage, 1.0)
         await asyncio.sleep(duration)
 
-class TestResourceOptimizationValidation(BaseTestCase):
+class ResourceOptimizationValidationTests(BaseTestCase):
     """Test resource optimization changes (memory 2Gi->1Gi, CPU boost)."""
 
     def test_memory_usage_optimization(self):
@@ -161,7 +161,7 @@ class TestResourceOptimizationValidation(BaseTestCase):
         processed = [item for item in data if item['id'] % 2 == 0]
         return len(processed)
 
-class TestHealthEndpointPerformance(BaseTestCase):
+class HealthEndpointPerformanceTests(BaseTestCase):
     """Test health endpoint response times (<100ms requirement)."""
 
     @pytest.mark.asyncio
@@ -223,7 +223,7 @@ class TestHealthEndpointPerformance(BaseTestCase):
         """Simulate readiness check execution."""
         await asyncio.sleep(0.1)
 
-class TestConfigEndpointReliability(BaseTestCase):
+class ConfigEndpointReliabilityTests(BaseTestCase):
     """Test config endpoint reliability and consistency."""
 
     @pytest.mark.asyncio
@@ -278,7 +278,7 @@ class TestConfigEndpointReliability(BaseTestCase):
         """Get config validation result."""
         return {'valid': True, 'errors': [], 'warnings': [], 'checks_performed': 5}
 
-class TestContainerStartupProbeSuccess(BaseTestCase):
+class ContainerStartupProbeSuccessTests(BaseTestCase):
     """Test container startup probe success scenarios."""
 
     @pytest.mark.asyncio
@@ -325,7 +325,7 @@ class TestContainerStartupProbeSuccess(BaseTestCase):
         await asyncio.sleep(3.0)
         return True
 
-class TestBackendServiceIntegration(BaseTestCase):
+class BackendServiceIntegrationTests(BaseTestCase):
     """Test integration between backend services."""
 
     @pytest.mark.asyncio

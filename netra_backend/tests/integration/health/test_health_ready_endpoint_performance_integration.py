@@ -37,7 +37,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import (
 )
 
 
-class TestHealthReadyEndpointPerformanceIntegration(SSotAsyncTestCase):
+class HealthReadyEndpointPerformanceIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for /health/ready endpoint performance with real Redis timeout issues.
     

@@ -16,7 +16,7 @@ from netra_backend.app.schemas.agent_state import (
 from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.services.state_serialization import DateTimeEncoder
 
-class TestDateTimeSerialization:
+class DateTimeSerializationTests:
     """Test datetime serialization in state persistence."""
     @pytest.mark.asyncio
     async def test_datetime_encoder_handles_datetime_objects(self):

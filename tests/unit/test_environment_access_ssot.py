@@ -45,7 +45,7 @@ class EnvironmentViolation:
     severity: str = 'HIGH'
 
 @pytest.mark.unit
-class TestEnvironmentAccessSSOTCompliance(SSotBaseTestCase):
+class EnvironmentAccessSSOTComplianceTests(SSotBaseTestCase):
     """
     MISSION CRITICAL: Test SSOT environment access compliance across all code.
     

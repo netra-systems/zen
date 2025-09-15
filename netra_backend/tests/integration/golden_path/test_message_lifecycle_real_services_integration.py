@@ -29,7 +29,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 
 @pytest.mark.integration
 @pytest.mark.golden_path
-class TestMessageLifecycleRealServicesIntegration(SSotBaseTestCase):
+class MessageLifecycleRealServicesIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for complete message lifecycle with real services.
     

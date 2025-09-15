@@ -31,7 +31,7 @@ from test_framework.ssot.real_services_test_fixtures import *
 
 
 @pytest.mark.e2e
-class TestCompleteAgentExecutionAuthenticatedFlow:
+class CompleteAgentExecutionAuthenticatedFlowTests:
     """E2E tests for complete authenticated agent execution flow."""
     
     def setup_method(self):

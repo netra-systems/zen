@@ -57,7 +57,7 @@ class IntegrationTestResult:
 
 
 @pytest.mark.integration
-class TestWebSocketCrossServiceIntegration(BaseIntegrationTest):
+class WebSocketCrossServiceIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for Issue #1182 WebSocket Manager SSOT cross-service compatibility.
     

@@ -20,7 +20,7 @@ from netra_backend.app.config import get_config
 # Get settings instance
 settings = get_config()
 
-class TestAPIRequestValidationL3:
+class APIRequestValidationL3Tests:
     """Test API request validation scenarios"""
 
     @pytest.mark.asyncio

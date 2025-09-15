@@ -52,7 +52,7 @@ def resource_monitor():
             return {'peak_cpu': max(self.cpu_usage) if self.cpu_usage else 0, 'peak_memory_mb': max(self.memory_usage) if self.memory_usage else 0, 'avg_cpu': sum(self.cpu_usage) / len(self.cpu_usage) if self.cpu_usage else 0}
     return ResourceMonitor()
 
-class TestLargeScaleGeneration:
+class LargeScaleGenerationTests:
     """Test large corpus generation (100k+ records)"""
 
     @pytest.mark.performance

@@ -23,7 +23,7 @@ from netra_backend.app.agents.tool_dispatcher_execution import ToolExecutionEngi
 from netra_backend.app.schemas.tool import ToolInput, ToolResult, ToolStatus, ToolExecuteResponse, ToolExecutionEngineInterface
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
-class TestToolExecutionEngineUnit(SSotBaseTestCase):
+class ToolExecutionEngineUnitTests(SSotBaseTestCase):
     """Unit tests for the tool execution engine wrapper."""
 
     def setup_method(self, method):
@@ -191,7 +191,7 @@ class TestToolExecutionEngineUnit(SSotBaseTestCase):
             assert result.success is False
         self.record_metric('malformed_response_handling_tested', True)
 
-class TestToolExecutionEngineWebSocketIntegrationUnit(SSotBaseTestCase):
+class ToolExecutionEngineWebSocketIntegrationUnitTests(SSotBaseTestCase):
     """Unit tests for WebSocket integration in execution engine."""
 
     def setup_method(self, method):
@@ -226,7 +226,7 @@ class TestToolExecutionEngineWebSocketIntegrationUnit(SSotBaseTestCase):
             mock_core_engine.execute_tool_with_input.assert_called_once()
         self.record_metric('websocket_behavior_inheritance_tested', True)
 
-class TestToolExecutionEngineCompatibilityUnit(SSotBaseTestCase):
+class ToolExecutionEngineCompatibilityUnitTests(SSotBaseTestCase):
     """Unit tests for compatibility with existing tool execution patterns."""
 
     def setup_method(self, method):
@@ -274,7 +274,7 @@ class TestToolExecutionEngineCompatibilityUnit(SSotBaseTestCase):
             assert result.result == 'state execution'
         self.record_metric('state_execution_compatibility_tested', True)
 
-class TestToolExecutionEngineArchitectureUnit(SSotBaseTestCase):
+class ToolExecutionEngineArchitectureUnitTests(SSotBaseTestCase):
     """Unit tests for architectural patterns in execution engine."""
 
     def test_follows_delegation_pattern(self):

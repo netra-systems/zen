@@ -132,7 +132,7 @@ def sample_execution_context():
     """Create sample AgentExecutionContext for testing."""
     return AgentExecutionContext(agent_name='TestAgent', run_id='run_12345', thread_id='thread_67890', user_id='user_99999', total_steps=5)
 
-class TestWebSocketNotifierUnit(SSotAsyncTestCase, unittest.TestCase):
+class WebSocketNotifierUnitTests(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive unit tests for WebSocketNotifier."""
 
     def setup_method(self, method):

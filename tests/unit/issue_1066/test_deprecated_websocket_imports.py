@@ -26,7 +26,7 @@ import importlib.util
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-class TestDeprecatedWebSocketImports:
+class DeprecatedWebSocketImportsTests:
     """Test that deprecated WebSocket factory imports are detected and eliminated."""
 
     def setup_method(self):
@@ -282,7 +282,7 @@ class TestDeprecatedWebSocketImports:
             assert "user_context" in str(exc_info.value).lower()
 
 
-class TestSSotWebSocketPatternCompliance:
+class SSotWebSocketPatternComplianceTests:
     """Test compliance with SSOT WebSocket patterns after migration."""
 
     @pytest.mark.unit

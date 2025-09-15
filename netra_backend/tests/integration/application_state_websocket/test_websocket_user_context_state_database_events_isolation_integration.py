@@ -444,7 +444,7 @@ class UserStateIsolationValidator:
         return validation_results
 
 
-class TestWebSocketUserStateIsolation(BaseIntegrationTest):
+class WebSocketUserStateIsolationTests(BaseIntegrationTest):
     """
     Integration test for user-specific state isolation across WebSocket events and database operations.
     

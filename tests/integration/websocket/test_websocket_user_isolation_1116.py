@@ -145,7 +145,7 @@ class MockWebSocketManager:
 
 
 @pytest.mark.integration
-class TestWebSocketUserIsolation1116(SSotAsyncTestCase):
+class WebSocketUserIsolation1116Tests(SSotAsyncTestCase):
     """
     Integration tests proving WebSocket user isolation failures.
     

@@ -21,7 +21,7 @@ import json
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestExceptionDockerImport(BaseIntegrationTest):
+class ExceptionDockerImportTests(BaseIntegrationTest):
     """Integration tests for ServiceError imports in Docker containers."""
     
     @classmethod

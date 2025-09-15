@@ -21,7 +21,7 @@ from tests.clients.factory import ClientFactory
 
 
 @pytest.mark.e2e
-class TestWebSocketEventStructure:
+class WebSocketEventStructureTests:
     """Test suite for WebSocket event structure validation."""
     
     @pytest.fixture

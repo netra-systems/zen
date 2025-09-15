@@ -209,7 +209,7 @@ class ChatInteractionTestHarness:
 @pytest.mark.e2e
 @pytest.mark.frontend
 @pytest.mark.chat
-class TestFrontendChatInteractions:
+class FrontendChatInteractionsTests:
     """Test chat interface interactions and real-time messaging"""
     
     @pytest.fixture(autouse=True)

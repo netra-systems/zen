@@ -207,7 +207,7 @@ class ServiceStartupValidator:
 @pytest.mark.critical
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestServiceStartupDependenciesBasic:
+class ServiceStartupDependenciesBasicTests:
     """Basic service startup dependencies test suite."""
     
     @pytest.fixture

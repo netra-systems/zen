@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
-class TestE2EHarnessIntegration(SSotAsyncTestCase):
+class E2EHarnessIntegrationTests(SSotAsyncTestCase):
     """Integration tests for E2E harness workflow and communication."""
 
     def setup_method(self, method):

@@ -45,7 +45,7 @@ from shared.logging.unified_logging_ssot import (
 )
 
 
-class TestLoguruKeyErrorFixValidation:
+class LoguruKeyErrorFixValidationTests:
     """
     Test class focused on validating the KeyError: 'timestamp' fix.
     

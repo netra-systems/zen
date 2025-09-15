@@ -101,7 +101,7 @@ class AgentSupervisorRaceConditionSimulator:
 @pytest.mark.real_services
 @pytest.mark.fallback_prevention
 @pytest.mark.race_condition_testing
-class TestAgentSupervisorRaceCondition:
+class AgentSupervisorRaceConditionTests:
     """
     Integration tests for agent supervisor race condition prevention.
     

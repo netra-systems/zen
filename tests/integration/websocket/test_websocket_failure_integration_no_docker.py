@@ -39,7 +39,7 @@ from shared.types.agent_types import AgentExecutionResult
 from shared.types.core_types import UserID, ThreadID, RunID
 
 @pytest.mark.integration
-class TestWebSocketFailureIntegrationNoDocker(SSotAsyncTestCase):
+class WebSocketFailureIntegrationNoDockerTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket failure cascades across components.
     NO DOCKER DEPENDENCIES - uses in-memory mocks and real object interactions.

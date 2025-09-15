@@ -122,7 +122,7 @@ class MockMultiUserAgent(BaseAgent):
 
 
 @pytest.mark.integration
-class TestUserExecutionEngineCoreIntegration(SSotAsyncTestCase):
+class UserExecutionEngineCoreIntegrationTests(SSotAsyncTestCase):
     """Integration tests for multi-user execution engine patterns."""
     
     def create_user_context(self, user_id: str, user_data: Dict[str, Any] = None) -> UserExecutionContext:

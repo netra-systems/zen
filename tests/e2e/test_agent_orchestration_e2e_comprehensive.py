@@ -233,7 +233,7 @@ async def orchestration_setup(real_services):
         yield {'supervisor': supervisor, 'llm_manager': llm_manager, 'websocket_manager': websocket_manager, 'tool_dispatcher': tool_dispatcher, 'db_session': db_session, 'config': app_config}
 
 @pytest.mark.e2e
-class TestCompleteAgentWorkflow(SSotBaseTestCase):
+class CompleteAgentWorkflowTests(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -309,7 +309,7 @@ class TestCompleteAgentWorkflow(SSotBaseTestCase):
             pytest.fail(f'Complex workflow failed with error: {e}')
 
 @pytest.mark.e2e
-class TestAgentHandoffAndContextPreservation(SSotBaseTestCase):
+class AgentHandoffAndContextPreservationTests(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -373,7 +373,7 @@ class TestAgentHandoffAndContextPreservation(SSotBaseTestCase):
         logger.info(f'Multi-turn conversation completed with {len(state.conversation_history)} history items')
 
 @pytest.mark.e2e
-class TestErrorRecoveryDuringExecution(SSotBaseTestCase):
+class ErrorRecoveryDuringExecutionTests(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -443,7 +443,7 @@ class TestErrorRecoveryDuringExecution(SSotBaseTestCase):
         logger.info(f'Error recovery testing completed: {recovery_attempts}/{len(error_scenarios)} scenarios handled')
 
 @pytest.mark.e2e
-class TestPerformanceAndProductionReadiness(SSotBaseTestCase):
+class PerformanceAndProductionReadinessTests(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

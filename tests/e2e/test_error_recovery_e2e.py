@@ -13,7 +13,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
-class TestErrorRecoveryE2E(BaseE2ETest):
+class ErrorRecoveryE2ETests(BaseE2ETest):
     """Test error recovery end-to-end."""
     
     @pytest.mark.e2e

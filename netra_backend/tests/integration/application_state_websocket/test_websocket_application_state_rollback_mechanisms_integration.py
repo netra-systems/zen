@@ -210,7 +210,7 @@ class RollbackManager:
             return False
 
 
-class TestWebSocketApplicationStateRollbackMechanisms(BaseIntegrationTest):
+class WebSocketApplicationStateRollbackMechanismsTests(BaseIntegrationTest):
     """Test application state rollback mechanisms during WebSocket event processing failures."""
     
     @pytest.mark.integration

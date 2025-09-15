@@ -52,7 +52,7 @@ from netra_backend.app.websocket_core.websocket_manager import (
 from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 
 
-class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
+class WebSocketManagerCompatibilityLayerTests(SSotBaseTestCase):
     """
     Comprehensive unit tests for WebSocket manager compatibility layer.
     
@@ -340,7 +340,7 @@ class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
         assert all_size < 1000, f"__all__ list too large: {all_size} bytes"
 
 
-class TestWebSocketManagerCompatibilityIntegration(SSotBaseTestCase):
+class WebSocketManagerCompatibilityIntegrationTests(SSotBaseTestCase):
     """
     Integration tests to ensure compatibility layer works with real components.
     
@@ -389,17 +389,17 @@ class TestWebSocketManagerCompatibilityIntegration(SSotBaseTestCase):
         from enum import Enum
         
         # Create complex message with various data types
-        class TestEnum(Enum):
+        class EnumTests(Enum):
             STARTED = "agent_started"
             THINKING = "agent_thinking"
         
         complex_message = {
-            "type": TestEnum.STARTED,
+            "type": EnumTests.STARTED,
             "timestamp": datetime.now(timezone.utc),
             "data": {
                 "nested": {"deep": {"value": 42}},
                 "list": [1, 2, 3],
-                "enum_value": TestEnum.THINKING
+                "enum_value": EnumTests.THINKING
             },
             "metadata": {
                 "priority": "high",

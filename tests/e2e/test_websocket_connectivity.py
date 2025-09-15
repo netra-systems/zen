@@ -73,7 +73,7 @@ class InMemoryWebSocketConnection:
         return 'CONNECTED' if self._connected else 'DISCONNECTED'
 
 @pytest.mark.e2e
-class TestWebSocketConnectivityAuthenticated:
+class WebSocketConnectivityAuthenticatedTests:
     """CLAUDE.md compliant WebSocket connectivity tests with mandatory authentication."""
 
     @pytest.mark.asyncio

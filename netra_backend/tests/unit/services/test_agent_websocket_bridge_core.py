@@ -84,7 +84,7 @@ class MockThreadRunRegistry:
         """Mock health check."""
         return self.is_healthy
 
-class TestAgentWebSocketBridgeCore(SSotAsyncTestCase):
+class AgentWebSocketBridgeCoreTests(SSotAsyncTestCase):
     """Comprehensive unit tests for AgentWebSocketBridge core functionality."""
 
     def setup_method(self, method):

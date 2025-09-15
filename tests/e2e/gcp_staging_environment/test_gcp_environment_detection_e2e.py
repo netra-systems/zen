@@ -32,7 +32,7 @@ except ImportError:
 from netra_backend.app.websocket_core.gcp_initialization_validator import create_gcp_websocket_validator, gcp_websocket_readiness_check
 
 @pytest.mark.e2e
-class TestGCPEnvironmentDetectionE2E(BaseE2ETest):
+class GCPEnvironmentDetectionE2ETests(BaseE2ETest):
     """
     Test real GCP environment detection and timeout optimization.
     

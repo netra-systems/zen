@@ -159,7 +159,7 @@ class GoldenPathResponseValidator:
 
 
 @pytest.mark.e2e
-class TestGoldenPathPhase2RegressionPrevention(SSotAsyncTestCase):
+class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
     """
     E2E test suite for Golden Path Phase 2 regression prevention.
     

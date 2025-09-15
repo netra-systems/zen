@@ -12,7 +12,7 @@ import sys
 from unittest.mock import patch, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestDeepChecksDatabaseIntegration(SSotAsyncTestCase):
+class DeepChecksDatabaseIntegrationTests(SSotAsyncTestCase):
     """Integration test for deep health checks database manager integration."""
 
     def setUp(self):

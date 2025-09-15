@@ -47,7 +47,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestWebSocketFactoryDeprecationViolations(SSotBaseTestCase):
+class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
     """
     SSOT violation detection tests for WebSocket factory deprecation.
     

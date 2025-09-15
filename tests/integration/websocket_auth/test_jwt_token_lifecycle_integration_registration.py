@@ -52,7 +52,7 @@ class MockConnectionEvent:
 
 
 @pytest.mark.integration
-class TestJWTTokenLifecycleRegistrationIntegration(SSotAsyncTestCase):
+class JWTTokenLifecycleRegistrationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for JWT Token Lifecycle Manager registration system.
     

@@ -53,7 +53,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 @pytest.mark.integration
-class TestUnifiedStateManagerIntegrationCore(SSotAsyncTestCase):
+class UnifiedStateManagerIntegrationCoreTests(SSotAsyncTestCase):
     """Core integration tests for UnifiedStateManager with real services"""
 
     @classmethod
@@ -91,7 +91,7 @@ class TestUnifiedStateManagerIntegrationCore(SSotAsyncTestCase):
         return UnifiedStateManager(user_id=user_id, redis_client=self.redis_client, config_manager=self.config_manager)
 
 @pytest.mark.integration
-class TestRealRedisIntegration(TestUnifiedStateManagerIntegrationCore):
+class RealRedisIntegrationTests(UnifiedStateManagerIntegrationCoreTests):
     """Integration tests with real Redis operations"""
 
     async def test_redis_state_persistence_workflow(self):
@@ -158,7 +158,7 @@ class TestRealRedisIntegration(TestUnifiedStateManagerIntegrationCore):
         self.assertIn(final_state.get('status'), ['before_failover', 'after_recovery'])
 
 @pytest.mark.integration
-class TestCrossServiceStateCoordination(TestUnifiedStateManagerIntegrationCore):
+class CrossServiceStateCoordinationTests(UnifiedStateManagerIntegrationCoreTests):
     """Integration tests for cross-service state coordination"""
 
     async def test_redis_postgres_state_synchronization(self):
@@ -212,7 +212,7 @@ class TestCrossServiceStateCoordination(TestUnifiedStateManagerIntegrationCore):
         self.assertEqual(len(supervisor_final['active_agents']), 2)
 
 @pytest.mark.integration
-class TestMultiTenantIsolationIntegration(TestUnifiedStateManagerIntegrationCore):
+class MultiTenantIsolationIntegrationTests(UnifiedStateManagerIntegrationCoreTests):
     """Integration tests for multi-tenant isolation with real services"""
 
     async def test_concurrent_user_isolation_redis(self):
@@ -272,7 +272,7 @@ class TestMultiTenantIsolationIntegration(TestUnifiedStateManagerIntegrationCore
         self.assertIn('user_preferences', legitimate_free)
 
 @pytest.mark.integration
-class TestHighLoadConcurrencyIntegration(TestUnifiedStateManagerIntegrationCore):
+class HighLoadConcurrencyIntegrationTests(UnifiedStateManagerIntegrationCoreTests):
     """Integration tests for high-load concurrent operations"""
 
     async def test_concurrent_state_operations_stress(self):
@@ -347,7 +347,7 @@ class TestHighLoadConcurrencyIntegration(TestUnifiedStateManagerIntegrationCore)
         self.assertGreater(recent_exists, threads_per_cycle * 0.7)
 
 @pytest.mark.integration
-class TestDisasterRecoveryIntegration(TestUnifiedStateManagerIntegrationCore):
+class DisasterRecoveryIntegrationTests(UnifiedStateManagerIntegrationCoreTests):
     """Integration tests for disaster recovery scenarios"""
 
     async def test_redis_connection_recovery(self):

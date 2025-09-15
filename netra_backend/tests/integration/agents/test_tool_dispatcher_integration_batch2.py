@@ -28,7 +28,7 @@ from netra_backend.app.agents.tool_dispatcher import (
 )
 
 
-class TestToolDispatcherIntegrationBatch2(SSotBaseTestCase):
+class ToolDispatcherIntegrationBatch2Tests(SSotBaseTestCase):
     """Integration tests for tool dispatcher with real components."""
     
     def setup_method(self, method):
@@ -49,7 +49,7 @@ class TestToolDispatcherIntegrationBatch2(SSotBaseTestCase):
         # Set up tools for testing
         from langchain_core.tools import BaseTool
         
-        class TestTool(BaseTool):
+        class ToolTests(BaseTool):
             name: str = "test_analyzer"
             description: str = "Analyzes test data"
             
@@ -59,7 +59,7 @@ class TestToolDispatcherIntegrationBatch2(SSotBaseTestCase):
             async def _arun(self, query: str) -> str:
                 return f"Async analysis result for: {query}"
         
-        self.test_tool = TestTool()
+        self.test_tool = ToolTests()
     
     @pytest.mark.asyncio
     async def test_factory_creates_isolated_dispatcher(self):
@@ -302,7 +302,7 @@ class TestToolDispatcherIntegrationBatch2(SSotBaseTestCase):
         self.record_metric("legacy_compatibility", "validated")
 
 
-class TestToolDispatcherFactoryIntegration(SSotBaseTestCase):
+class ToolDispatcherFactoryIntegrationTests(SSotBaseTestCase):
     """Integration tests for UnifiedToolDispatcherFactory."""
     
     def setup_method(self, method):

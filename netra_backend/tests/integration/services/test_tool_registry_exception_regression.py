@@ -42,7 +42,7 @@ class RegressionTestTool(BaseTool):
             raise RuntimeError(f'Simulated error in {self.name}')
         return f'Executed {self.name} successfully'
 
-class TestToolRegistryRegressionValidation(SSotAsyncTestCase):
+class ToolRegistryRegressionValidationTests(SSotAsyncTestCase):
     """Test that existing functionality continues to work while improving exceptions."""
 
     def setUp(self):
@@ -254,7 +254,7 @@ class TestToolRegistryRegressionValidation(SSotAsyncTestCase):
         if hasattr(self, 'unified_registry'):
             self.unified_registry.clear()
 
-class TestToolRegistryExceptionImprovementValidation(SSotAsyncTestCase):
+class ToolRegistryExceptionImprovementValidationTests(SSotAsyncTestCase):
     """Test that exception handling improvements actually improve the system."""
 
     def setUp(self):

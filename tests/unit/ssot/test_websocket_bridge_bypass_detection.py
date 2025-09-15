@@ -46,7 +46,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestWebSocketBridgeBypassDetection(SSotBaseTestCase):
+class WebSocketBridgeBypassDetectionTests(SSotBaseTestCase):
     """
     SSOT violation detection tests for WebSocket bridge bypass patterns.
 

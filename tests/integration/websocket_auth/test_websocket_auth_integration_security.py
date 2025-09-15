@@ -42,7 +42,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.integration
-class TestWebSocketAuthenticationSecurity(SSotAsyncTestCase):
+class WebSocketAuthenticationSecurityTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket authentication security and validation.
     
@@ -712,4 +712,4 @@ class TestWebSocketAuthenticationSecurity(SSotAsyncTestCase):
 
 
 # Export test class for pytest discovery
-__all__ = ["TestWebSocketAuthenticationSecurity"]
+__all__ = ["WebSocketAuthenticationSecurityTests"]

@@ -18,7 +18,7 @@ from netra_backend.app.config import get_config
 
 from netra_backend.app.services.external_api_client import ResilientHTTPClient as APIClient
 
-class TestErrorNetworkFailuresL3:
+class ErrorNetworkFailuresL3Tests:
     """Test network error handling scenarios"""
 
     @pytest.mark.asyncio

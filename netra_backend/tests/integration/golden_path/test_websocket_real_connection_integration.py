@@ -44,7 +44,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketRealConnectionIntegration(BaseIntegrationTest):
+class WebSocketRealConnectionIntegrationTests(BaseIntegrationTest):
     """Test WebSocket connections with real PostgreSQL and Redis services."""
     
     def setup_method(self):

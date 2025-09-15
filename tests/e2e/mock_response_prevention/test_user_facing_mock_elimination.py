@@ -40,7 +40,7 @@ from shared.types.core_types import UserID, ThreadID, RequestID
 logger = logging.getLogger(__name__)
 
 
-class TestUserFacingMockElimination(BaseE2ETest):
+class UserFacingMockEliminationTests(BaseE2ETest):
     """
     FAILING E2E TESTS: Prove users can see mock responses through any interface
     

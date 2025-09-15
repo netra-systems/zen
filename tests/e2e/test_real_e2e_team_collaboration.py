@@ -144,7 +144,7 @@ class TeamCollaborationSimulator:
         sorted_users = sorted(user_activities.items(), key=lambda x: x[1], reverse=True)
         return [{'user_id': user_id, 'contributions': count} for user_id, count in sorted_users[:3]]
 
-class TestRealE2ETeamCollaboration(BaseE2ETest):
+class RealE2ETeamCollaborationTests(BaseE2ETest):
     """Test team collaboration features end-to-end."""
 
     def setup_method(self):

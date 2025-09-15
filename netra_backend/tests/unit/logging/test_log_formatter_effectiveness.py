@@ -28,7 +28,7 @@ from shared.logging.unified_logging_ssot import get_ssot_logger, UnifiedLoggingS
 from netra_backend.app.logging.auth_trace_logger import AuthTraceLogger, AuthTraceContext
 
 
-class TestLogFormatterEffectiveness(SSotBaseTestCase):
+class LogFormatterEffectivenessTests(SSotBaseTestCase):
     """Test log formatter produces effective debugging information."""
     
     def setup_method(self, method=None):
@@ -58,7 +58,7 @@ class TestLogFormatterEffectiveness(SSotBaseTestCase):
         """Create a test logging handler to capture log records."""
         import logging
         
-        class TestLogHandler(logging.Handler):
+        class LogHandlerTests(logging.Handler):
             def __init__(self, records_list):
                 super().__init__()
                 self.records_list = records_list
@@ -67,7 +67,7 @@ class TestLogFormatterEffectiveness(SSotBaseTestCase):
             def emit(self, record):
                 self.records_list.append(record)
         
-        return TestLogHandler(self.log_records)
+        return LogHandlerTests(self.log_records)
     
     @pytest.mark.unit
     def test_log_record_contains_essential_debugging_info(self):

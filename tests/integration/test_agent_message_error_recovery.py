@@ -69,7 +69,7 @@ except ImportError as e:
     CircuitBreakerOpen = Exception
     CircuitBreakerTimeout = Exception
 
-class TestAgentMessageErrorRecovery(SSotAsyncTestCase):
+class AgentMessageErrorRecoveryTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Agent Message Error Recovery.
 

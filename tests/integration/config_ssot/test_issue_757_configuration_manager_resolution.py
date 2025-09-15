@@ -25,7 +25,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.integration
-class TestIssue757ConfigurationManagerResolution(SSotBaseTestCase):
+class Issue757ConfigurationManagerResolutionTests(SSotBaseTestCase):
     """Test suite validating Issue #757 Configuration Manager duplication crisis resolution."""
 
     def test_deprecated_configuration_manager_removed(self):

@@ -110,7 +110,7 @@ class CriticalEventTracker:
         return violations
 
 
-class TestCriticalEventDeliveryInconsistency(SSotAsyncTestCase):
+class CriticalEventDeliveryInconsistencyTests(SSotAsyncTestCase):
     """Test that demonstrates critical event delivery inconsistency across emitters.
     
     This test MUST FAIL before consolidation to prove event inconsistency exists.

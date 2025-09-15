@@ -25,7 +25,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.e2e
-class TestIssue174StateMachineCoordination(SSotAsyncTestCase):
+class Issue174StateMachineCoordinationTests(SSotAsyncTestCase):
     """E2E tests to reproduce Issue #174: State machine connection ID coordination failures."""
 
     @pytest.mark.asyncio
@@ -516,7 +516,7 @@ if __name__ == "__main__":
     
     async def run_issue_174_tests():
         """Run all Issue #174 state machine coordination tests."""
-        test_instance = TestIssue174StateMachineCoordination()
+        test_instance = Issue174StateMachineCoordinationTests()
         
         print(" ALERT:  STARTING ISSUE #174 STATE MACHINE COORDINATION TESTS")
         print("=" * 60)

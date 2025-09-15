@@ -33,7 +33,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestAuthTraceLoggerSsotCompliance(SSotBaseTestCase):
+class AuthTraceLoggerSsotComplianceTests(SSotBaseTestCase):
     """Unit tests for Auth Trace Logger SSOT configuration compliance."""
 
     def setup_method(self, method=None):

@@ -31,7 +31,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from test_framework.fixtures.websocket_fixtures import create_mock_websocket
 from test_framework.ssot.integration_auth_manager import IntegrationAuthServiceManager
 
-class TestSSOTWebSocketAuthenticationCompliance:
+class SSOTWebSocketAuthenticationComplianceTests:
     """Test suite for SSOT WebSocket authentication compliance."""
 
     @pytest.fixture
@@ -216,7 +216,7 @@ class TestSSOTWebSocketAuthenticationCompliance:
         print(' PASS:  SSOT COMPLIANCE: Import restrictions properly enforced')
 
 @pytest.mark.integration
-class TestSSOTWebSocketAuthenticationEndToEnd:
+class SSOTWebSocketAuthenticationEndToEndTests:
     """End-to-end integration tests for SSOT WebSocket authentication."""
 
     @pytest.mark.asyncio

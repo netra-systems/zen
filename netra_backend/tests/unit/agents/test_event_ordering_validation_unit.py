@@ -190,7 +190,7 @@ class EventOrderingValidator:
         self.state_transitions = []
 
 
-class TestEventOrderingValidation(SSotAsyncTestCase):
+class EventOrderingValidationTests(SSotAsyncTestCase):
     """Test WebSocket event ordering validation for Golden Path business value."""
 
     def setup_method(self, method):

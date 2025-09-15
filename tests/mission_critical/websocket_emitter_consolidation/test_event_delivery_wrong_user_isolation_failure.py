@@ -65,7 +65,7 @@ class UserEventTracker:
         return len(self.cross_contamination_detected)
 
 
-class TestEventDeliveryWrongUserIsolationFailure(SSotAsyncTestCase):
+class EventDeliveryWrongUserIsolationFailureTests(SSotAsyncTestCase):
     """Test that demonstrates user isolation failures in WebSocket event delivery.
     
     This test MUST FAIL before consolidation to prove isolation failures exist.

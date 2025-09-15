@@ -40,7 +40,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 
 
 @pytest.mark.unit
-class TestUserExecutionContextFactoryIntegrationUnit(SSotBaseTestCase):
+class UserExecutionContextFactoryIntegrationUnitTests(SSotBaseTestCase):
     """SSOT Unit test for UserExecutionContext integration with ExecutionEngineFactory.
     
     This test ensures the factory properly validates, integrates, and manages

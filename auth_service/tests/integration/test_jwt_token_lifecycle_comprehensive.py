@@ -50,7 +50,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestJWTTokenLifecycleComprehensive(SSotBaseTestCase):
+class JWTTokenLifecycleComprehensiveTests(SSotBaseTestCase):
     """
     JWT Token Lifecycle and Cross-Service Synchronization Integration Tests.
     

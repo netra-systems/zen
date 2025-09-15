@@ -8,7 +8,7 @@ import pytest
 from netra_backend.app.utils.datetime_utils import DatetimeUtils
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestDatetimeUtils:
+class DatetimeUtilsTests:
     """Test suite for DatetimeUtils"""
     
     @pytest.fixture

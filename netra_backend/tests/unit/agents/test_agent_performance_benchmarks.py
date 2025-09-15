@@ -38,7 +38,7 @@ class MockPerformanceAgent(BaseAgent):
         self.total_execution_time += execution_time
         return {'status': 'success', 'execution_time': execution_time, 'execution_count': self.execution_count}
 
-class TestInitializationPerformance:
+class InitializationPerformanceTests:
     """Test initialization overhead and startup time."""
 
     @pytest.fixture
@@ -61,7 +61,7 @@ class TestInitializationPerformance:
         assert total_time < 2.0
         assert avg_init_time < 0.2
 
-class TestExecutionPerformance:
+class ExecutionPerformanceTests:
     """Test execution timing under various loads."""
 
     @pytest.fixture
@@ -83,7 +83,7 @@ class TestExecutionPerformance:
         agent = MockPerformanceAgent(llm_manager=mock_llm_manager, name='ConcurrentPerfAgent', enable_reliability=True, execution_delay=0.001)
         assert agent.get_health_status() is not None
 
-class TestMemoryPerformance:
+class MemoryPerformanceTests:
     """Test memory usage patterns and leak detection."""
 
     @pytest.fixture
@@ -108,7 +108,7 @@ class TestMemoryPerformance:
             del agent
         assert len(agent_refs) == 10
 
-class TestCachePerformance:
+class CachePerformanceTests:
     """Test cache performance and hit rates."""
 
     @pytest.fixture
@@ -122,7 +122,7 @@ class TestCachePerformance:
         agent = MockPerformanceAgent(llm_manager=mock_llm_manager, name='CacheTestAgent', enable_reliability=True)
         assert agent.get_health_status() is not None
 
-class TestCircuitBreakerPerformance:
+class CircuitBreakerPerformanceTests:
     """Test circuit breaker performance overhead."""
 
     @pytest.fixture
@@ -138,7 +138,7 @@ class TestCircuitBreakerPerformance:
         assert agent_with_cb.get_health_status() is not None
         assert agent_without_cb.get_health_status() is not None
 
-class TestWebSocketEventPerformance:
+class WebSocketEventPerformanceTests:
     """Test WebSocket event emission latency."""
 
     @pytest.fixture
@@ -152,7 +152,7 @@ class TestWebSocketEventPerformance:
         agent = MockPerformanceAgent(llm_manager=mock_llm_manager, name='WebSocketPerfAgent', enable_reliability=True)
         assert agent.get_health_status() is not None
 
-class TestLargePayloadPerformance:
+class LargePayloadPerformanceTests:
     """Test performance with large payloads."""
 
     @pytest.fixture
@@ -166,7 +166,7 @@ class TestLargePayloadPerformance:
         agent = MockPerformanceAgent(llm_manager=mock_llm_manager, name='LargePayloadAgent', enable_reliability=True)
         assert agent.get_health_status() is not None
 
-class TestLongRunningOperationStability:
+class LongRunningOperationStabilityTests:
     """Test stability under long-running operations."""
 
     @pytest.fixture

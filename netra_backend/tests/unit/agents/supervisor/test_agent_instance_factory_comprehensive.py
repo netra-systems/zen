@@ -137,7 +137,7 @@ class MockNoParamAgent(BaseAgent):
         self._websocket_adapter.set_websocket_bridge = Mock(side_effect=mock_set_websocket_bridge)
 
 
-class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
+class AgentInstanceFactoryComprehensiveTests(SSotBaseTestCase):
     """Comprehensive test suite for AgentInstanceFactory - MISSION CRITICAL."""
     
     # Test requires real services for integration validation
@@ -1301,7 +1301,7 @@ class TestAgentInstanceFactoryComprehensive(SSotBaseTestCase):
 # WEBSOCKET EMITTER SPECIFIC TESTS
 # =========================================================================
 
-class TestUserWebSocketEmitterComprehensive(SSotBaseTestCase):
+class UserWebSocketEmitterComprehensiveTests(SSotBaseTestCase):
     """Comprehensive tests for UserWebSocketEmitter component."""
     
     def setup_method(self, method=None):
@@ -1404,7 +1404,7 @@ class TestUserWebSocketEmitterComprehensive(SSotBaseTestCase):
 # PERFORMANCE OPTIMIZATION TESTS
 # =========================================================================
 
-class TestAgentInstanceFactoryPerformance(SSotBaseTestCase):
+class AgentInstanceFactoryPerformanceTests(SSotBaseTestCase):
     """Performance-focused tests for AgentInstanceFactory optimizations."""
     
     def setup_method(self, method=None):

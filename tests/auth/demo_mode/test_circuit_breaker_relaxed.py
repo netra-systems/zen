@@ -27,7 +27,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.clients.circuit_breaker import get_circuit_breaker, CircuitBreakerOpen, CircuitBreakerTimeout
 
 
-class TestCircuitBreakerRelaxed(SSotAsyncTestCase):
+class CircuitBreakerRelaxedTests(SSotAsyncTestCase):
     """
     Test circuit breaker relaxed behavior in demo mode.
     

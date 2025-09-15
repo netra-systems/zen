@@ -26,7 +26,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 @pytest.mark.unit
-class TestWebSocketIntegrationConflicts(SSotAsyncTestCase):
+class WebSocketIntegrationConflictsTests(SSotAsyncTestCase):
     """
     Test suite to validate WebSocket integration consistency across registry implementations.
 

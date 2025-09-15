@@ -27,7 +27,7 @@ from netra_backend.app.db.migration_utils import DatabaseMigrator
 from netra_backend.app.db.database_manager import get_database_manager
 from netra_backend.app.db.models_postgres import User, Thread, Message
 
-class TestDatabaseMigrationIntegrityComprehensive(SSotBaseTestCase):
+class DatabaseMigrationIntegrityComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive database migration integrity tests.
     

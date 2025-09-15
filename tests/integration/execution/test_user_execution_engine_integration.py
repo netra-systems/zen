@@ -186,7 +186,7 @@ class MockUserWebSocketEmitter:
 
 
 @pytest.mark.integration
-class TestUserExecutionEngineIntegration(SSotAsyncTestCase):
+class UserExecutionEngineIntegrationTests(SSotAsyncTestCase):
     """
     Comprehensive integration tests for UserExecutionEngine.
     

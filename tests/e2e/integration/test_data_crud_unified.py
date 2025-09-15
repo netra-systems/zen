@@ -50,7 +50,7 @@ async def data_crud_manager():
     await manager.cleanup_test_environment()
 
 
-class TestDataCRUDUnifiedE2E:
+class DataCRUDUnifiedE2ETests:
     """E2E Tests for complete data CRUD operations across all services."""
     
     @pytest.mark.asyncio
@@ -219,7 +219,7 @@ class TestDataCRUDUnifiedE2E:
         return {'user_id': user_id, 'success': True}
 
 
-class TestDataCRUDGDPRCompliance:
+class DataCRUDGDPRComplianceTests:
     """GDPR compliance tests for data deletion operations."""
     
     @pytest.mark.asyncio
@@ -262,7 +262,7 @@ class TestDataCRUDGDPRCompliance:
         await manager.create_billing_data(user_id, billing_data)
 
 
-class TestDataCRUDPerformance:
+class DataCRUDPerformanceTests:
     """Performance tests for data CRUD operations."""
     
     @pytest.mark.asyncio

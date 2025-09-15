@@ -14,7 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.unit
-class TestDatabaseURLBuilder:
+class DatabaseURLBuilderTests:
     """Test DatabaseURLBuilder URL construction for all environments."""
     
     def test_development_with_database_url_async(self):
@@ -220,7 +220,7 @@ class TestDatabaseURLBuilder:
 
 
 @pytest.mark.unit
-class TestDatabaseURLBuilderEdgeCases:
+class DatabaseURLBuilderEdgeCasesTests:
     """Test edge cases and error conditions."""
     
     def test_none_database_url(self):

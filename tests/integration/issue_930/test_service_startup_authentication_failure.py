@@ -22,7 +22,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestServiceStartupAuthenticationFailure(SSotAsyncTestCase):
+class ServiceStartupAuthenticationFailureTests(SSotAsyncTestCase):
     """Tests reproducing service startup authentication failures from staging logs."""
 
     async def asyncSetUp(self):

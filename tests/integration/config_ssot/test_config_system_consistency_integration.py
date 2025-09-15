@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import BaseIntegrationTest
 
 
 @pytest.mark.integration
-class TestConfigSystemConsistencyIntegration(BaseIntegrationTest):
+class ConfigSystemConsistencyIntegrationTests(BaseIntegrationTest):
     """Integration tests for system-wide configuration consistency violations."""
 
     def setUp(self):

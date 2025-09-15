@@ -26,7 +26,7 @@ from tests.e2e.agent_orchestration_fixtures import (
 
 
 @pytest.mark.e2e
-class TestMultiAgentCoordination:
+class MultiAgentCoordinationTests:
     """Test parallel agent execution and result aggregation - BVJ: Value delivery"""
 
     @pytest.mark.asyncio
@@ -176,7 +176,7 @@ class TestMultiAgentCoordination:
 
 
 @pytest.mark.e2e
-class TestAgentSynchronization:
+class AgentSynchronizationTests:
     """Test agent synchronization mechanisms - BVJ: Coordinated value delivery"""
 
     @pytest.mark.asyncio
@@ -242,7 +242,7 @@ class TestAgentSynchronization:
 
 
 @pytest.mark.e2e
-class TestDataFlowOrchestration:
+class DataFlowOrchestrationTests:
     """Test data flow between agents - BVJ: Information fidelity and completeness"""
 
     @pytest.mark.asyncio

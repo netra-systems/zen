@@ -70,7 +70,7 @@ from netra_backend.app.core.service_dependencies.models import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestGoldenPathValidatorMonolithicFlaw:
+class GoldenPathValidatorMonolithicFlawTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -332,7 +332,7 @@ class TestGoldenPathValidatorMonolithicFlaw:
             )
 
 
-class TestGoldenPathValidatorArchitecturalRecommendations:
+class GoldenPathValidatorArchitecturalRecommendationsTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

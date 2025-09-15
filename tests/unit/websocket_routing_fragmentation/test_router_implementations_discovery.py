@@ -26,7 +26,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestRouterImplementationDiscovery(SSotAsyncTestCase):
+class RouterImplementationDiscoveryTests(SSotAsyncTestCase):
     """Detect and validate MessageRouter implementation fragmentation."""
 
     def setUp(self) -> None:

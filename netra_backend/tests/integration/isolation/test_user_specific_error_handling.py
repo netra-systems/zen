@@ -34,7 +34,7 @@ from shared.types import UserID, ThreadID, RunID, RequestID
 from shared.id_generation import UnifiedIdGenerator
 
 
-class TestUserSpecificErrorHandling(BaseIntegrationTest):
+class UserSpecificErrorHandlingTests(BaseIntegrationTest):
     """Integration tests for user-specific error handling and isolation."""
 
     @pytest.fixture(autouse=True)

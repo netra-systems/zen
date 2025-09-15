@@ -44,7 +44,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
 @pytest.mark.gcp_staging
 @pytest.mark.error_recovery
 @pytest.mark.mission_critical
-class TestAdvancedErrorRecoveryE2E(SSotAsyncTestCase):
+class AdvancedErrorRecoveryE2ETests(SSotAsyncTestCase):
     """
     E2E tests for validating advanced error recovery scenarios in staging GCP.
 

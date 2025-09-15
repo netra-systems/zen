@@ -86,7 +86,7 @@ class WebSocketEventDeliveryContext:
             self.delivery_metrics = {}
 
 
-class TestAgentWebSocketEventDeliveryIntegration(SSotAsyncTestCase):
+class AgentWebSocketEventDeliveryIntegrationTests(SSotAsyncTestCase):
     """CRITICAL integration tests for agent WebSocket event delivery."""
 
     @pytest.fixture

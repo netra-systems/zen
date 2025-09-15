@@ -32,7 +32,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 @pytest.mark.integration
-class TestMessageRouterSSOTComplianceTracking(SSotAsyncTestCase):
+class MessageRouterSSOTComplianceTrackingTests(SSotAsyncTestCase):
     """Integration tests for MessageRouter SSOT compliance tracking with real services."""
 
     def setUp(self):

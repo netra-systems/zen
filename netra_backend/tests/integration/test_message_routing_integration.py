@@ -44,7 +44,7 @@ from netra_backend.app.models.user import User
 from netra_backend.app.models.thread import Thread, Message
 
 
-class TestMessageRoutingIntegration(BaseIntegrationTest):
+class MessageRoutingIntegrationTests(BaseIntegrationTest):
     """Test message routing and processing with real service integration."""
 
     @pytest.mark.integration

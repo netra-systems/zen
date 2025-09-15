@@ -36,7 +36,7 @@ from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider, Googl
 from auth_service.auth_core.auth_environment import get_auth_env
 from shared.isolated_environment import get_env
 
-class TestGoogleOAuthProviderInitialization(SSotBaseTestCase):
+class GoogleOAuthProviderInitializationTests(SSotBaseTestCase):
     """Test Google OAuth provider initialization and configuration."""
 
     def setup_method(self, method=None):
@@ -95,7 +95,7 @@ class TestGoogleOAuthProviderInitialization(SSotBaseTestCase):
                 with self.expect_exception(GoogleOAuthError, 'not configured for production'):
                     GoogleOAuthProvider()
 
-class TestGoogleOAuthProviderConfiguration(SSotBaseTestCase):
+class GoogleOAuthProviderConfigurationTests(SSotBaseTestCase):
     """Test Google OAuth provider configuration and validation."""
 
     def setup_method(self, method=None):
@@ -181,7 +181,7 @@ class TestGoogleOAuthProviderConfiguration(SSotBaseTestCase):
             assert 'redirect_uri' in status
         self.record_metric('configuration_status_retrieved', True)
 
-class TestGoogleOAuthProviderRedirectURI(SSotBaseTestCase):
+class GoogleOAuthProviderRedirectURITests(SSotBaseTestCase):
     """Test Google OAuth provider redirect URI functionality."""
 
     def setup_method(self, method=None):
@@ -223,7 +223,7 @@ class TestGoogleOAuthProviderRedirectURI(SSotBaseTestCase):
         assert uri1 == uri2
         self.record_metric('redirect_uri_consistent', True)
 
-class TestGoogleOAuthProviderAuthorizationURL(SSotBaseTestCase):
+class GoogleOAuthProviderAuthorizationURLTests(SSotBaseTestCase):
     """Test Google OAuth provider authorization URL generation."""
 
     def setup_method(self, method=None):
@@ -295,7 +295,7 @@ class TestGoogleOAuthProviderAuthorizationURL(SSotBaseTestCase):
                 provider.get_authorization_url(self.test_state)
         self.record_metric('auth_url_client_id_required', True)
 
-class TestGoogleOAuthProviderCodeExchange(SSotBaseTestCase):
+class GoogleOAuthProviderCodeExchangeTests(SSotBaseTestCase):
     """Test Google OAuth provider authorization code exchange."""
 
     def setup_method(self, method=None):
@@ -396,7 +396,7 @@ class TestGoogleOAuthProviderCodeExchange(SSotBaseTestCase):
                 provider.exchange_code_for_user_info('real-auth-code', self.test_state)
         self.record_metric('user_info_failure_handled', True)
 
-class TestGoogleOAuthProviderSelfCheck(SSotBaseTestCase):
+class GoogleOAuthProviderSelfCheckTests(SSotBaseTestCase):
     """Test Google OAuth provider self-check functionality."""
 
     def setup_method(self, method=None):
@@ -478,7 +478,7 @@ class TestGoogleOAuthProviderSelfCheck(SSotBaseTestCase):
                 assert client_id_prefix != self.client_id
         self.record_metric('client_id_privacy_protected', True)
 
-class TestGoogleOAuthProviderSecurity(SSotBaseTestCase):
+class GoogleOAuthProviderSecurityTests(SSotBaseTestCase):
     """Test Google OAuth provider security features."""
 
     def setup_method(self, method=None):
@@ -551,7 +551,7 @@ class TestGoogleOAuthProviderSecurity(SSotBaseTestCase):
                     pass
         self.record_metric('input_sanitization_tests', len(malicious_inputs))
 
-class TestGoogleOAuthProviderPerformance(SSotBaseTestCase):
+class GoogleOAuthProviderPerformanceTests(SSotBaseTestCase):
     """Test Google OAuth provider performance characteristics."""
 
     def setup_method(self, method=None):

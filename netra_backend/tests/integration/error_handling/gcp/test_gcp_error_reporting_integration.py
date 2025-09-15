@@ -33,7 +33,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 logger = logging.getLogger(__name__)
 
-class TestGCPErrorReportingIntegration(SSotBaseTestCase):
+class GCPErrorReportingIntegrationTests(SSotBaseTestCase):
     """
     INTEGRATION: GCP Error Reporting Integration Test Suite
     

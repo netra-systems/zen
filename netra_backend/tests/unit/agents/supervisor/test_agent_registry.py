@@ -25,7 +25,7 @@ import asyncio
 from unittest.mock import Mock, AsyncMock, patch
 
 
-class TestAgentRegistryInitialization:
+class AgentRegistryInitializationTests:
     """Test AgentRegistry initialization and basic setup."""
 
     def test_import_works(self):
@@ -112,7 +112,7 @@ class TestAgentRegistryInitialization:
         assert callable(child_manager_method), "Child manager method should be callable"
 
 
-class TestDefaultAgentRegistration:
+class DefaultAgentRegistrationTests:
     """Test default agent registration functionality."""
 
     def test_placeholder_test(self):
@@ -120,7 +120,7 @@ class TestDefaultAgentRegistration:
         assert True
 
 
-class TestFactoryPatternSupport:
+class FactoryPatternSupportTests:
     """Test factory pattern support for user isolation."""
 
     def test_placeholder_test(self):
@@ -128,7 +128,7 @@ class TestFactoryPatternSupport:
         assert True
 
 
-class TestWebSocketIntegration:
+class WebSocketIntegrationTests:
     """Test WebSocket manager and bridge integration with interface contract validation."""
 
     def test_set_websocket_manager_interface_contract(self):
@@ -237,7 +237,7 @@ class TestWebSocketIntegration:
         assert child_substitutable, "Child AgentRegistry should be substitutable for parent (LSP compliance)"
 
 
-class TestLegacyAgentRegistration:
+class LegacyAgentRegistrationTests:
     """Test legacy agent registration for backward compatibility."""
 
     def test_placeholder_test(self):
@@ -245,7 +245,7 @@ class TestLegacyAgentRegistration:
         assert True
 
 
-class TestAgentRetrievalMethods:
+class AgentRetrievalMethodsTests:
     """Test agent retrieval and listing methods."""
 
     def test_placeholder_test(self):
@@ -253,7 +253,7 @@ class TestAgentRetrievalMethods:
         assert True
 
 
-class TestRegistryHealthAndDiagnostics:
+class RegistryHealthAndDiagnosticsTests:
     """Test registry health monitoring and diagnostic methods."""
 
     def test_placeholder_test(self):
@@ -261,7 +261,7 @@ class TestRegistryHealthAndDiagnostics:
         assert True
 
 
-class TestThreadSafety:
+class ThreadSafetyTests:
     """Test thread safety for concurrent access."""
 
     def test_placeholder_test(self):
@@ -269,7 +269,7 @@ class TestThreadSafety:
         assert True
 
 
-class TestErrorHandlingAndValidation:
+class ErrorHandlingAndValidationTests:
     """Test error handling and validation mechanisms."""
 
     def test_placeholder_test(self):

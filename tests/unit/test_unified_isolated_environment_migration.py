@@ -15,7 +15,7 @@ from pathlib import Path
 from shared.isolated_environment import get_env, IsolatedEnvironment, ValidationResult, setenv, getenv, delenv
 
 @pytest.mark.unit
-class TestUnifiedIsolatedEnvironment:
+class UnifiedIsolatedEnvironmentTests:
     """Test the unified IsolatedEnvironment implementation."""
 
     @pytest.fixture
@@ -310,7 +310,7 @@ class TestUnifiedIsolatedEnvironment:
         assert 'DEBUG_TEST' in debug_info['tracked_sources']
 
 @pytest.mark.unit
-class TestBackwardsCompatibility:
+class BackwardsCompatibilityTests:
     """Test backwards compatibility with legacy interfaces."""
 
     def test_environment_validator_compatibility(self):
@@ -344,7 +344,7 @@ class TestBackwardsCompatibility:
         assert hasattr(env_manager, 'set')
 
 @pytest.mark.unit
-class TestErrorHandling:
+class ErrorHandlingTests:
     """Test error handling and edge cases."""
 
     def test_file_loading_errors(self):

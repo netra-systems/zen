@@ -46,7 +46,7 @@ from netra_backend.app.core.configuration.base import (
 from shared.database_url_builder import DatabaseURLBuilder
 
 
-class TestCrossServiceConfigValidationIntegration(BaseIntegrationTest):
+class CrossServiceConfigValidationIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for cross-service configuration validation patterns.
     

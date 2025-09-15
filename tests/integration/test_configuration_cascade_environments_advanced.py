@@ -69,7 +69,7 @@ class EnvironmentConfigurationTracker:
 @pytest.mark.integration
 @pytest.mark.requires_docker
 @pytest.mark.configuration_critical
-class TestConfigurationCascadeEnvironments(DockerTestBase):
+class ConfigurationCascadeEnvironmentsTests(DockerTestBase):
     """Integration Test 8: Configuration cascade testing across environments"""
 
     @pytest.fixture(autouse=True)

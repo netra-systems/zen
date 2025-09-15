@@ -40,7 +40,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator, TestId
 
 
 @pytest.mark.e2e
-class TestGoldenPathSsotIdIntegration(SSotAsyncTestCase):
+class GoldenPathSsotIdIntegrationTests(SSotAsyncTestCase):
     """E2E tests for Golden Path SSOT ID integration in GCP staging.
     
     These tests validate complete end-to-end Golden Path user flow

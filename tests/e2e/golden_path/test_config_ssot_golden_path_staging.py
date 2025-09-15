@@ -34,7 +34,7 @@ import os
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.e2e
-class TestConfigSSotGoldenPathStaging(SSotAsyncTestCase):
+class ConfigSSotGoldenPathStagingTests(SSotAsyncTestCase):
     """E2E test suite for Golden Path with SSOT configuration on staging."""
 
     @pytest.fixture(scope='class')
@@ -251,7 +251,7 @@ class TestConfigSSotGoldenPathStaging(SSotAsyncTestCase):
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.golden_path
-class TestGoldenPathConfigIntegration:
+class GoldenPathConfigIntegrationTests:
     """Integration test class for Golden Path configuration validation."""
 
     async def test_complete_golden_path_with_ssot_config(self):
@@ -262,7 +262,7 @@ class TestGoldenPathConfigIntegration:
         """
         if not os.getenv('STAGING_ACCESS_ENABLED'):
             pytest.skip('Staging access not enabled for this test run')
-        test_instance = TestConfigSSotGoldenPathStaging()
+        test_instance = ConfigSSotGoldenPathStagingTests()
         staging_config = {'base_url': 'https://backend.staging.netrasystems.ai', 'websocket_url': 'wss://backend.staging.netrasystems.ai/ws', 'health_url': 'https://backend.staging.netrasystems.ai/health', 'timeout': 30}
         test_credentials = {'email': 'test@netra.ai', 'password': 'test123'}
         try:

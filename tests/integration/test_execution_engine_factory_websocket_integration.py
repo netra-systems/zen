@@ -28,7 +28,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 
 @pytest.mark.integration
-class TestExecutionEngineFactoryWebSocketIntegration:
+class ExecutionEngineFactoryWebSocketIntegrationTests:
     """Test ExecutionEngineFactory WebSocket bridge integration patterns."""
 
     @pytest.fixture
@@ -217,7 +217,7 @@ class TestExecutionEngineFactoryWebSocketIntegration:
                 await factory.cleanup_engine(engine)
 
 @pytest.mark.integration
-class TestExecutionEngineFactoryWebSocketConfiguration:
+class ExecutionEngineFactoryWebSocketConfigurationTests:
     """Test ExecutionEngineFactory WebSocket configuration and setup."""
 
     @pytest.mark.asyncio
@@ -281,7 +281,7 @@ class TestExecutionEngineFactoryWebSocketConfiguration:
                 await factory.cleanup_engine(engine)
 
 @pytest.mark.integration
-class TestExecutionEngineFactoryWebSocketBusinessValue:
+class ExecutionEngineFactoryWebSocketBusinessValueTests:
     """Test ExecutionEngineFactory delivers WebSocket business value."""
 
     def test_factory_websocket_integration_enables_chat_business_value(self):

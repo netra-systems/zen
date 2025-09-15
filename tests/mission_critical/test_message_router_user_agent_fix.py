@@ -41,7 +41,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
-class TestUserAgentMessageTypes:
+class UserAgentMessageTypesTests:
     """Test suite to verify the fix for 'user' and 'agent' message types."""
     
     @pytest.mark.asyncio

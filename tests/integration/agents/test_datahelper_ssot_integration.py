@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
-class TestDataHelperSSotIntegration(SSotAsyncTestCase):
+class DataHelperSSotIntegrationTests(SSotAsyncTestCase):
     """Integration test for DataHelper agent with SSOT compliance through full stack."""
 
     def setup_method(self, method):

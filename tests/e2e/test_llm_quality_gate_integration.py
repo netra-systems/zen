@@ -29,7 +29,7 @@ from tests.e2e.agent_response_test_utilities import (
 @pytest.mark.integration
 @pytest.mark.real_llm
 @pytest.mark.e2e
-class TestLLMQualityGateIntegration:
+class LLMQualityGateIntegrationTests:
     """Test real LLM quality gate validation system."""
     
     @pytest.fixture

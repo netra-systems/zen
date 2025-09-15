@@ -15,7 +15,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestMiddlewareStackIntegration(SSotBaseTestCase):
+class MiddlewareStackIntegrationTests(SSotBaseTestCase):
     """Test complete middleware stack integration scenarios."""
     
     def setUp(self):

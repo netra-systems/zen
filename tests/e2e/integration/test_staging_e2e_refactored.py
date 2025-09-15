@@ -49,7 +49,7 @@ from tests.e2e.test_environment_config import (
 )
 
 
-class TestStagingE2ESuite:
+class StagingE2ESuiteTests:
     """Refactored staging E2E test suite with modular architecture."""
     
     def __init__(self):
@@ -105,7 +105,7 @@ async def staging_suite():
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.e2e
-class TestStagingSystemStartup:
+class StagingSystemStartupTests:
     """Test system startup and basic health validation."""
     
     @pytest.mark.e2e
@@ -139,7 +139,7 @@ class TestStagingSystemStartup:
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.e2e
-class TestWebSocketConnectivity:
+class WebSocketConnectivityTests:
     """Test WebSocket connectivity and authentication."""
     
     @pytest.mark.e2e
@@ -166,7 +166,7 @@ class TestWebSocketConnectivity:
 @pytest.mark.asyncio
 @pytest.mark.staging  
 @pytest.mark.e2e
-class TestMessageHandling:
+class MessageHandlingTests:
     """Test AI message handling and agent responses."""
     
     @pytest.mark.e2e
@@ -206,7 +206,7 @@ class TestMessageHandling:
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.e2e
-class TestSystemIntegration:
+class SystemIntegrationTests:
     """Test full system integration including CORS and loading."""
     
     @pytest.mark.e2e
@@ -241,7 +241,7 @@ class TestSystemIntegration:
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.e2e
-class TestOAuthAuthentication:
+class OAuthAuthenticationTests:
     """Test OAuth authentication flow and security."""
     
     @pytest.mark.e2e
@@ -277,7 +277,7 @@ class TestOAuthAuthentication:
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.e2e
-class TestComprehensiveStagingValidation:
+class ComprehensiveStagingValidationTests:
     """Comprehensive staging environment validation."""
     
     @pytest.mark.e2e
@@ -322,7 +322,7 @@ async def run_complete_staging_validation() -> Dict[str, Any]:
     suite = StagingE2ETestSuite()
     await suite.setup_environment()
     try:
-        validator = TestComprehensiveStagingValidation()
+        validator = ComprehensiveStagingValidationTests()
         return await validator.test_staging_environment_summary(suite)
     finally:
         await suite.cleanup_environment()

@@ -31,7 +31,7 @@ from typing import List, Dict, Any
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestStatePersistenceSSotCompliance(SSotBaseTestCase):
+class StatePersistenceSSotComplianceTests(SSotBaseTestCase):
     """Validates SSOT compliance for consolidated state persistence service."""
 
     def test_single_persistence_service_exists(self):
@@ -329,7 +329,7 @@ class TestStatePersistenceSSotCompliance(SSotBaseTestCase):
         )
 
 
-class TestStatePersistenceArchitecturalIntegrity(SSotBaseTestCase):
+class StatePersistenceArchitecturalIntegrityTests(SSotBaseTestCase):
     """Validates architectural integrity after SSOT consolidation."""
     
     def test_no_circular_dependencies(self):

@@ -608,7 +608,7 @@ class ProductionLeakReproducer:
         }
 
 
-class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
+class WebSocketProductionLeakScenariosTests(SSotAsyncTestCase):
     """Critical WebSocket production leak scenario reproduction tests."""
     
     def setup_method(self, method=None):

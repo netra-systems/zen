@@ -34,7 +34,7 @@ except ImportError as e:
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.cross_service
-class TestCrossServiceIdConsistency(SSotAsyncTestCase):
+class CrossServiceIdConsistencyTests(SSotAsyncTestCase):
     """
     Integration test suite for cross-service ID consistency validation.
 

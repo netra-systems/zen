@@ -25,7 +25,7 @@ import re
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDeprecationRegressionPrevention(SSotBaseTestCase):
+class DeprecationRegressionPreventionTests(SSotBaseTestCase):
     """Prevent regression of deprecated import patterns"""
     
     def setUp(self):

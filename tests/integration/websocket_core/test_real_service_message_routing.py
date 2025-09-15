@@ -20,7 +20,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.integration
-class TestRealServiceMessageRouting(SSotAsyncTestCase):
+class RealServiceMessageRoutingTests(SSotAsyncTestCase):
     """Test real service integration with MessageRouter routing."""
 
     def setUp(self):

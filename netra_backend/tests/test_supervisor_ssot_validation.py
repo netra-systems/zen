@@ -25,7 +25,7 @@ from netra_backend.app.core.serialization.unified_json_handler import backend_js
 from netra_backend.app.core.unified_error_handler import agent_error_handler
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestSSOTCompliance:
+class SSOTComplianceTests:
     """Test SSOT compliance for all fixed components."""
 
     def test_json_handling_in_observability(self):
@@ -118,7 +118,7 @@ class TestSSOTCompliance:
         params = list(sig.parameters.keys())
         assert 'context' in params, '_emit_thinking should accept context parameter'
 
-class TestIntegrationPatterns:
+class IntegrationPatternsTests:
     """Test integration patterns between components."""
 
     @pytest.mark.asyncio
@@ -151,7 +151,7 @@ class TestIntegrationPatterns:
         source = inspect.getsource(actions_agent.__class__)
         assert 'ErrorContext(' in source, 'ActionsToMeetGoalsSubAgent should create ErrorContext'
 
-class TestBackwardCompatibility:
+class BackwardCompatibilityTests:
     """Test that backward compatibility is maintained where needed."""
 
     def test_agents_still_function_without_context(self):

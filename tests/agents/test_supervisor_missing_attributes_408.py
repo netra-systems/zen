@@ -18,7 +18,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base.interface import ExecutionContext
 
-class TestSupervisorAgentMissingAttributes:
+class SupervisorAgentMissingAttributesTests:
     """Test validation that issue #408 missing attributes have been resolved."""
 
     def test_supervisor_consolidated_has_workflow_executor(self):
@@ -136,7 +136,7 @@ class TestSupervisorAgentMissingAttributes:
         assert hasattr(execution_context, 'parameters')
         assert hasattr(execution_context, 'metadata')
 
-class TestBackwardCompatibility:
+class BackwardCompatibilityTests:
     """Test that the changes maintain backward compatibility."""
 
     @pytest.mark.asyncio

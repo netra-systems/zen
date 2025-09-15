@@ -112,7 +112,7 @@ class MockWebSocketConnection:
         return self.messages_sent.copy()
 
 @pytest.mark.unit
-class TestLegacyConfigMarker:
+class LegacyConfigMarkerTests:
     """Test legacy configuration marking and tracking."""
 
     def test_identifies_legacy_variables(self):
@@ -149,7 +149,7 @@ class TestLegacyConfigMarker:
         assert isinstance(report['legacy_vars'], list)
 
 @pytest.mark.unit
-class TestConfigDependencyMap:
+class ConfigDependencyMapTests:
     """Test configuration dependency mapping and impact analysis."""
 
     def test_identifies_dependent_services(self):
@@ -181,7 +181,7 @@ class TestConfigDependencyMap:
         assert impact_level == ConfigImpactLevel.LOW
 
 @pytest.mark.unit
-class TestCrossServiceValidation:
+class CrossServiceValidationTests:
     """Test cross-service configuration validation."""
 
     def test_oauth_config_validation_staging(self):
@@ -219,7 +219,7 @@ class TestCrossServiceValidation:
             assert len(result['affected_services']) > 0
 
 @pytest.mark.unit
-class TestConfigRegressionPrevention:
+class ConfigRegressionPreventionTests:
     """Test the integrated configuration regression prevention system."""
 
     def test_oauth_regression_prevention_check(self):

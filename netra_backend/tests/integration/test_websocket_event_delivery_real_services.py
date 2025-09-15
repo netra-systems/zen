@@ -34,7 +34,7 @@ from test_framework.ssot.real_websocket_test_client import RealWebSocketTestClie
 
 
 @pytest.mark.integration
-class TestWebSocketEventDeliveryRealServices:
+class WebSocketEventDeliveryRealServicesTests:
     """Integration tests for WebSocket event delivery with real services."""
     
     @pytest.mark.asyncio

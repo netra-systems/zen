@@ -61,7 +61,7 @@ class ProtocolValidationResult:
         """Check if sent protocol matches expected format."""
         return self.protocol_sent == self.protocol_expected
 
-class TestWebSocketProtocolFormatDeploymentValidation(SSotAsyncTestCase):
+class WebSocketProtocolFormatDeploymentValidationTests(SSotAsyncTestCase):
     """
     Test WebSocket protocol format consistency during deployments.
     

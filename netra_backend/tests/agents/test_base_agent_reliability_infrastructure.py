@@ -83,7 +83,7 @@ class ReliabilityTestAgent(BaseAgent):
         self.execution_attempts = 0
 
 
-class TestBaseAgentReliabilityInfrastructure(SSotAsyncTestCase):
+class BaseAgentReliabilityInfrastructureTests(SSotAsyncTestCase):
     """Test BaseAgent reliability infrastructure and error handling."""
 
     def setup_method(self, method):

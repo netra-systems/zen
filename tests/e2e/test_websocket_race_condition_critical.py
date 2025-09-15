@@ -218,7 +218,7 @@ class RaceConditionWebSocketClient:
         return thread_id
 
 @pytest.mark.e2e
-class TestWebSocketRaceConditionCritical:
+class WebSocketRaceConditionCriticalTests:
     """
     CRITICAL E2E test suite for WebSocket race condition bug.
     

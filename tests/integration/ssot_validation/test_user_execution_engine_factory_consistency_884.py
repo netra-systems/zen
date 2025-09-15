@@ -34,7 +34,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.integration
-class TestUserExecutionEngineFactoryConsistency884(SSotAsyncTestCase):
+class UserExecutionEngineFactoryConsistency884Tests(SSotAsyncTestCase):
     """
     Integration Test: Validate consolidated factory creates consistent UserExecutionEngine instances
     
@@ -141,12 +141,12 @@ class TestUserExecutionEngineFactoryConsistency884(SSotAsyncTestCase):
                     user_context_source = "core.user_execution_context"  
                 except ImportError:
                     # Create minimal context for testing if not found
-                    class TestUserExecutionContext:
+                    class UserExecutionContextTests:
                         def __init__(self, user_id: str, session_id: str, **kwargs):
                             self.user_id = user_id
                             self.session_id = session_id
                             self.metadata = kwargs
-                    UserExecutionContext = TestUserExecutionContext
+                    UserExecutionContext = UserExecutionContextTests
                     user_context_source = "test_fallback"
             
             self.record_metric("user_context_source", user_context_source)

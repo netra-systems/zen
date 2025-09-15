@@ -55,7 +55,7 @@ class MemoryLeakTestResult:
     recommendations: List[str] = field(default_factory=list)
 
 
-class TestMemoryUsageLeakDetection(BaseIntegrationTest):
+class MemoryUsageLeakDetectionTests(BaseIntegrationTest):
     """Test memory usage patterns and detect memory leaks."""
     
     def _get_memory_snapshot(self, label: str = "") -> MemorySnapshot:

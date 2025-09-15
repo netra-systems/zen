@@ -88,7 +88,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.mission_critical
-class TestLLMManagerGoldenPathProtection(SSotAsyncTestCase):
+class LLMManagerGoldenPathProtectionTests(SSotAsyncTestCase):
     """Test 1: Golden Path LLM Reliability E2E - Complete AI response validation"""
     
     async def test_golden_path_llm_reliability_e2e(self):

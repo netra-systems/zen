@@ -19,7 +19,7 @@ from netra_backend.app.config import get_config
 
 from netra_backend.app.services.session_service import SessionService
 
-class TestSessionCleanupL3:
+class SessionCleanupL3Tests:
     """Test session cleanup scenarios"""
 
     @pytest.mark.asyncio

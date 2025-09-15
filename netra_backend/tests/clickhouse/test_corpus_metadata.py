@@ -25,7 +25,7 @@ CorpusService,
 CorpusStatus,
 )
 
-class TestMetadataTracking:
+class MetadataTrackingTests:
     """Test metadata tracking throughout corpus lifecycle"""
 
     @pytest.mark.asyncio
@@ -80,7 +80,7 @@ class TestMetadataTracking:
             assert metadata["version"] == 2
             assert "updated_at" in metadata
 
-            class TestErrorRecovery:
+            class ErrorRecoveryTests:
                 """Test error recovery mechanisms"""
 
                 @pytest.mark.asyncio

@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 @pytest.mark.integration
-class TestAgentPipelineMockIntegration(SSotBaseTestCase):
+class AgentPipelineMockIntegrationTests(SSotBaseTestCase):
     """
     Integration test suite validating SSOT agent mock pipeline functionality.
     

@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 from netra_backend.app.db.clickhouse import get_clickhouse_config, _extract_clickhouse_config, _get_unified_config
 from test_framework.base_integration_test import BaseIntegrationTest
 
-class TestClickHouseConfigurationUnit(BaseIntegrationTest):
+class ClickHouseConfigurationUnitTests(BaseIntegrationTest):
     """Test ClickHouse configuration management unit functionality."""
 
     @pytest.mark.unit
@@ -105,7 +105,7 @@ class TestClickHouseConfigurationUnit(BaseIntegrationTest):
                     _extract_clickhouse_config(mock_config)
                 assert 'CLICKHOUSE_URL is mandatory in production' in str(exc_info.value)
 
-class TestClickHouseConfigurationSecrets(BaseIntegrationTest):
+class ClickHouseConfigurationSecretsTests(BaseIntegrationTest):
     """Test ClickHouse configuration with secrets management."""
 
     @pytest.mark.unit
@@ -145,7 +145,7 @@ class TestClickHouseConfigurationSecrets(BaseIntegrationTest):
                         assert config.password == 'url_password'
                         mock_logger.warning.assert_called()
 
-class TestClickHouseConfigurationValidation(BaseIntegrationTest):
+class ClickHouseConfigurationValidationTests(BaseIntegrationTest):
     """Test ClickHouse configuration validation and error handling."""
 
     @pytest.mark.unit
@@ -186,7 +186,7 @@ class TestClickHouseConfigurationValidation(BaseIntegrationTest):
                 assert config.database == 'db', 'Database from URL'
                 assert config.secure is True, 'Default secure for cloud'
 
-class TestClickHouseConfigurationIntegration(BaseIntegrationTest):
+class ClickHouseConfigurationIntegrationTests(BaseIntegrationTest):
     """Test configuration integration with unified config system."""
 
     @pytest.mark.unit

@@ -32,7 +32,7 @@ from netra_backend.app.factories.execution_factory import ExecutionFactory
 from netra_backend.app.core.user_execution_context import UserExecutionContext
 
 
-class TestGoldenPathFactoryPatternMismatches(BaseIntegrationTest):
+class GoldenPathFactoryPatternMismatchesTests(BaseIntegrationTest):
     """Test factory pattern mismatches causing Golden Path failures."""
 
     @pytest.mark.integration

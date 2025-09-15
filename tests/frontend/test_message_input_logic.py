@@ -14,7 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.frontend
-class TestMessageInputLogic(SSotBaseTestCase):
+class MessageInputLogicTests(SSotBaseTestCase):
     """Test the message input logic for determining message types."""
     
     def test_check_if_first_message_no_thread_id(self):

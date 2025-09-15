@@ -112,7 +112,7 @@ class RealWebSocketTestClient:
         """Clear received message buffer."""
         self.received_messages.clear()
 
-class TestWebSocketAgentEventIntegration(SSotAsyncTestCase):
+class WebSocketAgentEventIntegrationTests(SSotAsyncTestCase):
     """
     Comprehensive tests for WebSocket agent event integration.
 

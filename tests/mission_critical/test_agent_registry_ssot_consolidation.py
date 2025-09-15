@@ -27,7 +27,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry as 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry as AdvancedRegistry
 
 
-class TestAgentRegistrySSoTConsolidation(SSotAsyncTestCase):
+class AgentRegistrySSoTConsolidationTests(SSotAsyncTestCase):
     """Critical P0 tests for AgentRegistry SSOT consolidation validation"""
     
     def setup_method(self, method=None):

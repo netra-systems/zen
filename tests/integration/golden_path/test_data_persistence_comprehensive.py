@@ -83,7 +83,7 @@ except ImportError:
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.asyncio
-class TestDataPersistenceComprehensive(
+class DataPersistenceComprehensiveTests(
     DatabaseIntegrationTest, 
     CacheIntegrationTest, 
     ServiceOrchestrationIntegrationTest

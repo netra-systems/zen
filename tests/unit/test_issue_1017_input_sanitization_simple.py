@@ -21,7 +21,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
 @pytest.mark.unit
-class TestIssue1017InputSanitizationSimple(SSotBaseTestCase):
+class Issue1017InputSanitizationSimpleTests(SSotBaseTestCase):
     """
     Simple security vulnerability tests for Issue #1017.
 

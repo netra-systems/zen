@@ -80,7 +80,7 @@ class ApiRequestContext:
     method: str
     expected_session_reuse: bool = True
 
-class TestApiRouteContextCreationRegression(SSotBaseTestCase):
+class ApiRouteContextCreationRegressionTests(SSotBaseTestCase):
     """Integration test for API route context creation regression prevention.
     
     This test suite validates that API routes properly maintain session continuity

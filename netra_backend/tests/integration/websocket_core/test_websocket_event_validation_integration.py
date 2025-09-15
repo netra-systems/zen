@@ -51,7 +51,7 @@ except ImportError as e:
     pytest.skip(f"Validation test components not available: {e}", allow_module_level=True)
 
 
-class TestWebSocketEventValidationIntegration(BaseIntegrationTest):
+class WebSocketEventValidationIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket event validation and security."""
 
     async def async_setup(self):

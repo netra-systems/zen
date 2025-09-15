@@ -44,7 +44,7 @@ from shared.isolated_environment import IsolatedEnvironment
 logger = logging.getLogger(__name__)
 
 
-class TestAuthServiceCore:
+class AuthServiceCoreTests:
     """
     Core AuthService functionality tests with real instances
     No mocks - uses real database, real password hashing, real JWT operations
@@ -76,7 +76,7 @@ class TestAuthServiceCore:
             await self.service.redis_client.flushdb()
 
 
-class TestAuthServiceInitialization(TestAuthServiceCore):
+class AuthServiceInitializationTests(AuthServiceCoreTests):
     """Test AuthService initialization and setup"""
     
     def test_auth_service_init_creates_real_instances(self):
@@ -121,7 +121,7 @@ class TestAuthServiceInitialization(TestAuthServiceCore):
         assert jwt_handler.refresh_expiry > 0
 
 
-class TestAuthServiceUserAuthentication(TestAuthServiceCore):
+class AuthServiceUserAuthenticationTests(AuthServiceCoreTests):
     """Test core user authentication functionality"""
     
     @pytest.mark.asyncio
@@ -205,7 +205,7 @@ class TestAuthServiceUserAuthentication(TestAuthServiceCore):
         assert user_data["name"] == "Dev User"
 
 
-class TestAuthServiceUserCreation(TestAuthServiceCore):
+class AuthServiceUserCreationTests(AuthServiceCoreTests):
     """Test user creation functionality with validation"""
     
     @pytest.mark.asyncio
@@ -290,7 +290,7 @@ class TestAuthServiceUserCreation(TestAuthServiceCore):
         assert self.test_email in service._test_users
 
 
-class TestAuthServicePasswordSecurity(TestAuthServiceCore):
+class AuthServicePasswordSecurityTests(AuthServiceCoreTests):
     """Test password security functions"""
     
     @pytest.mark.asyncio
@@ -367,7 +367,7 @@ class TestAuthServicePasswordSecurity(TestAuthServiceCore):
                 assert is_valid is False, f"{description}: {message}"
 
 
-class TestAuthServiceTokenOperations(TestAuthServiceCore):
+class AuthServiceTokenOperationsTests(AuthServiceCoreTests):
     """Test token creation and validation"""
     
     @pytest.mark.asyncio
@@ -454,7 +454,7 @@ class TestAuthServiceTokenOperations(TestAuthServiceCore):
         assert payload_after_blacklist is None or await self.service.is_token_blacklisted(token)
 
 
-class TestAuthServiceLoginFlow(TestAuthServiceCore):
+class AuthServiceLoginFlowTests(AuthServiceCoreTests):
     """Test complete login flow"""
     
     @pytest.mark.asyncio
@@ -520,7 +520,7 @@ class TestAuthServiceLoginFlow(TestAuthServiceCore):
             pass
 
 
-class TestAuthServiceLogoutFlow(TestAuthServiceCore):
+class AuthServiceLogoutFlowTests(AuthServiceCoreTests):
     """Test logout functionality"""
     
     @pytest.mark.asyncio
@@ -563,7 +563,7 @@ class TestAuthServiceLogoutFlow(TestAuthServiceCore):
         assert success is True or success is False
 
 
-class TestAuthServiceSessionManagement(TestAuthServiceCore):
+class AuthServiceSessionManagementTests(AuthServiceCoreTests):
     """Test session management functionality"""
     
     def test_create_session_generates_valid_session(self):
@@ -630,7 +630,7 @@ class TestAuthServiceSessionManagement(TestAuthServiceCore):
         assert other_session in self.service._sessions
 
 
-class TestAuthServiceCircuitBreaker(TestAuthServiceCore):
+class AuthServiceCircuitBreakerTests(AuthServiceCoreTests):
     """Test circuit breaker functionality"""
     
     def test_circuit_breaker_initial_state_is_closed(self):
@@ -718,7 +718,7 @@ class TestAuthServiceCircuitBreaker(TestAuthServiceCore):
         assert self.service._is_circuit_breaker_open(service2) is False
 
 
-class TestAuthServiceEmailValidation(TestAuthServiceCore):
+class AuthServiceEmailValidationTests(AuthServiceCoreTests):
     """Test email validation functionality"""
     
     def test_validate_email_with_valid_emails_succeeds(self):
@@ -758,7 +758,7 @@ class TestAuthServiceEmailValidation(TestAuthServiceCore):
             assert is_valid is False, f"Should be invalid: {email}"
 
 
-class TestAuthServicePasswordResetFlow(TestAuthServiceCore):
+class AuthServicePasswordResetFlowTests(AuthServiceCoreTests):
     """Test password reset functionality"""
     
     @pytest.mark.asyncio
@@ -801,7 +801,7 @@ class TestAuthServicePasswordResetFlow(TestAuthServiceCore):
         assert response is not None
 
 
-class TestAuthServiceConcurrencyAndRaceConditions(TestAuthServiceCore):
+class AuthServiceConcurrencyAndRaceConditionsTests(AuthServiceCoreTests):
     """Test concurrent operations and race condition handling"""
     
     @pytest.mark.asyncio
@@ -891,7 +891,7 @@ class TestAuthServiceConcurrencyAndRaceConditions(TestAuthServiceCore):
             assert session_id in self.service._sessions
 
 
-class TestAuthServiceErrorHandlingAndBoundaryConditions(TestAuthServiceCore):
+class AuthServiceErrorHandlingAndBoundaryConditionsTests(AuthServiceCoreTests):
     """Test error handling and boundary conditions"""
     
     @pytest.mark.asyncio

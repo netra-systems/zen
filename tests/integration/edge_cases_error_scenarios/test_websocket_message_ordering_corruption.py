@@ -27,7 +27,7 @@ from test_framework.real_services import get_real_services
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketMessageOrderingCorruption(BaseIntegrationTest):
+class WebSocketMessageOrderingCorruptionTests(BaseIntegrationTest):
     """Test WebSocket message ordering and corruption scenarios."""
     
     @pytest.mark.integration

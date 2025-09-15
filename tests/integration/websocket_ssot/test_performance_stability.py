@@ -67,7 +67,7 @@ class PerformanceMetrics:
 
 
 @pytest.mark.integration
-class TestWebSocketManagerPerformanceStability(SSotAsyncTestCase):
+class WebSocketManagerPerformanceStabilityTests(SSotAsyncTestCase):
     """
     Tests to prove WebSocket manager performance and stability violations exist.
     

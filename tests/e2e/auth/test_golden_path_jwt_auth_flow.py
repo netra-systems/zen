@@ -76,7 +76,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.e2e
-class TestGoldenPathJWTAuthFlow(E2EAuthenticatedTestCase):
+class GoldenPathJWTAuthFlowTests(E2EAuthenticatedTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

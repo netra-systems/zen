@@ -48,7 +48,7 @@ from shared.isolated_environment import get_env
 from shared.jwt_secret_manager import get_unified_jwt_secret
 
 
-class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
+class WebSocketJWTAuthenticationIntegrationTests(BaseIntegrationTest):
     """
     Integration test class for WebSocket JWT authentication.
     

@@ -30,7 +30,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.websocket_core.supervisor_factory import get_websocket_scoped_supervisor
 from netra_backend.app.core.supervisor_factory import create_supervisor_core
 
-class TestWebSocketSupervisorInterfaceContracts:
+class WebSocketSupervisorInterfaceContractsTests:
     """
     Interface contract validation tests that specifically target WHY #2 
     from the Five Whys analysis - preventing interface drift between

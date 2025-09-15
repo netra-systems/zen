@@ -39,7 +39,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, create_authenticated_user_context
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestWebSocketThreadStateCoordination(BaseIntegrationTest):
+class WebSocketThreadStateCoordinationTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket connection state machine coordination with thread operations.
     

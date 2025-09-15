@@ -107,7 +107,7 @@ def circuit_monitor():
 
 
 @pytest.mark.e2e
-class TestRealSystemResourceMonitoring:
+class RealSystemResourceMonitoringTests:
     """Test real system resource monitoring - NO MOCKS - BVJ: Enterprise SLA protection"""
 
     @pytest.mark.asyncio
@@ -239,7 +239,7 @@ class TestRealSystemResourceMonitoring:
 
 
 @pytest.mark.e2e
-class TestRealServiceDegradation:
+class RealServiceDegradationTests:
     """Test real service degradation scenarios - NO AsyncNone MOCKS"""
 
     @pytest.mark.asyncio
@@ -359,7 +359,7 @@ class TestRealServiceDegradation:
 
 
 @pytest.mark.e2e
-class TestRealCircuitBreakerIntegration:
+class RealCircuitBreakerIntegrationTests:
     """Test circuit breaker integration with REAL circuit monitoring"""
 
     @pytest.mark.asyncio
@@ -470,7 +470,7 @@ class TestRealCircuitBreakerIntegration:
 
 
 @pytest.mark.e2e
-class TestBusinessCriticalScenarios:
+class BusinessCriticalScenariosTests:
     """Test business-critical scenarios with REAL system conditions"""
 
     @pytest.mark.asyncio
@@ -632,7 +632,7 @@ class TestBusinessCriticalScenarios:
 
 # Business Critical Test Validation
 @pytest.mark.e2e
-class TestFallbackBusinessValidation:
+class FallbackBusinessValidationTests:
     """Validate fallback mechanisms deliver business value under real conditions"""
 
     def test_fallback_configuration_business_alignment(self):

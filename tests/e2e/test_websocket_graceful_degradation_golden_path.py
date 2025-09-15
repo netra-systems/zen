@@ -73,7 +73,7 @@ class MockAppWithDegradedServices:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestWebSocketGracefulDegradationE2E:
+class WebSocketGracefulDegradationE2ETests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

@@ -38,7 +38,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 
-class TestGcpDatabaseConnectivityIssue1263(SSotAsyncTestCase):
+class GcpDatabaseConnectivityIssue1263Tests(SSotAsyncTestCase):
     """
     Integration tests for Issue #1263 - GCP Database connectivity and timeout issues.
 

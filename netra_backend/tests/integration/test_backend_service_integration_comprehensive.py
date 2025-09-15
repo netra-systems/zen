@@ -112,7 +112,7 @@ class BackendServiceTestContext:
     environment: IsolatedEnvironment
 
 
-class TestBackendServiceIntegrationComprehensive(BaseIntegrationTest):
+class BackendServiceIntegrationComprehensiveTests(BaseIntegrationTest):
     """Comprehensive integration test suite for backend service integration with real services."""
     
     def setup_method(self):

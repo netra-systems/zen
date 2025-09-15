@@ -96,7 +96,7 @@ class RecoveryResult:
     user_experience_maintained: bool
     errors: List[str]
 
-class TestAgentErrorRecoveryWorkflows(SSotAsyncTestCase):
+class AgentErrorRecoveryWorkflowsTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Agent Error Recovery Workflows.
 

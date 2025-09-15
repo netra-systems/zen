@@ -88,7 +88,7 @@ class IsolationTestResult:
     memory_isolation_maintained: bool = True
     execution_time: float = 0.0
 
-class TestMultiUserMessageIsolationIntegration(SSotAsyncTestCase):
+class MultiUserMessageIsolationIntegrationTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Multi-User Message Isolation.
 

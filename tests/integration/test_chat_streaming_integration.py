@@ -88,7 +88,7 @@ async def streaming_client(test_client: AsyncClient, jwt_token: str) -> Streamin
 
 
 @pytest.mark.integration
-class TestChatStreaming:
+class ChatStreamingTests:
     """Test suite for chat streaming functionality."""
     
     async def test_chat_stream_basic_flow(self, streaming_client: StreamingTestClient):
@@ -254,7 +254,7 @@ class TestChatStreaming:
 
 
 @pytest.mark.integration
-class TestAgentLifecycleControl:
+class AgentLifecycleControlTests:
     """Test suite for agent lifecycle control endpoints."""
     
     async def test_agent_start_endpoint(self, test_client: AsyncClient, jwt_token: str):
@@ -334,7 +334,7 @@ class TestAgentLifecycleControl:
 
 
 @pytest.mark.integration
-class TestHealthChecks:
+class HealthChecksTests:
     """Test suite for health check endpoints."""
     
     async def test_messages_health_endpoint(self, test_client: AsyncClient):

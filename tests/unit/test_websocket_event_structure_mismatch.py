@@ -18,7 +18,7 @@ from netra_backend.app.websocket_core.event_validator import (
 
 
 @pytest.mark.unit
-class TestWebSocketEventStructureMismatch:
+class WebSocketEventStructureMismatchTests:
     """Test cases that demonstrate the event structure mismatch issue."""
 
     def test_tool_executing_event_flat_structure_expected(self):
@@ -219,7 +219,7 @@ class TestWebSocketEventStructureMismatch:
 
 
 @pytest.mark.unit
-class TestWebSocketEventDeliveryFormat:
+class WebSocketEventDeliveryFormatTests:
     """Test the format of events as they would be delivered via WebSocket."""
 
     def test_websocket_manager_event_format_compatibility(self):
@@ -298,7 +298,7 @@ class TestWebSocketEventDeliveryFormat:
 
 
 @pytest.mark.unit
-class TestEventValidatorSchemaEnforcement:
+class EventValidatorSchemaEnforcementTests:
     """Test that the event validator properly enforces schema requirements."""
 
     def test_payload_schema_enforcement(self):

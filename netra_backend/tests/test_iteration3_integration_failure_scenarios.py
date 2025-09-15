@@ -20,7 +20,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.services.database_env_service import DatabaseEnvironmentValidator
 
 
-class TestIterationThreeIntegrationFailures:
+class IterationThreeIntegrationFailuresTests:
     """Tests that demonstrate how all three issues interact and compound"""
     
     def test_health_check_fails_due_to_password_corruption_and_missing_methods(self):
@@ -275,7 +275,7 @@ class TestIterationThreeIntegrationFailures:
         return errors
 
 
-class TestSystemRecoveryBlockedByPersistentIssues:
+class SystemRecoveryBlockedByPersistentIssuesTests:
     """Tests showing how persistent issues block system recovery"""
     
     def test_recovery_mechanisms_fail_due_to_compound_issues(self):
@@ -368,7 +368,7 @@ class TestSystemRecoveryBlockedByPersistentIssues:
         raise AttributeError("FailsafeSystemManager not implemented")
 
 
-class TestDeploymentValidationForAllThreeIssues:
+class DeploymentValidationForAllThreeIssuesTests:
     """Tests for comprehensive deployment validation that catches all three issues"""
     
     def test_pre_deployment_validation_catches_all_issues(self):

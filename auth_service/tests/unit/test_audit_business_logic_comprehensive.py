@@ -28,7 +28,7 @@ from auth_service.auth_core.audit.audit_business_logic import (
 from netra_backend.app.schemas.tenant import SubscriptionTier
 
 
-class TestAuditBusinessLogic(SSotBaseTestCase):
+class AuditBusinessLogicTests(SSotBaseTestCase):
     """Comprehensive unit tests for audit business logic."""
 
     def setUp(self):
@@ -447,7 +447,7 @@ class TestAuditBusinessLogic(SSotBaseTestCase):
         self.assertIn("enterprise_user_456", result.event_id)
 
 
-class TestAuditEventResult(SSotBaseTestCase):
+class AuditEventResultTests(SSotBaseTestCase):
     """Test the AuditEventResult dataclass."""
 
     def test_audit_event_result_creation(self):
@@ -483,7 +483,7 @@ class TestAuditEventResult(SSotBaseTestCase):
         self.assertEqual(result.compliance_tags, [])
 
 
-class TestAuditRequirement(SSotBaseTestCase):
+class AuditRequirementTests(SSotBaseTestCase):
     """Test the AuditRequirement dataclass."""
 
     def test_audit_requirement_creation(self):
@@ -518,7 +518,7 @@ class TestAuditRequirement(SSotBaseTestCase):
         self.assertEqual(requirement.compliance_flags, [])
 
 
-class TestAuditEventType(SSotBaseTestCase):
+class AuditEventTypeTests(SSotBaseTestCase):
     """Test the AuditEventType enum."""
 
     def test_audit_event_type_values(self):
@@ -541,7 +541,7 @@ class TestAuditEventType(SSotBaseTestCase):
             self.assertEqual(event_type.value, enum_value)
 
 
-class TestAuditSeverity(SSotBaseTestCase):
+class AuditSeverityTests(SSotBaseTestCase):
     """Test the AuditSeverity enum."""
 
     def test_audit_severity_values(self):

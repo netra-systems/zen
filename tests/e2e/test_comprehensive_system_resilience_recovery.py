@@ -215,7 +215,7 @@ class ResilienceTestConfig:
     preserve_data_integrity: bool = True
 
 
-class TestSystemResilienceRecoveryer:
+class SystemResilienceRecoveryerTests:
     """Comprehensive system resilience and recovery tester."""
     
     def __init__(self, config: ResilienceTestConfig):
@@ -1485,7 +1485,7 @@ class TestSystemResilienceRecoveryer:
 
 @pytest.mark.e2e
 @pytest.mark.asyncio
-class TestComprehensiveSystemResilienceRecovery:
+class ComprehensiveSystemResilienceRecoveryTests:
     """Comprehensive system resilience and recovery test suite."""
     
     @pytest.fixture

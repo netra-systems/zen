@@ -58,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class TestStartupResult:
+class StartupResultTests:
     """Results from startup testing."""
     success: bool
     startup_time: float
@@ -82,7 +82,7 @@ class ServiceConnectivityResult:
     errors: List[str]
 
 
-class TestDevLauncherStartuper:
+class DevLauncherStartuperTests:
     """
     Comprehensive dev launcher startup tester.
     

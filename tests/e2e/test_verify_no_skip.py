@@ -10,7 +10,7 @@ import pytest
 from shared.isolated_environment import get_env
 
 
-class TestE2ENoSkip:
+class E2ENoSkipTests:
     """Verify E2E tests are not being skipped."""
     
     def test_e2e_environment_enabled(self):

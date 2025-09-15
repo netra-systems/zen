@@ -51,7 +51,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
-class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
+class AgentExecutionToolDispatcherReproductionTests(BaseIntegrationTest):
     """Reproduce the exact agent execution and tool dispatcher failures identified in analysis."""
     
     def setup_method(self):

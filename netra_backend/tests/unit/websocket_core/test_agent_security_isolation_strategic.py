@@ -41,7 +41,7 @@ class SecurityTestUser:
     received_messages: List[Dict] = field(default_factory=list)
     sensitive_data: Set[str] = field(default_factory=set)
 
-class TestAgentSecurityIsolationStrategic(SSotAsyncTestCase):
+class AgentSecurityIsolationStrategicTests(SSotAsyncTestCase):
     """
     Strategic unit tests for advanced security scenarios in multi-user agent systems.
     

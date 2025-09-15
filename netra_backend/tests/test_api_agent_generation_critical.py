@@ -59,7 +59,7 @@ from typing import Any, Dict
 
 import pytest
 
-class TestAPIAgentGenerationCritical:
+class APIAgentGenerationCriticalTests:
     """Critical agent and generation API endpoint tests."""
     @pytest.mark.asyncio
     async def test_agent_query_endpoint(self):

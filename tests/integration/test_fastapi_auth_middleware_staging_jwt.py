@@ -15,7 +15,7 @@ from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.integration
-class TestFastAPIAuthMiddlewareJWTStaging(SSotAsyncTestCase):
+class FastAPIAuthMiddlewareJWTStagingTests(SSotAsyncTestCase):
     """Integration tests for FastAPI Auth Middleware JWT configuration in staging."""
 
     def setUp(self):

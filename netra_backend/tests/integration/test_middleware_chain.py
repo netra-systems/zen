@@ -19,7 +19,7 @@ from netra_backend.app.middleware.logging_middleware import LoggingMiddleware
 import asyncio
 
 
-class TestMiddlewareChain:
+class MiddlewareChainTests:
     """Test suite for middleware chain integration."""
 
     @pytest.fixture

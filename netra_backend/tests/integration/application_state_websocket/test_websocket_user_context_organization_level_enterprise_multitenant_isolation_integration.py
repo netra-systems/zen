@@ -621,7 +621,7 @@ class EnterpriseMultiTenantIsolationValidator:
         return report
 
 
-class TestWebSocketOrganizationLevelEnterpriseIsolation(BaseIntegrationTest):
+class WebSocketOrganizationLevelEnterpriseIsolationTests(BaseIntegrationTest):
     """
     Integration test for organization-level isolation in enterprise multi-tenant scenarios.
     

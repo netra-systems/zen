@@ -30,7 +30,7 @@ from netra_backend.app.core.config import get_config
 
 
 @pytest.mark.integration
-class TestAgentExecutionConcurrencyLimits(BaseIntegrationTest):
+class AgentExecutionConcurrencyLimitsTests(BaseIntegrationTest):
     """
     Test concurrent agent execution boundary conditions and user isolation.
     

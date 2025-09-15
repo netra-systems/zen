@@ -110,7 +110,7 @@ def mock_agent_class():
             return instance
     return MockAgent
 
-class TestAgentInstanceFactoryInitialization(SSotBaseTestCase):
+class AgentInstanceFactoryInitializationTests(SSotBaseTestCase):
     """Test AgentInstanceFactory initialization and configuration."""
 
     def test_factory_basic_initialization(self):
@@ -177,7 +177,7 @@ class TestAgentInstanceFactoryInitialization(SSotBaseTestCase):
         assert factory._websocket_bridge == mock_websocket_bridge
         assert factory._llm_manager == mock_llm_manager
 
-class TestUserExecutionContextCreationAndIsolation(SSotBaseTestCase):
+class UserExecutionContextCreationAndIsolationTests(SSotBaseTestCase):
     """Test user execution context creation with complete isolation."""
 
     @pytest.mark.asyncio
@@ -261,7 +261,7 @@ class TestUserExecutionContextCreationAndIsolation(SSotBaseTestCase):
         assert context_id not in factory._active_contexts
         assert factory._factory_metrics['active_contexts'] == 0
 
-class TestUserWebSocketEmitterIsolation(SSotBaseTestCase):
+class UserWebSocketEmitterIsolationTests(SSotBaseTestCase):
     """Test UserWebSocketEmitter provides complete per-user isolation."""
 
     def test_user_websocket_emitter_initialization(self, mock_websocket_bridge):
@@ -380,7 +380,7 @@ class TestUserWebSocketEmitterIsolation(SSotBaseTestCase):
         assert emitter2.user_id == 'user2'
         assert emitter3.user_id == 'user3'
 
-class TestAgentInstanceCreationWithUserIsolation(SSotBaseTestCase):
+class AgentInstanceCreationWithUserIsolationTests(SSotBaseTestCase):
     """Test agent instance creation maintains complete user isolation."""
 
     @pytest.mark.asyncio
@@ -453,7 +453,7 @@ class TestAgentInstanceCreationWithUserIsolation(SSotBaseTestCase):
                     assert agent.user_context.user_id != other_agent.user_context.user_id
                     assert agent.user_context.run_id != other_agent.user_context.run_id
 
-class TestUserContextCleanupAndResourceManagement(SSotBaseTestCase):
+class UserContextCleanupAndResourceManagementTests(SSotBaseTestCase):
     """Test proper cleanup and resource management per user context."""
 
     @pytest.mark.asyncio
@@ -534,7 +534,7 @@ class TestUserContextCleanupAndResourceManagement(SSotBaseTestCase):
         assert factory._factory_metrics['active_contexts'] == 0
         assert factory._factory_metrics['total_contexts_cleaned'] == len(contexts)
 
-class TestFactoryPerformanceMetricsAndMonitoring(SSotBaseTestCase):
+class FactoryPerformanceMetricsAndMonitoringTests(SSotBaseTestCase):
     """Test factory performance metrics and monitoring capabilities."""
 
     def test_factory_metrics_initialization(self):
@@ -603,7 +603,7 @@ class TestFactoryPerformanceMetricsAndMonitoring(SSotBaseTestCase):
         assert factory._factory_metrics['active_contexts'] == 0
         assert factory._factory_metrics['total_contexts_cleaned'] == 0
 
-class TestUserSemaphoreAndConcurrencyControl(SSotBaseTestCase):
+class UserSemaphoreAndConcurrencyControlTests(SSotBaseTestCase):
     """Test per-user semaphore and concurrency control mechanisms."""
 
     @pytest.mark.asyncio

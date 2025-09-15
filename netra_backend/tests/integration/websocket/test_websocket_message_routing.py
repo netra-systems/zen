@@ -45,7 +45,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, E2EAuthC
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketMessageRouting(BaseIntegrationTest):
+class WebSocketMessageRoutingTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket message routing and delivery.
     

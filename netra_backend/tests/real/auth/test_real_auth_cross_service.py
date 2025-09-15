@@ -33,7 +33,7 @@ from netra_backend.app.db.models_user import User
 from netra_backend.app.core.database import get_database_session
 
 
-class TestRealAuthCrossService:
+class RealAuthCrossServiceTests:
     """Test cross-service authentication with real services"""
 
     @pytest.fixture(autouse=True)

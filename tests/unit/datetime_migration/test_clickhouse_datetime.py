@@ -18,7 +18,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
-class TestClickHouseDateTimeMigration(unittest.TestCase):
+class ClickHouseDateTimeMigrationTests(unittest.TestCase):
     """Test cases for ClickHouse datetime migration."""
 
     def setUp(self):
@@ -164,7 +164,7 @@ class TestClickHouseDateTimeMigration(unittest.TestCase):
                              msg="Time calculation should be approximately 5 minutes")
 
 
-class TestClickHouseTimestampConsistency(unittest.TestCase):
+class ClickHouseTimestampConsistencyTests(unittest.TestCase):
     """Tests for ClickHouse timestamp consistency."""
 
     def test_iso_format_consistency(self):

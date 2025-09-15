@@ -38,7 +38,7 @@ from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import get_env
 
 @pytest.mark.integration
-class TestBasicSystemFunctionality:
+class BasicSystemFunctionalityTests:
     """Test basic system functionality after fixes."""
 
     @pytest.fixture(scope='class')
@@ -224,7 +224,7 @@ def run_basic_system_test():
     print('=' * 60)
     print('BASIC SYSTEM FUNCTIONALITY TEST')
     print('=' * 60)
-    test_instance = TestBasicSystemFunctionality()
+    test_instance = BasicSystemFunctionalityTests()
     env = get_env()
     environment_info = {'backend_url': env.get('BACKEND_SERVICE_URL', f'http://localhost:{ServicePorts.BACKEND_DEFAULT}'), 'auth_service_url': env.get('AUTH_SERVICE_URL', f'http://localhost:{ServicePorts.AUTH_SERVICE_DEFAULT}'), 'environment': env.get('ENVIRONMENT', 'development'), 'env_vars': env.get_all()}
     print(f"Environment: {environment_info['environment']}")

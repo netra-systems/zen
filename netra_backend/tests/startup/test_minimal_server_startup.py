@@ -181,7 +181,7 @@ class FullAppServerTest:
         if self.server_thread and self.server_thread.is_alive():
             time.sleep(0.5)
 
-class TestMinimalServerStartup:
+class MinimalServerStartupTests:
     """Test minimal FastAPI server startup to isolate issues."""
 
     def setup_method(self):

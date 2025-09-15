@@ -24,7 +24,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter, WebSocketEmitterFactory, AuthenticationWebSocketEmitter, WebSocketEmitterPool
 
 @pytest.mark.websocket
-class TestEmitterImportCompliance(SSotAsyncTestCase):
+class EmitterImportComplianceTests(SSotAsyncTestCase):
     """
     Test that all WebSocket emitter imports redirect to SSOT.
     
@@ -71,7 +71,7 @@ class TestEmitterImportCompliance(SSotAsyncTestCase):
         self.assertIn('from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as TransparentWebSocketEmitter', source_lines, 'Should redirect via import alias')
 
 @pytest.mark.websocket
-class TestEmitterInstanceCompliance(SSotAsyncTestCase):
+class EmitterInstanceComplianceTests(SSotAsyncTestCase):
     """
     Test that all emitter instances are SSOT types.
     
@@ -121,7 +121,7 @@ class TestEmitterInstanceCompliance(SSotAsyncTestCase):
             self.assertEqual(transparent_emitter.context, self.test_context)
 
 @pytest.mark.websocket
-class TestEmitterMethodCompliance(SSotAsyncTestCase):
+class EmitterMethodComplianceTests(SSotAsyncTestCase):
     """
     Test that all emitter instances have required SSOT methods.
     
@@ -172,7 +172,7 @@ class TestEmitterMethodCompliance(SSotAsyncTestCase):
             self.assertTrue(hasattr(auth_emitter, method_name), f'Auth emitter should have base {method_name} method')
 
 @pytest.mark.websocket
-class TestEmissionSourceCompliance(SSotAsyncTestCase):
+class EmissionSourceComplianceTests(SSotAsyncTestCase):
     """
     Test emission source compliance.
     
@@ -245,7 +245,7 @@ class TestEmissionSourceCompliance(SSotAsyncTestCase):
             self.assertEqual(call['user_id'], self.test_user_id, 'All emissions should have correct user_id')
 
 @pytest.mark.websocket
-class TestSSotConfigurationCompliance(SSotAsyncTestCase):
+class SSotConfigurationComplianceTests(SSotAsyncTestCase):
     """
     Test SSOT configuration compliance.
     

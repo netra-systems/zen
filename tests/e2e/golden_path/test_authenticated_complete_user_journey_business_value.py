@@ -60,7 +60,7 @@ import websockets
 @pytest.mark.real_services
 @pytest.mark.asyncio
 @pytest.mark.authentication_compliance
-class TestAuthenticatedCompleteUserJourneyBusinessValue(SSotAsyncTestCase):
+class AuthenticatedCompleteUserJourneyBusinessValueTests(SSotAsyncTestCase):
     """
     Phase 1 Authentication Compliance: Complete authenticated user journey validation.
     

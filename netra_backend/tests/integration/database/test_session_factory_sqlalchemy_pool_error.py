@@ -147,7 +147,7 @@ class MockRequestScopedSessionFactory:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestSessionFactorySQLAlchemyPoolError:
+class SessionFactorySQLAlchemyPoolErrorTests:
     """Integration tests for session factory pool configuration errors."""
     
     @pytest.fixture

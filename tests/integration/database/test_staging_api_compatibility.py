@@ -29,7 +29,7 @@ from shared.types.core_types import UserID, ensure_user_id
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestStagingDatabaseAPICompatibility:
+class StagingDatabaseAPICompatibilityTests:
     """
     Immediate bug reproduction test suite for staging API compatibility issues.
     
@@ -278,7 +278,7 @@ class TestStagingDatabaseAPICompatibility:
         assert True, 'Compatibility detection logic is properly configured'
 
 @pytest.mark.integration
-class TestDatabaseAPIViolationDetection:
+class DatabaseAPIViolationDetectionTests:
     """
     Tests specifically designed to detect SSOT violations in database API usage.
     

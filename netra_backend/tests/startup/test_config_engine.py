@@ -71,7 +71,7 @@ def mock_validation_context(temp_config_path: Path) -> ValidationContext:
     """Create mock validation context."""
     return ValidationContext(config_path=str(temp_config_path), is_interactive=True)
 
-class TestConfigDecisionEngine:
+class ConfigDecisionEngineTests:
     """Test configuration decision engine."""
 
     def test_should_use_existing_config_missing(self, mock_validation_context: ValidationContext) -> None:
@@ -97,7 +97,7 @@ class TestConfigDecisionEngine:
         engine = ConfigDecisionEngine()
         assert engine is not None
 
-class TestUtilityFunctions:
+class UtilityFunctionsTests:
     """Test utility functions."""
 
     def test_detect_ci_environment(self) -> None:

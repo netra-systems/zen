@@ -18,7 +18,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 
 
-class TestDataHelperIntegrationPatterns(SSotAsyncTestCase):
+class DataHelperIntegrationPatternsTests(SSotAsyncTestCase):
     """Test suite for Data Helper Agent integration patterns."""
     
     async def setUp(self):

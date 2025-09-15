@@ -34,7 +34,7 @@ class ConfigurationSection:
 @pytest.mark.integration
 @pytest.mark.startup
 @pytest.mark.configuration
-class TestConfigurationStartupIntegration(BaseIntegrationTest):
+class ConfigurationStartupIntegrationTests(BaseIntegrationTest):
     """Integration tests for configuration loading during startup."""
 
     async def async_setup(self):
@@ -263,7 +263,7 @@ class TestConfigurationStartupIntegration(BaseIntegrationTest):
 @pytest.mark.startup
 @pytest.mark.business_value
 @pytest.mark.configuration
-class TestConfigurationStartupBusinessValue(BaseIntegrationTest):
+class ConfigurationStartupBusinessValueTests(BaseIntegrationTest):
     """Business value validation for configuration startup."""
 
     def test_configuration_enables_multi_environment_business_operations(self):

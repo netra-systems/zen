@@ -44,7 +44,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestIssue962GcpStagingConfigurationValidation(SSotAsyncTestCase, unittest.TestCase):
+class Issue962GcpStagingConfigurationValidationTests(SSotAsyncTestCase, unittest.TestCase):
     """
     STAGING tests for GCP configuration validation - Issue #962 production gate.
 

@@ -35,7 +35,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
 from netra_backend.app.websocket_core.utils import extract_user_info_from_message
 
-class TestWebSocketMultiUserDataLeakageIntegration(SSotBaseTestCase):
+class WebSocketMultiUserDataLeakageIntegrationTests(SSotBaseTestCase):
     """
     Integration tests to expose multi-user data leakage vulnerabilities.
     

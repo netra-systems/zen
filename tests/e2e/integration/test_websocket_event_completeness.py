@@ -39,7 +39,7 @@ async def test_websocket_test_manager():
 
 
 @pytest.mark.e2e
-class TestWebSocketEventCompleteness:
+class WebSocketEventCompletenessTests:
     """Test WebSocket event flow completeness"""
     
     @pytest.mark.e2e

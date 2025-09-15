@@ -68,7 +68,7 @@ from netra_backend.app.clients.circuit_breaker import (
 from netra_backend.app.core.environment_constants import Environment
 
 
-class TestAuthServiceClient:
+class AuthServiceClientTests:
     """Test AuthServiceClient initialization and configuration."""
 
     @pytest.fixture
@@ -571,7 +571,7 @@ class TestAuthServiceClient:
         assert client._client.post.call_count == 10
 
 
-class TestAuthServiceErrorHandling:
+class AuthServiceErrorHandlingTests:
     """Test error handling in auth service client."""
 
     @pytest.mark.asyncio
@@ -635,7 +635,7 @@ class TestAuthServiceErrorHandling:
         assert "Service unavailable" in str(exc_info.value)
 
 
-class TestJWTValidation:
+class JWTValidationTests:
     """Test JWT format validation."""
 
     def test_validate_jwt_format_valid(self):
@@ -665,7 +665,7 @@ class TestJWTValidation:
         assert validate_jwt_format(None) is False
 
 
-class TestGetAuthServiceClient:
+class GetAuthServiceClientTests:
     """Test singleton auth service client."""
 
     def test_get_auth_service_client_singleton(self):
@@ -689,7 +689,7 @@ class TestGetAuthServiceClient:
             assert client1 is client2
 
 
-class TestOAuthOperations:
+class OAuthOperationsTests:
     """Test OAuth-specific operations."""
 
     @pytest.fixture
@@ -755,7 +755,7 @@ class TestOAuthOperations:
         assert result is None or result.get("error") == "redirect_uri_mismatch"
 
 
-class TestAuthServiceMetrics:
+class AuthServiceMetricsTests:
     """Test metrics and monitoring in auth service client."""
 
     @pytest.fixture
@@ -803,7 +803,7 @@ class TestAuthServiceMetrics:
         assert auth_client.token_cache is not None
 
 
-class TestCacheOperations:
+class CacheOperationsTests:
     """Test caching operations in auth service client."""
 
     @pytest.fixture
@@ -866,7 +866,7 @@ class TestCacheOperations:
         auth_client.token_cache.clear.assert_called_once()
 
 
-class TestServiceAuthentication:
+class ServiceAuthenticationTests:
     """Test service-to-service authentication."""
 
     @pytest.fixture
@@ -923,7 +923,7 @@ class TestServiceAuthentication:
         assert result is None
 
 
-class TestRateLimiting:
+class RateLimitingTests:
     """Test rate limiting handling."""
 
     @pytest.fixture
@@ -984,7 +984,7 @@ class TestRateLimiting:
         assert mock_sleep.call_count >= 2
 
 
-class TestEnvironmentDetection:
+class EnvironmentDetectionTests:
     """Test environment detection and configuration."""
 
     @pytest.mark.asyncio
@@ -1038,7 +1038,7 @@ class TestEnvironmentDetection:
             assert client.service_secret is None  # But client still initializes
 
 
-class TestEdgeCases:
+class EdgeCasesTests:
     """Test edge cases and boundary conditions."""
 
     @pytest.fixture

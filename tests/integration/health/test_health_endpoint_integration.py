@@ -16,7 +16,7 @@ from fastapi.testclient import TestClient
 from fastapi import FastAPI, Request, Response
 
 
-class TestHealthEndpointIntegration(SSotAsyncTestCase):
+class HealthEndpointIntegrationTests(SSotAsyncTestCase):
     """Integration test suite for health endpoint - Issue #894."""
 
     def setup_method(self):

@@ -44,7 +44,7 @@ import pytest
 from shared.isolated_environment import get_env
 
 
-class TestOAuthCredentialsConfiguration:
+class OAuthCredentialsConfigurationTests:
     """Test OAuth credentials configuration for authentication providers."""
     
     def test_google_client_id_missing_current_staging_issue(self):
@@ -218,7 +218,7 @@ class TestOAuthCredentialsConfiguration:
             )
 
 
-class TestOAuthEnvironmentConfiguration:
+class OAuthEnvironmentConfigurationTests:
     """Test OAuth configuration for different environments."""
     
     def test_oauth_environment_variable_loading(self):
@@ -328,7 +328,7 @@ class TestOAuthEnvironmentConfiguration:
             )
 
 
-class TestOAuthSecurityConfiguration:
+class OAuthSecurityConfigurationTests:
     """Test OAuth security configuration and validation."""
     
     def test_oauth_state_parameter_security(self):
@@ -466,7 +466,7 @@ class TestOAuthSecurityConfiguration:
             )
 
 
-class TestOAuthProviderConfiguration:
+class OAuthProviderConfigurationTests:
     """Test multi-provider OAuth configuration."""
     
     def test_multiple_oauth_providers_configuration(self):

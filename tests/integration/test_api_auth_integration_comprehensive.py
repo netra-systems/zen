@@ -50,7 +50,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
 logger = logging.getLogger(__name__)
 
 
-class TestAPIAuthIntegrationComprehensive(BaseIntegrationTest):
+class APIAuthIntegrationComprehensiveTests(BaseIntegrationTest):
     """Comprehensive API-Auth integration tests with real services.
     
     CRITICAL: Uses ONLY real services and validates actual business scenarios.

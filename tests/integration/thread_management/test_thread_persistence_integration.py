@@ -50,7 +50,7 @@ class PersistenceCheckpoint:
     checkpoint_id: str
 
 
-class TestThreadPersistenceIntegration(SSotAsyncTestCase):
+class ThreadPersistenceIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for thread persistence, recovery, and data durability.
     

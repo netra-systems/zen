@@ -30,7 +30,7 @@ from auth_service.auth_core.performance.metrics import (
 )
 
 
-class TestAuthPerformanceMonitor(SSotBaseTestCase):
+class AuthPerformanceMonitorTests(SSotBaseTestCase):
     """Comprehensive unit tests for auth performance monitoring."""
 
     def setUp(self):
@@ -432,7 +432,7 @@ class TestAuthPerformanceMonitor(SSotBaseTestCase):
                 mock_logger.warning.assert_called()
 
 
-class TestAuthMetric(SSotBaseTestCase):
+class AuthMetricTests(SSotBaseTestCase):
     """Test the AuthMetric dataclass."""
 
     def setUp(self):
@@ -474,7 +474,7 @@ class TestAuthMetric(SSotBaseTestCase):
         self.assertFalse(metric.cache_hit)
 
 
-class TestPerformanceStats(SSotBaseTestCase):
+class PerformanceStatsTests(SSotBaseTestCase):
     """Test the PerformanceStats dataclass."""
 
     def setUp(self):
@@ -518,7 +518,7 @@ class TestPerformanceStats(SSotBaseTestCase):
         self.assertLessEqual(stats.error_rate, 0.05)  # < 5% error rate
 
 
-class TestMonitorAuthPerformanceDecorator(SSotBaseTestCase):
+class MonitorAuthPerformanceDecoratorTests(SSotBaseTestCase):
     """Test the monitor_auth_performance decorator."""
 
     def setUp(self):
@@ -606,7 +606,7 @@ class TestMonitorAuthPerformanceDecorator(SSotBaseTestCase):
         self.assertEqual(latest_metric.user_id, "test_user_456")
 
 
-class TestGlobalPerformanceMonitor(SSotBaseTestCase):
+class GlobalPerformanceMonitorTests(SSotBaseTestCase):
     """Test the global auth performance monitor instance."""
 
     def setUp(self):

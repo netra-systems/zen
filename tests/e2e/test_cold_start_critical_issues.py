@@ -74,7 +74,7 @@ from database_scripts.create_postgres_tables import create_all_tables
 
 
 @pytest.mark.e2e
-class TestColdStartCriticalIssues:
+class ColdStartCriticalIssuesTests:
     """Test suite for critical cold start initialization issues."""
 
     @pytest.fixture(autouse=True)

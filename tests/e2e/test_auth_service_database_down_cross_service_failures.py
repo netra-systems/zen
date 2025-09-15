@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.e2e
-class TestAuthServiceDatabaseDownCrossServiceFailures:
+class AuthServiceDatabaseDownCrossServiceFailuresTests:
     """Test suite for cross-service failures when auth service database is down."""
     
     @pytest.fixture

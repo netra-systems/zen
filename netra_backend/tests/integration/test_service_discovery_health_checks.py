@@ -12,7 +12,7 @@ from netra_backend.app.services.discovery import ServiceRegistry, HealthMonitor,
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.smoke
-class TestServiceDiscoveryBasic:
+class ServiceDiscoveryBasicTests:
     """Test basic service discovery functionality."""
 
     @pytest.fixture

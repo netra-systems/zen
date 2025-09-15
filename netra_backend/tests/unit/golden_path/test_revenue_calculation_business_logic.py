@@ -227,7 +227,7 @@ class RevenueCalculator:
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestRevenueCalculationBusinessLogic:
+class RevenueCalculationBusinessLogicTests:
     """Test revenue calculation business logic that protects $500K+ ARR."""
     
     def setup_method(self):

@@ -17,7 +17,7 @@ from shared.isolated_environment import IsolatedEnvironment
 pytestmark = pytest.mark.skip(reason="oauth_security module has been removed/refactored")
 
 
-class TestOAuthSecurityVulnerabilities:
+class OAuthSecurityVulnerabilitiesTests:
     """Test OAuth security vulnerabilities that could lead to account compromise."""
 
     def setup_method(self):

@@ -22,7 +22,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerCanonicalSourceValidation(SSotAsyncTestCase):
+class WebSocketManagerCanonicalSourceValidationTests(SSotAsyncTestCase):
     """Test canonical source validation for WebSocket Manager SSOT."""
 
     def setUp(self):

@@ -17,7 +17,7 @@ from typing import Dict, List, Any
 
 
 @pytest.mark.integration
-class TestRedisSharedPoolIntegrationSimple(SSotBaseTestCase):
+class RedisSharedPoolIntegrationSimpleTests(SSotBaseTestCase):
     """Simplified integration tests validating Redis shared pool across services.
     
     These tests are designed to FAIL initially, proving the lack of

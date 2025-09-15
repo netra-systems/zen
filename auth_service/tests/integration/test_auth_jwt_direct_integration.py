@@ -31,7 +31,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestAuthJWTDirectIntegration(SSotBaseTestCase):
+class AuthJWTDirectIntegrationTests(SSotBaseTestCase):
     """
     Direct JWT Integration Tests using JWT handler without external dependencies.
     

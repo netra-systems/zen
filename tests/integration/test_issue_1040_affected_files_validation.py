@@ -46,7 +46,7 @@ except ImportError:
 
 
 @pytest.mark.integration
-class TestIssue1040AffectedFilesValidation(SSotBaseTestCase):
+class Issue1040AffectedFilesValidationTests(SSotBaseTestCase):
     """
     Validation test for files affected by Issue #1040 ServiceAvailability import issue.
 

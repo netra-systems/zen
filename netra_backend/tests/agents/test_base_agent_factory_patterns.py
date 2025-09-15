@@ -82,7 +82,7 @@ class LegacyPatternAgent(BaseAgent):
     # Missing _execute_with_user_context implementation to test migration status
 
 
-class TestBaseAgentFactoryPatterns(SSotAsyncTestCase):
+class BaseAgentFactoryPatternsTests(SSotAsyncTestCase):
     """Test BaseAgent factory patterns and SSOT compliance."""
 
     def setup_method(self, method):

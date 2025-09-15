@@ -22,7 +22,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 
 @pytest.mark.recovery
-class TestAgentErrorRecovery:
+class AgentErrorRecoveryTests:
     """Test comprehensive agent error recovery mechanisms."""
     
     @pytest.mark.asyncio
@@ -311,7 +311,7 @@ class TestAgentErrorRecovery:
 
 
 @pytest.mark.recovery
-class TestAgentResiliencePatterns:
+class AgentResiliencePatternsTests:
     """Test advanced resilience patterns in agent operations."""
     
     @pytest.mark.asyncio

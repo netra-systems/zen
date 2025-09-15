@@ -21,7 +21,7 @@ from typing import Any, Dict, Optional
 from pydantic import ValidationError
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType, create_standard_message
 
-class TestWebSocketMessageTimestampValidation:
+class WebSocketMessageTimestampValidationTests:
     """Unit tests for WebSocket message timestamp validation."""
 
     def test_exact_staging_error_reproduction(self):
@@ -119,7 +119,7 @@ class TestWebSocketMessageTimestampValidation:
         assert message.timestamp > 0
         assert abs(message.timestamp - time.time()) < 1.0
 
-class TestTimestampValidationPerformance:
+class TimestampValidationPerformanceTests:
     """Performance tests for timestamp validation overhead."""
 
     def test_timestamp_validation_performance(self):

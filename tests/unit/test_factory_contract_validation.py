@@ -11,7 +11,7 @@ from unittest.mock import Mock
 from shared.lifecycle.contract_validation_framework import ParameterInfo, MethodContract, InterfaceContract, ValidationResult, SignatureAnalyzer, ContractValidator, BreakingChangeDetector, FactoryContractRegistry, get_contract_registry, validate_factory_interface, check_parameter_compatibility
 
 @pytest.mark.unit
-class TestParameterMismatchDetection:
+class ParameterMismatchDetectionTests:
     """Test suite specifically for parameter mismatch detection."""
 
     def test_parameter_name_mismatch_detection(self):
@@ -86,7 +86,7 @@ class TestParameterMismatchDetection:
         assert any(('async mismatch' in error for error in result.errors))
 
 @pytest.mark.unit
-class TestUserExecutionContextValidation:
+class UserExecutionContextValidationTests:
     """Test validation of UserExecutionContext specifically."""
 
     def test_user_execution_context_contract_validation(self):
@@ -123,7 +123,7 @@ class TestUserExecutionContextValidation:
         assert context.websocket_connection_id == context.websocket_client_id
 
 @pytest.mark.unit
-class TestFactoryPatternValidation:
+class FactoryPatternValidationTests:
     """Test validation of factory patterns."""
 
     def test_websocket_manager_factory_validation(self):
@@ -151,7 +151,7 @@ class TestFactoryPatternValidation:
             pytest.skip('Supervisor factory not available')
 
 @pytest.mark.unit
-class TestBreakingChangeDetection:
+class BreakingChangeDetectionTests:
     """Test breaking change detection."""
 
     def test_parameter_name_change_detection(self):
@@ -199,7 +199,7 @@ class TestBreakingChangeDetection:
         assert any(('Removed required parameters' in change for change in changes))
 
 @pytest.mark.unit
-class TestSignatureAnalyzer:
+class SignatureAnalyzerTests:
     """Test signature analysis functionality."""
 
     def test_extract_method_contract(self):
@@ -227,7 +227,7 @@ class TestSignatureAnalyzer:
     def test_extract_class_contract(self):
         """Test extraction of class contracts."""
 
-        class TestClass:
+        class ClassTests:
             """Test class docstring."""
 
             def public_method(self, param1: str):
@@ -237,15 +237,15 @@ class TestSignatureAnalyzer:
             def _private_method(self, param1: str):
                 """Private method."""
                 pass
-        contract = SignatureAnalyzer.extract_class_contract(TestClass)
-        assert contract.interface_name == 'TestClass'
+        contract = SignatureAnalyzer.extract_class_contract(ClassTests)
+        assert contract.interface_name == 'ClassTests'
         assert contract.class_docstring == 'Test class docstring.'
         method_names = {method.method_name for method in contract.methods}
         assert 'public_method' in method_names
         assert '_private_method' not in method_names
 
 @pytest.mark.unit
-class TestContractRegistry:
+class ContractRegistryTests:
     """Test contract registry functionality."""
 
     def test_factory_contract_registry_initialization(self):
@@ -257,14 +257,14 @@ class TestContractRegistry:
     def test_validate_factory_pattern(self):
         """Test factory pattern validation through registry."""
 
-        class TestFactory:
+        class FactoryTests:
 
             def create_manager(self, user_context):
                 pass
         registry = FactoryContractRegistry()
-        result = registry.validate_factory_pattern(TestFactory)
+        result = registry.validate_factory_pattern(FactoryTests)
         assert isinstance(result, ValidationResult)
-        assert result.interface_name == 'TestFactory'
+        assert result.interface_name == 'FactoryTests'
 
 @pytest.mark.unit
 def test_integration_validation_script():

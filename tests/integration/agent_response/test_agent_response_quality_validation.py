@@ -334,7 +334,7 @@ class ResponseQualityValidator:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAgentResponseQualityValidation(BaseIntegrationTest):
+class AgentResponseQualityValidationTests(BaseIntegrationTest):
     """Test agent response quality validation scenarios."""
     
     def setup_method(self):

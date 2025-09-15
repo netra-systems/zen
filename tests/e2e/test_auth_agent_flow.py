@@ -52,7 +52,7 @@ class AuthAgentFlowHarness:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestAuthAgentFlow:
+class AuthAgentFlowTests:
     """Test suite for auth-agent flow validation"""
 
     def setup_method(self):

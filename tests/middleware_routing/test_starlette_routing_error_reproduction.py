@@ -26,7 +26,7 @@ class MiddlewareOrderError(Exception):
     """Exception raised when middleware ordering is incorrect."""
     pass
 
-class TestStarletteRoutingErrorReproduction:
+class StarletteRoutingErrorReproductionTests:
     """
     Test class to reproduce the specific Starlette routing error from the stack trace.
     
@@ -337,7 +337,7 @@ class TestStarletteRoutingErrorReproduction:
                     print(f"Middleware Analysis: {detail['middleware_analysis']}")
                 print('-' * 50)
 
-class TestMiddlewareOrdering:
+class MiddlewareOrderingTests:
     """Specific tests for middleware ordering issues that cause routing errors."""
 
     def setup_method(self, method=None):

@@ -46,7 +46,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 logger = logging.getLogger(__name__)
 
 
-class TestLLMProcessingFailuresEnhancedWarnings(SsotAsyncWarningUpgradeTestCase):
+class LLMProcessingFailuresEnhancedWarningsTests(SsotAsyncWarningUpgradeTestCase):
     """
     Test suite for LLM processing failure enhanced warning diagnostics.
     

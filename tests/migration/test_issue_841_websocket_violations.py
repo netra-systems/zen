@@ -33,7 +33,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
-class TestIssue841WebSocketViolations(SSotBaseTestCase):
+class Issue841WebSocketViolationsTests(SSotBaseTestCase):
     """
     Issue #841 WebSocket ID Generation Violation Tests
     

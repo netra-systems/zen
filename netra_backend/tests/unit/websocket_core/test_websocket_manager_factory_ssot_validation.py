@@ -35,7 +35,7 @@ from netra_backend.app.services.user_execution_context import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestWebSocketManagerSSotValidation:
+class WebSocketManagerSSotValidationTests:
     """Test SSOT validation failures in WebSocketManager."""
     
     def test_websocket_manager_factory_initialization_ssot_validation(self):

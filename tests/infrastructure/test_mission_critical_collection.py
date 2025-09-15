@@ -17,7 +17,7 @@ import pytest
 import subprocess
 from typing import List, Dict, Tuple
 
-class TestMissionCriticalCollection:
+class MissionCriticalCollectionTests:
     """Test suite to validate mission-critical test collection integrity."""
 
     def test_mission_critical_test_collection_succeeds(self):

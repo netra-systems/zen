@@ -30,7 +30,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 
 @pytest.mark.unit
 @pytest.mark.golden_path  
-class TestDataValidationBusinessRules:
+class DataValidationBusinessRulesTests:
     """Test data validation business rules for golden path scenarios."""
 
     def test_user_data_validation_business_requirements(self):
@@ -199,7 +199,7 @@ class TestDataValidationBusinessRules:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestDataTransformationBusinessLogic:
+class DataTransformationBusinessLogicTests:
     """Test data transformation business logic for golden path processing."""
 
     def test_cost_data_transformation_business_requirements(self):
@@ -439,7 +439,7 @@ class TestDataTransformationBusinessLogic:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestDataSanitizationBusinessSecurity:
+class DataSanitizationBusinessSecurityTests:
     """Test data sanitization and security validation for business requirements."""
 
     def test_user_input_sanitization_business_security(self):

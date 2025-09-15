@@ -31,7 +31,7 @@ import time
 from typing import Dict, Any, List, Set, Type
 from unittest.mock import MagicMock, patch
 
-class TestAgentRegistrySSotDuplication(SSotBaseTestCase):
+class AgentRegistrySSotDuplicationTests(SSotBaseTestCase):
     """Test suite demonstrating AgentRegistry SSOT duplication issues."""
     
     def setup_method(self, method=None):
@@ -372,7 +372,7 @@ class TestAgentRegistrySSotDuplication(SSotBaseTestCase):
                            f"Patterns: {initialization_patterns}")
 
 
-class TestAgentRegistryRuntimeBehaviorInconsistencies(SSotBaseTestCase):
+class AgentRegistryRuntimeBehaviorInconsistenciesTests(SSotBaseTestCase):
     """Test suite for runtime behavior inconsistencies between registries."""
     
     def test_01_concurrent_access_behavior(self):

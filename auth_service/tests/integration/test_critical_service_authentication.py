@@ -84,7 +84,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestCriticalServiceAuthentication(SSotBaseTestCase):
+class CriticalServiceAuthenticationTests(SSotBaseTestCase):
     """
     Critical Service Authentication Integration Tests.
     

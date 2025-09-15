@@ -50,7 +50,7 @@ class ServiceEndpoint:
 
 
 @pytest.mark.integration
-class TestCrossServiceMessaging(SSotBaseTestCase):
+class CrossServiceMessagingTests(SSotBaseTestCase):
     """
     Test cross-service messaging patterns and protocols.
     
@@ -466,7 +466,7 @@ class TestCrossServiceMessaging(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestServiceCommunicationReliability(SSotBaseTestCase):
+class ServiceCommunicationReliabilityTests(SSotBaseTestCase):
     """
     Test reliability patterns for cross-service communication.
     

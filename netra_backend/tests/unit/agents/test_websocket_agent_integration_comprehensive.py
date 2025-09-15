@@ -89,7 +89,7 @@ class MockWebSocketConnection:
         self.connected = False
         self.is_healthy = False
 
-class TestWebSocketEventEmissionDelivery(SSotAsyncTestCase):
+class WebSocketEventEmissionDeliveryTests(SSotAsyncTestCase):
     """Test suite for WebSocket event emission and delivery - 12 tests"""
 
     def setup_method(self, method):
@@ -248,7 +248,7 @@ class TestWebSocketEventEmissionDelivery(SSotAsyncTestCase):
         self.assertGreater(metrics.total_bytes_sent, 0)
         self.record_metric('event_metrics_collection_success', True)
 
-class TestWebSocketConnectionManagement(SSotAsyncTestCase):
+class WebSocketConnectionManagementTests(SSotAsyncTestCase):
     """Test suite for WebSocket connection management - 11 tests"""
 
     def setup_method(self, method):
@@ -390,7 +390,7 @@ class TestWebSocketConnectionManagement(SSotAsyncTestCase):
         self.assertIsNotNone(metrics.connection_duration)
         self.record_metric('connection_metrics_tracking_success', True)
 
-class TestMessageDeliveryMechanisms(SSotAsyncTestCase):
+class MessageDeliveryMechanismsTests(SSotAsyncTestCase):
     """Test suite for message delivery mechanisms - 10 tests"""
 
     def setup_method(self, method):
@@ -541,7 +541,7 @@ class TestMessageDeliveryMechanisms(SSotAsyncTestCase):
         self.assertEqual(len(delivery_metrics['delivery_times']), 3)
         self.record_metric('delivery_analytics_success', True)
 
-class TestAgentWebSocketCoordination(SSotAsyncTestCase):
+class AgentWebSocketCoordinationTests(SSotAsyncTestCase):
     """Test suite for Agent-WebSocket coordination - 12 tests"""
 
     def setup_method(self, method):

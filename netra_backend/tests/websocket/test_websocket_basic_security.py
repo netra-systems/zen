@@ -22,7 +22,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 pytestmark = [pytest.mark.env_test]
 
-class TestWebSocketBasicSecurity:
+class WebSocketBasicSecurityTests:
     """Test basic WebSocket security functionality."""
 
     def test_websocket_message_type_validation(self):

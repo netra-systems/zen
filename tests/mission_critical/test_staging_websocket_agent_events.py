@@ -194,7 +194,7 @@ class StagingWebSocketEventValidator:
 # STAGING WEBSOCKET TESTS
 # ============================================================================
 
-class TestStagingWebSocketFlow:
+class StagingWebSocketFlowTests:
     """Test WebSocket functionality against real staging environment."""
 
     @pytest.fixture(autouse=True)
@@ -400,7 +400,7 @@ class TestStagingWebSocketFlow:
 # STAGING REGRESSION PREVENTION TESTS
 # ============================================================================
 
-class TestStagingRegressionPrevention:
+class StagingRegressionPreventionTests:
     """Tests to prevent regression of staging-specific WebSocket issues."""
 
     @pytest.fixture(autouse=True)
@@ -484,7 +484,7 @@ class TestStagingRegressionPrevention:
 
 @pytest.mark.staging
 @pytest.mark.mission_critical
-class TestStagingMissionCriticalSuite:
+class StagingMissionCriticalSuiteTests:
     """Main test suite for staging WebSocket validation."""
 
     @pytest.mark.asyncio

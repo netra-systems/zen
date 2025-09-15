@@ -22,7 +22,7 @@ from netra_backend.tests.fixtures.realistic_test_fixtures import (
     create_mock_clickhouse_client,
 )
 
-class TestRealisticLogIngestion:
+class RealisticLogIngestionTests:
     """Test realistic log ingestion patterns"""
 
     @pytest.mark.asyncio

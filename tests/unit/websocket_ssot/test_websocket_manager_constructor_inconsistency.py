@@ -33,7 +33,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerConstructorInconsistency(SSotBaseTestCase):
+class WebSocketManagerConstructorInconsistencyTests(SSotBaseTestCase):
     """Phase 1 Reproduction Test: Prove constructor signatures differ between implementations."""
     
     def setup_method(self, method):

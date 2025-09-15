@@ -17,7 +17,7 @@ from typing import Dict, List, Set, Tuple
 from unittest.mock import patch
 
 
-class TestImportPathFragmentationIssue1196(unittest.TestCase):
+class ImportPathFragmentationIssue1196Tests(unittest.TestCase):
     """Test suite demonstrating SSOT import path fragmentation violations.
 
     These tests MUST FAIL initially to prove the fragmentation problem exists.

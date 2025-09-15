@@ -30,7 +30,7 @@ from netra_backend.app.services.unified_authentication_service import (
 )
 
 @pytest.mark.integration
-class TestWebSocketHttpAuthParity(SSotAsyncTestCase):
+class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
     """
     Test suite to compare HTTP vs WebSocket authentication configurations.
     

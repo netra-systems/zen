@@ -35,7 +35,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from tests.e2e.staging_config import get_staging_config
 
 
-class TestAuthenticationAuthorizationFlow(BaseE2ETest):
+class AuthenticationAuthorizationFlowTests(BaseE2ETest):
     """Test complete authentication and authorization flows."""
     
     def setup_method(self):

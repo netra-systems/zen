@@ -116,7 +116,7 @@ def create_test_config_file(config_dir: Path, filename: str, data: Dict) -> Path
 # BASIC CONFIGURATION OPERATIONS TESTS
 # ============================================================================
 
-class TestBasicConfigurationOperations:
+class BasicConfigurationOperationsTests:
     """Test basic configuration CRUD operations."""
     
     def test_initialization_creates_real_instance(self, config_manager):
@@ -232,7 +232,7 @@ class TestBasicConfigurationOperations:
 # TYPE COERCION AND CONVERSION TESTS
 # ============================================================================
 
-class TestTypeCoercionAndConversion:
+class TypeCoercionAndConversionTests:
     """Test configuration type coercion and conversion functionality."""
     
     def test_get_int_conversion(self, config_manager):
@@ -369,7 +369,7 @@ class TestTypeCoercionAndConversion:
 # MULTI-SOURCE PRECEDENCE TESTS
 # ============================================================================
 
-class TestMultiSourcePrecedence:
+class MultiSourcePrecedenceTests:
     """Test configuration source precedence and merging."""
     
     def test_source_precedence_order(self, config_manager):
@@ -464,7 +464,7 @@ class TestMultiSourcePrecedence:
 # VALIDATION AND ERROR HANDLING TESTS
 # ============================================================================
 
-class TestValidationAndErrorHandling:
+class ValidationAndErrorHandlingTests:
     """Test configuration validation and error handling."""
     
     def test_configuration_entry_validation(self):
@@ -656,7 +656,7 @@ class TestValidationAndErrorHandling:
 # SERVICE-SPECIFIC CONFIGURATION TESTS  
 # ============================================================================
 
-class TestServiceSpecificConfigurations:
+class ServiceSpecificConfigurationsTests:
     """Test service-specific configuration methods."""
     
     def test_database_configuration(self, config_manager):
@@ -789,7 +789,7 @@ class TestServiceSpecificConfigurations:
 # MULTI-USER ISOLATION AND FACTORY PATTERN TESTS
 # ============================================================================
 
-class TestMultiUserIsolationAndFactory:
+class MultiUserIsolationAndFactoryTests:
     """Test multi-user isolation and factory pattern functionality."""
     
     def test_factory_global_manager(self, factory_cleanup):
@@ -960,7 +960,7 @@ class TestMultiUserIsolationAndFactory:
 # THREAD SAFETY AND CONCURRENCY TESTS
 # ============================================================================
 
-class TestThreadSafetyAndConcurrency:
+class ThreadSafetyAndConcurrencyTests:
     """Test thread safety and concurrent access scenarios."""
     
     def test_concurrent_read_write_operations(self, config_manager):
@@ -1104,7 +1104,7 @@ class TestThreadSafetyAndConcurrency:
 # CACHING FUNCTIONALITY TESTS
 # ============================================================================
 
-class TestCachingFunctionality:
+class CachingFunctionalityTests:
     """Test configuration caching functionality."""
     
     def test_cache_enable_disable(self, config_manager):
@@ -1231,7 +1231,7 @@ class TestCachingFunctionality:
 # WEBSOCKET INTEGRATION TESTS
 # ============================================================================
 
-class TestWebSocketIntegrationAndNotifications:
+class WebSocketIntegrationAndNotificationsTests:
     """Test WebSocket integration and change notifications."""
     
     def test_websocket_manager_integration(self, config_manager):
@@ -1313,7 +1313,7 @@ class TestWebSocketIntegrationAndNotifications:
 # CHANGE TRACKING AND AUDITING TESTS
 # ============================================================================
 
-class TestChangeTrackingAndAuditing:
+class ChangeTrackingAndAuditingTests:
     """Test configuration change tracking and auditing functionality."""
     
     def test_change_history_tracking(self, config_manager):
@@ -1430,7 +1430,7 @@ class TestChangeTrackingAndAuditing:
 # STATUS AND MONITORING TESTS
 # ============================================================================
 
-class TestStatusAndMonitoring:
+class StatusAndMonitoringTests:
     """Test status reporting and monitoring functionality."""
     
     def test_comprehensive_status_report(self, config_manager):
@@ -1535,7 +1535,7 @@ class TestStatusAndMonitoring:
 # ERROR HANDLING AND EDGE CASES TESTS
 # ============================================================================
 
-class TestErrorHandlingAndEdgeCases:
+class ErrorHandlingAndEdgeCasesTests:
     """Test error handling and edge case scenarios."""
     
     def test_unicode_and_special_characters(self, config_manager):
@@ -1689,7 +1689,7 @@ class TestErrorHandlingAndEdgeCases:
 # PERFORMANCE CHARACTERISTICS TESTS
 # ============================================================================
 
-class TestPerformanceCharacteristics:
+class PerformanceCharacteristicsTests:
     """Test performance characteristics and large configuration handling."""
     
     def test_large_configuration_handling(self, config_manager):
@@ -1818,7 +1818,7 @@ class TestPerformanceCharacteristics:
 # ISOLATED ENVIRONMENT INTEGRATION TESTS
 # ============================================================================
 
-class TestIsolatedEnvironmentIntegration:
+class IsolatedEnvironmentIntegrationTests:
     """Test proper IsolatedEnvironment integration and compliance."""
     
     def test_isolated_environment_usage(self, config_manager):
@@ -1894,7 +1894,7 @@ class TestIsolatedEnvironmentIntegration:
 # LEGACY COMPATIBILITY TESTS
 # ============================================================================
 
-class TestLegacyCompatibilityFunctions:
+class LegacyCompatibilityFunctionsTests:
     """Test legacy compatibility functions for migrated managers."""
     
     def test_dashboard_config_manager_compatibility(self, factory_cleanup):
@@ -1972,7 +1972,7 @@ class TestLegacyCompatibilityFunctions:
 # COMPREHENSIVE EDGE CASE TESTS
 # ============================================================================
 
-class TestComprehensiveEdgeCases:
+class ComprehensiveEdgeCasesTests:
     """Test comprehensive edge cases and boundary conditions."""
     
     def test_extremely_nested_configuration_keys(self, config_manager):

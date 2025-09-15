@@ -28,7 +28,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
 @pytest.mark.unit
-class TestWebSocketEventStructureValidation:
+class WebSocketEventStructureValidationTests:
     """Test suite that reproduces Issue #1021 WebSocket event structure problems."""
 
     @pytest.fixture

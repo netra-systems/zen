@@ -40,7 +40,7 @@ except ImportError as e:
 
 
 @pytest.mark.unit
-class TestAuthStartupValidatorSSotViolations(unittest.TestCase):
+class AuthStartupValidatorSSotViolationsTests(unittest.TestCase):
     """
     Test suite to expose SSOT violations in AuthStartupValidator.
 
@@ -172,7 +172,7 @@ class TestAuthStartupValidatorSSotViolations(unittest.TestCase):
 
 
 @pytest.mark.unit
-class TestSSotViolationDetectionMetadata(unittest.TestCase):
+class SSotViolationDetectionMetadataTests(unittest.TestCase):
     """
     Metadata and reporting tests for SSOT violation detection.
     """

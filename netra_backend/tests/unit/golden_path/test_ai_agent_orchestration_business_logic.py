@@ -484,7 +484,7 @@ class AgentOrchestrator:
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestAIAgentOrchestrationBusinessLogic:
+class AIAgentOrchestrationBusinessLogicTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

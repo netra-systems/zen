@@ -13,7 +13,7 @@ from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.asyncio
-class TestErrorHandlerAsync:
+class ErrorHandlerAsyncTests:
     """Async test suite for ErrorHandler"""
 
     def setup_method(self):

@@ -13,7 +13,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import AgentRegis
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestAgentRegistryAdapterSignatureMismatchSimple:
+class AgentRegistryAdapterSignatureMismatchSimpleTests:
     """Simple focused test for the signature mismatch issue."""
 
     def setup_method(self):

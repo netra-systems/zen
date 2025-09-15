@@ -115,7 +115,7 @@ class EndToEndReportLifecycleValidator:
         return recovery_validation
 
 
-class TestEndToEndReportLifecycleIntegration(BaseIntegrationTest):
+class EndToEndReportLifecycleIntegrationTests(BaseIntegrationTest):
     """Test Suite 10: End-to-end report lifecycle integration tests."""
     
     @pytest.fixture(autouse=True)

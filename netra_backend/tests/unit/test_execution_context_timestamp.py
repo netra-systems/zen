@@ -14,7 +14,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestExecutionContextTimestamp:
+class ExecutionContextTimestampTests:
     """Tests to verify ExecutionContext has timestamp attribute."""
 
     def test_execution_context_has_timestamp_attribute(self):

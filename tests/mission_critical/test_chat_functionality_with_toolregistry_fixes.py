@@ -104,7 +104,7 @@ class WebSocketEventCapture:
 @pytest.mark.mission_critical
 @pytest.mark.e2e
 @pytest.mark.toolregistry
-class TestChatFunctionalityWithToolRegistryFixes(SSotBaseTestCase):
+class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
     """
     Mission critical tests for complete chat functionality after ToolRegistry fixes.
     
@@ -565,7 +565,7 @@ class TestChatFunctionalityWithToolRegistryFixes(SSotBaseTestCase):
 @pytest.mark.mission_critical
 @pytest.mark.e2e
 @pytest.mark.toolregistry
-class TestToolRegistryBusinessValueValidation(SSotBaseTestCase):
+class ToolRegistryBusinessValueValidationTests(SSotBaseTestCase):
     """
     Mission critical tests for tool registry business value validation.
     

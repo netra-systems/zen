@@ -37,7 +37,7 @@ from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketStartupVerificationUnit(SSotAsyncTestCase):
+class WebSocketStartupVerificationUnitTests(SSotAsyncTestCase):
     """Unit tests for WebSocket startup verification components."""
 
     def setup_method(self, method):
@@ -115,7 +115,7 @@ class TestWebSocketStartupVerificationUnit(SSotAsyncTestCase):
         self.record_metric("error_condition_test", "passed")
 
 
-class TestWebSocketStartupVerificationIntegration(SSotAsyncTestCase):
+class WebSocketStartupVerificationIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket startup verification process."""
 
     def setup_method(self, method):
@@ -238,7 +238,7 @@ class TestWebSocketStartupVerificationIntegration(SSotAsyncTestCase):
             raise
 
 
-class TestWebSocketStartupVerificationMissionCritical(SSotAsyncTestCase):
+class WebSocketStartupVerificationMissionCriticalTests(SSotAsyncTestCase):
     """Mission critical tests protecting business value and Golden Path functionality."""
 
     def setup_method(self, method):
@@ -383,9 +383,9 @@ def test_websocket_startup_verification_test_discovery():
     pytest collection and execution.
     """
     test_classes = [
-        TestWebSocketStartupVerificationUnit,
-        TestWebSocketStartupVerificationIntegration,
-        TestWebSocketStartupVerificationMissionCritical
+        WebSocketStartupVerificationUnitTests,
+        WebSocketStartupVerificationIntegrationTests,
+        WebSocketStartupVerificationMissionCriticalTests
     ]
     
     for test_class in test_classes:

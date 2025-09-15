@@ -43,7 +43,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, Us
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base_agent import BaseAgent
 
-class TestUserIsolationAndSecurity(SSotAsyncTestCase):
+class UserIsolationAndSecurityTests(SSotAsyncTestCase):
     """Test Suite 1: User Isolation & Security (Protects $15K+ MRR per enterprise customer)
     
     Business Value: Prevents data leakage between enterprise customers, enabling secure multi-tenancy
@@ -181,7 +181,7 @@ class TestUserIsolationAndSecurity(SSotAsyncTestCase):
         except Exception as e:
             self.assertIn('No factory registered', str(e))
 
-class TestAgentLifecycleManagement(SSotAsyncTestCase):
+class AgentLifecycleManagementTests(SSotAsyncTestCase):
     """Test Suite 2: Agent Lifecycle Management (Protects core chat functionality)
     
     Business Value: Ensures reliable agent creation, execution, and cleanup
@@ -303,7 +303,7 @@ class TestAgentLifecycleManagement(SSotAsyncTestCase):
         self.assertEqual(user1_agent.user_context.user_id, self.user_context.user_id)
         self.assertEqual(user2_agent.user_context.user_id, user2_context.user_id)
 
-class TestWebSocketIntegration(SSotAsyncTestCase):
+class WebSocketIntegrationTests(SSotAsyncTestCase):
     """Test Suite 3: WebSocket Integration (Protects 90% of platform value)
     
     Business Value: Enables real-time chat notifications critical for user experience
@@ -429,7 +429,7 @@ class TestWebSocketIntegration(SSotAsyncTestCase):
         await adapter.notify_tool_executing('run_123', 'test_agent', 'tool', {})
         limited_websocket_manager.notify_agent_started.assert_called_once()
 
-class TestRegistryManagementAndSSotCompliance(SSotAsyncTestCase):
+class RegistryManagementAndSSotComplianceTests(SSotAsyncTestCase):
     """Test Suite 4: Registry Management & SSOT Compliance (Protects system architecture)
     
     Business Value: Ensures SSOT compliance and proper registry inheritance
@@ -525,7 +525,7 @@ class TestRegistryManagementAndSSotCompliance(SSotAsyncTestCase):
             self.assertIn(feature, factory_status, f'Factory status must include {feature}')
             self.assertTrue(factory_status[feature], f'Factory feature {feature} must be enabled')
 
-class TestToolDispatcherIntegration(SSotAsyncTestCase):
+class ToolDispatcherIntegrationTests(SSotAsyncTestCase):
     """Test Suite 5: Tool Dispatcher Integration (Protects tool execution reliability)
     
     Business Value: Ensures tools work correctly with user isolation
@@ -611,7 +611,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
             dispatcher = await self.registry.create_tool_dispatcher_for_user(user_context=self.test_user_context, websocket_bridge=mock_bridge)
             mock_enhance.assert_called_once_with(mock_dispatcher, websocket_manager=mock_websocket_manager, user_context=self.test_user_context, enable_notifications=True)
 
-class TestPerformanceAndConcurrency(SSotAsyncTestCase):
+class PerformanceAndConcurrencyTests(SSotAsyncTestCase):
     """Test Suite 6: Performance & Concurrency (Protects system scalability)
     
     Business Value: Ensures platform can handle enterprise-scale concurrent usage

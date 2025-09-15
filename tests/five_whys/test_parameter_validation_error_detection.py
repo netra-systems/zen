@@ -26,7 +26,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext, InvalidContextError
 
-class TestParameterValidationErrorDetection:
+class ParameterValidationErrorDetectionTests:
     """
     Parameter validation error detection tests that specifically target WHY #3
     from the Five Whys analysis - missing validation that would catch parameter

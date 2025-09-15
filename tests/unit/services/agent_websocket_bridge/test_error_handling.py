@@ -58,7 +58,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestAgentWebSocketBridgeErrorHandling(SSotAsyncTestCase):
+class AgentWebSocketBridgeErrorHandlingTests(SSotAsyncTestCase):
     """
     Test AgentWebSocketBridge error handling and recovery mechanisms.
     

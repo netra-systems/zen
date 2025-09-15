@@ -41,7 +41,7 @@ from tests.e2e.database_test_operations import (
 logger = central_logger.get_logger(__name__)
 
 
-class TestDatabaseOperations:
+class DatabaseOperationsTests:
     """Real database operations test with comprehensive cross-service validation."""
     
     def __init__(self):
@@ -92,7 +92,7 @@ async def db_test():
 
 
 @pytest.mark.e2e
-class TestPostgreSQLOperations:
+class PostgreSQLOperationsTests:
     """Test PostgreSQL operations across Auth and Backend services."""
     
     @pytest.mark.asyncio
@@ -152,7 +152,7 @@ class TestPostgreSQLOperations:
 
 
 @pytest.mark.e2e
-class TestClickHouseOperations:
+class ClickHouseOperationsTests:
     """Test ClickHouse analytics operations."""
     
     @pytest.mark.asyncio
@@ -218,7 +218,7 @@ class TestClickHouseOperations:
 
 
 @pytest.mark.e2e
-class TestCrossDatabaseConsistency:
+class CrossDatabaseConsistencyTests:
     """Test consistency across different database systems."""
     
     @pytest.mark.asyncio
@@ -283,7 +283,7 @@ class TestCrossDatabaseConsistency:
 
 
 @pytest.mark.e2e
-class TestTransactionAtomicity:
+class TransactionAtomicityTests:
     """Test transaction atomicity across database operations."""
     
     @pytest.mark.asyncio
@@ -376,7 +376,7 @@ class TestTransactionAtomicity:
 
 
 @pytest.mark.e2e
-class TestConnectionPoolManagement:
+class ConnectionPoolManagementTests:
     """Test database connection pool management and limits."""
     
     @pytest.mark.asyncio
@@ -460,7 +460,7 @@ class TestConnectionPoolManagement:
 
 
 @pytest.mark.e2e
-class TestConcurrentWrites:
+class ConcurrentWritesTests:
     """Test concurrent write operations across databases."""
     
     @pytest.mark.asyncio
@@ -539,27 +539,27 @@ async def test_complete_database_operations_integration():
     
     try:
         # Test PostgreSQL operations
-        postgresql_test = TestPostgreSQLOperations()
+        postgresql_test = PostgreSQLOperationsTests()
         await postgresql_test.test_postgresql_user_operations(db_test)
         
         # Test ClickHouse operations
-        clickhouse_test = TestClickHouseOperations()
+        clickhouse_test = ClickHouseOperationsTests()
         await clickhouse_test.test_clickhouse_analytics_writes(db_test)
         
         # Test cross-database consistency
-        consistency_test = TestCrossDatabaseConsistency()
+        consistency_test = CrossDatabaseConsistencyTests()
         await consistency_test.test_cross_database_consistency(db_test)
         
         # Test transaction atomicity
-        atomicity_test = TestTransactionAtomicity()
+        atomicity_test = TransactionAtomicityTests()
         await atomicity_test.test_transaction_atomicity(db_test)
         
         # Test connection pool management
-        pool_test = TestConnectionPoolManagement()
+        pool_test = ConnectionPoolManagementTests()
         await pool_test.test_connection_pool_management(db_test)
         
         # Test concurrent operations
-        concurrent_test = TestConcurrentWrites()
+        concurrent_test = ConcurrentWritesTests()
         await concurrent_test.test_concurrent_writes(db_test)
         
         logger.info("Complete database operations integration test PASSED")

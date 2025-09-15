@@ -53,7 +53,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app import smd, startup_module
 
 
-class TestStartupCompleteE2E(BaseTestCase, E2ETestFixture):
+class StartupCompleteE2ETests(BaseTestCase, E2ETestFixture):
     """
     Complete E2E tests for startup system with real services and authentication.
     

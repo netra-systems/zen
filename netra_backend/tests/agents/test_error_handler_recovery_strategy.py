@@ -22,7 +22,7 @@ from netra_backend.app.schemas.core_enums import ErrorCategory
 from netra_backend.app.core.error_recovery import RecoveryStrategy, ErrorRecoveryManager, get_error_recovery_manager
 from netra_backend.app.core.error_codes import ErrorSeverity
 
-class TestErrorRecoveryStrategy:
+class ErrorRecoveryStrategyTests:
     """Test error recovery strategy logic."""
 
     def _create_network_error_for_delay_test(self):

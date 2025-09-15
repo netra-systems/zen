@@ -46,7 +46,7 @@ from tests.e2e.staging_config import StagingTestConfig, staging_urls
 from shared.isolated_environment import get_env
 
 @pytest.mark.e2e
-class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase):
+class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase):
     """
     CRITICAL E2E Tests for GCP Staging WebSocket Infrastructure
     
@@ -313,7 +313,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
         print(' PASS:  REGRESSION TEST PASSED: GitHub issue #113 header stripping prevented')
 
 @pytest.mark.e2e
-class TestGCPWebSocketInfrastructureResilience(SSotBaseTestCase, unittest.TestCase):
+class GCPWebSocketInfrastructureResilienceTests(SSotBaseTestCase, unittest.TestCase):
     """
     Tests for GCP WebSocket infrastructure resilience and error handling.
     

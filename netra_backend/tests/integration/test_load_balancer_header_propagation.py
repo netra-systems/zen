@@ -42,7 +42,7 @@ from shared.types.core_types import UserID, ensure_user_id
 logger = logging.getLogger(__name__)
 
 
-class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest):
+class LoadBalancerHeaderPropagationTests(WebSocketIntegrationTest):
     """
     Test load balancer header propagation in real multi-service scenarios.
     

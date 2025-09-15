@@ -28,7 +28,7 @@ from test_framework.websocket_test_integration import WebSocketTestClient, WebSo
 from test_framework.embedded_websocket_server import embedded_websocket_server, EmbeddedWebSocketTestHelper
 logger = logging.getLogger(__name__)
 
-class TestWebSocketEmbeddedServerIntegration:
+class WebSocketEmbeddedServerIntegrationTests:
     """Integration tests for WebSocket functionality using embedded server."""
 
     @pytest.mark.integration
@@ -163,7 +163,7 @@ class TestWebSocketEmbeddedServerIntegration:
         assert chat_business_value_validated, 'WebSocket implementation must support chat business value with all critical events'
         logger.info(' PASS:  PRIMARY BUSINESS VALUE VALIDATED: WebSocket supports chat functionality')
 
-class TestWebSocketEmbeddedServerAdvanced:
+class WebSocketEmbeddedServerAdvancedTests:
     """Advanced WebSocket tests for edge cases and performance."""
 
     @pytest.mark.integration

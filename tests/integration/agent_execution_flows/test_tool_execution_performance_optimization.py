@@ -25,7 +25,7 @@ from netra_backend.app.tools.performance_optimizer import ToolPerformanceOptimiz
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestToolExecutionPerformanceOptimization(BaseIntegrationTest):
+class ToolExecutionPerformanceOptimizationTests(BaseIntegrationTest):
     """Integration tests for tool execution performance optimization."""
 
     @pytest.mark.integration

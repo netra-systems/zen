@@ -26,7 +26,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 @pytest.mark.unit
-class TestAuthenticationServiceSSOTCompliance(SSotAsyncTestCase):
+class AuthenticationServiceSSOTComplianceTests(SSotAsyncTestCase):
     """
     Validate Authentication Service SSOT compliance for factory removal.
     

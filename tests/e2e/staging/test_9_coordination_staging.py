@@ -14,7 +14,7 @@ from tests.e2e.staging_test_base import StagingTestBase, staging_test
 
 
 @pytest.mark.e2e
-class TestCoordinationStaging(StagingTestBase):
+class CoordinationStagingTests(StagingTestBase):
     """Test coordination in staging environment"""
     
     @staging_test
@@ -118,7 +118,7 @@ class TestCoordinationStaging(StagingTestBase):
 
 if __name__ == "__main__":
     async def run_tests():
-        test_class = TestCoordinationStaging()
+        test_class = CoordinationStagingTests()
         test_class.setup_class()
         
         try:

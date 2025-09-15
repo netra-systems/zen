@@ -41,7 +41,7 @@ from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestBusinessExpert(SSotAsyncTestCase):
+class BusinessExpertTests(SSotAsyncTestCase):
     """Test BusinessExpert domain agent capabilities and expertise."""
 
     def setup_method(self, method):
@@ -498,7 +498,7 @@ class TestBusinessExpert(SSotAsyncTestCase):
         # user execution system while providing specialized business expertise
 
 
-class TestBusinessExpertEdgeCases(SSotBaseTestCase):
+class BusinessExpertEdgeCasesTests(SSotBaseTestCase):
     """Test BusinessExpert edge cases and error conditions."""
 
     def setUp(self):

@@ -53,7 +53,7 @@ CIRCUIT_RECOVERY_TIMEOUT = 60
 CACHE_TTL_SECONDS = 300
 
 
-class TestAuthCircuitBreakerer:
+class AuthCircuitBreakererTests:
     """Comprehensive auth circuit breaker test orchestrator."""
     
     def __init__(self):
@@ -287,14 +287,14 @@ async def test_auth_circuit_breaker_comprehensive():
     - Tests cached tokens work when auth is down
     - Must complete in <10 seconds
     """
-    tester = TestAuthCircuitBreakerer()
+    tester = AuthCircuitBreakererTests()
     
     results = await _execute_circuit_breaker_tests(tester)
     _validate_circuit_breaker_results(results)
     _print_circuit_breaker_success(results)
 
 
-async def _execute_circuit_breaker_tests(tester: TestAuthCircuitBreakerer) -> Dict[str, Any]:
+async def _execute_circuit_breaker_tests(tester: AuthCircuitBreakererTests) -> Dict[str, Any]:
     """Execute comprehensive circuit breaker validation."""
     return await tester.run_comprehensive_test()
 
@@ -357,7 +357,7 @@ async def test_circuit_breaker_failure_threshold():
     
     BVJ: Circuit breaker prevents cascading failures by opening after threshold
     """
-    tester = TestAuthCircuitBreakerer()
+    tester = AuthCircuitBreakererTests()
     results = await tester.test_circuit_breaker_opens_after_failures()
     
     assert results.get("passed", False), f"Circuit breaker threshold test failed: {results}"
@@ -375,7 +375,7 @@ async def test_fallback_authentication_mechanism():
     
     BVJ: Fallback auth ensures system remains functional when auth service fails
     """
-    tester = TestAuthCircuitBreakerer()
+    tester = AuthCircuitBreakererTests()
     results = await tester.test_fallback_authentication_activates()
     
     assert results.get("passed", False), f"Fallback authentication test failed: {results}"
@@ -393,7 +393,7 @@ async def test_cached_tokens_during_outage():
     
     BVJ: Token caching maintains user sessions during auth service outages
     """
-    tester = TestAuthCircuitBreakerer()
+    tester = AuthCircuitBreakererTests()
     results = await tester.test_cached_tokens_work_when_auth_down()
     
     assert results.get("passed", False), f"Cached token test failed: {results}"

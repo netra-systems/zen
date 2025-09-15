@@ -12,7 +12,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import asyncio
 
 
-class TestActionsToMeetGoalsAgentStateDependencies:
+class ActionsToMeetGoalsAgentStateDependenciesTests:
     """Test suite for ActionsToMeetGoalsSubAgent state dependency handling."""
     
     @pytest.fixture

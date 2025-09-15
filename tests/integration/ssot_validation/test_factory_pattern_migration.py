@@ -22,7 +22,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.integration
-class TestFactoryPatternMigration(SSotAsyncTestCase):
+class FactoryPatternMigrationTests(SSotAsyncTestCase):
     """Test factory pattern migration to UserExecutionEngine SSOT."""
     
     async def async_setup_method(self, method=None):
@@ -544,7 +544,7 @@ class TestFactoryPatternMigration(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestFactoryPatternConsistency(SSotAsyncTestCase):
+class FactoryPatternConsistencyTests(SSotAsyncTestCase):
     """Test factory pattern consistency across different factory implementations."""
     
     async def test_factory_pattern_alternatives(self):

@@ -28,7 +28,7 @@ from unittest.mock import patch, AsyncMock, MagicMock
 from netra_backend.app.config import get_config
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestRedisConnectionIssues:
+class RedisConnectionIssuesTests:
     """Test Redis connection issues from GCP staging deployment."""
 
     @pytest.mark.asyncio

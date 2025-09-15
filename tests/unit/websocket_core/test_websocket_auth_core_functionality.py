@@ -36,7 +36,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 @pytest.mark.unit
-class TestWebSocketAuthenticatorCore(SSotAsyncTestCase):
+class WebSocketAuthenticatorCoreTests(SSotAsyncTestCase):
     """Test core functionality of WebSocket authentication."""
 
     def setUp(self):
@@ -153,7 +153,7 @@ class TestWebSocketAuthenticatorCore(SSotAsyncTestCase):
         self.assertEqual(decoded['subscription_tier'], 'enterprise')
 
 @pytest.mark.unit
-class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
+class WebSocketAuthenticationIntegrationTests(SSotAsyncTestCase):
     """Test WebSocket authentication integration scenarios."""
 
     def setUp(self):
@@ -213,7 +213,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
                     self.assertIsNone(result.user_id)
 
 @pytest.mark.unit
-class TestWebSocketAuthenticationSecurity(SSotAsyncTestCase):
+class WebSocketAuthenticationSecurityTests(SSotAsyncTestCase):
     """Test WebSocket authentication security aspects."""
 
     def setUp(self):

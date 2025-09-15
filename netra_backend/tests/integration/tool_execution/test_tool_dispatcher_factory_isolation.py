@@ -54,7 +54,7 @@ class MockTrackingTool:
         return [exec for exec in self._executions if exec['user_id'] == str(user_id)]
 
 
-class TestToolDispatcherFactoryIsolation(BaseIntegrationTest):
+class ToolDispatcherFactoryIsolationTests(BaseIntegrationTest):
     """Test tool dispatcher factory patterns and context isolation with real services."""
     
     @pytest.mark.integration

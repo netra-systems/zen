@@ -47,7 +47,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.isolated_environment_fixtures import isolated_env
 logger = logging.getLogger(__name__)
 
-class TestDatabaseManagerGCPCloudSQL(BaseIntegrationTest):
+class DatabaseManagerGCPCloudSQLTests(BaseIntegrationTest):
     """E2E tests for DatabaseManager with GCP Cloud SQL.
     
     Business Value: Validates production database connectivity preventing $500K+ ARR outages
@@ -245,7 +245,7 @@ class TestDatabaseManagerGCPCloudSQL(BaseIntegrationTest):
                 await session.commit()
             await db_manager.close_all()
 
-class TestDatabaseManagerVPCConnector(BaseIntegrationTest):
+class DatabaseManagerVPCConnectorTests(BaseIntegrationTest):
     """E2E tests for DatabaseManager with GCP VPC connector.
     
     Business Value: Validates private network database access for security compliance
@@ -334,7 +334,7 @@ class TestDatabaseManagerVPCConnector(BaseIntegrationTest):
                 assert len(hashed_result) == 32
             await db_manager.close_all()
 
-class TestDatabaseManagerProductionScale(BaseIntegrationTest):
+class DatabaseManagerProductionScaleTests(BaseIntegrationTest):
     """E2E tests for DatabaseManager at production scale.
     
     Business Value: Validates performance at enterprise customer scale
@@ -492,7 +492,7 @@ class TestDatabaseManagerProductionScale(BaseIntegrationTest):
                 await session.commit()
             await db_manager.close_all()
 
-class TestDatabaseManagerMonitoringIntegration(BaseIntegrationTest):
+class DatabaseManagerMonitoringIntegrationTests(BaseIntegrationTest):
     """E2E tests for DatabaseManager monitoring and health check integration.
     
     Business Value: Validates production monitoring and alerting capabilities

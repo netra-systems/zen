@@ -36,7 +36,7 @@ BACKPRESSURE_CONFIG = {
     "backpressure_threshold": 0.8  # CPU/Memory threshold
 }
 
-class TestBackpressureMechanismTesting:
+class BackpressureMechanismTestingTests:
     """Test backpressure mechanisms under overload"""
     
     @pytest.mark.asyncio

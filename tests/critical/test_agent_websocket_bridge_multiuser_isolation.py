@@ -65,7 +65,7 @@ class WebSocketEventCollector:
         """Get all event types received."""
         return {e.get('type', 'unknown') for e in self.events}
 
-class TestAgentWebSocketBridgeMultiUserIsolation:
+class AgentWebSocketBridgeMultiUserIsolationTests:
     """
     CRITICAL TEST SUITE: Validates multi-user isolation in AgentWebSocketBridge.
     
@@ -271,7 +271,7 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-class TestMigrationFromSingletonToFactory:
+class MigrationFromSingletonToFactoryTests:
     """
     Tests to validate migration path from singleton to factory pattern.
     """

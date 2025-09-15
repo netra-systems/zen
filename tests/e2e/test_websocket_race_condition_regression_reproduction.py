@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.e2e
 @pytest.mark.websocket_regression
 @pytest.mark.real_services
-class TestWebSocketRaceConditionRegressionE2E(SSotBaseTestCase):
+class WebSocketRaceConditionRegressionE2ETests(SSotBaseTestCase):
     """
     End-to-end tests reproducing WebSocket race condition regression in
     complete user chat flows with real WebSocket connections and services.
@@ -706,7 +706,7 @@ class TestWebSocketRaceConditionRegressionE2E(SSotBaseTestCase):
 @pytest.mark.e2e
 @pytest.mark.websocket_regression  
 @pytest.mark.production_simulation
-class TestProductionWebSocketEventDeliveryFailures(SSotBaseTestCase):
+class ProductionWebSocketEventDeliveryFailuresTests(SSotBaseTestCase):
     """
     Production-level simulation tests for WebSocket event delivery failures
     that reproduce the specific patterns seen in production environments.

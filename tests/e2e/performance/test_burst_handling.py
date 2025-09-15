@@ -26,7 +26,7 @@ from tests.e2e.test_helpers.performance_base import (
 logger = logging.getLogger(__name__)
 
 
-class TestMessageOrderingPreservation:
+class MessageOrderingPreservationTests:
     """Test message ordering preservation under high load."""
     
     @pytest.mark.asyncio
@@ -206,7 +206,7 @@ class TestMessageOrderingPreservation:
                 logger.warning(f"Client cleanup error: {e}")
 
 
-class TestDeliveryGuaranteeValidation:
+class DeliveryGuaranteeValidationTests:
     """Test message delivery guarantees under various conditions."""
     
     @pytest.mark.asyncio

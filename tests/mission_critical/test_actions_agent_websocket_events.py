@@ -64,7 +64,7 @@ class WebSocketEventCapture:
         self.start_time = time.time()
 
 
-class TestActionsAgentWebSocketCompliance:
+class ActionsAgentWebSocketComplianceTests:
     """Test ActionsAgent WebSocket event compliance."""
     
     REQUIRED_EVENTS = {

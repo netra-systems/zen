@@ -18,7 +18,7 @@ import subprocess
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestEventValidatorSsotRegressionPrevention(SSotBaseTestCase):
+class EventValidatorSsotRegressionPreventionTests(SSotBaseTestCase):
     """
     Regression prevention tests for EventValidator SSOT consolidation.
     

@@ -12,7 +12,7 @@ from fastapi import HTTPException, WebSocket
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestWebSocketSubprotocolNegotiation(SSotBaseTestCase):
+class WebSocketSubprotocolNegotiationTests(SSotBaseTestCase):
     """Test WebSocket subprotocol negotiation for JWT authentication"""
 
     def setup_method(self, method=None):

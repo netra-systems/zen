@@ -28,7 +28,7 @@ from netra_backend.tests.test_route_fixtures import (
     agent_test_client,
 )
 
-class TestAgentRoute:
+class AgentRouteTests:
     """Test agent API message processing and streaming functionality."""
     
     def test_agent_message_processing(self, agent_test_client):

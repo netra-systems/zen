@@ -33,7 +33,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.e2e
-class TestCompleteAuditTrail:
+class CompleteAuditTrailTests:
     """Test complete audit trail logging across all services.
     
     Enterprise BVJ: Complete audit trails required for compliance certification
@@ -99,7 +99,7 @@ class TestCompleteAuditTrail:
 
 
 @pytest.mark.e2e
-class TestAuditDataIntegrity:
+class AuditDataIntegrityTests:
     """Test audit data integrity and tamper-proof logging verification.
     
     Enterprise BVJ: Tamper-proof audit logs critical for SOC2 Type II compliance

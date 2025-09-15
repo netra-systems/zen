@@ -41,7 +41,7 @@ import asyncpg
 import redis.asyncio as redis
 
 
-class TestSessionManagementIntegration(BaseIntegrationTest):
+class SessionManagementIntegrationTests(BaseIntegrationTest):
     """Integration tests for Session Management - NO MOCKS, REAL SERVICES ONLY."""
     
     def setup_method(self):

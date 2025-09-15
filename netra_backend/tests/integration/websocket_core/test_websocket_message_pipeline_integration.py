@@ -24,7 +24,7 @@ from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestWebSocketMessagePipelineIntegration(BaseIntegrationTest):
+class WebSocketMessagePipelineIntegrationTests(BaseIntegrationTest):
     """Integration tests for complete WebSocket message pipeline."""
     
     @pytest.fixture

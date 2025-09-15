@@ -33,7 +33,7 @@ TEST_CONFIG = {
 }
 
 @pytest.mark.e2e
-class TestResourceIsolationSuite:
+class ResourceIsolationSuiteTests:
     """Main test suite for resource isolation testing."""
     
     def __init__(self):

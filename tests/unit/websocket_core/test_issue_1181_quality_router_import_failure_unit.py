@@ -32,7 +32,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestIssue1181QualityRouterImportFailure(SSotAsyncTestCase, unittest.TestCase):
+class Issue1181QualityRouterImportFailureTests(SSotAsyncTestCase, unittest.TestCase):
     """Test suite to reproduce QualityMessageRouter import failures for Issue #1181."""
     
     def setUp(self):

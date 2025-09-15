@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import create_engine
 
 
-class TestDatabaseDriverImportAvailability:
+class DatabaseDriverImportAvailabilityTests:
     """Tests that replicate database driver import issues from staging logs"""
     
     def test_psycopg2_module_availability(self):
@@ -104,7 +104,7 @@ class TestDatabaseDriverImportAvailability:
             ]), f"Expected driver availability error for {driver}, got: {exc_info.value}"
 
 
-class TestDatabaseDriverVersionCompatibility:
+class DatabaseDriverVersionCompatibilityTests:
     """Test database driver version compatibility issues"""
     
     def test_psycopg2_version_compatibility(self):
@@ -193,7 +193,7 @@ class TestDatabaseDriverVersionCompatibility:
         return get_env().get('ENVIRONMENT') in ['staging', 'production']
 
 
-class TestDatabaseDriverDeploymentIssues:
+class DatabaseDriverDeploymentIssuesTests:
     """Test database driver issues specific to deployment environments"""
     
     def test_docker_container_driver_installation(self):
@@ -291,7 +291,7 @@ class TestDatabaseDriverDeploymentIssues:
         import_module(package_name)  # Will fail if patched to None
 
 
-class TestDatabaseDriverFallbackStrategies:
+class DatabaseDriverFallbackStrategiesTests:
     """Test fallback strategies when drivers are unavailable"""
     
     def test_sync_to_async_driver_fallback(self):

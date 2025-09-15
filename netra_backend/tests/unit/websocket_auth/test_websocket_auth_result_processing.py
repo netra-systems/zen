@@ -56,7 +56,7 @@ from shared.types.core_types import UserID, ensure_user_id
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestWebSocketAuthResultCreationAndValidation(SSotBaseTestCase):
+class WebSocketAuthResultCreationAndValidationTests(SSotBaseTestCase):
     """
     Unit tests for WebSocketAuthResult creation and validation.
     
@@ -150,7 +150,7 @@ class TestWebSocketAuthResultCreationAndValidation(SSotBaseTestCase):
         assert first_read == second_read
 
 @pytest.mark.unit
-class TestWebSocketAuthResultSerialization(SSotBaseTestCase):
+class WebSocketAuthResultSerializationTests(SSotBaseTestCase):
     """
     Unit tests for WebSocket authentication result serialization.
     
@@ -261,7 +261,7 @@ class TestWebSocketAuthResultSerialization(SSotBaseTestCase):
         assert deserialized_stats['array_value'] == original_stats['array_value']
 
 @pytest.mark.unit
-class TestWebSocketAuthResultErrorHandling(SSotBaseTestCase):
+class WebSocketAuthResultErrorHandlingTests(SSotBaseTestCase):
     """
     Unit tests for WebSocket authentication result error handling.
     

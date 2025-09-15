@@ -20,7 +20,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestWebSocketRESTAuthConsistency(SSotAsyncTestCase):
+class WebSocketRESTAuthConsistencyTests(SSotAsyncTestCase):
     """
     Integration test validating authentication consistency between WebSocket and REST protocols.
     Tests same auth service delegation patterns across both communication methods.

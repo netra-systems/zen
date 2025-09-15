@@ -15,7 +15,7 @@ import asyncio
 from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestAgentCircuitBreakerIntegration(SSotAsyncTestCase):
+class AgentCircuitBreakerIntegrationTests(SSotAsyncTestCase):
     """Test agent system integration with unified circuit breakers."""
 
     def test_agent_system_can_import_circuit_breakers(self):
@@ -144,7 +144,7 @@ class TestAgentCircuitBreakerIntegration(SSotAsyncTestCase):
         assert 'metrics' in status, 'Status should include metrics'
         print('\nAGENT INDEPENDENCE: Agent circuit breakers work independently of resilience framework availability')
 
-class TestAgentCircuitBreakerDecorators(SSotAsyncTestCase):
+class AgentCircuitBreakerDecoratorsTests(SSotAsyncTestCase):
     """Test circuit breaker decorator usage in agent contexts."""
 
     def test_agent_llm_call_decorator_compatibility(self):
@@ -187,7 +187,7 @@ class TestAgentCircuitBreakerDecorators(SSotAsyncTestCase):
             await execute_tool('failing_tool', {})
         print('\nAGENT TOOL DECORATOR: Async circuit breaker decorator works with tool execution')
 
-class TestAgentCircuitBreakerErrorScenarios(SSotAsyncTestCase):
+class AgentCircuitBreakerErrorScenariosTests(SSotAsyncTestCase):
     """Test error scenarios specific to agent circuit breaker integration."""
 
     def test_agent_circuit_breaker_missing_resilience_dependency_handling(self):

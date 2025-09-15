@@ -263,7 +263,7 @@ class EnvironmentDetector:
             return 'development'  # Safe fallback
 
 
-class TestConfigurationCascadePropagation:
+class ConfigurationCascadePropagationTests:
     """Integration tests for configuration cascade and environment propagation."""
     
     @pytest.fixture

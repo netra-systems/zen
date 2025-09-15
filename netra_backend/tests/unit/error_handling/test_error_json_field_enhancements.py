@@ -28,7 +28,7 @@ from netra_backend.app.core.exceptions_base import NetraException
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestErrorResponseModelEnhancements:
+class ErrorResponseModelEnhancementsTests:
     """Test enhanced ErrorResponse model with debugging fields."""
 
     def test_error_response_lacks_line_number_field(self):
@@ -112,7 +112,7 @@ class TestErrorResponseModelEnhancements:
             )
 
 
-class TestUnifiedErrorHandlerEnhancements:
+class UnifiedErrorHandlerEnhancementsTests:
     """Test UnifiedErrorHandler missing debugging functionality."""
 
     @pytest.fixture
@@ -259,7 +259,7 @@ class TestUnifiedErrorHandlerEnhancements:
             assert prod_details == dev_result.details
 
 
-class TestAPIErrorHandlerEnhancements:
+class APIErrorHandlerEnhancementsTests:
     """Test API error handler missing debug functionality."""
 
     @pytest.mark.asyncio
@@ -291,7 +291,7 @@ class TestAPIErrorHandlerEnhancements:
         assert "debug_correlation_id" not in response_data
 
 
-class TestAgentErrorHandlerEnhancements:
+class AgentErrorHandlerEnhancementsTests:
     """Test agent error handler missing debug functionality."""
 
     @pytest.mark.asyncio
@@ -345,7 +345,7 @@ class TestAgentErrorHandlerEnhancements:
             _ = error.tool_execution_duration
 
 
-class TestSecurityConsiderations:
+class SecurityConsiderationsTests:
     """Test that debug info is handled securely."""
 
     @pytest.mark.asyncio

@@ -27,7 +27,7 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
-class TestWebSocketConnectionCleanupResourceManagementIntegration(BaseIntegrationTest):
+class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrationTest):
     """Test WebSocket connection cleanup and resource management with comprehensive application state validation."""
     
     def _create_resource_tracking_websocket(self, connection_id: str, user_id: str):

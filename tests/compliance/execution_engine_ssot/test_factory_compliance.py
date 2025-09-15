@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Set, Type
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestFactoryCompliance(SSotBaseTestCase):
+class FactoryComplianceTests(SSotBaseTestCase):
     """Validate factory compliance with SSOT execution engine pattern."""
 
     def setUp(self):

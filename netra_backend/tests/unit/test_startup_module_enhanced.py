@@ -45,7 +45,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app import startup_module
 
 
-class TestStartupModuleEnhanced(BaseTestCase):
+class StartupModuleEnhancedTests(BaseTestCase):
     """
     Enhanced unit tests for startup_module.py with business value focus.
     

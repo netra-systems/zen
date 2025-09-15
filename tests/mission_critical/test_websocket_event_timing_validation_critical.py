@@ -67,7 +67,7 @@ class EventTimingMetrics:
     performance_grade: str = "UNKNOWN"  # A, B, C, D, F
 
 
-class TestWebSocketEventTimingValidationCritical(SSotAsyncTestCase):
+class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
     """
     Critical WebSocket event timing validation tests.
     

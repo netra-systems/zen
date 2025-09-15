@@ -12,7 +12,7 @@ from netra_backend.app.services.database.repository_errors import RepositoryErro
 from netra_backend.app.core.exceptions_database import DatabaseError
 
 
-class TestThreadQueryError:
+class ThreadQueryErrorTests:
     """Test thread query failures with asyncpg parameter type issues."""
     
     @pytest.mark.asyncio

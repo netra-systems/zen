@@ -116,7 +116,7 @@ class RegistryLifecycleTracker:
 
 @pytest.mark.integration
 @pytest.mark.toolregistry
-class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
+class ToolRegistryLifecycleManagementTests(SSotBaseTestCase):
     """
     Integration tests for tool registry lifecycle management.
     
@@ -533,7 +533,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
 
 @pytest.mark.integration 
 @pytest.mark.toolregistry
-class TestWebSocketRegistryCleanup(SSotBaseTestCase):
+class WebSocketRegistryCleanupTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket connection registry cleanup patterns.
     

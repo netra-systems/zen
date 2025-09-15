@@ -78,7 +78,7 @@ class MockBusinessTool(BaseTool):
         }
 
 
-class TestToolDispatcherIntegration(BaseAgentExecutionTest):
+class ToolDispatcherIntegrationTests(BaseAgentExecutionTest):
     """Test tool dispatcher integration with real business scenarios."""
     
     async def create_tool_dispatcher_with_business_tools(self, 

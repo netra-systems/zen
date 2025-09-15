@@ -139,7 +139,7 @@ class IntegrationRedisManager:
         """Simulate realistic health check."""
         return {'connected': self._connected, 'monitoring_ready': self._background_monitoring_ready, 'health_checks_ready': self._background_health_checks_ready, 'fully_ready': self.is_fully_ready()}
 
-class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
+class GCPValidatorRaceConditionIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for GCP validator race condition fix with real components.
     
@@ -386,7 +386,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         print(f"   GCP detected: {result.details.get('gcp_detected')}")
         print(f'   Warnings: {result.warnings}')
 
-class TestComponentIntegrationTimingAnalysis:
+class ComponentIntegrationTimingAnalysisTests:
     """
     Timing analysis tests for component integration with race condition fix.
     

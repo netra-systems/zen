@@ -177,7 +177,7 @@ class ConcurrencyWebSocketManager:
             concurrent_clusters.append(current_cluster)
         return {'total_events': len(self.all_events), 'unique_users': len(self.events_by_user), 'unique_runs': len(self.events_by_run), 'events_per_second': events_per_second, 'concurrent_clusters': len(concurrent_clusters), 'max_cluster_size': max((len(cluster) for cluster in concurrent_clusters)) if concurrent_clusters else 0, 'total_duration_seconds': total_time}
 
-class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
+class ConcurrentAgentExecutionIntegrationTests(BaseIntegrationTest):
     """Integration tests for concurrent agent execution safety."""
 
     def setup_method(self):

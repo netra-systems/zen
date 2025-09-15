@@ -55,7 +55,7 @@ class WebSocketTestHelper:
                 import asyncio
 
 
-                class TestDockerForceFlagProhibition:
+                class DockerForceFlagProhibitionTests:
                     """Comprehensive tests for Docker force flag prohibition."""
 
                     def test_guardian_detects_simple_force_flag(self):
@@ -336,7 +336,7 @@ class WebSocketTestHelper:
                                                                                                                                                                                                                                 mock_subprocess.assert_not_called()
 
 
-                                                                                                                                                                                                                                class TestGlobalValidationFunction:
+                                                                                                                                                                                                                                class GlobalValidationFunctionTests:
                                                                                                                                                                                                                                     """Test the global validation convenience function."""
 
                                                                                                                                                                                                                                     def test_global_validate_function(self):
@@ -356,7 +356,7 @@ class WebSocketTestHelper:
                                                                                                                                                                                                                                                 assert "docker stop" in alt
 
 
-                                                                                                                                                                                                                                                class TestRealWorldScenarios:
+                                                                                                                                                                                                                                                class RealWorldScenariosTests:
                                                                                                                                                                                                                                                     """Test scenarios based on real-world Docker usage."""
 
                                                                                                                                                                                                                                                     def test_docker_compose_with_force(self):

@@ -77,7 +77,7 @@ USER_ISOLATION_SCENARIOS = [
 ]
 
 
-class TestMultiUserGoldenPath(SSotAsyncTestCase):
+class MultiUserGoldenPathTests(SSotAsyncTestCase):
     """
     Multi-User Golden Path E2E Test Suite
     

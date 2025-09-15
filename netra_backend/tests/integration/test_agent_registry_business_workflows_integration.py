@@ -229,7 +229,7 @@ class MockWebSocketManager:
         return self.user_connections.get(user_id, [])
 
 
-class TestAgentRegistryBusinessWorkflowsIntegration(BaseIntegrationTest):
+class AgentRegistryBusinessWorkflowsIntegrationTests(BaseIntegrationTest):
     """Comprehensive AgentRegistry integration tests with real business workflows."""
     
     def setup_method(self):

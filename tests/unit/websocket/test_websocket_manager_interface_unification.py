@@ -26,7 +26,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestWebSocketManagerInterfaceUnification(SSotBaseTestCase, unittest.TestCase):
+class WebSocketManagerInterfaceUnificationTests(SSotBaseTestCase, unittest.TestCase):
     """Test suite to validate interface unification for WebSocket managers.
     
     These tests should FAIL initially, proving fragmented interfaces exist.

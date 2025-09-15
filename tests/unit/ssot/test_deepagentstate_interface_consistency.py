@@ -14,7 +14,7 @@ from typing import get_type_hints, get_origin, get_args
 from pydantic import BaseModel
 
 @pytest.mark.unit
-class TestDeepAgentStateInterfaceConsistency:
+class DeepAgentStateInterfaceConsistencyTests:
     """Test suite validating DeepAgentState interface consistency"""
 
     def get_class_signature(self, cls):

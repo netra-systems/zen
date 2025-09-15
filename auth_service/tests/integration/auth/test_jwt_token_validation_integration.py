@@ -27,7 +27,7 @@ from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.database.models import AuthUser as User, AuthSession as UserSession
 
 
-class TestJWTTokenValidationIntegration(BaseIntegrationTest):
+class JWTTokenValidationIntegrationTests(BaseIntegrationTest):
     """Integration tests for JWT token validation with real authentication flows."""
     
     def setup_method(self):
@@ -259,7 +259,7 @@ class TestJWTTokenValidationIntegration(BaseIntegrationTest):
         self.logger.info("JWT multi-user isolation validation successful")
 
 
-class TestJWTSecretSynchronizationIntegration(BaseIntegrationTest):
+class JWTSecretSynchronizationIntegrationTests(BaseIntegrationTest):
     """Integration tests for JWT secret synchronization across services."""
     
     def setup_method(self):

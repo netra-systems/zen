@@ -26,7 +26,7 @@ from test_framework.ssot.websocket_golden_path_helpers import WebSocketGoldenPat
 from netra_backend.app.websocket_core.event_validator import AgentEventValidator
 from test_framework.ssot.docker import DockerTestManager
 
-class TestChatCloudRunSimulation(BaseTestCase):
+class ChatCloudRunSimulationTests(BaseTestCase):
     """
     E2E tests simulating Cloud Run environment conditions.
     
@@ -286,7 +286,7 @@ class TestChatCloudRunSimulation(BaseTestCase):
         del memory_objects
         gc.collect()
 
-class TestWebSocketErrorRecovery(BaseTestCase):
+class WebSocketErrorRecoveryTests(BaseTestCase):
     """Test WebSocket error recovery after fixing import issues."""
 
     @pytest.mark.e2e

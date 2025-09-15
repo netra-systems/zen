@@ -22,7 +22,7 @@ import os
 from netra_backend.app.core.environment_context.cloud_environment_detector import CloudEnvironmentDetector, EnvironmentContext, EnvironmentType, CloudPlatform, get_cloud_environment_detector, detect_current_environment
 
 @pytest.mark.unit
-class TestCloudEnvironmentDetector:
+class CloudEnvironmentDetectorTests:
     """Test comprehensive cloud environment detection."""
 
     @pytest.fixture
@@ -165,7 +165,7 @@ class TestCloudEnvironmentDetector:
                 mock_detect.assert_called()
 
 @pytest.mark.unit
-class TestEnvironmentDetectionIntegration:
+class EnvironmentDetectionIntegrationTests:
     """Integration tests for environment detection."""
 
     @pytest.mark.asyncio
@@ -233,7 +233,7 @@ class TestEnvironmentDetectionIntegration:
                 print(f'    FAIL:  NO MORE localhost:8081 in staging!')
 
 @pytest.mark.unit
-class TestEnvironmentDetectionFailureCases:
+class EnvironmentDetectionFailureCasesTests:
     """Test failure scenarios and error handling."""
 
     @pytest.mark.asyncio

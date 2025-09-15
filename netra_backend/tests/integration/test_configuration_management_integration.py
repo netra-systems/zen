@@ -38,7 +38,7 @@ from netra_backend.app.services.configuration_service import (
 from netra_backend.app.core.configuration.base import UnifiedConfigManager as ConfigurationManager
 
 
-class TestConfigurationManagementIntegration(BaseIntegrationTest):
+class ConfigurationManagementIntegrationTests(BaseIntegrationTest):
     """Test configuration management with real environment isolation."""
 
     @pytest.mark.integration

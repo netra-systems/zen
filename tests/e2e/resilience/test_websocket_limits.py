@@ -25,7 +25,7 @@ from netra_backend.tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTe
 
 # Add project root to path
 @pytest.mark.e2e
-class TestWebSocketLimits:
+class WebSocketLimitsTests:
     """Test WebSocket connection limits"""
     
     @pytest.mark.e2e

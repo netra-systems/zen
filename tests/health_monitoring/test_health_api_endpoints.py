@@ -19,7 +19,7 @@ app = FastAPI()
 app.include_router(staging_health_router)
 client = TestClient(app)
 
-class TestStagingHealthOverview:
+class StagingHealthOverviewTests:
     """Test staging health overview endpoint."""
 
     @patch('netra_backend.app.routes.staging_health.staging_health_monitor')
@@ -57,7 +57,7 @@ class TestStagingHealthOverview:
         assert response.status_code == 500
         assert 'Failed to retrieve staging health overview' in response.json()['detail']
 
-class TestWebSocketHealthEndpoint:
+class WebSocketHealthEndpointTests:
     """Test WebSocket health monitoring endpoint."""
 
     @patch('netra_backend.app.routes.staging_health.staging_health_monitor')
@@ -100,7 +100,7 @@ class TestWebSocketHealthEndpoint:
         expected_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
         assert all((event in critical_events for event in expected_events))
 
-class TestDatabaseHealthEndpoint:
+class DatabaseHealthEndpointTests:
     """Test database health monitoring endpoint."""
 
     @patch('netra_backend.app.routes.staging_health.staging_health_monitor')
@@ -142,7 +142,7 @@ class TestDatabaseHealthEndpoint:
         assert 'average_query_time_ms' in data['performance_metrics']
         assert 'connection_pool_utilization' in data['performance_metrics']
 
-class TestServicesHealthEndpoint:
+class ServicesHealthEndpointTests:
     """Test services health monitoring endpoint."""
 
     @patch('netra_backend.app.routes.staging_health.staging_health_monitor')
@@ -183,7 +183,7 @@ class TestServicesHealthEndpoint:
         assert 'dependency_chain' in data['dependency_analysis']
         assert 'critical_path' in data['dependency_analysis']
 
-class TestPerformanceMetricsEndpoint:
+class PerformanceMetricsEndpointTests:
     """Test performance metrics monitoring endpoint."""
 
     @patch('netra_backend.app.routes.staging_health.staging_health_monitor')
@@ -223,7 +223,7 @@ class TestPerformanceMetricsEndpoint:
         assert 'trend_analysis' in data
         assert 'performance_predictions' in data
 
-class TestCriticalHealthEndpoint:
+class CriticalHealthEndpointTests:
     """Test critical health monitoring endpoint."""
 
     @patch('netra_backend.app.routes.staging_health.staging_health_monitor')
@@ -266,7 +266,7 @@ class TestCriticalHealthEndpoint:
         assert data['alert_threshold_used'] == 0.8
         assert data['critical_analysis']['components_below_threshold'] == 1
 
-class TestHealthAlertsEndpoint:
+class HealthAlertsEndpointTests:
     """Test health alerts subscription endpoint."""
 
     def test_subscribe_to_health_alerts_success(self):
@@ -289,7 +289,7 @@ class TestHealthAlertsEndpoint:
         assert response.status_code == 400
         assert 'Invalid webhook URL provided' in response.json()['detail']
 
-class TestHealthSummaryEndpoint:
+class HealthSummaryEndpointTests:
     """Test health status summary endpoint."""
 
     @patch('netra_backend.app.routes.staging_health.staging_health_monitor')
@@ -315,7 +315,7 @@ class TestHealthSummaryEndpoint:
         assert alert_summary['alert_count'] == 0
         assert alert_summary['highest_severity'] == 'none'
 
-class TestHealthEndpointsErrorHandling:
+class HealthEndpointsErrorHandlingTests:
     """Test error handling across health monitoring endpoints."""
 
     @patch('netra_backend.app.routes.staging_health.staging_health_monitor')
@@ -358,7 +358,7 @@ class TestHealthEndpointsErrorHandling:
         assert response.status_code == 500
         assert 'Failed to retrieve critical health status' in response.json()['detail']
 
-class TestHealthEndpointsIntegration:
+class HealthEndpointsIntegrationTests:
     """Integration tests for health monitoring API endpoints."""
 
     @patch('netra_backend.app.routes.staging_health.staging_health_monitor')

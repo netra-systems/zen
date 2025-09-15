@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.timeout_configuration import get_websocket_recv_timeout, get_agent_execution_timeout, TimeoutTier
 
-class TestWebSocketStartupTiming(SSotAsyncTestCase):
+class WebSocketStartupTimingTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket startup timing scenarios without Docker dependencies.
     

@@ -58,7 +58,7 @@ class SyncOperation:
 @pytest.mark.integration
 @pytest.mark.cross_system
 @pytest.mark.synchronization
-class TestServiceSynchronizationIntegration(SSotAsyncTestCase):
+class ServiceSynchronizationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for cross-service data synchronization.
     

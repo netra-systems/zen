@@ -176,7 +176,7 @@ class MultiServiceCircuitBreakerCoordinator:
         cascade_risk = await self.check_cascade_failure_risk()
         return {'overall_health': 'healthy' if not cascade_risk['high_risk'] else 'degraded', 'total_services': len(self.services), 'healthy_services': len([s for s in self.services.values() if s.state == 'closed']), 'degraded_services': len([s for s in self.services.values() if s.state == 'half_open']), 'failed_services': len([s for s in self.services.values() if s.state == 'open']), 'overall_failure_rate': total_failures / max(total_calls, 1), 'cascade_failure_risk': cascade_risk, 'service_details': service_stats}
 
-class TestCircuitBreakerErrorHandling(BaseIntegrationTest):
+class CircuitBreakerErrorHandlingTests(BaseIntegrationTest):
     """Integration tests for circuit breaker error handling patterns."""
 
     def setup_method(self):

@@ -20,7 +20,7 @@ from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestEmailVerificationTokens(SSotBaseTestCase):
+class EmailVerificationTokensTests(SSotBaseTestCase):
     """Unit tests for email verification token generation and validation."""
     
     def setup_method(self, method=None):

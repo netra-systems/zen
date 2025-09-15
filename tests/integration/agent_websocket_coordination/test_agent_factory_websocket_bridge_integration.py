@@ -30,7 +30,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
-class TestAgentFactoryWebSocketBridgeIntegration(SSotAsyncTestCase):
+class AgentFactoryWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
     """Test Agent Factory WebSocket Bridge Integration."""
     
     @pytest.mark.integration

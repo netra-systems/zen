@@ -39,7 +39,7 @@ from netra_backend.app.core.timeout_configuration import (
 
 
 @pytest.mark.unit
-class TestWebSocketTimeoutInadequacy(SSotAsyncTestCase):
+class WebSocketTimeoutInadequacyTests(SSotAsyncTestCase):
     """
     Unit tests demonstrating timeout inadequacy for Issue #379.
     
@@ -170,7 +170,7 @@ class TestWebSocketTimeoutInadequacy(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestWebSocketEventAcknowledgmentGaps(SSotAsyncTestCase):
+class WebSocketEventAcknowledgmentGapsTests(SSotAsyncTestCase):
     """
     Unit tests demonstrating missing event acknowledgment system.
     
@@ -324,7 +324,7 @@ class TestWebSocketEventAcknowledgmentGaps(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestWebSocketEventTimingRaceConditions(SSotAsyncTestCase):
+class WebSocketEventTimingRaceConditionsTests(SSotAsyncTestCase):
     """
     Unit tests demonstrating race condition gaps in event timing.
     
@@ -463,9 +463,9 @@ def run_issue_379_unit_tests():
     gaps they demonstrate for Issue #379 resolution planning.
     """
     test_classes = [
-        TestWebSocketTimeoutInadequacy,
-        TestWebSocketEventAcknowledgmentGaps, 
-        TestWebSocketEventTimingRaceConditions
+        WebSocketTimeoutInadequacyTests,
+        WebSocketEventAcknowledgmentGapsTests, 
+        WebSocketEventTimingRaceConditionsTests
     ]
     
     gap_summary = {

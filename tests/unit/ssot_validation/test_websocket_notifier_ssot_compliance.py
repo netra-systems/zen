@@ -22,7 +22,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.unit
-class TestWebSocketNotifierImportPathValidation(SSotBaseTestCase):
+class WebSocketNotifierImportPathValidationTests(SSotBaseTestCase):
     """Test 1-5: Import Path Validation Tests (PASSING)"""
 
     def test_canonical_import_path_works(self):
@@ -86,7 +86,7 @@ class TestWebSocketNotifierImportPathValidation(SSotBaseTestCase):
             self.fail(f'Documentation compliance check failed: {e}')
 
 @pytest.mark.unit
-class TestWebSocketNotifierFactoryPatternEnforcement(SSotBaseTestCase):
+class WebSocketNotifierFactoryPatternEnforcementTests(SSotBaseTestCase):
     """Test 6-13: Factory Pattern Enforcement Tests (PASSING)"""
 
     def setUp(self):
@@ -213,7 +213,7 @@ class TestWebSocketNotifierFactoryPatternEnforcement(SSotBaseTestCase):
             self.skipTest(f'Factory pattern not available: {e}')
 
 @pytest.mark.unit
-class TestWebSocketNotifierSSOTImplementation(SSotBaseTestCase):
+class WebSocketNotifierSSOTImplementationTests(SSotBaseTestCase):
     """Test 14-18: SSOT Implementation Tests (PASSING)"""
 
     def test_single_websocket_notifier_class_definition(self):
@@ -305,7 +305,7 @@ class TestWebSocketNotifierSSOTImplementation(SSotBaseTestCase):
             self.skipTest(f'Implementation not available for documentation test: {e}')
 
 @pytest.mark.unit
-class TestWebSocketNotifierUserIsolation(SSotBaseTestCase):
+class WebSocketNotifierUserIsolationTests(SSotBaseTestCase):
     """Test 19-22: User Isolation Tests (PASSING)"""
 
     def test_websocket_events_only_to_correct_user(self):

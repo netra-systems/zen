@@ -104,7 +104,7 @@ class ErrorHandlingReportValidator:
         }
 
 
-class TestErrorHandlingFallbackReportIntegration(BaseIntegrationTest):
+class ErrorHandlingFallbackReportIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for error handling and fallback report mechanisms
     

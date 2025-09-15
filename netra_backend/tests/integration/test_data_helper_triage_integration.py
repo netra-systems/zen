@@ -91,7 +91,7 @@ async def user_execution_contexts(test_users):
         contexts.append(context)
     yield contexts
 
-class TestDataHelperTriageIntegration(BaseIntegrationTest):
+class DataHelperTriageIntegrationTests(BaseIntegrationTest):
     """Integration test suite for data helper triage flow with real services."""
 
     @pytest.mark.integration

@@ -42,7 +42,7 @@ from shared.isolated_environment import IsolatedEnvironment
 logger = logging.getLogger(__name__)
 
 
-class TestJWTHandlerCore:
+class JWTHandlerCoreTests:
     """
     Core JWTHandler functionality tests with real JWT operations
     No mocks - uses real PyJWT library, real cryptographic operations
@@ -75,7 +75,7 @@ class TestJWTHandlerCore:
                 pass  # Redis might not be available
 
 
-class TestJWTHandlerInitialization(TestJWTHandlerCore):
+class JWTHandlerInitializationTests(JWTHandlerCoreTests):
     """Test JWTHandler initialization and configuration"""
     
     def test_jwt_handler_init_with_real_secret(self):
@@ -112,7 +112,7 @@ class TestJWTHandlerInitialization(TestJWTHandlerCore):
         assert len(handler._user_blacklist) == 0
 
 
-class TestJWTHandlerTokenCreation(TestJWTHandlerCore):
+class JWTHandlerTokenCreationTests(JWTHandlerCoreTests):
     """Test JWT token creation with real cryptographic operations"""
     
     def test_create_access_token_generates_valid_jwt(self):
@@ -214,7 +214,7 @@ class TestJWTHandlerTokenCreation(TestJWTHandlerCore):
         assert abs(actual_refresh_exp - expected_refresh_exp) < 10
 
 
-class TestJWTHandlerTokenValidation(TestJWTHandlerCore):
+class JWTHandlerTokenValidationTests(JWTHandlerCoreTests):
     """Test JWT token validation with security focus"""
     
     def test_validate_token_with_valid_access_token_succeeds(self):
@@ -365,7 +365,7 @@ class TestJWTHandlerTokenValidation(TestJWTHandlerCore):
             assert result is None, f"Should fail for incomplete payload: {incomplete_payload}"
 
 
-class TestJWTHandlerSecurityValidation(TestJWTHandlerCore):
+class JWTHandlerSecurityValidationTests(JWTHandlerCoreTests):
     """Test advanced security validation features"""
     
     def test_validate_token_security_consolidated_rejects_weak_algorithms(self):
@@ -442,7 +442,7 @@ class TestJWTHandlerSecurityValidation(TestJWTHandlerCore):
             assert self.handler._validate_enhanced_jwt_claims(invalid_payload) is False
 
 
-class TestJWTHandlerBlacklistOperations(TestJWTHandlerCore):
+class JWTHandlerBlacklistOperationsTests(JWTHandlerCoreTests):
     """Test token and user blacklist operations"""
     
     def test_blacklist_token_adds_to_blacklist(self):
@@ -540,7 +540,7 @@ class TestJWTHandlerBlacklistOperations(TestJWTHandlerCore):
         assert info["user_count"] >= 1   # At least our 1 user
 
 
-class TestJWTHandlerRefreshTokenOperations(TestJWTHandlerCore):
+class JWTHandlerRefreshTokenOperationsTests(JWTHandlerCoreTests):
     """Test refresh token operations and replay protection"""
     
     def test_refresh_access_token_with_valid_refresh_token_succeeds(self):
@@ -638,7 +638,7 @@ class TestJWTHandlerRefreshTokenOperations(TestJWTHandlerCore):
         assert result is None
 
 
-class TestJWTHandlerIDTokenValidation(TestJWTHandlerCore):
+class JWTHandlerIDTokenValidationTests(JWTHandlerCoreTests):
     """Test OAuth ID token validation for external providers"""
     
     def test_validate_id_token_with_valid_token_succeeds(self):
@@ -716,7 +716,7 @@ class TestJWTHandlerIDTokenValidation(TestJWTHandlerCore):
         assert result is None
 
 
-class TestJWTHandlerPerformanceAndUtilities(TestJWTHandlerCore):
+class JWTHandlerPerformanceAndUtilitiesTests(JWTHandlerCoreTests):
     """Test performance monitoring and utility functions"""
     
     def test_get_performance_stats_returns_metrics(self):
@@ -755,7 +755,7 @@ class TestJWTHandlerPerformanceAndUtilities(TestJWTHandlerCore):
             assert extracted_user_id is None, f"Should return None for invalid token: {invalid_token}"
 
 
-class TestJWTHandlerConcurrencyAndRaceConditions(TestJWTHandlerCore):
+class JWTHandlerConcurrencyAndRaceConditionsTests(JWTHandlerCoreTests):
     """Test concurrent operations and race condition handling"""
     
     def test_concurrent_token_creation_generates_unique_tokens(self):
@@ -826,7 +826,7 @@ class TestJWTHandlerConcurrencyAndRaceConditions(TestJWTHandlerCore):
         assert all(result["sub"] == self.test_user_id for result in results)
 
 
-class TestJWTHandlerBoundaryConditionsAndErrorHandling(TestJWTHandlerCore):
+class JWTHandlerBoundaryConditionsAndErrorHandlingTests(JWTHandlerCoreTests):
     """Test boundary conditions and error handling"""
     
     def test_operations_with_extremely_long_inputs_handle_gracefully(self):

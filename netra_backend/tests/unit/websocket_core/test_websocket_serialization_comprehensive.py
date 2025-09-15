@@ -26,7 +26,7 @@ class SerializationTestEnum(Enum):
     VALUE_ONE = 'value1'
     VALUE_TWO = 'value2'
 
-class TestWebSocketStateSerialization:
+class WebSocketStateSerializationTests:
     """Test WebSocketState serialization to prevent 1011 errors."""
 
     def test_starlette_websocket_state_serialization(self):
@@ -78,7 +78,7 @@ class TestWebSocketStateSerialization:
         except ImportError:
             pytest.skip('Starlette WebSocketState not available', allow_module_level=True)
 
-class TestGeneralSerialization:
+class GeneralSerializationTests:
     """Test general serialization functionality."""
 
     def test_already_serializable_dict(self):
@@ -137,7 +137,7 @@ class TestGeneralSerialization:
         result = _serialize_message_safely(obj)
         assert result == 'unknown_object'
 
-class TestConnectionDiagnostics:
+class ConnectionDiagnosticsTests:
     """Test connection diagnostics that caused the original 1011 error."""
 
     def test_connection_diagnostics_json_serializable(self):
@@ -173,7 +173,7 @@ class TestConnectionDiagnostics:
         assert json_str is not None
         assert diagnostics['websocket_state'] == 'no_websocket'
 
-class TestSerializationPerformance:
+class SerializationPerformanceTests:
     """Test serialization performance and edge cases."""
 
     def test_large_nested_structure(self):
@@ -201,7 +201,7 @@ class TestSerializationPerformance:
         except (RecursionError, ValueError):
             pass
 
-class TestOriginalBugReproduction:
+class OriginalBugReproductionTests:
     """Test that reproduces and verifies the fix for the original 1011 bug."""
 
     def test_websocket_error_message_serialization(self):

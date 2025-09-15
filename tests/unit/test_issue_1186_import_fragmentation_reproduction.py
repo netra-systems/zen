@@ -26,7 +26,7 @@ from collections import defaultdict
 
 
 @pytest.mark.unit
-class TestUserExecutionEngineImportFragmentation(unittest.TestCase):
+class UserExecutionEngineImportFragmentationTests(unittest.TestCase):
     """Test class to expose UserExecutionEngine import fragmentation issues"""
     
     def setUp(self):
@@ -296,7 +296,7 @@ class TestUserExecutionEngineImportFragmentation(unittest.TestCase):
 
 
 @pytest.mark.unit
-class TestUserExecutionEngineUserIsolationViolations(unittest.TestCase):
+class UserExecutionEngineUserIsolationViolationsTests(unittest.TestCase):
     """Test class to expose user isolation violations in UserExecutionEngine"""
     
     def setUp(self):

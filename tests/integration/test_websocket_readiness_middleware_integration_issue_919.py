@@ -46,7 +46,7 @@ def mock_app_with_middleware():
     return app
 
 @pytest.mark.integration
-class TestWebSocketReadinessMiddlewareIntegration:
+class WebSocketReadinessMiddlewareIntegrationTests:
     """Integration tests for WebSocket readiness middleware behavior."""
 
     def test_issue_919_gcp_staging_environment_bypass(self, mock_app_with_middleware):
@@ -158,7 +158,7 @@ class TestWebSocketReadinessMiddlewareIntegration:
                             assert data == 'connection_established'
 
 @pytest.mark.integration
-class TestAppStateStartupIntegration:
+class AppStateStartupIntegrationTests:
     """Test app state and startup validation integration."""
 
     def test_app_state_readiness_check_integration(self, mock_app_with_middleware):
@@ -181,7 +181,7 @@ class TestAppStateStartupIntegration:
                             assert data == 'connection_established'
 
 @pytest.mark.integration
-class TestWebSocketConnectionEstablishment:
+class WebSocketConnectionEstablishmentTests:
     """Test WebSocket connection establishment works correctly."""
 
     def test_websocket_connection_headers_validation(self, mock_app_with_middleware):
@@ -215,7 +215,7 @@ class TestWebSocketConnectionEstablishment:
                         assert data == 'connection_established'
 
 @pytest.mark.integration
-class TestSecurityMeasuresIntact:
+class SecurityMeasuresIntactTests:
     """Test that existing security measures remain intact."""
 
     def test_non_websocket_requests_not_affected(self, mock_app_with_middleware):

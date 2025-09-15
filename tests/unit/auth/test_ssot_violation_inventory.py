@@ -408,7 +408,7 @@ class JWTSSOTViolationInventoryCatalog:
 
 
 @pytest.mark.unit
-class TestJWTSSOTViolationInventory(SSotBaseTestCase):
+class JWTSSOTViolationInventoryTests(SSotBaseTestCase):
     """
     Unit Test Suite: JWT SSOT Violation Inventory
     

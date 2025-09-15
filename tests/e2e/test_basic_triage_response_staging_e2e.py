@@ -235,7 +235,7 @@ class StagingAuthManager:
 @pytest.mark.staging
 @pytest.mark.real_services
 @pytest.mark.issue_135
-class TestBasicTriageResponseStagingE2E(SSotAsyncTestCase):
+class BasicTriageResponseStagingE2ETests(SSotAsyncTestCase):
     """
     E2E tests for basic triage response on GCP staging environment.
     

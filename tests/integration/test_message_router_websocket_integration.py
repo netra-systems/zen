@@ -27,7 +27,7 @@ from netra_backend.app.websocket_core import create_websocket_manager
 
 
 @pytest.mark.integration
-class TestMessageRouterWebSocketIntegration(SSotAsyncTestCase):
+class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
     """Integration tests for MessageRouter with real WebSocket connections."""
     
     async def asyncSetUp(self):

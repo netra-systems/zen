@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 
-class TestReportingAgentSSOTJSONCompliance(SSotBaseTestCase):
+class ReportingAgentSSOTJSONComplianceTests(SSotBaseTestCase):
     """Mission critical tests detecting SSOT violations in ReportingSubAgent JSON handling."""
     
     def setUp(self):

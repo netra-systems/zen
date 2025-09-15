@@ -25,7 +25,7 @@ from test_framework.conftest_real_services import real_services
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketConnectionManagement(WebSocketIntegrationTest):
+class WebSocketConnectionManagementTests(WebSocketIntegrationTest):
     """Test WebSocket connection management with real services integration."""
 
     @pytest.mark.integration

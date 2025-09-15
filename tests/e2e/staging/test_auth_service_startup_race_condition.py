@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 
-class TestAuthServiceStartupRaceConditionE2E(SSotAsyncTestCase):
+class AuthServiceStartupRaceConditionE2ETests(SSotAsyncTestCase):
     """E2E staging tests for Auth Service startup race condition scenarios"""
     
     def setUp(self):

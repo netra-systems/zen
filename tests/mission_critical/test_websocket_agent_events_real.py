@@ -240,7 +240,7 @@ class RealWebSocketTestInfrastructure:
 
 @pytest.mark.asyncio
 @pytest.mark.mission_critical
-class TestWebSocketAgentEventsReal:
+class WebSocketAgentEventsRealTests:
     """Mission critical tests using REAL WebSocket connections and services."""
     
     @pytest.fixture
@@ -521,7 +521,7 @@ class TestWebSocketAgentEventsReal:
 @pytest.mark.asyncio
 @pytest.mark.mission_critical
 @pytest.mark.performance  
-class TestWebSocketPerformanceReal:
+class WebSocketPerformanceRealTests:
     """Performance validation using real WebSocket infrastructure."""
     
     @pytest.fixture

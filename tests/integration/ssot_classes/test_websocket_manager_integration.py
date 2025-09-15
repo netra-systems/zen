@@ -103,7 +103,7 @@ class MockWebSocket:
 
 
 @pytest.mark.integration
-class TestWebSocketManagerIntegration(SSotAsyncTestCase):
+class WebSocketManagerIntegrationTests(SSotAsyncTestCase):
     """
     Comprehensive integration tests for WebSocketManager SSOT class.
     

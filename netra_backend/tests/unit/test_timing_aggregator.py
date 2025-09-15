@@ -33,7 +33,7 @@ from netra_backend.app.agents.base.timing_collector import (
 )
 
 
-class TestTimingAggregator(SSotBaseTestCase):
+class TimingAggregatorTests(SSotBaseTestCase):
     """Test timing aggregation and optimization analysis."""
 
     def setup_method(self, method=None):

@@ -27,7 +27,7 @@ from netra_backend.app.services.websocket_bridge_factory import (
 )
 
 
-class TestWebSocketBridgeAdapter:
+class WebSocketBridgeAdapterTests:
     """Test WebSocketBridgeAdapter business logic"""
     
     @pytest.mark.unit
@@ -264,7 +264,7 @@ class TestWebSocketBridgeAdapter:
         )
 
 
-class TestWebSocketBridgeFactory:
+class WebSocketBridgeFactoryTests:
     """Test WebSocketBridgeFactory business logic"""
     
     @pytest.mark.unit
@@ -431,7 +431,7 @@ class TestWebSocketBridgeFactory:
         assert factory1 is factory2
 
 
-class TestUserWebSocketEmitter:
+class UserWebSocketEmitterTests:
     """Test UserWebSocketEmitter business logic"""
     
     @pytest.mark.unit
@@ -590,7 +590,7 @@ class TestUserWebSocketEmitter:
         mock_factory.cleanup_user_context.assert_called_once_with("user123", "conn789")
 
 
-class TestUserWebSocketConnection:
+class UserWebSocketConnectionTests:
     """Test UserWebSocketConnection business logic"""
     
     @pytest.mark.unit
@@ -699,7 +699,7 @@ class TestUserWebSocketConnection:
         mock_websocket.close.assert_called_once()
 
 
-class TestWebSocketEvent:
+class WebSocketEventTests:
     """Test WebSocketEvent business logic"""
     
     @pytest.mark.unit
@@ -737,7 +737,7 @@ class TestWebSocketEvent:
         assert event.retry_count == event.max_retries
 
 
-class TestWebSocketFactoryConfig:
+class WebSocketFactoryConfigTests:
     """Test WebSocketFactoryConfig business logic"""
     
     @pytest.mark.unit
@@ -788,7 +788,7 @@ class TestWebSocketFactoryConfig:
         assert config.delivery_retries == 4
 
 
-class TestEdgeCases:
+class EdgeCasesTests:
     """Test edge cases and error conditions"""
     
     @pytest.mark.unit

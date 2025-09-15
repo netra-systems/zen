@@ -35,7 +35,7 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 
 
 @pytest.mark.integration
-class TestWebSocketLegacyMessageIntegration913(SSotAsyncTestCase):
+class WebSocketLegacyMessageIntegration913Tests(SSotAsyncTestCase):
     """Test WebSocket message processing with legacy message types for Issue #913."""
 
     def setUp(self):
@@ -226,7 +226,7 @@ class TestWebSocketLegacyMessageIntegration913(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestWebSocketLegacyMessageFixValidation913(SSotAsyncTestCase):
+class WebSocketLegacyMessageFixValidation913Tests(SSotAsyncTestCase):
     """
     Integration tests that will PASS after Issue #913 fix is implemented.
 

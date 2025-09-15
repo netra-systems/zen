@@ -35,7 +35,7 @@ from netra_backend.app.dependencies import get_request_scoped_db_session
 from shared.isolated_environment import get_env
 
 @pytest.mark.websocket
-class TestWebSocketAntiPatternElimination(SSotBaseTestCase):
+class WebSocketAntiPatternEliminationTests(SSotBaseTestCase):
     """Test suite to validate elimination of WebSocket mock Request anti-patterns.
     
     These tests ensure the system uses proper WebSocketContext objects instead
@@ -234,7 +234,7 @@ class TestWebSocketAntiPatternElimination(SSotBaseTestCase):
             Mock WebSocket with controlled behavior
         """
 
-        class TestWebSocket:
+        class WebSocketTests:
 
             def __init__(self, client_state: WebSocketState):
                 self.client_state = client_state
@@ -254,7 +254,7 @@ class TestWebSocketAntiPatternElimination(SSotBaseTestCase):
             async def close(self, code: int=1000, reason: str='Normal closure'):
                 self.closed = True
                 self.client_state = WebSocketState.DISCONNECTED
-        return TestWebSocket(state)
+        return WebSocketTests(state)
 
     def tearDown(self) -> None:
         """Clean up test resources."""

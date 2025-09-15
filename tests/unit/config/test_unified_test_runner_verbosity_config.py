@@ -34,7 +34,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestUnifiedTestRunnerVerbosityConfig(SSotBaseTestCase):
+class UnifiedTestRunnerVerbosityConfigTests(SSotBaseTestCase):
     """Unit tests for verbosity configuration in unified test runner JSON output."""
 
     def setup_method(self, method=None):

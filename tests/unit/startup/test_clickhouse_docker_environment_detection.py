@@ -18,7 +18,7 @@ from netra_backend.app.startup_module import initialize_clickhouse
 from netra_backend.app.logging_config import central_logger
 
 @pytest.mark.unit
-class TestClickHouseDockerEnvironmentDetection:
+class ClickHouseDockerEnvironmentDetectionTests:
     """Test ClickHouse Docker environment detection and error handling."""
 
     @pytest.fixture

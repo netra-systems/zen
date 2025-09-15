@@ -36,7 +36,7 @@ from test_framework.websocket_helpers import WebSocketTestClient
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketAgentEventsMissing(BaseE2ETest):
+class WebSocketAgentEventsMissingTests(BaseE2ETest):
     """
     E2E test for missing WebSocket agent events with full authentication.
     

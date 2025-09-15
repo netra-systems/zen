@@ -14,7 +14,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
-class TestSSotNamespaceConflicts(SSotBaseTestCase):
+class SSotNamespaceConflictsTests(SSotBaseTestCase):
     """Test suite to reproduce SSOT namespace conflicts in ExecutionEngine implementations."""
 
     def test_execution_engine_namespace_conflicts(self):
@@ -150,7 +150,7 @@ class TestSSotNamespaceConflicts(SSotBaseTestCase):
             else:
                 logger.info('✅ METHOD COMPATIBILITY: All ExecutionEngine implementations have same methods')
 
-class TestExecutionEngineFactoryViolations(SSotBaseTestCase):
+class ExecutionEngineFactoryViolationsTests(SSotBaseTestCase):
     """Test suite to reproduce factory pattern SSOT violations."""
 
     def test_multiple_execution_engine_factory_methods(self):

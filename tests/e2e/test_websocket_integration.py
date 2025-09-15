@@ -130,7 +130,7 @@ async def websocket_auth_tester():
 
 
 @pytest.mark.e2e
-class TestWebSocketAuthHandshake:
+class WebSocketAuthHandshakeTests:
     """Test JWT validation during WebSocket connection handshake."""
     
     @pytest.mark.e2e
@@ -185,7 +185,7 @@ class TestWebSocketAuthHandshake:
 
 
 @pytest.mark.e2e
-class TestReconnectionWithAuth:
+class ReconnectionWithAuthTests:
     """Test disconnect  ->  reconnect  ->  resume with auth state."""
     
     @pytest.mark.e2e
@@ -266,7 +266,7 @@ class TestReconnectionWithAuth:
 
 
 @pytest.mark.e2e
-class TestMultiClientBroadcast:
+class MultiClientBroadcastTests:
     """Test message broadcast to multiple authenticated clients."""
     
     @pytest.mark.e2e
@@ -306,7 +306,7 @@ class TestMultiClientBroadcast:
 
 
 @pytest.mark.e2e
-class TestWebSocketRateLimiting:
+class WebSocketRateLimitingTests:
     """Test rate limit enforcement on WebSocket connections."""
     
     @pytest.mark.e2e

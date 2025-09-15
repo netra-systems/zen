@@ -32,7 +32,7 @@ from netra_backend.app.agents.tool_dispatcher import (
 )
 
 
-class TestToolDispatcherFacadeUnit(SSotBaseTestCase):
+class ToolDispatcherFacadeUnitTests(SSotBaseTestCase):
     """Unit tests for the main tool dispatcher facade."""
     
     def setup_method(self, method):
@@ -100,7 +100,7 @@ class TestToolDispatcherFacadeUnit(SSotBaseTestCase):
         self.record_metric("request_scoped_creation", "success")
 
 
-class TestToolDispatchRequestResponseModels(SSotBaseTestCase):
+class ToolDispatchRequestResponseModelsTests(SSotBaseTestCase):
     """Unit tests for tool dispatch request/response models."""
     
     def test_tool_dispatch_request_creation(self):
@@ -183,7 +183,7 @@ class TestToolDispatchRequestResponseModels(SSotBaseTestCase):
         self.record_metric("response_model_error", "validated")
 
 
-class TestDispatchStrategy(SSotBaseTestCase):
+class DispatchStrategyTests(SSotBaseTestCase):
     """Unit tests for dispatch strategy enumeration."""
     
     def test_dispatch_strategy_values(self):

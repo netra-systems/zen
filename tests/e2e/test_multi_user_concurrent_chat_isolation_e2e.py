@@ -47,7 +47,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 @pytest.mark.e2e
 @pytest.mark.staging_compatible
 @pytest.mark.multi_user
-class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
+class MultiUserConcurrentChatIsolationE2ETests(SSotBaseTestCase):
     """
     MISSION CRITICAL E2E Tests for Multi-User Concurrent Chat Isolation.
     

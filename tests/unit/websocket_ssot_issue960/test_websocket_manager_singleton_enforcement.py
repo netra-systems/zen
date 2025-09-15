@@ -21,7 +21,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 @pytest.mark.unit
-class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
+class WebSocketManagerSingletonEnforcementTests(SSotBaseTestCase):
     """Test WebSocket manager singleton enforcement - SHOULD FAIL before SSOT consolidation."""
 
     def setUp(self):

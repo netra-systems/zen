@@ -9,7 +9,7 @@ from test_framework.database.test_database_manager import DatabaseTestManager as
 from shared.isolated_environment import IsolatedEnvironment
 import asyncio
 
-class TestRefreshEndpointIntegration:
+class RefreshEndpointIntegrationTests:
     """Integration tests for the refresh endpoint"""
 
     @pytest.fixture

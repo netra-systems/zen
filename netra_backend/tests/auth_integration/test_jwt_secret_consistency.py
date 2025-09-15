@@ -15,7 +15,7 @@ import pytest
 from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretsManager as SecretManager
 from netra_backend.app.schemas.config import AppConfig
 
-class TestJWTSecretConsistency:
+class JWTSecretConsistencyTests:
     """Test JWT secret configuration for backend service."""
 
     def test_backend_service_uses_jwt_secret_key_env_var(self):
@@ -162,7 +162,7 @@ class TestJWTSecretConsistency:
                                                                                             secret_manager.populate_secrets(config)
 
                                                                                             @pytest.mark.asyncio
-                                                                                            class TestJWTSecretIntegration:
+                                                                                            class JWTSecretIntegrationTests:
                                                                                                 """Integration tests for JWT secret consistency."""
 
                                                                                                 @pytest.mark.asyncio

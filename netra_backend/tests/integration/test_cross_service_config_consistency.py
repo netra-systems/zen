@@ -32,7 +32,7 @@ from netra_backend.app.core.configuration.loader import get_configuration
 from netra_backend.app.schemas.config import DevelopmentConfig, StagingConfig, ProductionConfig
 
 
-class TestCrossServiceConfigConsistency(SSotAsyncTestCase):
+class CrossServiceConfigConsistencyTests(SSotAsyncTestCase):
     """Test configuration consistency across multiple services."""
 
     async def setup_method(self, method):
@@ -316,7 +316,7 @@ class TestCrossServiceConfigConsistency(SSotAsyncTestCase):
                 assert isinstance(expected_bool, bool)
 
 
-class TestConfigurationDrift(SSotAsyncTestCase):
+class ConfigurationDriftTests(SSotAsyncTestCase):
     """Test detection and prevention of configuration drift between services."""
 
     async def setup_method(self, method):
@@ -386,7 +386,7 @@ class TestConfigurationDrift(SSotAsyncTestCase):
             assert updated_secret == "updated-secret"
 
 
-class TestConfigurationIntegrationScenarios(SSotAsyncTestCase):
+class ConfigurationIntegrationScenariosTests(SSotAsyncTestCase):
     """Test real-world configuration integration scenarios."""
 
     async def setup_method(self, method):

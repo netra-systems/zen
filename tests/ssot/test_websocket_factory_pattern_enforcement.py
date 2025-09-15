@@ -23,7 +23,7 @@ from typing import List, Dict, Set, Tuple
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestWebSocketFactoryPatternEnforcement(SSotBaseTestCase):
+class WebSocketFactoryPatternEnforcementTests(SSotBaseTestCase):
     """
     SSOT validation tests for WebSocket factory pattern consolidation.
     

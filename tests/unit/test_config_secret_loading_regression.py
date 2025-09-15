@@ -85,7 +85,7 @@ class MockWebSocketConnection:
         return self.messages_sent.copy()
 
 @pytest.mark.unit
-class TestConfigSecretLoadingRegression:
+class ConfigSecretLoadingRegressionTests:
     """Test secret loading regression prevention."""
 
     def setup_method(self):

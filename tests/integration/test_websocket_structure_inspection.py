@@ -16,7 +16,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 
 
 @pytest.mark.integration
-class TestWebSocketStructureInspection:
+class WebSocketStructureInspectionTests:
     """Inspect actual WebSocket event structures to document mismatch."""
 
     @pytest.fixture

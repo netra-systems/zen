@@ -320,7 +320,7 @@ class ThreadIDConsistencyTracker:
         return "\n".join(lines)
 
 
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real test WebSocket connection component to replace mock usage per project requirements."""
     
     def __init__(self, connection_id: str):
@@ -354,7 +354,7 @@ class TestWebSocketConnection:
         return not self.is_connected
 
 
-class TestThreadIdConsistencyComprehensive(SSotAsyncTestCase):
+class ThreadIdConsistencyComprehensiveTests(SSotAsyncTestCase):
     """Comprehensive Thread ID Consistency Tests - REPRODUCES WEBSOCKET RESOURCE LEAK BUG."""
     
     def setup_method(self, method=None):
@@ -432,7 +432,7 @@ class TestThreadIdConsistencyComprehensive(SSotAsyncTestCase):
             connection_id = f"conn-{str(uuid.uuid4())[:8]}"
         
         # Create real test WebSocket component per project requirements
-        test_websocket = TestWebSocketConnection(connection_id)
+        test_websocket = WebSocketConnectionTests(connection_id)
         
         return WebSocketConnection(
             connection_id=connection_id,

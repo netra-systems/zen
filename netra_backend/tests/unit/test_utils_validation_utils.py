@@ -16,7 +16,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.utils.validation_utils import ValidationUtils
 
 
-class TestValidationUtils(SSotBaseTestCase):
+class ValidationUtilsTests(SSotBaseTestCase):
     """Test suite for ValidationUtils following SSOT patterns."""
     
     def setup_method(self, method):

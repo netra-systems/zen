@@ -25,11 +25,13 @@ from netra_backend.app.websocket_core.types import (
     WebSocketConnection,
     WebSocketManagerMode,
     create_isolated_mode,
-    _serialize_message_safely
+    _serialize_message_safely,
+    _get_enum_key_representation
 )
 from netra_backend.app.websocket_core.unified_manager import (
     _UnifiedWebSocketManagerImplementation,
-    MAX_CONNECTIONS_PER_USER
+    MAX_CONNECTIONS_PER_USER,
+    RegistryCompat
 )
 # SSOT Protocol import consolidated from protocols module
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol

@@ -44,7 +44,7 @@ from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionR
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 
-class TestPhaseTimer:
+class PhaseTimerTests:
     """Test PhaseTimer functionality."""
     
     def test_phase_timer_initialization(self):
@@ -77,7 +77,7 @@ class TestPhaseTimer:
         assert timer.metadata == metadata
 
 
-class TestEnhancedExecutionTimingCollector:
+class EnhancedExecutionTimingCollectorTests:
     """Test EnhancedExecutionTimingCollector functionality."""
     
     def test_collector_initialization(self):
@@ -236,7 +236,7 @@ class TestEnhancedExecutionTimingCollector:
         assert summary["metric_count"] == 2  # init phase + TTFT
 
 
-class TestPerformanceAnalyzer:
+class PerformanceAnalyzerTests:
     """Test PerformanceAnalyzer functionality."""
     
     def test_analyze_timing_breakdown(self):
@@ -310,7 +310,7 @@ class TestPerformanceAnalyzer:
         assert 0 <= compliance["database_query"] <= 100
 
 
-class TestMetricsAggregator:
+class MetricsAggregatorTests:
     """Test MetricsAggregator functionality."""
     
     def test_aggregator_initialization(self):
@@ -463,7 +463,7 @@ class TestMetricsAggregator:
         assert all("timestamp" in m for m in exported)
 
 
-class TestSupervisorObservabilityIntegration:
+class SupervisorObservabilityIntegrationTests:
     """Test SupervisorObservability with performance metrics."""
     
     def test_workflow_trace_with_timing(self):
@@ -558,7 +558,7 @@ class TestSupervisorObservabilityIntegration:
         assert breakdown.initialization_ms > 0
 
 
-class TestGlobalAggregator:
+class GlobalAggregatorTests:
     """Test global aggregator singleton."""
     
     def test_global_aggregator_singleton(self):
@@ -590,7 +590,7 @@ class TestGlobalAggregator:
 
 
 @pytest.mark.asyncio
-class TestAsyncPerformanceTracking:
+class AsyncPerformanceTrackingTests:
     """Test performance tracking in async contexts."""
     
     async def test_async_phase_tracking(self):

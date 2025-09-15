@@ -26,7 +26,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.mocks.service_mocks import MockServiceDependency, MockConfigurationManager, MockServiceContainer
 
-class TestServiceInitializationOffline(SSotBaseTestCase):
+class ServiceInitializationOfflineTests(SSotBaseTestCase):
     """Offline integration tests for service initialization."""
 
     def setup_method(self, method=None):

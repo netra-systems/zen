@@ -139,7 +139,7 @@ class StagingWebSocketClient:
         return events
 
 
-class TestGoldenPathClusterValidation(SSotAsyncTestCase):
+class GoldenPathClusterValidationTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

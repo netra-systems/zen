@@ -24,7 +24,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestIDGenerationInconsistency(SSotBaseTestCase):
+class IDGenerationInconsistencyTests(SSotBaseTestCase):
     """Test suite for reproducing and detecting ID generation inconsistencies."""
 
     def setUp(self):
@@ -164,7 +164,7 @@ class TestIDGenerationInconsistency(SSotBaseTestCase):
         return not self._test_correlation_logic(extracted_thread_id, thread_id, run_id)
 
 @pytest.mark.unit
-class TestSSOTIDManagerCompliance(SSotBaseTestCase):
+class SSOTIDManagerComplianceTests(SSotBaseTestCase):
     """Test suite for SSOT ID Manager compliance validation."""
 
     def setUp(self):

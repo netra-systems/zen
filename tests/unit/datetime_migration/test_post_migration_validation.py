@@ -18,7 +18,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
-class TestPostMigrationValidation(unittest.TestCase):
+class PostMigrationValidationTests(unittest.TestCase):
     """Test cases to validate successful datetime migration."""
 
     def setUp(self):
@@ -169,7 +169,7 @@ class TestPostMigrationValidation(unittest.TestCase):
         self.assertIsNotNone(future_time.tzinfo)
 
 
-class TestSpecificFunctionality(unittest.TestCase):
+class SpecificFunctionalityTests(unittest.TestCase):
     """Test specific functionality of migrated modules."""
 
     def test_websocket_protocol_validation_timestamp(self):

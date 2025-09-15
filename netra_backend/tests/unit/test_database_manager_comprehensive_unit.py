@@ -42,7 +42,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotBaseTestCase as BaseTestCase
 logger = logging.getLogger(__name__)
 
-class TestDatabaseManagerConfiguration(BaseTestCase):
+class DatabaseManagerConfigurationTests(BaseTestCase):
     """Unit tests for DatabaseManager configuration and initialization.
     
     Business Value: Prevents configuration errors causing service startup failures ($500K+ ARR impact)
@@ -192,7 +192,7 @@ class TestDatabaseManagerConfiguration(BaseTestCase):
             assert not db_manager._initialized
             assert len(db_manager._engines) == 0
 
-class TestDatabaseManagerConnectionPool(BaseTestCase):
+class DatabaseManagerConnectionPoolTests(BaseTestCase):
     """Unit tests for DatabaseManager connection pool management.
     
     Business Value: Prevents connection leaks and resource exhaustion ($500K+ ARR impact)
@@ -289,7 +289,7 @@ class TestDatabaseManagerConnectionPool(BaseTestCase):
             assert len(db_manager._engines) == 0
             assert not db_manager._initialized
 
-class TestDatabaseURLBuilderIntegration(BaseTestCase):
+class DatabaseURLBuilderIntegrationTests(BaseTestCase):
     """Unit tests for DatabaseURLBuilder SSOT integration.
     
     Business Value: Ensures consistent URL construction preventing connection failures
@@ -418,7 +418,7 @@ class TestDatabaseURLBuilderIntegration(BaseTestCase):
             assert call_args[1]['pool_recycle'] == 3600
             assert result_engine is mock_engine
 
-class TestDatabaseManagerSessionManagement(BaseTestCase):
+class DatabaseManagerSessionManagementTests(BaseTestCase):
     """Unit tests for DatabaseManager session management.
     
     Business Value: Ensures proper transaction handling preventing data corruption
@@ -527,7 +527,7 @@ class TestDatabaseManagerSessionManagement(BaseTestCase):
             assert health_result['connection'] == 'ok'
             assert db_manager._initialized
 
-class TestDatabaseManagerErrorHandling(BaseTestCase):
+class DatabaseManagerErrorHandlingTests(BaseTestCase):
     """Unit tests for DatabaseManager error handling and recovery.
     
     Business Value: Ensures proper error handling preventing silent failures

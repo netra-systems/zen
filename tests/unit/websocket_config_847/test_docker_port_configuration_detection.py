@@ -34,7 +34,7 @@ from test_framework.test_context import TestContext
 
 
 @pytest.mark.unit
-class TestDockerPortConfigurationDetection(unittest.TestCase):
+class DockerPortConfigurationDetectionTests(unittest.TestCase):
     """Test Docker port configuration detection for Issue #847."""
 
     def setUp(self):

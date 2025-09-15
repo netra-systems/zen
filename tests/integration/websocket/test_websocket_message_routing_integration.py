@@ -36,7 +36,7 @@ from shared.isolated_environment import get_env
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestWebSocketMessageRoutingIntegration(BaseIntegrationTest):
+class WebSocketMessageRoutingIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket message routing and delivery."""
 
     async def async_setup(self):

@@ -19,7 +19,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
-class TestUserContextContamination(SSotAsyncTestCase):
+class UserContextContaminationTests(SSotAsyncTestCase):
     """Test suite to reproduce user context contamination vulnerabilities."""
 
     async def test_user_context_contamination_reproduction(self):

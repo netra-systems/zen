@@ -33,7 +33,7 @@ class PermissionLevel(Enum):
     SUPER_ADMIN = "super_admin"
 
 
-class TestPermissionValidationAlgorithms(SSotBaseTestCase):
+class PermissionValidationAlgorithmsTests(SSotBaseTestCase):
     """
     Unit tests for permission validation algorithm business logic.
     Tests access control without external dependencies.

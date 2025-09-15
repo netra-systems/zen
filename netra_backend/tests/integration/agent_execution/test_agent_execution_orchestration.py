@@ -107,7 +107,7 @@ class MockExecutableAgent(BaseAgent):
             await self.websocket_bridge.notify_agent_thinking(run_id, self.name, f'Completing {self.name} analysis...', step_number=2)
         return {'success': True, 'agent_name': self.name, 'execution_count': self.execution_count, 'tool_calls': len(self.tool_calls), 'state': state, 'user_id': getattr(state, 'user_id', None), 'analysis': f'Completed {self.name} analysis', 'timestamp': datetime.now(timezone.utc).isoformat()}
 
-class TestAgentExecutionOrchestration(BaseIntegrationTest):
+class AgentExecutionOrchestrationTests(BaseIntegrationTest):
     """Integration tests for agent execution engine orchestration."""
 
     def setup_method(self):

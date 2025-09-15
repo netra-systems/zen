@@ -81,7 +81,7 @@ def _build_kv_cache_setup(agents: Dict, llm: LLMManager, ws: WebSocketManager) -
 
 @pytest.mark.real_llm
 
-class TestKVCacheAuditWorkflow:
+class KVCacheAuditWorkflowTests:
     pass
 
     """Test KV cache audit and optimization workflows."""
@@ -362,7 +362,7 @@ class TestKVCacheAuditWorkflow:
 
                                                                         @pytest.mark.real_llm
 
-                                                                        class TestKVCacheAuditEdgeCases:
+                                                                        class KVCacheAuditEdgeCasesTests:
                                                                             pass
 
                                                                             """Test edge cases in KV cache audit workflows."""
@@ -445,7 +445,7 @@ class TestKVCacheAuditWorkflow:
 
                                                                                             @pytest.mark.real_llm
 
-                                                                                            class TestKVCacheWorkflowIntegrity:
+                                                                                            class KVCacheWorkflowIntegrityTests:
                                                                                                 pass
 
                                                                                                 """Test overall workflow integrity for KV cache audit."""

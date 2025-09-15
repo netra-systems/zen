@@ -37,7 +37,7 @@ from test_framework.unified import TestCategory
 from shared.isolated_environment import get_env
 
 
-class TestExecutionTrackerBusiness(SSotBaseTestCase):
+class ExecutionTrackerBusinessTests(SSotBaseTestCase):
     """Comprehensive unit tests for ExecutionTracker business logic."""
 
     def setup_method(self, method):
@@ -448,7 +448,7 @@ class TestExecutionTrackerBusiness(SSotBaseTestCase):
         self.metrics.record_custom("singleton_pattern_verified", True)
 
 
-class TestExecutionTrackerBusinessScenarios(SSotBaseTestCase):
+class ExecutionTrackerBusinessScenariosTests(SSotBaseTestCase):
     """Business scenario tests for execution tracker edge cases."""
 
     async def test_concurrent_business_executions_tracked_independently(self):

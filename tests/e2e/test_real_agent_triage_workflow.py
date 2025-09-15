@@ -48,7 +48,7 @@ except ImportError:
     WEBSOCKET_SERVICES_AVAILABLE = False
 
 
-class TestRealAgentTriageWorkflow(BaseE2ETest):
+class RealAgentTriageWorkflowTests(BaseE2ETest):
     """Test complete triage workflow with real business scenarios."""
 
     def setup_method(self):

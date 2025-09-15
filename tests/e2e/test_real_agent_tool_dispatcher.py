@@ -133,7 +133,7 @@ class WebSocketEventCollector:
                 return False
         return True
 
-class TestRealAgentToolDispatcher(BaseE2ETest):
+class RealAgentToolDispatcherTests(BaseE2ETest):
     """E2E testing of UnifiedToolDispatcher with real services only."""
 
     def setup_method(self):

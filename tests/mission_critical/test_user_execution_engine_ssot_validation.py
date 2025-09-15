@@ -34,7 +34,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 
-class TestUserExecutionEngineSSotValidation(SSotAsyncTestCase):
+class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
     """
     Tests that SHOULD PASS to validate UserExecutionEngine SSOT compliance.
     

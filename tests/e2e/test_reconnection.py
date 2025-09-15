@@ -65,7 +65,7 @@ except ImportError:
 
 
 @pytest.mark.e2e
-class TestGracefulReconnectWithStatePreservation:
+class GracefulReconnectWithStatePreservationTests:
     """Test graceful reconnection while preserving application state."""
     
     @pytest.mark.asyncio
@@ -112,7 +112,7 @@ class TestGracefulReconnectWithStatePreservation:
 
 
 @pytest.mark.e2e
-class TestNetworkFailureRecovery:
+class NetworkFailureRecoveryTests:
     """Test reconnection scenarios after network failures."""
     
     @pytest.mark.asyncio
@@ -164,7 +164,7 @@ class TestNetworkFailureRecovery:
 
 
 @pytest.mark.e2e
-class TestTokenExpiryReconnection:
+class TokenExpiryReconnectionTests:
     """Test reconnection scenarios with expired authentication tokens."""
     
     @pytest.mark.asyncio
@@ -180,7 +180,7 @@ class TestTokenExpiryReconnection:
 
 
 @pytest.mark.e2e
-class TestMultipleReconnectionStability:
+class MultipleReconnectionStabilityTests:
     """Test system stability under multiple rapid reconnection scenarios."""
     
     @pytest.mark.asyncio
@@ -198,7 +198,7 @@ class TestMultipleReconnectionStability:
 
 
 @pytest.mark.e2e
-class TestReconnectionMessageIntegrity:
+class ReconnectionMessageIntegrityTests:
     """Test message integrity and no-loss guarantees during reconnection."""
     
     @pytest.mark.asyncio

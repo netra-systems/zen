@@ -38,7 +38,7 @@ def rate_limit_analysis_setup(real_llm_manager, real_websocket_manager, real_too
     }
 
 
-class TestRateLimitImpactAnalysis(BaseE2ETest):
+class RateLimitImpactAnalysisTests(BaseE2ETest):
     """Test rate limit impact analysis for proactive capacity management."""
 
     @pytest.mark.asyncio

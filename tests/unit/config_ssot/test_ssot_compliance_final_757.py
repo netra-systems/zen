@@ -12,7 +12,7 @@ from pathlib import Path
 import importlib.util
 
 @pytest.mark.unit
-class TestSSOTComplianceFinalValidation:
+class SSOTComplianceFinalValidationTests:
     """Phase 4 Tests - Final SSOT compliance validation"""
 
     def test_deprecated_manager_completely_removed_FINAL(self):
@@ -190,7 +190,7 @@ class TestSSOTComplianceFinalValidation:
         print(f'SSOT compliance details: {ssot_compliance_checks}')
 
 @pytest.mark.unit
-class TestConfigurationMigrationCompleteness:
+class ConfigurationMigrationCompletenessTests:
     """Validate migration completeness and system stability"""
 
     def test_system_stability_after_migration_FINAL(self):

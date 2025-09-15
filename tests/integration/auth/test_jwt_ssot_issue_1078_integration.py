@@ -22,7 +22,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 
 
 @pytest.mark.integration
-class TestJWTSSOTIssue1078Integration(BaseIntegrationTest):
+class JWTSSOTIssue1078IntegrationTests(BaseIntegrationTest):
     """Integration tests to validate JWT SSOT delegation patterns"""
     
     async def setup_method(self):

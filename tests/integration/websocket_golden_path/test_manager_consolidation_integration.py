@@ -59,7 +59,7 @@ class MockWebSocketConnection:
 
 
 @pytest.mark.integration
-class TestWebSocketManagerGoldenPathIntegration(SSotAsyncTestCase):
+class WebSocketManagerGoldenPathIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests to prove WebSocket manager consolidation violations break Golden Path.
     

@@ -69,7 +69,7 @@ class MockWebSocketEventEmitter:
 
 
 @pytest.mark.unit
-class TestWebSocketEventDuplicationUnit567(SSotAsyncTestCase):
+class WebSocketEventDuplicationUnit567Tests(SSotAsyncTestCase):
     """
     Unit tests for WebSocket event duplication prevention.
     

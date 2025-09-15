@@ -270,7 +270,7 @@ def resilience_validator():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
-class TestCascadingFailuresResilience:
+class CascadingFailuresResilienceTests:
     """Comprehensive cascading failures resilience test suite"""
     
     async def test_redis_failure_websocket_message_recovery(
@@ -534,7 +534,7 @@ if __name__ == "__main__":
         resilience_validator = ResilienceValidator()
         
         # Create test instance
-        test_instance = TestCascadingFailuresResilience()
+        test_instance = CascadingFailuresResilienceTests()
         
         try:
             # Run specific test

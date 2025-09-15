@@ -85,7 +85,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
-class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
+class ExecutionEngineComprehensiveGoldenPathTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for ExecutionEngine SSOT class.
     

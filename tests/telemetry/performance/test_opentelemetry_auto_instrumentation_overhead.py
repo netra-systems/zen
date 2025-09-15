@@ -65,7 +65,7 @@ class PerformanceMetrics:
         return statistics.quantiles(self.with_tracing, n=20)[18]  # 95th percentile
 
 
-class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
+class OpenTelemetryAutoInstrumentationOverheadTests(SSotAsyncTestCase):
     """Test performance overhead of automatic instrumentation."""
     
     @pytest.fixture(autouse=True)
@@ -604,7 +604,7 @@ class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
         return execution_times
 
 
-class TestAutoInstrumentationSystemWideOverhead(SSotAsyncTestCase):
+class AutoInstrumentationSystemWideOverheadTests(SSotAsyncTestCase):
     """Test system-wide performance impact of multiple auto-instrumentors."""
     
     def setup_method(self, method=None):

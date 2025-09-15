@@ -50,7 +50,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext as ServiceUserExecutionContext
 
 
-class TestUserExecutionContextFactoryPatterns(SSotAsyncTestCase):
+class UserExecutionContextFactoryPatternsTests(SSotAsyncTestCase):
     """Integration tests for UserExecutionContext factory patterns and isolation."""
     
     def setup_method(self, method=None):

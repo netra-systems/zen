@@ -26,7 +26,7 @@ from unittest.mock import AsyncMock, MagicMock
 logger = logging.getLogger(__name__)
 
 
-class TestServiceIndependentInfrastructureHealth:
+class ServiceIndependentInfrastructureHealthTests:
     """
     Test class to validate service-independent infrastructure health after fixes.
     
@@ -393,7 +393,7 @@ class TestServiceIndependentInfrastructureHealth:
             pytest.fail(f"Service fallback validation failed: {e}")
 
 
-class TestActualTestClassHealth:
+class ActualTestClassHealthTests:
     """
     Test class to validate actual service-independent test classes work correctly.
     
@@ -523,7 +523,7 @@ class TestActualTestClassHealth:
         logger.info(f"Multiple test class collection validation passed: {successful_collections} classes")
 
 
-class TestExecutionConfidenceCalculation:
+class ExecutionConfidenceCalculationTests:
     """
     Test class to validate execution confidence calculation works correctly.
     

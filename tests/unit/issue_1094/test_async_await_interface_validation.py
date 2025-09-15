@@ -34,7 +34,7 @@ from typing import Dict, Any
 from test_framework.base_integration_test import BaseIntegrationTest
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-class TestAsyncAwaitInterfaceValidation(BaseIntegrationTest):
+class AsyncAwaitInterfaceValidationTests(BaseIntegrationTest):
     """Test suite for Issue #1094 async/await interface validation."""
 
     @pytest.mark.unit
@@ -208,7 +208,7 @@ class TestAsyncAwaitInterfaceValidation(BaseIntegrationTest):
             "get_websocket_manager should accept user_context"
 
 
-class TestAgentServiceCoreInterfaceFix(BaseIntegrationTest):
+class AgentServiceCoreInterfaceFixTests(BaseIntegrationTest):
     """Integration tests for agent service core interface fixes."""
     
     @pytest.mark.integration
@@ -328,7 +328,7 @@ class TestAgentServiceCoreInterfaceFix(BaseIntegrationTest):
                     mock_manager.send_to_user.assert_called_once_with(user_id, {"type": "agent_stopped"})
 
 
-class TestWebSocketFactorySSotCompliance(BaseIntegrationTest):
+class WebSocketFactorySSotComplianceTests(BaseIntegrationTest):
     """Mission critical tests for WebSocket factory SSOT compliance."""
     
     @pytest.mark.mission_critical

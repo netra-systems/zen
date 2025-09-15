@@ -16,7 +16,7 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestPhase3GoldenPathExecutionIntegration(SSotAsyncTestCase):
+class Phase3GoldenPathExecutionIntegrationTests(SSotAsyncTestCase):
     """
     Phase 3: Validate golden path execution with modern SSOT patterns
     These tests should pass, demonstrating golden path works with modern factory.

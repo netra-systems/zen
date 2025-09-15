@@ -51,7 +51,7 @@ except ImportError as e:
 logger = logging.getLogger(__name__)
 
 
-class TestIssue358ComponentFailures(SSotBaseTestCase):
+class Issue358ComponentFailuresTests(SSotBaseTestCase):
     """
     Unit tests for Issue #358 component-level failures.
     

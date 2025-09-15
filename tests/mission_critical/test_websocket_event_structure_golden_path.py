@@ -24,7 +24,7 @@ from tests.mission_critical.websocket_real_test_base import RealWebSocketTestBas
 from test_framework.test_context import create_test_context
 
 
-class TestWebSocketEventStructureGoldenPath(RealWebSocketTestBase):
+class WebSocketEventStructureGoldenPathTests(RealWebSocketTestBase):
     """Mission Critical test suite for WebSocket event structure Golden Path compliance."""
 
     @pytest.mark.mission_critical

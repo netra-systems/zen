@@ -31,7 +31,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.auth import WebSocketAuth
 
 
-class TestGoldenPathAuthTokenCascades(BaseIntegrationTest):
+class GoldenPathAuthTokenCascadesTests(BaseIntegrationTest):
     """Test auth token validation cascades causing Golden Path failures."""
 
     @pytest.mark.integration

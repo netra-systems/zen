@@ -230,7 +230,7 @@ async def oauth_endpoint_validator():
     await validator.cleanup_test_resources()
 
 @pytest.mark.e2e
-class TestOAuthEndpointValidationReal:
+class OAuthEndpointValidationRealTests:
     """OAuth Service Endpoint Validation Tests with Real Services"""
 
     @pytest.mark.asyncio

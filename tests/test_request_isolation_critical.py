@@ -29,7 +29,7 @@ def lazy_import(module_path: str, component: str=None):
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
 
-class TestWebSocketConnection:
+class WebSocketConnectionTests:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
@@ -91,7 +91,7 @@ class UserContext:
         self.tool_executions: List[str] = []
         self.execution_results: List[Any] = []
 
-class TestConcurrentUserIsolation:
+class ConcurrentUserIsolationTests:
     """Test that concurrent users are properly isolated."""
 
     @pytest.mark.asyncio
@@ -161,7 +161,7 @@ class TestConcurrentUserIsolation:
         min_wait = min(execution_times.values())
         assert max_wait < min_wait * 10, 'No user should wait 10x longer than fastest'
 
-class TestWebSocketEventIsolation:
+class WebSocketEventIsolationTests:
     """Test that WebSocket events are properly isolated per user."""
 
     @pytest.mark.asyncio
@@ -171,7 +171,7 @@ class TestWebSocketEventIsolation:
 
         def create_user_websocket(user_id: str):
             """Create a mock WebSocket connection for a user."""
-            websocket = TestWebSocketConnection()
+            websocket = WebSocketConnectionTests()
             ws.events_received = []
             ws.user_id = user_id
 
@@ -244,7 +244,7 @@ class TestWebSocketEventIsolation:
         assert len(user1_events) == 2
         assert len(user2_events) == 2
 
-class TestDatabaseSessionIsolation:
+class DatabaseSessionIsolationTests:
     """Test that database sessions are properly isolated per request."""
 
     @pytest.mark.asyncio
@@ -299,7 +299,7 @@ class TestDatabaseSessionIsolation:
         overwrites = sum((1 for i, result in enumerate(results) if result != i))
         assert overwrites > 0, 'Global registry causes bridge overwrites between requests'
 
-class TestGlobalStateExecutionPath:
+class GlobalStateExecutionPathTests:
     """Test issues with global state in the execution path."""
 
     @pytest.mark.asyncio
@@ -357,7 +357,7 @@ class TestGlobalStateExecutionPath:
         conflicts = [r for r in results if isinstance(r, dict) and r.get('conflict')]
         assert len(conflicts) > 0 or len(executions) == 10, 'Shared tool executor causes serialization or conflicts'
 
-class TestThreadUserContextMixing:
+class ThreadUserContextMixingTests:
     """Test issues with thread_id, user_id, and run_id context mixing."""
 
     @pytest.mark.asyncio
@@ -392,7 +392,7 @@ class TestThreadUserContextMixing:
         await asyncio.gather(*tasks)
         assert len(context_issues) > 0, 'Thread IDs can collide between different users'
 
-class TestPlaceholderValueIssues:
+class PlaceholderValueIssuesTests:
     """Test issues with placeholder values in the system."""
 
     def test_registry_uses_placeholder_run_id(self):
@@ -400,14 +400,14 @@ class TestPlaceholderValueIssues:
         llm_manager = Mock(spec=LLMManager)
         tool_dispatcher = Mock(spec=ToolDispatcher)
         registry = AgentRegistry()
-        websocket = TestWebSocketConnection()
+        websocket = WebSocketConnectionTests()
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         registry.set_websocket_bridge(websocket_bridge)
         registry.register('test_agent', mock_agent)
         mock_agent.set_websocket_bridge.assert_called_with(websocket_bridge, None)
         assert mock_agent.set_websocket_bridge.call_args[0][1] is None, 'Registry should use None for run_id during registration, real user context set during execution'
 
-class TestRaceConditions:
+class RaceConditionsTests:
     """Test race conditions in concurrent operations."""
 
     @pytest.mark.asyncio
@@ -434,7 +434,7 @@ class TestRaceConditions:
         overwrites = sum((1 for r in results if not r))
         assert overwrites > 10, f'Race condition: {overwrites}/20 requests had bridge overwritten'
 
-class TestScalabilityLimits:
+class ScalabilityLimitsTests:
     """Test system behavior under load to expose scalability limits."""
 
     @pytest.mark.asyncio

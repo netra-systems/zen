@@ -12,7 +12,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
-class TestCircularDependencyFix(SSotBaseTestCase):
+class CircularDependencyFixTests(SSotBaseTestCase):
     """Validates that the circular dependency between SSOT logging and configuration is fixed."""
 
     def setUp(self):

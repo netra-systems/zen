@@ -97,7 +97,7 @@ class UvicornWebSocketsImplErrorSimulator:
         return corrupted_scope
 
 @pytest.mark.unit
-class TestIssue449UvicornErrorHandlingImprovements(SSotBaseTestCase):
+class Issue449UvicornErrorHandlingImprovementsTests(SSotBaseTestCase):
     """
     Unit tests for enhanced uvicorn error handling and websockets_impl.py:244 prevention.
 

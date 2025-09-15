@@ -102,7 +102,7 @@ class EventSequenceTracker:
             return 0.0
         return self.received_events[-1].timestamp - self.received_events[0].timestamp
 
-class TestWebSocketEventSequenceIntegration(SSotAsyncTestCase):
+class WebSocketEventSequenceIntegrationTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for WebSocket Event Sequence Delivery.
 

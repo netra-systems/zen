@@ -171,7 +171,7 @@ class SyntaxErrorDetector:
         return results
 
 @pytest.mark.integration
-class TestSyntaxErrorDetection(SSotBaseTestCase):
+class SyntaxErrorDetectionTests(SSotBaseTestCase):
     """
     CRITICAL: Comprehensive Syntax Error Detection Test Suite
     

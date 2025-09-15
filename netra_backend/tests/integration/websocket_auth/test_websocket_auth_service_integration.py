@@ -59,7 +59,7 @@ from netra_backend.tests.integration.test_fixtures.database_fixture import Datab
 from netra_backend.tests.integration.test_fixtures.redis_fixture import RedisTestFixture
 
 @pytest.mark.integration
-class TestWebSocketAuthServiceIntegration(SSotBaseTestCase):
+class WebSocketAuthServiceIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket authentication with real authentication service.
     
@@ -229,7 +229,7 @@ class TestWebSocketAuthServiceIntegration(SSotBaseTestCase):
         self.assertTrue(True, 'SSOT compliance validation completed')
 
 @pytest.mark.integration
-class TestWebSocketAuthServiceErrorHandling(SSotBaseTestCase):
+class WebSocketAuthServiceErrorHandlingTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket authentication service error handling.
     

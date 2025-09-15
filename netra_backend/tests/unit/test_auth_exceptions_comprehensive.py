@@ -43,7 +43,7 @@ from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 from netra_backend.app.core.exceptions_base import NetraException
 
 
-class TestAuthenticationError:
+class AuthenticationErrorTests:
     """Test AuthenticationError provides clear guidance for credential failures."""
 
     def test_authentication_error_default_initialization(self):
@@ -114,7 +114,7 @@ class TestAuthenticationError:
         assert error.code == ErrorCode.AUTHENTICATION_FAILED
 
 
-class TestAuthorizationError:
+class AuthorizationErrorTests:
     """Test AuthorizationError prevents privilege escalation with clear messages."""
 
     def test_authorization_error_default_initialization(self):
@@ -181,7 +181,7 @@ class TestAuthorizationError:
         assert error.severity == ErrorSeverity.HIGH
 
 
-class TestTokenExpiredError:
+class TokenExpiredErrorTests:
     """Test TokenExpiredError guides users to re-authenticate smoothly."""
 
     def test_token_expired_error_default_initialization(self):
@@ -241,7 +241,7 @@ class TestTokenExpiredError:
         assert str(error) == "Access token expired, refresh token still valid"
 
 
-class TestTokenInvalidError:
+class TokenInvalidErrorTests:
     """Test TokenInvalidError handles malformed tokens securely."""
 
     def test_token_invalid_error_default_initialization(self):
@@ -304,7 +304,7 @@ class TestTokenInvalidError:
         assert error.severity == ErrorSeverity.HIGH
 
 
-class TestNetraSecurityException:
+class NetraSecurityExceptionTests:
     """Test NetraSecurityException protects against security violations."""
 
     def test_netra_security_exception_default_initialization(self):
@@ -379,7 +379,7 @@ class TestNetraSecurityException:
         assert error.severity == ErrorSeverity.CRITICAL
 
 
-class TestTokenRevokedError:
+class TokenRevokedErrorTests:
     """Test TokenRevokedError handles session revocation properly."""
 
     def test_token_revoked_error_default_initialization(self):
@@ -438,7 +438,7 @@ class TestTokenRevokedError:
         assert str(error) == "All user sessions revoked due to password change"
 
 
-class TestTokenTamperError:
+class TokenTamperErrorTests:
     """Test TokenTamperError detects and prevents token tampering attacks."""
 
     def test_token_tamper_error_default_initialization(self):
@@ -512,7 +512,7 @@ class TestTokenTamperError:
         assert error.severity == ErrorSeverity.CRITICAL
 
 
-class TestExceptionInheritanceAndStructure:
+class ExceptionInheritanceAndStructureTests:
     """Test exception inheritance structure and base class compliance."""
 
     def test_all_auth_exceptions_inherit_from_netra_exception(self):
@@ -598,7 +598,7 @@ class TestExceptionInheritanceAndStructure:
             assert isinstance(exception, NetraException)
 
 
-class TestExceptionMessageSecurity:
+class ExceptionMessageSecurityTests:
     """Test exception messages maintain security without exposing system internals."""
 
     def test_exceptions_dont_expose_database_details(self):
@@ -653,7 +653,7 @@ class TestExceptionMessageSecurity:
             assert "internal-rbac" not in user_msg
 
 
-class TestExceptionBusinessValueDelivery:
+class ExceptionBusinessValueDeliveryTests:
     """Test that auth exceptions deliver expected business value."""
 
     def test_exceptions_reduce_support_ticket_volume(self):

@@ -18,7 +18,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestDockerConnectivity(SSotBaseTestCase):
+class DockerConnectivityTests(SSotBaseTestCase):
     """Test Docker connectivity validation and error handling."""
 
     def setUp(self):
@@ -133,7 +133,7 @@ class TestDockerConnectivity(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestDockerConnectivityRecovery(SSotBaseTestCase):
+class DockerConnectivityRecoveryTests(SSotBaseTestCase):
     """Test Docker connectivity recovery mechanisms."""
 
     def test_docker_recovery_with_exponential_backoff(self):

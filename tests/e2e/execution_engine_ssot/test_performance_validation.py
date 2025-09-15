@@ -243,7 +243,7 @@ class RealPerformanceWebSocketManager:
 
 
 @pytest.mark.e2e
-class TestPerformanceValidation(SSotAsyncTestCase):
+class PerformanceValidationTests(SSotAsyncTestCase):
     """E2E Test 9: Validate UserExecutionEngine performance meets baseline requirements"""
     
     async def asyncSetUp(self):

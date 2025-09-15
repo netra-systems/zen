@@ -147,7 +147,7 @@ class GracefulDegradationManager:
         avg_performance = sum((cap.performance_level for cap in self.capabilities.values() if cap.enabled)) / max(enabled_capabilities, 1)
         return {'overall_health': 'healthy' if healthy_services == total_services else 'degraded', 'service_health': {'healthy_services': healthy_services, 'total_services': total_services, 'health_ratio': healthy_services / max(total_services, 1)}, 'capability_health': {'enabled_capabilities': enabled_capabilities, 'total_capabilities': total_capabilities, 'capability_ratio': enabled_capabilities / max(total_capabilities, 1), 'average_performance': avg_performance}, 'degradation_events': len(self.degradation_history), 'services_status': {name: status.value for name, status in self.service_status.items()}, 'capabilities_status': {name: {'enabled': cap.enabled, 'performance_level': cap.performance_level, 'priority': cap.priority} for name, cap in self.capabilities.items()}}
 
-class TestGracefulDegradationErrorHandling(BaseIntegrationTest):
+class GracefulDegradationErrorHandlingTests(BaseIntegrationTest):
     """Integration tests for graceful degradation and service fallback patterns."""
 
     def setup_method(self):

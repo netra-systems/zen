@@ -20,7 +20,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.websocket_helpers import WebSocketTestClient
 
 
-class TestDeepAgentStateGoldenPathConsistency(SSotAsyncTestCase):
+class DeepAgentStateGoldenPathConsistencyTests(SSotAsyncTestCase):
     """Test suite validating agent state consistency in Golden Path execution"""
 
     def setup_method(self, method):

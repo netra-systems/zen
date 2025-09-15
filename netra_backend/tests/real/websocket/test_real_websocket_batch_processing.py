@@ -29,7 +29,7 @@ env = get_env()
 @pytest.mark.websocket
 @pytest.mark.batch_processing
 @skip_if_no_real_services
-class TestRealWebSocketBatchProcessing:
+class RealWebSocketBatchProcessingTests:
     """Test real WebSocket batch processing capabilities."""
     
     @pytest.fixture

@@ -89,7 +89,7 @@ Sequence: {'  ->  '.join(event_types)}
 
 @pytest.mark.critical
 @pytest.mark.mission_critical 
-class TestRealWebSocketSubAgent:
+class RealWebSocketSubAgentTests:
     """Test WebSocket sub-agent events using FORCED real connections."""
     
     @pytest.mark.asyncio
@@ -193,13 +193,13 @@ class TestRealWebSocketSubAgent:
         
         events_received = []
         
-        class TestWebSocket:
+        class WebSocketTests:
             async def send_json(self, data):
                 events_received.append(data)
                 logger.info(f"Manager sent: {data.get('type')}")
         
         # Connect and test
-        test_ws = TestWebSocket()
+        test_ws = WebSocketTests()
         await ws_manager.connect_user(connection_id, test_ws, connection_id)
         
         # Send test message

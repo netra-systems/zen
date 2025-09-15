@@ -39,7 +39,7 @@ from netra_backend.app.core.service_dependencies.models import (
 )
 
 
-class TestServiceIntegrationEnvironmentContextFix:
+class ServiceIntegrationEnvironmentContextFixTests:
     """Test complete service integration with environment context."""
     
     @pytest.fixture

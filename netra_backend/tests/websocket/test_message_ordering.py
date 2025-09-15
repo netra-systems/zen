@@ -237,7 +237,7 @@ async def test_protocol_version_mismatch():
     assert selected in subprotocols, "Should select valid subprotocol"
 
 
-class TestWebSocketMessageTamperingPrevention:
+class WebSocketMessageTamperingPreventionTests:
     """ITERATION 29: Prevent WebSocket message tampering attacks."""
     
     @pytest.mark.asyncio

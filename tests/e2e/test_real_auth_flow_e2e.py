@@ -43,7 +43,7 @@ docker_manager = UnifiedDockerManager()
 @pytest.mark.real_services
 @pytest.mark.e2e
 @pytest.mark.asyncio
-class TestRealAuthFlowE2E:
+class RealAuthFlowE2ETests:
     """REAL E2E Authentication Flow Validation - Zero Mocks, Zero Cheating.
     
     This test validates the complete authentication infrastructure using REAL

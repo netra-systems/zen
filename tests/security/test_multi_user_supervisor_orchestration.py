@@ -32,7 +32,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.llm.llm_manager import LLMManager
 
 
-class TestMultiUserSupervisorOrchestrationSecurity(SSotAsyncTestCase):
+class MultiUserSupervisorOrchestrationSecurityTests(SSotAsyncTestCase):
     """Security tests for multi-user supervisor orchestration."""
 
     def setup_method(self, method):
@@ -320,7 +320,7 @@ class TestMultiUserSupervisorOrchestrationSecurity(SSotAsyncTestCase):
             assert len(self.cross_contamination_detected) == 0, f"Cross-contamination detected: {self.cross_contamination_detected}"
 
 
-class TestSupervisorOrchestrationPerformance(SSotAsyncTestCase):
+class SupervisorOrchestrationPerformanceTests(SSotAsyncTestCase):
     """Performance tests for supervisor orchestration under load."""
 
     def setup_method(self, method):

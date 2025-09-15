@@ -24,7 +24,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestAuthPersistenceMultiAgent:
+class AuthPersistenceMultiAgentTests:
     """Test suite for authentication persistence across multi-agent workflows."""
     
     @pytest.fixture

@@ -27,7 +27,7 @@ from netra_backend.app.core.configuration.staging_validator import StagingConfig
 
 
 @pytest.mark.integration
-class TestStagingConfigurationValidationFailures(SSotBaseTestCase):
+class StagingConfigurationValidationFailuresTests(SSotBaseTestCase):
     """
     Integration tests that demonstrate the localhost validation failures in staging configuration.
     

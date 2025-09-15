@@ -30,7 +30,7 @@ from tests.e2e.config import TEST_CONFIG
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
-class TestServiceStartupHangingIntegration(SSotAsyncTestCase):
+class ServiceStartupHangingIntegrationTests(SSotAsyncTestCase):
     """Integration tests for service startup hanging behavior with real services"""
 
     async def setUp(self):
@@ -177,7 +177,7 @@ class TestServiceStartupHangingIntegration(SSotAsyncTestCase):
         await super().tearDown()
 
 @pytest.mark.integration
-class TestRealServiceInteractionPatterns(SSotAsyncTestCase):
+class RealServiceInteractionPatternsTests(SSotAsyncTestCase):
     """Test real service interaction patterns that might cause hanging"""
 
     async def test_rapid_consecutive_health_checks(self):

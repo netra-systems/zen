@@ -28,7 +28,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestIssue1094GoldenPathProtection(BaseIntegrationTest):
+class Issue1094GoldenPathProtectionTests(BaseIntegrationTest):
     """Mission critical tests ensuring Issue #1094 fix protects Golden Path business value."""
 
     @pytest.mark.mission_critical

@@ -20,7 +20,7 @@ from netra_backend.app.core.middleware_setup import _create_inline_websocket_exc
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.unit
-class TestASGIScopeHandling(SSotBaseTestCase):
+class ASGIScopeHandlingTests(SSotBaseTestCase):
     """Test ASGI scope handling in WebSocket middleware to reproduce HTTP 500 errors"""
 
     def setup_method(self):
@@ -118,7 +118,7 @@ class TestASGIScopeHandling(SSotBaseTestCase):
             pytest.fail(f'Middleware setup caused error: {e}')
 
 @pytest.mark.unit
-class TestASGIScopeEdgeCases(SSotBaseTestCase):
+class ASGIScopeEdgeCasesTests(SSotBaseTestCase):
     """Additional edge case tests for ASGI scope handling"""
 
     def test_concurrent_scope_access(self):

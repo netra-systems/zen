@@ -54,7 +54,7 @@ class RaceConditionScenario:
     tolerance: float = 0.0
 
 
-class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
+class ThreadSafetyRaceConditionPreventionTests(BaseIntegrationTest):
     """Test thread safety and race condition prevention mechanisms."""
     
     @pytest.mark.integration

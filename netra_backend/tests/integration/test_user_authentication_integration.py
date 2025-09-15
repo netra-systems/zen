@@ -43,7 +43,7 @@ from shared.isolated_environment import get_env
 import httpx
 
 
-class TestUserAuthenticationIntegration(DatabaseIntegrationTest, CacheIntegrationTest):
+class UserAuthenticationIntegrationTests(DatabaseIntegrationTest, CacheIntegrationTest):
     """
     Comprehensive User Authentication & JWT Validation Integration Test Suite.
     

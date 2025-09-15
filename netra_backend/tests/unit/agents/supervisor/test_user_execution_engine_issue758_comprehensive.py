@@ -118,7 +118,7 @@ class MockEnterpriseWebSocketBridge:
         """Get WebSocket isolation metrics."""
         return {'total_events': len(self.events), 'users_with_events': len(self.user_events), 'events_per_user': {user_id: len(events) for user_id, events in self.user_events.items()}}
 
-class TestUserExecutionEngineGoldenPath(SSotBaseTestCase):
+class UserExecutionEngineGoldenPathTests(SSotBaseTestCase):
     """Test UserExecutionEngine golden path patterns for Issue #758."""
 
     def setup_method(self, method):

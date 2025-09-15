@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketFactoryImportValidationFixed(unittest.TestCase):
+class WebSocketFactoryImportValidationFixedTests(unittest.TestCase):
     """
     Validate WebSocket Factory Import patterns for safe SSOT transition.
     

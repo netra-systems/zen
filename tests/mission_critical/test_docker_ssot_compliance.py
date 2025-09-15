@@ -52,7 +52,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestDockerSSOTCompliance:
+class DockerSSOTComplianceTests:
     """
     Comprehensive tests to ensure Docker SSOT compliance.
     
@@ -140,7 +140,7 @@ class SSOTComplianceMetrics:
         return (self.ssot_compliant_operations / self.total_docker_operations) * 100.0
 
 
-class TestDockerSSOTInfrastructure:
+class DockerSSOTInfrastructureTests:
     """Infrastructure tests for Docker SSOT compliance and validation."""
     
     def test_ssot_architecture_enforcement(self):

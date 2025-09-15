@@ -30,7 +30,7 @@ from unittest.mock import AsyncMock, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestBroadcastDuplicationViolations(SSotAsyncTestCase):
+class BroadcastDuplicationViolationsTests(SSotAsyncTestCase):
     """
     Phase 1 SSOT Violation Detection: Multiple broadcast_to_user() implementations
 

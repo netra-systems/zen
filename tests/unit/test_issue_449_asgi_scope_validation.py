@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.middleware.uvicorn_protocol_enhancement import UvicornProtocolValidator, UvicornWebSocketExclusionMiddleware
 
 @pytest.mark.unit
-class TestIssue449ASGIScopeValidation(SSotBaseTestCase):
+class Issue449ASGIScopeValidationTests(SSotBaseTestCase):
     """
     Unit tests for Issue #449 ASGI scope validation and repair.
 
@@ -199,7 +199,7 @@ class TestIssue449ASGIScopeValidation(SSotBaseTestCase):
         self.assertIsNone(corruption, 'GCP Cloud Run scope should not be detected as corrupted')
 
 @pytest.mark.unit
-class TestIssue449UvicornMiddlewareIntegration(SSotBaseTestCase):
+class Issue449UvicornMiddlewareIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for uvicorn middleware with enhanced protocol validation.
 

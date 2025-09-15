@@ -48,7 +48,7 @@ class StagingEnvironmentEndpoints:
     frontend: str = "https://staging.netrasystems.ai"
 
 
-class TestGoldenPathMasterCoordinationE2E(BaseE2ETest):
+class GoldenPathMasterCoordinationE2ETests(BaseE2ETest):
     """Test complete Golden Path master coordination with GCP staging environment."""
 
     def setup_method(self, method):

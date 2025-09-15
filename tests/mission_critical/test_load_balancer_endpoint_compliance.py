@@ -264,7 +264,7 @@ class LoadBalancerConnectivityValidator:
 
 
 @pytest.mark.asyncio
-class TestLoadBalancerEndpointCompliance:
+class LoadBalancerEndpointComplianceTests:
     """Mission critical tests for load balancer endpoint compliance"""
     
     @pytest.fixture(scope="class")

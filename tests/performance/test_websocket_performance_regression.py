@@ -29,7 +29,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.performance
-class TestWebSocketPerformanceRegression(SSotBaseTestCase):
+class WebSocketPerformanceRegressionTests(SSotBaseTestCase):
     """Test suite for identifying WebSocket performance regressions."""
 
     @pytest.fixture(autouse=True)

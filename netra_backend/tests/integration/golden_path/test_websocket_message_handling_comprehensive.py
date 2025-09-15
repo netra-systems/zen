@@ -78,7 +78,7 @@ class WebSocketEventType(Enum):
     ERROR = "error"
 
 
-class TestWebSocketMessageHandlingComprehensive(BaseIntegrationTest):
+class WebSocketMessageHandlingComprehensiveTests(BaseIntegrationTest):
     """Test comprehensive WebSocket message handling and event sequences."""
     
     def setup_method(self):

@@ -43,7 +43,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.e2e
-class TestGoldenPathWebSocketChat(SSotBaseTestCase):
+class GoldenPathWebSocketChatTests(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -328,7 +328,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
         return any((indicator in error_msg for indicator in unavailable_indicators))
 
 @pytest.mark.e2e
-class TestGoldenPathWebSocketChatResilience(SSotBaseTestCase):
+class GoldenPathWebSocketChatResilienceTests(SSotBaseTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

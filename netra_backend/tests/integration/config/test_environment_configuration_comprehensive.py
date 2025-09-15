@@ -28,7 +28,7 @@ from shared.database_url_builder import DatabaseURLBuilder
 from shared.jwt_secret_manager import get_unified_jwt_secret
 from shared.config_change_tracker import ConfigChangeTracker
 
-class TestEnvironmentConfigurationComprehensive(SSotBaseTestCase):
+class EnvironmentConfigurationComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive environment configuration tests.
     

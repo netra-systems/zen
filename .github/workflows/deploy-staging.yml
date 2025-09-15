@@ -347,6 +347,8 @@ jobs:
             --memory 4Gi \
             --min-instances 1 \
             --max-instances 10 \
+            --vpc-connector staging-connector \
+            --vpc-egress all-traffic \
             --set-env-vars="NETRA_ENV=staging" \
             --set-secrets="POSTGRES_HOST=staging-postgres-host:latest" \
             --set-secrets="POSTGRES_PORT=staging-postgres-port:latest" \
@@ -371,6 +373,8 @@ jobs:
             --memory 2Gi \
             --min-instances 1 \
             --max-instances 5 \
+            --vpc-connector staging-connector \
+            --vpc-egress all-traffic \
             --set-env-vars="NETRA_ENV=staging" \
             --set-secrets="POSTGRES_HOST=staging-postgres-host:latest" \
             --set-secrets="POSTGRES_PORT=staging-postgres-port:latest" \

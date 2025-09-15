@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestIssue1098LegacyWebSocketFactoryProblems(unittest.TestCase):
+class Issue1098LegacyWebSocketFactoryProblemsTests(unittest.TestCase):
     """Direct test for Issue #1098 legacy WebSocket factory problems."""
     
     def test_legacy_factory_produces_malformed_events(self):

@@ -43,7 +43,7 @@ except ImportError as e:
     EnhancedToolDispatcher = None
 
 @pytest.mark.integration
-class TestAgentExecutionIsolation(SSotAsyncTestCase):
+class AgentExecutionIsolationTests(SSotAsyncTestCase):
     """
     CRITICAL: This test proves agent execution isolation failures.
 

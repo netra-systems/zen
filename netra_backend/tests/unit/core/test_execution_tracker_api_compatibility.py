@@ -18,7 +18,7 @@ from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
 
 
 @pytest.mark.unit
-class TestExecutionTrackerAPICompatibility(SSotAsyncTestCase):
+class ExecutionTrackerAPICompatibilityTests(SSotAsyncTestCase):
     """Test ExecutionTracker API compatibility layer functionality."""
     
     def setUp(self):
@@ -131,7 +131,7 @@ class TestExecutionTrackerAPICompatibility(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestAgentExecutionCoreCompatibility(SSotAsyncTestCase):
+class AgentExecutionCoreCompatibilityTests(SSotAsyncTestCase):
     """Test AgentExecutionCore compatibility with ExecutionTracker API."""
     
     def setUp(self):
@@ -204,7 +204,7 @@ class TestAgentExecutionCoreCompatibility(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestMockObjectCompatibility(SSotAsyncTestCase):
+class MockObjectCompatibilityTests(SSotAsyncTestCase):
     """Test that mock objects used in tests are compatible with the API."""
     
     async def test_mock_agent_execution_with_run_method(self):

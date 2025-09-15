@@ -18,7 +18,7 @@ from types import AsyncGeneratorType
 from netra_backend.app.db.clickhouse_schema import ClickHouseTraceSchema
 
 
-class TestClickHouseSchemaAsyncError:
+class ClickHouseSchemaAsyncErrorTests:
     """Test class to reproduce the AsyncGeneratorContextManager error."""
 
     def test_get_client_returns_context_manager_not_client(self):
@@ -137,7 +137,7 @@ class TestClickHouseSchemaAsyncError:
         context_manager.close()
 
 
-class TestCorrectAsyncPattern:
+class CorrectAsyncPatternTests:
     """Test class showing the correct async pattern that should work."""
 
     @pytest.mark.asyncio

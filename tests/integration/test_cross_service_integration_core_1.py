@@ -78,7 +78,7 @@ def app():
 # =============================================================================
 
 @pytest.mark.integration
-class TestCrossServiceIntegrationCore1:
+class CrossServiceIntegrationCore1Tests:
     """Core cross-service integration tests."""
     
     def test_cors_middleware_initialization(self, app, service_discovery):

@@ -65,7 +65,7 @@ from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsC
 @pytest.mark.no_docker
 @pytest.mark.integration
 @pytest.mark.business_critical
-class TestAgentMessageWorkflowMockServices(SSotAsyncTestCase):
+class AgentMessageWorkflowMockServicesTests(SSotAsyncTestCase):
     """
     Agent Message Workflow Integration Tests - Phase 1 Mock Services
     

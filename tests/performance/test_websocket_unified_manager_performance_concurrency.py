@@ -161,7 +161,7 @@ class LoadTestWebSocketServer:
         return {'connected_clients': len(self.connected_clients), 'total_messages': self.message_count, 'uptime_seconds': uptime, 'messages_per_second': self.message_count / uptime if uptime > 0 else 0, 'client_details': {client_id: {'connected_duration': (datetime.now(timezone.utc) - client['connected_at']).total_seconds(), 'message_count': client['message_count']} for client_id, client in self.connected_clients.items()}}
 
 @pytest.mark.performance
-class TestUnifiedWebSocketManagerPerformanceConcurrency(BaseIntegrationTest):
+class UnifiedWebSocketManagerPerformanceConcurrencyTests(BaseIntegrationTest):
     """Performance and concurrency test suite for UnifiedWebSocketManager."""
 
     async def setUp(self):

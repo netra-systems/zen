@@ -30,7 +30,7 @@ from test_issue_416_category_coverage import TestDeprecationCategoryCoverage
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestIssue416ComprehensiveSuite(SSotBaseTestCase):
+class Issue416ComprehensiveSuiteTests(SSotBaseTestCase):
     """Comprehensive test suite orchestrator for Issue #416"""
     
     def setUp(self):

@@ -434,7 +434,7 @@ class ProductionWebSocketManager:
         return self.event_delivery_log.get(user_id, {"delivered": 0, "failed": 0})
 
 
-class TestToolDispatcherCoreE2EWithAuthentication(SSotBaseTestCase):
+class ToolDispatcherCoreE2EWithAuthenticationTests(SSotBaseTestCase):
     """Test tool dispatcher core functionality with real authentication and services."""
     
     @pytest.mark.e2e

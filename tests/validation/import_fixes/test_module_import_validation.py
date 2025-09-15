@@ -17,7 +17,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestModuleImportValidation(SSotBaseTestCase):
+class ModuleImportValidationTests(SSotBaseTestCase):
     """
     Test module import validation for collection error fixes.
     

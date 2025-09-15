@@ -76,7 +76,7 @@ class StagingEnvironmentConfig:
 @pytest.mark.golden_path
 @pytest.mark.mission_critical
 @pytest.mark.websocket_emitter_consolidation
-class TestGoldenPathPreservationStaging(SSotAsyncTestCase):
+class GoldenPathPreservationStagingTests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

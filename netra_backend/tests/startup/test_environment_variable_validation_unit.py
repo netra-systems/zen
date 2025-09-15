@@ -35,7 +35,7 @@ from netra_backend.app.core.startup_validation import (
 )
 
 
-class TestEnvironmentVariableValidationUnit(SSotAsyncTestCase):
+class EnvironmentVariableValidationUnitTests(SSotAsyncTestCase):
     """Unit tests for environment variable validation during startup."""
 
     def setup_method(self, method):
@@ -420,7 +420,7 @@ class TestEnvironmentVariableValidationUnit(SSotAsyncTestCase):
         assert validation.actual_count == expected_count
 
 
-class TestEnvironmentVariablePerformanceUnit(SSotAsyncTestCase):
+class EnvironmentVariablePerformanceUnitTests(SSotAsyncTestCase):
     """Unit tests for environment variable validation performance."""
 
     def setup_method(self, method):

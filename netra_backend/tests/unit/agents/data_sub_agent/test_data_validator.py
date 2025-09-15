@@ -19,7 +19,7 @@ import pytest
 from netra_backend.app.agents.data_sub_agent.data_validator import DataValidator
 pytestmark = [pytest.mark.env_test, pytest.mark.unit, pytest.mark.agents]
 
-class TestDataValidatorInitialization:
+class DataValidatorInitializationTests:
     """Test DataValidator initialization and configuration."""
 
     def test_data_validator_initialization(self):
@@ -37,7 +37,7 @@ class TestDataValidatorInitialization:
         assert 'throughput' in validator.valid_metrics
         assert validator.logger is not None
 
-class TestAnalysisRequestValidation:
+class AnalysisRequestValidationTests:
     """Test analysis request validation."""
 
     @pytest.fixture
@@ -59,7 +59,7 @@ class TestAnalysisRequestValidation:
         assert valid is False
         assert 'Analysis type is required' in errors
 
-class TestRawDataValidation:
+class RawDataValidationTests:
     """Test raw data quality validation."""
 
     @pytest.fixture
@@ -81,7 +81,7 @@ class TestRawDataValidation:
         assert 'No data provided for validation' in result['errors']
         assert result['data_points'] == 0
 
-class TestQualityScoring:
+class QualityScoringTests:
     """Test quality score calculation."""
 
     @pytest.fixture

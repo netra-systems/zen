@@ -26,7 +26,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestToolDispatcherAgentIntegration(BaseIntegrationTest):
+class ToolDispatcherAgentIntegrationTests(BaseIntegrationTest):
     """Integration tests for tool dispatcher and agent coordination."""
 
     @pytest.mark.integration

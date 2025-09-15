@@ -28,7 +28,7 @@ from test_framework.ssot.real_services_test_fixtures import *
 
 
 @pytest.mark.e2e
-class TestToolExecutionAuthenticatedE2E:
+class ToolExecutionAuthenticatedE2ETests:
     """E2E tests for tool execution with authentication."""
     
     def setup_method(self):

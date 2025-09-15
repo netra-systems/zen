@@ -397,7 +397,7 @@ def stability_validator():
 
 @pytest.mark.e2e
 @pytest.mark.env_test
-class TestComprehensiveStabilityValidation:
+class ComprehensiveStabilityValidationTests:
     """Comprehensive system stability and resilience tests."""
 
     @pytest.mark.asyncio

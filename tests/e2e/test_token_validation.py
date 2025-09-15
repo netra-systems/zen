@@ -19,7 +19,7 @@ from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
 @pytest.mark.e2e
-class TestTokenValidationFlow:
+class TokenValidationFlowTests:
     """Test complete token validation through all services."""
     
     @pytest.fixture
@@ -58,7 +58,7 @@ class TestTokenValidationFlow:
 
 
 @pytest.mark.e2e
-class TestValidTokenAccepted(TestTokenValidationFlow):
+class ValidTokenAcceptedTests(TokenValidationFlowTests):
     """Test valid tokens are accepted across services."""
     
     @pytest.mark.asyncio
@@ -83,7 +83,7 @@ class TestValidTokenAccepted(TestTokenValidationFlow):
 
 
 @pytest.mark.e2e
-class TestExpiredTokenRejected(TestTokenValidationFlow):
+class ExpiredTokenRejectedTests(TokenValidationFlowTests):
     """Test expired tokens are properly rejected."""
     
     @pytest.fixture
@@ -113,7 +113,7 @@ class TestExpiredTokenRejected(TestTokenValidationFlow):
 
 
 @pytest.mark.e2e
-class TestInvalidSignatureRejected(TestTokenValidationFlow):
+class InvalidSignatureRejectedTests(TokenValidationFlowTests):
     """Test tokens with invalid signatures are rejected."""
     
     async def _create_tampered_token(self, payload: dict) -> str:
@@ -143,7 +143,7 @@ class TestInvalidSignatureRejected(TestTokenValidationFlow):
 
 
 @pytest.mark.e2e
-class TestTokenRefreshFlow(TestTokenValidationFlow):
+class TokenRefreshFlowTests(TokenValidationFlowTests):
     """Test token refresh mechanism."""
     
     @pytest.fixture
@@ -183,7 +183,7 @@ class TestTokenRefreshFlow(TestTokenValidationFlow):
 
 
 @pytest.mark.e2e
-class TestTokenRevocation(TestTokenValidationFlow):
+class TokenRevocationTests(TokenValidationFlowTests):
     """Test token revocation mechanism."""
     
     @pytest.mark.asyncio
@@ -212,7 +212,7 @@ class TestTokenRevocation(TestTokenValidationFlow):
 
 
 @pytest.mark.e2e
-class TestWebSocketAuthentication(TestTokenValidationFlow):
+class WebSocketAuthenticationTests(TokenValidationFlowTests):
     """Test WebSocket-specific token authentication."""
     
     @pytest.mark.asyncio
@@ -243,7 +243,7 @@ class TestWebSocketAuthentication(TestTokenValidationFlow):
 
 
 @pytest.mark.e2e
-class TestAgentContextExtraction(TestTokenValidationFlow):
+class AgentContextExtractionTests(TokenValidationFlowTests):
     """Test agent context extraction from tokens."""
     
     @pytest.mark.asyncio
@@ -300,7 +300,7 @@ class TestAgentContextExtraction(TestTokenValidationFlow):
 
 
 @pytest.mark.e2e
-class TestTokenValidationSecurity(TestTokenValidationFlow):
+class TokenValidationSecurityTests(TokenValidationFlowTests):
     """Test security aspects of token validation."""
     
     @pytest.mark.asyncio
@@ -340,7 +340,7 @@ class TestTokenValidationSecurity(TestTokenValidationFlow):
 
 
 @pytest.mark.e2e
-class TestCrossServiceTokenFlow(TestTokenValidationFlow):
+class CrossServiceTokenFlowTests(TokenValidationFlowTests):
     """Test token validation across all services."""
     
     @pytest.mark.asyncio

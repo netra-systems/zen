@@ -41,7 +41,7 @@ from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 logger = central_logger.get_logger(__name__)
 
 
-class TestThreadManagementer:
+class ThreadManagementerTests:
     """Core thread management testing infrastructure with engagement focus."""
     
     def __init__(self):
@@ -95,7 +95,7 @@ class TestThreadManagementer:
         }
 
 # Alias for naming consistency
-ThreadManagementTester = TestThreadManagementer
+ThreadManagementTester = ThreadManagementerTests
 
 class ThreadBroadcastValidator:
     """Validates thread broadcast operations across connected clients."""

@@ -53,7 +53,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.isolated_environment_fixtures import isolated_env
 logger = logging.getLogger(__name__)
 
-class TestDatabaseManagerRealConnectionManagement(BaseIntegrationTest):
+class DatabaseManagerRealConnectionManagementTests(BaseIntegrationTest):
     """Integration tests for DatabaseManager with real database connections.
     
     Business Value: Validates database connection reliability preventing $500K+ ARR loss from outages
@@ -214,7 +214,7 @@ class TestDatabaseManagerRealConnectionManagement(BaseIntegrationTest):
             assert db_manager._initialized
             await db_manager.close_all()
 
-class TestDatabaseManagerTransactionSafety(BaseIntegrationTest):
+class DatabaseManagerTransactionSafetyTests(BaseIntegrationTest):
     """Integration tests for transaction safety with real databases.
     
     Business Value: Prevents data corruption protecting $500K+ ARR customer data
@@ -377,7 +377,7 @@ class TestDatabaseManagerTransactionSafety(BaseIntegrationTest):
                 assert count == 1
             await db_manager.close_all()
 
-class TestDatabaseManagerMultiUserConcurrency(BaseIntegrationTest):
+class DatabaseManagerMultiUserConcurrencyTests(BaseIntegrationTest):
     """Integration tests for multi-user concurrency and isolation.
     
     Business Value: Ensures proper user isolation preventing data leakage ($500K+ ARR risk)

@@ -34,7 +34,7 @@ from shared.types import UserID, ThreadID, RunID, RequestID
 from shared.id_generation import UnifiedIdGenerator
 
 
-class TestEventPersistenceAcrossReconnects(BaseIntegrationTest):
+class EventPersistenceAcrossReconnectsTests(BaseIntegrationTest):
     """Integration tests for event persistence during WebSocket reconnections."""
 
     @pytest.fixture(autouse=True)

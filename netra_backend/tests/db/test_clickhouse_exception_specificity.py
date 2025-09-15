@@ -21,7 +21,7 @@ from netra_backend.app.db.transaction_errors import (
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
+class ClickHouseExceptionSpecificityTests(SSotAsyncTestCase):
     """Test ClickHouse exception classification and specificity."""
 
     def setup_method(self, method):

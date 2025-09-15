@@ -23,7 +23,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.services.analytics.data_pipeline import DataPipeline
 from netra_backend.app.services.analytics.data_processor import DataProcessor
 
-class TestDataPipelineRealProcessingIntegration(SSotBaseTestCase):
+class DataPipelineRealProcessingIntegrationTests(SSotBaseTestCase):
     """Test data pipeline with real data processing"""
 
     def setup_method(self):

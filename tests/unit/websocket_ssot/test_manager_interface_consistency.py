@@ -42,7 +42,7 @@ class MethodSignature:
 
 
 @pytest.mark.unit
-class TestWebSocketManagerInterfaceConsistency(SSotBaseTestCase):
+class WebSocketManagerInterfaceConsistencyTests(SSotBaseTestCase):
     """
     Tests to prove WebSocket manager interface consistency violations exist.
     

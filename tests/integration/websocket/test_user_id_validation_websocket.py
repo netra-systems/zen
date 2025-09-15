@@ -49,7 +49,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 @pytest.mark.integration
-class TestWebSocketUserIDValidationIntegration(BaseIntegrationTest):
+class WebSocketUserIDValidationIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for WebSocket user ID validation bug reproduction.
     

@@ -120,7 +120,7 @@ class BusinessValueValidator:
         return 0.20 <= reduction <= 0.50
 
 
-class TestPerformanceExecutor:
+class PerformanceExecutorTests:
 
     """Executes performance tests with real measurements."""
     
@@ -207,7 +207,7 @@ class TestPerformanceExecutor:
 
 
 @pytest.mark.e2e
-class TestPerformanceSLA:
+class PerformanceSLATests:
 
     """Performance SLA validation tests."""
     
@@ -360,7 +360,7 @@ class TestPerformanceSLA:
 
 
 @pytest.mark.e2e
-class TestBusinessValueValidation:
+class BusinessValueValidationTests:
 
     """Business value claim validation tests."""
     
@@ -479,7 +479,7 @@ class TestBusinessValueValidation:
 @pytest.mark.sla
 
 @pytest.mark.e2e
-class TestSLACompliance:
+class SLAComplianceTests:
 
     """SLA compliance validation tests."""
     

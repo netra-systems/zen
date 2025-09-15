@@ -30,7 +30,7 @@ import json
 import requests
 from unittest.mock import patch
 
-class TestGoldenPathTestAccessibility:
+class GoldenPathTestAccessibilityTests:
     """
     Validate golden path test accessibility and execution capabilities
     """

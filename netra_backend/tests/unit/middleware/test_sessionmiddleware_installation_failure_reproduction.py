@@ -20,7 +20,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestSessionMiddlewareInstallationFailureReproduction(SSotBaseTestCase):
+class SessionMiddlewareInstallationFailureReproductionTests(SSotBaseTestCase):
     """Test cases designed to FAIL and reproduce Issue #169 SessionMiddleware failures."""
 
     def setup_method(self, method=None):

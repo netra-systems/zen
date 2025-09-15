@@ -17,7 +17,7 @@ from netra_backend.app.websocket_core.connection_manager import ConnectionManage
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 @pytest.mark.asyncio
-class TestConnectionManagerRealConnections:
+class ConnectionManagerRealConnectionsTests:
     """Real WebSocket connection test suite for ConnectionManager - NO MOCKS."""
 
     @pytest.fixture(autouse=True)
@@ -174,7 +174,7 @@ class TestConnectionManagerRealConnections:
         assert ws_client._connected is False
 
 @pytest.mark.asyncio
-class TestWebSocketAgentEventsReal:
+class WebSocketAgentEventsRealTests:
     """Test WebSocket agent events with real connections."""
 
     @pytest.fixture(autouse=True)

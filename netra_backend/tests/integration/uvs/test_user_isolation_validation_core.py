@@ -57,7 +57,7 @@ from test_framework.isolated_environment_fixtures import isolated_env
 from shared.isolated_environment import get_env
 
 
-class TestUserExecutionContextCreationAndValidation:
+class UserExecutionContextCreationAndValidationTests:
     """Test suite for UserExecutionContext creation and validation flows.
     
     BVJ: Ensures proper context creation with validation prevents security vulnerabilities
@@ -216,7 +216,7 @@ class TestUserExecutionContextCreationAndValidation:
         assert audit_trail["business_context"]["optimization_tier"] == "premium"
 
 
-class TestExecutionEngineFactoryLifecycleManagement:
+class ExecutionEngineFactoryLifecycleManagementTests:
     """Test suite for ExecutionEngineFactory lifecycle management.
     
     BVJ: Ensures proper resource management and cleanup prevents memory leaks
@@ -408,7 +408,7 @@ class TestExecutionEngineFactoryLifecycleManagement:
             assert not engine.is_active()
 
 
-class TestUserIsolationBetweenConcurrentRequests:
+class UserIsolationBetweenConcurrentRequestsTests:
     """Test suite for user isolation between concurrent requests.
     
     BVJ: Validates complete isolation between users preventing data leakage
@@ -597,7 +597,7 @@ class TestUserIsolationBetweenConcurrentRequests:
                 assert audit_trail["user_context"]["user_id"] != other_trail["user_context"]["user_id"]
 
 
-class TestFactoryBasedResourceManagement:
+class FactoryBasedResourceManagementTests:
     """Test suite for factory-based resource management patterns.
     
     BVJ: Validates proper resource management and cleanup patterns that enable
@@ -836,7 +836,7 @@ class TestFactoryBasedResourceManagement:
         assert resource_id not in active_after_timeout
 
 
-class TestContextHierarchyAndChildContextCreation:
+class ContextHierarchyAndChildContextCreationTests:
     """Test suite for context hierarchy and child context creation patterns.
     
     BVJ: Validates hierarchical context management enabling complex multi-agent

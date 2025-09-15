@@ -39,7 +39,7 @@ from netra_backend.app.agents.base.execution_context import ExecutionContext, Ex
 
 
 @pytest.mark.integration
-class TestIssue1017MultiUserIsolationVulnerabilities(SSotAsyncTestCase):
+class Issue1017MultiUserIsolationVulnerabilitiesTests(SSotAsyncTestCase):
     """
     Comprehensive multi-user isolation vulnerability tests for Issue #1017.
 

@@ -322,7 +322,7 @@ class StagingEnvironmentValidator:
         return perf_result
 
 @pytest.mark.integration
-class TestStagingDeploymentHealth(BaseIntegrationTest):
+class StagingDeploymentHealthTests(BaseIntegrationTest):
     """
     Test staging deployment health and service status validation.
     
@@ -394,7 +394,7 @@ class TestStagingDeploymentHealth(BaseIntegrationTest):
         assert len(services_with_version) > 0, f'No staging services provide version information\nThis makes it impossible to validate deployment consistency\nServices tested: {list(version_results.keys())}'
 
 @pytest.mark.integration
-class TestGoldenPathValidation(BaseIntegrationTest):
+class GoldenPathValidationTests(BaseIntegrationTest):
     """
     Test complete Golden Path user flow validation in staging.
     
@@ -438,7 +438,7 @@ class TestGoldenPathValidation(BaseIntegrationTest):
         assert ws_result['connection_time_ms'] < 10000, f"WebSocket connection too slow: {ws_result['connection_time_ms']}ms\nReal-time events require fast connection establishment"
 
 @pytest.mark.integration
-class TestDatabaseConsistency(BaseIntegrationTest):
+class DatabaseConsistencyTests(BaseIntegrationTest):
     """
     Test database connectivity and data consistency across storage tiers.
     
@@ -481,7 +481,7 @@ class TestDatabaseConsistency(BaseIntegrationTest):
         assert len(critical_slow_tiers) == 0, f'CRITICAL: {len(critical_slow_tiers)} critical database tiers too slow\nSlow tiers: {critical_slow_tiers}\nThis will cause user-facing performance issues in production'
 
 @pytest.mark.integration
-class TestPerformanceValidation(BaseIntegrationTest):
+class PerformanceValidationTests(BaseIntegrationTest):
     """
     Test performance benchmarking and resource utilization validation.
     
@@ -548,7 +548,7 @@ class TestPerformanceValidation(BaseIntegrationTest):
         assert concurrent_results['concurrency_handling_successful'], f"CRITICAL: Poor concurrent request handling in staging\nSuccess rate: {success_rate:.2%}\nSuccessful: {concurrent_results['successful_responses']}\nFailed: {concurrent_results['failed_responses']}\nThis indicates staging cannot handle production user load"
 
 @pytest.mark.integration
-class TestAuthenticationFlow(BaseIntegrationTest):
+class AuthenticationFlowTests(BaseIntegrationTest):
     """
     Test authentication and authorization flow validation in staging.
     
@@ -597,7 +597,7 @@ class TestAuthenticationFlow(BaseIntegrationTest):
         assert auth_integration_result['auth_backend_integration'], f"CRITICAL: Auth-Backend integration failed in staging\nErrors: {auth_integration_result['integration_errors']}\nUsers cannot access authenticated features"
 
 @pytest.mark.integration
-class TestCrossServiceCommunication(BaseIntegrationTest):
+class CrossServiceCommunicationTests(BaseIntegrationTest):
     """
     Test cross-service API communication and integration validation.
     
@@ -645,7 +645,7 @@ class TestCrossServiceCommunication(BaseIntegrationTest):
         assert service_communication_result['overall_communication_health'], f"CRITICAL: Cross-service communication issues in staging\nSuccess rate: {success_rate:.1%}\nSuccessful: {successful_pairs}/{total_pairs}\nFailed communications: {len(service_communication_result['failed_communications'])}\nThis will cause platform feature failures in production"
 
 @pytest.mark.integration
-class TestErrorHandlingAndRecovery(BaseIntegrationTest):
+class ErrorHandlingAndRecoveryTests(BaseIntegrationTest):
     """
     Test error handling and recovery mechanisms in staging environment.
     
@@ -701,7 +701,7 @@ class TestErrorHandlingAndRecovery(BaseIntegrationTest):
         assert resilience_result['service_resilience_score'] >= 0.6, f"CRITICAL: Poor service resilience in staging\nResilience score: {resilience_result['service_resilience_score']:.1%}\nSuccessful: {resilience_result['successful_responses']}\nErrors: {resilience_result['error_responses']}\nTimeouts: {resilience_result['timeout_responses']}\nThis indicates staging may fail under production load"
 
 @pytest.mark.integration
-class TestMonitoringAndAlerting(BaseIntegrationTest):
+class MonitoringAndAlertingTests(BaseIntegrationTest):
     """
     Test monitoring and alerting system validation in staging.
     
@@ -752,7 +752,7 @@ class TestMonitoringAndAlerting(BaseIntegrationTest):
         assert monitoring_result['monitoring_readiness_score'] >= 0.5, f"CRITICAL: Insufficient monitoring coverage in staging\nMonitoring readiness: {monitoring_result['monitoring_readiness_score']:.1%}\nServices with monitoring: {monitoring_result['services_with_health_endpoints']}\nServices without monitoring: {monitoring_result['services_without_health_endpoints']}\nProduction monitoring systems need health endpoints"
 
 @pytest.mark.integration
-class TestDisasterRecoveryAndSecurity(BaseIntegrationTest):
+class DisasterRecoveryAndSecurityTests(BaseIntegrationTest):
     """
     Test disaster recovery and security validation in staging environment.
     

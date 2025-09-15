@@ -29,7 +29,7 @@ from shared.isolated_environment import get_env
 logger = central_logger.get_logger(__name__)
 
 
-class TestPartialDataHandling:
+class PartialDataHandlingTests:
     """Test suite for partial data handling scenarios in orchestration."""
     
     # === Test Data Fixtures ===

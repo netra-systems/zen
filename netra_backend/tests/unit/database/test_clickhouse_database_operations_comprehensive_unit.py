@@ -28,7 +28,7 @@ from test_framework.fixtures.database_fixtures import test_db_session
 from shared.isolated_environment import get_env
 
 
-class TestClickHouseDatabaseOperationsUnit:
+class ClickHouseDatabaseOperationsUnitTests:
     """Unit tests for ClickHouse database operations."""
     
     @pytest.mark.unit

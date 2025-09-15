@@ -28,7 +28,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 
 
-class TestServiceIdEnvironmentIndependence(SSotBaseTestCase):
+class ServiceIdEnvironmentIndependenceTests(SSotBaseTestCase):
     """
     Validate SERVICE_ID independence from environment variables.
     

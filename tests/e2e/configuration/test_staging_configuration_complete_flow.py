@@ -20,7 +20,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 @pytest.mark.e2e
 @pytest.mark.staging
-class TestStagingConfigurationCompleteFlow:
+class StagingConfigurationCompleteFlowTests:
     """Test complete configuration flows in staging environment with authentication."""
 
     @pytest.fixture(autouse=True) 
@@ -294,7 +294,7 @@ class TestStagingConfigurationCompleteFlow:
 
 @pytest.mark.e2e
 @pytest.mark.staging
-class TestStagingEnvironmentConfigurationRegression:
+class StagingEnvironmentConfigurationRegressionTests:
     """Test staging environment configuration regression prevention."""
 
     @pytest.fixture(autouse=True)

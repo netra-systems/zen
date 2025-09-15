@@ -28,7 +28,7 @@ from shared.types.core_types import UserID, ensure_user_id
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestAuthenticationBusinessLogic:
+class AuthenticationBusinessLogicTests:
     """Test core authentication business logic for golden path scenarios."""
 
     def test_jwt_token_creation_business_rules(self):
@@ -329,7 +329,7 @@ class TestAuthenticationBusinessLogic:
 
 @pytest.mark.unit
 @pytest.mark.golden_path
-class TestAuthenticationValidationBusinessRules:
+class AuthenticationValidationBusinessRulesTests:
     """Test authentication validation business rules and edge cases."""
 
     def test_jwt_validation_comprehensive_business_rules(self):

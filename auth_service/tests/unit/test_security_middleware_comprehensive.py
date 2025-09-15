@@ -28,7 +28,7 @@ from auth_service.auth_core.security.middleware import (
 )
 
 
-class TestSecurityMiddleware(SSotBaseTestCase):
+class SecurityMiddlewareTests(SSotBaseTestCase):
     """Comprehensive unit tests for security middleware functionality."""
 
     def setUp(self):
@@ -317,7 +317,7 @@ class TestSecurityMiddleware(SSotBaseTestCase):
             self.assertNotIn(header, mock_response.headers)
 
 
-class TestSecurityMiddlewareEdgeCases(SSotBaseTestCase):
+class SecurityMiddlewareEdgeCasesTests(SSotBaseTestCase):
     """Test edge cases and security scenarios for middleware."""
 
     def setUp(self):

@@ -55,7 +55,7 @@ from analytics_service.analytics_core.config import get_config
 from shared.isolated_environment import get_env
 
 
-class TestEventIngestionPipeline:
+class EventIngestionPipelineTests:
     """Integration tests for event ingestion pipeline."""
 
     @pytest.fixture(autouse=True)
@@ -470,7 +470,7 @@ class TestEventIngestionPipeline:
         assert len(successful_results) >= len(high_volume_events) * 0.9  # At least 90% success rate
 
 
-class TestEventPersistenceIntegration:
+class EventPersistenceIntegrationTests:
     """Integration tests for event persistence and retrieval."""
 
     @pytest.fixture(autouse=True)

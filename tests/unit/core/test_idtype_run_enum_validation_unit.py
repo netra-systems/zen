@@ -39,7 +39,7 @@ from netra_backend.app.core.unified_id_manager import IDType, UnifiedIDManager, 
 
 
 @pytest.mark.unit
-class TestIDTypeRunEnumValidation(SSotBaseTestCase):
+class IDTypeRunEnumValidationTests(SSotBaseTestCase):
     """
     Unit tests for IDType.RUN enum validation and completeness.
     

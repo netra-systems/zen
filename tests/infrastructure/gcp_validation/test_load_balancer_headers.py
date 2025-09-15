@@ -53,7 +53,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from tests.clients.http_client import HTTPClient
 
 @pytest.mark.skipif(not GCP_AVAILABLE, reason='GCP client libraries not available')
-class TestGCPLoadBalancerHeaderForwarding(SSotBaseTestCase):
+class GCPLoadBalancerHeaderForwardingTests(SSotBaseTestCase):
     """
     Infrastructure tests for GCP Load Balancer header forwarding.
     
@@ -428,7 +428,7 @@ class TestGCPLoadBalancerHeaderForwarding(SSotBaseTestCase):
             await self.http_client.close()
         await super().asyncTearDown()
 
-class TestTerraformConfigurationValidation(SSotBaseTestCase):
+class TerraformConfigurationValidationTests(SSotBaseTestCase):
     """Test Terraform configuration for required header forwarding rules."""
 
     def test_terraform_files_exist(self):

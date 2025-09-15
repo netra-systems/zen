@@ -37,7 +37,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.websocket_core import create_websocket_manager
 
 
-class TestWebSocketBridgeIntegration(SSotBaseTestCase):
+class WebSocketBridgeIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for AgentWebSocketBridge with real components.
     
@@ -394,7 +394,7 @@ class TestWebSocketBridgeIntegration(SSotBaseTestCase):
         assert health_status.consecutive_failures == 0
 
 
-class TestWebSocketBridgeUserEmitter(SSotBaseTestCase):
+class WebSocketBridgeUserEmitterTests(SSotBaseTestCase):
     """
     Integration tests for WebSocket bridge user emitter patterns.
     
@@ -517,7 +517,7 @@ class TestWebSocketBridgeUserEmitter(SSotBaseTestCase):
             await bridge.shutdown()
 
 
-class TestWebSocketBridgeRealServices(SSotBaseTestCase):
+class WebSocketBridgeRealServicesTests(SSotBaseTestCase):
     """
     Integration tests with real WebSocket services.
     

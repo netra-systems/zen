@@ -71,7 +71,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestSSOTMessageRouterConsolidation(SSotAsyncTestCase):
+class SSOTMessageRouterConsolidationTests(SSotAsyncTestCase):
     """Test suite for SSOT Message Router consolidation validation.
 
     These tests validate that SSOT consolidation works properly and that
@@ -257,14 +257,14 @@ class TestSSOTMessageRouterConsolidation(SSotAsyncTestCase):
         initial_count = len(router1.handlers)
 
         # Create a test handler
-        class TestHandler:
+        class HandlerTests:
             def can_handle(self, message_type):
                 return message_type == MessageType.PING
 
             async def handle_message(self, user_id, websocket, message):
                 return True
 
-        test_handler = TestHandler()
+        test_handler = HandlerTests()
         router1.add_handler(test_handler)
 
         # Verify handler was added

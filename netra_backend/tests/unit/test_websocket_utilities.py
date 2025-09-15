@@ -62,7 +62,7 @@ from netra_backend.app.core.websocket_exceptions import (
 # Import the deprecated notifier for compatibility testing
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 
-class TestWebSocketEventFormatting:
+class WebSocketEventFormattingTests:
     """Test WebSocket event formatting and validation for business value delivery."""
 
     @pytest.mark.unit
@@ -267,7 +267,7 @@ class TestWebSocketEventFormatting:
         assert impact["risk_level"] in ["low", "medium", "high"]
 
 
-class TestWebSocketEventSerialization:
+class WebSocketEventSerializationTests:
     """Test WebSocket event serialization and deserialization for transmission."""
 
     @pytest.mark.unit
@@ -367,7 +367,7 @@ class TestWebSocketEventSerialization:
                 assert "invalid json" in malformed_json.lower()
 
 
-class TestWebSocketConnectionState:
+class WebSocketConnectionStateTests:
     """Test WebSocket connection state management for reliability."""
 
     @pytest.mark.unit  
@@ -474,7 +474,7 @@ class TestWebSocketConnectionState:
         assert auth_check is True
 
 
-class TestWebSocketEventOrdering:
+class WebSocketEventOrderingTests:
     """Test WebSocket event ordering and timing for user experience."""
 
     @pytest.mark.unit
@@ -567,7 +567,7 @@ class TestWebSocketEventOrdering:
         assert "agent_id" in response_data or "type" in response_data
 
 
-class TestWebSocketBusinessScenarios:
+class WebSocketBusinessScenariosTests:
     """Test WebSocket behavior in real business usage scenarios."""
 
     @pytest.mark.unit

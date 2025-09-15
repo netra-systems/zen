@@ -395,7 +395,7 @@ class EventEmittingMockAgent(BaseAgent):
             return ["generic_analysis_tool"]
 
 
-class TestWebSocketAgentEvents(BaseAgentExecutionTest):
+class WebSocketAgentEventsTests(BaseAgentExecutionTest):
     """Test WebSocket agent event delivery and the 5 critical events."""
     
     def setup_method(self):

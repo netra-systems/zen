@@ -30,7 +30,7 @@ from netra_backend.app.agents.admin_tool_executors import AdminToolExecutors
 from netra_backend.app.db.models_postgres import User
 
 
-class TestAdminToolExecutorsCore(SSotAsyncTestCase):
+class AdminToolExecutorsCoreTests(SSotAsyncTestCase):
     """Test AdminToolExecutors core functionality and initialization."""
 
     def setup_method(self, method):
@@ -59,7 +59,7 @@ class TestAdminToolExecutorsCore(SSotAsyncTestCase):
         assert isinstance(self.executor, AdminToolExecutors)
 
 
-class TestCorpusManagerExecution(SSotAsyncTestCase):
+class CorpusManagerExecutionTests(SSotAsyncTestCase):
     """Test AdminToolExecutors corpus manager functionality."""
 
     def setup_method(self, method):
@@ -195,7 +195,7 @@ class TestCorpusManagerExecution(SSotAsyncTestCase):
         assert params["description"] == "Corpus for general domain"
 
 
-class TestSyntheticDataExecution(SSotAsyncTestCase):
+class SyntheticDataExecutionTests(SSotAsyncTestCase):
     """Test AdminToolExecutors synthetic data generator functionality."""
 
     def setup_method(self, method):
@@ -298,7 +298,7 @@ class TestSyntheticDataExecution(SSotAsyncTestCase):
         assert params["count"] == 10
 
 
-class TestUserAdminExecution(SSotAsyncTestCase):
+class UserAdminExecutionTests(SSotAsyncTestCase):
     """Test AdminToolExecutors user administration functionality."""
 
     def setup_method(self, method):
@@ -468,7 +468,7 @@ class TestUserAdminExecution(SSotAsyncTestCase):
         assert "user_email and permission required" in error["error"]
 
 
-class TestSystemConfiguratorExecution(SSotAsyncTestCase):
+class SystemConfiguratorExecutionTests(SSotAsyncTestCase):
     """Test AdminToolExecutors system configurator functionality."""
 
     def setup_method(self, method):
@@ -591,7 +591,7 @@ class TestSystemConfiguratorExecution(SSotAsyncTestCase):
         assert safe_settings["debug_mode"] is False
 
 
-class TestLogAnalyzerExecution(SSotAsyncTestCase):
+class LogAnalyzerExecutionTests(SSotAsyncTestCase):
     """Test AdminToolExecutors log analyzer functionality."""
 
     def setup_method(self, method):
@@ -771,7 +771,7 @@ class TestLogAnalyzerExecution(SSotAsyncTestCase):
         assert response["level"] == "WARN"
 
 
-class TestAdminToolExecutorsEdgeCases(SSotBaseTestCase):
+class AdminToolExecutorsEdgeCasesTests(SSotBaseTestCase):
     """Test AdminToolExecutors edge cases and error scenarios."""
 
     def setup_method(self, method):

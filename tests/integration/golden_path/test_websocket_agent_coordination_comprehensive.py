@@ -52,7 +52,7 @@ from netra_backend.app.logging_config import central_logger
 from shared.isolated_environment import get_env
 logger = central_logger.get_logger(__name__)
 
-class TestWebSocketAgentCoordinationComprehensive(SSotAsyncTestCase):
+class WebSocketAgentCoordinationComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive integration tests for WebSocket-Agent coordination in golden path.
     

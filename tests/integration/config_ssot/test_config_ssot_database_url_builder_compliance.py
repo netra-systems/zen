@@ -23,7 +23,7 @@ from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import get_env
 
 
-class TestDatabaseURLBuilderCompliance(BaseIntegrationTest):
+class DatabaseURLBuilderComplianceTests(BaseIntegrationTest):
     """Test DatabaseURLBuilder SSOT compliance across services."""
     
     @pytest.mark.integration

@@ -19,7 +19,7 @@ from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher
 
 
-class TestPathValidationIntegration(SSotBaseTestCase):
+class PathValidationIntegrationTests(SSotBaseTestCase):
     """Integration tests for path validation."""
     
     def test_real_project_structure_validation(self):

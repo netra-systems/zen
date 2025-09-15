@@ -74,7 +74,7 @@ from netra_backend.app.core.service_dependencies.models import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestGoldenPathServiceBoundaries:
+class GoldenPathServiceBoundariesTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -427,7 +427,7 @@ class TestGoldenPathServiceBoundaries:
         )
 
 
-class TestCorrectServiceAwareArchitecture:
+class CorrectServiceAwareArchitectureTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

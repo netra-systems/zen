@@ -53,7 +53,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 logger = logging.getLogger(__name__)
 
 
-class TestSSOTRegressionPrevention:
+class SSOTRegressionPreventionTests:
     """
     REGRESSION CRITICAL: Prevent SSOT framework regression.
     These tests catch violations before they can cause system-wide issues.
@@ -1404,7 +1404,7 @@ class TestSSOTRegressionPrevention:
         return performance_metrics
 
 
-class TestSSOTContinuousCompliance:
+class SSOTContinuousComplianceTests:
     """
     COMPLIANCE CRITICAL: Continuous SSOT compliance monitoring.
     These tests run continuously to ensure SSOT compliance is maintained.
@@ -2248,7 +2248,7 @@ class TestSSOTContinuousCompliance:
 
 def run_websocket_tests():
     """Run WebSocket isolation tests."""
-    test_instance = TestSSOTRegressionPrevention()
+    test_instance = SSOTRegressionPreventionTests()
     test_instance.setUp()
     
     try:

@@ -42,7 +42,7 @@ class MockWebSocketState(Enum):
     CLOSED = 'closed'
 
 @pytest.mark.unit
-class TestUnifiedManagerCoreFunctions:
+class UnifiedManagerCoreFunctionsTests:
     """Test core utility functions that support WebSocket business logic."""
 
     def test_serialize_message_safely_handles_basic_dict(self):
@@ -96,7 +96,7 @@ class TestUnifiedManagerCoreFunctions:
         assert result == '3'
 
 @pytest.mark.unit
-class TestWebSocketConnectionDataClass:
+class WebSocketConnectionDataClassTests:
     """Test WebSocketConnection dataclass for business logic validation."""
 
     def test_websocket_connection_creation_with_required_fields(self):
@@ -126,7 +126,7 @@ class TestWebSocketConnectionDataClass:
         assert connection.metadata['session_id'] == 'session-123'
 
 @pytest.mark.unit
-class TestUnifiedWebSocketManagerBusiness:
+class UnifiedWebSocketManagerBusinessTests:
     """Test UnifiedWebSocketManager business logic with minimal mocking."""
 
     def test_manager_initialization_sets_up_business_state(self):
@@ -144,11 +144,11 @@ class TestUnifiedWebSocketManagerBusiness:
             pytest.skip(f'Manager requires factory pattern - future fix needed: {e}')
 
     def test_websocket_manager_mode_consolidation(self):
-        """Test WebSocketManagerMode enum consolidates to UNIFIED."""
+        """Test WebSocketManagerMode enum has correct distinct values."""
         assert WebSocketManagerMode.UNIFIED.value == 'unified'
-        assert WebSocketManagerMode.ISOLATED.value == 'unified'
-        assert WebSocketManagerMode.EMERGENCY.value == 'unified'
-        assert WebSocketManagerMode.DEGRADED.value == 'unified'
+        assert WebSocketManagerMode.ISOLATED.value == 'isolated'
+        assert WebSocketManagerMode.EMERGENCY.value == 'emergency'
+        assert WebSocketManagerMode.DEGRADED.value == 'degraded'
 
     def test_websocket_manager_supports_async_operations(self):
         """Test WebSocketManager interface supports async operations needed for business."""

@@ -91,7 +91,7 @@ class MockWebSocket:
         self.is_connected = False
         self.client_state = 'disconnected'
 
-class TestMessageRoutingGoldenPath(BaseIntegrationTest):
+class MessageRoutingGoldenPathTests(BaseIntegrationTest):
     """Test core message routing functionality that enables user chat experience."""
 
     @pytest.mark.integration
@@ -502,7 +502,7 @@ class TestMessageRoutingGoldenPath(BaseIntegrationTest):
         assert 'processed' in degraded_response['content'], 'Degraded responses must still be helpful'
         logger.info(' PASS:  Message routing graceful degradation test completed')
 
-class TestThreadManagementGoldenPath(BaseIntegrationTest):
+class ThreadManagementGoldenPathTests(BaseIntegrationTest):
     """Test thread management functionality that enables conversation continuity."""
 
     @pytest.mark.integration
@@ -913,7 +913,7 @@ class TestThreadManagementGoldenPath(BaseIntegrationTest):
         else:
             return f"Based on your context as CTO of a fintech startup with current AWS infrastructure, here's my recommendation..."
 
-class TestMultiUserConcurrentScenarios(BaseIntegrationTest):
+class MultiUserConcurrentScenariosTests(BaseIntegrationTest):
     """Test multi-user scenarios focusing on isolation and concurrent operations."""
 
     @pytest.mark.integration

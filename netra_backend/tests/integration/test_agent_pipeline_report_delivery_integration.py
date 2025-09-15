@@ -120,7 +120,7 @@ class AgentExecutionPipelineValidator:
         }
 
 
-class TestAgentPipelineReportDeliveryIntegration(BaseIntegrationTest):
+class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for agent execution pipeline that generates user reports
     

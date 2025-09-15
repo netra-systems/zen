@@ -52,7 +52,7 @@ class MockAuthService:
 
 
 @pytest.mark.e2e
-class TestAuthTokenCacheE2E:
+class AuthTokenCacheE2ETests:
     """E2E test for auth token validation caching."""
     
     @pytest.fixture

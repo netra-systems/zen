@@ -39,7 +39,7 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
 
 @pytest.mark.integration
-class TestGoldenPathAPICompatibility(SSotAsyncTestCase):
+class GoldenPathAPICompatibilityTests(SSotAsyncTestCase):
     """Test Golden Path API compatibility after ExecutionResult API fix."""
 
     def setup_method(self, method):

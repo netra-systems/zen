@@ -16,7 +16,7 @@ from netra_backend.app.db.clickhouse import get_clickhouse_client, get_clickhous
 from test_framework.ssot.test_context_decorator import ContextValidationError
 
 @pytest.mark.integration
-class TestClickHouseRealConnectionValidation:
+class ClickHouseRealConnectionValidationTests:
     """Integration tests for real ClickHouse connections."""
 
     @pytest.mark.real_database
@@ -62,7 +62,7 @@ class TestClickHouseRealConnectionValidation:
         assert isinstance(should_disable, bool)
 
 @pytest.mark.integration
-class TestClickHouseEnvironmentSeparation:
+class ClickHouseEnvironmentSeparationTests:
     """Test proper separation between test and production environments."""
 
     async def test_production_environment_uses_real_connections(self):
@@ -90,7 +90,7 @@ class TestClickHouseEnvironmentSeparation:
             assert should_use_mock == False
 
 @pytest.mark.integration
-class TestClickHouseDecoratorIntegration:
+class ClickHouseDecoratorIntegrationTests:
     """Test decorator behavior in integration context."""
 
     async def test_noop_client_works_in_test_context(self):
@@ -118,7 +118,7 @@ class TestClickHouseDecoratorIntegration:
             assert isinstance(should_use_mock, bool)
 
 @pytest.mark.integration
-class TestClickHouseConfigurationValidation:
+class ClickHouseConfigurationValidationTests:
     """Test ClickHouse configuration validation across environments."""
 
     async def test_configuration_loading_in_test_environment(self):
@@ -167,7 +167,7 @@ class TestClickHouseConfigurationValidation:
             await service.close()
 
 @pytest.mark.skip(reason='Demonstrates expected failures - will be enabled once decorators fully enforced')
-class TestStrictDecoratorEnforcement:
+class StrictDecoratorEnforcementTests:
     """Tests that demonstrate strict decorator enforcement (currently skipped)."""
 
     def test_noop_client_blocks_production_instantiation(self):

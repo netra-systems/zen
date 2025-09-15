@@ -32,7 +32,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from test_framework.ssot.mocks import MockFactory
 
 
-class TestAgentExecutionCoreBusiness:
+class AgentExecutionCoreBusinessTests:
     """Unit tests for AgentExecutionCore business logic validation."""
     
     def setup_method(self):

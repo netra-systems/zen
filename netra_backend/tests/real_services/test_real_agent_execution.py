@@ -129,7 +129,7 @@ async def agent_registry():
     yield registry
     await registry.shutdown()
 
-class TestRealAgentExecution:
+class RealAgentExecutionTests:
     """Test real agent execution without any mocks."""
 
     @pytest.mark.asyncio
@@ -323,7 +323,7 @@ class TestRealAgentExecution:
         assert len(successful_results) > 0, 'At least some concurrent executions should succeed'
         logger.info(f'Concurrent execution: {len(successful_results)}/{len(states)} succeeded in {total_time:.2f}s')
 
-class TestRealAgentIntegration:
+class RealAgentIntegrationTests:
     """Test agent integration with all real services."""
 
     @pytest.mark.asyncio

@@ -51,7 +51,7 @@ import pytest
 from loguru import logger
 
 
-class TestWebSocketEventDeliveryConsistency(SSotBaseTestCase):
+class WebSocketEventDeliveryConsistencyTests(SSotBaseTestCase):
     """Issue #960: WebSocket Event Delivery Consistency Validation
 
     This test validates consistent event delivery across all WebSocket

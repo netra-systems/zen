@@ -374,7 +374,7 @@ class OAuthIntegrationTestValidator:
 @pytest.mark.critical
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestOAuthFlows:
+class OAuthFlowsTests:
     """OAuth Authentication Flow Integration Tests."""
     
     @pytest.fixture

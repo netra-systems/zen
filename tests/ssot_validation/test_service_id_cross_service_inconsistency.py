@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 
-class TestServiceIdCrossServiceInconsistency(SSotAsyncTestCase):
+class ServiceIdCrossServiceInconsistencyTests(SSotAsyncTestCase):
     """
     Detect SERVICE_ID inconsistencies between auth_service and netra_backend.
     

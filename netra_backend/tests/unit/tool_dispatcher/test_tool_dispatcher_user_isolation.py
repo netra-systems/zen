@@ -93,7 +93,7 @@ class MockWebSocketEmitter:
         self.notifications.append({'type': event_type, **data, 'user_id': self.user_id, 'timestamp': datetime.now(timezone.utc).isoformat()})
         return True
 
-class TestToolDispatcherUserIsolation(SSotBaseTestCase):
+class ToolDispatcherUserIsolationTests(SSotBaseTestCase):
     """Test Tool Dispatcher ensures complete user isolation."""
 
     def setup_method(self):

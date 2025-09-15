@@ -197,7 +197,7 @@ async def real_agent_tester():
 
 
 @pytest.mark.e2e
-class TestAgentMessageFlowImplementation:
+class AgentMessageFlowImplementationTests:
     """Test suite for real agent message flow implementation."""
     
     @pytest.mark.asyncio

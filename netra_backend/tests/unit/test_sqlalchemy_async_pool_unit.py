@@ -47,7 +47,7 @@ from netra_backend.app.database import get_database_url, get_engine, get_session
 from shared.isolated_environment import get_env
 
 
-class TestSQLAlchemyAsyncPoolUnit:
+class SQLAlchemyAsyncPoolUnitTests:
     """
     Unit Tests for SQLAlchemy Async Pool Configuration Validation.
     

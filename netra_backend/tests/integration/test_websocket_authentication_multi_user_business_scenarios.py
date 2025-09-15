@@ -128,7 +128,7 @@ class MockAuthenticatedWebSocketConnection:
         return [msg for msg in self.sent_messages if msg.get("type") in business_event_types]
 
 
-class TestWebSocketAuthenticationMultiUserBusinessScenarios(SSotAsyncTestCase):
+class WebSocketAuthenticationMultiUserBusinessScenariosTests(SSotAsyncTestCase):
     """
     Comprehensive Integration Tests for Multi-User WebSocket Authentication Business Scenarios.
     

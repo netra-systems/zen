@@ -252,7 +252,7 @@ class WebSocketRaceConditionTestFramework:
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.e2e_auth_required
-class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
+class WebSocketRaceConditionCloudRunReproductionTests(SSotBaseTestCase):
     """
     Comprehensive E2E tests for WebSocket race condition reproduction.
     
@@ -552,7 +552,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
 
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestWebSocketRaceConditionPerformanceBenchmarks:
+class WebSocketRaceConditionPerformanceBenchmarksTests:
     """
     Performance benchmarks for WebSocket race condition scenarios.
     

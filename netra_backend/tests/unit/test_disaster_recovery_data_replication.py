@@ -9,7 +9,7 @@ from typing import Dict, List, Any
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestDisasterRecoveryDataReplication:
+class DisasterRecoveryDataReplicationTests:
     """Validates data replication integrity for disaster recovery."""
     
     @pytest.fixture

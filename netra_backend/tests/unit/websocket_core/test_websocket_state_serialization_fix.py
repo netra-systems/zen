@@ -16,7 +16,7 @@ from netra_backend.app.websocket_core.unified_manager import _serialize_message_
 from starlette.websockets import WebSocketState as StarletteWebSocketState
 from fastapi.websockets import WebSocketState as FastAPIWebSocketState
 
-class TestWebSocketStateSerialization:
+class WebSocketStateSerializationTests:
     """Test WebSocket state serialization fixes."""
 
     def test_serialize_starlette_websocket_state(self):
@@ -129,7 +129,7 @@ class TestWebSocketStateSerialization:
                 raise
         assert result == 'connected'
 
-class TestWebSocketMessageSending:
+class WebSocketMessageSendingTests:
     """Test WebSocket message sending patterns that were problematic."""
 
     @pytest.mark.asyncio

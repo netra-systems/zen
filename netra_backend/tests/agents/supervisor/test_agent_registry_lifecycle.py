@@ -73,7 +73,7 @@ class MockAgent(BaseAgent):
         self.lifecycle_events.append("deleted")
 
 
-class TestAgentRegistryLifecycle(SSotAsyncTestCase):
+class AgentRegistryLifecycleTests(SSotAsyncTestCase):
     """Test AgentRegistry lifecycle management and agent registration."""
 
     def setup_method(self, method):
@@ -137,23 +137,23 @@ class TestAgentRegistryLifecycle(SSotAsyncTestCase):
         registry = AgentRegistry()
 
         # Define test agent classes
-        class TestTriageAgent(MockAgent):
+        class TriageAgentTests(MockAgent):
             def __init__(self, *args, **kwargs):
                 super().__init__(agent_type="triage", *args, **kwargs)
 
-        class TestDataHelperAgent(MockAgent):
+        class DataHelperAgentTests(MockAgent):
             def __init__(self, *args, **kwargs):
                 super().__init__(agent_type="data_helper", *args, **kwargs)
 
-        class TestReportingAgent(MockAgent):
+        class ReportingAgentTests(MockAgent):
             def __init__(self, *args, **kwargs):
                 super().__init__(agent_type="reporting", *args, **kwargs)
 
         # Mock the agent registration process
         test_agent_classes = {
-            "triage": TestTriageAgent,
-            "data_helper": TestDataHelperAgent,
-            "reporting": TestReportingAgent
+            "triage": TriageAgentTests,
+            "data_helper": DataHelperAgentTests,
+            "reporting": ReportingAgentTests
         }
 
         # Mock the get_agent_classes method to return our test classes

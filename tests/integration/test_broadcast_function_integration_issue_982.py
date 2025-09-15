@@ -72,7 +72,7 @@ class MockWebSocketConnection:
 
 
 @pytest.mark.integration
-class TestBroadcastFunctionConsistency(SSotAsyncTestCase):
+class BroadcastFunctionConsistencyTests(SSotAsyncTestCase):
     """Integration tests for broadcast function consistency."""
 
     def setUp(self):
@@ -249,7 +249,7 @@ class TestBroadcastFunctionConsistency(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestBroadcastUserIsolationSecurity(SSotAsyncTestCase):
+class BroadcastUserIsolationSecurityTests(SSotAsyncTestCase):
     """Integration tests for user isolation security in broadcast functions."""
 
     def setUp(self):
@@ -468,7 +468,7 @@ class TestBroadcastUserIsolationSecurity(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestConvenienceFunctionIntegration(SSotAsyncTestCase):
+class ConvenienceFunctionIntegrationTests(SSotAsyncTestCase):
     """Integration tests for convenience function behavior."""
 
     async def test_convenience_function_vs_class_methods(self):

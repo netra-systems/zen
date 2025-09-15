@@ -35,7 +35,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
 @pytest.mark.e2e
-class TestSupervisorAgentOrchestrationE2E(BaseE2ETest):
+class SupervisorAgentOrchestrationE2ETests(BaseE2ETest):
     """E2E tests for supervisor agent orchestration with authenticated full-stack integration."""
 
     @pytest.fixture

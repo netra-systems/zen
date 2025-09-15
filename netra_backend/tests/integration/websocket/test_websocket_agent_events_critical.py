@@ -106,7 +106,7 @@ class MockLLMForAgentEvents:
         }
 
 
-class TestWebSocketAgentEventsCritical(BaseIntegrationTest):
+class WebSocketAgentEventsCriticalTests(BaseIntegrationTest):
     """
     Integration tests for the 5 mission-critical WebSocket agent events.
     

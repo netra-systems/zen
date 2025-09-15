@@ -105,7 +105,7 @@ class IntegrationTestContext:
             self.request_id = f"req-{self.service_name}-{self.session_id}"
 
 
-class TestIssue889WebSocketManagerDuplicationIntegration(SSotAsyncTestCase):
+class Issue889WebSocketManagerDuplicationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests to reproduce WebSocket manager duplication in service contexts.
 

@@ -41,7 +41,7 @@ from shared.database_url_builder import DatabaseURLBuilder
 
 
 @pytest.mark.integration
-class TestDatabaseManagerInitialization(SSotAsyncTestCase):
+class DatabaseManagerInitializationTests(SSotAsyncTestCase):
     """Test DatabaseManager initialization and URL building functionality."""
     
     def setup_method(self, method=None):
@@ -191,7 +191,7 @@ class TestDatabaseManagerInitialization(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestDatabaseManagerConnectionManagement(SSotAsyncTestCase):
+class DatabaseManagerConnectionManagementTests(SSotAsyncTestCase):
     """Test DatabaseManager connection and engine management functionality."""
     
     def setup_method(self, method=None):
@@ -324,7 +324,7 @@ class TestDatabaseManagerConnectionManagement(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestDatabaseManagerSessionLifecycle(SSotAsyncTestCase):
+class DatabaseManagerSessionLifecycleTests(SSotAsyncTestCase):
     """Test DatabaseManager session lifecycle and context management."""
     
     def setup_method(self, method=None):
@@ -444,7 +444,7 @@ class TestDatabaseManagerSessionLifecycle(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestDatabaseManagerMultiDatabaseSupport(SSotAsyncTestCase):
+class DatabaseManagerMultiDatabaseSupportTests(SSotAsyncTestCase):
     """Test DatabaseManager support for multiple database types."""
     
     def setup_method(self, method=None):
@@ -540,7 +540,7 @@ class TestDatabaseManagerMultiDatabaseSupport(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestDatabaseManagerErrorHandlingAndRecovery(SSotAsyncTestCase):
+class DatabaseManagerErrorHandlingAndRecoveryTests(SSotAsyncTestCase):
     """Test DatabaseManager error handling and connection recovery."""
     
     def setup_method(self, method=None):
@@ -703,7 +703,7 @@ class TestDatabaseManagerErrorHandlingAndRecovery(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestDatabaseManagerResourceCleanup(SSotAsyncTestCase):
+class DatabaseManagerResourceCleanupTests(SSotAsyncTestCase):
     """Test DatabaseManager resource cleanup and connection disposal."""
     
     def setup_method(self, method=None):

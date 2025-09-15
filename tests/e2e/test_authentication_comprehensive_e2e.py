@@ -153,7 +153,7 @@ async def comprehensive_auth_runner():
     await runner.cleanup_real_services()
 
 
-class TestAuthenticationComprehensiveE2E:
+class AuthenticationComprehensiveE2ETests:
     """Comprehensive E2E tests for authentication flows - CLAUDE.md Compliant.
     
     CRITICAL: All tests use REAL authentication, NO mocks, NO skipping.

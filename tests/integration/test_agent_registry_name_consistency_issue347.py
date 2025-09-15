@@ -30,7 +30,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestAgentRegistryNameConsistencyIntegration(SSotAsyncTestCase):
+class AgentRegistryNameConsistencyIntegrationTests(SSotAsyncTestCase):
     """Integration tests for agent registry naming consistency with real services."""
     
     @classmethod
@@ -248,7 +248,7 @@ class TestAgentRegistryNameConsistencyIntegration(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestAgentRegistryRealServiceIntegration(SSotAsyncTestCase):
+class AgentRegistryRealServiceIntegrationTests(SSotAsyncTestCase):
     """Integration tests with real agent registry patterns and services."""
     
     async def asyncSetUp(self):

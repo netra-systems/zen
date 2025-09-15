@@ -40,7 +40,7 @@ except ImportError as e:
 
 
 @pytest.mark.unit
-class TestUserExecutionEngineSSoTValidation(SSotAsyncTestCase):
+class UserExecutionEngineSSoTValidationTests(SSotAsyncTestCase):
     """Comprehensive validation that UserExecutionEngine is a complete SSOT"""
     
     def setUp(self):

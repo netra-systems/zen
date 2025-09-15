@@ -28,7 +28,7 @@ from shared.jwt_secret_manager import get_jwt_secret_manager
 from shared.isolated_environment import get_env
 
 
-class TestEnvironmentVariableResolution:
+class EnvironmentVariableResolutionTests:
     """Test environment variable resolution patterns."""
     
     @pytest.mark.asyncio
@@ -232,7 +232,7 @@ class TestEnvironmentVariableResolution:
         print(f"   OS environ SERVICE_ID: {os.environ.get('SERVICE_ID', 'NOT_SET')}")
 
 
-class TestEnvironmentPrecedenceAndFallbacks:
+class EnvironmentPrecedenceAndFallbacksTests:
     """Test environment variable precedence rules and fallback mechanisms."""
     
     @pytest.mark.asyncio
@@ -391,7 +391,7 @@ if __name__ == "__main__":
         print("=" * 60)
         
         print("\n1. Testing Service ID Resolution...")
-        test_instance = TestEnvironmentVariableResolution()
+        test_instance = EnvironmentVariableResolutionTests()
         try:
             await test_instance.test_service_id_resolution_fallback_behavior()
             print("   ✅ Service ID resolution tests completed")

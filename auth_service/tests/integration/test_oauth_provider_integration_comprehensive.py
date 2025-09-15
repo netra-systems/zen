@@ -39,7 +39,7 @@ from test_framework.ssot.database import DatabaseTestHelper
 from shared.isolated_environment import get_env
 
 
-class TestOAuthProviderIntegration(SSotBaseTestCase):
+class OAuthProviderIntegrationTests(SSotBaseTestCase):
     """
     Comprehensive OAuth provider integration tests.
     

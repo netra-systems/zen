@@ -27,7 +27,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 @pytest.mark.integration
-class TestWebSocketCleanupCorrelation(SSotAsyncTestCase):
+class WebSocketCleanupCorrelationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket cleanup correlation with ID patterns."""
 
     def setUp(self):

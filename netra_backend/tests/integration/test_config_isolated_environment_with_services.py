@@ -26,7 +26,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
 
 
-class TestIsolatedEnvironmentWithRealServices(BaseIntegrationTest):
+class IsolatedEnvironmentWithRealServicesTests(BaseIntegrationTest):
     """
     Integration tests for IsolatedEnvironment with real services.
     

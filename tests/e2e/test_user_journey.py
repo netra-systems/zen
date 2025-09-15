@@ -31,7 +31,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_test_user_
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.authentication_compliance
-class TestAuthenticatedUserJourney:
+class AuthenticatedUserJourneyTests:
     """Test suite for complete authenticated user journey flows - CLAUDE.md compliant."""
 
     def setup_method(self):

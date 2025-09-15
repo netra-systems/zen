@@ -52,7 +52,7 @@ class MockWebSocketManager:
 
 
 @pytest.mark.unit
-class TestUserExecutionEngineIsolationValidation(SSotAsyncTestCase):
+class UserExecutionEngineIsolationValidationTests(SSotAsyncTestCase):
     """Unit Test 1: Validate UserExecutionEngine user isolation"""
     
     def setUp(self):

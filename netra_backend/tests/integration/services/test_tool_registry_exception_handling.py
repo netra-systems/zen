@@ -43,7 +43,7 @@ class IntegrationTestTool(BaseTool):
             raise RuntimeError('Tool execution failed')
         return f'Success from {self.name}'
 
-class TestToolRegistryIntegrationExceptions(unittest.TestCase):
+class ToolRegistryIntegrationExceptionsTests(unittest.TestCase):
     """Test exception handling across multiple tool registry components."""
 
     def setUp(self):
@@ -251,7 +251,7 @@ class TestToolRegistryIntegrationExceptions(unittest.TestCase):
         if hasattr(self, 'universal_registry'):
             self.universal_registry.clear()
 
-class TestToolRegistryExceptionRecoveryIntegration(SSotAsyncTestCase):
+class ToolRegistryExceptionRecoveryIntegrationTests(SSotAsyncTestCase):
     """Test exception recovery mechanisms in integration scenarios."""
 
     def setUp(self):

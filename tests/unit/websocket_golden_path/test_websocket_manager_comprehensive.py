@@ -41,7 +41,7 @@ from shared.types.core_types import UserID, ThreadID, ConnectionID, WebSocketID
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 @pytest.mark.unit
-class TestWebSocketManagerComprehensive(SSotAsyncTestCase):
+class WebSocketManagerComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive unit tests for WebSocket Manager SSOT class.
     
@@ -271,7 +271,7 @@ class TestWebSocketManagerComprehensive(SSotAsyncTestCase):
                             self.fail(f"Cross-user message delivery detected: User {j} received User {i}'s message")
 
 @pytest.mark.unit
-class TestWebSocketManagerEdgeCases(SSotBaseTestCase):
+class WebSocketManagerEdgeCasesTests(SSotBaseTestCase):
     """
     Unit tests for WebSocket Manager edge cases and error conditions.
     

@@ -38,7 +38,7 @@ from test_framework.helpers.auth_helpers import (
 @pytest.mark.critical
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestWebSocketAuthConnection:
+class WebSocketAuthConnectionTests:
     """Critical WebSocket Authentication Connection Tests."""
     
     @pytest.fixture

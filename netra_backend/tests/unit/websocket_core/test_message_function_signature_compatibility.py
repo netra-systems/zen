@@ -26,7 +26,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestWebSocketMessageFunctionSignatureCompatibility(SSotBaseTestCase):
+class WebSocketMessageFunctionSignatureCompatibilityTests(SSotBaseTestCase):
     """
     CRITICAL: Test function signature compatibility between real and fallback implementations.
     
@@ -224,7 +224,7 @@ class TestWebSocketMessageFunctionSignatureCompatibility(SSotBaseTestCase):
         if violations:
             pytest.fail(f'Found {len(violations)} potential signature violations:\n' + '\n'.join(violations))
 
-class TestWebSocketMessageCreationEdgeCases(SSotBaseTestCase):
+class WebSocketMessageCreationEdgeCasesTests(SSotBaseTestCase):
     """Test edge cases in WebSocket message creation that could cause signature mismatches."""
 
     def test_error_message_with_none_values(self):
@@ -251,7 +251,7 @@ class TestWebSocketMessageCreationEdgeCases(SSotBaseTestCase):
         with pytest.raises((TypeError, ValueError)):
             create_server_message('test', None)
 
-class TestWebSocketFunctionCompatibilityMatrix(SSotBaseTestCase):
+class WebSocketFunctionCompatibilityMatrixTests(SSotBaseTestCase):
     """Test all combinations of real vs fallback function calls systematically."""
 
     def setup_method(self):

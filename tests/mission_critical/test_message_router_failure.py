@@ -47,7 +47,7 @@ class WebSocketTestHelper:
         return self.messages_sent.copy()
 
 
-class TestMessageRouterSSOTCompliance(SSotBaseTestCase):
+class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
     """Mission Critical Test: Validates MessageRouter SSOT compliance is resolved."""
 
     def setup_method(self, method=None):

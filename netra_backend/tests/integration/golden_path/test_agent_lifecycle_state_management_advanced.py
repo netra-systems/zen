@@ -78,7 +78,7 @@ class AgentStateSnapshot:
     websocket_events_count: int
 
 
-class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
+class AdvancedAgentLifecycleStateManagementTests(BaseIntegrationTest):
     """Advanced integration tests for agent lifecycle and state management."""
 
     @pytest.mark.asyncio

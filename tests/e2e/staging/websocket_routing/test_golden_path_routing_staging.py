@@ -24,7 +24,7 @@ import json
 from test_framework.ssot.base_test_case import BaseE2ETest
 
 
-class TestGoldenPathRoutingStagingE2E(BaseE2ETest):
+class GoldenPathRoutingStagingE2ETests(BaseE2ETest):
     """Test Golden Path routing with staging environment."""
 
     def setUp(self) -> None:

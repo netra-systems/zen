@@ -14,7 +14,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.integration
-class TestSystemIntegrationValidation:
+class SystemIntegrationValidationTests:
     """Test system-wide integration validation."""
 
     def test_cross_service_imports_work(self):

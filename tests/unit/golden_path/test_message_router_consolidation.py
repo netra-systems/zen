@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import BaseTestCase
 from shared.isolated_environment import get_env
 
 
-class TestMessageRouterConsolidation(BaseTestCase):
+class MessageRouterConsolidationTests(BaseTestCase):
     """Test message router consolidation maintains Golden Path success."""
 
     def setup_method(self, method):
@@ -232,7 +232,7 @@ class TestMessageRouterConsolidation(BaseTestCase):
         return True
 
 
-class TestMessageRouterPerformanceConsolidation(BaseTestCase):
+class MessageRouterPerformanceConsolidationTests(BaseTestCase):
     """Test message router performance improvements from consolidation."""
 
     def setup_method(self, method):

@@ -37,7 +37,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import WebSocket
 from test_framework.fixtures.websocket_manager_mock import MockWebSocketManager
 
 
-class TestWebSocketMockSsotBypassProof(SSotAsyncTestCase):
+class WebSocketMockSsotBypassProofTests(SSotAsyncTestCase):
     """Prove that WebSocket mock infrastructure bypasses SSOT patterns."""
     
     async def asyncSetUp(self):

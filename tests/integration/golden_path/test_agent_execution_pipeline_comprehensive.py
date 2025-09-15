@@ -53,7 +53,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from shared.id_generation import UnifiedIdGenerator
 
 
-class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
+class AgentExecutionPipelineComprehensiveTests(BaseIntegrationTest):
     """
     Comprehensive integration tests for the golden path agent execution pipeline.
     

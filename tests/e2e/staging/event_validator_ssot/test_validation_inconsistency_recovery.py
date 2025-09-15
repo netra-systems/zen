@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 @pytest.mark.e2e
-class TestValidationInconsistencyRecovery(SSotAsyncTestCase):
+class ValidationInconsistencyRecoveryTests(SSotAsyncTestCase):
     """
     E2E staging tests for EventValidator inconsistency recovery scenarios.
     

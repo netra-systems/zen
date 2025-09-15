@@ -37,7 +37,7 @@ import websockets
 
 logger = logging.getLogger(__name__)
 
-class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
+class WebSocketErrorEventDeliveryTests(SSotBaseTestCase):
     """
     MISSION CRITICAL: WebSocket Error Event Delivery Test Suite
     

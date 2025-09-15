@@ -143,7 +143,7 @@ class ErrorScenarioSimulator:
         }
 
 
-class TestAgentErrorRecoveryEventDelivery(BaseE2ETest):
+class AgentErrorRecoveryEventDeliveryTests(BaseE2ETest):
     """E2E tests for agent error recovery with WebSocket event delivery."""
     
     @pytest.fixture

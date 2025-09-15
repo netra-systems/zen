@@ -16,7 +16,7 @@ import pytest
 from test_framework.test_patterns import L3IntegrationTest
 
 @pytest.mark.skip(reason='L3 integration tests require backend service running - temporarily skipped for test runner stability')
-class TestAPIBasicOperations(L3IntegrationTest):
+class APIBasicOperationsTests(L3IntegrationTest):
     """Test API basic operations from multiple angles."""
 
     @pytest.mark.asyncio

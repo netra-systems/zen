@@ -204,7 +204,7 @@ class MockAgentHandler:
         })
 
 
-class TestAgentHandlerUnit(SSotAsyncTestCase):
+class AgentHandlerUnitTests(SSotAsyncTestCase):
     """Unit tests for WebSocket agent handler functionality
     
     This test class validates the critical agent message handling capabilities

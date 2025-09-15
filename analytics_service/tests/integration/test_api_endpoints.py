@@ -364,7 +364,7 @@ def create_analytics_api() -> FastAPI:
 # API ENDPOINT TESTS
 # =============================================================================
 
-class TestEventIngestionEndpoint:
+class EventIngestionEndpointTests:
     """Test suite for event ingestion API endpoint"""
     
     @pytest.fixture
@@ -482,7 +482,7 @@ class TestEventIngestionEndpoint:
 # RATE LIMITING TESTS
 # =============================================================================
 
-class TestRateLimiting:
+class RateLimitingTests:
     """Test suite for API rate limiting"""
     
     @pytest.fixture
@@ -553,7 +553,7 @@ class TestRateLimiting:
 # REPORT ENDPOINT TESTS
 # =============================================================================
 
-class TestReportEndpoints:
+class ReportEndpointsTests:
     """Test suite for report generation endpoints"""
     
     @pytest.fixture
@@ -650,7 +650,7 @@ class TestReportEndpoints:
 # HEALTH CHECK TESTS
 # =============================================================================
 
-class TestHealthCheckEndpoint:
+class HealthCheckEndpointTests:
     """Test suite for health check endpoint"""
     
     @pytest.fixture
@@ -696,7 +696,7 @@ class TestHealthCheckEndpoint:
 # PERFORMANCE TESTS
 # =============================================================================
 
-class TestAPIPerformance:
+class APIPerformanceTests:
     """Test suite for API performance"""
     
     @pytest.fixture
@@ -773,7 +773,7 @@ class TestAPIPerformance:
 # ERROR HANDLING TESTS
 # =============================================================================
 
-class TestAPIErrorHandling:
+class APIErrorHandlingTests:
     """Test suite for API error handling"""
     
     @pytest.fixture
@@ -821,7 +821,7 @@ class TestAPIErrorHandling:
 # INTEGRATION WITH FIXTURES
 # =============================================================================
 
-class TestAPIWithFixtures:
+class APIWithFixturesTests:
     """Test API endpoints using conftest fixtures"""
     
     @pytest.fixture

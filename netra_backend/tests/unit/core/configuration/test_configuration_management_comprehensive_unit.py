@@ -33,7 +33,7 @@ from test_framework.ssot.configuration_validator import (
 from shared.isolated_environment import get_env
 
 
-class TestConfigurationManagementUnit:
+class ConfigurationManagementUnitTests:
     """Unit tests for configuration management systems."""
     
     @pytest.mark.unit

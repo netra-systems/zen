@@ -18,7 +18,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.services.monitoring.gcp_client_manager import GCPClientManager, GCPCredentials, create_gcp_client_manager, MockErrorReportingClient, MockMonitoringClient, MockLoggingClient
 
-class TestGCPClientManagerUnit(SSotBaseTestCase):
+class GCPClientManagerUnitTests(SSotBaseTestCase):
     """
     UNIT: GCP Client Manager Unit Test Suite
     

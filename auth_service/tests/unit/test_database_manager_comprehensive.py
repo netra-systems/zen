@@ -25,7 +25,7 @@ from shared.database_url_builder import DatabaseURLBuilder
 from test_framework.real_services_test_fixtures import real_services_fixture
 
 
-class TestAuthDatabaseManagerEngineCreation:
+class AuthDatabaseManagerEngineCreationTests:
     """Test database engine creation functionality"""
     
     @pytest.mark.unit
@@ -84,7 +84,7 @@ class TestAuthDatabaseManagerEngineCreation:
                 AuthDatabaseManager.create_async_engine()
 
 
-class TestAuthDatabaseManagerURLConstruction:
+class AuthDatabaseManagerURLConstructionTests:
     """Test database URL construction and validation"""
     
     @pytest.mark.unit
@@ -184,7 +184,7 @@ class TestAuthDatabaseManagerURLConstruction:
                     AuthDatabaseManager.get_database_url()
 
 
-class TestAuthDatabaseManagerEnvironmentHandling:
+class AuthDatabaseManagerEnvironmentHandlingTests:
     """Test environment-specific behavior"""
     
     @pytest.mark.unit
@@ -272,7 +272,7 @@ class TestAuthDatabaseManagerEnvironmentHandling:
                 assert call_args["ENVIRONMENT"] == "development"
 
 
-class TestAuthDatabaseManagerIntegrationWithSharedComponents:
+class AuthDatabaseManagerIntegrationWithSharedComponentsTests:
     """Test integration with shared components"""
     
     @pytest.mark.unit
@@ -352,7 +352,7 @@ class TestAuthDatabaseManagerIntegrationWithSharedComponents:
                     mock_mask.assert_called_once_with("postgresql://user:password@host:5432/db")
 
 
-class TestAuthDatabaseManagerErrorHandlingAndEdgeCases:
+class AuthDatabaseManagerErrorHandlingAndEdgeCasesTests:
     """Test error handling and edge cases"""
     
     @pytest.mark.unit
@@ -444,7 +444,7 @@ class TestAuthDatabaseManagerErrorHandlingAndEdgeCases:
                         assert url == "postgresql://test"
 
 
-class TestAuthDatabaseManagerRealWorldScenarios:
+class AuthDatabaseManagerRealWorldScenariosTests:
     """Test real-world usage scenarios"""
     
     @pytest.mark.unit

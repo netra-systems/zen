@@ -46,7 +46,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestHelper
 @pytest.mark.agent_goldenpath
 @pytest.mark.business_value
 @pytest.mark.mission_critical
-class TestAgentBusinessValueValidationE2E(SSotAsyncTestCase):
+class AgentBusinessValueValidationE2ETests(SSotAsyncTestCase):
     """
     E2E tests validating that agents deliver substantive business value through
     quality AI responses that justify platform usage and customer retention.

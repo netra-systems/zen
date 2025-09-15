@@ -31,7 +31,7 @@ from auth_service.services.redis_service import RedisService
 from auth_service.database import get_database
 
 
-class TestMultiUserIsolationIntegration(BaseIntegrationTest):
+class MultiUserIsolationIntegrationTests(BaseIntegrationTest):
     """Integration tests for multi-user isolation with real services."""
     
     @pytest.fixture(autouse=True)

@@ -236,7 +236,7 @@ class MockWebSocketForEventCapture:
 @pytest.mark.mission_critical
 @pytest.mark.critical
 @pytest.mark.websocket_events  
-class TestWebSocketAgentEventsCore:
+class WebSocketAgentEventsCoreTests:
     """
     P0 Mission Critical WebSocket Event Delivery Test Suite.
     

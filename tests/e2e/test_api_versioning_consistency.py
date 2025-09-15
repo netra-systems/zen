@@ -21,7 +21,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestAPIVersioningConsistency:
+class APIVersioningConsistencyTests:
     """Test suite for API versioning and endpoint consistency."""
 
     async def test_api_version_consistency_across_services(self):

@@ -35,7 +35,7 @@ from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
-class TestConfigurationBaseSSoTViolationRemediation(SSotBaseTestCase):
+class ConfigurationBaseSSoTViolationRemediationTests(SSotBaseTestCase):
     """Test suite for Configuration Base SSOT violation detection and remediation."""
 
     def setup_method(self, method=None):

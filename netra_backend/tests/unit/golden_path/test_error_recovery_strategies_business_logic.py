@@ -704,7 +704,7 @@ class ErrorRecoveryManager:
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestErrorRecoveryStrategiesBusinessLogic:
+class ErrorRecoveryStrategiesBusinessLogicTests:
     """Test error recovery strategies business logic for platform reliability."""
     
     def setup_method(self):

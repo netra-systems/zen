@@ -110,7 +110,7 @@ class MockAgentExecutionCore(Mock):
         """Mock agent execution."""
         return AgentExecutionResult(success=True, agent_name=context.agent_name, duration=0.5, error=None, data={'result': f'Executed {context.agent_name} successfully'}, metadata={'user_id': context.user_id, 'execution_timestamp': datetime.now(timezone.utc).isoformat()})
 
-class TestUserExecutionEngineInitialization(SSotAsyncTestCase):
+class UserExecutionEngineInitializationTests(SSotAsyncTestCase):
     """Test suite for user execution engine initialization and configuration."""
 
     def setUp(self):
@@ -196,7 +196,7 @@ class TestUserExecutionEngineInitialization(SSotAsyncTestCase):
         repr_str = repr(engine)
         self.assertEqual(str_repr, repr_str)
 
-class TestUserExecutionEngineIsolation(SSotAsyncTestCase):
+class UserExecutionEngineIsolationTests(SSotAsyncTestCase):
     """Test suite for user isolation and concurrent execution safety."""
 
     def setUp(self):
@@ -302,7 +302,7 @@ class TestUserExecutionEngineIsolation(SSotAsyncTestCase):
         self.assertEqual(stats1['avg_execution_time'], 1.5)
         self.assertEqual(stats2['avg_execution_time'], 0.0)
 
-class TestUserExecutionEngineAgentExecution(SSotAsyncTestCase):
+class UserExecutionEngineAgentExecutionTests(SSotAsyncTestCase):
     """Test suite for agent execution with user context."""
 
     def setUp(self):
@@ -433,7 +433,7 @@ class TestUserExecutionEngineAgentExecution(SSotAsyncTestCase):
         time_diff = abs(execution_started[1] - execution_started[0])
         self.assertGreater(time_diff, 0.05)
 
-class TestUserExecutionEnginePipelineExecution(SSotAsyncTestCase):
+class UserExecutionEnginePipelineExecutionTests(SSotAsyncTestCase):
     """Test suite for pipeline execution with user context."""
 
     def setUp(self):
@@ -526,7 +526,7 @@ class TestUserExecutionEnginePipelineExecution(SSotAsyncTestCase):
         self.assertFalse(results[1].success)
         self.assertIn('Step 2 failed', results[1].error)
 
-class TestUserExecutionEngineResourceManagement(SSotAsyncTestCase):
+class UserExecutionEngineResourceManagementTests(SSotAsyncTestCase):
     """Test suite for resource management and cleanup."""
 
     def setUp(self):

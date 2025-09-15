@@ -49,7 +49,7 @@ from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 
-class TestWebSocketNotifierCompleteE2E(SSotBaseTestCase):
+class WebSocketNotifierCompleteE2ETests(SSotBaseTestCase):
     """Complete E2E tests for WebSocket Notifier functionality with authentication."""
     
     def setup_method(self):

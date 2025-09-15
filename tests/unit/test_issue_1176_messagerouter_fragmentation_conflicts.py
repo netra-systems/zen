@@ -23,7 +23,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestMessageRouterFragmentationConflicts(SSotBaseTestCase):
+class MessageRouterFragmentationConflictsTests(SSotBaseTestCase):
     """Test MessageRouter implementation fragmentation causing routing conflicts."""
 
     def setUp(self):
@@ -417,7 +417,7 @@ class TestMessageRouterFragmentationConflicts(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestMessageRouterImportPathFragmentation(SSotBaseTestCase):
+class MessageRouterImportPathFragmentationTests(SSotBaseTestCase):
     """Test MessageRouter import path fragmentation causing module conflicts."""
 
     def test_import_path_fragmentation_detection(self):

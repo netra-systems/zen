@@ -17,7 +17,7 @@ from netra_backend.app.services.state_persistence import StateCacheManager
 from netra_backend.app.routes.utils.thread_handlers import handle_create_thread_request
 from shared.types import RunID, UserID, ThreadID
 
-class TestThreeTierMessageFlowIntegration:
+class ThreeTierMessageFlowIntegrationTests:
     """Integration tests for complete three-tier message flow."""
 
     @pytest.fixture
@@ -151,7 +151,7 @@ class TestThreeTierMessageFlowIntegration:
         assert hasattr(message_repository, 'get_performance_summary'), 'Should provide performance summary for monitoring'
         assert 'redis_save' in performance_report, 'Performance report should include Redis operation metrics'
 
-class TestCurrentIntegrationGaps:
+class CurrentIntegrationGapsTests:
     """Tests that expose integration gaps in current message flow."""
 
     @pytest.mark.asyncio

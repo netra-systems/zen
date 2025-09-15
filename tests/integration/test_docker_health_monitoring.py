@@ -19,7 +19,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestDockerHealthMonitoring(SSotAsyncTestCase):
+class DockerHealthMonitoringTests(SSotAsyncTestCase):
     """Test Docker health monitoring integration."""
 
     def setUp(self):
@@ -108,7 +108,7 @@ class TestDockerHealthMonitoring(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestDockerHealthMonitoringAsync(SSotAsyncTestCase):
+class DockerHealthMonitoringAsyncTests(SSotAsyncTestCase):
     """Test asynchronous Docker health monitoring operations."""
 
     async def test_async_docker_health_check(self):

@@ -26,7 +26,7 @@ from netra_backend.app.core.configuration import unified_config_manager
 from test_framework.base import BaseTestCase
 from test_framework.performance_helpers import fast_test
 
-class TestStartupTimeoutEdgeCases(BaseTestCase):
+class StartupTimeoutEdgeCasesTests(BaseTestCase):
     """Test edge cases related to startup timeouts."""
 
     @pytest.mark.asyncio
@@ -116,7 +116,7 @@ class TestStartupTimeoutEdgeCases(BaseTestCase):
         await asyncio.sleep(1)
         return {'status': 'healthy', 'check': check_name}
 
-class TestMemoryInsufficientEdgeCases(BaseTestCase):
+class MemoryInsufficientEdgeCasesTests(BaseTestCase):
     """Test edge cases when memory is insufficient."""
 
     def test_memory_pressure_during_startup(self):
@@ -206,7 +206,7 @@ class TestMemoryInsufficientEdgeCases(BaseTestCase):
         finally:
             fragments.clear()
 
-class TestCPUBoostDisabledEdgeCases(BaseTestCase):
+class CPUBoostDisabledEdgeCasesTests(BaseTestCase):
     """Test edge cases when CPU boost is disabled."""
 
     def test_performance_without_cpu_boost(self):
@@ -318,7 +318,7 @@ class TestCPUBoostDisabledEdgeCases(BaseTestCase):
             result = result % 1000000
         return result
 
-class TestHealthCheckTimeoutEdgeCases(BaseTestCase):
+class HealthCheckTimeoutEdgeCasesTests(BaseTestCase):
     """Test edge cases when health checks timeout."""
 
     @pytest.mark.asyncio

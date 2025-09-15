@@ -209,7 +209,7 @@ class RoutingRecoveryManager:
         }
 
 
-class TestRoutingFailureRecovery(BaseIntegrationTest):
+class RoutingFailureRecoveryTests(BaseIntegrationTest):
     """Test WebSocket routing failure recovery mechanisms."""
     
     @pytest.mark.integration

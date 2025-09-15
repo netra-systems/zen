@@ -32,7 +32,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerImportPathFragmentation(SSotBaseTestCase):
+class WebSocketManagerImportPathFragmentationTests(SSotBaseTestCase):
     """Phase 1 Reproduction Test: Prove import path fragmentation creates different instances."""
     
     def setup_method(self, method):

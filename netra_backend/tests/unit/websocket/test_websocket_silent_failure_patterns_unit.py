@@ -35,7 +35,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.agent_types import AgentExecutionResult
 
-class TestWebSocketSilentFailurePatternsUnit(SSotAsyncTestCase):
+class WebSocketSilentFailurePatternsUnitTests(SSotAsyncTestCase):
     """
     Unit tests demonstrating silent failure patterns in WebSocket event emission.
     
@@ -200,7 +200,7 @@ class TestWebSocketSilentFailurePatternsUnit(SSotAsyncTestCase):
         infrastructure_gap = len(old_patterns_found) > 0 and len(modern_infrastructure_available) > 0
         self.assertTrue(infrastructure_gap, f'CRITICAL BUSINESS GAP: {len(old_patterns_found)} files use old patterns while {len(modern_infrastructure_available)} modern alternatives exist!')
 
-class TestWebSocketFailureBusinessImpact(SSotBaseTestCase):
+class WebSocketFailureBusinessImpactTests(SSotBaseTestCase):
     """
     Business impact analysis tests for WebSocket silent failures.
     These tests quantify the business cost of silent failures.

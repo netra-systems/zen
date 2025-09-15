@@ -57,7 +57,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
-class TestMessageQueueingUntilReady:
+class MessageQueueingUntilReadyTests:
     """Test message queuing behavior when WebSocket not ready."""
 
     @pytest.fixture

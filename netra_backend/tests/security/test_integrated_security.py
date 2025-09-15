@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
 from netra_backend.app.middleware.security_middleware import SecurityMiddleware
 
-class TestIntegratedSecurity:
+class IntegratedSecurityTests:
     """Test integrated security across all components."""
 
     @pytest.fixture

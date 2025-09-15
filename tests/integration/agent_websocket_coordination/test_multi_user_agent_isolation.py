@@ -84,7 +84,7 @@ class MockAgentInstanceFactory:
         return mock_agent
 
 
-class TestMultiUserAgentIsolation(SSotAsyncTestCase):
+class MultiUserAgentIsolationTests(SSotAsyncTestCase):
     """Test Multi-User Agent Isolation."""
     
     @pytest.mark.integration

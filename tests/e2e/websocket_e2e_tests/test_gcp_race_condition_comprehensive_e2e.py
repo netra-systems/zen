@@ -72,7 +72,7 @@ class MessageRoutingTestResult:
     errors: List[str]
 
 @pytest.mark.e2e_auth_required
-class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
+class GCPRaceConditionComprehensiveE2ETests(SSotBaseTestCase):
     """
     Comprehensive E2E tests for GCP WebSocket race condition fix.
     
@@ -389,7 +389,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
         assert len(successful_reconnections) >= 1, f"No successful reconnections: {[r['error'] for r in failed_reconnections]}"
         print(' PASS:  WEBSOCKET RECONNECTION WITH RACE CONDITION FIX VALIDATED')
 
-class TestWebSocketRaceConditionPerformanceE2E:
+class WebSocketRaceConditionPerformanceE2ETests:
     """
     Performance E2E tests for WebSocket race condition fix validation.
     

@@ -245,7 +245,7 @@ class GoldenPathValidator:
             yield mock_client
 
 
-class TestServiceDependencyIntegration(SSotAsyncTestCase):
+class ServiceDependencyIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for service dependency management with graceful degradation.
 

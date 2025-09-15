@@ -50,7 +50,7 @@ class MockMessageData:
         if self.metadata is None:
             self.metadata = {}
 
-class TestAgentMessageRouting(SSotAsyncTestCase):
+class AgentMessageRoutingTests(SSotAsyncTestCase):
     """Test suite for agent message routing functionality - 12 tests"""
 
     def setup_method(self, method):
@@ -176,7 +176,7 @@ class TestAgentMessageRouting(SSotAsyncTestCase):
         self.assertEqual(len(successful_results), 5)
         self.record_metric('concurrent_routing_success', True)
 
-class TestMessageTransformationProcessing(SSotAsyncTestCase):
+class MessageTransformationProcessingTests(SSotAsyncTestCase):
     """Test suite for message transformation and processing - 10 tests"""
 
     def setup_method(self, method):
@@ -273,7 +273,7 @@ class TestMessageTransformationProcessing(SSotAsyncTestCase):
         self.assertIsNotNone(large_message)
         self.record_metric('size_validation_success', True)
 
-class TestMessageErrorHandling(SSotAsyncTestCase):
+class MessageErrorHandlingTests(SSotAsyncTestCase):
     """Test suite for error handling in message flows - 8 tests"""
 
     def setup_method(self, method):
@@ -382,7 +382,7 @@ class TestMessageErrorHandling(SSotAsyncTestCase):
         self.assertIsNotNone(message.data)
         self.record_metric('graceful_degradation_success', True)
 
-class TestAgentResponseGeneration(SSotAsyncTestCase):
+class AgentResponseGenerationTests(SSotAsyncTestCase):
     """Test suite for agent response generation - 7 tests"""
 
     def setup_method(self, method):

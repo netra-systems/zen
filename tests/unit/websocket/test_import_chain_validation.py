@@ -27,7 +27,7 @@ import pytest
 from test_framework.ssot.base_test_case import BaseTestCase
 
 @pytest.mark.unit
-class TestImportChainValidation(BaseTestCase):
+class ImportChainValidationTests(BaseTestCase):
     """
     Unit tests for import chain validation under Cloud Run conditions.
     
@@ -182,7 +182,7 @@ class TestImportChainValidation(BaseTestCase):
         threading.Timer(0.1, lambda: sys.modules.update(removed_modules)).start()
 
 @pytest.mark.unit
-class TestExceptionHandlerImports(BaseTestCase):
+class ExceptionHandlerImportsTests(BaseTestCase):
     """Test import stability during exception handling scenarios."""
 
     def test_exception_handler_nested_import_failures(self):

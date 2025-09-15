@@ -18,7 +18,7 @@ fix_clickhouse_array_syntax,
 validate_clickhouse_query,
 )
 
-class TestRealisticDataVolumes:
+class RealisticDataVolumesTests:
     """Test with realistic data volumes"""
 
     @pytest.mark.asyncio

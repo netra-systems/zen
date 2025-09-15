@@ -48,7 +48,7 @@ class ServiceAuthClient:
         self.client.service_secret = self.service_secret
 
 
-class TestMultiServiceAuthConsistencyIntegration:
+class MultiServiceAuthConsistencyIntegrationTests:
     """Test authentication consistency across multiple services."""
 
     @pytest.fixture

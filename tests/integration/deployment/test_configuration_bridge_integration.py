@@ -36,7 +36,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.integration
-class TestConfigurationBridgeIntegration(SSotBaseTestCase):
+class ConfigurationBridgeIntegrationTests(SSotBaseTestCase):
     """
     Integration tests for configuration bridge functions.
     
@@ -289,7 +289,7 @@ class TestConfigurationBridgeIntegration(SSotBaseTestCase):
 
 
 @pytest.mark.integration
-class TestConfigurationBridgeErrorHandling(SSotBaseTestCase):
+class ConfigurationBridgeErrorHandlingTests(SSotBaseTestCase):
     """
     Test error handling in configuration bridge functions.
     """

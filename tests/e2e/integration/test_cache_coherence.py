@@ -36,7 +36,7 @@ MAX_CONSISTENCY_VIOLATIONS = 0
 
 
 @pytest.mark.e2e
-class TestCacheCoherence:
+class CacheCoherenceTests:
     """E2E tests for distributed cache coherence across services."""
     
     @pytest.fixture(autouse=True)

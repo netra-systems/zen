@@ -33,7 +33,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestEventValidatorSSOTViolations(SSotBaseTestCase):
+class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
     """
     Test that detects SSOT violations in EventValidator implementations.
     

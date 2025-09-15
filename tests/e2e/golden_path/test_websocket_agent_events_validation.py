@@ -43,7 +43,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.asyncio
-class TestWebSocketAgentEventsValidation(SSotAsyncTestCase):
+class WebSocketAgentEventsValidationTests(SSotAsyncTestCase):
     """
     Validates the 5 critical WebSocket agent events that enable golden path user experience.
     

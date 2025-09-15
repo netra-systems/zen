@@ -49,7 +49,7 @@ class MockUnifiedConfigurationManager:
                 return False
         return True
 
-class TestUnifiedConfigurationManagerBasics:
+class UnifiedConfigurationManagerBasicsTests:
     """Test basic functionality of UnifiedConfigurationManager."""
 
     @pytest.fixture
@@ -83,7 +83,7 @@ class TestUnifiedConfigurationManagerBasics:
         config_manager.set_config('new.nested.setting', 'nested_value')
         assert config_manager.get_config('new.nested.setting') == 'nested_value'
 
-class TestConfigurationHierarchy:
+class ConfigurationHierarchyTests:
     """Test configuration hierarchy and structure."""
 
     @pytest.fixture
@@ -109,7 +109,7 @@ class TestConfigurationHierarchy:
         assert config_manager.get_config('test.level1.level2') == 'value'
         assert isinstance(config_manager.get_config('test.level1'), dict)
 
-class TestConfigurationValidation:
+class ConfigurationValidationTests:
     """Test configuration validation patterns."""
 
     @pytest.fixture
@@ -133,7 +133,7 @@ class TestConfigurationValidation:
         assert config_manager.get_config('database.host') is not None
         assert config_manager.get_config('redis.port') is not None
 
-class TestConfigurationEdgeCases:
+class ConfigurationEdgeCasesTests:
     """Test edge cases in configuration management."""
 
     @pytest.fixture
@@ -157,7 +157,7 @@ class TestConfigurationEdgeCases:
         assert config_manager.get_config('test.none_value') is None
         assert config_manager.has_config('test.none_value') is True
 
-class TestConfigurationPerformance:
+class ConfigurationPerformanceTests:
     """Test performance characteristics of configuration management."""
 
     @pytest.fixture
@@ -177,7 +177,7 @@ class TestConfigurationPerformance:
         for i in range(50):
             assert config_manager.get_config(f'bulk.setting_{i}') == f'value_{i}'
 
-class TestConfigurationIntegration:
+class ConfigurationIntegrationTests:
     """Test integration patterns for configuration management."""
 
     @pytest.fixture

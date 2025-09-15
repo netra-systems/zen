@@ -12,7 +12,7 @@ from netra_backend.app.agents.corpus_admin.operations_analysis import CorpusAnal
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 
 
-class TestOperationsAnalysis:
+class OperationsAnalysisTests:
     """Test suite for CorpusAnalysisOperations - tests actual implementation"""
 
     @pytest.fixture

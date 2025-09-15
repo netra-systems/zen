@@ -235,7 +235,7 @@ class WebSocketEventTestAgent:
         self._trace_context = trace_context
 
 
-class TestAgentExecutionWebSocketEventsComprehensive(BaseE2ETest):
+class AgentExecutionWebSocketEventsComprehensiveTests(BaseE2ETest):
     """Comprehensive E2E tests for all WebSocket events in agent execution."""
     
     @pytest.fixture

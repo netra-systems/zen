@@ -24,7 +24,7 @@ from unittest.mock import MagicMock
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, SessionID, TokenString, WebSocketID, ConnectionID, AgentID, ExecutionID, ContextID, DatabaseSessionID, ensure_user_id, ensure_thread_id, ensure_run_id, ensure_request_id, ensure_websocket_id, to_string_dict, from_string_dict, AuthValidationResult, SessionValidationResult, TokenResponse, WebSocketMessage, WebSocketEventType, AgentExecutionContext, ConnectionState, WebSocketConnectionInfo, ExecutionMetrics, ExecutionContextState, DatabaseConnectionInfo
 from test_framework.base_integration_test import BaseIntegrationTest
 
-class TestStronglyTypedIDValidation(BaseIntegrationTest):
+class StronglyTypedIDValidationTests(BaseIntegrationTest):
     """Comprehensive unit tests for strongly typed ID validation utilities.
     
     CRITICAL PURPOSE: Expose type drift violations and validate SSOT patterns.
@@ -600,7 +600,7 @@ def test_id_validation_comprehensive():
     
     This test validates that strongly typed ID system works correctly.
     """
-    test_instance = TestStronglyTypedIDValidation()
+    test_instance = StronglyTypedIDValidationTests()
     test_instance.setup_method()
     try:
         test_instance.test_ensure_user_id_with_valid_input()

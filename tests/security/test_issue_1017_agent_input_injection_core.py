@@ -27,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
-class TestIssue1017AgentInputInjectionCore(SSotBaseTestCase, unittest.TestCase):
+class Issue1017AgentInputInjectionCoreTests(SSotBaseTestCase, unittest.TestCase):
     """
     Core agent input injection vulnerability tests for Issue #1017.
 

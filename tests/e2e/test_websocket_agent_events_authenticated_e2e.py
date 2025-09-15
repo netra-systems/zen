@@ -28,7 +28,7 @@ from test_framework.ssot.real_services_test_fixtures import *
 
 
 @pytest.mark.e2e
-class TestWebSocketAgentEventsAuthenticatedE2E:
+class WebSocketAgentEventsAuthenticatedE2ETests:
     """E2E tests for WebSocket agent events with authentication."""
     
     def setup_method(self):

@@ -100,7 +100,7 @@ class MockEventConfirmationTracker:
         return failed
 
 @pytest.mark.unit
-class TestToolEventConfirmationUnit(SSotAsyncTestCase):
+class ToolEventConfirmationUnitTests(SSotAsyncTestCase):
     """Unit tests for tool execution event confirmation logic.
     
     EXPECTED TO FAIL: These tests demonstrate missing confirmation functionality.
@@ -236,7 +236,7 @@ class TestToolEventConfirmationUnit(SSotAsyncTestCase):
             assert 'average_confirmation_time_ms' in metrics
 
 @pytest.mark.unit
-class TestEventConfirmationIntegrationPoints(SSotAsyncTestCase):
+class EventConfirmationIntegrationPointsTests(SSotAsyncTestCase):
     """Test integration points for event confirmation with existing systems.
     
     EXPECTED TO FAIL: Integration points for confirmation don't exist.

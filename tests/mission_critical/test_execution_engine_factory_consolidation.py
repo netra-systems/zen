@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestExecutionEngineFactoryConsolidation(SSotBaseTestCase):
+class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
     """Validates ExecutionEngine factory consolidation and thread safety."""
 
     def setUp(self):

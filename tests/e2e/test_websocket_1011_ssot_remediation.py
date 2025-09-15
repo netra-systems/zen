@@ -39,7 +39,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.e2e
-class TestWebSocket1011SSoTRemediation(SSotAsyncTestCase):
+class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
     """E2E tests for WebSocket 1011 SSOT remediation on GCP staging."""
 
     def setUp(self):

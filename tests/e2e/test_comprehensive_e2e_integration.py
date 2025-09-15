@@ -61,7 +61,7 @@ from netra_backend.app.auth_integration.auth import (
 )
 
 
-class TestComprehensiveE2EIntegration(SSotAsyncTestCase):
+class ComprehensiveE2EIntegrationTests(SSotAsyncTestCase):
     """
     COMPREHENSIVE E2E Integration Tests for Complete Business Workflows.
     

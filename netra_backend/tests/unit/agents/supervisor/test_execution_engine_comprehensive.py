@@ -197,7 +197,7 @@ class MockAgentCoreAdvanced:
         execution_time = time.time() - start_time
         return AgentExecutionResult(success=True, agent_name=context.agent_name, execution_time=execution_time, state=state, metadata={'test': 'success', 'call_number': self.call_count, 'execution_duration_ms': execution_time * 1000})
 
-class TestExecutionEngineConstructionComprehensive(AsyncBaseTestCase):
+class ExecutionEngineConstructionComprehensiveTests(AsyncBaseTestCase):
     """COMPREHENSIVE Test ExecutionEngine construction and initialization patterns."""
 
     def setUp(self):
@@ -316,7 +316,7 @@ class TestExecutionEngineConstructionComprehensive(AsyncBaseTestCase):
         mock_tracker.register_timeout_callback.assert_called_once_with(engine._handle_agent_timeout)
         engine.execution_tracker = original_tracker
 
-class TestExecutionEngineUserContextIntegration(AsyncBaseTestCase):
+class ExecutionEngineUserContextIntegrationTests(AsyncBaseTestCase):
     """COMPREHENSIVE Test ExecutionEngine UserExecutionContext integration."""
 
     def setUp(self):
@@ -462,7 +462,7 @@ class TestExecutionEngineUserContextIntegration(AsyncBaseTestCase):
         self.assertEqual(with_context.has_user_context(), with_status['has_user_context'])
         self.assertEqual(without_context.has_user_context(), without_status['has_user_context'])
 
-class TestExecutionEngineWebSocketEventsComprehensive(AsyncBaseTestCase):
+class ExecutionEngineWebSocketEventsComprehensiveTests(AsyncBaseTestCase):
     """MISSION CRITICAL: Test all 5 WebSocket events required for Chat functionality (90% of business value)."""
 
     def setUp(self):
@@ -638,7 +638,7 @@ class TestExecutionEngineWebSocketEventsComprehensive(AsyncBaseTestCase):
         self.assertEqual(tool_event['parameters']['filters'], original_params['filters'])
         self.assertEqual(tool_event['parameters']['boolean_flags']['detailed_breakdown'], True)
 
-class TestExecutionEngineAgentExecutionComprehensive(AsyncBaseTestCase):
+class ExecutionEngineAgentExecutionComprehensiveTests(AsyncBaseTestCase):
     """COMPREHENSIVE Test ExecutionEngine single agent execution with all scenarios."""
 
     def setUp(self):
@@ -878,7 +878,7 @@ class TestExecutionEngineAgentExecutionComprehensive(AsyncBaseTestCase):
         self.assertEqual(result.agent_name, 'delegation_test_agent')
         self.assertTrue(result.metadata.get('delegated', False))
 
-class TestExecutionEnginePipelineExecutionComprehensive(AsyncBaseTestCase):
+class ExecutionEnginePipelineExecutionComprehensiveTests(AsyncBaseTestCase):
     """COMPREHENSIVE Test ExecutionEngine pipeline execution with all strategies and scenarios."""
 
     def setUp(self):
@@ -1108,7 +1108,7 @@ class TestExecutionEnginePipelineExecutionComprehensive(AsyncBaseTestCase):
         expected_names = [f'pipeline_agent_{i}' for i in range(4)]
         self.assertEqual(sorted(agent_names), sorted(expected_names))
 
-class TestExecutionEngineResourceManagementComprehensive(AsyncBaseTestCase):
+class ExecutionEngineResourceManagementComprehensiveTests(AsyncBaseTestCase):
     """COMPREHENSIVE Test ExecutionEngine resource management, cleanup, and lifecycle."""
 
     def setUp(self):
@@ -1328,7 +1328,7 @@ class TestExecutionEngineResourceManagementComprehensive(AsyncBaseTestCase):
         self.assertEqual(len(self.websocket_bridge.events), 100)
         self.assertEqual(self.websocket_bridge.metrics['messages_sent'], 100)
 
-class TestExecutionEngineFactoryMethodsComprehensive(AsyncBaseTestCase):
+class ExecutionEngineFactoryMethodsComprehensiveTests(AsyncBaseTestCase):
     """COMPREHENSIVE Test ExecutionEngine factory methods and creation patterns."""
 
     def setUp(self):
@@ -1383,7 +1383,7 @@ class TestExecutionEngineFactoryMethodsComprehensive(AsyncBaseTestCase):
         for keyword in migration_keywords:
             self.assertIn(keyword, recommendations_text)
 
-class TestExecutionEngineErrorHandlingAndRetryComprehensive(AsyncBaseTestCase):
+class ExecutionEngineErrorHandlingAndRetryComprehensiveTests(AsyncBaseTestCase):
     """MISSION CRITICAL: Test ExecutionEngine error handling, retry mechanisms, and user notifications."""
 
     def setUp(self):
@@ -1541,7 +1541,7 @@ class TestExecutionEngineErrorHandlingAndRetryComprehensive(AsyncBaseTestCase):
             self.assertTrue(error_result.metadata['unexpected_error'])
             self.assertEqual(error_result.metadata['error_type'], type(error).__name__)
 
-class TestExecutionEnginePipelineHelpersComprehensive(AsyncBaseTestCase):
+class ExecutionEnginePipelineHelpersComprehensiveTests(AsyncBaseTestCase):
     """MISSION CRITICAL: Test ExecutionEngine pipeline helper methods and edge cases."""
 
     def setUp(self):
@@ -1672,7 +1672,7 @@ class TestExecutionEnginePipelineHelpersComprehensive(AsyncBaseTestCase):
         flow_id = self.engine._get_context_flow_id(context_none_flow)
         self.assertIsNone(flow_id)
 
-class TestExecutionEngineStaticMethodsComprehensive(AsyncBaseTestCase):
+class ExecutionEngineStaticMethodsComprehensiveTests(AsyncBaseTestCase):
     """MISSION CRITICAL: Test ExecutionEngine static methods and delegation patterns."""
 
     def setUp(self):
@@ -1728,7 +1728,7 @@ class TestExecutionEngineStaticMethodsComprehensive(AsyncBaseTestCase):
                 await ExecutionEngine.execute_with_user_isolation(user_context, agent_context, state)
             self.assertIn('Context manager setup failed', str(cm.exception))
 
-class TestExecutionEngineValidationEdgeCasesComprehensive(AsyncBaseTestCase):
+class ExecutionEngineValidationEdgeCasesComprehensiveTests(AsyncBaseTestCase):
     """MISSION CRITICAL: Test ExecutionEngine validation edge cases and boundary conditions."""
 
     def setUp(self):

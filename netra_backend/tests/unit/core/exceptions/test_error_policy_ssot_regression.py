@@ -36,7 +36,7 @@ from netra_backend.app.core.error_codes import ErrorSeverity
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestErrorPolicySsotRegressionPrevention(SSotBaseTestCase):
+class ErrorPolicySsotRegressionPreventionTests(SSotBaseTestCase):
     """
     SSOT regression prevention tests for ErrorPolicy class.
 

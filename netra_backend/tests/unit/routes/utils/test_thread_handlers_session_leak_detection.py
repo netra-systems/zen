@@ -33,7 +33,7 @@ from netra_backend.app.routes.utils.thread_handlers import (
 )
 
 
-class TestThreadHandlersSessionLeakDetection(SessionLeakTestBase):
+class ThreadHandlersSessionLeakDetectionTests(SessionLeakTestBase):
     """
     Session leak detection tests for all thread handler functions.
     

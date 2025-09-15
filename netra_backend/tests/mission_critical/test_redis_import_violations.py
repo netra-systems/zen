@@ -29,7 +29,7 @@ import logging
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestRedisImportViolations(SSotBaseTestCase):
+class RedisImportViolationsTests(SSotBaseTestCase):
     """Test suite to detect and prevent Redis import violations."""
 
     @pytest.fixture(autouse=True)

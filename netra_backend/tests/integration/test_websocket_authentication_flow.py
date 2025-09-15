@@ -50,7 +50,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocke
 logger = logging.getLogger(__name__)
 
 
-class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
+class WebSocketAuthenticationFlowTests(BaseIntegrationTest):
     """
     25 High-Quality Integration Tests for WebSocket Authentication Flow.
     

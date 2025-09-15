@@ -81,7 +81,7 @@ except ImportError as e:
 
 
 @pytest.mark.integration
-class TestExecutionEngineFactoryUserIsolation(SSotAsyncTestCase):
+class ExecutionEngineFactoryUserIsolationTests(SSotAsyncTestCase):
     """DESIGNED TO FAIL: Test user isolation with real factory patterns.
     
     These tests validate that factory patterns maintain proper user isolation
@@ -595,7 +595,7 @@ class TestExecutionEngineFactoryUserIsolation(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestExecutionEngineFactoryPerformance(SSotAsyncTestCase):
+class ExecutionEngineFactoryPerformanceTests(SSotAsyncTestCase):
     """Test factory performance before and after consolidation.
     
     These tests measure performance characteristics of factory patterns

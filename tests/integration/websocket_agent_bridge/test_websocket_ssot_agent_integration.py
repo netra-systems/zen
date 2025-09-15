@@ -11,7 +11,7 @@ from test_framework.ssot.base_test_case import SSotAsyncBaseTestCase
 
 
 @pytest.mark.integration
-class TestWebSocketSSOTAgentIntegration(SSotAsyncBaseTestCase):
+class WebSocketSSOTAgentIntegrationTests(SSotAsyncBaseTestCase):
     """Integration tests for WebSocket SSOT agent bridge functionality."""
 
     def test_websocket_ssot_agent_handler_setup_succeeds_with_correct_imports(self):
@@ -175,7 +175,7 @@ class TestWebSocketSSOTAgentIntegration(SSotAsyncBaseTestCase):
 
 
 @pytest.mark.integration
-class TestWebSocketSSOTBusinessImpactValidation(SSotAsyncBaseTestCase):
+class WebSocketSSOTBusinessImpactValidationTests(SSotAsyncBaseTestCase):
     """Validate the business impact and successful resolution of WebSocket agent bridge SSOT implementation."""
 
     async def test_golden_path_chat_functionality_restored(self):

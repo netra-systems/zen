@@ -107,7 +107,7 @@ class GCPStructuredLogCapture:
 
 
 @pytest.mark.e2e
-class TestUserContextValidationGCPLoggingVisibility(SSotAsyncTestCase):
+class UserContextValidationGCPLoggingVisibilityTests(SSotAsyncTestCase):
     """E2E test for GCP Cloud Logging visibility of UserExecutionContext validation errors.
     
     This test class validates that validation errors are properly structured and visible

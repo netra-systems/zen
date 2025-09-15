@@ -69,7 +69,7 @@ def sample_errors() -> List[StartupError]:
                     message="React build failed")
     ]
 
-class TestErrorAggregatorInit:
+class ErrorAggregatorInitTests:
     """Test initialization and setup."""
     
     def test_init_with_default_path(self) -> None:
@@ -83,7 +83,7 @@ class TestErrorAggregatorInit:
         aggregator = ErrorAggregator(str(temp_db_path))
         assert aggregator.db_path == temp_db_path
 
-class TestDatabaseSetup:
+class DatabaseSetupTests:
     """Test database creation and setup."""
     @pytest.mark.asyncio
     async def test_ensure_database_exists(self, error_aggregator: ErrorAggregator,
@@ -103,7 +103,7 @@ class TestDatabaseSetup:
             assert "startup_errors" in tables
             assert "error_patterns" in tables
 
-class TestErrorRecording:
+class ErrorRecordingTests:
     """Test error recording functionality."""
     @pytest.mark.asyncio
     async def test_record_error_basic(self, error_aggregator: ErrorAggregator) -> None:
@@ -137,7 +137,7 @@ class TestErrorRecording:
             count = (await cursor.fetchone())[0]
             assert count == 1
 
-class TestErrorRetrieval:
+class ErrorRetrievalTests:
     """Test error retrieval functionality."""
     @pytest.mark.asyncio
     async def test_get_recent_errors(self, error_aggregator: ErrorAggregator,
@@ -175,7 +175,7 @@ class TestErrorRetrieval:
         assert error.service == "backend"
         assert error.message == "test message"
 
-class TestPatternDetection:
+class PatternDetectionTests:
     """Test error pattern detection."""
     @pytest.mark.asyncio
     async def test_find_patterns_empty_errors(self, error_aggregator: ErrorAggregator) -> None:
@@ -204,7 +204,7 @@ class TestPatternDetection:
         assert pattern.frequency == 2
         assert "Database connection" in pattern.pattern
 
-class TestTrendAnalysis:
+class TrendAnalysisTests:
     """Test error trend analysis."""
     @pytest.mark.asyncio
     async def test_get_trends_empty(self, error_aggregator: ErrorAggregator) -> None:
@@ -238,7 +238,7 @@ class TestTrendAnalysis:
         assert services["backend"] == 1
         assert error_types["connection"] == 1
 
-class TestFixSuggestions:
+class FixSuggestionsTests:
     """Test fix suggestion functionality."""
     
     def test_suggest_fix_connection_error(self, error_aggregator: ErrorAggregator) -> None:
@@ -256,7 +256,7 @@ class TestFixSuggestions:
         fix = error_aggregator._suggest_fix(ErrorType.OTHER)
         assert "review error details" in fix.lower()
 
-class TestPatternFrequencyTracking:
+class PatternFrequencyTrackingTests:
     """Test pattern frequency tracking."""
     @pytest.mark.asyncio
     async def test_update_pattern_frequency(self, error_aggregator: ErrorAggregator) -> None:
@@ -278,7 +278,7 @@ class TestPatternFrequencyTracking:
             count = (await cursor.fetchone())[0]
             assert count == 1
 
-class TestReportGeneration:
+class ReportGenerationTests:
     """Test report generation functionality."""
     @pytest.mark.asyncio
     async def test_generate_report_daily(self, error_aggregator: ErrorAggregator) -> None:
@@ -303,7 +303,7 @@ class TestReportGeneration:
                 report = await error_aggregator.generate_report("weekly")
                 assert "generated_at" in report
 
-class TestRecommendations:
+class RecommendationsTests:
     """Test recommendation generation."""
     
     def test_generate_recommendations_empty(self, error_aggregator: ErrorAggregator) -> None:
@@ -339,7 +339,7 @@ class TestRecommendations:
         assert len(recommendations) == 1
         assert "critical errors" in recommendations[0].lower()
 
-class TestIntegrationScenarios:
+class IntegrationScenariosTests:
     """Test integration scenarios combining multiple features."""
     @pytest.mark.asyncio
     async def test_full_workflow_record_analyze_report(self, error_aggregator: ErrorAggregator) -> None:

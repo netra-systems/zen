@@ -45,7 +45,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.redis_manager import redis_manager
 
 @pytest.mark.integration
-class TestIssue566MultiUserLLMSecurityIntegration(SSotAsyncTestCase):
+class Issue566MultiUserLLMSecurityIntegrationTests(SSotAsyncTestCase):
     """
     Integration security tests for Issue #566 multi-user LLM cache vulnerability.
     

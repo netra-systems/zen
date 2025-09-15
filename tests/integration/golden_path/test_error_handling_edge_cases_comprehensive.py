@@ -221,7 +221,7 @@ class ErrorHandlingIntegrationTest(BaseIntegrationTest):
         )
 
 
-class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
+class ErrorHandlingEdgeCasesComprehensiveTests(ErrorHandlingIntegrationTest):
     """
     Comprehensive integration tests for golden path error handling and edge cases.
     

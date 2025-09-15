@@ -64,7 +64,7 @@ class StagingSyncValidationResult:
         """Check if frontend and backend protocols are synchronized."""
         return self.frontend_protocol == self.backend_protocol
 
-class TestStagingSourceProtocolFormatSynchronization(SSotAsyncTestCase):
+class StagingSourceProtocolFormatSynchronizationTests(SSotAsyncTestCase):
     """
     Test staging environment protocol format synchronization between sources.
     

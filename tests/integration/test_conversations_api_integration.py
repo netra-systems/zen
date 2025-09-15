@@ -27,7 +27,7 @@ from netra_backend.app.auth_integration.auth import get_current_active_user
 from netra_backend.app.db.models_auth import User
 
 
-class TestConversationsApiIntegration(SSotAsyncTestCase):
+class ConversationsApiIntegrationTests(SSotAsyncTestCase):
     """Integration tests for conversations API with real services."""
     
     def setup_method(self, method):

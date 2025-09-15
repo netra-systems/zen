@@ -27,7 +27,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from dev_launcher.database_connector import DatabaseConnector, DatabaseType, ConnectionStatus
 from dev_launcher.network_resilience import NetworkResilientClient, RetryPolicy
 
-class TestClickHousePortMismatchFailures:
+class ClickHousePortMismatchFailuresTests:
     """
     Test suite for ClickHouse port mismatch failures.
     
@@ -88,7 +88,7 @@ class TestClickHousePortMismatchFailures:
             if parsed.port and parsed.port != expected_http_port:
                 pytest.fail(f'ClickHouse URL uses port {parsed.port}, expected {expected_http_port} for HTTP health checks')
 
-class TestPostgreSQLConnectionFailures:
+class PostgreSQLConnectionFailuresTests:
     """
     Test suite for PostgreSQL connection failures.
     
@@ -134,7 +134,7 @@ class TestPostgreSQLConnectionFailures:
             assert connection.last_error is not None, 'Expected error to be recorded'
             assert 'refused' in connection.last_error.lower()
 
-class TestDatabaseConnectorTimeoutHandling:
+class DatabaseConnectorTimeoutHandlingTests:
     """
     Test suite for database connector timeout handling.
     """
@@ -171,7 +171,7 @@ class TestDatabaseConnectorTimeoutHandling:
             assert delay <= retry_config.max_delay, f'Delay {delay} exceeds max_delay {retry_config.max_delay} at attempt {attempt}'
             assert delay >= 0, f'Delay should be non-negative, got {delay}'
 
-class TestResilientValidationCascadeFailures:
+class ResilientValidationCascadeFailuresTests:
     """
     Test suite for resilient validation cascade failures.
     """
@@ -200,7 +200,7 @@ class TestResilientValidationCascadeFailures:
                 if connection:
                     assert connection.status in [ConnectionStatus.FAILED, ConnectionStatus.FALLBACK_AVAILABLE]
 
-class TestNetworkResilientClientRetryBehavior:
+class NetworkResilientClientRetryBehaviorTests:
     """
     Test suite for NetworkResilientClient retry behavior.
     """
@@ -242,7 +242,7 @@ class TestNetworkResilientClientRetryBehavior:
             assert 'Critical database error' in error
             assert attempt_counter[0] == 1, f'Expected 1 attempt for critical error, got {attempt_counter[0]}'
 
-class TestDatabaseURLHandling:
+class DatabaseURLHandlingTests:
     """
     Test suite for database URL handling and normalization.
     """

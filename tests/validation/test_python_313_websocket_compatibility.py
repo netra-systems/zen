@@ -27,7 +27,7 @@ from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 
-class TestPython313WebSocketCompatibility:
+class Python313WebSocketCompatibilityTests:
     """Validate websockets library compatibility with Python 3.13."""
 
     def test_websockets_library_version(self):
@@ -197,7 +197,7 @@ class TestPython313WebSocketCompatibility:
         except ImportError as e:
             pytest.fail(f"websockets library import failed: {e}")
 
-class TestWebSocketFrameworkCompatibility:
+class WebSocketFrameworkCompatibilityTests:
     """Test our WebSocket test framework compatibility."""
 
     def test_framework_parameter_handling(self):

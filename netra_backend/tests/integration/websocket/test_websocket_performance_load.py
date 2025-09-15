@@ -123,7 +123,7 @@ class PerformanceWebSocketMock:
 @pytest.mark.websocket
 @pytest.mark.performance
 @pytest.mark.asyncio
-class TestWebSocketPerformanceLoad(SSotAsyncTestCase):
+class WebSocketPerformanceLoadTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket performance under load.
     

@@ -104,7 +104,7 @@ class HighLoadUserSession:
     error_count: int
 
 
-class TestPerformanceRaceConditionsComprehensiveHighLoad(BaseIntegrationTest):
+class PerformanceRaceConditionsComprehensiveHighLoadTests(BaseIntegrationTest):
     """Comprehensive test for performance and race conditions under high-load scenarios."""
     
     def setup_method(self):

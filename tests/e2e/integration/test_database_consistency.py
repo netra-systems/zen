@@ -58,7 +58,7 @@ async def database_consistency_tester():
     await tester.cleanup_test_environment()
 
 
-class TestDatabaseConsistencyE2E:
+class DatabaseConsistencyE2ETests:
     """E2E Tests for cross-service database transaction consistency."""
     
     @pytest.mark.asyncio
@@ -155,7 +155,7 @@ class TestDatabaseConsistencyE2E:
                 assert transaction.user_id in auth_user["full_name"]
 
 
-class TestDatabaseConsistencyPerformance:
+class DatabaseConsistencyPerformanceTests:
     """Performance tests for cross-service database consistency."""
     
     @pytest.mark.asyncio
@@ -218,7 +218,7 @@ class TestDatabaseConsistencyPerformance:
         assert total_time < 8.0, f"Concurrent execution too slow: {total_time}s"
 
 
-class TestDatabaseConsistencyResilience:
+class DatabaseConsistencyResilienceTests:
     """Resilience tests for cross-service database consistency."""
     
     @pytest.mark.asyncio

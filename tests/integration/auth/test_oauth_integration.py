@@ -41,7 +41,7 @@ import asyncpg
 import redis.asyncio as redis
 
 
-class TestOAuthIntegration(BaseIntegrationTest):
+class OAuthIntegrationTests(BaseIntegrationTest):
     """Integration tests for OAuth flows - NO MOCKS for core logic, REAL SERVICES."""
     
     def setup_method(self):

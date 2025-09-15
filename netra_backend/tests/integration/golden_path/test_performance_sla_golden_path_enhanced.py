@@ -95,7 +95,7 @@ class PerformanceTestResult:
     p99_response_time: float
 
 
-class TestPerformanceSLAGoldenPath(ServiceOrchestrationIntegrationTest):
+class PerformanceSLAGoldenPathTests(ServiceOrchestrationIntegrationTest):
     """
     Enhanced Performance SLA Golden Path Tests
     

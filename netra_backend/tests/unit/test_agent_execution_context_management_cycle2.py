@@ -20,7 +20,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types import UserID, ThreadID, RunID
 
-class TestAgentExecutionContextManagement:
+class AgentExecutionContextManagementTests:
     """Test agent execution context management and isolation."""
     
     @pytest.fixture

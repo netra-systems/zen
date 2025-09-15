@@ -78,7 +78,7 @@ except ImportError as e:
     UnifiedWebSocketManager = MagicMock
     UnifiedWebSocketEmitter = MagicMock
 
-class TestAgentExecutionFlowIntegration(SSotAsyncTestCase):
+class AgentExecutionFlowIntegrationTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for Agent Execution Flow.
     

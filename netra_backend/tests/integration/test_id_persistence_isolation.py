@@ -37,7 +37,7 @@ except ImportError as e:
     get_database_session = None
     UserExecutionContextFactory = None
 
-class TestIDPersistenceIsolation(BaseIntegrationTest):
+class IDPersistenceIsolationTests(BaseIntegrationTest):
     """Integration tests for ID persistence and user isolation with real database.
     
     CRITICAL PURPOSE: Validate that strongly typed IDs prevent user data mixing
@@ -397,7 +397,7 @@ async def test_comprehensive_id_persistence_isolation(real_services_fixture):
     This test validates the entire ID persistence and isolation system
     with real database operations. Will FAIL until violations are fixed.
     """
-    test_instance = TestIDPersistenceIsolation()
+    test_instance = IDPersistenceIsolationTests()
     test_instance.setup_method()
     try:
         await test_instance.test_user_creation_with_strongly_typed_ids(real_services_fixture)

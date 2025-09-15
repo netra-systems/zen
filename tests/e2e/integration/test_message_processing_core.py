@@ -36,7 +36,7 @@ async def test_user_id():
 
 
 @pytest.mark.e2e
-class TestMessageValidation:
+class MessageValidationTests:
     """Test message validation flow"""
 
     @pytest.mark.e2e
@@ -73,7 +73,7 @@ class TestMessageValidation:
 
 
 @pytest.mark.e2e
-class TestMessageRouting:
+class MessageRoutingTests:
     """Test message routing to agents"""
 
     @pytest.mark.e2e
@@ -126,7 +126,7 @@ class TestMessageRouting:
 
 
 @pytest.mark.e2e
-class TestMessageStateTracking:
+class MessageStateTrackingTests:
     """Test message state transitions"""
 
     @pytest.mark.e2e
@@ -157,7 +157,7 @@ class TestMessageStateTracking:
 
 
 @pytest.mark.e2e
-class TestBusinessValueTracking:
+class BusinessValueTrackingTests:
     """Test business value and insights generation"""
 
     @pytest.mark.e2e

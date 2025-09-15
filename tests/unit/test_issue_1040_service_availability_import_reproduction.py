@@ -41,7 +41,7 @@ except ImportError:
 
 
 @pytest.mark.unit
-class TestIssue1040ServiceAvailabilityImportReproduction(SSotBaseTestCase):
+class Issue1040ServiceAvailabilityImportReproductionTests(SSotBaseTestCase):
     """
     Reproduction test for Issue #1040 ServiceAvailability import failure.
 
@@ -164,7 +164,7 @@ class TestIssue1040ServiceAvailabilityImportReproduction(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestIssue1040ServiceAvailabilityPostFix(SSotBaseTestCase):
+class Issue1040ServiceAvailabilityPostFixTests(SSotBaseTestCase):
     """
     Post-fix validation tests for Issue #1040.
 

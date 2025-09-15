@@ -55,7 +55,7 @@ class ConcreteAgentCommunication(AgentCommunicationMixin):
         return SubAgentLifecycle.RUNNING
 
 
-class TestAgentCommunicationCore(SSotAsyncTestCase):
+class AgentCommunicationCoreTests(SSotAsyncTestCase):
     """Test AgentCommunicationMixin core WebSocket communication functionality."""
 
     def setup_method(self, method):
@@ -206,7 +206,7 @@ class TestAgentCommunicationCore(SSotAsyncTestCase):
         self.agent.emit_thinking.assert_called_once_with("Agent is processing")
 
 
-class TestAgentCommunicationStateManagement(SSotAsyncTestCase):
+class AgentCommunicationStateManagementTests(SSotAsyncTestCase):
     """Test AgentCommunicationMixin state and message creation functionality."""
 
     def setup_method(self, method):
@@ -304,7 +304,7 @@ class TestAgentCommunicationStateManagement(SSotAsyncTestCase):
         assert ws_message.payload["sub_agent_name"] == self.agent.name
 
 
-class TestAgentCommunicationErrorHandling(SSotAsyncTestCase):
+class AgentCommunicationErrorHandlingTests(SSotAsyncTestCase):
     """Test AgentCommunicationMixin error handling and recovery functionality."""
 
     def setup_method(self, method):
@@ -462,7 +462,7 @@ class TestAgentCommunicationErrorHandling(SSotAsyncTestCase):
         assert isinstance(record["timestamp"], float)
 
 
-class TestAgentCommunicationUserManagement(SSotBaseTestCase):
+class AgentCommunicationUserManagementTests(SSotBaseTestCase):
     """Test AgentCommunicationMixin user ID management and background execution."""
 
     def setup_method(self, method):
@@ -534,7 +534,7 @@ class TestAgentCommunicationUserManagement(SSotBaseTestCase):
         assert True
 
 
-class TestAgentCommunicationRetryMechanisms(SSotAsyncTestCase):
+class AgentCommunicationRetryMechanismsTests(SSotAsyncTestCase):
     """Test AgentCommunicationMixin retry mechanisms and exception handling."""
 
     def setup_method(self, method):

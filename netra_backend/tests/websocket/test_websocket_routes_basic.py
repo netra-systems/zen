@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, AsyncMock, Mock, patch
 from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestWebSocketRoutesBasic:
+class WebSocketRoutesBasicTests:
     """Test basic WebSocket route functionality without requiring server startup."""
 
     def test_websocket_route_imports(self):

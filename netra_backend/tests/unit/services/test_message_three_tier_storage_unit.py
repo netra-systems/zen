@@ -24,7 +24,7 @@ from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.services.database.message_repository import MessageRepository
 
 
-class TestMessageThreeTierStorage:
+class MessageThreeTierStorageTests:
     """Unit tests for three-tier message storage - FAILING TESTS."""
     
     @pytest.mark.unit 

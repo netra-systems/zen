@@ -46,7 +46,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.services.user_execution_context import UserExecutionContext, validate_user_context
 
 
-class TestUserExecutionEngineIsolationValidation565(SSotAsyncTestCase):
+class UserExecutionEngineIsolationValidation565Tests(SSotAsyncTestCase):
     """
     Integration tests validating UserExecutionEngine provides proper user isolation.
     
@@ -574,7 +574,7 @@ if __name__ == "__main__":
     print("💡 Infrastructure: NO Docker required - staging environment validation")
     
     # Create test suite
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestUserExecutionEngineIsolationValidation565)
+    suite = unittest.TestLoader().loadTestsFromTestCase(UserExecutionEngineIsolationValidation565Tests)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     

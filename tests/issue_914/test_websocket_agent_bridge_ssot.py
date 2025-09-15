@@ -98,7 +98,7 @@ class MockAgentWebSocketBridge:
         })
 
 
-class TestWebSocketAgentBridgeSSot(SSotAsyncTestCase):
+class WebSocketAgentBridgeSSotTests(SSotAsyncTestCase):
     """Test WebSocket-Agent bridge SSOT consistency."""
 
     def setUp(self):
@@ -548,7 +548,7 @@ if __name__ == '__main__':
     import unittest
 
     # Run tests
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestWebSocketAgentBridgeSSot)
+    suite = unittest.TestLoader().loadTestsFromTestCase(WebSocketAgentBridgeSSotTests)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
 

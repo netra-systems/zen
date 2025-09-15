@@ -35,7 +35,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from tests.unified_test_runner import UnifiedTestRunner
 
-class TestIssue1270PatternFilterBug(BaseIntegrationTest):
+class Issue1270PatternFilterBugTests(BaseIntegrationTest):
     """Test suite for Issue #1270 - Pattern filter applied globally."""
 
     def setup_method(self):
@@ -220,7 +220,7 @@ class TestIssue1270PatternFilterBug(BaseIntegrationTest):
                 print(f"Skipping {category} - not in category mapping")
                 continue
 
-class TestIssue1270IntegrationValidation(BaseIntegrationTest):
+class Issue1270IntegrationValidationTests(BaseIntegrationTest):
     """Integration tests that validate the complete test runner behavior."""
 
     @pytest.mark.integration

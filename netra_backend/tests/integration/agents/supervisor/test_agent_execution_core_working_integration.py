@@ -25,7 +25,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestAgentExecutionCoreWorkingIntegration(BaseIntegrationTest):
+class AgentExecutionCoreWorkingIntegrationTests(BaseIntegrationTest):
     """Working integration tests for AgentExecutionCore with real business logic."""
     
     @pytest.fixture

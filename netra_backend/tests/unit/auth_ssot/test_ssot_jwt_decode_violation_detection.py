@@ -14,7 +14,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 logger = logging.getLogger(__name__)
 
-class TestSSOTJWTDecodeViolationDetection(SSotBaseTestCase):
+class SSOTJWTDecodeViolationDetectionTests(SSotBaseTestCase):
     """
     Unit test that FAILS when backend uses jwt.decode() directly.
     Validates that backend delegates all JWT operations to auth service.

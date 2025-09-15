@@ -97,7 +97,7 @@ class MockTestAgent(BaseAgent):
         return result
 
 
-class TestAgentExecutionCoreIntegration(BaseIntegrationTest):
+class AgentExecutionCoreIntegrationTests(BaseIntegrationTest):
     """Comprehensive integration tests for Agent Execution Core functionality."""
     
     def setup_method(self):

@@ -25,7 +25,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.integration
 @pytest.mark.startup
 @pytest.mark.factory_patterns
-class TestFactoryPatternInitialization(BaseIntegrationTest):
+class FactoryPatternInitializationTests(BaseIntegrationTest):
     """Integration tests for factory pattern initialization during startup."""
 
     async def async_setup(self):
@@ -249,7 +249,7 @@ class TestFactoryPatternInitialization(BaseIntegrationTest):
 @pytest.mark.startup
 @pytest.mark.business_value
 @pytest.mark.multi_user
-class TestFactoryPatternBusinessValue(BaseIntegrationTest):
+class FactoryPatternBusinessValueTests(BaseIntegrationTest):
     """Business value validation for factory pattern initialization."""
 
     async def test_factory_patterns_enable_multi_user_revenue_scaling(self):

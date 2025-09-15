@@ -37,7 +37,7 @@ from netra_backend.app.websocket_core.types import (
 )
 
 
-class TestWebSocketTimestampValidationCritical:
+class WebSocketTimestampValidationCriticalTests:
     """Mission critical tests for timestamp validation - MUST NEVER FAIL."""
 
     def test_iso_datetime_string_rejection_critical(self):
@@ -313,7 +313,7 @@ class TestWebSocketTimestampValidationCritical:
                 WebSocketMessage(**message_data)
 
 
-class TestCriticalTimestampValidationRegressionPrevention:
+class CriticalTimestampValidationRegressionPreventionTests:
     """Regression prevention tests - these must NEVER regress."""
 
     def test_staging_error_exact_reproduction(self):

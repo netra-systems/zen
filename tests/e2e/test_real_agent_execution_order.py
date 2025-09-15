@@ -50,7 +50,7 @@ except ImportError:
     WEBSOCKET_SERVICES_AVAILABLE = False
 
 
-class TestRealAgentExecutionOrder(BaseE2ETest):
+class RealAgentExecutionOrderTests(BaseE2ETest):
     """Test proper agent execution sequencing for business value delivery."""
 
     def setup_method(self):

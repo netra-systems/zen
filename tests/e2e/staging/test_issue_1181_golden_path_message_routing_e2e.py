@@ -22,7 +22,7 @@ from test_framework.websocket_helpers import WebSocketTestClient
 from shared.isolated_environment import get_env
 
 
-class TestIssue1181GoldenPathMessageRoutingE2E(BaseE2ETest):
+class Issue1181GoldenPathMessageRoutingE2ETests(BaseE2ETest):
     """Test Golden Path message routing with consolidated MessageRouter on staging."""
 
     @pytest.mark.e2e

@@ -50,7 +50,7 @@ from test_framework.isolated_environment_fixtures import isolated_env
 logger = logging.getLogger('netra_backend.app.db.database_manager')
 
 
-class TestDatabaseManagerComprehensive(BaseIntegrationTest):
+class DatabaseManagerComprehensiveTests(BaseIntegrationTest):
     """Comprehensive test suite for DatabaseManager class covering all critical functionality."""
     
     def setup_method(self):
@@ -847,7 +847,7 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
                 mock_builder.get_safe_log_message.assert_called_once()
 
 
-class TestDatabaseManagerEdgeCases(BaseIntegrationTest):
+class DatabaseManagerEdgeCasesTests(BaseIntegrationTest):
     """Edge cases and error scenarios that have caused production issues."""
     
     @pytest.mark.unit
@@ -992,7 +992,7 @@ class TestDatabaseManagerEdgeCases(BaseIntegrationTest):
             assert len(db_manager._engines) == 1  # Should only have one engine
 
 
-class TestDatabaseManagerAdvancedScenarios(BaseIntegrationTest):
+class DatabaseManagerAdvancedScenariosTests(BaseIntegrationTest):
     """Advanced test scenarios for connection pooling, multi-user isolation, and performance."""
     
     def setup_method(self):
@@ -1692,7 +1692,7 @@ class TestDatabaseManagerStressTests(BaseIntegrationTest):
             assert "DELETE" not in url or "%44%45%4C%45%54%45" in url  # URL encoded DELETE
 
 
-class TestDatabaseManagerRealIntegration(BaseIntegrationTest):
+class DatabaseManagerRealIntegrationTests(BaseIntegrationTest):
     """Real database integration tests using actual PostgreSQL connections."""
     
     REQUIRES_DATABASE = True
@@ -1914,7 +1914,7 @@ class TestDatabaseManagerRealIntegration(BaseIntegrationTest):
                 await db_manager.close_all()
 
 
-class TestDatabaseManagerMultiUserIsolation(BaseIntegrationTest):
+class DatabaseManagerMultiUserIsolationTests(BaseIntegrationTest):
     """Multi-user data isolation and concurrent access tests."""
     
     def setup_method(self):
@@ -2199,7 +2199,7 @@ class TestDatabaseManagerMultiUserIsolation(BaseIntegrationTest):
                 assert connection_usage["total_sessions"] > connection_usage["max_concurrent"]
 
 
-class TestDatabaseManagerConfigurationEdgeCases(BaseIntegrationTest):
+class DatabaseManagerConfigurationEdgeCasesTests(BaseIntegrationTest):
     """Configuration edge cases and environment-specific scenarios."""
     
     def setup_method(self):
@@ -2436,7 +2436,7 @@ class TestDatabaseManagerConfigurationEdgeCases(BaseIntegrationTest):
                     assert call_kwargs["pool_recycle"] == 3600
 
 
-class TestDatabaseManagerPerformanceScalability(BaseIntegrationTest):
+class DatabaseManagerPerformanceScalabilityTests(BaseIntegrationTest):
     """Performance and scalability testing for DatabaseManager under load."""
     
     def setup_method(self):
@@ -2808,7 +2808,7 @@ class TestDatabaseManagerPerformanceScalability(BaseIntegrationTest):
                     assert avg_fast < 0.02  # Fast queries should be very quick
 
 
-class TestDatabaseManagerDataIntegrityValidation(BaseIntegrationTest):
+class DatabaseManagerDataIntegrityValidationTests(BaseIntegrationTest):
     """Data integrity and consistency validation tests."""
     
     def setup_method(self):
@@ -3280,7 +3280,7 @@ class TestDatabaseManagerDataIntegrityValidation(BaseIntegrationTest):
                 assert any("data truncation" in attempt for attempt in corruption_attempts)
 
 
-class TestDatabaseManagerComprehensiveSSOTCompliance(BaseIntegrationTest):
+class DatabaseManagerComprehensiveSSOTComplianceTests(BaseIntegrationTest):
     """SSOT compliance verification and additional comprehensive test coverage."""
     
     REQUIRES_DATABASE = True
@@ -3823,7 +3823,7 @@ class TestDatabaseManagerComprehensiveSSOTCompliance(BaseIntegrationTest):
 
 
 # Final comprehensive test count and coverage verification
-class TestDatabaseManagerCoverageVerification(BaseIntegrationTest):
+class DatabaseManagerCoverageVerificationTests(BaseIntegrationTest):
     """Verification of 100% comprehensive test coverage for DatabaseManager."""
     
     def test_coverage_completeness_verification(self):

@@ -12,7 +12,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider
 from auth_service.auth_core.auth_environment import get_auth_env
 
-class TestOAuthRedirectURIConfiguration:
+class OAuthRedirectURIConfigurationTests:
     """Test OAuth redirect URI uses proper configuration from AuthEnvironment.
     
     CRITICAL: These tests ensure OAuth redirect URI is correctly configured
@@ -63,7 +63,7 @@ class TestOAuthRedirectURIConfiguration:
         redirect_uri = provider.get_redirect_uri()
         assert redirect_uri == 'https://custom.domain.com/auth/oauth/callback', f'Should respect AUTH_SERVICE_URL override, got: {redirect_uri}'
 
-class TestOAuthConfigurationValidation:
+class OAuthConfigurationValidationTests:
     """Test OAuth configuration validation to prevent deployment failures."""
 
     def test_validate_configuration_checks_redirect_uri(self):
@@ -95,7 +95,7 @@ class TestOAuthConfigurationValidation:
         if 'redirect_uri_configured' not in str(results['checks_passed']):
             assert 'redirect_uri_configured' not in str(results['checks_failed']), 'Redirect URI configuration should be checked'
 
-class TestOAuthAuthorizationURL:
+class OAuthAuthorizationURLTests:
     """Test OAuth authorization URL generation with proper redirect URI."""
 
     def test_authorization_url_uses_correct_redirect_uri(self):

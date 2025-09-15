@@ -36,7 +36,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestLLMManagerFactoryViolationsIssue224(SSotBaseTestCase):
+class LLMManagerFactoryViolationsIssue224Tests(SSotBaseTestCase):
     """Unit tests to detect the 51 LLMManager factory pattern violations for issue #224"""
     
     def test_detect_direct_llm_manager_instantiation_violations(self):

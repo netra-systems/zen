@@ -43,7 +43,7 @@ class PerformanceMetrics:
     success_rate: float
 
 @pytest.mark.integration
-class TestMigrationPerformanceImpact(SSotAsyncTestCase):
+class MigrationPerformanceImpactTests(SSotAsyncTestCase):
     """Integration tests validating performance impact of SSOT ID migration"""
 
     def setUp(self):

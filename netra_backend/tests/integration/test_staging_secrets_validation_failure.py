@@ -21,7 +21,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from shared.configuration.central_config_validator import CentralConfigurationValidator, Environment
 
 
-class TestStagingSecretsValidationFailure(BaseTestCase):
+class StagingSecretsValidationFailureTests(BaseTestCase):
     """Test that reproduces the exact staging secrets validation failure from GitHub #259."""
 
     def setup_method(self):

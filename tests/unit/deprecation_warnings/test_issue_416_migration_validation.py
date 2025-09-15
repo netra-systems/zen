@@ -27,7 +27,7 @@ import warnings
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDeprecationMigrationValidation(SSotBaseTestCase):
+class DeprecationMigrationValidationTests(SSotBaseTestCase):
     """Validate migration paths for deprecated imports"""
     
     def setUp(self):

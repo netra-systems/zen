@@ -30,7 +30,7 @@ from netra_backend.app.routes.demo_websocket import router, execute_real_agent_w
 
 
 @pytest.mark.e2e
-class TestDemoWebSocketComprehensive(SSotAsyncTestCase):
+class DemoWebSocketComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive tests for demo WebSocket endpoint functionality.
     
@@ -309,7 +309,7 @@ class TestDemoWebSocketComprehensive(SSotAsyncTestCase):
         
         # Import and test the WebSocketAdapter class from demo_websocket
         # Since it's defined inside the function, we'll test the pattern
-        class TestWebSocketAdapter:
+        class WebSocketAdapterTests:
             """Test version of the WebSocketAdapter from demo_websocket.py"""
             
             def __init__(self, websocket):
@@ -373,7 +373,7 @@ class TestDemoWebSocketComprehensive(SSotAsyncTestCase):
                 })
 
         # Test the adapter
-        adapter = TestWebSocketAdapter(mock_websocket)
+        adapter = WebSocketAdapterTests(mock_websocket)
         test_run_id = str(uuid.uuid4())
         test_agent = "TestAgent"
         

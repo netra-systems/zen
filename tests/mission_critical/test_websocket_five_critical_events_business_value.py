@@ -383,7 +383,7 @@ class RealWebSocketEventTester:
 
 
 @pytest.mark.mission_critical
-class TestWebSocketFiveCriticalEventsBusinessValue(SSotAsyncTestCase):
+class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
     """Mission critical tests for the 5 WebSocket events that drive business value."""
     
     @pytest.fixture(autouse=True)

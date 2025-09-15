@@ -103,7 +103,7 @@ STAGING_URLS = {
 }
 
 
-class TestGoldenPathStaging(SSotAsyncTestCase):
+class GoldenPathStagingTests(SSotAsyncTestCase):
     """
     Golden Path Staging Environment Test Suite
     

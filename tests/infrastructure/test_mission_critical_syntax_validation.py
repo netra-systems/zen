@@ -16,7 +16,7 @@ import os
 import pytest
 from typing import List, Tuple
 
-class TestMissionCriticalSyntaxValidation:
+class MissionCriticalSyntaxValidationTests:
     """Test suite to validate syntax integrity of mission-critical test files."""
 
     def test_mission_critical_files_have_valid_syntax(self):

@@ -41,7 +41,7 @@ from test_framework.database.database_fixtures import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 @pytest.mark.websocket
-class TestWebSocketSupervisorIsolation(SSotBaseTestCase):
+class WebSocketSupervisorIsolationTests(SSotBaseTestCase):
     """
     Comprehensive tests for WebSocket supervisor isolation using REAL services.
     

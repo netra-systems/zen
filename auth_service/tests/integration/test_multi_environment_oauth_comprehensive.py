@@ -43,7 +43,7 @@ from auth_service.auth_core.auth_environment import AuthEnvironment, get_auth_en
 from auth_service.auth_core.secret_loader import AuthSecretLoader
 from shared.isolated_environment import get_env
 
-class TestMultiEnvironmentOAuthConfigurationIntegration(SSotBaseTestCase):
+class MultiEnvironmentOAuthConfigurationIntegrationTests(SSotBaseTestCase):
     """Test OAuth configuration integration across multiple environments."""
 
     def setup_method(self, method=None):
@@ -163,7 +163,7 @@ class TestMultiEnvironmentOAuthConfigurationIntegration(SSotBaseTestCase):
                 assert url1 != url2, f'Auth URLs identical between {env1} and {env2}'
         self.record_metric('auth_urls_generated', len(auth_urls))
 
-class TestMultiEnvironmentOAuthAuthSecretLoaderIntegration(SSotBaseTestCase):
+class MultiEnvironmentOAuthAuthSecretLoaderIntegrationTests(SSotBaseTestCase):
     """Test OAuth integration with AuthSecretLoader across environments."""
 
     def setup_method(self, method=None):
@@ -222,7 +222,7 @@ class TestMultiEnvironmentOAuthAuthSecretLoaderIntegration(SSotBaseTestCase):
                     assert self_check['environment'] == scenario['env']
         self.record_metric('integration_scenarios_tested', len(test_scenarios))
 
-class TestMultiEnvironmentOAuthErrorHandlingIntegration(SSotBaseTestCase):
+class MultiEnvironmentOAuthErrorHandlingIntegrationTests(SSotBaseTestCase):
     """Test OAuth error handling integration across environments."""
 
     def setup_method(self, method=None):
@@ -263,7 +263,7 @@ class TestMultiEnvironmentOAuthErrorHandlingIntegration(SSotBaseTestCase):
                         GoogleOAuthProvider()
         self.record_metric('partial_credential_scenarios_tested', len(partial_credential_scenarios))
 
-class TestMultiEnvironmentOAuthEndToEndIntegration(SSotBaseTestCase):
+class MultiEnvironmentOAuthEndToEndIntegrationTests(SSotBaseTestCase):
     """Test end-to-end OAuth integration across environments."""
 
     def setup_method(self, method=None):

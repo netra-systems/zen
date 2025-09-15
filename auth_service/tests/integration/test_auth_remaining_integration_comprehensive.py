@@ -33,7 +33,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from shared.isolated_environment import get_env
 
 
-class TestJWTLifecycleIntegration(SSotBaseTestCase):
+class JWTLifecycleIntegrationTests(SSotBaseTestCase):
     """Test 4: JWT token lifecycle management integration."""
 
     @pytest.fixture
@@ -87,7 +87,7 @@ class TestJWTLifecycleIntegration(SSotBaseTestCase):
         assert new_access_valid.user_id == user_data["user_id"]
 
 
-class TestMultiUserSessionIntegration(SSotBaseTestCase):
+class MultiUserSessionIntegrationTests(SSotBaseTestCase):
     """Test 5: Multi-user session isolation integration."""
 
     @pytest.fixture
@@ -136,7 +136,7 @@ class TestMultiUserSessionIntegration(SSotBaseTestCase):
                     assert session["session_id"] != other_session["session_id"]
 
 
-class TestServiceStartupIntegration(SSotBaseTestCase):
+class ServiceStartupIntegrationTests(SSotBaseTestCase):
     """Test 6: Service startup and health checks integration."""
 
     @pytest.mark.integration
@@ -153,7 +153,7 @@ class TestServiceStartupIntegration(SSotBaseTestCase):
         assert isinstance(health_result, dict)
 
 
-class TestCrossServiceAuthIntegration(SSotBaseTestCase):
+class CrossServiceAuthIntegrationTests(SSotBaseTestCase):
     """Test 7: Cross-service authentication integration."""
 
     @pytest.mark.integration
@@ -184,7 +184,7 @@ class TestCrossServiceAuthIntegration(SSotBaseTestCase):
         assert validation_result.user_id == "service-user-123"
 
 
-class TestErrorHandlingIntegration(SSotBaseTestCase):
+class ErrorHandlingIntegrationTests(SSotBaseTestCase):
     """Test 8: Error handling and recovery integration."""
 
     @pytest.mark.integration
@@ -208,7 +208,7 @@ class TestErrorHandlingIntegration(SSotBaseTestCase):
             assert isinstance(e, Exception)
 
 
-class TestPerformanceIntegration(SSotBaseTestCase):
+class PerformanceIntegrationTests(SSotBaseTestCase):
     """Test 9: Performance and scalability integration."""
 
     @pytest.mark.integration
@@ -257,7 +257,7 @@ class TestPerformanceIntegration(SSotBaseTestCase):
         assert valid_count == 25
 
 
-class TestSecurityPolicyIntegration(SSotBaseTestCase):
+class SecurityPolicyIntegrationTests(SSotBaseTestCase):
     """Test 10: Security policy enforcement integration."""
 
     @pytest.mark.integration

@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestConfigManagerSSOTViolationsIssue667(SSotBaseTestCase, unittest.TestCase):
+class ConfigManagerSSOTViolationsIssue667Tests(SSotBaseTestCase, unittest.TestCase):
     """Unit tests to detect configuration manager SSOT violations for Issue #667."""
     
     def setUp(self):

@@ -17,7 +17,7 @@ import uuid
 from contextlib import asynccontextmanager
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
-class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
+class DatabaseConnectionFailureLoggingTests(SSotAsyncTestCase):
     """Test database connection failure logging coverage."""
 
     async def asyncSetUp(self):

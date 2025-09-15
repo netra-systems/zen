@@ -22,7 +22,7 @@ from unittest.mock import Mock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestWebSocketAgentInfrastructureMissing(SSotBaseTestCase):
+class WebSocketAgentInfrastructureMissingTests(SSotBaseTestCase):
     """
     Failing unit tests demonstrating missing WebSocket agent infrastructure components.
     
@@ -120,7 +120,7 @@ class TestWebSocketAgentInfrastructureMissing(SSotBaseTestCase):
         self.record_metric("priority", "P0 - Blocks $500K+ ARR validation")
 
 
-class TestWebSocketAgentInfrastructureExpectations(SSotBaseTestCase):
+class WebSocketAgentInfrastructureExpectationsTests(SSotBaseTestCase):
     """
     Additional tests documenting what the infrastructure SHOULD provide when implemented.
     

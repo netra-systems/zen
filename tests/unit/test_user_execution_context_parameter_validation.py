@@ -15,7 +15,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @pytest.mark.unit
-class TestUserExecutionContextParameterValidation(BaseTestCase):
+class UserExecutionContextParameterValidationTests(BaseTestCase):
     """Test cases to reproduce Issue #964 UserExecutionContext metadata parameter errors."""
 
     def setUp(self):

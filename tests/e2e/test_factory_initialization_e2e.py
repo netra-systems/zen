@@ -78,7 +78,7 @@ from netra_backend.app.core.configuration import get_configuration
 @pytest.mark.real_services
 @pytest.mark.mission_critical
 @pytest.mark.golden_path
-class TestFactoryInitializationE2E(BaseE2ETest):
+class FactoryInitializationE2ETests(BaseE2ETest):
     """
     E2E tests for factory initialization and user isolation architecture.
     

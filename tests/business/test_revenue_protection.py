@@ -101,7 +101,7 @@ class RevenueProtectionValidator:
             customer_segments_affected=segments_affected or []
         ))
 
-class TestRevenueProtection:
+class RevenueProtectionTests:
     """Business validation tests for revenue protection"""
 
     def setup_method(self, method=None):
@@ -708,7 +708,7 @@ if __name__ == "__main__":
     # Can be run standalone for business validation
     import sys
 
-    validator = TestRevenueProtection()
+    validator = RevenueProtectionTests()
     validator.setup_method()
 
     print("BUSINESS VALIDATION: Revenue Protection")

@@ -69,7 +69,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.integration
-class TestRegistryCrossServiceConsistency(SSotAsyncTestCase):
+class RegistryCrossServiceConsistencyTests(SSotAsyncTestCase):
     """
     Integration test suite for cross-service registry consistency.
 

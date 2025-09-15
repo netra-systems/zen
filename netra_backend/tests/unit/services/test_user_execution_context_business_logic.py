@@ -37,7 +37,7 @@ from netra_backend.app.services.user_execution_context import (
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestUserExecutionContextBusinessLogic(SSotAsyncTestCase):
+class UserExecutionContextBusinessLogicTests(SSotAsyncTestCase):
     """Comprehensive business logic unit tests for UserExecutionContext.
 
     These tests focus on the critical business logic that protects the Golden Path

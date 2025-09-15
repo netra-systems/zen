@@ -24,7 +24,7 @@ import asyncio
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
-class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
+class AgentExecutionCoreSSotComplianceTests(SSotAsyncTestCase):
     """Test agent execution core SSOT compliance for ExecutionState usage."""
 
     def setup_method(self):
@@ -192,7 +192,7 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
 
 @pytest.mark.unit
 @pytest.mark.ssot_validation
-class TestExecutionStateUsagePatterns:
+class ExecutionStateUsagePatternsTests:
     """Test execution state usage patterns for SSOT compliance."""
 
     def test_execution_state_in_conditional_logic(self):

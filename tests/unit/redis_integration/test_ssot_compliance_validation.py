@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestSsotComplianceValidation(SSotBaseTestCase):
+class SsotComplianceValidationTests(SSotBaseTestCase):
     """
     SSOT Compliance: System-wide Redis integration validation
     

@@ -44,7 +44,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
 @pytest.mark.unit
-class TestStatePersistenceServiceCore:
+class StatePersistenceServiceCoreTests:
     """Core state persistence functionality tests"""
     
     def test_initialization_creates_proper_configuration(self):
@@ -92,7 +92,7 @@ class TestStatePersistenceServiceCore:
 
 
 @pytest.mark.unit
-class TestSSotConsolidation:
+class SSotConsolidationTests:
     """Test SSOT consolidation with StateCacheManager functionality"""
     
     @pytest.mark.asyncio
@@ -172,7 +172,7 @@ class TestSSotConsolidation:
 
 
 @pytest.mark.unit
-class TestThreeTierArchitecture:
+class ThreeTierArchitectureTests:
     """Test 3-tier architecture (Redis/ClickHouse/PostgreSQL) - CRITICAL for $500K+ ARR"""
     
     @pytest.mark.asyncio
@@ -290,7 +290,7 @@ class TestThreeTierArchitecture:
 
 
 @pytest.mark.unit
-class TestOptimizationFeatures:
+class OptimizationFeaturesTests:
     """Test performance optimization features - prevents system degradation"""
     
     def test_state_hash_calculation(self):
@@ -384,7 +384,7 @@ class TestOptimizationFeatures:
 
 
 @pytest.mark.unit
-class TestRecoveryCapabilities:
+class RecoveryCapabilitiesTests:
     """Test state recovery capabilities - prevents $100K+ incident costs"""
     
     @pytest.mark.asyncio
@@ -491,7 +491,7 @@ class TestRecoveryCapabilities:
 
 
 @pytest.mark.unit
-class TestErrorHandlingAndEdgeCases:
+class ErrorHandlingAndEdgeCasesTests:
     """Test error handling and edge cases"""
     
     @pytest.mark.asyncio
@@ -581,7 +581,7 @@ class TestErrorHandlingAndEdgeCases:
 
 
 @pytest.mark.unit
-class TestCacheManagement:
+class CacheManagementTests:
     """Test cache management functionality"""
     
     @pytest.mark.asyncio
@@ -647,7 +647,7 @@ class TestCacheManagement:
 
 
 @pytest.mark.unit
-class TestStateCacheManagerCompatibility:
+class StateCacheManagerCompatibilityTests:
     """Test SSOT consolidation compatibility with StateCacheManager"""
     
     def test_state_cache_manager_alias(self):
@@ -680,7 +680,7 @@ class TestStateCacheManagerCompatibility:
 
 
 @pytest.mark.unit
-class TestPerformanceOptimizations:
+class PerformanceOptimizationsTests:
     """Test performance optimizations - prevents system degradation"""
     
     def test_memory_bounded_cache_growth(self):
@@ -762,7 +762,7 @@ class TestPerformanceOptimizations:
 
 
 @pytest.mark.unit
-class TestBusinessScenarioIntegration:
+class BusinessScenarioIntegrationTests:
     """Test complete business scenarios - protects $500K+ ARR"""
     
     @pytest.mark.asyncio

@@ -130,7 +130,7 @@ class WebSocketAuthEventValidator:
 @pytest.mark.mission_critical
 @pytest.mark.real_services
 @pytest.mark.websocket
-class TestWebSocketAuthEvents(SSotAsyncTestCase):
+class WebSocketAuthEventsTests(SSotAsyncTestCase):
     """Mission Critical: WebSocket authentication with agent events for chat value."""
     
     @pytest.fixture(autouse=True)
@@ -535,7 +535,7 @@ class TestWebSocketAuthEvents(SSotAsyncTestCase):
 @pytest.mark.mission_critical
 @pytest.mark.real_services
 @pytest.mark.websocket
-class TestWebSocketAuthPerformance(SSotAsyncTestCase):
+class WebSocketAuthPerformanceTests(SSotAsyncTestCase):
     """Mission Critical: WebSocket authentication performance under load."""
     
     async def test_websocket_auth_concurrent_connections(self):

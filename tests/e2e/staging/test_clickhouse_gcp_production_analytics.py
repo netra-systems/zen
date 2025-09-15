@@ -43,7 +43,7 @@ from netra_backend.app.db.clickhouse import (
 )
 
 
-class TestClickHouseGCPStagingConnectivity(SSotBaseTestCase):
+class ClickHouseGCPStagingConnectivityTests(SSotBaseTestCase):
     """
     E2E tests for ClickHouse GCP staging environment connectivity
     
@@ -220,7 +220,7 @@ class TestClickHouseGCPStagingConnectivity(SSotBaseTestCase):
                 await service.close()
 
 
-class TestClickHouseGCPStagingBusinessIntelligence(SSotBaseTestCase):
+class ClickHouseGCPStagingBusinessIntelligenceTests(SSotBaseTestCase):
     """
     E2E tests for business intelligence workflows in GCP staging
     
@@ -445,7 +445,7 @@ class TestClickHouseGCPStagingBusinessIntelligence(SSotBaseTestCase):
                 await service.close()
 
 
-class TestClickHouseGCPStagingEnterpriseSecurity(SSotBaseTestCase):
+class ClickHouseGCPStagingEnterpriseSecurityTests(SSotBaseTestCase):
     """
     E2E tests for enterprise security features in GCP staging
     
@@ -638,7 +638,7 @@ class TestClickHouseGCPStagingEnterpriseSecurity(SSotBaseTestCase):
                 await service.close()
 
 
-class TestClickHouseGCPStagingOperationalMonitoring(SSotBaseTestCase):
+class ClickHouseGCPStagingOperationalMonitoringTests(SSotBaseTestCase):
     """
     E2E tests for operational monitoring in GCP staging
     
@@ -786,7 +786,7 @@ class TestClickHouseGCPStagingOperationalMonitoring(SSotBaseTestCase):
 
 
 # Mark completion of comprehensive E2E GCP staging tests
-class TestClickHouseE2EGCPStagingTestsComplete(SSotBaseTestCase):
+class ClickHouseE2EGCPStagingTestsCompleteTests(SSotBaseTestCase):
     """Marker class indicating completion of E2E GCP staging test suite"""
 
     def test_e2e_gcp_staging_test_suite_completion_metrics(self):

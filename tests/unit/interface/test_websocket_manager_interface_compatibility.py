@@ -18,7 +18,7 @@ from unittest.mock import Mock, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestUnifiedWebSocketManagerImportCompatibility(SSotAsyncTestCase):
+class UnifiedWebSocketManagerImportCompatibilityTests(SSotAsyncTestCase):
     """Test suite for validating UnifiedWebSocketManager import compatibility.
 
     These tests are designed to fail and demonstrate interface issues.
@@ -207,11 +207,11 @@ if __name__ == "__main__":
 
     # Run the async test
     loader = unittest.TestLoader()
-    suite = loader.loadTestsFromTestCase(TestUnifiedWebSocketManagerImportCompatibility)
+    suite = loader.loadTestsFromTestCase(UnifiedWebSocketManagerImportCompatibilityTests)
 
     async def run_tests():
         # Create test instances and run them
-        test_instance = TestUnifiedWebSocketManagerImportCompatibility()
+        test_instance = UnifiedWebSocketManagerImportCompatibilityTests()
         await test_instance.asyncSetUp()
 
         try:

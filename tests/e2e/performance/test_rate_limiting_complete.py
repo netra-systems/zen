@@ -28,7 +28,7 @@ import websockets
 from tests.e2e.rate_limiting_core import MessageSender, RedisManager, UserManager
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
-class TestComprehensiveRateLimiter:
+class ComprehensiveRateLimiterTests:
     """Tests comprehensive rate limiting across all API endpoints and services."""
 
     def __init__(self, harness: UnifiedTestHarnessComplete):

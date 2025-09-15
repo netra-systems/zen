@@ -90,7 +90,7 @@ class AgentInfrastructureTestContext:
             self.redis_operations = []
 
 
-class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
+class AgentExecutionEngineIntegrationTests(SSotAsyncTestCase):
     """CRITICAL integration tests for agent execution engine with real database/Redis."""
     
     def setup_method(self, method=None):

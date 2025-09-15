@@ -18,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
-class TestServiceSecretConfiguration:
+class ServiceSecretConfigurationTests:
     """Test SERVICE_SECRET configuration and dependency patterns"""
     
     def test_service_secret_environment_variable_presence(self):
@@ -417,7 +417,7 @@ class TestServiceSecretConfiguration:
         assert critical_regressions[0]["impact"] == "System failure"
 
 
-class TestServiceSecretDocumentation:
+class ServiceSecretDocumentationTests:
     """Test SERVICE_SECRET documentation and knowledge capture"""
     
     def test_mission_critical_index_structure(self):

@@ -19,7 +19,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 
-class TestInheritanceRefactorValidation:
+class InheritanceRefactorValidationTests:
     """Test suite to validate the inheritance refactoring is successful."""
     
     @pytest.fixture
@@ -202,7 +202,7 @@ class TestInheritanceRefactorValidation:
         assert not inspect.isabstract(validation_agent.__class__), "ValidationSubAgent should not be abstract"
 
 
-class TestWebSocketEventIntegration:
+class WebSocketEventIntegrationTests:
     """Test WebSocket event integration after inheritance refactoring."""
     
     @pytest.fixture
@@ -239,7 +239,7 @@ class TestWebSocketEventIntegration:
             pytest.fail(f"WebSocket event emission failed: {e}")
 
 
-class TestPerformanceAfterRefactoring:
+class PerformanceAfterRefactoringTests:
     """Test performance characteristics after inheritance refactoring."""
     
     @pytest.fixture

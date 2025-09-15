@@ -32,7 +32,7 @@ from tests.e2e.websocket_resilience.utils.streaming_response_generator import (
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestMultipartStreamingDisconnection:
+class MultipartStreamingDisconnectionTests:
     """Test multipart streaming disconnection and recovery."""
     
     @pytest.mark.resilience

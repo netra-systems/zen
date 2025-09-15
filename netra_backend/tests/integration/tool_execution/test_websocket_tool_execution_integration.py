@@ -71,7 +71,7 @@ class MockWebSocketTool:
         return f"WebSocket test execution of {self.name} completed successfully"
 
 
-class TestWebSocketToolExecutionIntegration(BaseIntegrationTest):
+class WebSocketToolExecutionIntegrationTests(BaseIntegrationTest):
     """Test WebSocket integration with tool execution using real services."""
     
     @pytest.mark.integration

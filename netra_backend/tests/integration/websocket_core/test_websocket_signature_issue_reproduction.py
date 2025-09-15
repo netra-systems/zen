@@ -13,7 +13,7 @@ from typing import Dict, Any
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.websocket_core.types import MessageType, create_server_message
 
-class TestWebSocketSignatureIssueReproduction(SSotAsyncTestCase):
+class WebSocketSignatureIssueReproductionTests(SSotAsyncTestCase):
     """Integration test reproducing the exact signature issue from handlers.py."""
 
     async def test_handlers_calling_pattern_breaks(self):

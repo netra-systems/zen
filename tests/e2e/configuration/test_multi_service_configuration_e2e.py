@@ -36,7 +36,7 @@ import httpx
 
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestMultiServiceConfigurationE2E:
+class MultiServiceConfigurationE2ETests:
     """E2E tests for multi-service configuration management."""
     
     @pytest.fixture

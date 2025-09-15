@@ -159,7 +159,7 @@ class ImportAnalyzer:
         return violations
 
 
-class TestSSotImportCompliance(SSotBaseTestCase):
+class SSotImportComplianceTests(SSotBaseTestCase):
     """Mission Critical Test Suite: SSOT Import Compliance Validation."""
 
     def setup_method(self, method):

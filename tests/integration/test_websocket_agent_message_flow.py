@@ -67,7 +67,7 @@ except ImportError as e:
     create_agent_websocket_bridge = MagicMock
     BaseAgent = MagicMock
 
-class TestWebSocketAgentMessageFlow(SSotAsyncTestCase):
+class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
     """
     P0 Critical Integration Tests for WebSocket Agent Message Flow.
 

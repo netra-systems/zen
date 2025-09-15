@@ -51,7 +51,7 @@ class MockWebSocket:
         if e2e_context:
             self.headers.update(e2e_context.get('headers', {}))
 
-class TestPhase2TokenLifecycleIntegration:
+class Phase2TokenLifecycleIntegrationTests:
     """
     Phase 2 Integration Tests: Token Lifecycle Manager with WebSocket Auth.
     

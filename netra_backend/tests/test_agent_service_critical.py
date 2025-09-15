@@ -65,7 +65,7 @@ from netra_backend.app.schemas.request import StartAgentPayload
 
 from netra_backend.app.services.agent_service import AgentService
 
-class TestAgentServiceCritical:
+class AgentServiceCriticalTests:
     """Critical agent service tests for essential functionality."""
 
     @pytest.fixture

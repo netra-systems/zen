@@ -256,7 +256,7 @@ class ConcurrentStressTestAgent(BaseAgent):
 
 
 @pytest.mark.asyncio
-class TestAgentResiliencePatterns:
+class AgentResiliencePatternsTests:
     """CRITICAL tests that MUST FAIL if resilience patterns are missing."""
     
     def get_memory_usage_mb(self) -> float:

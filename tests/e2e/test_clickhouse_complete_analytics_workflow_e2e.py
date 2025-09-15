@@ -19,7 +19,7 @@ from netra_backend.app.db.clickhouse import get_clickhouse_client, get_clickhous
 from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.ssot.e2e_auth_helper import create_authenticated_user, get_user_auth_token
 
-class TestClickHouseCompleteAnalyticsWorkflowE2E(BaseE2ETest):
+class ClickHouseCompleteAnalyticsWorkflowE2ETests(BaseE2ETest):
     """Test complete ClickHouse analytics workflow with authentication."""
 
     def setup_method(self):

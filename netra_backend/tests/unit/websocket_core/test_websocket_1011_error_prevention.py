@@ -29,7 +29,7 @@ from shared.types.core_types import UserID, ConnectionID
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocket1011ErrorPrevention:
+class WebSocket1011ErrorPreventionTests:
     """
     Test that critical WebSocket 1011 error conditions are prevented.
     
@@ -295,7 +295,7 @@ def websocket_1011_prevention_context():
     }
 
 
-class TestWebSocket1011BusinessImpactPrevention:
+class WebSocket1011BusinessImpactPreventionTests:
     """
     Business-focused tests that validate chat functionality protection.
     

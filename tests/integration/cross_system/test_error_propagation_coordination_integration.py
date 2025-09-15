@@ -90,7 +90,7 @@ class ErrorEvent:
 @pytest.mark.integration
 @pytest.mark.cross_system
 @pytest.mark.error_handling
-class TestErrorPropagationCoordinationIntegration(SSotAsyncTestCase):
+class ErrorPropagationCoordinationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for error propagation and coordination.
     

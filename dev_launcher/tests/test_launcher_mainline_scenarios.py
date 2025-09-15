@@ -44,7 +44,7 @@ def create_test_project_structure(base_dir: Path) -> None:
     env_file.write_text("TEST_VAR=from_env_file\nLLM_MODE=shared\nGEMINI_API_KEY=test_key")
 
 
-class TestDefaultStartupWithRealLLM(SSotAsyncTestCase):
+class DefaultStartupWithRealLLMTests(SSotAsyncTestCase):
     """Test 1: Default startup should use 'shared' LLM mode and detect Gemini API key."""
     
     def setUp(self):
@@ -115,7 +115,7 @@ class TestDefaultStartupWithRealLLM(SSotAsyncTestCase):
                         "Variables from .env should be loaded when not in system environment")
 
 
-class TestDockerServiceDiscoveryReuse(SSotAsyncTestCase):
+class DockerServiceDiscoveryReuseTests(SSotAsyncTestCase):
     """Test 2: Docker service discovery should reuse existing containers."""
     
     def setUp(self):
@@ -182,7 +182,7 @@ class TestDockerServiceDiscoveryReuse(SSotAsyncTestCase):
             self.assertEqual(launcher._running_docker_services, {})
 
 
-class TestServiceStartupSequenceOrdering(SSotAsyncTestCase):
+class ServiceStartupSequenceOrderingTests(SSotAsyncTestCase):
     """Test 3: 13-step service startup sequence should execute in correct order."""
     
     def setUp(self):
@@ -289,7 +289,7 @@ class TestServiceStartupSequenceOrdering(SSotAsyncTestCase):
         asyncio.run(run_test())
 
 
-class TestDatabaseValidationMixedModes(SSotAsyncTestCase):
+class DatabaseValidationMixedModesTests(SSotAsyncTestCase):
     """Test 4: Database validation should work correctly with mixed mock/real modes."""
     
     def setUp(self):
@@ -376,7 +376,7 @@ class TestDatabaseValidationMixedModes(SSotAsyncTestCase):
         asyncio.run(run_test())
 
 
-class TestPortConflictDynamicAllocation(SSotAsyncTestCase):
+class PortConflictDynamicAllocationTests(SSotAsyncTestCase):
     """Test 5: Port conflicts should be resolved with dynamic allocation."""
     
     def setUp(self):
@@ -442,7 +442,7 @@ class TestPortConflictDynamicAllocation(SSotAsyncTestCase):
                           "Dynamic ports should be enabled for conflict resolution")
 
 
-class TestHealthMonitoringDelayedStart(SSotAsyncTestCase):
+class HealthMonitoringDelayedStartTests(SSotAsyncTestCase):
     """Test 6: Health monitoring should only start after all services are ready."""
     
     def setUp(self):
@@ -545,7 +545,7 @@ class TestHealthMonitoringDelayedStart(SSotAsyncTestCase):
         launcher.health_monitor.enable_monitoring.assert_not_called()
 
 
-class TestGracefulShutdownServiceOrdering(SSotAsyncTestCase):
+class GracefulShutdownServiceOrderingTests(SSotAsyncTestCase):
     """Test 7: Graceful shutdown should terminate services in proper order."""
     
     def setUp(self):
@@ -627,7 +627,7 @@ class TestGracefulShutdownServiceOrdering(SSotAsyncTestCase):
         launcher._verify_ports_freed_with_force_cleanup.assert_called_once()
 
 
-class TestEnvironmentVariablePriority(SSotAsyncTestCase):
+class EnvironmentVariablePriorityTests(SSotAsyncTestCase):
     """Test 8: Environment variables should load with correct priority."""
     
     def setUp(self):
@@ -697,7 +697,7 @@ class TestEnvironmentVariablePriority(SSotAsyncTestCase):
         self.assertGreaterEqual(len(token), 32, "Auth token should be at least 32 characters")
 
 
-class TestParallelStartupFailureRecovery(SSotAsyncTestCase):
+class ParallelStartupFailureRecoveryTests(SSotAsyncTestCase):
     """Test 9: Parallel startup should handle failures and fall back to sequential."""
     
     def setUp(self):
@@ -759,7 +759,7 @@ class TestParallelStartupFailureRecovery(SSotAsyncTestCase):
         self.assertEqual(call_count['count'], 2, "Should retry failed tasks")
 
 
-class TestCrossServiceAuthenticationFlow(SSotAsyncTestCase):
+class CrossServiceAuthenticationFlowTests(SSotAsyncTestCase):
     """Test 10: Cross-service authentication should work end-to-end."""
     
     def setUp(self):

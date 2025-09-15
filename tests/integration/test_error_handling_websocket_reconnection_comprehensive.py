@@ -275,7 +275,7 @@ class ReconnectingWebSocketClient:
         """Get comprehensive connection statistics."""
         return {'current_state': self.state.value, 'connection_attempts': self.connection_attempts, 'successful_connections': self.successful_connections, 'connection_failures': self.connection_failures, 'reconnect_attempts': self.reconnect_attempts, 'messages_sent': self.messages_sent, 'messages_received': self.messages_received, 'queued_messages': len(self.message_queue), 'pending_messages': len(self.pending_messages), 'connection_success_rate': self.successful_connections / max(self.connection_attempts, 1), 'reconnection_events_count': len(self.reconnection_events), 'connection_id': self.connection_id}
 
-class TestWebSocketErrorHandling(BaseIntegrationTest):
+class WebSocketErrorHandlingTests(BaseIntegrationTest):
     """Integration tests for WebSocket error handling and reconnection patterns."""
 
     def setup_method(self):

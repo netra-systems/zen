@@ -57,7 +57,7 @@ class UserDataHelper:
     thread_ids: List[str]
     execution_ids: List[str]
 
-class TestDatabasePersistenceGoldenPath(DatabaseIntegrationTest):
+class DatabasePersistenceGoldenPathTests(DatabaseIntegrationTest):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

@@ -27,7 +27,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator, reset_
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.integration
-class TestSessionContinuityIntegration:
+class SessionContinuityIntegrationTests:
     """Integration tests for session continuity patterns."""
     
     def setup_method(self):
@@ -281,7 +281,7 @@ class TestSessionContinuityIntegration:
 
 
 @pytest.mark.integration
-class TestWebSocketHandlerSessionIntegration:
+class WebSocketHandlerSessionIntegrationTests:
     """Integration tests specifically for WebSocket handler session patterns."""
     
     def setup_method(self):
@@ -365,7 +365,7 @@ class TestWebSocketHandlerSessionIntegration:
 
 
 @pytest.mark.asyncio
-class TestAsyncSessionContinuity:
+class AsyncSessionContinuityTests:
     """Async tests for session continuity in concurrent scenarios."""
     
     def setup_method(self):
@@ -427,7 +427,7 @@ class TestAsyncSessionContinuity:
 
 
 @pytest.mark.integration
-class TestRegressionPrevention:
+class RegressionPreventionTests:
     """Tests to prevent regression of the context creation vs getter pattern bug."""
     
     def setup_method(self):

@@ -1021,7 +1021,7 @@ class WebSocketRegressionTester:
 @pytest.mark.asyncio
 @pytest.mark.regression
 @pytest.mark.websocket
-class TestWebSocketRegressionPrevention:
+class WebSocketRegressionPreventionTests:
     """Pytest integration for WebSocket regression prevention."""
     
     @pytest.fixture(scope="class")

@@ -38,7 +38,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestSSotBaseTestCaseInheritanceAndSetup(SSotBaseTestCase):
+class SSotBaseTestCaseInheritanceAndSetupTests(SSotBaseTestCase):
     """Test the SSotBaseTestCase inheritance and setup validation - Foundation Infrastructure."""
 
     def test_ssot_base_test_case_setup_creates_required_attributes(self):
@@ -95,7 +95,7 @@ class TestSSotBaseTestCaseInheritanceAndSetup(SSotBaseTestCase):
         context = self.get_test_context()
         assert context is not None, 'Test context must be created during setup'
         assert context.test_name == 'test_ssot_base_test_case_context_initialization', 'Context must have correct test name'
-        assert context.test_id.startswith('TestSSotBaseTestCaseInheritanceAndSetup::'), 'Context must have correct test ID format'
+        assert context.test_id.startswith('SSotBaseTestCaseInheritanceAndSetupTests::'), 'Context must have correct test ID format'
         assert context.trace_id is not None, 'Context must have trace ID'
         assert context.trace_id.startswith('test_'), 'Trace ID must follow expected format'
         assert context.user_id is not None, 'Context must have user ID for isolation'
@@ -125,7 +125,7 @@ class TestSSotBaseTestCaseInheritanceAndSetup(SSotBaseTestCase):
         logger.info('Test method discovery and execution validation completed')
 
 @pytest.mark.integration
-class TestSSotBaseTestCaseEnvironmentIsolation(SSotBaseTestCase):
+class SSotBaseTestCaseEnvironmentIsolationTests(SSotBaseTestCase):
     """Test environment isolation validation - Critical for reliable testing."""
 
     def test_isolated_environment_integration_in_test_cases(self):
@@ -205,7 +205,7 @@ class TestSSotBaseTestCaseEnvironmentIsolation(SSotBaseTestCase):
         logger.info(f'Cross-contamination prevention validated with identifier: {test_identifier}')
 
 @pytest.mark.integration
-class TestSSotBaseTestCaseMockPolicyEnforcement(SSotBaseTestCase):
+class SSotBaseTestCaseMockPolicyEnforcementTests(SSotBaseTestCase):
     """Test mock policy enforcement - Critical for test integrity."""
 
     def test_mock_policy_compliance_checking_in_test_framework(self):
@@ -284,7 +284,7 @@ class TestSSotBaseTestCaseMockPolicyEnforcement(SSotBaseTestCase):
         logger.info('Mock detection and reporting systems validation completed')
 
 @pytest.mark.integration
-class TestSSotBaseTestCaseInfrastructureConsistency(SSotBaseTestCase):
+class SSotBaseTestCaseInfrastructureConsistencyTests(SSotBaseTestCase):
     """Test infrastructure consistency across all test suites."""
 
     def test_consistent_test_patterns_across_all_test_suites(self):
@@ -367,7 +367,7 @@ class TestSSotBaseTestCaseInfrastructureConsistency(SSotBaseTestCase):
         logger.info(f'Test execution environment standardization validated for environment: {env_name}')
 
 @pytest.mark.integration
-class TestSSotBaseTestCaseRealServiceIntegrationPatterns(SSotBaseTestCase):
+class SSotBaseTestCaseRealServiceIntegrationPatternsTests(SSotBaseTestCase):
     """Test real service integration patterns validation."""
 
     def test_real_service_integration_patterns_validation(self):
@@ -460,7 +460,7 @@ class TestSSotBaseTestCaseRealServiceIntegrationPatterns(SSotBaseTestCase):
         logger.info('Service mocking detection and prevention validation completed')
 
 @pytest.mark.integration
-class TestSSotBaseTestCaseExecutionAndReporting(SSotBaseTestCase):
+class SSotBaseTestCaseExecutionAndReportingTests(SSotBaseTestCase):
     """Test execution lifecycle management and reporting."""
 
     def test_test_execution_lifecycle_management(self):
@@ -561,7 +561,7 @@ class TestSSotBaseTestCaseExecutionAndReporting(SSotBaseTestCase):
         logger.info(f'Performance metrics collection validated: {len(all_metrics)} total metrics')
 
 @pytest.mark.integration
-class TestSSotAsyncTestCaseIntegration(SSotAsyncTestCase):
+class SSotAsyncTestCaseIntegrationTests(SSotAsyncTestCase):
     """Test async test case integration - Async Infrastructure."""
 
     async def test_ssot_async_test_case_setup_validation(self):

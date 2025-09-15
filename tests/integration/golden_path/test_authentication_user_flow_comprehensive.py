@@ -68,7 +68,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
+class AuthenticationUserFlowComprehensiveTests(SSotBaseTestCase):
     """
     Comprehensive Integration Tests for Authentication and User Flow.
     
@@ -1342,4 +1342,4 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
 
 
 # Export the test class for pytest discovery
-__all__ = ["TestAuthenticationUserFlowComprehensive"]
+__all__ = ["AuthenticationUserFlowComprehensiveTests"]

@@ -46,7 +46,7 @@ class MockReportingAgent(BaseAgent):
         report = {'type': 'analysis_report', 'generated_at': datetime.now(timezone.utc).isoformat(), 'data': self.report_data, 'agent_name': self.name, 'status': 'completed'}
         return {'status': 'success', 'report': report, 'metadata': {'execution_time': time.time(), 'agent_version': '1.0'}}
 
-class TestReportingAgentGoldenPattern:
+class ReportingAgentGoldenPatternTests:
     """Test golden pattern implementation for ReportingSubAgent."""
 
     @pytest.fixture
@@ -72,7 +72,7 @@ class TestReportingAgentGoldenPattern:
         health = agent.get_health_status()
         assert health is not None
 
-class TestReportingExecutionFlow:
+class ReportingExecutionFlowTests:
     """Test reporting agent execution flow patterns."""
 
     @pytest.fixture
@@ -98,7 +98,7 @@ class TestReportingExecutionFlow:
         agent = MockReportingAgent(llm_manager=mock_llm_manager, name='ExecutionFailureReporting', should_fail_execution=True, enable_reliability=True)
         assert agent.get_health_status() is not None
 
-class TestWebSocketEventEmission:
+class WebSocketEventEmissionTests:
     """Test WebSocket event emission for chat value delivery."""
 
     @pytest.fixture
@@ -113,7 +113,7 @@ class TestWebSocketEventEmission:
         assert agent.get_health_status() is not None
         assert hasattr(agent, 'name')
 
-class TestReportingAgentCaching:
+class ReportingAgentCachingTests:
     """Test caching patterns for report generation optimization."""
 
     @pytest.fixture
@@ -133,7 +133,7 @@ class TestReportingAgentCaching:
         assert agent.report_data['cache_status'] == 'miss'
         assert agent.get_health_status() is not None
 
-class TestReportingEdgeCases:
+class ReportingEdgeCasesTests:
     """Test difficult edge cases and failure scenarios."""
 
     @pytest.fixture
@@ -165,7 +165,7 @@ class TestReportingEdgeCases:
             assert agent.report_data['agent_id'] == i
             assert agent.name == f'ConcurrentReporting_{i}'
 
-class TestReportingPerformancePatterns:
+class ReportingPerformancePatternsTests:
     """Test performance optimization patterns for reporting."""
 
     @pytest.fixture
@@ -190,7 +190,7 @@ class TestReportingPerformancePatterns:
         agent = MockReportingAgent(llm_manager=mock_llm_manager, name='MemoryEfficientReporting', enable_reliability=True)
         assert agent.get_health_status() is not None
 
-class TestReportingIntegrationReadiness:
+class ReportingIntegrationReadinessTests:
     """Test integration readiness with other system components."""
 
     @pytest.fixture

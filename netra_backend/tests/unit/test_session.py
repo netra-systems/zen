@@ -9,7 +9,7 @@ from netra_backend.app.models.session import Session
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestSession:
+class SessionTests:
     """Test suite for Session"""
 
     @pytest.fixture

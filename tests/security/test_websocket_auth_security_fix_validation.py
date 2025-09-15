@@ -16,7 +16,7 @@ import os
 from typing import Dict, Any
 from netra_backend.app.websocket_core.unified_websocket_auth import extract_e2e_context_from_websocket
 
-class TestWebSocketAuthSecurityFix:
+class WebSocketAuthSecurityFixTests:
     """
     CRITICAL SECURITY VALIDATION: Test our WebSocket authentication security fix.
     
@@ -99,7 +99,7 @@ class TestWebSocketAuthSecurityFix:
             context = extract_e2e_context_from_websocket(mock_websocket)
             assert context is None or not context.get('is_e2e_testing', False), 'Auth bypass should not be enabled without explicit E2E environment variables'
 
-class TestWebSocketAuthSecurityRegression:
+class WebSocketAuthSecurityRegressionTests:
     """
     Regression tests to ensure the security fix doesn't break existing functionality.
     """

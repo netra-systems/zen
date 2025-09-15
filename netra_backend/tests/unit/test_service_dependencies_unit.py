@@ -61,7 +61,7 @@ class MockedServiceDependency:
     failure_mode: Optional[str] = None
 
 
-class TestServiceInitialization:
+class ServiceInitializationTests:
     """
     Unit tests for service initialization and dependency setup patterns.
     
@@ -155,7 +155,7 @@ class TestServiceInitialization:
         assert result is False
 
 
-class TestAuthServiceDependency:
+class AuthServiceDependencyTests:
     """
     Unit tests for Backend [U+2194] Auth Service dependency patterns.
     
@@ -246,7 +246,7 @@ class TestAuthServiceDependency:
             mock_create.assert_called_once_with(user_data)
 
 
-class TestDatabaseDependency:
+class DatabaseDependencyTests:
     """
     Unit tests for Backend [U+2194] PostgreSQL database dependency patterns.
     
@@ -319,7 +319,7 @@ class TestDatabaseDependency:
             mock_connection.rollback.assert_called_once()
 
 
-class TestRedisDependency:
+class RedisDependencyTests:
     """
     Unit tests for Backend [U+2194] Redis cache dependency patterns.
     
@@ -395,7 +395,7 @@ class TestRedisDependency:
             assert result == 1
 
 
-class TestCrossServiceErrorPropagation:
+class CrossServiceErrorPropagationTests:
     """
     Unit tests for cross-service error propagation and containment patterns.
     
@@ -483,7 +483,7 @@ class TestCrossServiceErrorPropagation:
         assert "database" in unhealthy_services
 
 
-class TestServiceConfigurationValidation:
+class ServiceConfigurationValidationTests:
     """
     Unit tests for service configuration validation and environment handling.
     
@@ -560,7 +560,7 @@ class TestServiceConfigurationValidation:
             assert config['log_level'] == 'ERROR'
 
 
-class TestServiceStartupSequence:
+class ServiceStartupSequenceTests:
     """
     Unit tests for service startup and shutdown sequence management.
     

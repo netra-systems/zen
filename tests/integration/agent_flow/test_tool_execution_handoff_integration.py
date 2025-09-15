@@ -84,7 +84,7 @@ class ToolExecutionPhase(Enum):
     HANDOFF_COMPLETED = "handoff_completed"
 
 
-class TestToolExecutionHandoffIntegration(SSotAsyncTestCase):
+class ToolExecutionHandoffIntegrationTests(SSotAsyncTestCase):
     """
     Integration Tests for Tool Execution Handoff Integration.
     

@@ -68,7 +68,7 @@ E2E_TEST_CONFIG = {
 
 
 @dataclass
-class TestLoadResults:
+class LoadResultsTests:
     """Results from load testing."""
     test_name: str
     start_time: float
@@ -240,7 +240,7 @@ async def test_user_token():
     """Test user authentication token"""
     return "mock-test-token-" + str(int(time.time()))
 
-class TestHighVolumeThroughputIntegration:
+class HighVolumeThroughputIntegrationTests:
     """Integration tests combining all throughput test aspects"""
     
     @pytest.mark.asyncio

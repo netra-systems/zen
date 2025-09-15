@@ -27,7 +27,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestIssue1182WebSocketManagerSSOTViolations(SSotBaseTestCase):
+class Issue1182WebSocketManagerSSOTViolationsTests(SSotBaseTestCase):
     """Mission critical tests for WebSocket Manager SSOT violations"""
 
     def setUp(self):

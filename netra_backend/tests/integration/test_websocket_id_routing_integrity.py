@@ -47,7 +47,7 @@ except ImportError:
     redis = None
     REDIS_AVAILABLE = False
 
-class TestWebSocketIDRoutingIntegrity(BaseIntegrationTest):
+class WebSocketIDRoutingIntegrityTests(BaseIntegrationTest):
     """Integration tests for WebSocket ID routing integrity with real services.
     
     CRITICAL PURPOSE: Validate that WebSocket routing uses strongly typed IDs
@@ -466,7 +466,7 @@ async def test_comprehensive_websocket_routing_integrity(real_services_fixture):
     This test validates the entire WebSocket routing system with strongly typed
     IDs and real services. Will FAIL until routing violations are remediated.
     """
-    test_instance = TestWebSocketIDRoutingIntegrity()
+    test_instance = WebSocketIDRoutingIntegrityTests()
     test_instance.setup_method()
     try:
         await test_instance.test_websocket_message_routing_with_typed_ids(real_services_fixture)

@@ -29,7 +29,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 @pytest.mark.unit
-class TestUserExecutionContextWebSocket(SSotAsyncTestCase):
+class UserExecutionContextWebSocketTests(SSotAsyncTestCase):
     """Test UserExecutionContext WebSocket integration."""
 
     async def test_user_context_creation_with_websocket(self):
@@ -78,7 +78,7 @@ class TestUserExecutionContextWebSocket(SSotAsyncTestCase):
         self.assertIn('test_scenario', metadata)
 
 @pytest.mark.unit
-class TestWebSocketCoreTypes(SSotAsyncTestCase):
+class WebSocketCoreTypesTests(SSotAsyncTestCase):
     """Test WebSocket core type validation."""
 
     async def test_websocket_id_types(self):
@@ -112,7 +112,7 @@ class TestWebSocketCoreTypes(SSotAsyncTestCase):
         self.assertIsNotNone(user_context.websocket_client_id)
 
 @pytest.mark.unit
-class TestWebSocketEventStructure(SSotAsyncTestCase):
+class WebSocketEventStructureTests(SSotAsyncTestCase):
     """Test WebSocket event structure validation."""
 
     async def test_basic_event_structure(self):
@@ -139,7 +139,7 @@ class TestWebSocketEventStructure(SSotAsyncTestCase):
         self.assertIn('data', targeted_event)
 
 @pytest.mark.unit
-class TestWebSocketErrorHandling(SSotAsyncTestCase):
+class WebSocketErrorHandlingTests(SSotAsyncTestCase):
     """Test WebSocket error handling scenarios."""
 
     async def test_invalid_user_context_handling(self):

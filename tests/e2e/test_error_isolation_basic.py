@@ -25,7 +25,7 @@ from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 logger = logging.getLogger(__name__)
 
 
-class TestErrorIsolationer:
+class ErrorIsolationerTests:
     """Core error isolation testing functionality."""
     
     def __init__(self):

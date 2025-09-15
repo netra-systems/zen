@@ -27,7 +27,7 @@ import websockets.exceptions
 logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
-class TestStagingWebSocketDirectConnection(SSotAsyncTestCase):
+class StagingWebSocketDirectConnectionTests(SSotAsyncTestCase):
     """Test direct WebSocket connections to staging environment."""
     STAGING_WEBSOCKET_URL = 'wss://netra-backend-staging-service-1087371144.us-central1.run.app/ws/chat'
     STAGING_API_URL = 'https://netra-backend-staging-service-1087371144.us-central1.run.app'
@@ -147,7 +147,7 @@ class TestStagingWebSocketDirectConnection(SSotAsyncTestCase):
             logger.warning('Could not reproduce specific 1006 error code, but connections failed as expected')
 
 @pytest.mark.e2e
-class TestStagingChatFlowFunctionality(SSotAsyncTestCase):
+class StagingChatFlowFunctionalityTests(SSotAsyncTestCase):
     """Test complete chat flow functionality in staging environment."""
 
     async def setup_method(self, method):

@@ -29,7 +29,7 @@ from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmi
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 
-class TestUnifiedWebSocketEmitterDemoIntegration(SSotAsyncTestCase):
+class UnifiedWebSocketEmitterDemoIntegrationTests(SSotAsyncTestCase):
     """Test UnifiedWebSocketEmitter integration with DemoWebSocketBridge - Issue #1209."""
 
     def setUp(self):

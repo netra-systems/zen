@@ -19,7 +19,7 @@ from pathlib import Path
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestLegacyPatternDetection(SSotBaseTestCase):
+class LegacyPatternDetectionTests(SSotBaseTestCase):
     """Detect and catalog legacy unittest.TestCase patterns for migration."""
     
     def test_identify_legacy_test_files(self):
@@ -266,7 +266,7 @@ if __name__ == "__main__":
     
     # Create test suite
     import unittest
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestLegacyPatternDetection)
+    suite = unittest.TestLoader().loadTestsFromTestCase(LegacyPatternDetectionTests)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     

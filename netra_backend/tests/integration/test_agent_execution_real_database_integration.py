@@ -35,7 +35,7 @@ from test_framework.ssot.real_services_test_fixtures import *
 
 
 @pytest.mark.integration
-class TestAgentExecutionRealDatabase:
+class AgentExecutionRealDatabaseTests:
     """Integration tests for agent execution with real database services."""
     
     @pytest.mark.asyncio

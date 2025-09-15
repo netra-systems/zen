@@ -224,7 +224,7 @@ async def test_database_isolation():
 
 
 @pytest.mark.e2e
-class TestRealServiceIntegration:
+class RealServiceIntegrationTests:
 
     """Test class demonstrating real service integration patterns."""
     

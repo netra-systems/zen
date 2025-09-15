@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from tests.e2e.staging_config import get_staging_config, is_staging_available
 
 @pytest.mark.e2e
-class TestChatFunctionalityBusinessValue(SSotAsyncTestCase):
+class ChatFunctionalityBusinessValueTests(SSotAsyncTestCase):
     """Test chat functionality business value protection during SSOT changes."""
 
     def setUp(self):

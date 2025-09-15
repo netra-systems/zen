@@ -34,7 +34,7 @@ sys.path.insert(0, str(project_root))
 from test_framework.base_e2e_test import BaseE2ETest
 
 
-class TestWebSocketEventDeliveryE2E(BaseE2ETest):
+class WebSocketEventDeliveryE2ETests(BaseE2ETest):
     """E2E tests for WebSocket event delivery using SSOT patterns."""
 
     def setup_method(self):
@@ -387,7 +387,7 @@ class TestWebSocketEventDeliveryE2E(BaseE2ETest):
             return None
 
 
-class TestWebSocketEventOrderingE2E:
+class WebSocketEventOrderingE2ETests:
     """Test WebSocket event ordering and sequence validation."""
 
     @pytest.mark.e2e

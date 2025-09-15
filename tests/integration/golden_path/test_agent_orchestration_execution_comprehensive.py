@@ -39,7 +39,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-from netra_backend.app.agents.supervisor.agent_instance_factory import create_agent_instance_factory, get_agent_instance_factory
+from netra_backend.app.agents.supervisor.agent_instance_factory import create_agent_instance_factory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, AgentExecutionResult, PipelineStep
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
@@ -58,7 +58,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
 logger = central_logger.get_logger(__name__)
 
-class TestAgentOrchestrationExecution(SSotAsyncTestCase):
+class AgentOrchestrationExecutionTests(SSotAsyncTestCase):
     """
     Comprehensive integration tests for agent orchestration and execution.
     
@@ -345,8 +345,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         Test agent integration with tool execution and monitoring.
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
-        factory = get_agent_instance_factory()
-        await self._ensure_agent_factory_configured()
+        factory = create_agent_instance_factory(user_context)
         agent = await factory.create_agent_instance('data_helper', user_context)
         mock_tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
         mock_tool_dispatcher.execute_tool.return_value = {'status': 'success', 'tool_name': 'cost_analyzer', 'result': {'monthly_cost': 1500.5, 'recommendations': ['optimize_batch_sizes']}, 'execution_time': 2.3}
@@ -453,8 +452,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         Test agent error handling and recovery mechanisms during execution failures.
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
-        factory = get_agent_instance_factory()
-        await self._ensure_agent_factory_configured()
+        factory = create_agent_instance_factory(user_context)
         agent = await factory.create_agent_instance('data_helper', user_context)
         failure_count = 0
 
@@ -492,8 +490,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         Test agent timeout and performance management for SLA compliance.
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
-        factory = get_agent_instance_factory()
-        await self._ensure_agent_factory_configured()
+        factory = create_agent_instance_factory(user_context)
         agent = await factory.create_agent_instance('optimization', user_context)
 
         async def slow_tool_execution(*args, **kwargs):
@@ -522,8 +519,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         Test multi-agent coordination and communication in complex workflows.
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
-        factory = get_agent_instance_factory()
-        await self._ensure_agent_factory_configured()
+        factory = create_agent_instance_factory(user_context)
         data_agent = await factory.create_agent_instance('data_helper', user_context)
         optimizer_agent = await factory.create_agent_instance('optimization', user_context)
         report_agent = await factory.create_agent_instance('reporting', user_context)
@@ -606,8 +602,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         Test agent execution monitoring and logging for observability.
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
-        factory = get_agent_instance_factory()
-        await self._ensure_agent_factory_configured()
+        factory = create_agent_instance_factory(user_context)
         agent = await factory.create_agent_instance('data_helper', user_context)
         execution_logs = []
         performance_metrics = []
@@ -645,10 +640,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         Test agent memory management and proper resource cleanup.
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
-        factory = get_agent_instance_factory()
+        factory = create_agent_instance_factory(user_context)
         agents = []
         initial_memory_usage = self._get_memory_usage()
-        await self._ensure_agent_factory_configured()
         for i in range(5):
             agent = await factory.create_agent_instance('triage', user_context)
             mock_tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
@@ -686,10 +680,10 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         """
         free_user_context = UserExecutionContext(user_id=str(uuid.uuid4()), thread_id=str(uuid.uuid4()), run_id=str(uuid.uuid4()), agent_context={'user_tier': 'free'})
         enterprise_user_context = UserExecutionContext(user_id=str(uuid.uuid4()), thread_id=str(uuid.uuid4()), run_id=str(uuid.uuid4()), agent_context={'user_tier': 'enterprise'})
-        factory = get_agent_instance_factory()
-        await self._ensure_agent_factory_configured()
-        free_agent = await factory.create_agent_instance('triage', free_user_context)
-        enterprise_agent = await factory.create_agent_instance('optimization', enterprise_user_context)
+        free_factory = create_agent_instance_factory(free_user_context)
+        enterprise_factory = create_agent_instance_factory(enterprise_user_context)
+        free_agent = await free_factory.create_agent_instance('triage', free_user_context)
+        enterprise_agent = await enterprise_factory.create_agent_instance('optimization', enterprise_user_context)
 
         def check_agent_permissions(agent_type: str, user_context: UserExecutionContext) -> bool:
             user_tier = user_context.agent_context.get('user_tier', 'unknown')
@@ -732,7 +726,8 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
         async def execute_user_workflow(engine, context):
             start_time = time.time()
-            agent = await get_agent_instance_factory().create_agent_instance('data_helper', context)
+            factory = create_agent_instance_factory(context)
+            agent = await factory.create_agent_instance('data_helper', context)
             agent.tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
             agent.tool_dispatcher.execute_tool.return_value = {'status': 'success'}
             result = await agent.execute(message=f'Concurrent execution for user {context.user_id}', context=context)
@@ -760,12 +755,11 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         Test agent dependency management and service availability handling.
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
-        factory = get_agent_instance_factory()
+        factory = create_agent_instance_factory(user_context)
         service_availability = {'database': True, 'redis': True, 'llm_service': False, 'tool_dispatcher': True}
 
         def check_service_availability(service_name: str) -> bool:
             return service_availability.get(service_name, False)
-        await self._ensure_agent_factory_configured()
         agent = await factory.create_agent_instance('data_helper', user_context)
         agent.check_service_availability = check_service_availability
         fallback_responses = {'llm_unavailable': {'status': 'degraded', 'message': 'LLM service unavailable, using cached responses', 'fallback_used': True}}
@@ -786,8 +780,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
         execution_tracker = get_execution_tracker()
-        factory = get_agent_instance_factory()
-        await self._ensure_agent_factory_configured()
+        factory = create_agent_instance_factory(user_context)
         agent = await factory.create_agent_instance('optimization', user_context)
 
         async def metrics_tool_execution(*args, **kwargs):
@@ -863,9 +856,8 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         """
         user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
         configurations = {'conservative': {'max_tokens': 1000, 'temperature': 0.1, 'max_tools': 2, 'timeout': 30}, 'aggressive': {'max_tokens': 4000, 'temperature': 0.8, 'max_tools': 8, 'timeout': 120}, 'balanced': {'max_tokens': 2000, 'temperature': 0.5, 'max_tools': 4, 'timeout': 60}}
-        factory = get_agent_instance_factory()
+        factory = create_agent_instance_factory(user_context)
         results = {}
-        await self._ensure_agent_factory_configured()
         for profile_name, config in configurations.items():
             agent = await factory.create_agent_instance('data_helper', user_context)
 
@@ -894,8 +886,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         external_services['cost_api'].get_cost_data.return_value = {'monthly_cost': 5500.75, 'breakdown': {'compute': 3200, 'storage': 1800, 'network': 500.75}}
         external_services['optimization_engine'].analyze.return_value = {'recommendations': [{'type': 'scaling', 'potential_savings': 850}, {'type': 'resource_optimization', 'potential_savings': 420}]}
         external_services['metrics_collector'].record_metrics.return_value = {'recorded': True}
-        factory = get_agent_instance_factory()
-        await self._ensure_agent_factory_configured()
+        factory = create_agent_instance_factory(user_context)
         agent = await factory.create_agent_instance('optimization', user_context)
 
         async def external_service_tool_execution(tool_name: str, *args, **kwargs):

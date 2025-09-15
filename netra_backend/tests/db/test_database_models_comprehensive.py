@@ -42,7 +42,7 @@ from netra_backend.app.db.models_agent import (
 )
 
 
-class TestUserModelsSSO:
+class UserModelsSSOTests:
     """Test User models as Single Source of Truth for user-related data structures."""
     
     @pytest.fixture
@@ -201,7 +201,7 @@ class TestUserModelsSSO:
         assert "all, delete-orphan" in str(subscriptions_rel.cascade)
 
 
-class TestSecretModelSSO:
+class SecretModelSSOTests:
     """Test Secret model for user secret management."""
     
     @pytest.mark.unit
@@ -258,7 +258,7 @@ class TestSecretModelSSO:
         assert 'plaintext_value' not in secret_fields
 
 
-class TestToolUsageLogModelSSO:
+class ToolUsageLogModelSSOTests:
     """Test ToolUsageLog model for analytics and billing."""
     
     @pytest.mark.unit
@@ -332,7 +332,7 @@ class TestToolUsageLogModelSSO:
         assert 'JSON' in str(arguments_column.type).upper()
 
 
-class TestAgentModelsSSO:
+class AgentModelsSSOTests:
     """Test Agent models as Single Source of Truth for AI assistant data structures."""
     
     @pytest.mark.unit
@@ -560,7 +560,7 @@ class TestAgentModelsSSO:
         assert object_column.default.arg == "thread.run.step"
 
 
-class TestApexOptimizerModelsSSO:
+class ApexOptimizerModelsSSOTests:
     """Test Apex Optimizer models for AI optimization tracking."""
     
     @pytest.mark.unit
@@ -631,7 +631,7 @@ class TestApexOptimizerModelsSSO:
         assert report_column.nullable == False  # Report is required
 
 
-class TestModelBusinessScenarios:
+class ModelBusinessScenariosTests:
     """Test business-critical model scenarios for golden path validation."""
     
     @pytest.mark.unit
@@ -882,7 +882,7 @@ class TestModelBusinessScenarios:
 
 
 @pytest.mark.integration
-class TestModelSSotIntegration:
+class ModelSSotIntegrationTests:
     """Integration tests for Model SSOT compliance with actual database operations."""
     
     @pytest.mark.real_database

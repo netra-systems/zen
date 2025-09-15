@@ -22,7 +22,7 @@ from typing import Dict, List, Any, Optional, Set, Tuple
 from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class TestAlpineDockerfileConfigValidation(SSotBaseTestCase):
+class AlpineDockerfileConfigValidationTests(SSotBaseTestCase):
     """Unit tests for Alpine Dockerfile configuration validation - PARSING ONLY
 
     These tests validate Alpine-specific Dockerfile configurations that can

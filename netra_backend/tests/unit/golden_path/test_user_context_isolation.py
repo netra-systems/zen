@@ -279,7 +279,7 @@ class MockUserContextIsolationValidator:
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestUserContextIsolationLogic(SSotBaseTestCase):
+class UserContextIsolationLogicTests(SSotBaseTestCase):
     """Test user context isolation business logic validation."""
 
     def setup_method(self, method=None):

@@ -27,7 +27,7 @@ from netra_backend.app.schemas.llm_types import LLMResponse, TokenUsage, LLMProv
 from shared.isolated_environment import get_env
 
 
-class TestLLMConversationContextIsolation(BaseIntegrationTest):
+class LLMConversationContextIsolationTests(BaseIntegrationTest):
     """
     Test conversation context isolation between users and sessions.
     

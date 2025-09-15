@@ -21,7 +21,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState, AgentMetadata
 
 
 @pytest.mark.unit
-class TestIssue1017SerializationSecuritySimple(SSotBaseTestCase):
+class Issue1017SerializationSecuritySimpleTests(SSotBaseTestCase):
     """
     Simple serialization security vulnerability tests for Issue #1017.
 

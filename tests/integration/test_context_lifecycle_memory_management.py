@@ -210,7 +210,7 @@ class ContextLifecycleTracker:
             return {'min': 0, 'max': 0, 'avg': 0, 'count': 0}
         return {'min': min(ages), 'max': max(ages), 'avg': sum(ages) / len(ages), 'count': len(ages)}
 
-class TestContextLifecycleMemoryManagement(SSotBaseTestCase):
+class ContextLifecycleMemoryManagementTests(SSotBaseTestCase):
     """Comprehensive integration tests for context lifecycle and memory management.
     
     Tests real memory behavior, resource cleanup, session expiration,

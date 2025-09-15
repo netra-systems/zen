@@ -93,7 +93,7 @@ class WebSocketEventCapture:
         return len(missing_critical) == 0, missing_critical
 
 
-class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase):
+class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
     """
     Mission critical tests for WebSocket event consistency in ExecutionEngine.
     

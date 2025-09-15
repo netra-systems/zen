@@ -31,7 +31,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerFactoryConsolidation(SSotBaseTestCase):
+class WebSocketManagerFactoryConsolidationTests(SSotBaseTestCase):
     """
     Tests to prove WebSocket manager factory fragmentation violations exist.
     

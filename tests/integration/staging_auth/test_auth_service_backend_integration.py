@@ -18,7 +18,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
-class TestAuthServiceBackendIntegration(SSotAsyncTestCase):
+class AuthServiceBackendIntegrationTests(SSotAsyncTestCase):
     """
     Integration test validating auth service → backend delegation in staging environment.
     Tests real service integration without Docker dependencies.

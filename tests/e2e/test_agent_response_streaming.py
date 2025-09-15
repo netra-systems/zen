@@ -65,7 +65,7 @@ async def real_websocket_client():
 
 
 @pytest.mark.e2e
-class TestAgentResponseStreaming:
+class AgentResponseStreamingTests:
     """Test real-time response delivery to frontend - BVJ: User experience"""
 
     @pytest.mark.asyncio

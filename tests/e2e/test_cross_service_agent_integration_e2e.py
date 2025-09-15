@@ -332,7 +332,7 @@ async def cross_service_integration_tester(request):
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.integration
-class TestCrossServiceAgentIntegration:
+class CrossServiceAgentIntegrationTests:
     """Test suite for cross-service agent integration validation."""
 
     async def test_auth_websocket_agent_integration(self, cross_service_integration_tester):

@@ -23,7 +23,7 @@ from netra_backend.app.core.logging_formatters import (
 )
 
 
-class TestLoggingColorOutput:
+class LoggingColorOutputTests:
     """Test proper color handling in logging output."""
 
     @pytest.fixture

@@ -23,7 +23,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestMultiUserWebSocketIsolation(SSotBaseTestCase):
+class MultiUserWebSocketIsolationTests(SSotBaseTestCase):
     """
     Test multi-user WebSocket isolation with UnifiedIDManager.
 

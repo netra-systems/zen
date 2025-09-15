@@ -59,7 +59,7 @@ from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ensure_user_id
 
 @pytest.mark.e2e
-class TestCompleteWebSocketAuthenticationJourneys:
+class CompleteWebSocketAuthenticationJourneysTests:
     """
     E2E tests for complete WebSocket authentication user journeys.
     

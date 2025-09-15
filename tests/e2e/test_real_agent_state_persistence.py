@@ -494,7 +494,7 @@ class RealAgentStatePersistenceE2ETest(BaseE2ETest):
         )
 
 
-class TestRealAgentStatePersistence(RealAgentStatePersistenceE2ETest):
+class RealAgentStatePersistenceTests(RealAgentStatePersistenceE2ETest):
     """Test suite for real agent state persistence flows."""
     
     @pytest.mark.e2e
@@ -840,7 +840,7 @@ if __name__ == "__main__":
     async def run_direct_tests():
         logger.info("Starting real agent state persistence E2E tests...")
         
-        test_instance = TestRealAgentStatePersistence()
+        test_instance = RealAgentStatePersistenceTests()
         
         try:
             # Mock real_services_fixture for direct testing

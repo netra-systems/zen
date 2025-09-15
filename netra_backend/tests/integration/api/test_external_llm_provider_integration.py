@@ -28,7 +28,7 @@ from netra_backend.app.services.llm.provider_failover import ProviderFailover
 from netra_backend.app.services.llm.response_validator import ResponseValidator
 from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 
-class TestExternalLLMProviderIntegration(SSotBaseTestCase):
+class ExternalLLMProviderIntegrationTests(SSotBaseTestCase):
     """
     Test external LLM provider integration with real API calls.
     

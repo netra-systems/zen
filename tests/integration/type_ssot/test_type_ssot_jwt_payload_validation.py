@@ -88,7 +88,7 @@ class ExtendedJWTPayload(StandardJWTPayload):
         )
 
 
-class TestJWTPayloadSSotCompliance(SSotBaseTestCase):
+class JWTPayloadSSotComplianceTests(SSotBaseTestCase):
     """Integration tests for JWT payload SSOT compliance across services."""
     
     @pytest.mark.integration

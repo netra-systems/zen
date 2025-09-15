@@ -189,7 +189,7 @@ class TransactionDeadlockSimulator:
             self.deadlock_detected = True
 
 
-class TestDatabaseTransactionStateIntegration(BaseIntegrationTest):
+class DatabaseTransactionStateIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for database transaction management and state consistency.
     

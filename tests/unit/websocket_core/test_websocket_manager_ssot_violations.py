@@ -28,7 +28,7 @@ logger = get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerSSOTViolations(SSotBaseTestCase):
+class WebSocketManagerSSOTViolationsTests(SSotBaseTestCase):
     """Test suite to detect WebSocket Manager SSOT violations.
     
     These tests MUST FAIL with current fragmented state to prove violations exist.

@@ -78,7 +78,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
+class WebSocketCriticalFailureReproductionTests(SSotAsyncTestCase):
     """
      ALERT:  MISSION CRITICAL TEST SUITE  ALERT: 
     

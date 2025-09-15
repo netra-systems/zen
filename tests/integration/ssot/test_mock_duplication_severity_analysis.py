@@ -40,7 +40,7 @@ class MockSeverityMetrics:
 
 
 @pytest.mark.integration
-class TestMockDuplicationSeverityAnalysis(SSotBaseTestCase):
+class MockDuplicationSeverityAnalysisTests(SSotBaseTestCase):
     """
     Severity analysis for mock duplication violations.
 

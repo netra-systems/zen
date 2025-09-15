@@ -24,7 +24,7 @@ from tests.helpers.auth_test_utils import TestAuthHelper
 
 
 @pytest.mark.e2e
-class TestWebSocketAuthFixVerification(StagingTestBase):
+class WebSocketAuthFixVerificationTests(StagingTestBase):
     """Verify WebSocket authentication fix using JWT secret consistency"""
     
     def setup_method(self):
@@ -333,7 +333,7 @@ if __name__ == "__main__":
     import sys
     
     async def run_verification():
-        test_class = TestWebSocketAuthFixVerification()
+        test_class = WebSocketAuthFixVerificationTests()
         test_class.setup_class()
         
         print("=" * 80)

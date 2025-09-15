@@ -25,7 +25,7 @@ USAGE:
     pytest tests/integration/test_five_whys_configuration_suite.py --docker -v
 
     # Run specific test categories
-    pytest tests/integration/test_five_whys_configuration_suite.py::TestFiveWhysRedisValidation -v
+    pytest tests/integration/test_five_whys_configuration_suite.py::FiveWhysRedisValidationTests -v
 """
 import pytest
 import subprocess
@@ -125,7 +125,7 @@ Root Cause Prevention Status: {' PASS:  PREVENTED' if len(self.critical_failures
         return len(self.critical_failures) > 0
 
 
-class TestFiveWhysConfigurationSuite:
+class FiveWhysConfigurationSuiteTests:
     """Comprehensive Five Whys configuration test suite."""
     
     @pytest.fixture(scope="class")
@@ -196,7 +196,7 @@ class TestFiveWhysConfigurationSuite:
             print(f"Prevention - {mechanism}: {description}")
 
 
-class TestFiveWhysRedisValidation:
+class FiveWhysRedisValidationTests:
     """Five Whys Redis configuration validation tests."""
     
     def test_redis_configuration_consistency_all_environments(self):
@@ -308,7 +308,7 @@ class TestFiveWhysRedisValidation:
             env.reset_to_original()
 
 
-class TestFiveWhysDockerPortValidation:
+class FiveWhysDockerPortValidationTests:
     """Five Whys Docker port mapping validation tests."""
     
     def test_docker_port_mapping_five_whys_prevention(self):
@@ -413,7 +413,7 @@ class TestFiveWhysDockerPortValidation:
             env.reset_to_original()
 
 
-class TestFiveWhysEnvironmentDetection:
+class FiveWhysEnvironmentDetectionTests:
     """Five Whys environment detection validation tests."""
     
     def test_environment_detection_five_whys_contexts(self):
@@ -489,7 +489,7 @@ class TestFiveWhysEnvironmentDetection:
             env.reset_to_original()
 
 
-class TestFiveWhysConfigurationDriftPrevention:
+class FiveWhysConfigurationDriftPreventionTests:
     """Five Whys configuration drift prevention tests."""
     
     def test_configuration_drift_detection_five_whys_scenarios(self):
@@ -541,7 +541,7 @@ class TestFiveWhysConfigurationDriftPrevention:
 
 
 @pytest.mark.integration
-class TestFiveWhysComprehensiveValidation:
+class FiveWhysComprehensiveValidationTests:
     """Comprehensive Five Whys validation suite."""
     
     def test_five_whys_end_to_end_prevention(self):

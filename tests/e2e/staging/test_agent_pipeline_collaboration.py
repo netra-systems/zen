@@ -50,7 +50,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
-class TestAgentPipelineCollaboration:
+class AgentPipelineCollaborationTests:
     """
     E2E Tests for Agent Pipeline Collaboration in Staging Environment.
     

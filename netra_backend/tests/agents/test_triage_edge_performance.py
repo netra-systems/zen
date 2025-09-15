@@ -19,7 +19,7 @@ def triage_agent():
     mock_redis = TriageMockHelpers.create_mock_redis()
     return TriageSubAgent(mock_llm, mock_tool, mock_redis)
 
-class TestEdgeCasesAndBoundaryConditions:
+class EdgeCasesAndBoundaryConditionsTests:
     """Test edge cases and boundary conditions"""
 
     @pytest.mark.asyncio
@@ -80,7 +80,7 @@ class TestEdgeCasesAndBoundaryConditions:
                                                     await agent.execute(state, 'malformed_test', stream_updates=False)
                                                     assert state.triage_result is not None
 
-                                                    class TestPerformanceOptimization:
+                                                    class PerformanceOptimizationTests:
                                                         """Test performance optimization features"""
 
                                                         @pytest.mark.asyncio
@@ -141,7 +141,7 @@ class TestEdgeCasesAndBoundaryConditions:
                                                                                         assert len(hash_result) >= 32
                                                                                         assert hash_result.isalnum()
 
-                                                                                        class TestPydanticModelValidation:
+                                                                                        class PydanticModelValidationTests:
                                                                                             """Test Pydantic model validation and serialization"""
 
                                                                                             def test_triage_result_comprehensive_validation(self):

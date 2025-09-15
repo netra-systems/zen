@@ -84,7 +84,7 @@ class MockBaseTool(BaseTool):
         }
 
 
-class TestToolDispatcherCoreBasicFunctionality(SSotBaseTestCase):
+class ToolDispatcherCoreBasicFunctionalityTests(SSotBaseTestCase):
     """Test basic tool dispatcher functionality."""
     
     @pytest.mark.unit
@@ -203,7 +203,7 @@ class TestToolDispatcherCoreBasicFunctionality(SSotBaseTestCase):
         assert dispatcher.has_websocket_support is False
 
 
-class TestToolDispatcherCoreToolExecutionLifecycle(SSotBaseTestCase):
+class ToolDispatcherCoreToolExecutionLifecycleTests(SSotBaseTestCase):
     """Test tool execution lifecycle management."""
     
     @pytest.mark.unit
@@ -362,7 +362,7 @@ class TestToolDispatcherCoreToolExecutionLifecycle(SSotBaseTestCase):
         assert len(websocket_manager.events_sent) >= 6
 
 
-class TestToolDispatcherCoreStateAndValidation(SSotBaseTestCase):
+class ToolDispatcherCoreStateAndValidationTests(SSotBaseTestCase):
     """Test state management and validation in tool dispatcher."""
     
     @pytest.mark.unit

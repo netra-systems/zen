@@ -60,7 +60,7 @@ async def real_websocket_manager():
 
 
 @pytest.mark.integration
-class TestRealWebSocketAgentEvents:
+class RealWebSocketAgentEventsTests:
     """Integration tests for real WebSocket agent event delivery."""
     
     @pytest.mark.asyncio
@@ -380,7 +380,7 @@ class TestRealWebSocketAgentEvents:
 
 
 @pytest.mark.integration
-class TestWebSocketAgentRegistryIntegration:
+class WebSocketAgentRegistryIntegrationTests:
     """Integration tests for WebSocket integration with AgentRegistry."""
     
     @pytest.mark.asyncio

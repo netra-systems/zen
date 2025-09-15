@@ -340,7 +340,7 @@ class MockCoordinationManager:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestCrossServiceCoordinationIntegration:
+class CrossServiceCoordinationIntegrationTests:
     """Cross-service coordination integration tests."""
     
     @pytest.fixture

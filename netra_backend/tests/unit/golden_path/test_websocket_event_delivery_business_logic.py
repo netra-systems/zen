@@ -528,7 +528,7 @@ class WebSocketEventManager:
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestWebSocketEventDeliveryBusinessLogic:
+class WebSocketEventDeliveryBusinessLogicTests:
     """Test WebSocket event delivery business logic that drives user engagement."""
     
     def setup_method(self):

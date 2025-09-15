@@ -181,7 +181,7 @@ class FirstUserJourneyValidator:
         report.append('=' * 80)
         return '\n'.join(report)
 
-class TestFirstUserJourneyE2E:
+class FirstUserJourneyE2ETests:
     """REAL First User Journey E2E Test Suite - NO MOCKS, NO FAKES."""
 
     @pytest.fixture

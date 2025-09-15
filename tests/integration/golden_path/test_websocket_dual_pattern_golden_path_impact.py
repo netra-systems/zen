@@ -23,7 +23,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.integration
-class TestWebSocketDualPatternGoldenPathImpact(SSotBaseTestCase):
+class WebSocketDualPatternGoldenPathImpactTests(SSotBaseTestCase):
     """Test suite to validate Golden Path impact of dual pattern (SHOULD FAIL)"""
 
     def setUp(self):

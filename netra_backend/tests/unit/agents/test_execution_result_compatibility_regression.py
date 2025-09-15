@@ -17,7 +17,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.agents.base.interface import ExecutionResult, ExecutionContext
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 
-class TestExecutionResultCompatibilityProperties:
+class ExecutionResultCompatibilityPropertiesTests:
     """Test ExecutionResult compatibility properties that were missing in the regression."""
 
     def test_error_property_compatibility(self):
@@ -46,7 +46,7 @@ class TestExecutionResultCompatibilityProperties:
         assert result.result == {}
         assert result.data == {}
 
-class TestExecutionStatusEnumConsistency:
+class ExecutionStatusEnumConsistencyTests:
     """Test ExecutionStatus enum consolidation and value consistency."""
 
     def test_execution_status_completed_value(self):
@@ -79,7 +79,7 @@ class TestExecutionStatusEnumConsistency:
         assert success_result.is_success is True
         assert success_result.status == ExecutionStatus.COMPLETED
 
-class TestExecutionResultCreationPatterns:
+class ExecutionResultCreationPatternsTests:
     """Test ExecutionResult creation patterns used across agents."""
 
     def test_success_execution_result_pattern(self):
@@ -121,7 +121,7 @@ class TestExecutionResultCreationPatterns:
         assert result.result == {'key': 'value'}
         assert result.error is None
 
-class TestBackwardCompatibilityScenarios:
+class BackwardCompatibilityScenariosTests:
     """Test scenarios that would have failed in the regression."""
 
     def test_legacy_success_status_usage(self):

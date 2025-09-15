@@ -188,7 +188,7 @@ class MockWebSocketManager:
                     agents_started.append(agent_name)
         return agents_started
 
-class TestMultiAgentWorkflowIntegration(BaseIntegrationTest):
+class MultiAgentWorkflowIntegrationTests(BaseIntegrationTest):
     """Integration tests for multi-agent workflow orchestration."""
 
     def setup_method(self):

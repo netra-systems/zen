@@ -36,7 +36,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 
 
 @pytest.mark.integration
-class TestBackwardCompatibilityPreservation(SSotAsyncTestCase):
+class BackwardCompatibilityPreservationTests(SSotAsyncTestCase):
     """
     Test suite validating backward compatibility during ExecutionEngine migration.
 

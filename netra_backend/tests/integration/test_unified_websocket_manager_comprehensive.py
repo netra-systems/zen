@@ -147,7 +147,7 @@ async def real_websocket_connections():
         await conn_info["websocket"].close()
 
 
-class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
+class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
     """Comprehensive integration tests for UnifiedWebSocketManager."""
     
     def setup_method(self):

@@ -27,7 +27,7 @@ from decimal import Decimal
 
 
 @pytest.mark.integration
-class TestBusinessValueMonitoringWebSocketIntegration(SSotAsyncTestCase):
+class BusinessValueMonitoringWebSocketIntegrationTests(SSotAsyncTestCase):
     """Integration tests with WebSocket manager for real-time alerts"""
     
     def setup_method(self, method):
@@ -120,7 +120,7 @@ class TestBusinessValueMonitoringWebSocketIntegration(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestBusinessValueMonitoringDatabaseIntegration(SSotAsyncTestCase):
+class BusinessValueMonitoringDatabaseIntegrationTests(SSotAsyncTestCase):
     """Integration tests with database persistence"""
     
     def setup_method(self, method):
@@ -221,7 +221,7 @@ class TestBusinessValueMonitoringDatabaseIntegration(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestBusinessValueMonitoringDashboardIntegration(SSotAsyncTestCase):
+class BusinessValueMonitoringDashboardIntegrationTests(SSotAsyncTestCase):
     """Integration tests with dashboard endpoints"""
     
     def setup_method(self, method):
@@ -312,7 +312,7 @@ class TestBusinessValueMonitoringDashboardIntegration(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestBusinessValueMonitoringAlertSystemIntegration(SSotAsyncTestCase):
+class BusinessValueMonitoringAlertSystemIntegrationTests(SSotAsyncTestCase):
     """Integration tests with alert system"""
     
     def setup_method(self, method):
@@ -407,7 +407,7 @@ class TestBusinessValueMonitoringAlertSystemIntegration(SSotAsyncTestCase):
 
 
 @pytest.mark.integration
-class TestBusinessValueMonitoringSystemIntegration(SSotAsyncTestCase):
+class BusinessValueMonitoringSystemIntegrationTests(SSotAsyncTestCase):
     """End-to-end system integration tests"""
     
     def setup_method(self, method):

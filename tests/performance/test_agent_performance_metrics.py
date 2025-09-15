@@ -37,7 +37,7 @@ class AgentPerformanceMetrics:
     error_count: int
 
 
-class TestAgentPerformanceMetrics(SSotAsyncTestCase):
+class AgentPerformanceMetricsTests(SSotAsyncTestCase):
     """Test agent performance metrics collection and validation."""
 
     @pytest.mark.performance

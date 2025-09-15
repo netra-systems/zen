@@ -29,7 +29,7 @@ from typing import Dict, List, Set, Optional, Tuple
 import re
 import json
 
-class TestPyprojectMarkerConfiguration:
+class PyprojectMarkerConfigurationTests:
     """
     Validate pyproject.toml marker configuration structure and behavior
     """

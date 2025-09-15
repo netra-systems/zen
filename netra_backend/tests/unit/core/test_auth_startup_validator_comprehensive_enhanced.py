@@ -51,7 +51,7 @@ from netra_backend.app.core.auth_startup_validator import (
 from netra_backend.app.core.environment_constants import Environment
 
 
-class TestAuthStartupValidatorSecurityFoundation(BaseIntegrationTest):
+class AuthStartupValidatorSecurityFoundationTests(BaseIntegrationTest):
     """Test security-critical initialization and foundation patterns."""
     
     def setup_method(self):
@@ -125,7 +125,7 @@ class TestAuthStartupValidatorSecurityFoundation(BaseIntegrationTest):
                     assert validator.is_production is False, f"Failed for environment: {env_value}"
 
 
-class TestAuthStartupValidatorJWTSecretSecurityHardening(BaseIntegrationTest):
+class AuthStartupValidatorJWTSecretSecurityHardeningTests(BaseIntegrationTest):
     """Test JWT secret validation with security hardening and attack prevention."""
     
     def setup_method(self):
@@ -356,7 +356,7 @@ class TestAuthStartupValidatorJWTSecretSecurityHardening(BaseIntegrationTest):
             validator.validation_results = []
 
 
-class TestAuthStartupValidatorServiceCredentialsSecurityCritical(BaseIntegrationTest):
+class AuthStartupValidatorServiceCredentialsSecurityCriticalTests(BaseIntegrationTest):
     """Test SERVICE_SECRET validation with security-critical focus on 173+ dependencies."""
     
     def setup_method(self):
@@ -573,7 +573,7 @@ class TestAuthStartupValidatorServiceCredentialsSecurityCritical(BaseIntegration
         assert service_results[0].valid is True  # Should pass with 64-char secret in production
 
 
-class TestAuthStartupValidatorOAuthSecurityIntegration(BaseIntegrationTest):
+class AuthStartupValidatorOAuthSecurityIntegrationTests(BaseIntegrationTest):
     """Test OAuth credentials validation with security integration focus."""
     
     def setup_method(self):
@@ -782,7 +782,7 @@ class TestAuthStartupValidatorOAuthSecurityIntegration(BaseIntegrationTest):
                     assert oauth_results[0].valid is False, f"Should fail: {test_case['name']}"
 
 
-class TestAuthStartupValidatorCORSSecurityBoundaries(BaseIntegrationTest):
+class AuthStartupValidatorCORSSecurityBoundariesTests(BaseIntegrationTest):
     """Test CORS configuration validation with security boundary enforcement."""
     
     def setup_method(self):
@@ -938,7 +938,7 @@ class TestAuthStartupValidatorCORSSecurityBoundaries(BaseIntegrationTest):
             validator.validation_results = []
 
 
-class TestAuthStartupValidatorCircuitBreakerSecurityResilience(BaseIntegrationTest):
+class AuthStartupValidatorCircuitBreakerSecurityResilienceTests(BaseIntegrationTest):
     """Test circuit breaker configuration for auth system security resilience."""
     
     def setup_method(self):
@@ -1058,7 +1058,7 @@ class TestAuthStartupValidatorCircuitBreakerSecurityResilience(BaseIntegrationTe
             validator.validation_results = []
 
 
-class TestAuthStartupValidatorProductionHardeningComprehensive(BaseIntegrationTest):
+class AuthStartupValidatorProductionHardeningComprehensiveTests(BaseIntegrationTest):
     """Test comprehensive production hardening requirements for authentication."""
     
     def setup_method(self):
@@ -1276,7 +1276,7 @@ class TestAuthStartupValidatorProductionHardeningComprehensive(BaseIntegrationTe
                         f"Expected error '{scenario['expected_error_contains']}' not found in {error_messages}"
 
 
-class TestAuthStartupValidatorCompleteSecurityIntegration(BaseIntegrationTest):
+class AuthStartupValidatorCompleteSecurityIntegrationTests(BaseIntegrationTest):
     """Test complete security integration scenarios across all auth components."""
     
     def setup_method(self):

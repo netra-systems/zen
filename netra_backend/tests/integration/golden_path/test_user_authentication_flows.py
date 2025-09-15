@@ -24,7 +24,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, create_a
 from shared.isolated_environment import get_env
 
 
-class TestUserAuthenticationFlows(BaseIntegrationTest):
+class UserAuthenticationFlowsTests(BaseIntegrationTest):
     """Integration tests for user authentication flows with real services."""
     
     @pytest.mark.integration

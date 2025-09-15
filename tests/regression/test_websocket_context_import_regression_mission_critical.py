@@ -109,7 +109,7 @@ except ImportError as e:
     WEBSOCKET_NOTIFIER_ERROR = str(e)
 
 @pytest.mark.mission_critical
-class TestWebSocketContextMissionCriticalRegression:
+class WebSocketContextMissionCriticalRegressionTests:
     """Mission critical tests for WebSocket context import regression.
     
     These tests validate that the regression destroys core business value delivery.

@@ -140,7 +140,7 @@ class ConcurrentTestMetrics:
         return sorted_data[min(index, len(sorted_data) - 1)]
 
 
-class TestConcurrentAgentExecutionPerformance(SSotAsyncTestCase):
+class ConcurrentAgentExecutionPerformanceTests(SSotAsyncTestCase):
     """
     Integration Tests for Concurrent Agent Execution Performance.
     

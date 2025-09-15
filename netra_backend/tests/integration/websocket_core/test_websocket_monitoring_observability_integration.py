@@ -24,7 +24,7 @@ from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from netra_backend.app.models import User
 
 
-class TestWebSocketMonitoringObservabilityIntegration(BaseIntegrationTest):
+class WebSocketMonitoringObservabilityIntegrationTests(BaseIntegrationTest):
     """Integration tests for WebSocket monitoring and observability."""
     
     @pytest.fixture

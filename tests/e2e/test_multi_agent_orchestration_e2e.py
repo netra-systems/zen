@@ -141,7 +141,7 @@ class MultiAgentOrchestrationValidator:
         report.extend(['', f'[U+1F916] Agent Summary: {sorted(self.active_agents)}', '=' * 80])
         return '\n'.join(report)
 
-class TestMultiAgentOrchestrationE2E:
+class MultiAgentOrchestrationE2ETests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

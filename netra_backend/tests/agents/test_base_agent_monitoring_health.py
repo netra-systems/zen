@@ -45,7 +45,7 @@ class ConcreteMonitoringAgent(BaseAgent):
         """Minimal implementation for testing."""
         return {'status': 'success', 'response': f'Processed: {request}', 'agent_type': self.agent_type}
 
-class TestBaseAgentHealthMonitoring(SSotBaseTestCase):
+class BaseAgentHealthMonitoringTests(SSotBaseTestCase):
     """Test BaseAgent health status and monitoring functionality."""
 
     def test_get_health_status_basic_functionality(self):
@@ -104,7 +104,7 @@ class TestBaseAgentHealthMonitoring(SSotBaseTestCase):
         self.assertIsInstance(usage_summary, dict)
         self.assertTrue(len(usage_summary) >= 0)
 
-class TestBaseAgentMetadataStorage(SSotBaseTestCase):
+class BaseAgentMetadataStorageTests(SSotBaseTestCase):
     """Test BaseAgent metadata storage and retrieval functionality."""
 
     def test_store_metadata_result_basic_functionality(self):
@@ -147,7 +147,7 @@ class TestBaseAgentMetadataStorage(SSotBaseTestCase):
         agent.store_metadata_result(context=context_b, key='isolation_test', value={'request': 'B', 'data': 'request_b_data'})
         self.assertTrue(True)
 
-class TestBaseAgentHealthMonitoringAsync(SSotAsyncTestCase):
+class BaseAgentHealthMonitoringAsyncTests(SSotAsyncTestCase):
     """Test BaseAgent async health monitoring functionality."""
 
     async def test_health_status_during_async_execution(self):

@@ -87,7 +87,7 @@ class MockWebSocketFor1011Testing:
         """Simulate connection ID lookup that might fail."""
         return None
 
-class TestWebSocket1011ErrorReproduction:
+class WebSocket1011ErrorReproductionTests:
     """
     REPRODUCTION TEST SUITE: Complete end-to-end reproduction of WebSocket 1011 errors.
     

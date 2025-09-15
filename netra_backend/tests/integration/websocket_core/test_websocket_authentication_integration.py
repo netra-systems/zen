@@ -76,7 +76,7 @@ def create_test_jwt_token(user_id: str, jwt_secret: str, expires_in_minutes: int
 
 
 @pytest.mark.integration
-class TestWebSocketAuthenticationFlow:
+class WebSocketAuthenticationFlowTests:
     """Integration tests for WebSocket authentication flows."""
     
     @pytest.mark.asyncio
@@ -296,7 +296,7 @@ class TestWebSocketAuthenticationFlow:
 
 
 @pytest.mark.integration
-class TestWebSocketSessionManagement:
+class WebSocketSessionManagementTests:
     """Integration tests for WebSocket session management with authentication."""
     
     @pytest.mark.asyncio
@@ -514,7 +514,7 @@ class TestWebSocketSessionManagement:
 
 
 @pytest.mark.integration
-class TestWebSocketAuthenticationErrorHandling:
+class WebSocketAuthenticationErrorHandlingTests:
     """Integration tests for WebSocket authentication error handling."""
     
     @pytest.mark.asyncio

@@ -39,7 +39,7 @@ from netra_backend.app.services.unified_authentication_service import get_unifie
 pytestmark = pytest.mark.asyncio
 
 @pytest.mark.integration
-class TestWebSocket1011ErrorReproduction:
+class WebSocket1011ErrorReproductionTests:
     """Test cases that reproduce the original 1011 error conditions."""
 
     async def test_invalid_user_context_causes_factory_error(self):
@@ -84,7 +84,7 @@ class TestWebSocket1011ErrorReproduction:
         assert 'SSOT VIOLATION' in str(exc_info.value) or 'must be non-empty string' in str(exc_info.value)
 
 @pytest.mark.integration
-class TestWebSocket1011ErrorFixValidation:
+class WebSocket1011ErrorFixValidationTests:
     """Test cases that validate the SSOT-compliant fix prevents 1011 errors."""
 
     async def test_defensive_user_context_creation_success(self):
@@ -146,7 +146,7 @@ class TestWebSocket1011ErrorFixValidation:
         assert 'unique_a'[:8] in user_context.websocket_client_id
 
 @pytest.mark.integration
-class TestWebSocketErrorHandlingIntegration:
+class WebSocketErrorHandlingIntegrationTests:
     """Integration tests for WebSocket error handling and fallback mechanisms."""
 
     async def test_websocket_auth_with_invalid_context_provides_fallback(self):
@@ -176,7 +176,7 @@ class TestWebSocketErrorHandlingIntegration:
             assert 'system configuration issue' in str(exc_info.value)
 
 @pytest.mark.integration
-class TestWebSocketValidationDefensiveMeasures:
+class WebSocketValidationDefensiveMeasuresTests:
     """Test defensive validation measures in WebSocket components."""
 
     async def test_ssot_validation_handles_attribute_access_errors(self):
@@ -224,7 +224,7 @@ class TestWebSocketValidationDefensiveMeasures:
             assert 'UserExecutionContext creation failed' in str(e)
 
 @pytest.mark.integration
-class TestWebSocketErrorDiagnostics:
+class WebSocketErrorDiagnosticsTests:
     """Test enhanced error diagnostics and logging for WebSocket issues."""
 
     async def test_factory_error_provides_detailed_diagnostics(self):
@@ -270,7 +270,7 @@ class TestWebSocketErrorDiagnostics:
             assert hasattr(result.auth_result, 'metadata')
 
 @pytest.mark.integration
-class TestWebSocketConnectionFlowIntegration:
+class WebSocketConnectionFlowIntegrationTests:
     """Integration test simulating complete WebSocket connection flow with error handling."""
 
     async def test_complete_websocket_connection_with_error_recovery(self):

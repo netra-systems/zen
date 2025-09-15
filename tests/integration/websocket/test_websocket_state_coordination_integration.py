@@ -48,7 +48,7 @@ class StateTransitionEvent:
     event_type: str
     details: Dict[str, Any]
 
-class TestWebSocketStateCoordination(SSotAsyncTestCase):
+class WebSocketStateCoordinationTests(SSotAsyncTestCase):
     """
     Integration tests for WebSocket state coordination without Docker dependencies.
     

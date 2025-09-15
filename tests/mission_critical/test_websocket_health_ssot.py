@@ -57,7 +57,7 @@ from loguru import logger
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestWebSocketHealthSSot(SSotAsyncTestCase):
+class WebSocketHealthSSotTests(SSotAsyncTestCase):
     """Mission Critical: WebSocket Health Check SSOT Integration Tests
     
     These tests validate the health check endpoints during factory pattern migration:

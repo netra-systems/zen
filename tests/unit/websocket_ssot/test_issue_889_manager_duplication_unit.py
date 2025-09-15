@@ -47,7 +47,7 @@ except ImportError as e:
 
 
 @pytest.mark.unit
-class TestIssue889ManagerDuplicationUnit(SSotAsyncTestCase):
+class Issue889ManagerDuplicationUnitTests(SSotAsyncTestCase):
     """
     Unit tests for Issue #889 WebSocket Manager SSOT Violations
     
@@ -283,7 +283,7 @@ class TestIssue889ManagerDuplicationUnit(SSotAsyncTestCase):
 
 
 @pytest.mark.unit
-class TestIssue889SSotFactoryComplianceUnit(SSotAsyncTestCase):
+class Issue889SSotFactoryComplianceUnitTests(SSotAsyncTestCase):
     """
     Additional unit tests focusing on SSOT factory compliance patterns
     

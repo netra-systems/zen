@@ -32,7 +32,7 @@ def mock_service_config() -> ServiceConfig:
         full_health_check=lambda: True
     )
 
-class TestServiceRegistration:
+class ServiceRegistrationTests:
     """Test service registration and management."""
     
     def test_register_service(self, health_monitor: StagedHealthMonitor,
@@ -68,7 +68,7 @@ class TestServiceRegistration:
         # Should not raise exception
         health_monitor.unregister_service("nonexistent")
 
-class TestMonitoringLifecycle:
+class MonitoringLifecycleTests:
     """Test monitoring lifecycle management."""
     
     @pytest.mark.asyncio

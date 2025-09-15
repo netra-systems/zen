@@ -89,7 +89,7 @@ class UserContextSimulator:
 
 
 @pytest.mark.mission_critical
-class TestNoSSotViolationsWithIsolation:
+class NoSSotViolationsWithIsolationTests:
     """CRITICAL: Comprehensive SSOT compliance and isolation testing."""
 
     @pytest.fixture

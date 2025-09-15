@@ -71,7 +71,7 @@ class AgentTestMetrics:
     user_contexts: Set[str] = field(default_factory=set)
 
 
-class TestBaseAgentIntegrationComprehensive(SSotAsyncTestCase):
+class BaseAgentIntegrationComprehensiveTests(SSotAsyncTestCase):
     """
     Comprehensive integration tests for BaseAgent with WebSocket events and user context.
 
@@ -212,7 +212,7 @@ class TestBaseAgentIntegrationComprehensive(SSotAsyncTestCase):
         Critical Path: Agent Creation → Initialization → Execution → WebSocket Events → Completion
         """
         # Arrange: Create test BaseAgent with WebSocket bridge
-        class TestBaseAgent(BaseAgent):
+        class BaseAgentTests(BaseAgent):
             """Test implementation of BaseAgent for lifecycle testing."""
 
             def __init__(self, llm_manager, websocket_bridge, agent_name="test_base_agent"):
@@ -265,7 +265,7 @@ class TestBaseAgentIntegrationComprehensive(SSotAsyncTestCase):
                 return execution_result
 
         # Create test agent instance
-        test_agent = TestBaseAgent(
+        test_agent = BaseAgentTests(
             llm_manager=self.mock_llm_manager,
             websocket_bridge=self.mock_websocket_bridge
         )

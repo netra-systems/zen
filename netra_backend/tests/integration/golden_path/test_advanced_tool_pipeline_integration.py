@@ -98,7 +98,7 @@ class PipelineExecutionResult:
     final_output: Optional[Dict[str, Any]] = None
 
 
-class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
+class AdvancedToolPipelineIntegrationTests(BaseIntegrationTest):
     """Advanced integration tests for tool pipeline and integration scenarios."""
 
     @pytest.mark.asyncio

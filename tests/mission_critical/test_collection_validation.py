@@ -15,7 +15,7 @@ import tempfile
 import json
 
 
-class TestCollectionValidation(SSotBaseTestCase):
+class CollectionValidationTests(SSotBaseTestCase):
     """Validate pytest test collection functionality."""
     
     def setup_method(self, method=None):

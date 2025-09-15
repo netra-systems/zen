@@ -23,7 +23,7 @@ from tests.clients.websocket_client import WebSocketTestClient
 from tests.e2e.config import UnifiedTestConfig
 
 
-class TestJWTPermissionPropagationer:
+class JWTPermissionPropagationerTests:
     """Tests JWT permission propagation across Auth, Backend, and WebSocket services."""
     
     def __init__(self):

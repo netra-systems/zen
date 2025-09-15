@@ -85,7 +85,7 @@ class RealWebSocketSimulator:
 
 
 @pytest.mark.integration
-class TestMultiUserExecutionValidation(SSotAsyncTestCase):
+class MultiUserExecutionValidationTests(SSotAsyncTestCase):
     """Integration Test 5: Validate multi-user execution with UserExecutionEngine SSOT"""
     
     def setup_method(self, method):

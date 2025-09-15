@@ -57,7 +57,7 @@ except ImportError:
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-class TestCrossServiceSecurityIntegration(BaseIntegrationTest):
+class CrossServiceSecurityIntegrationTests(BaseIntegrationTest):
     """Integration tests for cross-service security in WebSocket authentication."""
     
     async def setup_method(self):
@@ -428,7 +428,7 @@ class TestCrossServiceSecurityIntegration(BaseIntegrationTest):
 
 @pytest.mark.integration
 @pytest.mark.asyncio  
-class TestSecurityComplianceIntegration(BaseIntegrationTest):
+class SecurityComplianceIntegrationTests(BaseIntegrationTest):
     """Tests security compliance across cross-service WebSocket authentication."""
     
     async def setup_method(self):

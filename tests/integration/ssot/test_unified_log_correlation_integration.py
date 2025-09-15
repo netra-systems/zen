@@ -34,7 +34,7 @@ from contextlib import asynccontextmanager
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestUnifiedLogCorrelationIntegration(SSotAsyncTestCase):
+class UnifiedLogCorrelationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for SSOT log correlation across all services.
     

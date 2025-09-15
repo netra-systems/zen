@@ -50,7 +50,7 @@ async def test_user_id():
 
 
 @pytest.mark.e2e
-class TestThreadPersistence:
+class ThreadPersistenceTests:
     """Test thread persistence in database"""
 
     @pytest.mark.e2e
@@ -94,7 +94,7 @@ class TestThreadPersistence:
 
 
 @pytest.mark.e2e
-class TestMessagePersistence:
+class MessagePersistenceTests:
     """Test message persistence in database"""
 
     @pytest.mark.e2e
@@ -153,7 +153,7 @@ class TestMessagePersistence:
 
 
 @pytest.mark.e2e
-class TestThreadMessageRelationship:
+class ThreadMessageRelationshipTests:
     """Test thread-message relationship integrity"""
 
     @pytest.mark.e2e
@@ -195,7 +195,7 @@ class TestThreadMessageRelationship:
 
 
 @pytest.mark.e2e
-class TestExampleMessageIntegration:
+class ExampleMessageIntegrationTests:
     """Test integration between handlers and persistence"""
 
     @pytest.mark.e2e

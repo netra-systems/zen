@@ -51,7 +51,7 @@ class IntegrationTestAgent(BaseAgent):
         }
 
 
-class TestAgentExecutionCoreIntegration:
+class AgentExecutionCoreIntegrationTests:
     """Integration tests for the complete agent execution pipeline."""
 
     def setup_method(self):
@@ -317,7 +317,7 @@ class TestAgentExecutionCoreIntegration:
         assert agent.user_context == self.user_context
 
 
-class TestWorkflowOrchestratorIntegration:
+class WorkflowOrchestratorIntegrationTests:
     """Integration tests for workflow orchestrator using the problematic adapter."""
 
     def setup_method(self):
@@ -383,7 +383,7 @@ class TestWorkflowOrchestratorIntegration:
             assert "unexpected keyword argument 'context'" in str(exc_info.value)
 
 
-class TestSignatureFixSpecification:
+class SignatureFixSpecificationTests:
     """Test suite documenting the exact requirements for the signature fix."""
 
     def test_required_signature_specification(self):

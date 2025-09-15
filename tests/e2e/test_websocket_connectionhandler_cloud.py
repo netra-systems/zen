@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 GCP_TEST_CONFIG = {'websocket_url': 'wss://netra-backend-staging-xyz.run.app/ws', 'connection_timeout': 15.0, 'test_user_id': '105945141827451681156', 'max_connections_test': 25, 'rapid_connect_delay': 0.1}
 
-class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
+class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
     """
     CRITICAL E2E Tests for ConnectionHandler issues in GCP Cloud environment.
     

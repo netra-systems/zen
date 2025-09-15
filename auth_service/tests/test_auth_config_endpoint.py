@@ -7,7 +7,7 @@ from auth_service.main import app
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAuthConfigEndpoint:
+class AuthConfigEndpointTests:
     """Test the /auth/config endpoint that frontend requires"""
     
     @pytest.fixture

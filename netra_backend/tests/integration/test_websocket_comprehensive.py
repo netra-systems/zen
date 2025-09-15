@@ -45,7 +45,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.isolated_environment import get_env
 from shared.types import UserID, ThreadID, RunID, RequestID, WebSocketID
 
-class TestWebSocketConnectionEstablishment(BaseIntegrationTest):
+class WebSocketConnectionEstablishmentTests(BaseIntegrationTest):
     """Test WebSocket connection establishment with real authentication."""
 
     @pytest.mark.integration
@@ -112,7 +112,7 @@ class TestWebSocketConnectionEstablishment(BaseIntegrationTest):
         except (ConnectionClosed, InvalidStatus) as e:
             assert '401' in str(e) or '403' in str(e) or 'auth' in str(e).lower()
 
-class TestWebSocketAgentEvents(BaseIntegrationTest):
+class WebSocketAgentEventsTests(BaseIntegrationTest):
     """Test critical WebSocket agent events that enable chat value."""
 
     @pytest.mark.integration
@@ -220,7 +220,7 @@ class TestWebSocketAgentEvents(BaseIntegrationTest):
             pytest.skip('No agent_thinking event received - system may not generate for simple requests')
         await WebSocketTestHelpers.close_test_connection(websocket)
 
-class TestWebSocketMessageRouting(BaseIntegrationTest):
+class WebSocketMessageRoutingTests(BaseIntegrationTest):
     """Test WebSocket message routing to correct handlers."""
 
     @pytest.mark.integration
@@ -306,7 +306,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
             except Exception:
                 pass
 
-class TestWebSocketConcurrency(BaseIntegrationTest):
+class WebSocketConcurrencyTests(BaseIntegrationTest):
     """Test WebSocket handling of concurrent connections and messages."""
 
     @pytest.mark.integration
@@ -415,7 +415,7 @@ class TestWebSocketConcurrency(BaseIntegrationTest):
         await WebSocketTestHelpers.close_test_connection(user1_websocket)
         await WebSocketTestHelpers.close_test_connection(user2_websocket)
 
-class TestWebSocketErrorHandling(BaseIntegrationTest):
+class WebSocketErrorHandlingTests(BaseIntegrationTest):
     """Test WebSocket error handling and recovery."""
 
     @pytest.mark.integration
@@ -505,7 +505,7 @@ class TestWebSocketErrorHandling(BaseIntegrationTest):
             except Exception:
                 pass
 
-class TestWebSocketPerformance(BaseIntegrationTest):
+class WebSocketPerformanceTests(BaseIntegrationTest):
     """Test WebSocket performance characteristics."""
 
     @pytest.mark.integration
@@ -585,7 +585,7 @@ class TestWebSocketPerformance(BaseIntegrationTest):
                 continue
         assert len(connections) >= 3
 
-class TestWebSocketReconnection(BaseIntegrationTest):
+class WebSocketReconnectionTests(BaseIntegrationTest):
     """Test WebSocket reconnection and session restoration."""
 
     @pytest.mark.integration
@@ -853,7 +853,7 @@ class TestWebSocketReconnection(BaseIntegrationTest):
         assert queue_response is not None
         await WebSocketTestHelpers.close_test_connection(websocket)
 
-class TestWebSocketSecurity(BaseIntegrationTest):
+class WebSocketSecurityTests(BaseIntegrationTest):
     """Test WebSocket security features."""
 
     @pytest.mark.integration
@@ -935,7 +935,7 @@ class TestWebSocketSecurity(BaseIntegrationTest):
         assert response is not None
         await WebSocketTestHelpers.close_test_connection(websocket)
 
-class TestWebSocketHealthMonitoring(BaseIntegrationTest):
+class WebSocketHealthMonitoringTests(BaseIntegrationTest):
     """Test WebSocket health monitoring and metrics."""
 
     @pytest.mark.integration
@@ -1027,7 +1027,7 @@ class TestWebSocketHealthMonitoring(BaseIntegrationTest):
         assert success_count > 0
         await WebSocketTestHelpers.close_test_connection(websocket)
 
-class TestWebSocketUserContextIsolation(BaseIntegrationTest):
+class WebSocketUserContextIsolationTests(BaseIntegrationTest):
     """Test WebSocket user context isolation and factory patterns."""
 
     @pytest.mark.integration
@@ -1158,7 +1158,7 @@ class TestWebSocketUserContextIsolation(BaseIntegrationTest):
                 except Exception:
                     pass
 
-class TestWebSocketBusinessValueScenarios(BaseIntegrationTest):
+class WebSocketBusinessValueScenariosTests(BaseIntegrationTest):
     """Test WebSocket functionality that directly delivers business value."""
 
     @pytest.mark.integration

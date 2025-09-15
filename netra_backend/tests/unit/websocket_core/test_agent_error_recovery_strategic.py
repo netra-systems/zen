@@ -81,7 +81,7 @@ class RecoveryMetrics:
             return self.failure_detected_at - self.scenario_start
         return None
 
-class TestAgentErrorRecoveryStrategic(SSotAsyncTestCase):
+class AgentErrorRecoveryStrategicTests(SSotAsyncTestCase):
     """
     Strategic unit tests for error recovery mechanisms during partial agent failures.
     

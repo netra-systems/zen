@@ -31,7 +31,7 @@ from netra_backend.app.websocket_core.websocket_manager import get_websocket_man
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestIssue1231AsyncAwaitBugReproduction:
+class Issue1231AsyncAwaitBugReproductionTests:
     """
     REPRODUCTION TESTS: These tests demonstrate the async/await bug in websocket_ssot.py
 

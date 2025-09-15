@@ -28,7 +28,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.integration
-class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
+class Issue565CompatibilityBridgeIntegrationTests(BaseIntegrationTest):
     """Integration tests for Issue #565 compatibility bridge functionality."""
     
     async def test_legacy_execution_engine_creates_user_execution_engine(self):
@@ -251,7 +251,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
 
 
 @pytest.mark.integration
-class TestCompatibilityBridgeAPICompatibility(BaseIntegrationTest):
+class CompatibilityBridgeAPICompatibilityTests(BaseIntegrationTest):
     """Test that all expected API methods work through compatibility bridge."""
     
     async def test_legacy_api_methods_available(self):
@@ -324,7 +324,7 @@ class TestCompatibilityBridgeAPICompatibility(BaseIntegrationTest):
 
 
 @pytest.mark.integration
-class TestCompatibilityBridgeWarnings(BaseIntegrationTest):
+class CompatibilityBridgeWarningsTests(BaseIntegrationTest):
     """Test that appropriate warnings are issued for deprecated usage."""
     
     async def test_deprecation_warning_on_creation(self):
@@ -381,7 +381,7 @@ class TestCompatibilityBridgeWarnings(BaseIntegrationTest):
 
 
 @pytest.mark.integration
-class TestCompatibilityBridgeErrorHandling(BaseIntegrationTest):
+class CompatibilityBridgeErrorHandlingTests(BaseIntegrationTest):
     """Test error handling in compatibility bridge."""
     
     async def test_invalid_registry_handling(self):
@@ -425,7 +425,7 @@ class TestCompatibilityBridgeErrorHandling(BaseIntegrationTest):
 
 
 @pytest.mark.integration
-class TestCompatibilityBridgeRealWorldScenarios(BaseIntegrationTest):
+class CompatibilityBridgeRealWorldScenariosTests(BaseIntegrationTest):
     """Test real-world scenarios that use the compatibility bridge."""
     
     async def test_multiple_engine_creation_isolation(self):
@@ -523,17 +523,17 @@ if __name__ == "__main__":
     import asyncio
     
     async def run_manual_tests():
-        test_instance = TestIssue565CompatibilityBridgeIntegration()
+        test_instance = Issue565CompatibilityBridgeIntegrationTests()
         await test_instance.test_legacy_execution_engine_creates_user_execution_engine()
         await test_instance.test_compatibility_bridge_user_context_handling()
         
-        api_test = TestCompatibilityBridgeAPICompatibility()
+        api_test = CompatibilityBridgeAPICompatibilityTests()
         await api_test.test_legacy_api_methods_available()
         
-        warning_test = TestCompatibilityBridgeWarnings()
+        warning_test = CompatibilityBridgeWarningsTests()
         await warning_test.test_deprecation_warning_on_creation()
         
-        scenario_test = TestCompatibilityBridgeRealWorldScenarios()
+        scenario_test = CompatibilityBridgeRealWorldScenariosTests()
         await scenario_test.test_multiple_engine_creation_isolation()
         
         print("\n" + "="*80)

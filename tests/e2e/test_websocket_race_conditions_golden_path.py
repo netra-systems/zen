@@ -116,7 +116,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDisp
 @pytest.mark.real_services
 @pytest.mark.mission_critical
 @pytest.mark.golden_path
-class TestWebSocketRaceConditionsGoldenPath(BaseE2ETest):
+class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
     """
     E2E tests for WebSocket race conditions in complete golden path scenarios.
     

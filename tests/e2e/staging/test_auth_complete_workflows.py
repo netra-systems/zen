@@ -55,7 +55,7 @@ class AuthWorkflowTestResult:
     error_message: Optional[str] = None
     business_value_delivered: bool = False
 
-class TestCompleteAuthenticationWorkflows:
+class CompleteAuthenticationWorkflowsTests:
     """
     Complete E2E authentication workflow tests for staging environment.
     

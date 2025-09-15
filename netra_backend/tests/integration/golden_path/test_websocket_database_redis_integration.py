@@ -80,7 +80,7 @@ class MockWebSocketConnection:
 
 @pytest.mark.integration
 @pytest.mark.real_services  
-class TestWebSocketDatabaseRedisIntegration(WebSocketIntegrationTest, DatabaseIntegrationTest):
+class WebSocketDatabaseRedisIntegrationTests(WebSocketIntegrationTest, DatabaseIntegrationTest):
     """
     Integration tests for WebSocket + Database + Redis coordination.
     

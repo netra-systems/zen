@@ -47,7 +47,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocketConnectionRaces(BaseIntegrationTest):
+class WebSocketConnectionRacesTests(BaseIntegrationTest):
     """Test race conditions in WebSocket connection management."""
     
     def setup_method(self):

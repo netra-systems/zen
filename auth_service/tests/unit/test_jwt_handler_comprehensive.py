@@ -23,7 +23,7 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
-class TestJWTHandlerBasics:
+class JWTHandlerBasicsTests:
     """Test basic JWT creation and validation"""
     
     def setup_method(self):
@@ -167,7 +167,7 @@ class TestJWTHandlerBasics:
         assert len(jtis) == len(set(jtis))  # All JTIs are unique
 
 
-class TestJWTHandlerBlacklist:
+class JWTHandlerBlacklistTests:
     """Test token and user blacklisting functionality"""
     
     def setup_method(self):
@@ -239,7 +239,7 @@ class TestJWTHandlerBlacklist:
         assert isinstance(info["blacklisted_users"], int)
 
 
-class TestJWTHandlerSecurity:
+class JWTHandlerSecurityTests:
     """Test JWT security features and validations"""
     
     def setup_method(self):
@@ -380,7 +380,7 @@ class TestJWTHandlerSecurity:
         assert result is None
 
 
-class TestJWTHandlerPerformance:
+class JWTHandlerPerformanceTests:
     """Test performance-related functionality"""
     
     def setup_method(self):
@@ -437,7 +437,7 @@ class TestJWTHandlerPerformance:
         assert self.handler._validate_enhanced_jwt_claims_fast(payload) is False
 
 
-class TestJWTHandlerEdgeCases:
+class JWTHandlerEdgeCasesTests:
     """Test edge cases and error handling"""
     
     def setup_method(self):
@@ -531,7 +531,7 @@ class TestJWTHandlerEdgeCases:
         assert payload["permissions"] == []
 
 
-class TestJWTHandlerSecretManagement(BaseIntegrationTest):
+class JWTHandlerSecretManagementTests(BaseIntegrationTest):
     """Test JWT secret management and environment handling"""
     
     def setup_method(self):
@@ -592,7 +592,7 @@ class TestJWTHandlerSecretManagement(BaseIntegrationTest):
         assert handler.secret.startswith("TEST-ONLY-SECRET-NOT-FOR-PRODUCTION")
 
 
-class TestJWTHandlerAsyncOperations(BaseIntegrationTest):
+class JWTHandlerAsyncOperationsTests(BaseIntegrationTest):
     """Test async Redis operations and background tasks"""
     
     def setup_method(self):
@@ -704,7 +704,7 @@ class TestJWTHandlerAsyncOperations(BaseIntegrationTest):
                 mock_run.assert_called_once()
 
 
-class TestJWTHandlerAdvancedValidation(BaseIntegrationTest):
+class JWTHandlerAdvancedValidationTests(BaseIntegrationTest):
     """Test advanced validation methods"""
     
     def setup_method(self):
@@ -842,7 +842,7 @@ class TestJWTHandlerAdvancedValidation(BaseIntegrationTest):
         assert result2 is False
 
 
-class TestJWTHandlerTokenIdTracking(BaseIntegrationTest):
+class JWTHandlerTokenIdTrackingTests(BaseIntegrationTest):
     """Test JWT ID tracking for replay protection"""
     
     def setup_method(self):
@@ -888,7 +888,7 @@ class TestJWTHandlerTokenIdTracking(BaseIntegrationTest):
         assert len(self.handler._used_token_ids) == 0
 
 
-class TestJWTHandlerSecurityConsolidated(BaseIntegrationTest):
+class JWTHandlerSecurityConsolidatedTests(BaseIntegrationTest):
     """Test consolidated security validation methods"""
     
     def setup_method(self):
@@ -957,7 +957,7 @@ class TestJWTHandlerSecurityConsolidated(BaseIntegrationTest):
         assert result is False
 
 
-class TestJWTHandlerMockTokenSecurity(BaseIntegrationTest):
+class JWTHandlerMockTokenSecurityTests(BaseIntegrationTest):
     """Test mock token security handling"""
     
     def setup_method(self):
@@ -1002,7 +1002,7 @@ class TestJWTHandlerMockTokenSecurity(BaseIntegrationTest):
         assert result is None
 
 
-class TestJWTHandlerAudienceMapping(BaseIntegrationTest):
+class JWTHandlerAudienceMappingTests(BaseIntegrationTest):
     """Test audience mapping for different token types"""
     
     def setup_method(self):
@@ -1036,7 +1036,7 @@ class TestJWTHandlerAudienceMapping(BaseIntegrationTest):
         assert audience == "netra-platform"  # Default
 
 
-class TestJWTHandlerServiceSignature(BaseIntegrationTest):
+class JWTHandlerServiceSignatureTests(BaseIntegrationTest):
     """Test service signature generation"""
     
     def setup_method(self):
@@ -1098,7 +1098,7 @@ class TestJWTHandlerServiceSignature(BaseIntegrationTest):
         assert signature == ""
 
 
-class TestJWTHandlerInitializationAndConfig(BaseIntegrationTest):
+class JWTHandlerInitializationAndConfigTests(BaseIntegrationTest):
     """Test handler initialization and configuration"""
     
     def test_handler_initialization_loads_config(self):
@@ -1127,7 +1127,7 @@ class TestJWTHandlerInitializationAndConfig(BaseIntegrationTest):
         assert handler is not None
 
 
-class TestJWTHandlerRefreshTokenEdgeCases(BaseIntegrationTest):
+class JWTHandlerRefreshTokenEdgeCasesTests(BaseIntegrationTest):
     """Test refresh token edge cases and user data extraction"""
     
     def setup_method(self):
@@ -1181,7 +1181,7 @@ class TestJWTHandlerRefreshTokenEdgeCases(BaseIntegrationTest):
         assert access_payload["permissions"] == []  # Default empty
 
 
-class TestJWTHandlerIntegrationWithCache(BaseIntegrationTest):
+class JWTHandlerIntegrationWithCacheTests(BaseIntegrationTest):
     """Test JWT handler integration with cache system"""
     
     def setup_method(self):

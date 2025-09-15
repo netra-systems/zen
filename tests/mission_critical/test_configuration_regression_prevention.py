@@ -27,7 +27,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.isolated_test_helper import IsolatedTestCase
 
 
-class TestConfigurationRegression(SSotBaseTestCase, unittest.TestCase):
+class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
     """
     Critical tests to prevent configuration regressions that cause cascade failures.
     """
@@ -402,7 +402,7 @@ class TestConfigurationRegression(SSotBaseTestCase, unittest.TestCase):
                               f"Configuration change for {key} not detected")
 
 
-class TestConfigurationRegressionIntegration(SSotBaseTestCase, unittest.TestCase):
+class ConfigurationRegressionIntegrationTests(SSotBaseTestCase, unittest.TestCase):
     """
     Integration tests for configuration regression prevention.
     """

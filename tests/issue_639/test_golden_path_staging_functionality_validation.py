@@ -54,7 +54,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestIssue639GoldenPathFunctionalityValidation(SSotAsyncTestCase):
+class Issue639GoldenPathFunctionalityValidationTests(SSotAsyncTestCase):
     """
     Test suite for Issue #639 - Golden Path functionality validation after fixes.
     

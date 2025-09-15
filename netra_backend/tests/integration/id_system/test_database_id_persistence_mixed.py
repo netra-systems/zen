@@ -25,7 +25,7 @@ from netra_backend.app.database.session_manager import DatabaseSessionManager
 from shared.types.core_types import UserID, ThreadID, ExecutionID, DatabaseSessionID, ensure_user_id
 from test_framework.fixtures.id_system.id_format_samples import get_mixed_scenarios, generate_fresh_uuid_sample, generate_unified_sample
 
-class TestDatabaseIDPersistenceMixedFormats:
+class DatabaseIDPersistenceMixedFormatsTests:
     """
     Integration tests that expose database persistence failures with mixed ID formats.
     
@@ -264,7 +264,7 @@ class TestDatabaseIDPersistenceMixedFormats:
                     return False
         return True
 
-class TestDatabaseIDPersistencePerformance:
+class DatabaseIDPersistencePerformanceTests:
     """
     Tests that expose performance issues with mixed ID formats in database operations.
     """
@@ -328,7 +328,7 @@ class TestDatabaseIDPersistencePerformance:
 @pytest.mark.critical
 @pytest.mark.database
 @pytest.mark.id_system
-class TestCriticalDatabaseIDFailures:
+class CriticalDatabaseIDFailuresTests:
     """
     Most critical tests that prove database ID failures break business operations.
     """

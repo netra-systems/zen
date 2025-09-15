@@ -30,7 +30,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
 @pytest.mark.unit
-class TestIssue724SSotViolations(SSotBaseTestCase):
+class Issue724SSotViolationsTests(SSotBaseTestCase):
     """
     EXPECTED TO FAIL tests exposing Issue #724 SSOT violations.
     

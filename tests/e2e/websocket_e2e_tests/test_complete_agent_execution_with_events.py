@@ -46,7 +46,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocke
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestCompleteAgentExecutionWithEvents(BaseE2ETest):
+class CompleteAgentExecutionWithEventsTests(BaseE2ETest):
     """E2E tests for complete agent execution with all WebSocket events."""
     
     @pytest.fixture

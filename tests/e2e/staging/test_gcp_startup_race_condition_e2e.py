@@ -31,7 +31,7 @@ from contextlib import asynccontextmanager
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestGCPStartupRaceConditionE2E(SSotAsyncTestCase):
+class GCPStartupRaceConditionE2ETests(SSotAsyncTestCase):
     """
     E2E tests for startup race condition in real GCP staging environment.
     

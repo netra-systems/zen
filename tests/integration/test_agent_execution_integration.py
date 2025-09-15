@@ -102,7 +102,7 @@ except ImportError:
 @pytest.mark.integration
 @pytest.mark.agent_execution
 @pytest.mark.business_critical
-class TestAgentExecutionIntegration(SSotAsyncTestCase):
+class AgentExecutionIntegrationTests(SSotAsyncTestCase):
     """
     Phase 2: Agent Execution Integration Test Suite
 

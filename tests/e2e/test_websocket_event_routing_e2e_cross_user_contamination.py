@@ -61,7 +61,7 @@ class UserTestSession:
         self.sent_messages.append(message_with_meta)
 
 @pytest.mark.e2e
-class TestWebSocketE2ECrossUserContamination(SSotBaseTestCase):
+class WebSocketE2ECrossUserContaminationTests(SSotBaseTestCase):
     """
     E2E tests to expose cross-user message contamination in production scenarios.
     

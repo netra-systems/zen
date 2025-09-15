@@ -67,7 +67,7 @@ class MockWebSocketConnection:
         self.connection_state = ConnectionState.DISCONNECTED
 
 
-class TestWebSocketNotificationIntegration(BaseIntegrationTest):
+class WebSocketNotificationIntegrationTests(BaseIntegrationTest):
     """Test WebSocket notification system with real message routing and user isolation."""
 
     @pytest.mark.integration

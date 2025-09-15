@@ -216,7 +216,7 @@ class WebSocketEventValidator:
             grade = 'F'
         return {'score': final_score, 'grade': grade, 'coverage': validation['coverage_percentage'], 'penalties': {'order': order_penalty, 'content': content_penalty, 'missing': missing_penalty}, 'details': validation}
 
-class TestWebSocketEventValidator(SSotAsyncTestCase):
+class WebSocketEventValidatorTests(SSotAsyncTestCase):
     """Test WebSocket event validation logic."""
 
     def setup_method(self, method=None):

@@ -25,7 +25,7 @@ from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAuthPortConfigurationConsistency:
+class AuthPortConfigurationConsistencyTests:
     """Test port configuration consistency across all auth service components"""
 
     def test_port_configuration_sources_consistency(self):
@@ -260,7 +260,7 @@ class TestAuthPortConfigurationConsistency:
                 )
 
 
-class TestAuthServiceConfigurationValidation:
+class AuthServiceConfigurationValidationTests:
     """Test configuration validation that should prevent port mismatches"""
 
     def test_configuration_validation_detects_port_mismatch(self):
@@ -402,7 +402,7 @@ class TestAuthServiceConfigurationValidation:
                             pass
 
 
-class TestPortConfigurationRecovery:
+class PortConfigurationRecoveryTests:
     """Test recovery and error handling for port configuration issues"""
 
     def test_port_configuration_error_reporting(self):

@@ -30,7 +30,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 
-class TestSupervisorMissingAttributesIssue408:
+class SupervisorMissingAttributesIssue408Tests:
     """
     Test suite for Issue #408 - SupervisorAgent missing attributes
     
@@ -332,7 +332,7 @@ class MockExecutionEngine:
         """Mock execute method."""
         return {'status': 'completed'}
 
-class TestSupervisorExpectedBehaviorAfterFix:
+class SupervisorExpectedBehaviorAfterFixTests:
     """
     Tests that should PASS after the missing attributes are implemented.
     

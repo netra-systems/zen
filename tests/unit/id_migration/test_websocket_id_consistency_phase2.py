@@ -21,7 +21,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
 @pytest.mark.unit
-class TestWebSocketIdConsistencyPhase2(SSotBaseTestCase):
+class WebSocketIdConsistencyPhase2Tests(SSotBaseTestCase):
     """
     Validate WebSocket ID consistency across all components.
 

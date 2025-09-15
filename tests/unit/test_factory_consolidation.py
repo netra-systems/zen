@@ -149,7 +149,7 @@ def maximum_performance_config():
 
 
 @pytest.mark.unit
-class TestFactoryConsolidation:
+class FactoryConsolidationTests:
     """Test suite for factory consolidation."""
 
     @pytest.mark.asyncio

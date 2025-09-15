@@ -16,7 +16,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 @pytest.mark.unit
-class TestAdminToolAsyncioSafety:
+class AdminToolAsyncioSafetyTests:
     """Test admin tool validation for asyncio safety"""
 
     @pytest.mark.asyncio

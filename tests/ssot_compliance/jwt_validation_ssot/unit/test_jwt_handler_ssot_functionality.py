@@ -23,7 +23,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = logging.getLogger(__name__)
 
 
-class TestJWTHandlerSSOTFunctionality(SSotBaseTestCase):
+class JWTHandlerSSOTFunctionalityTests(SSotBaseTestCase):
     """Test auth service JWTHandler as single source of truth for JWT operations."""
     
     def setUp(self):
@@ -436,7 +436,7 @@ if __name__ == '__main__':
     
     # Create test suite focusing on failing tests (current state)
     loader = unittest.TestLoader()
-    suite = loader.loadTestsFromTestCase(TestJWTHandlerSSOTFunctionality)
+    suite = loader.loadTestsFromTestCase(JWTHandlerSSOTFunctionalityTests)
     
     # Run tests with detailed output
     runner = unittest.TextTestRunner(verbosity=2, buffer=False)

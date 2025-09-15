@@ -22,7 +22,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.e2e
 @pytest.mark.real_services
-class TestServiceStartup:
+class ServiceStartupTests:
     """Test suite for service startup and health verification."""
 
     @pytest.mark.asyncio

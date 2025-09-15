@@ -47,7 +47,7 @@ from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig, Netra
 logger = logging.getLogger(__name__)
 
 
-class TestConfigurationManagementIntegration(BaseIntegrationTest):
+class ConfigurationManagementIntegrationTests(BaseIntegrationTest):
     """Test configuration management with real services for Golden Path reliability."""
     
     def setup_method(self):

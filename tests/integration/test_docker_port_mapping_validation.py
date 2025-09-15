@@ -149,7 +149,7 @@ class DockerComposeParser:
         return profiles if profiles else ['default']
 
 
-class TestDockerPortMappingValidation:
+class DockerPortMappingValidationTests:
     """Test Docker port mapping consistency with application configuration."""
     
     @pytest.fixture(autouse=True)
@@ -382,7 +382,7 @@ class TestDockerPortMappingValidation:
             assert 'default' not in profiles, f"{service_name} should NOT be in default profile"
 
 
-class TestPortAccessibilityValidation:
+class PortAccessibilityValidationTests:
     """Test actual port accessibility for Docker services."""
     
     @pytest.fixture(autouse=True)
@@ -504,7 +504,7 @@ class TestPortAccessibilityValidation:
                     f"Port {port} expected to be used by {expected_service}, actually used by {actual_service}"
 
 
-class TestDockerNetworkingValidation:
+class DockerNetworkingValidationTests:
     """Test Docker internal networking configuration."""
     
     @pytest.fixture(autouse=True) 
@@ -618,7 +618,7 @@ class TestDockerNetworkingValidation:
                 assert "localhost" in backend_env.get_auth_service_url()
 
 
-class TestConfigurationDriftDetection:
+class ConfigurationDriftDetectionTests:
     """Test automated detection of configuration drift."""
     
     @pytest.fixture(autouse=True)

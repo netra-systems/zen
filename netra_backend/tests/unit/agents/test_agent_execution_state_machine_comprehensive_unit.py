@@ -477,7 +477,7 @@ class MockAgentExecutionStateMachine:
         }
 
 
-class TestAgentExecutionStateMachineUnit:
+class AgentExecutionStateMachineUnitTests:
     """Comprehensive unit tests for agent execution state machine."""
     
     def create_test_context(self, agent_type: str = "test_agent", **kwargs) -> AgentExecutionContext:

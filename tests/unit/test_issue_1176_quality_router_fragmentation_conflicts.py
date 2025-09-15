@@ -22,7 +22,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestQualityMessageRouterFragmentation(SSotBaseTestCase):
+class QualityMessageRouterFragmentationTests(SSotBaseTestCase):
     """Test specific fragmentation issues with QualityMessageRouter vs MessageRouter."""
 
     def setUp(self):

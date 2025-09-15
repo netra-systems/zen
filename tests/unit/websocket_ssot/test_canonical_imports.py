@@ -34,7 +34,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.unit
-class TestWebSocketManagerCanonicalImports(SSotBaseTestCase):
+class WebSocketManagerCanonicalImportsTests(SSotBaseTestCase):
     """
     Tests to prove WebSocket manager canonical import violations exist.
     

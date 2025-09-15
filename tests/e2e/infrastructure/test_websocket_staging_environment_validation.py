@@ -54,7 +54,7 @@ def staging_auth_helper(staging_config):
 
 
 @pytest.mark.e2e
-class TestWebSocketStagingEnvironmentValidation:
+class WebSocketStagingEnvironmentValidationTests:
     """
     Test suite that validates GCP staging environment infrastructure.
     
@@ -848,7 +848,7 @@ if __name__ == "__main__":
         staging_config = StagingTestConfig()
         auth_helper = E2EAuthHelper(environment="staging")
         
-        test_instance = TestWebSocketStagingEnvironmentValidation()
+        test_instance = WebSocketStagingEnvironmentValidationTests()
         
         infrastructure_tests = [
             ("domain_resolution", test_instance.test_staging_domains_resolve_correctly),

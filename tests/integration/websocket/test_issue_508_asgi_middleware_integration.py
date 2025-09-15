@@ -43,7 +43,7 @@ except ImportError:
     setup_enhanced_middleware_stack = None
 
 @pytest.mark.integration
-class TestIssue508WebSocketASGIMiddlewareIntegration(SSotAsyncTestCase):
+class Issue508WebSocketASGIMiddlewareIntegrationTests(SSotAsyncTestCase):
     """
     Issue #508: Integration tests for WebSocket ASGI middleware processing
     
@@ -66,7 +66,7 @@ class TestIssue508WebSocketASGIMiddlewareIntegration(SSotAsyncTestCase):
         that leads to the URL.query_params AttributeError
         """
 
-        class TestWebSocketExclusionMiddleware(BaseHTTPMiddleware):
+        class WebSocketExclusionMiddlewareTests(BaseHTTPMiddleware):
 
             async def dispatch(self, request, call_next):
                 try:
@@ -78,7 +78,7 @@ class TestIssue508WebSocketASGIMiddlewareIntegration(SSotAsyncTestCase):
                     if "'URL' object has no attribute 'query_params'" in str(e):
                         raise e
                     raise
-        self.app.add_middleware(TestWebSocketExclusionMiddleware)
+        self.app.add_middleware(WebSocketExclusionMiddlewareTests)
 
         @self.app.websocket('/ws/chat')
         async def websocket_endpoint(websocket: WebSocket):
@@ -142,7 +142,7 @@ class TestIssue508WebSocketASGIMiddlewareIntegration(SSotAsyncTestCase):
         assert "'URL' object has no attribute 'query_params'" in str(exc_info.value)
 
 @pytest.mark.integration
-class TestIssue508WebSocketSSoTHealthEndpointIntegration(SSotAsyncTestCase):
+class Issue508WebSocketSSoTHealthEndpointIntegrationTests(SSotAsyncTestCase):
     """
     Issue #508: Integration tests for WebSocket SSOT health endpoint processing
     
@@ -216,7 +216,7 @@ class TestIssue508WebSocketSSoTHealthEndpointIntegration(SSotAsyncTestCase):
         assert "'URL' object has no attribute 'query_params'" in str(exc_info.value)
 
 @pytest.mark.integration
-class TestIssue508WebSocketRealConnectionScenarios(SSotAsyncTestCase):
+class Issue508WebSocketRealConnectionScenariosTests(SSotAsyncTestCase):
     """
     Issue #508: Real WebSocket connection scenarios that trigger the bug
     

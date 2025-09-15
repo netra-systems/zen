@@ -27,7 +27,7 @@ from shared.logging.unified_logging_ssot import get_logger
 logger = get_logger(__name__)
 
 
-class TestGoldenPathWebSocketProtection(BaseE2ETest):
+class GoldenPathWebSocketProtectionTests(BaseE2ETest):
     """Test Golden Path WebSocket functionality protection during SSOT migration."""
     
     # Golden Path WebSocket events that MUST continue working

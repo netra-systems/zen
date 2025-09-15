@@ -409,7 +409,7 @@ class RealAgentErrorHandlingE2ETest(BaseE2ETest):
         )
 
 
-class TestRealAgentErrorHandling(RealAgentErrorHandlingE2ETest):
+class RealAgentErrorHandlingTests(RealAgentErrorHandlingE2ETest):
     """Test suite for real agent error handling and recovery flows."""
     
     @pytest.mark.e2e
@@ -826,7 +826,7 @@ if __name__ == "__main__":
     async def run_direct_tests():
         logger.info("Starting real agent error handling E2E tests...")
         
-        test_instance = TestRealAgentErrorHandling()
+        test_instance = RealAgentErrorHandlingTests()
         
         try:
             # Mock real_services_fixture for direct testing

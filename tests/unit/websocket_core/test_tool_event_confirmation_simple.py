@@ -18,7 +18,7 @@ from netra_backend.app.core.tool_models import ToolExecutionResult
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 @pytest.mark.asyncio
-class TestToolEventConfirmationSimple:
+class ToolEventConfirmationSimpleTests:
     """Simple tests for tool execution event confirmation logic."""
 
     def setup_method(self):
@@ -107,7 +107,7 @@ class TestToolEventConfirmationSimple:
         assert not hasattr(self.tool_engine, 'confirmation_success_rate'), 'Confirmation success rate should not exist yet'
 
 @pytest.mark.asyncio
-class TestCurrentWebSocketEventDelivery:
+class CurrentWebSocketEventDeliveryTests:
     """Test current WebSocket event delivery to show what's working vs missing."""
 
     def setup_method(self):

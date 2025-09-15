@@ -18,7 +18,7 @@ import re
 import pytest
 from netra_backend.app.core.websocket_cors import SECURITY_CONFIG, SUSPICIOUS_PATTERNS, WebSocketCORSHandler, get_environment_origins
 
-class TestProductionCORSSecurity:
+class ProductionCORSSecurityTests:
     """Test production-specific CORS security measures."""
 
     def test_production_environment_detection(self):
@@ -54,7 +54,7 @@ class TestProductionCORSSecurity:
                 assert 'https://app.netrasystems.ai' in origins
                 assert 'https://custom.com' in origins
 
-class TestThreatPatternDetection:
+class ThreatPatternDetectionTests:
     """Test detection and blocking of suspicious origin patterns."""
 
     def test_ip_address_blocking(self):
@@ -111,7 +111,7 @@ class TestThreatPatternDetection:
         elapsed = time.time() - start_time
         assert elapsed < 1.0
 
-class TestRateLimitingAndBlocking:
+class RateLimitingAndBlockingTests:
     """Test rate limiting and temporary blocking of violating origins."""
 
     def test_violation_tracking(self):
@@ -168,7 +168,7 @@ class TestRateLimitingAndBlocking:
         assert 'bad1.com' in str(stats['violation_counts'])
         assert stats['environment'] == 'production'
 
-class TestSecurityHeaderInjection:
+class SecurityHeaderInjectionTests:
     """Test injection of security headers in production responses."""
 
     def test_production_security_headers(self):
@@ -201,7 +201,7 @@ class TestSecurityHeaderInjection:
         assert headers['Access-Control-Allow-Methods'] == 'GET'
         assert headers['Vary'] == 'Origin'
 
-class TestSecurityConfigurationValidation:
+class SecurityConfigurationValidationTests:
     """Test that security configuration is properly validated and applied."""
 
     def test_security_config_structure(self):
@@ -248,7 +248,7 @@ class TestSecurityConfigurationValidation:
         finally:
             SECURITY_CONFIG['block_suspicious_patterns'] = original_suspicious
 
-class TestPerformanceUnderAttack:
+class PerformanceUnderAttackTests:
     """Test system performance under security attacks."""
 
     def test_many_violations_performance(self):
@@ -285,7 +285,7 @@ class TestPerformanceUnderAttack:
         assert len(handler._violation_counts) <= 1000
         assert len(handler._blocked_origins) <= 1000
 
-class TestWebSocketConnectionHijackingPrevention:
+class WebSocketConnectionHijackingPreventionTests:
     """ITERATION 27: Prevent WebSocket connection hijacking attacks."""
 
     def test_websocket_connection_hijacking_prevention(self):

@@ -38,7 +38,7 @@ from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.services.state_persistence import StatePersistenceService
 
 
-class TestRedisToPostgresDataFlow:
+class RedisToPostgresDataFlowTests:
     """Test data flow from Redis (Tier 1) to PostgreSQL (Tier 2)."""
     
     @pytest.fixture
@@ -227,7 +227,7 @@ class TestRedisToPostgresDataFlow:
             mock_session.commit.assert_called_once()
 
 
-class TestPostgresToClickHouseDataFlow:
+class PostgresToClickHouseDataFlowTests:
     """Test data flow from PostgreSQL (Tier 2) to ClickHouse (Tier 3)."""
     
     @pytest.fixture

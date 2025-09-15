@@ -367,7 +367,7 @@ class ReadinessVerificationImprover:
         return resilient_readiness_check
 
 @pytest.mark.integration
-class TestServiceReadinessVerificationImprovements:
+class ServiceReadinessVerificationImprovementsTests:
     """Integration tests for improved service readiness verification."""
 
     @pytest.mark.asyncio

@@ -20,7 +20,7 @@ sys.path.insert(0, str(project_root))
 from netra_backend.app.websocket_core.protocols import WebSocketProtocolValidator
 
 
-class TestWebSocketProtocolDateTimeMigration(unittest.TestCase):
+class WebSocketProtocolDateTimeMigrationTests(unittest.TestCase):
     """Test cases for WebSocket protocol datetime migration."""
 
     def setUp(self):
@@ -119,7 +119,7 @@ class TestWebSocketProtocolDateTimeMigration(unittest.TestCase):
         self.assertLess(time_diff, 5.0, "Protocol validation timestamps should be consistent")
 
 
-class TestDeprecatedPatternDetection(unittest.TestCase):
+class DeprecatedPatternDetectionTests(unittest.TestCase):
     """Tests specifically for detecting deprecated datetime patterns."""
 
     def test_scan_for_deprecated_patterns(self):

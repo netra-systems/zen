@@ -26,7 +26,7 @@ from tests.e2e.ai_supply_chain_helpers import (
 
 
 @pytest.mark.e2e
-class TestAISupplyChainFailover:
+class AISupplyChainFailoverTests:
     """Critical failover tests protecting revenue from provider outages."""
 
     @pytest.fixture
@@ -201,7 +201,7 @@ class TestAISupplyChainFailover:
 # Integration tests for end-to-end failover scenarios
 
 @pytest.mark.e2e
-class TestFailoverIntegration:
+class FailoverIntegrationTests:
     """Integration tests for complete failover workflows."""
 
     @pytest.mark.asyncio

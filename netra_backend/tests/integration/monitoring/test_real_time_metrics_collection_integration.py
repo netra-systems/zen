@@ -29,7 +29,7 @@ from netra_backend.app.monitoring.real_time_aggregator import RealTimeAggregator
 from netra_backend.app.services.monitoring.metrics_service import MetricsService
 from netra_backend.app.monitoring.alert_manager import AlertManager
 
-class TestRealTimeMetricsCollectionIntegration(SSotBaseTestCase):
+class RealTimeMetricsCollectionIntegrationTests(SSotBaseTestCase):
     """
     Test real-time metrics collection with actual infrastructure.
     

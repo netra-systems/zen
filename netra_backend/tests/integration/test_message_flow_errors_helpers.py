@@ -28,7 +28,7 @@ from netra_backend.app.core.exceptions_websocket import WebSocketError
 # Removed unused import: from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
 from test_framework.websocket_helpers import MockWebSocketConnection
 
-class TestSyntaxFix:
+class SyntaxFixTests:
     """Test class for orphaned methods"""
 
     def setup_method(self):

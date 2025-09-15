@@ -12,7 +12,7 @@ from uuid import uuid4
 logger = logging.getLogger(__name__)
 
 
-class TestCorpusLifecycle:
+class CorpusLifecycleTests:
     """Test class for corpus lifecycle management operations"""
     
     @pytest.mark.asyncio
@@ -116,7 +116,7 @@ class TestCorpusLifecycle:
         logger.info(f"Cleanup completed: {cleaned_count} cleaned, {archived_count} archived, {remaining_count} remaining")
 
 
-class TestWorkloadTypesCoverage:
+class WorkloadTypesCoverageTests:
     """Test class for different workload types and coverage scenarios"""
     
     @pytest.mark.asyncio

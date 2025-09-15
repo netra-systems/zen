@@ -36,7 +36,7 @@ docker_manager = UnifiedDockerManager()
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.asyncio
-class TestRealJWTValidation:
+class RealJWTValidationTests:
     """
     Real JWT validation tests using Docker services.
     

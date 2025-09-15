@@ -39,7 +39,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 logger = logging.getLogger(__name__)
 
 
-class TestIssue1176ServiceAuthBreakdownIntegration(BaseIntegrationTest):
+class Issue1176ServiceAuthBreakdownIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for Issue #1176 service authentication complete breakdown.
     
@@ -468,7 +468,7 @@ class TestIssue1176ServiceAuthBreakdownIntegration(BaseIntegrationTest):
                 assert True, "Service authentication failure also reproduces Issue #1176"
 
 
-class TestIssue1176ProductionReproductionIntegration(BaseIntegrationTest):
+class Issue1176ProductionReproductionIntegrationTests(BaseIntegrationTest):
     """Integration tests reproducing exact production patterns from Issue #1176."""
     
     @pytest.mark.integration

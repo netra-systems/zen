@@ -26,7 +26,7 @@ from tests.e2e.utils.rapid_message_sender import RapidMessageSender
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestMessageIdempotency:
+class MessageIdempotencyTests:
     """Test idempotency enforcement for rapid messages."""
     
     async def test_duplicate_message_detection(self, user_token, message_validator, test_config):

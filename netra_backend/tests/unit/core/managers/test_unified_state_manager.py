@@ -91,7 +91,7 @@ class MockUnifiedStateManager:
         self.state_data.clear()
         self.state_history.clear()
 
-class TestUnifiedStateManagerBasics:
+class UnifiedStateManagerBasicsTests:
     """Test basic functionality of UnifiedStateManager."""
 
     @pytest.fixture
@@ -132,7 +132,7 @@ class TestUnifiedStateManagerBasics:
         assert state_manager.has_state('test.exists') is True
         assert state_manager.has_state('test.nonexistent') is False
 
-class TestStateModification:
+class StateModificationTests:
     """Test state modification operations."""
 
     @pytest.fixture
@@ -168,7 +168,7 @@ class TestStateModification:
         assert state_manager.get_state('key2') is None
         assert len(state_manager.state_data) == 0
 
-class TestStateHistory:
+class StateHistoryTests:
     """Test state change history tracking."""
 
     @pytest.fixture
@@ -192,7 +192,7 @@ class TestStateHistory:
         assert history_entry['old_value'] == 'v1'
         assert history_entry['new_value'] == 'v2'
 
-class TestStateObservers:
+class StateObserversTests:
     """Test state observer functionality."""
 
     @pytest.fixture
@@ -220,7 +220,7 @@ class TestStateObservers:
         state_manager.set_state('any.key', 'any_value')
         callback.assert_called_once_with('any.key', 'any_value')
 
-class TestStateSnapshots:
+class StateSnapshotsTests:
     """Test state snapshot functionality."""
 
     @pytest.fixture
@@ -243,7 +243,7 @@ class TestStateSnapshots:
         snapshot['test']['value'] = 'modified'
         assert state_manager.get_state('test.value') == 'original'
 
-class TestStateDataTypes:
+class StateDataTypesTests:
     """Test handling of different data types in state."""
 
     @pytest.fixture
@@ -269,7 +269,7 @@ class TestStateDataTypes:
         assert state_manager.get_state('none.value') is None
         assert state_manager.has_state('none.value') is True
 
-class TestStateEdgeCases:
+class StateEdgeCasesTests:
     """Test edge cases in state management."""
 
     @pytest.fixture
@@ -288,7 +288,7 @@ class TestStateEdgeCases:
         assert state_manager.get_state(deep_key) == 'deep_value'
         assert state_manager.has_state(deep_key) is True
 
-class TestStatePerformance:
+class StatePerformanceTests:
     """Test performance characteristics of state management."""
 
     @pytest.fixture
@@ -309,7 +309,7 @@ class TestStatePerformance:
             value = state_manager.get_state('frequent.access')
             assert value == 'test_value'
 
-class TestStateIntegration:
+class StateIntegrationTests:
     """Test integration patterns for state management."""
 
     @pytest.fixture

@@ -38,7 +38,7 @@ import asyncpg
 import redis.asyncio as redis
 
 
-class TestCrossServiceAuthIntegration(BaseIntegrationTest):
+class CrossServiceAuthIntegrationTests(BaseIntegrationTest):
     """Integration tests for Cross-Service Authentication - NO MOCKS, REAL SERVICES ONLY."""
     
     def setup_method(self):

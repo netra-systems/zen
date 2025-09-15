@@ -19,7 +19,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
-class TestGoldenPathAuthConsistency(SSotAsyncTestCase):
+class GoldenPathAuthConsistencyTests(SSotAsyncTestCase):
     """
     E2E test validating Golden Path authentication consistency across all services.
     Tests complete user flow with SSOT authentication patterns.

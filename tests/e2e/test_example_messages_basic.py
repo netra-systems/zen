@@ -139,7 +139,7 @@ async def example_handler():
 
 
 @pytest.mark.e2e
-class TestExampleMessageBasicFlow:
+class ExampleMessageBasicFlowTests:
     """Test basic example message processing flow"""
 
     @pytest.mark.e2e
@@ -192,7 +192,7 @@ class TestExampleMessageBasicFlow:
 
 
 @pytest.mark.e2e
-class TestMessageValidation:
+class MessageValidationTests:
     """Test message validation"""
 
     @pytest.mark.e2e
@@ -229,7 +229,7 @@ class TestMessageValidation:
 
 
 @pytest.mark.e2e
-class TestBusinessValueTracking:
+class BusinessValueTrackingTests:
     """Test business value tracking"""
 
     @pytest.mark.e2e

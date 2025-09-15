@@ -57,7 +57,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import WebSocket
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestSSotWebSocketFactoryCompliance(SSotAsyncTestCase):
+class SSotWebSocketFactoryComplianceTests(SSotAsyncTestCase):
     """Mission Critical: SSOT WebSocket Factory Pattern Compliance Tests
     
     These tests validate that:

@@ -33,7 +33,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
-class TestIDMigrationViolationsUnit(SSotBaseTestCase):
+class IDMigrationViolationsUnitTests(SSotBaseTestCase):
     """Unit tests exposing ID generation violations across the codebase."""
 
     def setup_method(self, method=None):

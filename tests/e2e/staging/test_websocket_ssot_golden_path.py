@@ -35,7 +35,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 @pytest.mark.e2e
-class TestWebSocketSSoTGoldenPathStaging(SSotAsyncTestCase):
+class WebSocketSSoTGoldenPathStagingTests(SSotAsyncTestCase):
     """
     E2E Staging Golden Path Test Suite
     
@@ -680,7 +680,7 @@ class TestWebSocketSSoTGoldenPathStaging(SSotAsyncTestCase):
 
 
 @pytest.mark.e2e
-class TestWebSocketSSoTStagingPerformance(SSotAsyncTestCase):
+class WebSocketSSoTStagingPerformanceTests(SSotAsyncTestCase):
     """
     Staging Performance Test Suite
     

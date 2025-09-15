@@ -205,7 +205,7 @@ class MockWebSocketManager:
         self.event_log.clear()
 
 
-class TestWebSocketFactoryIntegration(SSotAsyncTestCase):
+class WebSocketFactoryIntegrationTests(SSotAsyncTestCase):
     """Integration tests for WebSocket factory integration and error scenarios."""
     
     @pytest.fixture

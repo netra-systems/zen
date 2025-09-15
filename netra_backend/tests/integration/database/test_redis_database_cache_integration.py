@@ -251,7 +251,7 @@ class MockDatabaseConnection:
         pass
 
 
-class TestRedisDatabaseCacheIntegration(BaseIntegrationTest):
+class RedisDatabaseCacheIntegrationTests(BaseIntegrationTest):
     """
     Integration tests for Redis database cache integration.
     

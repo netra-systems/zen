@@ -109,7 +109,7 @@ class MockRedisManagerWithRaceCondition:
             return self._connection_established and self._background_tasks_stable
         return False
 
-class TestGCPRedisReadinessRaceCondition:
+class GCPRedisReadinessRaceConditionTests:
     """
     Unit tests for GCP Redis readiness race condition fix.
     
@@ -339,7 +339,7 @@ class TestGCPRedisReadinessRaceCondition:
         print('   [U+2713] Direct instantiation works')
         print('   [U+2713] Both create equivalent objects')
 
-class TestRaceConditionPerformanceBenchmarks:
+class RaceConditionPerformanceBenchmarksTests:
     """
     Performance benchmark tests for race condition fix validation.
     

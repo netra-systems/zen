@@ -164,7 +164,7 @@ def create_test_user_data(index: int = 0) -> Dict:
 
 
 @pytest.mark.e2e
-class TestDatabaseUserConsistency:
+class DatabaseUserConsistencyTests:
     """Test Suite 6: Database User Consistency Tests."""
     
     @pytest.fixture

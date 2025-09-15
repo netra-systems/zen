@@ -34,7 +34,7 @@ from test_framework.fixtures.real_services import real_services_fixture
 from shared.isolated_environment import get_env
 
 
-class TestCrossServiceAuthFlowIntegration:
+class CrossServiceAuthFlowIntegrationTests:
     """Test cross-service authentication flow with real components."""
     
     @pytest.mark.integration

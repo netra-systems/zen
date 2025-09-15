@@ -24,7 +24,7 @@ class RequestStatus(Enum):
     FAILED = "failed"
 
 
-class TestCostLimitEnforcement:
+class CostLimitEnforcementTests:
     """Test suite for cost limit enforcement functionality."""
 
     @pytest.fixture

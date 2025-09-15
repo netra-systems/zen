@@ -42,7 +42,7 @@ from auth_service.main import app
 from test_framework.environment_markers import env, dev_and_staging, env_requires, skip_unless_environment
 client = TestClient(app)
 
-class TestAuthConfiguration:
+class AuthConfigurationTests:
     """Test authentication configuration and environment setup."""
 
     def test_environment_setup(self):
@@ -66,7 +66,7 @@ class TestAuthConfiguration:
         assert AuthProvider.GITHUB == 'github'
         assert AuthProvider.LOCAL == 'local'
 
-class TestDatabaseOperations:
+class DatabaseOperationsTests:
     """Test database operations and connections."""
 
     def test_database_connection_initialization(self):
@@ -84,7 +84,7 @@ class TestDatabaseOperations:
         else:
             assert True
 
-class TestJWTTokenHandling:
+class JWTTokenHandlingTests:
     """Test JWT token creation, validation, and handling."""
 
     def test_jwt_token_structure_validation(self):
@@ -124,7 +124,7 @@ class TestJWTTokenHandling:
         result = jwt_handler.validate_token(expired_token)
         assert result is None
 
-class TestOAuthFlows:
+class OAuthFlowsTests:
     """Test OAuth flows for all supported providers."""
 
     def test_google_oauth_initiation(self):
@@ -184,7 +184,7 @@ class TestOAuthFlows:
         if google_client_id:
             assert google_client_id is not None
 
-class TestAPIEndpoints:
+class APIEndpointsTests:
     """Test API endpoints and HTTP method compatibility."""
 
     def test_health_endpoint(self):
@@ -219,7 +219,7 @@ class TestAPIEndpoints:
             response = client.post('/login', json=payload)
             assert response.status_code in [400, 422]
 
-class TestSecurityScenarios:
+class SecurityScenariosTests:
     """Test security scenarios and edge cases."""
 
     def test_sql_injection_protection(self):
@@ -252,7 +252,7 @@ class TestSecurityScenarios:
             response = client.post('/register', json={'email': 'test@example.com', 'password': weak_password})
             assert response.status_code in [400, 422]
 
-class TestRedisOperations:
+class RedisOperationsTests:
     """Test Redis connection and failover scenarios."""
 
     def test_redis_connection_availability(self):
@@ -283,7 +283,7 @@ class TestRedisOperations:
             data = response.json()
             assert 'status' in data or isinstance(data, dict)
 
-class TestErrorHandling:
+class ErrorHandlingTests:
     """Test comprehensive error handling scenarios."""
 
     def test_database_connection_error_handling(self):
@@ -318,7 +318,7 @@ class TestErrorHandling:
             except Exception:
                 assert True
 
-class TestEnvironmentCompatibility:
+class EnvironmentCompatibilityTests:
     """Test environment-specific compatibility."""
 
     def test_development_environment_features(self):

@@ -79,7 +79,7 @@ class E2EServiceDependencyMetrics:
 
 
 @pytest.mark.e2e
-class TestCompleteUserJourneyServiceDependencies:
+class CompleteUserJourneyServiceDependenciesTests:
     """
     E2E tests for complete user journeys through all service dependencies.
     

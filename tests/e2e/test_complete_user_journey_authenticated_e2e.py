@@ -30,7 +30,7 @@ from test_framework.ssot.real_services_test_fixtures import *
 
 
 @pytest.mark.e2e
-class TestCompleteUserJourneyAuthenticatedE2E:
+class CompleteUserJourneyAuthenticatedE2ETests:
     """E2E tests for complete user journey with authentication."""
     
     def setup_method(self):

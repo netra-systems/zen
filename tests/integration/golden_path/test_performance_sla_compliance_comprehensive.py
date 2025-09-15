@@ -37,7 +37,7 @@ from test_framework.websocket_helpers import WebSocketTestHelpers
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
-class TestPerformanceSLAComplianceComprehensive(SSotAsyncTestCase):
+class PerformanceSLAComplianceComprehensiveTests(SSotAsyncTestCase):
     """
      LIGHTNING:  COMPREHENSIVE PERFORMANCE & SLA COMPLIANCE TEST  LIGHTNING: 
     

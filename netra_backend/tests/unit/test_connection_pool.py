@@ -11,7 +11,7 @@ from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAsyncConnectionPool:
+class AsyncConnectionPoolTests:
     """Test suite for AsyncConnectionPool"""
 
     @pytest.fixture

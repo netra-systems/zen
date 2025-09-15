@@ -50,7 +50,7 @@ from netra_backend.app.core.unified_id_manager import (
 
 
 @pytest.mark.unit
-class TestUnifiedIDManagerCore:
+class UnifiedIDManagerCoreTests:
     """Core ID manager functionality tests"""
     
     def test_initialization_creates_proper_structures(self):
@@ -121,7 +121,7 @@ class TestUnifiedIDManagerCore:
 
 
 @pytest.mark.unit
-class TestIDRegistration:
+class IDRegistrationTests:
     """Test ID registration and tracking functionality"""
     
     def test_register_existing_id(self):
@@ -177,7 +177,7 @@ class TestIDRegistration:
 
 
 @pytest.mark.unit
-class TestIDValidation:
+class IDValidationTests:
     """Test ID validation functionality - CRITICAL for data integrity"""
     
     def test_valid_id_checking(self):
@@ -260,7 +260,7 @@ class TestIDValidation:
 
 
 @pytest.mark.unit
-class TestIDLifecycleManagement:
+class IDLifecycleManagementTests:
     """Test ID lifecycle management - release and cleanup"""
     
     def test_id_release(self):
@@ -329,7 +329,7 @@ class TestIDLifecycleManagement:
 
 
 @pytest.mark.unit
-class TestThreadSafetyAndConcurrency:
+class ThreadSafetyAndConcurrencyTests:
     """Test thread safety under concurrent access - CRITICAL for multi-user system"""
     
     def test_concurrent_id_generation(self):
@@ -438,7 +438,7 @@ class TestThreadSafetyAndConcurrency:
 
 
 @pytest.mark.unit
-class TestFormatConversion:
+class FormatConversionTests:
     """Test ID format conversion functionality - supports migration"""
     
     def test_uuid_to_structured_conversion(self):
@@ -502,7 +502,7 @@ class TestFormatConversion:
 
 
 @pytest.mark.unit
-class TestClassMethodCompatibility:
+class ClassMethodCompatibilityTests:
     """Test class methods for compatibility with existing systems - CRITICAL for startup"""
     
     def test_generate_run_id_with_thread_id(self):
@@ -568,7 +568,7 @@ class TestClassMethodCompatibility:
 
 
 @pytest.mark.unit
-class TestStatisticsAndMonitoring:
+class StatisticsAndMonitoringTests:
     """Test statistics and monitoring functionality"""
     
     def test_id_manager_statistics(self):
@@ -631,7 +631,7 @@ class TestStatisticsAndMonitoring:
 
 
 @pytest.mark.unit
-class TestConvenienceFunctions:
+class ConvenienceFunctionsTests:
     """Test module-level convenience functions"""
     
     def test_global_manager_singleton(self):
@@ -692,7 +692,7 @@ class TestConvenienceFunctions:
 
 
 @pytest.mark.unit
-class TestPerformanceOptimizations:
+class PerformanceOptimizationsTests:
     """Test performance under high load - prevents system degradation"""
     
     def test_high_volume_id_generation(self):
@@ -761,7 +761,7 @@ class TestPerformanceOptimizations:
 
 
 @pytest.mark.unit
-class TestBusinessScenarios:
+class BusinessScenariosTests:
     """Test complete business scenarios - protects $500K+ ARR"""
     
     def test_user_session_lifecycle(self):

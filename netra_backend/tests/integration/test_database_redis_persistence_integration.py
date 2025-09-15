@@ -55,7 +55,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 @pytest.mark.integration
 @pytest.mark.real_services
 @pytest.mark.asyncio
-class TestDatabaseRedispersistence(DatabaseIntegrationTest, CacheIntegrationTest):
+class DatabaseRedispersistenceTests(DatabaseIntegrationTest, CacheIntegrationTest):
     """
     Comprehensive Database & Redis Persistence Integration Tests
     

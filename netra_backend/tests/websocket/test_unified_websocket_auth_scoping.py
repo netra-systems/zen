@@ -21,7 +21,7 @@ from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
 from netra_backend.app.websocket_core.unified_websocket_auth import extract_e2e_context_from_websocket, UnifiedWebSocketAuthenticator, authenticate_websocket_connection, WebSocketAuthResult
 
-class TestVariableScopingBug:
+class VariableScopingBugTests:
     """Test suite specifically for the variable scoping bug on lines 119/151."""
 
     @pytest.fixture
@@ -141,7 +141,7 @@ class TestVariableScopingBug:
                 if 'is_production' in str(e):
                     pytest.fail(f'Concurrent testing triggers scoping bug: {e}')
 
-class TestWebSocketAuthenticatorScoping:
+class WebSocketAuthenticatorScopingTests:
     """Test the main authenticator class with scoping conditions."""
 
     @pytest.fixture
@@ -211,7 +211,7 @@ class TestWebSocketAuthenticatorScoping:
                     else:
                         raise
 
-class TestBackwardCompatibilityWithScoping:
+class BackwardCompatibilityWithScopingTests:
     """Test backward compatibility functions under scoping bug conditions."""
 
     @pytest.fixture

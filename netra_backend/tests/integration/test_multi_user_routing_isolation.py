@@ -146,7 +146,7 @@ class MultiUserRoutingValidator:
         }
 
 
-class TestMultiUserRoutingIsolation(BaseIntegrationTest):
+class MultiUserRoutingIsolationTests(BaseIntegrationTest):
     """Test multi-user WebSocket routing isolation with proper authentication."""
     
     @pytest.mark.integration

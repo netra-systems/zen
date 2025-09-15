@@ -22,7 +22,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 @pytest.mark.unit
-class TestUserExecutionContextImportSyntax(unittest.TestCase):
+class UserExecutionContextImportSyntaxTests(unittest.TestCase):
     """Test syntax validation for UserExecutionContext imports in affected files."""
     
     def setUp(self):

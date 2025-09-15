@@ -374,7 +374,7 @@ class E2EAuthManager:
 @pytest.mark.e2e
 @pytest.mark.real_services
 @pytest.mark.slow
-class TestTriageGoldenPathE2E(SSotAsyncTestCase):
+class TriageGoldenPathE2ETests(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

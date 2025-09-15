@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 
-class TestWebSocketProtocolContractViolations(SSotBaseTestCase):
+class WebSocketProtocolContractViolationsTests(SSotBaseTestCase):
     """
     Protocol contract validation tests to expose type safety violations.
     

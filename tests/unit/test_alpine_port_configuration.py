@@ -15,7 +15,7 @@ from typing import Dict, List, Tuple
 from test_framework.ssot.base_test_case import BaseTestCase
 
 @pytest.mark.unit
-class TestAlpinePortConfiguration(BaseTestCase):
+class AlpinePortConfigurationTests(BaseTestCase):
     """Test suite to validate Alpine Dockerfile port configurations.
     
     These tests are expected to FAIL until the port configuration is fixed.

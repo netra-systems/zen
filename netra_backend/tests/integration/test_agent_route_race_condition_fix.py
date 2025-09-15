@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 from netra_backend.app.main import app
 
 
-class TestAgentRouteRaceConditionFix:
+class AgentRouteRaceConditionFixTests:
     """Test race condition fix for agent execution endpoints."""
     
     def setup_method(self):

@@ -24,7 +24,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestUnifiedLoggingPatternCompliance(SSotBaseTestCase):
+class UnifiedLoggingPatternComplianceTests(SSotBaseTestCase):
     """
     Validates both files use same SSOT logging pattern post-fix.
     
@@ -256,7 +256,7 @@ class TestUnifiedLoggingPatternCompliance(SSotBaseTestCase):
 if __name__ == '__main__':
     import unittest
     
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestUnifiedLoggingPatternCompliance)
+    suite = unittest.TestLoader().loadTestsFromTestCase(UnifiedLoggingPatternComplianceTests)
     runner = unittest.TextTestRunner(verbosity=2)
     
     result = runner.run(suite)

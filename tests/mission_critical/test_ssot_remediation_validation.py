@@ -26,7 +26,7 @@ from typing import Type
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-class TestSSOTRemediationValidation:
+class SSOTRemediationValidationTests:
     """Test suite validating SSOT remediation Phase 1 emergency stabilization."""
     
     def test_phase1_import_compatibility_maintained(self):

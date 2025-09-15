@@ -20,7 +20,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
 
 
-class TestServiceSecretValidationPatterns(BaseIntegrationTest):
+class ServiceSecretValidationPatternsTests(BaseIntegrationTest):
     """Test SERVICE_SECRET SSOT compliance and validation patterns."""
     
     @pytest.mark.integration

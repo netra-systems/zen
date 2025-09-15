@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import BaseTestCase
 from shared.isolated_environment import get_env
 
 
-class TestGoldenPathAuthCoordination(BaseTestCase):
+class GoldenPathAuthCoordinationTests(BaseTestCase):
     """Test auth coordination maintains Golden Path operational success."""
 
     def setup_method(self, method):
@@ -186,7 +186,7 @@ class TestGoldenPathAuthCoordination(BaseTestCase):
         return error_coordination_map.get(scenario, False)
 
 
-class TestAuthCoordinationIntegrationPoints(BaseTestCase):
+class AuthCoordinationIntegrationPointsTests(BaseTestCase):
     """Test auth coordination integration points maintain Golden Path."""
 
     def setup_method(self, method):

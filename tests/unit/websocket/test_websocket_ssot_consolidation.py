@@ -41,7 +41,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 @pytest.mark.unit
-class TestWebSocketSSOTConsolidation(SSotAsyncTestCase):
+class WebSocketSSOTConsolidationTests(SSotAsyncTestCase):
     """Test suite for WebSocket SSOT consolidation critical infrastructure gaps."""
 
     def setup_method(self, method):

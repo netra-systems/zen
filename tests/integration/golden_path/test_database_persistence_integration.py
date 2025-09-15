@@ -87,7 +87,7 @@ async def get_db_session():
         except Exception:
             pass
 
-class TestDatabasePersistenceIntegration(SSotAsyncTestCase):
+class DatabasePersistenceIntegrationTests(SSotAsyncTestCase):
     """Test database persistence integration with real PostgreSQL."""
 
     async def async_setup_method(self, method=None):

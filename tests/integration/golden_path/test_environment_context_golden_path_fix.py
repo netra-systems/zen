@@ -41,7 +41,7 @@ from netra_backend.app.core.service_dependencies.models import ServiceType
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 @pytest.mark.integration
-class TestEnvironmentContextGoldenPathFix:
+class EnvironmentContextGoldenPathFixTests:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""

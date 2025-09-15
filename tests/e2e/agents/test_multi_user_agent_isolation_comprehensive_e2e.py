@@ -39,7 +39,7 @@ from tests.e2e.staging_config import StagingTestConfig, get_staging_config
 logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
-class TestMultiUserAgentIsolationE2E(BaseE2ETest):
+class MultiUserAgentIsolationE2ETests(BaseE2ETest):
     """
     Comprehensive Multi-User Agent Isolation E2E Tests for GCP Staging.
 

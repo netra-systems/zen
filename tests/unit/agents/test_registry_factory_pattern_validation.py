@@ -58,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.unit
-class TestRegistryFactoryPatternValidation(SSotAsyncTestCase):
+class RegistryFactoryPatternValidationTests(SSotAsyncTestCase):
     """
     Test suite to validate registry factory pattern consistency.
 

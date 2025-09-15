@@ -386,7 +386,7 @@ class RealAgentPerformanceTester:
 # MISSION CRITICAL PERFORMANCE BENCHMARK TESTS
 # ============================================================================
 
-class TestWebSocketAgentPerformanceBenchmarks:
+class WebSocketAgentPerformanceBenchmarksTests:
     """Mission critical WebSocket agent performance validation."""
 
     @pytest.mark.asyncio

@@ -16,7 +16,7 @@ from netra_backend.app.core.health_checkers import (
 )
 
 
-class TestConfigurationConsistency:
+class ConfigurationConsistencyTests:
     """Test configuration consistency across environments."""
     
     def test_service_priority_consistency(self):
@@ -91,7 +91,7 @@ class TestConfigurationConsistency:
             assert isinstance(env_value, str)
 
 
-class TestHealthCheckTimeouts:
+class HealthCheckTimeoutsTests:
     """Test health check timeout configurations."""
     
     def test_timeout_values_are_reasonable(self):
@@ -117,7 +117,7 @@ class TestHealthCheckTimeouts:
         assert 1.0 <= dev_timeout <= 60.0
 
 
-class TestServiceDependencyMapping:
+class ServiceDependencyMappingTests:
     """Test service dependency and priority mapping."""
     
     def test_critical_services_are_minimal(self):
@@ -151,7 +151,7 @@ class TestServiceDependencyMapping:
             assert priority.name in ['IMPORTANT', 'OPTIONAL'], f"{service} should not be CRITICAL"
 
 
-class TestResilienceConfiguration:
+class ResilienceConfigurationTests:
     """Test resilience and error handling configuration."""
     
     def test_error_classification_consistency(self):
@@ -197,7 +197,7 @@ class TestResilienceConfiguration:
         assert abs(failure_result.response_time - 0.1234) < 0.0001  # Converted to seconds (with floating point tolerance)
 
 
-class TestSecurityBoundaryConfiguration:
+class SecurityBoundaryConfigurationTests:
     """Test security boundary configuration validation."""
     
     def test_environment_isolation_configuration(self):
@@ -412,7 +412,7 @@ class TestSecurityBoundaryConfiguration:
             assert is_valid == expected_valid, f"Pool config ({min_s}, {max_s}, {timeout}) validation incorrect"
 
 
-class TestSystemIntegrationConfiguration:
+class SystemIntegrationConfigurationTests:
     """Test system integration and cross-service configuration."""
     
     def test_health_checker_component_coverage(self):

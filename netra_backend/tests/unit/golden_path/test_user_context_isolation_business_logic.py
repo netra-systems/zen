@@ -16,7 +16,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.golden_path
 @pytest.mark.unit
-class TestUserContextIsolationBusinessLogic(SSotBaseTestCase):
+class UserContextIsolationBusinessLogicTests(SSotBaseTestCase):
     """Golden Path Unit Tests for User Context Isolation Business Logic."""
 
     def test_user_session_isolation_business_rule_validation(self):

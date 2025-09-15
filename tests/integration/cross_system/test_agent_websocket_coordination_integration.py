@@ -46,7 +46,7 @@ from netra_backend.app.core.configuration.base import get_config
 
 @pytest.mark.integration
 @pytest.mark.cross_system
-class TestAgentWebSocketCoordinationIntegration(SSotAsyncTestCase):
+class AgentWebSocketCoordinationIntegrationTests(SSotAsyncTestCase):
     """
     Integration tests for agent-websocket coordination patterns.
     

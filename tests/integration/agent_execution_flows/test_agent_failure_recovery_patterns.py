@@ -26,7 +26,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.supervisor.execution_context import PipelineStep
 
 
-class TestAgentFailureRecoveryPatterns(BaseIntegrationTest):
+class AgentFailureRecoveryPatternsTests(BaseIntegrationTest):
     """Integration tests for agent failure recovery patterns."""
 
     @pytest.mark.integration

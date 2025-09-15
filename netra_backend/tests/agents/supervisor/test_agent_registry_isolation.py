@@ -172,7 +172,7 @@ class IsolatedTestAgent(BaseAgent):
         }
 
 
-class TestAgentRegistryIsolation(SSotAsyncTestCase):
+class AgentRegistryIsolationTests(SSotAsyncTestCase):
     """Test AgentRegistry user isolation and security boundaries."""
 
     def setup_method(self, method):

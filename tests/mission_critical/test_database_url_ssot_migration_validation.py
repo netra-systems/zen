@@ -632,7 +632,7 @@ class DatabaseURLSSOTMigrationValidator:
 # PYTEST TEST CLASSES AND FUNCTIONS
 # These provide the pytest interface for running individual test components
 
-class TestDatabaseURLSSOTMigrationValidation:
+class DatabaseURLSSOTMigrationValidationTests:
     """
     Pytest test class for DATABASE_URL SSOT Migration validation.
     

@@ -22,7 +22,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 @pytest.mark.integration
-class TestMessageRouterSSOTIntegration(SSotAsyncTestCase):
+class MessageRouterSSOTIntegrationTests(SSotAsyncTestCase):
     """Integration tests for MessageRouter SSOT compliance."""
 
     async def test_multiple_import_paths_same_functionality(self):

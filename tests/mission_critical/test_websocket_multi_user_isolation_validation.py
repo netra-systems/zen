@@ -80,7 +80,7 @@ class MultiUserTestMetrics:
     test_duration_seconds: float = 0.0
 
 
-class TestWebSocketMultiUserIsolationValidation(SSotAsyncTestCase):
+class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
     """
     Multi-user WebSocket isolation validation tests.
     

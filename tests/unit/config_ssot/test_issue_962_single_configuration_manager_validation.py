@@ -43,7 +43,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @pytest.mark.unit
-class TestIssue962SingleConfigurationManagerValidation(SSotBaseTestCase, unittest.TestCase):
+class Issue962SingleConfigurationManagerValidationTests(SSotBaseTestCase, unittest.TestCase):
     """
     Unit tests to enforce single configuration manager SSOT for Issue #962.
 

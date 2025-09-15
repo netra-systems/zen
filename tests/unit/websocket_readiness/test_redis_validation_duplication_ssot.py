@@ -21,7 +21,7 @@ from test_framework.ssot.base_test_case import BaseTestCase
 from test_framework.ssot.configuration_validator import ConfigurationValidator
 from shared.isolated_environment import IsolatedEnvironment
 
-class TestRedisValidationDuplicationSSO(BaseTestCase):
+class RedisValidationDuplicationSSOTests(BaseTestCase):
     """Unit tests for Redis validation SSOT compliance.
     
     These tests validate that Redis validation follows SSOT principles

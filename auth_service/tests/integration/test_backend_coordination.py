@@ -77,7 +77,7 @@ class AuthBackendCoordinationValidator:
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAuthBackendCoordination(BaseIntegrationTest):
+class AuthBackendCoordinationTests(BaseIntegrationTest):
     """Integration: Auth service coordination with backend service."""
 
     @pytest.fixture(autouse=True)
@@ -254,7 +254,7 @@ class TestAuthBackendCoordination(BaseIntegrationTest):
 
 @pytest.mark.integration
 @pytest.mark.real_services
-class TestAuthServiceHealthCoordination(BaseIntegrationTest):
+class AuthServiceHealthCoordinationTests(BaseIntegrationTest):
     """Integration: Auth service health coordination with backend."""
 
     async def test_service_health_coordination(self):

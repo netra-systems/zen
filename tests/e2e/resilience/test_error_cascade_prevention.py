@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-class TestErrorCascadePrevention:
+class ErrorCascadePreventionTests:
     """Test #9: Error Cascade Prevention Across Services."""
     
     @pytest.fixture
@@ -220,9 +220,9 @@ class TestErrorCascadePrevention:
         assert results["recovery_result"].get("chat_restored", False), "System recovery failed"
 
 # Test execution helper functions
-def create_error_cascade_test_suite() -> TestErrorCascadePrevention:
+def create_error_cascade_test_suite() -> ErrorCascadePreventionTests:
     """Create error cascade test suite instance."""
-    return TestErrorCascadePrevention()
+    return ErrorCascadePreventionTests()
 
 async def run_error_cascade_validation() -> Dict[str, Any]:
     """Run error cascade validation and return results."""

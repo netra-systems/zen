@@ -56,7 +56,7 @@ class ChatAgentTestResult:
     error_message: Optional[str] = None
     agent_tools_used: List[str] = None
 
-class TestUserChatAgentExecution:
+class UserChatAgentExecutionTests:
     """
     Complete E2E user chat agent execution tests for staging environment.
     

@@ -15,7 +15,7 @@ from netra_backend.app.core.backend_environment import get_backend_env
 from auth_service.auth_core.auth_environment import AuthEnvironment
 
 
-class TestRedisConfigurationBuilderCore:
+class RedisConfigurationBuilderCoreTests:
     """Test core RedisConfigurationBuilder functionality."""
     
     def test_redis_builder_initialization(self):
@@ -193,7 +193,7 @@ class TestRedisConfigurationBuilderCore:
         assert masked == "NOT SET"
 
 
-class TestAuthRedisConfigurationBuilder:
+class AuthRedisConfigurationBuilderTests:
     """Test auth service-specific Redis configuration."""
     
     def test_auth_redis_builder_initialization(self):
@@ -242,7 +242,7 @@ class TestAuthRedisConfigurationBuilder:
         assert "session management" in error
 
 
-class TestServiceIntegration:
+class ServiceIntegrationTests:
     """Test service integration with unified Redis patterns."""
     
     def test_backend_environment_redis_integration(self):
@@ -302,7 +302,7 @@ class TestServiceIntegration:
         assert "/1" in auth_url
 
 
-class TestRedisPatternValidation:
+class RedisPatternValidationTests:
     """Test Redis configuration pattern validation framework."""
     
     def test_pattern_validator_initialization(self):
@@ -370,7 +370,7 @@ def bad_redis_config():
         assert isinstance(report["recommendations"], list)
 
 
-class TestEnvironmentSpecificBehavior:
+class EnvironmentSpecificBehaviorTests:
     """Test environment-specific Redis configuration behavior."""
     
     @pytest.mark.parametrize("environment,expected_behavior", [
@@ -425,7 +425,7 @@ class TestEnvironmentSpecificBehavior:
 
 
 @pytest.mark.integration
-class TestE2ERedisConfigurationFlow:
+class E2ERedisConfigurationFlowTests:
     """End-to-end tests for Redis configuration flow."""
     
     def test_complete_redis_configuration_flow(self):

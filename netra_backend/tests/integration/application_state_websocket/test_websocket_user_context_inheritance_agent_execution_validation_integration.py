@@ -671,7 +671,7 @@ class AgentContextInheritanceValidator:
         return isolation_validation
 
 
-class TestWebSocketAgentContextInheritance(BaseIntegrationTest):
+class WebSocketAgentContextInheritanceTests(BaseIntegrationTest):
     """
     Integration test for user context inheritance during agent execution via WebSocket.
     

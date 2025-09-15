@@ -451,7 +451,7 @@ class MockAgentExecutionValidator:
         return [report for report in self.validation_reports if report.user_id == user_id]
 
 
-class TestAgentExecutionMessageValidation(SSotAsyncTestCase):
+class AgentExecutionMessageValidationTests(SSotAsyncTestCase):
     """Unit tests for agent execution message validation
     
     This test class validates the critical message validation capabilities that

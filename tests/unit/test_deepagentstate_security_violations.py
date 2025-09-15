@@ -31,7 +31,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState, AgentMetadata
 from netra_backend.app.schemas.agent_models import AgentMetadata as SchemaAgentMetadata
 
 @pytest.mark.unit
-class TestDeepAgentStateSecurityViolations(SSotBaseTestCase):
+class DeepAgentStateSecurityViolationsTests(SSotBaseTestCase):
     """Unit tests for specific security violations in DeepAgentState implementation."""
 
     def setup_method(self, method=None):

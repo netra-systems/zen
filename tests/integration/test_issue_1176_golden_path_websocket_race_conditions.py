@@ -33,7 +33,7 @@ from netra_backend.app.websocket_core.events import WebSocketEventManager
 from netra_backend.app.routes.websocket_unified import websocket_endpoint
 
 
-class TestGoldenPathWebSocketRaceConditions(BaseIntegrationTest):
+class GoldenPathWebSocketRaceConditionsTests(BaseIntegrationTest):
     """Test WebSocket race conditions causing Golden Path failures."""
 
     @pytest.mark.integration

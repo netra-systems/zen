@@ -51,7 +51,7 @@ from shared.types import UserID, ConnectionID, ThreadID, MessageID
 
 @pytest.mark.integration
 @pytest.mark.database
-class TestWebSocketIdDatabaseIntegration(BaseIntegrationTest):
+class WebSocketIdDatabaseIntegrationTests(BaseIntegrationTest):
     """
     Integration tests that EXPOSE database integration failures with uuid.uuid4().
     

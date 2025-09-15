@@ -34,7 +34,7 @@ except ImportError:
 
 
 @pytest.mark.unit
-class TestExecutionStateConsolidation(SSotBaseTestCase):
+class ExecutionStateConsolidationTests(SSotBaseTestCase):
     """Test ExecutionState SSOT consolidation prevents dict/enum conflicts."""
     
     def test_execution_state_enum_consistency(self):

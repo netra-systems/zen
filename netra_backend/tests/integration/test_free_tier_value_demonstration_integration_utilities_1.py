@@ -28,7 +28,7 @@ from netra_backend.app.db.models_user import ToolUsageLog, User
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 from netra_backend.app.services.cost_calculator import CostCalculatorService, CostTier
 
-class TestSyntaxFix:
+class SyntaxFixTests:
     """Test class for orphaned methods"""
 
     def _calculate_daily_requests(self, config, day):

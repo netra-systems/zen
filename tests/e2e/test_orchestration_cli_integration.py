@@ -26,7 +26,7 @@ from shared.isolated_environment import IsolatedEnvironment
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 @pytest.mark.e2e
-class TestCLIArgumentParsing:
+class CLIArgumentParsingTests:
     """Test CLI argument parsing for new orchestration features"""
 
     def test_help_includes_orchestration_options(self):
@@ -54,7 +54,7 @@ class TestCLIArgumentParsing:
         assert result.returncode is not None
 
 @pytest.mark.e2e
-class TestBackwardCompatibilityE2E:
+class BackwardCompatibilityE2ETests:
     """End-to-end tests for backward compatibility"""
 
     def test_legacy_category_execution_still_works(self):
@@ -75,7 +75,7 @@ class TestBackwardCompatibilityE2E:
         assert result.returncode == 0 or 'not available' in result.stdout.lower()
 
 @pytest.mark.e2e
-class TestOrchestrationExecution:
+class OrchestrationExecutionTests:
     """Test actual orchestration execution (may be slow)"""
 
     @pytest.mark.slow
@@ -94,7 +94,7 @@ class TestOrchestrationExecution:
         assert len(result.stdout) > 0 or len(result.stderr) > 0
 
 @pytest.mark.e2e
-class TestErrorScenarios:
+class ErrorScenariosTests:
     """Test error scenarios and edge cases"""
 
     def test_no_arguments_defaults_to_legacy(self):
@@ -114,7 +114,7 @@ class TestErrorScenarios:
         assert result.returncode != 0 or 'error' in result.stderr.lower()
 
 @pytest.mark.e2e
-class TestProgressOutputModes:
+class ProgressOutputModesTests:
     """Test different progress output modes"""
 
     def test_json_progress_mode(self):

@@ -26,7 +26,7 @@ from test_framework.ssot.isolated_test_helper import IsolatedTestHelper
 from shared.isolated_environment import get_env
 
 
-class TestMissingEndpointsValidation(unittest.TestCase):
+class MissingEndpointsValidationTests(unittest.TestCase):
     """
     Unit test to validate endpoint existence.
     

@@ -18,7 +18,7 @@ from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher
 
 
-class TestDefaultLauncherConfig(SSotBaseTestCase):
+class DefaultLauncherConfigTests(SSotBaseTestCase):
     """Test suite for default launcher configuration."""
     
     # Mock: Component isolation for testing without external dependencies
@@ -171,7 +171,7 @@ class TestDefaultLauncherConfig(SSotBaseTestCase):
         self.assertTrue(launcher.parallel_enabled)
 
 
-class TestPortAllocationImprovements(SSotBaseTestCase):
+class PortAllocationImprovementsTests(SSotBaseTestCase):
     """Test improved port allocation functionality."""
     
     def test_find_available_port_prefers_specified_port(self):
@@ -222,7 +222,7 @@ class TestPortAllocationImprovements(SSotBaseTestCase):
                 mock_free.assert_called_once()
 
 
-class TestGracefulShutdownImprovements(SSotBaseTestCase):
+class GracefulShutdownImprovementsTests(SSotBaseTestCase):
     """Test improved graceful shutdown functionality."""
     
     # Mock: Component isolation for testing without external dependencies

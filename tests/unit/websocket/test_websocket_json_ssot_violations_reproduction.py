@@ -47,7 +47,7 @@ from netra_backend.app.dependencies import get_user_execution_context
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketJSONSSOTViolationsReproduction(BaseIntegrationTest):
+class WebSocketJSONSSOTViolationsReproductionTests(BaseIntegrationTest):
     """
     Reproduce WebSocket JSON SSOT violations that cause P1 critical failures.
     

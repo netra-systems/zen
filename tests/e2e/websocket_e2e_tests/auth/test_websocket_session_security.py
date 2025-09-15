@@ -42,7 +42,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.websocket
 @pytest.mark.auth
 @pytest.mark.isolation
-class TestWebSocketSessionSecurity(SSotBaseTestCase):
+class WebSocketSessionSecurityTests(SSotBaseTestCase):
     """
     E2E WebSocket Session Security Tests.
     

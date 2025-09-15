@@ -48,7 +48,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestMultiUserConcurrentChatIsolation565(SSotAsyncTestCase):
+class MultiUserConcurrentChatIsolation565Tests(SSotAsyncTestCase):
     """
     E2E tests validating complete user isolation in concurrent chat scenarios.
     
@@ -599,7 +599,7 @@ if __name__ == "__main__":
     os.environ['NETRA_ENV'] = 'staging'
     
     # Create test suite
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestMultiUserConcurrentChatIsolation565)
+    suite = unittest.TestLoader().loadTestsFromTestCase(MultiUserConcurrentChatIsolation565Tests)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     

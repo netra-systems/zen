@@ -49,7 +49,7 @@ import redis.asyncio as redis
 import asyncpg
 
 
-class TestGoldenPathStatePersistenceNonDocker(SSotAsyncTestCase):
+class GoldenPathStatePersistenceNonDockerTests(SSotAsyncTestCase):
     """
     Golden Path State Persistence Integration Tests - NO DOCKER
     
