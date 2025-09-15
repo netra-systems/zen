@@ -55,7 +55,8 @@ class TestWebSocketManagerCrossServiceIntegration(SSotAsyncTestCase, unittest.Te
             })()
             self.test_users.append(user_context)
         
-        logger.info(f"Starting cross-service integration test: {method.__name__}")
+        method_name = method.__name__ if method else "unknown_method"
+        logger.info(f"Starting cross-service integration test: {method_name}")
 
     def teardown_method(self, method):
         """Clean up test environment."""
@@ -282,7 +283,8 @@ class TestWebSocketManagerRealServiceIntegration(SSotAsyncTestCase, unittest.Tes
         from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
         reset_manager_registry()
         
-        logger.info(f"Starting real service integration test: {method.__name__}")
+        method_name = method.__name__ if method else "unknown_method"
+        logger.info(f"Starting real service integration test: {method_name}")
 
     def teardown_method(self, method):
         """Clean up test environment."""

@@ -172,7 +172,8 @@ class TestWebSocketManagerImportPathFragmentation(SSotAsyncTestCase, unittest.Te
     def setup_method(self, method):
         """Set up test environment."""
         super().setup_method(method)
-        logger.info(f"Starting import path fragmentation test: {method.__name__}")
+        method_name = method.__name__ if method else "unknown_method"
+        logger.info(f"Starting import path fragmentation test: {method_name}")
 
     def test_import_path_ssot_compliance(self):
         """Test that WebSocket Manager imports follow SSOT patterns."""
@@ -320,7 +321,8 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase, unittest.Te
         from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
         reset_manager_registry()
         
-        logger.info(f"Starting user isolation validation test: {method.__name__}")
+        method_name = method.__name__ if method else "unknown_method"
+        logger.info(f"Starting user isolation validation test: {method_name}")
 
     def teardown_method(self, method):
         """Clean up test environment."""

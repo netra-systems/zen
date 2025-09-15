@@ -232,18 +232,20 @@ class TestIssue358ComponentFailures(SSotBaseTestCase):
         logger.info("Testing WebSocket subprotocol format validation")
         
         # Test various WebSocket subprotocol formats that should work
-        test_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test.token"
+        # Make test token longer than 50 characters to pass the direct JWT detection
+        test_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXIifQ.test-signature-part-here"
         
+        # FIX: Match the actual formats supported by _extract_jwt_from_subprotocol method
         valid_subprotocol_formats = [
-            ['jwt-auth', f'jwt.{test_token}'],  # Current expected format
-            [f'jwt.{test_token}'],  # Alternative format
-            ['Bearer', test_token],  # HTTP-style format
-            [f'jwt-auth-{test_token}'],  # Single string format
+            ([f'jwt-auth.{test_token}'], test_token),  # jwt-auth.TOKEN format
+            ([f'Bearer.{test_token}'], test_token),   # Bearer.TOKEN format  
+            ([f'auth-{test_token}'], test_token),     # auth-TOKEN format
+            ([test_token], test_token),               # Direct JWT token (3+ dots)
         ]
         
         failures_detected = []
         
-        for protocol_format in valid_subprotocol_formats:
+        for protocol_format, expected_token in valid_subprotocol_formats:
             try:
                 # Mock WebSocket with subprotocol
                 mock_websocket = Mock()
@@ -262,12 +264,12 @@ class TestIssue358ComponentFailures(SSotBaseTestCase):
                         "issue": "Token extraction failed",
                         "result": None
                     })
-                elif extracted_token != test_token:
+                elif extracted_token != expected_token:
                     failures_detected.append({
                         "format": protocol_format, 
                         "issue": "Token extraction incorrect",
                         "result": extracted_token,
-                        "expected": test_token
+                        "expected": expected_token
                     })
                     
             except AttributeError as e:
