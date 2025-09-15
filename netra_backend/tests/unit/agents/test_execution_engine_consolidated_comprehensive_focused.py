@@ -48,9 +48,8 @@ from shared.isolated_environment import get_env
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
-from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
+from netra_backend.app.services.user_execution_context import UserExecutionContext, AgentExecutionContext
+from netra_backend.app.schemas.agent_result_types import AgentExecutionResult
 
 # Compatibility aliases
 ExecutionEngine = UserExecutionEngine

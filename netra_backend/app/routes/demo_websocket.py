@@ -24,6 +24,146 @@ logger = central_logger.get_logger(__name__)
 router = APIRouter(prefix="/api/demo", tags=["demo"])
 
 
+class WebSocketAdapter:
+    """Adapter to make WebSocket compatible with AgentWebSocketBridge"""
+
+    def __init__(self, websocket: WebSocket):
+        self.websocket = websocket
+
+    async def send_event(self, event_type: str, data: dict):
+        """Send WebSocket event to client"""
+        await self.websocket.send_json({
+            "type": event_type,
+            "timestamp": datetime.utcnow().isoformat(),
+            **data
+        })
+        logger.info(f"Demo WebSocket sent {event_type}: {data.get('run_id', 'unknown')}")
+
+    async def notify_agent_started(self, run_id: str, agent_name: str, context=None, **kwargs):
+        """Send agent started notification"""
+        await self.send_event("agent_started", {
+            "agent": agent_name,
+            "run_id": run_id,
+            "message": "Starting AI analysis..."
+        })
+
+    async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str = "", **kwargs):
+        """Send agent thinking notification"""
+        await self.send_event("agent_thinking", {
+            "agent": agent_name,
+            "run_id": run_id,
+            "message": reasoning or "Analyzing your request..."
+        })
+
+    async def notify_tool_executing(self, run_id: str, tool_name: str, agent_name: Optional[str] = None, parameters=None, **kwargs):
+        """Send tool executing notification"""
+        await self.send_event("tool_executing", {
+            "agent": agent_name or "Agent",
+            "run_id": run_id,
+            "tool": tool_name,
+            "message": f"Executing {tool_name}..."
+        })
+
+    async def notify_tool_completed(self, run_id: str, tool_name: str, result=None, agent_name: Optional[str] = None, **kwargs):
+        """Send tool completed notification"""
+        await self.send_event("tool_completed", {
+            "agent": agent_name or "Agent",
+            "run_id": run_id,
+            "tool": tool_name,
+            "message": f"Completed {tool_name}"
+        })
+
+    async def notify_agent_completed(self, run_id: str, agent_name: str, result=None, **kwargs):
+        """Send agent completed notification with final result"""
+        # Extract the response text from the result
+        response_text = "Analysis completed."
+        if result and isinstance(result, dict):
+            # Look for the actual response data
+            if "data" in result and isinstance(result["data"], dict):
+                result_data = result["data"]
+                if "results" in result_data:
+                    response_text = str(result_data["results"])
+                elif "reporting" in result_data:
+                    response_text = str(result_data["reporting"])
+            elif "results" in result:
+                response_text = str(result["results"])
+        elif result:
+            response_text = str(result)
+
+        await self.send_event("agent_completed", {
+            "agent": agent_name,
+            "run_id": run_id,
+            "message": response_text
+        })
+
+    async def notify_agent_error(self, run_id: str, agent_name: str, error: str, **kwargs):
+        """Send agent error notification"""
+        await self.send_event("agent_error", {
+            "agent": agent_name,
+            "run_id": run_id,
+            "error": error,
+            "message": f"Error in {agent_name}: {error}"
+        })
+
+
+class DemoWebSocketBridge(AgentWebSocketBridge):
+    """Demo WebSocket bridge that sends events directly to the demo WebSocket"""
+
+    def __init__(self, websocket_adapter, user_context):
+        super().__init__(user_context=user_context)
+        self.websocket_adapter = websocket_adapter
+        # Track connection state for demo purposes - assume active when bridge is created
+        self._connection_active = True
+
+    def is_connection_active(self, user_id: str) -> bool:
+        """
+        Check if WebSocket connection is active for the given user.
+
+        SSOT COMPLIANCE: Implements the required WebSocket protocol interface method
+        that is expected by unified_emitter.py for connection health validation.
+
+        For demo purposes, we consider the connection active as long as the bridge
+        exists and the user_id matches the demo user context.
+
+        Args:
+            user_id: User ID to check connection for
+
+        Returns:
+            bool: True if connection is active for this user, False otherwise
+        """
+        try:
+            # For demo bridge, connection is active if user matches context and bridge is initialized
+            if self.user_context and hasattr(self.user_context, 'user_id'):
+                is_active = str(user_id) == str(self.user_context.user_id) and self._connection_active
+                logger.debug(f"Demo bridge connection check for user {user_id}: {is_active}")
+                return is_active
+            else:
+                # Fallback: assume active for demo purposes if no specific user context
+                logger.debug(f"Demo bridge connection check (no context) for user {user_id}: True")
+                return self._connection_active
+        except Exception as e:
+            logger.warning(f"Error checking demo connection for user {user_id}: {e}")
+            return False
+
+    async def notify_agent_started(self, run_id: str, agent_name: str, **kwargs):
+        return await self.websocket_adapter.notify_agent_started(run_id, agent_name, **kwargs)
+
+    async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str = "", **kwargs):
+        return await self.websocket_adapter.notify_agent_thinking(run_id, agent_name, reasoning, **kwargs)
+
+    async def notify_tool_executing(self, run_id: str, tool_name: str, **kwargs):
+        return await self.websocket_adapter.notify_tool_executing(run_id, tool_name, **kwargs)
+
+    async def notify_tool_completed(self, run_id: str, tool_name: str, **kwargs):
+        return await self.websocket_adapter.notify_tool_completed(run_id, tool_name, **kwargs)
+
+    async def notify_agent_completed(self, run_id: str, agent_name: str, **kwargs):
+        return await self.websocket_adapter.notify_agent_completed(run_id, agent_name, **kwargs)
+
+    async def notify_agent_error(self, run_id: str, agent_name: str, error: str, **kwargs):
+        return await self.websocket_adapter.notify_agent_error(run_id, agent_name, error, **kwargs)
+
+
 async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, connection_id: str) -> None:
     """Execute real agent workflow with actual AI processing.
     
@@ -61,145 +201,9 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
                 audit_metadata={"demo_session": True, "connection_id": connection_id}
             )
             
-            # Create WebSocket bridge adapter that implements all required methods
-            class WebSocketAdapter:
-                """Adapter to make WebSocket compatible with AgentWebSocketBridge"""
-                
-                async def send_event(self, event_type: str, data: dict):
-                    """Send WebSocket event to client"""
-                    await websocket.send_json({
-                        "type": event_type,
-                        "timestamp": datetime.utcnow().isoformat(),
-                        **data
-                    })
-                    logger.info(f"Demo WebSocket sent {event_type}: {data.get('run_id', 'unknown')}")
-                
-                async def notify_agent_started(self, run_id: str, agent_name: str, context=None, **kwargs):
-                    """Send agent started notification"""
-                    await self.send_event("agent_started", {
-                        "agent": agent_name,
-                        "run_id": run_id,
-                        "message": "Starting AI analysis..."
-                    })
-                    
-                async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str = "", **kwargs):
-                    """Send agent thinking notification"""
-                    await self.send_event("agent_thinking", {
-                        "agent": agent_name,
-                        "run_id": run_id,
-                        "message": reasoning or "Analyzing your request..."
-                    })
-                    
-                async def notify_tool_executing(self, run_id: str, tool_name: str, agent_name: Optional[str] = None, parameters=None, **kwargs):
-                    """Send tool executing notification"""
-                    await self.send_event("tool_executing", {
-                        "agent": agent_name or "Agent",
-                        "run_id": run_id,
-                        "tool": tool_name,
-                        "message": f"Executing {tool_name}..."
-                    })
-                    
-                async def notify_tool_completed(self, run_id: str, tool_name: str, result=None, agent_name: Optional[str] = None, **kwargs):
-                    """Send tool completed notification"""
-                    await self.send_event("tool_completed", {
-                        "agent": agent_name or "Agent",
-                        "run_id": run_id,
-                        "tool": tool_name,
-                        "message": f"Completed {tool_name}"
-                    })
-                    
-                async def notify_agent_completed(self, run_id: str, agent_name: str, result=None, **kwargs):
-                    """Send agent completed notification with final result"""
-                    # Extract the response text from the result
-                    response_text = "Analysis completed."
-                    if result and isinstance(result, dict):
-                        # Look for the actual response data
-                        if "data" in result and isinstance(result["data"], dict):
-                            result_data = result["data"]
-                            if "results" in result_data:
-                                response_text = str(result_data["results"])
-                            elif "reporting" in result_data:
-                                response_text = str(result_data["reporting"])
-                        elif "results" in result:
-                            response_text = str(result["results"])
-                    elif result:
-                        response_text = str(result)
-                        
-                    await self.send_event("agent_completed", {
-                        "agent": agent_name,
-                        "run_id": run_id,
-                        "message": response_text
-                    })
-                    
-                async def notify_agent_error(self, run_id: str, agent_name: str, error: str, **kwargs):
-                    """Send agent error notification"""
-                    await self.send_event("agent_error", {
-                        "agent": agent_name,
-                        "run_id": run_id,
-                        "error": error,
-                        "message": f"Error in {agent_name}: {error}"
-                    })
-            
-            # Create a custom bridge that uses our WebSocket adapter
-            class DemoWebSocketBridge(AgentWebSocketBridge):
-                """Demo WebSocket bridge that sends events directly to the demo WebSocket"""
-
-                def __init__(self, websocket_adapter):
-                    super().__init__(user_context=user_context)
-                    self.websocket_adapter = websocket_adapter
-                    # Track connection state for demo purposes - assume active when bridge is created
-                    self._connection_active = True
-
-                def is_connection_active(self, user_id: str) -> bool:
-                    """
-                    Check if WebSocket connection is active for the given user.
-
-                    SSOT COMPLIANCE: Implements the required WebSocket protocol interface method
-                    that is expected by unified_emitter.py for connection health validation.
-
-                    For demo purposes, we consider the connection active as long as the bridge
-                    exists and the user_id matches the demo user context.
-
-                    Args:
-                        user_id: User ID to check connection for
-
-                    Returns:
-                        bool: True if connection is active for this user, False otherwise
-                    """
-                    try:
-                        # For demo bridge, connection is active if user matches context and bridge is initialized
-                        if self.user_context and hasattr(self.user_context, 'user_id'):
-                            is_active = str(user_id) == str(self.user_context.user_id) and self._connection_active
-                            logger.debug(f"Demo bridge connection check for user {user_id}: {is_active}")
-                            return is_active
-                        else:
-                            # Fallback: assume active for demo purposes if no specific user context
-                            logger.debug(f"Demo bridge connection check (no context) for user {user_id}: True")
-                            return self._connection_active
-                    except Exception as e:
-                        logger.warning(f"Error checking demo connection for user {user_id}: {e}")
-                        return False
-
-                async def notify_agent_started(self, run_id: str, agent_name: str, **kwargs):
-                    return await self.websocket_adapter.notify_agent_started(run_id, agent_name, **kwargs)
-
-                async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str = "", **kwargs):
-                    return await self.websocket_adapter.notify_agent_thinking(run_id, agent_name, reasoning, **kwargs)
-
-                async def notify_tool_executing(self, run_id: str, tool_name: str, **kwargs):
-                    return await self.websocket_adapter.notify_tool_executing(run_id, tool_name, **kwargs)
-
-                async def notify_tool_completed(self, run_id: str, tool_name: str, **kwargs):
-                    return await self.websocket_adapter.notify_tool_completed(run_id, tool_name, **kwargs)
-
-                async def notify_agent_completed(self, run_id: str, agent_name: str, **kwargs):
-                    return await self.websocket_adapter.notify_agent_completed(run_id, agent_name, **kwargs)
-
-                async def notify_agent_error(self, run_id: str, agent_name: str, error: str, **kwargs):
-                    return await self.websocket_adapter.notify_agent_error(run_id, agent_name, error, **kwargs)
-            
-            ws_adapter = WebSocketAdapter()
-            bridge = DemoWebSocketBridge(ws_adapter)
+            # Create WebSocket adapter and bridge using module-level classes
+            ws_adapter = WebSocketAdapter(websocket)
+            bridge = DemoWebSocketBridge(ws_adapter, user_context)
             
             # Get LLM manager with user context
             llm_manager = LLMManager(user_context)
