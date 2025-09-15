@@ -93,7 +93,7 @@ class TestServiceSecretAuthenticationRegression(SSotAsyncTestCase):
                 ws_url = self.backend_service_url.replace('http://', 'ws://') + '/ws'
                 headers = {'Authorization': f"Bearer {self.env.get('SERVICE_SECRET')}", 'X-Service-ID': 'backend-service'}
                 try:
-                    async with websockets.connect(ws_url, extra_headers=headers) as websocket:
+                    async with websockets.connect(ws_url, additional_headers=headers) as websocket:
                         await websocket.send('{"type": "test", "message": "auth test"}')
                         response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                         self.fail(f'WebSocket authentication should have failed with SERVICE_SECRET mismatch. Got successful response: {response}. This indicates Issue #1037 WebSocket regression is not reproduced.')

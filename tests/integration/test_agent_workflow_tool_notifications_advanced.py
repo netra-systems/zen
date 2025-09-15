@@ -99,7 +99,7 @@ class TestAgentWorkflowToolNotifications(DockerTestBase):
             auth_token = await self._create_test_auth_token()
             headers = {'Authorization': f'Bearer {auth_token}', 'User-Agent': 'IntegrationTest/1.0'}
             logger.info(f'Connecting to WebSocket: {self.websocket_url}')
-            websocket = await websockets.connect(self.websocket_url, extra_headers=headers, ping_interval=30, ping_timeout=10, close_timeout=5)
+            websocket = await websockets.connect(self.websocket_url, additional_headers=headers, ping_interval=30, ping_timeout=10, close_timeout=5)
             logger.info('WebSocket connection established successfully')
             return websocket
         except Exception as e:

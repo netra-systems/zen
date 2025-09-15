@@ -69,7 +69,8 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
         5. Response delivery
         """
         logger.info(' ALERT:  TESTING COMPLETE GOLDEN PATH AUTH SSOT VIOLATIONS')
-        if NoDockerModeDetector.is_no_docker_mode():
+        from test_framework.ssot.no_docker_mode_detector import get_no_docker_detector
+        if get_no_docker_detector().is_no_docker_mode():
             env = get_env()
             backend_url = env.get('BACKEND_URL', 'https://netra-backend-staging.ue.r.appspot.com')
             websocket_url = backend_url.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws'
