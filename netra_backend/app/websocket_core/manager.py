@@ -6,9 +6,9 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 CRITICAL: This is an SSOT compatibility layer that re-exports the unified WebSocket manager
 to maintain existing import paths while consolidating the actual implementation.
 
-PHASE 1 UPDATE: Now imports directly from unified_manager.py (SSOT)
+PHASE 1 SSOT CONSOLIDATION: Now imports from canonical websocket_manager.py (SSOT)
 - Legacy: from netra_backend.app.websocket_core.manager import WebSocketManager  
-- SSOT: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+- SSOT: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 Business Justification:
 - Maintains backward compatibility for existing tests and Golden Path functionality
@@ -17,8 +17,7 @@ Business Justification:
 """
 
 # ISSUE #824 REMEDIATION: Import from canonical SSOT path
-# OLD: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-# NEW: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+# SSOT CONSOLIDATION: websocket_manager.py is the canonical import point
 from netra_backend.app.websocket_core.websocket_manager import (
     UnifiedWebSocketManager,
     WebSocketConnection,

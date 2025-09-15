@@ -221,7 +221,7 @@ async def validate_no_duplicate_managers_for_user(user_context: Optional[Any]) -
     """
     user_key = _get_user_key(user_context)
     
-    async with _REGISTRY_LOCK:
+    with _REGISTRY_LOCK:
         # Check registry has at most one manager for this user
         registry_count = 1 if user_key in _USER_MANAGER_REGISTRY else 0
         
