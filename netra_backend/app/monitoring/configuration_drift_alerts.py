@@ -42,6 +42,12 @@ from netra_backend.app.monitoring.configuration_drift_monitor import (
     DriftSeverity,
     ConfigurationScope
 )
+from netra_backend.app.core.database_timeout_config import (
+    get_connection_monitor,
+    get_connection_performance_summary,
+    check_vpc_connector_performance,
+    register_connection_alert_handler
+)
 from shared.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
@@ -108,8 +114,11 @@ class ConfigurationDriftAlerting:
         self.alert_rules = self._initialize_alert_rules()
         self.alert_history: List[Dict[str, Any]] = []
         self.escalation_tracking: Dict[str, Dict[str, Any]] = {}
-        
-        logger.info("ConfigurationDriftAlerting initialized with business impact awareness")
+
+        # Register for database connection alerts
+        self._register_database_timeout_alerts()
+
+        logger.info("ConfigurationDriftAlerting initialized with business impact awareness and database timeout monitoring")
     
     def _initialize_alert_rules(self) -> List[AlertRule]:
         """Initialize alert rules based on business criticality."""
@@ -125,7 +134,43 @@ class ConfigurationDriftAlerting:
                 requires_acknowledgment=True,
                 auto_remediation_enabled=True
             ),
-            
+
+            # CRITICAL: Database timeout regression - Issue #1263 specific
+            AlertRule(
+                name="critical_database_timeout_regression",
+                severity_threshold=DriftSeverity.CRITICAL,
+                business_impact_threshold=80000.0,  # $80K+ MRR - Database issues affect all users
+                channels=[AlertChannel.PAGERDUTY, AlertChannel.SLACK, AlertChannel.EMAIL],
+                escalation_delay_minutes=2,  # Faster escalation for database issues
+                max_alerts_per_hour=15,  # Allow more alerts for critical database issues
+                requires_acknowledgment=True,
+                auto_remediation_enabled=False  # Database timeout issues require manual investigation
+            ),
+
+            # HIGH: Database performance degradation
+            AlertRule(
+                name="high_database_performance_degradation",
+                severity_threshold=DriftSeverity.HIGH,
+                business_impact_threshold=40000.0,  # $40K+ MRR
+                channels=[AlertChannel.SLACK, AlertChannel.JIRA, AlertChannel.EMAIL],
+                escalation_delay_minutes=10,
+                max_alerts_per_hour=8,
+                requires_acknowledgment=True,
+                auto_remediation_enabled=False  # Performance issues need investigation
+            ),
+
+            # HIGH: VPC connector performance issues
+            AlertRule(
+                name="high_vpc_connector_performance_degradation",
+                severity_threshold=DriftSeverity.HIGH,
+                business_impact_threshold=30000.0,  # $30K+ MRR
+                channels=[AlertChannel.SLACK, AlertChannel.JIRA],
+                escalation_delay_minutes=15,
+                max_alerts_per_hour=6,
+                requires_acknowledgment=True,
+                auto_remediation_enabled=False  # VPC issues require infrastructure investigation
+            ),
+
             # HIGH: Major functionality impacted
             AlertRule(
                 name="high_impact_authentication_drift",
@@ -137,7 +182,19 @@ class ConfigurationDriftAlerting:
                 requires_acknowledgment=True,
                 auto_remediation_enabled=True
             ),
-            
+
+            # MODERATE: Database timeout warning thresholds
+            AlertRule(
+                name="moderate_database_timeout_warning",
+                severity_threshold=DriftSeverity.MODERATE,
+                business_impact_threshold=15000.0,  # $15K+ MRR
+                channels=[AlertChannel.SLACK, AlertChannel.DASHBOARD],
+                escalation_delay_minutes=20,
+                max_alerts_per_hour=6,
+                requires_acknowledgment=False,
+                auto_remediation_enabled=False
+            ),
+
             # MODERATE: Significant but manageable impact
             AlertRule(
                 name="moderate_configuration_drift",
@@ -149,7 +206,7 @@ class ConfigurationDriftAlerting:
                 requires_acknowledgment=False,
                 auto_remediation_enabled=False  # Manual review for moderate issues
             ),
-            
+
             # LOW: Informational alerts
             AlertRule(
                 name="low_impact_drift_tracking",
