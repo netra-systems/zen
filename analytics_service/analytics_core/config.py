@@ -36,8 +36,7 @@ class AnalyticsConfig:
             # CRITICAL: Clear cache to pick up test environment variables
             self.env.clear_cache()
             # CRITICAL: Set test context marker for IsolatedEnvironment compatibility
-            import os
-            os.environ['PYTEST_CURRENT_TEST'] = 'analytics_config_test'
+            self.env.set('PYTEST_CURRENT_TEST', 'analytics_config_test')
 
         self._load_configuration()
         self._validate_configuration()

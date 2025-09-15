@@ -400,8 +400,13 @@ if __name__ == "__main__":
     # Run tests directly if called as script
     print("Running minimal auth service unit tests...")
     
-    # Set basic environment for tests
-    os.environ['ENVIRONMENT'] = 'test'
+    # Set basic environment for tests using IsolatedEnvironment
+    import sys
+    from pathlib import Path
+    sys.path.append(str(Path(__file__).parent.parent))
+    from shared.isolated_environment import get_env
+    env = get_env()
+    env.set('ENVIRONMENT', 'test')
     
     # Run with more detailed output
     unittest.main(argv=[''], exit=False, verbosity=2)
