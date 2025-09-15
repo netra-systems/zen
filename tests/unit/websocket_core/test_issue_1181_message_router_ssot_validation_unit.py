@@ -15,7 +15,7 @@ import pytest
 from typing import Dict, Any, List, Set
 from unittest.mock import patch
 
-from test_framework.base_test_case import BaseTestCase
+from test_framework.ssot.base_test_case import SSotBaseTestCase as BaseTestCase
 
 
 class TestIssue1181MessageRouterSSOTValidation(BaseTestCase):

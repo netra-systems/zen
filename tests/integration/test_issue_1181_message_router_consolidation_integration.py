@@ -16,7 +16,7 @@ import asyncio
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock, MagicMock
 
-from test_framework.base_integration_test import BaseIntegrationTest
+from test_framework.ssot.base_test_case import SSotAsyncTestCase as BaseIntegrationTest
 from test_framework.websocket_helpers import WebSocketTestClient
 from shared.isolated_environment import get_env
 

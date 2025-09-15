@@ -17,7 +17,7 @@ import traceback
 from typing import Dict, Any, List
 from unittest.mock import patch
 
-from test_framework.base_test_case import BaseTestCase
+from test_framework.ssot.base_test_case import SSotBaseTestCase as BaseTestCase
 
 
 class TestIssue1181QualityRouterImportFailure(BaseTestCase):
