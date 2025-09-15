@@ -194,6 +194,28 @@ def require_docker_services_smart() -> None:
         pytest.skip(f"Neither Docker nor staging environment available: {e}")
 
 
+def is_docker_available() -> bool:
+    """Check if Docker is available - wrapper for UnifiedDockerManager.
+
+    This function provides a unified interface for mission-critical tests to check
+    Docker availability through the SSOT UnifiedDockerManager pattern.
+
+    Returns:
+        bool: True if Docker is available and functional
+
+    Business Value:
+        - Enables proper test environment detection for $500K+ ARR validation
+        - Supports Golden Path first message experience testing
+        - Maintains SSOT compliance through UnifiedDockerManager delegation
+    """
+    try:
+        manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
+        return manager.is_docker_available()
+    except Exception as e:
+        logger.warning(f"Docker availability check failed: {e}")
+        return False
+
+
 def validate_staging_environment_health(websocket_url: str) -> bool:
     """Validate staging environment is healthy and responsive.
     
