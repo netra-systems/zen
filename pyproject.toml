@@ -197,6 +197,8 @@ markers = [
     "migration: Migration tests",
     "models: Model tests",
     "ssot_validation: SSOT validation tests",
+    "ssot_orchestration: SSOT orchestration and coordination tests",
+    "ssot_violation: SSOT violation detection tests",
     "toolregistry: Tool registry tests",
     "docker_required: Tests that require Docker services",
     "no_docker: Tests that work without Docker",
@@ -685,6 +687,8 @@ markers = [
     "issue_1058_broadcast_consolidation: Issue #1058 broadcast consolidation specific tests",
     "integration_demo: Integration demonstration and workflow tests",
     "ssl_security: SSL/TLS security validation tests",
+    "real_time_value: Real-time value delivery and performance tests",
+    "quality_assurance: Quality assurance and testing validation tests",
 ]
 
 # Coverage settings
