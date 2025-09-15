@@ -15,7 +15,7 @@ from netra_backend.app.dependencies import DbDep, get_llm_manager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core import create_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import create_websocket_manager
 
 
 def get_agent_service(
