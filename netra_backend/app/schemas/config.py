@@ -1592,6 +1592,44 @@ class StagingConfig(AppConfig):
                     "or #removed-legacyis provided."
                 )
     
+    def _load_sentry_config_from_environment(self, env, data: dict) -> None:
+        """Load Sentry configuration from environment variables for staging."""
+        # Load Sentry configuration from environment
+        sentry_mappings = {
+            'SENTRY_DSN': 'sentry_dsn',
+            'SENTRY_ENVIRONMENT': 'sentry_environment',
+            'SENTRY_RELEASE': 'sentry_release',
+            'SENTRY_SERVER_NAME': 'sentry_server_name',
+            'SENTRY_SAMPLE_RATE': 'sentry_sample_rate',
+            'SENTRY_TRACES_SAMPLE_RATE': 'sentry_traces_sample_rate',
+            'SENTRY_PROFILES_SAMPLE_RATE': 'sentry_profiles_sample_rate',
+            'SENTRY_DEBUG': 'sentry_debug',
+            'SENTRY_SEND_DEFAULT_PII': 'sentry_send_default_pii',
+        }
+        
+        for env_var, field_name in sentry_mappings.items():
+            value = env.get(env_var)
+            if value:
+                # Convert string values to appropriate types
+                if field_name in ['sentry_sample_rate', 'sentry_traces_sample_rate', 'sentry_profiles_sample_rate']:
+                    try:
+                        data[field_name] = float(value)
+                    except ValueError:
+                        pass  # Keep default if conversion fails
+                elif field_name in ['sentry_debug', 'sentry_send_default_pii']:
+                    data[field_name] = value.lower() in ('true', '1', 'yes', 'on')
+                else:
+                    data[field_name] = value
+        
+        # Set defaults for staging if not provided
+        if 'sentry_environment' not in data and not env.get('SENTRY_ENVIRONMENT'):
+            data['sentry_environment'] = 'staging'
+        
+        # Staging-specific Sentry settings
+        if not env.get('SENTRY_DEBUG'):
+            data['sentry_debug'] = False  # Disable debug in staging for performance
+        if not env.get('SENTRY_TRACES_SAMPLE_RATE'):
+            data['sentry_traces_sample_rate'] = 0.1  # Moderate sampling in staging
 
 class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""
