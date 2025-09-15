@@ -16,6 +16,17 @@ Business Justification:
 - Supports mission-critical Golden Path user flow ($500K+ ARR dependency)
 """
 
+import warnings
+
+# ISSUE #1182 REMEDIATION: Add deprecation warning for non-canonical imports
+warnings.warn(
+    "ISSUE #1182: Importing from 'netra_backend.app.websocket_core.manager' is deprecated. "
+    "Use 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager' instead. "
+    "This import path will be removed in Phase 2 of SSOT consolidation.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 # ISSUE #824 REMEDIATION: Import from canonical SSOT path
 # SSOT CONSOLIDATION: websocket_manager.py is the canonical import point
 from netra_backend.app.websocket_core.websocket_manager import (
