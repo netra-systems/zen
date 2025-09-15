@@ -1,0 +1,50 @@
+## Impact
+WebSocket Manager architecture violations detected in production logs - Multiple WebSocket Manager implementations violating Single Source of Truth principle, causing potential race conditions and inconsistent state management.
+
+## Current Behavior
+GCP logs show SSOT warnings: "Found other WebSocket Manager classes: ['netra_backend.app.websocket_core.websocket_manager.UnifiedWebSocketManager', 'netra_backend.app.websocket_core.websocket_manager.WebSocketManager']"
+- 10+ occurrences in last 1 hour
+- Context: netra_backend.app.websocket_core
+- Pattern repeating in production environment
+
+## Expected Behavior
+Single WebSocket Manager implementation following SSOT pattern to prevent:
+- Race conditions between manager instances
+- Inconsistent state across WebSocket connections
+- Debugging complexity from multiple code paths
+
+## Technical Details
+**Raw Log Data:**
+```json
+{
+  "timestamp": "2025-09-15T21:30:15.000000+00:00",
+  "severity": "WARNING",
+  "message": "SSOT WARNING: Found other WebSocket Manager classes",
+  "context": {
+    "service": "netra-service",
+    "name": "netra_backend.app.websocket_core"
+  }
+}
+```
+
+**Identified WebSocket Manager Classes:**
+- File: `netra_backend/app/websocket_core/websocket_manager.py:175`
+- Classes: `UnifiedWebSocketManager`, `WebSocketManager`, `_WebSocketManagerFactory`
+- File: `netra_backend/app/websocket_core/unified_manager.py:95`
+- Class: `_UnifiedWebSocketManagerImplementation`
+
+## Refactoring Steps
+1. **Audit all WebSocket Manager implementations** across websocket_core module
+2. **Consolidate to single canonical WebSocket Manager** with proper SSOT pattern
+3. **Update import statements** to reference single source
+4. **Deprecate/remove duplicate manager classes** with proper migration path
+5. **Update tests** to validate SSOT compliance
+6. **Monitor production logs** to confirm SSOT warnings eliminated
+
+## Related Work
+- References ongoing SSOT consolidation efforts (Issue #1186, #1182)
+- Multiple test files already exist for SSOT validation in `tests/unit/websocket_ssot/`
+- Architecture compliance monitoring in place detecting these violations
+
+**Priority:** P1 - Architecture compliance issue affecting code quality and maintainability
+**Environment:** Production (GCP staging environment)

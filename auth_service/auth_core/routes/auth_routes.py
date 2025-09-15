@@ -22,26 +22,26 @@ from shared.constants.service_identifiers import SERVICE_ID
 # Import lazy initialization for AuthService to prevent race conditions
 from auth_service.auth_core.core.lazy_auth_service import get_auth_service
 
+# Get environment manager
+env = get_env()
+
+logger = logging.getLogger(__name__)
+
 # Import MockAuthService for testing only in appropriate environments
 # SECURITY FIX: Only import MockAuthService in development/test environments
 MockAuthService = None
 try:
     from auth_service.auth_core.config import AuthConfig
-    env = AuthConfig.get_environment()
-    if env in ["development", "test"]:
+    auth_env = AuthConfig.get_environment()
+    if auth_env in ["development", "test"]:
         from auth_service.test_framework.mock_auth_service import MockAuthService
-        logger.info(f"MockAuthService imported for {env} environment")
+        logger.info(f"MockAuthService imported for {auth_env} environment")
     else:
-        logger.info(f"MockAuthService not available in {env} environment (security protection)")
+        logger.info(f"MockAuthService not available in {auth_env} environment (security protection)")
 except ImportError as e:
     logger.debug(f"MockAuthService not available: {e}")
 except Exception as e:
     logger.warning(f"Error checking MockAuthService availability: {e}")
-
-# Get environment manager
-env = get_env()
-
-logger = logging.getLogger(__name__)
 
 # Create router instances
 router = APIRouter()

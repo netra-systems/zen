@@ -1,0 +1,1739 @@
+{
+  "timestamp": "2025-09-15T14:34:57.294085",
+  "total_logs": 377,
+  "issues_by_severity": {
+    "ERROR": {
+      "database": 80,
+      "timeout": 72,
+      "connection": 53,
+      "startup": 42,
+      "auth": 18
+    },
+    "WARNING": {},
+    "NOTICE": {},
+    "INFO": {
+      "timeout": 7,
+      "memory": 2
+    }
+  },
+  "top_errors": [],
+  "recurring_patterns": [
+    {
+      "message": "{\"@type\": \"type.googleapis.com/google.cloud.audit.AuditLog\", \"authenticationInfo\": {\"principalEmail\": \"github-staging-deployer@netra-staging.iam.gserviceaccount.com\", \"serviceAccountKeyName\": \"//iam.g",
+      "count": 62
+    },
+    {
+      "message": "Container called exit(3).",
+      "count": 19
+    },
+    {
+      "message": "Sentry SDK not available - install sentry-sdk[fastapi] to enable error tracking",
+      "count": 17
+    },
+    {
+      "message": "SERVICE_ID contained whitespace - sanitized from 'netra-backend\\n' to 'netra-backend'",
+      "count": 17
+    },
+    {
+      "message": "SSOT WARNING: Found other WebSocket Manager classes: ['netra_backend.app.websocket_core.websocket_manager.UnifiedWebSocketManager', 'netra_backend.app.websocket_core.websocket_manager.WebSocketManager",
+      "count": 17
+    },
+    {
+      "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+      "count": 15
+    },
+    {
+      "message": "Continuing without migrations",
+      "count": 15
+    },
+    {
+      "message": "{\"@type\": \"type.googleapis.com/google.cloud.audit.AuditLog\", \"authenticationInfo\": {\"principalEmail\": \"netra-staging-deploy@netra-staging.iam.gserviceaccount.com\", \"serviceAccountKeyName\": \"//iam.goog",
+      "count": 15
+    },
+    {
+      "message": "Application startup failed. Exiting.",
+      "count": 9
+    },
+    {
+      "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+      "count": 9
+    }
+  ],
+  "service_issues": {
+    "netra-backend-staging": [
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-15T21:34:14.497992+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:34:14.497902+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:34:14.497902+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:34:14.467384+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:34:14.467384+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:34:14.467384+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:34:14.467384+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:34:14.332169+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:34:14.332169+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:34:14.332060+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:34:14.332060+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:34:04.135798+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:34:04.135798+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-15T21:33:11.739121+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:33:11.738688+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:33:11.738688+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:33:11.724993+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:33:11.724993+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:33:11.724993+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:33:11.724993+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:33:11.590993+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:33:11.590993+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:33:11.590756+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:33:11.590756+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:33:01.414140+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:33:01.414140+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-15T21:32:04.122987+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:32:04.122977+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:32:04.122977+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:32:04.105771+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:32:04.105771+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:32:04.105771+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:32:04.105771+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:32:03.978253+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:32:03.978253+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:32:03.978179+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:32:03.978179+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:31:53.794818+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:31:53.794818+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-15T21:30:57.217527+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:30:57.217511+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:30:57.217511+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:30:57.191991+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:30:57.191991+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:30:57.191991+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:30:57.191991+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:30:57.066836+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:30:57.066836+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:30:57.066712+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:30:57.066712+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:30:46.850189+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:30:46.850189+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-15T21:29:49.468627+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:29:49.468618+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:29:49.468618+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:29:49.459420+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:29:49.459420+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:29:49.459420+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:29:49.459420+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:29:49.338224+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:29:49.338224+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:29:49.338162+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:29:49.338162+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:29:39.180480+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:29:39.180480+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-15T21:28:44.888286+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:28:44.888277+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:28:44.888277+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:28:44.876247+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:28:44.876247+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:28:44.876247+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:28:44.876247+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:28:44.753127+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:28:44.753127+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:28:44.753106+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:28:44.753106+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:28:34.622673+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:28:34.622673+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-15T21:27:41.598201+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:27:41.598046+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:27:41.598046+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:27:41.582827+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:27:41.582827+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:27:41.582827+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:27:41.582827+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:27:41.456956+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:27:41.456956+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:27:41.456801+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:27:41.456801+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:27:31.264584+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:27:31.264584+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-15T21:26:36.900033+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:26:36.899964+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:26:36.899964+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:26:36.877485+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:26:36.877485+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:26:36.877485+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:26:36.877485+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:26:36.736879+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:26:36.736879+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:26:36.735176+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:26:36.735176+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:26:26.500342+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to run migrations: (psycopg2.OperationalError) connection to server on socket \"/cloudsql/netra-staging:us-central1:staging-shared-postgres/.s.PGSQL.5432\" failed: server closed the connection un",
+        "timestamp": "2025-09-15T21:26:26.500342+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Application startup failed. Exiting.",
+        "timestamp": "2025-09-15T21:25:30.296708+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:25:30.296690+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "uvicorn-compatible session middleware error: CRITICAL STARTUP FAILURE: Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES",
+        "timestamp": "2025-09-15T21:25:30.296690+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:25:30.285884+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:25:30.285884+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:25:30.285884+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", line 500, in wait_for\\n    return fut.result()\\n           ^^^^^^^^^^^^\\n  File \"/app/netra_backend/app/startup",
+        "timestamp": "2025-09-15T21:25:30.285884+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:25:30.158981+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": " FAIL:  PHASE FAILED: DATABASE - Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL inst",
+        "timestamp": "2025-09-15T21:25:30.158981+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:25:30.158967+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Database initialization timeout after 25.0s in staging environment. This may indicate Cloud SQL connection issues. Check POSTGRES_HOST configuration and Cloud SQL instance accessibility.",
+        "timestamp": "2025-09-15T21:25:30.158967+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "memory",
+        "message": "ThreadCleanupManager initialized for Issue #601 memory leak prevention",
+        "timestamp": "2025-09-15T21:34:40.291401+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "memory",
+        "message": "Thread cleanup hooks installed for Issue #601 memory leak prevention",
+        "timestamp": "2025-09-15T21:34:40.291187+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "timeout",
+        "message": "Enhanced GCP WebSocket Readiness Middleware initialized (Issue #449) - Environment: staging, GCP: True, Cloud Run: True, Timeout: 90.0s, uvicorn-compatible: True",
+        "timestamp": "2025-09-15T21:34:40.291022+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "timeout",
+        "message": "Enhanced GCP WebSocket readiness middleware added for staging environment (Issue #449, timeout: 90.0s)",
+        "timestamp": "2025-09-15T21:34:35.352342+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "timeout",
+        "message": "[BUSINESS] IMPACT: $200K+ MRR protected with valid timeout hierarchy",
+        "timestamp": "2025-09-15T21:34:35.227928+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "timeout",
+        "message": "[HIERARCHY] TIMEOUT HIERARCHY: [VALID] (gap: 3s)",
+        "timestamp": "2025-09-15T21:34:35.227785+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "timeout",
+        "message": "[AGENT] AGENT EXECUTION TIMEOUT: 16s",
+        "timestamp": "2025-09-15T21:34:35.223811+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "timeout",
+        "message": "[TIME] WEBSOCKET RECV TIMEOUT: 19s",
+        "timestamp": "2025-09-15T21:34:35.223429+00:00",
+        "severity": "INFO"
+      },
+      {
+        "type": "timeout",
+        "message": "CloudNativeTimeoutManager - Issue #586 Enhanced Environment Detection",
+        "timestamp": "2025-09-15T21:34:35.222591+00:00",
+        "severity": "INFO"
+      }
+    ],
+    "netra-auth-service": [
+      {
+        "type": "connection",
+        "message": "Default STARTUP TCP probe failed 1 time consecutively for container \"netra-auth-service-1\" on port 8080. The instance was not started.\nConnection failed with status CANCELLED.",
+        "timestamp": "2025-09-15T21:31:56.462754+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Default STARTUP TCP probe failed 1 time consecutively for container \"netra-auth-service-1\" on port 8080. The instance was not started.\nConnection failed with status CANCELLED.",
+        "timestamp": "2025-09-15T21:31:56.462754+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:52.762478+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:52.762478+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:52.762478+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:52.762478+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:52.762478+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:52.762459+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:52.762459+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:52.762459+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:52.762459+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:52.762459+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:31:52.762446+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:31:52.762446+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:31:52.762446+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-15T21:31:52.762430+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-15T21:31:52.762430+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:52.748150+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:52.748150+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:52.748150+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:52.748150+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:52.748150+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:31:52.748112+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:31:52.748112+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:31:52.748112+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Default STARTUP TCP probe failed 1 time consecutively for container \"netra-auth-service-1\" on port 8080. The instance was not started.\nConnection failed with status CANCELLED.",
+        "timestamp": "2025-09-15T21:31:34.086001+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Default STARTUP TCP probe failed 1 time consecutively for container \"netra-auth-service-1\" on port 8080. The instance was not started.\nConnection failed with status CANCELLED.",
+        "timestamp": "2025-09-15T21:31:34.086001+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:29.769323+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:29.769323+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:29.769323+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:29.769323+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:29.769323+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:29.769303+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:29.769303+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:29.769303+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:29.769303+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:29.769303+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:31:29.769254+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:31:29.769254+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:31:29.769254+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-15T21:31:29.769241+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-15T21:31:29.769241+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:29.755853+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:29.755853+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:29.755853+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:29.755853+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:29.755853+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:31:29.755798+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:31:29.755798+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:31:29.755798+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Default STARTUP TCP probe failed 1 time consecutively for container \"netra-auth-service-1\" on port 8080. The instance was not started.\nConnection failed with status CANCELLED.",
+        "timestamp": "2025-09-15T21:31:10.681907+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Default STARTUP TCP probe failed 1 time consecutively for container \"netra-auth-service-1\" on port 8080. The instance was not started.\nConnection failed with status CANCELLED.",
+        "timestamp": "2025-09-15T21:31:10.681907+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:05.666391+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:05.666391+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:05.666391+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:05.666391+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:31:05.666391+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:05.666378+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:05.666378+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:05.666378+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:05.666378+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:31:05.666378+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:31:05.666366+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:31:05.666366+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:31:05.666366+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-15T21:31:05.666352+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-15T21:31:05.666352+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:05.652353+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:05.652353+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:05.652353+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:05.652353+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:31:05.652353+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:31:05.652179+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:31:05.652179+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:31:05.652179+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Default STARTUP TCP probe failed 1 time consecutively for container \"netra-auth-service-1\" on port 8080. The instance was not started.\nConnection failed with status CANCELLED.",
+        "timestamp": "2025-09-15T21:30:46.770791+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Default STARTUP TCP probe failed 1 time consecutively for container \"netra-auth-service-1\" on port 8080. The instance was not started.\nConnection failed with status CANCELLED.",
+        "timestamp": "2025-09-15T21:30:46.770791+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:41.700504+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:41.700504+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:41.700504+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:41.700504+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:41.700504+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:41.700486+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:41.700486+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:41.700486+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:41.700486+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:41.700486+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:30:41.700447+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:30:41.700447+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:30:41.700447+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-15T21:30:41.700430+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-15T21:30:41.700430+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:41.686815+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:41.686815+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:41.686815+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:41.686815+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:41.686815+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:30:41.686694+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:30:41.686694+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:30:41.686694+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Default STARTUP TCP probe failed 1 time consecutively for container \"netra-auth-service-1\" on port 8080. The instance was not started.\nConnection failed with status CANCELLED.",
+        "timestamp": "2025-09-15T21:30:38.511626+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Default STARTUP TCP probe failed 1 time consecutively for container \"netra-auth-service-1\" on port 8080. The instance was not started.\nConnection failed with status CANCELLED.",
+        "timestamp": "2025-09-15T21:30:38.511626+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:32.897941+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:32.897941+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:32.897941+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:32.897941+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:32.897941+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:32.897929+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:32.897929+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:32.897929+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:32.897929+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:32.897929+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:30:32.897918+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:30:32.897918+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:30:32.897918+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-15T21:30:32.897906+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-15T21:30:32.897906+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:32.842667+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:32.842667+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:32.842667+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:32.842667+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:32.842667+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:30:32.842638+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:30:32.842638+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:30:32.842638+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Default STARTUP TCP probe failed 1 time consecutively for container \"netra-auth-service-1\" on port 8080. The instance was not started.\nConnection failed with status CANCELLED.",
+        "timestamp": "2025-09-15T21:30:23.259603+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Default STARTUP TCP probe failed 1 time consecutively for container \"netra-auth-service-1\" on port 8080. The instance was not started.\nConnection failed with status CANCELLED.",
+        "timestamp": "2025-09-15T21:30:23.259603+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:18.574354+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:18.574354+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:18.574354+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:18.574354+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/home/netra/.local/lib/python3.11/site-packages/starlette/routing.py\", line 677, in lifespan\n    async with self.lifespan_context(app) as maybe_state:\n  File",
+        "timestamp": "2025-09-15T21:30:18.574354+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:18.574332+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:18.574332+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:18.574332+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:18.574332+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/main.py\", line 285, in lifespan\n    await auth_db.initialize()\n  File \"/app/auth_service/auth_core/database/connection.py\", line 126, in in",
+        "timestamp": "2025-09-15T21:30:18.574332+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:30:18.574313+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:30:18.574313+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 72, in initialize\n    raise RuntimeError(\nRuntimeError: Database connection validation timeout exce",
+        "timestamp": "2025-09-15T21:30:18.574313+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-15T21:30:18.574287+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Traceback (most recent call last):\n  File \"/app/auth_service/auth_core/database/connection.py\", line 67, in initialize\n    await asyncio.wait_for(\n  File \"/usr/local/lib/python3.11/asyncio/tasks.py\", ",
+        "timestamp": "2025-09-15T21:30:18.574287+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:18.546327+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:18.546327+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "auth",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:18.546327+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:18.546327+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "startup",
+        "message": "FAIL:  AUTH DATABASE: Connection FAILED - Auth database initialization failed: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload",
+        "timestamp": "2025-09-15T21:30:18.546327+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "connection",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:30:18.546290+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "database",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:30:18.546290+00:00",
+        "severity": "ERROR"
+      },
+      {
+        "type": "timeout",
+        "message": "Failed to initialize auth database: Database connection validation timeout exceeded (15s). This may indicate network connectivity issues or database overload.",
+        "timestamp": "2025-09-15T21:30:18.546290+00:00",
+        "severity": "ERROR"
+      }
+    ]
+  },
+  "http_errors": [
+    {
+      "status": 503,
+      "url": "https://netra-backend-staging-701982941522.us-central1.run.app/health",
+      "method": "GET",
+      "timestamp": "2025-09-15T21:32:27.337771+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 503,
+      "url": "https://api.staging.netrasystems.ai/health/ready",
+      "method": "GET",
+      "timestamp": "2025-09-15T21:32:23.532369+00:00",
+      "service": "netra-backend-staging"
+    },
+    {
+      "status": 503,
+      "url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws/test-user",
+      "method": "GET",
+      "timestamp": "2025-09-15T21:26:21.647813+00:00",
+      "service": "netra-backend-staging"
+    }
+  ],
+  "connection_issues": [],
+  "database_issues": [],
+  "websocket_issues": [],
+  "auth_issues": []
+}

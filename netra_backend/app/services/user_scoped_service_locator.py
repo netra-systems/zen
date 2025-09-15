@@ -543,25 +543,23 @@ class ServiceLocatorSingletonAdapter:
         return self.user_scoped_locator.clear()
 
 
-# Global factory instance for creating user-scoped locators
-_factory_instance: Optional[ServiceLocatorFactory] = None
-_factory_lock = threading.RLock()
-
+# SINGLETON ELIMINATION (Issue #1186 Phase 3): Removed global factory instance
+# Factory instances are now created per-request to prevent user isolation violations
 
 def get_service_locator_factory() -> ServiceLocatorFactory:
     """
-    Get the global ServiceLocatorFactory instance.
-    
+    Create a new ServiceLocatorFactory instance per request.
+
+    SINGLETON ELIMINATION: This function now creates a fresh factory instance
+    for each call, ensuring proper user isolation and preventing cross-user
+    contamination of service location state.
+
     Returns:
-        ServiceLocatorFactory instance
+        ServiceLocatorFactory: Fresh factory instance
     """
-    global _factory_instance
-    
-    with _factory_lock:
-        if _factory_instance is None:
-            _factory_instance = ServiceLocatorFactory()
-        
-        return _factory_instance
+    # Issue #1186 Phase 3: Create new factory instance per request
+    # This eliminates the singleton pattern that violated user isolation
+    return ServiceLocatorFactory()
 
 
 def create_user_service_locator(user_context: UserExecutionContext) -> UserScopedServiceLocator:

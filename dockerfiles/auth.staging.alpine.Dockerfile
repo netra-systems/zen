@@ -91,14 +91,14 @@ ENTRYPOINT ["/sbin/tini", "--"]
 
 # Optimized health check for staging validation
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:8081/health || exit 1
+    CMD curl -f http://localhost:8080/health || exit 1
 
 # Expose auth service port
-EXPOSE 8081
+EXPOSE 8080
 
 # Optimized startup command for staging
 CMD ["sh", "-c", "\
     echo '[Staging] Starting Alpine-optimized auth service...' && \
     echo '[Staging] Memory limit: 256MB (reduced from 512MB)' && \
     echo '[Staging] Environment: ${ENVIRONMENT}' && \
-    exec python -m auth_service.main"]
+    exec python auth_service/main.py"]

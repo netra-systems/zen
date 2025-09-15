@@ -1,0 +1,58 @@
+{
+  "issue": "#1082 Docker Infrastructure Build Failures",
+  "test_timestamp": "2025-09-15T14:53:00Z",
+  "issues_found": [
+    "backend.alpine.Dockerfile:57 - COPY source missing: --chown=netra:netra",
+    "auth.alpine.Dockerfile:45 - COPY source missing: --chown=netra:netra",
+    "frontend.alpine.Dockerfile:21 - COPY source missing: frontend/package*.json",
+    "frontend.alpine.Dockerfile:55 - COPY source missing: --chown=nextjs:nodejs",
+    "frontend.alpine.Dockerfile:56 - COPY source missing: --chown=nextjs:nodejs",
+    "frontend.alpine.Dockerfile:57 - COPY source missing: --chown=nextjs:nodejs",
+    "backend.staging.alpine.Dockerfile:69 - COPY source missing: --chown=netra:netra",
+    "auth.staging.alpine.Dockerfile:62 - COPY source missing: --chown=netra:netra",
+    "frontend.staging.alpine.Dockerfile:30 - COPY source missing: frontend/package*.json",
+    "frontend.staging.alpine.Dockerfile:49 - COPY source missing: frontend/next-env.d.ts*",
+    "frontend.staging.alpine.Dockerfile:110 - COPY source missing: --chown=nextjs:nodejs",
+    "frontend.staging.alpine.Dockerfile:111 - COPY source missing: --chown=nextjs:nodejs",
+    "frontend.staging.alpine.Dockerfile:112 - COPY source missing: --chown=nextjs:nodejs",
+    "Found problematic files that can cause cache issues: ['C:\\\\netra-apex\\\\netra_backend\\\\__pycache__', 'C:\\\\netra-apex\\\\netra_backend\\\\app\\\\__pycache__', 'C:\\\\netra-apex\\\\netra_backend\\\\tests\\\\__pycache__', 'C:\\\\netra-apex\\\\netra_backend\\\\__pycache__\\\\conftest.cpython-312-pytest-8.4.1.pyc', 'C:\\\\netra-apex\\\\netra_backend\\\\__pycache__\\\\__init__.cpython-312.pyc', 'C:\\\\netra-apex\\\\netra_backend\\\\app\\\\__pycache__\\\\auth_dependencies.cpython-312.pyc']"
+  ],
+  "test_results": {
+    "netra_backend_exists": true,
+    "netra_backend_readable": true,
+    "found_dockerfiles": [
+      "backend.alpine.Dockerfile",
+      "auth.alpine.Dockerfile",
+      "frontend.alpine.Dockerfile",
+      "backend.staging.alpine.Dockerfile",
+      "auth.staging.alpine.Dockerfile",
+      "frontend.staging.alpine.Dockerfile"
+    ],
+    "missing_dockerfiles": [],
+    "copy_issues": [
+      "backend.alpine.Dockerfile:57 - COPY source missing: --chown=netra:netra",
+      "auth.alpine.Dockerfile:45 - COPY source missing: --chown=netra:netra",
+      "frontend.alpine.Dockerfile:21 - COPY source missing: frontend/package*.json",
+      "frontend.alpine.Dockerfile:55 - COPY source missing: --chown=nextjs:nodejs",
+      "frontend.alpine.Dockerfile:56 - COPY source missing: --chown=nextjs:nodejs",
+      "frontend.alpine.Dockerfile:57 - COPY source missing: --chown=nextjs:nodejs",
+      "backend.staging.alpine.Dockerfile:69 - COPY source missing: --chown=netra:netra",
+      "auth.staging.alpine.Dockerfile:62 - COPY source missing: --chown=netra:netra",
+      "frontend.staging.alpine.Dockerfile:30 - COPY source missing: frontend/package*.json",
+      "frontend.staging.alpine.Dockerfile:49 - COPY source missing: frontend/next-env.d.ts*",
+      "frontend.staging.alpine.Dockerfile:110 - COPY source missing: --chown=nextjs:nodejs",
+      "frontend.staging.alpine.Dockerfile:111 - COPY source missing: --chown=nextjs:nodejs",
+      "frontend.staging.alpine.Dockerfile:112 - COPY source missing: --chown=nextjs:nodejs"
+    ],
+    "dockerignore_exists": true,
+    "dockerignore_path": "C:\\netra-apex\\docker\\.dockerignore",
+    "problematic_files": [
+      "C:\\netra-apex\\netra_backend\\__pycache__",
+      "C:\\netra-apex\\netra_backend\\app\\__pycache__",
+      "C:\\netra-apex\\netra_backend\\tests\\__pycache__",
+      "C:\\netra-apex\\netra_backend\\__pycache__\\conftest.cpython-312-pytest-8.4.1.pyc",
+      "C:\\netra-apex\\netra_backend\\__pycache__\\__init__.cpython-312.pyc",
+      "C:\\netra-apex\\netra_backend\\app\\__pycache__\\auth_dependencies.cpython-312.pyc"
+    ]
+  }
+}
