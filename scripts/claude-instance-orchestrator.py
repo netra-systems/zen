@@ -72,6 +72,16 @@ from typing import Dict, List, Optional, Any
 import argparse
 from datetime import datetime, timedelta
 import re
+from uuid import uuid4, UUID
+
+# Optional NetraOptimizer imports
+DatabaseClient = None
+ExecutionRecord = None
+try:
+    from netraoptimizer import NetraOptimizerClient, DatabaseClient
+    from netraoptimizer.database import ExecutionRecord
+except ImportError:
+    pass  # NetraOptimizer is optional
 
 # Setup logging
 logging.basicConfig(
@@ -120,7 +130,9 @@ class InstanceStatus:
 class ClaudeInstanceOrchestrator:
     """Orchestrator for managing multiple Claude Code instances"""
 
-    def __init__(self, workspace_dir: Path, max_console_lines: int = 5, startup_delay: float = 1.0, max_line_length: int = 500, status_report_interval: int = 30):
+    def __init__(self, workspace_dir: Path, max_console_lines: int = 5, startup_delay: float = 1.0,
+                 max_line_length: int = 500, status_report_interval: int = 30,
+                 use_cloud_sql: bool = False, quiet: bool = False):
         self.workspace_dir = workspace_dir
         self.instances: Dict[str, InstanceConfig] = {}
         self.statuses: Dict[str, InstanceStatus] = {}
@@ -132,6 +144,29 @@ class ClaudeInstanceOrchestrator:
         self.status_report_interval = status_report_interval  # Seconds between status reports
         self.last_status_report = time.time()
         self.status_report_task = None  # For the rolling status report task
+        self.use_cloud_sql = use_cloud_sql
+        self.quiet = quiet
+        self.batch_id = str(uuid4())  # Generate batch ID for this orchestration run
+        self.db_client = None
+        self.optimizer = None
+
+        # Configure CloudSQL if requested
+        if use_cloud_sql:
+            os.environ['POSTGRES_PORT'] = '5434'
+            os.environ['POSTGRES_HOST'] = 'localhost'
+            os.environ['POSTGRES_DB'] = 'netra_optimizer'
+            os.environ['POSTGRES_USER'] = 'postgres'
+            os.environ['POSTGRES_PASSWORD'] = 'DTprdt5KoQXlEG4Gh9lF'
+            os.environ['ENVIRONMENT'] = 'staging'
+            logger.info("Configured for CloudSQL on port 5434")
+
+            # Initialize database client if available
+            if DatabaseClient:
+                try:
+                    self.db_client = DatabaseClient(use_cloud_sql=True)
+                    logger.info("NetraOptimizer database client configured")
+                except Exception as e:
+                    logger.warning(f"Failed to initialize database client: {e}")
 
     def add_instance(self, config: InstanceConfig):
         """Add a new instance configuration"""
@@ -356,6 +391,10 @@ class ClaudeInstanceOrchestrator:
 
             status.end_time = time.time()
 
+            # Save metrics to database if CloudSQL is enabled
+            if self.use_cloud_sql and self.db_client:
+                await self._save_metrics_to_database(name, config, status)
+
             if returncode == 0:
                 status.status = "completed"
                 logger.info(f"Instance {name} completed successfully")
@@ -372,6 +411,70 @@ class ClaudeInstanceOrchestrator:
             status.error = str(e)
             logger.error(f"Exception running instance {name}: {e}")
             return False
+
+    async def _save_metrics_to_database(self, name: str, config: InstanceConfig, status: InstanceStatus):
+        """Save execution metrics to CloudSQL database"""
+        if not self.db_client or not ExecutionRecord:
+            return
+
+        try:
+            # Initialize database if not already done
+            if not hasattr(self.db_client, '_initialized'):
+                await self.db_client.initialize()
+                self.db_client._initialized = True
+
+            # Create execution record
+            execution_id = uuid4()
+            command_string = config.command
+            start_time = datetime.fromtimestamp(status.start_time) if status.start_time else datetime.now()
+
+            # Calculate cache metrics
+            cache_read = 0
+            cache_creation = 0
+
+            # Try to extract cache metrics from cached_tokens
+            # In claude-instance-orchestrator.py, cached_tokens combines both read and creation
+            # We'll need to parse from the output to get accurate breakdown
+
+            record = ExecutionRecord(
+                id=execution_id,
+                timestamp=start_time,
+                command_base='claude',  # Always 'claude' for consistency
+                command_raw=command_string,
+                batch_id=UUID(self.batch_id) if self.batch_id else None,
+                execution_sequence=list(self.instances.keys()).index(name),
+                workspace_context={
+                    'instance_name': name,
+                    'workspace_dir': str(self.workspace_dir),
+                    'description': config.description,
+                    'orchestration_run': self.start_datetime.isoformat()
+                },
+                input_tokens=status.input_tokens,
+                output_tokens=status.output_tokens,
+                cached_tokens=status.cached_tokens,  # Combined cache_read + cache_creation
+                fresh_tokens=0,  # Will be set if we can parse cache_creation separately
+                total_tokens=status.total_tokens,
+                cache_hit_rate=(status.cached_tokens / status.total_tokens * 100) if status.total_tokens > 0 else 0,
+                cost_usd=self._calculate_cost(status),
+                cache_savings_usd=0,  # Will calculate if we have cache_read data
+                execution_time_ms=int((status.end_time - status.start_time) * 1000) if status.start_time else 0,
+                status=status.status,
+                error_message=status.error if status.error else None
+            )
+
+            # Save to database
+            await self.db_client.insert_execution(record)
+            logger.info(f"Saved metrics to CloudSQL for {name}")
+
+        except Exception as e:
+            logger.warning(f"Failed to save metrics to database for {name}: {e}")
+
+    def _calculate_cost(self, status: InstanceStatus) -> float:
+        """Calculate cost based on token usage (Claude 3.5 Sonnet pricing)"""
+        input_cost = (status.input_tokens / 1_000_000) * 3.00  # $3 per M input tokens
+        output_cost = (status.output_tokens / 1_000_000) * 15.00  # $15 per M output tokens
+        cache_cost = (status.cached_tokens / 1_000_000) * 0.30  # Assume cache read cost
+        return input_cost + output_cost + cache_cost
 
     async def _stream_output(self, name: str, process):
         """Stream output in real-time for stream-json format (DEPRECATED - use _stream_output_parallel)"""
@@ -1329,6 +1432,8 @@ async def main():
                        help="Seconds between rolling status reports (default: 5)")
     parser.add_argument("--start-at", type=str, default=None,
                        help="Schedule orchestration to start at specific time. Examples: '2h' (2 hours from now), '30m' (30 minutes), '14:30' (2:30 PM today), '1am' (1 AM today/tomorrow)")
+    parser.add_argument("--use-cloud-sql", action="store_true",
+                       help="Save metrics to CloudSQL database (NetraOptimizer integration)")
 
     args = parser.parse_args()
 
@@ -1362,7 +1467,9 @@ async def main():
         max_console_lines=max_lines,
         startup_delay=args.startup_delay,
         max_line_length=args.max_line_length,
-        status_report_interval=args.status_report_interval
+        status_report_interval=args.status_report_interval,
+        use_cloud_sql=args.use_cloud_sql,
+        quiet=args.quiet
     )
 
     # Handle command inspection modes
@@ -1481,6 +1588,9 @@ async def main():
 
     # Run all instances
     logger.info("Starting Claude Code instance orchestration")
+    if args.use_cloud_sql:
+        logger.info(f"Batch ID: {orchestrator.batch_id}")
+        logger.info("Metrics will be saved to CloudSQL")
     start_time = time.time()
 
     results = await orchestrator.run_all_instances(args.timeout)
@@ -1534,6 +1644,13 @@ async def main():
     # Show the actual filename used (important when auto-generated)
     final_output_file = args.output or orchestrator.generate_output_filename()
     print(f"\nFull results saved to: {final_output_file}")
+
+    # Show CloudSQL info if enabled
+    if args.use_cloud_sql:
+        print(f"\n📊 Metrics saved to CloudSQL")
+        print(f"   Batch ID: {orchestrator.batch_id}")
+        print(f"   View metrics with:")
+        print(f"   psql -h localhost -p 5434 -U postgres -d netra_optimizer -c \"SELECT * FROM command_executions WHERE batch_id = '{orchestrator.batch_id}';\"")
 
     # Exit with appropriate code
     sys.exit(0 if summary['failed'] == 0 else 1)
