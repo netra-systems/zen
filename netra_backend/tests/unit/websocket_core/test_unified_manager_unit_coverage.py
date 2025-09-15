@@ -144,11 +144,11 @@ class TestUnifiedWebSocketManagerBusiness:
             pytest.skip(f'Manager requires factory pattern - future fix needed: {e}')
 
     def test_websocket_manager_mode_consolidation(self):
-        """Test WebSocketManagerMode enum consolidates to UNIFIED."""
+        """Test WebSocketManagerMode enum has correct distinct values."""
         assert WebSocketManagerMode.UNIFIED.value == 'unified'
-        assert WebSocketManagerMode.ISOLATED.value == 'unified'
-        assert WebSocketManagerMode.EMERGENCY.value == 'unified'
-        assert WebSocketManagerMode.DEGRADED.value == 'unified'
+        assert WebSocketManagerMode.ISOLATED.value == 'isolated'
+        assert WebSocketManagerMode.EMERGENCY.value == 'emergency'
+        assert WebSocketManagerMode.DEGRADED.value == 'degraded'
 
     def test_websocket_manager_supports_async_operations(self):
         """Test WebSocketManager interface supports async operations needed for business."""
