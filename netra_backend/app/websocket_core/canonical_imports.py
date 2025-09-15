@@ -19,7 +19,7 @@ Usage:
 # CANONICAL IMPORTS - Use these paths only:
 from netra_backend.app.websocket_core.canonical_imports import (
     create_websocket_manager,     # Factory function for isolated managers
-    UnifiedWebSocketManager,      # Direct manager (use factory instead)
+    WebSocketManager,             # Direct manager (use factory instead)
     WebSocketManagerProtocol,     # Interface protocol
 )
 ```
@@ -378,7 +378,7 @@ manager = await factory.create_isolated_manager(user_id, connection_id)
 ```python
 # Multiple import paths (causes SSOT violations)
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager  
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager  # WRONG: Use canonical alias instead
 from netra_backend.app.core.interfaces_websocket import WebSocketManagerProtocol
 
 # Singleton patterns (security risk)
