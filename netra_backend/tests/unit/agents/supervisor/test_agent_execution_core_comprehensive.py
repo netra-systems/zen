@@ -121,6 +121,11 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         
         # Mock the agent's run method to return an awaitable result
         mock_agent.run = AsyncMock()
+        # Fix RuntimeWarning: Mock async methods that are called but not awaited
+        mock_agent.set_trace_context = MagicMock()  # Not async
+        mock_agent.set_websocket_bridge = MagicMock()  # Not async
+        mock_agent.execution_engine = MagicMock()
+        mock_agent.execution_engine.set_websocket_bridge = MagicMock()  # Not async
         
         # Create system under test
         execution_core = AgentExecutionCore(
