@@ -1,0 +1,35 @@
+# NetraOptimizer Requirements
+# Focused dependencies for Claude usage tracking and optimization
+
+# --- Core Dependencies ---
+# Async PostgreSQL driver for database operations
+asyncpg>=0.30.0
+
+# Pydantic for configuration and data validation
+pydantic>=2.11.7
+pydantic-settings>=2.7.0
+
+# --- Google Cloud Integration ---
+# Google Cloud Secret Manager for secure credential storage
+google-cloud-secret-manager>=2.20.0
+
+# Google Cloud SDK authentication
+google-auth>=2.38.0
+google-auth-oauthlib>=1.2.1
+
+# --- Database ---
+# PostgreSQL adapter for synchronous operations (setup scripts)
+psycopg2-binary>=2.9.10
+
+# --- Development Dependencies ---
+# Testing framework
+pytest>=8.4.1
+pytest-asyncio>=1.1.0
+pytest-cov>=6.0.0
+
+# --- Optional Dependencies ---
+# For improved logging (optional but recommended)
+loguru>=0.7.3
+
+# For environment file support during development
+python-dotenv>=1.1.1
