@@ -80,6 +80,10 @@ from netra_backend.app.core.managers.execution_engine_factory import ExecutionEn
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine  # RECOMMENDED: Use alias for backward compatibility
 from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine  # FACTORY METHOD: Use for proper instantiation
 
+# ExecutionEngine - SSOT Pattern (FIXED 2025-09-12)
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine  # RECOMMENDED: Use alias for backward compatibility
+from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine  # FACTORY METHOD: Use for proper instantiation
+
 # Tools (Performance and Optimization)
 from netra_backend.app.tools.performance_optimizer import ToolPerformanceOptimizer
 from netra_backend.app.tools.result_aggregator import ToolResultAggregator

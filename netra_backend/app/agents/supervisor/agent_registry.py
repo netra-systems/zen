@@ -27,6 +27,9 @@ from dataclasses import dataclass, field
 # SSOT COMPLIANCE: UnifiedIdGenerator for consistent ID generation
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
+# SSOT COMPLIANCE: UnifiedIdGenerator for consistent ID generation
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+
 # SSOT: Import from UniversalRegistry - avoid name collision
 from netra_backend.app.core.registry.universal_registry import (
     UniversalRegistry,

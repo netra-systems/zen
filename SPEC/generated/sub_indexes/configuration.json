@@ -2316,6 +2316,15 @@
         "scripts/analyze_uuid_violations_comprehensive.py:425"
       ]
     },
+    "EASY": {
+      "value": "EASY",
+      "category": "configuration",
+      "locations": [
+        "scripts/analyze_uuid_violations_comprehensive.py:423",
+        "scripts/analyze_uuid_violations_comprehensive.py:424",
+        "scripts/analyze_uuid_violations_comprehensive.py:425"
+      ]
+    },
     "ECONNRESET": {
       "value": "ECONNRESET",
       "category": "configuration",
@@ -3864,6 +3873,14 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/websocket_core/unified_websocket_auth.py:1011"
+      ]
+    },
+    "HARD": {
+      "value": "HARD",
+      "category": "configuration",
+      "locations": [
+        "scripts/analyze_uuid_violations_comprehensive.py:419",
+        "scripts/analyze_uuid_violations_comprehensive.py:422"
       ]
     },
     "HARD": {
