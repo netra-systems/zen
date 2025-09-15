@@ -38,7 +38,7 @@ try:
 except ImportError:
     # Fallback if staging config not available
     def get_staging_config():
-        return {"staging_backend_url": "https://netra-staging.example.com", "staging_auth_url": "https://auth-staging.example.com"}
+        return {"staging_backend_url": "https://api.staging.netrasystems.ai", "staging_auth_url": "https://auth.staging.netrasystems.ai"}
     def is_staging_available():
         return False
 

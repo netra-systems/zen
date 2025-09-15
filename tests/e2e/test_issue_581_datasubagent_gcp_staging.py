@@ -88,8 +88,8 @@ class TestIssue581DataSubAgentGCPStaging(SSotAsyncTestCase):
         
         # Get staging environment configuration
         self.env = get_env()
-        self.staging_base_url = self.env.get("STAGING_BASE_URL", "https://netra-staging.example.com")
-        self.staging_ws_url = self.env.get("STAGING_WS_URL", "wss://netra-staging.example.com/ws")
+        self.staging_base_url = self.env.get("STAGING_BASE_URL", "https://api.staging.netrasystems.ai")
+        self.staging_ws_url = self.env.get("STAGING_WS_URL", "wss://api.staging.netrasystems.ai/ws")
         
         # E2E test configuration
         self.test_user_email = f"e2e-test-581-{datetime.now().timestamp()}@netratest.com"
