@@ -26,11 +26,13 @@ class AnalyticsConfig:
     def __init__(self):
         """Initialize configuration with service-specific environment management."""
         self.env = get_env()
-        
-        # Enable isolation for development/testing
-        if self._is_development_environment():
+
+        # Enable isolation for development/testing - check after enabling isolation
+        # so environment variables can be properly detected
+        import sys
+        if 'pytest' in sys.modules:
             self.env.enable_isolation()
-        
+
         self._load_configuration()
         self._validate_configuration()
     
