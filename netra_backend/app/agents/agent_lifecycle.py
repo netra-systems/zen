@@ -198,3 +198,86 @@ class AgentLifecycleMixin(ABC):
         if not hasattr(self, '_execution_steps'):
             self._execution_steps = 0
         self._execution_steps += 1
+
+
+class AgentLifecycleManager:
+    """
+    SSOT-compliant Agent Lifecycle Management class
+
+    Provides centralized lifecycle management for agents with proper factory pattern support
+    and multi-user isolation capabilities.
+    """
+
+    def __init__(self, registry=None):
+        """Initialize lifecycle manager with optional registry reference."""
+        self._registry = registry
+        self.logger = central_logger.get_logger(__name__)
+        self._active_agents = {}  # user_id -> agent_dict mapping
+        self._execution_stats = {}  # user_id -> stats mapping
+
+    def register_agent_lifecycle(self, user_id: str, agent_name: str, agent_instance):
+        """Register an agent for lifecycle tracking."""
+        if user_id not in self._active_agents:
+            self._active_agents[user_id] = {}
+
+        self._active_agents[user_id][agent_name] = {
+            'agent': agent_instance,
+            'created_at': time.time(),
+            'executions': 0,
+            'total_execution_time': 0.0
+        }
+
+        self.logger.debug(f"Registered agent {agent_name} for user {user_id}")
+
+    def unregister_agent_lifecycle(self, user_id: str, agent_name: str):
+        """Unregister an agent from lifecycle tracking."""
+        if user_id in self._active_agents and agent_name in self._active_agents[user_id]:
+            del self._active_agents[user_id][agent_name]
+            if not self._active_agents[user_id]:  # Remove user entry if no agents
+                del self._active_agents[user_id]
+
+            self.logger.debug(f"Unregistered agent {agent_name} for user {user_id}")
+
+    def get_active_agents(self, user_id: str = None):
+        """Get active agents for a specific user or all users."""
+        if user_id:
+            return self._active_agents.get(user_id, {})
+        return self._active_agents
+
+    def update_execution_stats(self, user_id: str, agent_name: str, execution_time: float):
+        """Update execution statistics for an agent."""
+        if user_id in self._active_agents and agent_name in self._active_agents[user_id]:
+            agent_info = self._active_agents[user_id][agent_name]
+            agent_info['executions'] += 1
+            agent_info['total_execution_time'] += execution_time
+
+            self.logger.debug(f"Updated stats for agent {agent_name} (user {user_id}): "
+                            f"{agent_info['executions']} executions, "
+                            f"{agent_info['total_execution_time']:.2f}s total")
+
+    def cleanup_user_agents(self, user_id: str):
+        """Clean up all agents for a specific user."""
+        if user_id in self._active_agents:
+            agent_count = len(self._active_agents[user_id])
+            del self._active_agents[user_id]
+            self.logger.info(f"Cleaned up {agent_count} agents for user {user_id}")
+
+    def get_lifecycle_summary(self, user_id: str = None):
+        """Get lifecycle summary statistics."""
+        if user_id:
+            return {
+                'user_id': user_id,
+                'active_agents': len(self._active_agents.get(user_id, {})),
+                'agents': self._active_agents.get(user_id, {})
+            }
+
+        return {
+            'total_users': len(self._active_agents),
+            'total_agents': sum(len(agents) for agents in self._active_agents.values()),
+            'users': list(self._active_agents.keys())
+        }
+
+    @classmethod
+    def create_for_registry(cls, registry):
+        """Factory method to create lifecycle manager for a specific registry."""
+        return cls(registry=registry)
