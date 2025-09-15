@@ -187,7 +187,7 @@ class StartupOrchestrator:
             await self._phase7_finalize()
             
             # Success - mark as complete (ONLY after ALL phases complete)
-            self._mark_startup_complete()
+            await self._mark_startup_complete()
             
         except Exception as e:
             # Mark current phase as failed if set
@@ -1747,7 +1747,7 @@ class StartupOrchestrator:
             # In deterministic mode, schema validation failure is critical
             raise DeterministicStartupError("Database schema validation failed - schema inconsistent")
     
-    def _mark_startup_complete(self) -> None:
+    async def _mark_startup_complete(self) -> None:
         """Mark startup as complete - ONLY after ALL 7 phases complete successfully."""
         # Complete the final phase before marking overall completion
         if self.current_phase:
