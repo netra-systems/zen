@@ -156,6 +156,8 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         
         mock_agent.run.return_value = expected_result
         mock_registry.get_agent.return_value = mock_agent
+        # Fix: Mock the async get_async method that AgentExecutionCore actually calls
+        mock_registry.get_async = AsyncMock(return_value=mock_agent)
         
         # Mock execution tracking
         mock_exec_id = uuid4()
