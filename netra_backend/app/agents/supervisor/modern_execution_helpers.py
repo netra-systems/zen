@@ -532,7 +532,7 @@ class SupervisorExecutionHelpers:
             user_context = UserExecutionContext(
                 user_id=context.user_id,
                 thread_id=context.chat_thread_id,
-                request_id=context.run_id or f"converted_{context.user_id}",
+                run_id=context.run_id or f"converted_run_{context.user_id}",
                 agent_context=copy.deepcopy(context.agent_context)
             )
 
@@ -560,8 +560,14 @@ class SupervisorExecutionHelpers:
         if not state.user_id:
             raise ValueError("SECURITY VIOLATION: Missing user_id required for user isolation")
 
+        # Generate thread_id if missing (for legacy compatibility)
         if not state.chat_thread_id:
-            raise ValueError("SECURITY VIOLATION: Missing chat_thread_id required for execution tracking")
+            import uuid
+            state.chat_thread_id = f"legacy_thread_{state.user_id}_{uuid.uuid4().hex[:8]}"
+            logger.warning(
+                f"SECURITY WARNING: Generated thread_id for legacy DeepAgentState for user {state.user_id}. "
+                f"Consider updating to use proper UserExecutionContext."
+            )
 
         # Validate agent_context if present
         if state.agent_context:
