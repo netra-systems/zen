@@ -650,9 +650,23 @@ class DeepAgentState(BaseModel):
         )
     
     def _validate_merge_input(self, other_state: 'DeepAgentState') -> None:
-        """Validate input for merge operation."""
+        """Validate input for merge operation with user boundary security check.
+
+        SECURITY FIX: Issue #953 - Prevents cross-user state contamination by validating
+        that merge operations only occur between states belonging to the same user.
+        This ensures multi-tenant user isolation and prevents data leakage.
+        """
         if not isinstance(other_state, DeepAgentState):
             raise TypeError("other_state must be a DeepAgentState instance")
+
+        # SECURITY CHECK: Prevent cross-user state merging to maintain user isolation
+        if self.user_id and other_state.user_id and self.user_id != other_state.user_id:
+            raise ValueError(
+                f"SECURITY VIOLATION: Cannot merge states from different users. "
+                f"Current state user_id='{self.user_id}', other state user_id='{other_state.user_id}'. "
+                f"Cross-user state merging is prohibited to prevent data contamination and "
+                f"maintain multi-tenant security boundaries."
+            )
     
     def _merge_custom_fields(self, other_state: 'DeepAgentState') -> Dict[str, str]:
         """Merge custom fields from both states."""

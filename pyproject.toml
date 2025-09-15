@@ -262,6 +262,7 @@ markers = [
     "app_factory: Application factory pattern tests",
     "health_checks: Health check and service status tests",
     "ssot_violation: SSOT violation detection and remediation tests",
+    "advanced_scenarios: Advanced user scenarios and enterprise workflows tests",
     
     # Missing marker for auth service secret loader tests (Issue #687)
     "secret_loader: Secret loader component tests",

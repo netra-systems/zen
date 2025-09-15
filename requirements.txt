@@ -70,6 +70,8 @@ cachetools==5.5.0
 httpx>=0.28.1
 # Alternative HTTP client for specific use cases
 aiohttp>=3.12.15
+# Traditional HTTP client for synchronous requests and test compatibility
+requests>=2.32.0
 
 # --- Configuration & Environment ---
 # Loads environment variables from .env files.
