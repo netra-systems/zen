@@ -696,6 +696,14 @@ markers = [
 
     # Issue #860 Windows WebSocket Connection Failure markers (2025-09-15)
     "windows: Windows platform-specific tests for connection failures and compatibility",
+
+    # Issue #1058 Data Integrity and Security Boundary markers
+    "issue_1058_data_integrity: Issue #1058 data integrity validation tests",
+    "issue_1058_security_boundaries: Issue #1058 security boundary enforcement tests",
+    "enterprise_compliance: Enterprise compliance and regulatory validation tests",
+
+    # Scalability and performance markers
+    "scalability: Scalability and concurrent user load testing",
 ]
 
 # Coverage settings
