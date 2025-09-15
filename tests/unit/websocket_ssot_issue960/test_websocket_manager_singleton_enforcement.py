@@ -40,7 +40,7 @@ class TestWebSocketManagerSingletonEnforcement(SSotBaseTestCase):
         logger.info('Testing WebSocket manager import path SSOT compliance - EXPECTING FAILURE')
         try:
             from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as Manager1
-            from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation as Manager2
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as Manager2
             user_context = {'user_id': 'test_user_123', 'thread_id': 'test_thread_456'}
             manager1 = Manager1(user_context=user_context)
             manager2 = Manager2(user_context=user_context)
