@@ -9,7 +9,7 @@ import random
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, Optional, Tuple
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 # Import RetryPolicy for backwards compatibility
@@ -34,7 +34,7 @@ class BackoffStrategy:
         self.base_delay = base_delay
         self.max_delay = max_delay
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 # RetryConfig now imported from shared_types.py
