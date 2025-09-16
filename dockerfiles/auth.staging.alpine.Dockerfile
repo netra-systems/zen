@@ -20,10 +20,4 @@ COPY shared/ ./shared/
 ENV PYTHONPATH=/app
 
 # Run the application with gunicorn+uvicorn for Cloud Run stability
-CMD ["gunicorn", "auth_service.main:app", \
-     "-w", "1", \
-     "-k", "uvicorn.workers.UvicornWorker", \
-     "--bind", "0.0.0.0:8080", \
-     "--timeout", "300", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-"]
+CMD ["sh", "-c", "gunicorn auth_service.main:app -w 1 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT:-8001} --timeout 300 --access-logfile - --error-logfile -"]
