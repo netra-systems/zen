@@ -770,7 +770,8 @@ class DeepAgentState(BaseModel):
         self,
         operation_name: str,
         additional_context: Optional[Dict[str, Any]] = None,
-        additional_agent_context: Optional[Dict[str, Any]] = None
+        additional_agent_context: Optional[Dict[str, Any]] = None,
+        additional_audit_metadata: Optional[Dict[str, Any]] = None
     ) -> 'DeepAgentState':
         """PHASE 1 INTERFACE COMPATIBILITY FIX: Create child context with dual parameter support.
 
