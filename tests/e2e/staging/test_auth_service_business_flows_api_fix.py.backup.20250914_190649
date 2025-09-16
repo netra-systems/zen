@@ -55,7 +55,7 @@ class TestAuthServiceBusinessFlowsStagingAPIFix:
         # Get staging auth service URL
         cls.auth_service_url = cls.env.get(
             "STAGING_AUTH_SERVICE_URL", 
-            "https://auth-service-staging.netra.ai"
+            "https://auth-service-staging.netrasystems.ai"
         )
         
         # Configure test mode
@@ -330,7 +330,7 @@ class TestDockerAPISignatureVsStagingValidation:
         
         # Part 2: Demonstrate auth service works on staging
         env = get_env()
-        staging_url = env.get("STAGING_AUTH_SERVICE_URL", "https://auth-service-staging.netra.ai")
+        staging_url = env.get("STAGING_AUTH_SERVICE_URL", "https://auth-service-staging.netrasystems.ai")
         
         if staging_url:
             import requests

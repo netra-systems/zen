@@ -33,7 +33,7 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
     async def test_websocket_connection_error_handling_with_state_recovery(self, real_services_fixture):
         """Test comprehensive error handling with application state preservation and recovery."""
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'error_recovery_user@netra.ai',
+            'email': 'error_recovery_user@netrasystems.ai',
             'name': 'Error Recovery User',
             'is_active': True
         })
@@ -267,7 +267,7 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
         users = []
         for i in range(3):
             user_data = await self.create_test_user_context(real_services_fixture, {
-                'email': f'cascading_error_user_{i}@netra.ai',
+                'email': f'cascading_error_user_{i}@netrasystems.ai',
                 'name': f'Cascading Error User {i}',
                 'is_active': True
             })
@@ -407,7 +407,7 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
         # Test system recovery after cascading errors
         # Create a new healthy connection to verify system can still accept new connections
         recovery_user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'post_cascade_recovery_user@netra.ai',
+            'email': 'post_cascade_recovery_user@netrasystems.ai',
             'name': 'Post Cascade Recovery User',
             'is_active': True
         })

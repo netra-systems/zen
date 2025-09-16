@@ -77,11 +77,11 @@ class Issue639GetEnvSignatureBugTests(SSotAsyncTestCase):
         
         # Test the exact patterns that are failing in the staging test
         failing_patterns = [
-            ('get_env("STAGING_BASE_URL", "https://staging.netra.ai")', "STAGING_BASE_URL", "https://staging.netra.ai"),
-            ('get_env("STAGING_WEBSOCKET_URL", "wss://staging.netra.ai/ws")', "STAGING_WEBSOCKET_URL", "wss://staging.netra.ai/ws"),
-            ('get_env("STAGING_API_URL", "https://staging.netra.ai/api")', "STAGING_API_URL", "https://staging.netra.ai/api"),
-            ('get_env("STAGING_AUTH_URL", "https://staging.netra.ai/auth")', "STAGING_AUTH_URL", "https://staging.netra.ai/auth"),
-            ('get_env("TEST_USER_EMAIL", "test@netra.ai")', "TEST_USER_EMAIL", "test@netra.ai"),
+            ('get_env("STAGING_BASE_URL", "https://staging.netrasystems.ai")', "STAGING_BASE_URL", "https://staging.netrasystems.ai"),
+            ('get_env("STAGING_WEBSOCKET_URL", "wss://staging.netrasystems.ai/ws")', "STAGING_WEBSOCKET_URL", "wss://staging.netrasystems.ai/ws"),
+            ('get_env("STAGING_API_URL", "https://staging.netrasystems.ai/api")', "STAGING_API_URL", "https://staging.netrasystems.ai/api"),
+            ('get_env("STAGING_AUTH_URL", "https://staging.netrasystems.ai/auth")', "STAGING_AUTH_URL", "https://staging.netrasystems.ai/auth"),
+            ('get_env("TEST_USER_EMAIL", "test@netrasystems.ai")', "TEST_USER_EMAIL", "test@netrasystems.ai"),
             ('get_env("TEST_USER_PASSWORD", "test_password")', "TEST_USER_PASSWORD", "test_password")
         ]
         
@@ -143,11 +143,11 @@ class Issue639GetEnvSignatureBugTests(SSotAsyncTestCase):
         
         # Test correct patterns
         correct_patterns = [
-            ("STAGING_BASE_URL", "https://staging.netra.ai"),
-            ("STAGING_WEBSOCKET_URL", "wss://staging.netra.ai/ws"),
-            ("STAGING_API_URL", "https://staging.netra.ai/api"),
-            ("STAGING_AUTH_URL", "https://staging.netra.ai/auth"),
-            ("TEST_USER_EMAIL", "test@netra.ai"),
+            ("STAGING_BASE_URL", "https://staging.netrasystems.ai"),
+            ("STAGING_WEBSOCKET_URL", "wss://staging.netrasystems.ai/ws"),
+            ("STAGING_API_URL", "https://staging.netrasystems.ai/api"),
+            ("STAGING_AUTH_URL", "https://staging.netrasystems.ai/auth"),
+            ("TEST_USER_EMAIL", "test@netrasystems.ai"),
             ("TEST_USER_PASSWORD", "test_password")
         ]
         
@@ -395,22 +395,22 @@ class Issue639StagingConfigurationValidationTests(SSotAsyncTestCase):
         url_configs = {
             "STAGING_BASE_URL": {
                 "expected_pattern": r"https://staging\.netra\.ai",
-                "default": "https://staging.netra.ai",
+                "default": "https://staging.netrasystems.ai",
                 "description": "Main staging application URL"
             },
             "STAGING_WEBSOCKET_URL": {
                 "expected_pattern": r"wss://staging\.netra\.ai/ws",
-                "default": "wss://staging.netra.ai/ws", 
+                "default": "wss://staging.netrasystems.ai/ws", 
                 "description": "Staging WebSocket endpoint"
             },
             "STAGING_API_URL": {
                 "expected_pattern": r"https://staging\.netra\.ai/api",
-                "default": "https://staging.netra.ai/api",
+                "default": "https://staging.netrasystems.ai/api",
                 "description": "Staging API endpoint"
             },
             "STAGING_AUTH_URL": {
                 "expected_pattern": r"https://staging\.netra\.ai/auth",
-                "default": "https://staging.netra.ai/auth",
+                "default": "https://staging.netrasystems.ai/auth",
                 "description": "Staging authentication endpoint"
             }
         }

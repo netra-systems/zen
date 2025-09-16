@@ -19,15 +19,15 @@ def test_service_id_no_timestamp():
         content = f.read()
     
     # Check for the old pattern with timestamp
-    timestamp_pattern = r'"service-id-staging":\s*f"netra-auth-staging-\{int\(time\.time\(\)\)\}"'
+    timestamp_pattern = r'"service-id-staging":\s*f"netra-auth-\{int\(time\.time\(\)\)\}"'
     if re.search(timestamp_pattern, content):
-        assert False, "SERVICE_ID still contains timestamp suffix! Should be 'netra-auth-staging' without timestamp"
+        assert False, "SERVICE_ID still contains timestamp suffix! Should be 'netra-auth' without timestamp"
     
     # Check for the correct pattern without timestamp
-    correct_pattern = r'"service-id-staging":\s*"netra-auth-staging"'
-    assert re.search(correct_pattern, content), "SERVICE_ID should be set to 'netra-auth-staging' without timestamp"
+    correct_pattern = r'"service-id-staging":\s*"netra-auth"'
+    assert re.search(correct_pattern, content), "SERVICE_ID should be set to 'netra-auth' without timestamp"
     
-    print("[PASS] SERVICE_ID correctly set to 'netra-auth-staging' without timestamp suffix")
+    print("[PASS] SERVICE_ID correctly set to 'netra-auth' without timestamp suffix")
 
 if __name__ == "__main__":
     test_service_id_no_timestamp()

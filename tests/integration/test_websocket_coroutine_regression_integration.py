@@ -69,7 +69,7 @@ class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
         """
         # CRITICAL: Create authenticated user with real auth flow
         user = await self.auth_helper.create_authenticated_user(
-            email="websocket.test@netra.ai",
+            email="websocket.test@netrasystems.ai",
             environment="staging"
         )
         
@@ -219,7 +219,7 @@ class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
         """
         # CRITICAL: Create authenticated user
         user = await self.auth_helper.create_authenticated_user(
-            email="env.detection.test@netra.ai",
+            email="env.detection.test@netrasystems.ai",
             environment="staging"
         )
         

@@ -74,14 +74,14 @@ class TestUserAuthenticationFlowIntegration(BaseIntegrationTest):
         self.test_users = [
             {
                 "user_id": "auth-flow-user-1",
-                "email": "authflow1@netra.ai",
+                "email": "authflow1@netrasystems.ai",
                 "password": "SecurePass123!",
                 "name": "Auth Flow Test User 1",
                 "phone": "+1234567890"
             },
             {
                 "user_id": "auth-flow-user-2", 
-                "email": "authflow2@netra.ai",
+                "email": "authflow2@netrasystems.ai",
                 "password": "AnotherPass456@",
                 "name": "Auth Flow Test User 2",
                 "phone": "+1234567891"
@@ -188,7 +188,7 @@ class TestUserAuthenticationFlowIntegration(BaseIntegrationTest):
                 {
                     "name": "weak_password",
                     "data": {
-                        "email": "weakpass@netra.ai",
+                        "email": "weakpass@netrasystems.ai",
                         "password": "weak",
                         "name": "Test User" 
                     },
@@ -197,7 +197,7 @@ class TestUserAuthenticationFlowIntegration(BaseIntegrationTest):
                 {
                     "name": "missing_required_fields",
                     "data": {
-                        "email": "missing@netra.ai"
+                        "email": "missing@netrasystems.ai"
                         # Missing password and name
                     },
                     "should_fail": True
@@ -323,7 +323,7 @@ class TestUserAuthenticationFlowIntegration(BaseIntegrationTest):
                     {
                         "name": "nonexistent_user",
                         "credentials": {
-                            "email": "nonexistent@netra.ai", 
+                            "email": "nonexistent@netrasystems.ai", 
                             "password": "AnyPassword123!"
                         },
                         "expected_status": [401, 404]
@@ -496,7 +496,7 @@ class TestUserAuthenticationFlowIntegration(BaseIntegrationTest):
                     invalid_scenarios = [
                         {
                             "name": "nonexistent_email",
-                            "email": "nonexistent@netra.ai",
+                            "email": "nonexistent@netrasystems.ai",
                             "should_fail": True
                         },
                         {

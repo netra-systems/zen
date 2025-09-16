@@ -236,7 +236,7 @@ class Issue466ASGIExceptionReproductionTests(SSotAsyncTestCase):
         
         FIX TARGET: Proper WebSocket authentication handling
         """
-        websocket_headers = [(b'host', b'staging.netra.app'), (b'upgrade', b'websocket'), (b'connection', b'upgrade')]
+        websocket_headers = [(b'host', b'staging.netrasystems.ai'), (b'upgrade', b'websocket'), (b'connection', b'upgrade')]
 
         def extract_auth_token(headers) -> Optional[str]:
             """Extract authentication token from headers."""
@@ -246,7 +246,7 @@ class Issue466ASGIExceptionReproductionTests(SSotAsyncTestCase):
             return None
         auth_token = extract_auth_token(websocket_headers)
         self.assertIsNone(auth_token, 'Auth token should be missing in reproduction')
-        fixed_headers = [(b'host', b'staging.netra.app'), (b'upgrade', b'websocket'), (b'connection', b'upgrade'), (b'authorization', b'Bearer valid-jwt-token-for-websocket')]
+        fixed_headers = [(b'host', b'staging.netrasystems.ai'), (b'upgrade', b'websocket'), (b'connection', b'upgrade'), (b'authorization', b'Bearer valid-jwt-token-for-websocket')]
         fixed_auth_token = extract_auth_token(fixed_headers)
         self.assertIsNotNone(fixed_auth_token, 'Auth token should be available after fix')
         self.assertIn('Bearer', fixed_auth_token, 'Should be proper Bearer token format')

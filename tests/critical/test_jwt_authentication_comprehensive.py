@@ -100,7 +100,7 @@ class JWTAuthenticationTestSuite:
     def real_websocket(self):
         """Create real WebSocket connection for testing."""
         websocket = RealWebSocketConnection()
-        websocket.headers = {'origin': 'https://app.netra.ai', 'user-agent': 'test-client', 'host': 'localhost:8000'}
+        websocket.headers = {'origin': 'https://app.netrasystems.ai', 'user-agent': 'test-client', 'host': 'localhost:8000'}
         return websocket
 
     @pytest.fixture
@@ -427,7 +427,7 @@ class WebSocketAuthenticationMiddlewareTests(JWTAuthenticationTestSuite):
         connections = []
         for i in range(connection_count):
             websocket = RealWebSocketConnection()
-            websocket.headers = {'authorization': f'Bearer test_token_user_{i}', 'origin': 'https://app.netra.ai'}
+            websocket.headers = {'authorization': f'Bearer test_token_user_{i}', 'origin': 'https://app.netrasystems.ai'}
             connections.append(websocket)
         with patch.object(websocket_authenticator, 'authenticate') as mock_auth:
             mock_auth.side_effect = lambda token: {'user_id': f"user_{token.split('_')[-1]}", 'email': f"user{token.split('_')[-1]}@example.com", 'permissions': ['user'], 'authenticated': True}

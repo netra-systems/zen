@@ -485,8 +485,8 @@ class TestWebSocketConnectionHijackingPrevention:
         handler = WebSocketCORSHandler(environment="production")
         
         # Test 1: Origin spoofing attempt should be blocked
-        legitimate_origin = "https://app.netra.ai"
-        spoofed_origin = "https://app.netra.ai.evil.com"  # Subdomain attack
+        legitimate_origin = "https://app.netrasystems.ai"
+        spoofed_origin = "https://app.netrasystems.ai.evil.com"  # Subdomain attack
         
         # Legitimate origin should pass
         assert handler.is_origin_allowed(legitimate_origin) is True
@@ -507,8 +507,8 @@ class TestWebSocketConnectionHijackingPrevention:
             assert handler._is_suspicious_origin(ip_origin) is True
             
         # Test 3: Protocol downgrade attacks should be detected
-        secure_origin = "https://app.netra.ai"
-        downgrade_origin = "http://app.netra.ai"
+        secure_origin = "https://app.netrasystems.ai"
+        downgrade_origin = "http://app.netrasystems.ai"
         
         # HTTPS should pass in production
         is_valid_https, _ = handler._validate_origin_security(secure_origin)

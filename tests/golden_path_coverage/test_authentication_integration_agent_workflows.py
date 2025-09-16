@@ -68,7 +68,7 @@ class RealAuthTestClient:
     async def create_test_user(self, user_id: str, email: str=None) -> Dict[str, Any]:
         """Create a real test user account."""
         if email is None:
-            email = f'{user_id}@test.netra.ai'
+            email = f'{user_id}@test.netrasystems.ai'
         user_data = {'user_id': user_id, 'email': email, 'name': f'Test User {user_id}', 'tier': 'mid_market', 'test_account': True}
         try:
             created_user = await self.auth_service.create_user(user_data)
@@ -291,7 +291,7 @@ class AuthenticationIntegrationAgentWorkflowsTests(SSotAsyncTestCase):
     async def test_oauth_flow_completion_before_agent_execution(self):
         """Test OAuth flow completion before starting agent execution."""
         await self.setup_real_auth_infrastructure()
-        oauth_result = await self.auth_service.complete_oauth_flow(provider='google', authorization_code='test_auth_code_' + self.test_id, user_info={'email': f'{self.test_user_id}@test.netra.ai', 'name': f'OAuth User {self.test_id}', 'provider_id': f'google_{self.test_id}'})
+        oauth_result = await self.auth_service.complete_oauth_flow(provider='google', authorization_code='test_auth_code_' + self.test_id, user_info={'email': f'{self.test_user_id}@test.netrasystems.ai', 'name': f'OAuth User {self.test_id}', 'provider_id': f'google_{self.test_id}'})
         assert oauth_result is not None, 'OAuth flow should complete successfully'
         oauth_token = oauth_result.get('access_token')
         assert oauth_token is not None, 'Should receive access token from OAuth'
@@ -309,7 +309,7 @@ class AuthenticationIntegrationAgentWorkflowsTests(SSotAsyncTestCase):
     async def test_oauth_token_scope_validation_during_execution(self):
         """Test OAuth token scope validation during agent execution."""
         await self.setup_real_auth_infrastructure()
-        oauth_result = await self.auth_service.complete_oauth_flow(provider='google', authorization_code='test_scoped_auth_' + self.test_id, user_info={'email': f'{self.test_user_id}@test.netra.ai', 'name': f'Scoped User {self.test_id}'}, scopes=['read_data', 'analyze_supply_chain', 'generate_reports'])
+        oauth_result = await self.auth_service.complete_oauth_flow(provider='google', authorization_code='test_scoped_auth_' + self.test_id, user_info={'email': f'{self.test_user_id}@test.netrasystems.ai', 'name': f'Scoped User {self.test_id}'}, scopes=['read_data', 'analyze_supply_chain', 'generate_reports'])
         oauth_token = oauth_result.get('access_token')
         user_context = UserExecutionContext(user_id=oauth_result.get('user_id', self.test_user_id), thread_id=self.conversation_id, auth_token=oauth_token, auth_method='oauth', metadata={'scopes': ['read_data', 'analyze_supply_chain', 'generate_reports']})
         execution_engine = UserExecutionEngine(user_context=user_context, websocket_manager=self.websocket_manager, auth_service=self.auth_service)

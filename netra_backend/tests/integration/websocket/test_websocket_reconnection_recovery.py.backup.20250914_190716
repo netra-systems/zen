@@ -242,7 +242,7 @@ class TestWebSocketReconnectionRecovery(SSotAsyncTestCase):
         # Test user data
         self.test_user = TestUserData(
             user_id=f"reconnect_user_{uuid.uuid4().hex[:8]}",
-            email="reconnect@netra.ai",
+            email="reconnect@netrasystems.ai",
             tier="mid",
             thread_id=f"reconnect_thread_{uuid.uuid4().hex[:8]}"
         )

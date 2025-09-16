@@ -1170,7 +1170,7 @@ class AuthenticationFlowMemoryManagementTests:
                 
                 # 1. SIGNUP FLOW
                 signup_data = {
-                    "email": f"{user_id}@netra.ai",
+                    "email": f"{user_id}@netrasystems.ai",
                     "password": "SecurePass123!",
                     "full_name": f"Memory Test User {i}",
                     "company": "Netra Memory Testing",
@@ -1494,7 +1494,7 @@ class AuthenticationFlowMemoryManagementTests:
                 # OAuth initiation
                 oauth_request = {
                     "provider": provider,
-                    "redirect_uri": f"https://netra.ai/auth/{provider}/callback",
+                    "redirect_uri": f"https://netrasystems.ai/auth/{provider}/callback",
                     "state": f"{provider}_state_{i}_{uuid.uuid4()}",
                     "user_id": f"oauth_user_{provider}_{i}"
                 }

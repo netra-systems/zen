@@ -73,7 +73,7 @@ class TestAgentStatePersistenceE2E(BaseE2ETest):
         self.test_users = []
         for i in range(2):  # 2 users for state isolation testing
             user_context = await create_authenticated_user_context(
-                user_email=f"state_persistence_test_{i}_{int(time.time())}@staging.netra.ai",
+                user_email=f"state_persistence_test_{i}_{int(time.time())}@staging.netrasystems.ai",
                 environment="staging",
                 permissions=["read", "write", "execute_agents", "persist_state", "manage_sessions"]
             )

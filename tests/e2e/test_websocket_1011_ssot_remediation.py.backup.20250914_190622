@@ -56,9 +56,9 @@ class TestWebSocket1011SSoTRemediation(SSotAsyncTestCase):
         
         # Test user configurations for multi-user testing
         self.test_users = [
-            {'email': 'test_user_1@netra.ai', 'password': 'test_password_1'},
-            {'email': 'test_user_2@netra.ai', 'password': 'test_password_2'},
-            {'email': 'test_user_3@netra.ai', 'password': 'test_password_3'},
+            {'email': 'test_user_1@netrasystems.ai', 'password': 'test_password_1'},
+            {'email': 'test_user_2@netrasystems.ai', 'password': 'test_password_2'},
+            {'email': 'test_user_3@netrasystems.ai', 'password': 'test_password_3'},
         ]
         
         # Tracking for test results

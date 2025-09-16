@@ -204,7 +204,7 @@ class TestUnifiedTestRunnerGCPStaging(SSotAsyncTestCase):
         Business Value: Operational excellence - immediate notification of test failures.
         Validates: Real-time monitoring, alerting mechanisms, dashboard integration.
         """
-        monitoring_config = await self.test_runner.configure_real_time_monitoring(monitoring_level='comprehensive', alert_thresholds={'test_failure_rate': 0.05, 'execution_time_increase': 0.25, 'resource_exhaustion': 0.85, 'flaky_test_detection': 3}, notification_channels={'slack': {'enabled': True, 'webhook': self.env.get('SLACK_WEBHOOK_URL')}, 'email': {'enabled': True, 'recipients': ['test-team@netra.ai']}, 'dashboard': {'enabled': True, 'update_interval': 30}}, metrics_collection_interval=10)
+        monitoring_config = await self.test_runner.configure_real_time_monitoring(monitoring_level='comprehensive', alert_thresholds={'test_failure_rate': 0.05, 'execution_time_increase': 0.25, 'resource_exhaustion': 0.85, 'flaky_test_detection': 3}, notification_channels={'slack': {'enabled': True, 'webhook': self.env.get('SLACK_WEBHOOK_URL')}, 'email': {'enabled': True, 'recipients': ['test-team@netrasystems.ai']}, 'dashboard': {'enabled': True, 'update_interval': 30}}, metrics_collection_interval=10)
         self.assertTrue(monitoring_config.get('configured', False), 'Real-time monitoring configuration failed')
         monitoring_session = await self.test_runner.start_monitoring_session(session_name='e2e_monitoring_test', expected_duration_minutes=30, enable_detailed_metrics=True)
         self.assertIsNotNone(monitoring_session.get('session_id'), 'Monitoring session creation failed')

@@ -359,7 +359,7 @@ class Issue1176ServiceDetectionLogicTests(BaseIntegrationTest):
             "service:auth-service", 
             "service:analytics-service",
             "user:regular@example.com",  # Regular user for comparison
-            "admin:admin@netra.ai"
+            "admin:admin@netrasystems.ai"
         ]
         
         service_detection_failures = []

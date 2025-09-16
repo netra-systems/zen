@@ -322,7 +322,7 @@ async def test_websocket_chat_events_complete_flow():
     await test.setup()
     from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
     auth_helper = E2EAuthHelper()
-    token = auth_helper.create_test_jwt_token(user_id='test_user', email='test@netra.ai')
+    token = auth_helper.create_test_jwt_token(user_id='test_user', email='test@netrasystems.ai')
     result = await test.test_single_message_flow(token)
     assert result['success'], f"Chat flow failed: {result.get('error')}"
     report = result['validation_report']
@@ -337,7 +337,7 @@ async def test_websocket_concurrent_messages():
     await test.setup()
     from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
     auth_helper = E2EAuthHelper()
-    token = auth_helper.create_test_jwt_token(user_id='test_user', email='test@netra.ai')
+    token = auth_helper.create_test_jwt_token(user_id='test_user', email='test@netrasystems.ai')
     result = await test.test_concurrent_messages(token, num_messages=5)
     assert result['success'], f"Concurrent messages failed: {result['successful']}/{result['total']}"
 
@@ -349,7 +349,7 @@ async def test_websocket_deduplication():
     await test.setup()
     from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
     auth_helper = E2EAuthHelper()
-    token = auth_helper.create_test_jwt_token(user_id='test_user', email='test@netra.ai')
+    token = auth_helper.create_test_jwt_token(user_id='test_user', email='test@netrasystems.ai')
     result = await test.test_message_deduplication(token)
     assert result['success'], f"Deduplication failed: {result['agent_started_count']} agent_started events"
 
@@ -360,7 +360,7 @@ async def test_websocket_event_storm():
     stress_test = WebSocketEventStressTest()
     from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
     auth_helper = E2EAuthHelper()
-    token = auth_helper.create_test_jwt_token(user_id='test_user', email='test@netra.ai')
+    token = auth_helper.create_test_jwt_token(user_id='test_user', email='test@netrasystems.ai')
     result = await stress_test.test_event_storm(token, num_clients=5, messages_per_client=3)
     logger.info(f'Stress test results: {json.dumps(result, indent=2)}')
     assert result['success_rate'] >= 80, f"Too many failures: {result['failed']}/{result['total_messages']}"

@@ -125,9 +125,9 @@ class TestRealAuthConfigValidation:
             },
             "production": {
                 "expected_patterns": {
-                    "oauth_client_id": ["production", "netra.ai"],
+                    "oauth_client_id": ["production", "netrasystems.ai"],
                     "database_url": ["production"],
-                    "frontend_url": ["netra.ai"]
+                    "frontend_url": ["netrasystems.ai"]
                 },
                 "forbidden_patterns": {
                     "oauth_client_id": ["test", "localhost", "staging"],
@@ -153,7 +153,7 @@ class TestRealAuthConfigValidation:
         # Test JWT secret can create and validate tokens
         test_payload = {
             JWTConstants.SUBJECT: "config_test_user",
-            JWTConstants.EMAIL: "config@netra.ai",
+            JWTConstants.EMAIL: "config@netrasystems.ai",
             JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()),
             JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=5)).timestamp()),
             JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,

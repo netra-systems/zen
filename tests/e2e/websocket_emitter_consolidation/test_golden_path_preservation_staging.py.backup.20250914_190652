@@ -103,7 +103,7 @@ class GoldenPathMetrics:
 class StagingEnvironmentConfig:
     """Configuration for staging environment testing."""
     staging_base_url: str = "https://netra-staging.googleapis.com"
-    staging_auth_url: str = "https://auth-staging.googleapis.com" 
+    staging_auth_url: str = "https://auth.googleapis.com" 
     staging_websocket_url: str = "wss://ws-staging.googleapis.com"
     test_timeout_seconds: int = 120
     max_concurrent_users: int = 10

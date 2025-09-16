@@ -93,8 +93,8 @@ class TestRealTokenRefresh:
     def create_token_pair(self, user_id: int, jwt_secret_key: str) -> Tuple[str, str]:
         """Create access and refresh token pair."""
         now = datetime.utcnow()
-        access_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netra.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=15)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.ACCESS_TOKEN_TYPE, 'user_id': user_id, 'permissions': ['read', 'write']}
-        refresh_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netra.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(days=7)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.REFRESH_TOKEN_TYPE, 'user_id': user_id, 'refresh_id': secrets.token_hex(16)}
+        access_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netrasystems.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=15)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.ACCESS_TOKEN_TYPE, 'user_id': user_id, 'permissions': ['read', 'write']}
+        refresh_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netrasystems.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(days=7)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.REFRESH_TOKEN_TYPE, 'user_id': user_id, 'refresh_id': secrets.token_hex(16)}
         access_token = jwt.encode(access_payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
         refresh_token = jwt.encode(refresh_payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
         return (access_token, refresh_token)
@@ -153,7 +153,7 @@ class TestRealTokenRefresh:
             parsed_refresh = json.loads(stored_refresh)
             assert parsed_refresh['is_active'] is True
             now = datetime.utcnow()
-            new_access_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netra.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=15)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.ACCESS_TOKEN_TYPE, 'user_id': user_id, 'permissions': ['read', 'write'], 'refreshed_at': now.isoformat()}
+            new_access_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netrasystems.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=15)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.ACCESS_TOKEN_TYPE, 'user_id': user_id, 'permissions': ['read', 'write'], 'refreshed_at': now.isoformat()}
             new_access_token = jwt.encode(new_access_payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
             parsed_refresh['use_count'] += 1
             parsed_refresh['last_used'] = now.isoformat()
@@ -184,8 +184,8 @@ class TestRealTokenRefresh:
             await redis_client.setex(old_refresh_key, CacheConstants.SERVICE_TOKEN_CACHE_TTL, json.dumps(refresh_data))
             now = datetime.utcnow()
             new_refresh_id = secrets.token_hex(16)
-            new_access_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netra.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=15)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.ACCESS_TOKEN_TYPE, 'user_id': user_id, 'permissions': ['read', 'write'], 'generation': 2}
-            new_refresh_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netra.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(days=7)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.REFRESH_TOKEN_TYPE, 'user_id': user_id, 'refresh_id': new_refresh_id, 'generation': 2}
+            new_access_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netrasystems.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=15)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.ACCESS_TOKEN_TYPE, 'user_id': user_id, 'permissions': ['read', 'write'], 'generation': 2}
+            new_refresh_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netrasystems.ai', JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(days=7)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.REFRESH_TOKEN_TYPE, 'user_id': user_id, 'refresh_id': new_refresh_id, 'generation': 2}
             new_access_token = jwt.encode(new_access_payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
             new_refresh_token = jwt.encode(new_refresh_payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
             new_refresh_key = f'{CacheConstants.SERVICE_TOKEN_PREFIX}refresh:{user_id}:{new_refresh_id}'
@@ -213,7 +213,7 @@ class TestRealTokenRefresh:
         """Test rejection of expired refresh tokens."""
         user_id = 55555
         expired_time = datetime.utcnow() - timedelta(hours=1)
-        expired_refresh_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netra.ai', JWTConstants.ISSUED_AT: int(expired_time.timestamp()), JWTConstants.EXPIRES_AT: int(expired_time.timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.REFRESH_TOKEN_TYPE, 'user_id': user_id, 'refresh_id': secrets.token_hex(16)}
+        expired_refresh_payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: f'user{user_id}@netrasystems.ai', JWTConstants.ISSUED_AT: int(expired_time.timestamp()), JWTConstants.EXPIRES_AT: int(expired_time.timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'token_type': JWTConstants.REFRESH_TOKEN_TYPE, 'user_id': user_id, 'refresh_id': secrets.token_hex(16)}
         expired_refresh_token = jwt.encode(expired_refresh_payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
         with pytest.raises(jwt.ExpiredSignatureError):
             jwt.decode(expired_refresh_token, jwt_secret_key, algorithms=[JWTConstants.HS256_ALGORITHM])

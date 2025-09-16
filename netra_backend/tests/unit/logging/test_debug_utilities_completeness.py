@@ -380,7 +380,7 @@ class DebugUtilitiesCompletenessTests(SSotBaseTestCase):
             "connection_id": "ws_conn_debug_001",
             "user_id": "ws_test_user_001",
             "session_id": "ws_session_001",
-            "connection_origin": "wss://app.netra.ai",
+            "connection_origin": "wss://app.netrasystems.ai",
             "auth_method": "jwt_bearer",
             "protocol_version": "v1",
             "client_info": {

@@ -74,9 +74,9 @@ class MultiUserIsolationSecurityTests(BaseE2ETest):
         self.data_leakage_detection_samples = 100
         
         # GCP staging endpoints
-        self.staging_websocket_url = "wss://staging.netra.ai/ws"
-        self.staging_auth_url = "https://auth-staging.netra.ai"
-        self.staging_api_url = "https://api-staging.netra.ai"
+        self.staging_websocket_url = "wss://staging.netrasystems.ai/ws"
+        self.staging_auth_url = "https://auth.netrasystems.ai"
+        self.staging_api_url = "https://api-staging.netrasystems.ai"
         
         # Security violation tracking
         self.security_violations = []

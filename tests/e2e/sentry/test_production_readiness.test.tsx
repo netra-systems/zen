@@ -15,7 +15,7 @@ import { test, expect, Page, Browser } from '@playwright/test';
 
 // Production readiness configuration
 const PRODUCTION_READINESS_CONFIG = {
-  baseURL: process.env.STAGING_BASE_URL || 'https://staging.netra.ai',
+  baseURL: process.env.STAGING_BASE_URL || 'https://staging.netrasystems.ai',
   performanceBudget: {
     maxErrorCaptureTime: 50,      // ms - Error capture overhead
     maxPageLoadImpact: 100,       // ms - Impact on page load

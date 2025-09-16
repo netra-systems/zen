@@ -110,7 +110,7 @@ class TestUnifiedConfigurationManagerGCPStagingProductionCritical(BaseE2ETest):
             "LOG_LEVEL": "INFO",
             "DEBUG": "false",
             "ENABLE_METRICS": "true",
-            "CORS_ORIGINS": "https://staging.netra.ai,https://staging-api.netra.ai"
+            "CORS_ORIGINS": "https://staging.netrasystems.ai,https://staging-api.netrasystems.ai"
         }
         
         for key, value in staging_config.items():
@@ -243,7 +243,7 @@ class TestUnifiedConfigurationManagerGCPStagingProductionCritical(BaseE2ETest):
                 "LOG_LEVEL": "INFO",
                 "DEBUG": "false",
                 "JWT_SECRET_KEY": "global_jwt_secret_key",  # Same across regions
-                "CORS_ORIGINS": f"https://{region}-staging.netra.ai"
+                "CORS_ORIGINS": f"https://{region}-staging.netrasystems.ai"
             }
             
             # Region-specific configurations

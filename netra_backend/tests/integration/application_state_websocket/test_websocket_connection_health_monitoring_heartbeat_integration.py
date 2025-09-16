@@ -264,7 +264,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
         """
         # Create test user
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'health_monitoring_test@netra.ai',
+            'email': 'health_monitoring_test@netrasystems.ai',
             'name': 'Health Monitoring Test User',
             'is_active': True
         })
@@ -428,7 +428,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
         connection conditions while maintaining service availability.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'health_degraded_test@netra.ai',
+            'email': 'health_degraded_test@netrasystems.ai',
             'name': 'Health Degraded Test User',
             'is_active': True
         })
@@ -613,7 +613,7 @@ class WebSocketConnectionHealthMonitoringHeartbeatIntegrationTests(BaseIntegrati
         # Create 2 users with 2 connections each
         for user_index in range(2):
             user_data = await self.create_test_user_context(real_services_fixture, {
-                'email': f'multi_health_user_{user_index}@netra.ai',
+                'email': f'multi_health_user_{user_index}@netrasystems.ai',
                 'name': f'Multi Health User {user_index}',
                 'is_active': True
             })

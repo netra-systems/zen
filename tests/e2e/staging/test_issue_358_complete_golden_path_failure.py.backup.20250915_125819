@@ -66,9 +66,9 @@ REQUIREMENTS per CLAUDE.md:
 - Demonstrate business impact through real staging failures
 
 STAGING ENVIRONMENT:
-- Backend: https://staging-backend.netra-systems.com
+- Backend: https://staging-api.netra-systems.com
 - Auth Service: https://staging-auth.netra-systems.com  
-- WebSocket: wss://staging-backend.netra-systems.com/ws
+- WebSocket: wss://staging-api.netra-systems.com/ws
 - Frontend: https://staging.netra-systems.com
 """
 
@@ -122,9 +122,9 @@ class TestIssue358CompleteGoldenPathFailure(SSotAsyncTestCase):
         self.metrics.start_timing()
         
         # Staging environment configuration
-        self.staging_backend_url = "https://staging-backend.netra-systems.com"
+        self.staging_backend_url = "https://staging-api.netra-systems.com"
         self.staging_auth_url = "https://staging-auth.netra-systems.com"
-        self.staging_websocket_url = "wss://staging-backend.netra-systems.com/ws"
+        self.staging_websocket_url = "wss://staging-api.netra-systems.com/ws"
         self.staging_frontend_url = "https://staging.netra-systems.com"
         
         # Test timeout settings for staging

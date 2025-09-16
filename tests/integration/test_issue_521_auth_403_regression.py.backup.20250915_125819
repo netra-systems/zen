@@ -38,7 +38,7 @@ class TestIssue521AuthenticationRegression(SSotBaseTestCase):
     def setUpClass(cls):
         """Setup test class with staging environment configuration."""
         super().setUpClass()
-        cls.staging_config = {'base_url': 'https://netra-backend-staging-1234567890-uc.a.run.app', 'auth_service_url': 'https://netra-auth-staging-1234567890-uc.a.run.app', 'timeout': 30, 'retry_count': 3}
+        cls.staging_config = {'base_url': 'https://netra-backend-staging-1234567890-uc.a.run.app', 'auth_service_url': 'https://netra-auth-1234567890-uc.a.run.app', 'timeout': 30, 'retry_count': 3}
 
     def setUp(self):
         """Setup individual test with required configuration."""

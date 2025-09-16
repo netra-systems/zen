@@ -78,7 +78,7 @@ class RealAuthTestClient:
     async def create_test_user(self, user_id: str, email: str = None) -> Dict[str, Any]:
         """Create a real test user account."""
         if email is None:
-            email = f"{user_id}@test.netra.ai"
+            email = f"{user_id}@test.netrasystems.ai"
 
         user_data = {
             "user_id": user_id,
@@ -502,7 +502,7 @@ class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
             provider="google",
             authorization_code="test_auth_code_" + self.test_id,
             user_info={
-                "email": f"{self.test_user_id}@test.netra.ai",
+                "email": f"{self.test_user_id}@test.netrasystems.ai",
                 "name": f"OAuth User {self.test_id}",
                 "provider_id": f"google_{self.test_id}"
             }
@@ -554,7 +554,7 @@ class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
             provider="google",
             authorization_code="test_scoped_auth_" + self.test_id,
             user_info={
-                "email": f"{self.test_user_id}@test.netra.ai",
+                "email": f"{self.test_user_id}@test.netrasystems.ai",
                 "name": f"Scoped User {self.test_id}"
             },
             scopes=["read_data", "analyze_supply_chain", "generate_reports"]

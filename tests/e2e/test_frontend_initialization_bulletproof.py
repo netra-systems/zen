@@ -109,7 +109,7 @@ class FrontendInitializationSimulator:
         """Initialize authentication and get token."""
         try:
             if get_env().get('NODE_ENV') == 'development':
-                user = AuthUser(id=f'dev_user_{uuid.uuid4().hex[:8]}', email='dev@netra.ai', name='Dev User')
+                user = AuthUser(id=f'dev_user_{uuid.uuid4().hex[:8]}', email='dev@netrasystems.ai', name='Dev User')
             else:
                 response = self.client.post('/auth/callback', json={'code': 'test_auth_code', 'state': 'test_state'})
                 if response.status_code != 200:

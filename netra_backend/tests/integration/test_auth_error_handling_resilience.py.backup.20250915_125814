@@ -88,7 +88,7 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
         
         for i in range(num_users):
             user_id = f"load-test-user-{i}-{int(time.time())}"
-            email = f"load-test-{i}-{user_id}@netra.ai"
+            email = f"load-test-{i}-{user_id}@netrasystems.ai"
             
             jwt_token = self.auth_helper.create_test_jwt_token(
                 user_id=user_id,
@@ -271,7 +271,7 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
         """Test that auth system provides graceful degradation when Redis is unavailable."""
         # Arrange: Create test user and verify normal operation
         user_id = f"graceful-degradation-user-{int(time.time())}"
-        email = f"degradation-{user_id}@netra.ai"
+        email = f"degradation-{user_id}@netrasystems.ai"
         
         jwt_token = self.auth_helper.create_test_jwt_token(
             user_id=user_id,
@@ -398,7 +398,7 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
         
         for i in range(num_users):
             user_id = f"recovery-test-user-{i}-{int(time.time())}"
-            email = f"recovery-{i}-{user_id}@netra.ai"
+            email = f"recovery-{i}-{user_id}@netrasystems.ai"
             
             jwt_token = self.auth_helper.create_test_jwt_token(
                 user_id=user_id,

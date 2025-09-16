@@ -112,7 +112,7 @@ class RealPermissionEnforcementTests:
     def create_user_with_role(self, user_id: int, role: Role, permissions: List[Permission], jwt_secret_key: str, **kwargs) -> str:
         """Create JWT token for user with specific role and permissions."""
         now = datetime.utcnow()
-        payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: kwargs.get('email', f'user{user_id}@netra.ai'), JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(hours=1)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': user_id, 'role': role.value, 'permissions': [p.value for p in permissions], 'workspace_id': kwargs.get('workspace_id', f'workspace_{user_id}'), 'tenant_id': kwargs.get('tenant_id', f'tenant_{user_id}')}
+        payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: kwargs.get('email', f'user{user_id}@netrasystems.ai'), JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(hours=1)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': user_id, 'role': role.value, 'permissions': [p.value for p in permissions], 'workspace_id': kwargs.get('workspace_id', f'workspace_{user_id}'), 'tenant_id': kwargs.get('tenant_id', f'tenant_{user_id}')}
         return jwt.encode(payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
 
     def create_protected_resource(self, owner_id: int, required_permissions: List[Permission]) -> Dict[str, Any]:

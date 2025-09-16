@@ -138,7 +138,7 @@
         # REMOVED_SYNTAX_ERROR: """Test complete Google OAuth flow from landing page."""
         # 1. User clicks "Sign in with Google" on landing page
         # REMOVED_SYNTAX_ERROR: oauth_url = auth_service.get_google_oauth_url( )
-        # REMOVED_SYNTAX_ERROR: redirect_uri="https://staging.netra.ai/auth/callback"
+        # REMOVED_SYNTAX_ERROR: redirect_uri="https://staging.netrasystems.ai/auth/callback"
         
         # REMOVED_SYNTAX_ERROR: assert "accounts.google.com/o/oauth2/v2/auth" in oauth_url
         # REMOVED_SYNTAX_ERROR: assert "client_id=" in oauth_url

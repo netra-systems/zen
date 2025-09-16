@@ -202,7 +202,7 @@ class StagingAuthCrossServiceValidator:
         """Generate a test token with specific claims for validation testing."""
         # Use auth service's JWT handler to create token
         user_id = kwargs.get("user_id", f"test_user_{uuid.uuid4().hex[:8]}")
-        email = kwargs.get("email", f"{user_id}@test.netra.ai")
+        email = kwargs.get("email", f"{user_id}@test.netrasystems.ai")
         permissions = kwargs.get("permissions", ["read", "write"])
         
         token = self.jwt_handler.create_access_token(user_id, email, permissions)
@@ -418,7 +418,7 @@ class StagingCrossServiceJWTValidationTests:
         
         # Generate test tokens with identical parameters
         test_user_id = "test_user_consistency"
-        test_email = "consistency@test.netra.ai"
+        test_email = "consistency@test.netrasystems.ai"
         test_permissions = ["read", "write", "admin"]
         
         # Generate multiple tokens to test consistency
@@ -569,25 +569,25 @@ class StagingCrossServiceJWTValidationTests:
             {
                 "name": "standard_claims",
                 "user_id": "standard_user",
-                "email": "standard@test.netra.ai",
+                "email": "standard@test.netrasystems.ai",
                 "permissions": ["read", "write"]
             },
             {
                 "name": "admin_claims", 
                 "user_id": "admin_user",
-                "email": "admin@test.netra.ai",
+                "email": "admin@test.netrasystems.ai",
                 "permissions": ["read", "write", "admin", "super_admin"]
             },
             {
                 "name": "minimal_claims",
                 "user_id": "minimal_user",
-                "email": "minimal@test.netra.ai",
+                "email": "minimal@test.netrasystems.ai",
                 "permissions": []
             },
             {
                 "name": "service_claims",
                 "user_id": "service_netra_backend",
-                "email": "service@netra.ai",
+                "email": "service@netrasystems.ai",
                 "permissions": ["service", "api_access"]
             }
         ]
@@ -971,7 +971,7 @@ async def run_single_test(test_name: str):
         
         # Test data for new user signup
         test_user = {
-            "email": f"test_user_{uuid.uuid4().hex[:8]}@test.netra.ai",
+            "email": f"test_user_{uuid.uuid4().hex[:8]}@test.netrasystems.ai",
             "password": "TestPass123!",
             "full_name": "Test User",
             "company": "Test Company"
@@ -1066,7 +1066,7 @@ async def run_single_test(test_name: str):
             start_time = time.time()
             
             test_user = {
-                "email": f"load_test_user_{user_id}@test.netra.ai",
+                "email": f"load_test_user_{user_id}@test.netrasystems.ai",
                 "password": "TestPass123!"
             }
             
@@ -1141,7 +1141,7 @@ async def run_single_test(test_name: str):
         validator = StagingAuthCrossServiceValidator()
         
         test_user = {
-            "email": f"multi_device_user_{uuid.uuid4().hex[:8]}@test.netra.ai",
+            "email": f"multi_device_user_{uuid.uuid4().hex[:8]}@test.netrasystems.ai",
             "password": "TestPass123!"
         }
         
@@ -1220,7 +1220,7 @@ async def run_single_test(test_name: str):
         
         # Create user with short-lived token
         test_user = {
-            "email": f"refresh_test_user_{uuid.uuid4().hex[:8]}@test.netra.ai",
+            "email": f"refresh_test_user_{uuid.uuid4().hex[:8]}@test.netrasystems.ai",
             "password": "TestPass123!"
         }
         
@@ -1314,7 +1314,7 @@ async def run_single_test(test_name: str):
         validator = StagingAuthCrossServiceValidator()
         
         test_user = {
-            "email": f"upgrade_user_{uuid.uuid4().hex[:8]}@test.netra.ai",
+            "email": f"upgrade_user_{uuid.uuid4().hex[:8]}@test.netrasystems.ai",
             "password": "TestPass123!",
             "tier": "free"
         }
@@ -1449,7 +1449,7 @@ async def run_single_test(test_name: str):
         validator = StagingAuthCrossServiceValidator()
         
         test_user = {
-            "email": f"security_user_{uuid.uuid4().hex[:8]}@test.netra.ai",
+            "email": f"security_user_{uuid.uuid4().hex[:8]}@test.netrasystems.ai",
             "password": "TestPass123!"
         }
         
@@ -1534,7 +1534,7 @@ async def run_single_test(test_name: str):
         validator = StagingAuthCrossServiceValidator()
         
         onboarding_user = {
-            "email": f"onboarding_user_{uuid.uuid4().hex[:8]}@test.netra.ai",
+            "email": f"onboarding_user_{uuid.uuid4().hex[:8]}@test.netrasystems.ai",
             "password": "TestPass123!",
             "full_name": "Onboarding Test User",
             "company": "Test Corp",
@@ -1619,7 +1619,7 @@ async def run_single_test(test_name: str):
         validator = StagingAuthCrossServiceValidator()
         
         power_user = {
-            "email": f"power_user_{uuid.uuid4().hex[:8]}@test.netra.ai",
+            "email": f"power_user_{uuid.uuid4().hex[:8]}@test.netrasystems.ai",
             "password": "TestPass123!",
             "tier": "premium",
             "role": "admin"
@@ -1711,7 +1711,7 @@ async def run_single_test(test_name: str):
         validator = StagingAuthCrossServiceValidator()
         
         billing_user = {
-            "email": f"billing_user_{uuid.uuid4().hex[:8]}@test.netra.ai",
+            "email": f"billing_user_{uuid.uuid4().hex[:8]}@test.netrasystems.ai",
             "password": "TestPass123!",
             "tier": "free"
         }
@@ -1815,7 +1815,7 @@ async def run_single_test(test_name: str):
             user_results = []
             
             test_user = {
-                "email": f"load_user_{user_id}@test.netra.ai",
+                "email": f"load_user_{user_id}@test.netrasystems.ai",
                 "password": "TestPass123!"
             }
             
@@ -1954,7 +1954,7 @@ async def run_single_test(test_name: str):
             
             while time.time() < end_time:
                 test_user = {
-                    "email": f"memory_test_user_{authentication_count}@test.netra.ai",
+                    "email": f"memory_test_user_{authentication_count}@test.netrasystems.ai",
                     "password": "TestPass123!"
                 }
                 
@@ -2400,7 +2400,7 @@ async def run_single_test(test_name: str):
             oauth_data = {
                 "provider": provider,
                 "scope": scope,
-                "redirect_uri": redirect_uri or f"https://staging.netra.ai/auth/{provider}/callback"
+                "redirect_uri": redirect_uri or f"https://staging.netrasystems.ai/auth/{provider}/callback"
             }
             
             async with httpx.AsyncClient(timeout=10.0) as client:

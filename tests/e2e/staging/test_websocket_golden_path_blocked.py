@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'E2E STAGING TEST SUITE: WebSocket Golden Path Blocked - Issue #165 (Real GCP Services)\n\nTHIS SUITE VALIDATES WEBSOCKET SCOPE BUG WITH COMPLETE E2E GOLDEN PATH TESTING.\nBusiness Impact: $500K+ ARR - Complete Golden Path failure due to WebSocket scope bug\n\nGolden Path E2E Testing:\n- Tests complete user journey from login to AI response delivery\n- Validates WebSocket connection failures block entire Golden Path \n- Measures business impact on real GCP staging infrastructure\n- Tests actual user experience degradation and timeout scenarios\n\nE2E Test Characteristics:\n- Real GCP staging services (api-staging.netra.ai)\n- Real WebSocket connections with full authentication\n- Real agent execution and business logic\n- Real database persistence and state management\n- Real-time event delivery validation\n- Complete timeout and failure scenario testing\n\nThese tests are designed to FAIL initially to demonstrate the scope bug\ncompletely blocks the Golden Path user experience, causing 100% business\nvalue delivery failure.\n\nBusiness Value Justification (BVJ):\n- Segment: All (Free, Early, Mid, Enterprise) \n- Business Goal: Validate Golden Path reliability and scope bug impact\n- Value Impact: Prove scope bug prevents all business value delivery\n- Strategic Impact: $500K+ ARR completely blocked by infrastructure scope bug\n'
+'E2E STAGING TEST SUITE: WebSocket Golden Path Blocked - Issue #165 (Real GCP Services)\n\nTHIS SUITE VALIDATES WEBSOCKET SCOPE BUG WITH COMPLETE E2E GOLDEN PATH TESTING.\nBusiness Impact: $500K+ ARR - Complete Golden Path failure due to WebSocket scope bug\n\nGolden Path E2E Testing:\n- Tests complete user journey from login to AI response delivery\n- Validates WebSocket connection failures block entire Golden Path \n- Measures business impact on real GCP staging infrastructure\n- Tests actual user experience degradation and timeout scenarios\n\nE2E Test Characteristics:\n- Real GCP staging services (api-staging.netrasystems.ai)\n- Real WebSocket connections with full authentication\n- Real agent execution and business logic\n- Real database persistence and state management\n- Real-time event delivery validation\n- Complete timeout and failure scenario testing\n\nThese tests are designed to FAIL initially to demonstrate the scope bug\ncompletely blocks the Golden Path user experience, causing 100% business\nvalue delivery failure.\n\nBusiness Value Justification (BVJ):\n- Segment: All (Free, Early, Mid, Enterprise) \n- Business Goal: Validate Golden Path reliability and scope bug impact\n- Value Impact: Prove scope bug prevents all business value delivery\n- Strategic Impact: $500K+ ARR completely blocked by infrastructure scope bug\n'
 import asyncio
 import json
 import os
@@ -99,7 +99,7 @@ class WebSocketGoldenPathBlockedTests(StagingTestBase):
             golden_path_metrics['connection_attempts'] += 1
             attempt_start_time = time.time()
             try:
-                test_token = self.auth_helper.create_test_token(f'golden_path_user_{attempt}_{int(time.time())}', f'golden_path_{attempt}@staging.netra.ai')
+                test_token = self.auth_helper.create_test_token(f'golden_path_user_{attempt}_{int(time.time())}', f'golden_path_{attempt}@staging.netrasystems.ai')
                 headers = {'Authorization': f'Bearer {test_token}', 'X-Test-Type': 'e2e', 'X-Test-Environment': 'staging', 'X-Golden-Path-Test': 'true', 'X-Scope-Bug-Test': 'issue_165'}
                 logger.info(f'[U+1F4E1] Connecting to WebSocket: {self.websocket_url}')
                 async with websockets.connect(self.websocket_url, additional_headers=headers, timeout=10) as websocket:
@@ -205,7 +205,7 @@ class WebSocketGoldenPathBlockedTests(StagingTestBase):
             logger.info(f"[U+1F5E3][U+FE0F] Testing chat scenario: {scenario['name']}")
             chat_metrics['chat_attempts'] += 1
             try:
-                test_token = self.auth_helper.create_test_token(f"chat_user_{scenario['name'].lower()}_{int(time.time())}", f"chat_{scenario['name'].lower()}@staging.netra.ai")
+                test_token = self.auth_helper.create_test_token(f"chat_user_{scenario['name'].lower()}_{int(time.time())}", f"chat_{scenario['name'].lower()}@staging.netrasystems.ai")
                 headers = {'Authorization': f'Bearer {test_token}', 'X-Test-Type': 'e2e', 'X-Chat-Scenario': scenario['name'], 'X-Expected-Value': scenario['expected_value']}
                 async with websockets.connect(self.websocket_url, additional_headers=headers, timeout=15) as websocket:
                     chat_metrics['successful_connections'] += 1
@@ -289,7 +289,7 @@ class WebSocketGoldenPathBlockedTests(StagingTestBase):
             logger.info(f'[U+1F4E1] Event delivery attempt {attempt + 1}/{max_attempts}')
             event_metrics['connection_attempts'] += 1
             try:
-                test_token = self.auth_helper.create_test_token(f'event_test_user_{attempt}_{int(time.time())}', f'events_{attempt}@staging.netra.ai')
+                test_token = self.auth_helper.create_test_token(f'event_test_user_{attempt}_{int(time.time())}', f'events_{attempt}@staging.netrasystems.ai')
                 headers = {'Authorization': f'Bearer {test_token}', 'X-Test-Type': 'e2e', 'X-Test-Focus': 'websocket_events', 'X-Event-Test': f'attempt_{attempt + 1}'}
                 async with websockets.connect(self.websocket_url, additional_headers=headers, timeout=15) as websocket:
                     event_metrics['successful_connections'] += 1

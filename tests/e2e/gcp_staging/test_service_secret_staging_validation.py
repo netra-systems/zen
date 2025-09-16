@@ -38,7 +38,7 @@ class ServiceSecretStagingValidationTests(SSotAsyncTestCase):
         super().setUp()
         self.env = IsolatedEnvironment()
         self.staging_backend_url = self.env.get('STAGING_BACKEND_URL', 'https://netra-backend-staging-123456789.us-central1.run.app')
-        self.staging_auth_url = self.env.get('STAGING_AUTH_URL', 'https://netra-auth-staging-123456789.us-central1.run.app')
+        self.staging_auth_url = self.env.get('STAGING_AUTH_URL', 'https://netra-auth-123456789.us-central1.run.app')
         if not self._staging_available():
             pytest.skip('Staging environment not available for E2E testing')
         logger.info(f'E2E Staging Test Setup: Backend={self.staging_backend_url}, Auth={self.staging_auth_url}')

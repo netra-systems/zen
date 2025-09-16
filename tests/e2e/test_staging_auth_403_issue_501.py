@@ -41,13 +41,13 @@ from netra_backend.app.auth_integration.auth import BackendAuthIntegration, Auth
 logger = logging.getLogger(__name__)
 
 # Staging environment configuration
-STAGING_BACKEND_URL = os.environ.get("STAGING_BACKEND_URL", "https://staging-backend.netra.ai")
-STAGING_AUTH_URL = os.environ.get("STAGING_AUTH_URL", "https://staging-auth.netra.ai")
-STAGING_FRONTEND_URL = os.environ.get("STAGING_FRONTEND_URL", "https://staging.netra.ai")
+STAGING_BACKEND_URL = os.environ.get("STAGING_BACKEND_URL", "https://staging-api.netrasystems.ai")
+STAGING_AUTH_URL = os.environ.get("STAGING_AUTH_URL", "https://staging-auth.netrasystems.ai")
+STAGING_FRONTEND_URL = os.environ.get("STAGING_FRONTEND_URL", "https://staging.netrasystems.ai")
 
 # Test configuration
 REQUEST_TIMEOUT = 30  # seconds
-TEST_USER_EMAIL = "test-issue-501@netra.ai"
+TEST_USER_EMAIL = "test-issue-501@netrasystems.ai"
 TEST_USER_PASSWORD = "TestPassword123!"
 
 class StagingAuth403ReproductionTest:

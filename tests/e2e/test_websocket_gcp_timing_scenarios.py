@@ -44,8 +44,8 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
         self.primary_user = await self.auth_helper.create_authenticated_user(email='e2e_primary@websocket.test', full_name='E2E Primary User', permissions=['read', 'write', 'websocket_access'])
         self.secondary_user = await self.auth_helper.create_authenticated_user(email='e2e_secondary@websocket.test', full_name='E2E Secondary User', permissions=['read', 'write', 'websocket_access'])
         if test_environment == 'staging':
-            self.websocket_url = 'wss://staging-backend.netraapex.com/ws'
-            self.backend_url = 'https://staging-backend.netraapex.com'
+            self.websocket_url = 'wss://staging-api.netraapex.com/ws'
+            self.backend_url = 'https://staging-api.netraapex.com'
         else:
             self.websocket_url = 'ws://localhost:8000/ws'
             self.backend_url = 'http://localhost:8000'

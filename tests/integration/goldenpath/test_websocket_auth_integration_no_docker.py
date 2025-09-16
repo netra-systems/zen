@@ -87,7 +87,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
         """Create JWT token for golden path authentication testing."""
         payload = {
             "user_id": user_id,
-            "email": f"{user_id}@goldenpath.netra.ai",
+            "email": f"{user_id}@goldenpath.netrasystems.ai",
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=expires_in_minutes),
             "scope": "websocket_access golden_path",
@@ -101,7 +101,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
         """Create expired JWT token for security testing."""
         payload = {
             "user_id": user_id,
-            "email": f"{user_id}@goldenpath.netra.ai",
+            "email": f"{user_id}@goldenpath.netrasystems.ai",
             "iat": datetime.now(timezone.utc) - timedelta(minutes=120),
             "exp": datetime.now(timezone.utc) - timedelta(minutes=60),
             "scope": "websocket_access"
@@ -119,7 +119,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
         # Real authentication headers
         mock_websocket.request_headers = {
             'authorization': f'Bearer {token}',
-            'origin': 'https://app.netra.ai',
+            'origin': 'https://app.netrasystems.ai',
             'user-agent': 'Golden-Path-Integration-Test/1.0',
             'sec-websocket-protocol': 'netra-chat-v1'
         }
@@ -409,9 +409,9 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
             
             # Test valid origins
             valid_origins = [
-                'https://app.netra.ai',
-                'https://staging.netra.ai',
-                'https://dashboard.netra.ai'
+                'https://app.netrasystems.ai',
+                'https://staging.netrasystems.ai',
+                'https://dashboard.netrasystems.ai'
             ]
             
             for origin in valid_origins:
@@ -475,9 +475,9 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
                 
                 # Simulate CORS origin validation
                 is_origin_allowed = invalid_origin in [
-                    'https://app.netra.ai',
-                    'https://staging.netra.ai', 
-                    'https://dashboard.netra.ai'
+                    'https://app.netrasystems.ai',
+                    'https://staging.netrasystems.ai', 
+                    'https://dashboard.netrasystems.ai'
                 ]
                 
                 self.assertFalse(is_origin_allowed, f"Invalid origin '{invalid_origin}' should be blocked")

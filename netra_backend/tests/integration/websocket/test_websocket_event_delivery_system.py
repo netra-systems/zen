@@ -116,7 +116,7 @@ class WebSocketEventDeliverySystemTests(SSotAsyncTestCase):
         self.env = IsolatedEnvironment()
         self.env.set('TESTING', '1', source='websocket_event_test')
         self.env.set('USE_REAL_SERVICES', 'true', source='websocket_event_test')
-        self.test_user = TestUserData(user_id=f'test_user_{uuid.uuid4().hex[:8]}', email='test@netra.ai', tier='early', thread_id=f'test_thread_{uuid.uuid4().hex[:8]}')
+        self.test_user = TestUserData(user_id=f'test_user_{uuid.uuid4().hex[:8]}', email='test@netrasystems.ai', tier='early', thread_id=f'test_thread_{uuid.uuid4().hex[:8]}')
         self.websocket_managers: List[Any] = []
         self.event_capturers: List[EventCapturingWebSocket] = []
 
@@ -242,7 +242,7 @@ class WebSocketEventDeliverySystemTests(SSotAsyncTestCase):
         Business Value: Ensures scalable multi-tenant chat operations for enterprise customers,
         preventing cross-user interference that could impact service quality.
         """
-        users = [TestUserData(user_id=f'concurrent_user_{i}_{uuid.uuid4().hex[:8]}', email=f'user{i}@netra.ai', tier='early', thread_id=f'thread_{i}_{uuid.uuid4().hex[:8]}') for i in range(3)]
+        users = [TestUserData(user_id=f'concurrent_user_{i}_{uuid.uuid4().hex[:8]}', email=f'user{i}@netrasystems.ai', tier='early', thread_id=f'thread_{i}_{uuid.uuid4().hex[:8]}') for i in range(3)]
         user_setups = []
         for user_data in users:
             manager, capturer = await self.setup_websocket_with_event_capture(user_data)

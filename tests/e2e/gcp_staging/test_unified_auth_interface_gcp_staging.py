@@ -54,7 +54,7 @@ class UnifiedAuthInterfaceGCPStagingTests(SSotAsyncTestCase):
         cls.auth_service = AuthService()
         cls.jwt_secret = cls.env.get('JWT_SECRET_KEY')
         cls.jwt_algorithm = 'HS256'
-        cls.oauth_configs = {'google': {'client_id': cls.env.get('GOOGLE_CLIENT_ID'), 'client_secret': cls.env.get('GOOGLE_CLIENT_SECRET'), 'redirect_uri': 'https://staging.netra.ai/auth/callback/google'}, 'github': {'client_id': cls.env.get('GITHUB_CLIENT_ID'), 'client_secret': cls.env.get('GITHUB_CLIENT_SECRET'), 'redirect_uri': 'https://staging.netra.ai/auth/callback/github'}, 'azure': {'client_id': cls.env.get('AZURE_CLIENT_ID'), 'client_secret': cls.env.get('AZURE_CLIENT_SECRET'), 'redirect_uri': 'https://staging.netra.ai/auth/callback/azure'}, 'okta': {'client_id': cls.env.get('OKTA_CLIENT_ID'), 'client_secret': cls.env.get('OKTA_CLIENT_SECRET'), 'redirect_uri': 'https://staging.netra.ai/auth/callback/okta'}}
+        cls.oauth_configs = {'google': {'client_id': cls.env.get('GOOGLE_CLIENT_ID'), 'client_secret': cls.env.get('GOOGLE_CLIENT_SECRET'), 'redirect_uri': 'https://staging.netrasystems.ai/auth/callback/google'}, 'github': {'client_id': cls.env.get('GITHUB_CLIENT_ID'), 'client_secret': cls.env.get('GITHUB_CLIENT_SECRET'), 'redirect_uri': 'https://staging.netrasystems.ai/auth/callback/github'}, 'azure': {'client_id': cls.env.get('AZURE_CLIENT_ID'), 'client_secret': cls.env.get('AZURE_CLIENT_SECRET'), 'redirect_uri': 'https://staging.netrasystems.ai/auth/callback/azure'}, 'okta': {'client_id': cls.env.get('OKTA_CLIENT_ID'), 'client_secret': cls.env.get('OKTA_CLIENT_SECRET'), 'redirect_uri': 'https://staging.netrasystems.ai/auth/callback/okta'}}
 
     async def asyncTearDown(self):
         """Clean up test authentication data."""
@@ -70,16 +70,16 @@ class UnifiedAuthInterfaceGCPStagingTests(SSotAsyncTestCase):
         Business Value: $15K+ MRR per Enterprise - SSO is critical for enterprise sales.
         Validates: SAML/OIDC integration, multi-provider support, enterprise policies.
         """
-        enterprise_domain = 'enterprise-test.netra.ai'
+        enterprise_domain = 'enterprise-test.netrasystems.ai'
         sso_config = {'domain': enterprise_domain, 'providers': ['azure', 'okta', 'google'], 'require_domain_verification': True, 'enforce_mfa': True, 'session_policies': {'max_idle_minutes': 30, 'require_device_trust': True, 'restrict_ip_ranges': ['10.0.0.0/8', '172.16.0.0/12']}, 'compliance_requirements': {'audit_all_logins': True, 'require_consent': True, 'data_residency': 'US'}}
         sso_deployment = await self.unified_auth.deploy_sso_configuration(domain=enterprise_domain, config=sso_config, validation_mode='production')
         self.assertTrue(sso_deployment.get('success', False), 'SSO configuration deployment failed')
         self.assertIsNotNone(sso_deployment.get('configuration_id'), 'No SSO configuration ID generated')
-        test_users = [{'email': 'test.user.azure@enterprise-test.netra.ai', 'provider': 'azure', 'enterprise_attributes': {'department': 'Engineering', 'role': 'Senior Developer', 'permissions': ['read', 'write', 'admin']}}, {'email': 'test.user.okta@enterprise-test.netra.ai', 'provider': 'okta', 'enterprise_attributes': {'department': 'Finance', 'role': 'Analyst', 'permissions': ['read', 'write']}}, {'email': 'test.user.google@enterprise-test.netra.ai', 'provider': 'google', 'enterprise_attributes': {'department': 'Marketing', 'role': 'Manager', 'permissions': ['read', 'write', 'reports']}}]
+        test_users = [{'email': 'test.user.azure@enterprise-test.netrasystems.ai', 'provider': 'azure', 'enterprise_attributes': {'department': 'Engineering', 'role': 'Senior Developer', 'permissions': ['read', 'write', 'admin']}}, {'email': 'test.user.okta@enterprise-test.netrasystems.ai', 'provider': 'okta', 'enterprise_attributes': {'department': 'Finance', 'role': 'Analyst', 'permissions': ['read', 'write']}}, {'email': 'test.user.google@enterprise-test.netrasystems.ai', 'provider': 'google', 'enterprise_attributes': {'department': 'Marketing', 'role': 'Manager', 'permissions': ['read', 'write', 'reports']}}]
         authentication_results = []
         for test_user in test_users:
             auth_flow_start = time.time()
-            sso_initiation = await self.unified_auth.initiate_sso_flow(domain=enterprise_domain, provider=test_user['provider'], user_email=test_user['email'], redirect_uri=f'https://staging.netra.ai/dashboard')
+            sso_initiation = await self.unified_auth.initiate_sso_flow(domain=enterprise_domain, provider=test_user['provider'], user_email=test_user['email'], redirect_uri=f'https://staging.netrasystems.ai/dashboard')
             self.assertTrue(sso_initiation.get('success', False), f"SSO initiation failed for {test_user['provider']}")
             provider_auth = await self.unified_auth.simulate_provider_authentication(provider=test_user['provider'], flow_id=sso_initiation['flow_id'], user_attributes={'email': test_user['email'], 'verified': True, 'mfa_completed': True, **test_user['enterprise_attributes']})
             self.assertTrue(provider_auth.get('success', False), f"Provider authentication failed for {test_user['provider']}")
@@ -111,7 +111,7 @@ class UnifiedAuthInterfaceGCPStagingTests(SSotAsyncTestCase):
         """
         mfa_test_users = []
         for i in range(50):
-            user_email = f'mfa.test.{i}@netra.ai'
+            user_email = f'mfa.test.{i}@netrasystems.ai'
             user_id = self.id_manager.generate_user_id()
             user_registration = await self.unified_auth.register_user(email=user_email, password='SecureTestPassword123!', require_mfa=True, user_id=user_id, security_level=SecurityLevel.ENTERPRISE)
             self.assertTrue(user_registration.get('success', False), f'User registration failed: {user_email}')
@@ -183,7 +183,7 @@ class UnifiedAuthInterfaceGCPStagingTests(SSotAsyncTestCase):
         Business Value: $500K+ ARR protection - prevents session hijacking attacks.
         Validates: Session isolation, concurrent session limits, device fingerprinting.
         """
-        enterprise_user_email = 'enterprise.security@netra.ai'
+        enterprise_user_email = 'enterprise.security@netrasystems.ai'
         enterprise_user_id = self.id_manager.generate_user_id()
         enterprise_session_policy = SessionPolicy(max_concurrent_sessions=3, session_timeout_minutes=30, require_device_fingerprinting=True, enable_location_tracking=True, require_ip_validation=True, enable_session_binding=True, force_logout_on_suspicious_activity=True, enable_concurrent_session_monitoring=True)
         user_registration = await self.unified_auth.register_user(email=enterprise_user_email, password='EnterpriseSecurePassword123!', user_id=enterprise_user_id, security_level=SecurityLevel.ENTERPRISE, session_policy=enterprise_session_policy)
@@ -320,7 +320,7 @@ class UnifiedAuthInterfaceGCPStagingTests(SSotAsyncTestCase):
         Validates: JWT signing, validation, expiration, refresh token security.
         """
         test_user_id = self.id_manager.generate_user_id()
-        test_email = 'jwt.security.test@netra.ai'
+        test_email = 'jwt.security.test@netrasystems.ai'
         security_levels = [SecurityLevel.BASIC, SecurityLevel.STANDARD, SecurityLevel.ENTERPRISE]
         jwt_test_results = []
         for security_level in security_levels:
@@ -393,7 +393,7 @@ class UnifiedAuthInterfaceGCPStagingTests(SSotAsyncTestCase):
             response_times = []
             for attempt in range(scenario['requests_per_minute']):
                 attempt_start = time.time()
-                test_email = f'rate.limit.test.{attempt}@netra.ai'
+                test_email = f'rate.limit.test.{attempt}@netrasystems.ai'
                 wrong_password = f'wrong_password_{attempt}'
                 login_result = await self.unified_auth.authenticate_user(email=test_email, password=wrong_password, ip_address=scenario['ip_address'], user_agent='Rate Limit Test Bot', bypass_rate_limit=False)
                 attempt_time = time.time() - attempt_start
@@ -422,7 +422,7 @@ class UnifiedAuthInterfaceGCPStagingTests(SSotAsyncTestCase):
         for attack_round in range(3):
             attack_tasks = []
             for i in range(20):
-                attack_email = f'attack.test.{attack_round}.{i}@netra.ai'
+                attack_email = f'attack.test.{attack_round}.{i}@netrasystems.ai'
                 attack_task = self.unified_auth.authenticate_user(email=attack_email, password='definitely_wrong_password', ip_address=attack_ip, user_agent='Attack Bot', bypass_rate_limit=False)
                 attack_tasks.append(attack_task)
             attack_results = await asyncio.gather(*attack_tasks, return_exceptions=True)
@@ -435,7 +435,7 @@ class UnifiedAuthInterfaceGCPStagingTests(SSotAsyncTestCase):
         self.assertTrue(whitelist_result.get('success', False), 'IP whitelist addition failed')
         whitelist_test_tasks = []
         for i in range(50):
-            whitelist_email = f'whitelist.test.{i}@netra.ai'
+            whitelist_email = f'whitelist.test.{i}@netrasystems.ai'
             whitelist_task = self.unified_auth.authenticate_user(email=whitelist_email, password='wrong_password', ip_address=whitelist_ip, user_agent='Whitelist Test', bypass_rate_limit=False)
             whitelist_test_tasks.append(whitelist_task)
         whitelist_results = await asyncio.gather(*whitelist_test_tasks, return_exceptions=True)
@@ -452,7 +452,7 @@ class UnifiedAuthInterfaceGCPStagingTests(SSotAsyncTestCase):
         Validates: Audit trail completeness, log integrity, compliance reporting.
         """
         audit_user_id = self.id_manager.generate_user_id()
-        audit_email = 'audit.compliance@enterprise.netra.ai'
+        audit_email = 'audit.compliance@enterprise.netrasystems.ai'
         audit_config = await self.unified_auth.configure_audit_logging(log_level='comprehensive', retention_days=2555, encryption_enabled=True, integrity_checking=True, real_time_alerts=True, compliance_standards=['sox', 'gdpr', 'hipaa', 'iso27001'])
         self.assertTrue(audit_config.get('success', False), 'Audit logging configuration failed')
         audit_activities = [{'activity': 'user_registration', 'data': {'email': audit_email, 'security_level': 'enterprise'}}, {'activity': 'login_attempt', 'data': {'email': audit_email, 'success': True, 'mfa_used': True}}, {'activity': 'login_failure', 'data': {'email': audit_email, 'reason': 'wrong_password'}}, {'activity': 'password_change', 'data': {'user_id': audit_user_id, 'forced': False}}, {'activity': 'mfa_setup', 'data': {'user_id': audit_user_id, 'method': 'totp'}}, {'activity': 'permission_granted', 'data': {'user_id': audit_user_id, 'permission': 'admin_access'}}, {'activity': 'permission_denied', 'data': {'user_id': audit_user_id, 'resource': 'sensitive_data'}}, {'activity': 'role_assignment', 'data': {'user_id': audit_user_id, 'role': 'enterprise_admin'}}, {'activity': 'session_created', 'data': {'user_id': audit_user_id, 'device': 'laptop'}}, {'activity': 'session_expired', 'data': {'user_id': audit_user_id, 'reason': 'timeout'}}, {'activity': 'concurrent_session_limit', 'data': {'user_id': audit_user_id, 'limit': 5}}, {'activity': 'suspicious_login', 'data': {'user_id': audit_user_id, 'reason': 'unusual_location'}}, {'activity': 'account_locked', 'data': {'user_id': audit_user_id, 'reason': 'brute_force'}}, {'activity': 'security_alert', 'data': {'user_id': audit_user_id, 'alert_type': 'credential_stuffing'}}, {'activity': 'data_access', 'data': {'user_id': audit_user_id, 'resource': 'customer_data', 'action': 'read'}}, {'activity': 'data_modification', 'data': {'user_id': audit_user_id, 'resource': 'user_profile', 'action': 'update'}}, {'activity': 'data_deletion', 'data': {'user_id': audit_user_id, 'resource': 'audit_logs', 'action': 'delete'}}, {'activity': 'admin_action', 'data': {'admin_id': audit_user_id, 'action': 'user_deletion', 'target': 'test_user'}}, {'activity': 'config_change', 'data': {'admin_id': audit_user_id, 'setting': 'password_policy', 'old_value': 'standard', 'new_value': 'strict'}}, {'activity': 'backup_created', 'data': {'admin_id': audit_user_id, 'backup_type': 'full', 'size_mb': 1024}}]

@@ -68,7 +68,7 @@ class TestWebSocketAuthProtocolIntegration(SSotAsyncTestCase):
         # Create test tokens
         cls.test_user_payload = {
             "sub": "test_user_protocol_auth",
-            "email": "test@netra.ai", 
+            "email": "test@netrasystems.ai", 
             "exp": 9999999999,  # Far future
             "iat": 1000000000
         }
@@ -76,7 +76,7 @@ class TestWebSocketAuthProtocolIntegration(SSotAsyncTestCase):
         # Generate real JWT token using production auth service
         cls.valid_jwt_token = await generate_access_token(
             user_id="test_user_protocol_auth",
-            email="test@netra.ai"
+            email="test@netrasystems.ai"
         )
         
         # Create base64url encoded version for subprotocol

@@ -124,7 +124,7 @@ class ASGIScopeErrorReproductionTests:
     def test_reproduce_websocket_ssot_error_line_385(self):
         """Reproduce the exact error from websocket_ssot.py:385 - WILL FAIL."""
         websocket = Mock()
-        websocket.url = URL('wss://staging.netra.ai/ws?token=abc123&user_id=user123')
+        websocket.url = URL('wss://staging.netrasystems.ai/ws?token=abc123&user_id=user123')
         with pytest.raises(AttributeError, match="'URL' object has no attribute 'query_params'"):
             if hasattr(websocket.url, 'query_params'):
                 query_params = websocket.url.query_params
@@ -135,7 +135,7 @@ class ASGIScopeErrorReproductionTests:
         def simulate_middleware_websocket_processing():
             """Simulate the WebSocket processing that fails."""
             websocket = Mock()
-            websocket.url = URL('wss://staging.netra.ai/ws?token=abc123')
+            websocket.url = URL('wss://staging.netrasystems.ai/ws?token=abc123')
             try:
                 if hasattr(websocket.url, 'query_params'):
                     params = websocket.url.query_params
@@ -147,7 +147,7 @@ class ASGIScopeErrorReproductionTests:
 
     def test_gcp_cloud_run_asgi_scope_characteristics(self):
         """Test GCP Cloud Run specific ASGI scope characteristics - MAY FAIL."""
-        gcp_style_scope = {'type': 'websocket', 'scheme': 'wss', 'path': '/ws', 'query_string': b'token=abc123&user_id=user123', 'headers': [(b'host', b'staging.netra.ai'), (b'x-forwarded-for', b'10.0.0.1'), (b'x-forwarded-proto', b'https')], 'server': ('staging.netra.ai', 443), 'client': ('10.0.0.1', 56789)}
+        gcp_style_scope = {'type': 'websocket', 'scheme': 'wss', 'path': '/ws', 'query_string': b'token=abc123&user_id=user123', 'headers': [(b'host', b'staging.netrasystems.ai'), (b'x-forwarded-for', b'10.0.0.1'), (b'x-forwarded-proto', b'https')], 'server': ('staging.netrasystems.ai', 443), 'client': ('10.0.0.1', 56789)}
         assert gcp_style_scope['type'] == 'websocket'
         assert gcp_style_scope['query_string'] == b'token=abc123&user_id=user123'
 if __name__ == '__main__':

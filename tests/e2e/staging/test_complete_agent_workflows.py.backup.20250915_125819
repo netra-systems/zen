@@ -62,7 +62,7 @@ class TestCompleteAgentWorkflowsStaging(BaseE2ETest):
         assert self.staging_config.validate_configuration(), 'Staging configuration invalid'
         self.test_users = []
         for i in range(3):
-            user_context = await create_authenticated_user_context(user_email=f'e2e_agent_test_{i}_{int(time.time())}@staging.netra.ai', environment='staging', permissions=['read', 'write', 'execute_agents'])
+            user_context = await create_authenticated_user_context(user_email=f'e2e_agent_test_{i}_{int(time.time())}@staging.netrasystems.ai', environment='staging', permissions=['read', 'write', 'execute_agents'])
             self.test_users.append(user_context)
         self.logger.info(f' PASS:  Staging environment setup complete - {len(self.test_users)} authenticated users')
 

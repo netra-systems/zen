@@ -226,8 +226,8 @@ class ConfigurationValidationAlgorithmsTests(BaseTestCase):
         
         # Test auth service OAuth pattern (environment-specific names)
         auth_oauth = {
-            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "auth-staging-client-id",
-            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "auth-staging-client-secret",
+            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "auth-client-id",
+            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "auth-client-secret",
             "service_type": "auth"
         }
         

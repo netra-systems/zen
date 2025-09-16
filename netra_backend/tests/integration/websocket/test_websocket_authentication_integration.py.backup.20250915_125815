@@ -109,7 +109,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
         self.env.set('TESTING', '1', source='websocket_auth_test')
         self.env.set('USE_REAL_SERVICES', 'true', source='websocket_auth_test')
         self.env.set('JWT_SECRET_KEY', 'test_secret_key_for_websocket_auth', source='websocket_auth_test')
-        self.auth_test_scenarios = [AuthTestScenario(name='valid_free_user', user_data=TestUserData(user_id=f'free_user_{uuid.uuid4().hex[:8]}', email='free@netra.ai', tier='free', thread_id=f'free_thread_{uuid.uuid4().hex[:8]}'), token_valid=True, token_expired=False, expected_connection_success=True), AuthTestScenario(name='valid_enterprise_user', user_data=TestUserData(user_id=f'enterprise_user_{uuid.uuid4().hex[:8]}', email='enterprise@company.com', tier='enterprise', thread_id=f'enterprise_thread_{uuid.uuid4().hex[:8]}'), token_valid=True, token_expired=False, expected_connection_success=True), AuthTestScenario(name='expired_token_user', user_data=TestUserData(user_id=f'expired_user_{uuid.uuid4().hex[:8]}', email='expired@netra.ai', tier='early', thread_id=f'expired_thread_{uuid.uuid4().hex[:8]}'), token_valid=False, token_expired=True, expected_connection_success=False, expected_auth_error='token_expired'), AuthTestScenario(name='invalid_token_user', user_data=TestUserData(user_id=f'invalid_user_{uuid.uuid4().hex[:8]}', email='invalid@netra.ai', tier='mid', thread_id=f'invalid_thread_{uuid.uuid4().hex[:8]}'), token_valid=False, token_expired=False, expected_connection_success=False, expected_auth_error='invalid_token')]
+        self.auth_test_scenarios = [AuthTestScenario(name='valid_free_user', user_data=TestUserData(user_id=f'free_user_{uuid.uuid4().hex[:8]}', email='free@netrasystems.ai', tier='free', thread_id=f'free_thread_{uuid.uuid4().hex[:8]}'), token_valid=True, token_expired=False, expected_connection_success=True), AuthTestScenario(name='valid_enterprise_user', user_data=TestUserData(user_id=f'enterprise_user_{uuid.uuid4().hex[:8]}', email='enterprise@company.com', tier='enterprise', thread_id=f'enterprise_thread_{uuid.uuid4().hex[:8]}'), token_valid=True, token_expired=False, expected_connection_success=True), AuthTestScenario(name='expired_token_user', user_data=TestUserData(user_id=f'expired_user_{uuid.uuid4().hex[:8]}', email='expired@netrasystems.ai', tier='early', thread_id=f'expired_thread_{uuid.uuid4().hex[:8]}'), token_valid=False, token_expired=True, expected_connection_success=False, expected_auth_error='token_expired'), AuthTestScenario(name='invalid_token_user', user_data=TestUserData(user_id=f'invalid_user_{uuid.uuid4().hex[:8]}', email='invalid@netrasystems.ai', tier='mid', thread_id=f'invalid_thread_{uuid.uuid4().hex[:8]}'), token_valid=False, token_expired=False, expected_connection_success=False, expected_auth_error='invalid_token')]
         self.websocket_managers: List[Any] = []
         self.mock_websockets: List[MockAuthenticatedWebSocket] = []
 
@@ -275,7 +275,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
         Business Value: Ensures user identity and permissions are correctly established
         for personalized AI interactions and proper access control.
         """
-        test_user_data = TestUserData(user_id=f'context_user_{uuid.uuid4().hex[:8]}', email='context-test@netra.ai', tier='mid', thread_id=f'context_thread_{uuid.uuid4().hex[:8]}')
+        test_user_data = TestUserData(user_id=f'context_user_{uuid.uuid4().hex[:8]}', email='context-test@netrasystems.ai', tier='mid', thread_id=f'context_thread_{uuid.uuid4().hex[:8]}')
         token = self.create_test_jwt_token(test_user_data, expired=False, invalid=False)
         with patch('auth_service.auth_core.core.jwt_handler.JWTHandler.decode_token') as mock_decode:
             mock_decode.return_value = {'user_id': test_user_data.user_id, 'email': test_user_data.email, 'tier': test_user_data.tier, 'exp': (datetime.now(UTC) + timedelta(hours=24)).timestamp(), 'iat': datetime.now(UTC).timestamp(), 'iss': 'netra-auth-test'}
@@ -310,7 +310,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
         Business Value: Ensures seamless user experience during token renewal,
         preventing interruption of revenue-generating chat sessions.
         """
-        test_user_data = TestUserData(user_id=f'renewal_user_{uuid.uuid4().hex[:8]}', email='renewal-test@netra.ai', tier='enterprise', thread_id=f'renewal_thread_{uuid.uuid4().hex[:8]}')
+        test_user_data = TestUserData(user_id=f'renewal_user_{uuid.uuid4().hex[:8]}', email='renewal-test@netrasystems.ai', tier='enterprise', thread_id=f'renewal_thread_{uuid.uuid4().hex[:8]}')
         initial_token = self.create_test_jwt_token(test_user_data, expired=False, invalid=False)
         user_context = await self.create_mock_user_context_from_token(initial_token, test_user_data)
         manager = get_websocket_manager(user_context=user_context, mode=WebSocketManagerMode.ISOLATED)

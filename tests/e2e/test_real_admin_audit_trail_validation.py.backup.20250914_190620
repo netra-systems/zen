@@ -95,7 +95,7 @@ class TestRealAdminAuditTrailValidation:
     async def authenticated_admin(self, auth_helper: E2EAuthHelper) -> AuthenticatedUser:
         """Create REAL authenticated admin user for audit trail testing."""
         admin_user = await auth_helper.create_authenticated_user(
-            email=f"admin_audit_test_{int(time.time())}@netra.ai",
+            email=f"admin_audit_test_{int(time.time())}@netrasystems.ai",
             permissions=["admin", "read", "write"],
             user_id=f"admin-{int(time.time())}"
         )
@@ -105,7 +105,7 @@ class TestRealAdminAuditTrailValidation:
     async def test_target_user(self, auth_helper: E2EAuthHelper) -> AuthenticatedUser:
         """Create REAL target user for admin operations."""
         target_user = await auth_helper.create_authenticated_user(
-            email=f"audit_target_{int(time.time())}@netra.ai",
+            email=f"audit_target_{int(time.time())}@netrasystems.ai",
             permissions=["read", "write"],
             user_id=f"target-{int(time.time())}"
         )

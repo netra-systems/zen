@@ -76,7 +76,7 @@ class TestOAuthIntegration(BaseIntegrationTest):
         self.test_oauth_users = {
             "google": {
                 "sub": "oauth-google-123456",
-                "email": "oauth.google@netra.ai", 
+                "email": "oauth.google@netrasystems.ai", 
                 "name": "OAuth Google User",
                 "picture": "https://example.com/avatar.jpg",
                 "email_verified": True
@@ -84,7 +84,7 @@ class TestOAuthIntegration(BaseIntegrationTest):
             "github": {
                 "id": "oauth-github-789012",
                 "login": "oauth-github-user",
-                "email": "oauth.github@netra.ai",
+                "email": "oauth.github@netrasystems.ai",
                 "name": "OAuth GitHub User", 
                 "avatar_url": "https://example.com/avatar.jpg"
             }

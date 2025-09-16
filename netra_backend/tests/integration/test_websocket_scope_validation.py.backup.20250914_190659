@@ -86,7 +86,7 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
         self.env.set("E2E_TESTING", "0", source="integration_test")
         
         # Get staging service URLs
-        self.backend_url = self.env.get("BACKEND_URL", "https://api-staging.netra.ai")  
+        self.backend_url = self.env.get("BACKEND_URL", "https://api-staging.netrasystems.ai")  
         self.websocket_url = self.backend_url.replace("https://", "wss://").replace("http://", "ws://") + "/ws"
         
         logger.info(f"[U+1F527] INTEGRATION SETUP: Testing against {self.backend_url}")

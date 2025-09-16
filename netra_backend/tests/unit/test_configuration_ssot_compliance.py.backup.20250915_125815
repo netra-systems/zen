@@ -130,8 +130,8 @@ class TestConfigurationSSOTCompliance(BaseTestCase):
         
         # Test auth service SSOT pattern (environment-specific names)
         auth_oauth_ssot = {
-            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "auth-staging-client-unified",
-            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "auth-staging-secret-unified", 
+            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "auth-client-unified",
+            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "auth-secret-unified", 
             "oauth_pattern": "auth_environment_specific"
         }
         

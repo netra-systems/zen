@@ -286,7 +286,7 @@ class TestWebSocketHeartbeatMonitoring(SSotAsyncTestCase):
         # Test user data
         self.test_user = TestUserData(
             user_id=f"heartbeat_user_{uuid.uuid4().hex[:8]}",
-            email="heartbeat-test@netra.ai",
+            email="heartbeat-test@netrasystems.ai",
             tier="enterprise",
             thread_id=f"heartbeat_thread_{uuid.uuid4().hex[:8]}"
         )

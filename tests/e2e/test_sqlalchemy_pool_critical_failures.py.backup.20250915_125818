@@ -97,7 +97,7 @@ class TestSQLAlchemyPoolCriticalFailures:
         """Create authenticated test user for E2E scenarios."""
         # Create test user with real authentication
         user_data = await create_test_user(
-            email="sqlalchemy.pool.test@netra.ai",
+            email="sqlalchemy.pool.test@netrasystems.ai",
             name="SQLAlchemy Pool Test User",
             subscription="enterprise"
         )
@@ -315,7 +315,7 @@ class TestSQLAlchemyPoolCriticalFailures:
             for i in range(count):
                 try:
                     user = await create_test_user(
-                        email=f"concurrent.pool.test.{i}@netra.ai",
+                        email=f"concurrent.pool.test.{i}@netrasystems.ai",
                         name=f"Concurrent Pool Test User {i}",
                         subscription="basic"
                     )

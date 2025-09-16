@@ -32,7 +32,7 @@ class TestWebSocketAgentEventFlowsE2E(BaseE2ETest):
         """Create authenticated user for E2E testing."""
         auth_helper = E2EAuthHelper()
         user = await auth_helper.create_authenticated_user(
-            email="e2e_websocket_user@test.netra.ai",
+            email="e2e_websocket_user@test.netrasystems.ai",
             name="E2E WebSocket Test User"
         )
         return user
@@ -144,11 +144,11 @@ class TestWebSocketAgentEventFlowsE2E(BaseE2ETest):
         # Arrange: Create two authenticated users
         auth_helper = E2EAuthHelper()
         user1 = await auth_helper.create_authenticated_user(
-            email="e2e_isolation_user1@test.netra.ai",
+            email="e2e_isolation_user1@test.netrasystems.ai",
             name="E2E Isolation User 1"
         )
         user2 = await auth_helper.create_authenticated_user(
-            email="e2e_isolation_user2@test.netra.ai", 
+            email="e2e_isolation_user2@test.netrasystems.ai", 
             name="E2E Isolation User 2"
         )
         
@@ -284,7 +284,7 @@ class TestWebSocketAgentEventFlowsE2E(BaseE2ETest):
         users = []
         for i in range(3):  # 3 concurrent users for E2E load test
             user = await auth_helper.create_authenticated_user(
-                email=f"e2e_load_user_{i}@test.netra.ai",
+                email=f"e2e_load_user_{i}@test.netrasystems.ai",
                 name=f"E2E Load User {i}"
             )
             users.append(user)

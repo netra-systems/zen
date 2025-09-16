@@ -205,7 +205,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
         """
         # Create test user
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'cleanup_test_user@netra.ai',
+            'email': 'cleanup_test_user@netrasystems.ai',
             'name': 'Cleanup Test User',
             'is_active': True
         })
@@ -336,7 +336,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
         cleanup operations encounter errors or exceptions.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'failure_cleanup_test@netra.ai',
+            'email': 'failure_cleanup_test@netrasystems.ai',
             'name': 'Failure Cleanup Test User',
             'is_active': True
         })
@@ -526,7 +526,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
         # Create 3 users with 2 connections each (6 total connections)
         for user_index in range(3):
             user_data = await self.create_test_user_context(real_services_fixture, {
-                'email': f'bulk_cleanup_user_{user_index}@netra.ai',
+                'email': f'bulk_cleanup_user_{user_index}@netrasystems.ai',
                 'name': f'Bulk Cleanup User {user_index}',
                 'is_active': True
             })

@@ -30,7 +30,7 @@ class TestUserContextExtractionSSOT(SSotAsyncTestCase):
     async def asyncSetUpClass(cls):
         """Setup user context SSOT testing environment"""
         await super().asyncSetUpClass()
-        cls.staging_auth_service_url = os.getenv('STAGING_AUTH_SERVICE_URL', 'https://auth-staging.netra-apex.com')
+        cls.staging_auth_service_url = os.getenv('STAGING_AUTH_SERVICE_URL', 'https://auth.netra-apex.com')
         cls.staging_backend_url = os.getenv('STAGING_BACKEND_URL', 'https://backend-staging.netra-apex.com')
         cls.staging_test_email = 'user-context-test@example.com'
         cls.staging_test_password = 'UserContext123!'

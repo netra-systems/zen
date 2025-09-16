@@ -201,7 +201,7 @@ class ConfigurationDatasets:
             "oauth": {
                 "client_id": "enterprise-oauth-client-id",
                 "client_secret": "enterprise-oauth-client-secret",
-                "redirect_uri": "https://enterprise.netra.ai/auth/callback"
+                "redirect_uri": "https://enterprise.netrasystems.ai/auth/callback"
             }
         },
         "features": {
@@ -286,7 +286,7 @@ class ConfigurationDatasets:
         },
         "monitoring": {
             "enabled": True,
-            "metrics_endpoint": "https://metrics.netra.ai",
+            "metrics_endpoint": "https://metrics.netrasystems.ai",
             "log_level": "INFO"
         }
     }

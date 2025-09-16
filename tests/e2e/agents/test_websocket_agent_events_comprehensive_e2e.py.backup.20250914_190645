@@ -73,7 +73,7 @@ class TestWebSocketAgentEventsE2E(BaseE2ETest):
         self.test_users = []
         for i in range(3):  # 3 users for event delivery validation
             user_context = await create_authenticated_user_context(
-                user_email=f"websocket_event_test_{i}_{int(time.time())}@staging.netra.ai",
+                user_email=f"websocket_event_test_{i}_{int(time.time())}@staging.netrasystems.ai",
                 environment="staging",
                 permissions=["read", "write", "execute_agents", "websocket_events"]
             )

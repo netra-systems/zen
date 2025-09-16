@@ -82,7 +82,7 @@ class MultiUserStateIsolationIntegrationTests(BaseIntegrationTest):
     async def _create_isolated_user_context(self, real_services_fixture, user_index: int,
                                           scenario: IsolationTestScenario) -> UserIsolationContext:
         """Create isolated user context for testing."""
-        user_email = f"isolation_user_{user_index}_{scenario.value}@netra.ai"
+        user_email = f"isolation_user_{user_index}_{scenario.value}@netrasystems.ai"
         
         # Create user with real services
         user_data = await self.create_test_user_context(real_services_fixture, {

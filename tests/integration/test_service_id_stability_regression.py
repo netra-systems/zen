@@ -58,7 +58,7 @@ class ServiceIDStabilityTest:
         
         # Verify correct stable SERVICE_ID patterns exist
         expected_patterns = {
-            '"service-id-staging": "netra-auth-staging"': 'Staging SERVICE_ID should be stable',
+            '"service-id-staging": "netra-auth"': 'Staging SERVICE_ID should be stable',
             '"service-id-production": "netra-auth-production"': 'Production SERVICE_ID should be stable (if exists)'
         }
         

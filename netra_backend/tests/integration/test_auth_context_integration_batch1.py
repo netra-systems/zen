@@ -44,7 +44,7 @@ class AuthContextIntegrationTests(SSotAsyncTestCase):
         self.test_users = []
         self.created_contexts = []
         self.auth_helper = E2EAuthHelper()
-        self.user_test_data = [{'user_id': str(uuid.uuid4()), 'email': f'testuser1_{uuid.uuid4().hex[:8]}@netra.ai', 'role': 'user', 'permissions': ['read', 'write']}, {'user_id': str(uuid.uuid4()), 'email': f'testuser2_{uuid.uuid4().hex[:8]}@netra.ai', 'role': 'admin', 'permissions': ['read', 'write', 'admin']}, {'user_id': str(uuid.uuid4()), 'email': f'testuser3_{uuid.uuid4().hex[:8]}@netra.ai', 'role': 'viewer', 'permissions': ['read']}]
+        self.user_test_data = [{'user_id': str(uuid.uuid4()), 'email': f'testuser1_{uuid.uuid4().hex[:8]}@netrasystems.ai', 'role': 'user', 'permissions': ['read', 'write']}, {'user_id': str(uuid.uuid4()), 'email': f'testuser2_{uuid.uuid4().hex[:8]}@netrasystems.ai', 'role': 'admin', 'permissions': ['read', 'write', 'admin']}, {'user_id': str(uuid.uuid4()), 'email': f'testuser3_{uuid.uuid4().hex[:8]}@netrasystems.ai', 'role': 'viewer', 'permissions': ['read']}]
 
     async def asyncSetUp(self):
         """Async setup for test fixtures."""
@@ -102,7 +102,7 @@ class AuthContextIntegrationTests(SSotAsyncTestCase):
         async def authenticate_user(user_index: int) -> Dict[str, Any]:
             """Authenticate a single user and return context info."""
             base_data = self.user_test_data[user_index % len(self.user_test_data)]
-            user_data = {**base_data, 'user_id': str(uuid.uuid4()), 'email': f'concurrent_user_{user_index}_{uuid.uuid4().hex[:8]}@netra.ai'}
+            user_data = {**base_data, 'user_id': str(uuid.uuid4()), 'email': f'concurrent_user_{user_index}_{uuid.uuid4().hex[:8]}@netrasystems.ai'}
             test_user = await self.auth_helper.create_test_user(user_id=user_data['user_id'], email=user_data['email'], role=user_data['role'])
             token = get_test_jwt_token(user_id=user_data['user_id'], email=user_data['email'], permissions=user_data['permissions'])
             auth_result = await self.auth_service.authenticate_token(token=token, context=AuthenticationContext.REST_API, method=AuthenticationMethod.JWT_TOKEN)
@@ -146,7 +146,7 @@ class AuthContextIntegrationTests(SSotAsyncTestCase):
 
     async def test_invalid_jwt_prevents_context_creation(self):
         """Test 3: Invalid JWT tokens prevent UserExecutionContext creation."""
-        invalid_tokens = ['invalid.jwt.token', '', 'header.payload', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid.signature', get_test_jwt_token(user_id=str(uuid.uuid4()), email='expired@netra.ai', permissions=['read'], exp_delta=timedelta(days=-1))]
+        invalid_tokens = ['invalid.jwt.token', '', 'header.payload', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid.signature', get_test_jwt_token(user_id=str(uuid.uuid4()), email='expired@netrasystems.ai', permissions=['read'], exp_delta=timedelta(days=-1))]
         for i, invalid_token in enumerate(invalid_tokens):
             with self.subTest(token_type=f'invalid_token_{i}'):
                 auth_result = await self.auth_service.authenticate_token(token=invalid_token, context=AuthenticationContext.REST_API, method=AuthenticationMethod.JWT_TOKEN)
@@ -217,7 +217,7 @@ class AuthContextIntegrationTests(SSotAsyncTestCase):
 
     def test_jwt_token_format_validation(self):
         """Test JWT token format validation utility."""
-        valid_tokens = [get_test_jwt_token(str(uuid.uuid4()), 'test@netra.ai', ['read']), 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c']
+        valid_tokens = [get_test_jwt_token(str(uuid.uuid4()), 'test@netrasystems.ai', ['read']), 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c']
         invalid_tokens = ['', 'invalid', 'header.payload', 'too.many.dots.here.invalid', None]
         for token in valid_tokens:
             self.assertTrue(validate_jwt_format(token), f'Token should be valid: {token[:50]}...')

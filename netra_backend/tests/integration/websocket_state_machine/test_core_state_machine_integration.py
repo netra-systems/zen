@@ -54,7 +54,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         """
         # Create test user context
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'state_init_test@netra.ai',
+            'email': 'state_init_test@netrasystems.ai',
             'name': 'State Init Test User',
             'is_active': True
         })
@@ -97,7 +97,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         reliable chat interactions and agent execution.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'valid_transitions_test@netra.ai',
+            'email': 'valid_transitions_test@netrasystems.ai',
             'name': 'Valid Transitions Test User',
             'is_active': True
         })
@@ -161,7 +161,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         lost messages or system instability.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'invalid_transitions_test@netra.ai',
+            'email': 'invalid_transitions_test@netrasystems.ai',
             'name': 'Invalid Transitions Test User',
             'is_active': True
         })
@@ -212,7 +212,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         supporting features like message queuing and reconnection logic.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'callbacks_test@netra.ai',
+            'email': 'callbacks_test@netrasystems.ai',
             'name': 'Callbacks Test User',
             'is_active': True
         })
@@ -298,7 +298,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         service restarts and load balancer changes.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'persistence_test@netra.ai',
+            'email': 'persistence_test@netrasystems.ai',
             'name': 'Persistence Test User',
             'is_active': True
         })
@@ -396,7 +396,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         users = []
         for i in range(3):
             user_data = await self.create_test_user_context(real_services_fixture, {
-                'email': f'registry_test_{i}@netra.ai',
+                'email': f'registry_test_{i}@netrasystems.ai',
                 'name': f'Registry Test User {i}',
                 'is_active': True
             })
@@ -492,7 +492,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         users = []
         for i in range(5):
             user_data = await self.create_test_user_context(real_services_fixture, {
-                'email': f'multi_conn_test_{i}@netra.ai',
+                'email': f'multi_conn_test_{i}@netrasystems.ai',
                 'name': f'Multi Connection Test User {i}',
                 'is_active': True
             })
@@ -607,7 +607,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         performance for monitoring and debugging.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'metrics_test@netra.ai',
+            'email': 'metrics_test@netrasystems.ai',
             'name': 'Metrics Test User',
             'is_active': True
         })
@@ -733,7 +733,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         preventing race conditions that could corrupt connection state.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'concurrent_test@netra.ai',
+            'email': 'concurrent_test@netrasystems.ai',
             'name': 'Concurrent Test User',
             'is_active': True
         })
@@ -869,7 +869,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         updates that could lead to undefined behavior.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'rollback_test@netra.ai',
+            'email': 'rollback_test@netrasystems.ai',
             'name': 'Rollback Test User',
             'is_active': True
         })
@@ -1010,7 +1010,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         are cleaned up when connections end, preventing resource leaks.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'terminal_states_test@netra.ai',
+            'email': 'terminal_states_test@netrasystems.ai',
             'name': 'Terminal States Test User',
             'is_active': True
         })
@@ -1100,7 +1100,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         readiness information to the broader WebSocket infrastructure.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'utilities_integration_test@netra.ai',
+            'email': 'utilities_integration_test@netrasystems.ai',
             'name': 'Utilities Integration Test User',
             'is_active': True
         })
@@ -1209,7 +1209,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         premature message processing and maintains reliable chat functionality.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'readiness_test@netra.ai',
+            'email': 'readiness_test@netrasystems.ai',
             'name': 'Readiness Test User',
             'is_active': True
         })
@@ -1339,7 +1339,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         proper load balancing and health monitoring across connections.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'operational_test@netra.ai',
+            'email': 'operational_test@netrasystems.ai',
             'name': 'Operational Test User',
             'is_active': True
         })
@@ -1497,7 +1497,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         users = []
         for i in range(5):
             user_data = await self.create_test_user_context(real_services_fixture, {
-                'email': f'cleanup_test_{i}@netra.ai',
+                'email': f'cleanup_test_{i}@netrasystems.ai',
                 'name': f'Cleanup Test User {i}',
                 'is_active': True
             })
@@ -1663,7 +1663,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         unrecoverable connection states, maintaining system stability.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'forced_error_test@netra.ai',
+            'email': 'forced_error_test@netrasystems.ai',
             'name': 'Forced Error Test User',
             'is_active': True
         })
@@ -1775,7 +1775,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         for monitoring and optimization of user onboarding experience.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'setup_metrics_test@netra.ai',
+            'email': 'setup_metrics_test@netrasystems.ai',
             'name': 'Setup Metrics Test User',
             'is_active': True
         })
@@ -1951,7 +1951,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         WebSocket connections for realistic connection management scenarios.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'real_websocket_test@netra.ai',
+            'email': 'real_websocket_test@netrasystems.ai',
             'name': 'Real WebSocket Test User',
             'is_active': True
         })
@@ -2146,7 +2146,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         users = []
         for i in range(10):
             user_data = await self.create_test_user_context(real_services_fixture, {
-                'email': f'cleanup_comprehensive_{i}@netra.ai',
+                'email': f'cleanup_comprehensive_{i}@netrasystems.ai',
                 'name': f'Cleanup Comprehensive User {i}',
                 'is_active': True
             })
@@ -2370,7 +2370,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         users = []
         for i in range(8):
             user_data = await self.create_test_user_context(real_services_fixture, {
-                'email': f'stats_test_{i}@netra.ai',
+                'email': f'stats_test_{i}@netrasystems.ai',
                 'name': f'Statistics Test User {i}',
                 'is_active': True
             })
@@ -2616,7 +2616,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         during partial failures, maintaining user experience continuity.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'degraded_mode_test@netra.ai',
+            'email': 'degraded_mode_test@netrasystems.ai',
             'name': 'Degraded Mode Test User',
             'is_active': True
         })
@@ -2833,7 +2833,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         normal operations, maintaining service availability and user experience.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'error_recovery_test@netra.ai',
+            'email': 'error_recovery_test@netrasystems.ai',
             'name': 'Error Recovery Test User',
             'is_active': True
         })
@@ -3095,7 +3095,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         users = []
         for i in range(3):
             user_data = await self.create_test_user_context(real_services_fixture, {
-                'email': f'user_context_test_{i}@netra.ai',
+                'email': f'user_context_test_{i}@netrasystems.ai',
                 'name': f'User Context Test {i}',
                 'is_active': True
             })
@@ -3364,7 +3364,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         processing capabilities, ensuring reliable chat functionality delivery.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'lifecycle_test@netra.ai',
+            'email': 'lifecycle_test@netrasystems.ai',
             'name': 'Lifecycle Test User',
             'is_active': True
         })
@@ -3671,7 +3671,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         event system, ensuring mission-critical chat functionality works end-to-end.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'e2e_websocket_test@netra.ai',
+            'email': 'e2e_websocket_test@netrasystems.ai',
             'name': 'E2E WebSocket Test User',
             'is_active': True
         })
@@ -3881,7 +3881,7 @@ class CoreStateMachineIntegrationTests(BaseIntegrationTest):
         for i in range(3):
             # Create separate user for each connection
             user_data_i = await self.create_test_user_context(real_services_fixture, {
-                'email': f'multi_user_websocket_{i}@netra.ai',
+                'email': f'multi_user_websocket_{i}@netrasystems.ai',
                 'name': f'Multi User WebSocket {i}',
                 'is_active': True
             })

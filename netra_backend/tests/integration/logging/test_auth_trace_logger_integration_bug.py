@@ -168,7 +168,7 @@ class AuthTraceLoggerIntegrationBugTests(BaseIntegrationTest):
                     "connection_id": conn_id,
                     "connection_type": "websocket",
                     "upgrade_request": True,
-                    "origin": "https://app.netra.ai",
+                    "origin": "https://app.netrasystems.ai",
                     "real_database": True,
                     "real_redis": True,
                     "websocket_handshake": "failed"

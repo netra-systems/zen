@@ -23,7 +23,7 @@ class GCPWebSocketASGITests:
     @pytest.fixture
     def gcp_staging_env(self):
         """GCP staging environment configuration."""
-        return GCPStagingEnvironment(base_url='https://staging.netra.ai', websocket_url='wss://staging.netra.ai/ws')
+        return GCPStagingEnvironment(base_url='https://staging.netrasystems.ai', websocket_url='wss://staging.netrasystems.ai/ws')
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -31,7 +31,7 @@ class GCPWebSocketASGITests:
         """Test WebSocket connection establishment in GCP staging - WILL FAIL if ASGI error persists."""
         websocket_url = f'{gcp_staging_env.websocket_url}?token=test_token&user_id=test_user'
         try:
-            async with websockets.connect(websocket_url, additional_headers={'Origin': 'https://staging.netra.ai', 'User-Agent': 'pytest-websocket-client/1.0'}, timeout=10) as websocket:
+            async with websockets.connect(websocket_url, additional_headers={'Origin': 'https://staging.netrasystems.ai', 'User-Agent': 'pytest-websocket-client/1.0'}, timeout=10) as websocket:
                 assert websocket.open, 'WebSocket connection should be open'
                 test_message = {'type': 'ping', 'data': 'connection_test'}
                 await websocket.send(json.dumps(test_message))
@@ -55,7 +55,7 @@ class GCPWebSocketASGITests:
     @pytest.mark.e2e
     async def test_websocket_auth_flow_with_query_params(self, gcp_staging_env):
         """Test WebSocket authentication flow with query parameters - WILL FAIL if query_params parsing broken."""
-        test_cases = [{'token': 'abc123', 'user_id': 'user123'}, {'session_id': 'sess_456', 'workspace': 'default'}, {'auth_token': 'bearer_789', 'client_version': '1.0.0'}, {'redirect_uri': 'https://staging.netra.ai/callback', 'state': 'complex_state_123'}, {'filter': 'category=ai&type=optimization', 'sort': 'created_desc'}]
+        test_cases = [{'token': 'abc123', 'user_id': 'user123'}, {'session_id': 'sess_456', 'workspace': 'default'}, {'auth_token': 'bearer_789', 'client_version': '1.0.0'}, {'redirect_uri': 'https://staging.netrasystems.ai/callback', 'state': 'complex_state_123'}, {'filter': 'category=ai&type=optimization', 'sort': 'created_desc'}]
         for test_params in test_cases:
             query_string = '&'.join([f'{k}={v}' for k, v in test_params.items()])
             websocket_url = f'{gcp_staging_env.websocket_url}?{query_string}'
@@ -152,7 +152,7 @@ class GCPWebSocketASGITests:
     @pytest.mark.e2e
     async def test_websocket_error_recovery_in_gcp(self, gcp_staging_env):
         """Test WebSocket error recovery in GCP when ASGI scope errors occur - VALIDATES FIXES."""
-        error_prone_scenarios = [{'scenario': 'complex_params', 'params': {'redirect': 'https://app.netra.ai/callback?state=123', 'data': 'encoded%20value'}}, {'scenario': 'special_chars', 'params': {'query': 'AI optimization & performance', 'filter': 'category=ai+ml'}}, {'scenario': 'long_params', 'params': {'session_data': 'a' * 1000, 'context': 'b' * 500}}, {'scenario': 'unicode_params', 'params': {'name': '测试用户', 'description': 'AI优化平台'}}]
+        error_prone_scenarios = [{'scenario': 'complex_params', 'params': {'redirect': 'https://app.netrasystems.ai/callback?state=123', 'data': 'encoded%20value'}}, {'scenario': 'special_chars', 'params': {'query': 'AI optimization & performance', 'filter': 'category=ai+ml'}}, {'scenario': 'long_params', 'params': {'session_data': 'a' * 1000, 'context': 'b' * 500}}, {'scenario': 'unicode_params', 'params': {'name': '测试用户', 'description': 'AI优化平台'}}]
         recovery_success_count = 0
         for scenario in error_prone_scenarios:
             scenario_name = scenario['scenario']
@@ -185,7 +185,7 @@ class GCPWebSocketASGITests:
     async def test_gcp_websocket_specific_asgi_scope_validation(self, gcp_staging_env):
         """Test GCP-specific ASGI scope characteristics - VALIDATES GCP COMPATIBILITY."""
         websocket_url = f'{gcp_staging_env.websocket_url}?gcp_test=true&cloud_run=staging'
-        gcp_headers = {'X-Forwarded-For': '203.0.113.1', 'X-Forwarded-Proto': 'https', 'X-Cloud-Trace-Context': '105445aa7843bc8bf206b120001000/1', 'Origin': 'https://staging.netra.ai', 'User-Agent': 'Mozilla/5.0 (compatible; GCP-Test/1.0)'}
+        gcp_headers = {'X-Forwarded-For': '203.0.113.1', 'X-Forwarded-Proto': 'https', 'X-Cloud-Trace-Context': '105445aa7843bc8bf206b120001000/1', 'Origin': 'https://staging.netrasystems.ai', 'User-Agent': 'Mozilla/5.0 (compatible; GCP-Test/1.0)'}
         try:
             async with websockets.connect(websocket_url, additional_headers=gcp_headers, timeout=15) as websocket:
                 gcp_test_message = {'type': 'gcp_environment_test', 'validate_headers': True, 'validate_query_params': True, 'expected_environment': 'gcp_cloud_run'}
@@ -209,7 +209,7 @@ class WebSocketASGIRecoveryTests:
     @pytest.mark.e2e
     async def test_websocket_resilience_after_asgi_errors(self):
         """Test that WebSocket system recovers after ASGI scope errors."""
-        staging_url = 'wss://staging.netra.ai/ws'
+        staging_url = 'wss://staging.netrasystems.ai/ws'
         problematic_url = f'{staging_url}?complex=value%20with%20spaces&special=chars%26symbols'
         try:
             async with websockets.connect(problematic_url, timeout=5) as websocket:

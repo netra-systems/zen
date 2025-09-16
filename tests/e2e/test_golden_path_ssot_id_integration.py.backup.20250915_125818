@@ -57,8 +57,8 @@ class TestGoldenPathSsotIdIntegration(SSotAsyncTestCase):
         UnifiedIdGenerator.reset_global_counter()
         
         # GCP Staging environment configuration
-        self.staging_base_url = self.get_env_var("STAGING_BASE_URL", "https://staging-api.netra.ai")
-        self.staging_ws_url = self.get_env_var("STAGING_WS_URL", "wss://staging-api.netra.ai/ws")
+        self.staging_base_url = self.get_env_var("STAGING_BASE_URL", "https://staging-api.netrasystems.ai")
+        self.staging_ws_url = self.get_env_var("STAGING_WS_URL", "wss://staging-api.netrasystems.ai/ws")
         
         # Test user configuration for staging
         self.e2e_test_users = [

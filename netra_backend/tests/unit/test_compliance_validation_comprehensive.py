@@ -47,7 +47,7 @@ class ComplianceValidationComprehensiveTests:
                 return {"status": "scheduled", "deletion_date": datetime.now(timezone.utc) + timedelta(days=gdpr_config["deletion_grace_period_days"])}
             elif request_type == "portability":
                 if format_type in gdpr_config["right_to_portability_formats"]:
-                    return {"status": "completed", "export_url": f"https://exports.netra.ai/{user_id}.{format_type}"}
+                    return {"status": "completed", "export_url": f"https://exports.netrasystems.ai/{user_id}.{format_type}"}
             return {"status": "invalid_request"}
         
         gdpr_service.process_request = handle_data_subject_request

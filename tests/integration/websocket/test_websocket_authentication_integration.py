@@ -54,7 +54,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
         """Create test JWT token for authentication."""
         payload = {
             "user_id": user_id,
-            "email": f"{user_id}@test.netra.ai",
+            "email": f"{user_id}@test.netrasystems.ai",
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=expires_in_minutes),
             "scope": "websocket_access"
@@ -66,7 +66,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
         """Create expired JWT token for testing token expiration."""
         payload = {
             "user_id": user_id,
-            "email": f"{user_id}@test.netra.ai", 
+            "email": f"{user_id}@test.netrasystems.ai", 
             "iat": datetime.now(timezone.utc) - timedelta(minutes=120),
             "exp": datetime.now(timezone.utc) - timedelta(minutes=60),  # Expired 1 hour ago
             "scope": "websocket_access"
@@ -84,7 +84,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
         # Mock WebSocket request headers with authentication
         mock_websocket.request_headers = {
             'authorization': f'Bearer {token}',
-            'origin': 'https://app.netra.ai',
+            'origin': 'https://app.netrasystems.ai',
             'user-agent': 'Mozilla/5.0 (Integration Test)'
         }
         
@@ -126,7 +126,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_jwt@test.netra.ai',
+            'email': f'{self.test_user_id_base}_jwt@test.netrasystems.ai',
             'name': 'JWT Validation User'
         })
         
@@ -192,7 +192,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_session@test.netra.ai',
+            'email': f'{self.test_user_id_base}_session@test.netrasystems.ai',
             'name': 'Session Validation User'
         })
         
@@ -295,7 +295,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_invalid@test.netra.ai',
+            'email': f'{self.test_user_id_base}_invalid@test.netrasystems.ai',
             'name': 'Invalid Token Test User'
         })
         
@@ -383,7 +383,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_expiration@test.netra.ai',
+            'email': f'{self.test_user_id_base}_expiration@test.netrasystems.ai',
             'name': 'Token Expiration Test User'
         })
         
@@ -496,7 +496,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_oauth@test.netra.ai',
+            'email': f'{self.test_user_id_base}_oauth@test.netrasystems.ai',
             'name': 'OAuth Integration User',
             'oauth_provider': 'google',
             'oauth_id': 'google_' + UnifiedIdGenerator.generate_base_id("oauth")
@@ -614,7 +614,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_cross_service@test.netra.ai',
+            'email': f'{self.test_user_id_base}_cross_service@test.netrasystems.ai',
             'name': 'Cross-Service Auth User',
             'service_permissions': ['api_access', 'websocket_access', 'ui_access']
         })
@@ -746,7 +746,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_security@test.netra.ai',
+            'email': f'{self.test_user_id_base}_security@test.netrasystems.ai',
             'name': 'Security Headers Test User'
         })
         
@@ -766,7 +766,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
                     "name": "Valid Origin Header",
                     "headers": {
                         'authorization': f'Bearer {secure_token}',
-                        'origin': 'https://app.netra.ai',
+                        'origin': 'https://app.netrasystems.ai',
                         'user-agent': 'Mozilla/5.0 (Security Test)',
                         'sec-websocket-protocol': 'netra-chat-v1'
                     },
@@ -793,7 +793,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
                     "name": "Valid Headers with CSRF Protection",
                     "headers": {
                         'authorization': f'Bearer {secure_token}',
-                        'origin': 'https://app.netra.ai',
+                        'origin': 'https://app.netrasystems.ai',
                         'user-agent': 'Mozilla/5.0 (Security Test)',
                         'x-csrf-token': 'csrf_' + UnifiedIdGenerator.generate_base_id("csrf"),
                         'sec-websocket-protocol': 'netra-chat-v1'
@@ -826,7 +826,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
                     
                     # Check origin validation
                     origin = test_case['headers'].get('origin')
-                    is_origin_valid = origin in ['https://app.netra.ai', 'https://staging.netra.ai'] if origin else False
+                    is_origin_valid = origin in ['https://app.netrasystems.ai', 'https://staging.netrasystems.ai'] if origin else False
                     
                     is_authenticated = is_token_valid and (is_origin_valid or not origin)  # Allow missing origin for now
                     
@@ -868,7 +868,7 @@ class WebSocketAuthenticationIntegrationTests(BaseIntegrationTest):
             # Final test: Verify system remains secure and functional
             final_secure_headers = {
                 'authorization': f'Bearer {secure_token}',
-                'origin': 'https://app.netra.ai',
+                'origin': 'https://app.netrasystems.ai',
                 'user-agent': 'Mozilla/5.0 (Final Security Test)',
                 'x-csrf-token': 'final_csrf_' + UnifiedIdGenerator.generate_base_id("csrf")
             }

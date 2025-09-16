@@ -112,8 +112,8 @@ websocket_url = "ws://localhost:8002/ws"
 
 # Staging Testing  
 environment = "staging"
-auth_service_url = "https://auth-staging.netra.ai"
-websocket_url = "wss://api-staging.netra.ai/ws"
+auth_service_url = "https://auth.netrasystems.ai"
+websocket_url = "wss://api-staging.netrasystems.ai/ws"
 ```
 
 ### Authentication Requirements

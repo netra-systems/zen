@@ -33,7 +33,7 @@ class TestWebSocketConnectionMetadataTrackingApplicationStateIntegration(BaseInt
     async def test_connection_metadata_tracking_with_application_state_correlation(self, real_services_fixture):
         """Test comprehensive metadata tracking and state correlation for connections."""
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'metadata_tracking_user@netra.ai',
+            'email': 'metadata_tracking_user@netrasystems.ai',
             'name': 'Metadata Tracking User',
             'is_active': True
         })
@@ -189,7 +189,7 @@ class TestWebSocketConnectionMetadataTrackingApplicationStateIntegration(BaseInt
     async def test_metadata_evolution_tracking_across_connection_lifecycle(self, real_services_fixture):
         """Test that connection metadata properly evolves and is tracked across connection lifecycle."""
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'metadata_evolution_user@netra.ai',
+            'email': 'metadata_evolution_user@netrasystems.ai',
             'name': 'Metadata Evolution User',
             'is_active': True
         })

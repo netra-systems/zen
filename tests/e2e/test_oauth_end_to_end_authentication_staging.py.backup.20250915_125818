@@ -76,8 +76,8 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
         CRITICAL: This tests the complete user journey that generates business value.
         """
         # Arrange: Create unique staging test user
-        test_user_id = f"e2e-oauth-staging-{int(time.time())}-{uuid.uuid4().hex[:6]}"
-        test_email = f"e2e-oauth-{test_user_id}@staging.netra.ai"
+        test_user_id = f"e2e-oauth-{int(time.time())}-{uuid.uuid4().hex[:6]}"
+        test_email = f"e2e-oauth-{test_user_id}@staging.netrasystems.ai"
         
         print(f" TARGET:  Testing complete OAuth onboarding for user: {test_email}")
         print(f"[U+1F310] Staging environment: {self.staging_config.auth_service_url}")
@@ -200,7 +200,7 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
         
         for i in range(num_users):
             user_id = f"e2e-oauth-concurrent-{i}-{int(time.time())}-{uuid.uuid4().hex[:4]}"
-            email = f"e2e-concurrent-{i}-{user_id}@staging.netra.ai"
+            email = f"e2e-concurrent-{i}-{user_id}@staging.netrasystems.ai"
             
             user_contexts.append({
                 "user_id": user_id,
@@ -325,7 +325,7 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
         """
         # Arrange: Create OAuth authenticated user
         test_user_id = f"e2e-oauth-persistence-{int(time.time())}-{uuid.uuid4().hex[:6]}"
-        test_email = f"e2e-persistence-{test_user_id}@staging.netra.ai"
+        test_email = f"e2e-persistence-{test_user_id}@staging.netrasystems.ai"
         
         print(f" CYCLE:  Testing OAuth session persistence for: {test_email}")
         

@@ -100,7 +100,7 @@ class AcceptMessageRoutingRaceTest(BaseIntegrationTest):
         for i in range(3):  # Multiple users for isolation testing
             user_data = self.auth_helper.create_test_user(
                 username=f"race_test_user_{i}_{int(time.time())}",
-                email=f"race_user_{i}_{int(time.time())}@test.netra.ai"
+                email=f"race_user_{i}_{int(time.time())}@test.netrasystems.ai"
             )
             self.test_users.append(user_data)
         

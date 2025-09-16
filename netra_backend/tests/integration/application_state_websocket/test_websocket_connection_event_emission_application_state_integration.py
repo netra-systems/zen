@@ -33,7 +33,7 @@ class WebSocketConnectionEventEmissionApplicationStateIntegrationTests(BaseInteg
     async def test_websocket_event_emission_with_application_state_synchronization(self, real_services_fixture):
         """Test that WebSocket events are properly emitted and synchronized with application state."""
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'event_emission_user@netra.ai',
+            'email': 'event_emission_user@netrasystems.ai',
             'name': 'Event Emission User',
             'is_active': True
         })
@@ -179,7 +179,7 @@ class WebSocketConnectionEventEmissionApplicationStateIntegrationTests(BaseInteg
     async def test_event_emission_reliability_and_delivery_guarantees(self, real_services_fixture):
         """Test event emission reliability and delivery guarantees under various conditions."""
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'event_reliability_user@netra.ai',
+            'email': 'event_reliability_user@netrasystems.ai',
             'name': 'Event Reliability User',
             'is_active': True
         })

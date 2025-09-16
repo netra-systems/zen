@@ -102,7 +102,7 @@ class ConcurrentUserIsolationManager:
                 # Create authenticated user via SSOT helper
                 user = await create_authenticated_user(
                     user_id=user_id,
-                    email=f"{user_id}@concurrent.test.netra.ai",
+                    email=f"{user_id}@concurrent.test.netrasystems.ai",
                     permissions=["read", "write", "concurrent_test"]
                 )
                 

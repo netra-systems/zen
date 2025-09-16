@@ -72,9 +72,9 @@ class CypressConfigManager:
         # Add test user credentials (for test environment only)
         if env_config["ENVIRONMENT"] in ["local", "test", "development"]:
             env_config.update({
-                "TEST_USER_EMAIL": os.getenv("TEST_USER_EMAIL", "test@netra.ai"),
+                "TEST_USER_EMAIL": os.getenv("TEST_USER_EMAIL", "test@netrasystems.ai"),
                 "TEST_USER_PASSWORD": os.getenv("TEST_USER_PASSWORD", "testpassword"),
-                "ADMIN_USER_EMAIL": os.getenv("ADMIN_USER_EMAIL", "admin@netra.ai"),
+                "ADMIN_USER_EMAIL": os.getenv("ADMIN_USER_EMAIL", "admin@netrasystems.ai"),
                 "ADMIN_USER_PASSWORD": os.getenv("ADMIN_USER_PASSWORD", "adminpassword"),
             })
         

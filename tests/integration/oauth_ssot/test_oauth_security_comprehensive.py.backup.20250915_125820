@@ -50,7 +50,7 @@ class TestOAuthSecurityComprehensive:
         self.secure_test_credentials = {
             "client_id": "test-oauth-client-id-for-automated-testing",
             "client_secret": "test-oauth-client-secret-for-automated-testing-secure",
-            "redirect_uri": "https://test.netra.app/auth/callback",
+            "redirect_uri": "https://test.netrasystems.ai/auth/callback",
             "scope": "openid email profile"
         }
         
@@ -149,7 +149,7 @@ class TestOAuthSecurityComprehensive:
         # Test OAuth redirect URI validation (security critical)
         # This ensures only authorized redirect URIs are accepted
         test_redirect_uris = [
-            ("https://test.netra.app/auth/callback", True),  # Valid test URI
+            ("https://test.netrasystems.ai/auth/callback", True),  # Valid test URI
             ("https://netra.app/auth/callback", True),       # Valid production URI
             ("http://localhost:3000/auth/callback", True),   # Valid dev URI
             ("http://evil.com/steal-tokens", False),         # Invalid external URI
@@ -361,7 +361,7 @@ class TestOAuthSecurityComprehensive:
         
         # Check for authorized domains (basic whitelist)
         authorized_domains = [
-            'netra.app', 'test.netra.app', 'localhost',
+            'netra.app', 'test.netrasystems.ai', 'localhost',
             '127.0.0.1', '0.0.0.0'
         ]
         
@@ -412,7 +412,7 @@ def test_oauth_security_validation_capability():
         # Verify security validation methods work
         assert not test_instance._validate_oauth_redirect_uri_security(""), \
             "Should reject empty redirect URI"
-        assert test_instance._validate_oauth_redirect_uri_security("https://test.netra.app/auth/callback"), \
+        assert test_instance._validate_oauth_redirect_uri_security("https://test.netrasystems.ai/auth/callback"), \
             "Should accept valid redirect URI"
         
         assert not test_instance._validate_oauth_state_security(""), \
