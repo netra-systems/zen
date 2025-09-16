@@ -46,7 +46,7 @@ from netra_backend.app.factories.tool_dispatcher_factory import (
 # SSOT PHASE 2 FIX: Replace factory imports with SSOT agent bridge
 from netra_backend.app.services.agent_websocket_bridge import (
     AgentWebSocketBridge,
-    WebSocketBridgeAdapter,
+    create_agent_websocket_bridge,
 )
 
 __all__ = [
@@ -64,14 +64,9 @@ __all__ = [
     "create_tool_dispatcher",
     "tool_dispatcher_scope",
     # SSOT WebSocket Bridge Factory
-    "WebSocketBridgeProtocol",
-    "StandardWebSocketBridge",
-    "create_standard_websocket_bridge",
-    "create_agent_bridge_adapter",
-    "create_emitter_bridge_adapter",
-    "create_manager_bridge_adapter",
+    "AgentWebSocketBridge",
+    "create_agent_websocket_bridge",
     # Backward Compatibility (DEPRECATED)
     "create_isolated_tool_dispatcher",
     "isolated_tool_dispatcher_scope",
-    "WebSocketBridgeAdapter",
 ]
