@@ -224,7 +224,7 @@ class PipelineExecutorComprehensiveGoldenPathTests(SSotAsyncTestCase):
         )
         self.state_persistence_patch.start()
     
-    def teardown_method(self):
+    def teardown_method(self, method=None):
         """Clean up after each test."""
         # Stop patches
         if hasattr(self, 'flow_logger_patch'):
