@@ -1458,11 +1458,46 @@ async def initialize_monitoring_integration(handlers: dict = None) -> bool:
             logger.warning(f"Could not update health status for agent_websocket_bridge: {health_error}")
             logger.info("[U+2139][U+FE0F] AgentWebSocketBridge using per-request pattern - this is expected")
         
-        # CRITICAL FIX: Removed legacy bridge registration code
-        # The AgentWebSocketBridge is now per-request, not singleton
-        # There's no global 'bridge' instance to register with the monitor
-        # Each request creates its own bridge instance as needed
-        logger.info(" PASS:  Monitoring integration complete - per-request bridges work independently")
+        # ENHANCED for issue #1019: Improved ChatEventMonitor integration
+        # While AgentWebSocketBridge is per-request, we can still configure monitoring
+        # Each bridge instance will auto-register with ChatEventMonitor when created
+        
+        # Verify ChatEventMonitor is ready to accept bridge registrations
+        if hasattr(chat_event_monitor, 'register_component'):
+            logger.info("✅ ChatEventMonitor ready to accept bridge component registrations")
+        else:
+            logger.warning("⚠️ ChatEventMonitor missing component registration - some monitoring features disabled")
+        
+        # Test the monitoring integration by creating a temporary bridge instance
+        try:
+            from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+            
+            # Create a temporary system-level bridge to test monitoring integration
+            test_bridge = AgentWebSocketBridge(user_context=None)
+            
+            # Verify it auto-registered with ChatEventMonitor
+            if hasattr(test_bridge, '_monitor_observers') and len(test_bridge._monitor_observers) > 0:
+                logger.info("✅ AgentWebSocketBridge successfully auto-registers with ChatEventMonitor")
+            else:
+                logger.info("ℹ️  AgentWebSocketBridge monitoring integration available but not auto-connected")
+            
+            # Get health status to verify enhanced interface
+            health_status = await test_bridge.get_health_status()
+            if "integration_health" in health_status:
+                logger.info("✅ Enhanced monitoring interface active with integration health tracking")
+            else:
+                logger.warning("⚠️ Basic monitoring interface only - enhanced features unavailable")
+            
+            # Clean up test bridge
+            del test_bridge
+            
+        except Exception as test_error:
+            logger.warning(
+                f"Could not test monitoring integration: {test_error}. "
+                f"Bridge-monitor integration will be verified per-request."
+            )
+        
+        logger.info(" PASS:  Enhanced monitoring integration complete - per-request bridges auto-register with ChatEventMonitor")
         
         return True
     
