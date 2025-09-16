@@ -37,7 +37,7 @@ from netra_backend.app.core.logging_context import (
     get_unified_trace_context,
     create_child_trace_context
 )
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
 # CRITICAL REMEDIATION: Import consolidated agent execution tracker for preventing execution blocking
 from netra_backend.app.core.agent_execution_tracker import (
@@ -59,7 +59,7 @@ from netra_backend.app.agents.supervisor.agent_execution_prerequisites import (
     validate_all_agent_execution_prerequisites
 )
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 def get_agent_state_tracker() -> AgentExecutionTracker:
