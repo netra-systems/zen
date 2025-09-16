@@ -118,40 +118,36 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
     @pytest.mark.integration
     def test_execution_engine_factory_websocket_integration_with_none_bridge(self):
         """
-        ISSUE #920 INTEGRATION: ExecutionEngineFactory integration with None websocket_bridge.
+        ISSUE #920 INTEGRATION FIXED: ExecutionEngineFactory integration with None websocket_bridge.
         
-        This test validates Issue #920 behavior - factory should handle None websocket_bridge
+        This test validates Issue #920 fixed behavior - factory should handle None websocket_bridge
         gracefully in integration scenarios.
         """
         # When: Creating ExecutionEngineFactory with None websocket_bridge
-        try:
-            factory = ExecutionEngineFactory(
-                websocket_bridge=None,  # Issue #920: This should be allowed
-                database_session_manager=self.mock_db_manager,
-                redis_manager=self.mock_redis_manager
-            )
-            
-            # Then: Factory should initialize in compatibility mode
-            assert factory is not None
-            assert factory._websocket_bridge is None
-            
-            # And: Factory should still have proper infrastructure
-            assert factory._database_session_manager is self.mock_db_manager
-            assert factory._redis_manager is self.mock_redis_manager
-            
-            # And: Factory should handle missing WebSocket bridge gracefully
-            assert hasattr(factory, '_active_engines')
-            assert hasattr(factory, '_engine_lock')
-            
-            self.integration_metrics['factories_created'] += 1
-            self.record_metric("none_bridge_integration_success", True)
-            
-        except ExecutionEngineFactoryError as e:
-            # If this fails, Issue #920 is not yet resolved
-            pytest.fail(
-                f"ISSUE #920 INTEGRATION FAILURE: ExecutionEngineFactory should handle "
-                f"None websocket_bridge in integration scenarios. Error: {e}"
-            )
+        factory = ExecutionEngineFactory(
+            websocket_bridge=None,  # Issue #920 FIXED: This is now allowed
+            database_session_manager=self.mock_db_manager,
+            redis_manager=self.mock_redis_manager
+        )
+        
+        # Then: Factory should initialize in compatibility mode
+        assert factory is not None
+        assert factory._websocket_bridge is None
+        
+        # And: Factory should still have proper infrastructure
+        assert factory._database_session_manager is self.mock_db_manager
+        assert factory._redis_manager is self.mock_redis_manager
+        
+        # And: Factory should handle missing WebSocket bridge gracefully
+        assert hasattr(factory, '_active_engines')
+        assert hasattr(factory, '_engine_lock')
+        
+        # And: Factory should have proper test mode configuration
+        assert factory._max_engines_per_user > 0
+        assert factory._engine_timeout_seconds > 0
+        
+        self.integration_metrics['factories_created'] += 1
+        self.record_metric("none_bridge_integration_success", True)
     
     @pytest.mark.integration
     async def test_user_websocket_emitter_factory_integration_flow(self):
@@ -343,26 +339,21 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
         
         for i in range(3):
             # Create factory (some with None websocket_bridge for Issue #920 testing)
-            try:
-                factory = ExecutionEngineFactory(
-                    websocket_bridge=self.mock_websocket_bridge if i % 2 == 0 else None,
-                    database_session_manager=self.mock_db_manager,
-                    redis_manager=self.mock_redis_manager
+            factory = ExecutionEngineFactory(
+                websocket_bridge=self.mock_websocket_bridge if i % 2 == 0 else None,
+                database_session_manager=self.mock_db_manager,
+                redis_manager=self.mock_redis_manager
+            )
+            factories.append(factory)
+            
+            # Create emitter if factory has websocket_bridge
+            if factory._websocket_bridge is not None:
+                emitter = UserWebSocketEmitter(
+                    manager=factory._websocket_bridge,
+                    user_id=f"cleanup_user_{i}",
+                    context=self.user_context
                 )
-                factories.append(factory)
-                
-                # Create emitter if factory has websocket_bridge
-                if factory._websocket_bridge is not None:
-                    emitter = UserWebSocketEmitter(
-                        manager=factory._websocket_bridge,
-                        user_id=f"cleanup_user_{i}",
-                        context=self.user_context
-                    )
-                    emitters.append(emitter)
-                    
-            except ExecutionEngineFactoryError:
-                # Skip if Issue #920 not yet fixed
-                continue
+                emitters.append(emitter)
         
         # When: Cleaning up resources
         for factory in factories:
