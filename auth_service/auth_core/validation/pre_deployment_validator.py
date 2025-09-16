@@ -582,7 +582,7 @@ class PreDeploymentValidator:
                 
                 # Check if service name matches expected pattern
                 expected_service_patterns = {
-                    "staging": ["netra-auth", "auth-service-staging"],
+                    "staging": ["netra-auth-staging", "auth-service-staging"],
                     "production": ["netra-auth-service", "netra-auth-prod"]
                 }
                 
