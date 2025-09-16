@@ -46,6 +46,7 @@ class RedisConnectionHandler:
         host = get_env().get("REDIS_HOST", "localhost")
         port = int(get_env().get("REDIS_PORT", "6379"))
         db = int(get_env().get("REDIS_DB", "0"))
+        password = get_env().get("REDIS_PASSWORD")
         
         # Environment-specific host resolution
         if self.env == "staging":
@@ -67,6 +68,7 @@ class RedisConnectionHandler:
             "host": host,
             "port": port,
             "db": db,
+            "password": password if password else None,
             "environment": self.env,
             "socket_timeout": 5,
             "socket_connect_timeout": 5,
@@ -104,6 +106,10 @@ class RedisConnectionHandler:
                     "max_connections": 20,
                     "connection_class": redis.Connection
                 }
+                
+                # Add password if provided
+                if self._connection_info.get("password"):
+                    pool_config["password"] = self._connection_info["password"]
                 
                 # Add SSL for staging/production
                 if self.env in ["staging", "production"]:
