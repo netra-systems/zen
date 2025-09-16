@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.state import OptimizationsResult, ActionPlanResult
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, PerformanceMetrics
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -173,7 +173,7 @@ class ActionsToMeetGoalsExecutionFlowIntegrationTests(SSotAsyncTestCase):
         real_tool_dispatcher = Mock(spec=UnifiedToolDispatcher)
         real_tool_dispatcher.execute_tool = AsyncMock(return_value={'result': 'tool executed'})
         agent = ActionsToMeetGoalsSubAgent(llm_manager=None, tool_dispatcher=real_tool_dispatcher)
-        context = UserExecutionContext.from_request_supervisor(user_id='partial_deps_user', thread_id='partial_deps_thread', run_id='partial_deps_run', metadata={'user_request': 'Test partial dependency execution', 'optimizations_result': OptimizationsResult(optimization_type='cost', recommendations=['Reduce instance sizes'], confidence_score=0.7), 'data_result': DataAnalysisResponse(query='cost analysis', results=[{'cost': 1500, 'usage': 'high'}], insights={'potential_savings': '30%'}, metadata={'analysis_type': 'cost'}, recommendations=['Right-size instances'])})
+        context = UserExecutionContext.from_request_supervisor(user_id='partial_deps_user', thread_id='partial_deps_thread', run_id='partial_deps_run', metadata={'user_request': 'Test partial dependency execution', 'optimizations_result': OptimizationsResult(optimization_type='cost', recommendations=['Reduce instance sizes'], confidence_score=0.7), 'data_result': DataAnalysisResponse(analysis_id='cost-analysis-test', status='completed', results={'cost': 1500, 'usage': 'high', 'potential_savings': '30%'}, metrics=PerformanceMetrics(duration_ms=750.0, memory_usage_mb=64.0, throughput=5.0), created_at=time.time())})
         with pytest.raises(RuntimeError) as exc_info:
             result = await agent.execute(context, stream_updates=False)
         assert 'LLM manager is None' in str(exc_info.value)

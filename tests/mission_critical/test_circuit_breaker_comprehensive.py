@@ -72,7 +72,6 @@ if project_root not in sys.path:
 # Import circuit breaker components
 from netra_backend.app.core.circuit_breaker import (
     CircuitBreaker,
-    CircuitConfig as CircuitBreakerConfig,
     get_circuit_breaker as CircuitBreakerManager,
     CircuitBreakerOpenError as CircuitOpenException,
     CircuitState,
@@ -285,38 +284,39 @@ class CircuitBreakerStressTester:
     async def setup_circuit_breakers(self):
         """Setup circuit breakers for all critical services."""
         service_configs = {
-            "database": CircuitBreakerConfig(
+            "database": UnifiedCircuitConfig(
+                name="database",
                 failure_threshold=3,
                 recovery_timeout=30,
                 success_threshold=2,
-                timeout=5.0,
-                expected_exception_types=["ConnectionError", "TimeoutError"]
+                timeout_seconds=5.0
             ),
-            "llm_service": CircuitBreakerConfig(
+            "llm_service": UnifiedCircuitConfig(
+                name="llm_service",
                 failure_threshold=2,
                 recovery_timeout=60,
                 success_threshold=3,
-                timeout=30.0,
-                expected_exception_types=["ConnectionError", "TimeoutError", "RateLimitError"]
+                timeout_seconds=30.0
             ),
-            "auth_service": CircuitBreakerConfig(
+            "auth_service": UnifiedCircuitConfig(
+                name="auth_service",
                 failure_threshold=5,
                 recovery_timeout=45,
                 success_threshold=2,
-                timeout=10.0,
-                expected_exception_types=["ConnectionError", "AuthenticationError"]
+                timeout_seconds=10.0
             ),
-            "redis": CircuitBreakerConfig(
+            "redis": UnifiedCircuitConfig(
+                name="redis",
                 failure_threshold=4,
                 recovery_timeout=20,
                 success_threshold=2,
-                timeout=3.0,
-                expected_exception_types=["ConnectionError", "RedisError"]
+                timeout_seconds=3.0
             )
         }
         
+        manager = get_unified_circuit_breaker_manager()
         for service_name, config in service_configs.items():
-            self.circuit_breakers[service_name] = CircuitBreaker(service_name, config)
+            self.circuit_breakers[service_name] = manager.create_circuit_breaker(service_name, config)
             logger.info(f"Setup circuit breaker for {service_name}")
     
     async def execute_stress_test(
@@ -435,10 +435,12 @@ class CircuitBreakerStressTester:
         
         for i in range(iterations):
             # Create and destroy circuit breakers
-            temp_breaker = CircuitBreaker(
-                f"temp_breaker_{i}",
-                CircuitBreakerConfig(failure_threshold=1, recovery_timeout=1)
+            temp_config = UnifiedCircuitConfig(
+                name=f"temp_breaker_{i}",
+                failure_threshold=1,
+                recovery_timeout=1
             )
+            temp_breaker = UnifiedCircuitBreaker(temp_config)
             
             # Exercise the circuit breaker
             try:
@@ -478,7 +480,8 @@ class CircuitBreakerStressTester:
         baseline_time = time.perf_counter() - start_time
         
         # Test with circuit breaker
-        circuit_breaker = CircuitBreaker("perf_test", CircuitBreakerConfig())
+        perf_config = UnifiedCircuitConfig(name="perf_test")
+        circuit_breaker = UnifiedCircuitBreaker(perf_config)
         start_time = time.perf_counter()
         for _ in range(requests):
             try:
@@ -834,11 +837,13 @@ async def test_circuit_breaker_websocket_notifications():
     # Create circuit breaker with WebSocket integration
     from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     
-    breaker = CircuitBreaker(
-        name="websocket_test_service", failure_threshold=2,
-        recovery_timeout=1.0,
-        half_open_max_calls=1
+    websocket_config = UnifiedCircuitConfig(
+        name="websocket_test_service",
+        failure_threshold=2,
+        recovery_timeout=1,
+        timeout_seconds=1.0
     )
+    breaker = UnifiedCircuitBreaker(websocket_config)
     
     # Simulate service failures that should trigger notifications
     failures = 0
@@ -895,10 +900,12 @@ async def test_circuit_breaker_websocket_event_sequence():
     websocket_manager.send_to_thread.side_effect = capture_websocket_event
     websocket_notifier = WebSocketNotifier.create_for_user(websocket_manager)
     
-    breaker = CircuitBreaker(
-        name="event_sequence_service", failure_threshold=2,
-        recovery_timeout=0.5
+    event_config = UnifiedCircuitConfig(
+        name="event_sequence_service",
+        failure_threshold=2,
+        recovery_timeout=1  # recovery_timeout must be an integer (seconds)
     )
+    breaker = UnifiedCircuitBreaker(event_config)
     
     # Execute circuit breaker lifecycle with WebSocket events
     lifecycle_events = ["closed", "open", "half_open", "closed"]
@@ -974,10 +981,12 @@ async def test_circuit_breaker_websocket_error_notifications():
     websocket_manager.send_to_thread.side_effect = capture_error_notification
     websocket_notifier = WebSocketNotifier.create_for_user(websocket_manager)
     
-    breaker = CircuitBreaker(
-        name="error_notification_service", failure_threshold=2,
-        recovery_timeout=1.0
+    error_config = UnifiedCircuitConfig(
+        name="error_notification_service",
+        failure_threshold=2,
+        recovery_timeout=1
     )
+    breaker = UnifiedCircuitBreaker(error_config)
     
     # Simulate different types of failures with error notifications
     error_scenarios = [
@@ -1031,10 +1040,12 @@ async def test_circuit_breaker_websocket_concurrent_notifications():
     # Create multiple circuit breakers for concurrent testing
     breakers = []
     for i in range(3):
-        breaker = CircuitBreaker(
-            name=f"concurrent_service_{i}", failure_threshold=2,
-            recovery_timeout=0.5
+        concurrent_config = UnifiedCircuitConfig(
+            name=f"concurrent_service_{i}",
+            failure_threshold=2,
+            recovery_timeout=1
         )
+        breaker = UnifiedCircuitBreaker(concurrent_config)
         breakers.append(breaker)
     
     # Execute concurrent operations with WebSocket notifications
@@ -1101,11 +1112,12 @@ async def test_circuit_breaker_execute_core_integration():
     class CircuitBreakerAgent(BaseAgent):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
-            self.circuit_breaker = CircuitBreaker(
+            execute_config = UnifiedCircuitConfig(
                 name="execute_core_service",
                 failure_threshold=2,
-                recovery_timeout=1.0
+                recovery_timeout=1
             )
+            self.circuit_breaker = UnifiedCircuitBreaker(execute_config)
             self.execution_count = 0
             
         async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
@@ -1195,12 +1207,12 @@ async def test_execute_core_circuit_breaker_recovery_patterns():
     class RecoveryAgent(BaseAgent):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
-            self.circuit_breaker = CircuitBreaker(
-                name="recovery_service", 
+            recovery_config = UnifiedCircuitConfig(
+                name="recovery_service",
                 failure_threshold=2,
-                recovery_timeout=0.5,
-                half_open_max_calls=1
+                recovery_timeout=1
             )
+            self.circuit_breaker = UnifiedCircuitBreaker(recovery_config)
             self.attempt_count = 0
             
         async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
@@ -1284,11 +1296,12 @@ async def test_execute_core_circuit_breaker_timing():
     class TimingAgent(BaseAgent):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
-            self.circuit_breaker = CircuitBreaker(
+            timing_config = UnifiedCircuitConfig(
                 name="timing_service",
                 failure_threshold=2,
-                recovery_timeout=1.0
+                recovery_timeout=1
             )
+            self.circuit_breaker = UnifiedCircuitBreaker(timing_config)
             
         async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
             start_time = time.time()
@@ -1382,11 +1395,12 @@ async def test_execute_core_circuit_breaker_resource_management():
     class ResourceAgent(BaseAgent):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
-            self.circuit_breaker = CircuitBreaker(
+            resource_config = UnifiedCircuitConfig(
                 name="resource_service",
                 failure_threshold=2,
-                recovery_timeout=1.0
+                recovery_timeout=1
             )
+            self.circuit_breaker = UnifiedCircuitBreaker(resource_config)
             self.resources_allocated = 0
             self.resources_freed = 0
             
@@ -1491,11 +1505,12 @@ async def test_execute_core_circuit_breaker_state_consistency():
     class StateConsistencyAgent(BaseAgent):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
-            self.circuit_breaker = CircuitBreaker(
+            state_config = UnifiedCircuitConfig(
                 name="state_consistency_service",
                 failure_threshold=2,
-                recovery_timeout=1.0
+                recovery_timeout=1
             )
+            self.circuit_breaker = UnifiedCircuitBreaker(state_config)
             
         async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
             # Record initial states
@@ -1614,11 +1629,12 @@ async def test_execute_core_circuit_breaker_concurrent_safety():
     class ConcurrentAgent(BaseAgent):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
-            self.circuit_breaker = CircuitBreaker(
+            concurrent_config = UnifiedCircuitConfig(
                 name="concurrent_service",
                 failure_threshold=3,  # Higher threshold for concurrent testing
-                recovery_timeout=1.0
+                recovery_timeout=1
             )
+            self.circuit_breaker = UnifiedCircuitBreaker(concurrent_config)
             self.execution_count = 0
             self.concurrent_count = 0
             self.max_concurrent = 0
@@ -1730,11 +1746,12 @@ async def test_execute_core_circuit_breaker_error_propagation():
     class ErrorPropagationAgent(BaseAgent):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
-            self.circuit_breaker = CircuitBreaker(
+            error_prop_config = UnifiedCircuitConfig(
                 name="error_propagation_service",
                 failure_threshold=2,
-                recovery_timeout=1.0
+                recovery_timeout=1
             )
+            self.circuit_breaker = UnifiedCircuitBreaker(error_prop_config)
             
         async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
             async def error_prone_operation():

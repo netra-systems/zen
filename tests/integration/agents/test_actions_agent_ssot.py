@@ -43,7 +43,7 @@ from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecution
 from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult, ActionPlanResult, PlanStep
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse, RetryConfig
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, PerformanceMetrics, RetryConfig
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.services.database.run_repository import RunRepository
 from netra_backend.app.redis_manager import RedisManager
@@ -130,7 +130,66 @@ class RealisticDataGenerator:
     @staticmethod
     def create_data_analysis_result(scenario: str='default') -> DataAnalysisResponse:
         """Create realistic data analysis result for different scenarios."""
-        scenarios = {'cost_analysis': DataAnalysisResponse(query='Analyze cost patterns over last 6 months', results=[{'service': 'compute', 'cost': 15000, 'trend': 'increasing'}, {'service': 'storage', 'cost': 8000, 'trend': 'stable'}, {'service': 'networking', 'cost': 3000, 'trend': 'decreasing'}, {'service': 'database', 'cost': 12000, 'trend': 'increasing'}], insights={'total_cost': 38000, 'cost_drivers': ['compute', 'database'], 'optimization_potential': 8500, 'seasonality_detected': True}, metadata={'time_range': '6_months', 'data_quality': 'high', 'analysis_confidence': 0.89}, recommendations=['Focus optimization efforts on compute and database services', 'Implement cost monitoring alerts for anomaly detection', 'Consider reserved instances for predictable workloads']), 'performance_analysis': DataAnalysisResponse(query='Analyze system performance metrics', results=[{'metric': 'response_time', 'value': 245, 'unit': 'ms', 'status': 'warning'}, {'metric': 'throughput', 'value': 1250, 'unit': 'req/s', 'status': 'normal'}, {'metric': 'cpu_utilization', 'value': 78, 'unit': '%', 'status': 'warning'}, {'metric': 'memory_usage', 'value': 65, 'unit': '%', 'status': 'normal'}], insights={'bottlenecks': ['response_time', 'cpu_utilization'], 'peak_hours': ['9-11AM', '2-4PM'], 'performance_trend': 'degrading', 'scaling_needed': True}, metadata={'monitoring_period': '30_days', 'data_points': 43200, 'anomalies_detected': 12}, recommendations=['Scale compute resources during peak hours', 'Investigate CPU-intensive processes', 'Implement performance monitoring dashboard']), 'default': DataAnalysisResponse(query='General system analysis', results=[{'status': 'analyzed'}], insights={'general': 'system analyzed'}, metadata={'source': 'default'}, recommendations=['Continue monitoring'])}
+        scenarios = {
+            'cost_analysis': DataAnalysisResponse(
+                analysis_id='cost-analysis-6months',
+                status='completed',
+                results={
+                    'services': [
+                        {'service': 'compute', 'cost': 15000, 'trend': 'increasing'},
+                        {'service': 'storage', 'cost': 8000, 'trend': 'stable'},
+                        {'service': 'networking', 'cost': 3000, 'trend': 'decreasing'},
+                        {'service': 'database', 'cost': 12000, 'trend': 'increasing'}
+                    ],
+                    'total_cost': 38000,
+                    'cost_drivers': ['compute', 'database'],
+                    'optimization_potential': 8500,
+                    'seasonality_detected': True
+                },
+                metrics=PerformanceMetrics(
+                    duration_ms=2500.0,
+                    memory_usage_mb=128.0,
+                    throughput=450.0
+                ),
+                created_at=time.time() - 300  # 5 minutes ago
+            ),
+            'performance_analysis': DataAnalysisResponse(
+                analysis_id='performance-analysis-30days',
+                status='completed',
+                results={
+                    'metrics': [
+                        {'metric': 'response_time', 'value': 245, 'unit': 'ms', 'status': 'warning'},
+                        {'metric': 'throughput', 'value': 1250, 'unit': 'req/s', 'status': 'normal'},
+                        {'metric': 'cpu_utilization', 'value': 78, 'unit': '%', 'status': 'warning'},
+                        {'metric': 'memory_usage', 'value': 65, 'unit': '%', 'status': 'normal'}
+                    ],
+                    'bottlenecks': ['response_time', 'cpu_utilization'],
+                    'peak_hours': ['9-11AM', '2-4PM'],
+                    'performance_trend': 'degrading',
+                    'scaling_needed': True
+                },
+                metrics=PerformanceMetrics(
+                    duration_ms=4200.0,
+                    memory_usage_mb=256.0,
+                    cpu_usage_percent=78.0,
+                    throughput=1250.0,
+                    latency_p95=380.0,
+                    latency_p99=520.0
+                ),
+                created_at=time.time() - 600  # 10 minutes ago
+            ),
+            'default': DataAnalysisResponse(
+                analysis_id='general-system-analysis',
+                status='completed',
+                results={'status': 'analyzed', 'general': 'system analyzed'},
+                metrics=PerformanceMetrics(
+                    duration_ms=1000.0,
+                    memory_usage_mb=64.0,
+                    throughput=1.0
+                ),
+                created_at=time.time()
+            )
+        }
         return scenarios.get(scenario, scenarios['default'])
 
 class ActionsAgentSupervisorIntegrationTests:

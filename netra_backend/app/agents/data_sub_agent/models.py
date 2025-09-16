@@ -24,12 +24,7 @@ class CorrelationAnalysis(BaseModel):
     significant_correlations: List[Dict[str, Any]] = []
 
 
-class DataAnalysisResponse(BaseModel):
-    """Legacy data analysis response model."""
-    analysis_type: str = "legacy_stub"
-    results: Dict[str, Any] = {}
-    metrics: Dict[str, float] = {}
-    summary: str = "Legacy stub response"
+# DataAnalysisResponse removed - use SSOT version from netra_backend.app.schemas.shared_types
     
 
 class PerformanceInsights(BaseModel):
@@ -73,7 +68,7 @@ class UsagePattern(BaseModel):
 __all__ = [
     "AnomalyDetectionResponse",
     "CorrelationAnalysis", 
-    "DataAnalysisResponse",
+    # "DataAnalysisResponse" removed - use SSOT version from netra_backend.app.schemas.shared_types
     "PerformanceInsights",
     "UsageAnalysisResponse",
     "DataQualityMetrics",

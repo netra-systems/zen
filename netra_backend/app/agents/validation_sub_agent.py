@@ -20,7 +20,7 @@ from netra_backend.app.core.type_validators import agent_type_safe
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.user_execution_context import UserExecutionContext, validate_user_context
-from netra_backend.app.database.session_manager import SessionManager
+# SSOT: Removed SessionManager import - it's just a stub, real DB access via context.db_session
 from netra_backend.app.schemas.shared_types import ValidationResult, NestedJsonDict
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 
@@ -115,8 +115,8 @@ class ValidationSubAgent(BaseAgent):
         context = validate_user_context(context)
         
         try:
-            # Create database session manager (stub implementation)
-            session_mgr = SessionManager()
+            # SSOT: SessionManager is a stub - no actual database operations needed
+            # Real database access should use context.db_session or DatabaseManager
             
             # Emit thinking event (agent_started is handled by orchestrator)
             await self.emit_thinking("Starting comprehensive validation process")
@@ -165,12 +165,9 @@ class ValidationSubAgent(BaseAgent):
             self.logger.error(f"ValidationSubAgent execution failed: {str(e)}")
             return self._create_error_result(str(e), start_time)
         finally:
-            # Ensure proper cleanup
-            try:
-                if 'session_mgr' in locals():
-                    await session_mgr.cleanup()
-            except Exception as cleanup_e:
-                self.logger.error(f"Session cleanup error: {cleanup_e}")
+            # SSOT: Removed cleanup call - SessionManager stub has no cleanup method
+            # Database cleanup happens automatically via context.db_session lifecycle
+            pass
     
     # execute_core_logic and validate_preconditions removed - single inheritance pattern
     # All execution logic is now in execute() method only

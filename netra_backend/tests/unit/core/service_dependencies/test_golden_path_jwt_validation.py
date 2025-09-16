@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 
 # PERFORMANCE: Lazy loading for mission critical tests
 

@@ -38,7 +38,8 @@ except ImportError as e:
     get_event_delivery_tracker = None
     EventPriority = None
     EventDeliveryStatus = None
-from shared.monitoring.interfaces import MonitorableComponent
+# Enhanced monitoring interface for issue #1019 integration
+from netra_backend.app.core.monitoring.base import MonitorableComponent
 
 # CRITICAL FIX: Real agent execution imports for production deployment
 # MOVED TO TYPE_CHECKING to avoid circular import
@@ -310,7 +311,205 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._last_health_broadcast = 0.0
         self._health_broadcast_interval = 30.0  # 30 seconds
         self._last_broadcasted_state = None
-        logger.debug("Monitor observer system initialized")
+        self._monitoring_enabled = True  # Enable monitoring by default
+        self._health_notifications_sent = 0  # Track notification count
+        
+        # Enhanced for issue #1019: Auto-register with ChatEventMonitor if available
+        self._auto_register_with_chat_event_monitor()
+        
+        logger.debug("Monitor observer system initialized with ChatEventMonitor integration")
+    
+    def _auto_register_with_chat_event_monitor(self) -> None:
+        """
+        Auto-register this bridge instance with ChatEventMonitor for comprehensive monitoring.
+        
+        Implements issue #1019 requirement: Enable ChatEventMonitor to observe 
+        AgentWebSocketBridge health and operations for silent failure detection.
+        
+        CRITICAL: This registration happens per-instance (per-request) to maintain
+        proper user isolation while enabling monitoring coverage.
+        
+        Business Value: Protects $500K+ ARR by ensuring WebSocket bridge failures
+        are detected and reported through comprehensive monitoring.
+        """
+        try:
+            # Import ChatEventMonitor safely to avoid circular imports
+            from netra_backend.app.websocket_core.event_monitor import chat_event_monitor
+            
+            # Generate unique component ID for this bridge instance
+            component_id = self._generate_monitoring_component_id()
+            
+            # Register this bridge instance for monitoring
+            # Use sync method for initialization compatibility
+            if hasattr(chat_event_monitor, 'register_component'):
+                chat_event_monitor.register_component(component_id, self)
+                logger.info(
+                    f"🔍 MONITOR_INTEGRATION: AgentWebSocketBridge instance registered "
+                    f"with ChatEventMonitor (component_id={component_id})"
+                )
+            else:
+                logger.debug("ChatEventMonitor doesn't support component registration - using observer pattern only")
+            
+            # Also register ourselves as a monitor observer (reverse integration)
+            self.register_monitor_observer(chat_event_monitor)
+            
+        except Exception as e:
+            logger.warning(
+                f"⚠️ Failed to auto-register with ChatEventMonitor: {e}. "
+                f"Bridge will continue operating without monitoring integration. "
+                f"This is expected during testing or if ChatEventMonitor is unavailable."
+            )
+    
+    def _generate_monitoring_component_id(self) -> str:
+        """Generate unique component ID for monitoring registration."""
+        base_id = "agent_websocket_bridge"
+        
+        # Include user context for proper isolation
+        if self.user_context:
+            user_suffix = self.user_context.user_id[:8] if self.user_context.user_id else "unknown"
+            return f"{base_id}_user_{user_suffix}"
+        else:
+            # System-level bridge instance
+            import time
+            timestamp = int(time.time() * 1000) % 10000  # Last 4 digits of timestamp
+            return f"{base_id}_system_{timestamp}"
+    
+    def _calculate_event_emission_health(self) -> str:
+        """Calculate health status of event emission capabilities."""
+        try:
+            # Check if we have active WebSocket connections
+            if hasattr(self, '_websocket_manager') and self._websocket_manager:
+                # If we have a websocket manager, check its health
+                return "healthy"
+            elif self.user_context:
+                # Per-user bridge should be able to emit events
+                return "ready"
+            else:
+                # System bridge without active connections
+                return "standby"
+        except Exception:
+            return "degraded"
+    
+    async def _notify_health_change_if_needed(self, current_health: Dict[str, Any]) -> None:
+        """
+        Notify observers of health changes if status has changed significantly.
+        
+        Enhanced for issue #1019: Provides intelligent health change detection
+        to avoid spam while ensuring critical changes are reported.
+        """
+        try:
+            now = time.time()
+            current_state = current_health.get("state", "unknown")
+            current_healthy = current_health.get("healthy", False)
+            
+            # Check if we should broadcast based on time interval
+            time_to_broadcast = (
+                now - self._last_health_broadcast > self._health_broadcast_interval
+            )
+            
+            # Check if health status changed significantly
+            status_changed = (
+                self._last_broadcasted_state != current_state or
+                self._last_broadcasted_state is None
+            )
+            
+            # Always broadcast errors or critical state changes
+            critical_change = (
+                not current_healthy or 
+                current_state in ["error", "failed", "critical"]
+            )
+            
+            if time_to_broadcast or status_changed or critical_change:
+                await self.notify_health_change(current_health)
+                self._last_health_broadcast = now
+                self._last_broadcasted_state = current_state
+                self._health_notifications_sent += 1
+                
+                logger.debug(
+                    f"Health change notified to {len(self._monitor_observers)} observers: "
+                    f"state={current_state}, healthy={current_healthy}"
+                )
+                
+        except Exception as e:
+            logger.warning(f"Error in health change notification: {e}")
+    
+    def _is_chat_event_monitor_connected(self) -> bool:
+        """Check if ChatEventMonitor is connected as an observer."""
+        for observer in self._monitor_observers:
+            if "ChatEventMonitor" in type(observer).__name__:
+                return True
+        return False
+    
+    def _calculate_websocket_integration_health(self) -> str:
+        """Calculate overall WebSocket integration health."""
+        try:
+            if self._websocket_manager and hasattr(self, '_registry') and self._registry:
+                return "healthy"
+            elif self._websocket_manager:
+                return "degraded"
+            else:
+                return "offline"
+        except Exception:
+            return "error"
+    
+    def _assess_chat_functionality_health(self) -> str:
+        """Assess the health of chat functionality provided by this bridge."""
+        try:
+            # Check core components needed for chat
+            websocket_ok = self._websocket_manager is not None
+            registry_ok = hasattr(self, '_registry') and self._registry is not None
+            monitoring_ok = len(self._monitor_observers) > 0
+            
+            if websocket_ok and registry_ok:
+                return "optimal" if monitoring_ok else "functional"
+            elif websocket_ok or registry_ok:
+                return "degraded"
+            else:
+                return "impaired"
+        except Exception:
+            return "unknown"
+    
+    def _assess_user_experience_impact(self) -> str:
+        """Assess potential impact on user experience."""
+        try:
+            success_rate = (
+                self.metrics.successful_initializations / 
+                max(1, self.metrics.total_initializations)
+            )
+            
+            if success_rate >= 0.95:
+                return "minimal"
+            elif success_rate >= 0.85:
+                return "low"
+            elif success_rate >= 0.70:
+                return "moderate"
+            else:
+                return "high"
+        except Exception:
+            return "unknown"
+    
+    def _calculate_system_reliability_score(self) -> float:
+        """Calculate overall system reliability score (0-100)."""
+        try:
+            # Weight different factors
+            success_rate = (
+                self.metrics.successful_initializations / 
+                max(1, self.metrics.total_initializations)
+            ) * 40  # 40% weight
+            
+            recovery_rate = (
+                self.metrics.successful_recoveries /
+                max(1, self.metrics.recovery_attempts) if self.metrics.recovery_attempts > 0 else 1.0
+            ) * 30  # 30% weight
+            
+            uptime_score = min(self._calculate_uptime() / 3600, 1.0) * 20  # 20% weight (max 1 hour)
+            
+            monitoring_score = (10 if len(self._monitor_observers) > 0 else 0)  # 10% weight
+            
+            return min(100.0, success_rate + recovery_rate + uptime_score + monitoring_score)
+            
+        except Exception:
+            return 0.0
     
     def _track_event_for_tests(self, event_type: str, event_data: Dict[str, Any]) -> None:
         """Track WebSocket events for Golden Path test validation.
@@ -824,45 +1023,90 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         Get current health status for monitoring (MonitorableComponent interface).
         
+        Enhanced for issue #1019: Provides comprehensive health data for ChatEventMonitor
+        integration including integration health and performance indicators.
+        
         Exposes bridge health status in standardized format for external monitors.
         This method maintains full independence - bridge works without any monitors.
         
         Returns:
-            Dict containing standardized health status for monitoring
+            Dict containing enhanced health status for comprehensive monitoring
         """
         try:
             health = await self.health_check()
             
-            return {
+            # Enhanced health status with integration data
+            health_status = {
                 "healthy": health.websocket_manager_healthy and health.registry_healthy,
                 "state": health.state.value,
                 "timestamp": time.time(),
+                
+                # Core component health
                 "websocket_manager_healthy": health.websocket_manager_healthy,
                 "registry_healthy": health.registry_healthy,
                 "consecutive_failures": health.consecutive_failures,
                 "uptime_seconds": health.uptime_seconds,
                 "last_health_check": health.last_health_check.isoformat(),
                 "error_message": health.error_message,
-                "total_recoveries": health.total_recoveries
+                "total_recoveries": health.total_recoveries,
+                
+                # Enhanced integration health for ChatEventMonitor
+                "integration_health": {
+                    "chat_event_monitor_registered": len(self._monitor_observers) > 0,
+                    "monitor_observers_count": len(self._monitor_observers),
+                    "monitoring_enabled": getattr(self, '_monitoring_enabled', True),
+                    "user_context_available": self.user_context is not None,
+                    "component_id": self._generate_monitoring_component_id()
+                },
+                
+                # Performance indicators affecting health
+                "performance_indicators": {
+                    "initialization_success_rate": (
+                        self.metrics.successful_initializations / 
+                        max(self.metrics.total_initializations, 1) * 100
+                    ),
+                    "event_emission_health": self._calculate_event_emission_health(),
+                    "last_health_broadcast": self._last_health_broadcast,
+                    "health_broadcast_interval": self._health_broadcast_interval
+                }
             }
+            
+            # Trigger health change notification if status changed significantly
+            await self._notify_health_change_if_needed(health_status)
+            
+            return health_status
+            
         except Exception as e:
             logger.error(f"Error getting health status for monitoring: {e}")
-            return {
+            error_status = {
                 "healthy": False,
                 "state": "error",
                 "timestamp": time.time(),
-                "error_message": f"Health status retrieval failed: {e}"
+                "error_message": f"Health status retrieval failed: {e}",
+                "integration_health": {
+                    "chat_event_monitor_registered": False,
+                    "monitor_observers_count": 0,
+                    "monitoring_enabled": False,
+                    "error": str(e)
+                }
             }
+            
+            # Always notify of error conditions
+            await self.notify_health_change(error_status)
+            return error_status
     
     async def get_metrics(self) -> Dict[str, Any]:
         """
         Get operational metrics for analysis (MonitorableComponent interface).
         
+        Enhanced for issue #1019: Provides comprehensive metrics including
+        ChatEventMonitor integration status and monitoring health indicators.
+        
         Provides comprehensive metrics for business decisions and monitoring.
         Bridge operates fully independently without registered monitors.
         
         Returns:
-            Dict containing operational metrics
+            Dict containing enhanced operational metrics
         """
         try:
             return {
@@ -889,10 +1133,24 @@ class AgentWebSocketBridge(MonitorableComponent):
                 "current_uptime_seconds": self._calculate_uptime(),
                 "uptime_start": self.metrics.current_uptime_start.isoformat(),
                 
-                # Observer system metrics  
-                "registered_observers": len(self._monitor_observers),
-                "last_health_broadcast": self._last_health_broadcast,
-                "health_broadcast_interval": self._health_broadcast_interval,
+                # Enhanced monitoring integration metrics for ChatEventMonitor
+                "monitoring_integration": {
+                    "registered_observers": len(self._monitor_observers),
+                    "chat_event_monitor_connected": self._is_chat_event_monitor_connected(),
+                    "last_health_broadcast": self._last_health_broadcast,
+                    "health_broadcast_interval": self._health_broadcast_interval,
+                    "component_id": self._generate_monitoring_component_id(),
+                    "monitoring_enabled": getattr(self, '_monitoring_enabled', True),
+                    "health_notifications_sent": getattr(self, '_health_notifications_sent', 0)
+                },
+                
+                # Integration health metrics
+                "integration_health_metrics": {
+                    "event_emission_capability": self._calculate_event_emission_health(),
+                    "websocket_integration_health": self._calculate_websocket_integration_health(),
+                    "user_isolation_status": "enabled" if self.user_context else "system_mode",
+                    "monitoring_observer_types": [type(obs).__name__ for obs in self._monitor_observers]
+                },
                 
                 # Component availability
                 "websocket_manager_available": self._websocket_manager is not None,
@@ -900,6 +1158,13 @@ class AgentWebSocketBridge(MonitorableComponent):
                 # "orchestrator_available": self._orchestrator is not None,
                 "supervisor_available": self._supervisor is not None,
                 "registry_available": self._registry is not None,
+                
+                # Business impact metrics
+                "business_impact_indicators": {
+                    "chat_functionality_health": self._assess_chat_functionality_health(),
+                    "user_experience_impact": self._assess_user_experience_impact(),
+                    "system_reliability_score": self._calculate_system_reliability_score()
+                },
                 
                 # Timestamp
                 "metrics_timestamp": time.time()
@@ -2133,6 +2398,10 @@ class AgentWebSocketBridge(MonitorableComponent):
         
         CRYSTAL CLEAR EMISSION PATH: Agent  ->  Bridge  ->  WebSocket Manager  ->  User Chat
         
+        Event Structure (FIX #935):
+            - Top-level 'results' field: Contains sanitized tool execution results
+            - Nested 'data.result' field: Backward compatibility (same as top-level)
+            
         Args:
             run_id: Unique execution identifier for routing
             agent_name: Name of the agent that executed the tool
@@ -2165,15 +2434,17 @@ class AgentWebSocketBridge(MonitorableComponent):
                 event_id = result.get('event_id')
             
             # Build standardized notification message with user_id for proper routing
+            sanitized_result = self._sanitize_result(result) if result else {}
             notification = {
                 "type": "tool_completed",
                 "run_id": run_id,
                 "user_id": effective_user_context.user_id,  # PHASE 1 FIX: Include user_id for routing
                 "agent_name": effective_agent_name,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
+                "results": sanitized_result,  # FIX #935: Add top-level results field
                 "data": {
                     "tool_name": tool_name,
-                    "result": self._sanitize_result(result) if result else {},
+                    "result": sanitized_result,  # Keep nested result for backward compatibility
                     "execution_time_ms": execution_time_ms,
                     "status": "completed",
                     "message": f"{effective_agent_name} completed {tool_name}"

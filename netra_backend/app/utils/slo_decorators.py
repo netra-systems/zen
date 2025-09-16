@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 """
 SLO Monitoring Decorators and Integration Helpers
 

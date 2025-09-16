@@ -22,22 +22,24 @@ PROCESS INSTRUCTIONS START:
 
 0) Init: SNST: 
 
-    Verify current branch is develop-long-lived: `git branch --show-current`
+    0.1: Verify current branch is develop-long-lived: `git branch --show-current`
     If not on develop-long-lived, STOP and switch: `git checkout develop-long-lived`
     Record branch state for safety monitoring throughout process.
 
-    Clean working state:
+    0.2: Clean working state:
         git commit, pull latest, and handle merge conflicts
 
-    If ISSUE is not a single literal number:
+    0.3: If ISSUE is not a single literal number:
         Search git issues to determine most important issue to work on relative to ISSUE text.
         Be mindful of dependency tags
         ISSUE = to that number
 
-    0) Is the issue actually clearly complete?
+    0.4: add a tags to the issue: actively-being-worked-on, AGENT_SESSION_ID
+
+    0.5: Is the issue actually clearly complete?
         If so close it and report to master (and suggest master breaks entire process)
 
-    Audit the current state of the issue to determine
+    0.6: Audit the current state of the issue to determine
         1) Is there enough research (including comments) or does the issue need to be researched?
             Or is there confusing research that needs to be untangled?
             Declare this and return RESEARCH_NEEDED = {BOOL: True || False}
@@ -45,8 +47,7 @@ PROCESS INSTRUCTIONS START:
         2) Is there enough planning?
         Declare this and return PLANNING_NEEDED = {BOOL: True || False} 
 
-    add a tags to the issue: actively-being-worked-on, AGENT_SESSION_ID
-    return ISSUE number to master
+    0.7: return ISSUE number to master
 
 **only do step 1 if RESEARCH_NEEDED == True**
 1) Research and review : SNST :

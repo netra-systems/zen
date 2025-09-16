@@ -46,6 +46,7 @@ class RedisConnectionHandler:
         host = get_env().get("REDIS_HOST", "localhost")
         port = int(get_env().get("REDIS_PORT", "6379"))
         db = int(get_env().get("REDIS_DB", "0"))
+        password = get_env().get("REDIS_PASSWORD")
         
         # Environment-specific host resolution
         if self.env == "staging":
@@ -67,6 +68,7 @@ class RedisConnectionHandler:
             "host": host,
             "port": port,
             "db": db,
+            "password": password if password else None,
             "environment": self.env,
             "socket_timeout": 5,
             "socket_connect_timeout": 5,
@@ -105,6 +107,10 @@ class RedisConnectionHandler:
                     "connection_class": redis.Connection
                 }
                 
+                # Add password if provided
+                if self._connection_info.get("password"):
+                    pool_config["password"] = self._connection_info["password"]
+                
                 # Add SSL for staging/production
                 if self.env in ["staging", "production"]:
                     pool_config.update({
@@ -128,16 +134,22 @@ class RedisConnectionHandler:
             import redis
             
             # Create Redis client directly with connection info
-            client = redis.Redis(
-                host=self._connection_info["host"],
-                port=self._connection_info["port"],
-                db=self._connection_info["db"],
-                socket_timeout=self._connection_info["socket_timeout"],
-                socket_connect_timeout=self._connection_info["socket_connect_timeout"],
-                retry_on_timeout=self._connection_info["retry_on_timeout"],
-                health_check_interval=self._connection_info["health_check_interval"],
-                decode_responses=True
-            )
+            client_config = {
+                "host": self._connection_info["host"],
+                "port": self._connection_info["port"],
+                "db": self._connection_info["db"],
+                "socket_timeout": self._connection_info["socket_timeout"],
+                "socket_connect_timeout": self._connection_info["socket_connect_timeout"],
+                "retry_on_timeout": self._connection_info["retry_on_timeout"],
+                "health_check_interval": self._connection_info["health_check_interval"],
+                "decode_responses": True
+            }
+            
+            # Add password if provided
+            if self._connection_info.get("password"):
+                client_config["password"] = self._connection_info["password"]
+                
+            client = redis.Redis(**client_config)
             
             # Test connection
             client.ping()

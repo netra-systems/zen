@@ -61,14 +61,19 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
         """Create user execution context for factory testing."""
         return UserExecutionContext(user_id=f'factory_user_{user_suffix}_{uuid.uuid4().hex[:8]}', thread_id=f'factory_thread_{user_suffix}_{uuid.uuid4().hex[:8]}', run_id=f'factory_run_{user_suffix}_{uuid.uuid4().hex[:8]}', request_id=f'factory_req_{user_suffix}_{uuid.uuid4().hex[:8]}', websocket_client_id=f'factory_ws_{user_suffix}_{uuid.uuid4().hex[:8]}')
 
-    def test_factory_requires_websocket_bridge_for_business_value(self):
-        """Test factory enforces WebSocket bridge requirement for chat business value."""
-        with pytest.raises(ExecutionEngineFactoryError, match='ExecutionEngineFactory requires websocket_bridge'):
-            ExecutionEngineFactory(websocket_bridge=None)
+    def test_factory_supports_none_websocket_bridge_for_test_environments(self):
+        """Test factory allows None WebSocket bridge for test environments (Issue #920 fixed)."""
+        # Issue #920 FIXED: Factory should now accept None websocket_bridge for test environments
+        factory = ExecutionEngineFactory(websocket_bridge=None)
+        assert factory._websocket_bridge is None
+        assert factory is not None
+        assert hasattr(factory, '_active_engines')
+        
+        # Test with actual bridge still works
         mock_bridge = MagicMock()
-        factory = ExecutionEngineFactory(websocket_bridge=mock_bridge)
-        assert factory._websocket_bridge == mock_bridge
-        assert factory._websocket_bridge is not None
+        factory_with_bridge = ExecutionEngineFactory(websocket_bridge=mock_bridge)
+        assert factory_with_bridge._websocket_bridge == mock_bridge
+        assert factory_with_bridge._websocket_bridge is not None
 
     @pytest.mark.asyncio
     async def test_factory_creates_user_engines_with_websocket_integration(self, mock_websocket_bridge):

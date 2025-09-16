@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 '''Test logging color output to ensure proper ANSI escape codes instead of literal tags.
 
 This test verifies that the logging system produces proper colored console output

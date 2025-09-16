@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 """
 Unified health check endpoints for the backend service.
 Consolidates all health functionality into standardized endpoints.

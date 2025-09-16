@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 """
 Main FastAPI application module.
 Entry point for the Netra AI Optimization Platform.

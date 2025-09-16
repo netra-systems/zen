@@ -1,3 +1,4 @@
+from netra_backend.app.logging_config import central_logger
 """
 Backend service health check configuration.
 Sets up all health checks for the backend service using the unified health system.
