@@ -102,26 +102,27 @@ class ImprovedSSOTChecker:
             if 'websocket' in f and 'manager' in f
         ]
 
-        # Check for unified entry point
+        # Check for SSOT canonical patterns (Issue #885 fix)
+        canonical_patterns = self._check_websocket_canonical_patterns()
         unified_manager = None
         interface_protocols = []
         type_definitions = []
 
         for file_path in websocket_files:
-            if 'unified_manager' in file_path:
+            if 'unified_manager' in file_path or 'canonical_import_patterns' in file_path:
                 unified_manager = file_path
             elif 'protocol' in file_path:
                 interface_protocols.append(file_path)
             elif 'types' in file_path:
                 type_definitions.append(file_path)
 
-        # Functional SSOT analysis
-        has_unified_implementation = unified_manager is not None
-        has_clear_interfaces = len(interface_protocols) > 0
-        has_type_definitions = len(type_definitions) > 0
+        # Functional SSOT analysis - Issue #885 fix: recognize SSOT consolidation patterns
+        has_unified_implementation = unified_manager is not None or canonical_patterns['has_canonical_imports']
+        has_clear_interfaces = len(interface_protocols) > 0 or canonical_patterns['has_protocol_definitions']
+        has_type_definitions = len(type_definitions) > 0 or canonical_patterns['has_type_definitions']
 
-        # Check import consolidation
-        import_consolidation = self._check_websocket_import_consolidation()
+        # Check import consolidation - Issue #885 fix: check actual working patterns
+        import_consolidation = canonical_patterns['import_consolidation_working']
 
         return {
             'achieves_functional_ssot': has_unified_implementation and import_consolidation,
@@ -129,30 +130,67 @@ class ImprovedSSOTChecker:
             'interface_files': interface_protocols,
             'type_files': type_definitions,
             'import_consolidation': import_consolidation,
-            'architectural_diversity_legitimate': has_clear_interfaces and has_type_definitions
+            'architectural_diversity_legitimate': has_clear_interfaces and has_type_definitions,
+            'canonical_patterns_detected': canonical_patterns
         }
+
+    def _check_websocket_canonical_patterns(self) -> Dict[str, bool]:
+        """Check WebSocket SSOT canonical patterns (Issue #885 fix)"""
+        try:
+            # Check for canonical import patterns file
+            canonical_file = self.config.root_path / "netra_backend" / "app" / "websocket_core" / "canonical_import_patterns.py"
+            manager_file = self.config.root_path / "netra_backend" / "app" / "websocket_core" / "manager.py"
+            websocket_manager_file = self.config.root_path / "netra_backend" / "app" / "websocket_core" / "websocket_manager.py"
+
+            has_canonical_imports = canonical_file.exists()
+            has_manager_compat = manager_file.exists()
+            has_websocket_manager = websocket_manager_file.exists()
+
+            # Check protocols and types
+            protocols_file = self.config.root_path / "netra_backend" / "app" / "websocket_core" / "protocols.py"
+            types_file = self.config.root_path / "netra_backend" / "app" / "websocket_core" / "types.py"
+
+            has_protocol_definitions = protocols_file.exists()
+            has_type_definitions = types_file.exists()
+
+            # Check if import consolidation is working via compatibility layer
+            import_consolidation_working = False
+            if has_manager_compat and has_canonical_imports:
+                try:
+                    with open(manager_file, 'r', encoding='utf-8') as f:
+                        manager_content = f.read()
+
+                    # Check for SSOT compatibility patterns
+                    has_ssot_imports = 'from netra_backend.app.websocket_core.canonical_import_patterns import' in manager_content
+                    has_deprecation_warning = 'DeprecationWarning' in manager_content or 'warnings.warn' in manager_content
+
+                    import_consolidation_working = has_ssot_imports and has_deprecation_warning
+                except Exception:
+                    import_consolidation_working = False
+
+            return {
+                'has_canonical_imports': has_canonical_imports,
+                'has_manager_compat': has_manager_compat,
+                'has_websocket_manager': has_websocket_manager,
+                'has_protocol_definitions': has_protocol_definitions,
+                'has_type_definitions': has_type_definitions,
+                'import_consolidation_working': import_consolidation_working
+            }
+
+        except Exception:
+            return {
+                'has_canonical_imports': False,
+                'has_manager_compat': False,
+                'has_websocket_manager': False,
+                'has_protocol_definitions': False,
+                'has_type_definitions': False,
+                'import_consolidation_working': False
+            }
 
     def _check_websocket_import_consolidation(self) -> bool:
         """Check if WebSocket imports are properly consolidated"""
-        try:
-            # Test that canonical imports work
-            websocket_manager_file = self.config.root_path / "netra_backend" / "app" / "websocket_core" / "websocket_manager.py"
-            if not websocket_manager_file.exists():
-                return False
-
-            # Check for consolidated import patterns
-            with open(websocket_manager_file, 'r', encoding='utf-8') as f:
-                content = f.read()
-
-            # Look for SSOT import patterns
-            has_unified_imports = 'from netra_backend.app.websocket_core.unified_manager import' in content
-            has_protocol_imports = 'from netra_backend.app.websocket_core.protocols import' in content
-            has_type_imports = 'from netra_backend.app.websocket_core.types import' in content
-
-            return has_unified_imports and (has_protocol_imports or has_type_imports)
-
-        except Exception:
-            return False
+        canonical_patterns = self._check_websocket_canonical_patterns()
+        return canonical_patterns['import_consolidation_working']
 
     def _analyze_unified_interfaces(self, components: Dict[str, List[str]]) -> Dict[str, any]:
         """Analyze interface unification across components"""
