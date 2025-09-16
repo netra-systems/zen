@@ -261,17 +261,17 @@ Issue #1021 implemented the payload wrapper pattern that resolved the WebSocket 
 ### Follow-up Actions
 To prevent future confusion and clean up technical debt, we've created three focused issues:
 
-1. **#[NEW_ISSUE_1] - WebSocket Test Infrastructure Consolidation**
+1. **#1301 - WebSocket Test Infrastructure Consolidation**
    - Reduce 500+ test files to <50
    - Remove outdated test expectations
    - Achieve 100% SSOT compliance
 
-2. **#[NEW_ISSUE_2] - Complete WebSocket Event Structure Documentation**
+2. **#1302 - Complete WebSocket Event Structure Documentation**
    - Create canonical mermaid diagrams
    - Document the payload wrapper pattern
    - Provide migration guides
 
-3. **#[NEW_ISSUE_3] - Enhance WebSocket Health Monitoring**
+3. **#1303 - Enhance WebSocket Health Monitoring**
    - Improve health check accuracy
    - Add monitoring dashboards
    - Implement proper alerting
