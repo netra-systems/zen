@@ -1524,6 +1524,11 @@ CMD ["npm", "start"]
                     if secret_name in critical_secrets:
                         results['errors'].append(f"{service_name}: CRITICAL secret missing: {secret_name}")
                         results['success'] = False
+                elif validation_result['status'] == 'no_access':
+                    results['errors'].append(f"{service_name}: Service account lacks access to {secret_name}")
+                    if 'fix' in validation_result:
+                        results['errors'].append(f"  Fix: {validation_result['fix']}")
+                    results['success'] = False
                 elif validation_result['status'] == 'placeholder':
                     placeholder_secrets.append(secret_name)
                     if secret_name in critical_secrets:
@@ -1569,11 +1574,11 @@ CMD ["npm", "start"]
     
     def _validate_individual_secret(self, gsm_secret_id: str, secret_name: str) -> Dict[str, Any]:
         """Validate an individual secret with quality checks.
-        
+
         Args:
             gsm_secret_id: Google Secret Manager secret ID
             secret_name: Logical secret name
-            
+
         Returns:
             Dictionary with validation status and details
         """
@@ -1586,10 +1591,20 @@ CMD ["npm", "start"]
                 check=False,
                 shell=self.use_shell
             )
-            
+
             if result.returncode != 0:
                 return {'status': 'missing', 'error': result.stderr}
-            
+
+            # CRITICAL: Check if service account has access to the secret
+            service_account = f"netra-staging-deploy@{self.project_id}.iam.gserviceaccount.com"
+            access_check = self._check_secret_access(gsm_secret_id, service_account)
+            if not access_check['has_access']:
+                return {
+                    'status': 'no_access',
+                    'error': f"Service account {service_account} lacks access to secret {gsm_secret_id}",
+                    'fix': f"Run: gcloud secrets add-iam-policy-binding {gsm_secret_id} --member=serviceAccount:{service_account} --role=roles/secretmanager.secretAccessor --project={self.project_id}"
+                }
+
             # Get secret value for quality validation
             value_result = subprocess.run(
                 [self.gcloud_cmd, "secrets", "versions", "access", "latest",
@@ -1599,10 +1614,10 @@ CMD ["npm", "start"]
                 check=False,
                 shell=self.use_shell
             )
-            
+
             if value_result.returncode != 0:
                 return {'status': 'missing', 'error': value_result.stderr}
-            
+
             secret_value = value_result.stdout.strip()
             
             # Phase 3: Secret Quality Validation
@@ -1622,6 +1637,45 @@ CMD ["npm", "start"]
         except Exception as e:
             return {'status': 'error', 'error': str(e)}
     
+    def _check_secret_access(self, secret_id: str, service_account: str) -> Dict[str, Any]:
+        """Check if a service account has access to a secret.
+
+        Args:
+            secret_id: The secret ID in Secret Manager
+            service_account: The service account email
+
+        Returns:
+            Dictionary with 'has_access' boolean and details
+        """
+        try:
+            # Get the IAM policy for the secret
+            result = subprocess.run(
+                [self.gcloud_cmd, "secrets", "get-iam-policy", secret_id,
+                 "--project", self.project_id, "--format", "json"],
+                capture_output=True,
+                text=True,
+                check=False,
+                shell=self.use_shell
+            )
+
+            if result.returncode != 0:
+                return {'has_access': False, 'error': f"Failed to get IAM policy: {result.stderr}"}
+
+            import json
+            policy = json.loads(result.stdout)
+
+            # Check if service account has secretAccessor role
+            service_account_member = f"serviceAccount:{service_account}"
+            for binding in policy.get('bindings', []):
+                if 'secretAccessor' in binding.get('role', ''):
+                    if service_account_member in binding.get('members', []):
+                        return {'has_access': True}
+
+            return {'has_access': False, 'error': f"Service account {service_account} not found in secret IAM policy"}
+
+        except Exception as e:
+            return {'has_access': False, 'error': str(e)}
+
     def _validate_secret_quality(self, secret_name: str, secret_value: str) -> Optional[str]:
         """Validate secret quality (based on SecretConfig quality validation).
         
