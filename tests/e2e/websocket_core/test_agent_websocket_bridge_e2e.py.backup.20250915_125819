@@ -52,9 +52,9 @@ class TestAgentWebSocketBridgeE2EIntegration(BaseTestCase):
         users = []
         
         user_configs = [
-            {"email": "bridge_enterprise@netra.ai", "name": "Bridge Enterprise", "user_type": "enterprise"},
-            {"email": "bridge_mid@netra.ai", "name": "Bridge Mid Tier", "user_type": "mid"},
-            {"email": "bridge_free@netra.ai", "name": "Bridge Free", "user_type": "free"}
+            {"email": "bridge_enterprise@netrasystems.ai", "name": "Bridge Enterprise", "user_type": "enterprise"},
+            {"email": "bridge_mid@netrasystems.ai", "name": "Bridge Mid Tier", "user_type": "mid"},
+            {"email": "bridge_free@netrasystems.ai", "name": "Bridge Free", "user_type": "free"}
         ]
         
         for config in user_configs:

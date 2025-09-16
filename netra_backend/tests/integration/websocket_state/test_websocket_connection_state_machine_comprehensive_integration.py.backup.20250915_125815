@@ -162,7 +162,7 @@ class TestWebSocketConnectionStateMachineIntegration(BaseIntegrationTest):
         """
         # Create test user and connection
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'state_persistence_test@netra.ai',
+            'email': 'state_persistence_test@netrasystems.ai',
             'name': 'State Persistence User',
             'is_active': True
         })
@@ -309,7 +309,7 @@ class TestWebSocketConnectionStateMachineIntegration(BaseIntegrationTest):
         users = []
         for i in range(3):
             user_data = await self.create_test_user_context(real_services_fixture, {
-                'email': f'multi_state_user_{i}@netra.ai',
+                'email': f'multi_state_user_{i}@netrasystems.ai',
                 'name': f'Multi State User {i}',
                 'is_active': True
             })
@@ -487,7 +487,7 @@ class TestWebSocketConnectionStateMachineIntegration(BaseIntegrationTest):
         while maintaining state consistency and enabling automatic reconnection.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'error_recovery_integration@netra.ai',
+            'email': 'error_recovery_integration@netrasystems.ai',
             'name': 'Error Recovery Integration User',
             'is_active': True
         })
@@ -680,7 +680,7 @@ class TestWebSocketConnectionStateMachineIntegration(BaseIntegrationTest):
         performance degradation, maintaining responsive user experience.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'performance_load_test@netra.ai',
+            'email': 'performance_load_test@netrasystems.ai',
             'name': 'Performance Load Test User',
             'is_active': True
         })

@@ -148,7 +148,7 @@ class ConcurrentAgentLoadTester(SSotAsyncTestCase, StagingTestBase):
         """Create and authenticate a single user"""
         session_id = f"load_test_{index}_{uuid.uuid4().hex[:8]}"
         user_id = f"load_user_{index}_{int(time.time())}"
-        email = f"{user_id}@loadtest.netra.ai"
+        email = f"{user_id}@loadtest.netrasystems.ai"
         
         # Create JWT token with appropriate permissions
         access_token = create_real_jwt_token(

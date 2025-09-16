@@ -114,7 +114,7 @@ async def upgrade_flow_manager():
     manager = Mock()
     # Mock: Async component isolation for testing without real async operations
     manager.initiate_upgrade = AsyncMock(return_value = {
-        "upgrade_url": "https://netra.ai/upgrade",
+        "upgrade_url": "https://netrasystems.ai/upgrade",
         "discount_code": "FIRST20",
         "expires_at": "2024-01-01T00:00:00Z",
 })

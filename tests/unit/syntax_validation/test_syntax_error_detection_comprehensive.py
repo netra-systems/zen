@@ -111,7 +111,7 @@ class SyntaxErrorDetectionComprehensive(SSotBaseTestCase):
             "from from ",  # Duplicated 'from'
             "import import ",  # Duplicated 'import'
             "from . import from",  # Circular naming
-            "from netra_backend.netra_backend",  # Duplicated path
+            "from netra_api.netra_backend",  # Duplicated path
             "from auth_service.auth_service",  # Duplicated path
         ]
 

@@ -202,7 +202,7 @@ class TestWebSocketHeartbeatMonitoring(SSotAsyncTestCase):
         self.env = IsolatedEnvironment()
         self.env.set('TESTING', '1', source='websocket_heartbeat_test')
         self.env.set('USE_REAL_SERVICES', 'true', source='websocket_heartbeat_test')
-        self.test_user = TestUserData(user_id=f'heartbeat_user_{uuid.uuid4().hex[:8]}', email='heartbeat-test@netra.ai', tier='enterprise', thread_id=f'heartbeat_thread_{uuid.uuid4().hex[:8]}')
+        self.test_user = TestUserData(user_id=f'heartbeat_user_{uuid.uuid4().hex[:8]}', email='heartbeat-test@netrasystems.ai', tier='enterprise', thread_id=f'heartbeat_thread_{uuid.uuid4().hex[:8]}')
         self.websocket_managers: List[Any] = []
         self.mock_websockets: List[HeartbeatMonitoringWebSocket] = []
 

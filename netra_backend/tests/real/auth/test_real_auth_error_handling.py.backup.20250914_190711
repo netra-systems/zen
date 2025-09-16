@@ -389,7 +389,7 @@ class TestRealAuthErrorHandling:
                 "status_code": expected_status,
                 "user_friendly": True,
                 "retry_after": 60 if error_code == "rate_limited" else None,
-                "support_contact": "support@netra.ai" if error_code == "invalid_credentials" else None
+                "support_contact": "support@netrasystems.ai" if error_code == "invalid_credentials" else None
             }
             
             # Validate error response structure
@@ -630,7 +630,7 @@ class TestRealAuthErrorHandling:
                 "available_features": available_features,
                 "recovery_action": recovery_action,
                 "estimated_recovery_time": "5-15 minutes",
-                "status_page": "https://status.netra.ai",
+                "status_page": "https://status.netrasystems.ai",
                 "user_message": self.get_system_recovery_message(scenario_name)
             }
             

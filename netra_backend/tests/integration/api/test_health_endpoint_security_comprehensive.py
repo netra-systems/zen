@@ -244,13 +244,13 @@ class HealthEndpointSecurityComprehensiveTests(SSotBaseTestCase):
                         if check['critical']:
                             missing_critical_headers.append(f"{header_name}: should contain {check['must_contain']}, got '{header_value}'")
             assert len(missing_critical_headers) == 0, f'Critical security headers missing: {missing_critical_headers}'
-            cors_origins_to_test = ['https://app.netra.ai', 'https://staging.netra.ai', 'http://localhost:3000', 'https://evil.com']
+            cors_origins_to_test = ['https://app.netrasystems.ai', 'https://staging.netrasystems.ai', 'http://localhost:3000', 'https://evil.com']
             for origin in cors_origins_to_test:
                 cors_headers = {'Origin': origin, 'Access-Control-Request-Method': 'GET', 'Access-Control-Request-Headers': 'authorization,content-type'}
                 preflight_response = await client.options(health_url, headers=cors_headers)
                 cors_response_headers = preflight_response.headers
                 allowed_origin = cors_response_headers.get('Access-Control-Allow-Origin', '')
-                if origin.endswith('netra.ai') or origin.startswith('http://localhost'):
+                if origin.endswith('netrasystems.ai') or origin.startswith('http://localhost'):
                     assert allowed_origin in [origin, '*'], f'Legitimate origin {origin} not allowed: {allowed_origin}'
                 elif origin == 'https://evil.com':
                     assert allowed_origin != origin, f'Malicious origin {origin} incorrectly allowed'

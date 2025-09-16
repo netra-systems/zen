@@ -2,9 +2,9 @@
 
 ## Executive Summary
 
-**Issue**: WebSocket connections in staging were failing with 403 Forbidden errors due to incorrect SERVICE_ID configuration. The backend service was sending `netra-auth-staging-1757260376` instead of the expected `netra-backend`.
+**Issue**: WebSocket connections in staging were failing with 403 Forbidden errors due to incorrect SERVICE_ID configuration. The backend service was sending `netra-auth-1757260376` instead of the expected `netra-backend`.
 
-**Root Cause**: Google Secret Manager secret `service-id-staging` contained a dynamic auth service ID pattern (`netra-auth-staging-$(date +%s)`) instead of the correct backend service ID (`netra-backend`).
+**Root Cause**: Google Secret Manager secret `service-id-staging` contained a dynamic auth service ID pattern (`netra-auth-$(date +%s)`) instead of the correct backend service ID (`netra-backend`).
 
 **Fix Applied**: Updated the secret value and redeployed the backend service.
 
@@ -17,17 +17,17 @@
 ### Why were WebSocket connections failing with 403?
 Auth service rejected requests due to SERVICE_ID mismatch detected.
 
-**Evidence**: GCP logs showed: "Service ID mismatch: received 'netra-auth-staging-1757260376', expected 'netra-backend'. Backend should use SERVICE_ID='netra-backend'"
+**Evidence**: GCP logs showed: "Service ID mismatch: received 'netra-auth-1757260376', expected 'netra-backend'. Backend should use SERVICE_ID='netra-backend'"
 
 ### Why was there a SERVICE_ID mismatch?
-Backend service was sending `netra-auth-staging-1757260376` instead of `netra-backend`.
+Backend service was sending `netra-auth-1757260376` instead of `netra-backend`.
 
 **Evidence**: The backend service was reading its SERVICE_ID from the Google Secret Manager secret `service-id-staging`.
 
 ### Why was the backend sending the wrong SERVICE_ID?
 The Google Secret Manager secret `service-id-staging` contained an incorrect value.
 
-**Evidence**: Secret contained `netra-auth-staging-$(date +%s)` which evaluated to `netra-auth-staging-1757260376`.
+**Evidence**: Secret contained `netra-auth-$(date +%s)` which evaluated to `netra-auth-1757260376`.
 
 ### Why did the secret contain the wrong value?
 The secret was configured with an auth service ID pattern instead of the backend service ID.
@@ -58,13 +58,13 @@ Tests were using fallback authentication that bypassed this service-to-service v
 3. **Google Secret Manager** (what was stored):
    ```
    SECRET: service-id-staging
-   VALUE: netra-auth-staging-$(date +%s)
-   EVALUATED TO: netra-auth-staging-1757260376
+   VALUE: netra-auth-$(date +%s)
+   EVALUATED TO: netra-auth-1757260376
    ```
 
 4. **Auth Service Expectation**:
    - Expected: `netra-backend` (the actual backend service identifier)
-   - Received: `netra-auth-staging-1757260376` (an auth service pattern)
+   - Received: `netra-auth-1757260376` (an auth service pattern)
 
 ### Files Analyzed
 
@@ -89,7 +89,7 @@ Tests were using fallback authentication that bypassed this service-to-service v
 ```bash
 # Previous value (incorrect):
 gcloud secrets versions access latest --secret="service-id-staging" --project="netra-staging"
-# Output: netra-auth-staging-$(date +%s)
+# Output: netra-auth-$(date +%s)
 
 # Updated value (correct):
 echo "netra-backend" | gcloud secrets versions add service-id-staging --data-file=- --project="netra-staging"
@@ -118,7 +118,7 @@ gcloud run deploy netra-backend-staging \
 
 ### Pre-Fix State
 - ❌ WebSocket connections failing with 403 Forbidden
-- ❌ Backend sending `netra-auth-staging-1757260376` 
+- ❌ Backend sending `netra-auth-1757260376` 
 - ❌ Auth service rejecting due to SERVICE_ID mismatch
 
 ### Post-Fix State  
@@ -171,7 +171,7 @@ The fix can be verified by:
 
 ### Google Cloud Platform
 - **Secret**: `service-id-staging`
-  - **Before**: `netra-auth-staging-$(date +%s)` 
+  - **Before**: `netra-auth-$(date +%s)` 
   - **After**: `netra-backend`
   - **Method**: `gcloud secrets versions add`
 
@@ -198,7 +198,7 @@ The fix can be verified by:
 ## Related Issues and References
 
 ### Previous SERVICE_ID Issues
-- Similar patterns found in test files expecting `netra-auth-staging` pattern
+- Similar patterns found in test files expecting `netra-auth` pattern
 - Historical learning documents reference this configuration pattern
 
 ### Auth Service Configuration  

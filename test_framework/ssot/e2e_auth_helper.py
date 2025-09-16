@@ -1618,7 +1618,7 @@ def get_user_auth_token(
     Returns:
         JWT authentication token string
     """
-    email = email or f"{user_id}@test.netra.ai"
+    email = email or f"{user_id}@test.netrasystems.ai"
     permissions = permissions or ["read", "write"]
     
     return get_jwt_token_for_user(
@@ -1650,7 +1650,7 @@ def get_test_user_context(
     """
     # Generate defaults
     user_id = user_id or f"test_user_{uuid.uuid4().hex[:8]}"
-    email = email or f"{user_id}@test.netra.ai"
+    email = email or f"{user_id}@test.netrasystems.ai"
     permissions = permissions or ["read", "write"]
     
     # Create authenticated user context

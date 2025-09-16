@@ -201,7 +201,7 @@ class TestASGIScopeErrorReproduction:
         """Reproduce the exact error from websocket_ssot.py:385 - WILL FAIL."""
         # Create a websocket mock with a Starlette URL object (no query_params)
         websocket = Mock()
-        websocket.url = URL("wss://staging.netra.ai/ws?token=abc123&user_id=user123")
+        websocket.url = URL("wss://staging.netrasystems.ai/ws?token=abc123&user_id=user123")
         
         # This should reproduce the AttributeError from line 385
         with pytest.raises(AttributeError, match="'URL' object has no attribute 'query_params'"):
@@ -216,7 +216,7 @@ class TestASGIScopeErrorReproduction:
         def simulate_middleware_websocket_processing():
             """Simulate the WebSocket processing that fails."""
             websocket = Mock()
-            websocket.url = URL("wss://staging.netra.ai/ws?token=abc123")
+            websocket.url = URL("wss://staging.netrasystems.ai/ws?token=abc123")
             
             # This simulates the processing that leads to the error
             try:
@@ -242,12 +242,12 @@ class TestASGIScopeErrorReproduction:
             'path': '/ws',
             'query_string': b'token=abc123&user_id=user123',
             'headers': [
-                (b'host', b'staging.netra.ai'),
+                (b'host', b'staging.netrasystems.ai'),
                 (b'x-forwarded-for', b'10.0.0.1'),
                 (b'x-forwarded-proto', b'https'),
             ],
             # GCP might add additional scope keys that affect URL object creation
-            'server': ('staging.netra.ai', 443),
+            'server': ('staging.netrasystems.ai', 443),
             'client': ('10.0.0.1', 56789),
         }
         

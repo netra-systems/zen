@@ -61,8 +61,8 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
         
         # Set URLs based on environment
         if test_environment == "staging":
-            self.websocket_url = "wss://staging-backend.netraapex.com/ws"
-            self.backend_url = "https://staging-backend.netraapex.com"
+            self.websocket_url = "wss://staging-api.netraapex.com/ws"
+            self.backend_url = "https://staging-api.netraapex.com"
         else:
             self.websocket_url = "ws://localhost:8000/ws"
             self.backend_url = "http://localhost:8000"

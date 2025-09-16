@@ -56,7 +56,7 @@ class TestWebSocketConnectionEstablishmentApplicationStateIntegration(WebSocketI
                 "postgres": real_services_fixture["postgres"],
                 "redis": real_redis_fixture
             }), {
-                'email': 'websocket_test_user@netra.ai',
+                'email': 'websocket_test_user@netrasystems.ai',
                 'name': 'WebSocket Test User',
                 'is_active': True
             }
@@ -123,7 +123,7 @@ class TestWebSocketConnectionEstablishmentApplicationStateIntegration(WebSocketI
             str(user_id)
         )
         assert db_user is not None, "User should exist in database"
-        assert db_user['email'] == 'websocket_test_user@netra.ai', "Database user email should match"
+        assert db_user['email'] == 'websocket_test_user@netrasystems.ai', "Database user email should match"
         assert db_user['is_active'] is True, "Database user should be active"
         
         # Verify session state persistence in REAL Redis - NO MOCKS
@@ -186,7 +186,7 @@ class TestWebSocketConnectionEstablishmentApplicationStateIntegration(WebSocketI
         
         for i in range(3):
             user_data = await self.create_test_user_context(real_services_manager, {
-                'email': f'concurrent_test_user_{i}@netra.ai',
+                'email': f'concurrent_test_user_{i}@netrasystems.ai',
                 'name': f'Concurrent Test User {i}',
                 'is_active': True
             })
@@ -344,7 +344,7 @@ class TestWebSocketConnectionEstablishmentApplicationStateIntegration(WebSocketI
         })
         
         user_data = await self.create_test_user_context(real_services_manager, {
-            'email': 'failure_test_user@netra.ai',
+            'email': 'failure_test_user@netrasystems.ai',
             'name': 'Failure Test User',
             'is_active': True
         })

@@ -45,7 +45,7 @@ class TestConfigSSotGoldenPathStaging(SSotAsyncTestCase):
     @pytest.fixture(scope='class')
     def test_user_credentials(self):
         """Test user credentials for staging authentication."""
-        return {'email': 'test@netra.ai', 'password': 'test123'}
+        return {'email': 'test@netrasystems.ai', 'password': 'test123'}
 
     async def test_staging_config_manager_health_check(self, staging_config):
         """
@@ -264,7 +264,7 @@ class TestGoldenPathConfigIntegration:
             pytest.skip('Staging access not enabled for this test run')
         test_instance = TestConfigSSotGoldenPathStaging()
         staging_config = {'base_url': 'https://backend.staging.netrasystems.ai', 'websocket_url': 'wss://backend.staging.netrasystems.ai/ws', 'health_url': 'https://backend.staging.netrasystems.ai/health', 'timeout': 30}
-        test_credentials = {'email': 'test@netra.ai', 'password': 'test123'}
+        test_credentials = {'email': 'test@netrasystems.ai', 'password': 'test123'}
         try:
             result = await test_instance.test_golden_path_end_to_end_user_flow(staging_config, test_credentials)
             assert result.get('golden_path_success') or result.get('golden_path_partial'), f'Golden Path test failed: {result}'

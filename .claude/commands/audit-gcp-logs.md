@@ -32,7 +32,7 @@ Audit Google Cloud Platform logs for staging/production services with automatic 
 ### 3. Collect Logs by Service
 if [[ "${1:-all}" == "all" ]]; then
     !echo "\n🔍 Collecting logs from ALL services (last ${2:-1} hours)..."
-    !for service in backend-staging auth-staging frontend-staging; do
+    !for service in backend-staging auth frontend-staging; do
         echo "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo "🌐 Service: $service"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -216,7 +216,7 @@ fi
 ## Usage Examples
 - `/audit-gcp-logs` - Audit all services with auto-debug
 - `/audit-gcp-logs backend-staging 24` - Audit backend (last 24 hours)
-- `/audit-gcp-logs auth-staging 3` - Audit auth service (last 3 hours)
+- `/audit-gcp-logs auth 3` - Audit auth service (last 3 hours)
 
 ## Features
 - **Comprehensive GCP Analysis** - Errors, performance, security, resources

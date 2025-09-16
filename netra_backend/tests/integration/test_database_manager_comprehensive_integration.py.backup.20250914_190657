@@ -184,7 +184,7 @@ class TestDatabaseManagerRealConnectionManagement(BaseIntegrationTest):
                 # Insert real business data
                 await session.execute(
                     text("INSERT INTO integration_users (email, username, subscription_tier, is_active) VALUES (:email, :username, :tier, :active)"),
-                    {"email": "integration@netra.ai", "username": "integration_user", "tier": "premium", "active": True}
+                    {"email": "integration@netrasystems.ai", "username": "integration_user", "tier": "premium", "active": True}
                 )
                 await session.commit()
                 
@@ -196,7 +196,7 @@ class TestDatabaseManagerRealConnectionManagement(BaseIntegrationTest):
                 row = result.fetchone()
                 
                 assert row is not None
-                assert row[0] == "integration@netra.ai"
+                assert row[0] == "integration@netrasystems.ai"
                 assert row[1] == "premium"
             
             # Test health check on real database
@@ -334,13 +334,13 @@ class TestDatabaseManagerRealConnectionManagement(BaseIntegrationTest):
             async with db_manager.get_session() as session:
                 await session.execute(
                     text("INSERT INTO integration_users (email, username) VALUES (:email, :username)"),
-                    {"email": "auto_init@netra.ai", "username": "auto_init_user"}
+                    {"email": "auto_init@netrasystems.ai", "username": "auto_init_user"}
                 )
                 await session.commit()
                 
                 result = await session.execute(
                     text("SELECT username FROM integration_users WHERE email = :email"),
-                    {"email": "auto_init@netra.ai"}
+                    {"email": "auto_init@netrasystems.ai"}
                 )
                 username = result.scalar()
                 assert username == "auto_init_user"
@@ -410,7 +410,7 @@ class TestDatabaseManagerTransactionSafety(BaseIntegrationTest):
             async with db_manager.get_session() as session:
                 await session.execute(
                     text("INSERT INTO integration_users (email, username, subscription_tier) VALUES (:email, :username, :tier)"),
-                    {"email": "commit_test@netra.ai", "username": "commit_user", "tier": "enterprise"}
+                    {"email": "commit_test@netrasystems.ai", "username": "commit_user", "tier": "enterprise"}
                 )
                 # Implicit commit on successful context exit
             
@@ -418,7 +418,7 @@ class TestDatabaseManagerTransactionSafety(BaseIntegrationTest):
             async with db_manager.get_session() as session:
                 result = await session.execute(
                     text("SELECT subscription_tier FROM integration_users WHERE email = :email"),
-                    {"email": "commit_test@netra.ai"}
+                    {"email": "commit_test@netrasystems.ai"}
                 )
                 tier = result.scalar()
                 assert tier == "enterprise"
@@ -429,7 +429,7 @@ class TestDatabaseManagerTransactionSafety(BaseIntegrationTest):
                 async with db_manager.get_session() as session:
                     await session.execute(
                         text("INSERT INTO integration_users (email, username, subscription_tier) VALUES (:email, :username, :tier)"),
-                        {"email": "rollback_test@netra.ai", "username": "rollback_user", "tier": "premium"}
+                        {"email": "rollback_test@netrasystems.ai", "username": "rollback_user", "tier": "premium"}
                     )
                     
                     # Force exception before commit
@@ -443,7 +443,7 @@ class TestDatabaseManagerTransactionSafety(BaseIntegrationTest):
             async with db_manager.get_session() as session:
                 result = await session.execute(
                     text("SELECT COUNT(*) FROM integration_users WHERE email = :email"),
-                    {"email": "rollback_test@netra.ai"}
+                    {"email": "rollback_test@netrasystems.ai"}
                 )
                 count = result.scalar()
                 assert count == 0  # Rollback should prevent data persistence
@@ -486,7 +486,7 @@ class TestDatabaseManagerTransactionSafety(BaseIntegrationTest):
                         await session.execute(
                             text("""INSERT OR IGNORE INTO integration_users (email, username, subscription_tier) 
                                    VALUES (:email, :username, :tier)"""),
-                            {"email": f"user_{user_id}@netra.ai", "username": f"user_{user_id}", "tier": "free"}
+                            {"email": f"user_{user_id}@netrasystems.ai", "username": f"user_{user_id}", "tier": "free"}
                         )
                         
                         # Create conversation
@@ -572,7 +572,7 @@ class TestDatabaseManagerTransactionSafety(BaseIntegrationTest):
             async with db_manager.get_session() as session:
                 await session.execute(
                     text("INSERT INTO integration_users (email, username, subscription_tier) VALUES (:email, :username, :tier)"),
-                    {"email": "unique@netra.ai", "username": "unique_user", "tier": "premium"}
+                    {"email": "unique@netrasystems.ai", "username": "unique_user", "tier": "premium"}
                 )
                 await session.commit()
             
@@ -582,7 +582,7 @@ class TestDatabaseManagerTransactionSafety(BaseIntegrationTest):
                 async with db_manager.get_session() as session:
                     await session.execute(
                         text("INSERT INTO integration_users (email, username, subscription_tier) VALUES (:email, :username, :tier)"),
-                        {"email": "unique@netra.ai", "username": "duplicate_user", "tier": "free"}  # Same email
+                        {"email": "unique@netrasystems.ai", "username": "duplicate_user", "tier": "free"}  # Same email
                     )
                     await session.commit()
             except Exception as e:
@@ -595,7 +595,7 @@ class TestDatabaseManagerTransactionSafety(BaseIntegrationTest):
             async with db_manager.get_session() as session:
                 result = await session.execute(
                     text("SELECT username, subscription_tier FROM integration_users WHERE email = :email"),
-                    {"email": "unique@netra.ai"}
+                    {"email": "unique@netrasystems.ai"}
                 )
                 row = result.fetchone()
                 assert row is not None
@@ -605,7 +605,7 @@ class TestDatabaseManagerTransactionSafety(BaseIntegrationTest):
                 # Verify only one record with this email exists
                 result = await session.execute(
                     text("SELECT COUNT(*) FROM integration_users WHERE email = :email"),
-                    {"email": "unique@netra.ai"}
+                    {"email": "unique@netrasystems.ai"}
                 )
                 count = result.scalar()
                 assert count == 1  # No duplicate records
@@ -671,7 +671,7 @@ class TestDatabaseManagerMultiUserConcurrency(BaseIntegrationTest):
             # Simulate concurrent user operations
             async def simulate_user_workflow(user_id: int, operations: int):
                 """Simulate realistic user workflow with database operations."""
-                user_email = f"concurrent_user_{user_id}@netra.ai"
+                user_email = f"concurrent_user_{user_id}@netrasystems.ai"
                 user_results = []
                 
                 for op_num in range(operations):
@@ -784,7 +784,7 @@ class TestDatabaseManagerMultiUserConcurrency(BaseIntegrationTest):
             await self._create_real_test_tables(engine)
             
             # User A creates sensitive data
-            user_a_email = "sensitive_user_a@netra.ai"
+            user_a_email = "sensitive_user_a@netrasystems.ai"
             async with db_manager.get_session() as session_a:
                 await session_a.execute(
                     text("INSERT INTO integration_users (email, username, subscription_tier) VALUES (:email, :username, :tier)"),
@@ -799,7 +799,7 @@ class TestDatabaseManagerMultiUserConcurrency(BaseIntegrationTest):
                 await session_a.commit()
             
             # User B operates in separate session 
-            user_b_email = "regular_user_b@netra.ai"
+            user_b_email = "regular_user_b@netrasystems.ai"
             user_b_data = None
             sensitive_data_visible_to_b = False
             
@@ -898,7 +898,7 @@ class TestDatabaseManagerMultiUserConcurrency(BaseIntegrationTest):
                 for i in range(num_users):
                     await session.execute(
                         text("INSERT INTO integration_users (email, username, subscription_tier, is_active) VALUES (:email, :username, :tier, :active)"),
-                        {"email": f"bulk_user_{i}@netra.ai", "username": f"bulk_user_{i}", "tier": "free", "active": True}
+                        {"email": f"bulk_user_{i}@netrasystems.ai", "username": f"bulk_user_{i}", "tier": "free", "active": True}
                     )
                     
                     # Create multiple conversations per user
@@ -990,7 +990,7 @@ class TestDatabaseManagerMultiUserConcurrency(BaseIntegrationTest):
             async with db_manager.get_session() as session:
                 await session.execute(
                     text("INSERT INTO integration_users (email, username, subscription_tier) VALUES (:email, :username, :tier)"),
-                    {"email": "resilience@netra.ai", "username": "resilience_user", "tier": "premium"}
+                    {"email": "resilience@netrasystems.ai", "username": "resilience_user", "tier": "premium"}
                 )
                 await session.commit()
             
@@ -1002,7 +1002,7 @@ class TestDatabaseManagerMultiUserConcurrency(BaseIntegrationTest):
             async with db_manager.get_session() as session:
                 result = await session.execute(
                     text("SELECT username FROM integration_users WHERE email = :email"),
-                    {"email": "resilience@netra.ai"}
+                    {"email": "resilience@netrasystems.ai"}
                 )
                 username = result.scalar()
                 assert username == "resilience_user"

@@ -114,7 +114,7 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
         self.test_users = []
         for i in range(5):  # More users for comprehensive WebSocket testing
             user_context = await create_authenticated_user_context(
-                user_email=f"e2e_ws_events_test_{i}_{int(time.time())}@staging.netra.ai",
+                user_email=f"e2e_ws_events_test_{i}_{int(time.time())}@staging.netrasystems.ai",
                 environment="staging",
                 permissions=["read", "write", "execute_agents", "websocket_connect"]
             )

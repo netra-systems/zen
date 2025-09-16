@@ -211,7 +211,7 @@ class CriticalAuthServiceCascadeFailuresTests(SSotAsyncTestCase):
         # Simulate deployment environment with strict timeouts
         deployment_env = {
             'ENVIRONMENT': 'staging',
-            'K_SERVICE': 'netra-auth-staging',      # Cloud Run environment
+            'K_SERVICE': 'netra-auth',      # Cloud Run environment
             'SHUTDOWN_TIMEOUT_SECONDS': '5',        # Short timeout for deployment
             'AUTH_FAST_TEST_MODE': 'false'
         }

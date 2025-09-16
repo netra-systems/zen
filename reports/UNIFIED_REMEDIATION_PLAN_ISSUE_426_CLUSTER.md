@@ -372,7 +372,7 @@ python scripts/validate_staging_environment.py
 rm docker/backend.staging.Dockerfile  # If causing issues
 git checkout HEAD~1 -- docker-compose.staging.yml  # Restore compose
 # Verify staging validation unaffected
-curl https://staging.netra.ai/health
+curl https://staging.netrasystems.ai/health
 ```
 
 ### Graceful Degradation

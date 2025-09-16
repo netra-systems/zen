@@ -330,7 +330,7 @@ class TestGoldenPathMessageRoutingFailures(SSotAsyncTestCase):
         """Create a test user context."""
         return {
             "id": user_id,
-            "email": f"test-{user_id}@netra.ai",
+            "email": f"test-{user_id}@netrasystems.ai",
             "subscription_tier": "enterprise",
             "created_at": asyncio.get_event_loop().time()
         }

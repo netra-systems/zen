@@ -20,7 +20,8 @@ for key, value in test_env_dev.items():
     os.environ[key] = value
 
 # Now import and test the function
-sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 
 from netra_backend.app.websocket_core.unified_websocket_auth import extract_e2e_context_from_websocket
 

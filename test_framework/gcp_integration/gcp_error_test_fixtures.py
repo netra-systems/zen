@@ -361,7 +361,7 @@ def mock_gcp_api_responses():
                         'user': 'test_user_123',
                         'httpRequest': {
                             'method': 'GET',
-                            'url': 'ws://api.netra.ai/ws',
+                            'url': 'ws://api.netrasystems.ai/ws',
                             'userAgent': 'NetraApp/2.1 (iOS)',
                             'remoteIp': '203.0.113.195',
                             'responseStatusCode': 401
@@ -436,7 +436,7 @@ def user_context_scenarios():
             'business_priority': 'high',
             'sla_response_time_ms': 1000,
             'error_notification_preference': 'all_errors',
-            'account_manager': 'sarah.johnson@netra.ai'
+            'account_manager': 'sarah.johnson@netrasystems.ai'
         },
         
         'enterprise_user': {
@@ -450,7 +450,7 @@ def user_context_scenarios():
             'sla_response_time_ms': 500,
             'contract_value_usd': 50000,
             'error_notification_preference': 'real_time',
-            'account_manager': 'james.wilson@netra.ai',
+            'account_manager': 'james.wilson@netrasystems.ai',
             'dedicated_support': True,
             'escalation_phone': '+1-555-ENTERPRISE'
         }

@@ -435,7 +435,7 @@ class TestEnvironmentConfigurationComprehensive(SSotBaseTestCase):
                 "REDIS_URL": "redis://staging-redis:6379/0",
                 "DEBUG_MODE": "false",
                 "LOG_LEVEL": "INFO", 
-                "CORS_ORIGINS": "https://staging.netra.ai",
+                "CORS_ORIGINS": "https://staging.netrasystems.ai",
                 "JWT_SECRET_KEY": "staging_jwt_secret_secure_32_chars",
                 "RATE_LIMITING": "true"
             }
@@ -451,7 +451,7 @@ class TestEnvironmentConfigurationComprehensive(SSotBaseTestCase):
                 "REDIS_URL": "redis://prod-redis:6379/0", 
                 "DEBUG_MODE": "false",
                 "LOG_LEVEL": "WARNING",
-                "CORS_ORIGINS": "https://app.netra.ai",
+                "CORS_ORIGINS": "https://app.netrasystems.ai",
                 "JWT_SECRET_KEY": "production_jwt_secret_highly_secure",
                 "RATE_LIMITING": "true"
             }
@@ -486,7 +486,7 @@ class TestEnvironmentConfigurationComprehensive(SSotBaseTestCase):
                     assert "localhost" in cors_origins, f"Development CORS should include localhost"
                 elif env_name == "production":
                     assert "localhost" not in cors_origins, f"Production CORS should not include localhost"
-                    assert "netra.ai" in cors_origins, f"Production CORS should include production domains"
+                    assert "netrasystems.ai" in cors_origins, f"Production CORS should include production domains"
             
             # Test configuration inheritance and overrides
             base_config = {
@@ -567,7 +567,7 @@ class TestEnvironmentConfigurationComprehensive(SSotBaseTestCase):
                 "PORT": "8000",
                 "ENVIRONMENT": "test",
                 "LOG_LEVEL": "INFO",
-                "CORS_ORIGINS": "https://app.netra.ai"
+                "CORS_ORIGINS": "https://app.netrasystems.ai"
             }
             
             # Add all configuration

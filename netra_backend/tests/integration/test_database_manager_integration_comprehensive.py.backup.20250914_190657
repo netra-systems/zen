@@ -954,7 +954,7 @@ class TestDatabaseManagerIntegrationComprehensive(BaseIntegrationTest):
                 await conn.run_sync(metadata.create_all)
             
             # Business Scenario: User Registration and Session Management
-            test_user_email = "business_user@netra.ai"
+            test_user_email = "business_user@netrasystems.ai"
             
             # Step 1: User registration
             async with db_manager.get_session() as session:

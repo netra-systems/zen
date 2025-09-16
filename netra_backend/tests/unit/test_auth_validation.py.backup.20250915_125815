@@ -186,14 +186,14 @@ class TestAuthValidation(SSotBaseTestCase):
         
         # Test production environment
         prod_request = MagicMock()
-        prod_request.base_url = "https://api.netra.ai/"
+        prod_request.base_url = "https://api.netrasystems.ai/"
         
         prod_uri = build_redirect_uri(prod_request)
-        assert prod_uri == "https://api.netra.ai/auth/callback"
+        assert prod_uri == "https://api.netrasystems.ai/auth/callback"
         
         # Test with trailing slash handling
         trailing_request = MagicMock()
-        trailing_request.base_url = "https://staging.netra.ai//"
+        trailing_request.base_url = "https://staging.netrasystems.ai//"
         
         trailing_uri = build_redirect_uri(trailing_request)
         assert not trailing_uri.endswith("//auth/callback")  # Should handle trailing slashes

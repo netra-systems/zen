@@ -35,7 +35,7 @@ for i in $(seq 1 $ITERATIONS); do
     if [[ "$SERVICE" == "all" ]]; then
         echo ""
         echo "🔍 Collecting logs from ALL services (last ${TIME_RANGE} minutes)..."
-        for service in backend-staging auth-staging frontend-staging; do
+        for service in backend-staging auth frontend-staging; do
             echo ""
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "🌐 Service: $service"

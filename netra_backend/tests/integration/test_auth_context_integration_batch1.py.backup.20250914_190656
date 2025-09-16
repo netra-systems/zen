@@ -66,19 +66,19 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
         self.user_test_data = [
             {
                 "user_id": str(uuid.uuid4()),
-                "email": f"testuser1_{uuid.uuid4().hex[:8]}@netra.ai",
+                "email": f"testuser1_{uuid.uuid4().hex[:8]}@netrasystems.ai",
                 "role": "user",
                 "permissions": ["read", "write"]
             },
             {
                 "user_id": str(uuid.uuid4()),
-                "email": f"testuser2_{uuid.uuid4().hex[:8]}@netra.ai", 
+                "email": f"testuser2_{uuid.uuid4().hex[:8]}@netrasystems.ai", 
                 "role": "admin",
                 "permissions": ["read", "write", "admin"]
             },
             {
                 "user_id": str(uuid.uuid4()),
-                "email": f"testuser3_{uuid.uuid4().hex[:8]}@netra.ai",
+                "email": f"testuser3_{uuid.uuid4().hex[:8]}@netrasystems.ai",
                 "role": "viewer",
                 "permissions": ["read"]
             }
@@ -189,7 +189,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
             user_data = {
                 **base_data,
                 "user_id": str(uuid.uuid4()),  # Unique ID for each concurrent user
-                "email": f"concurrent_user_{user_index}_{uuid.uuid4().hex[:8]}@netra.ai"
+                "email": f"concurrent_user_{user_index}_{uuid.uuid4().hex[:8]}@netrasystems.ai"
             }
             
             # Create test user
@@ -293,7 +293,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid.signature",  # Invalid signature
             get_test_jwt_token(
                 user_id=str(uuid.uuid4()),
-                email="expired@netra.ai", 
+                email="expired@netrasystems.ai", 
                 permissions=["read"],
                 exp_delta=timedelta(days=-1)  # Expired token
             )
@@ -499,7 +499,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
         
         # Valid JWT formats
         valid_tokens = [
-            get_test_jwt_token(str(uuid.uuid4()), "test@netra.ai", ["read"]),
+            get_test_jwt_token(str(uuid.uuid4()), "test@netrasystems.ai", ["read"]),
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
         ]
         

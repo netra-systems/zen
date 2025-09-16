@@ -137,7 +137,7 @@ class TestWebSocketConnectionStateMachineE2E(BaseE2ETest):
         """
         # Create authenticated user for Golden Path
         client_info = await self._create_authenticated_websocket_client(
-            real_services, "golden_path_state@netra.ai"
+            real_services, "golden_path_state@netrasystems.ai"
         )
         
         websocket_client = client_info['websocket_client']
@@ -361,7 +361,7 @@ class TestWebSocketConnectionStateMachineE2E(BaseE2ETest):
         users = []
         for i in range(3):
             client_info = await self._create_authenticated_websocket_client(
-                real_services, f"concurrent_user_{i}@netra.ai"
+                real_services, f"concurrent_user_{i}@netrasystems.ai"
             )
             users.append(client_info)
         
@@ -525,7 +525,7 @@ class TestWebSocketConnectionStateMachineE2E(BaseE2ETest):
         continue their AI interactions even when network or service issues occur.
         """
         client_info = await self._create_authenticated_websocket_client(
-            real_services, "error_recovery_e2e@netra.ai"
+            real_services, "error_recovery_e2e@netrasystems.ai"
         )
         
         websocket_client = client_info['websocket_client']
@@ -764,7 +764,7 @@ class TestWebSocketConnectionStateMachineE2E(BaseE2ETest):
         the full agent execution lifecycle, ensuring reliable AI interactions.
         """
         client_info = await self._create_authenticated_websocket_client(
-            real_services, "agent_lifecycle_e2e@netra.ai"
+            real_services, "agent_lifecycle_e2e@netrasystems.ai"
         )
         
         websocket_client = client_info['websocket_client']

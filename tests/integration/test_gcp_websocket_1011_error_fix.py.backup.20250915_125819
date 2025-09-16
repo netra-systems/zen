@@ -317,7 +317,7 @@ class TestProductionScenarios:
             "context": {
                 "httpRequest": {
                     "method": "GET", 
-                    "url": "wss://app.netra.ai/ws",
+                    "url": "wss://app.netrasystems.ai/ws",
                     "responseStatusCode": 200  # NOT 1011 anymore!
                 },
                 "reportLocation": {

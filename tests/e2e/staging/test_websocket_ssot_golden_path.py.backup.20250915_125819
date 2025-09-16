@@ -56,12 +56,12 @@ class TestWebSocketSSoTGoldenPathStaging(SSotAsyncTestCase):
         cls.env = IsolatedEnvironment()
         
         # Get staging environment configuration
-        cls.staging_base_url = cls.env.get('STAGING_BASE_URL', 'https://staging.netra.ai')
-        cls.staging_ws_url = cls.env.get('STAGING_WS_URL', 'wss://staging.netra.ai/ws')
-        cls.staging_auth_url = cls.env.get('STAGING_AUTH_URL', 'https://auth-staging.netra.ai')
+        cls.staging_base_url = cls.env.get('STAGING_BASE_URL', 'https://staging.netrasystems.ai')
+        cls.staging_ws_url = cls.env.get('STAGING_WS_URL', 'wss://staging.netrasystems.ai/ws')
+        cls.staging_auth_url = cls.env.get('STAGING_AUTH_URL', 'https://auth.netrasystems.ai')
         
         # Test credentials for staging environment
-        cls.test_email = cls.env.get('STAGING_TEST_EMAIL', 'test@netra.ai')
+        cls.test_email = cls.env.get('STAGING_TEST_EMAIL', 'test@netrasystems.ai')
         cls.test_password = cls.env.get('STAGING_TEST_PASSWORD', 'staging_test_pass')
         
         # Performance thresholds for staging validation

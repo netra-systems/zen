@@ -46,7 +46,7 @@ class JWTSSOTMigrationRegressionTests(SSotAsyncTestCase):
         # Test user for regression testing
         self.test_user = {
             "user_id": f"regression_user_{uuid.uuid4().hex[:8]}",
-            "email": "regression.test@netra.ai",
+            "email": "regression.test@netrasystems.ai",
             "permissions": ["read", "write", "chat", "agents"]
         }
 

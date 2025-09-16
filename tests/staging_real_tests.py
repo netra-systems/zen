@@ -15,11 +15,11 @@ import pytest
 from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
-STAGING_BASE_URL = os.environ.get('STAGING_BASE_URL', 'https://staging.netra.ai')
-STAGING_AUTH_URL = os.environ.get('STAGING_AUTH_URL', 'https://auth-staging.netra.ai')
+STAGING_BASE_URL = os.environ.get('STAGING_BASE_URL', 'https://staging.netrasystems.ai')
+STAGING_AUTH_URL = os.environ.get('STAGING_AUTH_URL', 'https://auth.netrasystems.ai')
 STAGING_API_URL = os.environ.get('STAGING_API_URL', f'{STAGING_BASE_URL}/api')
 TIMEOUT = 30
-TEST_USER_EMAIL = 'test@netra.ai'
+TEST_USER_EMAIL = 'test@netrasystems.ai'
 TEST_USER_PASSWORD = 'TestPassword123!'
 
 class TestStagingEnvironment:

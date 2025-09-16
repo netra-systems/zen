@@ -476,8 +476,8 @@ class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
             
             # Test CORS headers
             cors_origins_to_test = [
-                "https://app.netra.ai",      # Production origin
-                "https://staging.netra.ai",  # Staging origin
+                "https://app.netrasystems.ai",      # Production origin
+                "https://staging.netrasystems.ai",  # Staging origin
                 "http://localhost:3000",     # Development origin
                 "https://evil.com"           # Malicious origin
             ]
@@ -495,7 +495,7 @@ class TestHealthEndpointSecurityComprehensive(SSotBaseTestCase):
                 cors_response_headers = preflight_response.headers
                 allowed_origin = cors_response_headers.get("Access-Control-Allow-Origin", "")
                 
-                if origin.endswith("netra.ai") or origin.startswith("http://localhost"):
+                if origin.endswith("netrasystems.ai") or origin.startswith("http://localhost"):
                     # Should allow legitimate origins
                     assert allowed_origin in [origin, "*"], \
                         f"Legitimate origin {origin} not allowed: {allowed_origin}"

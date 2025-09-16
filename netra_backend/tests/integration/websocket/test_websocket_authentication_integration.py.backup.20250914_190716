@@ -142,7 +142,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
                 name="valid_free_user",
                 user_data=TestUserData(
                     user_id=f"free_user_{uuid.uuid4().hex[:8]}",
-                    email="free@netra.ai",
+                    email="free@netrasystems.ai",
                     tier="free",
                     thread_id=f"free_thread_{uuid.uuid4().hex[:8]}"
                 ),
@@ -166,7 +166,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
                 name="expired_token_user",
                 user_data=TestUserData(
                     user_id=f"expired_user_{uuid.uuid4().hex[:8]}",
-                    email="expired@netra.ai",
+                    email="expired@netrasystems.ai",
                     tier="early",
                     thread_id=f"expired_thread_{uuid.uuid4().hex[:8]}"
                 ),
@@ -179,7 +179,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
                 name="invalid_token_user",
                 user_data=TestUserData(
                     user_id=f"invalid_user_{uuid.uuid4().hex[:8]}",
-                    email="invalid@netra.ai", 
+                    email="invalid@netrasystems.ai", 
                     tier="mid",
                     thread_id=f"invalid_thread_{uuid.uuid4().hex[:8]}"
                 ),
@@ -524,7 +524,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
         """
         test_user_data = TestUserData(
             user_id=f"context_user_{uuid.uuid4().hex[:8]}",
-            email="context-test@netra.ai",
+            email="context-test@netrasystems.ai",
             tier="mid",
             thread_id=f"context_thread_{uuid.uuid4().hex[:8]}"
         )
@@ -621,7 +621,7 @@ class TestWebSocketAuthenticationIntegration(SSotAsyncTestCase):
         """
         test_user_data = TestUserData(
             user_id=f"renewal_user_{uuid.uuid4().hex[:8]}",
-            email="renewal-test@netra.ai",
+            email="renewal-test@netrasystems.ai",
             tier="enterprise",
             thread_id=f"renewal_thread_{uuid.uuid4().hex[:8]}"
         )

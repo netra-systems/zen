@@ -611,7 +611,7 @@ class StagingAuthManager:
                 return auth_url
         
         # Default staging auth URL
-        default_auth_url = "https://netra-auth-staging-pnovr5vsba-uc.a.run.app"
+        default_auth_url = "https://netra-auth-pnovr5vsba-uc.a.run.app"
         self.logger.warning(
             f"No auth URL found in environment variables {auth_url_vars}, "
             f"using default: {default_auth_url}"
@@ -624,7 +624,7 @@ class StagingAuthManager:
         timestamp = str(int(time.time()))
         
         return {
-            "email": f"test_user_{timestamp}@staging.netra.ai",
+            "email": f"test_user_{timestamp}@staging.netrasystems.ai",
             "password": f"TestPass_{timestamp}!",
             "first_name": "Test",
             "last_name": f"User_{timestamp[-4:]}"
@@ -888,7 +888,7 @@ class RealStagingTestBase:
                 return auth_url
         
         # Default staging auth URL  
-        return "https://netra-auth-staging-pnovr5vsba-uc.a.run.app"
+        return "https://netra-auth-pnovr5vsba-uc.a.run.app"
     
     def setup_test(self):
         """Setup method called before each test - VALIDATES REAL NETWORK"""

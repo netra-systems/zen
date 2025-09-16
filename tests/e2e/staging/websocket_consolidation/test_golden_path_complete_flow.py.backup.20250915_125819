@@ -251,7 +251,7 @@ class TestGoldenPathCompleteFlow(SSotAsyncTestCase):
 
     def _get_staging_config(self) -> Dict[str, str]:
         """Get staging environment configuration."""
-        return {'auth_service_url': self.env.get_env('STAGING_AUTH_SERVICE_URL', 'https://auth-staging.netra.com'), 'backend_service_url': self.env.get_env('STAGING_BACKEND_SERVICE_URL', 'https://backend-staging.netra.com'), 'websocket_url': self.env.get_env('STAGING_WEBSOCKET_URL', 'wss://backend-staging.netra.com')}
+        return {'auth_service_url': self.env.get_env('STAGING_AUTH_SERVICE_URL', 'https://auth.netra.com'), 'backend_service_url': self.env.get_env('STAGING_BACKEND_SERVICE_URL', 'https://backend-staging.netra.com'), 'websocket_url': self.env.get_env('STAGING_WEBSOCKET_URL', 'wss://backend-staging.netra.com')}
 
     def _staging_available(self) -> bool:
         """Check if staging environment is available for testing."""

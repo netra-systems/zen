@@ -111,7 +111,7 @@ class TestDatabaseManagerBusinessScenarios(BaseIntegrationTest):
         db_manager = real_sqlite_database_manager
         
         # Business Scenario: New user signs up for Netra platform
-        user_email = f"business_user_{uuid.uuid4().hex[:8]}@netra.ai"
+        user_email = f"business_user_{uuid.uuid4().hex[:8]}@netrasystems.ai"
         user = BusinessUser(
             email=user_email,
             username=f"business_user_{int(time.time())}",

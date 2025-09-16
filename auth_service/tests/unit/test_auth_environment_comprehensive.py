@@ -972,8 +972,8 @@ class EmailConfigurationTests:
     def test_get_smtp_from_email_default(self):
         """Test SMTP from email has correct default."""
         with patch.object(self.env.env, 'get') as mock_get:
-            mock_get.side_effect = lambda key, default="noreply@netra.ai": default
-            assert self.env.get_smtp_from_email() == "noreply@netra.ai"
+            mock_get.side_effect = lambda key, default="noreply@netrasystems.ai": default
+            assert self.env.get_smtp_from_email() == "noreply@netrasystems.ai"
 
     def test_is_smtp_enabled_checks_required_fields(self):
         """Test SMTP enabled checks for required host and username."""

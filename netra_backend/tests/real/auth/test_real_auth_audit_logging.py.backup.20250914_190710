@@ -169,9 +169,9 @@ class TestRealAuthAuditLogging:
         
         # Simulate successful login events
         users = [
-            {"user_id": 10001, "email": "user1@netra.ai", "ip": "192.168.1.10"},
-            {"user_id": 10002, "email": "user2@netra.ai", "ip": "192.168.1.11"},
-            {"user_id": 10003, "email": "admin@netra.ai", "ip": "10.0.0.1"}
+            {"user_id": 10001, "email": "user1@netrasystems.ai", "ip": "192.168.1.10"},
+            {"user_id": 10002, "email": "user2@netrasystems.ai", "ip": "192.168.1.11"},
+            {"user_id": 10003, "email": "admin@netrasystems.ai", "ip": "10.0.0.1"}
         ]
         
         audit_keys = []
@@ -231,14 +231,14 @@ class TestRealAuthAuditLogging:
         failure_scenarios = [
             {
                 "user_id": None,
-                "email": "nonexistent@netra.ai",
+                "email": "nonexistent@netrasystems.ai",
                 "failure_reason": "user_not_found",
                 "ip": "192.168.1.100",
                 "severity": AuditSeverity.MEDIUM
             },
             {
                 "user_id": 20001,
-                "email": "user@netra.ai",
+                "email": "user@netrasystems.ai",
                 "failure_reason": "invalid_password",
                 "ip": "192.168.1.100",
                 "severity": AuditSeverity.MEDIUM,
@@ -246,7 +246,7 @@ class TestRealAuthAuditLogging:
             },
             {
                 "user_id": 20002,
-                "email": "locked@netra.ai",
+                "email": "locked@netrasystems.ai",
                 "failure_reason": "account_locked",
                 "ip": "10.0.0.5",
                 "severity": AuditSeverity.HIGH,

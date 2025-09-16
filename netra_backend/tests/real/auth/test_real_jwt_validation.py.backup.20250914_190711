@@ -108,7 +108,7 @@ class TestRealJWTValidation:
         now = datetime.utcnow()
         return {
             JWTConstants.SUBJECT: "test_user_123",
-            JWTConstants.EMAIL: "test@netra.ai",
+            JWTConstants.EMAIL: "test@netrasystems.ai",
             JWTConstants.ISSUED_AT: int(now.timestamp()),
             JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=30)).timestamp()),
             JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,
@@ -133,7 +133,7 @@ class TestRealJWTValidation:
             
             # Verify payload contents
             assert decoded[JWTConstants.SUBJECT] == "test_user_123"
-            assert decoded[JWTConstants.EMAIL] == "test@netra.ai"
+            assert decoded[JWTConstants.EMAIL] == "test@netrasystems.ai"
             assert decoded[JWTConstants.ISSUER] == JWTConstants.NETRA_AUTH_SERVICE
             assert "user_id" in decoded
             assert "permissions" in decoded
@@ -151,7 +151,7 @@ class TestRealJWTValidation:
         expired_time = datetime.utcnow() - timedelta(hours=1)
         expired_payload = {
             JWTConstants.SUBJECT: "test_user_expired",
-            JWTConstants.EMAIL: "expired@netra.ai",
+            JWTConstants.EMAIL: "expired@netrasystems.ai",
             JWTConstants.ISSUED_AT: int(expired_time.timestamp()),
             JWTConstants.EXPIRES_AT: int(expired_time.timestamp()),  # Already expired
             JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE
@@ -208,7 +208,7 @@ class TestRealJWTValidation:
         
         # Token missing required subject claim
         incomplete_payload = {
-            JWTConstants.EMAIL: "incomplete@netra.ai",
+            JWTConstants.EMAIL: "incomplete@netrasystems.ai",
             JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()),
             JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp())
         }
@@ -244,7 +244,7 @@ class TestRealJWTValidation:
         # Create tokens for different users
         user1_payload = {
             JWTConstants.SUBJECT: "user_1",
-            JWTConstants.EMAIL: "user1@netra.ai",
+            JWTConstants.EMAIL: "user1@netrasystems.ai",
             JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()),
             JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp()),
             "user_id": 1,
@@ -253,7 +253,7 @@ class TestRealJWTValidation:
         
         user2_payload = {
             JWTConstants.SUBJECT: "user_2", 
-            JWTConstants.EMAIL: "user2@netra.ai",
+            JWTConstants.EMAIL: "user2@netrasystems.ai",
             JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()),
             JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp()),
             "user_id": 2,
@@ -281,7 +281,7 @@ class TestRealJWTValidation:
         # Create tokens with different permission levels
         admin_payload = {
             JWTConstants.SUBJECT: "admin_user",
-            JWTConstants.EMAIL: "admin@netra.ai",
+            JWTConstants.EMAIL: "admin@netrasystems.ai",
             JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()),
             JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp()),
             "user_id": 999,
@@ -290,7 +290,7 @@ class TestRealJWTValidation:
         
         readonly_payload = {
             JWTConstants.SUBJECT: "readonly_user",
-            JWTConstants.EMAIL: "readonly@netra.ai", 
+            JWTConstants.EMAIL: "readonly@netrasystems.ai", 
             JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()),
             JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp()),
             "user_id": 100,
@@ -322,7 +322,7 @@ class TestRealJWTValidation:
         # Create access and refresh tokens
         access_payload = {
             JWTConstants.SUBJECT: "refresh_test_user",
-            JWTConstants.EMAIL: "refresh@netra.ai",
+            JWTConstants.EMAIL: "refresh@netrasystems.ai",
             JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()),
             JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=5)).timestamp()),  # Short expiry
             "token_type": JWTConstants.ACCESS_TOKEN_TYPE,
@@ -331,7 +331,7 @@ class TestRealJWTValidation:
         
         refresh_payload = {
             JWTConstants.SUBJECT: "refresh_test_user",
-            JWTConstants.EMAIL: "refresh@netra.ai",
+            JWTConstants.EMAIL: "refresh@netrasystems.ai",
             JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()),
             JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(days=7)).timestamp()),  # Longer expiry
             "token_type": JWTConstants.REFRESH_TOKEN_TYPE,
@@ -362,7 +362,7 @@ class TestRealJWTValidation:
         # Create valid JWT token for API authentication
         api_payload = {
             JWTConstants.SUBJECT: "api_test_user",
-            JWTConstants.EMAIL: "apitest@netra.ai", 
+            JWTConstants.EMAIL: "apitest@netrasystems.ai", 
             JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()),
             JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp()),
             JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,

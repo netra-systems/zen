@@ -111,8 +111,8 @@
     # REMOVED_SYNTAX_ERROR: "backend_url": "http://localhost:8000"
     # REMOVED_SYNTAX_ERROR: },
     # REMOVED_SYNTAX_ERROR: "production": { )
-    # REMOVED_SYNTAX_ERROR: "auth_url": "https://auth.netra.ai",
-    # REMOVED_SYNTAX_ERROR: "backend_url": "https://api.netra.ai"
+    # REMOVED_SYNTAX_ERROR: "auth_url": "https://auth.netrasystems.ai",
+    # REMOVED_SYNTAX_ERROR: "backend_url": "https://api.netrasystems.ai"
     
     
     # REMOVED_SYNTAX_ERROR: self.original_env = {}

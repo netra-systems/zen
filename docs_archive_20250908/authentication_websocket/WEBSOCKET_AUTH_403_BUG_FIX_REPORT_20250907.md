@@ -31,7 +31,7 @@
 ### Primary Issues Identified
 
 1. **SERVICE_ID Configuration** (✅ FIXED)
-   - **Issue**: Backend sending wrong SERVICE_ID (`netra-auth-staging-1757260376` vs `netra-backend`)
+   - **Issue**: Backend sending wrong SERVICE_ID (`netra-auth-1757260376` vs `netra-backend`)
    - **Fix**: Updated Google Secret Manager secret `service-id-staging` to correct value
    - **Status**: RESOLVED
 

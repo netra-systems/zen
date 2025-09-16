@@ -93,7 +93,7 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
         assert self.staging_config.validate_configuration(), 'Staging configuration invalid'
         self.test_users = []
         for i in range(5):
-            user_context = await create_authenticated_user_context(user_email=f'e2e_ws_events_test_{i}_{int(time.time())}@staging.netra.ai', environment='staging', permissions=['read', 'write', 'execute_agents', 'websocket_connect'])
+            user_context = await create_authenticated_user_context(user_email=f'e2e_ws_events_test_{i}_{int(time.time())}@staging.netrasystems.ai', environment='staging', permissions=['read', 'write', 'execute_agents', 'websocket_connect'])
             self.test_users.append(user_context)
         self.event_sequences: Dict[str, WebSocketEventSequence] = {}
         self.logger.info(f' PASS:  WebSocket testing environment setup complete - {len(self.test_users)} authenticated users')

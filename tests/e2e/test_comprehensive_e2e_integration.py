@@ -122,7 +122,7 @@ class ComprehensiveE2EIntegrationTests(SSotAsyncTestCase):
         
         # Create test user account
         user_data = {
-            'email': f'e2e_test_{uuid.uuid4().hex[:8]}@netra.ai',
+            'email': f'e2e_test_{uuid.uuid4().hex[:8]}@netrasystems.ai',
             'password': 'SecureTestPass123!',
             'organization': 'E2E Testing Corp'
         }
@@ -1139,7 +1139,7 @@ class ComprehensiveE2EIntegrationTests(SSotAsyncTestCase):
         
         # Step 1: User registration in auth service
         registration_data = {
-            'email': f'cross_service_{uuid.uuid4().hex[:8]}@netra.ai',
+            'email': f'cross_service_{uuid.uuid4().hex[:8]}@netrasystems.ai',
             'password': 'CrossServiceTest123!',
             'organization': 'Cross Service Testing Corp',
             'tier': 'enterprise'
@@ -2320,7 +2320,7 @@ class ComprehensiveE2EIntegrationTests(SSotAsyncTestCase):
         
         # Create test user
         user_data = {
-            'email': f'token_test_{uuid.uuid4().hex[:8]}@netra.ai',
+            'email': f'token_test_{uuid.uuid4().hex[:8]}@netrasystems.ai',
             'password': 'SecureTestPass123!',
             'organization': 'Token Test Corp'
         }

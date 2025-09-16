@@ -44,7 +44,7 @@ class GoldenPathValidator:
         # Test user configuration
         self.test_user = {
             "user_id": "golden-path-validator",
-            "email": "golden-path-test@netra.ai",
+            "email": "golden-path-test@netrasystems.ai",
             "name": "Golden Path Test User"
         }
         

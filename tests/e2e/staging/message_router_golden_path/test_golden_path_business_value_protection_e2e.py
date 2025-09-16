@@ -67,7 +67,7 @@ class GoldenPathBusinessValueProtectionE2ETests(SSotAsyncTestCase):
             auth_helper = E2EAuthHelper(staging_environment["auth_url"])
 
             # Create real user for testing
-            test_user_email = f"e2e-test-{uuid.uuid4()}@netra.ai"
+            test_user_email = f"e2e-test-{uuid.uuid4()}@netrasystems.ai"
 
             try:
                 # Create authenticated user
@@ -220,7 +220,7 @@ class GoldenPathBusinessValueProtectionE2ETests(SSotAsyncTestCase):
 
                 # Create unique user
                 test_user = await auth_helper.create_authenticated_user(
-                    email=f"concurrent-user-{user_index}-{uuid.uuid4()}@netra.ai",
+                    email=f"concurrent-user-{user_index}-{uuid.uuid4()}@netrasystems.ai",
                     subscription_tier="enterprise",
                     additional_claims={"user_index": user_index}
                 )
@@ -328,7 +328,7 @@ class GoldenPathBusinessValueProtectionE2ETests(SSotAsyncTestCase):
         try:
             auth_helper = E2EAuthHelper(staging_environment["auth_url"])
             test_user = await auth_helper.create_authenticated_user(
-                email=f"event-reliability-test-{uuid.uuid4()}@netra.ai",
+                email=f"event-reliability-test-{uuid.uuid4()}@netrasystems.ai",
                 subscription_tier="enterprise"
             )
             auth_token = await auth_helper.get_auth_token(test_user)

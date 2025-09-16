@@ -83,7 +83,7 @@ class TestCrossServiceAuthIntegration(BaseIntegrationTest):
         # Test user for cross-service testing
         self.test_user = {
             "user_id": "cross-service-user-1",
-            "email": "crossservice@netra.ai",
+            "email": "crossservice@netrasystems.ai",
             "name": "Cross Service Test User",
             "password": "CrossService123!",
             "permissions": ["read", "write", "execute"]

@@ -19,7 +19,7 @@ Business Value Justification:
 - Revenue Impact: Validates $500K+ ARR protection in staging environment
 
 Environment: GCP Staging (netra-staging project)
-Connection: Real WebSocket connections to staging.netra.ai
+Connection: Real WebSocket connections to staging.netrasystems.ai
 Authentication: Real JWT tokens with staging auth service
 """
 import asyncio
@@ -44,8 +44,8 @@ class TestWebSocketSendAfterCloseStagingE2E(SSotAsyncTestCase):
     async def asyncSetUpClass(cls):
         """Set up staging environment connections."""
         await super().asyncSetUpClass()
-        cls.staging_config = {'websocket_url': os.getenv('STAGING_WEBSOCKET_URL', 'wss://staging.netra.ai/ws'), 'auth_url': os.getenv('STAGING_AUTH_URL', 'https://staging.netra.ai/auth'), 'api_url': os.getenv('STAGING_API_URL', 'https://staging.netra.ai/api')}
-        cls.test_users = [{'email': 'test.user.1@staging.netra.ai', 'user_id': 'staging_test_user_1', 'display_name': 'Staging Test User 1'}, {'email': 'test.user.2@staging.netra.ai', 'user_id': 'staging_test_user_2', 'display_name': 'Staging Test User 2'}, {'email': 'test.user.3@staging.netra.ai', 'user_id': 'staging_test_user_3', 'display_name': 'Staging Test User 3'}]
+        cls.staging_config = {'websocket_url': os.getenv('STAGING_WEBSOCKET_URL', 'wss://staging.netrasystems.ai/ws'), 'auth_url': os.getenv('STAGING_AUTH_URL', 'https://staging.netrasystems.ai/auth'), 'api_url': os.getenv('STAGING_API_URL', 'https://staging.netrasystems.ai/api')}
+        cls.test_users = [{'email': 'test.user.1@staging.netrasystems.ai', 'user_id': 'staging_test_user_1', 'display_name': 'Staging Test User 1'}, {'email': 'test.user.2@staging.netrasystems.ai', 'user_id': 'staging_test_user_2', 'display_name': 'Staging Test User 2'}, {'email': 'test.user.3@staging.netrasystems.ai', 'user_id': 'staging_test_user_3', 'display_name': 'Staging Test User 3'}]
         cls.auth_tokens = {}
         logger.info(f'Staging E2E test setup complete: {len(cls.test_users)} test users configured')
 
@@ -228,7 +228,7 @@ class TestWebSocketSendAfterCloseStagingE2E(SSotAsyncTestCase):
     async def _authenticate_test_users(self):
         """Authenticate test users and get tokens for staging."""
         for user in self.test_users:
-            test_token_payload = {'sub': user['user_id'], 'email': user['email'], 'exp': int(time.time()) + 3600, 'iat': int(time.time()), 'aud': 'staging.netra.ai'}
+            test_token_payload = {'sub': user['user_id'], 'email': user['email'], 'exp': int(time.time()) + 3600, 'iat': int(time.time()), 'aud': 'staging.netrasystems.ai'}
             test_secret = 'staging_test_secret_key_for_race_condition_testing'
             token = jwt.encode(test_token_payload, test_secret, algorithm='HS256')
             self.auth_tokens[user['user_id']] = token

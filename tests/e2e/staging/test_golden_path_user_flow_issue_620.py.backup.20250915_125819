@@ -314,7 +314,7 @@ class TestGoldenPathUserFlowIssue620(BaseE2ETest):
         
         return {
             "user_id": user_id,
-            "email": f"{user_id}@test.netra.ai",
+            "email": f"{user_id}@test.netrasystems.ai",
             "name": f"Test User {suffix}",
             "test_mode": True
         }

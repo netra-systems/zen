@@ -58,7 +58,7 @@ class AuthSessionManagementCoreTests:
         # Arrange
         handler = JWTHandler()
         user_id = "session-test-user-12345"
-        email = "session.test@netra.ai"
+        email = "session.test@netrasystems.ai"
         permissions = ["read:agents", "write:threads"]
         
         # Test different expiration times
@@ -114,7 +114,7 @@ class AuthSessionManagementCoreTests:
         # Arrange
         handler = JWTHandler()
         user_id = "blacklist-test-user-12345"
-        email = "blacklist.test@netra.ai"
+        email = "blacklist.test@netrasystems.ai"
         
         # Create multiple tokens for the same user (simulate multiple sessions)
         session_tokens = []
@@ -160,9 +160,9 @@ class AuthSessionManagementCoreTests:
         
         # Create multiple users with multiple sessions each
         users_config = [
-            {"user_id": "multi-session-user-1", "email": "user1@netra.ai"},
-            {"user_id": "multi-session-user-2", "email": "user2@netra.ai"},
-            {"user_id": "multi-session-user-3", "email": "user3@netra.ai"}
+            {"user_id": "multi-session-user-1", "email": "user1@netrasystems.ai"},
+            {"user_id": "multi-session-user-2", "email": "user2@netrasystems.ai"},
+            {"user_id": "multi-session-user-3", "email": "user3@netrasystems.ai"}
         ]
         
         all_sessions = {}
@@ -222,13 +222,13 @@ class AuthSessionManagementCoreTests:
         with patch.object(handler, 'access_expiry', -1):  # Already expired
             short_lived_token = handler.create_access_token(
                 user_id="short-lived-user",
-                email="short@netra.ai"
+                email="short@netrasystems.ai"
             )
         
         # Create long-lived token 
         long_lived_token = handler.create_access_token(
             user_id="long-lived-user",
-            email="long@netra.ai"
+            email="long@netrasystems.ai"
         )
         
         # Blacklist both tokens
@@ -259,7 +259,7 @@ class AuthSessionManagementCoreTests:
         # Arrange
         handler = JWTHandler()
         user_id = "concurrent-test-user"
-        email = "concurrent@netra.ai"
+        email = "concurrent@netrasystems.ai"
         
         # Create multiple tokens for concurrent operations
         tokens = []
@@ -326,7 +326,7 @@ class AuthSessionManagementCoreTests:
         # Arrange
         handler = JWTHandler()
         user_id = "refresh-expiry-test-user"
-        email = "refresh.expiry@netra.ai"
+        email = "refresh.expiry@netrasystems.ai"
         
         # Act: Create access and refresh tokens
         access_token = handler.create_access_token(user_id, email)

@@ -294,8 +294,8 @@ class TestWebSocketConnectionHijackingPrevention:
         Business Value: Prevents data theft attacks worth $200K+ per breach.
         """
         handler = WebSocketCORSHandler(environment='production')
-        legitimate_origin = 'https://app.netra.ai'
-        spoofed_origin = 'https://app.netra.ai.evil.com'
+        legitimate_origin = 'https://app.netrasystems.ai'
+        spoofed_origin = 'https://app.netrasystems.ai.evil.com'
         assert handler.is_origin_allowed(legitimate_origin) is True
         assert handler.is_origin_allowed(spoofed_origin) is False
         assert handler._is_suspicious_origin(spoofed_origin) is True
@@ -303,8 +303,8 @@ class TestWebSocketConnectionHijackingPrevention:
         for ip_origin in ip_origins:
             assert handler.is_origin_allowed(ip_origin) is False
             assert handler._is_suspicious_origin(ip_origin) is True
-        secure_origin = 'https://app.netra.ai'
-        downgrade_origin = 'http://app.netra.ai'
+        secure_origin = 'https://app.netrasystems.ai'
+        downgrade_origin = 'http://app.netrasystems.ai'
         is_valid_https, _ = handler._validate_origin_security(secure_origin)
         assert is_valid_https is True
         if SECURITY_CONFIG['require_https_production']:

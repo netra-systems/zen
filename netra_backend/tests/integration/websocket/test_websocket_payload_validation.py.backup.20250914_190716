@@ -305,7 +305,7 @@ class TestWebSocketPayloadValidation(SSotAsyncTestCase):
         # Test user data
         self.test_user = TestUserData(
             user_id=f"payload_user_{uuid.uuid4().hex[:8]}",
-            email="payload-test@netra.ai",
+            email="payload-test@netrasystems.ai",
             tier="enterprise",
             thread_id=f"payload_thread_{uuid.uuid4().hex[:8]}"
         )

@@ -170,7 +170,7 @@ class TestWebSocketEventDeliverySystem(SSotAsyncTestCase):
         # Test data
         self.test_user = TestUserData(
             user_id=f"test_user_{uuid.uuid4().hex[:8]}",
-            email="test@netra.ai",
+            email="test@netrasystems.ai",
             tier="early",
             thread_id=f"test_thread_{uuid.uuid4().hex[:8]}"
         )
@@ -448,7 +448,7 @@ class TestWebSocketEventDeliverySystem(SSotAsyncTestCase):
         users = [
             TestUserData(
                 user_id=f"concurrent_user_{i}_{uuid.uuid4().hex[:8]}",
-                email=f"user{i}@netra.ai",
+                email=f"user{i}@netrasystems.ai",
                 tier="early",
                 thread_id=f"thread_{i}_{uuid.uuid4().hex[:8]}"
             )

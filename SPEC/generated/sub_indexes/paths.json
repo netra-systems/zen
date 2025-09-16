@@ -6864,8 +6864,8 @@
         "scripts/archived/migrate_websocket_v2_critical_services.py:670"
       ]
     },
-    "Examples:\n  # Start real-time monitoring\n  python scripts/production_monitoring.py start --stage canary\n  \n  # Check current metrics\n  python scripts/production_monitoring.py metrics --detailed\n  \n  # Generate daily report\n  python scripts/production_monitoring.py daily-report --email-recipients team@netra.ai": {
-      "value": "Examples:\n  # Start real-time monitoring\n  python scripts/production_monitoring.py start --stage canary\n  \n  # Check current metrics\n  python scripts/production_monitoring.py metrics --detailed\n  \n  # Generate daily report\n  python scripts/production_monitoring.py daily-report --email-recipients team@netra.ai",
+    "Examples:\n  # Start real-time monitoring\n  python scripts/production_monitoring.py start --stage canary\n  \n  # Check current metrics\n  python scripts/production_monitoring.py metrics --detailed\n  \n  # Generate daily report\n  python scripts/production_monitoring.py daily-report --email-recipients team@netrasystems.ai": {
+      "value": "Examples:\n  # Start real-time monitoring\n  python scripts/production_monitoring.py start --stage canary\n  \n  # Check current metrics\n  python scripts/production_monitoring.py metrics --detailed\n  \n  # Generate daily report\n  python scripts/production_monitoring.py daily-report --email-recipients team@netrasystems.ai",
       "category": "paths",
       "locations": [
         "scripts/production_monitoring.py:849"

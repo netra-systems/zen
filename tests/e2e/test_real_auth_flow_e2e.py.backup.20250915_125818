@@ -82,7 +82,7 @@ class TestRealAuthFlowE2E:
     async def test_real_user_registration_flow(self, auth_helper: E2EAuthHelper, real_db_session: AsyncSession):
         """Test REAL user registration with actual auth service and database."""
         print('[U+1F4DD] Testing REAL user registration flow...')
-        test_email = f'real_reg_test_{int(time.time())}@netra.ai'
+        test_email = f'real_reg_test_{int(time.time())}@netrasystems.ai'
         test_password = 'RealTestPassword123!'
         async with httpx.AsyncClient() as client:
             auth_url = env.get_env_var('AUTH_SERVICE_URL', 'http://localhost:8083')
@@ -129,7 +129,7 @@ class TestRealAuthFlowE2E:
     async def test_real_user_login_flow(self, auth_helper: E2EAuthHelper, real_db_session: AsyncSession):
         """Test REAL user login with actual auth service validation."""
         print('[U+1F511] Testing REAL user login flow...')
-        test_email = f'real_login_test_{int(time.time())}@netra.ai'
+        test_email = f'real_login_test_{int(time.time())}@netrasystems.ai'
         test_password = 'RealLoginTest123!'
         async with httpx.AsyncClient() as client:
             auth_url = env.get_env_var('AUTH_SERVICE_URL', 'http://localhost:8083')
@@ -159,7 +159,7 @@ class TestRealAuthFlowE2E:
     async def test_real_websocket_authentication_flow(self, auth_helper: E2EAuthHelper):
         """Test REAL WebSocket authentication with actual WebSocket connection."""
         print('[U+1F50C] Testing REAL WebSocket authentication flow...')
-        auth_user = await auth_helper.create_authenticated_user(email=f'ws_auth_test_{int(time.time())}@netra.ai')
+        auth_user = await auth_helper.create_authenticated_user(email=f'ws_auth_test_{int(time.time())}@netrasystems.ai')
         websocket_url = env.get_env_var('WEBSOCKET_URL', 'ws://localhost:8000/ws')
         try:
             headers = auth_helper.get_websocket_headers(auth_user.jwt_token)
@@ -186,7 +186,7 @@ class TestRealAuthFlowE2E:
     async def test_real_jwt_token_validation_flow(self, auth_helper: E2EAuthHelper):
         """Test REAL JWT token validation with actual auth service."""
         print('[U+1F3AB] Testing REAL JWT token validation flow...')
-        auth_user = await auth_helper.create_authenticated_user(email=f'jwt_test_{int(time.time())}@netra.ai')
+        auth_user = await auth_helper.create_authenticated_user(email=f'jwt_test_{int(time.time())}@netrasystems.ai')
         async with httpx.AsyncClient() as client:
             auth_url = env.get_env_var('AUTH_SERVICE_URL', 'http://localhost:8083')
             validation_response = await client.get(f'{auth_url}/auth/validate', headers={'Authorization': f'Bearer {auth_user.jwt_token}'})
@@ -211,7 +211,7 @@ class TestRealAuthFlowE2E:
     async def test_real_session_management_flow(self, auth_helper: E2EAuthHelper, real_db_session: AsyncSession):
         """Test REAL session management with database persistence."""
         print('[U+1F4CB] Testing REAL session management flow...')
-        auth_user = await auth_helper.create_authenticated_user(email=f'session_test_{int(time.time())}@netra.ai')
+        auth_user = await auth_helper.create_authenticated_user(email=f'session_test_{int(time.time())}@netrasystems.ai')
         try:
             result = await real_db_session.execute(select(AuthSession).where(AuthSession.user_id == auth_user.user_id))
             sessions = result.scalars().all()
@@ -255,7 +255,7 @@ class TestRealAuthFlowE2E:
     async def test_complete_auth_flow_integration(self, auth_helper: E2EAuthHelper, real_db_session: AsyncSession):
         """Test complete authentication flow integration with all components."""
         print(' CYCLE:  Testing complete REAL auth flow integration...')
-        test_email = f'complete_auth_test_{int(time.time())}@netra.ai'
+        test_email = f'complete_auth_test_{int(time.time())}@netrasystems.ai'
         test_password = 'CompleteAuthTest123!'
         registration_result = await self.test_real_user_registration_flow(auth_helper, real_db_session)
         login_result = await self.test_real_user_login_flow(auth_helper, real_db_session)

@@ -52,7 +52,7 @@ class StagingAuthEdgeCaseReplicator:
         Current issue: No graceful handling of mid-session token expiration
         """
         try:
-            expired_payload = {'sub': str(uuid.uuid4()), 'email': 'test@staging.example.com', 'iat': int(time.time() - 7200), 'exp': int(time.time() - 3600), 'iss': 'netra-auth-staging', 'aud': ['netra-backend', 'netra-frontend']}
+            expired_payload = {'sub': str(uuid.uuid4()), 'email': 'test@staging.example.com', 'iat': int(time.time() - 7200), 'exp': int(time.time() - 3600), 'iss': 'netra-auth', 'aud': ['netra-backend', 'netra-frontend']}
             expired_token = jwt.encode(expired_payload, 'staging_secret', algorithm='HS256')
             validation_result = await self.auth_client.validate_token_jwt(expired_token)
             if validation_result and validation_result.get('valid'):

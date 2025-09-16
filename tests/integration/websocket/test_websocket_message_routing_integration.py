@@ -77,12 +77,12 @@ class WebSocketMessageRoutingIntegrationTests(BaseIntegrationTest):
         
         # Create test users
         user1_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_routing_1@test.netra.ai',
+            'email': f'{self.test_user_id_base}_routing_1@test.netrasystems.ai',
             'name': 'Message Routing User 1'
         })
         
         user2_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_routing_2@test.netra.ai',
+            'email': f'{self.test_user_id_base}_routing_2@test.netrasystems.ai',
             'name': 'Message Routing User 2'
         })
         
@@ -152,7 +152,7 @@ class WebSocketMessageRoutingIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_threads@test.netra.ai',
+            'email': f'{self.test_user_id_base}_threads@test.netrasystems.ai',
             'name': 'Thread Routing User'
         })
         
@@ -240,7 +240,7 @@ class WebSocketMessageRoutingIntegrationTests(BaseIntegrationTest):
         isolated_users = []
         for i in range(3):
             user_data = await self.create_test_user_context(services, {
-                'email': f'{self.test_user_id_base}_isolation_{i}@test.netra.ai',
+                'email': f'{self.test_user_id_base}_isolation_{i}@test.netrasystems.ai',
                 'name': f'Isolated User {i}',
                 'privacy_level': 'high'
             })
@@ -339,7 +339,7 @@ class WebSocketMessageRoutingIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_invalid@test.netra.ai',
+            'email': f'{self.test_user_id_base}_invalid@test.netrasystems.ai',
             'name': 'Invalid Message Test User'
         })
         
@@ -426,7 +426,7 @@ class WebSocketMessageRoutingIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_queuing@test.netra.ai',
+            'email': f'{self.test_user_id_base}_queuing@test.netrasystems.ai',
             'name': 'Message Queue Test User'
         })
         
@@ -512,7 +512,7 @@ class WebSocketMessageRoutingIntegrationTests(BaseIntegrationTest):
         test_users = []
         for i in range(5):
             user_data = await self.create_test_user_context(services, {
-                'email': f'{self.test_user_id_base}_load_{i}@test.netra.ai',
+                'email': f'{self.test_user_id_base}_load_{i}@test.netrasystems.ai',
                 'name': f'Load Test User {i}',
                 'test_group': f'group_{i}'
             })

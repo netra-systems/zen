@@ -75,7 +75,7 @@ def get_service_endpoints(environment: str = "local") -> ServiceEndpoints:
         )
     elif environment.lower() in ["staging", "prod"]:
         return ServiceEndpoints(
-            auth_service_url="https://auth-staging.netra-apex.com",
+            auth_service_url="https://auth.netra-apex.com",
             backend_service_url="https://staging.netra-apex.com", 
             frontend_service_url="https://staging.netra-apex.com",
             websocket_url="wss://staging.netra-apex.com/ws"

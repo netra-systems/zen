@@ -392,7 +392,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         
         # Mock CORS middleware configuration
         cors_config = {
-            "allow_origins": ["https://app.netra.ai", "https://staging.netra.ai"],
+            "allow_origins": ["https://app.netrasystems.ai", "https://staging.netrasystems.ai"],
             "allow_credentials": True,
             "allow_methods": ["GET", "POST"],
             "allow_headers": ["authorization", "content-type"]
@@ -405,8 +405,8 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         self._mark_component_initialized("WebSocketCORSMiddleware")
         
         # Test valid origins
-        assert validate_origin("https://app.netra.ai"), "Production origin should be allowed"
-        assert validate_origin("https://staging.netra.ai"), "Staging origin should be allowed"
+        assert validate_origin("https://app.netrasystems.ai"), "Production origin should be allowed"
+        assert validate_origin("https://staging.netrasystems.ai"), "Staging origin should be allowed"
         
         # Test invalid origins
         assert not validate_origin("https://malicious-site.com"), "Unknown origins should be blocked"

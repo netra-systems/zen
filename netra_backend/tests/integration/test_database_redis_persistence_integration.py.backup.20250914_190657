@@ -109,7 +109,7 @@ class TestDatabaseRedispersistence(DatabaseIntegrationTest, CacheIntegrationTest
         suffix = user_suffix or str(uuid.uuid4())[:8]
         user_data = {
             'id': f"test_user_{suffix}",
-            'email': f'persistence_test_{suffix}@netra.ai', 
+            'email': f'persistence_test_{suffix}@netrasystems.ai', 
             'name': f'Persistence Test User {suffix}',
             'is_active': True,
             'created_at': int(time.time())

@@ -242,7 +242,7 @@ class TestCloudRunWebSocketRace:
         E2E test for Cloud Run specific race conditions.
         Tests rapid connection attempts in actual GCP environment.
         """
-        staging_url = "wss://staging.netra.ai/ws"
+        staging_url = "wss://staging.netrasystems.ai/ws"
         auth_headers = await self._get_staging_auth_headers()
         
         # Simulate multiple concurrent connections to trigger race condition
@@ -271,7 +271,7 @@ class TestCloudRunWebSocketRace:
         """
         Tests the specific "Need to call accept first" error in staging.
         """
-        staging_url = "wss://staging.netra.ai/ws"
+        staging_url = "wss://staging.netrasystems.ai/ws"
         auth_headers = await self._get_staging_auth_headers()
         
         # Create connection and immediately send message to trigger race
@@ -312,7 +312,7 @@ class TestLoadBalancerHeaderRace:
         Tests whether GCP Load Balancer strips authentication headers
         causing authentication failures during WebSocket upgrade.
         """
-        staging_url = "wss://staging.netra.ai/ws"
+        staging_url = "wss://staging.netrasystems.ai/ws"
         auth_token = await self._get_staging_auth_token()
         
         # Test with Authorization header
@@ -340,7 +340,7 @@ class TestLoadBalancerHeaderRace:
         """
         Tests subprotocol-based authentication as workaround for header stripping.
         """
-        staging_url = "wss://staging.netra.ai/ws"
+        staging_url = "wss://staging.netrasystems.ai/ws"
         auth_token = await self._get_staging_auth_token()
         
         # Use subprotocol for auth instead of headers

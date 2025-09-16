@@ -76,7 +76,7 @@ class TestDatabaseManagerBusinessScenarios(BaseIntegrationTest):
     async def test_complete_user_lifecycle_business_flow(self, real_sqlite_database_manager, isolated_env):
         """Test complete user lifecycle from registration to deactivation."""
         db_manager = real_sqlite_database_manager
-        user_email = f'business_user_{uuid.uuid4().hex[:8]}@netra.ai'
+        user_email = f'business_user_{uuid.uuid4().hex[:8]}@netrasystems.ai'
         user = BusinessUser(email=user_email, username=f'business_user_{int(time.time())}', subscription_tier='free')
         logger.info('Step 1: User registration flow')
         async with db_manager.get_session() as session:

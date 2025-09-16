@@ -123,7 +123,7 @@ class JWTAuthenticationTestSuite:
         """Create real WebSocket connection for testing."""
         websocket = RealWebSocketConnection()
         websocket.headers = {
-            "origin": "https://app.netra.ai",
+            "origin": "https://app.netrasystems.ai",
             "user-agent": "test-client",
             "host": "localhost:8000"
         }
@@ -701,7 +701,7 @@ class TestWebSocketAuthenticationMiddleware(JWTAuthenticationTestSuite):
             websocket = RealWebSocketConnection()
             websocket.headers = {
                 "authorization": f"Bearer test_token_user_{i}",
-                "origin": "https://app.netra.ai"
+                "origin": "https://app.netrasystems.ai"
             }
             connections.append(websocket)
         

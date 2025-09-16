@@ -152,7 +152,7 @@ class TestRealPermissionEnforcement:
         
         payload = {
             JWTConstants.SUBJECT: f"user_{user_id}",
-            JWTConstants.EMAIL: kwargs.get("email", f"user{user_id}@netra.ai"),
+            JWTConstants.EMAIL: kwargs.get("email", f"user{user_id}@netrasystems.ai"),
             JWTConstants.ISSUED_AT: int(now.timestamp()),
             JWTConstants.EXPIRES_AT: int((now + timedelta(hours=1)).timestamp()),
             JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,

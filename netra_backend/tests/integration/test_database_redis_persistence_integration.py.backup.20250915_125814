@@ -89,7 +89,7 @@ class TestDatabaseRedispersistence(DatabaseIntegrationTest, CacheIntegrationTest
         BVJ: Multi-user isolation prevents data leakage and ensures privacy compliance.
         """
         suffix = user_suffix or str(uuid.uuid4())[:8]
-        user_data = {'id': f'test_user_{suffix}', 'email': f'persistence_test_{suffix}@netra.ai', 'name': f'Persistence Test User {suffix}', 'is_active': True, 'created_at': int(time.time())}
+        user_data = {'id': f'test_user_{suffix}', 'email': f'persistence_test_{suffix}@netrasystems.ai', 'name': f'Persistence Test User {suffix}', 'is_active': True, 'created_at': int(time.time())}
         async with real_services['db'].begin() as tx:
             await tx.execute(text('\n                INSERT INTO users (id, email, name, is_active, created_at)\n                VALUES (:id, :email, :name, :is_active, :created_at)\n                ON CONFLICT (id) DO UPDATE SET\n                    email = EXCLUDED.email,\n                    name = EXCLUDED.name,\n                    is_active = EXCLUDED.is_active\n            '), user_data)
         session_data = {'user_id': user_data['id'], 'session_id': f'session_{suffix}', 'created_at': time.time(), 'expires_at': time.time() + 3600, 'active': True}

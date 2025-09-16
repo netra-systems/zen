@@ -182,7 +182,7 @@ class TestDatabaseInitializerBusinessImpact:
         # EXPECTED: Specific error with deployment context
         expected_context = {
             "error_type": "ConnectionError",
-            "database_host": "staging-db.netra.ai", 
+            "database_host": "staging-db.netrasystems.ai", 
             "migration_step": "Creating user tables",
             "suggested_action": "Check database server status and credentials"
         }

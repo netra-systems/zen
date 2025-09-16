@@ -646,7 +646,7 @@ class WebSocketManagerSSotViolationsE2EStagingTests(SSotAsyncTestCase):
         
         try:
             # Test WebSocket connection to staging environment
-            staging_url = self.get_env_var("STAGING_WEBSOCKET_URL", "wss://staging.netra.ai/ws")
+            staging_url = self.get_env_var("STAGING_WEBSOCKET_URL", "wss://staging.netrasystems.ai/ws")
             
             # Simulate Golden Path connection attempts
             connection_attempts = 5

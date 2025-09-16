@@ -271,7 +271,7 @@ class DatabaseBusinessLogicIntegrationTests:
         
         # Execute: Create new user
         new_user = MockUser(
-            email="integration.test@netra.ai",
+            email="integration.test@netrasystems.ai",
             name="Integration Test User"
         )
         
@@ -284,7 +284,7 @@ class DatabaseBusinessLogicIntegrationTests:
         assert len(mock_db_session.data["user"]) == 1
         
         stored_user = mock_db_session.data["user"][0]
-        assert stored_user.email == "integration.test@netra.ai"
+        assert stored_user.email == "integration.test@netrasystems.ai"
         assert stored_user.name == "Integration Test User"
         assert stored_user.id is not None
         
@@ -294,7 +294,7 @@ class DatabaseBusinessLogicIntegrationTests:
         # Verify: User retrieved successfully
         assert retrieved_user is not None
         assert retrieved_user.id == stored_user.id
-        assert retrieved_user.email == "integration.test@netra.ai"
+        assert retrieved_user.email == "integration.test@netrasystems.ai"
         
     async def test_thread_management_with_user_association_integration(
         self, mock_db_session, enterprise_user_context
@@ -305,7 +305,7 @@ class DatabaseBusinessLogicIntegrationTests:
         # Setup: Create user first
         user = MockUser(
             id=1,
-            email="thread.test@netra.ai",
+            email="thread.test@netrasystems.ai",
             name="Thread Test User"
         )
         await mock_db_session.add(user)
@@ -566,7 +566,7 @@ class DatabaseBusinessLogicIntegrationTests:
         mock_db_session.in_transaction = True
         
         # Execute: Add multiple related objects
-        user = MockUser(email="transaction.test@netra.ai", name="Transaction Test")
+        user = MockUser(email="transaction.test@netrasystems.ai", name="Transaction Test")
         await mock_db_session.add(user)
         
         thread = MockThread(user_id="1", title="Transaction Test Thread")
@@ -670,7 +670,7 @@ class DatabaseBusinessLogicIntegrationTests:
         executions_per_thread = 3
         
         for user_id in range(1, users_count + 1):
-            user = MockUser(id=user_id, email=f"perf_test_{user_id}@netra.ai")
+            user = MockUser(id=user_id, email=f"perf_test_{user_id}@netrasystems.ai")
             await mock_db_session.add(user)
             
             for thread_idx in range(threads_per_user):

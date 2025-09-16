@@ -64,7 +64,7 @@ class MockWebSocketWith1011Conditions:
                 "x-forwarded-proto": "https",
                 "x-cloud-trace-context": "12345/67890;o=1",
                 "x-forwarded-for": "203.0.113.1",
-                "origin": "https://app-staging.netra.ai",
+                "origin": "https://app-staging.netrasystems.ai",
                 "user-agent": "Chrome/118.0.0.0"
             }
             # Headers may be stripped by load balancer

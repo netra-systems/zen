@@ -118,7 +118,7 @@ class TestStronglyTypedIdentifiers:
         valid_auth_result = AuthValidationResult(
             valid=True,
             user_id="authenticated-user-12345",
-            email="user@netra.ai",
+            email="user@netrasystems.ai",
             permissions=["read:agents", "write:threads"],
             expires_at=datetime.now(timezone.utc)
         )
@@ -130,7 +130,7 @@ class TestStronglyTypedIdentifiers:
         assert valid_auth_result.user_id == "authenticated-user-12345", f"User ID must match input: {valid_auth_result.user_id}"
         # Verify it was converted through the UserID constructor (business logic test)
         assert str(UserID("authenticated-user-12345")) == valid_auth_result.user_id, "User ID must be created through UserID NewType"
-        assert valid_auth_result.email == "user@netra.ai", f"Email must match input: {valid_auth_result.email}"
+        assert valid_auth_result.email == "user@netrasystems.ai", f"Email must match input: {valid_auth_result.email}"
         assert len(valid_auth_result.permissions) == 2, f"Permissions must be preserved: {valid_auth_result.permissions}"
         assert "read:agents" in valid_auth_result.permissions, "Read permissions must be included"
         assert "write:threads" in valid_auth_result.permissions, "Write permissions must be included"

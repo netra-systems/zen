@@ -54,7 +54,7 @@ class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
     async def asyncSetUpClass(cls):
         """Setup staging environment test configuration"""
         await super().asyncSetUpClass()
-        cls.staging_config = {'backend_url': 'https://staging-backend-service.netra.ai', 'auth_url': 'https://staging-auth-service.netra.ai', 'websocket_url': 'wss://staging-backend-service.netra.ai/ws', 'frontend_url': 'https://staging.netra.ai'}
+        cls.staging_config = {'backend_url': 'https://staging-backend-service.netrasystems.ai', 'auth_url': 'https://staging-auth-service.netrasystems.ai', 'websocket_url': 'wss://staging-backend-service.netrasystems.ai/ws', 'frontend_url': 'https://staging.netrasystems.ai'}
         cls.staging_available = await cls._check_staging_availability()
         if not cls.staging_available:
             pytest.skip('Staging environment not available for E2E Golden Path testing')

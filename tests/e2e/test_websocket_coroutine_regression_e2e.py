@@ -98,7 +98,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
         """
         # CRITICAL: Create authenticated user with real JWT
         user = await self.auth_helper.create_authenticated_user(
-            email="chat.e2e.test@netra.ai",
+            email="chat.e2e.test@netrasystems.ai",
             environment="staging"
         )
         
@@ -192,7 +192,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
         """
         # CRITICAL: Real authentication for E2E test
         user = await self.auth_helper.create_authenticated_user(
-            email="env.detection.e2e@netra.ai",
+            email="env.detection.e2e@netrasystems.ai",
             environment="staging"
         )
         
@@ -241,7 +241,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
         users = []
         for i in range(3):  # Test with 3 concurrent users
             user = await self.auth_helper.create_authenticated_user(
-                email=f"multiuser.e2e.{i}@netra.ai",
+                email=f"multiuser.e2e.{i}@netrasystems.ai",
                 environment="staging"
             )
             users.append(user)
@@ -316,7 +316,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
         """
         # CRITICAL: Real authentication for agent events test
         user = await self.auth_helper.create_authenticated_user(
-            email="agent.events.e2e@netra.ai",
+            email="agent.events.e2e@netrasystems.ai",
             environment="staging"
         )
         

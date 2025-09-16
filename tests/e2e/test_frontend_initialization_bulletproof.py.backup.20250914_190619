@@ -187,7 +187,7 @@ class FrontendInitializationSimulator:
                 # Use dev auto-login
                 user = AuthUser(
                     id=f"dev_user_{uuid.uuid4().hex[:8]}",
-                    email="dev@netra.ai",
+                    email="dev@netrasystems.ai",
                     name="Dev User"
                 )
             else:

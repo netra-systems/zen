@@ -182,10 +182,10 @@ def _get_base_test_environment_config(environment: Optional[EnvironmentTypeTests
         return EnvironmentConfigTests(
             environment=EnvironmentTypeTests.STAGING,
             services=ServiceUrls(
-                backend=get_env().get("STAGING_API_URL", "https://staging.netra.ai"),
-                auth=get_env().get("STAGING_AUTH_URL", "https://auth.staging.netra.ai"),
-                frontend=get_env().get("STAGING_FRONTEND_URL", "https://staging.netra.ai"),
-                websocket=get_env().get("STAGING_WS_URL", "wss://staging.netra.ai/ws")
+                backend=get_env().get("STAGING_API_URL", "https://staging.netrasystems.ai"),
+                auth=get_env().get("STAGING_AUTH_URL", "https://auth.staging.netrasystems.ai"),
+                frontend=get_env().get("STAGING_FRONTEND_URL", "https://staging.netrasystems.ai"),
+                websocket=get_env().get("STAGING_WS_URL", "wss://staging.netrasystems.ai/ws")
             ),
             database=DatabaseConfig(
                 url=get_env().get("STAGING_DATABASE_URL", "postgresql://staging:staging@localhost:5432/staging_db"),

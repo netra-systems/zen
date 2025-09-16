@@ -101,7 +101,7 @@ class PerformanceAndScalingTests(BaseE2ETest):
         self.concurrent_user_count = 15
         self.test_users = []
         for i in range(self.concurrent_user_count):
-            user_context = await create_authenticated_user_context(user_email=f'e2e_perf_test_{i}_{int(time.time())}@staging.netra.ai', environment='staging', permissions=['read', 'write', 'execute_agents', 'performance_test'])
+            user_context = await create_authenticated_user_context(user_email=f'e2e_perf_test_{i}_{int(time.time())}@staging.netrasystems.ai', environment='staging', permissions=['read', 'write', 'execute_agents', 'performance_test'])
             self.test_users.append(user_context)
         self.logger.info(f' PASS:  Performance testing environment setup complete - {len(self.test_users)} test users')
 

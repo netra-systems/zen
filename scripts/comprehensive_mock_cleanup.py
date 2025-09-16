@@ -182,7 +182,8 @@ def cleanup_mock_imports(file_path: Path) -> Tuple[bool, List[str]]:
 
 def main():
     """Main cleanup function."""
-    base_dir = Path('/Users/anthony/Documents/GitHub/netra-apex')
+    project_root = Path(__file__).parent.parent
+    base_dir = project_root
     
     print("[U+1F9F9] COMPREHENSIVE MOCK CLEANUP - MOCKS = ABOMINATION")
     print("=" * 60)

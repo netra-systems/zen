@@ -27,7 +27,8 @@ os.environ.setdefault("DATABASE_URL", "sqlite:///test.db")
 os.environ.setdefault("JWT_SECRET_KEY", "test-jwt-secret-key-unified-testing-32chars")
 
 # Add path for imports
-sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 
 try:
     from fastapi import FastAPI, WebSocket, WebSocketDisconnect

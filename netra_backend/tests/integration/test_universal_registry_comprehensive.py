@@ -1164,7 +1164,7 @@ class UniversalRegistryComprehensiveTests(BaseIntegrationTest):
         
         # Staging environment configuration
         staging_services = {
-            "backend": {"url": "https://staging-backend.netra.io", "replicas": 2},
+            "backend": {"url": "https://staging-api.netra.io", "replicas": 2},
             "database": {"url": "postgresql://staging-db.netra.io:5432/netra", "replicas": 2},
             "redis": {"url": "redis://staging-redis.netra.io:6379", "replicas": 2}
         }

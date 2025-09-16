@@ -259,7 +259,7 @@
             Checks all OAuth-related configuration and suggests fixes.
         </usage>
   </learning>
-  <learning id="oauth-staging-localhost-2025">
+  <learning id="oauth-localhost-2025">
     <title>OAuth Staging Errors on Localhost (January 2025)</title>
     <problem>
             When running locally with staging configuration:

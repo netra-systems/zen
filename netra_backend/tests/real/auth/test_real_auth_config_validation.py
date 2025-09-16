@@ -74,7 +74,7 @@ class RealAuthConfigValidationTests:
 
     def get_environment_specific_config_patterns(self) -> Dict[str, Dict[str, Any]]:
         """Get environment-specific configuration patterns for validation."""
-        return {'test': {'expected_patterns': {'database_url': ['localhost', '127.0.0.1', 'test'], 'oauth_client_id': ['test', 'localhost'], 'frontend_url': ['localhost', '127.0.0.1', '3000']}, 'forbidden_patterns': {'oauth_client_id': ['staging', 'production', '.googleapis.com'], 'database_url': ['staging', 'production']}}, 'staging': {'expected_patterns': {'oauth_client_id': ['staging'], 'database_url': ['staging'], 'frontend_url': ['staging']}, 'forbidden_patterns': {'oauth_client_id': ['test', 'localhost', 'production'], 'database_url': ['localhost', 'test', 'production']}}, 'production': {'expected_patterns': {'oauth_client_id': ['production', 'netra.ai'], 'database_url': ['production'], 'frontend_url': ['netra.ai']}, 'forbidden_patterns': {'oauth_client_id': ['test', 'localhost', 'staging'], 'database_url': ['localhost', 'test', 'staging']}}}
+        return {'test': {'expected_patterns': {'database_url': ['localhost', '127.0.0.1', 'test'], 'oauth_client_id': ['test', 'localhost'], 'frontend_url': ['localhost', '127.0.0.1', '3000']}, 'forbidden_patterns': {'oauth_client_id': ['staging', 'production', '.googleapis.com'], 'database_url': ['staging', 'production']}}, 'staging': {'expected_patterns': {'oauth_client_id': ['staging'], 'database_url': ['staging'], 'frontend_url': ['staging']}, 'forbidden_patterns': {'oauth_client_id': ['test', 'localhost', 'production'], 'database_url': ['localhost', 'test', 'production']}}, 'production': {'expected_patterns': {'oauth_client_id': ['production', 'netrasystems.ai'], 'database_url': ['production'], 'frontend_url': ['netrasystems.ai']}, 'forbidden_patterns': {'oauth_client_id': ['test', 'localhost', 'staging'], 'database_url': ['localhost', 'test', 'staging']}}}
 
     @pytest.mark.asyncio
     async def test_jwt_secret_validation_and_consistency(self):
@@ -84,7 +84,7 @@ class RealAuthConfigValidationTests:
             pytest.skip('JWT_SECRET_KEY not configured - skipping JWT validation tests')
         assert len(jwt_secret) >= 32, 'JWT secret should be at least 32 characters'
         assert jwt_secret != 'default' and jwt_secret != 'secret', 'JWT secret should not be default value'
-        test_payload = {JWTConstants.SUBJECT: 'config_test_user', JWTConstants.EMAIL: 'config@netra.ai', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=5)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'test': 'config_validation'}
+        test_payload = {JWTConstants.SUBJECT: 'config_test_user', JWTConstants.EMAIL: 'config@netrasystems.ai', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=5)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'test': 'config_validation'}
         try:
             test_token = jwt.encode(test_payload, jwt_secret, algorithm=JWTConstants.HS256_ALGORITHM)
             assert test_token is not None

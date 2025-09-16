@@ -65,7 +65,7 @@ class TestJWTAuthenticationIntegration(BaseIntegrationTest):
         # Test user data
         self.test_user = {
             "user_id": "jwt-test-user-1",
-            "email": "jwt.test@netra.ai",
+            "email": "jwt.test@netrasystems.ai",
             "name": "JWT Test User",
             "permissions": ["read", "write", "execute"]
         }
@@ -271,7 +271,7 @@ class TestJWTAuthenticationIntegration(BaseIntegrationTest):
                 "name": "valid_user_payload",
                 "payload": {
                     "user_id": "valid-user-123", 
-                    "email": "valid@netra.ai",
+                    "email": "valid@netrasystems.ai",
                     "permissions": ["read", "write"],
                     "exp": int(time.time()) + 3600,
                     "iat": int(time.time())
@@ -281,7 +281,7 @@ class TestJWTAuthenticationIntegration(BaseIntegrationTest):
             {
                 "name": "missing_user_id",
                 "payload": {
-                    "email": "missing-userid@netra.ai",
+                    "email": "missing-userid@netrasystems.ai",
                     "permissions": ["read"],
                     "exp": int(time.time()) + 3600,
                     "iat": int(time.time())
@@ -292,7 +292,7 @@ class TestJWTAuthenticationIntegration(BaseIntegrationTest):
                 "name": "invalid_permissions_format",
                 "payload": {
                     "user_id": "user-456",
-                    "email": "user@netra.ai", 
+                    "email": "user@netrasystems.ai", 
                     "permissions": "read,write",  # Should be array, not string
                     "exp": int(time.time()) + 3600,
                     "iat": int(time.time())
@@ -398,7 +398,7 @@ class TestJWTAuthenticationIntegration(BaseIntegrationTest):
             # Test that both services use the same JWT secret
             test_payload = {
                 "user_id": "sync-test-user",
-                "email": "sync@netra.ai", 
+                "email": "sync@netrasystems.ai", 
                 "exp": int(time.time()) + 3600,
                 "iat": int(time.time()),
                 "service": "auth"

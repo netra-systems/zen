@@ -41,7 +41,7 @@ class WebSocketASGIMiddlewareTests:
     @pytest.mark.asyncio
     async def test_websocket_exclusion_middleware_with_malformed_scope(self, middleware):
         """Test WebSocket exclusion middleware with malformed ASGI scope - WILL FAIL."""
-        malformed_scope = {'type': 'websocket', 'scheme': 'wss', 'path': '/ws', 'query_string': b'token=abc123&user_id=user123', 'headers': [(b'host', b'staging.netra.ai')]}
+        malformed_scope = {'type': 'websocket', 'scheme': 'wss', 'path': '/ws', 'query_string': b'token=abc123&user_id=user123', 'headers': [(b'host', b'staging.netrasystems.ai')]}
         receive = AsyncMock()
         send = AsyncMock()
         with pytest.raises(Exception):
@@ -57,14 +57,14 @@ class WebSocketASGIMiddlewareTests:
         assert isinstance(result, dict), 'Failed to extract from FastAPI WebSocket'
         assert result.get('token') == 'abc123', 'Token extraction failed'
         websocket_starlette = Mock()
-        websocket_starlette.url = URL('wss://staging.netra.ai/ws?token=abc123&user_id=user123')
+        websocket_starlette.url = URL('wss://staging.netrasystems.ai/ws?token=abc123&user_id=user123')
         with pytest.raises(AttributeError, match="'URL' object has no attribute 'query_params'"):
             result = extract_query_params(websocket_starlette)
 
     @pytest.mark.asyncio
     async def test_asgi_scope_passthrough_safety(self, middleware):
         """Test safe ASGI scope passthrough when URL objects are malformed - WILL FAIL."""
-        problematic_scope = {'type': 'websocket', 'scheme': 'wss', 'path': '/ws', 'query_string': b'token=special%20chars&param=value', 'headers': [], 'server': ('staging.netra.ai', 443), 'client': ('10.0.0.1', 45678)}
+        problematic_scope = {'type': 'websocket', 'scheme': 'wss', 'path': '/ws', 'query_string': b'token=special%20chars&param=value', 'headers': [], 'server': ('staging.netrasystems.ai', 443), 'client': ('10.0.0.1', 45678)}
         receive = AsyncMock()
         send = AsyncMock()
         try:
@@ -94,7 +94,7 @@ class WebSocketASGIMiddlewareTests:
     @pytest.mark.asyncio
     async def test_gcp_cloud_run_asgi_simulation(self):
         """Simulate GCP Cloud Run ASGI environment characteristics - WILL FAIL if GCP-specific."""
-        gcp_style_scope = {'type': 'websocket', 'scheme': 'wss', 'path': '/ws', 'raw_path': b'/ws', 'query_string': b'token=abc123&user_id=user123', 'root_path': '', 'headers': [(b'host', b'staging.netra.ai'), (b'user-agent', b'websockets/10.4'), (b'upgrade', b'websocket'), (b'connection', b'Upgrade'), (b'sec-websocket-key', b'dGhlIHNhbXBsZSBub25jZQ=='), (b'sec-websocket-version', b'13'), (b'x-forwarded-for', b'203.0.113.1'), (b'x-forwarded-proto', b'https'), (b'x-cloud-trace-context', b'105445aa7843bc8bf206b120001000/1'), (b'x-appengine-request-log-id', b'5f2b6e6c0001f4b6b9d7c8e9')], 'server': ('staging.netra.ai', 443), 'client': ('203.0.113.1', 56789), 'extensions': {}}
+        gcp_style_scope = {'type': 'websocket', 'scheme': 'wss', 'path': '/ws', 'raw_path': b'/ws', 'query_string': b'token=abc123&user_id=user123', 'root_path': '', 'headers': [(b'host', b'staging.netrasystems.ai'), (b'user-agent', b'websockets/10.4'), (b'upgrade', b'websocket'), (b'connection', b'Upgrade'), (b'sec-websocket-key', b'dGhlIHNhbXBsZSBub25jZQ=='), (b'sec-websocket-version', b'13'), (b'x-forwarded-for', b'203.0.113.1'), (b'x-forwarded-proto', b'https'), (b'x-cloud-trace-context', b'105445aa7843bc8bf206b120001000/1'), (b'x-appengine-request-log-id', b'5f2b6e6c0001f4b6b9d7c8e9')], 'server': ('staging.netrasystems.ai', 443), 'client': ('203.0.113.1', 56789), 'extensions': {}}
         try:
             websocket = Mock()
             url_string = f"{gcp_style_scope['scheme']}://{gcp_style_scope['server'][0]}{gcp_style_scope['path']}"
@@ -156,7 +156,7 @@ class ASGIScopeErrorScenariosTests:
         """Reproduce the exact error from middleware_setup.py:576 - WILL FAIL."""
         app = FastAPI()
         middleware = WebSocketExclusionMiddleware(app)
-        problematic_scope = {'type': 'websocket', 'scheme': 'wss', 'path': '/ws', 'query_string': b'token=abc123', 'headers': [(b'host', b'staging.netra.ai')]}
+        problematic_scope = {'type': 'websocket', 'scheme': 'wss', 'path': '/ws', 'query_string': b'token=abc123', 'headers': [(b'host', b'staging.netrasystems.ai')]}
         receive = AsyncMock()
         send = AsyncMock()
         with pytest.raises(Exception, match='ASGI scope error'):
@@ -166,16 +166,16 @@ class ASGIScopeErrorScenariosTests:
     async def test_websocket_url_attribute_access_patterns(self):
         """Test various WebSocket URL attribute access patterns that fail."""
         websocket1 = Mock()
-        websocket1.url = URL('wss://staging.netra.ai/ws?token=abc123')
+        websocket1.url = URL('wss://staging.netrasystems.ai/ws?token=abc123')
         with pytest.raises(AttributeError):
             params = websocket1.url.query_params
         websocket2 = Mock()
-        websocket2.url = URL('wss://staging.netra.ai/ws?token=abc123')
+        websocket2.url = URL('wss://staging.netrasystems.ai/ws?token=abc123')
         if hasattr(websocket2.url, 'query_params'):
             with pytest.raises(AttributeError):
                 params = websocket2.url.query_params
         websocket3 = Mock()
-        websocket3.url = URL('wss://staging.netra.ai/ws?token=abc123')
+        websocket3.url = URL('wss://staging.netrasystems.ai/ws?token=abc123')
         try:
             params = getattr(websocket3.url, 'query_params', None)
             if params is None:

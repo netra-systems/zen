@@ -28,8 +28,8 @@ class TestGCPWebSocketASGI:
     def gcp_staging_env(self):
         """GCP staging environment configuration."""
         return GCPStagingEnvironment(
-            base_url="https://staging.netra.ai",
-            websocket_url="wss://staging.netra.ai/ws"
+            base_url="https://staging.netrasystems.ai",
+            websocket_url="wss://staging.netrasystems.ai/ws"
         )
     
     @pytest.mark.asyncio
@@ -44,7 +44,7 @@ class TestGCPWebSocketASGI:
             async with websockets.connect(
                 websocket_url,
                 additional_headers={
-                    "Origin": "https://staging.netra.ai",
+                    "Origin": "https://staging.netrasystems.ai",
                     "User-Agent": "pytest-websocket-client/1.0"
                 },
                 timeout=10
@@ -86,7 +86,7 @@ class TestGCPWebSocketASGI:
             {"session_id": "sess_456", "workspace": "default"},
             {"auth_token": "bearer_789", "client_version": "1.0.0"},
             # Complex query parameters that might cause URL object issues
-            {"redirect_uri": "https://staging.netra.ai/callback", "state": "complex_state_123"},
+            {"redirect_uri": "https://staging.netrasystems.ai/callback", "state": "complex_state_123"},
             {"filter": "category=ai&type=optimization", "sort": "created_desc"},
         ]
         
@@ -254,7 +254,7 @@ class TestGCPWebSocketASGI:
         # Test scenarios that previously caused ASGI scope errors
         error_prone_scenarios = [
             # Complex query parameters
-            {"scenario": "complex_params", "params": {"redirect": "https://app.netra.ai/callback?state=123", "data": "encoded%20value"}},
+            {"scenario": "complex_params", "params": {"redirect": "https://app.netrasystems.ai/callback?state=123", "data": "encoded%20value"}},
             # Special characters in parameters  
             {"scenario": "special_chars", "params": {"query": "AI optimization & performance", "filter": "category=ai+ml"}},
             # Long parameter values
@@ -321,7 +321,7 @@ class TestGCPWebSocketASGI:
             "X-Forwarded-For": "203.0.113.1",
             "X-Forwarded-Proto": "https", 
             "X-Cloud-Trace-Context": "105445aa7843bc8bf206b120001000/1",
-            "Origin": "https://staging.netra.ai",
+            "Origin": "https://staging.netrasystems.ai",
             "User-Agent": "Mozilla/5.0 (compatible; GCP-Test/1.0)"
         }
         
@@ -368,7 +368,7 @@ class TestWebSocketASGIRecovery:
     @pytest.mark.e2e
     async def test_websocket_resilience_after_asgi_errors(self):
         """Test that WebSocket system recovers after ASGI scope errors."""
-        staging_url = "wss://staging.netra.ai/ws"
+        staging_url = "wss://staging.netrasystems.ai/ws"
         
         # First, try a connection that might trigger ASGI error
         problematic_url = f"{staging_url}?complex=value%20with%20spaces&special=chars%26symbols"

@@ -103,7 +103,7 @@ describe('Sentry CSP and Security Integration Tests', () => {
         captureException: mockSentryCaptureException,
       },
       location: {
-        href: 'https://app.netra.ai/chat',
+        href: 'https://app.netrasystems.ai/chat',
         protocol: 'https:',
       },
       localStorage: {
@@ -458,7 +458,7 @@ describe('Sentry CSP and Security Integration Tests', () => {
         const errorWithReferrer = {
           request: {
             headers: {
-              referer: 'https://app.netra.ai/private/user-123/sensitive-page',
+              referer: 'https://app.netrasystems.ai/private/user-123/sensitive-page',
             },
           },
         };

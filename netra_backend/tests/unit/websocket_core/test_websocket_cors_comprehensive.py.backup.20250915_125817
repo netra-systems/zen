@@ -86,13 +86,13 @@ class TestWebSocketCORSHandler(SSotBaseTestCase):
         ]
         
         self.staging_origins = [
-            "https://staging.netra.ai",
+            "https://staging.netrasystems.ai",
             "https://netra-staging.appspot.com",
             "http://localhost:3000"  # Still allow localhost in staging
         ]
         
         self.production_origins = [
-            "https://app.netra.ai",
+            "https://app.netrasystems.ai",
             "https://netra-production.appspot.com"
         ]
 
@@ -144,15 +144,15 @@ class TestWebSocketCORSHandler(SSotBaseTestCase):
         Business Critical: Allowed origins must be accepted reliably.
         """
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         
         # Exact match should be allowed
-        assert handler.is_origin_allowed("https://app.netra.ai") is True
+        assert handler.is_origin_allowed("https://app.netrasystems.ai") is True
         
         # With trailing slash should also be allowed
-        assert handler.is_origin_allowed("https://app.netra.ai/") is True
+        assert handler.is_origin_allowed("https://app.netrasystems.ai/") is True
         
         # Different origin should be denied
         assert handler.is_origin_allowed("https://evil.com") is False
@@ -164,17 +164,17 @@ class TestWebSocketCORSHandler(SSotBaseTestCase):
         Business Critical: Wildcard patterns must work correctly for subdomains.
         """
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://*.netra.ai"],
+            allowed_origins=["https://*.netrasystems.ai"],
             environment="production"
         )
         
         # Subdomain should be allowed
-        assert handler.is_origin_allowed("https://app.netra.ai") is True
-        assert handler.is_origin_allowed("https://staging.netra.ai") is True
+        assert handler.is_origin_allowed("https://app.netrasystems.ai") is True
+        assert handler.is_origin_allowed("https://staging.netrasystems.ai") is True
         
         # Different domain should be denied
         assert handler.is_origin_allowed("https://app.evil.com") is False
-        assert handler.is_origin_allowed("https://netra.ai.evil.com") is False
+        assert handler.is_origin_allowed("https://netrasystems.ai.evil.com") is False
 
     def test_cors_handler_development_permissive_mode(self):
         """
@@ -207,13 +207,13 @@ class TestWebSocketCORSHandler(SSotBaseTestCase):
         Business Critical: Production must block unauthorized origins.
         """
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         
         # Should block suspicious patterns
         suspicious_origins = [
-            "http://app.netra.ai",  # HTTP in production
+            "http://app.netrasystems.ai",  # HTTP in production
             "https://evil.com",  # Not in allowed list
             "https://192.168.1.1:3000",  # Direct IP
             "https://abc123.ngrok.io",  # Ngrok tunnel
@@ -230,7 +230,7 @@ class TestWebSocketCORSHandler(SSotBaseTestCase):
         Business Critical: Prevents abuse and DoS attacks via CORS violations.
         """
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         
@@ -257,7 +257,7 @@ class TestWebSocketCORSHandler(SSotBaseTestCase):
         Business Critical: Administrators must be able to unblock false positives.
         """
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         
@@ -286,7 +286,7 @@ class TestWebSocketCORSHandler(SSotBaseTestCase):
         Business Critical: Security monitoring requires accurate statistics.
         """
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         
@@ -316,11 +316,11 @@ class TestWebSocketCORSHandler(SSotBaseTestCase):
         Business Critical: Proper CORS headers ensure browser compatibility.
         """
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         
-        origin = "https://app.netra.ai"
+        origin = "https://app.netrasystems.ai"
         headers = handler.get_cors_headers(origin)
         
         # Verify required CORS headers
@@ -345,7 +345,7 @@ class TestWebSocketCORSHandler(SSotBaseTestCase):
         )
         
         prod_handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         
@@ -362,7 +362,7 @@ class TestWebSocketCORSHandler(SSotBaseTestCase):
         Business Critical: Must block known attack vectors and tunnels.
         """
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         
@@ -420,7 +420,7 @@ class TestWebSocketCORSMiddleware(SSotBaseTestCase):
         """
         mock_app = Mock()
         custom_handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         
@@ -456,7 +456,7 @@ class TestWebSocketCORSMiddleware(SSotBaseTestCase):
         
         # Create middleware with test handler
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         middleware = WebSocketCORSMiddleware(mock_app, handler)
@@ -464,7 +464,7 @@ class TestWebSocketCORSMiddleware(SSotBaseTestCase):
         # Mock WebSocket scope with allowed origin
         scope = {
             "type": "websocket",
-            "headers": [(b"origin", b"https://app.netra.ai")]
+            "headers": [(b"origin", b"https://app.netrasystems.ai")]
         }
         receive = AsyncMock()
         send = AsyncMock()
@@ -479,7 +479,7 @@ class TestWebSocketCORSMiddleware(SSotBaseTestCase):
         middleware.app.assert_called_once_with(scope, receive, send)
         
         # Verify origin was added to scope
-        assert scope["websocket_cors_origin"] == "https://app.netra.ai"
+        assert scope["websocket_cors_origin"] == "https://app.netrasystems.ai"
 
     async def test_cors_middleware_websocket_scope_rejection(self):
         """
@@ -491,7 +491,7 @@ class TestWebSocketCORSMiddleware(SSotBaseTestCase):
         
         # Create middleware with restrictive handler
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         middleware = WebSocketCORSMiddleware(mock_app, handler)
@@ -529,7 +529,7 @@ class TestWebSocketCORSMiddleware(SSotBaseTestCase):
         mock_app = AsyncMock()
         
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         middleware = WebSocketCORSMiddleware(mock_app, handler)
@@ -562,12 +562,12 @@ class TestWebSocketCORSUtilityFunctions(SSotBaseTestCase):
         # Mock WebSocket with origin header
         mock_websocket = Mock()
         mock_websocket.headers.items.return_value = [
-            ("origin", "https://app.netra.ai"),
+            ("origin", "https://app.netrasystems.ai"),
             ("user-agent", "Mozilla/5.0")
         ]
         
         origin = _extract_origin_from_websocket(mock_websocket)
-        assert origin == "https://app.netra.ai"
+        assert origin == "https://app.netrasystems.ai"
 
     def test_extract_origin_from_websocket_multiple_identical_headers(self):
         """
@@ -577,13 +577,13 @@ class TestWebSocketCORSUtilityFunctions(SSotBaseTestCase):
         """
         mock_websocket = Mock()
         mock_websocket.headers.items.return_value = [
-            ("origin", "https://app.netra.ai"),
-            ("origin", "https://app.netra.ai"),  # Duplicate
+            ("origin", "https://app.netrasystems.ai"),
+            ("origin", "https://app.netrasystems.ai"),  # Duplicate
             ("user-agent", "Mozilla/5.0")
         ]
         
         origin = _extract_origin_from_websocket(mock_websocket)
-        assert origin == "https://app.netra.ai"
+        assert origin == "https://app.netrasystems.ai"
 
     def test_extract_origin_from_websocket_multiple_different_headers(self):
         """
@@ -593,7 +593,7 @@ class TestWebSocketCORSUtilityFunctions(SSotBaseTestCase):
         """
         mock_websocket = Mock()
         mock_websocket.headers.items.return_value = [
-            ("origin", "https://app.netra.ai"),
+            ("origin", "https://app.netrasystems.ai"),
             ("origin", "https://evil.com"),  # Different!
             ("user-agent", "Mozilla/5.0")
         ]
@@ -613,12 +613,12 @@ class TestWebSocketCORSUtilityFunctions(SSotBaseTestCase):
         """
         mock_websocket = Mock()
         mock_websocket.headers.items.return_value = [
-            ("Origin", "https://app.netra.ai"),  # Capital O
+            ("Origin", "https://app.netrasystems.ai"),  # Capital O
             ("USER-AGENT", "Mozilla/5.0")
         ]
         
         origin = _extract_origin_from_websocket(mock_websocket)
-        assert origin == "https://app.netra.ai"
+        assert origin == "https://app.netrasystems.ai"
 
     def test_validate_websocket_origin_success(self):
         """
@@ -628,11 +628,11 @@ class TestWebSocketCORSUtilityFunctions(SSotBaseTestCase):
         """
         mock_websocket = Mock()
         mock_websocket.headers.items.return_value = [
-            ("origin", "https://app.netra.ai")
+            ("origin", "https://app.netrasystems.ai")
         ]
         
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         
@@ -651,7 +651,7 @@ class TestWebSocketCORSUtilityFunctions(SSotBaseTestCase):
         ]
         
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         
@@ -741,18 +741,18 @@ class TestWebSocketCORSPerformance(SSotBaseTestCase):
         """
         handler = WebSocketCORSHandler(
             allowed_origins=[
-                "https://app.netra.ai",
-                "https://staging.netra.ai",
-                "https://*.internal.netra.ai"
+                "https://app.netrasystems.ai",
+                "https://staging.netrasystems.ai",
+                "https://*.internal.netrasystems.ai"
             ],
             environment="production"
         )
         
         # Test many validation calls
         test_origins = [
-            "https://app.netra.ai",
-            "https://staging.netra.ai", 
-            "https://api.internal.netra.ai",
+            "https://app.netrasystems.ai",
+            "https://staging.netrasystems.ai", 
+            "https://api.internal.netrasystems.ai",
             "https://evil.com",
             "https://another-evil.com"
         ]
@@ -781,7 +781,7 @@ class TestWebSocketCORSPerformance(SSotBaseTestCase):
         Business Critical: Security monitoring should not slow down connections.
         """
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         
@@ -809,7 +809,7 @@ class TestWebSocketCORSPerformance(SSotBaseTestCase):
         Business Critical: Memory leaks could crash the system under attack.
         """
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://app.netra.ai"],
+            allowed_origins=["https://app.netrasystems.ai"],
             environment="production"
         )
         

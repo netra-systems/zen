@@ -60,7 +60,7 @@ class TestWebSocketConnectionIntegration(BaseIntegrationTest):
         
         # Create test user context with real database
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id}@test.netra.ai',
+            'email': f'{self.test_user_id}@test.netrasystems.ai',
             'name': 'WebSocket Integration Test User'
         })
         
@@ -121,7 +121,7 @@ class TestWebSocketConnectionIntegration(BaseIntegrationTest):
         
         # Create test user
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id}@test.netra.ai',
+            'email': f'{self.test_user_id}@test.netrasystems.ai',
             'name': 'Persistence Test User'
         })
         
@@ -198,12 +198,12 @@ class TestWebSocketConnectionIntegration(BaseIntegrationTest):
         
         # Create multiple test users for cleanup testing
         user_data_1 = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id}_1@test.netra.ai',
+            'email': f'{self.test_user_id}_1@test.netrasystems.ai',
             'name': 'Cleanup Test User 1'
         })
         
         user_data_2 = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id}_2@test.netra.ai', 
+            'email': f'{self.test_user_id}_2@test.netrasystems.ai', 
             'name': 'Cleanup Test User 2'
         })
         
@@ -277,7 +277,7 @@ class TestWebSocketConnectionIntegration(BaseIntegrationTest):
         users = []
         for i in range(3):
             user_data = await self.create_test_user_context(services, {
-                'email': f'{self.test_user_id}_isolation_{i}@test.netra.ai',
+                'email': f'{self.test_user_id}_isolation_{i}@test.netrasystems.ai',
                 'name': f'Isolation Test User {i}'
             })
             users.append(user_data)
@@ -358,7 +358,7 @@ class TestWebSocketConnectionIntegration(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id}@test.netra.ai',
+            'email': f'{self.test_user_id}@test.netrasystems.ai',
             'name': 'State Management Test User'
         })
         

@@ -76,7 +76,7 @@ class WebSocketAcceptRaceConditionE2ETest(BaseE2ETest):
         self.agent_execution_failures: List[str] = []
         self.real_test_users = []
         for i in range(5):
-            user_data = self.auth_helper.create_test_user(username=f'e2e_race_user_{i}_{int(time.time())}', email=f'e2e_user_{i}_{int(time.time())}@test.netra.ai')
+            user_data = self.auth_helper.create_test_user(username=f'e2e_race_user_{i}_{int(time.time())}', email=f'e2e_user_{i}_{int(time.time())}@test.netrasystems.ai')
             self.real_test_users.append(user_data)
         self.gcp_handshake_delay_range = (0.1, 0.3)
         self.gcp_accept_timeout = 15.0

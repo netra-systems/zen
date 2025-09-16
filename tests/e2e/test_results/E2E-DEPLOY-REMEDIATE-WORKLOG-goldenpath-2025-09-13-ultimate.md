@@ -114,7 +114,7 @@ Timeout: httpx.ReadTimeout after 30 seconds
 
 **Configuration Inconsistencies Found:**
 - `staging_test_config.py`: Uses `https://api.staging.netrasystems.ai`
-- `config.py`: Uses `https://api-staging.netra.ai`  
+- `config.py`: Uses `https://api-staging.netrasystems.ai`  
 - `database_sync_fixtures.py`: Uses `https://staging-api.netra.com`
 - Various other files use different staging URL patterns
 
@@ -197,7 +197,7 @@ Timeout: httpx.ReadTimeout after 30 seconds
 ### Configuration URL Analysis
 **Found Multiple Staging URL Patterns:**
 - Primary: `https://api.staging.netrasystems.ai` (current, not working)
-- Alternative 1: `https://api-staging.netra.ai` 
+- Alternative 1: `https://api-staging.netrasystems.ai` 
 - Alternative 2: `https://staging-api.netra.com`
 - Cloud Run Pattern: `https://netra-backend-staging-*.run.app`
 
@@ -212,7 +212,7 @@ Timeout: httpx.ReadTimeout after 30 seconds
 ### GCP Service Configuration Analysis
 **Expected Cloud Run Services:**
 - `netra-backend-staging` (Backend API)
-- `netra-auth-staging` (Authentication service)  
+- `netra-auth` (Authentication service)  
 - `netra-frontend-staging` (Frontend application)
 
 ## Phase 5: Immediate Action Plan
@@ -233,7 +233,7 @@ curl https://api.staging.netrasystems.ai/health
 ```bash
 # Test if alternative URLs work
 curl https://netra-backend-staging-123456789-uc.a.run.app/health
-curl https://api-staging.netra.ai/health
+curl https://api-staging.netrasystems.ai/health
 curl https://staging-api.netra.com/health
 ```
 

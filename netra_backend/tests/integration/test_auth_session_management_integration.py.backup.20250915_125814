@@ -81,7 +81,7 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
         """Test that user sessions persist correctly across multiple API calls with real services."""
         # Arrange: Create authenticated user session
         user_id = f"session-persist-user-{int(time.time())}"
-        email = f"session-persist-{user_id}@netra.ai"
+        email = f"session-persist-{user_id}@netrasystems.ai"
         
         # Create JWT token using SSOT auth helper
         jwt_token = self.auth_helper.create_test_jwt_token(
@@ -147,7 +147,7 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
         """Test that expired sessions properly invalidate API access with real auth service."""
         # Arrange: Create user session with very short expiry
         user_id = f"session-expire-user-{int(time.time())}"
-        email = f"session-expire-{user_id}@netra.ai"
+        email = f"session-expire-{user_id}@netrasystems.ai"
         
         # Create token with short expiry for testing
         short_lived_token = self.auth_helper.create_test_jwt_token(
@@ -202,7 +202,7 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
         """Test that session data is properly cached and retrieved from Redis."""
         # Arrange: Create user session for Redis testing
         user_id = f"redis-session-user-{int(time.time())}"
-        email = f"redis-session-{user_id}@netra.ai"
+        email = f"redis-session-{user_id}@netrasystems.ai"
         
         jwt_token = self.auth_helper.create_test_jwt_token(
             user_id=user_id,
@@ -262,7 +262,7 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
         
         for i in range(num_users):
             user_id = f"concurrent-session-user-{i}-{int(time.time())}"
-            email = f"concurrent-session-{i}-{user_id}@netra.ai"
+            email = f"concurrent-session-{i}-{user_id}@netrasystems.ai"
             permissions = [f"read:user_{i}", f"write:user_{i}"]
             
             jwt_token = self.auth_helper.create_test_jwt_token(
@@ -381,7 +381,7 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
             session_key = f"test_session:cleanup:{config['user_id']}"
             session_data = {
                 "user_id": config["user_id"],
-                "email": f"{config['user_id']}@netra.ai",
+                "email": f"{config['user_id']}@netrasystems.ai",
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "expiry_seconds": str(config["expiry_seconds"])
             }

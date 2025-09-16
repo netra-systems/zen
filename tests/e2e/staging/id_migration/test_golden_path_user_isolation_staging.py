@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-STAGING_CONFIG = {'backend_url': 'https://backend-staging-1234567890.us-central1.run.app', 'websocket_url': 'wss://backend-staging-1234567890.us-central1.run.app/ws', 'auth_url': 'https://auth-staging-1234567890.us-central1.run.app', 'timeout': 30, 'max_retries': 3}
+STAGING_CONFIG = {'backend_url': 'https://backend-staging-1234567890.us-central1.run.app', 'websocket_url': 'wss://backend-staging-1234567890.us-central1.run.app/ws', 'auth_url': 'https://auth-1234567890.us-central1.run.app', 'timeout': 30, 'max_retries': 3}
 
 @dataclass
 class GoldenPathSession:

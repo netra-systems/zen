@@ -6,7 +6,7 @@
       "output_format": "stream-json"
     },
     {
-      "command": "/clear-old-issue-locks",
+      "command": "/runtests e2e critical",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },
@@ -112,6 +112,11 @@
     },
     {
       "command": "/ultimate-test-deploy-loop",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitcommitgardener",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },

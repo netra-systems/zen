@@ -220,7 +220,7 @@ This worklog contains GCP log issues and errors discovered from the `netra-backe
 ## Issue 10: OAuth URI Mismatch Warning
 **Severity:** P3 (Low)  
 **First Occurrence:** 2025-09-12T13:34:33.833434Z  
-**Log Message:** `WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai`  
+**Log Message:** `WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai`  
 **Module:** `logging`  
 **Function:** `callHandlers`  
 
@@ -232,7 +232,7 @@ This worklog contains GCP log issues and errors discovered from the `netra-backe
     "line": "1706",
     "module": "logging"
   },
-  "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+  "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
   "timestamp": "2025-09-12T13:34:33.833434+00:00",
   "severity": "WARNING"
 }

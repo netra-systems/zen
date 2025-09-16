@@ -97,7 +97,7 @@ class StagingWebSocketConnectionTests:
     # ):
     # """Test CORS headers validation for staging domains."""
     # # Test with valid staging origin
-    # staging_origin = "https://staging.netra.app"
+    # staging_origin = "https://staging.netrasystems.ai"
     # headers = {
     # "Authorization": f"Bearer {test_user.tokens['access_token']}",
     # "Origin": staging_origin

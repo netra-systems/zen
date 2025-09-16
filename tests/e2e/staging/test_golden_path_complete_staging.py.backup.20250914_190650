@@ -85,10 +85,10 @@ class TestGoldenPathCompleteStaging(SSotAsyncTestCase):
         
         # Staging GCP environment configuration
         cls.staging_config = {
-            "backend_url": "https://staging-backend-service.netra.ai",  # Replace with actual staging URL
-            "auth_url": "https://staging-auth-service.netra.ai",        # Replace with actual staging URL
-            "websocket_url": "wss://staging-backend-service.netra.ai/ws", # Replace with actual staging URL
-            "frontend_url": "https://staging.netra.ai"                   # Replace with actual staging URL
+            "backend_url": "https://staging-backend-service.netrasystems.ai",  # Replace with actual staging URL
+            "auth_url": "https://staging-auth-service.netrasystems.ai",        # Replace with actual staging URL
+            "websocket_url": "wss://staging-backend-service.netrasystems.ai/ws", # Replace with actual staging URL
+            "frontend_url": "https://staging.netrasystems.ai"                   # Replace with actual staging URL
         }
         
         # Check if we're in a staging-capable environment

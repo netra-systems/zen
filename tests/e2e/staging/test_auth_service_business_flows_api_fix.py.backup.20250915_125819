@@ -46,7 +46,7 @@ class TestAuthServiceBusinessFlowsStagingAPIFix:
     def setup_class(cls):
         """Set up staging environment configuration for auth testing."""
         cls.env = get_env()
-        cls.auth_service_url = cls.env.get('STAGING_AUTH_SERVICE_URL', 'https://auth-service-staging.netra.ai')
+        cls.auth_service_url = cls.env.get('STAGING_AUTH_SERVICE_URL', 'https://auth-service-staging.netrasystems.ai')
         cls.test_mode = 'staging_e2e'
         logger.info(f'🌐 Staging Auth E2E Tests - Service URL: {cls.auth_service_url}')
 
@@ -185,7 +185,7 @@ class TestDockerAPISignatureVsStagingValidation:
             logger.info(f'✅ Confirmed API signature issue exists: {e}')
         assert api_signature_fails, 'API signature issue should exist to demonstrate Issue #552'
         env = get_env()
-        staging_url = env.get('STAGING_AUTH_SERVICE_URL', 'https://auth-service-staging.netra.ai')
+        staging_url = env.get('STAGING_AUTH_SERVICE_URL', 'https://auth-service-staging.netrasystems.ai')
         if staging_url:
             import requests
             try:

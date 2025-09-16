@@ -384,8 +384,8 @@ class TestStagingConfigurationValidationFailures(SSotBaseTestCase):
                 'https://backend-staging.netra.gcp.dev'
             ],
             'auth_service_url_patterns': [
-                'https://netra-auth-staging-*.a.run.app',
-                'https://auth-staging.netrasystems.ai',
+                'https://netra-auth-*.a.run.app',
+                'https://auth.netrasystems.ai',
                 'https://staging-auth.netra.dev'
             ]
         }

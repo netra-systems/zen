@@ -57,7 +57,7 @@ class WebSocketHeaderStrippingValidator:
         
         # Headers that simulate what gets through Load Balancer WITHOUT auth
         stripped_headers = {
-            "host": "staging.netra.ai", 
+            "host": "staging.netrasystems.ai", 
             "via": "1.1 google",
             "x-forwarded-for": "203.0.113.1",
             "x-forwarded-proto": "https",

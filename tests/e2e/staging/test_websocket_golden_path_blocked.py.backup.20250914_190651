@@ -49,7 +49,7 @@ Golden Path E2E Testing:
 - Tests actual user experience degradation and timeout scenarios
 
 E2E Test Characteristics:
-- Real GCP staging services (api-staging.netra.ai)
+- Real GCP staging services (api-staging.netrasystems.ai)
 - Real WebSocket connections with full authentication
 - Real agent execution and business logic
 - Real database persistence and state management
@@ -186,7 +186,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                 # Create test user token for this attempt
                 test_token = self.auth_helper.create_test_token(
                     f"golden_path_user_{attempt}_{int(time.time())}",
-                    f"golden_path_{attempt}@staging.netra.ai"
+                    f"golden_path_{attempt}@staging.netrasystems.ai"
                 )
                 
                 # Real WebSocket connection with authentication
@@ -406,7 +406,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                 # Create unique test user for this chat scenario
                 test_token = self.auth_helper.create_test_token(
                     f"chat_user_{scenario['name'].lower()}_{int(time.time())}",
-                    f"chat_{scenario['name'].lower()}@staging.netra.ai"
+                    f"chat_{scenario['name'].lower()}@staging.netrasystems.ai"
                 )
                 
                 # Attempt chat connection
@@ -564,7 +564,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                 # Create test user for event testing
                 test_token = self.auth_helper.create_test_token(
                     f"event_test_user_{attempt}_{int(time.time())}",
-                    f"events_{attempt}@staging.netra.ai"
+                    f"events_{attempt}@staging.netrasystems.ai"
                 )
                 
                 headers = {

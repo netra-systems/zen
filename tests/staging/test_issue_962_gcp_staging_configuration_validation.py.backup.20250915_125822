@@ -61,7 +61,7 @@ class TestIssue962GcpStagingConfigurationValidation(SSotAsyncTestCase, unittest.
 
         # GCP Staging environment configuration
         self.staging_base_url = self.env.get("STAGING_BASE_URL", "https://netra-staging.com")
-        self.staging_auth_url = self.env.get("STAGING_AUTH_URL", "https://auth-staging.netra.com")
+        self.staging_auth_url = self.env.get("STAGING_AUTH_URL", "https://auth.netra.com")
         self.staging_websocket_url = self.env.get("STAGING_WS_URL", "wss://staging.netra.com/ws")
 
         # Production readiness tracking

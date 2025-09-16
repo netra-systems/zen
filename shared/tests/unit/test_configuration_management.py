@@ -155,10 +155,10 @@ class TestIsolatedEnvironmentValidationPatterns:
         
         Based on OAuth regression analysis - prevents credential exposure and auth failures.
         """
-        oauth_config = {'GOOGLE_CLIENT_ID': 'backend-oauth-client-id', 'GOOGLE_CLIENT_SECRET': 'backend-oauth-client-secret', 'GOOGLE_OAUTH_CLIENT_ID_STAGING': 'auth-staging-oauth-client-id', 'GOOGLE_OAUTH_CLIENT_SECRET_STAGING': 'auth-staging-oauth-client-secret'}
+        oauth_config = {'GOOGLE_CLIENT_ID': 'backend-oauth-client-id', 'GOOGLE_CLIENT_SECRET': 'backend-oauth-client-secret', 'GOOGLE_OAUTH_CLIENT_ID_STAGING': 'auth-oauth-client-id', 'GOOGLE_OAUTH_CLIENT_SECRET_STAGING': 'auth-oauth-client-secret'}
         clean_env.update(oauth_config, source='oauth_test')
         assert clean_env.get('GOOGLE_CLIENT_ID') == 'backend-oauth-client-id'
-        assert clean_env.get('GOOGLE_OAUTH_CLIENT_ID_STAGING') == 'auth-staging-oauth-client-id'
+        assert clean_env.get('GOOGLE_OAUTH_CLIENT_ID_STAGING') == 'auth-oauth-client-id'
         clean_env.set('JWT_SECRET_KEY', 'short', 'jwt_test')
         jwt_secret = clean_env.get('JWT_SECRET_KEY')
         if len(jwt_secret) < 32:
@@ -256,7 +256,7 @@ class TestEnvironmentValidatorCascadeFailurePrevention:
         Based on 2025-09-07 incident: SERVICE_ID with timestamp caused auth failures every 60s.
         """
         validator, env = validator_with_env
-        problematic_ids = ['netra-backend-20250907-123456', 'netra-auth-staging-1694123456', 'service-pr-4-test-20250907']
+        problematic_ids = ['netra-backend-20250907-123456', 'netra-auth-1694123456', 'service-pr-4-test-20250907']
         for service_id in problematic_ids:
             env.set('SERVICE_ID', service_id, 'stability_test')
             result = validator.validate_service_id_stability()

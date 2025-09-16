@@ -365,7 +365,7 @@ class MediumLowStorageTests:
         """Test #75: File download"""
         file_download = {
             "file_id": str(uuid.uuid4()),
-            "download_url": f"https://storage.netra.ai/files/{uuid.uuid4()}",
+            "download_url": f"https://storage.netrasystems.ai/files/{uuid.uuid4()}",
             "expires_at": (datetime.utcnow() + timedelta(hours=1)).isoformat(),
             "access_control": {
                 "owner": "user_123",

@@ -1124,8 +1124,8 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
         # Test CORS preflight handling for authentication
         test_origins = [
             "http://localhost:3000",  # Development frontend
-            "https://app.netra.ai",   # Production frontend
-            "https://staging.netra.ai"  # Staging frontend
+            "https://app.netrasystems.ai",   # Production frontend
+            "https://staging.netrasystems.ai"  # Staging frontend
         ]
         
         env = get_env()
@@ -1159,7 +1159,7 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
         cross_origin_token = jwt.encode({
             "user_id": self.test_user_id,
             "email": self.test_email,
-            "origin": "https://app.netra.ai",
+            "origin": "https://app.netrasystems.ai",
             "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp())
         }, self.test_jwt_secret, algorithm="HS256")
         
@@ -1168,13 +1168,13 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
                 "valid": True,
                 "user_id": self.test_user_id,
                 "email": self.test_email,
-                "origin": "https://app.netra.ai"
+                "origin": "https://app.netrasystems.ai"
             })
             
             validation_result = await _validate_token_with_auth_service(cross_origin_token)
             
             assert validation_result.get("valid") is True, "Cross-origin token should be valid"
-            assert validation_result.get("origin") == "https://app.netra.ai", "Origin should be preserved"
+            assert validation_result.get("origin") == "https://app.netrasystems.ai", "Origin should be preserved"
         
         self.record_metric("cross_origin_auth_tested", True)
 

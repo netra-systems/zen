@@ -10,7 +10,8 @@ import json
 import gc
 from shared.isolated_environment import IsolatedEnvironment
 
-sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 
 from netra_backend.app.websocket_core.manager import WebSocketManager
 

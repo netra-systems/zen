@@ -97,7 +97,7 @@ class TestSSotUserExecutionContextStaging(SSotAsyncTestCase):
             websocket_endpoint='/ws',
             health_check_endpoint='/health',
             test_user_credentials={
-                'email': self.env.get('STAGING_TEST_USER_EMAIL', 'test@netra.ai'),
+                'email': self.env.get('STAGING_TEST_USER_EMAIL', 'test@netrasystems.ai'),
                 'password': self.env.get('STAGING_TEST_USER_PASSWORD', 'test_password')
             }
         )

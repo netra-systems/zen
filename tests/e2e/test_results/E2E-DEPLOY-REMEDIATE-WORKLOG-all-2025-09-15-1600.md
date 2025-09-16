@@ -103,7 +103,7 @@
 #### Authentication Test Failures (ALL CRITICAL):
 - Complete OAuth authentication system failure
 - "Invalid E2E bypass key" errors across all tests
-- Auth service connectivity issues (auth-service-staging.netra.ai DNS resolution failures)
+- Auth service connectivity issues (auth-service-staging.netrasystems.ai DNS resolution failures)
 - Token generation fallbacks working but not accepted by backend
 
 ### Infrastructure Validation Tests - PARTIAL SUCCESS
@@ -148,7 +148,7 @@
 ### IMMEDIATE ACTION REQUIRED (P0):
 1. **Fix OAuth Authentication System (Issue #1234)**
    - Investigation needed: E2E bypass key configuration in staging
-   - Auth service DNS resolution issues (auth-service-staging.netra.ai)
+   - Auth service DNS resolution issues (auth-service-staging.netrasystems.ai)
    - Token validation logic between auth service and backend
 
 2. **Restore Agent Execution Pipeline (Issue #1229)**

@@ -190,7 +190,7 @@ class TestDatabaseManagerGCPCloudSQL(BaseIntegrationTest):
             await self._create_staging_test_tables(engine)
             
             # Test real database operations in Cloud SQL
-            test_email = f"gcp_test_{int(time.time())}@netra.ai"
+            test_email = f"gcp_test_{int(time.time())}@netrasystems.ai"
             async with db_manager.get_session() as session:
                 # Insert test data
                 await session.execute(
@@ -280,7 +280,7 @@ class TestDatabaseManagerGCPCloudSQL(BaseIntegrationTest):
                 # Note: Cloud SQL Unix sockets don't report SSL status the same way as TCP connections
                 
                 # Test that sensitive operations work securely
-                test_email = f"ssl_test_{int(time.time())}@netra.ai"
+                test_email = f"ssl_test_{int(time.time())}@netrasystems.ai"
                 await session.execute(
                     text("INSERT INTO e2e_staging_users (email, username, metadata_json) VALUES (:email, :username, :metadata)"),
                     {
@@ -340,7 +340,7 @@ class TestDatabaseManagerGCPCloudSQL(BaseIntegrationTest):
                     try:
                         async with db_manager.get_session() as session:
                             # Complex transaction simulating real business logic
-                            test_email = f"load_test_user_{user_id}_{op}@netra.ai"
+                            test_email = f"load_test_user_{user_id}_{op}@netrasystems.ai"
                             
                             # Insert user
                             await session.execute(
@@ -418,7 +418,7 @@ class TestDatabaseManagerGCPCloudSQL(BaseIntegrationTest):
                 # Check total users created
                 result = await session.execute(
                     text("SELECT COUNT(*) FROM e2e_staging_users WHERE email LIKE :pattern"),
-                    {"pattern": "load_test_user_%@netra.ai"}
+                    {"pattern": "load_test_user_%@netrasystems.ai"}
                 )
                 user_count = result.scalar()
                 
@@ -444,7 +444,7 @@ class TestDatabaseManagerGCPCloudSQL(BaseIntegrationTest):
                 # Clean up test data
                 await session.execute(
                     text("DELETE FROM e2e_staging_users WHERE email LIKE :pattern"),
-                    {"pattern": "load_test_user_%@netra.ai"}
+                    {"pattern": "load_test_user_%@netrasystems.ai"}
                 )
                 await session.execute(
                     text("DELETE FROM e2e_performance_metrics WHERE test_name = :test"),

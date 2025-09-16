@@ -57,7 +57,7 @@ class ToolExecutionOrchestrationE2ETests(BaseE2ETest):
         assert self.staging_config.validate_configuration(), 'Staging configuration invalid'
         self.test_users = []
         for i in range(2):
-            user_context = await create_authenticated_user_context(user_email=f'tool_orchestration_test_{i}_{int(time.time())}@staging.netra.ai', environment='staging', permissions=['read', 'write', 'execute_agents', 'execute_tools', 'orchestrate_workflows'])
+            user_context = await create_authenticated_user_context(user_email=f'tool_orchestration_test_{i}_{int(time.time())}@staging.netrasystems.ai', environment='staging', permissions=['read', 'write', 'execute_agents', 'execute_tools', 'orchestrate_workflows'])
             self.test_users.append(user_context)
         self.tool_executions = {}
         self.tool_results = {}

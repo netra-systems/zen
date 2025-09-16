@@ -82,170 +82,213 @@ class AgentExecutionCoreGoldenPathTests(SSotAsyncTestCase, unittest.TestCase):
         self.state_changes = []
         self.performance_metrics = []
 
-    async def async_setup_method(self, method):
-        """Async setup for agent and context initialization."""
-        await super().async_setup_method(method)
+    async def asyncSetUp(self):
+        """Async setup method for business value tests."""
+        await super().asyncSetUp()
+        
+        # Initialize business value scenarios for local testing
+        self.business_value_scenarios = [
+            {
+                "scenario_name": "agent_execution_core_protection",
+                "customer_tier": "Enterprise", 
+                "arr_value": 500000,
+                "test_type": "unit_local"
+            },
+            {
+                "scenario_name": "supervisor_agent_functionality",
+                "customer_tier": "Premium",
+                "arr_value": 250000,
+                "test_type": "unit_local" 
+            }
+        ]
+        
+        # Set local testing environment
+        self.set_env_var("TESTING", "true")
+        self.set_env_var("TEST_OFFLINE", "true") 
+        self.set_env_var("NO_REAL_SERVERS", "true")
+        
+        # Initialize execution tracker for tests
         self.execution_tracker = get_execution_tracker()
 
     @pytest.mark.unit
     @pytest.mark.golden_path
-    async def test_supervisor_agent_initialization_and_configuration(self):
+    def test_supervisor_agent_initialization_and_configuration(self):
         """
         BVJ: All segments | System Reliability | Ensures supervisor agent initializes correctly
         Test SupervisorAgent initialization with proper configuration.
         """
-        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
-        assert supervisor is not None
-        assert supervisor.llm_manager == self.mock_llm_manager
-        assert hasattr(supervisor, 'name')
-        assert hasattr(supervisor, 'description')
-        assert supervisor.name.lower() == 'supervisor'
-        assert 'orchestrat' in supervisor.description.lower()
-        assert hasattr(supervisor, 'state')
-        initial_state = supervisor.get_state()
-        from netra_backend.app.schemas.agent import SubAgentLifecycle
-        assert initial_state == SubAgentLifecycle.PENDING
-        mock_bridge = AsyncMock(spec=AgentWebSocketBridge)
-        supervisor.websocket_bridge = mock_bridge
-        assert supervisor.websocket_bridge == mock_bridge
-        logger.info(' PASS:  SupervisorAgent initialization validation passed')
+        async def _async_test():
+            supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
+            assert supervisor is not None
+            assert supervisor.llm_manager == self.mock_llm_manager
+            assert hasattr(supervisor, 'name')
+            assert hasattr(supervisor, 'description')
+            assert supervisor.name.lower() == 'supervisor'
+            assert 'orchestrat' in supervisor.description.lower()
+            assert hasattr(supervisor, 'state')
+            initial_state = supervisor.get_state()
+            from netra_backend.app.schemas.agent import SubAgentLifecycle
+            assert initial_state == SubAgentLifecycle.PENDING
+            mock_bridge = AsyncMock(spec=AgentWebSocketBridge)
+            supervisor.websocket_bridge = mock_bridge
+            assert supervisor.websocket_bridge == mock_bridge
+            logger.info(' PASS:  SupervisorAgent initialization validation passed')
+        
+        # Run async code properly
+        asyncio.run(_async_test())
 
     @pytest.mark.unit
     @pytest.mark.golden_path
-    async def test_execution_engine_factory_user_isolation_patterns(self):
+    def test_execution_engine_factory_user_isolation_patterns(self):
         """
         BVJ: All segments | User Isolation | Ensures proper user context isolation
         Test UnifiedExecutionEngineFactory creates properly isolated execution environments.
         """
-        websocket_bridge = AgentWebSocketBridge()
-        user1_context = UserExecutionContext(user_id=str(uuid.uuid4()), thread_id=str(uuid.uuid4()), run_id=str(uuid.uuid4()))
-        user2_context = UserExecutionContext(user_id=str(uuid.uuid4()), thread_id=str(uuid.uuid4()), run_id=str(uuid.uuid4()))
-        engine1 = await UserExecutionEngine.create_execution_engine(user_context=user1_context, websocket_bridge=websocket_bridge)
-        engine2 = await UserExecutionEngine.create_execution_engine(user_context=user2_context, websocket_bridge=websocket_bridge)
-        assert engine1 is not engine2, 'Engines should be separate instances'
-        assert id(engine1) != id(engine2), 'Engines should have different memory addresses'
-        context1 = engine1.get_user_context()
-        context2 = engine2.get_user_context()
-        assert context1.user_id != context2.user_id, 'User IDs should be different'
-        assert context1.thread_id != context2.thread_id, 'Thread IDs should be different'
-        assert context1.run_id != context2.run_id, 'Run IDs should be different'
-        test_key = 'test_agent_state'
-        user1_value = 'user1_specific_value'
-        user2_value = 'user2_specific_value'
-        engine1.set_agent_state(test_key, user1_value)
-        engine2.set_agent_state(test_key, user2_value)
-        assert engine1.get_agent_state(test_key) == user1_value
-        assert engine2.get_agent_state(test_key) == user2_value
-        assert engine1.get_agent_state(test_key) != engine2.get_agent_state(test_key)
-        execution_data1 = {'message': 'user1_message', 'type': 'analysis'}
-        execution_data2 = {'message': 'user2_message', 'type': 'optimization'}
-        engine1.set_agent_result('current_task', execution_data1)
-        engine2.set_agent_result('current_task', execution_data2)
-        retrieved_data1 = engine1.get_agent_result('current_task')
-        retrieved_data2 = engine2.get_agent_result('current_task')
-        assert retrieved_data1['message'] == 'user1_message'
-        assert retrieved_data2['message'] == 'user2_message'
-        logger.info(' PASS:  UnifiedExecutionEngineFactory user isolation validation passed')
+        async def _async_test():
+            websocket_bridge = AgentWebSocketBridge()
+            user1_context = UserExecutionContext(user_id=str(uuid.uuid4()), thread_id=str(uuid.uuid4()), run_id=str(uuid.uuid4()))
+            user2_context = UserExecutionContext(user_id=str(uuid.uuid4()), thread_id=str(uuid.uuid4()), run_id=str(uuid.uuid4()))
+            engine1 = await UserExecutionEngine.create_execution_engine(user_context=user1_context, websocket_bridge=websocket_bridge)
+            engine2 = await UserExecutionEngine.create_execution_engine(user_context=user2_context, websocket_bridge=websocket_bridge)
+            assert engine1 is not engine2, 'Engines should be separate instances'
+            assert id(engine1) != id(engine2), 'Engines should have different memory addresses'
+            context1 = engine1.get_user_context()
+            context2 = engine2.get_user_context()
+            assert context1.user_id != context2.user_id, 'User IDs should be different'
+            assert context1.thread_id != context2.thread_id, 'Thread IDs should be different'
+            assert context1.run_id != context2.run_id, 'Run IDs should be different'
+            test_key = 'test_agent_state'
+            user1_value = 'user1_specific_value'
+            user2_value = 'user2_specific_value'
+            engine1.set_agent_state(test_key, user1_value)
+            engine2.set_agent_state(test_key, user2_value)
+            assert engine1.get_agent_state(test_key) == user1_value
+            assert engine2.get_agent_state(test_key) == user2_value
+            assert engine1.get_agent_state(test_key) != engine2.get_agent_state(test_key)
+            execution_data1 = {'message': 'user1_message', 'type': 'analysis'}
+            execution_data2 = {'message': 'user2_message', 'type': 'optimization'}
+            engine1.set_agent_result('current_task', execution_data1)
+            engine2.set_agent_result('current_task', execution_data2)
+            retrieved_data1 = engine1.get_agent_result('current_task')
+            retrieved_data2 = engine2.get_agent_result('current_task')
+            assert retrieved_data1['message'] == 'user1_message'
+            assert retrieved_data2['message'] == 'user2_message'
+            logger.info(' PASS:  UnifiedExecutionEngineFactory user isolation validation passed')
+        
+        # Run async code properly
+        asyncio.run(_async_test())
 
     @pytest.mark.unit
     @pytest.mark.golden_path
-    async def test_agent_state_management_and_transitions(self):
+    def test_agent_state_management_and_transitions(self):
         """
         BVJ: All segments | State Management | Ensures proper agent state handling
         Test agent state management and state transitions during execution.
         """
-        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
-        state_history = []
+        async def _async_test():
+            supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
+            state_history = []
 
-        def track_state_change(old_state, new_state):
-            state_history.append((old_state, new_state, datetime.utcnow()))
-        from netra_backend.app.schemas.agent import SubAgentLifecycle
-        original_set_state = supervisor.set_state
+            def track_state_change(old_state, new_state):
+                state_history.append((old_state, new_state, datetime.utcnow()))
+            from netra_backend.app.schemas.agent import SubAgentLifecycle
+            original_set_state = supervisor.set_state
 
-        def tracked_set_state(new_state):
-            old_state = supervisor.get_state()
-            result = original_set_state(new_state)
-            track_state_change(old_state, new_state)
-            return result
-        supervisor.set_state = tracked_set_state
-        initial_state = supervisor.get_state()
-        assert initial_state == SubAgentLifecycle.PENDING
-        supervisor.set_state(SubAgentLifecycle.RUNNING)
-        assert supervisor.get_state() == SubAgentLifecycle.RUNNING
-        supervisor.set_state(SubAgentLifecycle.COMPLETED)
-        assert supervisor.get_state() == SubAgentLifecycle.COMPLETED
-        error_supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
-        error_supervisor.set_state(SubAgentLifecycle.RUNNING)
-        error_supervisor.set_state(SubAgentLifecycle.FAILED)
-        assert error_supervisor.get_state() == SubAgentLifecycle.FAILED
-        reset_supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
-        assert reset_supervisor.get_state() == SubAgentLifecycle.PENDING
-        assert len(state_history) == 2, f'Expected 2 state transitions, got {len(state_history)}'
-        expected_transitions = [(SubAgentLifecycle.PENDING, SubAgentLifecycle.RUNNING), (SubAgentLifecycle.RUNNING, SubAgentLifecycle.COMPLETED)]
-        for i, (expected_old, expected_new) in enumerate(expected_transitions):
-            actual_old, actual_new, timestamp = state_history[i]
-            assert actual_old == expected_old, f'Transition {i}: expected old state {expected_old}, got {actual_old}'
-            assert actual_new == expected_new, f'Transition {i}: expected new state {expected_new}, got {actual_new}'
-            assert isinstance(timestamp, datetime), f'Transition {i}: timestamp should be datetime'
-        logger.info(' PASS:  Agent state management validation passed')
+            def tracked_set_state(new_state):
+                old_state = supervisor.get_state()
+                result = original_set_state(new_state)
+                track_state_change(old_state, new_state)
+                return result
+            supervisor.set_state = tracked_set_state
+            initial_state = supervisor.get_state()
+            assert initial_state == SubAgentLifecycle.PENDING
+            supervisor.set_state(SubAgentLifecycle.RUNNING)
+            assert supervisor.get_state() == SubAgentLifecycle.RUNNING
+            supervisor.set_state(SubAgentLifecycle.COMPLETED)
+            assert supervisor.get_state() == SubAgentLifecycle.COMPLETED
+            error_supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
+            error_supervisor.set_state(SubAgentLifecycle.RUNNING)
+            error_supervisor.set_state(SubAgentLifecycle.FAILED)
+            assert error_supervisor.get_state() == SubAgentLifecycle.FAILED
+            reset_supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
+            assert reset_supervisor.get_state() == SubAgentLifecycle.PENDING
+            assert len(state_history) == 2, f'Expected 2 state transitions, got {len(state_history)}'
+            expected_transitions = [(SubAgentLifecycle.PENDING, SubAgentLifecycle.RUNNING), (SubAgentLifecycle.RUNNING, SubAgentLifecycle.COMPLETED)]
+            for i, (expected_old, expected_new) in enumerate(expected_transitions):
+                actual_old, actual_new, timestamp = state_history[i]
+                assert actual_old == expected_old, f'Transition {i}: expected old state {expected_old}, got {actual_old}'
+                assert actual_new == expected_new, f'Transition {i}: expected new state {expected_new}, got {actual_new}'
+                assert isinstance(timestamp, datetime), f'Transition {i}: timestamp should be datetime'
+            logger.info(' PASS:  Agent state management validation passed')
+        
+        # Run async code properly
+        asyncio.run(_async_test())
 
     @pytest.mark.unit
     @pytest.mark.golden_path
-    async def test_agent_execution_workflow_coordination(self):
+    def test_agent_execution_workflow_coordination(self):
         """
         BVJ: All segments | Workflow Management | Ensures proper execution coordination
         Test agent execution workflow and coordination logic.
         """
-        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
-        mock_bridge = AsyncMock(spec=AgentWebSocketBridge)
-        supervisor.websocket_bridge = mock_bridge
-        execution_steps = []
+        async def _async_test():
+            supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
+            mock_bridge = AsyncMock(spec=AgentWebSocketBridge)
+            supervisor.websocket_bridge = mock_bridge
+            execution_steps = []
 
-        async def mock_llm_response(*args, **kwargs):
-            execution_steps.append('llm_call')
-            return {'response': "I'll analyze your request and coordinate the appropriate sub-agents.", 'workflow': {'steps': ['triage', 'data_collection', 'analysis', 'report_generation'], 'estimated_time': '2-3 minutes'}}
-        self.mock_llm_client.agenerate.side_effect = mock_llm_response
-        start_time = time.time()
-        result = await supervisor.execute(context=self.user_context, stream_updates=True)
-        execution_time = time.time() - start_time
-        assert result is not None, 'Execution should return a result'
-        if isinstance(result, dict):
-            assert 'status' in result or 'success' in result or 'supervisor_result' in result
-        elif hasattr(result, 'success'):
-            assert hasattr(result, 'success')
-            assert hasattr(result, 'error')
-        bridge_calls = mock_bridge.method_calls
-        assert len(bridge_calls) > 0, 'WebSocket bridge should be called for events'
-        called_methods = [call.method for call in bridge_calls if hasattr(call, 'method')]
-        assert len(bridge_calls) > 0, 'Bridge should be called during execution'
-        assert execution_time < 5.0, f'Execution took too long: {execution_time}s'
-        logger.info(f'Execution steps tracked: {execution_steps}')
-        logger.info(f' PASS:  Agent execution workflow validation passed: {execution_time:.3f}s')
+            async def mock_llm_response(*args, **kwargs):
+                execution_steps.append('llm_call')
+                return {'response': "I'll analyze your request and coordinate the appropriate sub-agents.", 'workflow': {'steps': ['triage', 'data_collection', 'analysis', 'report_generation'], 'estimated_time': '2-3 minutes'}}
+            self.mock_llm_client.agenerate.side_effect = mock_llm_response
+            start_time = time.time()
+            result = await supervisor.execute(context=self.user_context, stream_updates=True)
+            execution_time = time.time() - start_time
+            assert result is not None, 'Execution should return a result'
+            if isinstance(result, dict):
+                assert 'status' in result or 'success' in result or 'supervisor_result' in result
+            elif hasattr(result, 'success'):
+                assert hasattr(result, 'success')
+                assert hasattr(result, 'error')
+            bridge_calls = mock_bridge.method_calls
+            assert len(bridge_calls) > 0, 'WebSocket bridge should be called for events'
+            called_methods = [call.method for call in bridge_calls if hasattr(call, 'method')]
+            assert len(bridge_calls) > 0, 'Bridge should be called during execution'
+            assert execution_time < 5.0, f'Execution took too long: {execution_time}s'
+            logger.info(f'Execution steps tracked: {execution_steps}')
+            logger.info(f' PASS:  Agent execution workflow validation passed: {execution_time:.3f}s')
+        
+        # Run async code properly
+        asyncio.run(_async_test())
 
     @pytest.mark.unit
     @pytest.mark.golden_path
-    async def test_agent_error_handling_and_recovery_mechanisms(self):
+    def test_agent_error_handling_and_recovery_mechanisms(self):
         """
         BVJ: All segments | System Reliability | Ensures robust error handling
         Test agent error handling and recovery mechanisms.
         """
-        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
-        failing_client = AsyncMock()
+        async def _async_test():
+            supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager, user_context=self.user_context)
+            failing_client = AsyncMock()
 
-        async def failing_llm_response(*args, **kwargs):
-            raise Exception('LLM service temporarily unavailable')
-        failing_client.agenerate.side_effect = failing_llm_response
-        self.mock_llm_manager.get_default_client.return_value = failing_client
-        error_events = []
+            async def failing_llm_response(*args, **kwargs):
+                raise Exception('LLM service temporarily unavailable')
+            failing_client.agenerate.side_effect = failing_llm_response
+            self.mock_llm_manager.get_default_client.return_value = failing_client
+            error_events = []
 
-        async def capture_error_event(*args, **kwargs):
-            if len(args) > 0 and 'error' in str(args[0]).lower():
-                error_events.append({'args': args, 'kwargs': kwargs})
-        mock_bridge = AsyncMock(spec=AgentWebSocketBridge)
-        mock_bridge.notify_agent_error = capture_error_event
-        supervisor.websocket_bridge = mock_bridge
-        # Execute and validate graceful error handling (SSOT pattern)
-        result = await supervisor.execute(context=self.user_context, stream_updates=True)
+            async def capture_error_event(*args, **kwargs):
+                if len(args) > 0 and 'error' in str(args[0]).lower():
+                    error_events.append({'args': args, 'kwargs': kwargs})
+            mock_bridge = AsyncMock(spec=AgentWebSocketBridge)
+            mock_bridge.notify_agent_error = capture_error_event
+            supervisor.websocket_bridge = mock_bridge
+            # Execute and validate graceful error handling (SSOT pattern)
+            result = await supervisor.execute(context=self.user_context, stream_updates=True)
+            return result
+        
+        result = asyncio.run(_async_test())
         assert result is not None, "Execution should return result even on error"
         assert isinstance(result, dict), "Result should be dict format"
         
@@ -286,16 +329,20 @@ class AgentExecutionCoreGoldenPathTests(SSotAsyncTestCase, unittest.TestCase):
         final_state = supervisor.get_state()
         from netra_backend.app.schemas.agent import SubAgentLifecycle
         assert final_state != SubAgentLifecycle.COMPLETED, f'Agent should not be in COMPLETED state after error, got {final_state}'
-        working_client = AsyncMock()
-        working_client.agenerate.return_value = {'response': 'Recovery successful, proceeding with analysis.', 'status': 'recovered'}
-        self.mock_llm_manager.get_default_client.return_value = working_client
-        # Only reset state if not already in PENDING
-        current_state = supervisor.get_state()
-        if current_state != SubAgentLifecycle.PENDING:
-            supervisor.set_state(SubAgentLifecycle.PENDING)
-        recovery_result = await supervisor.execute(context=self.user_context, stream_updates=True)
+        # Test recovery mechanism with working client
+        async def _async_recovery_test():
+            working_client = AsyncMock()
+            working_client.agenerate.return_value = {'response': 'Recovery successful, proceeding with analysis.', 'status': 'recovered'}
+            self.mock_llm_manager.get_default_client.return_value = working_client
+            # Only reset state if not already in PENDING
+            current_state = supervisor.get_state()
+            if current_state != SubAgentLifecycle.PENDING:
+                supervisor.set_state(SubAgentLifecycle.PENDING)
+            recovery_result = await supervisor.execute(context=self.user_context, stream_updates=True)
+            return recovery_result, supervisor.get_state()
+        
+        recovery_result, recovery_state = asyncio.run(_async_recovery_test())
         assert recovery_result is not None, 'Recovery execution should succeed'
-        recovery_state = supervisor.get_state()
         assert recovery_state != SubAgentLifecycle.FAILED, f'Agent should recover from error state, got {recovery_state}'
         logger.info(' PASS:  Agent error handling and recovery validation passed')
 

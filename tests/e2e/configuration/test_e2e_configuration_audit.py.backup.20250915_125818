@@ -44,7 +44,7 @@ class TestE2EConfigurationAudit(SSotBaseTestCase):
     FORBIDDEN_CLOUDRUN_PATTERNS = [
         r"netra-backend-staging-[a-z0-9]+-uc\.a\.run\.app",
         r"netra-frontend-staging-[a-z0-9]+-uc\.a\.run\.app",
-        r"auth-staging-[a-z0-9]+-uc\.a\.run\.app",
+        r"auth-[a-z0-9]+-uc\.a\.run\.app",
         r"[a-zA-Z0-9-]+-staging-[a-zA-Z0-9]+-uc\.a\.run\.app"
     ]
     

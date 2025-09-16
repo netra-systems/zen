@@ -6,7 +6,7 @@
       "output_format": "stream-json"
     },
     {
-      "command": "/clear-old-issue-locks",
+      "command": "/runtests agents, e2e gcp",
       "permission_mode": "acceptEdits",
       "output_format": "stream-json"
     },

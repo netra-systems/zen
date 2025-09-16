@@ -87,7 +87,7 @@ class WebSocketConnectionLifecycleTests(SSotAsyncTestCase):
         self.env = IsolatedEnvironment()
         self.env.set('TESTING', '1', source='websocket_lifecycle_test')
         self.env.set('USE_REAL_SERVICES', 'true', source='websocket_lifecycle_test')
-        self.test_users = [TestUserData(user_id=f'test_user_{uuid.uuid4().hex[:8]}', email=f'test{i}@netra.ai', tier='early', thread_id=f'test_thread_{uuid.uuid4().hex[:8]}') for i in range(3)]
+        self.test_users = [TestUserData(user_id=f'test_user_{uuid.uuid4().hex[:8]}', email=f'test{i}@netrasystems.ai', tier='early', thread_id=f'test_thread_{uuid.uuid4().hex[:8]}') for i in range(3)]
         self.active_connections: Dict[str, Any] = {}
         self.websocket_managers: List[Any] = []
 

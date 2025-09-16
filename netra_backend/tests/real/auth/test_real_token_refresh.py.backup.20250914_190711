@@ -118,7 +118,7 @@ class TestRealTokenRefresh:
         # Access token (short-lived)
         access_payload = {
             JWTConstants.SUBJECT: f"user_{user_id}",
-            JWTConstants.EMAIL: f"user{user_id}@netra.ai",
+            JWTConstants.EMAIL: f"user{user_id}@netrasystems.ai",
             JWTConstants.ISSUED_AT: int(now.timestamp()),
             JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=15)).timestamp()),  # 15 min
             JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,
@@ -130,7 +130,7 @@ class TestRealTokenRefresh:
         # Refresh token (long-lived)
         refresh_payload = {
             JWTConstants.SUBJECT: f"user_{user_id}",
-            JWTConstants.EMAIL: f"user{user_id}@netra.ai",
+            JWTConstants.EMAIL: f"user{user_id}@netrasystems.ai",
             JWTConstants.ISSUED_AT: int(now.timestamp()),
             JWTConstants.EXPIRES_AT: int((now + timedelta(days=7)).timestamp()),  # 7 days
             JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,
@@ -247,7 +247,7 @@ class TestRealTokenRefresh:
             now = datetime.utcnow()
             new_access_payload = {
                 JWTConstants.SUBJECT: f"user_{user_id}",
-                JWTConstants.EMAIL: f"user{user_id}@netra.ai",
+                JWTConstants.EMAIL: f"user{user_id}@netrasystems.ai",
                 JWTConstants.ISSUED_AT: int(now.timestamp()),
                 JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=15)).timestamp()),
                 JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,
@@ -315,7 +315,7 @@ class TestRealTokenRefresh:
             # New access token
             new_access_payload = {
                 JWTConstants.SUBJECT: f"user_{user_id}",
-                JWTConstants.EMAIL: f"user{user_id}@netra.ai",
+                JWTConstants.EMAIL: f"user{user_id}@netrasystems.ai",
                 JWTConstants.ISSUED_AT: int(now.timestamp()),
                 JWTConstants.EXPIRES_AT: int((now + timedelta(minutes=15)).timestamp()),
                 JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,
@@ -328,7 +328,7 @@ class TestRealTokenRefresh:
             # New refresh token
             new_refresh_payload = {
                 JWTConstants.SUBJECT: f"user_{user_id}",
-                JWTConstants.EMAIL: f"user{user_id}@netra.ai",
+                JWTConstants.EMAIL: f"user{user_id}@netrasystems.ai",
                 JWTConstants.ISSUED_AT: int(now.timestamp()),
                 JWTConstants.EXPIRES_AT: int((now + timedelta(days=7)).timestamp()),
                 JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,
@@ -391,7 +391,7 @@ class TestRealTokenRefresh:
         expired_time = datetime.utcnow() - timedelta(hours=1)
         expired_refresh_payload = {
             JWTConstants.SUBJECT: f"user_{user_id}",
-            JWTConstants.EMAIL: f"user{user_id}@netra.ai",
+            JWTConstants.EMAIL: f"user{user_id}@netrasystems.ai",
             JWTConstants.ISSUED_AT: int(expired_time.timestamp()),
             JWTConstants.EXPIRES_AT: int(expired_time.timestamp()),  # Already expired
             JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,

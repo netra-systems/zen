@@ -219,8 +219,8 @@ class TestUserExperienceQualityE2E(SSotAsyncTestCase):
 ```yaml
 # GCP Staging E2E Test Configuration
 staging_environment:
-  websocket_url: "wss://staging-backend.netra.ai/ws"
-  auth_service_url: "https://staging-auth.netra.ai"
+  websocket_url: "wss://staging-api.netrasystems.ai/ws"
+  auth_service_url: "https://staging-auth.netrasystems.ai"
   test_users: "demo-users with isolated contexts"
   performance_targets:
     websocket_connection: "< 2 seconds"

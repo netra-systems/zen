@@ -285,7 +285,7 @@ class TestDataGenerator:
     def _generate_referrer(self) -> str:
         """Generate realistic referrer URL."""
         referrers = [
-            "https://google.com", "https://netra.ai", "https://docs.netra.ai",
+            "https://google.com", "https://netrasystems.ai", "https://docs.netrasystems.ai",
             "", "https://github.com", "https://stackoverflow.com"
         ]
         return random.choice(referrers)

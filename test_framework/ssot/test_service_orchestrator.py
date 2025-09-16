@@ -94,7 +94,7 @@ class EnvironmentServiceResolver:
             ),
             ServiceType.AUTH: ServiceEndpoint(
                 local_url="http://localhost:8001", 
-                staging_url="https://auth-staging-123456789-uc.a.run.app",
+                staging_url="https://auth-123456789-uc.a.run.app",
                 health_path="/health"
             ),
             ServiceType.POSTGRES: ServiceEndpoint(

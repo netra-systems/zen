@@ -36,7 +36,7 @@ test_get_env_signature_error.py::TestGetEnvSignatureError::test_staging_config_p
 ```
 TypeError: get_env() takes 0 positional arguments but 2 were given
 tests/e2e/golden_path/test_complete_golden_path_e2e_staging.py:115: in setup_method
-    "base_url": get_env("STAGING_BASE_URL", "https://staging.netra.ai"),
+    "base_url": get_env("STAGING_BASE_URL", "https://staging.netrasystems.ai"),
 ```
 
 **Error Location:** Line 115 in `setup_method` where staging configuration is built.
@@ -121,15 +121,15 @@ value = get_env().get("VARIABLE_NAME", "default_value")  # ✅ CORRECT
 ```python
 # Current incorrect pattern (80+ instances):
 config = {
-    "base_url": get_env("STAGING_BASE_URL", "https://staging.netra.ai"),  # ❌
-    "api_url": get_env("STAGING_API_URL", "https://staging.netra.ai/api"), # ❌
+    "base_url": get_env("STAGING_BASE_URL", "https://staging.netrasystems.ai"),  # ❌
+    "api_url": get_env("STAGING_API_URL", "https://staging.netrasystems.ai/api"), # ❌
 }
 
 # Correct pattern:
 env = get_env()
 config = {
-    "base_url": env.get("STAGING_BASE_URL", "https://staging.netra.ai"),  # ✅
-    "api_url": env.get("STAGING_API_URL", "https://staging.netra.ai/api"), # ✅
+    "base_url": env.get("STAGING_BASE_URL", "https://staging.netrasystems.ai"),  # ✅
+    "api_url": env.get("STAGING_API_URL", "https://staging.netrasystems.ai/api"), # ✅
 }
 ```
 

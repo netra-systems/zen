@@ -469,8 +469,8 @@ class CloudEnvironmentDetector:
             "staging", "stage", "-stg-", "_staging_", 
             "-staging", "-stage", "stg-", "stage-",
             # Netra-specific patterns
-            "netra-backend-staging", "netra-auth-staging", 
-            "backend-staging", "auth-staging"
+            "netra-backend-staging", "netra-auth", 
+            "backend-staging", "auth"
         ]
         if any(pattern in service_lower for pattern in staging_patterns):
             return EnvironmentType.STAGING
@@ -500,7 +500,7 @@ class CloudEnvironmentDetector:
             return EnvironmentType.STAGING
         elif service_lower == "netra-backend":
             return EnvironmentType.PRODUCTION
-        elif service_lower in ["netra-auth-staging", "backend-staging", "auth-staging"]:
+        elif service_lower in ["netra-auth", "backend-staging", "auth"]:
             return EnvironmentType.STAGING
         
         return EnvironmentType.UNKNOWN

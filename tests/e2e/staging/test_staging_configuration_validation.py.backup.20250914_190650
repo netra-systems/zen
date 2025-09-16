@@ -74,7 +74,7 @@ class TestStagingConfigurationValidation(BaseE2ETest):
         
         # Create authenticated user for configuration testing
         self.test_user_context = await create_authenticated_user_context(
-            user_email=f"e2e_config_test_{int(time.time())}@staging.netra.ai",
+            user_email=f"e2e_config_test_{int(time.time())}@staging.netrasystems.ai",
             environment="staging",
             permissions=["read", "write", "admin", "config_validation"]
         )

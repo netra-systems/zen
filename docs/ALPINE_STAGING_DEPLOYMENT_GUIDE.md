@@ -39,7 +39,7 @@ docker-compose -f docker-compose.staging.alpine.yml up --build
 
 # Or build images separately
 docker build -f docker/backend.staging.alpine.Dockerfile -t netra-backend-staging:alpine .
-docker build -f docker/auth.staging.alpine.Dockerfile -t netra-auth-staging:alpine .
+docker build -f docker/auth.staging.alpine.Dockerfile -t netra-auth:alpine .
 docker build -f docker/frontend.staging.alpine.Dockerfile -t netra-frontend-staging:alpine .
 
 # Run with pre-built images

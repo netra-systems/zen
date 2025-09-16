@@ -359,8 +359,8 @@ class EnhancedUserCreationHelper(UserCreationHelper):
             UserPersona.DEVELOPER_USER: "github.com", 
             UserPersona.MID_TIER_BUSINESS: "business.com",
             UserPersona.DATA_SCIENTIST: "research.edu",
-            UserPersona.ADMIN_USER: "netra.ai",
-            UserPersona.SUPPORT_USER: "netra.ai"
+            UserPersona.ADMIN_USER: "netrasystems.ai",
+            UserPersona.SUPPORT_USER: "netrasystems.ai"
         }
         domain = domain_map.get(persona, "example.com")
         email = f"{persona.value}_{user_id[:8]}@{domain}"

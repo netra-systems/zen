@@ -66,7 +66,7 @@ class CrossServiceAuthFlowTest(SSotAsyncTestCase):
         # Test configuration
         self.timeout = 30
         self.test_user = {
-            "email": "test-cross-service@netra.ai",
+            "email": "test-cross-service@netrasystems.ai",
             "password": "CrossServiceTest123!"
         }
         

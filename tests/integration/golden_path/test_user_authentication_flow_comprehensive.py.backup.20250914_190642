@@ -989,7 +989,7 @@ class TestUserAuthenticationFlowComprehensive(
             "headers": {
                 "Authorization": f"Bearer {middleware_user['access_token']}",
                 "Content-Type": "application/json",
-                "Origin": "https://app.netra.ai",
+                "Origin": "https://app.netrasystems.ai",
                 "X-Forwarded-For": "192.168.1.100",
                 "User-Agent": "Mozilla/5.0 (Test Client)"
             },
@@ -1007,7 +1007,7 @@ class TestUserAuthenticationFlowComprehensive(
         def cors_middleware(context):
             """Simulate CORS middleware processing."""
             origin = context["headers"].get("Origin")
-            if origin and "netra.ai" in origin:
+            if origin and "netrasystems.ai" in origin:
                 context["cors_valid"] = True
                 middleware_execution_order.append("cors_middleware")
                 return True
@@ -1158,7 +1158,7 @@ class TestUserAuthenticationFlowComprehensive(
             "headers": {
                 "Authorization": "Bearer invalid.token.here",
                 "Content-Type": "application/json",
-                "Origin": "https://app.netra.ai"
+                "Origin": "https://app.netrasystems.ai"
             },
             "method": "POST",
             "path": "/api/chat/send",

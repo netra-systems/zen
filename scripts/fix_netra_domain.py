@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fix incorrect netra.ai domain references to netrasystems.ai."""
+"""Fix incorrect netrasystems.ai domain references to netrasystems.ai."""
 
 import os
 import re
@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 def fix_domain_in_file(file_path: Path) -> List[Tuple[int, str, str]]:
-    """Fix netra.ai domain references in a file."""
+    """Fix netrasystems.ai domain references in a file."""
     changes = []
     
     try:
@@ -16,11 +16,11 @@ def fix_domain_in_file(file_path: Path) -> List[Tuple[int, str, str]]:
         
         modified = False
         for i, line in enumerate(lines):
-            # Find all variations of netra.ai domain
-            if 'netra.ai' in line and 'netrasystems.ai' not in line:
+            # Find all variations of netrasystems.ai domain
+            if 'netrasystems.ai' in line and 'netrasystems.ai' not in line:
                 old_line = line
                 # Replace domain while preserving the rest of the URL structure
-                new_line = line.replace('netra.ai', 'netrasystems.ai')
+                new_line = line.replace('netrasystems.ai', 'netrasystems.ai')
                 
                 if new_line != old_line:
                     lines[i] = new_line
@@ -43,7 +43,7 @@ def fix_domain_in_file(file_path: Path) -> List[Tuple[int, str, str]]:
 
 def main():
     """Main function to fix all files."""
-    # List of files identified with netra.ai references
+    # List of files identified with netrasystems.ai references
     test_files = [
         'netra_backend/tests/integration/critical_paths/test_multi_tenant_data_isolation_l4.py',
         'netra_backend/tests/integration/critical_paths/test_production_deployment_e2e_l4.py',
@@ -62,7 +62,7 @@ def main():
     total_changes = 0
     files_fixed = 0
     
-    print("=== Fixing netra.ai domain references to netrasystems.ai ===\n")
+    print("=== Fixing netrasystems.ai domain references to netrasystems.ai ===\n")
     
     for file_path in test_files:
         full_path = root_dir / file_path

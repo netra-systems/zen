@@ -280,7 +280,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         mock_websocket = self._create_mock_websocket({
             "authorization": f"Bearer {token}",
             "user-agent": "Free-Tier-Client/1.0",
-            "origin": "https://app.netra.ai"
+            "origin": "https://app.netrasystems.ai"
         })
         
         authenticator = get_websocket_authenticator()
@@ -307,7 +307,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         mock_websocket = self._create_mock_websocket({
             "authorization": f"Bearer {token}",
             "user-agent": "Enterprise-Client/2.0", 
-            "origin": "https://enterprise.netra.ai"
+            "origin": "https://enterprise.netrasystems.ai"
         })
         
         authenticator = get_websocket_authenticator()
@@ -417,7 +417,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         """
         mock_websocket = self._create_mock_websocket({
             "user-agent": "Anonymous-Client/1.0",
-            "origin": "https://public.netra.ai"
+            "origin": "https://public.netrasystems.ai"
         })
         
         authenticator = get_websocket_authenticator()
@@ -572,7 +572,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         # Test legitimate origin
         legitimate_websocket = self._create_mock_websocket({
             "authorization": f"Bearer {token}",
-            "origin": "https://app.netra.ai",
+            "origin": "https://app.netrasystems.ai",
             "user-agent": "Legitimate-Client/1.0"
         })
         

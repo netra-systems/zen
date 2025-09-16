@@ -202,7 +202,7 @@ class GoldenPathAuthSSOTViolationsTests(BaseE2ETest):
         
         service_endpoints = [
             f"{staging_config.get('backend_url', 'https://netra-staging.com')}/health",
-            f"{staging_config.get('auth_url', 'https://auth-staging.com')}/health"
+            f"{staging_config.get('auth_url', 'https://auth.com')}/health"
         ]
         
         env_consistency_results = {}
@@ -288,7 +288,7 @@ class GoldenPathAuthSSOTViolationsTests(BaseE2ETest):
         """Get staging environment configuration."""
         return {
             'backend_url': 'https://backend-staging-service-dot-netra-staging.uk.r.appspot.com',
-            'auth_url': 'https://auth-staging-service-dot-netra-staging.uk.r.appspot.com',  
+            'auth_url': 'https://auth-service-dot-netra-staging.uk.r.appspot.com',  
             'websocket_url': 'wss://backend-staging-service-dot-netra-staging.uk.r.appspot.com',
             'frontend_url': 'https://netra-staging.com'
         }

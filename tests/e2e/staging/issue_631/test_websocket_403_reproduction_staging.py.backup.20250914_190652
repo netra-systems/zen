@@ -42,8 +42,8 @@ class TestWebSocket403ReproductionStaging(SSotAsyncTestCase):
         self.env = IsolatedEnvironment()
         
         # Staging URLs
-        self.staging_backend_url = self.staging_config.get("BACKEND_URL", "https://netra-backend-staging.netra.ai")
-        self.staging_websocket_url = self.staging_config.get("WEBSOCKET_URL", "wss://netra-backend-staging.netra.ai/ws")
+        self.staging_backend_url = self.staging_config.get("BACKEND_URL", "https://netra-backend-staging.netrasystems.ai")
+        self.staging_websocket_url = self.staging_config.get("WEBSOCKET_URL", "wss://netra-backend-staging.netrasystems.ai/ws")
         self.staging_auth_service_url = self.staging_config.get("AUTH_SERVICE_URL", None)
         
         logger.info(f"Staging Backend URL: {self.staging_backend_url}")
@@ -87,7 +87,7 @@ class TestWebSocket403ReproductionStaging(SSotAsyncTestCase):
             websocket_headers["Authorization"] = f"Bearer {auth_token}"
         
         websocket_headers.update({
-            "Origin": "https://netra.ai",
+            "Origin": "https://netrasystems.ai",
             "User-Agent": "Netra-E2E-Test/1.0"
         })
         
@@ -171,7 +171,7 @@ class TestWebSocket403ReproductionStaging(SSotAsyncTestCase):
         # ACT: Connect with valid token
         websocket_headers = {
             "Authorization": f"Bearer {auth_token}",
-            "Origin": "https://netra.ai"
+            "Origin": "https://netrasystems.ai"
         }
         
         connection_successful = False
@@ -224,7 +224,7 @@ class TestWebSocket403ReproductionStaging(SSotAsyncTestCase):
                 websocket_headers = {}
                 if invalid_token:
                     websocket_headers["Authorization"] = f"Bearer {invalid_token}"
-                websocket_headers["Origin"] = "https://netra.ai"
+                websocket_headers["Origin"] = "https://netrasystems.ai"
                 
                 # ACT: Attempt connection with invalid token
                 got_403_error = False
@@ -313,7 +313,7 @@ class TestWebSocket403ReproductionStaging(SSotAsyncTestCase):
         
         websocket_headers = {
             "Authorization": f"Bearer {auth_token}",
-            "Origin": "https://netra.ai"
+            "Origin": "https://netrasystems.ai"
         }
         
         # ACT: Test connection with short timeout

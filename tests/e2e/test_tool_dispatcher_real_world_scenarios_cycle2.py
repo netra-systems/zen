@@ -32,7 +32,7 @@ class ToolDispatcherRealWorldScenariosE2ETests(BaseE2ETest):
         """Create authenticated user for E2E testing."""
         auth_helper = E2EAuthHelper()
         user = await auth_helper.create_authenticated_user(
-            email="e2e_tool_user@test.netra.ai",
+            email="e2e_tool_user@test.netrasystems.ai",
             name="E2E Tool Dispatcher Test User"
         )
         return user

@@ -25,7 +25,7 @@ def test_alpine_dockerfile_config_issue_1082():
         'auth.alpine.Dockerfile': 'auth',
         'frontend.alpine.Dockerfile': 'frontend',
         'backend.staging.alpine.Dockerfile': 'backend-staging',
-        'auth.staging.alpine.Dockerfile': 'auth-staging',
+        'auth.staging.alpine.Dockerfile': 'auth',
         'frontend.staging.alpine.Dockerfile': 'frontend-staging'
     }
 

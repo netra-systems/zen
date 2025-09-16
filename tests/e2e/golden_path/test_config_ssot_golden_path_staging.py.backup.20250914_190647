@@ -56,7 +56,7 @@ class TestConfigSSotGoldenPathStaging(SSotAsyncTestCase):
     def test_user_credentials(self):
         """Test user credentials for staging authentication."""
         return {
-            'email': 'test@netra.ai',
+            'email': 'test@netrasystems.ai',
             'password': 'test123'
         }
 
@@ -431,7 +431,7 @@ class TestGoldenPathConfigIntegration:
         }
 
         test_credentials = {
-            'email': 'test@netra.ai',
+            'email': 'test@netrasystems.ai',
             'password': 'test123'
         }
 

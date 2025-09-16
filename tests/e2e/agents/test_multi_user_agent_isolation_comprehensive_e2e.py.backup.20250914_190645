@@ -75,7 +75,7 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
 
         for i in range(user_count):
             user_context = await create_authenticated_user_context(
-                user_email=f"isolation_test_user_{i}_{int(time.time())}@staging.netra.ai",
+                user_email=f"isolation_test_user_{i}_{int(time.time())}@staging.netrasystems.ai",
                 environment="staging",
                 permissions=["read", "write", "execute_agents"],
                 user_metadata={

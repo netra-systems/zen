@@ -311,7 +311,7 @@ class EventModelTests:
             "country_code": "US",
             "page_path": "/chat",
             "page_title": "Chat Interface",
-            "referrer": "https://netra.ai/dashboard",
+            "referrer": "https://netrasystems.ai/dashboard",
             "gtm_container_id": "GTM-TEST123",
             "environment": "test",
             "app_version": "1.0.0-test"

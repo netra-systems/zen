@@ -101,10 +101,10 @@ python -m pytest tests/issue_639/test_golden_path_staging_get_env_signature_bug.
 # In tests/e2e/golden_path/test_complete_golden_path_e2e_staging.py
 
 # BROKEN (Lines 115-119, 124-125):
-"base_url": get_env("STAGING_BASE_URL", "https://staging.netra.ai"),
+"base_url": get_env("STAGING_BASE_URL", "https://staging.netrasystems.ai"),
 
 # FIXED:
-"base_url": get_env().get("STAGING_BASE_URL", "https://staging.netra.ai"),
+"base_url": get_env().get("STAGING_BASE_URL", "https://staging.netrasystems.ai"),
 ```
 
 #### Phase 3: Post-Fix Validation (Functionality Verification)

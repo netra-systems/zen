@@ -15,7 +15,7 @@ import { test, expect, Page, Browser } from '@playwright/test';
 
 // Configuration for staging environment tests
 const STAGING_CONFIG = {
-  baseURL: process.env.STAGING_BASE_URL || 'https://staging.netra.ai',
+  baseURL: process.env.STAGING_BASE_URL || 'https://staging.netrasystems.ai',
   timeout: 30000,
   retries: 2,
   viewport: { width: 1280, height: 720 },

@@ -226,15 +226,15 @@ class TestIsolatedEnvironmentValidationPatterns:
             "GOOGLE_CLIENT_SECRET": "backend-oauth-client-secret",
             
             # Auth service pattern (environment-specific)
-            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "auth-staging-oauth-client-id",
-            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "auth-staging-oauth-client-secret"
+            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "auth-oauth-client-id",
+            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "auth-oauth-client-secret"
         }
         
         clean_env.update(oauth_config, source="oauth_test")
         
         # Verify both patterns are supported
         assert clean_env.get("GOOGLE_CLIENT_ID") == "backend-oauth-client-id"
-        assert clean_env.get("GOOGLE_OAUTH_CLIENT_ID_STAGING") == "auth-staging-oauth-client-id"
+        assert clean_env.get("GOOGLE_OAUTH_CLIENT_ID_STAGING") == "auth-oauth-client-id"
         
         # Test JWT secret validation
         clean_env.set("JWT_SECRET_KEY", "short", "jwt_test")
@@ -406,7 +406,7 @@ class TestEnvironmentValidatorCascadeFailurePrevention:
         # Test problematic SERVICE_ID patterns
         problematic_ids = [
             "netra-backend-20250907-123456",  # Timestamp suffix
-            "netra-auth-staging-1694123456",  # Different timestamp format
+            "netra-auth-1694123456",  # Different timestamp format
             "service-pr-4-test-20250907"      # PR build pattern
         ]
         

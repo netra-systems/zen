@@ -55,7 +55,7 @@ class OAuthCompleteAuthenticationFlowIntegrationTests(BaseIntegrationTest):
         self.auth_config = E2EAuthConfig(
             auth_service_url="http://localhost:8081",  # Test auth service
             backend_url="http://localhost:8000",       # Test backend
-            test_user_email=f"oauth-integration-{uuid.uuid4().hex[:8]}@netra.ai",
+            test_user_email=f"oauth-integration-{uuid.uuid4().hex[:8]}@netrasystems.ai",
             jwt_secret="integration-oauth-jwt-secret-32-chars-long-key",
             timeout=15.0
         )
@@ -74,7 +74,7 @@ class OAuthCompleteAuthenticationFlowIntegrationTests(BaseIntegrationTest):
         """Test that OAuth simulation creates valid user session with proper JWT tokens."""
         # Arrange: Create unique test user for OAuth simulation
         test_user_id = f"oauth-sim-user-{int(time.time())}"
-        test_email = f"oauth-sim-{test_user_id}@netra.ai"
+        test_email = f"oauth-sim-{test_user_id}@netrasystems.ai"
         
         # Act: Use OAuth simulation to create user session
         simulation_key = self.env.get("E2E_OAUTH_SIMULATION_KEY")
@@ -138,7 +138,7 @@ class OAuthCompleteAuthenticationFlowIntegrationTests(BaseIntegrationTest):
         """Test that OAuth token refresh preserves OAuth provider data and permissions."""
         # Arrange: Create OAuth user session with provider data
         test_user_id = f"oauth-refresh-user-{int(time.time())}"
-        test_email = f"oauth-refresh-{test_user_id}@netra.ai"
+        test_email = f"oauth-refresh-{test_user_id}@netrasystems.ai"
         provider = "github"
         provider_user_id = f"github-{uuid.uuid4().hex[:8]}"
         original_permissions = ["read:agents", "write:threads", "oauth:github"]
@@ -333,7 +333,7 @@ class OAuthCompleteAuthenticationFlowIntegrationTests(BaseIntegrationTest):
     async def test_oauth_error_handling_for_invalid_simulation_keys(self, real_services_fixture):
         """Test that OAuth simulation properly handles invalid keys and malformed requests."""
         test_user_id = f"oauth-error-user-{int(time.time())}"
-        test_email = f"oauth-error-{test_user_id}@netra.ai"
+        test_email = f"oauth-error-{test_user_id}@netrasystems.ai"
         
         error_test_cases = [
             {

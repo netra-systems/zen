@@ -319,7 +319,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
         """
         # Create test user
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'timeout_handling_test@netra.ai',
+            'email': 'timeout_handling_test@netrasystems.ai',
             'name': 'Timeout Handling Test User',
             'is_active': True
         })
@@ -519,7 +519,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
         recover their session state without losing progress or context.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'timeout_recovery_test@netra.ai',
+            'email': 'timeout_recovery_test@netrasystems.ai',
             'name': 'Timeout Recovery Test User',
             'is_active': True
         })
@@ -773,7 +773,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
         
         for user_index in range(3):
             user_data = await self.create_test_user_context(real_services_fixture, {
-                'email': f'concurrent_timeout_user_{user_index}@netra.ai',
+                'email': f'concurrent_timeout_user_{user_index}@netrasystems.ai',
                 'name': f'Concurrent Timeout User {user_index}',
                 'is_active': True
             })

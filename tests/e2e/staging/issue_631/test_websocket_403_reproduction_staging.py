@@ -34,8 +34,8 @@ class WebSocket403ReproductionStagingTests(SSotAsyncTestCase):
         self.auth_config = E2EAuthConfig.for_staging()
         self.auth_helper = E2EAuthHelper(config=self.auth_config, environment='staging')
         self.env = IsolatedEnvironment()
-        self.staging_backend_url = self.staging_config.get('BACKEND_URL', 'https://netra-backend-staging.netra.ai')
-        self.staging_websocket_url = self.staging_config.get('WEBSOCKET_URL', 'wss://netra-backend-staging.netra.ai/ws')
+        self.staging_backend_url = self.staging_config.get('BACKEND_URL', 'https://netra-backend-staging.netrasystems.ai')
+        self.staging_websocket_url = self.staging_config.get('WEBSOCKET_URL', 'wss://netra-backend-staging.netrasystems.ai/ws')
         self.staging_auth_service_url = self.staging_config.get('AUTH_SERVICE_URL', None)
         logger.info(f'Staging Backend URL: {self.staging_backend_url}')
         logger.info(f'Staging WebSocket URL: {self.staging_websocket_url}')
@@ -68,7 +68,7 @@ class WebSocket403ReproductionStagingTests(SSotAsyncTestCase):
         websocket_headers = {}
         if auth_token:
             websocket_headers['Authorization'] = f'Bearer {auth_token}'
-        websocket_headers.update({'Origin': 'https://netra.ai', 'User-Agent': 'Netra-E2E-Test/1.0'})
+        websocket_headers.update({'Origin': 'https://netrasystems.ai', 'User-Agent': 'Netra-E2E-Test/1.0'})
         start_time = time.time()
         connection_error = None
         try:
@@ -113,7 +113,7 @@ class WebSocket403ReproductionStagingTests(SSotAsyncTestCase):
             self.assertIsNotNone(auth_token, 'Should be able to get valid JWT token from auth service')
         except Exception as e:
             self.skipTest(f'Cannot get valid JWT token - auth service integration issue: {e}')
-        websocket_headers = {'Authorization': f'Bearer {auth_token}', 'Origin': 'https://netra.ai'}
+        websocket_headers = {'Authorization': f'Bearer {auth_token}', 'Origin': 'https://netrasystems.ai'}
         connection_successful = False
         try:
             async with websockets.connect(self.staging_websocket_url, additional_headers=websocket_headers, timeout=15) as websocket:
@@ -141,7 +141,7 @@ class WebSocket403ReproductionStagingTests(SSotAsyncTestCase):
                 websocket_headers = {}
                 if invalid_token:
                     websocket_headers['Authorization'] = f'Bearer {invalid_token}'
-                websocket_headers['Origin'] = 'https://netra.ai'
+                websocket_headers['Origin'] = 'https://netrasystems.ai'
                 got_403_error = False
                 try:
                     async with websockets.connect(self.staging_websocket_url, additional_headers=websocket_headers, timeout=10) as websocket:
@@ -185,7 +185,7 @@ class WebSocket403ReproductionStagingTests(SSotAsyncTestCase):
             auth_token = await self.auth_helper.get_valid_jwt_token()
         except Exception as e:
             self.skipTest(f'Cannot get auth token for timeout test: {e}')
-        websocket_headers = {'Authorization': f'Bearer {auth_token}', 'Origin': 'https://netra.ai'}
+        websocket_headers = {'Authorization': f'Bearer {auth_token}', 'Origin': 'https://netrasystems.ai'}
         timeout_occurred = False
         start_time = time.time()
         try:

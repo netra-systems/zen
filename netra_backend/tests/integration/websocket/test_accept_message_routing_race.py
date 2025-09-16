@@ -71,7 +71,7 @@ class AcceptMessageRoutingRaceTest(BaseIntegrationTest):
         self.accept_timing_violations: List[str] = []
         self.test_users = []
         for i in range(3):
-            user_data = self.auth_helper.create_test_user(username=f'race_test_user_{i}_{int(time.time())}', email=f'race_user_{i}_{int(time.time())}@test.netra.ai')
+            user_data = self.auth_helper.create_test_user(username=f'race_test_user_{i}_{int(time.time())}', email=f'race_user_{i}_{int(time.time())}@test.netrasystems.ai')
             self.test_users.append(user_data)
         self.active_connections: Dict[str, Dict[str, Any]] = {}
         self.message_attempts: List[Dict[str, Any]] = []

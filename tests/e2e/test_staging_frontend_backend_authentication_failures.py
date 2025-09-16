@@ -227,7 +227,7 @@ async def test_jwt_secret_synchronization_failure():
     """
     replicator = StagingAuthenticationFailureReplicator()
     try:
-        mock_token_payload = {'sub': replicator.test_user_id, 'email': 'test@staging.example.com', 'iat': int(time.time()), 'exp': int(time.time() + 3600), 'iss': 'netra-auth-staging'}
+        mock_token_payload = {'sub': replicator.test_user_id, 'email': 'test@staging.example.com', 'iat': int(time.time()), 'exp': int(time.time() + 3600), 'iss': 'netra-auth'}
         validation_result = await replicator.auth_client.validate_token_jwt(f'mock_jwt_token_{uuid.uuid4().hex}')
         if validation_result and validation_result.get('valid'):
             pytest.fail('JWT validation should fail due to secret mismatch but succeeded')

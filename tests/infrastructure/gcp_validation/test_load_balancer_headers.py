@@ -70,8 +70,8 @@ class GCPLoadBalancerHeaderForwardingTests(SSotBaseTestCase):
         cls.gcp_project = 'netra-staging'
         cls.load_balancer_ip = None
         cls.backend_service_url = None
-        cls.staging_urls = {'frontend': 'https://staging.netra.ai', 'backend': 'https://api-staging.netra.ai', 'websocket': 'wss://api-staging.netra.ai/ws', 'health': 'https://api-staging.netra.ai/health'}
-        cls.test_headers = {'authorization': 'Bearer test.jwt.token.12345', 'x-user-id': 'test-user-123', 'x-auth-degraded': 'true', 'x-emergency-access': 'true', 'x-demo-mode': '1', 'x-custom-auth': 'custom-auth-value', 'origin': 'https://staging.netra.ai', 'user-agent': 'AuthPermissiveness/1.0 Test Client'}
+        cls.staging_urls = {'frontend': 'https://staging.netrasystems.ai', 'backend': 'https://api-staging.netrasystems.ai', 'websocket': 'wss://api-staging.netrasystems.ai/ws', 'health': 'https://api-staging.netrasystems.ai/health'}
+        cls.test_headers = {'authorization': 'Bearer test.jwt.token.12345', 'x-user-id': 'test-user-123', 'x-auth-degraded': 'true', 'x-emergency-access': 'true', 'x-demo-mode': '1', 'x-custom-auth': 'custom-auth-value', 'origin': 'https://staging.netrasystems.ai', 'user-agent': 'AuthPermissiveness/1.0 Test Client'}
         cls.expected_lb_config = {'url_map_name': 'netra-staging-url-map', 'backend_service_name': 'netra-staging-backend', 'websocket_path_rules': ['/ws', '/websocket'], 'header_forwarding_rules': ['authorization', 'x-user-id', 'x-auth-*', 'x-emergency-*', 'x-demo-*']}
 
     async def asyncSetUp(self):
