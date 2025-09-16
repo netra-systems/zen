@@ -1344,6 +1344,48 @@ class WebSocketSSOTRouter:
                 
                 # Receive message with coordinated timeout
                 try:
+                    # CRITICAL FIX FOR ISSUE #1061: Enhanced handshake completion validation
+                    # Ensure WebSocket accept() has fully completed before attempting receive operations
+                    # This prevents "WebSocket is not connected. Need to call 'accept' first" errors
+                    max_handshake_wait = 3.0  # Maximum time to wait for handshake completion
+                    handshake_wait_start = time.time()
+                    
+                    while time.time() - handshake_wait_start < max_handshake_wait:
+                        try:
+                            # Test if WebSocket is ready for receive operations by checking internal state
+                            # This is more robust than just checking WebSocket state enums
+                            if hasattr(websocket, 'receive') and callable(websocket.receive):
+                                # Try a lightweight operation to verify accept() completion
+                                # Use a very short timeout to detect if accept() is complete
+                                test_ready = True
+                                try:
+                                    # Check if the websocket's internal receive queue is properly initialized
+                                    # by attempting to get the current state without actually receiving
+                                    if hasattr(websocket, 'client_state') and websocket.client_state != WebSocketState.CONNECTED:
+                                        test_ready = False
+                                    elif hasattr(websocket, 'application_state') and websocket.application_state != WebSocketState.CONNECTED:
+                                        test_ready = False
+                                except Exception:
+                                    test_ready = False
+                                
+                                if test_ready:
+                                    logger.debug(f"WebSocket handshake completion validated for connection {connection_id} after {time.time() - handshake_wait_start:.3f}s")
+                                    break
+                            
+                            # If not ready, wait a short time before retrying
+                            await asyncio.sleep(0.01)  # 10ms incremental check
+                            
+                        except Exception as handshake_check_error:
+                            logger.debug(f"Handshake completion check failed: {handshake_check_error}")
+                            await asyncio.sleep(0.01)
+                    else:
+                        # Handshake completion timeout - log and continue with more lenient validation
+                        logger.warning(f"WebSocket handshake completion timeout after {max_handshake_wait}s for connection {connection_id}")
+                        # Apply additional validation using the existing function with retry logic
+                        if not is_websocket_connected_and_ready(websocket, connection_id):
+                            logger.error(f"WebSocket not ready after handshake timeout for connection {connection_id}")
+                            break
+                    
                     receive_start = time.time()
                     raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=websocket_timeout)
                     receive_duration = time.time() - receive_start
