@@ -1160,7 +1160,7 @@ __all__ = [
     'WebSocketManager',  # SSOT: Canonical WebSocket Manager import
     # SSOT PHASE 2 FIX: Removed 'UnifiedWebSocketManager' - import from unified_manager.py (canonical)
     'WebSocketConnectionManager',  # SSOT: Backward compatibility alias (Issue #824)
-    'WebSocketManagerFactory',  # ISSUE #1182: Legacy factory interface (consolidated)
+    # 'WebSocketManagerFactory',  # ISSUE #1098: Removed - Use get_websocket_manager() instead
     'WebSocketConnection',
     # REMOVED: WebSocketManagerProtocol - import directly from netra_backend.app.websocket_core.protocols
     # REMOVED: WebSocketManagerMode - import directly from netra_backend.app.websocket_core.types
