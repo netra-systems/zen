@@ -24,11 +24,11 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union, Callable
 from uuid import uuid4
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.schemas.startup_types import ErrorType as BaseErrorType
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 # =============================================================================
