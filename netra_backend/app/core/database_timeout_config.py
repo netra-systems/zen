@@ -262,11 +262,12 @@ def get_database_timeout_config(environment: str) -> Dict[str, float]:
             # Cloud SQL resource constraints: 25s delay under concurrent connection pressure
             # Network latency amplification: 10s additional delay during infrastructure stress
             # Safety margin for cascading failures: 15s buffer
-            "initialization_timeout": 75.0,    # CRITICAL: Extended to handle compound VPC+CloudSQL delays (increased from 45.0)
-            "table_setup_timeout": 25.0,       # Extended for schema operations under load (increased from 15.0)
-            "connection_timeout": 35.0,        # Extended for VPC connector peak scaling delays (increased from 25.0)
-            "pool_timeout": 45.0,              # Extended for connection pool exhaustion + VPC delays (increased from 30.0)
-            "health_check_timeout": 20.0,      # Extended for compound infrastructure health checks (increased from 15.0)
+            # URGENT UPDATE: Auth service was failing with 15s timeout - now aligned with auth service 90s
+            "initialization_timeout": 90.0,    # CRITICAL: Aligned with auth service validation timeout (increased from 75.0)
+            "table_setup_timeout": 35.0,       # Extended for schema operations under load (increased from 25.0)
+            "connection_timeout": 50.0,        # Extended for VPC connector peak scaling delays (increased from 35.0)
+            "pool_timeout": 60.0,              # Extended for connection pool exhaustion + VPC delays (increased from 45.0)
+            "health_check_timeout": 30.0,      # Extended for compound infrastructure health checks (increased from 20.0)
         },
         "production": {
             # CRITICAL: Production needs maximum reliability
