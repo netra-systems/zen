@@ -96,26 +96,120 @@ class GitHubAnalyzerService(BaseAgent):
             .add_post_execution_hook(self._post_execution_hook) \
             .build()
     
+    def _create_user_execution_context(
+        self, 
+        state: DeepAgentState, 
+        context: Dict[str, Any]
+    ) -> UserExecutionContext:
+        """Create UserExecutionContext for proper user isolation.
+        
+        PHASE 1 MIGRATION: Creates UserExecutionContext from DeepAgentState and context
+        to ensure proper user isolation during GitHub repository analysis.
+        
+        SECURITY CRITICAL: Prevents cross-user data contamination by establishing
+        proper isolation boundaries for each analysis request.
+        """
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        
+        # Extract user information with fallbacks
+        user_id = context.get("user_id") or state.user_id
+        if not user_id:
+            # Generate a secure user_id for anonymous analysis (still isolated)
+            user_id = UnifiedIdGenerator.generate_base_id("github_user")
+        
+        thread_id = context.get("thread_id") or state.chat_thread_id
+        if not thread_id:
+            thread_id = UnifiedIdGenerator.generate_base_id("github_thread")
+        
+        run_id = context.get("run_id") or state.run_id
+        if not run_id:
+            run_id = UnifiedIdGenerator.generate_base_id("github_run")
+        
+        # Create agent context for analysis-specific data
+        agent_context = {
+            'operation_name': 'github_repository_analysis',
+            'repository_url': context.get('repository_url'),
+            'analysis_type': context.get('analysis_type', 'full'),
+            'stream_updates': context.get('stream_updates', False),
+            'user_request': state.user_request,
+            'user_prompt': state.user_prompt
+        }
+        
+        # Merge existing agent_context from state
+        if state.agent_context:
+            agent_context.update(state.agent_context)
+        
+        # Create audit metadata for compliance and debugging
+        audit_metadata = {
+            'component': 'GitHubAnalyzerService',
+            'migration_phase': 'phase_1',
+            'correlation_id': context.get('correlation_id'),
+            'original_context': {k: v for k, v in context.items() if k not in ['repository_url']},  # Exclude sensitive data
+            'state_metadata': state.metadata.model_dump() if state.metadata else {}
+        }
+        
+        return UserExecutionContext(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            websocket_client_id=context.get('websocket_client_id'),
+            agent_context=agent_context,
+            audit_metadata=audit_metadata,
+            operation_depth=0
+        )
+
     @agent_type_safe
     async def execute(
         self, 
         state: DeepAgentState, 
         context: Dict[str, Any]
     ) -> TypedAgentResult:
-        """Execute repository analysis using BaseExecutionEngine."""
+        """Execute repository analysis using BaseExecutionEngine with enhanced user isolation.
+        
+        PHASE 1 MIGRATION: Now uses UserExecutionContext for proper user isolation
+        during GitHub repository analysis, preventing cross-user data contamination.
+        """
         try:
             await self._validate_input(context)
             
-            # Create execution context
+            # PHASE 1 MIGRATION: Create UserExecutionContext for proper isolation
+            try:
+                user_context = self._create_user_execution_context(state, context)
+                # Validate that migration is safe
+                UserExecutionContextAdapter.validate_migration_compatibility(state, user_context)
+                
+                # Update state with UserExecutionContext data for enhanced isolation
+                enhanced_state = UserExecutionContextAdapter.create_deep_state_from_user_context(user_context)
+                
+                logger.info(
+                    f"PHASE 1 MIGRATION: Created isolated execution context for GitHub analysis. "
+                    f"user_id={user_context.user_id[:8]}..., run_id={user_context.run_id}, "
+                    f"repository_url={context.get('repository_url', 'unknown')}"
+                )
+                
+            except Exception as migration_error:
+                logger.warning(
+                    f"PHASE 1 MIGRATION: Failed to create UserExecutionContext, falling back to legacy pattern. "
+                    f"Error: {migration_error}"
+                )
+                enhanced_state = state
+                user_context = None
+            
+            # Create execution context (backward compatible)
             execution_context = ExecutionContext(
                 run_id=context.get("run_id", "github_analysis"),
                 agent_name=self.name,
-                state=state,
+                state=enhanced_state,
                 stream_updates=context.get("stream_updates", False),
                 thread_id=context.get("thread_id"),
-                user_id=context.get("user_id"),
+                user_id=context.get("user_id") or enhanced_state.user_id,
                 correlation_id=context.get("correlation_id")
             )
+            
+            # Store both contexts for enhanced isolation tracking
+            execution_context.analysis_context = context
+            if user_context:
+                execution_context.user_context = user_context
             
             # Store analysis context in execution context
             execution_context.analysis_context = context
