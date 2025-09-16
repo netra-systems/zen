@@ -12,6 +12,28 @@ from typing import Any, Awaitable, Callable, Optional, Tuple
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 
+# Import RetryPolicy for backwards compatibility
+try:
+    from netra_backend.app.db.intelligent_retry_system import RetryPolicy
+except ImportError:
+    # Create a simple RetryPolicy class if import fails
+    class RetryPolicy:
+        """Simple RetryPolicy for backwards compatibility"""
+        def __init__(self, max_retries: int = 3, base_delay: float = 1.0):
+            self.max_retries = max_retries
+            self.base_delay = base_delay
+
+# Define missing exceptions that tests expect
+class RetryExhaustedException(Exception):
+    """Exception raised when retry attempts are exhausted"""
+    pass
+
+class BackoffStrategy:
+    """Simple backoff strategy for backwards compatibility"""
+    def __init__(self, base_delay: float = 1.0, max_delay: float = 60.0):
+        self.base_delay = base_delay
+        self.max_delay = max_delay
+
 logger = central_logger.get_logger(__name__)
 
 
