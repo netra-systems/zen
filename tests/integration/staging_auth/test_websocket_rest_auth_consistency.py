@@ -30,7 +30,7 @@ class WebSocketRESTAuthConsistencyTests(SSotAsyncTestCase):
     async def asyncSetUpClass(cls):
         """Setup cross-protocol auth consistency testing"""
         await super().asyncSetUpClass()
-        cls.staging_auth_service_url = os.getenv('STAGING_AUTH_SERVICE_URL', 'https://auth-staging.netra-apex.com')
+        cls.staging_auth_service_url = os.getenv('STAGING_AUTH_SERVICE_URL', 'https://auth.netra-apex.com')
         cls.staging_backend_url = os.getenv('STAGING_BACKEND_URL', 'https://backend-staging.netra-apex.com')
         cls.staging_websocket_url = os.getenv('STAGING_WEBSOCKET_URL', 'wss://websocket-staging.netra-apex.com')
         cls.staging_test_email = 'websocket-rest-test@example.com'

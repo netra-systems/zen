@@ -15,7 +15,7 @@ import { test, expect, Page, Browser } from '@playwright/test';
 
 // Conflict prevention test configuration
 const CONFLICT_PREVENTION_CONFIG = {
-  baseURL: process.env.STAGING_BASE_URL || 'https://staging.netra.ai',
+  baseURL: process.env.STAGING_BASE_URL || 'https://staging.netrasystems.ai',
   testScenarios: {
     rapidMounting: { iterations: 10, delay: 100 },
     multiTab: { tabCount: 5, operationsPerTab: 3 },

@@ -109,7 +109,7 @@
           <incident date="2025-09-07" severity="CRITICAL" duration="recurring">
             <description>SERVICE_ID with timestamp suffix caused auth failures every 60 seconds</description>
             <impact>Service authentication mismatch, blacklist validation failures</impact>
-            <logs_pattern>Service ID mismatch: received netra-auth-staging-[timestamp] but expected netra-backend</logs_pattern>
+            <logs_pattern>Service ID mismatch: received netra-auth-[timestamp] but expected netra-backend</logs_pattern>
           </incident>
         </incident_history>
         <used_in>
@@ -311,8 +311,8 @@
       <port>8000</port>
     </service>
     
-    <service name="auth" id="netra-auth-staging">
-      <cloud_run_name>netra-auth-staging</cloud_run_name>
+    <service name="auth" id="netra-auth">
+      <cloud_run_name>netra-auth</cloud_run_name>
       <docker_service_name>auth</docker_service_name>
       <port>8081</port>
     </service>

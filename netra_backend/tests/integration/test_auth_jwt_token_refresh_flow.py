@@ -59,7 +59,7 @@ class JWTTokenRefreshFlowIntegrationTests(BaseIntegrationTest):
         """Test that JWT access tokens validate correctly with real auth service."""
         # Arrange: Create unique test user
         user_id = f"jwt-test-user-{int(time.time())}"
-        email = f"jwt-test-{user_id}@netra.ai"
+        email = f"jwt-test-{user_id}@netrasystems.ai"
         permissions = ["read:agents", "write:threads", "execute:tools"]
         
         # Act: Create JWT token using SSOT auth helper
@@ -100,7 +100,7 @@ class JWTTokenRefreshFlowIntegrationTests(BaseIntegrationTest):
         """Test that JWT refresh flow preserves user data and permissions correctly."""
         # Arrange: Create test user with specific permissions
         user_id = f"jwt-refresh-user-{int(time.time())}"
-        email = f"refresh-test-{user_id}@netra.ai"
+        email = f"refresh-test-{user_id}@netrasystems.ai"
         original_permissions = ["read:agents", "write:threads", "admin:users", "execute:tools"]
         
         # Create initial token pair through OAuth simulation (most realistic)
@@ -168,7 +168,7 @@ class JWTTokenRefreshFlowIntegrationTests(BaseIntegrationTest):
         """Test that expired JWT tokens are properly rejected by auth service."""
         # Arrange: Create user for expired token test
         user_id = f"jwt-expired-user-{int(time.time())}"
-        email = f"expired-test-{user_id}@netra.ai"
+        email = f"expired-test-{user_id}@netrasystems.ai"
         
         # Create token with very short expiry (already expired)
         expired_token = self.auth_helper.create_test_jwt_token(
@@ -232,7 +232,7 @@ class JWTTokenRefreshFlowIntegrationTests(BaseIntegrationTest):
         
         for i in range(num_users):
             user_id = f"concurrent-jwt-user-{i}-{int(time.time())}"
-            email = f"concurrent-{i}-{user_id}@netra.ai"
+            email = f"concurrent-{i}-{user_id}@netrasystems.ai"
             permissions = [f"read:user_{i}", f"write:user_{i}"]
             
             token = self.auth_helper.create_test_jwt_token(

@@ -84,7 +84,7 @@ class GCPAuditLoop:
         if service_name and service_name != "all":
             services = [service_name]
         else:
-            services = ["backend-staging", "auth-staging", "frontend-staging"]
+            services = ["backend-staging", "auth", "frontend-staging"]
         
         for service in services:
             print(f"\n SEARCH:  Collecting logs from {service}...")
@@ -209,7 +209,7 @@ class GCPAuditLoop:
         
         if service == "backend-staging":
             deploy_cmd = "python scripts/deploy_to_gcp.py --service backend --project netra-staging --build-local"
-        elif service == "auth-staging":
+        elif service == "auth":
             deploy_cmd = "python scripts/deploy_to_gcp.py --service auth --project netra-staging --build-local"
         elif service == "frontend-staging":
             deploy_cmd = "python scripts/deploy_to_gcp.py --service frontend --project netra-staging --build-local"

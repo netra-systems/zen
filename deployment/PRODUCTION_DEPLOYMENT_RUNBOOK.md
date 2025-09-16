@@ -187,7 +187,7 @@ python scripts/automated_rollback.py emergency \
 
 #### Step 2.1: Enable Internal-Only Mode
 ```bash
-# Enable for internal users (@netrasystems.ai, @netra.ai)
+# Enable for internal users (@netrasystems.ai, @netrasystems.ai)
 python scripts/production_rollout_control.py update-all-stages \
     --stage internal \
     --updated-by "deployment_team"
@@ -273,7 +273,7 @@ python scripts/configure_production_alerts.py \
     --stage canary \
     --slack-webhook $SLACK_PROD_WEBHOOK \
     --pagerduty-key $PAGERDUTY_INTEGRATION_KEY \
-    --email-recipients "engineering@netra.ai,devops@netra.ai"
+    --email-recipients "engineering@netrasystems.ai,devops@netrasystems.ai"
 ```
 
 #### Stage 3 Monitoring Requirements (48 hours)
@@ -378,10 +378,10 @@ python scripts/generate_performance_report.py \
 ### Real-Time Dashboards
 
 #### Primary Dashboard URLs
-- **Isolation Score Dashboard**: `https://grafana.netra.ai/d/isolation-score`
-- **Request Independence Monitor**: `https://grafana.netra.ai/d/request-isolation`
-- **WebSocket Health**: `https://grafana.netra.ai/d/websocket-events`
-- **Business Metrics**: `https://grafana.netra.ai/d/business-kpis`
+- **Isolation Score Dashboard**: `https://grafana.netrasystems.ai/d/isolation-score`
+- **Request Independence Monitor**: `https://grafana.netrasystems.ai/d/request-isolation`
+- **WebSocket Health**: `https://grafana.netrasystems.ai/d/websocket-events`
+- **Business Metrics**: `https://grafana.netrasystems.ai/d/business-kpis`
 
 #### Key Metrics to Monitor
 
@@ -428,7 +428,7 @@ python scripts/production_rollout_control.py status --environment production
 ```bash
 # Daily monitoring report
 python scripts/production_monitoring.py daily-report \
-    --email-recipients "team@netra.ai"
+    --email-recipients "team@netrasystems.ai"
 
 # Isolation score trend analysis
 python scripts/analyze_isolation_trends.py \
@@ -632,7 +632,7 @@ python scripts/analyze_performance_impact.py \
 ```bash
 # Daily isolation score report
 python scripts/production_monitoring.py daily-report \
-    --email-recipients "engineering@netra.ai"
+    --email-recipients "engineering@netrasystems.ai"
 
 # Performance baseline update
 python scripts/update_performance_baseline.py \

@@ -47,7 +47,7 @@ class WebSocketNotifierE2EAgentFlowTests(BaseTestCase):
     async def authenticated_user(self, auth_helper):
         """Create authenticated user context for WebSocket testing."""
         user_data = await auth_helper.create_test_user(
-            email="websocket_notifier_e2e@netra.ai",
+            email="websocket_notifier_e2e@netrasystems.ai",
             name="WebSocket E2E Test User",
             user_type="enterprise"
         )
@@ -374,13 +374,13 @@ class WebSocketNotifierE2EAgentFlowTests(BaseTestCase):
         """
         # Arrange - Create two different authenticated users
         user_a = await auth_helper.create_test_user(
-            email="user_a_ws_notifier@netra.ai",
+            email="user_a_ws_notifier@netrasystems.ai",
             name="WebSocket User A",
             user_type="enterprise"
         )
         
         user_b = await auth_helper.create_test_user(
-            email="user_b_ws_notifier@netra.ai", 
+            email="user_b_ws_notifier@netrasystems.ai", 
             name="WebSocket User B",
             user_type="mid"
         )

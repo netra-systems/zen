@@ -51,7 +51,7 @@ class TestWebSocketASGIMiddleware:
             'scheme': 'wss',
             'path': '/ws',
             'query_string': b'token=abc123&user_id=user123',
-            'headers': [(b'host', b'staging.netra.ai')],
+            'headers': [(b'host', b'staging.netrasystems.ai')],
             # Missing required fields or malformed structure that causes URL object issues
         }
         
@@ -78,7 +78,7 @@ class TestWebSocketASGIMiddleware:
         
         # Test Case 2: WebSocket with raw Starlette URL (should FAIL initially)
         websocket_starlette = Mock()
-        websocket_starlette.url = URL("wss://staging.netra.ai/ws?token=abc123&user_id=user123")
+        websocket_starlette.url = URL("wss://staging.netrasystems.ai/ws?token=abc123&user_id=user123")
         
         # This should FAIL initially because Starlette URL doesn't have query_params
         with pytest.raises(AttributeError, match="'URL' object has no attribute 'query_params'"):
@@ -95,7 +95,7 @@ class TestWebSocketASGIMiddleware:
             'query_string': b'token=special%20chars&param=value',
             'headers': [],
             # Simulate GCP Cloud Run specific scope characteristics
-            'server': ('staging.netra.ai', 443),
+            'server': ('staging.netrasystems.ai', 443),
             'client': ('10.0.0.1', 45678),
         }
         
@@ -158,7 +158,7 @@ class TestWebSocketASGIMiddleware:
             'query_string': b'token=abc123&user_id=user123',
             'root_path': '',
             'headers': [
-                (b'host', b'staging.netra.ai'),
+                (b'host', b'staging.netrasystems.ai'),
                 (b'user-agent', b'websockets/10.4'),
                 (b'upgrade', b'websocket'),
                 (b'connection', b'Upgrade'),
@@ -170,7 +170,7 @@ class TestWebSocketASGIMiddleware:
                 (b'x-cloud-trace-context', b'105445aa7843bc8bf206b120001000/1'),
                 (b'x-appengine-request-log-id', b'5f2b6e6c0001f4b6b9d7c8e9'),
             ],
-            'server': ('staging.netra.ai', 443),
+            'server': ('staging.netrasystems.ai', 443),
             'client': ('203.0.113.1', 56789),
             # GCP might add additional scope fields
             'extensions': {},
@@ -286,7 +286,7 @@ class TestASGIScopeErrorScenarios:
             'scheme': 'wss',
             'path': '/ws',
             'query_string': b'token=abc123',
-            'headers': [(b'host', b'staging.netra.ai')],
+            'headers': [(b'host', b'staging.netrasystems.ai')],
         }
         
         receive = AsyncMock()
@@ -301,14 +301,14 @@ class TestASGIScopeErrorScenarios:
         """Test various WebSocket URL attribute access patterns that fail."""
         # Pattern 1: Direct query_params access (fails with raw URL)
         websocket1 = Mock()
-        websocket1.url = URL("wss://staging.netra.ai/ws?token=abc123")
+        websocket1.url = URL("wss://staging.netrasystems.ai/ws?token=abc123")
         
         with pytest.raises(AttributeError):
             params = websocket1.url.query_params
         
         # Pattern 2: Hasattr check that passes but access fails
         websocket2 = Mock()
-        websocket2.url = URL("wss://staging.netra.ai/ws?token=abc123")
+        websocket2.url = URL("wss://staging.netrasystems.ai/ws?token=abc123")
         
         # hasattr might return True even if access fails
         if hasattr(websocket2.url, 'query_params'):
@@ -317,7 +317,7 @@ class TestASGIScopeErrorScenarios:
         
         # Pattern 3: Safe access pattern (should work)
         websocket3 = Mock()
-        websocket3.url = URL("wss://staging.netra.ai/ws?token=abc123")
+        websocket3.url = URL("wss://staging.netrasystems.ai/ws?token=abc123")
         
         # Safe pattern with proper fallback
         try:

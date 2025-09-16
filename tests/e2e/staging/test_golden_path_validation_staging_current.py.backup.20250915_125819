@@ -147,7 +147,7 @@ class TestGoldenPathValidationStagingIssues:
                 headers = {"Authorization": f"Bearer {token}"}
                 
                 # Test basic backend health
-                backend_url = "https://staging-backend.netra-systems.com/health"  # Adjust URL
+                backend_url = "https://staging-api.netra-systems.com/health"  # Adjust URL
                 response = await client.get(backend_url, headers=headers)
                 
                 # Should get some response indicating backend is reachable

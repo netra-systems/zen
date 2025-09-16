@@ -76,7 +76,7 @@ class RealAuthDatabaseIntegrityTests:
 
     def create_test_user_data(self, user_id: int) -> Dict[str, Any]:
         """Create test user data for database operations."""
-        return {'id': user_id, 'email': f'user{user_id}@netra.ai', 'full_name': f'Test User {user_id}', 'password_hash': secrets.token_hex(32), 'is_active': True, 'created_at': datetime.utcnow(), 'last_login_at': None, 'failed_login_attempts': 0, 'account_locked_until': None, 'oauth_provider': 'google', 'oauth_external_id': f'oauth_{user_id}_{secrets.token_hex(8)}'}
+        return {'id': user_id, 'email': f'user{user_id}@netrasystems.ai', 'full_name': f'Test User {user_id}', 'password_hash': secrets.token_hex(32), 'is_active': True, 'created_at': datetime.utcnow(), 'last_login_at': None, 'failed_login_attempts': 0, 'account_locked_until': None, 'oauth_provider': 'google', 'oauth_external_id': f'oauth_{user_id}_{secrets.token_hex(8)}'}
 
     def create_test_session_data(self, user_id: int, session_id: str=None) -> Dict[str, Any]:
         """Create test session data for database operations."""

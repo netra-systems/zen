@@ -52,7 +52,7 @@ class HealthReadyTimeoutFixE2ETests(SSotAsyncTestCase):
         self.set_env_var('TESTING', 'true')
         
         # Staging backend URL (real staging environment)
-        self.backend_url = self.get_env_var('BACKEND_URL', 'https://staging-backend.netra.ai')
+        self.backend_url = self.get_env_var('BACKEND_URL', 'https://staging-api.netrasystems.ai')
         if not self.backend_url:
             pytest.skip("BACKEND_URL not configured for E2E testing")
             

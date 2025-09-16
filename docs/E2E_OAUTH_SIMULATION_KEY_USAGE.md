@@ -88,7 +88,7 @@ gcloud secrets create e2e-oauth-simulation-key --data-file=key.txt
 
 # Grant access to staging auth service
 gcloud secrets add-iam-policy-binding e2e-oauth-simulation-key \
-  --member="serviceAccount:netra-auth-staging@project.iam.gserviceaccount.com" \
+  --member="serviceAccount:netra-auth@project.iam.gserviceaccount.com" \
   --role="roles/secretmanager.secretAccessor"
 ```
 

@@ -74,9 +74,9 @@ class TestWebSocketEventSLACompliance(BaseE2ETest):
         self.sla_event_reliability = 100.0  # percent (all events must be delivered)
         
         # GCP staging endpoints
-        self.staging_websocket_url = "wss://staging.netra.ai/ws"
-        self.staging_auth_url = "https://auth-staging.netra.ai"
-        self.staging_api_url = "https://api-staging.netra.ai"
+        self.staging_websocket_url = "wss://staging.netrasystems.ai/ws"
+        self.staging_auth_url = "https://auth.netrasystems.ai"
+        self.staging_api_url = "https://api-staging.netrasystems.ai"
         
         # Required critical events for business value
         self.critical_events = [
@@ -473,7 +473,7 @@ class TestWebSocketEventSLACompliance(BaseE2ETest):
             response = await client.post(
                 f"{self.staging_auth_url}/login",
                 json={
-                    "email": "test@netra.ai",
+                    "email": "test@netrasystems.ai",
                     "password": "testpassword123"
                 }
             )

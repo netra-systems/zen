@@ -166,7 +166,7 @@ class WebSocketReconnectionRecoveryTests(SSotAsyncTestCase):
         self.env = IsolatedEnvironment()
         self.env.set('TESTING', '1', source='websocket_reconnection_test')
         self.env.set('USE_REAL_SERVICES', 'true', source='websocket_reconnection_test')
-        self.test_user = TestUserData(user_id=f'reconnect_user_{uuid.uuid4().hex[:8]}', email='reconnect@netra.ai', tier='mid', thread_id=f'reconnect_thread_{uuid.uuid4().hex[:8]}')
+        self.test_user = TestUserData(user_id=f'reconnect_user_{uuid.uuid4().hex[:8]}', email='reconnect@netrasystems.ai', tier='mid', thread_id=f'reconnect_thread_{uuid.uuid4().hex[:8]}')
         self.websocket_managers: List[Any] = []
         self.mock_websockets: List[ReconnectingWebSocketMock] = []
 

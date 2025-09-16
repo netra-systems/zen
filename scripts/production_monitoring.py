@@ -26,7 +26,7 @@ Usage Examples:
         --slack-webhook $SLACK_WEBHOOK --pagerduty-key $PAGERDUTY_KEY
     
     # Generate daily report
-    python scripts/production_monitoring.py daily-report --email-recipients team@netra.ai
+    python scripts/production_monitoring.py daily-report --email-recipients team@netrasystems.ai
 """
 
 import asyncio
@@ -855,7 +855,7 @@ Examples:
   python scripts/production_monitoring.py metrics --detailed
   
   # Generate daily report
-  python scripts/production_monitoring.py daily-report --email-recipients team@netra.ai
+  python scripts/production_monitoring.py daily-report --email-recipients team@netrasystems.ai
         """
     )
     

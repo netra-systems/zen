@@ -143,7 +143,7 @@ class WebSocketAgentEventsIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_agent_started@test.netra.ai',
+            'email': f'{self.test_user_id_base}_agent_started@test.netrasystems.ai',
             'name': 'Agent Started Event User'
         })
         
@@ -218,7 +218,7 @@ class WebSocketAgentEventsIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_thinking@test.netra.ai', 
+            'email': f'{self.test_user_id_base}_thinking@test.netrasystems.ai', 
             'name': 'Agent Thinking Event User'
         })
         
@@ -296,7 +296,7 @@ class WebSocketAgentEventsIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_tool_exec@test.netra.ai',
+            'email': f'{self.test_user_id_base}_tool_exec@test.netrasystems.ai',
             'name': 'Tool Execution Event User'
         })
         
@@ -376,7 +376,7 @@ class WebSocketAgentEventsIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_tool_complete@test.netra.ai',
+            'email': f'{self.test_user_id_base}_tool_complete@test.netrasystems.ai',
             'name': 'Tool Completion Event User'
         })
         
@@ -480,7 +480,7 @@ class WebSocketAgentEventsIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_agent_complete@test.netra.ai',
+            'email': f'{self.test_user_id_base}_agent_complete@test.netrasystems.ai',
             'name': 'Agent Completion Event User'
         })
         
@@ -581,7 +581,7 @@ class WebSocketAgentEventsIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_ordering@test.netra.ai',
+            'email': f'{self.test_user_id_base}_ordering@test.netrasystems.ai',
             'name': 'Event Ordering Test User'
         })
         
@@ -665,7 +665,7 @@ class WebSocketAgentEventsIntegrationTests(BaseIntegrationTest):
             pytest.skip("Database not available for integration test")
         
         user_data = await self.create_test_user_context(services, {
-            'email': f'{self.test_user_id_base}_payload@test.netra.ai',
+            'email': f'{self.test_user_id_base}_payload@test.netrasystems.ai',
             'name': 'Event Payload Validation User'
         })
         
@@ -839,7 +839,7 @@ class WebSocketAgentEventsIntegrationTests(BaseIntegrationTest):
         concurrent_users = []
         for i in range(3):
             user_data = await self.create_test_user_context(services, {
-                'email': f'{self.test_user_id_base}_concurrent_{i}@test.netra.ai',
+                'email': f'{self.test_user_id_base}_concurrent_{i}@test.netrasystems.ai',
                 'name': f'Concurrent Agent User {i}'
             })
             concurrent_users.append(user_data)

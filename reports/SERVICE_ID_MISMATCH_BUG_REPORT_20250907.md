@@ -9,9 +9,9 @@ The authentication service is experiencing persistent SERVICE_ID mismatch errors
 ## Problem Statement
 
 ### Symptoms
-- Warning logs: `Blacklist check - Service ID mismatch: received 'netra-auth-staging-1757251019', expected 'netra-auth-staging-1757252100'`
+- Warning logs: `Blacklist check - Service ID mismatch: received 'netra-auth-1757251019', expected 'netra-auth-1757252100'`
 - The expected SERVICE_ID changes every 60 seconds (matching Unix timestamp increments)
-- Backend consistently sends the same SERVICE_ID: `netra-auth-staging-1757251019`
+- Backend consistently sends the same SERVICE_ID: `netra-auth-1757251019`
 
 ### Root Cause Analysis (Five Whys)
 
@@ -39,10 +39,10 @@ sequenceDiagram
     participant AuthService
     participant Environment
 
-    Environment->>AuthService: SERVICE_ID=netra-auth-staging-{timestamp}
-    Backend->>Backend: Uses fixed SERVICE_ID=netra-auth-staging-1757251019
-    Backend->>AuthService: POST /auth/check-blacklist<br/>X-Service-ID: netra-auth-staging-1757251019
-    AuthService->>AuthService: Reads env.SERVICE_ID<br/>(e.g., netra-auth-staging-1757252100)
+    Environment->>AuthService: SERVICE_ID=netra-auth-{timestamp}
+    Backend->>Backend: Uses fixed SERVICE_ID=netra-auth-1757251019
+    Backend->>AuthService: POST /auth/check-blacklist<br/>X-Service-ID: netra-auth-1757251019
+    AuthService->>AuthService: Reads env.SERVICE_ID<br/>(e.g., netra-auth-1757252100)
     AuthService->>AuthService: Compare IDs<br/>1757251019 != 1757252100
     AuthService-->>Backend: Error: Service ID mismatch
 ```
@@ -104,7 +104,7 @@ expected_service_id = env.get("SERVICE_ID", "netra-backend")
 # For staging, accept both timestamped and non-timestamped versions
 if env.get("ENVIRONMENT") == "staging":
     # Strip timestamp suffix if present
-    if expected_service_id.startswith("netra-auth-staging-"):
+    if expected_service_id.startswith("netra-auth-"):
         expected_service_id = "netra-backend"  # Use stable ID
 ```
 

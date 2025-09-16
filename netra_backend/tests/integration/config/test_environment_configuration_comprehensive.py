@@ -275,11 +275,11 @@ class EnvironmentConfigurationComprehensiveTests(SSotBaseTestCase):
             for key, value in dev_config.items():
                 dev_env.set(key, value, source='development')
             staging_env = IsolatedEnvironment()
-            staging_config = {'ENVIRONMENT': 'staging', 'DATABASE_URL': 'postgresql://staging:secret@staging-db:5432/staging_db', 'REDIS_URL': 'redis://staging-redis:6379/0', 'DEBUG_MODE': 'false', 'LOG_LEVEL': 'INFO', 'CORS_ORIGINS': 'https://staging.netra.ai', 'JWT_SECRET_KEY': 'staging_jwt_secret_secure_32_chars', 'RATE_LIMITING': 'true'}
+            staging_config = {'ENVIRONMENT': 'staging', 'DATABASE_URL': 'postgresql://staging:secret@staging-db:5432/staging_db', 'REDIS_URL': 'redis://staging-redis:6379/0', 'DEBUG_MODE': 'false', 'LOG_LEVEL': 'INFO', 'CORS_ORIGINS': 'https://staging.netrasystems.ai', 'JWT_SECRET_KEY': 'staging_jwt_secret_secure_32_chars', 'RATE_LIMITING': 'true'}
             for key, value in staging_config.items():
                 staging_env.set(key, value, source='staging')
             prod_env = IsolatedEnvironment()
-            prod_config = {'ENVIRONMENT': 'production', 'DATABASE_URL': 'postgresql://prod:secure@prod-db:5432/prod_db', 'REDIS_URL': 'redis://prod-redis:6379/0', 'DEBUG_MODE': 'false', 'LOG_LEVEL': 'WARNING', 'CORS_ORIGINS': 'https://app.netra.ai', 'JWT_SECRET_KEY': 'production_jwt_secret_highly_secure', 'RATE_LIMITING': 'true'}
+            prod_config = {'ENVIRONMENT': 'production', 'DATABASE_URL': 'postgresql://prod:secure@prod-db:5432/prod_db', 'REDIS_URL': 'redis://prod-redis:6379/0', 'DEBUG_MODE': 'false', 'LOG_LEVEL': 'WARNING', 'CORS_ORIGINS': 'https://app.netrasystems.ai', 'JWT_SECRET_KEY': 'production_jwt_secret_highly_secure', 'RATE_LIMITING': 'true'}
             for key, value in prod_config.items():
                 prod_env.set(key, value, source='production')
             environments = {'development': dev_env, 'staging': staging_env, 'production': prod_env}
@@ -295,7 +295,7 @@ class EnvironmentConfigurationComprehensiveTests(SSotBaseTestCase):
                     assert 'localhost' in cors_origins, f'Development CORS should include localhost'
                 elif env_name == 'production':
                     assert 'localhost' not in cors_origins, f'Production CORS should not include localhost'
-                    assert 'netra.ai' in cors_origins, f'Production CORS should include production domains'
+                    assert 'netrasystems.ai' in cors_origins, f'Production CORS should include production domains'
             base_config = {'SERVICE_NAME': 'netra-backend', 'SERVICE_VERSION': '1.0.0', 'DEFAULT_TIMEOUT': '30', 'MAX_CONNECTIONS': '100'}
             for env_name, env_instance in environments.items():
                 for key, value in base_config.items():
@@ -336,7 +336,7 @@ class EnvironmentConfigurationComprehensiveTests(SSotBaseTestCase):
         test_env = self.setup_test_isolation()
         try:
             sensitive_config = {'DATABASE_PASSWORD': 'super_secret_db_password_123', 'JWT_SECRET_KEY': 'jwt_secret_key_must_be_protected', 'API_KEY': 'sk-1234567890abcdef', 'OAUTH_CLIENT_SECRET': 'oauth_secret_never_expose', 'ENCRYPTION_KEY': 'encryption_key_for_user_data', 'REDIS_PASSWORD': 'redis_secret_password'}
-            non_sensitive_config = {'SERVICE_NAME': 'netra-backend', 'PORT': '8000', 'ENVIRONMENT': 'test', 'LOG_LEVEL': 'INFO', 'CORS_ORIGINS': 'https://app.netra.ai'}
+            non_sensitive_config = {'SERVICE_NAME': 'netra-backend', 'PORT': '8000', 'ENVIRONMENT': 'test', 'LOG_LEVEL': 'INFO', 'CORS_ORIGINS': 'https://app.netrasystems.ai'}
             for key, value in sensitive_config.items():
                 test_env.set(key, value, source='test')
             for key, value in non_sensitive_config.items():

@@ -579,7 +579,7 @@ async def test_websocket_chat_events_complete_flow():
     auth_helper = E2EAuthHelper()
     token = auth_helper.create_test_jwt_token(
         user_id="test_user",
-        email="test@netra.ai"
+        email="test@netrasystems.ai"
     )
     
     result = await test.test_single_message_flow(token)
@@ -605,7 +605,7 @@ async def test_websocket_concurrent_messages():
     auth_helper = E2EAuthHelper()
     token = auth_helper.create_test_jwt_token(
         user_id="test_user",
-        email="test@netra.ai"
+        email="test@netrasystems.ai"
     )
     
     result = await test.test_concurrent_messages(token, num_messages=5)
@@ -625,7 +625,7 @@ async def test_websocket_deduplication():
     auth_helper = E2EAuthHelper()
     token = auth_helper.create_test_jwt_token(
         user_id="test_user",
-        email="test@netra.ai"
+        email="test@netrasystems.ai"
     )
     
     result = await test.test_message_deduplication(token)
@@ -644,7 +644,7 @@ async def test_websocket_event_storm():
     auth_helper = E2EAuthHelper()
     token = auth_helper.create_test_jwt_token(
         user_id="test_user",
-        email="test@netra.ai"
+        email="test@netrasystems.ai"
     )
     
     result = await stress_test.test_event_storm(

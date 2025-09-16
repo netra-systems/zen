@@ -130,7 +130,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
         # Test user credentials for staging
         self.test_users = [
             {
-                "email": get_env().get("TEST_USER_EMAIL", "test@netra.ai"),
+                "email": get_env().get("TEST_USER_EMAIL", "test@netrasystems.ai"),
                 "password": get_env().get("TEST_USER_PASSWORD", "test_password"),
                 "user_id": None,  # Will be set after authentication
                 "jwt_token": None  # Will be set after authentication
@@ -207,8 +207,8 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
 
         # Default staging domain fallbacks
         staging_domains = [
-            "staging.netra.ai",
-            "staging-api.netra.ai",
+            "staging.netrasystems.ai",
+            "staging-api.netrasystems.ai",
             "netra-staging.herokuapp.com",
             "localhost:8000",  # Local fallback
             "127.0.0.1:8000"   # IP fallback
@@ -243,10 +243,10 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
         # Ultimate fallback if no domains work
         if not fallback_config:
             fallback_config = {
-                "base_url": "https://staging.netra.ai",
-                "websocket_url": "wss://staging.netra.ai/ws",
-                "api_url": "https://staging.netra.ai/api",
-                "auth_url": "https://staging.netra.ai/auth"
+                "base_url": "https://staging.netrasystems.ai",
+                "websocket_url": "wss://staging.netrasystems.ai/ws",
+                "api_url": "https://staging.netrasystems.ai/api",
+                "auth_url": "https://staging.netrasystems.ai/auth"
             }
             logger.warning("Using ultimate fallback configuration - may not be reachable")
 
@@ -559,7 +559,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
         for i in range(num_concurrent_users):
             user_context = {
                 "user_index": i,
-                "email": f"test_user_{i}@staging.netra.ai",
+                "email": f"test_user_{i}@staging.netrasystems.ai",
                 "jwt_token": f"mock_jwt_token_user_{i}",
                 "user_id": str(uuid.uuid4()),
                 "thread_id": str(uuid.uuid4())

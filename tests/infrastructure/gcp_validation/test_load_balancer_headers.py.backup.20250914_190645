@@ -85,10 +85,10 @@ class TestGCPLoadBalancerHeaderForwarding(SSotBaseTestCase):
         
         # Test endpoints
         cls.staging_urls = {
-            "frontend": "https://staging.netra.ai",
-            "backend": "https://api-staging.netra.ai", 
-            "websocket": "wss://api-staging.netra.ai/ws",
-            "health": "https://api-staging.netra.ai/health"
+            "frontend": "https://staging.netrasystems.ai",
+            "backend": "https://api-staging.netrasystems.ai", 
+            "websocket": "wss://api-staging.netrasystems.ai/ws",
+            "health": "https://api-staging.netrasystems.ai/health"
         }
         
         # Test headers to validate forwarding
@@ -99,7 +99,7 @@ class TestGCPLoadBalancerHeaderForwarding(SSotBaseTestCase):
             "x-emergency-access": "true",
             "x-demo-mode": "1",
             "x-custom-auth": "custom-auth-value",
-            "origin": "https://staging.netra.ai",
+            "origin": "https://staging.netrasystems.ai",
             "user-agent": "AuthPermissiveness/1.0 Test Client"
         }
         

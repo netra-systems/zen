@@ -66,7 +66,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
         if missing_config:
             logger.warning(f'Missing staging configuration: {missing_config}')
             self.staging_config.update(self._apply_environment_fallbacks())
-        self.test_users = [{'email': get_env().get('TEST_USER_EMAIL', 'test@netra.ai'), 'password': get_env().get('TEST_USER_PASSWORD', 'test_password'), 'user_id': None, 'jwt_token': None}]
+        self.test_users = [{'email': get_env().get('TEST_USER_EMAIL', 'test@netrasystems.ai'), 'password': get_env().get('TEST_USER_PASSWORD', 'test_password'), 'user_id': None, 'jwt_token': None}]
         self.captured_events: List[Dict[str, Any]] = []
         self.websocket_connections: List[websockets.ServerConnection] = []
         self.performance_metrics: List[Dict[str, Any]] = []
@@ -286,7 +286,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
         num_concurrent_users = 3
         concurrent_users = []
         for i in range(num_concurrent_users):
-            user_context = {'user_index': i, 'email': f'test_user_{i}@staging.netra.ai', 'jwt_token': f'mock_jwt_token_user_{i}', 'user_id': str(uuid.uuid4()), 'thread_id': str(uuid.uuid4())}
+            user_context = {'user_index': i, 'email': f'test_user_{i}@staging.netrasystems.ai', 'jwt_token': f'mock_jwt_token_user_{i}', 'user_id': str(uuid.uuid4()), 'thread_id': str(uuid.uuid4())}
             concurrent_users.append(user_context)
 
         async def single_user_journey(user_context: Dict[str, Any]) -> Dict[str, Any]:

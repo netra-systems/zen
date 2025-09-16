@@ -48,7 +48,7 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
         self.staging_env = IsolatedEnvironment()
         self.staging_base_url = self.staging_env.get('GCP_STAGING_BASE_URL', 'https://staging-backend-dot-netra-staging.uc.r.appspot.com')
         self.staging_websocket_url = self.staging_base_url.replace('https://', 'wss://') + '/ws'
-        self.test_users = [{'email': 'test_user_1@netra.ai', 'password': 'test_password_1'}, {'email': 'test_user_2@netra.ai', 'password': 'test_password_2'}, {'email': 'test_user_3@netra.ai', 'password': 'test_password_3'}]
+        self.test_users = [{'email': 'test_user_1@netrasystems.ai', 'password': 'test_password_1'}, {'email': 'test_user_2@netrasystems.ai', 'password': 'test_password_2'}, {'email': 'test_user_3@netrasystems.ai', 'password': 'test_password_3'}]
         self.connection_results = []
         self.websocket_1011_errors = []
         self.golden_path_results = []

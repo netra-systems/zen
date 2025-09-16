@@ -50,11 +50,11 @@ class TestUnifiedWebSocketManagerE2EMultiUser(BaseTestCase):
         
         # Create users representing different segments
         user_configs = [
-            {"email": "free_user_ws@netra.ai", "name": "Free Tier User", "user_type": "free"},
-            {"email": "early_user_ws@netra.ai", "name": "Early User", "user_type": "early"},
-            {"email": "mid_user_ws@netra.ai", "name": "Mid Tier User", "user_type": "mid"},
-            {"email": "enterprise_user_ws@netra.ai", "name": "Enterprise User", "user_type": "enterprise"},
-            {"email": "concurrent_user_ws@netra.ai", "name": "Concurrent User", "user_type": "mid"}
+            {"email": "free_user_ws@netrasystems.ai", "name": "Free Tier User", "user_type": "free"},
+            {"email": "early_user_ws@netrasystems.ai", "name": "Early User", "user_type": "early"},
+            {"email": "mid_user_ws@netrasystems.ai", "name": "Mid Tier User", "user_type": "mid"},
+            {"email": "enterprise_user_ws@netrasystems.ai", "name": "Enterprise User", "user_type": "enterprise"},
+            {"email": "concurrent_user_ws@netrasystems.ai", "name": "Concurrent User", "user_type": "mid"}
         ]
         
         for config in user_configs:

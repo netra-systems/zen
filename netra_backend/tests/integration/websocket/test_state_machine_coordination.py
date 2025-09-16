@@ -71,7 +71,7 @@ class StateMachineCoordinationTest(BaseIntegrationTest):
         self.synchronization_errors: List[str] = []
         self.test_users = []
         for i in range(3):
-            user_data = self.auth_helper.create_test_user(username=f'coord_test_user_{i}_{int(time.time())}', email=f'coord_user_{i}_{int(time.time())}@test.netra.ai')
+            user_data = self.auth_helper.create_test_user(username=f'coord_test_user_{i}_{int(time.time())}', email=f'coord_user_{i}_{int(time.time())}@test.netrasystems.ai')
             self.test_users.append(user_data)
         self.active_state_machines: Dict[str, ConnectionStateMachine] = {}
         self.coordination_violations: List[Dict[str, Any]] = []

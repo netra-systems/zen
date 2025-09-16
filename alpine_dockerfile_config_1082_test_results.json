@@ -56,7 +56,7 @@
           "image": "python:3.11-alpine3.19"
         }
       ],
-      "auth-staging": [
+      "auth": [
         {
           "dockerfile": "auth.staging.alpine.Dockerfile",
           "line": 5,
@@ -128,7 +128,7 @@
           "/app"
         ]
       ],
-      "auth-staging": [
+      "auth": [
         [
           23,
           "/build"

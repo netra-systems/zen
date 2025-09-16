@@ -75,7 +75,8 @@ def fix_database_imports(file_path):
 
 def main():
     """Fix all database imports in test files."""
-    test_dir = Path('/Users/anthony/Documents/GitHub/netra-apex/netra_backend/tests')
+    project_root = Path(__file__).parent.parent
+    test_dir = project_root / 'netra_backend' / 'tests'
     
     fixed_count = 0
     for root, dirs, files in os.walk(test_dir):

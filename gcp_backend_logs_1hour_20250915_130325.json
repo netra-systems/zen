@@ -740,7 +740,7 @@
         "instanceId": "0069c7a988470ab48851fc60ead04cae6f283b0429b8f0b8c84ab0bc61655a8d6e1505cb00541b972c329f1fb14fbe527135780d9405dc275214104e66663914c03d7815d9de542a6d6cdf5d69027c"
       },
       "jsonPayload": {
-        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
         "timestamp": "2025-09-15T20:02:58.381395+00:00",
         "labels": {
           "line": "1706",
@@ -1806,7 +1806,7 @@
         "migration-run": "1757350810"
       },
       "jsonPayload": {
-        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
         "timestamp": "2025-09-15T20:02:26.506421+00:00",
         "labels": {
           "line": "1706",
@@ -2748,7 +2748,7 @@
         "vpc-connectivity": "enabled"
       },
       "jsonPayload": {
-        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
         "timestamp": "2025-09-15T20:01:56.925934+00:00",
         "labels": {
           "line": "1706",
@@ -2940,7 +2940,7 @@
         "migration-run": "1757350810"
       },
       "jsonPayload": {
-        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
         "timestamp": "2025-09-15T20:01:29.211594+00:00",
         "labels": {
           "line": "1706",
@@ -3010,7 +3010,7 @@
         "instanceId": "0069c7a98803ed11f3b08f42f974ad89405f74b7af20ee628a709b7c301bb18daa4c3f610f59a5746386a56f9a4c6e14bf8c8b35304e3633b2bae68112966bf038c856899fb2edc9dee902b72d09fd"
       },
       "jsonPayload": {
-        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
         "timestamp": "2025-09-15T20:01:23.234451+00:00",
         "labels": {
           "line": "1706",
@@ -3446,7 +3446,7 @@
         "instanceId": "0069c7a988a3963e22cb3d1354b80361ebd4f073ab9747efa6abbf0b00bd53a94d2af0c8c0aab5e3f10cd3b8100f5b1f84b1981126824e30a79602df3bcdb8ee34ef6875bd7cb9743b5bcc3a008b16"
       },
       "jsonPayload": {
-        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
         "timestamp": "2025-09-15T20:00:19.230868+00:00",
         "labels": {
           "line": "1706",
@@ -3638,7 +3638,7 @@
         "instanceId": "0069c7a9883b23a72d64e6249efca00c83dab3775f65d663f52ae2c57761926cf9b67d5b9ad4086d0abde4f6c8cf7e12422f8558e54abf8c6335f15c1672e84619c9035ac3336a25ce0a4fca21937b"
       },
       "jsonPayload": {
-        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
         "timestamp": "2025-09-15T19:59:13.814930+00:00",
         "labels": {
           "line": "1706",
@@ -3856,7 +3856,7 @@
         "vpc-connectivity": "enabled"
       },
       "jsonPayload": {
-        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+        "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
         "timestamp": "2025-09-15T19:58:05.454055+00:00",
         "labels": {
           "line": "1706",

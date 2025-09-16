@@ -205,7 +205,7 @@ class JWTPayloadSSotComplianceTests(SSotBaseTestCase):
             {
                 'name': 'admin_user_token',
                 'user_id': 'jwt-admin-001',
-                'email': 'admin@netra.ai',
+                'email': 'admin@netrasystems.ai',
                 'permissions': ['admin', 'read', 'write', 'delete'],
                 'session_id': 'admin-session-001'
             },

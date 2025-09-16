@@ -64,13 +64,13 @@ class TestWebSocketRaceConditionStaging(BaseE2ETest):
         
         # Get staging service URLs
         cls.backend_url = env.get("BACKEND_URL", "wss://netra-backend-staging.onrender.com")
-        cls.auth_url = env.get("AUTH_URL", "https://netra-auth-staging.onrender.com")
+        cls.auth_url = env.get("AUTH_URL", "https://netra-auth.onrender.com")
         
         # WebSocket endpoint (note: wss:// for staging, ws:// for local)
         cls.websocket_url = cls.backend_url.replace("https://", "wss://").replace("http://", "ws://") + "/ws"
         
         # Test user credentials for staging
-        cls.test_user_email = env.get("TEST_USER_EMAIL", "test+staging@netra.ai")
+        cls.test_user_email = env.get("TEST_USER_EMAIL", "test+staging@netrasystems.ai")
         cls.test_user_password = env.get("TEST_USER_PASSWORD", "staging_test_password")
     
     async def get_auth_token(self) -> str:

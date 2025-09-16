@@ -326,7 +326,7 @@ class ReportingAgentCoordinationTests(BaseIntegrationTest):
         
         mock_pdf_coordinator = AsyncMock()
         mock_pdf_coordinator.generate_pdf_report = AsyncMock(return_value={
-            "pdf_url": "https://storage.netra.app/reports/cost_analysis_202401.pdf",
+            "pdf_url": "https://storage.netrasystems.ai/reports/cost_analysis_202401.pdf",
             "file_size": "2.4MB",
             "page_count": 12
         })

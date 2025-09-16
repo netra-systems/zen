@@ -106,7 +106,7 @@ class TestLoadBalancerEndpointValidation(BaseIntegrationTest):
         
         # Create authenticated user for endpoint testing
         self.test_user_context = await create_authenticated_user_context(
-            user_email=f"load_balancer_test_{int(time.time())}@staging.netra.ai",
+            user_email=f"load_balancer_test_{int(time.time())}@staging.netrasystems.ai",
             environment="staging"
         )
         self.auth_helper = E2EAuthHelper(environment="staging")
@@ -492,7 +492,7 @@ class TestLoadBalancerUserPathSimulation(BaseE2ETest):
         
         # Create authenticated user context
         self.test_user_context = await create_authenticated_user_context(
-            user_email=f"user_path_test_{int(time.time())}@staging.netra.ai",
+            user_email=f"user_path_test_{int(time.time())}@staging.netrasystems.ai",
             environment="staging"
         )
         

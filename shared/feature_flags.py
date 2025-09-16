@@ -98,7 +98,7 @@ class ProductionFeatureFlags:
         # Configuration
         self.redis_prefix = f"feature_flags:{self.environment}"
         self.metrics_prefix = f"isolation_metrics:{self.environment}"
-        self.internal_user_domains = {"netrasystems.ai", "netra.ai"}
+        self.internal_user_domains = {"netrasystems.ai", "netrasystems.ai"}
         
         # Circuit breaker settings
         self.circuit_breaker_window_seconds = 300  # 5 minutes

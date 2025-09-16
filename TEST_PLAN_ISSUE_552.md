@@ -111,7 +111,7 @@ class TestAuthServiceBusinessFlowsStagingAPIFix:
         """Test auth registration using correct UnifiedDockerManager API on staging."""
         
         # Use staging environment instead of Docker
-        auth_service_url = get_env().get("STAGING_AUTH_SERVICE_URL", "https://auth-service-staging.netra.ai")
+        auth_service_url = get_env().get("STAGING_AUTH_SERVICE_URL", "https://auth-service-staging.netrasystems.ai")
         
         # Test the business flow that was failing
         async with aiohttp.ClientSession() as session:
@@ -202,7 +202,7 @@ python -m pytest tests/integration/test_auth_service_api_patterns_no_docker.py -
 ```bash
 # Run staging environment tests to prove auth service functionality
 export USE_STAGING_FALLBACK=true
-export STAGING_AUTH_SERVICE_URL="https://auth-service-staging.netra.ai"
+export STAGING_AUTH_SERVICE_URL="https://auth-service-staging.netrasystems.ai"
 python -m pytest tests/e2e/staging/test_auth_service_business_flows_api_fix.py -v
 
 # Expected: Auth business flows work on staging (proves service is functional)

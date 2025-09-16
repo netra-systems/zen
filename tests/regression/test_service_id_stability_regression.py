@@ -81,7 +81,7 @@ class ServiceIdStabilityRegressionTests:
         original_service_id = os.environ.get('SERVICE_ID')
         try:
             # Set a SERVICE_ID with timestamp that should NOT be used
-            bad_service_id = f"netra-auth-staging-{int(time.time())}"
+            bad_service_id = f"netra-auth-{int(time.time())}"
             os.environ['SERVICE_ID'] = bad_service_id
             
             # Read auth_routes to verify it doesn't use this value

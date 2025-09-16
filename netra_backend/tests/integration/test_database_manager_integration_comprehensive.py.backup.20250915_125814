@@ -558,7 +558,7 @@ class TestDatabaseManagerIntegrationComprehensive(BaseIntegrationTest):
             sessions_table = Table('user_sessions', metadata, Column('id', Integer, primary_key=True), Column('user_id', Integer), Column('session_token', String(255)), Column('expires_at', DateTime), Column('is_valid', Integer, default=1, nullable=False))
             async with engine.begin() as conn:
                 await conn.run_sync(metadata.create_all)
-            test_user_email = 'business_user@netra.ai'
+            test_user_email = 'business_user@netrasystems.ai'
             async with db_manager.get_session() as session:
                 await session.execute(text('INSERT INTO business_users (email, username, subscription_tier, is_active) VALUES (:email, :username, :subscription_tier, :is_active)'), {'email': test_user_email, 'username': 'business_user', 'subscription_tier': 'free', 'is_active': 1})
                 await session.commit()

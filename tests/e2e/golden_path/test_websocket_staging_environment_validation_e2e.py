@@ -106,7 +106,7 @@ class WebSocketStagingEnvironmentValidationE2ETests(SSotAsyncTestCase):
         )
         self._staging_auth_url = self.get_env_var(
             "STAGING_AUTH_SERVICE_URL",
-            self.get_env_var("AUTH_SERVICE_URL", "https://auth-staging.netra.co")
+            self.get_env_var("AUTH_SERVICE_URL", "https://auth.netra.co")
         )
         
         # Record staging environment setup

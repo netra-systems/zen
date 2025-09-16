@@ -78,7 +78,7 @@
     # websocket setup complete  # Real WebSocket implementation
     # REMOVED_SYNTAX_ERROR: websocket.client.host = "127.0.0.1"
     # REMOVED_SYNTAX_ERROR: websocket.headers = { )
-    # REMOVED_SYNTAX_ERROR: "origin": "https://app.netra.ai",
+    # REMOVED_SYNTAX_ERROR: "origin": "https://app.netrasystems.ai",
     # REMOVED_SYNTAX_ERROR: "user-agent": "test-client"
     
     # websocket setup complete  # Real WebSocket implementation

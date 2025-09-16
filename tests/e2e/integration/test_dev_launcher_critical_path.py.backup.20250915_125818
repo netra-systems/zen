@@ -188,7 +188,7 @@ class TestDevLauncherCriticalPath:
         await self._start_dev_launcher()
         try:
             async with httpx.AsyncClient(follow_redirects=True) as client:
-                login_data = {'username': 'dev@netra.ai', 'password': 'dev123'}
+                login_data = {'username': 'dev@netrasystems.ai', 'password': 'dev123'}
                 response = await client.post(f'{AUTH_URL}/auth/login', json=login_data, headers={'Content-Type': 'application/json'})
                 assert response.status_code == 200, f'Login failed: {response.status_code} - {response.text}'
                 auth_data = response.json()
@@ -199,7 +199,7 @@ class TestDevLauncherCriticalPath:
                 assert response.status_code == 200, f'Authenticated API call failed: {response.status_code}'
                 user_data = response.json()
                 assert 'email' in user_data, 'User profile missing email'
-                assert user_data['email'] == 'dev@netra.ai', 'Wrong user returned'
+                assert user_data['email'] == 'dev@netrasystems.ai', 'Wrong user returned'
         finally:
             await self._stop_dev_launcher()
 
@@ -372,7 +372,7 @@ class TestDevLauncherCriticalPath:
     async def _get_dev_auth_token(self) -> Optional[str]:
         """Get development authentication token."""
         async with httpx.AsyncClient(follow_redirects=True) as client:
-            login_data = {'username': 'dev@netra.ai', 'password': 'dev123'}
+            login_data = {'username': 'dev@netrasystems.ai', 'password': 'dev123'}
             try:
                 response = await client.post(f'{AUTH_URL}/auth/login', json=login_data, timeout=10)
                 if response.status_code == 200:

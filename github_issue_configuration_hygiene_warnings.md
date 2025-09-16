@@ -82,7 +82,7 @@ Clean service configuration without warnings:
 ### OAuth URI Configuration Drift
 1. **Source:** Inconsistent OAuth redirect URI configuration between environments
 2. **Impact:** Potential authentication issues and configuration drift alerts
-3. **Pattern:** `https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai`
+3. **Pattern:** `https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai`
 
 ## Business Risk Assessment
 - **Priority:** P2 (Warning) - Configuration drift affecting multiple environments

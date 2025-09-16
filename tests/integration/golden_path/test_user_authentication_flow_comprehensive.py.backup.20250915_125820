@@ -459,12 +459,12 @@ class TestUserAuthenticationFlowComprehensive(DatabaseIntegrationTest, CacheInte
         middleware_execution_order = []
         middleware_components = ['cors_middleware', 'rate_limiting_middleware', 'jwt_validation_middleware', 'user_context_middleware', 'authorization_middleware', 'business_logic_handler']
         middleware_user = await create_test_user_with_auth(email=f'middleware_test_{int(time.time())}@example.com', name='Middleware Test User', permissions=['read', 'write', 'middleware_test'], environment=self.environment)
-        request_context = {'headers': {'Authorization': f"Bearer {middleware_user['access_token']}", 'Content-Type': 'application/json', 'Origin': 'https://app.netra.ai', 'X-Forwarded-For': '192.168.1.100', 'User-Agent': 'Mozilla/5.0 (Test Client)'}, 'method': 'POST', 'path': '/api/chat/send', 'body': {'message': 'Test middleware order'}, 'user_id': None, 'permissions': None, 'rate_limit_passed': False, 'authenticated': False, 'authorized': False}
+        request_context = {'headers': {'Authorization': f"Bearer {middleware_user['access_token']}", 'Content-Type': 'application/json', 'Origin': 'https://app.netrasystems.ai', 'X-Forwarded-For': '192.168.1.100', 'User-Agent': 'Mozilla/5.0 (Test Client)'}, 'method': 'POST', 'path': '/api/chat/send', 'body': {'message': 'Test middleware order'}, 'user_id': None, 'permissions': None, 'rate_limit_passed': False, 'authenticated': False, 'authorized': False}
 
         def cors_middleware(context):
             """Simulate CORS middleware processing."""
             origin = context['headers'].get('Origin')
-            if origin and 'netra.ai' in origin:
+            if origin and 'netrasystems.ai' in origin:
                 context['cors_valid'] = True
                 middleware_execution_order.append('cors_middleware')
                 return True
@@ -560,7 +560,7 @@ class TestUserAuthenticationFlowComprehensive(DatabaseIntegrationTest, CacheInte
         assert request_context['authenticated'], 'User must be authenticated'
         assert request_context['authorized'], 'User must be authorized'
         assert request_context['response']['status'] == 'success', 'Business logic must succeed'
-        invalid_request_context = {'headers': {'Authorization': 'Bearer invalid.token.here', 'Content-Type': 'application/json', 'Origin': 'https://app.netra.ai'}, 'method': 'POST', 'path': '/api/chat/send', 'body': {'message': 'Test with invalid token'}}
+        invalid_request_context = {'headers': {'Authorization': 'Bearer invalid.token.here', 'Content-Type': 'application/json', 'Origin': 'https://app.netrasystems.ai'}, 'method': 'POST', 'path': '/api/chat/send', 'body': {'message': 'Test with invalid token'}}
         error_middleware_order = []
         cors_passed = cors_middleware(invalid_request_context)
         if cors_passed:

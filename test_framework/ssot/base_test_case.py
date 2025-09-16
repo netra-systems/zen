@@ -337,11 +337,15 @@ class SSotBaseTestCase:
     
     def setUp(self):
         """
-        unittest compatibility method.
+        unittest compatibility method with async support.
         
         IMPORTANT: This provides backward compatibility for tests that inherit 
         from unittest.TestCase and use setUp/tearDown pattern. It calls the 
         pytest-style setup_method to ensure consistent behavior.
+        
+        ASYNC SUPPORT: If the test class has an asyncSetUp() method, this will
+        automatically call it after the standard setup to ensure proper async
+        initialization for unit tests.
         
         NOTE: Tests should prefer setup_method/teardown_method for new code.
         """
@@ -367,6 +371,24 @@ class SSotBaseTestCase:
         
         # Call the standard setup_method
         self.setup_method(test_method)
+        
+        # Call asyncSetUp if it exists and we're in an async test
+        if hasattr(self, 'asyncSetUp') and asyncio.iscoroutinefunction(self.asyncSetUp):
+            # Create event loop if none exists
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_closed():
+                    raise RuntimeError("Event loop is closed")
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+            
+            # Run asyncSetUp
+            try:
+                loop.run_until_complete(self.asyncSetUp())
+            except Exception as e:
+                logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
+                raise
     
     def tearDown(self):
         """
@@ -1189,11 +1211,15 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
 
     def setUp(self):
         """
-        unittest compatibility method for async tests.
+        unittest compatibility method for async tests with async support.
         
         IMPORTANT: This provides backward compatibility for async tests that inherit 
         from unittest.TestCase and use setUp/tearDown pattern. It calls the 
         pytest-style setup_method to ensure consistent behavior.
+        
+        ASYNC SUPPORT: If the test class has an asyncSetUp() method, this will
+        automatically call it after the standard setup to ensure proper async
+        initialization for unit tests.
         
         NOTE: Tests should prefer setup_method/teardown_method for new code.
         """
@@ -1219,6 +1245,24 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
         
         # Call the standard setup_method
         self.setup_method(test_method)
+        
+        # Call asyncSetUp if it exists and we're in an async test
+        if hasattr(self, 'asyncSetUp') and asyncio.iscoroutinefunction(self.asyncSetUp):
+            # Create event loop if none exists
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_closed():
+                    raise RuntimeError("Event loop is closed")
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+            
+            # Run asyncSetUp
+            try:
+                loop.run_until_complete(self.asyncSetUp())
+            except Exception as e:
+                logger.error(f"asyncSetUp failed in {self.__class__.__name__}: {e}")
+                raise
     
     def tearDown(self):
         """

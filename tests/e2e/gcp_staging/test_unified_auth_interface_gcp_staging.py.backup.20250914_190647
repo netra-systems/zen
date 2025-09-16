@@ -85,22 +85,22 @@ class TestUnifiedAuthInterfaceGCPStaging(SSotAsyncTestCase):
             "google": {
                 "client_id": cls.env.get("GOOGLE_CLIENT_ID"),
                 "client_secret": cls.env.get("GOOGLE_CLIENT_SECRET"),
-                "redirect_uri": "https://staging.netra.ai/auth/callback/google"
+                "redirect_uri": "https://staging.netrasystems.ai/auth/callback/google"
             },
             "github": {
                 "client_id": cls.env.get("GITHUB_CLIENT_ID"),
                 "client_secret": cls.env.get("GITHUB_CLIENT_SECRET"),
-                "redirect_uri": "https://staging.netra.ai/auth/callback/github"
+                "redirect_uri": "https://staging.netrasystems.ai/auth/callback/github"
             },
             "azure": {
                 "client_id": cls.env.get("AZURE_CLIENT_ID"),
                 "client_secret": cls.env.get("AZURE_CLIENT_SECRET"),
-                "redirect_uri": "https://staging.netra.ai/auth/callback/azure"
+                "redirect_uri": "https://staging.netrasystems.ai/auth/callback/azure"
             },
             "okta": {
                 "client_id": cls.env.get("OKTA_CLIENT_ID"),
                 "client_secret": cls.env.get("OKTA_CLIENT_SECRET"),
-                "redirect_uri": "https://staging.netra.ai/auth/callback/okta"
+                "redirect_uri": "https://staging.netrasystems.ai/auth/callback/okta"
             }
         }
 
@@ -119,7 +119,7 @@ class TestUnifiedAuthInterfaceGCPStaging(SSotAsyncTestCase):
         Business Value: $15K+ MRR per Enterprise - SSO is critical for enterprise sales.
         Validates: SAML/OIDC integration, multi-provider support, enterprise policies.
         """
-        enterprise_domain = "enterprise-test.netra.ai"
+        enterprise_domain = "enterprise-test.netrasystems.ai"
         
         # Configure enterprise SSO settings
         sso_config = {
@@ -154,7 +154,7 @@ class TestUnifiedAuthInterfaceGCPStaging(SSotAsyncTestCase):
         # Test multi-provider authentication flows
         test_users = [
             {
-                "email": "test.user.azure@enterprise-test.netra.ai",
+                "email": "test.user.azure@enterprise-test.netrasystems.ai",
                 "provider": "azure",
                 "enterprise_attributes": {
                     "department": "Engineering",
@@ -163,7 +163,7 @@ class TestUnifiedAuthInterfaceGCPStaging(SSotAsyncTestCase):
                 }
             },
             {
-                "email": "test.user.okta@enterprise-test.netra.ai", 
+                "email": "test.user.okta@enterprise-test.netrasystems.ai", 
                 "provider": "okta",
                 "enterprise_attributes": {
                     "department": "Finance",
@@ -172,7 +172,7 @@ class TestUnifiedAuthInterfaceGCPStaging(SSotAsyncTestCase):
                 }
             },
             {
-                "email": "test.user.google@enterprise-test.netra.ai",
+                "email": "test.user.google@enterprise-test.netrasystems.ai",
                 "provider": "google",
                 "enterprise_attributes": {
                     "department": "Marketing",
@@ -192,7 +192,7 @@ class TestUnifiedAuthInterfaceGCPStaging(SSotAsyncTestCase):
                 domain=enterprise_domain,
                 provider=test_user["provider"],
                 user_email=test_user["email"],
-                redirect_uri=f"https://staging.netra.ai/dashboard"
+                redirect_uri=f"https://staging.netrasystems.ai/dashboard"
             )
             
             self.assertTrue(sso_initiation.get("success", False), 
@@ -287,7 +287,7 @@ class TestUnifiedAuthInterfaceGCPStaging(SSotAsyncTestCase):
         # Create test users requiring MFA
         mfa_test_users = []
         for i in range(50):  # Production-scale user count
-            user_email = f"mfa.test.{i}@netra.ai"
+            user_email = f"mfa.test.{i}@netrasystems.ai"
             user_id = self.id_manager.generate_user_id()
             
             # Register user with MFA requirement
@@ -488,7 +488,7 @@ class TestUnifiedAuthInterfaceGCPStaging(SSotAsyncTestCase):
         Validates: Session isolation, concurrent session limits, device fingerprinting.
         """
         # Create enterprise user with strict session policies
-        enterprise_user_email = "enterprise.security@netra.ai"
+        enterprise_user_email = "enterprise.security@netrasystems.ai"
         enterprise_user_id = self.id_manager.generate_user_id()
         
         enterprise_session_policy = SessionPolicy(
@@ -866,7 +866,7 @@ class TestUnifiedAuthInterfaceGCPStaging(SSotAsyncTestCase):
         Validates: JWT signing, validation, expiration, refresh token security.
         """
         test_user_id = self.id_manager.generate_user_id()
-        test_email = "jwt.security.test@netra.ai"
+        test_email = "jwt.security.test@netrasystems.ai"
         
         # Test JWT token generation with various security levels
         security_levels = [
@@ -1104,7 +1104,7 @@ class TestUnifiedAuthInterfaceGCPStaging(SSotAsyncTestCase):
                 attempt_start = time.time()
                 
                 # Use different email for each attempt to avoid account lockout
-                test_email = f"rate.limit.test.{attempt}@netra.ai"
+                test_email = f"rate.limit.test.{attempt}@netrasystems.ai"
                 wrong_password = f"wrong_password_{attempt}"
                 
                 login_result = await self.unified_auth.authenticate_user(
@@ -1168,7 +1168,7 @@ class TestUnifiedAuthInterfaceGCPStaging(SSotAsyncTestCase):
             attack_tasks = []
             
             for i in range(20):  # 20 attempts per round
-                attack_email = f"attack.test.{attack_round}.{i}@netra.ai"
+                attack_email = f"attack.test.{attack_round}.{i}@netrasystems.ai"
                 attack_task = self.unified_auth.authenticate_user(
                     email=attack_email,
                     password="definitely_wrong_password",
@@ -1207,7 +1207,7 @@ class TestUnifiedAuthInterfaceGCPStaging(SSotAsyncTestCase):
         # Test that whitelisted IP bypasses rate limits
         whitelist_test_tasks = []
         for i in range(50):  # High volume that would normally be rate limited
-            whitelist_email = f"whitelist.test.{i}@netra.ai"
+            whitelist_email = f"whitelist.test.{i}@netrasystems.ai"
             whitelist_task = self.unified_auth.authenticate_user(
                 email=whitelist_email,
                 password="wrong_password",
@@ -1237,7 +1237,7 @@ class TestUnifiedAuthInterfaceGCPStaging(SSotAsyncTestCase):
         Validates: Audit trail completeness, log integrity, compliance reporting.
         """
         audit_user_id = self.id_manager.generate_user_id()
-        audit_email = "audit.compliance@enterprise.netra.ai"
+        audit_email = "audit.compliance@enterprise.netrasystems.ai"
         
         # Enable comprehensive audit logging
         audit_config = await self.unified_auth.configure_audit_logging(

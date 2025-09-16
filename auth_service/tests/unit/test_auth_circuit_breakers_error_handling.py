@@ -227,7 +227,7 @@ class AuthCircuitBreakersCoreTests:
         
         # Create valid token first (before simulating DB failure)
         user_id = "db-failure-test-user"
-        email = "db-failure@netra.ai"
+        email = "db-failure@netrasystems.ai"
         valid_token = handler.create_access_token(user_id, email)
         
         # Verify token is valid before simulating failure
@@ -307,7 +307,7 @@ class AuthCircuitBreakersCoreTests:
         
         # Create tokens for blacklisting test
         user_id = "blacklist-failure-test"
-        email = "blacklist-failure@netra.ai"
+        email = "blacklist-failure@netrasystems.ai"
         
         token_to_blacklist = handler.create_access_token(user_id, email)
         valid_token = handler.create_access_token(f"{user_id}-valid", email)
@@ -390,7 +390,7 @@ class AuthCircuitBreakersCoreTests:
         
         # Create test tokens
         user_id = "recovery-test-user"
-        email = "recovery@netra.ai"
+        email = "recovery@netrasystems.ai"
         test_token = handler.create_access_token(user_id, email)
         
         # Verify initial valid state

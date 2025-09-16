@@ -346,7 +346,7 @@ This index catalogues all 39 custom Claude Code slash commands available for the
 ```bash
 /audit-gcp-logs                       # All services, last hour
 /audit-gcp-logs backend-staging 24    # Backend last 24 hours
-/audit-gcp-logs auth-staging 3        # Auth last 3 hours
+/audit-gcp-logs auth 3        # Auth last 3 hours
 ```
 
 ---

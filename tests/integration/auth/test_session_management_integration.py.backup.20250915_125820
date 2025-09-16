@@ -72,13 +72,13 @@ class TestSessionManagementIntegration(BaseIntegrationTest):
         self.test_users = [
             {
                 "user_id": "session-test-user-1",
-                "email": "session1@netra.ai", 
+                "email": "session1@netrasystems.ai", 
                 "name": "Session Test User 1",
                 "device_id": "device-001"
             },
             {
                 "user_id": "session-test-user-2", 
-                "email": "session2@netra.ai",
+                "email": "session2@netrasystems.ai",
                 "name": "Session Test User 2",
                 "device_id": "device-002"
             }
@@ -599,7 +599,7 @@ class TestSessionManagementIntegration(BaseIntegrationTest):
                 """Create session for different users concurrently."""
                 test_user = {
                     "user_id": f"concurrent-user-{user_index}",
-                    "email": f"concurrent{user_index}@netra.ai",
+                    "email": f"concurrent{user_index}@netrasystems.ai",
                     "device_id": f"concurrent-device-{user_index}"
                 }
                 

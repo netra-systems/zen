@@ -1861,7 +1861,7 @@
         "trace": null,
         "span_id": null,
         "json_payload": {
-          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
           "timestamp": "2025-09-15T21:37:07.419756+00:00",
           "labels": {
             "line": "1706",
@@ -1870,7 +1870,7 @@
           }
         },
         "raw_payload_type": "dict",
-        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:37:07.419756+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
+        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:37:07.419756+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
       },
       {
         "timestamp": "2025-09-15T21:37:07.408494+00:00",
@@ -2053,7 +2053,7 @@
         "trace": null,
         "span_id": null,
         "json_payload": {
-          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
           "timestamp": "2025-09-15T21:36:11.740850+00:00",
           "labels": {
             "line": "1706",
@@ -2062,7 +2062,7 @@
           }
         },
         "raw_payload_type": "dict",
-        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:36:11.740850+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
+        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:36:11.740850+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
       },
       {
         "timestamp": "2025-09-15T21:36:11.725709+00:00",
@@ -2245,7 +2245,7 @@
         "trace": null,
         "span_id": null,
         "json_payload": {
-          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
           "timestamp": "2025-09-15T21:35:11.612935+00:00",
           "labels": {
             "line": "1706",
@@ -2254,7 +2254,7 @@
           }
         },
         "raw_payload_type": "dict",
-        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:35:11.612935+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
+        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:35:11.612935+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
       },
       {
         "timestamp": "2025-09-15T21:35:11.599660+00:00",
@@ -2463,7 +2463,7 @@
         "trace": null,
         "span_id": null,
         "json_payload": {
-          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
           "timestamp": "2025-09-15T21:34:04.147851+00:00",
           "labels": {
             "line": "1706",
@@ -2472,7 +2472,7 @@
           }
         },
         "raw_payload_type": "dict",
-        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:34:04.147851+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
+        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:34:04.147851+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
       },
       {
         "timestamp": "2025-09-15T21:34:04.136160+00:00",
@@ -2655,7 +2655,7 @@
         "trace": null,
         "span_id": null,
         "json_payload": {
-          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
           "timestamp": "2025-09-15T21:33:01.424996+00:00",
           "labels": {
             "line": "1706",
@@ -2664,7 +2664,7 @@
           }
         },
         "raw_payload_type": "dict",
-        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:33:01.424996+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
+        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:33:01.424996+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
       },
       {
         "timestamp": "2025-09-15T21:33:01.414200+00:00",
@@ -2873,7 +2873,7 @@
         "trace": null,
         "span_id": null,
         "json_payload": {
-          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
           "timestamp": "2025-09-15T21:31:53.809435+00:00",
           "labels": {
             "line": "1706",
@@ -2882,7 +2882,7 @@
           }
         },
         "raw_payload_type": "dict",
-        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:31:53.809435+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
+        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:31:53.809435+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
       },
       {
         "timestamp": "2025-09-15T21:31:53.794864+00:00",
@@ -3091,7 +3091,7 @@
         "trace": null,
         "span_id": null,
         "json_payload": {
-          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
           "timestamp": "2025-09-15T21:30:46.863276+00:00",
           "labels": {
             "line": "1706",
@@ -3100,7 +3100,7 @@
           }
         },
         "raw_payload_type": "dict",
-        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:30:46.863276+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
+        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:30:46.863276+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
       },
       {
         "timestamp": "2025-09-15T21:30:46.850453+00:00",
@@ -3309,7 +3309,7 @@
         "trace": null,
         "span_id": null,
         "json_payload": {
-          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
           "timestamp": "2025-09-15T21:29:39.190676+00:00",
           "labels": {
             "line": "1706",
@@ -3318,7 +3318,7 @@
           }
         },
         "raw_payload_type": "dict",
-        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:29:39.190676+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
+        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:29:39.190676+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
       },
       {
         "timestamp": "2025-09-15T21:29:39.180547+00:00",
@@ -3527,7 +3527,7 @@
         "trace": null,
         "span_id": null,
         "json_payload": {
-          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai",
+          "message": "   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai",
           "timestamp": "2025-09-15T21:28:34.633390+00:00",
           "labels": {
             "line": "1706",
@@ -3536,7 +3536,7 @@
           }
         },
         "raw_payload_type": "dict",
-        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netra.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:28:34.633390+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
+        "raw_payload": "{'message': '   WARNING:  OAuth=REDACTED URI mismatch (non-critical in staging): https://app.staging.netrasystems.ai/auth/callback vs https://app.staging.netrasystems.ai', 'timestamp': '2025-09-15T21:28:34.633390+00:00', 'labels': {'line': '1706', 'module': 'logging', 'function': 'callHandlers'}}"
       },
       {
         "timestamp": "2025-09-15T21:28:34.622823+00:00",

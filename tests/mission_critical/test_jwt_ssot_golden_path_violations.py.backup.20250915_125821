@@ -46,7 +46,7 @@ class TestJWTSSOTGoldenPathViolations(SSotAsyncTestCase):
         # Golden Path test user
         self.golden_path_user = {
             "user_id": f"golden_path_user_{uuid.uuid4().hex[:8]}",
-            "email": "golden.path@netra.ai",
+            "email": "golden.path@netrasystems.ai",
             "permissions": ["chat", "agents", "read", "write"]
         }
 

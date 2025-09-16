@@ -1170,7 +1170,7 @@ class AuthEnvironment:
     
     def get_smtp_from_email(self) -> str:
         """Get SMTP from email address."""
-        return self.env.get("SMTP_FROM_EMAIL", "noreply@netra.ai")
+        return self.env.get("SMTP_FROM_EMAIL", "noreply@netrasystems.ai")
     
     def is_smtp_enabled(self) -> bool:
         """Check if SMTP is configured."""

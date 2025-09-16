@@ -32,7 +32,7 @@ class AgentExecutionRealLLME2ETests(BaseE2ETest):
         """Create authenticated user for E2E testing."""
         auth_helper = E2EAuthHelper()
         user = await auth_helper.create_authenticated_user(
-            email="e2e_llm_user@test.netra.ai",
+            email="e2e_llm_user@test.netrasystems.ai",
             name="E2E LLM Test User"
         )
         return user

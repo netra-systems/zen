@@ -9,10 +9,10 @@ During analysis, I discovered that **the primary `get_env()` signature errors ha
 The fixes were implemented correctly:
 ```python
 # BEFORE (causing errors):
-"base_url": get_env("STAGING_BASE_URL", "https://staging.netra.ai"),
+"base_url": get_env("STAGING_BASE_URL", "https://staging.netrasystems.ai"),
 
 # AFTER (working correctly):
-"base_url": get_env().get("STAGING_BASE_URL", "https://staging.netra.ai"),
+"base_url": get_env().get("STAGING_BASE_URL", "https://staging.netrasystems.ai"),
 ```
 
 ## 📋 REMAINING REMEDIATION TASKS

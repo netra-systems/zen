@@ -281,7 +281,7 @@ class TestSupervisorMultiUserIsolation(SSotAsyncTestCase):
         for i in range(count):
             # Create unique user identity
             user_id = f"isolation_test_user_{i}_{uuid.uuid4().hex[:8]}"
-            email = f"{user_id}@test.netra.ai"
+            email = f"{user_id}@test.netrasystems.ai"
             
             # Create auth helper for this user
             auth_helper = E2EWebSocketAuthHelper(

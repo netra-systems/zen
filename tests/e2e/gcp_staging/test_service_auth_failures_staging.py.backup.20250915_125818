@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 # GCP Staging Configuration
 GCP_STAGING_CONFIG = {
     "backend_service_url": "https://netra-backend-staging-YOUR-PROJECT.a.run.app",
-    "auth_service_url": "https://netra-auth-staging-YOUR-PROJECT.a.run.app",
+    "auth_service_url": "https://netra-auth-YOUR-PROJECT.a.run.app",
     "project_id": "netra-staging",
     "region": "us-central1"
 }
@@ -456,7 +456,7 @@ class TestIssue1037E2EReproductionSuite:
         # Document staging environment requirements
         staging_requirements = {
             "gcp_project": GCP_STAGING_CONFIG["project_id"],
-            "services_deployed": ["netra-backend-staging", "netra-auth-staging"],
+            "services_deployed": ["netra-backend-staging", "netra-auth"],
             "secret_manager_enabled": True,
             "cloud_run_configuration": "production-like",
             "authentication_enabled": True

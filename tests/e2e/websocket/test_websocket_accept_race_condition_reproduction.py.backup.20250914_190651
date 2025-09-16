@@ -94,7 +94,7 @@ class WebSocketAcceptRaceConditionE2ETest(BaseE2ETest):
         for i in range(5):  # Multiple users for concurrent scenarios
             user_data = self.auth_helper.create_test_user(
                 username=f"e2e_race_user_{i}_{int(time.time())}",
-                email=f"e2e_user_{i}_{int(time.time())}@test.netra.ai"
+                email=f"e2e_user_{i}_{int(time.time())}@test.netrasystems.ai"
             )
             self.real_test_users.append(user_data)
         

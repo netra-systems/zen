@@ -362,7 +362,7 @@ class LoadBalancerEndpointComplianceTests:
         # Test forbidden pattern detection with example text
         test_content = """
         BACKEND_URL = "https://netra-backend-staging-abc123-uc.a.run.app"
-        AUTH_URL = "https://netra-auth-staging-xyz789-uc.a.run.app"
+        AUTH_URL = "https://netra-auth-xyz789-uc.a.run.app"
         GOOD_URL = "https://api.staging.netrasystems.ai"
         """
         
@@ -379,7 +379,7 @@ class LoadBalancerEndpointComplianceTests:
             # Verify violation details
             violation_urls = [v.violation_text for v in violations]
             assert "https://netra-backend-staging-abc123-uc.a.run.app" in violation_urls
-            assert "https://netra-auth-staging-xyz789-uc.a.run.app" in violation_urls
+            assert "https://netra-auth-xyz789-uc.a.run.app" in violation_urls
             
         finally:
             # Clean up

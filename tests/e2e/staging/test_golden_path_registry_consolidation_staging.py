@@ -37,8 +37,8 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Staging environment detection
 STAGING_ENVIRONMENT = os.getenv('NETRA_ENV', '').lower() == 'staging'
-GCP_STAGING_URL = os.getenv('STAGING_API_URL', 'https://staging-api.netra.ai')
-GCP_STAGING_WS_URL = os.getenv('STAGING_WS_URL', 'wss://staging-api.netra.ai/ws')
+GCP_STAGING_URL = os.getenv('STAGING_API_URL', 'https://staging-api.netrasystems.ai')
+GCP_STAGING_WS_URL = os.getenv('STAGING_WS_URL', 'wss://staging-api.netrasystems.ai/ws')
 
 # Registry imports for staging validation
 try:
@@ -168,7 +168,7 @@ class GoldenPathRegistryConsolidationStagingTests(SSotAsyncTestCase):
                 # Fallback: Direct HTTP authentication
                 async with httpx.AsyncClient(timeout=self.staging_config['timeout']) as client:
                     auth_request = {
-                        'username': f'test_user_{uuid.uuid4().hex[:8]}@staging.netra.ai',
+                        'username': f'test_user_{uuid.uuid4().hex[:8]}@staging.netrasystems.ai',
                         'password': 'staging_test_password_123',
                         'grant_type': 'password'
                     }

@@ -315,7 +315,7 @@ class OAuthConfigGeneratorComprehensiveTests:
             mock_get.side_effect = lambda key, default=None: {
                 'GOOGLE_OAUTH_CLIENT_ID_PRODUCTION': 'prod-google-client-id',
                 'GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION': 'prod-google-client-secret',
-                'OAUTH_REDIRECT_URI': 'https://app.netra.ai/auth/callback'
+                'OAUTH_REDIRECT_URI': 'https://app.netrasystems.ai/auth/callback'
             }.get(key, default)
             
             generator = OAuthConfigGenerator()
@@ -338,7 +338,7 @@ class OAuthConfigGeneratorComprehensiveTests:
             mock_get.side_effect = lambda key, default=None: {
                 'GOOGLE_OAUTH_CLIENT_ID_STAGING': 'staging-google-client-id',
                 'GOOGLE_OAUTH_CLIENT_SECRET_STAGING': 'staging-google-client-secret',
-                'OAUTH_REDIRECT_URI': 'https://app.staging.netra.ai/auth/callback'
+                'OAUTH_REDIRECT_URI': 'https://app.staging.netrasystems.ai/auth/callback'
             }.get(key, default)
             
             generator = OAuthConfigGenerator()

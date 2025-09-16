@@ -110,7 +110,7 @@ class TestAuthenticatedMultiUserScenarios(BaseE2ETest):
         for i in range(self.max_concurrent_users):
             # Create unique user context for each session
             user_context = await create_authenticated_user_context(
-                user_email=f"e2e_multiuser_test_{i}_{int(time.time())}@staging.netra.ai",
+                user_email=f"e2e_multiuser_test_{i}_{int(time.time())}@staging.netrasystems.ai",
                 environment="staging",
                 permissions=["read", "write", "execute_agents", "multi_user_access"]
             )

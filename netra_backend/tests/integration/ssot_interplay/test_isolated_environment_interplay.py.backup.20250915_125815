@@ -811,7 +811,7 @@ class TestIsolatedEnvironmentInterplay(BaseIntegrationTest):
         # Set monitoring context variables
         self._set_test_var("LOG_PATH", "/var/log/netra", "monitoring")
         self._set_test_var("METRICS_ENDPOINT", "http://prometheus:9090", "monitoring")
-        self._set_test_var("ALERT_EMAIL", "alerts@netra.ai", "monitoring")
+        self._set_test_var("ALERT_EMAIL", "alerts@netrasystems.ai", "monitoring")
         
         # Set maintenance context variables
         self._set_test_var("BACKUP_PATH", "/backups/netra", "maintenance")
@@ -832,7 +832,7 @@ class TestIsolatedEnvironmentInterplay(BaseIntegrationTest):
         # Test monitoring variables
         assert self.env.get("LOG_PATH") == "/var/log/netra"
         assert self.env.get("METRICS_ENDPOINT") == "http://prometheus:9090"
-        assert self.env.get("ALERT_EMAIL") == "alerts@netra.ai"
+        assert self.env.get("ALERT_EMAIL") == "alerts@netrasystems.ai"
         
         # Test maintenance variables
         assert self.env.get("BACKUP_PATH") == "/backups/netra"

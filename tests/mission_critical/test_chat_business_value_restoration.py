@@ -17,7 +17,7 @@ Business Value Focus:
 - Multiple users can chat simultaneously without conflicts
 - System remains stable across multiple chat sessions
 
-See: /Users/anthony/Documents/GitHub/netra-apex/audit/staging/auto-solve-loop/toolregistry-duplicate-registration-20250109.md
+See: audit/staging/auto-solve-loop/toolregistry-duplicate-registration-20250109.md
 """
 
 import asyncio

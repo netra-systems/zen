@@ -654,7 +654,7 @@ class TestUnifiedConfigurationManagerIntegration(BaseIntegrationTest):
         oauth_configs = {
             "oauth.client_id": "test_client_id_12345",
             "oauth.client_secret": "test_client_secret_67890abcdef",  # Hex string
-            "oauth.redirect_uri": "https://app.netra.ai/auth/callback",
+            "oauth.redirect_uri": "https://app.netrasystems.ai/auth/callback",
             "oauth.scope": "read write admin"
         }
         
@@ -812,7 +812,7 @@ class TestUnifiedConfigurationManagerIntegration(BaseIntegrationTest):
         
         # Set shared configuration values that need to be synchronized
         shared_config = {
-            "cors.allowed_origins": ["https://app.netra.ai", "https://dashboard.netra.ai"],
+            "cors.allowed_origins": ["https://app.netrasystems.ai", "https://dashboard.netrasystems.ai"],
             "api.version": "v1",
             "security.session_timeout": 1800,
             "features.enable_analytics": True

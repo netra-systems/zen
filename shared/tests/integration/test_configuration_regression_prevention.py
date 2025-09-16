@@ -112,14 +112,14 @@ class TestConfigurationRegressionPrevention(BaseIntegrationTest):
         REGRESSION TEST: Prevent SERVICE_ID timestamp suffix auth failures (2025-09-07).
         
         INCIDENT: SERVICE_ID with timestamp suffix caused auth failures every 60 seconds.
-        Auth service expected stable SSOT SERVICE_ID but received "netra-auth-staging-[timestamp]".
+        Auth service expected stable SSOT SERVICE_ID but received "netra-auth-[timestamp]".
         
         IMPACT: Recurring authentication failures every minute.
-        LOG_PATTERN: "Service ID mismatch: received netra-auth-staging-[timestamp] but expected netra-backend"
+        LOG_PATTERN: "Service ID mismatch: received netra-auth-[timestamp] but expected netra-backend"
         """
         # Generate timestamp suffix like the problematic pattern
         timestamp_suffix = str(int(time.time()))
-        problematic_service_id = f"netra-auth-staging-{timestamp_suffix}"
+        problematic_service_id = f"netra-auth-{timestamp_suffix}"
         
         with self.isolated_helper.create_isolated_context("service_id_regression") as context:
             # GIVEN: SERVICE_ID with timestamp suffix (reproducing incident)

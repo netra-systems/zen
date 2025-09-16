@@ -80,7 +80,7 @@ async def auth_helper():
 @pytest.fixture
 async def authenticated_user(auth_helper):
     """Create authenticated user for testing."""
-    return await auth_helper.create_authenticated_user(email='datahelper_test@netra.ai', full_name='Data Helper Test User', permissions=['read', 'write', 'agent_execution'])
+    return await auth_helper.create_authenticated_user(email='datahelper_test@netrasystems.ai', full_name='Data Helper Test User', permissions=['read', 'write', 'agent_execution'])
 
 @pytest.fixture
 async def user_execution_context(authenticated_user, real_services_fixture):
@@ -332,8 +332,8 @@ class TestDataHelperUserExecutionContext(SSotBaseTestCase):
         - Value Impact: Ensures user privacy and data security
         - Revenue Impact: Prevents security incidents and compliance violations
         """
-        user1 = await auth_helper.create_authenticated_user(email='datahelper_user1@netra.ai', full_name='Data Helper User 1')
-        user2 = await auth_helper.create_authenticated_user(email='datahelper_user2@netra.ai', full_name='Data Helper User 2')
+        user1 = await auth_helper.create_authenticated_user(email='datahelper_user1@netrasystems.ai', full_name='Data Helper User 1')
+        user2 = await auth_helper.create_authenticated_user(email='datahelper_user2@netrasystems.ai', full_name='Data Helper User 2')
         context1 = await create_authenticated_user_context(user_email=user1.email, user_id=user1.user_id, environment='test')
         context2 = await create_authenticated_user_context(user_email=user2.email, user_id=user2.user_id, environment='test')
         context1.metadata['user_request'] = f'User {user1.user_id}: Optimize my $50,000 AWS budget for financial services ML'
@@ -454,7 +454,7 @@ class TestDataHelperUserExecutionContext(SSotBaseTestCase):
         users = []
         contexts = []
         for i in range(num_concurrent_users):
-            user = await auth_helper.create_authenticated_user(email=f'concurrent_user_{i}@netra.ai', full_name=f'Concurrent User {i}')
+            user = await auth_helper.create_authenticated_user(email=f'concurrent_user_{i}@netrasystems.ai', full_name=f'Concurrent User {i}')
             users.append(user)
             context = await create_authenticated_user_context(user_email=user.email, user_id=user.user_id, environment='test')
             scenarios = [{'request': 'Optimize chatbot costs for customer service', 'category': 'Customer Service AI'}, {'request': 'Reduce ML training costs for recommendation system', 'category': 'ML Training Optimization'}, {'request': 'Improve API performance for mobile app', 'category': 'API Performance'}, {'request': 'Optimize data pipeline costs for analytics', 'category': 'Data Pipeline'}, {'request': 'Reduce cloud storage costs for ML datasets', 'category': 'Storage Optimization'}]

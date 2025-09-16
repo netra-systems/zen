@@ -344,9 +344,9 @@ class NetworkHandler:
     def _get_effective_cors_origins(self) -> List[str]:
         """Get effective CORS origins based on environment."""
         if self.environment == "production":
-            return self.cors_config.production_origins or ["https://netra.ai"]
+            return self.cors_config.production_origins or ["https://netrasystems.ai"]
         elif self.environment == "staging":
-            return self.cors_config.staging_origins or ["https://staging.netra.ai"]
+            return self.cors_config.staging_origins or ["https://staging.netrasystems.ai"]
         else:
             return self.cors_config.development_origins
     

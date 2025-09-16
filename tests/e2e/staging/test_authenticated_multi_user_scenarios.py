@@ -86,7 +86,7 @@ class AuthenticatedMultiUserScenariosTests(BaseE2ETest):
         self.user_sessions: List[UserSession] = []
         self.max_concurrent_users = 10
         for i in range(self.max_concurrent_users):
-            user_context = await create_authenticated_user_context(user_email=f'e2e_multiuser_test_{i}_{int(time.time())}@staging.netra.ai', environment='staging', permissions=['read', 'write', 'execute_agents', 'multi_user_access'])
+            user_context = await create_authenticated_user_context(user_email=f'e2e_multiuser_test_{i}_{int(time.time())}@staging.netrasystems.ai', environment='staging', permissions=['read', 'write', 'execute_agents', 'multi_user_access'])
             auth_helper = E2EAuthHelper(environment='staging')
             ws_auth_helper = E2EWebSocketAuthHelper(environment='staging')
             user_session = UserSession(user_context=user_context, auth_helper=auth_helper, ws_auth_helper=ws_auth_helper)

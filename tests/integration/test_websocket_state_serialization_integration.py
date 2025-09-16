@@ -191,7 +191,7 @@ class GCPCloudRunCompatibilityTests:
             "context": {
                 "httpRequest": {
                     "method": "GET",
-                    "url": "wss://staging.netra.ai/ws",
+                    "url": "wss://staging.netrasystems.ai/ws",
                     "responseStatusCode": 1011
                 },
                 "reportLocation": {

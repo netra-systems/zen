@@ -89,7 +89,7 @@
 
         # REMOVED_SYNTAX_ERROR: assert auth_env.get_environment() == 'production'
         # REMOVED_SYNTAX_ERROR: assert auth_env.get_frontend_url() == 'https://app.netrasystems.ai'
-        # REMOVED_SYNTAX_ERROR: assert auth_env.get_backend_url() == 'https://backend.netrasystems.ai'
+        # REMOVED_SYNTAX_ERROR: assert auth_env.get_backend_url() == 'https://api.netrasystems.ai'
         # REMOVED_SYNTAX_ERROR: assert auth_env.get_auth_service_url() == 'https://auth.netrasystems.ai'
         # REMOVED_SYNTAX_ERROR: assert auth_env.get_oauth_redirect_uri() == 'https://app.netrasystems.ai/auth/callback'
 

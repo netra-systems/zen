@@ -216,7 +216,7 @@ class CrossServiceAuthValidationIntegrationTests(SSotAsyncTestCase):
         # Generate service-to-service authentication token
         service_token = await self.jwt_service.create_access_token(
             user_id='system',  # Special system user for service-to-service
-            email='system@netra.ai',
+            email='system@netrasystems.ai',
             permissions=['service_internal', 'system_access'],
             expires_delta=timedelta(hours=1)  # Longer expiry for service tokens
         )

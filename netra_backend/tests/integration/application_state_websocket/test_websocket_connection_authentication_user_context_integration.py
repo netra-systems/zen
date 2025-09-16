@@ -37,7 +37,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
         now = datetime.utcnow()
         payload = {
             "user_id": user_id,
-            "email": f"user_{user_id}@netra.ai",
+            "email": f"user_{user_id}@netrasystems.ai",
             "iat": now,
             "exp": now + timedelta(hours=1),
             "aud": "netra-backend",
@@ -67,7 +67,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
         """
         # Create authenticated test user
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'auth_test_user@netra.ai',
+            'email': 'auth_test_user@netrasystems.ai',
             'name': 'Auth Test User',
             'is_active': True
         })
@@ -239,7 +239,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
         """
         # Create test user (but will use invalid authentication)
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'invalid_auth_test@netra.ai',
+            'email': 'invalid_auth_test@netrasystems.ai',
             'name': 'Invalid Auth Test User',
             'is_active': True
         })
@@ -360,7 +360,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
         )
         assert db_user is not None, "User should still exist after auth failures"
         assert db_user['is_active'] is True, "User should remain active after auth failures"
-        assert db_user['email'] == 'invalid_auth_test@netra.ai', "User data should be unchanged"
+        assert db_user['email'] == 'invalid_auth_test@netrasystems.ai', "User data should be unchanged"
         
         # Test Case 4: Successful authentication after failures
         valid_token = self._create_test_jwt_token(user_id, {
@@ -444,7 +444,7 @@ class WebSocketConnectionAuthenticationUserContextIntegrationTests(BaseIntegrati
         users = []
         for i in range(3):
             user_data = await self.create_test_user_context(real_services_fixture, {
-                'email': f'multi_auth_user_{i}@netra.ai',
+                'email': f'multi_auth_user_{i}@netrasystems.ai',
                 'name': f'Multi Auth User {i}',
                 'is_active': True
             })

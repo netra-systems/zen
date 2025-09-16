@@ -260,7 +260,7 @@ None identified
 
 ## Auth Service Status
 **Auth Service Status:** HEALTHY - No warnings or errors detected in last 3 days
-**Service Name:** auth-staging
+**Service Name:** auth
 **Log Coverage:** Clean operational logs only
 
 ---
@@ -292,7 +292,7 @@ None identified
 ## Log Collection Details
 - **GCP Project:** netra-staging
 - **Backend Service:** netra-backend-staging
-- **Auth Service:** auth-staging
+- **Auth Service:** auth
 - **Time Range:** Last 3 days
 - **Log Filter:** severity>=WARNING
 - **Collection Method:** gcloud logging read

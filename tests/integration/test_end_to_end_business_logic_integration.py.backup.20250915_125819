@@ -162,7 +162,7 @@ class TestEndToEndBusinessLogicIntegration(SSotAsyncTestCase):
         self.test_user_ids.append(user_id)
 
         # Create user account
-        user_email = f"test_user_{user_id}@netra.ai"
+        user_email = f"test_user_{user_id}@netrasystems.ai"
         user_password = "SecureTestPassword123!"
 
         auth_token = await self.auth_helper.create_test_user_with_token(

@@ -221,7 +221,7 @@ class TestClickHouseGoldenPathLoggingE2E(SSotBaseTestCase):
         with IsolatedEnvironment(golden_path_env):
             # Create authenticated user for complete golden path
             authenticated_user = await self.auth_helper.create_authenticated_user(
-                email="goldenpath@test.netra.ai",
+                email="goldenpath@test.netrasystems.ai",
                 user_id=UserID("golden-path-user-123")
             )
             
@@ -319,7 +319,7 @@ class TestClickHouseGoldenPathLoggingE2E(SSotBaseTestCase):
             with self._capture_system_logs() as log_capture:
                 # Create authenticated user
                 authenticated_user = await self.auth_helper.create_authenticated_user(
-                    email="mixedfailure@test.netra.ai",
+                    email="mixedfailure@test.netrasystems.ai",
                     user_id=UserID("mixed-failure-user-456")
                 )
                 
@@ -401,7 +401,7 @@ class TestClickHouseGoldenPathLoggingE2E(SSotBaseTestCase):
         with IsolatedEnvironment(alerting_env):
             # Create authenticated user for realistic scenario
             authenticated_user = await self.auth_helper.create_authenticated_user(
-                email="alerting@test.netra.ai",
+                email="alerting@test.netrasystems.ai",
                 user_id=UserID("alerting-test-user-789")
             )
             
@@ -502,7 +502,7 @@ class TestClickHouseGoldenPathLoggingE2E(SSotBaseTestCase):
         with IsolatedEnvironment(volume_test_env):
             # Create authenticated user
             authenticated_user = await self.auth_helper.create_authenticated_user(
-                email="volume@test.netra.ai",
+                email="volume@test.netrasystems.ai",
                 user_id=UserID("volume-test-user-999")
             )
             

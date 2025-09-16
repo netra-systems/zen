@@ -85,19 +85,19 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
         self.test_users = [
             {
                 "user_id": "usr_enterprise_error_test_001",
-                "email": "enterprise.error.test@netra.ai", 
+                "email": "enterprise.error.test@netrasystems.ai", 
                 "tier": "enterprise",
                 "permissions": ["read", "write", "admin"]
             },
             {
                 "user_id": "usr_mid_tier_error_test_002", 
-                "email": "midtier.error.test@netra.ai",
+                "email": "midtier.error.test@netrasystems.ai",
                 "tier": "mid_tier",
                 "permissions": ["read", "write"]
             },
             {
                 "user_id": "usr_free_tier_error_test_003",
-                "email": "freetier.error.test@netra.ai", 
+                "email": "freetier.error.test@netrasystems.ai", 
                 "tier": "free",
                 "permissions": ["read"]
             }

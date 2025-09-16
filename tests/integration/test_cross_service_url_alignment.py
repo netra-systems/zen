@@ -355,7 +355,7 @@
                         # Should not be exactly the production URL
                         # REMOVED_SYNTAX_ERROR: assert url not in [ )
                         # REMOVED_SYNTAX_ERROR: 'https://app.netrasystems.ai',
-                        # REMOVED_SYNTAX_ERROR: 'https://backend.netrasystems.ai',
+                        # REMOVED_SYNTAX_ERROR: 'https://api.netrasystems.ai',
                         # REMOVED_SYNTAX_ERROR: 'https://auth.netrasystems.ai'
                         # REMOVED_SYNTAX_ERROR: ], "formatted_string"
 

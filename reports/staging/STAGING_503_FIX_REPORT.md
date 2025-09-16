@@ -147,7 +147,7 @@ gcloud secrets create database-password-staging --data-file=db-password.txt
 gcloud secrets create redis-password-staging --data-file=redis-password.txt
 gcloud secrets create fernet-key-staging --data-file=fernet-key.txt
 gcloud secrets create gemini-api-key-staging --data-file=gemini-key.txt
-gcloud secrets create google-oauth-staging --data-file=oauth-config.json
+gcloud secrets create google-oauth --data-file=oauth-config.json
 ```
 
 ### 4. Cloud Run Deployment Fix
@@ -159,8 +159,8 @@ gcloud run deploy netra-backend-staging \
   --set-secrets=REDIS_PASSWORD=redis-password-staging:latest \
   --set-secrets=FERNET_KEY=fernet-key-staging:latest \
   --set-secrets=GEMINI_API_KEY=gemini-api-key-staging:latest \
-  --set-secrets=GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-staging:latest \
-  --set-secrets=GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-staging:latest
+  --set-secrets=GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth:latest \
+  --set-secrets=GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth:latest
 ```
 
 ## CONFIGURATION SSOT COMPLIANCE

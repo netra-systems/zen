@@ -103,7 +103,7 @@ class TestRealAuthFlowE2E:
         print("[U+1F4DD] Testing REAL user registration flow...")
         
         # Generate unique test user
-        test_email = f"real_reg_test_{int(time.time())}@netra.ai"
+        test_email = f"real_reg_test_{int(time.time())}@netrasystems.ai"
         test_password = "RealTestPassword123!"
         
         # Perform REAL user registration
@@ -201,7 +201,7 @@ class TestRealAuthFlowE2E:
         print("[U+1F511] Testing REAL user login flow...")
         
         # Create a real user first for login testing
-        test_email = f"real_login_test_{int(time.time())}@netra.ai"
+        test_email = f"real_login_test_{int(time.time())}@netrasystems.ai"
         test_password = "RealLoginTest123!"
         
         # Register user first
@@ -289,7 +289,7 @@ class TestRealAuthFlowE2E:
         
         # Create authenticated user
         auth_user = await auth_helper.create_authenticated_user(
-            email=f"ws_auth_test_{int(time.time())}@netra.ai"
+            email=f"ws_auth_test_{int(time.time())}@netrasystems.ai"
         )
         
         # Test REAL WebSocket connection with authentication
@@ -355,7 +355,7 @@ class TestRealAuthFlowE2E:
         
         # Create real JWT token
         auth_user = await auth_helper.create_authenticated_user(
-            email=f"jwt_test_{int(time.time())}@netra.ai"
+            email=f"jwt_test_{int(time.time())}@netrasystems.ai"
         )
         
         # Validate token with REAL auth service
@@ -419,7 +419,7 @@ class TestRealAuthFlowE2E:
         
         # Create user and get session
         auth_user = await auth_helper.create_authenticated_user(
-            email=f"session_test_{int(time.time())}@netra.ai"
+            email=f"session_test_{int(time.time())}@netrasystems.ai"
         )
         
         # Check if session was created in REAL database
@@ -512,7 +512,7 @@ class TestRealAuthFlowE2E:
         print(" CYCLE:  Testing complete REAL auth flow integration...")
         
         # Step 1: Registration
-        test_email = f"complete_auth_test_{int(time.time())}@netra.ai"
+        test_email = f"complete_auth_test_{int(time.time())}@netrasystems.ai"
         test_password = "CompleteAuthTest123!"
         
         registration_result = await self.test_real_user_registration_flow(

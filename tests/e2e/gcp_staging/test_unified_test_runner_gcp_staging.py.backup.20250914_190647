@@ -581,7 +581,7 @@ class TestUnifiedTestRunnerGCPStaging(SSotAsyncTestCase):
             },
             notification_channels={
                 "slack": {"enabled": True, "webhook": self.env.get("SLACK_WEBHOOK_URL")},
-                "email": {"enabled": True, "recipients": ["test-team@netra.ai"]},
+                "email": {"enabled": True, "recipients": ["test-team@netrasystems.ai"]},
                 "dashboard": {"enabled": True, "update_interval": 30}
             },
             metrics_collection_interval=10  # Collect metrics every 10 seconds

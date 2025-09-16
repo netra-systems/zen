@@ -141,7 +141,7 @@ def create_test_user_with_oauth(email: str = "test@example.com"):
     # REMOVED_SYNTAX_ERROR: cls.frontend_url = "http://localhost:3000"
 
     # Test data
-    # REMOVED_SYNTAX_ERROR: cls.test_user_email = "test_init@netra.ai"
+    # REMOVED_SYNTAX_ERROR: cls.test_user_email = "test_init@netrasystems.ai"
     # REMOVED_SYNTAX_ERROR: cls.test_user_password = "TestInit123!@#"
 
     # REMOVED_SYNTAX_ERROR: @classmethod

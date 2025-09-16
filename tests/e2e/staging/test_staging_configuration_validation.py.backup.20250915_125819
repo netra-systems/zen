@@ -58,7 +58,7 @@ class TestStagingConfigurationValidation(BaseE2ETest):
         self.staging_config = get_staging_config()
         self.env = get_env()
         assert self.staging_config.validate_configuration(), 'Staging configuration invalid'
-        self.test_user_context = await create_authenticated_user_context(user_email=f'e2e_config_test_{int(time.time())}@staging.netra.ai', environment='staging', permissions=['read', 'write', 'admin', 'config_validation'])
+        self.test_user_context = await create_authenticated_user_context(user_email=f'e2e_config_test_{int(time.time())}@staging.netrasystems.ai', environment='staging', permissions=['read', 'write', 'admin', 'config_validation'])
         self.auth_helper = E2EAuthHelper(environment='staging')
         self.ws_auth_helper = E2EWebSocketAuthHelper(environment='staging')
         self.logger.info(f' PASS:  Staging configuration validation setup complete')

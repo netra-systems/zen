@@ -144,7 +144,8 @@ class StringLiteralsValidationCriticalTests:
         CASCADE FAILURE: Silent configuration errors, wrong API endpoints
         """
         # Test string literals query tool exists and works
-        script_path = Path("/Users/anthony/Documents/GitHub/netra-apex/scripts/query_string_literals.py")
+        project_root = Path(__file__).parent.parent.parent.parent
+        script_path = project_root / "scripts" / "query_string_literals.py"
         assert script_path.exists(), "String literals query script should exist"
         
         # Test critical configuration query (mocked since we can't run external commands)

@@ -520,7 +520,7 @@
       "details": {
         "status_code": 400,
         "cors_headers": {
-          "access-control-allow-origin": "https://app.netra.ai",
+          "access-control-allow-origin": "https://app.netrasystems.ai",
           "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
           "access-control-allow-headers": "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, Referer, X-Request-ID, X-Requested-With, X-Service-Name, X-Trace-ID",
           "access-control-max-age": "3600"
@@ -547,7 +547,7 @@
           "x-request-start": "1756535075076",
           "x-environment": "staging",
           "x-security-fingerprint": "2f27ca46126b6960",
-          "Access-Control-Allow-Origin": "https://app.netra.ai",
+          "Access-Control-Allow-Origin": "https://app.netrasystems.ai",
           "x-cloud-trace-context": "977e0b784a608dddf9e3ba4e2f19ba5a",
           "Date": "Sat, 30 Aug 2025 06:24:35 GMT",
           "Server": "Google Frontend",
@@ -822,7 +822,7 @@
       "details": {
         "status_code": 400,
         "cors_headers": {
-          "access-control-allow-origin": "https://app.netra.ai",
+          "access-control-allow-origin": "https://app.netrasystems.ai",
           "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
           "access-control-allow-headers": "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, Referer, X-Request-ID, X-Requested-With, X-Service-Name, X-Trace-ID",
           "access-control-max-age": "3600"
@@ -849,7 +849,7 @@
           "x-request-start": "1756535075076",
           "x-environment": "staging",
           "x-security-fingerprint": "2f27ca46126b6960",
-          "Access-Control-Allow-Origin": "https://app.netra.ai",
+          "Access-Control-Allow-Origin": "https://app.netrasystems.ai",
           "x-cloud-trace-context": "977e0b784a608dddf9e3ba4e2f19ba5a",
           "Date": "Sat, 30 Aug 2025 06:24:35 GMT",
           "Server": "Google Frontend",

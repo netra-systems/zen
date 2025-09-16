@@ -44,7 +44,7 @@ class TestJWTSSOTGoldenPathProtection(SSotAsyncTestCase):
         # Golden Path test user
         self.golden_path_user = {
             "user_id": f"golden_path_user_{uuid.uuid4().hex[:8]}",
-            "email": "golden.path@netra.ai",
+            "email": "golden.path@netrasystems.ai",
             "permissions": ["chat", "agents", "read", "write"]
         }
 
@@ -161,12 +161,12 @@ class TestJWTSSOTGoldenPathProtection(SSotAsyncTestCase):
         test_users = [
             {
                 "user_id": f"user_a_{uuid.uuid4().hex[:8]}",
-                "email": "user.a@netra.ai",
+                "email": "user.a@netrasystems.ai",
                 "permissions": ["chat"]
             },
             {
                 "user_id": f"user_b_{uuid.uuid4().hex[:8]}",
-                "email": "user.b@netra.ai",
+                "email": "user.b@netrasystems.ai",
                 "permissions": ["chat"]
             }
         ]
@@ -482,7 +482,7 @@ class TestJWTSSOTGoldenPathRegression(SSotAsyncTestCase):
             mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "existing_user",
-                "email": "existing@netra.ai",
+                "email": "existing@netrasystems.ai",
                 "permissions": ["chat"]
             })
 

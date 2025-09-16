@@ -156,7 +156,7 @@ class DatabaseORMOperationsTests(SSotAsyncTestCase):
             # Create new users
             user1 = User(
                 id=self.user1_context.user_id,
-                email="test_user_001@netra.ai",
+                email="test_user_001@netrasystems.ai",
                 username="test_user_001",
                 full_name="Test User 001",
                 is_active=True,
@@ -165,7 +165,7 @@ class DatabaseORMOperationsTests(SSotAsyncTestCase):
             
             user2 = User(
                 id=self.user2_context.user_id,
-                email="test_user_002@netra.ai", 
+                email="test_user_002@netrasystems.ai", 
                 username="test_user_002",
                 full_name="Test User 002",
                 is_active=True,
@@ -183,7 +183,7 @@ class DatabaseORMOperationsTests(SSotAsyncTestCase):
             # Query user by ID
             queried_user1 = await session.get(User, self.user1_context.user_id)
             assert queried_user1 is not None
-            assert queried_user1.email == "test_user_001@netra.ai"
+            assert queried_user1.email == "test_user_001@netrasystems.ai"
             assert queried_user1.is_active is True
             
             # Query all users
@@ -232,7 +232,7 @@ class DatabaseORMOperationsTests(SSotAsyncTestCase):
         async with self.db_fixture.get_async_session() as session:
             user = User(
                 id=self.user1_context.user_id,
-                email="thread_test@netra.ai",
+                email="thread_test@netrasystems.ai",
                 username="thread_test_user",
                 full_name="Thread Test User",
                 is_active=True
@@ -320,7 +320,7 @@ class DatabaseORMOperationsTests(SSotAsyncTestCase):
         async with self.db_fixture.get_async_session() as session:
             user = User(
                 id=self.user1_context.user_id,
-                email="execution_test@netra.ai",
+                email="execution_test@netrasystems.ai",
                 username="execution_test_user",
                 full_name="Execution Test User",
                 is_active=True
@@ -429,14 +429,14 @@ class DatabaseORMOperationsTests(SSotAsyncTestCase):
             users = [
                 User(
                     id=self.user1_context.user_id,
-                    email="isolation_test_1@netra.ai",
+                    email="isolation_test_1@netrasystems.ai",
                     username="isolation_test_1",
                     full_name="Isolation Test User 1",
                     is_active=True
                 ),
                 User(
                     id=self.user2_context.user_id,
-                    email="isolation_test_2@netra.ai",
+                    email="isolation_test_2@netrasystems.ai",
                     username="isolation_test_2", 
                     full_name="Isolation Test User 2",
                     is_active=True
@@ -564,7 +564,7 @@ class DatabaseORMOperationsTests(SSotAsyncTestCase):
         async with self.db_fixture.get_async_session() as session:
             user = User(
                 id=self.user1_context.user_id,
-                email="performance_test@netra.ai",
+                email="performance_test@netrasystems.ai",
                 username="performance_test_user",
                 full_name="Performance Test User",
                 is_active=True

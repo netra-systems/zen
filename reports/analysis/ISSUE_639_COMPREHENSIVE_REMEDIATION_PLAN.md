@@ -19,11 +19,11 @@ Issue #639 has been analyzed and a systematic remediation plan created. The root
 ### Affected Pattern Examples
 ```python
 # ❌ INCORRECT USAGE (causing TypeError)
-get_env("STAGING_BASE_URL", "https://staging.netra.ai")
+get_env("STAGING_BASE_URL", "https://staging.netrasystems.ai")
 get_env("REDIS_URL", "redis://localhost:6379")
 
 # ✅ CORRECT USAGE 
-get_env().get("STAGING_BASE_URL", "https://staging.netra.ai")
+get_env().get("STAGING_BASE_URL", "https://staging.netrasystems.ai")
 get_env().get("REDIS_URL", "redis://localhost:6379")
 ```
 

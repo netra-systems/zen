@@ -488,12 +488,12 @@ CLICKHOUSE_ERROR_CODE_ALERTS = {
     60: {
         "severity": "critical",
         "message": "ClickHouse tables missing - immediate attention required",
-        "runbook": "https://docs.netra.ai/runbooks/clickhouse-table-recovery"
+        "runbook": "https://docs.netrasystems.ai/runbooks/clickhouse-table-recovery"
     },
     516: {
         "severity": "high", 
         "message": "ClickHouse authentication failure",
-        "runbook": "https://docs.netra.ai/runbooks/clickhouse-auth-recovery"
+        "runbook": "https://docs.netrasystems.ai/runbooks/clickhouse-auth-recovery"
     }
 }
 ```

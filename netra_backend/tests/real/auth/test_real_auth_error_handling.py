@@ -190,7 +190,7 @@ class RealAuthErrorHandlingTests:
             user_message = scenario['user_message']
             expected_status = scenario['status_code']
             print(f' SEARCH:  Testing OAuth error scenario: {scenario_name}')
-            oauth_error_response = {'error': error_code, 'error_description': user_message, 'status_code': expected_status, 'user_friendly': True, 'retry_after': 60 if error_code == 'rate_limited' else None, 'support_contact': 'support@netra.ai' if error_code == 'invalid_credentials' else None}
+            oauth_error_response = {'error': error_code, 'error_description': user_message, 'status_code': expected_status, 'user_friendly': True, 'retry_after': 60 if error_code == 'rate_limited' else None, 'support_contact': 'support@netrasystems.ai' if error_code == 'invalid_credentials' else None}
             assert oauth_error_response['error'] == error_code
             assert len(oauth_error_response['error_description']) > 0
             assert oauth_error_response['user_friendly'] is True
@@ -264,7 +264,7 @@ class RealAuthErrorHandlingTests:
             available_features = scenario['available_features']
             recovery_action = scenario['recovery_action']
             print(f'[U+1F527] Testing system recovery scenario: {description}')
-            recovery_response = {'system_status': 'degraded', 'scenario': scenario_name, 'description': description, 'degraded_features': degraded_features, 'available_features': available_features, 'recovery_action': recovery_action, 'estimated_recovery_time': '5-15 minutes', 'status_page': 'https://status.netra.ai', 'user_message': self.get_system_recovery_message(scenario_name)}
+            recovery_response = {'system_status': 'degraded', 'scenario': scenario_name, 'description': description, 'degraded_features': degraded_features, 'available_features': available_features, 'recovery_action': recovery_action, 'estimated_recovery_time': '5-15 minutes', 'status_page': 'https://status.netrasystems.ai', 'user_message': self.get_system_recovery_message(scenario_name)}
             assert recovery_response['system_status'] == 'degraded'
             assert len(recovery_response['available_features']) > 0
             assert len(recovery_response['user_message']) > 0

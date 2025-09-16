@@ -109,7 +109,7 @@ class WebSocketAuthHeadersTests(SSotAsyncTestCase):
         This test ensures the system fails fast when GCP Load Balancer
         strips authentication headers, preventing silent auth bypass.
         """
-        headers_without_auth = {'host': 'staging.netra.ai', 'connection': 'upgrade', 'upgrade': 'websocket', 'sec-websocket-key': 'test-key', 'sec-websocket-version': '13'}
+        headers_without_auth = {'host': 'staging.netrasystems.ai', 'connection': 'upgrade', 'upgrade': 'websocket', 'sec-websocket-key': 'test-key', 'sec-websocket-version': '13'}
         mock_websocket = self.create_mock_websocket_with_headers(headers_without_auth)
         auth_header = mock_websocket.headers.get('authorization')
         self.assertIsNone(auth_header, 'Authorization header should be missing (simulating Load Balancer stripping)')
@@ -186,7 +186,7 @@ class WebSocketAuthHeadersTests(SSotAsyncTestCase):
         This test validates that we can distinguish between infrastructure headers
         added by GCP Load Balancer and actual authentication headers.
         """
-        gcp_infrastructure_headers = {'host': 'staging.netra.ai', 'via': '1.1 google', 'x-forwarded-for': '203.0.113.1', 'x-forwarded-proto': 'https', 'forwarded': 'for=203.0.113.1;host=staging.netra.ai;proto=https', 'traceparent': '00-trace-span-01'}
+        gcp_infrastructure_headers = {'host': 'staging.netrasystems.ai', 'via': '1.1 google', 'x-forwarded-for': '203.0.113.1', 'x-forwarded-proto': 'https', 'forwarded': 'for=203.0.113.1;host=staging.netrasystems.ai;proto=https', 'traceparent': '00-trace-span-01'}
         mock_websocket = self.create_mock_websocket_with_headers(gcp_infrastructure_headers)
         has_auth_header = 'authorization' in [k.lower() for k in mock_websocket.headers.keys()]
         has_infrastructure_headers = any((header in mock_websocket.headers for header in ['host', 'via', 'x-forwarded-for', 'x-forwarded-proto']))
@@ -315,7 +315,7 @@ class WebSocketAuthenticatorIntegrationTests(SSotAsyncTestCase):
         mock_auth_result.error_code = 'NO_TOKEN'
         mock_auth_result.metadata = {}
         mock_auth_service.authenticate_websocket.return_value = (mock_auth_result, None)
-        headers_without_auth = {'host': 'staging.netra.ai', 'x-forwarded-for': '203.0.113.1'}
+        headers_without_auth = {'host': 'staging.netrasystems.ai', 'x-forwarded-for': '203.0.113.1'}
         mock_websocket = Mock()
         mock_websocket.headers = headers_without_auth
         mock_websocket.client = Mock()

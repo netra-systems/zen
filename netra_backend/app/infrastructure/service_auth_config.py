@@ -240,7 +240,7 @@ class ServiceAuthManager:
             
             # Issue #1278: Check for problematic SERVICE_ID patterns
             problematic_patterns = [
-                "netra-auth-staging-1757260376",  # Known bad pattern from Issue #1278
+                "netra-auth-1757260376",  # Known bad pattern from Issue #1278
                 "auth-service",                   # Wrong service type
             ]
             
@@ -268,7 +268,7 @@ class ServiceAuthManager:
         if self.environment == ServiceEnvironment.STAGING:
             valid_staging_patterns = [
                 "http://auth:8081",                    # Docker compose internal
-                "https://netra-auth-staging",          # GCP Cloud Run
+                "https://netra-auth",          # GCP Cloud Run
                 "http://localhost:8081",               # Local testing
             ]
             
@@ -332,7 +332,7 @@ class ServiceAuthManager:
         
         # Known problematic patterns that should be fixed
         problematic_fixes = {
-            "netra-auth-staging-1757260376": "netra-backend",
+            "netra-auth-1757260376": "netra-backend",
             "auth-service": "netra-backend",
             "netra-auth": "netra-backend"
         }

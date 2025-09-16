@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "netra-apex"
 version = "1.0.0"
 description = "Netra Apex AI Optimization Platform"
-authors = [{name = "Netra Systems", email = "dev@netra.ai"}]
+authors = [{name = "Netra Systems", email = "dev@netrasystems.ai"}]
 license = {text = "Proprietary"}
 requires-python = ">=3.9"
 dependencies = []

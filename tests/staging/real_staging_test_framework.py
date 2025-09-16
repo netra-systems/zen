@@ -624,7 +624,7 @@ class StagingAuthManager:
         timestamp = str(int(time.time()))
         
         return {
-            "email": f"test_user_{timestamp}@staging.netra.ai",
+            "email": f"test_user_{timestamp}@staging.netrasystems.ai",
             "password": f"TestPass_{timestamp}!",
             "first_name": "Test",
             "last_name": f"User_{timestamp[-4:]}"

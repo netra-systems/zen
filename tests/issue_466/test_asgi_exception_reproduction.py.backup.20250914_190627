@@ -404,7 +404,7 @@ class TestIssue466ASGIExceptionReproduction(SSotAsyncTestCase):
         
         # REPRODUCTION: WebSocket request with authentication issues
         websocket_headers = [
-            (b'host', b'staging.netra.app'),
+            (b'host', b'staging.netrasystems.ai'),
             (b'upgrade', b'websocket'),
             (b'connection', b'upgrade'),
             # MISSING: Proper authorization header
@@ -424,7 +424,7 @@ class TestIssue466ASGIExceptionReproduction(SSotAsyncTestCase):
         # VALIDATION: Test the fix
         # Fix: WebSocket connections should bypass authentication or handle it properly
         fixed_headers = [
-            (b'host', b'staging.netra.app'),
+            (b'host', b'staging.netrasystems.ai'),
             (b'upgrade', b'websocket'),
             (b'connection', b'upgrade'),
             (b'authorization', b'Bearer valid-jwt-token-for-websocket'),

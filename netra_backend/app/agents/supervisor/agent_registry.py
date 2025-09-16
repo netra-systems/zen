@@ -56,15 +56,14 @@ else:
 
 from shared.logging.unified_logging_ssot import get_logger
 
-central_logger = get_logger(__name__)
+# ISSUE #1184 REMEDIATION: Fix deprecated logging pattern
+logger = get_logger(__name__)
 
 # CRITICAL ISSUE #387 REMEDIATION: Agent Execution Prerequisites Validation  
 from netra_backend.app.agents.supervisor.agent_execution_prerequisites import (
     AgentExecutionPrerequisites,
     PrerequisiteValidationLevel
 )
-
-logger = central_logger
 
 
 # SSOT CONSOLIDATION: Agent enums moved here to break circular imports

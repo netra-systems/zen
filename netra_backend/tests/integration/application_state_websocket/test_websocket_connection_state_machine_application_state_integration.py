@@ -161,7 +161,7 @@ class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegr
         """
         # Create test user and session
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'state_machine_test@netra.ai',
+            'email': 'state_machine_test@netrasystems.ai',
             'name': 'State Machine Test User',
             'is_active': True
         })
@@ -345,7 +345,7 @@ class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegr
         while maintaining application state consistency and enabling reconnection.
         """
         user_data = await self.create_test_user_context(real_services_fixture, {
-            'email': 'error_recovery_test@netra.ai',
+            'email': 'error_recovery_test@netrasystems.ai',
             'name': 'Error Recovery Test User',
             'is_active': True
         })
@@ -539,7 +539,7 @@ class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegr
         users = []
         for i in range(3):
             user_data = await self.create_test_user_context(real_services_fixture, {
-                'email': f'concurrent_state_user_{i}@netra.ai',
+                'email': f'concurrent_state_user_{i}@netrasystems.ai',
                 'name': f'Concurrent State User {i}',
                 'is_active': True
             })

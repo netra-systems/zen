@@ -180,7 +180,7 @@ kubectl rollout restart deployment/netra-backend
 kubectl rollout restart deployment/netra-websocket
 
 # Verify rollback
-curl -X GET https://staging.netra.ai/health/agent-execution-core
+curl -X GET https://staging.netrasystems.ai/health/agent-execution-core
 ```
 
 #### Code Rollback (5 minutes)
@@ -314,9 +314,9 @@ python tests/mission_critical/test_websocket_agent_events_suite.py
 python tests/mission_critical/test_golden_path_user_flow.py
 
 # Check system metrics
-curl -X GET https://staging.netra.ai/health
-curl -X GET https://staging.netra.ai/health/agents
-curl -X GET https://staging.netra.ai/health/websockets
+curl -X GET https://staging.netrasystems.ai/health
+curl -X GET https://staging.netrasystems.ai/health/agents
+curl -X GET https://staging.netrasystems.ai/health/websockets
 ```
 
 ---

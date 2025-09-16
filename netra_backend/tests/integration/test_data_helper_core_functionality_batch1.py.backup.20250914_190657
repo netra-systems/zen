@@ -96,7 +96,7 @@ async def auth_helper():
 async def authenticated_user(auth_helper):
     """Create authenticated user for testing."""
     return await auth_helper.create_authenticated_user(
-        email="datahelper_test@netra.ai",
+        email="datahelper_test@netrasystems.ai",
         full_name="Data Helper Test User",
         permissions=["read", "write", "agent_execution"]
     )
@@ -593,11 +593,11 @@ class TestDataHelperUserExecutionContext(SSotBaseTestCase):
         """
         # Create two separate authenticated users
         user1 = await auth_helper.create_authenticated_user(
-            email="datahelper_user1@netra.ai",
+            email="datahelper_user1@netrasystems.ai",
             full_name="Data Helper User 1"
         )
         user2 = await auth_helper.create_authenticated_user(
-            email="datahelper_user2@netra.ai", 
+            email="datahelper_user2@netrasystems.ai", 
             full_name="Data Helper User 2"
         )
         
@@ -857,7 +857,7 @@ class TestDataHelperUserExecutionContext(SSotBaseTestCase):
         
         for i in range(num_concurrent_users):
             user = await auth_helper.create_authenticated_user(
-                email=f"concurrent_user_{i}@netra.ai",
+                email=f"concurrent_user_{i}@netrasystems.ai",
                 full_name=f"Concurrent User {i}"
             )
             users.append(user)

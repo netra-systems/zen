@@ -290,7 +290,7 @@ python tests/unified_test_runner.py --category e2e --prefer-staging
 ### Environment Setup
 - **Local Development**: Unit tests only, no external dependencies
 - **CI Integration**: Integration tests with real service connections
-- **Staging Validation**: E2E tests against staging.netra.ai environment
+- **Staging Validation**: E2E tests against staging.netrasystems.ai environment
 
 ### Test Data Management
 ```python

@@ -78,7 +78,7 @@ class TestCompleteAgentWorkflowsStaging(BaseE2ETest):
         self.test_users = []
         for i in range(3):  # Create 3 test users for concurrent testing
             user_context = await create_authenticated_user_context(
-                user_email=f"e2e_agent_test_{i}_{int(time.time())}@staging.netra.ai",
+                user_email=f"e2e_agent_test_{i}_{int(time.time())}@staging.netrasystems.ai",
                 environment="staging",
                 permissions=["read", "write", "execute_agents"]
             )

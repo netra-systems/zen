@@ -45,7 +45,7 @@ class ConfigSSotGoldenPathStagingTests(SSotAsyncTestCase):
     @pytest.fixture(scope='class')
     def test_user_credentials(self):
         """Test user credentials for staging authentication."""
-        return {'email': 'test@netra.ai', 'password': 'test123'}
+        return {'email': 'test@netrasystems.ai', 'password': 'test123'}
 
     async def test_staging_config_manager_health_check(self, staging_config):
         """

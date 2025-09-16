@@ -1315,8 +1315,8 @@ class WebSocketAuthenticationFlowTests(BaseIntegrationTest):
         
         # Test different origin scenarios
         origin_scenarios = [
-            "https://app.netra.ai",
-            "https://staging.netra.ai", 
+            "https://app.netrasystems.ai",
+            "https://staging.netrasystems.ai", 
             "http://localhost:3000",
             "https://custom-domain.com"
         ]

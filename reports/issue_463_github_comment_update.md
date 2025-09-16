@@ -40,7 +40,7 @@ gcloud run deploy netra-backend-staging \
 
 **Auth Service Update:**
 ```bash
-gcloud run deploy netra-auth-staging \
+gcloud run deploy netra-auth \
     --project=netra-staging \
     --region=us-central1 \
     --image=gcr.io/netra-staging/netra-auth:latest \

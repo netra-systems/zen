@@ -55,7 +55,7 @@ class TestAuthServiceStartupRaceConditionE2E(SSotAsyncTestCase):
             get_env().get("AUTH_SERVICE_STAGING_URL"),
             get_env().get("STAGING_AUTH_URL"),
             "https://auth.staging.netrasystems.ai",
-            "https://auth-staging.run.app",
+            "https://auth.run.app",
             "http://localhost:8081"  # Local staging fallback
         ]
         

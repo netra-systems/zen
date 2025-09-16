@@ -37,8 +37,8 @@ class TestOAuthConfigurationIsolation:
         
         # Auth service pattern (environment-specific names)
         auth_service_oauth_config = {
-            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "auth-staging-google-client-id.apps.googleusercontent.com",
-            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "auth-staging-google-client-secret",
+            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "auth-google-client-id.apps.googleusercontent.com",
+            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "auth-google-client-secret",
             "GOOGLE_OAUTH_CLIENT_ID_PRODUCTION": "auth-production-google-client-id.apps.googleusercontent.com",
             "GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION": "auth-production-google-client-secret"
         }

@@ -325,7 +325,7 @@ class WebSocketIntegrationTests:
 
     def test_websocket_auth_context_extraction(self):
         """Test extraction of auth context from WebSocket."""
-        mock_ws = MockWebSocket(headers={'sec-websocket-protocol': 'jwt.eyJhbGciOiJIUzI1NiJ9.test.token', 'origin': 'https://app.netra.ai'}, client_host='203.0.113.1')
+        mock_ws = MockWebSocket(headers={'sec-websocket-protocol': 'jwt.eyJhbGciOiJIUzI1NiJ9.test.token', 'origin': 'https://app.netrasystems.ai'}, client_host='203.0.113.1')
         detector = EnvironmentAuthDetector()
         context = detector._build_auth_context(mock_ws)
         assert context.headers_available is True

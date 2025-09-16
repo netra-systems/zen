@@ -23,8 +23,8 @@
                 <location>auth_service/auth_core/security/oauth_security.py:833-876</location>
                 <usage>Used in auth_routes.py line 707 for OAuth callback security</usage>
                 <hardcoded_origins>
-                    - https://app.netra.ai
-                    - https://app.staging.netra.ai  
+                    - https://app.netrasystems.ai
+                    - https://app.staging.netrasystems.ai  
                     - https://app.staging.netrasystems.ai
                     - http://localhost:3000
                     - http://127.0.0.1:3000
@@ -38,8 +38,8 @@
                 <location>auth_service/auth_core/security/oauth_security.py:661-668</location>
                 <usage>Used in oauth_security.py line 205 for CSRF token validation</usage>
                 <hardcoded_origins>
-                    - https://app.netra.ai
-                    - https://app.staging.netra.ai
+                    - https://app.netrasystems.ai
+                    - https://app.staging.netrasystems.ai
                     - http://localhost:3000
                 </hardcoded_origins>
             </violation>
@@ -142,7 +142,7 @@
         <verification_results>
             <environment name="development">
                 - http://localhost:3000: ALLOW ✓
-                - https://app.netra.ai: BLOCK ✓
+                - https://app.netrasystems.ai: BLOCK ✓
                 - https://app.staging.netrasystems.ai: BLOCK ✓
                 - http://malicious.com: BLOCK ✓
             </environment>

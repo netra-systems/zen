@@ -221,7 +221,7 @@
         <path>service_id_stability_fix_20250907.xml</path>
         <critical-takeaway>
             Auth service was expecting dynamically changing SERVICE_ID with timestamp suffix
-            (e.g., netra-auth-staging-1757252100) while backend sent fixed ID. Fixed by hardcoding
+            (e.g., netra-auth-1757252100) while backend sent fixed ID. Fixed by hardcoding
             expected_service_id = "netra-backend" in auth_routes.py instead of reading from env.
             SERVICE_ID must be stable for cross-service auth - never use timestamps or dynamic values.
         </critical-takeaway>
@@ -3382,8 +3382,8 @@
         <path>service_id_timestamp_issue_20250907.xml</path>
         <critical-takeaway>
             Deployment script was appending timestamp to SERVICE_ID in Google Secret Manager
-            (e.g., 'netra-auth-staging-1757224059'), causing service ID mismatch between backend
-            and auth service. Fixed by using stable SERVICE_ID without timestamp: 'netra-auth-staging'.
+            (e.g., 'netra-auth-1757224059'), causing service ID mismatch between backend
+            and auth service. Fixed by using stable SERVICE_ID without timestamp: 'netra-auth'.
         </critical-takeaway>
         <severity>HIGH</severity>
         <business-impact>Inter-service authentication failures preventing backend from communicating with auth service</business-impact>

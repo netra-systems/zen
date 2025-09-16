@@ -585,9 +585,9 @@ LOCAL_TEST_DATABASE_CONFIG = {
 # GCP staging configuration
 GCP_STAGING_CONFIG = {
     'enabled': True,
-    'base_url': 'https://staging.netra.ai',
-    'auth_service_url': 'https://auth-staging.netra.ai',
-    'websocket_url': 'wss://ws-staging.netra.ai'
+    'base_url': 'https://staging.netrasystems.ai',
+    'auth_service_url': 'https://auth.netrasystems.ai',
+    'websocket_url': 'wss://ws-staging.netrasystems.ai'
 }
 ```
 

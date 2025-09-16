@@ -270,7 +270,7 @@ docker build -t gcr.io/netra-systems/auth-service:latest .
 docker push gcr.io/netra-systems/auth-service:latest
 
 # Deploy to staging
-gcloud run deploy auth-staging \
+gcloud run deploy auth \
   --image gcr.io/netra-systems/auth-service:latest \
   --platform managed \
   --region us-central1 \
@@ -280,7 +280,7 @@ gcloud run deploy auth-staging \
 
 # Map custom domain
 gcloud run domain-mappings create \
-  --service auth-staging \
+  --service auth \
   --domain auth.staging.netrasystems.ai \
   --region us-central1
 ```

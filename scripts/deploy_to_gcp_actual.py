@@ -1833,7 +1833,7 @@ CMD ["npm", "start"]
             "oauth-hmac-secret-staging": "oauth_hmac_secret_for_staging_at_least_32_chars_secure",
             # Enhanced JWT security for auth service - matches staging.env
             "service-secret-staging": "staging-service-secret-distinct-from-jwt-7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-staging-distinct",
-            "service-id-staging": "netra-auth-staging",
+            "service-id-staging": "netra-auth",
             # CRITICAL: Redis endpoint must match staging-shared-redis primary endpoint in GCP
             # Primary endpoint: 10.107.0.3 (verified in Google Cloud Console)
             # See SPEC/redis_staging_configuration.xml for full configuration details
@@ -2424,6 +2424,10 @@ Examples:
   Default deployment (fast, no checks, no secrets/API validation):
     python scripts/deploy_to_gcp.py --project netra-staging --build-local
     
+    NOTE: VPC connector (--vpc-connector staging-connector --vpc-egress all-traffic) 
+    and database timeout settings (--timeout 600 --cpu-boost) are automatically
+    applied for backend/auth services to ensure database connectivity (Issue #1263).
+    
   With full validation (production readiness):
     python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks --check-secrets --check-apis
     
@@ -2433,6 +2437,30 @@ Examples:
   Cloud Build (slower):
     python scripts/deploy_to_gcp.py --project netra-staging
     
+CRITICAL: For staging deployments, VPC connector configuration is required for
+database connectivity. These flags are automatically applied:
+  --vpc-connector staging-connector
+  --vpc-egress all-traffic  
+  --timeout 600
+  --cpu-boost
+  --add-cloudsql-instances {project}:us-central1:staging-shared-postgres
+
+INFRASTRUCTURE REQUIREMENTS (Based on Issues #1263, #1278, P0 fixes):
+  VPC Connector: Must support 10-30s scaling delays under load
+  Database Connections: Pool sizing for concurrent instance startup
+  SSL Certificates: Ensure *.netrasystems.ai domains have valid certificates
+  Monitoring: GCP error reporter exports must be included in builds
+  Load Balancer: Health checks configured for 600s database startup timeout
+  Secrets: All GSM secrets validated before deployment
+  Redis: VPC connector required for Redis connectivity
+
+DOMAIN CONFIGURATION (CRITICAL - Issue #1278):
+  Staging URLs: *.netrasystems.ai (NOT *.staging.netrasystems.ai)
+  - Backend: https://staging.netrasystems.ai
+  - Auth: https://staging.netrasystems.ai  
+  - Frontend: https://staging.netrasystems.ai
+  - WebSocket: wss://api-staging.netrasystems.ai
+
 See SPEC/gcp_deployment.xml for detailed guidelines.
         """
     )
@@ -2462,6 +2490,16 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                        help="Check and enable GCP APIs (default: skip)")
     parser.add_argument("--check-secrets", action="store_true",
                        help="Validate secrets from Google Secret Manager (default: skip)")
+    parser.add_argument("--check-vpc", action="store_true",
+                       help="Validate VPC connector capacity and scaling (addresses Issue #1278)")
+    parser.add_argument("--check-ssl", action="store_true",
+                       help="Validate SSL certificates for *.netrasystems.ai domains")
+    parser.add_argument("--check-load-balancer", action="store_true",
+                       help="Validate load balancer health check timeouts (600s)")
+    parser.add_argument("--check-redis", action="store_true",
+                       help="Validate Redis connectivity through VPC connector")
+    parser.add_argument("--validate-monitoring", action="store_true",
+                       help="Validate GCP error reporter exports (P0 fix 2f130c108)")
     
     args = parser.parse_args()
     

@@ -40,7 +40,7 @@ class WebSocketInfrastructureStagingTests:
         self.staging_websocket_url = self.staging_backend_url.replace('https://', 'wss://').replace('http://', 'ws://')
         self.staging_auth_url = self.env.get(
             'AUTH_STAGING_URL',
-            'https://netra-auth-staging-123456-uc.a.run.app'
+            'https://netra-auth-123456-uc.a.run.app'
         )
         
         # Test configuration for staging

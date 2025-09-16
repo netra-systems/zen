@@ -32,7 +32,7 @@ class TestAuthServiceBackendIntegration(SSotAsyncTestCase):
         # Staging environment endpoints
         cls.staging_auth_service_url = os.getenv(
             "STAGING_AUTH_SERVICE_URL",
-            "https://auth-staging.netra-apex.com"
+            "https://auth.netra-apex.com"
         )
         cls.staging_backend_url = os.getenv(
             "STAGING_BACKEND_URL",

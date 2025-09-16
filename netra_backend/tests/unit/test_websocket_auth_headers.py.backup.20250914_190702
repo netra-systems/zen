@@ -159,7 +159,7 @@ class TestWebSocketAuthHeaders(SSotAsyncTestCase):
         """
         # Arrange - WebSocket without Authorization header (simulates GCP Load Balancer stripping)
         headers_without_auth = {
-            "host": "staging.netra.ai",
+            "host": "staging.netrasystems.ai",
             "connection": "upgrade", 
             "upgrade": "websocket",
             "sec-websocket-key": "test-key",
@@ -302,11 +302,11 @@ class TestWebSocketAuthHeaders(SSotAsyncTestCase):
         """
         # Arrange - Headers that GCP Load Balancer typically adds
         gcp_infrastructure_headers = {
-            "host": "staging.netra.ai",
+            "host": "staging.netrasystems.ai",
             "via": "1.1 google",
             "x-forwarded-for": "203.0.113.1",
             "x-forwarded-proto": "https", 
-            "forwarded": "for=203.0.113.1;host=staging.netra.ai;proto=https",
+            "forwarded": "for=203.0.113.1;host=staging.netrasystems.ai;proto=https",
             "traceparent": "00-trace-span-01",
             # NO authorization header (simulates stripping)
         }
@@ -520,7 +520,7 @@ class TestWebSocketAuthenticatorIntegration(SSotAsyncTestCase):
         
         # Create WebSocket without auth headers (simulates Load Balancer stripping)
         headers_without_auth = {
-            "host": "staging.netra.ai",
+            "host": "staging.netrasystems.ai",
             "x-forwarded-for": "203.0.113.1"
         }
         mock_websocket = Mock()

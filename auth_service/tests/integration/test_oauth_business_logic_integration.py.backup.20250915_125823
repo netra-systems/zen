@@ -74,8 +74,8 @@ class TestOAuthBusinessLogicIntegration(SSotBaseTestCase):
         auth_env.set("LINKEDIN_OAUTH_CLIENT_SECRET", "test-linkedin-oauth-client-secret-hijklm6789012345", source="integration_test")
         
         # Real service URLs for integration testing
-        auth_env.set("AUTH_SERVICE_URL", "https://test.netra.ai", source="integration_test")
-        auth_env.set("BACKEND_URL", "https://api.test.netra.ai", source="integration_test")
+        auth_env.set("AUTH_SERVICE_URL", "https://test.netrasystems.ai", source="integration_test")
+        auth_env.set("BACKEND_URL", "https://api.test.netrasystems.ai", source="integration_test")
         auth_env.set("JWT_SECRET_KEY", "test-integration-jwt-secret-32-chars-long", source="integration_test")
         
         # Database configuration for real integration testing

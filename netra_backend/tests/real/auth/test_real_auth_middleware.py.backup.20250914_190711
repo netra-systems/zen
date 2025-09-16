@@ -102,7 +102,7 @@ class TestRealAuthMiddleware:
         def _create_token(payload: Dict[str, Any]) -> str:
             default_payload = {
                 JWTConstants.SUBJECT: "test_user",
-                JWTConstants.EMAIL: "test@netra.ai",
+                JWTConstants.EMAIL: "test@netrasystems.ai",
                 JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()),
                 JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp()),
                 JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,
@@ -198,7 +198,7 @@ class TestRealAuthMiddleware:
         # Create expired token
         expired_payload = {
             JWTConstants.SUBJECT: "expired_user",
-            JWTConstants.EMAIL: "expired@netra.ai",
+            JWTConstants.EMAIL: "expired@netrasystems.ai",
             JWTConstants.ISSUED_AT: int((datetime.utcnow() - timedelta(hours=2)).timestamp()),
             JWTConstants.EXPIRES_AT: int((datetime.utcnow() - timedelta(hours=1)).timestamp()),  # Expired
             JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE,
@@ -275,7 +275,7 @@ class TestRealAuthMiddleware:
         # Create token with rich user context
         user_context = {
             "user_id": 77777,
-            "email": "context.test@netra.ai",
+            "email": "context.test@netrasystems.ai",
             "full_name": "Context Test User",
             "permissions": ["read", "write", "admin"],
             "workspace_id": "workspace_123",
@@ -479,7 +479,7 @@ class TestRealAuthMiddleware:
         # Create token for authenticated request
         token = create_test_token({
             "user_id": 99999,
-            "email": "metrics@netra.ai"
+            "email": "metrics@netrasystems.ai"
         })
         
         headers = {

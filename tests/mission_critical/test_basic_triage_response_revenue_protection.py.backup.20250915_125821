@@ -599,7 +599,7 @@ class TestBasicTriageResponseRevenueProtection(SSotAsyncTestCase):
         emergency_response = {
             "type": "emergency_response",
             "message": "We're experiencing technical difficulties. Our team has been notified and will respond within 2 hours.",
-            "support_contact": "support@netra.ai",
+            "support_contact": "support@netrasystems.ai",
             "escalation_ticket": f"EMRG_{uuid.uuid4().hex[:8]}"
         }
         return True

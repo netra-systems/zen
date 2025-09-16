@@ -98,7 +98,7 @@ class TestRealAuthDatabaseIntegrity:
         """Create test user data for database operations."""
         return {
             "id": user_id,
-            "email": f"user{user_id}@netra.ai",
+            "email": f"user{user_id}@netrasystems.ai",
             "full_name": f"Test User {user_id}",
             "password_hash": secrets.token_hex(32),
             "is_active": True,

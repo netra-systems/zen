@@ -558,8 +558,8 @@ class ConfigurationScenario:
             'OPENAI_API_KEY': 'staging_openai_api_key_real', 
             'OAUTH_CLIENT_ID': 'staging_oauth_client_id',
             'OAUTH_CLIENT_SECRET': 'staging_oauth_client_secret',
-            'FRONTEND_URL': 'https://staging.netra.ai',
-            'BACKEND_URL': 'https://api-staging.netra.ai',
+            'FRONTEND_URL': 'https://staging.netrasystems.ai',
+            'BACKEND_URL': 'https://api-staging.netrasystems.ai',
             'ENABLE_MONITORING': 'true',
             'RATE_LIMITING': 'true'
         }
@@ -579,8 +579,8 @@ class ConfigurationScenario:
             'OPENAI_API_KEY': 'production_openai_api_key_real',
             'OAUTH_CLIENT_ID': 'production_oauth_client_id',
             'OAUTH_CLIENT_SECRET': 'production_oauth_client_secret',
-            'FRONTEND_URL': 'https://netra.ai',
-            'BACKEND_URL': 'https://api.netra.ai',
+            'FRONTEND_URL': 'https://netrasystems.ai',
+            'BACKEND_URL': 'https://api.netrasystems.ai',
             'ENABLE_MONITORING': 'true',
             'ENABLE_ANALYTICS': 'true',
             'RATE_LIMITING': 'true',

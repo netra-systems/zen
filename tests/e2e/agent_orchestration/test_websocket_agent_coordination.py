@@ -125,7 +125,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         # Create authenticated user session
         auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
         user_id = f"websocket_events_user_{uuid.uuid4().hex[:8]}"
-        email = f"{user_id}@test.netra.ai"
+        email = f"{user_id}@test.netrasystems.ai"
         
         # Create JWT and establish WebSocket connection
         jwt_token = auth_helper.create_test_jwt_token(
@@ -194,7 +194,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         # Create user session
         auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
         user_id = f"multi_agent_coord_user_{uuid.uuid4().hex[:8]}"
-        email = f"{user_id}@test.netra.ai"
+        email = f"{user_id}@test.netrasystems.ai"
         
         jwt_token = auth_helper.create_test_jwt_token(user_id=user_id, email=email)
         websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
@@ -264,7 +264,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         # Create user session
         auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
         user_id = f"realtime_events_user_{uuid.uuid4().hex[:8]}"
-        email = f"{user_id}@test.netra.ai"
+        email = f"{user_id}@test.netrasystems.ai"
         
         jwt_token = auth_helper.create_test_jwt_token(user_id=user_id, email=email)
         websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
@@ -320,7 +320,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         for i in range(session_count):
             auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
             user_id = f"concurrent_ws_user_{i}_{uuid.uuid4().hex[:8]}"
-            email = f"{user_id}@test.netra.ai"
+            email = f"{user_id}@test.netrasystems.ai"
             
             jwt_token = auth_helper.create_test_jwt_token(user_id=user_id, email=email)
             websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)

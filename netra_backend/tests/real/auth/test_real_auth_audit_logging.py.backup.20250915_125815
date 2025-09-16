@@ -118,7 +118,7 @@ class TestRealAuthAuditLogging:
     @pytest.mark.asyncio
     async def test_authentication_success_audit_logging(self, redis_client, real_db_session):
         """Test audit logging for successful authentication events."""
-        users = [{'user_id': 10001, 'email': 'user1@netra.ai', 'ip': '192.168.1.10'}, {'user_id': 10002, 'email': 'user2@netra.ai', 'ip': '192.168.1.11'}, {'user_id': 10003, 'email': 'admin@netra.ai', 'ip': '10.0.0.1'}]
+        users = [{'user_id': 10001, 'email': 'user1@netrasystems.ai', 'ip': '192.168.1.10'}, {'user_id': 10002, 'email': 'user2@netrasystems.ai', 'ip': '192.168.1.11'}, {'user_id': 10003, 'email': 'admin@netrasystems.ai', 'ip': '10.0.0.1'}]
         audit_keys = []
         try:
             for user in users:
@@ -146,7 +146,7 @@ class TestRealAuthAuditLogging:
     @pytest.mark.asyncio
     async def test_authentication_failure_audit_logging(self, redis_client):
         """Test audit logging for failed authentication attempts."""
-        failure_scenarios = [{'user_id': None, 'email': 'nonexistent@netra.ai', 'failure_reason': 'user_not_found', 'ip': '192.168.1.100', 'severity': AuditSeverity.MEDIUM}, {'user_id': 20001, 'email': 'user@netra.ai', 'failure_reason': 'invalid_password', 'ip': '192.168.1.100', 'severity': AuditSeverity.MEDIUM, 'attempt_count': 3}, {'user_id': 20002, 'email': 'locked@netra.ai', 'failure_reason': 'account_locked', 'ip': '10.0.0.5', 'severity': AuditSeverity.HIGH, 'attempt_count': 5}, {'user_id': None, 'email': 'bot@malicious.com', 'failure_reason': 'suspicious_activity', 'ip': '203.0.113.1', 'severity': AuditSeverity.CRITICAL, 'bot_detected': True}]
+        failure_scenarios = [{'user_id': None, 'email': 'nonexistent@netrasystems.ai', 'failure_reason': 'user_not_found', 'ip': '192.168.1.100', 'severity': AuditSeverity.MEDIUM}, {'user_id': 20001, 'email': 'user@netrasystems.ai', 'failure_reason': 'invalid_password', 'ip': '192.168.1.100', 'severity': AuditSeverity.MEDIUM, 'attempt_count': 3}, {'user_id': 20002, 'email': 'locked@netrasystems.ai', 'failure_reason': 'account_locked', 'ip': '10.0.0.5', 'severity': AuditSeverity.HIGH, 'attempt_count': 5}, {'user_id': None, 'email': 'bot@malicious.com', 'failure_reason': 'suspicious_activity', 'ip': '203.0.113.1', 'severity': AuditSeverity.CRITICAL, 'bot_detected': True}]
         audit_keys = []
         try:
             for scenario in failure_scenarios:

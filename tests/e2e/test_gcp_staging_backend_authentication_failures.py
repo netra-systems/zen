@@ -375,7 +375,7 @@ class BackendAuthenticationFailuresTests:
                 "auth_service_url": "http://localhost:8001",  # Development URL
                 "expected_url": "https://auth.staging.netrasystems.ai",
                 "jwt_issuer": "netra-auth-dev",
-                "expected_issuer": "netra-auth-staging", 
+                "expected_issuer": "netra-auth", 
                 "environment_mismatch": True
             },
             "message": "Authentication service configured for wrong environment"
