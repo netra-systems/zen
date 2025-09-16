@@ -23,10 +23,11 @@ from uuid import UUID
 # Core imports following SSOT patterns
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.logging_config import central_logger
+# ISSUE #1184 REMEDIATION: Fix deprecated logging pattern
+from shared.logging.unified_logging_ssot import get_logger
 from shared.types.core_types import UserID, ThreadID, RunID
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class PrerequisiteCategory(Enum):

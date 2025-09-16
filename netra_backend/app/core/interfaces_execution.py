@@ -9,11 +9,12 @@ from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum
 
-from netra_backend.app.logging_config import central_logger
+# ISSUE #1184 REMEDIATION: Fix deprecated logging pattern
+from shared.logging.unified_logging_ssot import get_logger
 # SSOT: Import ExecutionStatus from core_enums instead of defining duplicate
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class ExecutionStrategy(Enum):
