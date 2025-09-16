@@ -1336,14 +1336,35 @@ class CentralConfigurationValidator:
         
         # Check for legacy usage using the standard marker
         warnings = LegacyConfigMarker.check_legacy_usage(current_configs)
-        
+
         for warning in warnings:
             if warning.startswith("ERROR:"):
-                logger.error(warning)
-                # Don't fail hard on legacy configs if they're still supported
-                # This allows gradual migration
-                if "no longer supported" in warning:
-                    raise ValueError(warning)
+                # Special handling for JWT_SECRET - warn but don't fail if proper secrets exist
+                if "'JWT_SECRET' is no longer supported" in warning:
+                    environment = self.get_environment()
+                    env_specific_secrets = {
+                        Environment.STAGING: 'JWT_SECRET_STAGING',
+                        Environment.PRODUCTION: 'JWT_SECRET_PRODUCTION',
+                        Environment.DEVELOPMENT: 'JWT_SECRET_KEY',
+                        Environment.TEST: 'JWT_SECRET_KEY'
+                    }
+                    expected_secret = env_specific_secrets.get(environment)
+
+                    # If the proper environment-specific secret exists, just warn
+                    if expected_secret and current_configs.get(expected_secret):
+                        logger.warning(f"Legacy JWT_SECRET detected but {expected_secret} is properly configured. "
+                                     f"Please remove JWT_SECRET from environment variables to avoid confusion.")
+                        continue  # Don't raise error, just continue
+                    else:
+                        # If proper secret missing, this is a real error
+                        logger.error(warning)
+                        raise ValueError(warning)
+                else:
+                    logger.error(warning)
+                    # Don't fail hard on legacy configs if they're still supported
+                    # This allows gradual migration
+                    if "no longer supported" in warning:
+                        raise ValueError(warning)
             elif warning.startswith("SECURITY WARNING:"):
                 logger.critical(warning)
             else:
