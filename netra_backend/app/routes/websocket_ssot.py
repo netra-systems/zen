@@ -92,9 +92,10 @@ from netra_backend.app.websocket_core.unified_jwt_protocol_handler import (
 )
 
 # Authentication and security (SSOT for all patterns)
-from netra_backend.app.websocket_core.unified_websocket_auth import (
-    get_websocket_authenticator,
-    authenticate_websocket_ssot
+# ISSUE #1176 REMEDIATION: Use new SSOT authentication
+from netra_backend.app.websocket_core.unified_auth_ssot import (
+    authenticate_websocket as authenticate_websocket_ssot,
+    WebSocketAuthResult
 )
 
 # PERMISSIVE AUTH REMEDIATION: Import auth permissiveness and circuit breaker
