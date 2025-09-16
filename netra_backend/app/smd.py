@@ -489,7 +489,10 @@ class StartupOrchestrator:
                 self.app.state.emergency_database_bypassed = True
                 self.logger.info("  [⚠️] Step 7: Database bypassed in emergency mode")
                 self.logger.info("  [⚠️] Step 8: Database schema validation bypassed in emergency mode")
-                return  # Continue to Phase 4
+
+                # FIXED: Continue startup sequence instead of terminating prematurely
+                # This allows graceful degradation to work properly
+                self.logger.info("  [⚠️] Database emergency bypass complete - continuing startup sequence for graceful degradation")
 
             # NO GRACEFUL DEGRADATION - Database is critical for chat
             raise DeterministicStartupError(enhanced_error_msg, original_error=e, phase=StartupPhase.DATABASE) from e
@@ -521,7 +524,10 @@ class StartupOrchestrator:
                 self.app.state.redis_manager = None  # Explicitly set to None with bypass flag
                 self.app.state.emergency_redis_bypassed = True
                 self.logger.info("  [⚠️] Step 9: Redis bypassed in emergency mode")
-                return  # Continue to Phase 5
+
+                # FIXED: Continue startup sequence instead of terminating prematurely
+                # This allows graceful degradation to work properly
+                self.logger.info("  [⚠️] Redis emergency bypass complete - continuing startup sequence for graceful degradation")
 
             # Redis is critical for chat functionality - if Redis fails, startup MUST fail
             raise DeterministicStartupError(f"Phase 4 cache setup failed - Redis is critical: {e}", original_error=e, phase=StartupPhase.CACHE) from e
