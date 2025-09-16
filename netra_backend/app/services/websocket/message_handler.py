@@ -24,7 +24,7 @@ from netra_backend.app.services.websocket.message_queue import (
     QueuedMessage,
     message_queue,
 )
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)

@@ -39,7 +39,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 class MockWebSocketWithTimeout:

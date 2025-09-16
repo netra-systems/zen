@@ -44,7 +44,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Import the system under test
 from netra_backend.app.websocket_core import websocket_manager
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.canonical_import_patterns import (
     get_websocket_manager,
     WebSocketManager,
     WebSocketConnection,

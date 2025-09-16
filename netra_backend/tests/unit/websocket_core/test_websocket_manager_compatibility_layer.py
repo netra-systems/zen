@@ -43,7 +43,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.websocket_core import manager as websocket_manager_compatibility
 
 # Import expected components for validation
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.canonical_import_patterns import (
     WebSocketManager,
     WebSocketConnection, 
     WebSocketManagerProtocol,
@@ -97,7 +97,7 @@ class WebSocketManagerCompatibilityLayerTests(SSotBaseTestCase):
         WebSocketManagerFromCompat = websocket_manager_compatibility.WebSocketManager
         
         # Verify it's the same class as the SSOT implementation
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as SSOTWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as SSOTWebSocketManager
         assert WebSocketManagerFromCompat is SSOTWebSocketManager, "WebSocketManager compatibility broken"
         
         # Test that it's actually the UnifiedWebSocketManager (as per current implementation)
@@ -115,7 +115,7 @@ class WebSocketManagerCompatibilityLayerTests(SSotBaseTestCase):
         WebSocketConnectionFromCompat = websocket_manager_compatibility.WebSocketConnection
 
         # Verify it's the same class as SSOT implementation
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection as SSOTWebSocketConnection
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketConnection as SSOTWebSocketConnection
         assert WebSocketConnectionFromCompat is SSOTWebSocketConnection, "WebSocketConnection compatibility broken"
         
         # Test that we can create instances (basic functionality)
@@ -141,7 +141,7 @@ class WebSocketManagerCompatibilityLayerTests(SSotBaseTestCase):
         ProtocolFromCompat = websocket_manager_compatibility.WebSocketManagerProtocol
         
         # Verify it's the same as SSOT implementation
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerProtocol as SSOTProtocol
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerProtocol as SSOTProtocol
         assert ProtocolFromCompat is SSOTProtocol, "WebSocketManagerProtocol compatibility broken"
         
         # Verify it's a Protocol (for type checking)
@@ -157,7 +157,7 @@ class WebSocketManagerCompatibilityLayerTests(SSotBaseTestCase):
         serialize_func = websocket_manager_compatibility._serialize_message_safely
         
         # Verify it's the same function as SSOT implementation
-        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely as SSOTSerialize
+        from netra_backend.app.websocket_core.canonical_import_patterns import _serialize_message_safely as SSOTSerialize
         assert serialize_func is SSOTSerialize, "_serialize_message_safely compatibility broken"
         
         # Test basic functionality with a simple message
@@ -287,7 +287,7 @@ class WebSocketManagerCompatibilityLayerTests(SSotBaseTestCase):
             content = f.read()
         
         # Should contain key structural elements
-        assert 'from netra_backend.app.websocket_core.websocket_manager import' in content
+        assert 'from netra_backend.app.websocket_core.canonical_import_patterns import' in content
         assert 'from netra_backend.app.websocket_core.unified_manager import' in content
         assert '__all__' in content
         

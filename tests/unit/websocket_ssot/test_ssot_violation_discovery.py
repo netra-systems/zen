@@ -241,19 +241,19 @@ class WebSocketManagerSSotViolationDiscoveryTests(SSotBaseTestCase):
         manager_classes = []
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager_classes.append(('UnifiedWebSocketManager', UnifiedWebSocketManager))
         except ImportError:
             pass
             
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager_classes.append(('WebSocketManager', WebSocketManager))
         except ImportError:
             pass
             
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WSM
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WSM
             manager_classes.append(('websocket_manager.WebSocketManager', WSM))
         except ImportError:
             pass

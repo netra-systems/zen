@@ -38,7 +38,7 @@ from shared.isolated_environment import get_env
 # WebSocket Core SSOT Imports
 from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 # SSOT imports - Issue #824 remediation  
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.unified_emitter import (
     UnifiedWebSocketEmitter, 
     AuthenticationWebSocketEmitter,

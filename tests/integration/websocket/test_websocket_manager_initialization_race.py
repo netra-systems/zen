@@ -463,7 +463,7 @@ class WebSocketManagerInitializationRaceTests(SSotAsyncTestCase):
         
         if import_scenario == 'legacy_websocket_manager':
             # This would normally test:
-            # from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            # from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Simulate the legacy import creating a different instance
             legacy_manager_mock = MagicMock()

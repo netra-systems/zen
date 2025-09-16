@@ -29,7 +29,7 @@ from unittest.mock import patch, MagicMock
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, create_standard_message
 from netra_backend.app.websocket_core.context import WebSocketContext
 from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.utils import generate_connection_id, generate_message_id
 from netra_backend.app.websocket_core.migration_adapter import WebSocketManagerAdapter
 from netra_backend.app.websocket_core.handlers import WebSocketHandler

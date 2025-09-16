@@ -72,8 +72,8 @@ class WebSocketSSOTFactoryPatternsTests(SSotAsyncTestCase):
         """
         # Test canonical import (this should work with SSOT patterns)
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection, WebSocketManagerMode
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketConnection, WebSocketManagerMode
         except ImportError as e:
             pytest.fail(
                 f"❌ Canonical SSOT import failed: {e}\n"
@@ -282,14 +282,14 @@ class WebSocketSSOTFactoryPatternsTests(SSotAsyncTestCase):
         # Test canonical SSOT import (should work)
         ssot_import_success = False
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             ssot_import_success = True
         except ImportError:
             pass
 
         assert ssot_import_success, (
             "❌ Canonical SSOT import should work\n"
-            "🔧 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager"
+            "🔧 from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager"
         )
 
         # Test legacy imports (should fail or generate warnings)

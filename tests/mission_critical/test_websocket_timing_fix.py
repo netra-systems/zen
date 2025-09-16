@@ -9,7 +9,7 @@ import uuid
 import time
 from typing import Dict, Any, List
 
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketConnection
 
 
 class MockWebSocket:

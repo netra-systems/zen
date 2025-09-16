@@ -32,7 +32,7 @@ from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecution
 from netra_backend.app.core.tool_models import ToolExecutionResult
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from shared.types.core_types import UserID, ThreadID, RunID
 
 class MockWebSocketConnection:

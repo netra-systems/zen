@@ -24,7 +24,7 @@ from netra_backend.app.websocket_core.unified_manager import (
     WebSocketConnection,
     _serialize_message_safely
 )
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 
 class UnifiedWebSocketManagerE2EMultiUserTests(BaseTestCase):

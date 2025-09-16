@@ -42,7 +42,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 from test_framework.ssot.mocks import MockFactory
 from netra_backend.app.websocket_core.canonical_imports import ConnectionLifecycleManager, FactoryInitializationError, get_websocket_manager_factory, create_websocket_manager, validate_websocket_component_health, _validate_ssot_user_context, _validate_ssot_user_context_staging_safe, WebSocketManagerFactory, IsolatedWebSocketManager, _factory_instance, _factory_lock
 from netra_backend.app.monitoring.websocket_metrics import FactoryMetrics, ManagerMetrics
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.core.user_execution_context import UserExecutionContext
 from netra_backend.app.services.user_execution_context import InvalidContextError
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection

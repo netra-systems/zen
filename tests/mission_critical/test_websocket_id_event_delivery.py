@@ -41,7 +41,7 @@ from netra_backend.app.websocket_core.types import (
     WebSocketMessage, MessageType, ConnectionInfo, generate_default_message
 )
 from netra_backend.app.websocket_core.context import WebSocketRequestContext  
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.event_validation_framework import EventValidationFramework
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 

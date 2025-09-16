@@ -37,7 +37,7 @@ from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.config import AgentConfig
 from netra_backend.app.schemas.agent_models import AgentResult
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.db.database_manager import DatabaseManager
 logger = logging.getLogger(__name__)
 

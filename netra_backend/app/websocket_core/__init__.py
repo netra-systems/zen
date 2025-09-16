@@ -13,7 +13,7 @@ Business Value:
 # Unified implementations (SSOT)
 # ISSUE #1144 SSOT CONSOLIDATION: Phase 1 - Deprecate __init__.py imports
 # DEPRECATED: from netra_backend.app.websocket_core import WebSocketManager
-# CANONICAL: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+# CANONICAL: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 #
 # MIGRATION PLAN:
 # - Phase 1: Update key consumers to use canonical imports (IN PROGRESS)
@@ -71,7 +71,7 @@ def _check_direct_import_and_warn():
                             # This is a direct import - issue warning
                             warnings.warn(
                                 f"ISSUE #1144: Direct import from 'netra_backend.app.websocket_core' is deprecated. "
-                                f"Use specific module imports like 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'. "
+                                f"Use specific module imports like 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager'. "
                                 f"This import path will be removed in Phase 2 of SSOT consolidation.",
                                 DeprecationWarning,
                                 stacklevel=2
@@ -92,7 +92,7 @@ _check_direct_import_and_warn()
 # DECISION: Remove __init__.py exports to force consistent direct imports from specific modules
 
 # DEPRECATION NOTICE: __init__.py imports are deprecated in favor of direct module imports
-# Use: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+# Use: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 # Use: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 import warnings
 
@@ -101,7 +101,7 @@ def _emit_deprecation_warning():
     warnings.warn(
         "ISSUE #1176 Phase 2: Importing from websocket_core.__init__ is deprecated. "
         "Use direct imports from specific modules: "
-        "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+        "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
         DeprecationWarning,
         stacklevel=3
     )
@@ -114,7 +114,7 @@ def _emit_deprecation_warning():
 
 # Minimal imports for critical backward compatibility only
 try:
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
     from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
@@ -194,7 +194,7 @@ def create_websocket_manager(user_context=None):
 
 # COORDINATION FIX: Remove redundant imports that create fragmentation
 # Use direct imports for these instead:
-# from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+# from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 # from netra_backend.app.websocket_core.migration_adapter import get_legacy_websocket_manager
 # from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
 # from netra_backend.app.websocket_core.context import WebSocketContext

@@ -1,4 +1,4 @@
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 #!/usr/bin/env python
 """
 E2E Staging Tests for WebSocket Agent Chat Flows
@@ -26,7 +26,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility, WebSocketEventTy
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 # Import production components for staging tests - NO MOCKS per CLAUDE.md
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry

@@ -209,7 +209,7 @@ class DeprecationWarningDetectionTests(SSotBaseTestCase):
         migration_tests = [
             {
                 'deprecated': 'from netra_backend.app.websocket_core import WebSocketManager',
-                'canonical': 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'
+                'canonical': 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager'
             },
             {
                 'deprecated': 'from netra_backend.app.websocket_core.event_validator import get_websocket_validator',

@@ -19,7 +19,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher, UnifiedToolDispatcherFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 

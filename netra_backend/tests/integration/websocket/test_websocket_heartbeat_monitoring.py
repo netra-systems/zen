@@ -38,7 +38,7 @@ import statistics
 import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.websocket_core.unified_manager import WebSocketManagerMode
 from netra_backend.app.websocket_core.types import WebSocketConnectionState, MessageType, ConnectionMetadata
 from shared.types.core_types import UserID, ThreadID, ensure_user_id

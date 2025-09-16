@@ -221,7 +221,7 @@ class WebSocketIntegrationTests:
     async def test_websocket_manager_initialization(self):
         """Test WebSocket manager is properly initialized."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Create WebSocket manager
             manager = UnifiedWebSocketManager()

@@ -160,7 +160,7 @@ class DeprecatedWebSocketImportsTests:
         # Test direct instantiation pattern
         try:
             # Import the SSOT WebSocketManager
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.user_context.factory import UserExecutionContextFactory
 
             # Create test user context
@@ -273,7 +273,7 @@ class DeprecatedWebSocketImportsTests:
         except ImportError:
             # If create_websocket_manager is removed, this is the desired end state
             # Test that direct WebSocketManager requires user_context
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
             with pytest.raises((ValueError, TypeError)) as exc_info:
                 WebSocketManager(user_context=None)
@@ -295,7 +295,7 @@ class SSotWebSocketPatternComplianceTests:
         """
         try:
             # CANONICAL IMPORT: Direct from websocket_manager module
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
             # Verify the class is importable and functional
             assert WebSocketManager is not None

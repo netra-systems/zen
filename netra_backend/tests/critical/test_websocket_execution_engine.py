@@ -8,7 +8,7 @@ from typing import Any, Dict
 import pytest
 from netra_backend.app.websocket_core.connection_info import ConnectionInfo
 from netra_backend.app.websocket_core.handlers import MessageRouter, get_message_router, UserMessageHandler, HeartbeatHandler, JsonRpcHandler, ErrorHandler
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as BroadcastManager
 from netra_backend.app.services.websocket.message_handler import MessageHandlerService
 from netra_backend.app.websocket_core.handlers import MessageRouter as ServiceMessageRouter

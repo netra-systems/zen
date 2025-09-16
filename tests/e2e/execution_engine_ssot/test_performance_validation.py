@@ -1,4 +1,4 @@
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 #!/usr/bin/env python
 """
 E2E TEST 9: Real Performance Validation for UserExecutionEngine SSOT
@@ -40,7 +40,7 @@ import unittest
 
 # REAL SERVICES ONLY - NO MOCKS
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.db.performance_monitor import DatabasePerformanceMonitor, PerformanceMetrics, MonitoringType
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ensure_user_id

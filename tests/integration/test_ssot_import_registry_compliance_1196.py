@@ -34,7 +34,7 @@ class SSotImportRegistryComplianceIssue1196Tests(unittest.TestCase):
         self.ssot_registry_imports = {
             # WebSocket Manager - should be single canonical path
             "WebSocketManager": {
-                "canonical": "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+                "canonical": "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
                 "alternatives": [
                     "from netra_backend.app.websocket_core import WebSocketManager",  # Deprecated
                     "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager",  # SSOT but different name
@@ -198,13 +198,13 @@ class SSotImportRegistryComplianceIssue1196Tests(unittest.TestCase):
         problematic_sequences = [
             # WebSocket -> ExecutionEngine -> WebSocket cycle
             [
-                "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+                "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
                 "from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine",
             ],
             # AgentRegistry -> WebSocket -> AgentRegistry cycle
             [
                 "from netra_backend.app.agents.registry import AgentRegistry",
-                "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+                "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
             ],
             # ExecutionEngine -> AgentRegistry -> ExecutionEngine cycle
             [
@@ -274,7 +274,7 @@ class SSotImportRegistryComplianceIssue1196Tests(unittest.TestCase):
                     del sys.modules[mod]
 
             # Import via canonical path
-            exec("from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WM1")
+            exec("from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WM1")
             canonical_instance = locals().get('WM1')
 
             # Clear and import via alternative path

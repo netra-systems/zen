@@ -1,4 +1,4 @@
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 # REMOVED_SYNTAX_ERROR: '''Agent Context Window Management Integration Test
 
 # REMOVED_SYNTAX_ERROR: Business Value Justification (BVJ):
@@ -14,7 +14,7 @@ from netra_backend.app.websocket_core.websocket_manager import get_websocket_man
     # REMOVED_SYNTAX_ERROR: import time
     # REMOVED_SYNTAX_ERROR: import uuid
     # REMOVED_SYNTAX_ERROR: from typing import Any, Dict, List, Optional
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 

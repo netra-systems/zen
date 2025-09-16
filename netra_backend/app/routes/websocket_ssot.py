@@ -66,7 +66,7 @@ from netra_backend.app.services.monitoring.gcp_error_reporter import gcp_reporta
 
 # WebSocket core components (unified across all patterns)
 # PHASE 1 FIX: Import from canonical SSOT sources instead of __init__.py to prevent circular references
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.canonical_import_patterns import (
     WebSocketManager,
     get_websocket_manager,
 )
@@ -136,7 +136,7 @@ from netra_backend.app.dependencies import (
 )
 
 # Isolated pattern dependencies (for isolated mode)
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ConnectionScopedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as ConnectionScopedWebSocketManager
 from netra_backend.app.websocket.connection_handler import connection_scope
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 

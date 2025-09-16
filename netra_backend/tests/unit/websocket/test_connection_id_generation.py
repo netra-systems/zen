@@ -31,7 +31,7 @@ from netra_backend.app.websocket_core.utils import generate_connection_id, gener
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, MessageType, create_standard_message
 from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 # SSOT import after Issue #824 remediation
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.connection_manager import ConnectionManager
 
 # Import ID generation components

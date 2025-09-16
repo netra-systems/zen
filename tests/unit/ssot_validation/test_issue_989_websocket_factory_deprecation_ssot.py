@@ -142,7 +142,7 @@ class Issue989WebSocketFactoryDeprecationSSoTTests(SSotBaseTestCase):
                 content = self.websocket_factory_path.read_text(encoding='utf-8')
                 lines = content.split('\n')
                 warning_patterns = ['warnings.warn', 'DeprecationWarning', 'deprecated', 'DEPRECATED']
-                ssot_redirect_patterns = ['from netra_backend.app.websocket_core.websocket_manager import', 'get_websocket_manager(', 'WebSocketManager(']
+                ssot_redirect_patterns = ['from netra_backend.app.websocket_core.canonical_import_patterns import', 'get_websocket_manager(', 'WebSocketManager(']
                 for line_num, line in enumerate(lines, 1):
                     line_lower = line.lower()
                     for pattern in warning_patterns:

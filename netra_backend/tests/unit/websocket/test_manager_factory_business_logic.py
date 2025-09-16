@@ -25,7 +25,7 @@ import pytest
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, Any
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.canonical_imports import ConnectionLifecycleManager, FactoryInitializationError, get_websocket_manager_factory, create_websocket_manager, create_websocket_manager_sync, _validate_ssot_user_context, _validate_ssot_user_context_staging_safe
 from netra_backend.app.services.user_execution_context import create_defensive_user_execution_context
 from netra_backend.app.monitoring.websocket_metrics import FactoryMetrics, ManagerMetrics

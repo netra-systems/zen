@@ -48,7 +48,7 @@ from netra_backend.app.websocket_core.types import (
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from netra_backend.app.websocket_core.utils import is_websocket_connected
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.timestamp_utils import safe_convert_timestamp
 
 logger = central_logger.get_logger(__name__)

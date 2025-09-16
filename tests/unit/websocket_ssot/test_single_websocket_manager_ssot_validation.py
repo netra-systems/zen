@@ -68,9 +68,9 @@ class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
         logger.info("Validating single WebSocket manager implementation (SSOT compliance)")
         
         # Import all WebSocket manager references
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ManagerAlias
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CompatibilityManager
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as ManagerAlias
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as CompatibilityManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as UnifiedManager
         
         # Get the actual class objects and their implementation details
         manager_classes = {
@@ -213,7 +213,7 @@ class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
         """
         logger.info("Validating consolidated WebSocket manager interface completeness")
         
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         
         # Define required methods for complete WebSocket manager functionality
         required_methods = [
@@ -282,9 +282,9 @@ class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
         logger.info("Validating WebSocket manager instantiation consistency")
         
         # Import from different paths
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as Path1
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as Path2
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as Path3
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as Path1
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as Path2
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as Path3
         
         # Create test user context
         test_context = type('TestContext', (), {
@@ -294,7 +294,7 @@ class SingleWebSocketManagerSsotValidationTests(SSotBaseTestCase):
             'is_test': True
         })()
         
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerMode
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerMode
         
         # Test instantiation from all paths
         instances = []

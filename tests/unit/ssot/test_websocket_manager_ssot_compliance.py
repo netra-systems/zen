@@ -42,9 +42,9 @@ class WebSocketManagerSSotComplianceTests(SSotBaseTestCase):
 
     # PROHIBITED legacy import patterns
     PROHIBITED_IMPORT_PATTERNS = {
-        "websocket_manager_direct": "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+        "websocket_manager_direct": "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
         "websocket_manager_module": "from netra_backend.app.websocket_core import WebSocketManager",
-        "websocket_manager_star": "from netra_backend.app.websocket_core.websocket_manager import *",
+        "websocket_manager_star": "from netra_backend.app.websocket_core.canonical_import_patterns import *",
         "websocket_core_star": "from netra_backend.app.websocket_core import *"
     }
 

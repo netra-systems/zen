@@ -231,7 +231,7 @@ class WebSocketFactoryConsolidationValidationTests(BaseIntegrationTest):
 
         try:
             # Try direct instantiation
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             instance1 = WebSocketManager()
             creation_methods.append("direct")
         except ImportError:
@@ -293,7 +293,7 @@ class WebSocketFactoryConsolidationValidationTests(BaseIntegrationTest):
 
                 # Method 1: Direct instantiation (if available)
                 try:
-                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                     instance1 = WebSocketManager()
                     creation_attempts.append(("direct", instance1, time.time() - start_time))
                 except ImportError:
@@ -454,7 +454,7 @@ class WebSocketFactoryConsolidationValidationTests(BaseIntegrationTest):
     def _test_direct_instantiation_isolation(self, test_users: List[UserID]) -> Dict[str, Any]:
         """Test isolation for direct instantiation pattern."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
             instances = []
             for user_id in test_users:
@@ -595,7 +595,7 @@ class WebSocketFactoryConsolidationValidationTests(BaseIntegrationTest):
 
     def _test_direct_lifecycle(self) -> Dict[str, Any]:
         """Test lifecycle for direct instantiation."""
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
         instance = WebSocketManager()
 

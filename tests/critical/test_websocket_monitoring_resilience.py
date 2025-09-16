@@ -23,7 +23,7 @@ from typing import Dict, Any, List
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 class WebSocketMonitoringResilienceTests:
     """Test suite for WebSocket Manager monitoring resilience fixes."""

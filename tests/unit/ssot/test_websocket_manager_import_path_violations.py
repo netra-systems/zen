@@ -47,7 +47,7 @@ class WebSocketManagerImportPathViolationsTests(SSotBaseTestCase):
     
     # Legacy import patterns (violating SSOT)
     LEGACY_IMPORT_PATTERNS = [
-        "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+        "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
         "from netra_backend.app.websocket_core import WebSocketManager"
     ]
 

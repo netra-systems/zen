@@ -93,7 +93,7 @@ class WebSocketRaceConditionReproductionTests(BaseIntegrationTest):
 
                 # Attempt 1: Direct WebSocket Manager import (timing sensitive)
                 try:
-                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                     instance1 = WebSocketManager()
                     initialization_results.append(("direct_manager", id(instance1), time.time() - start_time))
                 except Exception as e:
@@ -287,7 +287,7 @@ class WebSocketRaceConditionReproductionTests(BaseIntegrationTest):
 
                 # Pattern 2: Direct instantiation (may not respect context)
                 try:
-                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                     direct_start = time.time()
                     manager2 = WebSocketManager()
 
@@ -479,7 +479,7 @@ class WebSocketRaceConditionReproductionTests(BaseIntegrationTest):
 
                     # Pattern 2: Direct creation (may not be cleanable)
                     try:
-                        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                         direct_instance = WebSocketManager()
                         created_instances.append(('direct', direct_instance))
                     except ImportError:
@@ -575,7 +575,7 @@ class WebSocketRaceConditionReproductionTests(BaseIntegrationTest):
 
         # Count by attempting to access different implementation types
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             # In real implementation, would have instance tracking
             instance_count += 1  # Simplified counting
         except ImportError:

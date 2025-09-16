@@ -31,8 +31,8 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from shared.isolated_environment import IsolatedEnvironment
 
 # Import components for future SSOT validation
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ensure_user_id
 
@@ -112,7 +112,7 @@ class WebSocketSsotConsolidationValidationTests(SSotAsyncTestCase):
         # TARGET STATE: Get SSOT singleton instance
         try:
             # Future SSOT pattern: Singleton access method
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager_singleton
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager_singleton
             
             ssot_manager = get_websocket_manager_singleton()
             self.assertIsNotNone(ssot_manager, "SSOT singleton should be available")
@@ -389,7 +389,7 @@ class SsotConsolidationIntegrationTests(SSotBaseTestCase):
         """
         # TARGET STATE: WebSocket SSOT isolated to backend service
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Check that WebSocket SSOT doesn't import cross-service dependencies
             websocket_module_path = WebSocketManager.__module__
