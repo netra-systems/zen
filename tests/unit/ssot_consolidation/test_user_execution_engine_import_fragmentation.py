@@ -1,40 +1,52 @@
 """
-Test Suite: UserExecutionEngine Import Fragmentation Detection
-Issue #1186: UserExecutionEngine SSOT Consolidation
+Import Fragmentation Detection Test for Issue #1186
 
-PURPOSE: Expose and validate import fragmentation violations in UserExecutionEngine usage.
-These tests are DESIGNED TO FAIL initially to demonstrate current violations.
+Tests for detecting import fragmentation violations in UserExecutionEngine patterns
+across the codebase. This test suite identifies the 275+ violations that need
+to be addressed as part of SSOT consolidation.
 
-Business Impact: 275 import fragmentation violations prevent enterprise-grade
-user isolation and violate SSOT principles, blocking $500K+ ARR scalability.
+Business Value: Platform/Internal - System Stability & Development Velocity
+Prevents cascade failures from duplicated import patterns and ensures reliable
+SSOT compliance for the $500K+ ARR Golden Path.
 
-EXPECTED BEHAVIOR: 
-- All tests SHOULD FAIL initially (demonstrating violations)
-- All tests SHOULD PASS after SSOT consolidation is complete
+Expected: FAIL initially (detects 275+ violations)
+Target: 100% SSOT compliance with zero import fragmentation violations
+
+CRITICAL: This test MUST fail initially to demonstrate current violations.
+Only passes when SSOT consolidation is complete.
 """
 
 import ast
 import os
 import re
-import sys
-import pytest
-import unittest
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
-from collections import defaultdict
 from dataclasses import dataclass
-
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 @dataclass
-class ImportFragmentationResult:
-    """Container for import fragmentation analysis results."""
-    total_violations: int
-    fragmented_imports: List[Tuple[str, str]]
-    unique_patterns: Set[str]
-    canonical_pattern: str
+class ImportViolation:
+    """Container for import fragmentation violations."""
+    file_path: str
+    line_number: int
+    import_statement: str
+    violation_type: str
     severity: str
+    pattern_type: str
+    
+
+@dataclass
+class FragmentationStats:
+    """Statistics for import fragmentation analysis."""
+    total_violations: int
+    critical_violations: int
+    high_violations: int
+    medium_violations: int
+    low_violations: int
+    patterns_detected: Set[str]
+    files_affected: Set[str]
+    duplicate_imports: Dict[str, int]
 
 
 @pytest.mark.unit
