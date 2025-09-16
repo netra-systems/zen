@@ -52,8 +52,7 @@ class JWTSecretManager:
         Priority order (consistent across ALL services):
         1. Environment-specific JWT_SECRET_{ENVIRONMENT} (e.g., JWT_SECRET_STAGING)  
         2. Generic JWT_SECRET_KEY
-        3. Legacy JWT_SECRET
-        4. Environment-specific fallbacks (dev/test only)
+        3. Environment-specific fallbacks (dev/test only)
         
         Returns:
             JWT secret string for token signing/validation
@@ -84,8 +83,7 @@ class JWTSecretManager:
                 # STAGING: Use explicit staging secret hierarchy with proper validation
                 staging_secrets = [
                     "JWT_SECRET_STAGING",
-                    "JWT_SECRET_KEY", 
-                    "JWT_SECRET"
+                    "JWT_SECRET_KEY"
                 ]
                 
                 for secret_key in staging_secrets:
@@ -98,7 +96,7 @@ class JWTSecretManager:
                 # STAGING FALLBACK: Use unified secret from secrets manager if available
                 try:
                     from deployment.secrets_config import get_staging_secret
-                    staging_secret = get_staging_secret("JWT_SECRET")
+                    staging_secret = get_staging_secret("JWT_SECRET_KEY")
                     if staging_secret and len(staging_secret) >= min_secret_length:
                         logger.info("STAGING JWT SECRET: Using deployment secrets manager")
                         self._cached_secret = staging_secret
@@ -157,7 +155,7 @@ class JWTSecretManager:
                 
             # 6. Hard failure for staging/production environments (non-test contexts)
             if environment in ["staging", "production"]:
-                expected_vars = [env_specific_key, "JWT_SECRET_KEY", "JWT_SECRET"]
+                expected_vars = [env_specific_key, "JWT_SECRET_KEY"]
                 logger.critical(f"JWT secret not configured for {environment} environment")
                 logger.critical(f"Expected one of: {expected_vars}")
                 logger.critical("This will cause WebSocket 403 authentication failures")
@@ -397,9 +395,8 @@ class JWTSecretManager:
             "environment_specific_key": env_specific_key,
             "has_env_specific": bool(env.get(env_specific_key)),
             "has_generic_key": bool(env.get("JWT_SECRET_KEY")),
-            "has_legacy_key": bool(env.get("JWT_SECRET")),
             "available_keys": [
-                key for key in [env_specific_key, "JWT_SECRET_KEY", "JWT_SECRET"]
+                key for key in [env_specific_key, "JWT_SECRET_KEY"]
                 if env.get(key)
             ],
             "algorithm": self.get_jwt_algorithm()

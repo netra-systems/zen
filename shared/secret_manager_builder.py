@@ -76,7 +76,7 @@ class SecretManagerBuilder(ConfigBuilderBase):
                 provided_keys = set(self.parent._env_vars.keys())
                 environment = self.parent.env.get("ENVIRONMENT", "development").lower()
                 env_specific_key = f"JWT_SECRET_{environment.upper()}"
-                jwt_keys = {"JWT_SECRET_KEY", "JWT_SECRET", env_specific_key}
+                jwt_keys = {"JWT_SECRET_KEY", env_specific_key}
                 if not (jwt_keys & provided_keys):  # No JWT keys provided at all
                     # This is a test scenario expecting hard failure
                     raise ValueError("JWT secret is not available")
@@ -87,7 +87,6 @@ class SecretManagerBuilder(ConfigBuilderBase):
             if (not hasattr(self.parent, '_env_vars') or self.parent._env_vars is None):
                 if env.get("TESTING") == "true" and not any([
                     env.get("JWT_SECRET_KEY", "").strip(),
-                    env.get("JWT_SECRET", "").strip(), 
                     env.get(f"JWT_SECRET_{env.get('ENVIRONMENT', 'development').upper()}", "").strip()
                 ]):
                     # This appears to be a reset test environment expecting hard failure
@@ -111,10 +110,8 @@ class SecretManagerBuilder(ConfigBuilderBase):
             if jwt_secret and len(jwt_secret.strip()) >= 4:
                 return jwt_secret.strip()
             
-            # 3. Try legacy JWT_SECRET
-            jwt_secret = env.get("JWT_SECRET")
-            if jwt_secret and len(jwt_secret.strip()) >= 4:
-                return jwt_secret.strip()
+            # JWT_SECRET fallback REMOVED as part of JWT_SECRET_KEY migration
+            # All services must use JWT_SECRET_KEY for consistency
             
             # 4. Fallback to SharedJWTSecretManager for real environment resolution
             return SharedJWTSecretManager.get_jwt_secret()

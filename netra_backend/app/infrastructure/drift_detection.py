@@ -278,7 +278,7 @@ class ServiceConfigurationValidator:
         results = []
         
         # Check JWT secret configuration
-        jwt_secret = self.env.get("JWT_SECRET_KEY") or self.env.get("JWT_SECRET")
+        jwt_secret = self.env.get("JWT_SECRET_KEY")
         auth_service_url = self.env.get("AUTH_SERVICE_URL")
         
         if auth_service_url and not jwt_secret:
