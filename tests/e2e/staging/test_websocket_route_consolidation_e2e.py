@@ -20,7 +20,7 @@ E2E SCOPE:
 
 STAGING ENVIRONMENT:
 - URL: https://auth.staging.netrasystems.ai
-- WebSocket: wss://backend.staging.netrasystems.ai/ws
+- WebSocket: wss://api.staging.netrasystems.ai/ws
 - Authentication: Real JWT tokens from staging auth service
 
 NOTE: This requires GCP staging environment to be operational.
@@ -60,8 +60,8 @@ class WebSocketRouteConsolidationE2ETests(SSotAsyncTestCase):
         # Staging environment configuration
         self.staging_config = {
             'auth_base_url': 'https://auth.staging.netrasystems.ai',
-            'backend_base_url': 'https://backend.staging.netrasystems.ai',
-            'websocket_url': 'wss://backend.staging.netrasystems.ai/ws',
+            'backend_base_url': 'https://api.staging.netrasystems.ai',
+            'websocket_url': 'wss://api.staging.netrasystems.ai/ws',
             'timeout': 30  # seconds
         }
 

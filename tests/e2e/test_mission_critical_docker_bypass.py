@@ -37,7 +37,7 @@ class MissionCriticalDockerBypassTests(SSotBaseTestCase):
 
         # Staging environment URLs (canonical fallback)
         cls.staging_urls = {
-            'backend': 'https://backend.staging.netrasystems.ai',
+            'backend': 'https://api.staging.netrasystems.ai',
             'auth': 'https://auth.staging.netrasystems.ai',
             'frontend': 'https://staging.netrasystems.ai'
         }
@@ -120,7 +120,7 @@ class MissionCriticalDockerBypassTests(SSotBaseTestCase):
         """
         websocket_fallback_issues = []
 
-        staging_websocket_url = f"wss://backend.staging.netrasystems.ai{self.critical_endpoints['websocket_endpoint']}"
+        staging_websocket_url = f"wss://api.staging.netrasystems.ai{self.critical_endpoints['websocket_endpoint']}"
 
         try:
             # Mock WebSocket connection testing (actual WebSocket would need real infrastructure)
@@ -317,7 +317,7 @@ class MissionCriticalDockerBypassTests(SSotBaseTestCase):
             ],
             'cors_configuration': [
                 'https://staging.netrasystems.ai',
-                'wss://backend.staging.netrasystems.ai'
+                'wss://api.staging.netrasystems.ai'
             ]
         }
 
@@ -428,7 +428,7 @@ class MissionCriticalDockerBypassTests(SSotBaseTestCase):
                         'backend.alpine.Dockerfile:69'
                     ],
                     'staging_fallback_procedures': [
-                        'https://backend.staging.netrasystems.ai',
+                        'https://api.staging.netrasystems.ai',
                         'WebSocket bypass',
                         'mission-critical test execution'
                     ],

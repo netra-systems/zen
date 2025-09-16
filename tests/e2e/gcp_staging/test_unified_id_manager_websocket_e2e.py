@@ -36,7 +36,7 @@ class UnifiedIdManagerWebSocketE2ETests(SSotBaseTestCase):
         """Set up E2E test environment."""
         super().setup_method(method)
         self.id_manager = UnifiedIDManager()
-        self.staging_base_url = "wss://backend.staging.netrasystems.ai"
+        self.staging_base_url = "wss://api.staging.netrasystems.ai"
         self.business_critical_events = [
             "agent_started",
             "agent_thinking",

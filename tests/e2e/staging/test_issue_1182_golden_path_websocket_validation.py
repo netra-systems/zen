@@ -54,9 +54,9 @@ class GoldenPathWebSocketValidationTests(SSotAsyncTestCase):
         super().setUp()
         
         # Staging environment configuration
-        self.staging_base_url = "https://backend.staging.netrasystems.ai"
-        self.staging_ws_url = "wss://backend.staging.netrasystems.ai/ws"
-        self.demo_ws_url = "wss://backend.staging.netrasystems.ai/api/demo/ws"
+        self.staging_base_url = "https://api.staging.netrasystems.ai"
+        self.staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
+        self.demo_ws_url = "wss://api.staging.netrasystems.ai/api/demo/ws"
         
         # Test configuration
         self.golden_path_timeout = 60.0  # 60 seconds for complete journey

@@ -47,7 +47,7 @@ class GoldenPathJWTAuthenticationTests(SSotAsyncTestCase):
         self.set_env_var("ENVIRONMENT", "staging")
         self.set_env_var("NETRA_ENVIRONMENT", "staging")
         self.set_env_var("AUTH_SERVICE_URL", "https://api.staging.netrasystems.ai")
-        self.set_env_var("BACKEND_URL", "https://backend.staging.netrasystems.ai")
+        self.set_env_var("BACKEND_URL", "https://api.staging.netrasystems.ai")
         self.set_env_var("WEBSOCKET_URL", "wss://ws.staging.netrasystems.ai")
         
         # Test user credentials for Golden Path

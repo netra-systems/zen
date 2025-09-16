@@ -42,8 +42,8 @@ class Issue1181BusinessValueProtectionStagingE2ETests(SSotAsyncTestCase):
         super().setUpClass()
         
         # Staging environment configuration
-        cls.staging_base_url = "https://backend.staging.netrasystems.ai"
-        cls.staging_ws_url = "wss://backend.staging.netrasystems.ai/ws"
+        cls.staging_base_url = "https://api.staging.netrasystems.ai"
+        cls.staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
         cls.staging_auth_url = "https://auth.staging.netrasystems.ai"
         
         # Business value test configuration

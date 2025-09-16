@@ -3,7 +3,7 @@ E2E Tests for /api/conversations on GCP Staging - Issue #1233
 
 This module provides end-to-end testing of the missing /api/conversations endpoint
 on the GCP staging environment using:
-- Real staging environment (https://backend.staging.netrasystems.ai)
+- Real staging environment (https://api.staging.netrasystems.ai)
 - Real authentication service (https://auth.staging.netrasystems.ai)
 - Real database and services
 - Real network conditions and load balancers
@@ -32,7 +32,7 @@ class ConversationsE2EStagingTests(SSotAsyncTestCase):
         super().setup_method(method)
         
         # GCP Staging environment URLs
-        self.backend_url = "https://backend.staging.netrasystems.ai"
+        self.backend_url = "https://api.staging.netrasystems.ai"
         self.auth_url = "https://auth.staging.netrasystems.ai"
         self.frontend_url = "https://app.staging.netrasystems.ai"
         
