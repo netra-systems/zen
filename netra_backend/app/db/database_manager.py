@@ -698,20 +698,60 @@ class DatabaseManager:
             raise classified_error
 
     async def _test_connection_with_retry(self, engine: AsyncEngine, max_retries: int = 3) -> bool:
-        """Test database connection with retry logic for Issue #1278."""
+        """Test database connection with enhanced retry logic for Issue #1278 infrastructure resilience."""
+        # Get infrastructure-aware configuration
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
+        
+        # Issue #1278: Infrastructure-aware retry configuration
+        if environment in ["staging", "production"]:
+            # Cloud environments need more retries and longer timeouts due to VPC/infrastructure delays
+            max_retries = max(max_retries, 5)  # Minimum 5 retries for cloud
+            base_timeout = 10.0  # 10 second base timeout for infrastructure delays
+            retry_backoff = 2.0  # 2 second exponential backoff
+        else:
+            base_timeout = 5.0
+            retry_backoff = 1.0
+        
+        # Try to get infrastructure-aware timeout if monitoring is available
+        try:
+            from netra_backend.app.infrastructure.vpc_connector_monitoring import get_capacity_aware_database_timeout
+            infrastructure_timeout = get_capacity_aware_database_timeout(environment, "connection_test") 
+            connection_timeout = max(base_timeout, infrastructure_timeout)
+            logger.info(f"Using infrastructure-aware connection timeout: {connection_timeout}s for {environment}")
+        except Exception:
+            connection_timeout = base_timeout
+            logger.debug(f"Using default connection timeout: {connection_timeout}s")
+        
         for attempt in range(max_retries):
             try:
-                async with engine.begin() as conn:
-                    await conn.execute(text("SELECT 1"))
-                logger.info(f"Database connection test successful on attempt {attempt + 1}")
+                # Issue #1278: Use asyncio.wait_for for timeout control
+                async def test_connection():
+                    async with engine.begin() as conn:
+                        await conn.execute(text("SELECT 1"))
+                
+                await asyncio.wait_for(test_connection(), timeout=connection_timeout)
+                logger.info(f"✅ Database connection test successful on attempt {attempt + 1}/{max_retries} ({environment} environment)")
                 return True
-            except Exception as e:
-                logger.warning(f"Database connection test failed on attempt {attempt + 1}: {e}")
+                
+            except asyncio.TimeoutError:
+                logger.warning(f"⏰ Database connection test timed out after {connection_timeout}s on attempt {attempt + 1}/{max_retries}")
                 if attempt < max_retries - 1:
-                    await asyncio.sleep(1)  # Brief delay before retry
+                    # Issue #1278: Exponential backoff for infrastructure recovery
+                    wait_time = retry_backoff * (2 ** attempt)
+                    logger.info(f"Waiting {wait_time}s before retry (infrastructure recovery time)")
+                    await asyncio.sleep(wait_time)
+                
+            except Exception as e:
+                error_type = type(e).__name__
+                logger.warning(f"❌ Database connection test failed on attempt {attempt + 1}/{max_retries}: {error_type}: {e}")
+                if attempt < max_retries - 1:
+                    wait_time = retry_backoff * (2 ** attempt)
+                    await asyncio.sleep(wait_time)
                 else:
-                    logger.error("Database connection test failed after all retry attempts")
+                    logger.error(f"🚨 Database connection test failed after all {max_retries} retry attempts in {environment} environment")
                     return False
+        
         return False
     
     def get_engine(self, name: str = 'primary') -> AsyncEngine:
