@@ -193,6 +193,49 @@
         </monitoring_alerts>
     </prevention_measures>
 
+    <external_service_patterns>
+        <pattern name="external_api_access_via_nat">
+            <description>All external services require Cloud NAT with private-ranges-only VPC egress</description>
+            <affected_services>
+                <service name="ClickHouse Cloud" url="xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443" type="analytics"/>
+                <service name="OpenAI API" url="api.openai.com" type="llm"/>
+                <service name="Anthropic API" url="api.anthropic.com" type="llm"/>
+                <service name="Google Gemini API" url="generativelanguage.googleapis.com" type="llm"/>
+                <service name="External Monitoring" url="various" type="observability"/>
+                <service name="Webhook Endpoints" url="various" type="integration"/>
+                <service name="Third-party APIs" url="various" type="integration"/>
+            </affected_services>
+            <routing_requirement>Internet access via Cloud NAT gateway</routing_requirement>
+            <vpc_egress_requirement>private-ranges-only (NOT all-traffic)</vpc_egress_requirement>
+        </pattern>
+        
+        <pattern name="internal_gcp_services_direct">
+            <description>Internal GCP services require direct access, NOT through Cloud NAT</description>
+            <affected_services>
+                <service name="Cloud SQL Unix Sockets" path="/cloudsql/PROJECT:REGION:INSTANCE" type="database"/>
+                <service name="Cloud Storage" url="storage.googleapis.com" type="storage"/>
+                <service name="Secret Manager" url="secretmanager.googleapis.com" type="security"/>
+                <service name="Cloud Logging" url="logging.googleapis.com" type="observability"/>
+                <service name="Cloud Monitoring" url="monitoring.googleapis.com" type="observability"/>
+                <service name="Cloud Pub/Sub" url="pubsub.googleapis.com" type="messaging"/>
+                <service name="Internal Load Balancers" url="internal IPs" type="networking"/>
+            </affected_services>
+            <routing_requirement>Direct access via private Google network</routing_requirement>
+            <vpc_egress_requirement>private-ranges-only (bypasses VPC connector)</vpc_egress_requirement>
+        </pattern>
+        
+        <pattern name="hybrid_external_gcp_services">
+            <description>External GCP services that work with both routing methods</description>
+            <affected_services>
+                <service name="Cloud Storage Public" url="storage.googleapis.com" type="storage"/>
+                <service name="BigQuery Public API" url="bigquery.googleapis.com" type="analytics"/>
+                <service name="Cloud Translation" url="translate.googleapis.com" type="ai"/>
+            </affected_services>
+            <routing_requirement>Can use either direct or NAT routing</routing_requirement>
+            <vpc_egress_requirement>Works with both private-ranges-only and all-traffic</vpc_egress_requirement>
+        </pattern>
+    </external_service_patterns>
+
     <related_issues>
         <github_issue number="1086">
             <title>Staging connectivity crisis</title>
