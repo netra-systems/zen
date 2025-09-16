@@ -348,7 +348,7 @@ class RealErrorHandlingTests:
     async def test_database_connection_failure_handling(self, isolated_test_env):
         """Test handling of database connection failures."""
         try:
-            with patch.object(AuthConfig, 'get_database_url', return_value='postgresql://invalid:invalid@localhost:9999/invalid'):
+            with patch.object(AuthConfig, 'get_database_url', return_value='postgresql+asyncpg://invalid:invalid@localhost:9999/invalid'):
                 factory = TestRepositoryFactory(use_real_db=True)
                 await factory.initialize()
                 user_repo = await factory.get_user_repository()
