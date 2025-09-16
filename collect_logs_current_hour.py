@@ -43,13 +43,20 @@ class GCPLogCollector:
 
     def collect_logs_last_hour(self):
         """Collect logs from the last hour with all severities and full JSON payload"""
+        # Calculate current time and 1 hour ago in UTC
+        now_utc = datetime.utcnow()
+        one_hour_ago_utc = now_utc - timedelta(hours=1)
+
+        start_time = one_hour_ago_utc.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        end_time = now_utc.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+
         print("=" * 60)
-        print("GCP LOG COLLECTION - LAST 1 HOUR")
+        print("GCP LOG COLLECTION - CURRENT LAST 1 HOUR")
         print("=" * 60)
         print(f"Project: {self.project}")
-        print(f"Time: 4:43 PM PDT to 5:43 PM PDT (Sept 15, 2025)")
-        print(f"UTC: 23:43 Sept 15 to 00:43 Sept 16, 2025")
-        print(f"Current time: {datetime.now()}")
+        print(f"Start Time (UTC): {start_time}")
+        print(f"End Time (UTC): {end_time}")
+        print(f"Current local time: {datetime.now()}")
         print("=" * 60)
 
         # Check authentication first
@@ -79,8 +86,8 @@ class GCPLogCollector:
         for service_name in service_patterns:
             print(f"\n🔍 Searching for service: {service_name}")
 
-            # Query for ALL logs (not just errors) to get complete picture
-            cmd = f'''gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name={service_name} AND timestamp>=\\"2025-09-15T23:43:00.000Z\\" AND timestamp<=\\"2025-09-16T00:43:00.000Z\\"" --limit=1000 --format=json --project={self.project}'''
+            # Query for WARNING+ logs with full JSON payload for current last hour
+            cmd = f'''gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name={service_name} AND severity>=WARNING AND timestamp>=\\"{start_time}\\" AND timestamp<=\\"{end_time}\\"" --limit=1000 --format=json --project={self.project}'''
 
             stdout, stderr, code = self.run_command(cmd, timeout=120)
 
