@@ -60,8 +60,8 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         for key, value in self.test_env.items():
             self.set_env_var(key, value)
         
-        # Initialize SSOT Redis manager for testing
-        self.redis_manager = RedisManager()
+        # Initialize SSOT Redis manager for testing - use singleton pattern
+        self.redis_manager = redis_manager
         await self.redis_manager.initialize()
         
         # Track original state for cleanup

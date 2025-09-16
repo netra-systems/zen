@@ -31,7 +31,13 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class TestIssue1197FoundationalFixes(SSotBaseTestCase):
-    """Test foundational infrastructure fixes for Issue #1197."""
+    """Test foundational infrastructure fixes for Issue #1197.
+    
+    This test validates the three specific fixes implemented:
+    1. Unified Test Runner Category Failure - Fix category processing logic
+    2. Missing Docker Compose Path Configuration - Set COMPOSE_FILE environment variable  
+    3. Missing RealWebSocketTestConfig Class - Add missing test dependency
+    """
     
     def test_multiline_import_parsing_regression(self):
         """
