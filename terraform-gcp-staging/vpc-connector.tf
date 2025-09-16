@@ -29,11 +29,16 @@ resource "google_vpc_access_connector" "staging_connector" {
   # Redis is in 10.166.0.0/16 network, so using 10.2.0.0/28 for connector (non-overlapping)
   ip_cidr_range = "10.2.0.0/28" # Non-overlapping CIDR for VPC connector routing to Redis network
 
-  # Enhanced scaling configuration for production workloads
-  min_instances = 3  # Increased for reliability
-  max_instances = 20 # Increased for capacity during traffic spikes
+  # PHASE 1 FIX: Enhanced scaling configuration for VPC capacity exhaustion (Issue #1278)
+  # Based on Five Whys analysis - increase capacity to handle staging load
+  min_instances = 5  # Increased for better baseline availability
+  max_instances = 50 # Significantly increased to prevent capacity exhaustion during test runs
 
-  # ISSUE #1177 FIX: Enhanced machine type for better performance
+  # Enhanced throughput settings to support multiple concurrent services
+  min_throughput = 300 # Minimum throughput in Mbps
+  max_throughput = 1000 # Maximum throughput in Mbps
+
+  # ISSUE #1177 + #1278 FIX: Enhanced machine type for better performance and capacity
   machine_type = "e2-standard-4" # Upgraded for higher throughput and resilience
 
   # ISSUE #1177 FIX: Enhanced lifecycle management

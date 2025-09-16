@@ -170,7 +170,7 @@ except ImportError:
 
 # SSOT COMPLIANCE: Factory pattern eliminated - use direct WebSocketManager import
 # from netra_backend.app.websocket_core.websocket_manager_factory import (
-#     WebSocketManagerFactory,
+#     WebSocketManagerFactory,  # REMOVED: Issue #1098 - Use get_websocket_manager() instead
 #     IsolatedWebSocketManager,
 #     get_websocket_manager_factory,
 #     create_websocket_manager

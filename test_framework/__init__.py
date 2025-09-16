@@ -32,3 +32,38 @@ def setup_test_path() -> Path:
         sys.path.insert(0, project_root_str)
     
     return project_root
+
+
+# Automatically setup the test path when module is imported
+PROJECT_ROOT = setup_test_path()
+
+# Import and expose commonly used test framework components
+try:
+    from .unified_docker_manager import UnifiedDockerManager
+except ImportError as e:
+    # Log import issues but don't fail completely
+    import logging
+    logging.getLogger(__name__).warning(f"Could not import UnifiedDockerManager: {e}")
+    UnifiedDockerManager = None
+
+try:
+    # Try importing the SSOT module first
+    from . import ssot
+    from .ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
+except ImportError as e:
+    import logging
+    logging.getLogger(__name__).warning(f"Could not import SSOT base test cases: {e}")
+    SSotBaseTestCase = None
+    SSotAsyncTestCase = None
+    ssot = None
+
+# Export the key components
+__all__ = [
+    "setup_test_path",
+    "PROJECT_ROOT",
+    "UnifiedDockerManager",
+    "SSotBaseTestCase",
+    "SSotAsyncTestCase",
+    "ssot",
+    "__version__"
+]

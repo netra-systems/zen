@@ -217,7 +217,7 @@ class WebSocketManagerSSotValidator:
             factory_patterns = [
                 'create_websocket_manager',
                 'get_websocket_manager',
-                'WebSocketManagerFactory'
+                # 'WebSocketManagerFactory'  # REMOVED: Issue #1098
             ]
 
             has_direct = any(pattern in str(creation_stack) for pattern in direct_patterns)

@@ -1,4 +1,5 @@
-from shared.isolated_environment import get_env
+# Move this import inside functions that need it to avoid early import issues
+# from shared.isolated_environment import get_env
 """
 Single Source of Truth (SSOT) Test Framework
 

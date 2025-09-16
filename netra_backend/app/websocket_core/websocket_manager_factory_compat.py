@@ -32,13 +32,14 @@ warnings.warn(
 from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager as _canonical_create_websocket_manager
 create_websocket_manager = _canonical_create_websocket_manager
 
-from netra_backend.app.websocket_core.canonical_imports import WebSocketManagerFactory as _CanonicalWebSocketManagerFactory
-WebSocketManagerFactory = _CanonicalWebSocketManagerFactory
+# REMOVED: WebSocketManagerFactory no longer available - use get_websocket_manager() instead
+# from netra_backend.app.websocket_core.canonical_imports import WebSocketManagerFactory as _CanonicalWebSocketManagerFactory
+# WebSocketManagerFactory = _CanonicalWebSocketManagerFactory
 
 from netra_backend.app.websocket_core.canonical_imports import get_websocket_manager_factory as _canonical_get_websocket_manager_factory
 get_websocket_manager_factory = _canonical_get_websocket_manager_factory
 
-__all__ = ['create_websocket_manager', 'get_websocket_manager_factory', 'WebSocketManagerFactory']
+__all__ = ['create_websocket_manager', 'get_websocket_manager_factory']  # Removed: 'WebSocketManagerFactory'
 
 
 def _validate_compatibility_usage():

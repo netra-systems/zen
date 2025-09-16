@@ -12,11 +12,7 @@
 **Current Status:** Fresh backend deployment completed successfully, proceeding with comprehensive E2E test validation
 - ✅ **Backend Deployment:** SUCCESS - Fresh deployment completed (all services healthy)
   - Backend: https://netra-backend-staging-pnovr5vsba-uc.a.run.app
-<<<<<<< HEAD
-  - Auth: https://netra-auth-service-pnovr5vsba-uc.a.run.app
-=======
   - Auth: https://auth.staging.netrasystems.ai
->>>>>>> 8764938e17e7cbfd22700a00d83f352704f5be9d
   - Frontend: https://netra-frontend-staging-pnovr5vsba-uc.a.run.app
 - ✅ **Test Selection:** Comprehensive "all" category E2E tests selected from staging index
 - ⚠️ **Issue Context:** Recent critical issues require attention (SSOT, WebSocket, infrastructure)
@@ -44,11 +40,7 @@ Multiple P0/P1 critical SSOT and WebSocket issues indicate infrastructure instab
 ### 0.2 Service Health Verification
 **All Services Operational:**
 - ✅ **backend:** https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health
-<<<<<<< HEAD
-- ✅ **auth:** https://netra-auth-service-pnovr5vsba-uc.a.run.app/health
-=======
 - ✅ **auth:** https://auth.staging.netrasystems.ai/health
->>>>>>> 8764938e17e7cbfd22700a00d83f352704f5be9d
 - ✅ **frontend:** https://netra-frontend-staging-pnovr5vsba-uc.a.run.app
 
 ---
