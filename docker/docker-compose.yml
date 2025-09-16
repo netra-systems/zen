@@ -11,7 +11,7 @@
 # - docker-compose down                 # Stop all services
 # - docker-compose down -v              # Stop all services and remove volumes
 
-version: '3.8'
+# version directive is obsolete in modern Docker Compose
 
 services:
   # ============================================

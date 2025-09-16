@@ -164,7 +164,7 @@ class TestDockerPhase1Completion(BaseIntegrationTest):
         matrix_file = project_root / "dockerfiles" / "DOCKER_SSOT_MATRIX.md"
 
         if matrix_file.exists():
-            with open(matrix_file, 'r') as f:
+            with open(matrix_file, 'r', encoding='utf-8') as f:
                 content = f.read()
 
             # Should not reference Alpine variants anymore
@@ -205,7 +205,7 @@ class TestDockerInfrastructurePerformance(BaseIntegrationTest):
             result = subprocess.run([
                 "docker-compose",
                 "-f", str(compose_file),
-                "up", "-d", "postgres", "redis"
+                "up", "-d", "dev-postgres", "dev-redis"
             ], capture_output=True, text=True, timeout=45)
 
             startup_time = time.time() - start_time
