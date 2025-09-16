@@ -44,7 +44,7 @@ from netra_backend.app.core.auth_constants import (
 from netra_backend.app.core.network_constants import ServicePorts, URLConstants
 from tests.e2e.integration.unified_e2e_harness import create_e2e_harness
 from tests.e2e.test_environment_config import (
-    TestEnvironmentType,
+    EnvironmentTypeTests,
     get_test_environment_config,
 )
 
@@ -69,7 +69,7 @@ class StagingE2ESuiteTests:
         
     def _validate_staging_config(self) -> None:
         """Validate staging configuration integrity."""
-        assert self.env_config.environment == TestEnvironmentType.STAGING
+        assert self.env_config.environment == EnvironmentTypeTests.STAGING
         assert self.env_config.services.backend.startswith("https://")
         assert self.env_config.services.websocket.startswith("wss://")
         

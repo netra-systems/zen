@@ -90,7 +90,8 @@ class DatabaseConnection:
         self.state = ConnectionState.DISCONNECTED
         self.metrics = ConnectionMetrics()
         self._circuit_breaker_open_until: Optional[datetime] = None
-        self._circuit_breaker_timeout = 5.0  # seconds
+        # Issue #1278: Infrastructure-aware circuit breaker timeout
+        self._circuit_breaker_timeout = self._get_infrastructure_aware_timeout()  # Dynamic timeout based on environment
 
     async def connect(self) -> bool:
         """Attempt to connect to the database with circuit breaker logic."""
@@ -151,6 +152,27 @@ class DatabaseConnection:
         self._circuit_breaker_open_until = datetime.now(timezone.utc) + timedelta(seconds=self._circuit_breaker_timeout)
         self.state = ConnectionState.CIRCUIT_BREAKER_OPEN
         logger.warning(f"Circuit breaker opened for connection '{self.name}' after {self.metrics.connection_errors} errors")
+
+    def _get_infrastructure_aware_timeout(self) -> float:
+        """Calculate circuit breaker timeout based on infrastructure conditions (Issue #1278)."""
+        try:
+            from netra_backend.app.infrastructure.vpc_connector_monitoring import get_capacity_aware_database_timeout
+            from shared.isolated_environment import get_env
+
+            env = get_env()
+            environment = env.get("ENVIRONMENT", "development").lower()
+
+            # Base timeout with infrastructure awareness
+            base_timeout = 5.0
+            if environment in ["staging", "production"]:
+                # VPC connector + Cloud SQL requires longer circuit breaker timeouts
+                infrastructure_timeout = get_capacity_aware_database_timeout(environment, "circuit_breaker")
+                return max(base_timeout, infrastructure_timeout * 0.5)  # 50% of connection timeout for circuit breaker
+
+            return base_timeout
+        except Exception as e:
+            logger.warning(f"Failed to calculate infrastructure-aware timeout, using default: {e}")
+            return 5.0
 
 
 class CoordinationEventType(Enum):
@@ -541,25 +563,53 @@ class DatabaseManager:
             logger.debug("Constructing database URL using DatabaseURLBuilder SSOT")
             database_url = self._get_database_url()
             
-            # ISSUE #414 FIX: Enhanced connection pool configuration
+            # P0 EMERGENCY: Check for VPC connector capacity emergency configuration
+            from netra_backend.app.core.configuration.emergency import get_emergency_config
+            emergency_config = get_emergency_config()
+
+            # ISSUE #414 FIX + P0 EMERGENCY: Enhanced connection pool configuration with emergency mode
             echo = getattr(self.config, 'database_echo', False)
-            # Increased pool sizes to handle concurrent user load and prevent exhaustion
-            pool_size = getattr(self.config, 'database_pool_size', 25)  # Increased from 5 to 25
-            max_overflow = getattr(self.config, 'database_max_overflow', 50)  # Increased from 10 to 50
-            pool_timeout = getattr(self.config, 'database_pool_timeout', 30)  # 30 second timeout
-            
-            logger.info(f"[U+1F527] Enhanced database configuration (Issue #414): echo={echo}, pool_size={pool_size}, max_overflow={max_overflow}, timeout={pool_timeout}s")
+
+            if emergency_config.is_emergency_mode():
+                # Use emergency database configuration to reduce VPC load
+                emergency_db_config = emergency_config.get_database_config()
+                pool_size = emergency_db_config['pool_size']
+                max_overflow = emergency_db_config['max_overflow']
+                pool_timeout = emergency_db_config['pool_timeout']
+
+                logger.critical(f"🚨 P0 EMERGENCY DATABASE CONFIG: VPC capacity emergency mode active")
+                logger.critical(f"   Emergency level: {emergency_config.get_current_level().value.upper()}")
+                logger.critical(f"   Reduced pool_size: {pool_size} (emergency), max_overflow: {max_overflow}, timeout: {pool_timeout}s")
+
+                # Get load reduction summary
+                reduction_summary = emergency_config.get_vpc_load_reduction_summary()
+                logger.critical(f"   VPC load reduction: {reduction_summary['vpc_load_reduction']['database_pool_reduction_percent']}% database pool reduction")
+            else:
+                # Normal operation - increased pool sizes to handle concurrent user load and prevent exhaustion
+                pool_size = getattr(self.config, 'database_pool_size', 25)  # Increased from 5 to 25
+                max_overflow = getattr(self.config, 'database_max_overflow', 25)  # Issue #1278: Reduced from 50 to 25 for optimal resource balance
+                pool_timeout = getattr(self.config, 'database_pool_timeout', 30)  # 30 second timeout
+
+                logger.info(f"[U+1F527] Enhanced database configuration (Issue #414): echo={echo}, pool_size={pool_size}, max_overflow={max_overflow}, timeout={pool_timeout}s")
             
             # Use appropriate pool class for async engines with enhanced configuration
+            # P0 EMERGENCY: Use emergency pool recycle time if in emergency mode
+            if emergency_config.is_emergency_mode():
+                pool_recycle = emergency_config.get_database_config()['pool_recycle']
+                application_name = "netra_backend_emergency_pool"
+            else:
+                pool_recycle = 1800  # Normal: Reduced from 3600 to 1800s for faster recycling
+                application_name = "netra_backend_enhanced_pool"
+
             engine_kwargs = {
                 "echo": echo,
                 "pool_pre_ping": True,
-                "pool_recycle": 1800,  # Reduced from 3600 to 1800s for faster recycling
+                "pool_recycle": pool_recycle,
                 "pool_timeout": pool_timeout,  # Add timeout to prevent hanging
                 "connect_args": {
                     "command_timeout": 30,  # 30 second query timeout
                     "server_settings": {
-                        "application_name": "netra_backend_enhanced_pool"
+                        "application_name": application_name
                     }
                 }
             }
@@ -586,14 +636,14 @@ class DatabaseManager:
                 **engine_kwargs
             )
             
-            # Test initial connection
-            logger.debug("Testing initial database connection...")
-            async with primary_engine.begin() as conn:
-                await conn.execute(text("SELECT 1"))
-            
+            # Test initial connection with retry logic for Issue #1278
+            connection_success = await self._test_connection_with_retry(primary_engine)
+            if not connection_success:
+                raise ConnectionError("Failed to establish database connection after all retry attempts")
+
             self._engines['primary'] = primary_engine
             self._initialized = True
-            
+
             init_duration = time.time() - init_start_time
             logger.info(f" PASS:  DatabaseManager initialized successfully in {init_duration:.3f}s")
             

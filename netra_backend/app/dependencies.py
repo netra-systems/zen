@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.database import get_db
 
 from netra_backend.app.llm.client_unified import ResilientLLMClient
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
@@ -65,7 +65,7 @@ if TYPE_CHECKING:
     from netra_backend.app.services.corpus_service import CorpusService
     from netra_backend.app.services.thread_service import ThreadService
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 # Session isolation error class
 class SessionIsolationError(Exception):

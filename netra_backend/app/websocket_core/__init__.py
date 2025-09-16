@@ -43,7 +43,7 @@ def _check_direct_import_and_warn():
             
         # Read the source line to check the import pattern
         try:
-            with open(frame.filename, 'r') as f:
+            with open(frame.filename, 'r', encoding='utf-8', errors='ignore') as f:
                 lines = f.readlines()
                 if frame.lineno <= len(lines):
                     line = lines[frame.lineno - 1].strip()
@@ -121,6 +121,12 @@ try:
 
     # REMEDIATION: Add missing exports for test compatibility (Issue #1176 Phase 2 Fix)
     from netra_backend.app.websocket_core.types import create_server_message, create_error_message
+
+    # ISSUE #1286 FIX: Add missing get_websocket_manager export for test compatibility
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+
+    # ISSUE #1286 FIX: Add missing create_test_user_context export for test compatibility
+    from netra_backend.app.websocket_core.canonical_import_patterns import create_test_user_context
 except ImportError as e:
     # FAIL FAST: Critical WebSocket components must be available
     raise ImportError(
@@ -272,6 +278,12 @@ __all__ = [
     "create_server_message",      # CANONICAL: types.py
     "create_error_message",       # CANONICAL: types.py
 
+    # ISSUE #1286 FIX: Add missing get_websocket_manager export for test compatibility
+    "get_websocket_manager",      # CANONICAL: canonical_import_patterns.py
+
+    # ISSUE #1286 FIX: Add missing create_test_user_context export for test compatibility
+    "create_test_user_context",   # CANONICAL: canonical_import_patterns.py
+
     # Backward compatibility only - prefer direct imports
     "create_websocket_manager",
 
@@ -280,6 +292,9 @@ __all__ = [
 
     # Constants
     "CRITICAL_EVENTS",
+    
+    # GOLDEN PATH PHASE 3: Mission critical test compatibility
+    "get_websocket_manager",
 
     # NOTE: All other exports removed to eliminate import path fragmentation
     # COORDINATION FIX: Use direct imports for all other components:
@@ -308,7 +323,10 @@ if get_websocket_manager is not None:
 __all__.extend(_optional_exports)
 
 
+# GOLDEN PATH PHASE 3 FIX: Export get_websocket_manager for mission critical tests
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+
 # Log consolidation
-from netra_backend.app.logging_config import central_logger
-logger = central_logger.get_logger(__name__)
+from shared.logging.unified_logging_ssot import get_logger
+logger = get_logger(__name__)
 logger.info("WebSocket SSOT loaded - CRITICAL SECURITY MIGRATION: Factory pattern available, singleton vulnerabilities mitigated")

@@ -50,12 +50,12 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
 )
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 # SSOT ENHANCEMENT: Enhanced logging for factory operations
-ssot_logger = central_logger.get_logger(f"{__name__}.ssot")
+ssot_logger = get_logger(f"{__name__}.ssot")
 
 
 class ExecutionEngineFactoryError(Exception):

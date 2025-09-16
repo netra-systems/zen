@@ -202,6 +202,7 @@ class DatabaseCircuitBreaker:
         error_type = type(error).__name__
 
         # Infrastructure-level errors (Cloud SQL VPC, network, etc.)
+        # Issue #1278: Enhanced with patterns from VPC connector failures
         infrastructure_patterns = [
             'connection refused',
             'connection timeout',
@@ -220,6 +221,17 @@ class DatabaseCircuitBreaker:
             'cloudsql',
             'vpc connector',
             'unix socket',
+            # Issue #1278: New patterns from infrastructure failures
+            'database initialization timeout',
+            'startup failure due to database',
+            'pool exhaustion',
+            'connection pool timeout',
+            'capacity pressure',
+            'scaling delay',
+            'infrastructure stress',
+            'resource unavailable',
+            'service temporarily unavailable',
+            'backend connection timeout',
         ]
 
         # Authentication/permission errors (could be either, but often config)

@@ -10,7 +10,7 @@ from starlette.websockets import WebSocketDisconnect
 from fastapi import WebSocket
 
 from netra_backend.app.db.models_postgres import Message, Run, Thread
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.services.service_interfaces import IMessageHandlerService
 
 if TYPE_CHECKING:
@@ -69,7 +69,7 @@ from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 class StartAgentPayloadTyped(TypedDict):
     """Strongly typed payload for start_agent messages"""

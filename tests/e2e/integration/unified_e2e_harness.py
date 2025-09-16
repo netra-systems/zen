@@ -13,8 +13,8 @@ from typing import Any, Dict, List, Optional
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from tests.e2e.integration.user_journey_executor import TestUser, UserJourneyExecutor
 from tests.e2e.test_environment_config import (
-    TestEnvironmentConfig,
-    TestEnvironmentType,
+    EnvironmentConfigTests,
+    EnvironmentTypeTests,
     get_test_environment_config,
 )
 
@@ -38,7 +38,7 @@ class UnifiedE2ETestHarness:
     
     def __init__(self, 
                  project_root: Optional[Path] = None,
-                 environment: Optional[TestEnvironmentType] = None):
+                 environment: Optional[EnvironmentTypeTests] = None):
         """Initialize E2E test harness.
         
         Args:
@@ -170,7 +170,7 @@ class UnifiedE2ETestHarness:
 
 # Factory functions for easy instantiation
 def create_e2e_harness(project_root: Optional[Path] = None, 
-                      environment: Optional[TestEnvironmentType] = None) -> UnifiedE2ETestHarness:
+                      environment: Optional[EnvironmentTypeTests] = None) -> UnifiedE2ETestHarness:
     """Create unified E2E test harness instance.
     
     Args:
@@ -183,7 +183,7 @@ def create_e2e_harness(project_root: Optional[Path] = None,
     return UnifiedE2ETestHarness(project_root, environment)
 
 
-async def quick_e2e_test(environment: Optional[TestEnvironmentType] = None) -> Dict[str, Any]:
+async def quick_e2e_test(environment: Optional[EnvironmentTypeTests] = None) -> Dict[str, Any]:
     """Quick E2E test for validation.
     
     Args:

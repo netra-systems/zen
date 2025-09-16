@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.core.service_dependencies import (
     ServiceDependencyChecker,
     EnvironmentType,
@@ -56,7 +56,7 @@ class StartupValidator:
     """
     
     def __init__(self, environment: EnvironmentType = EnvironmentType.DEVELOPMENT):
-        self.logger = central_logger.get_logger(__name__)
+        self.logger = get_logger(__name__)
         self.validations: List[ComponentValidation] = []
         self.start_time = None
         self.end_time = None

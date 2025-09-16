@@ -6,11 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
 
 from netra_backend.app.db.models_postgres import Run, Thread
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 async def send_agent_started_notification(
     user_id: str, thread: Optional[Thread], run: Optional[Run], user_context: Optional[UserExecutionContext] = None

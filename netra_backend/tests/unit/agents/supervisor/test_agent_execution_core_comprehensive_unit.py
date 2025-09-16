@@ -58,10 +58,10 @@ class AgentExecutionCoreUnitTests(SSotBaseTestCase):
     @pytest.fixture
     def mock_execution_tracker(self):
         """Mock execution tracker for lifecycle management."""
-        tracker = AsyncMock()
-        tracker.register_execution = AsyncMock(return_value=uuid4())
-        tracker.start_execution = AsyncMock()
-        tracker.complete_execution = AsyncMock()
+        tracker = Mock()
+        tracker.register_execution = Mock(return_value=uuid4())
+        tracker.start_execution = Mock()
+        tracker.complete_execution = Mock()
         tracker.collect_metrics = AsyncMock(return_value={'duration': 1.5, 'memory_mb': 128})
         return tracker
 
@@ -447,22 +447,24 @@ class AgentExecutionCoreUnitTests(SSotBaseTestCase):
         assert combined_metrics["total_duration_seconds"] == 3.5
         assert "context_size" in combined_metrics
 
-    def test_get_agent_or_error_success(self, execution_core):
+    @pytest.mark.asyncio
+    async def test_get_agent_or_error_success(self, execution_core):
         """Test successful agent retrieval from registry."""
         mock_agent = Mock()
-        execution_core.registry.get.return_value = mock_agent
-        
-        result = execution_core._get_agent_or_error("test_agent")
-        
-        assert result == mock_agent
-        execution_core.registry.get.assert_called_once_with("test_agent")
+        execution_core.registry.get_async = AsyncMock(return_value=mock_agent)
 
-    def test_get_agent_or_error_not_found(self, execution_core):
+        result = await execution_core._get_agent_or_error("test_agent")
+
+        assert result == mock_agent
+        execution_core.registry.get_async.assert_called_once_with("test_agent", context=None)
+
+    @pytest.mark.asyncio
+    async def test_get_agent_or_error_not_found(self, execution_core):
         """Test agent not found error handling."""
-        execution_core.registry.get.return_value = None
-        
-        result = execution_core._get_agent_or_error("missing_agent")
-        
+        execution_core.registry.get_async = AsyncMock(return_value=None)
+
+        result = await execution_core._get_agent_or_error("missing_agent")
+
         assert isinstance(result, AgentExecutionResult)
         assert result.success is False
         assert result.agent_name == "missing_agent"
