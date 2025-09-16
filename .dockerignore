@@ -100,8 +100,12 @@
 **/scripts/
 **/dev-tools/
 **/dev_launcher/
-**/monitoring/
 **/prometheus/
+# EMERGENCY FIX: Exclude general monitoring but allow netra_backend monitoring modules
+monitoring/
+deployment/monitoring/
+!netra_backend/app/monitoring/
+!netra_backend/app/services/monitoring/
 
 # Claude Code and AI Tools
 **/.claude/

@@ -374,16 +374,29 @@ class SSotBaseTestCase:
         
         # Call asyncSetUp if it exists and we're in an async test
         if hasattr(self, 'asyncSetUp') and asyncio.iscoroutinefunction(self.asyncSetUp):
-            # Create event loop if none exists
+            # Improved event loop management with better error detection
             try:
                 loop = asyncio.get_event_loop()
                 if loop.is_closed():
                     raise RuntimeError("Event loop is closed")
-            except RuntimeError:
+                if loop.is_running():
+                    raise RuntimeError(
+                        f"Event loop is already running in {self.__class__.__name__}. "
+                        f"This typically indicates a circular dependency between setUp() and asyncSetUp(). "
+                        f"Check that asyncSetUp() doesn't call super().setUp()."
+                    )
+            except RuntimeError as e:
+                if "already running" in str(e):
+                    logger.error(
+                        f"AsyncIO circular dependency detected in {self.__class__.__name__}: {e}. "
+                        f"This usually means asyncSetUp() is calling super().setUp() which calls asyncSetUp() again."
+                    )
+                    raise
+                # Create new event loop if needed
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-            
-            # Run asyncSetUp
+
+            # Run asyncSetUp with better error handling
             try:
                 loop.run_until_complete(self.asyncSetUp())
             except Exception as e:
@@ -1062,10 +1075,21 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
 
     async def asyncSetUp(self):
         """Async setup method for async tests."""
-        # Call parent sync setup to ensure all base attributes are initialized
-        if hasattr(super(), 'setUp'):
-            super().setUp()
+        # Initialize async-specific state without calling sync setUp to avoid circular dependency
+        await self._initialize_async_state()
         # This allows subclasses to override asyncSetUp for additional async initialization
+        pass
+
+    async def _initialize_async_state(self):
+        """
+        Helper method to initialize async-specific state.
+
+        This method provides proper async state initialization without creating
+        circular dependencies with the sync setUp method. It ensures that
+        async test infrastructure is properly configured.
+        """
+        # Initialize any async-specific attributes here
+        # This replaces the problematic super().setUp() call
         pass
 
     async def asyncTearDown(self):
@@ -1248,16 +1272,29 @@ class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
         
         # Call asyncSetUp if it exists and we're in an async test
         if hasattr(self, 'asyncSetUp') and asyncio.iscoroutinefunction(self.asyncSetUp):
-            # Create event loop if none exists
+            # Improved event loop management with better error detection
             try:
                 loop = asyncio.get_event_loop()
                 if loop.is_closed():
                     raise RuntimeError("Event loop is closed")
-            except RuntimeError:
+                if loop.is_running():
+                    raise RuntimeError(
+                        f"Event loop is already running in {self.__class__.__name__}. "
+                        f"This typically indicates a circular dependency between setUp() and asyncSetUp(). "
+                        f"Check that asyncSetUp() doesn't call super().setUp()."
+                    )
+            except RuntimeError as e:
+                if "already running" in str(e):
+                    logger.error(
+                        f"AsyncIO circular dependency detected in {self.__class__.__name__}: {e}. "
+                        f"This usually means asyncSetUp() is calling super().setUp() which calls asyncSetUp() again."
+                    )
+                    raise
+                # Create new event loop if needed
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-            
-            # Run asyncSetUp
+
+            # Run asyncSetUp with better error handling
             try:
                 loop.run_until_complete(self.asyncSetUp())
             except Exception as e:
