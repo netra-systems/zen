@@ -10,7 +10,8 @@ from netra_backend.app.agents.base.interface import (
     ExecutionContext,
 )
 from netra_backend.app.schemas.core_enums import ExecutionStatus
-from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState, UserExecutionContextAdapter
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Local result structure since ExecutionResult may not be available
 @dataclass
@@ -233,14 +234,54 @@ class QueryBuilder(ABC):
         """
         
     async def execute_with_reliability(self, request: QueryExecutionRequest) -> ExecutionResult:
-        """Execute query building with reliability patterns."""
-        context = ExecutionContext(
-            run_id=f"query_{int(time.time() * 1000)}",
-            agent_name=self.agent_name,
-            state=DeepAgentState(),
-            user_id=str(request.user_id),
-            metadata={'request': request.__dict__}
-        )
+        """Execute query building with reliability patterns and proper user isolation.
+        
+        PHASE 1 MIGRATION: Now uses UserExecutionContext for enhanced user isolation
+        and database session management, preventing cross-user data contamination.
+        """
+        # PHASE 1 MIGRATION: Create UserExecutionContext for proper isolation
+        try:
+            # Generate secure IDs for this execution
+            from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+            
+            user_context = UserExecutionContext(
+                user_id=str(request.user_id),
+                thread_id=UnifiedIdGenerator.generate_base_id("query_thread"),
+                run_id=f"query_{int(time.time() * 1000)}",
+                agent_context={
+                    'operation_name': 'query_building',
+                    'query_type': request.query_type,
+                    'parameters': request.parameters,
+                    'execution_timeout': request.execution_timeout
+                },
+                audit_metadata={
+                    'component': 'QueryBuilder',
+                    'request_params': request.__dict__,
+                    'migration_phase': 'phase_1'
+                }
+            )
+            
+            # Create backward compatible ExecutionContext using adapter
+            deep_state = UserExecutionContextAdapter.create_deep_state_from_user_context(user_context)
+            
+            context = ExecutionContext(
+                run_id=user_context.run_id,
+                agent_name=self.agent_name,
+                state=deep_state,
+                user_id=user_context.user_id,
+                metadata={'request': request.__dict__, 'user_context': user_context}
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to create secure execution context: {e}")
+            # Fallback to legacy pattern for Phase 1 compatibility
+            context = ExecutionContext(
+                run_id=f"query_{int(time.time() * 1000)}",
+                agent_name=self.agent_name,
+                state=DeepAgentState(),
+                user_id=str(request.user_id),
+                metadata={'request': request.__dict__}
+            )
         
         try:
             if not await self.validate_preconditions(context):

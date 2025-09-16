@@ -49,8 +49,6 @@ class FragmentationStats:
     duplicate_imports: Dict[str, int]
 
 
-@pytest.mark.unit
-@pytest.mark.ssot_consolidation
 class TestUserExecutionEngineImportFragmentation(SSotBaseTestCase):
     """
     Test class to detect and validate UserExecutionEngine import fragmentation.
