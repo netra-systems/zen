@@ -22,7 +22,8 @@ class DockerComposeConfigValidationTests:
         This test validates the first part of the Issue #115 fix.
         Should FAIL initially, then PASS after adding SERVICE_ID to docker-compose.staging.yml.
         """
-        staging_compose_path = Path('/Users/anthony/Documents/GitHub/netra-apex/docker-compose.staging.yml')
+        project_root = Path(__file__).parent.parent
+        staging_compose_path = project_root / 'docker-compose.staging.yml'
         with open(staging_compose_path, 'r') as f:
             compose_config = yaml.safe_load(f)
         backend_env = compose_config['services']['backend']['environment']
@@ -35,7 +36,8 @@ class DockerComposeConfigValidationTests:
         This test validates the second part of the Issue #115 fix.
         Should FAIL initially, then PASS after adding SERVICE_SECRET to docker-compose.staging.yml.
         """
-        staging_compose_path = Path('/Users/anthony/Documents/GitHub/netra-apex/docker-compose.staging.yml')
+        project_root = Path(__file__).parent.parent
+        staging_compose_path = project_root / 'docker-compose.staging.yml'
         with open(staging_compose_path, 'r') as f:
             compose_config = yaml.safe_load(f)
         backend_env = compose_config['services']['backend']['environment']
@@ -48,7 +50,8 @@ class DockerComposeConfigValidationTests:
         
         This validates proper security isolation between service auth and JWT auth.
         """
-        staging_compose_path = Path('/Users/anthony/Documents/GitHub/netra-apex/docker-compose.staging.yml')
+        project_root = Path(__file__).parent.parent
+        staging_compose_path = project_root / 'docker-compose.staging.yml'
         with open(staging_compose_path, 'r') as f:
             compose_config = yaml.safe_load(f)
         backend_env = compose_config['services']['backend']['environment']
@@ -63,7 +66,8 @@ class DockerComposeConfigValidationTests:
         
         This validates that both backend and auth services can authenticate with each other.
         """
-        staging_compose_path = Path('/Users/anthony/Documents/GitHub/netra-apex/docker-compose.staging.yml')
+        project_root = Path(__file__).parent.parent
+        staging_compose_path = project_root / 'docker-compose.staging.yml'
         with open(staging_compose_path, 'r') as f:
             compose_config = yaml.safe_load(f)
         backend_env = compose_config['services']['backend']['environment']
@@ -80,7 +84,8 @@ class DockerComposeConfigValidationTests:
         
         This is a comprehensive validation of the complete authentication configuration.
         """
-        staging_compose_path = Path('/Users/anthony/Documents/GitHub/netra-apex/docker-compose.staging.yml')
+        project_root = Path(__file__).parent.parent
+        staging_compose_path = project_root / 'docker-compose.staging.yml'
         with open(staging_compose_path, 'r') as f:
             compose_config = yaml.safe_load(f)
         backend_env = compose_config['services']['backend']['environment']
@@ -109,7 +114,8 @@ class ServiceAuthConfigurationRegressionTests:
         Dynamic SERVICE_ID generation causes authentication failures.
         SERVICE_ID must always be the hardcoded value 'netra-backend'.
         """
-        staging_compose_path = Path('/Users/anthony/Documents/GitHub/netra-apex/docker-compose.staging.yml')
+        project_root = Path(__file__).parent.parent
+        staging_compose_path = project_root / 'docker-compose.staging.yml'
         with open(staging_compose_path, 'r') as f:
             compose_content = f.read()
         dynamic_patterns = ['${', 'timestamp', 'date', 'time', 'uuid', 'random', 'env:', '${']
@@ -128,7 +134,8 @@ class ServiceAuthConfigurationRegressionTests:
         
         Prevents configuration with dummy/placeholder values that cause auth failures.
         """
-        staging_compose_path = Path('/Users/anthony/Documents/GitHub/netra-apex/docker-compose.staging.yml')
+        project_root = Path(__file__).parent.parent
+        staging_compose_path = project_root / 'docker-compose.staging.yml'
         with open(staging_compose_path, 'r') as f:
             compose_config = yaml.safe_load(f)
         backend_env = compose_config['services']['backend']['environment']

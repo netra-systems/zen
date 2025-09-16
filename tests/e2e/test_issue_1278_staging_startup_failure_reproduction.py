@@ -39,9 +39,34 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, Any, Optional, List
 import logging
 
-from test_framework.base_e2e_test import BaseE2ETest
-from test_framework.websocket_helpers import WebSocketTestClient
-from shared.isolated_environment import get_env
+try:
+    from test_framework.base_e2e_test import BaseE2ETest
+except ImportError:
+    # Fallback base class if test framework not available
+    class BaseE2ETest:
+        def setup_method(self, method=None):
+            self.start_time = time.time()
+            
+        def teardown_method(self, method=None):
+            pass
+            
+        def set_env_var(self, key, value):
+            import os
+            os.environ[key] = value
+            
+        def record_metric(self, key, value):
+            print(f"METRIC: {key} = {value}")
+
+try:
+    from shared.isolated_environment import get_env
+except ImportError:
+    # Fallback environment getter
+    def get_env():
+        import os
+        class MockEnv:
+            def get(self, key, default=None):
+                return os.environ.get(key, default)
+        return MockEnv()
 
 
 class StagingStartupFailureIssue1278E2ETests(BaseE2ETest):
