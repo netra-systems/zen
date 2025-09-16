@@ -241,15 +241,24 @@ class VPCDependencyValidator:
             }
     
     async def _validate_external_apis(self) -> Dict:
-        """Validate external API access (OpenAI, Anthropic, etc.)."""
+        """
+        Validate external API access (OpenAI, Anthropic, Gemini, etc.).
+        
+        CRITICAL PATTERN: All external internet services require Cloud NAT with
+        private-ranges-only VPC egress. This test validates the universal pattern
+        discovered in the Sept 15, 2025 VPC egress regression.
+        """
         start_time = time.time()
         
         try:
-            # Test basic internet connectivity
+            # Test external service connectivity (all require Cloud NAT)
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as session:
                 test_urls = [
-                    "https://api.openai.com/v1/models",
-                    "https://api.anthropic.com/v1/messages",
+                    "https://api.openai.com/v1/models",  # OpenAI LLM API
+                    "https://api.anthropic.com/v1/messages",  # Anthropic LLM API
+                    "https://generativelanguage.googleapis.com/v1/models",  # Google Gemini API
+                    "https://xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/ping",  # ClickHouse Analytics
+                    "https://httpbin.org/get",  # Generic external connectivity test
                 ]
                 
                 accessible_count = 0
@@ -362,10 +371,12 @@ class VPCDependencyValidator:
             print("   SOLUTION: Change to 'private-ranges-only' + implement Cloud NAT for external access.")
             print("   See: SPEC/learnings/vpc_egress_cloud_sql_regression_critical.xml")
         
-        if clickhouse_result.get('status') == 'error' and vpc_egress == 'private-ranges-only':
-            print("⚠️  WARNING: ClickHouse access blocked with private-ranges-only")
+        external_apis_result = self.validation_results.get('external_apis', {})
+        if external_apis_result.get('status') == 'error' and vpc_egress == 'private-ranges-only':
+            print("⚠️  WARNING: External API access blocked with private-ranges-only")
+            print("   AFFECTED SERVICES: OpenAI, Anthropic, Gemini, ClickHouse, external webhooks")
             print("   SOLUTION: Implement Cloud NAT for external service access.")
-            print("   See: SPEC/learnings/vpc_clickhouse_proxy_solutions.xml")
+            print("   See: docs/infrastructure/vpc-egress-decision-matrix.md")
         
         if vpc_egress == 'all-traffic':
             print("⚠️  RISK: VPC egress 'all-traffic' may break Cloud SQL Unix sockets")
@@ -374,6 +385,8 @@ class VPCDependencyValidator:
         print("\n📚 Related Documentation:")
         print("-" * 50)
         print("• SPEC/learnings/vpc_egress_cloud_sql_regression_critical.xml")
+        print("• docs/infrastructure/vpc-egress-decision-matrix.md")
+        print("• docs/infrastructure/clickhouse-network-path-analysis.md") 
         print("• SPEC/learnings/vpc_clickhouse_proxy_solutions.xml") 
         print("• docs/infrastructure/vpc-egress-regression-timeline.md")
         print("• scripts/deploy_to_gcp_actual.py:1088 (VPC egress configuration)")
