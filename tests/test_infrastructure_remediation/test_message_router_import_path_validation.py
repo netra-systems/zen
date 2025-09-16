@@ -41,10 +41,14 @@ class TestMessageRouterImportPaths:
         except ImportError as e:
             pytest.fail(f"Compatibility import path failed: {e}")
 
-    def test_routes_import_path_missing(self):
-        """Test that proves the routes import path is missing (causing test failures)"""
-        with pytest.raises(ImportError, match="No module named 'netra_backend.app.routes.message_router'"):
+    def test_routes_import_path_now_works(self):
+        """Test that the routes import path now works (fixes test collection errors)"""
+        try:
             from netra_backend.app.routes.message_router import MessageRouter
+            assert MessageRouter is not None
+            assert hasattr(MessageRouter, 'route_message')
+        except ImportError as e:
+            pytest.fail(f"Routes import path failed: {e}")
 
     def test_handlers_import_path_works(self):
         """Test that handlers import path works (used by some tests)"""
@@ -59,15 +63,20 @@ class TestMessageRouterImportPaths:
 class TestMessageRouterInterfaceCompliance:
     """Test that all import paths provide the same interface"""
 
-    def test_all_imports_provide_same_class(self):
-        """Test that all working import paths provide the same underlying class"""
+    def test_all_imports_provide_compatible_interface(self):
+        """Test that all working import paths provide compatible interface"""
         from netra_backend.app.websocket_core.canonical_message_router import CanonicalMessageRouter
-        from netra_backend.app.websocket_core.message_router import MessageRouter
+        from netra_backend.app.websocket_core.message_router import MessageRouter as CompatMessageRouter
         from netra_backend.app.websocket_core.handlers import MessageRouter as HandlersMessageRouter
+        from netra_backend.app.routes.message_router import MessageRouter as RoutesMessageRouter
 
-        # All should be the same class
-        assert MessageRouter is CanonicalMessageRouter
-        assert HandlersMessageRouter is CanonicalMessageRouter
+        # All should provide the same interface (canonical is base class)
+        assert CompatMessageRouter is CanonicalMessageRouter
+        assert RoutesMessageRouter is CanonicalMessageRouter
+        
+        # Handlers MessageRouter is a subclass, so check interface compatibility
+        assert hasattr(HandlersMessageRouter, 'route_message')
+        assert issubclass(HandlersMessageRouter, CanonicalMessageRouter)
 
     def test_factory_functions_work(self):
         """Test that factory functions work correctly"""
@@ -117,14 +126,21 @@ class TestMissionCriticalTestCollectionFix:
 
     def test_websocket_event_types_available(self):
         """Test that WebSocket event types are available for tests"""
-        from netra_backend.app.websocket_core.canonical_message_router import WebSocketEventType
+        from netra_backend.app.websocket_core.types import MessageType
         
-        # Tests need these event types
-        assert hasattr(WebSocketEventType, 'agent_started')
-        assert hasattr(WebSocketEventType, 'agent_thinking')
-        assert hasattr(WebSocketEventType, 'tool_executing')
-        assert hasattr(WebSocketEventType, 'tool_completed')
-        assert hasattr(WebSocketEventType, 'agent_completed')
+        # Tests need these event types (using correct enum names)
+        assert hasattr(MessageType, 'AGENT_STARTED')
+        assert hasattr(MessageType, 'AGENT_THINKING') 
+        assert hasattr(MessageType, 'TOOL_EXECUTING')
+        assert hasattr(MessageType, 'TOOL_COMPLETED')
+        assert hasattr(MessageType, 'AGENT_COMPLETED')
+        
+        # Test the string values are correct
+        assert MessageType.AGENT_STARTED == "agent_started"
+        assert MessageType.AGENT_THINKING == "agent_thinking" 
+        assert MessageType.TOOL_EXECUTING == "tool_executing"
+        assert MessageType.TOOL_COMPLETED == "tool_completed"
+        assert MessageType.AGENT_COMPLETED == "agent_completed"
 
 
 if __name__ == "__main__":
