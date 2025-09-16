@@ -24,6 +24,7 @@ from netra_backend.app.core.circuit_breaker_types import (
     CircuitConfig,
     CircuitMetrics,
     CircuitState,
+    CircuitOpenException,  # Alias for compatibility
 )
 
 # Import unified circuit breaker system
@@ -87,9 +88,10 @@ def circuit_breaker(name=None, config=None):
 __all__ = [
     # Core Types (preserved)
     'CircuitState',
-    'CircuitConfig', 
+    'CircuitConfig',
     'CircuitMetrics',
     'CircuitBreakerOpenError',
+    'CircuitOpenException',  # Alias for compatibility
     
     # Unified Circuit Breaker System
     'UnifiedCircuitBreaker',

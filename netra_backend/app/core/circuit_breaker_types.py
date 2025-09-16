@@ -18,7 +18,8 @@ __all__ = [
     'CircuitBreakerState',  # Alias for compatibility
     'CircuitConfig',
     'CircuitMetrics',
-    'CircuitBreakerOpenError'
+    'CircuitBreakerOpenError',
+    'CircuitOpenException'  # Alias for compatibility
 ]
 
 
@@ -118,7 +119,11 @@ class CircuitMetrics:
 
 class CircuitBreakerOpenError(ServiceError):
     """Exception raised when circuit breaker is open."""
-    
+
     def __init__(self, circuit_name: str) -> None:
         super().__init__(f"Circuit breaker '{circuit_name}' is OPEN")
         self.circuit_name = circuit_name
+
+
+# Alias for compatibility with existing code
+CircuitOpenException = CircuitBreakerOpenError
