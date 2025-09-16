@@ -48,11 +48,11 @@ from netra_backend.app.websocket_core.canonical_import_patterns import (
     get_websocket_manager,
     WebSocketManager,
     WebSocketConnection,
-    WebSocketManagerProtocol,
     _serialize_message_safely,
     WebSocketEventEmitter,
     UnifiedWebSocketEmitter
 )
+from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 
 # Import dependencies for mocking
 from netra_backend.app.websocket_core.unified_manager import (
