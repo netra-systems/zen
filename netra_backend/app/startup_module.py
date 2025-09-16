@@ -29,6 +29,9 @@ _setup_paths()
 # NOW import shared modules after paths are set
 from shared.isolated_environment import get_env
 from netra_backend.app.core.project_utils import get_project_root as _get_project_root
+from netra_backend.app.core.environment_context.cloud_environment_detector import (
+    get_cloud_environment_detector, CloudPlatform
+)
 
 from fastapi import FastAPI
 
@@ -681,10 +684,6 @@ async def _should_check_docker_containers(logger: logging.Logger) -> bool:
     """
     try:
         # Use CloudEnvironmentDetector for reliable environment detection
-        from netra_backend.app.core.environment_context.cloud_environment_detector import (
-            get_cloud_environment_detector, CloudPlatform
-        )
-        
         detector = get_cloud_environment_detector()
         context = await detector.detect_environment_context()
         
