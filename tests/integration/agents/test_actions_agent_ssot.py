@@ -43,7 +43,7 @@ from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecution
 from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult, ActionPlanResult, PlanStep
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse, RetryConfig
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, PerformanceMetrics, RetryConfig
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.services.database.run_repository import RunRepository
 from netra_backend.app.redis_manager import RedisManager

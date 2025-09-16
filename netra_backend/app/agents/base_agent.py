@@ -590,24 +590,29 @@ class BaseAgent(ABC):
     def _get_session_manager(self, context: UserExecutionContext) -> 'DatabaseSessionManager':
         """Get database session manager for the given context.
         
+        SSOT: This returns a legacy stub DatabaseSessionManager for backward compatibility.
+        Real database operations should use context.db_session directly or DatabaseManager.
+        
         Args:
             context: User execution context with database session
             
         Returns:
-            DatabaseSessionManager for database operations
+            DatabaseSessionManager for database operations (stub implementation)
             
         Raises:
             SessionManagerError: If context is invalid or lacks session
         """
-        # Import DatabaseSessionManager as expected by tests
+        # SSOT: Import the stub DatabaseSessionManager for backward compatibility
+        # Real database access comes from context.db_session or DatabaseManager
         from netra_backend.app.database.session_manager import DatabaseSessionManager
         
         # Validate context type with comprehensive validation  
         if not isinstance(context, UserExecutionContext):
             raise TypeError(f"Expected UserExecutionContext, got {type(context).__name__}")
         
-        # Create DatabaseSessionManager with the context
-        return DatabaseSessionManager(context)
+        # SSOT: Return stub DatabaseSessionManager - real DB access is via context.db_session
+        # This maintains backward compatibility while tests are migrated to proper patterns
+        return DatabaseSessionManager()
     
     # === Abstract Methods ===
     
