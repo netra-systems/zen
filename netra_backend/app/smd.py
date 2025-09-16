@@ -37,6 +37,15 @@ from netra_backend.app.config import get_config, settings
 from netra_backend.app.services.backend_health_config import setup_backend_health_service
 from shared.logging.unified_logging_ssot import get_logger
 
+# Infrastructure resilience imports
+from netra_backend.app.services.infrastructure_resilience import (
+    initialize_infrastructure_resilience, get_resilience_manager,
+    register_infrastructure_alert_handler
+)
+from netra_backend.app.resilience.circuit_breaker import (
+    get_circuit_breaker_manager, CircuitBreakerConfig, get_circuit_breaker
+)
+
 
 class StartupPhase(Enum):
     """7-phase deterministic startup sequence phases."""
@@ -439,6 +448,10 @@ class StartupOrchestrator:
         # Step 7: Apply startup fixes (CRITICAL)
         await self._apply_startup_fixes()
         self.logger.info("  [U+2713] Step 7: Startup fixes applied")
+
+        # Step 8: Initialize Infrastructure Resilience (CRITICAL for Issue #1278)
+        await self._initialize_infrastructure_resilience()
+        self.logger.info("  [U+2713] Step 8: Infrastructure resilience initialized")
     
     async def _phase3_database_setup(self) -> None:
         """Phase 3: DATABASE - Database connections and schema with Issue #1278 graceful degradation."""
@@ -2204,6 +2217,137 @@ class StartupOrchestrator:
             # Log factory initialization summary
             status = factory_adapter.get_migration_status()
             self.logger.info("     CHART:  Factory Pattern Migration Status:")
+
+    async def _initialize_infrastructure_resilience(self) -> None:
+        """Initialize infrastructure resilience monitoring and circuit breakers - CRITICAL for Issue #1278."""
+        try:
+            self.logger.info("    - Initializing infrastructure resilience components...")
+
+            # 1. Initialize circuit breaker manager with default configuration
+            circuit_breaker_manager = get_circuit_breaker_manager()
+            self.app.state.circuit_breaker_manager = circuit_breaker_manager
+            self.logger.info("    [✓] Circuit breaker manager initialized")
+
+            # 2. Create circuit breakers for critical infrastructure services
+            environment = get_env("ENVIRONMENT", "development")
+
+            # Database circuit breaker with timeout awareness
+            database_config = CircuitBreakerConfig(
+                failure_threshold=3,
+                recovery_timeout=60.0,
+                timeout_threshold=self._get_database_timeout_for_environment(environment),
+                enable_fallback=False,  # Database is critical, no fallback
+                enable_metrics=True,
+                enable_alerts=True
+            )
+            database_cb = get_circuit_breaker("database", database_config)
+            self.logger.info(f"    [✓] Database circuit breaker initialized (timeout: {database_config.timeout_threshold}s)")
+
+            # Redis circuit breaker with fallback enabled
+            redis_config = CircuitBreakerConfig(
+                failure_threshold=3,
+                recovery_timeout=30.0,
+                timeout_threshold=10.0,
+                enable_fallback=True,  # Redis can use in-memory fallback
+                enable_metrics=True,
+                enable_alerts=False  # Less critical than database
+            )
+            redis_cb = get_circuit_breaker("redis", redis_config)
+            self.logger.info("    [✓] Redis circuit breaker initialized")
+
+            # WebSocket circuit breaker
+            websocket_config = CircuitBreakerConfig(
+                failure_threshold=5,
+                recovery_timeout=30.0,
+                timeout_threshold=30.0,
+                enable_fallback=False,  # WebSocket is critical for chat
+                enable_metrics=True,
+                enable_alerts=True,
+                alert_on_state_change=True
+            )
+            websocket_cb = get_circuit_breaker("websocket", websocket_config)
+            self.logger.info("    [✓] WebSocket circuit breaker initialized")
+
+            # 3. Initialize infrastructure resilience manager
+            await initialize_infrastructure_resilience()
+            resilience_manager = get_resilience_manager()
+            self.app.state.resilience_manager = resilience_manager
+            self.logger.info("    [✓] Infrastructure resilience manager initialized")
+
+            # 4. Register alert handlers for critical infrastructure events
+            register_infrastructure_alert_handler(self._handle_infrastructure_alert)
+            self.logger.info("    [✓] Infrastructure alert handlers registered")
+
+            # 5. Add circuit breaker state change handlers
+            circuit_breaker_manager.add_global_state_change_handler(self._handle_circuit_breaker_state_change)
+            circuit_breaker_manager.add_global_failure_handler(self._handle_circuit_breaker_failure)
+            self.logger.info("    [✓] Circuit breaker event handlers registered")
+
+            # 6. Store circuit breakers for easy access
+            self.app.state.circuit_breakers = {
+                'database': database_cb,
+                'redis': redis_cb,
+                'websocket': websocket_cb
+            }
+
+            self.logger.info("    [✓] Infrastructure resilience initialization complete")
+
+        except Exception as e:
+            error_msg = f"Infrastructure resilience initialization failed: {e}"
+            self.logger.error(error_msg)
+            raise DeterministicStartupError(error_msg, original_error=e, phase=self.current_phase)
+
+    def _get_database_timeout_for_environment(self, environment: str) -> float:
+        """Get database timeout configuration for the environment."""
+        try:
+            from netra_backend.app.core.database_timeout_config import get_database_timeout_config
+            timeout_config = get_database_timeout_config(environment)
+            return timeout_config.get('connection_timeout', 30.0)
+        except Exception as e:
+            self.logger.warning(f"Could not get database timeout config: {e}, using default 30s")
+            return 30.0
+
+    def _handle_infrastructure_alert(self, service, status, alert_data):
+        """Handle infrastructure resilience alerts."""
+        from netra_backend.app.services.infrastructure_resilience import ServiceStatus
+
+        level = "CRITICAL" if status in [ServiceStatus.CRITICAL, ServiceStatus.UNAVAILABLE] else "WARNING"
+
+        if alert_data.get('chat_impact', False):
+            self.logger.critical(f"[{level}] INFRASTRUCTURE ALERT - CHAT FUNCTIONALITY IMPACTED")
+            self.logger.critical(f"Service: {service.value}, Status: {status.value}")
+            self.logger.critical(f"Alert: {alert_data}")
+        else:
+            self.logger.warning(f"[{level}] Infrastructure Alert - Service: {service.value}, Status: {status.value}")
+            self.logger.warning(f"Alert Details: {alert_data}")
+
+    def _handle_circuit_breaker_state_change(self, name, old_state, new_state, reason):
+        """Handle circuit breaker state changes."""
+        from netra_backend.app.resilience.circuit_breaker import CircuitBreakerState
+
+        if new_state == CircuitBreakerState.OPEN:
+            self.logger.error(f"CIRCUIT BREAKER OPENED: {name} - {reason}")
+
+            # Alert on critical service circuit breaker opening
+            if name in ['database', 'websocket']:
+                self.logger.critical(f"CRITICAL CIRCUIT BREAKER OPENED: {name}")
+                self.logger.critical("This may impact chat functionality and $500K+ ARR")
+
+        elif new_state == CircuitBreakerState.CLOSED and old_state == CircuitBreakerState.OPEN:
+            self.logger.info(f"CIRCUIT BREAKER RECOVERED: {name} - {reason}")
+        else:
+            self.logger.info(f"Circuit breaker state change: {name} {old_state.value} -> {new_state.value} - {reason}")
+
+    def _handle_circuit_breaker_failure(self, name, failure_type, reason):
+        """Handle circuit breaker failure events."""
+        from netra_backend.app.resilience.circuit_breaker import FailureType
+
+        if failure_type == FailureType.TIMEOUT:
+            self.logger.warning(f"Circuit breaker timeout: {name} - {reason}")
+        elif failure_type in [FailureType.CONNECTION_ERROR, FailureType.SERVICE_UNAVAILABLE]:
+            self.logger.error(f"Circuit breaker connection failure: {name} - {reason}")
+        else:
+            self.logger.warning(f"Circuit breaker failure: {name} ({failure_type.value}) - {reason}")
             self.logger.info(f"      Migration Mode: {status['migration_mode']}")
             self.logger.info(f"      Routes Enabled: {len(status['route_flags'])}")
             self.logger.info(f"      Legacy Fallback: {'Enabled' if status['config']['legacy_fallback_enabled'] else 'Disabled'}")

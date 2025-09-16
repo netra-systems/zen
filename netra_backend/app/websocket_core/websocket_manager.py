@@ -979,6 +979,9 @@ def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketMan
     ISSUE #889 REMEDIATION: Implements user-scoped manager registry to ensure single
     manager instance per user context, preventing duplication warnings and state contamination.
 
+    EMERGENCY CLEANUP INTEGRATION: Uses enhanced factory when users approach resource limits
+    to provide comprehensive emergency cleanup capabilities (Issue #1278 remediation).
+
     Business Value Justification:
     - Segment: ALL (Free -> Enterprise)
     - Business Goal: Enable secure WebSocket communication for Golden Path
@@ -1005,6 +1008,46 @@ def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketMan
             existing_manager = _USER_MANAGER_REGISTRY[user_key]
             logger.debug(f"Returning existing WebSocket manager for user {user_key}")
             return existing_manager
+
+        # EMERGENCY CLEANUP INTEGRATION: Check if user is approaching resource limits
+        user_id = str(getattr(user_context, 'user_id', 'unknown'))
+        current_user_managers = sum(1 for key in _USER_MANAGER_REGISTRY.keys() if key.startswith(user_id))
+
+        # Use enhanced factory if user has many managers (approaching limits)
+        if current_user_managers >= 15:  # 75% of 20-manager limit
+            logger.warning(f"User {user_id} has {current_user_managers} managers, using enhanced factory for resource management")
+            try:
+                # Import enhanced factory and create manager with emergency cleanup capabilities
+                from netra_backend.app.websocket_core.websocket_manager_factory import create_manager_with_enhanced_cleanup
+
+                # Note: We need to handle the async call in sync context
+                import asyncio
+                try:
+                    loop = asyncio.get_event_loop()
+                    if loop.is_running():
+                        # If event loop is running, we can't use run() - use create_task or run_until_complete
+                        # For now, fall back to regular creation
+                        logger.warning(f"Event loop running, falling back to regular manager creation for user {user_id}")
+                        pass  # Continue to regular creation
+                    else:
+                        # Event loop exists but not running
+                        manager = loop.run_until_complete(create_manager_with_enhanced_cleanup(user_context, mode))
+                        # Register in the main registry for consistency
+                        _USER_MANAGER_REGISTRY[user_key] = manager
+                        logger.info(f"Enhanced WebSocket manager created and registered for user {user_key}")
+                        return manager
+                except RuntimeError:
+                    # No event loop - create one
+                    manager = asyncio.run(create_manager_with_enhanced_cleanup(user_context, mode))
+                    # Register in the main registry for consistency
+                    _USER_MANAGER_REGISTRY[user_key] = manager
+                    logger.info(f"Enhanced WebSocket manager created and registered for user {user_key}")
+                    return manager
+
+            except Exception as e:
+                logger.error(f"Failed to create enhanced WebSocket manager for user {user_id}: {e}")
+                # Fall back to regular creation
+                logger.warning(f"Falling back to regular manager creation for user {user_id}")
 
         # No existing manager - create new one following original logic
         try:

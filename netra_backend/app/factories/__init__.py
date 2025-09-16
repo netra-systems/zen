@@ -48,6 +48,16 @@ from netra_backend.app.services.agent_websocket_bridge import (
     AgentWebSocketBridge,
     create_agent_websocket_bridge,
 )
+# WebSocket Bridge Factory imports for test support
+from netra_backend.app.factories.websocket_bridge_factory import (
+    StandardWebSocketBridge,
+    WebSocketBridgeAdapter,
+    WebSocketBridgeFactory,
+    create_standard_websocket_bridge,
+    create_agent_bridge_adapter,
+    create_websocket_bridge_for_testing,
+    create_websocket_bridge_with_context,
+)
 
 __all__ = [
     "DataAccessFactory",
@@ -66,6 +76,14 @@ __all__ = [
     # SSOT WebSocket Bridge Factory
     "AgentWebSocketBridge",
     "create_agent_websocket_bridge",
+    # WebSocket Bridge Factory components
+    "StandardWebSocketBridge",
+    "WebSocketBridgeAdapter",
+    "WebSocketBridgeFactory",
+    "create_standard_websocket_bridge",
+    "create_agent_bridge_adapter",
+    "create_websocket_bridge_for_testing",
+    "create_websocket_bridge_with_context",
     # Backward Compatibility (DEPRECATED)
     "create_isolated_tool_dispatcher",
     "isolated_tool_dispatcher_scope",
