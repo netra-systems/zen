@@ -8,6 +8,7 @@ import logging
 from fastapi import FastAPI
 
 from shared.logging.unified_logging_ssot import get_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.utils.multiprocessing_cleanup import cleanup_multiprocessing
 from netra_backend.app.services.background_task_manager import background_task_manager
