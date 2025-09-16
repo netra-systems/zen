@@ -43,7 +43,7 @@ def _check_direct_import_and_warn():
             
         # Read the source line to check the import pattern
         try:
-            with open(frame.filename, 'r') as f:
+            with open(frame.filename, 'r', encoding='utf-8', errors='ignore') as f:
                 lines = f.readlines()
                 if frame.lineno <= len(lines):
                     line = lines[frame.lineno - 1].strip()
