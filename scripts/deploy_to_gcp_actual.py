@@ -84,8 +84,9 @@ class GCPDeployer:
         
         # Service configurations (Alpine-optimized if flag is set)
         # ISSUE #128 FIX: Increased resources for staging WebSocket reliability
+        # ISSUE #1278 REMEDIATION: Further increased resources for infrastructure reliability
         backend_dockerfile = "dockerfiles/backend.staging.alpine.Dockerfile" if self.use_alpine else "deployment/docker/backend.gcp.Dockerfile"
-        backend_memory = "4Gi"  # Increased from 2Gi for better WebSocket connection handling
+        backend_memory = "6Gi"  # Issue #1278 remediation - increased from 4Gi to 6Gi for infrastructure pressure handling
         backend_cpu = "4"       # Increased from 2 for faster asyncio.selector.select() processing
         
         self.services = [
@@ -97,8 +98,8 @@ class GCPDeployer:
                 cloud_run_name="netra-backend-staging",
                 memory=backend_memory,
                 cpu=backend_cpu,
-                min_instances=1,
-                max_instances=20,
+                min_instances=2,  # Issue #1278 remediation - increased from 1 to 2 for better availability
+                max_instances=15,  # Issue #1278 remediation - reduced from 20 to 15 for resource optimization
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
