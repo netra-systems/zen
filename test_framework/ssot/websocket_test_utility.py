@@ -23,6 +23,10 @@ from test_framework.ssot.websocket_bridge_test_helper import (
 from test_framework.ssot.websocket_auth_helper import (
     WebSocketAuthHelper,
 )
+# ISSUE #1197 FIX: Import RealWebSocketTestConfig for infrastructure tests
+from tests.mission_critical.websocket_real_test_base import (
+    RealWebSocketTestConfig,
+)
 
 # Create WebSocketTestUtility as an alias that combines functionality
 class WebSocketTestUtility(WebSocketBridgeTestHelper):

@@ -1110,45 +1110,11 @@ WebSocketEventEmitter = UnifiedWebSocketEmitter
 WebSocketConnectionManager = _UnifiedWebSocketManagerImplementation
 
 # WEBSOCKET MANAGER SSOT CONSOLIDATION: Legacy factory function compatibility
-def create_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, **kwargs) -> _UnifiedWebSocketManagerImplementation:
-    """
-    Create WebSocket manager - Legacy compatibility function.
+# SSOT ENFORCEMENT: Deprecated factory functions removed to consolidate to single factory pattern
+# Use get_websocket_manager() directly for SSOT compliance
 
-    DEPRECATED: Use get_websocket_manager() directly for new code.
-    This function provides backward compatibility for existing tests and modules.
-
-    Args:
-        user_context: UserExecutionContext for user isolation
-        mode: WebSocket manager mode (all modes redirect to UNIFIED)
-        **kwargs: Additional arguments (ignored for compatibility)
-
-    Returns:
-        UnifiedWebSocketManager instance
-    """
-    import warnings
-    warnings.warn(
-        "create_websocket_manager() is deprecated. "
-        "Use get_websocket_manager() directly for SSOT compliance.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    return get_websocket_manager(user_context, mode)
-
-# WEBSOCKET MANAGER SSOT CONSOLIDATION: Synchronous factory function alias
-def create_websocket_manager_sync(user_context: Optional[Any] = None, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, **kwargs) -> _UnifiedWebSocketManagerImplementation:
-    """
-    Create WebSocket manager synchronously - Legacy compatibility function.
-
-    DEPRECATED: Use get_websocket_manager() directly for new code.
-    """
-    import warnings
-    warnings.warn(
-        "create_websocket_manager_sync() is deprecated. "
-        "Use get_websocket_manager() directly for SSOT compliance.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    return get_websocket_manager(user_context, mode)
+# SSOT ENFORCEMENT: Legacy factory functions completely removed for consolidation
+# Use get_websocket_manager() directly for SSOT compliance
 
 # Export the protocol for type checking and SSOT compliance
 __all__ = [
@@ -1162,8 +1128,7 @@ __all__ = [
     '_serialize_message_safely',
     'get_websocket_manager',  # SSOT: Synchronous factory function
     'get_websocket_manager_async',  # ISSUE #1184: Async factory function for proper await usage
-    'create_websocket_manager',  # DEPRECATED: Legacy compatibility function
-    'create_websocket_manager_sync',  # DEPRECATED: Legacy sync function
+    # SSOT COMPLIANCE: Deprecated factory functions removed from exports
     'check_websocket_service_available',  # Service availability check
     'create_test_user_context',  # Test context helper
     'create_test_fallback_manager',  # Test fallback helper
