@@ -33,7 +33,7 @@ from netra_backend.app.schemas.user_plan import (
     ToolAllowance
 )
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuth
-from netra_backend.app.core.redis_connection_handler import RedisConnectionHandler
+from netra_backend.app.redis_manager import redis_manager as RedisConnectionHandler
 
 
 @pytest.mark.integration
