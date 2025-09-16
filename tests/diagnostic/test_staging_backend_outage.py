@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 
 # Staging environment URLs (canonical staging URLs per requirements)
 STAGING_URLS = {
-    'backend': 'https://backend.staging.netrasystems.ai',
+    'backend': 'https://api.staging.netrasystems.ai',
     'auth': 'https://auth.staging.netrasystems.ai',
     'frontend': 'https://frontend.staging.netrasystems.ai',
-    'websocket': 'wss://backend.staging.netrasystems.ai/ws'
+    'websocket': 'wss://api.staging.netrasystems.ai/ws'
 }
 
 class StagingBackendDiagnostic:
