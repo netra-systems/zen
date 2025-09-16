@@ -1446,14 +1446,16 @@ class _UnifiedWebSocketManagerImplementation:
                 # Extract event type from processed data for root level
                 event_type_value = processed_data.get("type", event_type)
 
-                # Create message with payload wrapper for frontend compatibility
+                # Create message with business data at root level for proper event structure
                 message = {
-                    "type": event_type_value,
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "critical": True,
-                    "attempt": attempt + 1 if attempt > 0 else None,
-                    "payload": processed_data  # Wrap business data in payload object for frontend
+                    **processed_data  # Merge business data at root level (includes type, payload fields)
                 }
+                
+                # Add attempt info only if retry
+                if attempt > 0:
+                    message["attempt"] = attempt + 1
                 
                 try:
                     await self.send_to_user(user_id, message)

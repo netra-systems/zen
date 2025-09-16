@@ -311,6 +311,8 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._last_health_broadcast = 0.0
         self._health_broadcast_interval = 30.0  # 30 seconds
         self._last_broadcasted_state = None
+        self._monitoring_enabled = True  # Enable monitoring by default
+        self._health_notifications_sent = 0  # Track notification count
         
         # Enhanced for issue #1019: Auto-register with ChatEventMonitor if available
         self._auto_register_with_chat_event_monitor()
@@ -421,6 +423,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 await self.notify_health_change(current_health)
                 self._last_health_broadcast = now
                 self._last_broadcasted_state = current_state
+                self._health_notifications_sent += 1
                 
                 logger.debug(
                     f"Health change notified to {len(self._monitor_observers)} observers: "
