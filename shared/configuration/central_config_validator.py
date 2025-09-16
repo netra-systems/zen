@@ -15,7 +15,7 @@ import os
 import logging
 import threading
 import time
-from typing import Dict, List, Optional, Set, Tuple, Any
+from typing import Dict, List, Optional, Set, Tuple, Any, Callable
 from enum import Enum
 from dataclasses import dataclass
 from datetime import datetime
@@ -53,6 +53,8 @@ class ConfigRule:
     # Legacy support fields
     legacy_info: Optional['LegacyConfigInfo'] = None
     replacement_vars: Optional[List[str]] = None
+    # Service-specific filtering
+    service_filter: Optional[Callable[[Callable[[str, str], Optional[str]]], bool]] = None
 
 
 @dataclass
@@ -171,6 +173,35 @@ class LegacyConfigMarker:
         """Check if a legacy variable can be auto-constructed from components."""
         config = cls.LEGACY_VARIABLES.get(legacy_var, {})
         return config.get("auto_construct", False)
+
+
+def _is_backend_service(env_getter: Callable[[str, str], Optional[str]]) -> bool:
+    """
+    Check if the current service is the backend service.
+
+    Auth service doesn't need AI/LLM capabilities (GEMINI_API_KEY).
+    Only backend service requires it for agent operations.
+    """
+    # Check K_SERVICE (Cloud Run service name)
+    k_service = env_getter("K_SERVICE", "")
+    if k_service:
+        # Service names in Cloud Run
+        if "auth" in k_service.lower():
+            return False
+        if "backend" in k_service.lower():
+            return True
+
+    # Check SERVICE_ID
+    service_id = env_getter("SERVICE_ID", "")
+    if service_id:
+        if "auth" in service_id.lower():
+            return False
+        if "backend" in service_id.lower():
+            return True
+
+    # Default to True (require GEMINI_API_KEY) for safety
+    # Better to fail validation than to miss required config
+    return True
 
 
 class CentralConfigurationValidator:
@@ -295,7 +326,9 @@ class CentralConfigurationValidator:
             environments={Environment.STAGING, Environment.PRODUCTION},
             min_length=10,
             forbidden_values={"", "your-api-key", "AIzaSy-placeholder"},
-            error_message="GEMINI_API_KEY required in staging/production. Cannot be placeholder value."
+            error_message="GEMINI_API_KEY required in staging/production. Cannot be placeholder value.",
+            # Only required for backend service - auth service doesn't need AI/LLM capabilities
+            service_filter=lambda env: _is_backend_service(env)
         ),
         
         # OAuth Configuration (HIGH PRIORITY) - SSOT for all environments
@@ -747,8 +780,14 @@ class CentralConfigurationValidator:
     
     def _validate_single_requirement(self, rule: ConfigRule, environment: Environment) -> None:
         """Validate a single configuration requirement."""
+        # Check service filter if present
+        if rule.service_filter and not rule.service_filter(self.env_getter):
+            # This rule doesn't apply to the current service, skip it
+            logger.debug(f"Skipping {rule.env_var} validation - not required for this service")
+            return
+
         value = self.env_getter(rule.env_var)
-        
+
         # CRITICAL FIX: Enhanced JWT secret validation
         # The central validator MUST detect missing JWT secrets properly
         # NOTE: Legacy fallback removed to enforce strict environment-specific JWT secrets
