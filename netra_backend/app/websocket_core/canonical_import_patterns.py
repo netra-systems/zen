@@ -27,7 +27,8 @@ from netra_backend.app.websocket_core.types import (
     WebSocketConnection,
     _serialize_message_safely,
     _get_enum_key_representation,
-    create_server_message
+    create_server_message,
+    create_error_message
 )
 from netra_backend.app.websocket_core.protocols import (
     WebSocketManagerProtocol,
@@ -359,6 +360,7 @@ __all__ = [
     '_serialize_message_safely',
     '_get_enum_key_representation',
     'create_server_message',
+    'create_error_message',
 
     # Event emitter imports
     'UnifiedWebSocketEmitter',
