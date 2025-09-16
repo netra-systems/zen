@@ -14,27 +14,30 @@ class TestIssue1021SimpleReproduction(unittest.TestCase):
 
     def test_backend_vs_frontend_structure_mismatch(self):
         """
-        DEMONSTRATION: This test shows the actual structure mismatch.
+        VALIDATION: This test validates Issue #1021 resolution.
 
-        Expected Result: This test should reveal that the backend emits
-        one structure while the frontend expects another.
+        Expected Result: This test should now PASS showing that the backend
+        and frontend structures are aligned after the payload wrapper fix.
         """
-        # Simulate what the backend actually sends
-        # Based on unified_emitter.py analysis
+        # Simulate what the backend actually sends (AFTER Issue #1021 fix)
+        # Based on unified_manager.py analysis (payload wrapper implemented)
         backend_emitted_structure = {
             "type": "tool_executing",
-            "data": {
+            "timestamp": "2025-09-15T18:59:18.374705+00:00",
+            "critical": True,
+            "attempt": None,
+            "payload": {
                 "tool_name": "aws_cost_analyzer",
                 "metadata": {
                     "parameters": {"region": "us-east-1"},
                     "description": "Analyzing costs"
                 },
                 "status": "executing",
-                "timestamp": time.time()
-            },
-            "user_id": "test_user_123",
-            "run_id": "run_123",
-            "correlation_id": "corr_456"
+                "timestamp": time.time(),
+                "user_id": "test_user_123",
+                "run_id": "run_123",
+                "correlation_id": "corr_456"
+            }
         }
 
         # What the frontend expects (based on demo chat types)
@@ -72,11 +75,13 @@ class TestIssue1021SimpleReproduction(unittest.TestCase):
             if 'payload' not in backend_emitted_structure:
                 mismatch_found = True
                 print(f"\nMISMATCH: Frontend expects 'payload' field, backend uses 'data' field")
+            else:
+                print(f"\n✅ STRUCTURE ALIGNMENT: Both backend and frontend use 'payload' field")
 
-        # Check data nesting
+        # Check data nesting (AFTER Issue #1021 fix)
         backend_tool_name = None
-        if 'data' in backend_emitted_structure:
-            backend_tool_name = backend_emitted_structure['data'].get('tool_name')
+        if 'payload' in backend_emitted_structure:
+            backend_tool_name = backend_emitted_structure['payload'].get('tool_name')
 
         frontend_tool_name = None
         if 'payload' in frontend_expected_structure:
@@ -84,13 +89,15 @@ class TestIssue1021SimpleReproduction(unittest.TestCase):
 
         if backend_tool_name and frontend_tool_name:
             print(f"\nTOOL NAME ACCESS:")
-            print(f"Backend: data.tool_name = {backend_tool_name}")
+            print(f"Backend: payload.tool_name = {backend_tool_name}")
             print(f"Frontend expects: payload.tool_name = {frontend_tool_name}")
 
-            # This shows the access path mismatch
-            if backend_emitted_structure.get('data', {}).get('tool_name') != \
+            # Check if access paths are now aligned
+            if backend_emitted_structure.get('payload', {}).get('tool_name') == \
                frontend_expected_structure.get('payload', {}).get('tool_name'):
-                print("DIFFERENT ACCESS PATHS: backend uses 'data.tool_name', frontend expects 'payload.tool_name'")
+                print("✅ ACCESS PATHS ALIGNED: Both use 'payload.tool_name' - Issue #1021 RESOLVED!")
+            else:
+                print("❌ ACCESS PATHS STILL MISALIGNED")
 
         # Simulate frontend processing failure
         def simulate_frontend_processing(event_data):

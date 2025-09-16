@@ -1443,11 +1443,16 @@ class _UnifiedWebSocketManagerImplementation:
                     processed_data = {"type": event_type, "timestamp": time.time(), **data}
                 
                 # Connection exists, try to send
+                # Extract event type from processed data for root level
+                event_type_value = processed_data.get("type", event_type)
+
+                # Create message with payload wrapper for frontend compatibility
                 message = {
+                    "type": event_type_value,
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "critical": True,
                     "attempt": attempt + 1 if attempt > 0 else None,
-                    **processed_data  # Spread processed business data to root level
+                    "payload": processed_data  # Wrap business data in payload object for frontend
                 }
                 
                 try:
