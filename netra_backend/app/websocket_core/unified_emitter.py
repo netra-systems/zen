@@ -417,6 +417,10 @@ class UnifiedWebSocketEmitter:
         CRITICAL EVENT: Tool execution completed.
         Shows the results from tool execution.
         
+        Event Structure (FIX #935):
+            - Top-level 'results' field: Promoted from metadata.result if available
+            - Nested 'metadata.result' field: Maintained for backward compatibility
+        
         Args:
             data: Event data including tool name and results
             
@@ -551,12 +555,19 @@ class UnifiedWebSocketEmitter:
             max_attempts = self.MAX_CRITICAL_RETRIES if is_auth_event else self.MAX_RETRIES
         
         # ISSUE #1039 FIX: Ensure tool_executing events have tool_name at top level
+        # ISSUE #935 FIX: Ensure tool_completed events have results at top level
         final_event_data = data.copy()
         if event_type == 'tool_executing' and 'tool_name' in data:
             # Promote tool_name to top level for frontend/validation compatibility
             final_event_data = {
                 'tool_name': data['tool_name'],
                 **data  # Include all other fields
+            }
+        elif event_type == 'tool_completed' and 'metadata' in data and 'result' in data['metadata']:
+            # FIX #935: Promote tool results to top level for frontend compatibility
+            final_event_data = {
+                'results': data['metadata']['result'],  # Add top-level results field
+                **data  # Include all other fields (metadata.result kept for backward compatibility)
             }
         
         # Emit with retries

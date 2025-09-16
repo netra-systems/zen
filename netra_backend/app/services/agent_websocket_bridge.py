@@ -38,7 +38,8 @@ except ImportError as e:
     get_event_delivery_tracker = None
     EventPriority = None
     EventDeliveryStatus = None
-from shared.monitoring.interfaces import MonitorableComponent
+# Enhanced monitoring interface for issue #1019 integration
+from netra_backend.app.core.monitoring.base import MonitorableComponent
 
 # CRITICAL FIX: Real agent execution imports for production deployment
 # MOVED TO TYPE_CHECKING to avoid circular import
