@@ -68,15 +68,20 @@ class CreateServerMessageSignatureErrorTests(SSotBaseTestCase):
             self.logger.error(f'Expected signature error detected: {e}')
             assert 'missing 1 required positional argument' in str(e) or 'takes' in str(e), f'Expected signature error, got: {e}'
 
-    def test_incorrect_two_argument_call(self):
+    def test_flexible_call_patterns(self):
         """
-        Test the broken pattern: create_server_message(msg_type, data_dict).
+        Test that canonical implementation supports flexible calling patterns.
         
-        Many calls in handlers.py use only 2 arguments expecting data=None default.
-        This should FAIL when calling types.py implementation.
+        Post-SSOT: The implementation supports backward compatibility with defaults.
         """
-        with pytest.raises(TypeError, match='missing 1 required positional argument|takes.*positional arguments'):
-            types_create_server_message(MessageType.SYSTEM_MESSAGE)
+        # Test single argument call (uses defaults)
+        result1 = types_create_server_message(MessageType.SYSTEM_MESSAGE)
+        assert isinstance(result1, ServerMessage), 'Single argument call should work with defaults'
+        
+        # Test two argument call
+        result2 = types_create_server_message(MessageType.SYSTEM_MESSAGE, {'status': 'test'})
+        assert isinstance(result2, ServerMessage), 'Two argument call should work'
+        assert result2.data['status'] == 'test', 'Data should be set correctly'
 
     def test_correct_call_pattern(self):
         """
@@ -98,17 +103,18 @@ class CreateServerMessageSignatureErrorTests(SSotBaseTestCase):
         """
         self.logger.info('Testing canonical SSOT implementation behavior')
         
-        # Test that insufficient parameters raise TypeError (validates strict signature)
-        with pytest.raises(TypeError):
-            types_create_server_message(MessageType.SYSTEM_MESSAGE)
+        # Test minimal parameters work (flexible defaults)
+        result1 = types_create_server_message(MessageType.SYSTEM_MESSAGE)
+        assert isinstance(result1, ServerMessage), 'Minimal parameters should work'
         
-        # Test that proper parameters work correctly
-        result = types_create_server_message(
+        # Test complete parameters work correctly
+        result2 = types_create_server_message(
             MessageType.SYSTEM_MESSAGE, 
             {'status': 'test'}, 
             correlation_id='test-123'
         )
-        assert isinstance(result, ServerMessage), 'Should return ServerMessage instance'
+        assert isinstance(result2, ServerMessage), 'Should return ServerMessage instance'
+        assert result2.correlation_id == 'test-123', 'Correlation ID should be set'
 
     def test_handlers_import_resolution(self):
         """
