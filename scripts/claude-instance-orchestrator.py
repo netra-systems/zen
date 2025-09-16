@@ -34,6 +34,11 @@ from datetime import datetime, timedelta
 import re
 from uuid import uuid4, UUID
 
+# Add token budget imports with proper path handling
+sys.path.insert(0, str(Path(__file__).parent))
+from token_budget.budget_manager import TokenBudgetManager
+from token_budget.visualization import render_progress_bar
+
 # Optional NetraOptimizer imports
 DatabaseClient = None
 ExecutionRecord = None
@@ -63,6 +68,7 @@ class InstanceConfig:
     clear_history: bool = False
     compact_history: bool = False
     pre_commands: List[str] = None  # Commands to run before main command
+    max_tokens_per_command: Optional[int] = None  # Token budget for this specific command
 
     def __post_init__(self):
         """Set defaults after initialization"""
@@ -86,13 +92,17 @@ class InstanceStatus:
     output_tokens: int = 0
     cached_tokens: int = 0
     tool_calls: int = 0
+    _last_known_total_tokens: int = 0  # For delta tracking in budget management
 
 class ClaudeInstanceOrchestrator:
     """Orchestrator for managing multiple Claude Code instances"""
 
     def __init__(self, workspace_dir: Path, max_console_lines: int = 5, startup_delay: float = 1.0,
                  max_line_length: int = 500, status_report_interval: int = 30,
-                 use_cloud_sql: bool = False, quiet: bool = False):
+                 use_cloud_sql: bool = False, quiet: bool = False,
+                 overall_token_budget: Optional[int] = None,
+                 budget_enforcement_mode: str = "warn",
+                 enable_budget_visuals: bool = True):
         self.workspace_dir = workspace_dir
         self.instances: Dict[str, InstanceConfig] = {}
         self.statuses: Dict[str, InstanceStatus] = {}
@@ -109,6 +119,13 @@ class ClaudeInstanceOrchestrator:
         self.batch_id = str(uuid4())  # Generate batch ID for this orchestration run
         self.db_client = None
         self.optimizer = None
+
+        # Initialize budget manager if requested
+        self.budget_manager = TokenBudgetManager(
+            overall_budget=overall_token_budget,
+            enforcement_mode=budget_enforcement_mode
+        ) if overall_token_budget or budget_enforcement_mode != "warn" else None
+        self.enable_budget_visuals = enable_budget_visuals
 
         # Configure CloudSQL if requested
         if use_cloud_sql:
@@ -289,6 +306,22 @@ class ClaudeInstanceOrchestrator:
         config = self.instances[name]
         status = self.statuses[name]
 
+        # --- PRE-EXECUTION BUDGET CHECK ---
+        if self.budget_manager:
+            # V1: Use a simple placeholder or the configured max. Future versions can predict.
+            estimated_tokens = config.max_tokens_per_command or 1000  # Default estimate
+            # CRITICAL: Use base command for budget checking
+            base_command = config.command.split()[0] if config.command else config.command
+            if not self.budget_manager.check_budget(base_command, estimated_tokens):
+                message = f"Budget exceeded for instance {name}. Skipping."
+                if self.budget_manager.enforcement_mode == "block":
+                    logger.error(f"BLOCK MODE: {message}")
+                    status.status = "failed"
+                    status.error = "Blocked by budget limit"
+                    return False
+                else:  # warn mode
+                    logger.warning(f"WARN MODE: {message}")
+
         try:
             logger.info(f"Starting instance: {name}")
             status.status = "running"
@@ -345,7 +378,7 @@ class ClaudeInstanceOrchestrator:
                     stdout_str = stdout.decode() if isinstance(stdout, bytes) else stdout
                     status.output += stdout_str
                     # Parse token usage from final output
-                    self._parse_final_output_token_usage(stdout_str, status, config.output_format)
+                    self._parse_final_output_token_usage(stdout_str, status, config.output_format, name)
                 if stderr:
                     status.error += stderr.decode() if isinstance(stderr, bytes) else stderr
 
@@ -526,7 +559,7 @@ class ClaudeInstanceOrchestrator:
                     if prefix == "STDOUT":
                         status.output += line_str
                         # Parse token usage from Claude output if present
-                        self._parse_token_usage(clean_line, status)
+                        self._parse_token_usage(clean_line, status, name)
                     else:
                         status.error += line_str
             except Exception as e:
@@ -712,6 +745,25 @@ class ClaudeInstanceOrchestrator:
         total_tools_all = sum(s.tool_calls for s in self.statuses.values())
         median_str = self._format_tokens(int(token_median)) if token_median > 0 else "0"
         print(f"║ Tokens: {self._format_tokens(total_tokens_all)} total, {self._format_tokens(total_cached_all)} cached | Median: {median_str} | Tools: {total_tools_all}")
+
+        # --- ADD BUDGET STATUS SECTION ---
+        if self.budget_manager and self.enable_budget_visuals:
+            bm = self.budget_manager
+            overall_budget = bm.overall_budget or 0
+            overall_bar = render_progress_bar(bm.total_usage, overall_budget)
+            used_formatted = self._format_tokens(bm.total_usage)
+            total_formatted = self._format_tokens(overall_budget)
+
+            print(f"║")
+            print(f"╠═══ TOKEN BUDGET STATUS ═══╣")
+            print(f"║ Overall: {overall_bar} {used_formatted}/{total_formatted}")
+
+            if bm.command_budgets:
+                print(f"║ Command Budgets:")
+                for name, budget_info in bm.command_budgets.items():
+                    bar = render_progress_bar(budget_info.used, budget_info.limit)
+                    print(f"║   {name:<30} {bar}")
+
         print(f"║")
         
         # Print column headers with wider name column
@@ -755,15 +807,27 @@ class ClaudeInstanceOrchestrator:
         footer = "╚" + "═" * (len(header) - 2) + "╝"
         print(f"{footer}\n")
 
-    def _parse_token_usage(self, line: str, status: InstanceStatus):
+    def _parse_token_usage(self, line: str, status: InstanceStatus, instance_name: str):
         """Parse token usage information from Claude Code JSON output lines"""
         # First try to parse as JSON - this is the modern approach for stream-json format
         if self._try_parse_json_token_usage(line, status):
+            self._update_budget_tracking(status, instance_name)
             return
-        
+
         # Fallback to regex parsing for backward compatibility or non-JSON output
         self._parse_token_usage_fallback(line, status)
-    
+        self._update_budget_tracking(status, instance_name)
+
+    def _update_budget_tracking(self, status: InstanceStatus, instance_name: str):
+        """Update budget tracking with token deltas"""
+        if self.budget_manager and status.total_tokens > status._last_known_total_tokens:
+            new_tokens = status.total_tokens - status._last_known_total_tokens
+            # Extract base command without arguments
+            command = self.instances[instance_name].command
+            base_command = command.split()[0] if command else command
+            self.budget_manager.record_usage(base_command, new_tokens)
+            status._last_known_total_tokens = status.total_tokens
+
     def _try_parse_json_token_usage(self, line: str, status: InstanceStatus) -> bool:
         """Try to parse token usage from JSON format output"""
         line = line.strip()
@@ -960,19 +1024,19 @@ class ClaudeInstanceOrchestrator:
         if any(phrase in line_lower for phrase in ['tool call', 'executing tool', 'calling tool', 'tool execution']):
             status.tool_calls += 1
     
-    def _parse_final_output_token_usage(self, output: str, status: InstanceStatus, output_format: str):
+    def _parse_final_output_token_usage(self, output: str, status: InstanceStatus, output_format: str, instance_name: str):
         """Parse token usage from final Claude Code output for non-streaming formats"""
         if output_format == "json":
             # For standard JSON format, try to parse the entire output as JSON
-            self._parse_json_final_output(output, status)
+            self._parse_json_final_output(output, status, instance_name)
         else:
             # For other formats, parse line by line
             for line in output.split('\n'):
                 line = line.strip()
                 if line:
-                    self._parse_token_usage(line, status)
+                    self._parse_token_usage(line, status, instance_name)
     
-    def _parse_json_final_output(self, output: str, status: InstanceStatus):
+    def _parse_json_final_output(self, output: str, status: InstanceStatus, instance_name: str):
         """Parse token usage from complete JSON output"""
         try:
             # Try to parse the entire output as JSON
@@ -1022,7 +1086,7 @@ class ClaudeInstanceOrchestrator:
             for line in output.split('\n'):
                 line = line.strip()
                 if line:
-                    self._parse_token_usage(line, status)
+                    self._parse_token_usage(line, status, instance_name)
     
     def _extract_usage_stats(self, usage_data: dict, status: InstanceStatus):
         """Extract usage statistics from a usage object"""
@@ -1395,6 +1459,16 @@ async def main():
     parser.add_argument("--use-cloud-sql", action="store_true",
                        help="Save metrics to CloudSQL database (NetraOptimizer integration)")
 
+    # Token budget arguments
+    parser.add_argument("--overall-token-budget", type=int, default=None,
+                       help="Global token budget for the entire session.")
+    parser.add_argument("--command-budget", action='append',
+                       help="Per-command budget in format: '/command_name=limit'. Can be used multiple times.")
+    parser.add_argument("--budget-enforcement-mode", choices=["warn", "block"], default="warn",
+                       help="Action to take when a budget is exceeded: 'warn' (log and continue) or 'block' (prevent new instances).")
+    parser.add_argument("--disable-budget-visuals", action="store_true",
+                       help="Disable budget visualization in status reports")
+
     args = parser.parse_args()
 
     # Determine workspace directory with better Mac compatibility
@@ -1429,8 +1503,21 @@ async def main():
         max_line_length=args.max_line_length,
         status_report_interval=args.status_report_interval,
         use_cloud_sql=args.use_cloud_sql,
-        quiet=args.quiet
+        quiet=args.quiet,
+        overall_token_budget=args.overall_token_budget,
+        budget_enforcement_mode=args.budget_enforcement_mode,
+        enable_budget_visuals=not args.disable_budget_visuals
     )
+
+    # Process per-command budgets
+    if orchestrator.budget_manager and args.command_budget:
+        for budget_str in args.command_budget:
+            try:
+                command_name, limit = budget_str.split('=', 1)
+                orchestrator.budget_manager.set_command_budget(command_name.strip(), int(limit))
+                logger.info(f"Set budget for {command_name.strip()} to {limit} tokens.")
+            except ValueError:
+                logger.error(f"Invalid format for --command-budget: '{budget_str}'. Use '/command=limit'.")
 
     # Handle command inspection modes
     if args.list_commands:
