@@ -79,7 +79,7 @@ class AuthEnvironment:
         
         if is_production_test_scenario:
             # Direct production validation without unified manager fallbacks
-            expected_vars = ["JWT_SECRET_PRODUCTION", "JWT_SECRET_KEY", "JWT_SECRET"]
+            expected_vars = ["JWT_SECRET_PRODUCTION", "JWT_SECRET_KEY"]
             logger.critical(f"JWT secret not configured for production environment - WebSocket auth will fail")
             logger.critical(f"COORDINATED VALIDATION: Production validation requires explicit JWT configuration")
             raise ValueError(f"JWT_SECRET_KEY must be explicitly set in production environment. Expected one of: {expected_vars}")
@@ -108,11 +108,8 @@ class AuthEnvironment:
                 logger.debug("Fallback: Using generic JWT_SECRET_KEY")
                 return secret.strip()
                 
-            # 3. Try legacy JWT_SECRET
-            secret = self.env.get("JWT_SECRET", "")
-            if secret:
-                logger.warning("Fallback: Using JWT_SECRET from environment (DEPRECATED)")
-                return secret.strip()
+            # JWT_SECRET fallback REMOVED as part of JWT_SECRET_KEY migration
+            # All services must use JWT_SECRET_KEY for consistency
             
             # 4. Environment-specific fallbacks
             if env == "development":
@@ -131,7 +128,7 @@ class AuthEnvironment:
                 return test_secret
             elif env in ["staging", "production"]:
                 # Hard failure for staging/production - no fallbacks
-                expected_vars = [env_specific_key, "JWT_SECRET_KEY", "JWT_SECRET"]
+                expected_vars = [env_specific_key, "JWT_SECRET_KEY"]
                 logger.critical(f"JWT secret not configured for {env} environment - WebSocket auth will fail")
                 raise ValueError(f"JWT_SECRET_KEY must be explicitly set in {env} environment. Expected one of: {expected_vars}")
             
@@ -1270,7 +1267,7 @@ def get_auth_env(refresh: bool = False) -> AuthEnvironment:
         current_environment == "production" and
         not env_manager.get("JWT_SECRET_KEY") and
         not env_manager.get("JWT_SECRET_PRODUCTION") and 
-        not env_manager.get("JWT_SECRET")
+        not env_manager.get("JWT_SECRET_KEY")
         # NOTE: Comprehensive check covers all JWT secret variants for robust test detection
     )
     

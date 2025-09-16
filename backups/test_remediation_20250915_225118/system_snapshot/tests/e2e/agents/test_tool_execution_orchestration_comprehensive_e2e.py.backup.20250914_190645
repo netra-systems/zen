@@ -1,0 +1,718 @@
+#!/usr/bin/env python
+"""
+Tool Execution Orchestration Comprehensive E2E Tests
+
+Business Value Justification (BVJ):
+- Segment: Enterprise - Advanced AI tool orchestration ($400K+ MRR)
+- Business Goal: Ensure complex tool chains execute reliably for AI optimization
+- Value Impact: Multi-step AI analysis delivers deep insights and recommendations
+- Strategic/Revenue Impact: Tool orchestration is core differentiator for enterprise AI
+
+This test suite validates comprehensive tool execution orchestration:
+1. Sequential tool execution with dependency management
+2. Parallel tool execution with resource coordination
+3. Tool error handling and recovery patterns
+4. Tool result aggregation and data flow
+5. Complex tool chains with branching logic
+6. Tool execution monitoring and progress tracking
+
+CRITICAL E2E REQUIREMENTS:
+- Real GCP staging environment (NO Docker)
+- Authenticated tool execution with JWT
+- Real tool instances with actual processing
+- WebSocket events for tool_executing and tool_completed
+- Tool result validation and data integrity
+"""
+
+import asyncio
+import json
+import logging
+import time
+import uuid
+from datetime import datetime, timezone
+from typing import Dict, List, Any, Optional, Tuple, Set
+import pytest
+import websockets
+import aiohttp
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+# Import E2E auth helper for SSOT authentication
+from test_framework.ssot.e2e_auth_helper import (
+    E2EAuthHelper, E2EWebSocketAuthHelper,
+    create_authenticated_user_context,
+    E2EAuthConfig
+)
+from test_framework.base_e2e_test import BaseE2ETest
+from tests.e2e.staging_config import StagingTestConfig, get_staging_config
+
+logger = logging.getLogger(__name__)
+
+
+class TestToolExecutionOrchestrationE2E(BaseE2ETest):
+    """
+    Comprehensive Tool Execution Orchestration E2E Tests for GCP Staging.
+
+    Tests complex tool orchestration patterns that deliver enterprise-grade
+    AI analysis and optimization capabilities.
+    """
+
+    @pytest.fixture(autouse=True)
+    async def setup_tool_orchestration_environment(self):
+        """Set up tool orchestration testing environment with comprehensive monitoring."""
+        await self.initialize_test_environment()
+
+        # Configure for GCP staging environment
+        self.staging_config = get_staging_config()
+        self.auth_helper = E2EAuthHelper(environment="staging")
+        self.ws_auth_helper = E2EWebSocketAuthHelper(environment="staging")
+
+        # Validate staging configuration
+        assert self.staging_config.validate_configuration(), "Staging configuration invalid"
+
+        # Create authenticated test users for tool orchestration
+        self.test_users = []
+        for i in range(2):  # 2 users for tool orchestration testing
+            user_context = await create_authenticated_user_context(
+                user_email=f"tool_orchestration_test_{i}_{int(time.time())}@staging.netrasystems.ai",
+                environment="staging",
+                permissions=["read", "write", "execute_agents", "execute_tools", "orchestrate_workflows"]
+            )
+            self.test_users.append(user_context)
+
+        # Tool execution tracking
+        self.tool_executions = {}
+        self.tool_results = {}
+        self.orchestration_flows = {}
+
+        for user in self.test_users:
+            self.tool_executions[user.user_id] = []
+            self.tool_results[user.user_id] = {}
+            self.orchestration_flows[user.user_id] = {
+                "sequential_tools": [],
+                "parallel_tools": [],
+                "dependency_chain": {},
+                "execution_timeline": []
+            }
+
+        self.logger.info(f"✅ PASS: Tool orchestration test environment ready - {len(self.test_users)} users authenticated")
+
+    async def test_sequential_tool_execution_chain(self):
+        """
+        Test sequential tool execution with dependency management.
+
+        BVJ: Validates $200K+ MRR workflow orchestration - Tools must execute in order
+        Ensures: Sequential tool dependencies respected, data flows correctly
+        """
+        user_context = self.test_users[0]
+
+        websocket = await self.ws_auth_helper.connect_authenticated_websocket(timeout=25.0)
+        self.register_cleanup_task(lambda: asyncio.create_task(websocket.close()))
+
+        # Track sequential tool execution
+        tool_execution_sequence = []
+        tool_results = {}
+        dependencies_respected = True
+
+        async def monitor_sequential_execution():
+            """Monitor sequential tool execution with dependency validation."""
+            nonlocal dependencies_respected
+            try:
+                async for message in websocket:
+                    event = json.loads(message)
+                    event_type = event.get("type")
+                    event_data = event.get("data", {})
+
+                    if event_type == "tool_executing":
+                        tool_name = event_data.get("tool_name", event_data.get("tool", "unknown"))
+                        execution_record = {
+                            "tool_name": tool_name,
+                            "started_at": time.time(),
+                            "sequence_position": len(tool_execution_sequence) + 1
+                        }
+                        tool_execution_sequence.append(execution_record)
+
+                        self.logger.info(f"🔧 Tool executing: {tool_name} (position: {execution_record['sequence_position']})")
+
+                        # Validate dependency order
+                        if not self._validate_tool_dependency_order(tool_name, tool_execution_sequence):
+                            dependencies_respected = False
+                            self.logger.error(f"🚨 Dependency violation: {tool_name} started out of order")
+
+                    elif event_type == "tool_completed":
+                        tool_name = event_data.get("tool_name", event_data.get("tool", "unknown"))
+                        tool_result = event_data.get("result", event_data.get("output", {}))
+
+                        tool_results[tool_name] = {
+                            "result": tool_result,
+                            "completed_at": time.time(),
+                            "success": event_data.get("success", True)
+                        }
+
+                        # Update execution record
+                        for record in tool_execution_sequence:
+                            if record["tool_name"] == tool_name and "completed_at" not in record:
+                                record["completed_at"] = time.time()
+                                record["duration"] = record["completed_at"] - record["started_at"]
+                                break
+
+                        self.logger.info(f"✅ Tool completed: {tool_name}")
+
+                    elif event_type == "agent_completed":
+                        break
+
+            except Exception as e:
+                self.logger.error(f"Sequential execution monitoring error: {e}")
+
+        execution_task = asyncio.create_task(monitor_sequential_execution())
+
+        # Send sequential tool chain request
+        sequential_request = {
+            "type": "execute_agent",
+            "agent_type": "sequential_tool_orchestration",
+            "user_id": user_context.user_id,
+            "thread_id": user_context.thread_id,
+            "request_id": user_context.request_id,
+            "data": {
+                "tool_execution_pattern": "sequential",
+                "required_tools": [
+                    "cost_analyzer",
+                    "usage_profiler",
+                    "optimization_generator",
+                    "risk_assessor",
+                    "report_compiler"
+                ],
+                "dependency_validation": True,
+                "sequential_execution": True,
+                "orchestration_test": True
+            }
+        }
+
+        start_time = time.time()
+        await websocket.send(json.dumps(sequential_request))
+
+        # Wait for sequential execution completion
+        try:
+            await asyncio.wait_for(execution_task, timeout=75.0)  # Extended timeout for tool chain
+        except asyncio.TimeoutError:
+            pytest.fail("Sequential tool execution timed out")
+
+        total_duration = time.time() - start_time
+
+        # Validate sequential execution
+        assert dependencies_respected, "Tool dependency order was violated during sequential execution"
+        assert len(tool_execution_sequence) >= 4, f"Expected at least 4 tools in sequence, got {len(tool_execution_sequence)}"
+
+        # Validate all tools completed successfully
+        completed_tools = [name for name, result in tool_results.items() if result.get("success", False)]
+        assert len(completed_tools) >= 4, f"Expected at least 4 successful tool completions, got {len(completed_tools)}"
+
+        # Validate sequential timing - tools should not overlap significantly
+        overlapping_tools = 0
+        for i in range(len(tool_execution_sequence) - 1):
+            current_tool = tool_execution_sequence[i]
+            next_tool = tool_execution_sequence[i + 1]
+
+            if "completed_at" in current_tool and "started_at" in next_tool:
+                gap = next_tool["started_at"] - current_tool["completed_at"]
+                # Allow small overlaps but detect major violations
+                if gap < -2.0:  # Next tool started more than 2s before current completed
+                    overlapping_tools += 1
+
+        assert overlapping_tools <= 1, f"Too many overlapping tools in sequential execution: {overlapping_tools}"
+
+        # Validate data flow between tools
+        tool_names = [record["tool_name"] for record in tool_execution_sequence]
+        expected_sequence_patterns = ["cost_analyzer", "usage_profiler", "optimization_generator"]
+
+        # Check if expected tools appear in correct relative order
+        for i, expected_tool in enumerate(expected_sequence_patterns[:-1]):
+            if expected_tool in tool_names:
+                expected_position = tool_names.index(expected_tool)
+                next_expected_tool = expected_sequence_patterns[i + 1]
+                if next_expected_tool in tool_names:
+                    next_position = tool_names.index(next_expected_tool)
+                    assert expected_position < next_position, f"Tool sequence violation: {expected_tool} should come before {next_expected_tool}"
+
+        self.logger.info(f"✅ PASS: Sequential tool execution validated successfully")
+        self.logger.info(f"🔧 Tools executed: {len(tool_execution_sequence)}")
+        self.logger.info(f"✅ Successful completions: {len(completed_tools)}")
+        self.logger.info(f"⏱️ Total execution time: {total_duration:.2f}s")
+        self.logger.info(f"📋 Tool sequence: {' → '.join([r['tool_name'] for r in tool_execution_sequence[:5]])}")
+
+    async def test_parallel_tool_execution_coordination(self):
+        """
+        Test parallel tool execution with resource coordination.
+
+        BVJ: Validates $300K+ MRR performance optimization - Parallel execution for speed
+        Ensures: Tools execute concurrently, results properly aggregated
+        """
+        user_context = self.test_users[0]
+
+        websocket = await self.ws_auth_helper.connect_authenticated_websocket(timeout=25.0)
+        self.register_cleanup_task(lambda: asyncio.create_task(websocket.close()))
+
+        # Track parallel execution patterns
+        concurrent_executions = []
+        tool_start_times = {}
+        tool_end_times = {}
+        max_concurrent_tools = 0
+
+        async def monitor_parallel_execution():
+            """Monitor parallel tool execution and concurrency levels."""
+            nonlocal max_concurrent_tools
+            currently_executing = set()
+
+            try:
+                async for message in websocket:
+                    event = json.loads(message)
+                    event_type = event.get("type")
+                    event_data = event.get("data", {})
+                    current_time = time.time()
+
+                    if event_type == "tool_executing":
+                        tool_name = event_data.get("tool_name", event_data.get("tool", "unknown"))
+                        currently_executing.add(tool_name)
+                        tool_start_times[tool_name] = current_time
+
+                        # Track concurrent execution level
+                        current_concurrency = len(currently_executing)
+                        max_concurrent_tools = max(max_concurrent_tools, current_concurrency)
+
+                        concurrent_executions.append({
+                            "tool_name": tool_name,
+                            "action": "started",
+                            "timestamp": current_time,
+                            "concurrent_count": current_concurrency
+                        })
+
+                        self.logger.info(f"🔧 Tool started: {tool_name} (concurrent: {current_concurrency})")
+
+                    elif event_type == "tool_completed":
+                        tool_name = event_data.get("tool_name", event_data.get("tool", "unknown"))
+                        currently_executing.discard(tool_name)
+                        tool_end_times[tool_name] = current_time
+
+                        concurrent_executions.append({
+                            "tool_name": tool_name,
+                            "action": "completed",
+                            "timestamp": current_time,
+                            "concurrent_count": len(currently_executing)
+                        })
+
+                        self.logger.info(f"✅ Tool completed: {tool_name} (concurrent: {len(currently_executing)})")
+
+                    elif event_type == "agent_completed":
+                        break
+
+            except Exception as e:
+                self.logger.error(f"Parallel execution monitoring error: {e}")
+
+        parallel_task = asyncio.create_task(monitor_parallel_execution())
+
+        # Send parallel tool execution request
+        parallel_request = {
+            "type": "execute_agent",
+            "agent_type": "parallel_tool_orchestration",
+            "user_id": user_context.user_id,
+            "thread_id": user_context.thread_id,
+            "request_id": user_context.request_id,
+            "data": {
+                "tool_execution_pattern": "parallel",
+                "parallel_tools": [
+                    "performance_analyzer",
+                    "security_scanner",
+                    "compliance_checker",
+                    "cost_optimizer",
+                    "usage_monitor"
+                ],
+                "max_concurrent_tools": 4,
+                "parallel_execution": True,
+                "coordination_test": True
+            }
+        }
+
+        start_time = time.time()
+        await websocket.send(json.dumps(parallel_request))
+
+        # Wait for parallel execution completion
+        try:
+            await asyncio.wait_for(parallel_task, timeout=60.0)
+        except asyncio.TimeoutError:
+            pytest.fail("Parallel tool execution timed out")
+
+        total_duration = time.time() - start_time
+
+        # Validate parallel execution characteristics
+        assert max_concurrent_tools >= 2, f"Expected at least 2 concurrent tools, got {max_concurrent_tools}"
+        assert len(tool_start_times) >= 3, f"Expected at least 3 tools to start, got {len(tool_start_times)}"
+        assert len(tool_end_times) >= 3, f"Expected at least 3 tools to complete, got {len(tool_end_times)}"
+
+        # Validate genuine parallelism - tools should overlap in execution time
+        overlapping_pairs = 0
+        tool_names = list(tool_start_times.keys())
+
+        for i, tool1 in enumerate(tool_names):
+            for j, tool2 in enumerate(tool_names[i+1:], i+1):
+                if tool1 in tool_end_times and tool2 in tool_end_times:
+                    # Check if execution periods overlap
+                    tool1_start = tool_start_times[tool1]
+                    tool1_end = tool_end_times[tool1]
+                    tool2_start = tool_start_times[tool2]
+                    tool2_end = tool_end_times[tool2]
+
+                    # Tools overlap if one starts before the other ends
+                    if (tool1_start < tool2_end and tool2_start < tool1_end):
+                        overlapping_pairs += 1
+
+        assert overlapping_pairs >= 1, f"Expected at least 1 overlapping tool pair (parallel execution), got {overlapping_pairs}"
+
+        # Validate performance benefit of parallelization
+        # Total execution time should be less than sum of individual tool times
+        total_tool_duration = sum(
+            tool_end_times[tool] - tool_start_times[tool]
+            for tool in tool_names
+            if tool in tool_end_times and tool in tool_start_times
+        )
+
+        parallelization_efficiency = total_tool_duration / total_duration
+        assert parallelization_efficiency >= 1.5, f"Insufficient parallelization benefit: {parallelization_efficiency:.2f}x"
+
+        # Validate concurrency management
+        concurrency_peaks = [event["concurrent_count"] for event in concurrent_executions if event["action"] == "started"]
+        if concurrency_peaks:
+            avg_concurrency = sum(concurrency_peaks) / len(concurrency_peaks)
+            assert avg_concurrency >= 1.5, f"Average concurrency too low: {avg_concurrency:.2f}"
+
+        self.logger.info(f"✅ PASS: Parallel tool execution validated successfully")
+        self.logger.info(f"🚀 Max concurrent tools: {max_concurrent_tools}")
+        self.logger.info(f"⚡ Parallelization efficiency: {parallelization_efficiency:.2f}x")
+        self.logger.info(f"🔗 Overlapping tool pairs: {overlapping_pairs}")
+        self.logger.info(f"⏱️ Total execution time: {total_duration:.2f}s")
+
+    async def test_complex_tool_chain_with_branching(self):
+        """
+        Test complex tool orchestration with conditional branching logic.
+
+        BVJ: Validates $400K+ MRR enterprise intelligence - Complex decision trees
+        Ensures: Conditional tool execution based on intermediate results
+        """
+        user_context = self.test_users[0]
+
+        websocket = await self.ws_auth_helper.connect_authenticated_websocket(timeout=30.0)
+        self.register_cleanup_task(lambda: asyncio.create_task(websocket.close()))
+
+        # Track complex orchestration flow
+        orchestration_flow = {
+            "decision_points": [],
+            "branch_selections": [],
+            "conditional_executions": [],
+            "result_aggregations": []
+        }
+
+        async def monitor_complex_orchestration():
+            """Monitor complex tool orchestration with branching logic."""
+            try:
+                async for message in websocket:
+                    event = json.loads(message)
+                    event_type = event.get("type")
+                    event_data = event.get("data", {})
+
+                    if event_type == "orchestration_decision":
+                        decision_info = {
+                            "decision_point": event_data.get("decision_point", "unknown"),
+                            "condition": event_data.get("condition", "unknown"),
+                            "selected_branch": event_data.get("selected_branch", "unknown"),
+                            "timestamp": time.time()
+                        }
+                        orchestration_flow["decision_points"].append(decision_info)
+
+                        self.logger.info(f"🔀 Orchestration decision: {decision_info['decision_point']} → {decision_info['selected_branch']}")
+
+                    elif event_type == "conditional_tool_execution":
+                        conditional_info = {
+                            "tool_name": event_data.get("tool_name", "unknown"),
+                            "condition_met": event_data.get("condition_met", False),
+                            "branch_context": event_data.get("branch_context", "unknown"),
+                            "timestamp": time.time()
+                        }
+                        orchestration_flow["conditional_executions"].append(conditional_info)
+
+                        self.logger.info(f"🎯 Conditional execution: {conditional_info['tool_name']} (condition: {conditional_info['condition_met']})")
+
+                    elif event_type == "result_aggregation":
+                        aggregation_info = {
+                            "aggregation_type": event_data.get("aggregation_type", "unknown"),
+                            "input_tools": event_data.get("input_tools", []),
+                            "output_summary": event_data.get("output_summary", {}),
+                            "timestamp": time.time()
+                        }
+                        orchestration_flow["result_aggregations"].append(aggregation_info)
+
+                        self.logger.info(f"📊 Result aggregation: {aggregation_info['aggregation_type']} from {len(aggregation_info['input_tools'])} tools")
+
+                    elif event_type == "agent_completed":
+                        break
+
+            except Exception as e:
+                self.logger.error(f"Complex orchestration monitoring error: {e}")
+
+        orchestration_task = asyncio.create_task(monitor_complex_orchestration())
+
+        # Send complex orchestration request with branching logic
+        complex_request = {
+            "type": "execute_agent",
+            "agent_type": "complex_tool_orchestration",
+            "user_id": user_context.user_id,
+            "thread_id": user_context.thread_id,
+            "request_id": user_context.request_id,
+            "data": {
+                "orchestration_pattern": "complex_branching",
+                "decision_tree": {
+                    "initial_analysis": ["cost_analyzer", "performance_profiler"],
+                    "cost_branch": {
+                        "condition": "high_cost_detected",
+                        "tools": ["cost_optimizer", "budget_analyzer"]
+                    },
+                    "performance_branch": {
+                        "condition": "performance_issues_detected",
+                        "tools": ["performance_tuner", "resource_optimizer"]
+                    },
+                    "aggregation": "comprehensive_report_generator"
+                },
+                "conditional_execution": True,
+                "result_aggregation": True,
+                "branching_test": True
+            }
+        }
+
+        start_time = time.time()
+        await websocket.send(json.dumps(complex_request))
+
+        # Wait for complex orchestration completion
+        try:
+            await asyncio.wait_for(orchestration_task, timeout=90.0)  # Extended timeout for complex flow
+        except asyncio.TimeoutError:
+            pytest.fail("Complex tool orchestration timed out")
+
+        total_duration = time.time() - start_time
+
+        # Validate complex orchestration
+        assert len(orchestration_flow["decision_points"]) >= 1, f"Expected at least 1 decision point, got {len(orchestration_flow['decision_points'])}"
+        assert len(orchestration_flow["conditional_executions"]) >= 2, f"Expected at least 2 conditional executions, got {len(orchestration_flow['conditional_executions'])}"
+
+        # Validate decision-making process
+        decision_points = orchestration_flow["decision_points"]
+        for decision in decision_points:
+            assert decision["decision_point"] != "unknown", f"Invalid decision point: {decision}"
+            assert decision["selected_branch"] != "unknown", f"Invalid branch selection: {decision}"
+
+        # Validate conditional executions
+        conditional_executions = orchestration_flow["conditional_executions"]
+        executed_tools = [exec["tool_name"] for exec in conditional_executions if exec["condition_met"]]
+        assert len(executed_tools) >= 2, f"Expected at least 2 conditionally executed tools, got {len(executed_tools)}"
+
+        # Validate result aggregation occurred
+        if orchestration_flow["result_aggregations"]:
+            aggregations = orchestration_flow["result_aggregations"]
+            final_aggregation = aggregations[-1]  # Last aggregation should be comprehensive
+
+            assert len(final_aggregation["input_tools"]) >= 2, f"Final aggregation should combine at least 2 tools, got {len(final_aggregation['input_tools'])}"
+            assert final_aggregation["aggregation_type"] != "unknown", f"Invalid aggregation type: {final_aggregation}"
+
+        # Validate execution flow timing
+        if len(decision_points) >= 1:
+            decision_times = [dp["timestamp"] for dp in decision_points]
+            execution_times = [ce["timestamp"] for ce in conditional_executions]
+
+            # Decisions should generally come before executions
+            earliest_decision = min(decision_times)
+            earliest_execution = min(execution_times) if execution_times else float('inf')
+
+            if earliest_execution != float('inf'):
+                assert earliest_decision <= earliest_execution + 1.0, "Decisions should generally precede executions"
+
+        self.logger.info(f"✅ PASS: Complex tool orchestration validated successfully")
+        self.logger.info(f"🔀 Decision points: {len(orchestration_flow['decision_points'])}")
+        self.logger.info(f"🎯 Conditional executions: {len(orchestration_flow['conditional_executions'])}")
+        self.logger.info(f"📊 Result aggregations: {len(orchestration_flow['result_aggregations'])}")
+        self.logger.info(f"⏱️ Total orchestration time: {total_duration:.2f}s")
+
+    async def test_tool_error_recovery_orchestration(self):
+        """
+        Test tool execution error recovery within orchestration flows.
+
+        BVJ: Validates $250K+ MRR reliability - Tool failures must not break workflows
+        Ensures: Graceful error handling, workflow continuation, fallback execution
+        """
+        user_context = self.test_users[0]
+
+        websocket = await self.ws_auth_helper.connect_authenticated_websocket(timeout=30.0)
+        self.register_cleanup_task(lambda: asyncio.create_task(websocket.close()))
+
+        # Track error recovery in orchestration
+        error_recovery_flow = {
+            "tool_errors": [],
+            "recovery_actions": [],
+            "fallback_executions": [],
+            "workflow_continuations": []
+        }
+
+        async def monitor_error_recovery_orchestration():
+            """Monitor error recovery patterns in tool orchestration."""
+            try:
+                async for message in websocket:
+                    event = json.loads(message)
+                    event_type = event.get("type")
+                    event_data = event.get("data", {})
+
+                    if event_type == "tool_error":
+                        error_info = {
+                            "tool_name": event_data.get("tool_name", "unknown"),
+                            "error_message": event_data.get("error", event_data.get("message", "unknown")),
+                            "error_type": event_data.get("error_type", "unknown"),
+                            "recoverable": event_data.get("recoverable", False),
+                            "timestamp": time.time()
+                        }
+                        error_recovery_flow["tool_errors"].append(error_info)
+
+                        self.logger.info(f"🚨 Tool error: {error_info['tool_name']} - {error_info['error_message']}")
+
+                    elif event_type == "orchestration_recovery":
+                        recovery_info = {
+                            "recovery_strategy": event_data.get("recovery_strategy", "unknown"),
+                            "failed_tool": event_data.get("failed_tool", "unknown"),
+                            "recovery_action": event_data.get("recovery_action", "unknown"),
+                            "timestamp": time.time()
+                        }
+                        error_recovery_flow["recovery_actions"].append(recovery_info)
+
+                        self.logger.info(f"🔄 Recovery action: {recovery_info['recovery_strategy']} for {recovery_info['failed_tool']}")
+
+                    elif event_type == "fallback_tool_execution":
+                        fallback_info = {
+                            "original_tool": event_data.get("original_tool", "unknown"),
+                            "fallback_tool": event_data.get("fallback_tool", "unknown"),
+                            "fallback_reason": event_data.get("fallback_reason", "unknown"),
+                            "timestamp": time.time()
+                        }
+                        error_recovery_flow["fallback_executions"].append(fallback_info)
+
+                        self.logger.info(f"🔧 Fallback execution: {fallback_info['fallback_tool']} replacing {fallback_info['original_tool']}")
+
+                    elif event_type == "workflow_continuation":
+                        continuation_info = {
+                            "continuation_strategy": event_data.get("continuation_strategy", "unknown"),
+                            "skipped_tools": event_data.get("skipped_tools", []),
+                            "alternative_path": event_data.get("alternative_path", []),
+                            "timestamp": time.time()
+                        }
+                        error_recovery_flow["workflow_continuations"].append(continuation_info)
+
+                        self.logger.info(f"⏭️ Workflow continuation: {continuation_info['continuation_strategy']}")
+
+                    elif event_type == "agent_completed":
+                        break
+
+            except Exception as e:
+                self.logger.error(f"Error recovery orchestration monitoring failed: {e}")
+
+        recovery_task = asyncio.create_task(monitor_error_recovery_orchestration())
+
+        # Send error recovery orchestration test
+        recovery_request = {
+            "type": "execute_agent",
+            "agent_type": "error_recovery_orchestration",
+            "user_id": user_context.user_id,
+            "thread_id": user_context.thread_id,
+            "request_id": user_context.request_id,
+            "data": {
+                "orchestration_pattern": "error_recovery_test",
+                "tools_with_errors": [
+                    {"tool": "unreliable_analyzer", "failure_probability": 0.8},
+                    {"tool": "flaky_optimizer", "failure_probability": 0.6}
+                ],
+                "recovery_strategies": ["retry", "fallback_tool", "skip_and_continue"],
+                "error_recovery_test": True,
+                "workflow_resilience_test": True
+            }
+        }
+
+        start_time = time.time()
+        await websocket.send(json.dumps(recovery_request))
+
+        # Wait for error recovery test completion
+        try:
+            await asyncio.wait_for(recovery_task, timeout=75.0)
+        except asyncio.TimeoutError:
+            pytest.fail("Tool error recovery orchestration timed out")
+
+        total_duration = time.time() - start_time
+
+        # Validate error recovery orchestration
+        assert len(error_recovery_flow["tool_errors"]) >= 1, f"Expected at least 1 tool error for recovery test, got {len(error_recovery_flow['tool_errors'])}"
+        assert len(error_recovery_flow["recovery_actions"]) >= 1, f"Expected at least 1 recovery action, got {len(error_recovery_flow['recovery_actions'])}"
+
+        # Validate recovery strategies were applied
+        recovery_strategies = [action["recovery_strategy"] for action in error_recovery_flow["recovery_actions"]]
+        expected_strategies = ["retry", "fallback_tool", "skip_and_continue"]
+
+        strategies_used = [strategy for strategy in expected_strategies if strategy in recovery_strategies]
+        assert len(strategies_used) >= 1, f"Expected at least 1 recovery strategy to be used, got {strategies_used}"
+
+        # Validate error details
+        for error in error_recovery_flow["tool_errors"]:
+            assert error["tool_name"] != "unknown", f"Tool error missing tool name: {error}"
+            assert error["error_message"] != "unknown", f"Tool error missing error message: {error}"
+
+        # Validate workflow continuation after errors
+        if error_recovery_flow["workflow_continuations"]:
+            continuations = error_recovery_flow["workflow_continuations"]
+            assert len(continuations) >= 1, "Expected workflow to continue after errors"
+
+            for continuation in continuations:
+                assert continuation["continuation_strategy"] != "unknown", f"Invalid continuation strategy: {continuation}"
+
+        # Validate fallback executions if they occurred
+        if error_recovery_flow["fallback_executions"]:
+            fallbacks = error_recovery_flow["fallback_executions"]
+            for fallback in fallbacks:
+                assert fallback["original_tool"] != "unknown", f"Fallback missing original tool: {fallback}"
+                assert fallback["fallback_tool"] != "unknown", f"Fallback missing fallback tool: {fallback}"
+
+        self.logger.info(f"✅ PASS: Tool error recovery orchestration validated")
+        self.logger.info(f"🚨 Tool errors handled: {len(error_recovery_flow['tool_errors'])}")
+        self.logger.info(f"🔄 Recovery actions: {len(error_recovery_flow['recovery_actions'])}")
+        self.logger.info(f"🔧 Fallback executions: {len(error_recovery_flow['fallback_executions'])}")
+        self.logger.info(f"⏭️ Workflow continuations: {len(error_recovery_flow['workflow_continuations'])}")
+        self.logger.info(f"📋 Strategies used: {', '.join(strategies_used)}")
+
+    def _validate_tool_dependency_order(self, current_tool: str, execution_sequence: List[Dict]) -> bool:
+        """Validate that tool dependency order is respected in sequential execution."""
+        # Define expected tool dependencies
+        dependencies = {
+            "usage_profiler": ["cost_analyzer"],  # usage_profiler depends on cost_analyzer
+            "optimization_generator": ["cost_analyzer", "usage_profiler"],  # optimization depends on both
+            "risk_assessor": ["cost_analyzer"],  # risk_assessor depends on cost analysis
+            "report_compiler": ["optimization_generator", "risk_assessor"]  # report depends on optimization and risk
+        }
+
+        if current_tool not in dependencies:
+            return True  # No dependencies to validate
+
+        required_deps = dependencies[current_tool]
+        completed_tools = []
+
+        # Find tools that have already started (and potentially completed)
+        for record in execution_sequence:
+            if record["tool_name"] != current_tool:  # Don't include the current tool
+                completed_tools.append(record["tool_name"])
+
+        # Check if all required dependencies have started
+        missing_deps = [dep for dep in required_deps if dep not in completed_tools]
+
+        return len(missing_deps) == 0
+
+
+# Integration with pytest for automated test discovery
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--tb=short"])

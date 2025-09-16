@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Docker Login</title>
+</head>
+<body>
+    <h1>Test Docker Compose Login</h1>
+    <button id="loginBtn">Test Login</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testLogin() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                // Step 1: Get auth config
+                resultDiv.innerHTML = 'Getting auth config...';
+                const configResponse = await fetch('http://localhost:8081/auth/config');
+                const authConfig = await configResponse.json();
+                console.log('Auth config:', authConfig);
+                
+                if (!authConfig.development_mode) {
+                    resultDiv.innerHTML = 'ERROR: Not in development mode!';
+                    return;
+                }
+                
+                // Step 2: Perform dev login
+                resultDiv.innerHTML = 'Performing dev login...';
+                const loginResponse = await fetch(authConfig.endpoints.dev_login, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'dev@example.com',
+                        password: 'dev'
+                    })
+                });
+                
+                if (!loginResponse.ok) {
+                    const error = await loginResponse.text();
+                    resultDiv.innerHTML = `Login failed: ${loginResponse.status} - ${error}`;
+                    return;
+                }
+                
+                const loginData = await loginResponse.json();
+                console.log('Login response:', loginData);
+                
+                // Step 3: Verify token works
+                resultDiv.innerHTML = 'Verifying token...';
+                const verifyResponse = await fetch(authConfig.endpoints.user, {
+                    headers: {
+                        'Authorization': `Bearer ${loginData.access_token}`
+                    }
+                });
+                
+                if (verifyResponse.ok) {
+                    const userData = await verifyResponse.json();
+                    resultDiv.innerHTML = `<h2>SUCCESS!</h2>
+                        <p>Token: ${loginData.access_token.substring(0, 20)}...</p>
+                        <p>User: ${JSON.stringify(userData)}</p>`;
+                } else {
+                    resultDiv.innerHTML = `Token verification failed: ${verifyResponse.status}`;
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `ERROR: ${error.message}`;
+                console.error(error);
+            }
+        }
+        
+        document.getElementById('loginBtn').addEventListener('click', testLogin);
+    </script>
+</body>
+</html>

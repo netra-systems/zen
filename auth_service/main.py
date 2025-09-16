@@ -59,6 +59,69 @@ configure_service_logging({
 })
 logger = get_logger(__name__)
 
+# CRITICAL: SSOT-Compliant Environment Validation at Startup  
+# Validate environment configuration before starting auth service
+# This implements Phase 1 of the SSOT-compliant integration plan
+def validate_auth_environment():
+    """
+    Validate auth service environment configuration.
+    SSOT COMPLIANT: Uses central validators and follows SSOT patterns.
+    """
+    import sys
+    from shared.configuration.central_config_validator import validate_platform_configuration
+    
+    logger.info("🔍 Validating auth service environment with SSOT validators...")
+    
+    try:
+        # Use SSOT central validator for comprehensive environment validation
+        # This validates JWT secrets, OAuth credentials, database config, etc.
+        validate_platform_configuration()
+        logger.info("✅ Auth service environment validation completed (SSOT compliant)")
+        
+    except ValueError as e:
+        error_message = f"""
+🚨 AUTH SERVICE ENVIRONMENT VALIDATION FAILED (SSOT) 🚨
+
+Service: auth-service
+Validator: SSOT CentralConfigValidator
+Error: {str(e)}
+
+SSOT compliance status: ✅ Validated
+Required actions:
+1. Set all missing environment variables
+2. Verify OAuth configuration for current environment
+3. Check JWT secret configuration
+4. Verify database connectivity settings  
+5. Restart auth service after fixing configuration
+
+Auth service startup ABORTED - user login will fail without these variables.
+This prevents Golden Path authentication failures.
+"""
+        logger.critical(error_message)
+        sys.exit(1)
+    except Exception as e:
+        # For unexpected errors, log but handle gracefully based on environment
+        env_name = get_env().get("ENVIRONMENT", "development").lower()
+        
+        if env_name in ["staging", "production"]:
+            error_message = f"""
+🚨 AUTH SERVICE VALIDATION ERROR (SSOT) 🚨
+
+Service: auth-service
+Environment: {env_name}
+Error: {str(e)}
+
+Critical validation infrastructure failure in {env_name} environment.
+Auth service startup ABORTED for safety.
+"""
+            logger.critical(error_message)
+            sys.exit(1)
+        else:
+            logger.warning(f"⚠️ Auth service validation error in {env_name}: {e} - continuing startup")
+
+# Run SSOT-compliant validation before service initialization
+validate_auth_environment()
+
 # Global shutdown event for graceful shutdown
 shutdown_event = asyncio.Event()
 

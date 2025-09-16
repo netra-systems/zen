@@ -1,0 +1,863 @@
+"""
+Agent Handoff Chain Validation E2E Tests
+=========================================
+
+Business Value Justification (BVJ):
+- Segment: Platform/All tiers (affects all users)
+- Business Goal: Platform Stability & User Experience 
+- Value Impact: Ensures reliable agent workflow progression and prevents broken user interactions
+- Revenue Impact: Protects $500K+ ARR by preventing agent execution failures in production
+
+These tests validate the complete agent handoff chain in the Supervisor Agent orchestration:
+Triage → Data Helper → APEX Optimizer → Actions → Reporting
+
+Each handoff must transfer context correctly, maintain user isolation, and ensure
+reliable progression through the complete workflow chain.
+
+Test Environment: GCP Staging (NO DOCKER)
+Coverage Focus: Agent Handoff Chain Validation (Issue #872)
+"""
+
+import asyncio
+import json
+import logging
+import time
+import uuid
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Tuple
+from dataclasses import dataclass
+from enum import Enum
+
+import pytest
+
+from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, E2EAuthConfig
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from shared.isolated_environment import IsolatedEnvironment
+
+logger = logging.getLogger(__name__)
+
+
+class AgentHandoffStatus(Enum):
+    """Status of agent handoffs in the chain."""
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+
+
+@dataclass
+class AgentHandoffEvent:
+    """Represents an agent handoff event."""
+    from_agent: str
+    to_agent: str
+    timestamp: float
+    context_transferred: Dict[str, Any]
+    handoff_data: Dict[str, Any]
+    user_id: str
+    run_id: str
+    status: AgentHandoffStatus = AgentHandoffStatus.PENDING
+
+
+@dataclass 
+class HandoffChainValidation:
+    """Validation result for a complete handoff chain."""
+    chain_completed: bool
+    expected_sequence: List[str]
+    actual_sequence: List[str]
+    handoff_events: List[AgentHandoffEvent]
+    broken_handoffs: List[str]
+    context_preservation_score: float
+    total_execution_time: float
+    user_id: str
+
+
+class AgentHandoffChainValidationTests(SSotAsyncTestCase):
+    """
+    E2E Tests for Agent Handoff Chain Validation.
+    
+    These tests validate the complete agent orchestration chain:
+    Supervisor → Triage → Data Helper → APEX Optimizer → Actions → Reporting
+    """
+    
+    def setUp(self):
+        """Set up test environment for agent handoff chain validation."""
+        super().setUp()
+        
+        # Use staging environment for real E2E testing
+        self.environment = IsolatedEnvironment().get("TEST_ENV", "staging")
+        self.auth_config = E2EAuthConfig.for_environment(self.environment)
+        
+        # Expected agent handoff chain for supervisor orchestration
+        self.expected_agent_chain = [
+            "Supervisor",  # Entry point
+            "Triage",      # Request analysis and categorization
+            "Data",        # Data gathering and analysis  
+            "APEX",        # AI optimization recommendations
+            "Actions",     # Action plan generation
+            "Reporting"    # Final report compilation
+        ]
+        
+        # Test configuration
+        self.handoff_timeout = 30.0  # 30 seconds per handoff
+        self.chain_timeout = 180.0   # 3 minutes for complete chain
+        self.context_validation_threshold = 0.8  # 80% context preservation required
+        
+        logger.info(f"Setting up Agent Handoff Chain Validation tests in {self.environment}")
+
+    @pytest.mark.asyncio
+    @pytest.mark.e2e
+    @pytest.mark.agent_handoff_chain
+    @pytest.mark.timeout(240)  # 4 minutes for complete chain validation
+    async def test_complete_agent_handoff_chain(self):
+        """
+        Test the complete agent handoff chain from Supervisor through all sub-agents.
+        
+        Validates that each agent in the orchestration chain properly hands off
+        to the next agent with correct context transfer and no broken links.
+        """
+        logger.info("🧪 Starting complete agent handoff chain test")
+        
+        # Create authenticated user session
+        auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
+        user_id = f"handoff_chain_user_{uuid.uuid4().hex[:8]}"
+        email = f"{user_id}@test.netrasystems.ai"
+        
+        # Create JWT and establish WebSocket connection
+        jwt_token = auth_helper.create_test_jwt_token(
+            user_id=user_id,
+            email=email,
+            permissions=["read", "write", "agent_execution"]
+        )
+        
+        websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
+        
+        # Define comprehensive request that should trigger all agents
+        comprehensive_request = {
+            "user_request": (
+                "Analyze our AI infrastructure performance, identify bottlenecks, "
+                "recommend optimizations for cost and efficiency, create implementation "
+                "plan, and provide executive summary report"
+            ),
+            "expected_chain": self.expected_agent_chain,
+            "context_tracking_id": f"chain_test_{int(time.time())}"
+        }
+        
+        # Execute complete handoff chain validation
+        chain_validation = await self._execute_and_validate_handoff_chain(
+            websocket=websocket,
+            user_id=user_id,
+            request_data=comprehensive_request
+        )
+        
+        # Validate chain completion
+        self.assertTrue(chain_validation.chain_completed,
+                       f"Agent handoff chain did not complete successfully. "
+                       f"Expected: {chain_validation.expected_sequence}, "
+                       f"Actual: {chain_validation.actual_sequence}")
+        
+        # Validate sequence correctness
+        self.assertEqual(len(chain_validation.broken_handoffs), 0,
+                        f"Broken handoffs detected: {chain_validation.broken_handoffs}")
+        
+        # Validate context preservation
+        self.assertGreaterEqual(chain_validation.context_preservation_score,
+                               self.context_validation_threshold,
+                               f"Context preservation too low: "
+                               f"{chain_validation.context_preservation_score:.2f} < "
+                               f"{self.context_validation_threshold}")
+        
+        # Validate execution time
+        self.assertLess(chain_validation.total_execution_time, self.chain_timeout,
+                       f"Chain execution took too long: {chain_validation.total_execution_time:.1f}s")
+        
+        # Log success metrics
+        logger.info(f"✅ Complete agent handoff chain test succeeded: "
+                   f"sequence_length={len(chain_validation.actual_sequence)}, "
+                   f"context_score={chain_validation.context_preservation_score:.2f}, "
+                   f"execution_time={chain_validation.total_execution_time:.1f}s")
+        
+        await websocket.close()
+
+    @pytest.mark.asyncio
+    @pytest.mark.e2e
+    @pytest.mark.agent_handoff_chain
+    @pytest.mark.timeout(180)  # 3 minutes
+    async def test_handoff_context_preservation(self):
+        """
+        Test that context is properly preserved across agent handoffs.
+        
+        Validates that critical context data (user request, previous results, 
+        tracking IDs) is correctly transferred between agents in the chain.
+        """
+        logger.info("🧪 Starting handoff context preservation test")
+        
+        # Create user session
+        auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
+        user_id = f"context_preservation_user_{uuid.uuid4().hex[:8]}"
+        email = f"{user_id}@test.netrasystems.ai"
+        
+        jwt_token = auth_helper.create_test_jwt_token(user_id=user_id, email=email)
+        websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
+        
+        # Define request with specific context elements to track
+        context_tracking_request = {
+            "user_request": "Optimize database performance for user analytics dashboard",
+            "tracking_elements": {
+                "project_id": f"proj_{int(time.time())}",
+                "priority": "high",
+                "department": "analytics",
+                "deadline": "2024-01-15",
+                "budget_limit": "$50000",
+                "technical_requirements": ["postgresql", "redis", "elasticsearch"]
+            },
+            "context_validation_markers": [
+                "database_performance_optimization",
+                "user_analytics_dashboard", 
+                "high_priority_project"
+            ]
+        }
+        
+        # Execute chain with context tracking
+        context_validation = await self._execute_chain_with_context_tracking(
+            websocket=websocket,
+            user_id=user_id,
+            request_data=context_tracking_request
+        )
+        
+        # Validate context preservation across handoffs
+        await self._validate_context_preservation_across_handoffs(context_validation)
+        
+        # Validate specific tracking elements
+        await self._validate_tracking_elements_preservation(
+            context_validation,
+            context_tracking_request["tracking_elements"]
+        )
+        
+        # Validate context validation markers
+        await self._validate_context_markers_propagation(
+            context_validation,
+            context_tracking_request["context_validation_markers"]
+        )
+        
+        logger.info("✅ Handoff context preservation test completed successfully")
+        await websocket.close()
+
+    @pytest.mark.asyncio
+    @pytest.mark.e2e
+    @pytest.mark.agent_handoff_chain
+    @pytest.mark.timeout(300)  # 5 minutes for failure recovery testing
+    async def test_handoff_chain_failure_recovery(self):
+        """
+        Test agent handoff chain recovery when individual agents fail.
+        
+        Validates that the orchestration can handle agent failures gracefully
+        and continue the chain or provide meaningful error responses.
+        """
+        logger.info("🧪 Starting handoff chain failure recovery test")
+        
+        # Create user session
+        auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
+        user_id = f"failure_recovery_user_{uuid.uuid4().hex[:8]}"
+        email = f"{user_id}@test.netrasystems.ai"
+        
+        jwt_token = auth_helper.create_test_jwt_token(user_id=user_id, email=email)
+        websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
+        
+        # Test different failure scenarios
+        failure_scenarios = [
+            {
+                "name": "triage_agent_timeout",
+                "user_request": "TIMEOUT_SIMULATION: Analyze complex data patterns",
+                "expected_failure_agent": "Triage",
+                "expected_recovery": "supervisor_fallback"
+            },
+            {
+                "name": "data_agent_error",
+                "user_request": "ERROR_SIMULATION: Generate comprehensive report with invalid parameters",
+                "expected_failure_agent": "Data",
+                "expected_recovery": "skip_to_next_agent"
+            },
+            {
+                "name": "optimization_agent_resource_limit",
+                "user_request": "RESOURCE_LIMIT_SIMULATION: Optimize large-scale infrastructure",
+                "expected_failure_agent": "APEX",
+                "expected_recovery": "partial_completion"
+            }
+        ]
+        
+        recovery_results = []
+        
+        for scenario in failure_scenarios:
+            logger.info(f"Testing failure recovery scenario: {scenario['name']}")
+            
+            # Execute scenario with failure monitoring
+            recovery_result = await self._execute_failure_recovery_scenario(
+                websocket=websocket,
+                user_id=user_id,
+                scenario=scenario
+            )
+            
+            recovery_results.append(recovery_result)
+            
+            # Brief pause between scenarios
+            await asyncio.sleep(2.0)
+        
+        # Validate recovery results
+        await self._validate_failure_recovery_results(recovery_results, failure_scenarios)
+        
+        logger.info(f"✅ Handoff chain failure recovery test completed: "
+                   f"{len(recovery_results)} scenarios tested")
+        await websocket.close()
+
+    @pytest.mark.asyncio
+    @pytest.mark.e2e 
+    @pytest.mark.agent_handoff_chain
+    @pytest.mark.timeout(360)  # 6 minutes for concurrent chain testing
+    async def test_concurrent_handoff_chains(self):
+        """
+        Test multiple concurrent agent handoff chains.
+        
+        Validates that multiple users can execute agent chains concurrently
+        without interference or context bleeding between chains.
+        """
+        logger.info("🧪 Starting concurrent handoff chains test")
+        
+        # Create multiple user sessions
+        concurrent_sessions = []
+        session_count = 3
+        
+        for i in range(session_count):
+            auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
+            user_id = f"concurrent_chain_user_{i}_{uuid.uuid4().hex[:8]}"
+            email = f"{user_id}@test.netrasystems.ai"
+            
+            jwt_token = auth_helper.create_test_jwt_token(user_id=user_id, email=email)
+            websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
+            
+            concurrent_sessions.append({
+                "user_id": user_id,
+                "websocket": websocket,
+                "auth_helper": auth_helper,
+                "session_index": i
+            })
+        
+        # Define unique requests for each concurrent chain
+        concurrent_requests = [
+            {
+                "user_request": f"Session {session['session_index']}: Analyze performance metrics for production environment",
+                "chain_identifier": f"concurrent_chain_{session['session_index']}_{int(time.time())}",
+                "expected_isolation": True
+            }
+            for session in concurrent_sessions
+        ]
+        
+        # Execute concurrent chains
+        concurrent_tasks = []
+        start_time = time.time()
+        
+        for i, session in enumerate(concurrent_sessions):
+            task = asyncio.create_task(
+                self._execute_concurrent_chain_validation(
+                    websocket=session["websocket"],
+                    user_id=session["user_id"],
+                    request_data=concurrent_requests[i],
+                    session_index=i
+                )
+            )
+            concurrent_tasks.append(task)
+        
+        # Wait for all concurrent chains to complete
+        concurrent_results = await asyncio.gather(*concurrent_tasks, return_exceptions=True)
+        total_execution_time = time.time() - start_time
+        
+        # Analyze concurrent execution results
+        successful_chains = [
+            r for r in concurrent_results 
+            if isinstance(r, dict) and r.get("chain_completed", False)
+        ]
+        
+        # Validate concurrent execution success
+        success_rate = len(successful_chains) / len(concurrent_sessions) * 100
+        self.assertGreaterEqual(success_rate, 75.0,
+                               f"Concurrent chain success rate too low: {success_rate:.1f}%")
+        
+        # Validate isolation between concurrent chains
+        await self._validate_concurrent_chain_isolation(successful_chains, concurrent_requests)
+        
+        # Validate performance under concurrent load
+        avg_execution_time = total_execution_time / len(concurrent_sessions)
+        self.assertLess(avg_execution_time, self.chain_timeout,
+                       f"Average concurrent execution time too high: {avg_execution_time:.1f}s")
+        
+        logger.info(f"✅ Concurrent handoff chains test completed: "
+                   f"{len(successful_chains)}/{len(concurrent_sessions)} successful, "
+                   f"avg_time={avg_execution_time:.1f}s")
+        
+        # Clean up sessions
+        for session in concurrent_sessions:
+            await session["websocket"].close()
+
+    # === Helper Methods ===
+
+    async def _execute_and_validate_handoff_chain(
+        self,
+        websocket: object,
+        user_id: str,
+        request_data: Dict[str, Any]
+    ) -> HandoffChainValidation:
+        """Execute agent chain and validate handoffs."""
+        
+        # Send chain execution request
+        chain_request = {
+            "type": "supervisor_execute_with_handoff_tracking",
+            "user_id": user_id,
+            "request_id": f"chain_req_{user_id}_{int(time.time())}",
+            "user_request": request_data["user_request"],
+            "expected_chain": request_data["expected_chain"],
+            "track_handoffs": True,
+            "context_tracking_id": request_data["context_tracking_id"],
+            "timestamp": time.time()
+        }
+        
+        await websocket.send(json.dumps(chain_request))
+        
+        # Monitor chain execution and handoffs
+        start_time = time.time()
+        handoff_events = []
+        agent_sequence = []
+        context_transfers = []
+        
+        while time.time() - start_time < self.chain_timeout:
+            try:
+                response_raw = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+                response = json.loads(response_raw)
+                
+                # Track agent starts (handoff targets)
+                if response.get("type") == "agent_started":
+                    agent_name = response.get("agent")
+                    if agent_name and agent_name not in agent_sequence:
+                        agent_sequence.append(agent_name)
+                
+                # Track handoff events
+                if response.get("type") == "agent_handoff":
+                    handoff_event = AgentHandoffEvent(
+                        from_agent=response.get("from_agent", ""),
+                        to_agent=response.get("to_agent", ""),
+                        timestamp=response.get("timestamp", time.time()),
+                        context_transferred=response.get("context_transferred", {}),
+                        handoff_data=response.get("handoff_data", {}),
+                        user_id=user_id,
+                        run_id=response.get("run_id", ""),
+                        status=AgentHandoffStatus.COMPLETED
+                    )
+                    handoff_events.append(handoff_event)
+                
+                # Track context transfers
+                if response.get("type") == "context_transfer":
+                    context_transfers.append(response)
+                
+                # Check for chain completion
+                if (response.get("type") == "agent_completed" and 
+                    response.get("agent") == "Supervisor"):
+                    break
+                    
+            except asyncio.TimeoutError:
+                continue
+        
+        total_execution_time = time.time() - start_time
+        
+        # Analyze handoff chain
+        expected_sequence = request_data["expected_chain"]
+        broken_handoffs = self._identify_broken_handoffs(agent_sequence, expected_sequence)
+        context_score = self._calculate_context_preservation_score(context_transfers, handoff_events)
+        
+        return HandoffChainValidation(
+            chain_completed=len(agent_sequence) >= len(expected_sequence) * 0.8,  # 80% completion
+            expected_sequence=expected_sequence,
+            actual_sequence=agent_sequence,
+            handoff_events=handoff_events,
+            broken_handoffs=broken_handoffs,
+            context_preservation_score=context_score,
+            total_execution_time=total_execution_time,
+            user_id=user_id
+        )
+
+    async def _execute_chain_with_context_tracking(
+        self,
+        websocket: object,
+        user_id: str,
+        request_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Execute chain with detailed context tracking."""
+        
+        request = {
+            "type": "supervisor_execute_with_context_tracking",
+            "user_id": user_id,
+            "request_id": f"context_req_{user_id}_{int(time.time())}",
+            "user_request": request_data["user_request"],
+            "tracking_elements": request_data["tracking_elements"],
+            "context_validation_markers": request_data["context_validation_markers"],
+            "track_context_transfers": True,
+            "timestamp": time.time()
+        }
+        
+        await websocket.send(json.dumps(request))
+        
+        # Monitor context preservation
+        start_time = time.time()
+        context_snapshots = []
+        agent_contexts = {}
+        
+        while time.time() - start_time < self.chain_timeout:
+            try:
+                response_raw = await asyncio.wait_for(websocket.recv(), timeout=3.0)
+                response = json.loads(response_raw)
+                
+                # Capture context snapshots
+                if response.get("type") == "context_snapshot":
+                    context_snapshots.append(response)
+                
+                # Track agent-specific contexts
+                if response.get("type") == "agent_context_update":
+                    agent_name = response.get("agent")
+                    if agent_name:
+                        agent_contexts[agent_name] = response.get("context", {})
+                
+                # Check for completion
+                if (response.get("type") == "agent_completed" and 
+                    response.get("agent") == "Supervisor"):
+                    break
+                    
+            except asyncio.TimeoutError:
+                continue
+        
+        return {
+            "user_id": user_id,
+            "context_snapshots": context_snapshots,
+            "agent_contexts": agent_contexts,
+            "tracking_elements": request_data["tracking_elements"],
+            "validation_markers": request_data["context_validation_markers"],
+            "execution_time": time.time() - start_time
+        }
+
+    async def _execute_failure_recovery_scenario(
+        self,
+        websocket: object,
+        user_id: str,
+        scenario: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Execute failure recovery scenario."""
+        
+        request = {
+            "type": "supervisor_execute_with_failure_simulation",
+            "user_id": user_id,
+            "request_id": f"failure_req_{user_id}_{int(time.time())}",
+            "user_request": scenario["user_request"],
+            "expected_failure_agent": scenario["expected_failure_agent"],
+            "expected_recovery": scenario["expected_recovery"],
+            "failure_simulation": True,
+            "timestamp": time.time()
+        }
+        
+        await websocket.send(json.dumps(request))
+        
+        # Monitor failure and recovery
+        start_time = time.time()
+        failure_detected = False
+        recovery_attempted = False
+        recovery_successful = False
+        failure_details = {}
+        recovery_details = {}
+        
+        while time.time() - start_time < self.chain_timeout:
+            try:
+                response_raw = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+                response = json.loads(response_raw)
+                
+                # Detect agent failures
+                if response.get("type") == "agent_error":
+                    failure_detected = True
+                    failure_details = response
+                
+                # Detect recovery attempts
+                if response.get("type") == "recovery_attempt":
+                    recovery_attempted = True
+                    recovery_details = response
+                
+                # Detect successful recovery
+                if response.get("type") == "recovery_successful":
+                    recovery_successful = True
+                
+                # Check for completion (successful or failed)
+                if response.get("type") in ["agent_completed", "chain_failed"]:
+                    break
+                    
+            except asyncio.TimeoutError:
+                continue
+        
+        return {
+            "scenario_name": scenario["name"],
+            "failure_detected": failure_detected,
+            "recovery_attempted": recovery_attempted,
+            "recovery_successful": recovery_successful,
+            "failure_details": failure_details,
+            "recovery_details": recovery_details,
+            "execution_time": time.time() - start_time
+        }
+
+    async def _execute_concurrent_chain_validation(
+        self,
+        websocket: object,
+        user_id: str,
+        request_data: Dict[str, Any],
+        session_index: int
+    ) -> Dict[str, Any]:
+        """Execute chain validation for concurrent testing."""
+        
+        request = {
+            "type": "supervisor_execute_concurrent",
+            "user_id": user_id,
+            "request_id": f"concurrent_req_{user_id}_{int(time.time())}",
+            "user_request": request_data["user_request"],
+            "chain_identifier": request_data["chain_identifier"],
+            "session_index": session_index,
+            "concurrent_mode": True,
+            "timestamp": time.time()
+        }
+        
+        await websocket.send(json.dumps(request))
+        
+        # Monitor concurrent chain execution
+        start_time = time.time()
+        chain_events = []
+        isolation_verified = True
+        
+        while time.time() - start_time < self.chain_timeout:
+            try:
+                response_raw = await asyncio.wait_for(websocket.recv(), timeout=3.0)
+                response = json.loads(response_raw)
+                
+                chain_events.append(response)
+                
+                # Check for isolation violations
+                if response.get("type") == "isolation_violation":
+                    isolation_verified = False
+                
+                # Check for completion
+                if (response.get("type") == "agent_completed" and 
+                    response.get("agent") == "Supervisor"):
+                    return {
+                        "chain_completed": True,
+                        "user_id": user_id,
+                        "session_index": session_index,
+                        "chain_identifier": request_data["chain_identifier"],
+                        "isolation_verified": isolation_verified,
+                        "chain_events": chain_events,
+                        "execution_time": time.time() - start_time
+                    }
+                    
+            except asyncio.TimeoutError:
+                continue
+        
+        # Timeout case
+        return {
+            "chain_completed": False,
+            "user_id": user_id,
+            "session_index": session_index,
+            "error": "Chain execution timeout",
+            "partial_events": len(chain_events)
+        }
+
+    def _identify_broken_handoffs(self, actual_sequence: List[str], expected_sequence: List[str]) -> List[str]:
+        """Identify broken handoffs in the agent sequence."""
+        broken_handoffs = []
+        
+        # Check for missing agents
+        for expected_agent in expected_sequence:
+            if expected_agent not in actual_sequence:
+                broken_handoffs.append(f"missing_agent:{expected_agent}")
+        
+        # Check for sequence order issues
+        expected_indices = {agent: i for i, agent in enumerate(expected_sequence)}
+        actual_indices = {agent: i for i, agent in enumerate(actual_sequence) if agent in expected_indices}
+        
+        for agent, actual_idx in actual_indices.items():
+            expected_idx = expected_indices[agent]
+            
+            # Check if agent appeared too early in sequence
+            if actual_idx < expected_idx:
+                broken_handoffs.append(f"early_execution:{agent}")
+        
+        return broken_handoffs
+
+    def _calculate_context_preservation_score(
+        self, 
+        context_transfers: List[Dict[str, Any]], 
+        handoff_events: List[AgentHandoffEvent]
+    ) -> float:
+        """Calculate context preservation score across handoffs."""
+        
+        if not handoff_events:
+            return 0.0
+        
+        preservation_scores = []
+        
+        for handoff in handoff_events:
+            # Calculate preservation for this handoff
+            context_size = len(handoff.context_transferred)
+            handoff_data_size = len(handoff.handoff_data)
+            
+            if context_size > 0:
+                # Simple preservation metric based on data transferred
+                preservation_score = min(1.0, handoff_data_size / max(1, context_size))
+                preservation_scores.append(preservation_score)
+        
+        return sum(preservation_scores) / len(preservation_scores) if preservation_scores else 0.0
+
+    async def _validate_context_preservation_across_handoffs(self, context_validation: Dict[str, Any]) -> None:
+        """Validate context preservation across handoffs."""
+        
+        context_snapshots = context_validation.get("context_snapshots", [])
+        agent_contexts = context_validation.get("agent_contexts", {})
+        
+        # Verify context consistency
+        if len(context_snapshots) < 2:
+            logger.warning("Insufficient context snapshots for preservation validation")
+            return
+        
+        # Check for context loss between snapshots
+        context_loss_detected = False
+        for i in range(1, len(context_snapshots)):
+            prev_snapshot = context_snapshots[i-1]
+            curr_snapshot = context_snapshots[i]
+            
+            prev_keys = set(prev_snapshot.get("context", {}).keys())
+            curr_keys = set(curr_snapshot.get("context", {}).keys())
+            
+            lost_keys = prev_keys - curr_keys
+            if lost_keys:
+                context_loss_detected = True
+                logger.warning(f"Context keys lost between snapshots {i-1} and {i}: {lost_keys}")
+        
+        self.assertFalse(context_loss_detected, "Context loss detected between handoffs")
+
+    async def _validate_tracking_elements_preservation(
+        self, 
+        context_validation: Dict[str, Any],
+        tracking_elements: Dict[str, Any]
+    ) -> None:
+        """Validate that specific tracking elements are preserved."""
+        
+        agent_contexts = context_validation.get("agent_contexts", {})
+        
+        preservation_failures = []
+        
+        for agent_name, agent_context in agent_contexts.items():
+            for element_key, element_value in tracking_elements.items():
+                if element_key not in agent_context:
+                    preservation_failures.append(f"{agent_name} missing {element_key}")
+                elif str(agent_context[element_key]) != str(element_value):
+                    preservation_failures.append(
+                        f"{agent_name} {element_key} mismatch: "
+                        f"expected {element_value}, got {agent_context[element_key]}"
+                    )
+        
+        self.assertEqual(len(preservation_failures), 0,
+                        f"Tracking element preservation failures: {preservation_failures}")
+
+    async def _validate_context_markers_propagation(
+        self,
+        context_validation: Dict[str, Any],
+        validation_markers: List[str]
+    ) -> None:
+        """Validate that context validation markers propagate through the chain."""
+        
+        agent_contexts = context_validation.get("agent_contexts", {})
+        
+        marker_propagation_failures = []
+        
+        for agent_name, agent_context in agent_contexts.items():
+            context_text = json.dumps(agent_context).lower()
+            
+            for marker in validation_markers:
+                if marker.lower() not in context_text:
+                    marker_propagation_failures.append(f"{agent_name} missing marker: {marker}")
+        
+        # Allow some tolerance for marker propagation (80% success rate)
+        total_checks = len(agent_contexts) * len(validation_markers)
+        failure_rate = len(marker_propagation_failures) / max(1, total_checks)
+        
+        self.assertLessEqual(failure_rate, 0.2,
+                           f"Context marker propagation failure rate too high: "
+                           f"{failure_rate:.2f} ({marker_propagation_failures})")
+
+    async def _validate_failure_recovery_results(
+        self,
+        recovery_results: List[Dict[str, Any]],
+        failure_scenarios: List[Dict[str, Any]]
+    ) -> None:
+        """Validate failure recovery results."""
+        
+        recovery_analysis = []
+        
+        for i, result in enumerate(recovery_results):
+            scenario = failure_scenarios[i]
+            
+            analysis = {
+                "scenario": scenario["name"],
+                "failure_detected": result.get("failure_detected", False),
+                "recovery_attempted": result.get("recovery_attempted", False),
+                "recovery_successful": result.get("recovery_successful", False),
+                "expected_recovery": scenario["expected_recovery"]
+            }
+            
+            recovery_analysis.append(analysis)
+        
+        # Validate that failures were detected
+        failures_detected = sum(1 for r in recovery_analysis if r["failure_detected"])
+        self.assertGreaterEqual(failures_detected, len(failure_scenarios) * 0.7,
+                               f"Too few failures detected: {failures_detected}/{len(failure_scenarios)}")
+        
+        # Validate recovery attempts were made
+        recovery_attempts = sum(1 for r in recovery_analysis if r["recovery_attempted"])
+        self.assertGreaterEqual(recovery_attempts, failures_detected * 0.8,
+                               f"Too few recovery attempts: {recovery_attempts}/{failures_detected}")
+
+    async def _validate_concurrent_chain_isolation(
+        self,
+        successful_chains: List[Dict[str, Any]],
+        concurrent_requests: List[Dict[str, Any]]
+    ) -> None:
+        """Validate isolation between concurrent chains."""
+        
+        isolation_violations = []
+        
+        # Create mapping of chain identifiers
+        chain_identifiers = {}
+        for i, chain in enumerate(successful_chains):
+            if i < len(concurrent_requests):
+                chain_identifiers[chain["user_id"]] = concurrent_requests[i]["chain_identifier"]
+        
+        # Check for cross-contamination between chains
+        for chain in successful_chains:
+            user_id = chain["user_id"]
+            chain_events = chain.get("chain_events", [])
+            chain_text = json.dumps(chain_events).lower()
+            
+            # Look for other chains' identifiers
+            for other_user_id, other_identifier in chain_identifiers.items():
+                if other_user_id != user_id and other_identifier.lower() in chain_text:
+                    isolation_violations.append({
+                        "victim_chain": user_id,
+                        "contaminated_with": other_user_id,
+                        "identifier_leaked": other_identifier
+                    })
+        
+        self.assertEqual(len(isolation_violations), 0,
+                        f"Concurrent chain isolation violations: {isolation_violations}")
+
+    async def tearDown(self):
+        """Clean up test resources."""
+        logger.info("Cleaning up Agent Handoff Chain Validation test resources")
+        await super().tearDown() if hasattr(super(), 'tearDown') else None

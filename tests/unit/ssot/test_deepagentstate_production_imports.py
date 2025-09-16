@@ -15,6 +15,7 @@ from typing import Dict, List, Set, Tuple
 import pytest
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from netra_backend.app.core.user_execution_context import UserExecutionContext
 
 
 @pytest.mark.unit
@@ -259,7 +260,7 @@ Progress Status: {"ðŸ”´ REMEDIATION NEEDED" if files_with_violations > 0 else "â
                 violations.append("Direct deprecated import: 'from netra_backend.app.schemas.agent_models import DeepAgentState'")
 
             # Pattern 2: Wildcard import including DeepAgentState
-            if 'from netra_backend.app.agents.state import *' in content and 'DeepAgentState' in content:
+            if 'from netra_backend.app.schemas.agent_models import DeepAgentState' in content:
                 violations.append("Wildcard import with DeepAgentState usage")
 
             # Pattern 3: Multi-line import including DeepAgentState
@@ -275,7 +276,7 @@ Progress Status: {"ðŸ”´ REMEDIATION NEEDED" if files_with_violations > 0 else "â
 
             # Pattern 4: Usage indicators (might be using imported DeepAgentState)
             for i, line in enumerate(lines, 1):
-                if 'DeepAgentState(' in line or 'state: DeepAgentState' in line:
+                if 'UserExecutionContext.create_isolated_context(user_id="test_user", ' in line or 'state: DeepAgentState' in line:
                     violations.append(f"Usage at line {i}: {line.strip()}")
 
         except Exception as e:

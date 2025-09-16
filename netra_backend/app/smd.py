@@ -502,7 +502,10 @@ class StartupOrchestrator:
                 self.app.state.emergency_database_bypassed = True
                 self.logger.info("  [⚠️] Step 7: Database bypassed in emergency mode")
                 self.logger.info("  [⚠️] Step 8: Database schema validation bypassed in emergency mode")
-                return  # Continue to Phase 4
+
+                # FIXED: Continue startup sequence instead of terminating prematurely
+                # This allows graceful degradation to work properly
+                self.logger.info("  [⚠️] Database emergency bypass complete - continuing startup sequence for graceful degradation")
 
             # NO GRACEFUL DEGRADATION - Database is critical for chat
             raise DeterministicStartupError(enhanced_error_msg, original_error=e, phase=StartupPhase.DATABASE) from e
@@ -534,7 +537,10 @@ class StartupOrchestrator:
                 self.app.state.redis_manager = None  # Explicitly set to None with bypass flag
                 self.app.state.emergency_redis_bypassed = True
                 self.logger.info("  [⚠️] Step 9: Redis bypassed in emergency mode")
-                return  # Continue to Phase 5
+
+                # FIXED: Continue startup sequence instead of terminating prematurely
+                # This allows graceful degradation to work properly
+                self.logger.info("  [⚠️] Redis emergency bypass complete - continuing startup sequence for graceful degradation")
 
             # Redis is critical for chat functionality - if Redis fails, startup MUST fail
             raise DeterministicStartupError(f"Phase 4 cache setup failed - Redis is critical: {e}", original_error=e, phase=StartupPhase.CACHE) from e
@@ -2120,11 +2126,9 @@ class StartupOrchestrator:
     
     async def _initialize_factory_patterns(self) -> None:
         """Initialize factory patterns for singleton removal - CRITICAL."""
-        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, get_agent_websocket_bridge
-        from netra_backend.app.agents.supervisor.agent_instance_factory import (
-            get_agent_instance_factory,
-            configure_agent_instance_factory
-        )
+        from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, get_websocket_bridge_factory
+        # PHASE 2A MIGRATION: Removed deprecated get_agent_instance_factory and configure_agent_instance_factory imports
+        # These are no longer needed as we use create_agent_instance_factory(user_context) pattern per-request
         from netra_backend.app.services.factory_adapter import FactoryAdapter, AdapterConfig
         # ISSUE #1144 FIX: Use canonical SSOT import path instead of deprecated module import
         from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
@@ -2217,6 +2221,10 @@ class StartupOrchestrator:
             # Log factory initialization summary
             status = factory_adapter.get_migration_status()
             self.logger.info("     CHART:  Factory Pattern Migration Status:")
+            
+        except Exception as e:
+            self.logger.error(f" FAIL:  Factory initialization failed: {e}")
+            raise
 
     async def _initialize_infrastructure_resilience(self) -> None:
         """Initialize infrastructure resilience monitoring and circuit breakers - CRITICAL for Issue #1278."""
@@ -2348,12 +2356,6 @@ class StartupOrchestrator:
             self.logger.error(f"Circuit breaker connection failure: {name} - {reason}")
         else:
             self.logger.warning(f"Circuit breaker failure: {name} ({failure_type.value}) - {reason}")
-            self.logger.info(f"      Migration Mode: {status['migration_mode']}")
-            self.logger.info(f"      Routes Enabled: {len(status['route_flags'])}")
-            self.logger.info(f"      Legacy Fallback: {'Enabled' if status['config']['legacy_fallback_enabled'] else 'Disabled'}")
-            
-        except Exception as e:
-            raise DeterministicStartupError(f"Factory pattern initialization failed: {e}")
     
     async def _validate_database_schema(self) -> None:
         """Validate database schema - CRITICAL."""

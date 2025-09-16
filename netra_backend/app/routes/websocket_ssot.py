@@ -92,9 +92,10 @@ from netra_backend.app.websocket_core.unified_jwt_protocol_handler import (
 )
 
 # Authentication and security (SSOT for all patterns)
-from netra_backend.app.websocket_core.unified_websocket_auth import (
-    get_websocket_authenticator,
-    authenticate_websocket_ssot
+# ISSUE #1176 REMEDIATION: Use new SSOT authentication
+from netra_backend.app.websocket_core.unified_auth_ssot import (
+    authenticate_websocket as authenticate_websocket_ssot,
+    WebSocketAuthResult
 )
 
 # PERMISSIVE AUTH REMEDIATION: Import auth permissiveness and circuit breaker
@@ -173,7 +174,7 @@ async def get_current_user_401(credentials: HTTPAuthorizationCredentials = Depen
     from netra_backend.app.dependencies import get_request_scoped_db_session as get_db
     # SSOT REMEDIATION: Use auth service directly instead of auth_integration wrapper
     from auth_service.auth_core.core.token_validator import TokenValidator
-    from auth_service.auth_core.core.user_manager import UserManager
+    from netra_backend.app.services.user_service import user_service
     
     try:
         # Get a database session
@@ -183,9 +184,14 @@ async def get_current_user_401(credentials: HTTPAuthorizationCredentials = Depen
             token = credentials.credentials
             # SSOT REMEDIATION: Use auth service directly instead of wrapper functions
             token_validator = TokenValidator()
-            validation_result = await token_validator.validate_token_async(token)
-            user_manager = UserManager()
-            user = await user_manager.get_user_from_database_async(db, validation_result)
+            validation_result = token_validator.validate_token(token)
+            
+            # Extract user_id from validation result and get user from database
+            user_id = validation_result.get('user_id')
+            if not user_id:
+                raise HTTPException(status_code=401, detail="Invalid token: missing user_id")
+            
+            user = await user_service.get(db, id=user_id)
             
             # SECURITY: Store JWT validation result on user object for admin functions
             if hasattr(user, '__dict__'):

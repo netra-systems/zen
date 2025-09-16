@@ -3998,7 +3998,7 @@ class _UnifiedWebSocketManagerImplementation:
         """
         Check if this manager instance is active and responsive.
 
-        Used by WebSocketManagerFactory for resource management decisions.
+        Used by get_websocket_manager() for resource management decisions.
 
         Returns:
             bool: True if manager is active and handling connections
@@ -4028,7 +4028,7 @@ class _UnifiedWebSocketManagerImplementation:
         """
         Perform comprehensive health check of this manager instance.
 
-        Used by WebSocketManagerFactory for zombie detection and cleanup decisions.
+        Used by get_websocket_manager() for zombie detection and cleanup decisions.
 
         Args:
             timeout: Maximum time to spend on health check
@@ -4111,7 +4111,7 @@ class _UnifiedWebSocketManagerImplementation:
         """
         Perform graceful shutdown of this manager instance.
 
-        Used by WebSocketManagerFactory during emergency cleanup.
+        Used by get_websocket_manager() during emergency cleanup.
 
         Args:
             timeout: Maximum time to spend on shutdown
@@ -4174,7 +4174,7 @@ class _UnifiedWebSocketManagerImplementation:
         """
         Get detailed metrics about this manager instance.
 
-        Used by WebSocketManagerFactory for health assessment and monitoring.
+        Used by get_websocket_manager() for health assessment and monitoring.
 
         Returns:
             Dict containing manager metrics and health indicators

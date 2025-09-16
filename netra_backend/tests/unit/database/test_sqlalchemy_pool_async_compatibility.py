@@ -303,7 +303,7 @@ class SQLAlchemyPoolAsyncCompatibilityTests:
         test_urls = [
             "sqlite+aiosqlite:///:memory:",
             "postgresql+asyncpg://user:password@localhost:5432/testdb",
-            "mysql+aiomysql://user:password@localhost:3306/testdb"
+            "postgresql+psycopg://user:password@localhost:5432/testdb2"
         ]
         
         start_time = time.time()

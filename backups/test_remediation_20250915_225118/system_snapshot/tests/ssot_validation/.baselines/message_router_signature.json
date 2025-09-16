@@ -1,0 +1,22 @@
+{
+  "class_name": "MessageRouter",
+  "file_path": "/Users/anthony/Desktop/netra-apex/netra_backend/app/websocket_core/handlers.py",
+  "method_names": [
+    "add_handler",
+    "insert_handler",
+    "_validate_handler_protocol",
+    "__init__",
+    "handlers",
+    "get_handler_order",
+    "remove_handler",
+    "_find_handler",
+    "check_handler_status_with_grace_period",
+    "_is_unknown_message_type",
+    "get_stats"
+  ],
+  "property_names": [],
+  "line_count": 386,
+  "content_hash": "260c4292913d4298ff86db08fb416c4c",
+  "similarity_score": 0.0,
+  "baseline_timestamp": "2025-09-14T11:30:40.353620"
+}

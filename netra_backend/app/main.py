@@ -45,6 +45,69 @@ central_logger = get_logger(__name__)
 # Configure loggers after unified logging is initialized
 logging.getLogger("faker").setLevel(logging.WARNING)
 
+# CRITICAL: SSOT-Compliant Environment Validation at Startup
+# Validate environment configuration before creating app to prevent runtime failures
+# This implements Phase 1 of the SSOT-compliant integration plan
+def validate_environment_at_startup():
+    """
+    Validate environment configuration before starting service.
+    SSOT COMPLIANT: Uses central validators and IsolatedEnvironment.
+    """
+    import sys
+    from shared.configuration.central_config_validator import validate_platform_configuration
+    
+    central_logger.info("🔍 Validating environment configuration with SSOT validators...")
+    
+    try:
+        # Use SSOT central validator for comprehensive environment validation
+        # This validates JWT secrets, database config, OAuth, Redis, LLM keys etc.
+        validate_platform_configuration()
+        central_logger.info("✅ Environment validation completed (SSOT compliant)")
+        
+    except ValueError as e:
+        error_message = f"""
+🚨 ENVIRONMENT VALIDATION FAILED (SSOT) 🚨
+
+Service: netra-backend
+Validator: SSOT CentralConfigValidator
+Error: {str(e)}
+
+SSOT compliance status: ✅ Validated
+Required actions:
+1. Fix environment variable configuration
+2. Verify all POSTGRES_*, JWT_*, and SERVICE_* variables are set
+3. Check OAuth credentials for current environment
+4. Restart service after fixing configuration
+
+This prevents runtime configuration failures that could impact the Golden Path.
+Service startup ABORTED for safety.
+"""
+        central_logger.critical(error_message)
+        sys.exit(1)
+    except Exception as e:
+        # For unexpected errors, log but don't prevent startup in development
+        env_manager = get_env()
+        environment = env_manager.get("ENVIRONMENT", "development").lower()
+        
+        if environment in ["staging", "production"]:
+            error_message = f"""
+🚨 ENVIRONMENT VALIDATION ERROR (SSOT) 🚨
+
+Service: netra-backend
+Environment: {environment}
+Error: {str(e)}
+
+Critical validation infrastructure failure in {environment} environment.
+Service startup ABORTED for safety.
+"""
+            central_logger.critical(error_message)
+            sys.exit(1)
+        else:
+            central_logger.warning(f"⚠️ Environment validation error in {environment}: {e} - continuing startup")
+
+# Run SSOT-compliant validation before creating app
+validate_environment_at_startup()
+
 from netra_backend.app.core.app_factory import create_app
 
 app = create_app()

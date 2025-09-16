@@ -79,7 +79,7 @@ def get_manager():
     
     REQUIRED MIGRATION:
     - Use create_websocket_manager(user_context) with proper UserExecutionContext
-    - Or use WebSocketManagerFactory.create_manager(user_context) directly
+    - Or use get_websocket_manager(user_context) directly
     
     See User Context Architecture documentation for proper implementation.
     """
@@ -88,7 +88,7 @@ def get_manager():
         "This function enabled cross-user data leakage in multi-user environments. "
         "\n\nREQUIRED MIGRATION (choose one):"
         "\n1. Use create_websocket_manager(user_context) with proper user isolation"
-        "\n2. Use WebSocketManagerFactory.create_manager(user_context) directly"
+        "\n2. Use get_websocket_manager(user_context) directly"
         "\n3. For testing: Create dedicated test instances with UserExecutionContext"
         "\n\nSee User Context Architecture documentation for secure patterns."
     )

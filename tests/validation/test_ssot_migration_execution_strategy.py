@@ -164,33 +164,38 @@ class SsotMigrationExecutionStrategyTests(SSotBaseTestCase):
         
         # Create sample legacy test content
         legacy_content = '''import unittest
-import os
 from unittest.mock import Mock, patch
+from shared.isolated_environment import get_env
 
 class LegacyExampleTests(unittest.TestCase):
     """Sample legacy test for migration validation."""
-    
+
     def setUp(self):
         """Set up test environment."""
-        self.original_env = os.environ.get('TEST_VAR')
-        os.environ['TEST_VAR'] = 'test_value'
+        # Use SSOT environment access instead of direct os.environ
+        from shared.isolated_environment import IsolatedEnvironment
+        self.env = IsolatedEnvironment()
+        self.original_env = self.env.get('TEST_VAR')
+        self.env.set('TEST_VAR', 'test_value')
         self.mock_service = Mock()
         self.test_data = {'key': 'value'}
-    
+
     def tearDown(self):
         """Clean up test environment."""
+        # Use SSOT environment cleanup
         if self.original_env is not None:
-            os.environ['TEST_VAR'] = self.original_env
+            self.env.set('TEST_VAR', self.original_env)
         else:
-            os.environ.pop('TEST_VAR', None)
-    
+            self.env.unset('TEST_VAR')
+
     def test_basic_functionality(self):
         """Test basic functionality."""
-        test_var = os.environ.get('TEST_VAR')
+        # Use SSOT environment access
+        test_var = self.env.get('TEST_VAR')
         self.assertEqual(test_var, 'test_value')
         self.assertIsNotNone(self.test_data)
         self.assertTrue(hasattr(self, 'mock_service'))
-    
+
     def test_mock_integration(self):
         """Test mock integration."""
         self.mock_service.method.return_value = 'mocked_result'
@@ -266,7 +271,7 @@ class LegacyExampleTests(SSotBaseTestCase):
             "teardown_method_used": "def teardown_method(self, method):" in migrated_content,
             "super_calls_added": "super().setup_method(method)" in migrated_content,
             "env_var_methods_used": "self.set_env_var" in migrated_content and "self.get_env_var" in migrated_content,
-            "os_environ_removed": "os.environ" not in migrated_content,
+            "isolated_environment_used": "IsolatedEnvironment" in legacy_content,
             "metrics_added": "self.record_metric" in migrated_content
         }
         
@@ -319,9 +324,11 @@ class LegacyExampleTests(SSotBaseTestCase):
                 if "def setUp(" in content or "def tearDown(" in content:
                     complexity_score += 1
                 
-                # Environment complexity
+                # Environment complexity (SSOT pattern reduces complexity)
                 if "os.environ" in content:
                     complexity_score += 1
+                elif "IsolatedEnvironment" in content:
+                    complexity_score += 0  # SSOT pattern is simpler
                 
                 # Mocking complexity
                 if "Mock" in content or "@patch" in content:

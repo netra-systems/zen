@@ -84,8 +84,9 @@ class GCPDeployer:
         
         # Service configurations (Alpine-optimized if flag is set)
         # ISSUE #128 FIX: Increased resources for staging WebSocket reliability
+        # ISSUE #1278 REMEDIATION: Further increased resources for infrastructure reliability
         backend_dockerfile = "dockerfiles/backend.staging.alpine.Dockerfile" if self.use_alpine else "deployment/docker/backend.gcp.Dockerfile"
-        backend_memory = "4Gi"  # Increased from 2Gi for better WebSocket connection handling
+        backend_memory = "6Gi"  # Issue #1278 remediation - increased from 4Gi to 6Gi for infrastructure pressure handling
         backend_cpu = "4"       # Increased from 2 for faster asyncio.selector.select() processing
         
         self.services = [
@@ -97,8 +98,8 @@ class GCPDeployer:
                 cloud_run_name="netra-backend-staging",
                 memory=backend_memory,
                 cpu=backend_cpu,
-                min_instances=1,
-                max_instances=20,
+                min_instances=2,  # Issue #1278 remediation - increased from 1 to 2 for better availability
+                max_instances=15,  # Issue #1278 remediation - reduced from 20 to 15 for resource optimization
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
@@ -1082,15 +1083,37 @@ CMD ["npm", "start"]
             # CRITICAL: VPC connector required for Redis, Cloud SQL, and service-to-service connectivity
             # ISSUE #1177 FIX: Use updated VPC connector with proper CIDR range for Redis connectivity
             vpc_connector_name = f"projects/{self.project_id}/locations/{self.region}/connectors/staging-connector-v2"
+            
+            # ⚠️  CRITICAL VPC EGRESS CONFIGURATION WARNING ⚠️
+            # 
+            # REGRESSION DOCUMENTED: commit 2acf46c8a (Sept 15, 2025)
+            # Changed from "private-ranges-only" → "all-traffic" to fix ClickHouse
+            # UNINTENDED CONSEQUENCE: Broke Cloud SQL Unix socket connections
+            # 
+            # TECHNICAL DETAILS:
+            # - Cloud SQL Unix sockets (/cloudsql/...) require DIRECT proxy access
+            # - "all-traffic" forces everything through VPC connector → BLOCKS Cloud SQL
+            # - Result: 15-second database timeouts, auth/backend services fail to start
+            #
+            # CURRENT SOLUTION OPTIONS:
+            # 1. RECOMMENDED: Use Cloud NAT + private-ranges-only (see vpc_clickhouse_proxy_solutions.xml)
+            # 2. Switch Cloud SQL to TCP connections instead of Unix sockets
+            # 3. Selective VPC routing per service
+            #
+            # LEARNING DOCS:
+            # - /SPEC/learnings/vpc_egress_cloud_sql_regression_critical.xml
+            # - /SPEC/learnings/vpc_clickhouse_proxy_solutions.xml
+            #
+            # DO NOT CHANGE THIS WITHOUT FULL REGRESSION TESTING!
             cmd.extend([
                 "--vpc-connector", "staging-connector-v2",
-                "--vpc-egress", "all-traffic"  # Route all traffic through VPC to fix ClickHouse connectivity
+                "--vpc-egress", "private-ranges-only"  # ✅ FIXED: Cloud NAT enables external access while preserving Cloud SQL
             ])
             
             # CRITICAL: Service annotations for enhanced VPC connectivity
             vpc_annotations = [
                 f"run.googleapis.com/vpc-access-connector={vpc_connector_name}",
-                "run.googleapis.com/vpc-access-egress=all-traffic",
+                "run.googleapis.com/vpc-access-egress=private-ranges-only",
                 "run.googleapis.com/network-interfaces=[{\"network\":\"default\",\"subnetwork\":\"default\"}]"
             ]
             

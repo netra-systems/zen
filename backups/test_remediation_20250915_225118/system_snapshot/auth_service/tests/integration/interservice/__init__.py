@@ -1,0 +1,1 @@
+"""Interservice integration tests for auth service interactions."""

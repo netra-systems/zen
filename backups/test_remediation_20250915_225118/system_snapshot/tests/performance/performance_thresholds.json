@@ -1,0 +1,148 @@
+{
+  "performance_thresholds": {
+    "version": "1.0",
+    "description": "Performance thresholds for UserExecutionContext migration validation",
+    "updated": "2025-09-02",
+    
+    "context_creation": {
+      "description": "UserExecutionContext creation performance limits",
+      "single_context_creation_max_ms": 1.0,
+      "bulk_10k_creation_max_ms": 5000,
+      "creation_rate_min_per_sec": 2000,
+      "memory_delta_max_mb_per_1k": 10,
+      "error_rate_max_percent": 1.0
+    },
+    
+    "execution_engine": {
+      "description": "Execution engine factory performance limits",
+      "engine_creation_max_ms": 20,
+      "engine_cleanup_max_ms": 5,
+      "concurrent_engines_min": 50,
+      "factory_overhead_max_ms": 10,
+      "memory_per_engine_max_mb": 20
+    },
+    
+    "concurrent_requests": {
+      "description": "Concurrent request handling performance limits",
+      "min_success_rate_percent": 95,
+      "max_duration_1000_requests_ms": 30000,
+      "p50_response_time_max_ms": 100,
+      "p95_response_time_max_ms": 500,
+      "p99_response_time_max_ms": 1000,
+      "memory_growth_max_mb": 100,
+      "cpu_utilization_max_percent": 85
+    },
+    
+    "websocket_performance": {
+      "description": "WebSocket event dispatch performance limits", 
+      "min_events_per_second": 1000,
+      "event_dispatch_max_ms_per_1k": 2000,
+      "event_failure_rate_max_percent": 0.1,
+      "event_queue_memory_max_mb": 50,
+      "concurrent_streams_min": 100
+    },
+    
+    "database_operations": {
+      "description": "Database connection and query performance limits",
+      "connection_creation_max_ms": 10,
+      "query_execution_max_ms": 100,
+      "transaction_throughput_min_per_sec": 100,
+      "concurrent_connections_min": 50,
+      "connection_leak_max_percent": 0,
+      "connection_reuse_min_percent": 90
+    },
+    
+    "memory_management": {
+      "description": "Memory usage and leak detection limits",
+      "memory_growth_max_mb_per_1k_requests": 20,
+      "gc_effectiveness_min_percent": 80,
+      "memory_recovery_min_percent": 80,
+      "baseline_memory_max_mb": 200,
+      "peak_memory_max_mb": 500
+    },
+    
+    "load_testing": {
+      "description": "Load test scenario performance limits",
+      "sustained_load": {
+        "min_success_rate_percent": 90,
+        "max_memory_growth_mb": 50,
+        "max_avg_response_time_ms": 50
+      },
+      "spike_load": {
+        "min_success_rate_percent": 80,
+        "max_peak_response_time_ms": 1000,
+        "max_recovery_time_ms": 30000
+      },
+      "stress_test": {
+        "graceful_degradation_required": true,
+        "no_system_crashes_required": true,
+        "auto_recovery_required": true
+      }
+    },
+    
+    "system_stability": {
+      "description": "Long-running system stability requirements",
+      "max_memory_leak_mb_per_hour": 50,
+      "min_uptime_percent": 99.9,
+      "max_response_time_degradation_percent": 10,
+      "max_error_rate_increase_percent": 1
+    }
+  },
+  
+  "alerting_rules": {
+    "critical": {
+      "description": "Critical performance issues that require immediate attention",
+      "triggers": [
+        "success_rate < 90%",
+        "memory_growth > 200MB",
+        "response_time_p95 > 1000ms",
+        "connection_leaks > 0",
+        "system_crashes > 0"
+      ]
+    },
+    
+    "warning": {
+      "description": "Performance degradation that should be monitored",
+      "triggers": [
+        "success_rate < 95%",
+        "memory_growth > 100MB", 
+        "response_time_p95 > 500ms",
+        "cpu_utilization > 80%",
+        "memory_recovery < 80%"
+      ]
+    },
+    
+    "info": {
+      "description": "Performance metrics that are within acceptable ranges but worth tracking",
+      "triggers": [
+        "response_time_improvement > 10%",
+        "memory_efficiency_improvement > 5%",
+        "throughput_improvement > 20%"
+      ]
+    }
+  },
+  
+  "test_configuration": {
+    "description": "Configuration parameters for performance tests",
+    "default_test_timeout_seconds": 300,
+    "memory_sampling_interval_ms": 1000,
+    "gc_force_frequency": 10,
+    "metric_precision_decimal_places": 3,
+    "concurrent_test_batch_size": 100,
+    "load_test_ramp_up_duration_seconds": 5,
+    "load_test_ramp_down_duration_seconds": 5
+  },
+  
+  "environment_requirements": {
+    "description": "Minimum system requirements for reliable performance testing",
+    "min_memory_gb": 4,
+    "min_cpu_cores": 2,
+    "min_disk_space_gb": 10,
+    "required_python_version": "3.9+",
+    "required_packages": [
+      "pytest>=7.0.0",
+      "psutil>=5.9.0",
+      "memory-profiler>=0.60.0"
+    ]
+  }
+}

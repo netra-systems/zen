@@ -1,0 +1,57 @@
+ M STAGING_CONNECTIVITY_REPORT.md
+ M STAGING_TEST_REPORT_PYTEST.md
+ M gcp/log-gardener/GCP-LOG-GARDENER-WORKLOG-last-1-hour-2025-09-15-22-38.md
+ M netra_backend/tests/unit/agents/supervisor/test_agent_execution_core_business_logic_comprehensive.py
+?? ISSUE_1278_COMPREHENSIVE_TEST_STRATEGY.md
+?? ISSUE_1278_TEST_IMPLEMENTATION_SPECS.md
+?? ISSUE_220_SSOT_CONSOLIDATION_COMPREHENSIVE_TEST_PLAN.md
+?? ISSUE_347_TEST_EXECUTION_SUMMARY.md
+?? P0_AUTH_SERVICE_GITHUB_ISSUE_DELIVERABLES_REPORT.md
+?? TEST_PLAN_ISSUE_347_AGENT_NAME_REGISTRY_VERIFICATION.md
+?? TEST_WARNING_REMEDIATION_PLAN.md
+?? UNIT_TEST_REMEDIATION_PLAN_COMPREHENSIVE.md
+?? backups/test_remediation_20250915_224946/
+?? create_serviceid_whitespace_issue.sh
+?? execute_issue_1278_closure.sh
+?? github_issue_1278_commands_20250916.sh
+?? github_issue_1278_status_comment.md
+?? github_issue_auth_service_import_architecture_violation.md
+?? github_issue_relations_serviceid_whitespace.md
+?? github_issue_serviceid_whitespace_p2_20250916.md
+?? issue_1197_status_comment.md
+?? issue_1278_comprehensive_test_plan_comment.md
+?? issue_1278_final_status_decision.md
+?? issue_1278_github_operations_summary_20250916.md
+?? issue_1278_status_update_comprehensive_20250916.md
+?? issue_1278_test_plan_github_comment.md
+?? issue_body.md
+?? netra_backend/tests/unit/test_issue_1278_smd_phase3_timeout_reproduction.py
+?? post_comment.sh
+?? post_issue_1278_comment.sh
+?? scripts/fix_async_test_patterns.py
+?? scripts/fix_test_return_values.py
+?? scripts/migrate_deprecated_logging_imports.py
+?? scripts/run_issue_220_validation.py
+?? scripts/test_warning_remediation_orchestrator.py
+?? serviceid_whitespace_github_issue_safety_compliance_report.md
+?? test_plan_issue_1278.md
+?? tests/e2e/golden_path_staging/test_issue_220_golden_path_ssot_preservation.py
+?? tests/e2e/staging/test_issue_347_golden_path_e2e_staging_validation.py
+?? tests/e2e/test_results/E2E-DEPLOY-REMEDIATE-WORKLOG-all-2025-09-16-04.md
+?? tests/infrastructure/test_issue_1278_configuration_validation.py
+?? tests/infrastructure/test_issue_1278_golden_path_user_flow.py
+?? tests/infrastructure/test_issue_1278_staging_gcp_connectivity.py
+?? tests/integration/ssot_validation/test_factory_pattern_user_isolation.py
+?? tests/integration/ssot_validation/test_message_router_ssot_consolidation.py
+?? tests/integration/test_issue_347_golden_path_agent_workflow_integration.py
+?? tests/integration/test_redis_websocket_integration_no_docker.py
+?? tests/mission_critical/test_golden_path_phase2_user_isolation_violations.py
+?? tests/mission_critical/test_redis_ssot_compliance_suite.py
+?? tests/mission_critical/test_redis_websocket_1011_regression.py
+?? tests/performance/test_redis_performance_validation.py
+?? tests/simulation/
+?? tests/unit/infrastructure/test_issue_1278_application_config_validation.py
+?? tests/unit/ssot_validation/test_agent_execution_tracker_ssot.py
+?? tests/unit/ssot_validation/test_issue_220_ssot_compliance_baseline.py
+?? tests/unit/test_agent_factory_phase2_compliance.py
+?? tests/unit/test_issue_347_comprehensive_agent_name_validation.py

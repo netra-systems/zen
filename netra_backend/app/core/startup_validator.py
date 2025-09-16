@@ -240,26 +240,50 @@ class StartupValidator:
     
     def _validate_imports(self) -> Tuple[bool, str]:
         """Validate critical imports work."""
+        # CRITICAL FIX: Updated module list to match actual SSOT architecture
+        # Removed non-existent modules and added graceful handling
         critical_modules = [
             'netra_backend.app.core.unified_id_manager',
-            'netra_backend.app.services.thread_service',
+            'netra_backend.app.services.thread_service', 
             'netra_backend.app.services.agent_websocket_bridge',
-            'netra_backend.app.orchestration.agent_execution_registry',
             'netra_backend.app.core.interfaces_observability'
         ]
         
-        failed_imports = []
+        # Optional modules that may not exist in all deployment scenarios
+        optional_modules = [
+            'netra_backend.app.orchestration.agent_execution_registry',  # May not exist in some setups
+            'netra_backend.app.agents.registry',  # Alternative registry location
+            'netra_backend.app.agents.supervisor.agent_registry'  # Actual agent registry
+        ]
         
+        failed_imports = []
+        optional_failures = []
+        
+        # Validate critical modules - these MUST exist
         for module_name in critical_modules:
             try:
                 importlib.import_module(module_name)
             except Exception as e:
                 failed_imports.append(f"{module_name}: {str(e)}")
         
-        if failed_imports:
-            return False, f"Import failures: {', '.join(failed_imports)}"
+        # Validate optional modules - failure is logged but not critical
+        for module_name in optional_modules:
+            try:
+                importlib.import_module(module_name)
+            except Exception as e:
+                optional_failures.append(f"{module_name}: {str(e)}")
         
-        return True, f"All {len(critical_modules)} critical modules imported"
+        # Hard fail only on critical modules
+        if failed_imports:
+            return False, f"Critical import failures: {', '.join(failed_imports)}"
+        
+        # Log optional failures but don't fail validation
+        warning_msg = f"All {len(critical_modules)} critical modules imported"
+        if optional_failures:
+            logger.warning(f"Optional module import warnings: {', '.join(optional_failures)}")
+            warning_msg += f" ({len(optional_failures)} optional modules unavailable)"
+        
+        return True, warning_msg
     
     def _validate_method_signatures(self) -> Tuple[bool, str]:
         """Validate critical method signatures are correct."""
@@ -269,8 +293,10 @@ class StartupValidator:
             validations = []
             
             # Check critical methods
+            # CRITICAL FIX: generate_run_id has optional thread_id parameter, so it has 0 required args
+            # but can accept 1 optional arg. This is correct behavior for SSOT compatibility.
             methods_to_check = [
-                ('generate_run_id', 1),
+                ('generate_run_id', 0),  # FIXED: Optional thread_id parameter means 0 required args
                 ('extract_thread_id', 1),
                 ('validate_run_id', 1),
                 ('parse_run_id', 1),

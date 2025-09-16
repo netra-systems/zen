@@ -1,0 +1,872 @@
+"""
+WebSocket Agent Coordination E2E Tests
+======================================
+
+Business Value Justification (BVJ):
+- Segment: Platform/All tiers (affects all users)
+- Business Goal: User Experience & Platform Reliability 
+- Value Impact: Ensures real-time agent progress updates and responsive user interface
+- Revenue Impact: Protects $500K+ ARR by providing transparent agent execution visibility
+
+These tests validate the WebSocket coordination between agents and the frontend,
+ensuring that all 5 critical WebSocket events are properly emitted during agent
+execution and orchestration:
+
+1. agent_started - User sees agent execution beginning
+2. agent_thinking - Real-time reasoning visibility
+3. tool_executing - Tool usage transparency  
+4. tool_completed - Tool results display
+5. agent_completed - User knows response is ready
+
+Test Environment: GCP Staging (NO DOCKER)  
+Coverage Focus: WebSocket Agent Coordination (Issue #872)
+"""
+
+import asyncio
+import json
+import logging
+import time
+import uuid
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Set
+from dataclasses import dataclass, field
+from enum import Enum
+
+import pytest
+
+from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, E2EAuthConfig
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from shared.isolated_environment import IsolatedEnvironment
+
+logger = logging.getLogger(__name__)
+
+
+class WebSocketEventType(Enum):
+    """Critical WebSocket event types for agent coordination."""
+    AGENT_STARTED = "agent_started"
+    AGENT_THINKING = "agent_thinking" 
+    TOOL_EXECUTING = "tool_executing"
+    TOOL_COMPLETED = "tool_completed"
+    AGENT_COMPLETED = "agent_completed"
+    AGENT_ERROR = "agent_error"
+
+
+@dataclass
+class WebSocketEvent:
+    """Represents a WebSocket event for validation."""
+    event_type: str
+    agent_name: str
+    timestamp: float
+    run_id: str
+    user_id: str
+    payload: Dict[str, Any] = field(default_factory=dict)
+    event_id: Optional[str] = None
+
+
+@dataclass
+class AgentExecutionTrace:
+    """Trace of agent execution with WebSocket events."""
+    user_id: str
+    run_id: str
+    agent_name: str
+    start_time: float
+    end_time: Optional[float] = None
+    websocket_events: List[WebSocketEvent] = field(default_factory=list)
+    execution_successful: bool = False
+    critical_events_received: Set[str] = field(default_factory=set)
+
+
+class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
+    """
+    E2E Tests for WebSocket Agent Coordination.
+    
+    These tests validate that agents properly coordinate with the WebSocket
+    system to provide real-time updates during execution.
+    """
+    
+    def setUp(self):
+        """Set up test environment for WebSocket agent coordination."""
+        super().setUp()
+        
+        # Use staging environment for real E2E testing
+        self.environment = IsolatedEnvironment().get("TEST_ENV", "staging")
+        self.auth_config = E2EAuthConfig.for_environment(self.environment)
+        
+        # Critical WebSocket events that MUST be received
+        self.critical_events = [
+            WebSocketEventType.AGENT_STARTED.value,
+            WebSocketEventType.AGENT_THINKING.value, 
+            WebSocketEventType.TOOL_EXECUTING.value,
+            WebSocketEventType.TOOL_COMPLETED.value,
+            WebSocketEventType.AGENT_COMPLETED.value
+        ]
+        
+        # Test configuration
+        self.event_timeout = 30.0  # 30 seconds to receive events
+        self.execution_timeout = 180.0  # 3 minutes for complete execution
+        self.event_order_validation = True
+        self.min_thinking_events = 1  # At least 1 thinking event expected
+        
+        logger.info(f"Setting up WebSocket Agent Coordination tests in {self.environment}")
+
+    @pytest.mark.asyncio
+    @pytest.mark.e2e
+    @pytest.mark.websocket_coordination
+    @pytest.mark.timeout(240)  # 4 minutes for comprehensive event testing
+    async def test_critical_websocket_events_coverage(self):
+        """
+        Test that all 5 critical WebSocket events are emitted during agent execution.
+        
+        This test validates the complete WebSocket event coverage for agent
+        execution, ensuring users receive real-time updates at every stage.
+        """
+        logger.info("🧪 Starting critical WebSocket events coverage test")
+        
+        # Create authenticated user session
+        auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
+        user_id = f"websocket_events_user_{uuid.uuid4().hex[:8]}"
+        email = f"{user_id}@test.netrasystems.ai"
+        
+        # Create JWT and establish WebSocket connection
+        jwt_token = auth_helper.create_test_jwt_token(
+            user_id=user_id,
+            email=email,
+            permissions=["read", "write", "agent_execution", "websocket_events"]
+        )
+        
+        websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
+        
+        # Define comprehensive request that should trigger all event types
+        comprehensive_request = {
+            "type": "agent_execute_with_full_event_tracking",
+            "user_id": user_id,
+            "request_id": f"events_req_{user_id}_{int(time.time())}",
+            "user_request": (
+                "Analyze system performance metrics, use tools to gather data, "
+                "optimize configurations, and provide detailed recommendations"
+            ),
+            "require_critical_events": self.critical_events,
+            "event_tracking": True,
+            "timestamp": time.time()
+        }
+        
+        # Execute request with comprehensive event monitoring
+        execution_trace = await self._execute_with_comprehensive_event_monitoring(
+            websocket=websocket,
+            request_data=comprehensive_request,
+            expected_events=self.critical_events
+        )
+        
+        # Validate all critical events were received
+        missing_events = set(self.critical_events) - execution_trace.critical_events_received
+        self.assertEqual(len(missing_events), 0,
+                        f"Critical WebSocket events missing: {missing_events}")
+        
+        # Validate event sequence and timing
+        await self._validate_event_sequence_and_timing(execution_trace)
+        
+        # Validate event payload completeness
+        await self._validate_event_payload_completeness(execution_trace)
+        
+        # Validate business value - user experience impact
+        await self._validate_user_experience_impact(execution_trace)
+        
+        logger.info(f"✅ Critical WebSocket events coverage test completed: "
+                   f"events_received={len(execution_trace.critical_events_received)}/5, "
+                   f"total_events={len(execution_trace.websocket_events)}")
+        
+        await websocket.close()
+
+    @pytest.mark.asyncio
+    @pytest.mark.e2e 
+    @pytest.mark.websocket_coordination
+    @pytest.mark.timeout(300)  # 5 minutes for multi-agent coordination
+    async def test_multi_agent_websocket_coordination(self):
+        """
+        Test WebSocket coordination across multiple agents in orchestration.
+        
+        Validates that WebSocket events are properly coordinated when the
+        Supervisor orchestrates multiple sub-agents, ensuring users get
+        visibility into the complete workflow.
+        """
+        logger.info("🧪 Starting multi-agent WebSocket coordination test")
+        
+        # Create user session
+        auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
+        user_id = f"multi_agent_coord_user_{uuid.uuid4().hex[:8]}"
+        email = f"{user_id}@test.netrasystems.ai"
+        
+        jwt_token = auth_helper.create_test_jwt_token(user_id=user_id, email=email)
+        websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
+        
+        # Define multi-agent orchestration request
+        orchestration_request = {
+            "type": "supervisor_execute_with_multi_agent_tracking",
+            "user_id": user_id,
+            "request_id": f"multi_agent_req_{user_id}_{int(time.time())}",
+            "user_request": (
+                "Complete analysis: triage request, analyze data patterns, "
+                "generate optimization recommendations, create action plan, "
+                "and compile final report"
+            ),
+            "expected_agents": ["Supervisor", "Triage", "Data", "APEX", "Actions", "Reporting"],
+            "track_agent_coordination": True,
+            "timestamp": time.time()
+        }
+        
+        # Execute multi-agent orchestration with coordination monitoring  
+        coordination_traces = await self._execute_multi_agent_coordination_monitoring(
+            websocket=websocket,
+            request_data=orchestration_request
+        )
+        
+        # Validate coordination across all agents
+        self.assertGreaterEqual(len(coordination_traces), 4,
+                               f"Expected at least 4 agent executions, got {len(coordination_traces)}")
+        
+        # Validate each agent emitted critical events
+        for trace in coordination_traces:
+            missing_events = set(self.critical_events) - trace.critical_events_received
+            
+            # Allow some tolerance for sub-agents (may not use all tools)
+            critical_missing = missing_events - {
+                WebSocketEventType.TOOL_EXECUTING.value,
+                WebSocketEventType.TOOL_COMPLETED.value
+            }
+            
+            self.assertEqual(len(critical_missing), 0,
+                           f"Agent {trace.agent_name} missing critical events: {critical_missing}")
+        
+        # Validate coordination timing and sequencing
+        await self._validate_multi_agent_coordination_timing(coordination_traces)
+        
+        # Validate no event interference between agents
+        await self._validate_no_agent_event_interference(coordination_traces)
+        
+        logger.info(f"✅ Multi-agent WebSocket coordination test completed: "
+                   f"agents_coordinated={len(coordination_traces)}")
+        
+        await websocket.close()
+
+    @pytest.mark.asyncio
+    @pytest.mark.e2e
+    @pytest.mark.websocket_coordination
+    @pytest.mark.timeout(200)  # ~3 minutes for real-time testing
+    async def test_real_time_websocket_event_delivery(self):
+        """
+        Test real-time delivery of WebSocket events during agent execution.
+        
+        Validates that WebSocket events are delivered with minimal latency
+        to provide responsive user experience during agent operations.
+        """
+        logger.info("🧪 Starting real-time WebSocket event delivery test")
+        
+        # Create user session
+        auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
+        user_id = f"realtime_events_user_{uuid.uuid4().hex[:8]}"
+        email = f"{user_id}@test.netrasystems.ai"
+        
+        jwt_token = auth_helper.create_test_jwt_token(user_id=user_id, email=email)
+        websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
+        
+        # Define real-time monitoring request
+        realtime_request = {
+            "type": "agent_execute_with_realtime_monitoring",
+            "user_id": user_id,
+            "request_id": f"realtime_req_{user_id}_{int(time.time())}",
+            "user_request": "Perform real-time data analysis with progress updates",
+            "realtime_monitoring": True,
+            "latency_tracking": True,
+            "timestamp": time.time()
+        }
+        
+        # Execute with real-time event monitoring
+        realtime_metrics = await self._execute_with_realtime_event_monitoring(
+            websocket=websocket,
+            request_data=realtime_request
+        )
+        
+        # Validate event delivery latency
+        await self._validate_event_delivery_latency(realtime_metrics)
+        
+        # Validate event ordering consistency
+        await self._validate_event_ordering_consistency(realtime_metrics)
+        
+        # Validate real-time user experience metrics
+        await self._validate_realtime_user_experience(realtime_metrics)
+        
+        logger.info(f"✅ Real-time WebSocket event delivery test completed: "
+                   f"avg_latency={realtime_metrics['average_event_latency']:.1f}ms")
+        
+        await websocket.close()
+
+    @pytest.mark.asyncio
+    @pytest.mark.e2e
+    @pytest.mark.websocket_coordination
+    @pytest.mark.timeout(360)  # 6 minutes for concurrent coordination
+    async def test_concurrent_agent_websocket_coordination(self):
+        """
+        Test WebSocket coordination with concurrent agent executions.
+        
+        Validates that WebSocket events are properly isolated and delivered
+        when multiple users have concurrent agent executions running.
+        """
+        logger.info("🧪 Starting concurrent agent WebSocket coordination test")
+        
+        # Create multiple concurrent user sessions
+        concurrent_sessions = []
+        session_count = 3
+        
+        for i in range(session_count):
+            auth_helper = E2EWebSocketAuthHelper(environment=self.environment)
+            user_id = f"concurrent_ws_user_{i}_{uuid.uuid4().hex[:8]}"
+            email = f"{user_id}@test.netrasystems.ai"
+            
+            jwt_token = auth_helper.create_test_jwt_token(user_id=user_id, email=email)
+            websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
+            
+            concurrent_sessions.append({
+                "user_id": user_id,
+                "websocket": websocket,
+                "auth_helper": auth_helper,
+                "session_index": i
+            })
+        
+        # Define concurrent requests with unique identifiers
+        concurrent_requests = [
+            {
+                "type": "agent_execute_concurrent",
+                "user_id": session["user_id"],
+                "request_id": f"concurrent_req_{session['user_id']}_{int(time.time())}",
+                "user_request": f"Session {session['session_index']}: Analyze metrics and generate report",
+                "session_identifier": f"concurrent_session_{session['session_index']}_{int(time.time())}",
+                "concurrent_mode": True,
+                "timestamp": time.time()
+            }
+            for session in concurrent_sessions
+        ]
+        
+        # Execute concurrent agent coordination
+        concurrent_tasks = []
+        start_time = time.time()
+        
+        for i, session in enumerate(concurrent_sessions):
+            task = asyncio.create_task(
+                self._execute_concurrent_websocket_coordination(
+                    websocket=session["websocket"],
+                    user_id=session["user_id"],
+                    request_data=concurrent_requests[i],
+                    session_index=i
+                )
+            )
+            concurrent_tasks.append(task)
+        
+        # Wait for all concurrent executions
+        concurrent_results = await asyncio.gather(*concurrent_tasks, return_exceptions=True)
+        total_execution_time = time.time() - start_time
+        
+        # Analyze concurrent coordination results
+        successful_coordinations = [
+            r for r in concurrent_results 
+            if isinstance(r, dict) and r.get("coordination_successful", False)
+        ]
+        
+        # Validate concurrent success rate
+        success_rate = len(successful_coordinations) / len(concurrent_sessions) * 100
+        self.assertGreaterEqual(success_rate, 75.0,
+                               f"Concurrent WebSocket coordination success rate too low: {success_rate:.1f}%")
+        
+        # Validate event isolation between concurrent sessions
+        await self._validate_concurrent_event_isolation(successful_coordinations, concurrent_requests)
+        
+        # Validate coordination performance under load
+        avg_coordination_time = total_execution_time / len(concurrent_sessions)
+        self.assertLess(avg_coordination_time, self.execution_timeout,
+                       f"Average concurrent coordination time too high: {avg_coordination_time:.1f}s")
+        
+        logger.info(f"✅ Concurrent agent WebSocket coordination test completed: "
+                   f"{len(successful_coordinations)}/{len(concurrent_sessions)} successful")
+        
+        # Clean up sessions
+        for session in concurrent_sessions:
+            await session["websocket"].close()
+
+    # === Helper Methods ===
+
+    async def _execute_with_comprehensive_event_monitoring(
+        self,
+        websocket: object,
+        request_data: Dict[str, Any],
+        expected_events: List[str]
+    ) -> AgentExecutionTrace:
+        """Execute request with comprehensive WebSocket event monitoring."""
+        
+        user_id = request_data["user_id"]
+        run_id = f"run_{user_id}_{int(time.time())}"
+        
+        # Send execution request
+        await websocket.send(json.dumps(request_data))
+        
+        # Monitor WebSocket events
+        start_time = time.time()
+        websocket_events = []
+        critical_events_received = set()
+        agent_name = "Unknown"
+        
+        while time.time() - start_time < self.execution_timeout:
+            try:
+                response_raw = await asyncio.wait_for(websocket.recv(), timeout=2.0)
+                response = json.loads(response_raw)
+                
+                # Create WebSocket event
+                event_type = response.get("type", "unknown")
+                event_agent = response.get("agent", "Unknown")
+                if event_agent != "Unknown":
+                    agent_name = event_agent
+                
+                websocket_event = WebSocketEvent(
+                    event_type=event_type,
+                    agent_name=event_agent,
+                    timestamp=response.get("timestamp", time.time()),
+                    run_id=response.get("run_id", run_id),
+                    user_id=response.get("user_id", user_id),
+                    payload=response,
+                    event_id=response.get("event_id")
+                )
+                
+                websocket_events.append(websocket_event)
+                
+                # Track critical events
+                if event_type in expected_events:
+                    critical_events_received.add(event_type)
+                
+                # Check for completion
+                if event_type == WebSocketEventType.AGENT_COMPLETED.value:
+                    logger.info(f"Agent execution completed, received {len(websocket_events)} events")
+                    break
+                    
+            except asyncio.TimeoutError:
+                continue
+            except Exception as e:
+                logger.error(f"Error monitoring WebSocket events: {e}")
+                break
+        
+        end_time = time.time()
+        
+        return AgentExecutionTrace(
+            user_id=user_id,
+            run_id=run_id,
+            agent_name=agent_name,
+            start_time=start_time,
+            end_time=end_time,
+            websocket_events=websocket_events,
+            execution_successful=len(critical_events_received) >= 3,  # At least 3 critical events
+            critical_events_received=critical_events_received
+        )
+
+    async def _execute_multi_agent_coordination_monitoring(
+        self,
+        websocket: object,
+        request_data: Dict[str, Any]
+    ) -> List[AgentExecutionTrace]:
+        """Execute multi-agent orchestration with coordination monitoring."""
+        
+        user_id = request_data["user_id"]
+        expected_agents = request_data.get("expected_agents", [])
+        
+        # Send orchestration request
+        await websocket.send(json.dumps(request_data))
+        
+        # Monitor multi-agent coordination
+        start_time = time.time()
+        agent_traces = {}  # agent_name -> AgentExecutionTrace
+        
+        while time.time() - start_time < self.execution_timeout:
+            try:
+                response_raw = await asyncio.wait_for(websocket.recv(), timeout=3.0)
+                response = json.loads(response_raw)
+                
+                event_type = response.get("type", "unknown")
+                agent_name = response.get("agent", "Unknown")
+                run_id = response.get("run_id", f"run_{int(time.time())}")
+                
+                # Initialize agent trace if new agent
+                if agent_name not in agent_traces and agent_name != "Unknown":
+                    agent_traces[agent_name] = AgentExecutionTrace(
+                        user_id=user_id,
+                        run_id=run_id,
+                        agent_name=agent_name,
+                        start_time=time.time(),
+                        websocket_events=[],
+                        critical_events_received=set()
+                    )
+                
+                # Add event to appropriate agent trace
+                if agent_name in agent_traces:
+                    trace = agent_traces[agent_name]
+                    
+                    websocket_event = WebSocketEvent(
+                        event_type=event_type,
+                        agent_name=agent_name,
+                        timestamp=response.get("timestamp", time.time()),
+                        run_id=run_id,
+                        user_id=user_id,
+                        payload=response
+                    )
+                    
+                    trace.websocket_events.append(websocket_event)
+                    
+                    if event_type in self.critical_events:
+                        trace.critical_events_received.add(event_type)
+                    
+                    if event_type == WebSocketEventType.AGENT_COMPLETED.value:
+                        trace.end_time = time.time()
+                        trace.execution_successful = True
+                
+                # Check for orchestration completion
+                if (event_type == WebSocketEventType.AGENT_COMPLETED.value and 
+                    agent_name == "Supervisor"):
+                    logger.info(f"Multi-agent orchestration completed with {len(agent_traces)} agents")
+                    break
+                    
+            except asyncio.TimeoutError:
+                continue
+        
+        return list(agent_traces.values())
+
+    async def _execute_with_realtime_event_monitoring(
+        self,
+        websocket: object,
+        request_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Execute with real-time event latency monitoring."""
+        
+        # Send request with timing
+        request_send_time = time.time()
+        await websocket.send(json.dumps(request_data))
+        
+        # Monitor events with latency tracking
+        event_latencies = []
+        event_timestamps = []
+        events_received = []
+        
+        start_time = time.time()
+        
+        while time.time() - start_time < self.execution_timeout:
+            try:
+                receive_start = time.time()
+                response_raw = await asyncio.wait_for(websocket.recv(), timeout=2.0)
+                receive_end = time.time()
+                
+                response = json.loads(response_raw)
+                
+                # Calculate event latency
+                event_timestamp = response.get("timestamp", receive_end)
+                latency_ms = (receive_end - event_timestamp) * 1000
+                
+                event_latencies.append(latency_ms)
+                event_timestamps.append(receive_end)
+                events_received.append(response)
+                
+                # Check for completion
+                if response.get("type") == WebSocketEventType.AGENT_COMPLETED.value:
+                    break
+                    
+            except asyncio.TimeoutError:
+                continue
+        
+        # Calculate real-time metrics
+        total_execution_time = time.time() - start_time
+        average_latency = sum(event_latencies) / len(event_latencies) if event_latencies else 0
+        max_latency = max(event_latencies) if event_latencies else 0
+        
+        # Calculate event interval consistency
+        event_intervals = []
+        for i in range(1, len(event_timestamps)):
+            interval = event_timestamps[i] - event_timestamps[i-1]
+            event_intervals.append(interval)
+        
+        return {
+            "total_events_received": len(events_received),
+            "average_event_latency": average_latency,
+            "max_event_latency": max_latency,
+            "event_latencies": event_latencies,
+            "event_intervals": event_intervals,
+            "total_execution_time": total_execution_time,
+            "events_per_second": len(events_received) / max(1, total_execution_time),
+            "events": events_received
+        }
+
+    async def _execute_concurrent_websocket_coordination(
+        self,
+        websocket: object,
+        user_id: str,
+        request_data: Dict[str, Any],
+        session_index: int
+    ) -> Dict[str, Any]:
+        """Execute concurrent WebSocket coordination monitoring."""
+        
+        # Send concurrent request
+        await websocket.send(json.dumps(request_data))
+        
+        # Monitor coordination with isolation tracking
+        start_time = time.time()
+        coordination_events = []
+        isolation_violations = []
+        session_identifier = request_data["session_identifier"]
+        
+        while time.time() - start_time < self.execution_timeout:
+            try:
+                response_raw = await asyncio.wait_for(websocket.recv(), timeout=3.0)
+                response = json.loads(response_raw)
+                
+                coordination_events.append(response)
+                
+                # Check for isolation violations
+                response_text = json.dumps(response).lower()
+                if any(f"concurrent_session_{i}" in response_text for i in range(10) 
+                       if i != session_index):
+                    isolation_violations.append({
+                        "event_type": response.get("type"),
+                        "foreign_session_detected": True,
+                        "response": response
+                    })
+                
+                # Check for completion
+                if (response.get("type") == WebSocketEventType.AGENT_COMPLETED.value and
+                    response.get("user_id") == user_id):
+                    return {
+                        "coordination_successful": True,
+                        "user_id": user_id,
+                        "session_index": session_index,
+                        "session_identifier": session_identifier,
+                        "events_received": len(coordination_events),
+                        "isolation_violations": isolation_violations,
+                        "execution_time": time.time() - start_time
+                    }
+                    
+            except asyncio.TimeoutError:
+                continue
+        
+        # Timeout case
+        return {
+            "coordination_successful": False,
+            "user_id": user_id,
+            "error": "Coordination timeout",
+            "partial_events": len(coordination_events)
+        }
+
+    async def _validate_event_sequence_and_timing(self, execution_trace: AgentExecutionTrace) -> None:
+        """Validate WebSocket event sequence and timing."""
+        
+        events = execution_trace.websocket_events
+        
+        # Validate minimum event sequence
+        event_types = [e.event_type for e in events]
+        
+        # agent_started should come first
+        started_events = [i for i, t in enumerate(event_types) if t == WebSocketEventType.AGENT_STARTED.value]
+        self.assertGreater(len(started_events), 0, "Should have at least one agent_started event")
+        
+        # agent_completed should come last (if execution completed)
+        completed_events = [i for i, t in enumerate(event_types) if t == WebSocketEventType.AGENT_COMPLETED.value]
+        if completed_events:
+            last_completed = max(completed_events)
+            self.assertEqual(last_completed, len(event_types) - 1,
+                           "agent_completed should be the last event")
+        
+        # Validate timing - events should be in chronological order
+        for i in range(1, len(events)):
+            self.assertGreaterEqual(events[i].timestamp, events[i-1].timestamp,
+                                   f"Event {i} timestamp should be >= event {i-1} timestamp")
+
+    async def _validate_event_payload_completeness(self, execution_trace: AgentExecutionTrace) -> None:
+        """Validate WebSocket event payload completeness."""
+        
+        required_fields = ["type", "agent", "timestamp", "run_id"]
+        
+        payload_issues = []
+        
+        for event in execution_trace.websocket_events:
+            payload = event.payload
+            
+            # Check required fields
+            for field in required_fields:
+                if field not in payload:
+                    payload_issues.append(f"Event {event.event_type} missing field: {field}")
+            
+            # Event-specific validations
+            if event.event_type == WebSocketEventType.AGENT_THINKING.value:
+                if "reasoning" not in payload:
+                    payload_issues.append("agent_thinking event missing reasoning field")
+            
+            if event.event_type == WebSocketEventType.TOOL_EXECUTING.value:
+                if "tool_name" not in payload:
+                    payload_issues.append("tool_executing event missing tool_name field")
+        
+        self.assertEqual(len(payload_issues), 0, f"Event payload issues: {payload_issues}")
+
+    async def _validate_user_experience_impact(self, execution_trace: AgentExecutionTrace) -> None:
+        """Validate business value - user experience impact of WebSocket events."""
+        
+        # Calculate user experience metrics
+        total_execution_time = (execution_trace.end_time or time.time()) - execution_trace.start_time
+        events_received = len(execution_trace.websocket_events)
+        
+        # User should receive regular updates (at least every 30 seconds)
+        if total_execution_time > 30:
+            min_expected_events = max(3, int(total_execution_time / 30))
+            self.assertGreaterEqual(events_received, min_expected_events,
+                                   f"Insufficient progress updates for user experience: "
+                                   f"{events_received} events in {total_execution_time:.1f}s")
+        
+        # Validate thinking events for transparency
+        thinking_events = [e for e in execution_trace.websocket_events 
+                          if e.event_type == WebSocketEventType.AGENT_THINKING.value]
+        self.assertGreaterEqual(len(thinking_events), self.min_thinking_events,
+                               f"Insufficient thinking events for transparency: {len(thinking_events)}")
+
+    async def _validate_event_delivery_latency(self, realtime_metrics: Dict[str, Any]) -> None:
+        """Validate WebSocket event delivery latency."""
+        
+        avg_latency = realtime_metrics["average_event_latency"]
+        max_latency = realtime_metrics["max_event_latency"]
+        
+        # Business requirement: average latency under 2 seconds for good UX
+        self.assertLess(avg_latency, 2000.0,
+                       f"Average event latency too high: {avg_latency:.1f}ms")
+        
+        # Maximum latency should be reasonable (under 5 seconds)
+        self.assertLess(max_latency, 5000.0,
+                       f"Maximum event latency too high: {max_latency:.1f}ms")
+
+    async def _validate_event_ordering_consistency(self, realtime_metrics: Dict[str, Any]) -> None:
+        """Validate event ordering consistency in real-time delivery."""
+        
+        events = realtime_metrics["events"]
+        
+        # Check that events maintain logical ordering
+        agent_events = {}
+        for event in events:
+            agent = event.get("agent", "Unknown")
+            if agent not in agent_events:
+                agent_events[agent] = []
+            agent_events[agent].append(event)
+        
+        ordering_violations = []
+        
+        for agent, agent_event_list in agent_events.items():
+            # For each agent, started should come before completed
+            started_indices = [i for i, e in enumerate(agent_event_list) 
+                             if e.get("type") == WebSocketEventType.AGENT_STARTED.value]
+            completed_indices = [i for i, e in enumerate(agent_event_list)
+                               if e.get("type") == WebSocketEventType.AGENT_COMPLETED.value]
+            
+            for started_idx in started_indices:
+                for completed_idx in completed_indices:
+                    if completed_idx <= started_idx:
+                        ordering_violations.append(f"{agent}: completed before started")
+        
+        self.assertEqual(len(ordering_violations), 0,
+                        f"Event ordering violations: {ordering_violations}")
+
+    async def _validate_realtime_user_experience(self, realtime_metrics: Dict[str, Any]) -> None:
+        """Validate real-time user experience metrics."""
+        
+        events_per_second = realtime_metrics["events_per_second"]
+        total_events = realtime_metrics["total_events_received"]
+        
+        # Reasonable event frequency for user experience
+        self.assertGreaterEqual(events_per_second, 0.1,
+                               f"Event frequency too low for good UX: {events_per_second:.2f} events/sec")
+        
+        self.assertLessEqual(events_per_second, 10.0,
+                           f"Event frequency too high (spam): {events_per_second:.2f} events/sec")
+        
+        # Minimum events for meaningful progress indication
+        self.assertGreaterEqual(total_events, 3,
+                               f"Too few events for meaningful progress: {total_events}")
+
+    async def _validate_multi_agent_coordination_timing(self, coordination_traces: List[AgentExecutionTrace]) -> None:
+        """Validate timing coordination across multiple agents."""
+        
+        timing_issues = []
+        
+        # Sort traces by start time
+        sorted_traces = sorted(coordination_traces, key=lambda t: t.start_time)
+        
+        # Validate supervisor starts first (if present)
+        supervisor_traces = [t for t in sorted_traces if t.agent_name == "Supervisor"]
+        if supervisor_traces:
+            supervisor_start = supervisor_traces[0].start_time
+            
+            # Other agents should start after supervisor
+            for trace in sorted_traces:
+                if trace.agent_name != "Supervisor" and trace.start_time < supervisor_start:
+                    timing_issues.append(f"{trace.agent_name} started before Supervisor")
+        
+        # Validate reasonable execution times
+        for trace in coordination_traces:
+            if trace.end_time:
+                execution_time = trace.end_time - trace.start_time
+                if execution_time > 120.0:  # 2 minutes per agent max
+                    timing_issues.append(f"{trace.agent_name} execution too long: {execution_time:.1f}s")
+        
+        self.assertEqual(len(timing_issues), 0, f"Multi-agent timing issues: {timing_issues}")
+
+    async def _validate_no_agent_event_interference(self, coordination_traces: List[AgentExecutionTrace]) -> None:
+        """Validate no event interference between different agents."""
+        
+        interference_violations = []
+        
+        # Check for event cross-contamination
+        for trace in coordination_traces:
+            for event in trace.websocket_events:
+                # Event should belong to this agent
+                event_agent = event.agent_name
+                if event_agent != trace.agent_name and event_agent != "Unknown":
+                    interference_violations.append({
+                        "trace_agent": trace.agent_name,
+                        "event_agent": event_agent,
+                        "event_type": event.event_type
+                    })
+        
+        self.assertEqual(len(interference_violations), 0,
+                        f"Agent event interference detected: {interference_violations}")
+
+    async def _validate_concurrent_event_isolation(
+        self,
+        successful_coordinations: List[Dict[str, Any]],
+        concurrent_requests: List[Dict[str, Any]]
+    ) -> None:
+        """Validate event isolation between concurrent sessions."""
+        
+        isolation_violations = []
+        
+        # Create mapping of session identifiers
+        session_map = {}
+        for i, coordination in enumerate(successful_coordinations):
+            if i < len(concurrent_requests):
+                session_map[coordination["user_id"]] = concurrent_requests[i]["session_identifier"]
+        
+        # Check for cross-session event contamination
+        for coordination in successful_coordinations:
+            user_id = coordination["user_id"]
+            isolation_violations_found = coordination.get("isolation_violations", [])
+            
+            if isolation_violations_found:
+                isolation_violations.extend([
+                    {
+                        "session": user_id,
+                        "violation": violation
+                    }
+                    for violation in isolation_violations_found
+                ])
+        
+        self.assertEqual(len(isolation_violations), 0,
+                        f"Concurrent event isolation violations: {isolation_violations}")
+
+    async def tearDown(self):
+        """Clean up test resources."""
+        logger.info("Cleaning up WebSocket Agent Coordination test resources")
+        await super().tearDown() if hasattr(super(), 'tearDown') else None

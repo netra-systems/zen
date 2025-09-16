@@ -19,7 +19,7 @@ ALL Github content must follow @GITHUB_STYLE_GUIDE.md
  
 PROCESS INSTRUCTIONS START:
 
-AGENT_SESSEION_ID = agent-session-{datetime}
+AGENT_SESSION_ID = agent-session-{datetime}
 
 Deeply think and plan out what to do based on the content of the issue.
 First create the outline of the plan and save it as a comment on the isue

@@ -110,10 +110,10 @@ class ExecutionEngineStateConsolidationTests(SSotBaseTestCase):
         POST-CONSOLIDATION EXPECTED: PASS (Factory uses AgentExecutionTracker)
         """
         try:
-            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngineFactory
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
         except ImportError:
-            self.skip('UserExecutionEngineFactory not available')
-        source = inspect.getsource(UserExecutionEngineFactory)
+            pytest.skip('ExecutionEngineFactory not available')
+        source = inspect.getsource(ExecutionEngineFactory)
         factory_violations = []
         if 'AgentExecutionTracker' not in source:
             factory_violations.append('Factory does not use AgentExecutionTracker')
