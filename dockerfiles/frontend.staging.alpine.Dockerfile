@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copy package files first for better caching
 COPY frontend/package*.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy all frontend source files
 # The .dockerignore file handles exclusions (node_modules, tests, etc.)
@@ -26,7 +26,7 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/next.config.ts ./
 
 # Install production dependencies only
-RUN npm ci --production
+RUN npm ci --production --legacy-peer-deps
 
 # Set environment variables
 ENV NODE_ENV=production
