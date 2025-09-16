@@ -95,10 +95,10 @@ class StagingValidator:
             start_time = time.time()
             async with websockets.connect(
                 url, 
-                ssl=ssl_context, 
-                timeout=timeout,
+                ssl=ssl_context,
                 ping_interval=30,
-                ping_timeout=10
+                ping_timeout=10,
+                open_timeout=timeout
             ) as websocket:
                 connection_time = time.time() - start_time
                 

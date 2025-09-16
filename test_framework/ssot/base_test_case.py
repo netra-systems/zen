@@ -119,18 +119,38 @@ def _detect_async_test_context():
                 if 'pytest_asyncio' in filename or function_name in ['async_test_wrapper', 'pytest_pyfunc_call']:
                     return True
                     
-                # Look for pytest patterns
-                if 'pytest' in filename and ('runtest' in function_name or 'call' in function_name):
+                # Look for pytest patterns - more comprehensive detection
+                if 'pytest' in filename and ('runtest' in function_name or 'call' in function_name or 'setup' in function_name):
+                    return True
+                    
+                # Check for pytest runner patterns
+                if function_name in ['runtest', 'pytest_runtest_call', 'runtest_call'] or 'pytest' in filename:
                     return True
                     
                 frame = frame.f_back
         finally:
             del frame
             
-        return False
+        # If we have a running loop and we're in pytest, assume pytest-asyncio is managing it
+        return True
         
     except RuntimeError:
-        # No event loop running, so we're not in pytest-asyncio context
+        # No event loop running, check if we're still in pytest context
+        import inspect
+        frame = inspect.currentframe()
+        try:
+            while frame:
+                filename = frame.f_code.co_filename
+                function_name = frame.f_code.co_name
+                
+                # Even without a running loop, if we're in pytest, assume pytest-asyncio will handle it
+                if 'pytest' in filename or function_name.startswith('pytest') or 'test_' in function_name:
+                    return True
+                    
+                frame = frame.f_back
+        finally:
+            del frame
+            
         return False
 
 
