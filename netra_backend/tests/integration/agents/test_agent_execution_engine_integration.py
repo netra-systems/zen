@@ -114,7 +114,8 @@ class AgentExecutionEngineIntegrationTests(SSotAsyncTestCase):
     @pytest.fixture
     async def redis_manager(self):
         """Real Redis manager for testing with proper event loop handling."""
-        redis_mgr = RedisManager()
+        from netra_backend.app.redis_manager import redis_manager
+        redis_mgr = redis_manager
         # Don't initialize here to avoid event loop issues
         # Let the manager initialize lazily when get_client() is called
         # This ensures the Redis connection is created in the test's event loop

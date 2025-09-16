@@ -494,7 +494,7 @@ class RedisSharedPoolIntegrationTests(SSotAsyncTestCase):
     async def _get_cache_service_redis(self):
         """Get Redis client from cache service."""
         try:
-            from netra_backend.app.cache.redis_cache_manager import RedisCacheManager
+            from netra_backend.app.redis_manager import RedisManager as RedisCacheManager
             manager = RedisCacheManager()
             if hasattr(manager, 'get_client'):
                 return await manager.get_client()
@@ -524,7 +524,7 @@ class RedisSharedPoolIntegrationTests(SSotAsyncTestCase):
     async def _get_database_service_redis(self):
         """Get Redis client from database service."""
         try:
-            from netra_backend.app.db.redis_manager import RedisManager
+            from netra_backend.app.redis_manager import RedisManager
             manager = RedisManager()
             if hasattr(manager, 'get_client'):
                 return await manager.get_client()
