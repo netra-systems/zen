@@ -3,15 +3,15 @@
   "score": 95.0,
   "required_events": [
     "agent_thinking",
-    "agent_started",
     "tool_executing",
+    "agent_started",
     "tool_completed",
     "agent_completed"
   ],
   "critical_events": [
-    "agent_completed",
+    "agent_started",
     "agent_thinking",
-    "agent_started"
+    "agent_completed"
   ],
   "validations": {
     "SSOT_Architecture": {
@@ -38,8 +38,8 @@
       "valid": false,
       "score": 70,
       "issues": [
-        "Frontend not handling event: agent_thinking",
-        "Frontend not handling event: agent_started"
+        "Frontend not handling event: agent_started",
+        "Frontend not handling event: agent_thinking"
       ]
     },
     "Test_Coverage": {

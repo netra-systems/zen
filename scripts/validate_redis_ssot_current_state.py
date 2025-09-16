@@ -204,7 +204,7 @@ def generate_immediate_action_plan(analysis: Dict, priority_violations: Dict,
 
 def main():
     """Main execution."""
-    base_path = Path("C:/netra-apex")
+    base_path = Path("C:/GitHub/netra-apex")
 
     if not base_path.exists():
         logger.error(f"Base path not found: {base_path}")
